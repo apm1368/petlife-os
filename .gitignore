@@ -6,6 +6,7 @@ dist
 out
 coverage
 *.log
+*.tsbuildinfo
 .env
 .env.local
 .env.*.local
