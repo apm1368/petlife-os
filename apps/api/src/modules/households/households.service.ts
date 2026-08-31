@@ -14,17 +14,23 @@ export class HouseholdsService {
   ) {}
 
   async create(userId: string, dto: CreateHouseholdDto) {
-    const household = await this.prisma.household.create({
-      data: {
-        ...dto,
-        members: {
-          create: { userId, role: HouseholdRole.OWNER },
+    return this.prisma.$transaction(async (tx) => {
+      const household = await tx.household.create({
+        data: {
+          ...dto,
+          members: {
+            create: { userId, role: HouseholdRole.OWNER },
+          },
         },
-      },
-    });
+      });
 
-    await this.events.publish("HouseholdCreated", { householdId: household.id, ownerId: userId });
-    return household;
+      await this.events.publish(
+        "HouseholdCreated",
+        { householdId: household.id, ownerId: userId },
+        { tx, aggregateType: "Household", aggregateId: household.id },
+      );
+      return household;
+    });
   }
 
   async getById(id: string) {

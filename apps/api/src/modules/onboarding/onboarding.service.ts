@@ -66,20 +66,27 @@ export class OnboardingService {
   }
 
   async complete(userId: string) {
-    const progress = await this.prisma.onboardingProgress.upsert({
-      where: { userId },
-      update: { chapter: OnboardingChapter.READY, step: "ready", status: OnboardingStatus.COMPLETED, lastCompletedAt: new Date() },
-      create: {
-        userId,
-        chapter: OnboardingChapter.READY,
-        step: "ready",
-        status: OnboardingStatus.COMPLETED,
-        completedSteps: [],
-        lastCompletedAt: new Date(),
-      },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const progress = await tx.onboardingProgress.upsert({
+        where: { userId },
+        update: {
+          chapter: OnboardingChapter.READY,
+          step: "ready",
+          status: OnboardingStatus.COMPLETED,
+          lastCompletedAt: new Date(),
+        },
+        create: {
+          userId,
+          chapter: OnboardingChapter.READY,
+          step: "ready",
+          status: OnboardingStatus.COMPLETED,
+          completedSteps: [],
+          lastCompletedAt: new Date(),
+        },
+      });
 
-    await this.events.publish("OnboardingCompleted", { userId });
-    return progress;
+      await this.events.publish("OnboardingCompleted", { userId }, { tx, aggregateType: "User", aggregateId: userId });
+      return progress;
+    });
   }
 }

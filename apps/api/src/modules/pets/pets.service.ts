@@ -6,6 +6,19 @@ import { PetAccessService } from "../pet-access/pet-access.service";
 import type { CreatePetDto } from "./dto/create-pet.dto";
 import type { UpdatePetDto } from "./dto/update-pet.dto";
 
+/**
+ * Normalization rule: strip whitespace and common separators (space, hyphen,
+ * dot), upper-case the rest. Used only to detect duplicate chips reliably —
+ * the raw value the owner/importer entered is always preserved verbatim and
+ * never rejected, since a legacy/imported value that can't be confidently
+ * normalized still needs to be stored.
+ */
+export function normalizeMicrochip(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const normalized = raw.trim().replace(/[\s\-.]/g, "").toUpperCase();
+  return normalized.length > 0 ? normalized : null;
+}
+
 @Injectable()
 export class PetsService {
   constructor(
@@ -19,39 +32,51 @@ export class PetsService {
       throw new ValidationApiException({ field: "birthDate", reason: "birthDate or approximateAgeMonths is required" });
     }
 
-    const pet = await this.prisma.pet.create({
-      data: {
-        householdId,
-        name: dto.name,
-        species: dto.species,
-        breed: dto.breed,
-        sex: dto.sex,
-        birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
-        approximateAgeMonths: dto.approximateAgeMonths,
-        photoUrl: dto.photoUrl,
-        latestWeightValue: dto.latestWeightValue,
-        latestWeightUnit: dto.latestWeightUnit,
-        colorMarkings: dto.colorMarkings,
-        neuteredStatus: dto.neuteredStatus,
-        microchipNumber: dto.microchipNumber,
-      },
-    });
-
-    await this.petAccess.applyHouseholdDefaults(pet.id, householdId);
-
-    const hasActivePet = await this.prisma.activePetPreference.findUnique({
-      where: { userId_householdId: { userId: creatorUserId, householdId } },
-    });
-
-    if (!hasActivePet) {
-      await this.prisma.activePetPreference.create({
-        data: { userId: creatorUserId, householdId, petId: pet.id },
+    return this.prisma.$transaction(async (tx) => {
+      const pet = await tx.pet.create({
+        data: {
+          householdId,
+          name: dto.name,
+          species: dto.species,
+          breed: dto.breed,
+          sex: dto.sex,
+          birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+          approximateAgeMonths: dto.approximateAgeMonths,
+          photoUrl: dto.photoUrl,
+          latestWeightValue: dto.latestWeightValue,
+          latestWeightUnit: dto.latestWeightUnit,
+          colorMarkings: dto.colorMarkings,
+          neuteredStatus: dto.neuteredStatus,
+          microchipNumber: dto.microchipNumber,
+          microchipNormalized: normalizeMicrochip(dto.microchipNumber),
+        },
       });
-      await this.events.publish("ActivePetChanged", { userId: creatorUserId, householdId, petId: pet.id });
-    }
 
-    await this.events.publish("PetCreated", { petId: pet.id, householdId, creatorUserId });
-    return pet;
+      await this.petAccess.applyHouseholdDefaults(pet.id, householdId, tx);
+
+      const hasActivePet = await tx.activePetPreference.findUnique({
+        where: { userId_householdId: { userId: creatorUserId, householdId } },
+      });
+
+      if (!hasActivePet) {
+        await tx.activePetPreference.create({
+          data: { userId: creatorUserId, householdId, petId: pet.id },
+        });
+        await this.events.publish(
+          "ActivePetChanged",
+          { userId: creatorUserId, householdId, petId: pet.id },
+          { tx, aggregateType: "Pet", aggregateId: pet.id },
+        );
+      }
+
+      await this.events.publish(
+        "PetCreated",
+        { petId: pet.id, householdId, creatorUserId },
+        { tx, aggregateType: "Pet", aggregateId: pet.id },
+      );
+
+      return pet;
+    });
   }
 
   async getById(id: string) {
@@ -61,18 +86,22 @@ export class PetsService {
   }
 
   async listForHousehold(householdId: string) {
-    return this.prisma.pet.findMany({ where: { householdId }, orderBy: { createdAt: "asc" } });
+    return this.prisma.pet.findMany({ where: { householdId, deletedAt: null }, orderBy: { createdAt: "asc" } });
   }
 
   async update(id: string, dto: UpdatePetDto) {
-    const pet = await this.prisma.pet.update({
-      where: { id },
-      data: {
-        ...dto,
-        birthDate: dto.birthDate === undefined ? undefined : dto.birthDate ? new Date(dto.birthDate) : null,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const pet = await tx.pet.update({
+        where: { id },
+        data: {
+          ...dto,
+          birthDate: dto.birthDate === undefined ? undefined : dto.birthDate ? new Date(dto.birthDate) : null,
+          microchipNormalized:
+            dto.microchipNumber === undefined ? undefined : normalizeMicrochip(dto.microchipNumber),
+        },
+      });
+      await this.events.publish("PetProfileUpdated", { petId: id }, { tx, aggregateType: "Pet", aggregateId: id });
+      return pet;
     });
-    await this.events.publish("PetProfileUpdated", { petId: id });
-    return pet;
   }
 }

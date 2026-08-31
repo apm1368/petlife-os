@@ -45,7 +45,7 @@ async function main() {
   });
 
   for (const pet of [luna, milo]) {
-    await prisma.petAccess.create({
+    await prisma.petAccessGrant.create({
       data: {
         petId: pet.id,
         userId: sarah.id,

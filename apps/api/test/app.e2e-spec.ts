@@ -1,7 +1,9 @@
 import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
+import { PetAccessSource, HouseholdRole } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
+import { PrismaService } from "../src/common/prisma/prisma.service";
 
 interface Cookies {
   session?: string;
@@ -61,10 +63,12 @@ function authedRequest(app: INestApplication, cookies: Cookies) {
 
 describe("PET LIFE OS critical paths (e2e)", () => {
   let app: INestApplication;
+  let prisma: PrismaService;
   let logSpy: jest.SpyInstance;
 
   beforeAll(async () => {
     app = await createTestApp();
+    prisma = app.get(PrismaService);
   });
 
   afterAll(async () => {
@@ -193,5 +197,221 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
     const pets = await client.get(`/households/${householdId}/pets`).expect(200);
     expect(pets.body.filter((p: { name: string }) => p.name === "Rex")).toHaveLength(1);
+  });
+
+  describe("schema hardening: grant model, FK policy, constraints", () => {
+    it("unions two simultaneous grants for the same user/pet instead of one overwriting the other", async () => {
+      const ownerIdentifier = `grant-owner-${unique()}@example.com`;
+      const strangerIdentifier = `grant-stranger-${unique()}@example.com`;
+
+      const owner = authedRequest(app, await signUp(app, logSpy, ownerIdentifier));
+      const strangerCookies = await signUp(app, logSpy, strangerIdentifier);
+      const stranger = authedRequest(app, strangerCookies);
+      const strangerSession = await stranger.get("/auth/session").expect(200);
+      const strangerId: string = strangerSession.body.user.id;
+
+      const household = await owner.post("/households").send({}).expect(201);
+      const pet = await owner
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Grantee", species: "DOG", approximateAgeMonths: 12 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      // First grant: view-only. Baseline access works, edit does not.
+      await prisma.petAccessGrant.create({
+        data: { petId, userId: strangerId, source: PetAccessSource.MANUAL, canViewIdentity: true },
+      });
+      await stranger.get(`/pets/${petId}`).expect(200);
+      await stranger.patch(`/pets/${petId}`).send({ name: "Renamed" }).expect(403);
+
+      // Second, independent grant adds edit — the union of both must now allow it.
+      // The first grant is untouched (nothing overwrites it).
+      await prisma.petAccessGrant.create({
+        data: { petId, userId: strangerId, source: PetAccessSource.MANUAL, canEditIdentity: true, canViewIdentity: false },
+      });
+      const grantCount = await prisma.petAccessGrant.count({ where: { petId, userId: strangerId } });
+      expect(grantCount).toBe(2);
+
+      await stranger.patch(`/pets/${petId}`).send({ name: "Renamed" }).expect(200);
+    });
+
+    it("lets a temporary grant expire without affecting a separate standing grant", async () => {
+      const ownerIdentifier = `expiry-owner-${unique()}@example.com`;
+      const vetIdentifier = `expiry-vet-${unique()}@example.com`;
+
+      const owner = authedRequest(app, await signUp(app, logSpy, ownerIdentifier));
+      const vetCookies = await signUp(app, logSpy, vetIdentifier);
+      const vet = authedRequest(app, vetCookies);
+      const vetSession = await vet.get("/auth/session").expect(200);
+      const vetId: string = vetSession.body.user.id;
+
+      const household = await owner.post("/households").send({}).expect(201);
+      const pet = await owner
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "TimeBox", species: "CAT", approximateAgeMonths: 8 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      // Standing grant: no expiry.
+      await prisma.petAccessGrant.create({
+        data: { petId, userId: vetId, source: PetAccessSource.MANUAL, canViewIdentity: true },
+      });
+      // Temporary grant: already expired.
+      await prisma.petAccessGrant.create({
+        data: {
+          petId,
+          userId: vetId,
+          source: PetAccessSource.TEMPORARY,
+          canEditIdentity: true,
+          expiresAt: new Date(Date.now() - 60_000),
+        },
+      });
+
+      // The expired grant does not contribute canEditIdentity to the union...
+      await vet.patch(`/pets/${petId}`).send({ name: "Renamed" }).expect(403);
+      // ...but the standing grant is unaffected and still authorizes baseline access.
+      await vet.get(`/pets/${petId}`).expect(200);
+    });
+
+    it("stops authorizing access the moment a grant is revoked", async () => {
+      const ownerIdentifier = `revoke-owner-${unique()}@example.com`;
+      const sitterIdentifier = `revoke-sitter-${unique()}@example.com`;
+
+      const owner = authedRequest(app, await signUp(app, logSpy, ownerIdentifier));
+      const sitterCookies = await signUp(app, logSpy, sitterIdentifier);
+      const sitter = authedRequest(app, sitterCookies);
+      const sitterSession = await sitter.get("/auth/session").expect(200);
+      const sitterId: string = sitterSession.body.user.id;
+
+      const household = await owner.post("/households").send({}).expect(201);
+      const pet = await owner
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Revokee", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      const grant = await prisma.petAccessGrant.create({
+        data: { petId, userId: sitterId, source: PetAccessSource.TEMPORARY, canViewIdentity: true },
+      });
+
+      await sitter.get(`/pets/${petId}`).expect(200);
+
+      await prisma.petAccessGrant.update({
+        where: { id: grant.id },
+        data: { revokedAt: new Date(), revokedByUserId: (await owner.get("/auth/session").expect(200)).body.user.id },
+      });
+
+      const denied = await sitter.get(`/pets/${petId}`).expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("keeps the onboarding progress row when its referenced household and pet are deleted", async () => {
+      const identifier = `orphan-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const householdId = household.body.id;
+      const pet = await client
+        .post(`/households/${householdId}/pets`)
+        .send({ name: "Ephemeral", species: "CAT", approximateAgeMonths: 3 })
+        .expect(201);
+
+      await client
+        .put("/onboarding/progress")
+        .send({ chapter: "PET_IDENTITY", step: "species", status: "COMPLETED", householdId, petId: pet.body.id })
+        .expect(200);
+
+      const before = await client.get("/onboarding").expect(200);
+      expect(before.body.householdId).toBe(householdId);
+      expect(before.body.petId).toBe(pet.body.id);
+
+      // Hard delete, bypassing the API (no delete endpoint exists yet) — this
+      // exercises the FK's ON DELETE SET NULL policy directly.
+      await prisma.pet.delete({ where: { id: pet.body.id } });
+      await prisma.household.delete({ where: { id: householdId } });
+
+      const after = await client.get("/onboarding").expect(200);
+      expect(after.body.householdId).toBeNull();
+      expect(after.body.petId).toBeNull();
+      // The row itself, and its progress, survive.
+      expect(after.body.chapter).toBe("PET_IDENTITY");
+      expect(after.body.status).toBe("COMPLETED");
+    });
+
+    it("rejects a duplicate NULL-pet UserPetInterest instead of storing it twice", async () => {
+      const identifier = `interest-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const session = await client.get("/auth/session").expect(200);
+      const userId: string = session.body.user.id;
+
+      const send = () =>
+        client
+          .put("/onboarding/progress")
+          .send({ chapter: "PERSONALIZATION", step: "personalization", status: "COMPLETED", interests: ["VET"] })
+          .expect(200);
+
+      await send();
+      await send();
+
+      const count = await prisma.userPetInterest.count({ where: { userId, petId: null, interest: "VET" } });
+      expect(count).toBe(1);
+    });
+
+    it("rejects setting an active pet that does not belong to the target household", async () => {
+      const identifier = `cross-household-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const householdA = await client.post("/households").send({}).expect(201);
+      const householdB = await client.post("/households").send({}).expect(201);
+      const petInA = await client
+        .post(`/households/${householdA.body.id}/pets`)
+        .send({ name: "StaysInA", species: "DOG", approximateAgeMonths: 12 })
+        .expect(201);
+
+      const response = await client
+        .put(`/households/${householdB.body.id}/active-pet`)
+        .send({ petId: petInA.body.id })
+        .expect(400);
+      expect(response.body.error.code).toBe("VALIDATION_ERROR");
+    });
+
+    it("requires effective pet access to set an active pet, even for a real household member", async () => {
+      const ownerIdentifier = `member-owner-${unique()}@example.com`;
+      const familyIdentifier = `member-family-${unique()}@example.com`;
+
+      const owner = authedRequest(app, await signUp(app, logSpy, ownerIdentifier));
+      const familyCookies = await signUp(app, logSpy, familyIdentifier);
+      const family = authedRequest(app, familyCookies);
+      const familySession = await family.get("/auth/session").expect(200);
+      const familyId: string = familySession.body.user.id;
+
+      const household = await owner.post("/households").send({}).expect(201);
+      const householdId = household.body.id;
+
+      // No "invite member" endpoint exists yet — added directly, which is
+      // itself what makes this a real household member for HouseholdMemberGuard.
+      await prisma.householdMember.create({ data: { householdId, userId: familyId, role: HouseholdRole.FAMILY } });
+
+      const pet = await owner
+        .post(`/households/${householdId}/pets`)
+        .send({ name: "GuardedPet", species: "CAT", approximateAgeMonths: 6 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      // applyHouseholdDefaults granted the family member access on pet creation — revoke it.
+      await prisma.petAccessGrant.updateMany({
+        where: { petId, userId: familyId },
+        data: { revokedAt: new Date() },
+      });
+
+      // Passes HouseholdMemberGuard (real membership row) but fails PetAccessGuard's
+      // equivalent check inside ActivePetService — access, not membership, gates this.
+      const response = await family.put(`/households/${householdId}/active-pet`).send({ petId }).expect(403);
+      expect(response.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("rejects a user with neither email nor phone at the database layer", async () => {
+      await expect(prisma.user.create({ data: { displayName: "No Contact Info" } })).rejects.toThrow();
+    });
   });
 });

@@ -92,6 +92,10 @@ enum PetInterest {
 // Core identity
 // ---------------------------------------------------------------------------
 
+/// DB-level integrity: a CHECK constraint (email IS NOT NULL OR phone IS NOT NULL)
+/// is added by the schema_hardening migration's raw SQL — Prisma's schema DSL has
+/// no multi-column CHECK syntax, so it is not representable here. Application-layer
+/// validation in AuthService remains, but this is no longer the only guarantee.
 model User {
   id              String          @id @default(uuid()) @db.Uuid
   email           String?         @unique
@@ -105,7 +109,7 @@ model User {
 
   sessions             Session[]
   householdMemberships HouseholdMember[]
-  petAccessGrants      PetAccess[]
+  petAccessGrants      PetAccessGrant[]
   activePetPreferences ActivePetPreference[]
   onboardingProgress   OnboardingProgress[]
   petInterests         UserPetInterest[]
@@ -140,6 +144,7 @@ model Household {
   members              HouseholdMember[]
   pets                 Pet[]
   activePetPreferences ActivePetPreference[]
+  onboardingProgress   OnboardingProgress[]
 
   @@map("households")
 }
@@ -170,6 +175,11 @@ model Pet {
   name    String
   species PetSpecies
   breed   String?
+  /// NULL = not answered/not recorded. UNKNOWN = user explicitly stated they
+  /// don't know. Both states are kept distinct — this is the Known Negative /
+  /// Unknown / Incomplete distinction applied to a single field, and later
+  /// Health/Care work must preserve the same convention rather than
+  /// collapsing "never asked" and "asked, don't know" into one value.
   sex     PetSex?
 
   birthDate            DateTime? @db.Date
@@ -180,16 +190,35 @@ model Pet {
   latestWeightValue Decimal?    @db.Decimal(6, 2)
   latestWeightUnit  WeightUnit?
 
-  colorMarkings   String?
-  neuteredStatus  NeuteredStatus?
-  microchipNumber String?
+  colorMarkings       String?
+  /// See the doc comment on `sex` — NULL vs UNKNOWN carries the same meaning here.
+  neuteredStatus      NeuteredStatus?
+  microchipNumber     String?
+  /// Normalized form of microchipNumber (whitespace/separators stripped, upper-cased)
+  /// used for uniqueness checks — see PetsService's normalizeMicrochip(). Raw
+  /// microchipNumber is preserved as entered/imported and never rejected; only
+  /// microchipNormalized participates in the partial unique index added by the
+  /// schema_hardening migration (WHERE microchipNormalized IS NOT NULL), since
+  /// legacy/imported values that can't be confidently normalized should not be
+  /// blocked from being stored.
+  microchipNormalized String?
 
   lifecycleStatus PetLifecycleStatus @default(ACTIVE)
+
+  /// Soft-delete marker for the archive strategy: removing a pet from normal
+  /// operational UI must set this rather than issuing a hard DELETE, so that
+  /// PetAccessGrant/health/future financial history referencing this pet is
+  /// never silently destroyed. lifecycleStatus (ACTIVE/LOST/DECEASED/MEMORIAL)
+  /// continues to represent the pet's real-world state; deletedAt represents
+  /// removal from the product, which is a separate axis. Not yet set by any
+  /// code path — no delete/archive endpoint exists yet, this is schema
+  /// preparation only.
+  deletedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  access               PetAccess[]
+  accessGrants         PetAccessGrant[]
   activePetPreferences ActivePetPreference[]
   onboardingProgress   OnboardingProgress[]
   interests            UserPetInterest[]
@@ -198,8 +227,21 @@ model Pet {
   @@map("pets")
 }
 
-/// Fine-grained per-user, per-pet permissions. Independent of HouseholdMember.role.
-model PetAccess {
+/// The authorization source of truth for pets — independent of
+/// HouseholdMember.role, which is only a preset applied at grant-creation
+/// time. A user may hold MULTIPLE simultaneous, independent grants for the
+/// same pet (e.g. a standing HOUSEHOLD grant plus a 24-hour TEMPORARY vet
+/// grant) — grants never overwrite one another. Effective authorization is
+/// the boolean OR ("union") of every currently active, non-revoked grant's
+/// flags; see PetAccessService.getEffectivePermissions() for the algorithm.
+/// A grant is active when: revokedAt IS NULL AND (startsAt IS NULL OR
+/// startsAt <= now) AND (expiresAt IS NULL OR expiresAt > now). Revoking
+/// access sets revokedAt rather than deleting the row, preserving the grant
+/// as an audit record.
+///
+/// Replaces the old one-row-per-(pet,user) `pet_access` table (schema_hardening
+/// migration); deliberately has NO @@unique([petId, userId]).
+model PetAccessGrant {
   id     String @id @default(uuid()) @db.Uuid
   petId  String @db.Uuid
   pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
@@ -220,13 +262,27 @@ model PetAccess {
   expiresAt DateTime?
 
   source PetAccessSource @default(HOUSEHOLD)
+  /// Free-text context for why this grant exists (e.g. "24h post-visit access", a booking reference). Not shown to end users in this phase.
+  reason String?
+
+  /// Who created this grant. Plain UUID (no FK) — audit-style reference, deliberately
+  /// not cascaded/relation-tracked so revoking or deleting the granter's account can
+  /// never alter grant history.
+  grantedByUserId String? @db.Uuid
+
+  /// Revocation is soft: set revokedAt/revokedByUserId rather than deleting the row.
+  /// A revoked grant is permanently excluded from the active-grant union.
+  revokedAt       DateTime?
+  revokedByUserId String?   @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([petId, userId])
-  @@index([userId])
-  @@map("pet_access")
+  @@index([petId, userId])
+  @@index([expiresAt])
+  @@index([source])
+  @@index([revokedAt])
+  @@map("pet_access_grants")
 }
 
 /// Active pet is a per-user, per-household preference — never stored on Pet itself.
@@ -238,12 +294,21 @@ model ActivePetPreference {
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   petId       String    @db.Uuid
   pet         Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@unique([userId, householdId])
   @@map("active_pet_preferences")
 }
 
+/// True uniqueness is enforced by two partial unique indexes added via raw SQL
+/// in the schema_hardening migration — not representable as a single @@unique
+/// here because Postgres treats NULL as distinct in unique indexes, so a plain
+/// UNIQUE(userId, petId, interest) does not stop duplicate (userId, NULL, interest)
+/// rows. The two indexes are:
+///   UNIQUE (userId, interest)          WHERE petId IS NULL
+///   UNIQUE (userId, petId, interest)   WHERE petId IS NOT NULL
+/// The @@index below is for query performance only and carries no uniqueness guarantee.
 model UserPetInterest {
   id        String      @id @default(uuid()) @db.Uuid
   userId    String      @db.Uuid
@@ -253,7 +318,7 @@ model UserPetInterest {
   interest  PetInterest
   createdAt DateTime    @default(now())
 
-  @@unique([userId, petId, interest])
+  @@index([userId, petId, interest])
   @@map("user_pet_interests")
 }
 
@@ -261,13 +326,19 @@ model UserPetInterest {
 // Onboarding
 // ---------------------------------------------------------------------------
 
+/// Deleting/archiving a referenced Household or Pet must never silently
+/// destroy the user's onboarding progress row — hence SetNull (not Cascade)
+/// on both householdId and petId. There is still exactly one progress row
+/// per user (@@unique([userId]) below), covering only the initial onboarding
+/// flow; it is not a general per-household/per-pet progress log.
 model OnboardingProgress {
-  id          String  @id @default(uuid()) @db.Uuid
-  userId      String  @db.Uuid
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  householdId String? @db.Uuid
-  petId       String? @db.Uuid
-  pet         Pet?    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdId String?    @db.Uuid
+  household   Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  petId       String?    @db.Uuid
+  pet         Pet?       @relation(fields: [petId], references: [id], onDelete: SetNull)
 
   chapter        OnboardingChapter
   step           String
@@ -286,13 +357,30 @@ model OnboardingProgress {
 // Domain events (transactional-outbox-shaped; dispatched in-process for now)
 // ---------------------------------------------------------------------------
 
+/// `type` is deliberately plain text, not a Postgres enum — event types will
+/// grow significantly over the product's life, and a DB enum would mean a
+/// migration per new event. Type safety instead lives in application code:
+/// DomainEventType (a TypeScript union derived from DOMAIN_EVENT_TYPES in
+/// domain-events.service.ts) is the canonical registry; a typo'd event name
+/// fails to compile rather than silently inserting an unrecognized string.
+///
+/// The extra columns below (eventVersion, aggregateType/aggregateId,
+/// attemptCount, lastError) make this row usable as a real transactional
+/// outbox later — a poller can pick up unprocessed rows, retry with backoff,
+/// and record failures — without any schema change when that poller is built.
 model DomainEvent {
-  id          String    @id @default(uuid()) @db.Uuid
-  type        String
-  payload     Json
-  occurredAt  DateTime  @default(now())
-  processedAt DateTime?
+  id            String    @id @default(uuid()) @db.Uuid
+  type          String
+  eventVersion  Int       @default(1)
+  payload       Json
+  aggregateType String?
+  aggregateId   String?
+  attemptCount  Int       @default(0)
+  lastError     String?
+  occurredAt    DateTime  @default(now())
+  processedAt   DateTime?
 
   @@index([processedAt])
+  @@index([aggregateType, aggregateId])
   @@map("domain_events")
 }

@@ -12,14 +12,30 @@ export const DOMAIN_EVENT_TYPES = [
   "PetProfileUpdated",
 ] as const;
 
+/**
+ * The canonical event-name registry. Every publish() call is checked against
+ * this union at compile time — a typo'd event name (e.g. "HouseholdCraeted")
+ * fails the build/tests instead of silently inserting an unrecognized string
+ * into the domain_events table. This is deliberately a TypeScript-only
+ * guarantee: the DB column stays plain text (see the doc comment on the
+ * DomainEvent Prisma model) because a Postgres enum would need a migration
+ * for every new event type as the product grows.
+ */
 export type DomainEventType = (typeof DOMAIN_EVENT_TYPES)[number];
+
+export interface PublishOptions {
+  /** Pass the same $transaction callback's tx here to commit the event atomically with the domain mutation it describes. */
+  tx?: Prisma.TransactionClient;
+  aggregateType?: string;
+  aggregateId?: string;
+}
 
 /**
  * Outbox-shaped: every event is persisted to `domain_events` before being
  * dispatched in-process via EventEmitter2. Today the dispatch is synchronous
  * and best-effort; evolving to an at-least-once relay only means adding a
- * poller that reads unprocessed rows and marks `processedAt` — no schema or
- * call-site change required.
+ * poller that reads unprocessed (or failed/retryable, via attemptCount) rows
+ * and marks `processedAt` — no schema or call-site change required.
  */
 @Injectable()
 export class DomainEventsService {
@@ -30,19 +46,33 @@ export class DomainEventsService {
     private readonly emitter: EventEmitter2,
   ) {}
 
-  async publish(type: DomainEventType, payload: Record<string, unknown>): Promise<void> {
-    const event = await this.prisma.domainEvent.create({
-      data: { type, payload: payload as Prisma.InputJsonValue },
+  async publish(type: DomainEventType, payload: Record<string, unknown>, options: PublishOptions = {}): Promise<void> {
+    const client = options.tx ?? this.prisma;
+
+    const event = await client.domainEvent.create({
+      data: {
+        type,
+        payload: payload as Prisma.InputJsonValue,
+        aggregateType: options.aggregateType,
+        aggregateId: options.aggregateId,
+      },
     });
 
     try {
       this.emitter.emit(type, payload);
-      await this.prisma.domainEvent.update({
+      await client.domainEvent.update({
         where: { id: event.id },
         data: { processedAt: new Date() },
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to dispatch domain event ${type} (${event.id})`, error instanceof Error ? error.stack : undefined);
+      await client.domainEvent
+        .update({
+          where: { id: event.id },
+          data: { attemptCount: { increment: 1 }, lastError: message },
+        })
+        .catch(() => undefined);
     }
   }
 }
