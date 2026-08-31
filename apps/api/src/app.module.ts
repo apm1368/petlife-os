@@ -1,0 +1,60 @@
+import { MiddlewareConsumer, Module, type NestModule } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
+import { RequestIdMiddleware } from "./common/middleware/request-id.middleware";
+import { CsrfMiddleware } from "./common/csrf/csrf.middleware";
+import { CsrfGuard } from "./common/csrf/csrf.guard";
+import { PrismaModule } from "./common/prisma/prisma.module";
+import { RedisModule } from "./common/redis/redis.module";
+import { SessionModule } from "./common/session/session.module";
+import { DomainEventsModule } from "./common/events/domain-events.module";
+import { validateEnv } from "./config/env";
+import { HealthModule } from "./health/health.module";
+import { AuthModule } from "./modules/auth/auth.module";
+import { UsersModule } from "./modules/users/users.module";
+import { HouseholdsModule } from "./modules/households/households.module";
+import { PetAccessModule } from "./modules/pet-access/pet-access.module";
+import { PetsModule } from "./modules/pets/pets.module";
+import { OnboardingModule } from "./modules/onboarding/onboarding.module";
+import { HomeModule } from "./modules/home/home.module";
+import { StorageModule } from "./modules/storage/storage.module";
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
+    EventEmitterModule.forRoot(),
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 100 }],
+      // The e2e suite creates many users in quick succession from the same
+      // "IP" (supertest has no real network layer); production rate limits
+      // stay intact, only the test run bypasses them.
+      skipIf: () => process.env.NODE_ENV === "test",
+    }),
+    PrismaModule,
+    RedisModule,
+    SessionModule,
+    DomainEventsModule,
+    HealthModule,
+    AuthModule,
+    UsersModule,
+    HouseholdsModule,
+    PetAccessModule,
+    PetsModule,
+    OnboardingModule,
+    HomeModule,
+    StorageModule,
+  ],
+  providers: [
+    { provide: APP_FILTER, useClass: ApiExceptionFilter },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: CsrfGuard },
+  ],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestIdMiddleware, CsrfMiddleware).forRoutes("*");
+  }
+}

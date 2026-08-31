@@ -1,0 +1,11 @@
+{
+  "extends": "@petlife/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "lib": ["dom", "ES2022"]
+  },
+  "include": ["src"]
+}

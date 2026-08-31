@@ -1,0 +1,138 @@
+{
+  "common": {
+    "appName": "PET LIFE OS",
+    "continue": "ادامه",
+    "back": "بازگشت",
+    "skip": "رد کردن",
+    "save": "ذخیره",
+    "cancel": "انصراف",
+    "retry": "تلاش دوباره",
+    "loading": "در حال بارگذاری",
+    "optional": "اختیاری"
+  },
+  "auth": {
+    "welcome": {
+      "title": "به PET LIFE OS خوش آمدید",
+      "subtitle": "همه چیز درباره زندگی حیوان خانگی شما، در یک جا.",
+      "continueWithEmail": "ادامه با ایمیل",
+      "continueWithPhone": "ادامه با شماره موبایل"
+    },
+    "identifier": {
+      "emailLabel": "آدرس ایمیل",
+      "phoneLabel": "شماره موبایل",
+      "sendCode": "ارسال کد"
+    },
+    "otp": {
+      "title": "کد را وارد کنید",
+      "subtitle": "یک کد ۶ رقمی به {identifier} ارسال شد",
+      "resend": "ارسال دوباره کد",
+      "resendIn": "ارسال دوباره تا {seconds} ثانیه دیگر",
+      "verify": "تأیید",
+      "invalid": "این کد نادرست است یا منقضی شده.",
+      "rateLimited": "تلاش بیش از حد. {seconds} ثانیه دیگر دوباره امتحان کنید."
+    }
+  },
+  "onboarding": {
+    "chapters": {
+      "account": "حساب شما",
+      "household": "خانواده",
+      "petIdentity": "با حیوان خانگی خود آشنا شوید",
+      "personalization": "شخصی‌سازی",
+      "ready": "آماده"
+    },
+    "household": {
+      "title": "خانواده خود را تنظیم کنید",
+      "subtitle": "می‌توانید بعداً آن را تغییر دهید.",
+      "nameLabel": "نام خانواده",
+      "cityLabel": "شهر"
+    },
+    "species": {
+      "title": "چه نوع حیوانی دارید؟",
+      "dog": "سگ",
+      "cat": "گربه"
+    },
+    "petName": {
+      "title": "اسمش چیست؟"
+    },
+    "petPhoto": {
+      "title": "یک عکس اضافه کنید",
+      "subtitle": "اختیاری — می‌توانید بعداً اضافه کنید.",
+      "upload": "بارگذاری عکس",
+      "uploading": "در حال بارگذاری...",
+      "retry": "تلاش دوباره برای بارگذاری"
+    },
+    "breed": {
+      "title": "نژاد",
+      "subtitle": "اختیاری"
+    },
+    "sex": {
+      "title": "جنسیت",
+      "male": "نر",
+      "female": "ماده",
+      "unknown": "مطمئن نیستم",
+      "subtitle": "اختیاری"
+    },
+    "age": {
+      "title": "تاریخ تولد یا سن تقریبی",
+      "birthDateLabel": "تاریخ تولد",
+      "approxAgeLabel": "سن تقریبی (ماه)",
+      "useApprox": "تاریخ تولد دقیق را نمی‌دانم"
+    },
+    "personalization": {
+      "title": "به چه چیزی علاقه دارید؟",
+      "subtitle": "این به ما کمک می‌کند صفحه اصلی شما را اولویت‌بندی کنیم.",
+      "health": "سلامت",
+      "vet": "دامپزشکی",
+      "dailyCare": "مراقبت روزانه",
+      "shopping": "خرید",
+      "training": "آموزش",
+      "travel": "سفر",
+      "insurance": "بیمه",
+      "animalSupport": "حمایت از حیوانات"
+    },
+    "ready": {
+      "title": "{name} آماده است!",
+      "subtitle": "بریم به صفحه اصلی.",
+      "cta": "رفتن به صفحه اصلی"
+    }
+  },
+  "home": {
+    "title": "امروز برای {name}",
+    "action": {
+      "completeHealth": "تکمیل اطلاعات سلامت",
+      "viewProfile": "مشاهده پروفایل {name}",
+      "findVet": "یافتن دامپزشک",
+      "askAi": "پرسش از هوش مصنوعی درباره {name}",
+      "addPet": "افزودن اولین حیوان خانگی"
+    },
+    "sections": {
+      "ai": "پرسش از هوش مصنوعی",
+      "upcoming": "پیش‌ رو"
+    },
+    "aiPlaceholder": "راهنمایی هوش مصنوعی به‌زودی فعال می‌شود.",
+    "upcomingPlaceholder": "چیزی برنامه‌ریزی نشده است."
+  },
+  "pets": {
+    "myPets": "حیوانات خانگی من",
+    "addPet": "افزودن حیوان خانگی",
+    "active": "فعال",
+    "setActive": "تنظیم به‌عنوان فعال",
+    "openProfile": "مشاهده پروفایل",
+    "profile": {
+      "editIdentity": "ویرایش اطلاعات هویتی",
+      "digitalId": "شناسه دیجیتال",
+      "digitalIdComingSoon": "به‌زودی",
+      "weight": "وزن",
+      "unknown": "ثبت نشده"
+    }
+  },
+  "theme": {
+    "system": "سیستم",
+    "light": "روشن",
+    "dark": "تیره"
+  },
+  "errors": {
+    "generic": "مشکلی پیش آمد.",
+    "offline": "شما آفلاین هستید. برخی عملیات ممکن است کار نکنند."
+  }
+}

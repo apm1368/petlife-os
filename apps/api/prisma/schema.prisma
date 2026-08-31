@@ -1,0 +1,298 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Locale {
+  fa
+  en
+}
+
+enum ThemePreference {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+enum HouseholdRole {
+  OWNER
+  FAMILY
+}
+
+enum PetSpecies {
+  DOG
+  CAT
+}
+
+enum PetSex {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum NeuteredStatus {
+  NEUTERED
+  INTACT
+  UNKNOWN
+}
+
+enum WeightUnit {
+  KG
+  LB
+}
+
+enum PetLifecycleStatus {
+  ACTIVE
+  LOST
+  TEMPORARILY_TRANSFERRED
+  DECEASED
+  MEMORIAL
+}
+
+enum PetAccessSource {
+  HOUSEHOLD
+  MANUAL
+  TEMPORARY
+}
+
+enum OnboardingChapter {
+  ACCOUNT
+  HOUSEHOLD
+  PET_IDENTITY
+  PERSONALIZATION
+  READY
+}
+
+enum OnboardingStatus {
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum PetInterest {
+  HEALTH
+  VET
+  DAILY_CARE
+  SHOPPING
+  TRAINING
+  TRAVEL
+  INSURANCE
+  ANIMAL_SUPPORT
+}
+
+// ---------------------------------------------------------------------------
+// Core identity
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String          @id @default(uuid()) @db.Uuid
+  email           String?         @unique
+  phone           String?         @unique
+  displayName     String
+  avatarUrl       String?
+  locale          Locale          @default(fa)
+  themePreference ThemePreference @default(SYSTEM)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  sessions             Session[]
+  householdMemberships HouseholdMember[]
+  petAccessGrants      PetAccess[]
+  activePetPreferences ActivePetPreference[]
+  onboardingProgress   OnboardingProgress[]
+  petInterests         UserPetInterest[]
+
+  @@map("users")
+}
+
+/// Server-side session record backing the HTTP-only session cookie. The cookie carries only the id.
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  rotatedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Household {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String?
+  city        String?
+  region      String?
+  countryCode String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members              HouseholdMember[]
+  pets                 Pet[]
+  activePetPreferences ActivePetPreference[]
+
+  @@map("households")
+}
+
+model HouseholdMember {
+  id          String        @id @default(uuid()) @db.Uuid
+  householdId String        @db.Uuid
+  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId      String        @db.Uuid
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        HouseholdRole
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([householdId, userId])
+  @@map("household_members")
+}
+
+// ---------------------------------------------------------------------------
+// Pet identity
+// ---------------------------------------------------------------------------
+
+model Pet {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  name    String
+  species PetSpecies
+  breed   String?
+  sex     PetSex?
+
+  birthDate            DateTime? @db.Date
+  approximateAgeMonths Int?
+
+  photoUrl String?
+
+  latestWeightValue Decimal?    @db.Decimal(6, 2)
+  latestWeightUnit  WeightUnit?
+
+  colorMarkings   String?
+  neuteredStatus  NeuteredStatus?
+  microchipNumber String?
+
+  lifecycleStatus PetLifecycleStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  access               PetAccess[]
+  activePetPreferences ActivePetPreference[]
+  onboardingProgress   OnboardingProgress[]
+  interests            UserPetInterest[]
+
+  @@index([householdId])
+  @@map("pets")
+}
+
+/// Fine-grained per-user, per-pet permissions. Independent of HouseholdMember.role.
+model PetAccess {
+  id     String @id @default(uuid()) @db.Uuid
+  petId  String @db.Uuid
+  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  canViewIdentity    Boolean @default(true)
+  canEditIdentity    Boolean @default(false)
+  canViewHealth      Boolean @default(false)
+  canEditHealth      Boolean @default(false)
+  canBookCare        Boolean @default(false)
+  canViewCareProfile Boolean @default(false)
+  canEditCareProfile Boolean @default(false)
+  canViewLocation    Boolean @default(false)
+  canManageAccess    Boolean @default(false)
+
+  startsAt  DateTime?
+  expiresAt DateTime?
+
+  source PetAccessSource @default(HOUSEHOLD)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([petId, userId])
+  @@index([userId])
+  @@map("pet_access")
+}
+
+/// Active pet is a per-user, per-household preference — never stored on Pet itself.
+model ActivePetPreference {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, householdId])
+  @@map("active_pet_preferences")
+}
+
+model UserPetInterest {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String      @db.Uuid
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId     String?     @db.Uuid
+  pet       Pet?        @relation(fields: [petId], references: [id], onDelete: Cascade)
+  interest  PetInterest
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, petId, interest])
+  @@map("user_pet_interests")
+}
+
+// ---------------------------------------------------------------------------
+// Onboarding
+// ---------------------------------------------------------------------------
+
+model OnboardingProgress {
+  id          String  @id @default(uuid()) @db.Uuid
+  userId      String  @db.Uuid
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdId String? @db.Uuid
+  petId       String? @db.Uuid
+  pet         Pet?    @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  chapter        OnboardingChapter
+  step           String
+  status         OnboardingStatus  @default(IN_PROGRESS)
+  completedSteps Json              @default("[]")
+
+  lastCompletedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId])
+  @@map("onboarding_progress")
+}
+
+// ---------------------------------------------------------------------------
+// Domain events (transactional-outbox-shaped; dispatched in-process for now)
+// ---------------------------------------------------------------------------
+
+model DomainEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  type        String
+  payload     Json
+  occurredAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  @@index([processedAt])
+  @@map("domain_events")
+}

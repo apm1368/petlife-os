@@ -1,0 +1,15 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "setupFiles": ["<rootDir>/test/jest-env-setup.js"],
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@petlife/types$": "<rootDir>/../../packages/types/src/index.ts",
+    "^@petlife/validation$": "<rootDir>/../../packages/validation/src/index.ts",
+    "^@petlife/config$": "<rootDir>/../../packages/config/src/index.ts"
+  }
+}

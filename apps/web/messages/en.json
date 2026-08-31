@@ -1,0 +1,138 @@
+{
+  "common": {
+    "appName": "PET LIFE OS",
+    "continue": "Continue",
+    "back": "Back",
+    "skip": "Skip",
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "loading": "Loading",
+    "optional": "Optional"
+  },
+  "auth": {
+    "welcome": {
+      "title": "Welcome to PET LIFE OS",
+      "subtitle": "Everything about your pet's life, in one place.",
+      "continueWithEmail": "Continue with email",
+      "continueWithPhone": "Continue with phone"
+    },
+    "identifier": {
+      "emailLabel": "Email address",
+      "phoneLabel": "Phone number",
+      "sendCode": "Send code"
+    },
+    "otp": {
+      "title": "Enter the code",
+      "subtitle": "We sent a 6-digit code to {identifier}",
+      "resend": "Resend code",
+      "resendIn": "Resend in {seconds}s",
+      "verify": "Verify",
+      "invalid": "That code is incorrect or has expired.",
+      "rateLimited": "Too many attempts. Try again in {seconds}s."
+    }
+  },
+  "onboarding": {
+    "chapters": {
+      "account": "Your Account",
+      "household": "Household",
+      "petIdentity": "Meet Your Pet",
+      "personalization": "Make It Yours",
+      "ready": "Ready"
+    },
+    "household": {
+      "title": "Set up your household",
+      "subtitle": "You can always change this later.",
+      "nameLabel": "Household name",
+      "cityLabel": "City"
+    },
+    "species": {
+      "title": "What kind of pet?",
+      "dog": "Dog",
+      "cat": "Cat"
+    },
+    "petName": {
+      "title": "What's their name?"
+    },
+    "petPhoto": {
+      "title": "Add a photo",
+      "subtitle": "Optional — you can add one later.",
+      "upload": "Upload photo",
+      "uploading": "Uploading...",
+      "retry": "Retry upload"
+    },
+    "breed": {
+      "title": "Breed",
+      "subtitle": "Optional"
+    },
+    "sex": {
+      "title": "Sex",
+      "male": "Male",
+      "female": "Female",
+      "unknown": "Not sure",
+      "subtitle": "Optional"
+    },
+    "age": {
+      "title": "Birthday or approximate age",
+      "birthDateLabel": "Birthday",
+      "approxAgeLabel": "Approximate age (months)",
+      "useApprox": "I don't know the exact birthday"
+    },
+    "personalization": {
+      "title": "What are you interested in?",
+      "subtitle": "This helps us prioritize your Home.",
+      "health": "Health",
+      "vet": "Veterinary care",
+      "dailyCare": "Daily care",
+      "shopping": "Shopping",
+      "training": "Training",
+      "travel": "Travel",
+      "insurance": "Insurance",
+      "animalSupport": "Animal support"
+    },
+    "ready": {
+      "title": "{name} is ready!",
+      "subtitle": "Let's head to your Home.",
+      "cta": "Go to Home"
+    }
+  },
+  "home": {
+    "title": "Today for {name}",
+    "action": {
+      "completeHealth": "Complete health setup",
+      "viewProfile": "View {name}'s profile",
+      "findVet": "Find veterinary care",
+      "askAi": "Ask AI about {name}",
+      "addPet": "Add your first pet"
+    },
+    "sections": {
+      "ai": "Ask AI",
+      "upcoming": "Upcoming"
+    },
+    "aiPlaceholder": "AI guidance is coming soon.",
+    "upcomingPlaceholder": "Nothing scheduled yet."
+  },
+  "pets": {
+    "myPets": "My Pets",
+    "addPet": "Add pet",
+    "active": "Active",
+    "setActive": "Set as active",
+    "openProfile": "Open profile",
+    "profile": {
+      "editIdentity": "Edit identity",
+      "digitalId": "Digital ID",
+      "digitalIdComingSoon": "Coming soon",
+      "weight": "Weight",
+      "unknown": "Not set"
+    }
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "errors": {
+    "generic": "Something went wrong.",
+    "offline": "You're offline. Some actions may not work."
+  }
+}

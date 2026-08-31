@@ -1,0 +1,52 @@
+/*
+ * Typography tokens. Vazirmatn UI (variable) covers Persian glyphs and
+ * mixed Persian/Latin runs (e.g. "Apoquel 16 mg") without a font-switch
+ * flash; the Latin fallbacks only apply if the webfont fails to load.
+ */
+
+:root {
+  /* --font-vazirmatn / --font-inter are injected by next/font (see apps/web/lib/fonts.ts); fall back gracefully without it. */
+  --font-fa: var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
+  --font-en: var(--font-inter, "Inter"), var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
+
+  --text-hero-size: 2.25rem;
+  --text-hero-line: 2.75rem;
+  --text-hero-weight: 700;
+
+  --text-page-title-size: 1.5rem;
+  --text-page-title-line: 2rem;
+  --text-page-title-weight: 700;
+
+  --text-section-title-size: 1.125rem;
+  --text-section-title-line: 1.5rem;
+  --text-section-title-weight: 600;
+
+  --text-body-size: 1rem;
+  --text-body-line: 1.5rem;
+  --text-body-weight: 400;
+
+  --text-metadata-size: 0.8125rem;
+  --text-metadata-line: 1.125rem;
+  --text-metadata-weight: 500;
+
+  --text-status-size: 0.75rem;
+  --text-status-line: 1rem;
+  --text-status-weight: 600;
+
+  --text-cta-size: 0.9375rem;
+  --text-cta-line: 1.25rem;
+  --text-cta-weight: 600;
+
+  --text-numeric-size: 1rem;
+  --text-numeric-line: 1.25rem;
+  --text-numeric-weight: 600;
+  --text-numeric-feature: "tnum";
+}
+
+[dir="rtl"] {
+  font-family: var(--font-fa);
+}
+
+[dir="ltr"] {
+  font-family: var(--font-en);
+}

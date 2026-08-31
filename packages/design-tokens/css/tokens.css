@@ -1,0 +1,110 @@
+/*
+ * Semantic design tokens for PET LIFE OS.
+ * Only semantic surface/text/brand/state variables live here — never a
+ * page-specific color. Components reference these variables, not raw hex.
+ */
+
+:root {
+  color-scheme: light;
+
+  --surface-base: #faf9f6;
+  --surface-subtle: #f1efe9;
+  --surface-elevated: #ffffff;
+  --surface-overlay: rgba(31, 28, 23, 0.45);
+
+  --text-primary: #211d17;
+  --text-secondary: #5c564a;
+  --text-inverse: #faf9f6;
+  --text-disabled: #a39c8d;
+
+  --border-subtle: #e3ded2;
+  --border-strong: #c9c1af;
+
+  --brand-natural: #6b7f4f;
+  --brand-natural-strong: #556a3d;
+  --brand-mint: #3fae8f;
+  --brand-mint-strong: #2f8e73;
+
+  --ai-primary: #7c6bd6;
+  --ai-primary-strong: #6353c2;
+
+  --state-attention: #c98a1a;
+  --state-higher-concern: #d3651f;
+  --state-urgent: #c93b2e;
+  --state-emergency: #a3121f;
+  --state-success: #3f8f5f;
+
+  --focus-ring: #3fae8f;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --surface-base: #211e1a;
+    --surface-subtle: #2a2622;
+    --surface-elevated: #322e28;
+    --surface-overlay: rgba(0, 0, 0, 0.55);
+
+    --text-primary: #f3f0e8;
+    --text-secondary: #c3bcab;
+    --text-inverse: #211e1a;
+    --text-disabled: #6f6a5f;
+
+    --border-subtle: #3c372f;
+    --border-strong: #4c4638;
+
+    --brand-natural: #8fa571;
+    --brand-natural-strong: #a3ba85;
+    --brand-mint: #5cc4a5;
+    --brand-mint-strong: #79d4b8;
+
+    --ai-primary: #a597e8;
+    --ai-primary-strong: #b8adef;
+
+    --state-attention: #e0a544;
+    --state-higher-concern: #e58a4c;
+    --state-urgent: #e2685a;
+    --state-emergency: #d1544f;
+    --state-success: #67b585;
+
+    --focus-ring: #5cc4a5;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-base: #211e1a;
+  --surface-subtle: #2a2622;
+  --surface-elevated: #322e28;
+  --surface-overlay: rgba(0, 0, 0, 0.55);
+
+  --text-primary: #f3f0e8;
+  --text-secondary: #c3bcab;
+  --text-inverse: #211e1a;
+  --text-disabled: #6f6a5f;
+
+  --border-subtle: #3c372f;
+  --border-strong: #4c4638;
+
+  --brand-natural: #8fa571;
+  --brand-natural-strong: #a3ba85;
+  --brand-mint: #5cc4a5;
+  --brand-mint-strong: #79d4b8;
+
+  --ai-primary: #a597e8;
+  --ai-primary-strong: #b8adef;
+
+  --state-attention: #e0a544;
+  --state-higher-concern: #e58a4c;
+  --state-urgent: #e2685a;
+  --state-emergency: #d1544f;
+  --state-success: #67b585;
+
+  --focus-ring: #5cc4a5;
+}

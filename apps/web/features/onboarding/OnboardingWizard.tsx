@@ -1,0 +1,101 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { Skeleton } from "@petlife/ui";
+import { onboardingService } from "@/services/onboarding.service";
+import { petsService } from "@/services/pets.service";
+import { useOnboardingStore } from "@/stores/onboarding-store";
+import { HouseholdStep } from "./steps/HouseholdStep";
+import { SpeciesStep } from "./steps/SpeciesStep";
+import { PetNameStep } from "./steps/PetNameStep";
+import { AgeStep } from "./steps/AgeStep";
+import { PetPhotoStep } from "./steps/PetPhotoStep";
+import { BreedStep } from "./steps/BreedStep";
+import { SexStep } from "./steps/SexStep";
+import { PersonalizationStep } from "./steps/PersonalizationStep";
+import { ReadyStep } from "./steps/ReadyStep";
+
+const STEP_ORDER = ["household", "species", "pet-name", "age", "pet-photo", "breed", "sex", "personalization", "ready"] as const;
+type Step = (typeof STEP_ORDER)[number];
+
+export function OnboardingWizard() {
+  const [step, setStep] = useState<Step | null>(null);
+  const update = useOnboardingStore((s) => s.update);
+  const router = useRouter();
+  const locale = useLocale();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resume() {
+      const progress = await onboardingService.getProgress();
+      if (cancelled) return;
+
+      if (progress.status === "COMPLETED" && progress.chapter === "READY") {
+        router.replace(`/${locale}/home`);
+        return;
+      }
+
+      if (progress.householdId) update({ householdId: progress.householdId });
+      if (progress.petId) {
+        const pet = await petsService.getById(progress.petId);
+        if (cancelled) return;
+        update({
+          petId: pet.id,
+          species: pet.species,
+          name: pet.name,
+          breed: pet.breed,
+          sex: pet.sex,
+          photoUrl: pet.photoUrl,
+          birthDate: pet.birthDate,
+          approximateAgeMonths: pet.approximateAgeMonths,
+        });
+      }
+
+      const resumeStep = STEP_ORDER.includes(progress.step as Step) ? (progress.step as Step) : "household";
+      // Resume at the step AFTER the last completed one, unless it was skipped mid-way.
+      const index = STEP_ORDER.indexOf(resumeStep);
+      const next = progress.status === "IN_PROGRESS" ? resumeStep : (STEP_ORDER[index + 1] ?? "ready");
+      setStep(next);
+    }
+
+    void resume();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function goTo(next: Step) {
+    setStep(next);
+  }
+
+  if (!step) {
+    return <Skeleton className="h-64 w-full" aria-label="Loading onboarding" />;
+  }
+
+  switch (step) {
+    case "household":
+      return <HouseholdStep onNext={() => goTo("species")} />;
+    case "species":
+      return <SpeciesStep onNext={() => goTo("pet-name")} />;
+    case "pet-name":
+      return <PetNameStep onNext={() => goTo("age")} />;
+    case "age":
+      return <AgeStep onNext={() => goTo("pet-photo")} />;
+    case "pet-photo":
+      return <PetPhotoStep onNext={() => goTo("breed")} onSkip={() => goTo("breed")} />;
+    case "breed":
+      return <BreedStep onNext={() => goTo("sex")} onSkip={() => goTo("sex")} />;
+    case "sex":
+      return <SexStep onNext={() => goTo("personalization")} onSkip={() => goTo("personalization")} />;
+    case "personalization":
+      return <PersonalizationStep onNext={() => goTo("ready")} />;
+    case "ready":
+      return <ReadyStep />;
+    default:
+      return null;
+  }
+}
