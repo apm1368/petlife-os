@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Avatar, Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
-import type { PetDto } from "@petlife/types";
+import type { HealthSummaryDto, CareProfileDto, PetDto } from "@petlife/types";
 import { PetLifecycleStatus } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
+import { healthService } from "@/services/health.service";
+import { careProfileService } from "@/services/care-profile.service";
 import { usePetStore } from "@/stores/pet-store";
 
 export function PetProfileView({ petId }: { petId: string }) {
   const t = useTranslations("pets.profile");
   const tCommon = useTranslations("common");
+  const tHealth = useTranslations("health");
+  const router = useRouter();
+  const locale = useLocale();
   const activePetId = usePetStore((s) => s.activePetId);
   const upsertPet = usePetStore((s) => s.upsertPet);
 
@@ -19,6 +25,9 @@ export function PetProfileView({ petId }: { petId: string }) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
+
+  const [healthSummary, setHealthSummary] = useState<HealthSummaryDto | null>(null);
+  const [careProfile, setCareProfile] = useState<CareProfileDto | null>(null);
 
   async function load() {
     setError(false);
@@ -32,8 +41,27 @@ export function PetProfileView({ petId }: { petId: string }) {
     }
   }
 
+  async function loadTeasers() {
+    // No health/care data leaks onto Pet Profile when the current grant doesn't include it.
+    setHealthSummary(null);
+    setCareProfile(null);
+    let access;
+    try {
+      access = await petsService.getMyAccess(petId);
+    } catch {
+      return;
+    }
+    if (access.canViewHealth) {
+      healthService.getSummary(petId).then(setHealthSummary).catch(() => undefined);
+    }
+    if (access.canViewCareProfile) {
+      careProfileService.get(petId).then(setCareProfile).catch(() => undefined);
+    }
+  }
+
   useEffect(() => {
     void load();
+    void loadTeasers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
@@ -90,6 +118,34 @@ export function PetProfileView({ petId }: { petId: string }) {
           </Button>
         )}
       </ContextSurface>
+
+      {healthSummary ? (
+        <ContextSurface className="flex items-center justify-between">
+          <div>
+            <p className="text-body text-text-primary">{t("healthTeaser")}</p>
+            <StatusLabel tone={healthSummary.vaccinationStatus === "UP_TO_DATE" ? "success" : "attention"}>
+              {tHealth(`vaccinationStatus.${healthSummary.vaccinationStatus}`)}
+            </StatusLabel>
+          </div>
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/health`)}>
+            {t("openHealth")}
+          </Button>
+        </ContextSurface>
+      ) : null}
+
+      {careProfile ? (
+        <ContextSurface className="flex items-center justify-between">
+          <div>
+            <p className="text-body text-text-primary">{t("careTeaser")}</p>
+            <StatusLabel tone={careProfile.status === "COMPLETE" ? "success" : "neutral"}>
+              {tHealth(`setupStatus.${careProfile.status}`)}
+            </StatusLabel>
+          </div>
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/care`)}>
+            {t("openCareProfile")}
+          </Button>
+        </ContextSurface>
+      ) : null}
 
       <ContextSurface className="flex items-center justify-between">
         <span className="text-body text-text-primary">{t("digitalId")}</span>

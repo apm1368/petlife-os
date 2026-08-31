@@ -5,11 +5,20 @@ Onboarding + Basic Home. This is the first production-shaped slice of PET LIFE
 OS — it proves **User → Household → Pet Identity → Active Pet → Personalized
 Home** end to end, without prematurely building the rest of the product.
 
-Before Handoff 02 (Health Basics + Care Profile) began, the core data model
-went through a **schema hardening checkpoint** — see
-[Schema hardening checkpoint](#schema-hardening-checkpoint) below. No
-Health/Care code exists yet; that checkpoint is schema, authorization, and
-transactional-outbox work only.
+Before Handoff 02 began, the core data model went through a **schema
+hardening checkpoint** — see
+[Schema hardening checkpoint](#schema-hardening-checkpoint) below.
+
+Coding Handoff 02: **Health Basics + Care Profile + Home Context Integration**
+— see [Health Basics + Care Profile (Handoff 02)](#health-basics--care-profile-handoff-02)
+below. This is deliberately *not* the full Health platform: labs, imaging,
+prescriptions, veterinary booking, AI Health, a full medical timeline, and
+pharmacy are all still out of scope. What's here is Allergies, Conditions,
+Medications, a Vaccination summary, Diet/nutrition basics, and a free-text
+Care Profile — with health-permission-aware Home ranking and Pet Profile
+teasers, and a product-wide rule that a health fact is always one of **Known
+Present / Known Negative / Unknown / Incomplete**, never collapsed to a
+boolean.
 
 ## Architecture
 
@@ -45,8 +54,13 @@ Modular monolith, one NestJS module per bounded concern:
 - `HouseholdsModule` — household CRUD, membership
 - `PetAccessModule` — the permission model (see below)
 - `PetsModule` — pet CRUD, Active Pet, photo upload
-- `OnboardingModule` — resumable progress
-- `HomeModule` — deterministic Home ranking
+- `OnboardingModule` — resumable progress (now includes a `HEALTH_BASICS` chapter)
+- `PetHealthModule` — Allergies/Conditions/Medications/Vaccination summary +
+  `HealthSummaryService` (named `PetHealthModule`, not `HealthModule`, to avoid
+  colliding with the unrelated infra health-check module at `src/health/`)
+- `NutritionModule` — diet/nutrition basics (`/pets/:petId/nutrition`)
+- `CareProfileModule` — free-text behavioral/handling profile (`/pets/:petId/care-profile`)
+- `HomeModule` — deterministic Home ranking, now permission-aware over health/care data
 - `StorageModule` — S3-compatible object storage abstraction (local dev fallback)
 
 Cross-cutting infrastructure lives in `src/common`:
@@ -251,10 +265,219 @@ poller needs — so building that poller later requires no schema change.
 ### Home ranking (MVP)
 
 `HomeRankingService` (`apps/api/src/modules/home/home-ranking.service.ts`) is
-a pure function, deliberately not wired to any ML: given `hasActivePet`,
-`healthBasicsComplete`, and the user's interests, it returns a primary action
-and secondary actions. `HomeService` does the DB reads and calls it. This
-split is what lets the ranking evolve later without touching data access.
+a pure function, deliberately not wired to any ML, and deliberately has no DB
+access — `HomeService` does every read (including the permission check) and
+hands it a fully-resolved input. See
+[Home ranking changes (Handoff 02)](#home-ranking-changes-handoff-02) below
+for the current rule chain.
+
+## Health Basics + Care Profile (Handoff 02)
+
+Adds Health Basics (Allergies, Conditions, Medications, a Vaccination
+summary), Diet/nutrition basics, and a free-text Care Profile — plus the
+Home/Pet-Profile integration that makes them visible where a user already
+looks. Explicitly **not** implemented: labs, imaging, prescriptions,
+veterinary booking, AI Health, a full medical timeline, or pharmacy — see
+[Known limitations](#known-limitations--deliberate-simplifications).
+
+### The core rule: Known Present / Known Negative / Unknown / Incomplete
+
+Every health fact in this system is one of four states, never a boolean:
+
+| State | Meaning | Example |
+| --- | --- | --- |
+| **Known Present** | The list has at least one row | An allergy to pollen is recorded |
+| **Known Negative** | The owner explicitly said "none" | "No known allergies" was answered |
+| **Unknown** | The owner explicitly said "I don't know" | Vaccination status set to `UNKNOWN` |
+| **Incomplete** | Nobody has answered yet (skipped, or never reached) | The question was left at "Add later" |
+
+`KnowledgeState` (frontend/API-facing) and `HealthAreaKnowledgeState`
+(`NONE_KNOWN`/`UNKNOWN`, stored on `HealthProfile` for the list-backed
+domains) are how this is represented — **Known Negative and Unknown are
+different stored values**, not the same "empty list" collapsed two ways.
+`VaccinationStatus` carries the same idea natively: `UNKNOWN` and
+`INCOMPLETE` are distinct from each other and from `OVERDUE` — the vaccination
+summary service and `HealthSummaryService` never *derive* `OVERDUE` from
+missing or unanswered data, only from an explicit stored answer.
+
+### New models
+
+All pet-scoped, `onDelete: Restrict` on the `Pet` relation — deleting a pet
+with health/care history attached is a decision, not a side effect:
+
+- **`HealthProfile`** — one row per pet. `status` (`SetupStatus`:
+  `NOT_STARTED`/`PARTIAL`/`COMPLETE`) is never client-settable; it's
+  recomputed by `HealthProfileService.recomputeStatus()` after every mutation
+  to any of the four Health Basics domains (allergies/conditions/medications/
+  vaccination). Also carries `allergiesOverallState` /
+  `conditionsOverallState` / `medicationsOverallState`
+  (`HealthAreaKnowledgeState?`) — the Known-Negative/Unknown answer for a
+  domain whose list is still empty.
+- **`Allergy`** / **`Condition`** / **`Medication`** — per-row entries with
+  their own status/severity vocabularies (`AllergyStatus`/`AllergySeverity`,
+  `ConditionStatus`, `MedicationStatus`), provenance (`SourceType`,
+  `sourceLabel`), and an audit trail (`recordedByUserId`, `recordedAt`,
+  `updatedAt`). `Allergy` also has a per-row `AllergyKnowledgeState`
+  (`KNOWN`/`UNKNOWN`) — a *different* concept from `HealthProfile`'s overall
+  state: this one is per-item confidence, not "is the list empty".
+- **`VaccinationSummary`** — one row per pet, `status: VaccinationStatus`
+  (`UP_TO_DATE`/`DUE_SOON`/`OVERDUE`/`UNKNOWN`/`INCOMPLETE`) plus
+  `nextDueDate`/`lastKnownDate`. A `PUT`-only resource (always a full
+  replace) since there's exactly one summary per pet.
+- **`NutritionProfile`** — one row per pet: `dietType`, `currentFoodText`,
+  `feedingFrequencyText`, `restrictionsText`, and a `status` that is
+  `COMPLETE` only once `dietType` + `currentFoodText` +
+  `feedingFrequencyText` are all answered.
+- **`CareProfile`** — one row per pet, nine free-text fields (temperament,
+  around people/animals, leash behavior, handling sensitivity, feeding/toilet
+  routine, separation behavior, special instructions) by design — "readable
+  text, not a checkbox wall". `status` is `COMPLETE` only once every field
+  is filled, `PARTIAL` if some are, `NOT_STARTED` if none are.
+
+**Provenance.** Every health record carries `sourceType`
+(`OWNER`/`PROVIDER`/`IMPORTED_DOCUMENT`/`SYSTEM`), but only `OWNER` is
+actually reachable from any endpoint this phase — there is no import or
+provider-integration flow yet. **`OWNER`-sourced data is never marked or
+treated as verified provider data**; the field exists so a future provider
+integration doesn't require a migration.
+
+**`HealthSeverity`** (`NORMAL`/`INFORMATIONAL`/`ATTENTION`/`HIGHER_CONCERN`/
+`URGENT`/`EMERGENCY`) is fully defined but only `NORMAL`/`INFORMATIONAL`/
+`ATTENTION` are ever assigned by any logic this phase — the vocabulary exists
+so a future urgent-finding feature doesn't need a new enum.
+
+### Permissions
+
+`PetAccessFlags` gained `canViewHealth` / `canEditHealth` /
+`canViewCareProfile` / `canEditCareProfile`, computed through the exact same
+grant-union algorithm as every other flag (see
+[Schema hardening: the grant model](#schema-hardening-the-grant-model)) — no
+separate authorization path was introduced for health data. `HOUSEHOLD`
+grants give `FAMILY` members view access to both but edit access to neither;
+`OWNER` gets both view and edit. Every health/care controller is guarded by
+`SessionAuthGuard, PetAccessGuard` with `@RequirePetAccess(...)` naming the
+exact flag required — there is no health endpoint reachable without an active
+grant carrying that flag (see the IDOR tests below).
+
+### `HealthSummaryService`
+
+The one consumer-facing read model for a pet's health (`GET
+/pets/:petId/health/summary`) — Home and Pet Profile both consume this, never
+raw `Allergy`/`Condition`/`Medication`/`VaccinationSummary` rows. Shape:
+
+```json
+{
+  "status": "PARTIAL",
+  "allergyState": "KNOWN_NEGATIVE",
+  "conditionsState": "INCOMPLETE",
+  "activeMedicationCount": 1,
+  "medicationsState": "KNOWN_PRESENT",
+  "vaccinationStatus": "DUE_SOON",
+  "nextVaccinationDueAt": "2026-09-14",
+  "primaryAttention": {
+    "type": "VACCINATION_DUE",
+    "severity": "ATTENTION",
+    "titleKey": "health.attention.vaccinationDueSoon",
+    "action": "VIEW_VACCINATION"
+  }
+}
+```
+
+`primaryAttention` mirrors Home's own priority order (vaccination due, then
+setup incomplete) so the Health Overview screen and Home never disagree about
+"what matters next"; it's `null` once nothing needs attention.
+
+### API endpoints (Handoff 02 additions)
+
+```
+GET    /pets/:petId/health/summary
+PATCH  /pets/:petId/health/profile
+
+GET    /pets/:petId/health/allergies
+POST   /pets/:petId/health/allergies
+PATCH  /pets/:petId/health/allergies/:id
+DELETE /pets/:petId/health/allergies/:id
+
+GET    /pets/:petId/health/conditions
+POST   /pets/:petId/health/conditions
+PATCH  /pets/:petId/health/conditions/:id
+
+GET    /pets/:petId/health/medications
+POST   /pets/:petId/health/medications
+PATCH  /pets/:petId/health/medications/:id
+
+GET    /pets/:petId/health/vaccination-summary
+PUT    /pets/:petId/health/vaccination-summary
+
+GET    /pets/:petId/nutrition
+PUT    /pets/:petId/nutrition
+
+GET    /pets/:petId/care-profile
+PUT    /pets/:petId/care-profile
+
+GET    /pets/:id/access          (the caller's own effective PetAccessFlags for this pet)
+```
+
+### UI screens (Handoff 02 additions)
+
+- **Health Overview** (`/pets/:id/health`) — one hierarchy, not a grid of
+  equal metric cards: a single primary-attention block (mirroring
+  `HealthSummaryDto.primaryAttention` exactly), then a secondary scannable
+  list of allergy/condition/medication/vaccination state.
+- **Allergies / Conditions / Medications** (`/pets/:id/health/{allergies,conditions,medications}`)
+  — list + inline add, each row showing its provenance (`source: OWNER`).
+- **Vaccination Summary** (`/pets/:id/health/vaccination`) — a direct status
+  picker (`UP_TO_DATE`/`DUE_SOON`/`OVERDUE`/`UNKNOWN`), never a derived value.
+- **Nutrition Basics** (`/pets/:id/health/nutrition`) — diet type + free-text
+  current food/feeding frequency.
+- **Care Profile** (`/pets/:id/care`) — read-only prose for a
+  `canViewCareProfile`-but-not-`canEditCareProfile` caller (no edit button,
+  no form ever mounted); the editable form is a separate component
+  (`CareProfileForm`) only rendered for an editor.
+- **Pet Profile teasers** — a Health Summary teaser (vaccination status) and
+  a Care Profile teaser (setup status), each with an "Open Health"/"Open Care
+  Profile" action, added to the existing Pet Profile screen without turning
+  it into a dashboard; both are fetched only when `petsService.getMyAccess()`
+  says the caller can view that data.
+- **Onboarding — Health Basics chapter** (after Pet Identity/Basic Profile,
+  before Personalization): allergies/conditions/medications each ask
+  None known / Yes (inline single-name quick-add, not a full intake form) /
+  I don't know / Add later; vaccination and diet get their own native
+  status/type pickers plus the same "I don't know"/"Add later" pair. "Add
+  later" is stored as `OnboardingStatus.SKIPPED` and leaves the domain
+  **Incomplete** — a materially different stored state from an explicit
+  "None known"/"I don't know" answer, never the same value.
+
+### Home ranking changes (Handoff 02)
+
+`HomeRankingInput` gained `activePetId` (for building real hrefs — see
+below) plus `health: { visible, vaccinationStatus, profileStatus }` and
+`care: { visible, profileStatus }`. `HomeService` resolves `visible` from
+`PetAccessService.getEffectivePermissions()` *before* deciding whether to
+even query `HealthSummaryService`/`CareProfileService` — when the caller
+lacks `canViewHealth`/`canViewCareProfile`, the corresponding health/care data
+is never fetched, let alone ranked. The rule chain, in order:
+
+1. No active pet → suggest adding one.
+2. `health.visible` and vaccination is `DUE_SOON` or `OVERDUE` → primary =
+   `VIEW_VACCINATION`.
+3. `health.visible` and `health.profileStatus !== COMPLETE` → primary =
+   `COMPLETE_HEALTH`.
+4. Otherwise (health not visible, or complete and vaccination fine): if
+   `care.visible` and `care.profileStatus !== COMPLETE` and the household
+   member has the `DAILY_CARE` interest, lead the secondary action with
+   `COMPLETE_CARE_PROFILE`.
+5. `VET` interest → primary = `FIND_VET`; else primary = `ASK_AI`. The
+   care-profile secondary action (if any) rides along either way.
+
+New `HomeActionKind` values: `VIEW_VACCINATION`, `VIEW_MEDICATION` (defined,
+not yet wired to a ranking rule), `COMPLETE_CARE_PROFILE`. Every action's
+`href` is built from the real active pet id (`/pets/{id}/health/vaccination`,
+`/pets/{id}/health`, `/pets/{id}/care`) rather than the Handoff 01
+`/pets/active/*` placeholder-redirect pattern — the now-unreachable
+`/pets/active/health-setup` placeholder route was removed. `/pets/active`
+itself (a client-side redirect to `/pets/{activePetId}`) still exists for any
+future top-level "current pet" deep link.
 
 ## API endpoints
 
@@ -278,6 +501,7 @@ POST   /households/:householdId/pets           (Idempotency-Key supported)
 GET    /pets/:id
 PATCH  /pets/:id
 POST   /pets/:id/photo-upload-url
+GET    /pets/:id/access
 
 GET    /households/:householdId/active-pet
 PUT    /households/:householdId/active-pet
@@ -287,6 +511,25 @@ PUT    /onboarding/progress
 POST   /onboarding/complete                     (Idempotency-Key supported)
 
 GET    /home
+
+GET    /pets/:petId/health/summary
+PATCH  /pets/:petId/health/profile
+GET    /pets/:petId/health/allergies
+POST   /pets/:petId/health/allergies
+PATCH  /pets/:petId/health/allergies/:id
+DELETE /pets/:petId/health/allergies/:id
+GET    /pets/:petId/health/conditions
+POST   /pets/:petId/health/conditions
+PATCH  /pets/:petId/health/conditions/:id
+GET    /pets/:petId/health/medications
+POST   /pets/:petId/health/medications
+PATCH  /pets/:petId/health/medications/:id
+GET    /pets/:petId/health/vaccination-summary
+PUT    /pets/:petId/health/vaccination-summary
+GET    /pets/:petId/nutrition
+PUT    /pets/:petId/nutrition
+GET    /pets/:petId/care-profile
+PUT    /pets/:petId/care-profile
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
@@ -317,7 +560,11 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 
 pnpm db:migrate                  # prisma migrate dev
-pnpm db:seed                     # Sarah + Luna (Golden Retriever) + Milo (DSH)
+pnpm db:seed                     # Sarah + Luna (Golden Retriever, vaccination
+                                  # due soon, no known allergies, complete diet
+                                  # profile, partial care profile) + Milo (DSH,
+                                  # unknown vaccination, unknown allergies,
+                                  # minimal care profile)
 
 pnpm dev                         # api on :4000, web on :3000
 ```
@@ -347,8 +594,17 @@ pnpm --filter @petlife/api test:e2e
 - **Unit tests** (`apps/api/src/**/*.spec.ts`, run by `pnpm test`): OTP
   identifier classification, session cookie signing/tamper-detection, Home
   ranking rules.
-- **Frontend unit tests** (`apps/web/**/*.test.ts`, Vitest): locale/RTL
-  config, theme persistence.
+- **Frontend unit tests** (`apps/web/**/*.test.{ts,tsx}`, Vitest +
+  Testing Library): locale/RTL config, theme persistence, and — new in
+  Handoff 02 — component-level tests rendered against the app's real `en`/`fa`
+  message catalogs (`apps/web/test/render-with-intl.tsx`): Health Overview's
+  single-primary-attention hierarchy and its never-collapsed Known
+  Negative/Unknown/Known Present labels, Vaccination Summary rendering
+  `UNKNOWN` and `INCOMPLETE` as distinct from `OVERDUE`, Care Profile's
+  read-only-vs-editable rendering by permission, and a Persian-locale RTL
+  test asserting a Latin drug name + numeric dosage ("Apoquel — 16 mg")
+  renders untouched inside a `dir="auto"` element regardless of the
+  surrounding page direction.
 - **API e2e tests** (`apps/api/test/app.e2e-spec.ts`, Supertest against a
   real Nest app + Postgres + Redis): OTP → session, IDOR denial on a pet the
   user has no `PetAccessGrant` for, household + pet creation with optional
@@ -362,7 +618,22 @@ pnpm --filter @petlife/api test:e2e
   actually rejected now, active-pet selection is denied both for a pet
   outside the target household and for a real household member with no
   effective grant, and a user with neither email nor phone is rejected at
-  the DB layer (the `CHECK` constraint, not just app validation).
+  the DB layer (the `CHECK` constraint, not just app validation) — plus a
+  `"Health Basics + Care Profile (Handoff 02)"` block: IDOR denial on both
+  the health and care-profile endpoints for a user with no active grant,
+  Known Negative vs. Unknown staying distinct (and becoming Known Present
+  once a real row exists) across repeated `PATCH /health/profile` calls,
+  creating an allergy and a medication (and the medication count only
+  counting `ACTIVE` ones), a declared `UNKNOWN` vaccination never reading
+  back as `OVERDUE`, updating the Care Profile through `NOT_STARTED` →
+  `PARTIAL` → `COMPLETE`, Home ranking `VIEW_VACCINATION` as primary when
+  due soon, Home never surfacing a health action to a caller granted
+  identity-only access (added to the household *after* the pet already
+  existed, so `applyHouseholdDefaults` never ran for them), the Health
+  summary staying scoped to whichever pet is queried when switching between
+  Luna and Milo, onboarding resuming into the `HEALTH_BASICS` chapter, and
+  onboarding completing successfully when every Health Basics question was
+  left unanswered.
 
   The e2e suite needs its own database (kept separate from your dev data):
 
@@ -384,6 +655,20 @@ CI (`.github/workflows/ci.yml`) runs install → build shared packages →
 generate Prisma client → lint → typecheck → migrate → unit+component tests →
 e2e tests → build, against real Postgres/Redis service containers.
 
+- **Browser E2E (Handoff 02, manual verification against a real Chromium)**:
+  the full spec flow — sign up → verify OTP → create a household → create
+  Luna → Health Basics (No known allergies → Add later ×2 → vaccination Due
+  soon → diet Dry food) → Personalization → Home (asserted `VIEW_VACCINATION`
+  as the primary action, with an href built from Luna's real pet id) → Pet
+  Profile (Health teaser shows "Due soon") → Health Overview (primary
+  attention block + "None known" allergy state) → Vaccination Summary
+  (`DUE_SOON` selected) → Care Profile (not-set-up state) → add Milo via My
+  Pets → switch active pet to Milo → re-check Home (no longer shows Luna's
+  vaccination action; the primary action's href now points at Milo's pet id)
+  → Milo's own Health Overview (`Incomplete`, not Luna's `None known`) — all
+  15 checkpoints passed, explicitly confirming that switching the active pet
+  never leaks one pet's health data into another's context.
+
 ## What's implemented
 
 Everything in the acceptance criteria of the coding handoff: Persian
@@ -398,6 +683,29 @@ hardening checkpoint above (DB-level contact-info `CHECK`, `SET NULL` FK
 policy for onboarding, NULL-safe `UserPetInterest` uniqueness, the
 grant-based authorization model, microchip normalization, `Pet.deletedAt`
 prep, and transactional-outbox columns on `domain_events`).
+
+Everything in the Handoff 02 acceptance criteria: Health Basics (Allergies,
+Conditions, Medications, Vaccination summary) with Known Present/Known
+Negative/Unknown/Incomplete always kept distinct; Diet/nutrition basics; a
+free-text Care Profile with permission-aware read-only rendering;
+`canViewHealth`/`canEditHealth`/`canViewCareProfile`/`canEditCareProfile`
+enforced through the existing grant-union algorithm (no separate
+authorization path); a `HealthSummaryService` that is the only thing Home and
+Pet Profile ever read (never raw domain rows); a permission-aware
+`HomeRankingService` rule chain (vaccination due → health incomplete → care
+incomplete + `DAILY_CARE` interest → fallback) that never surfaces health
+data to a caller without `canViewHealth`; a Health Basics onboarding chapter
+that never forces a full medical intake and never conflates "skipped" with an
+explicit negative answer; full Persian/English localization including
+mixed-content ("Apoquel 16 mg")-safe RTL rendering; domain events for every
+health/care mutation using the existing outbox-shaped infrastructure;
+provenance (`sourceType`, `recordedByUserId`) preserved and never silently
+overwritten; a forward-only migration; updated seed data for Luna (due-soon
+vaccination, no known allergies, a complete diet profile, a partial care
+profile) and Milo (unknown vaccination, unknown allergies, a minimal care
+profile); backend + frontend unit/e2e tests for the scenarios above; and a
+full manual browser E2E pass (see above) confirming Luna/Milo health-data
+isolation end to end.
 
 ## Known limitations / deliberate simplifications
 
@@ -445,15 +753,47 @@ prep, and transactional-outbox columns on `domain_events`).
 - **Accessibility**: components use semantic roles/labels, visible focus
   rings, `role="alert"` for errors, and `prefers-reduced-motion` handling
   globally — not independently audited with a screen reader.
-- Full Health, AI, Vet marketplace, Commerce, Travel, Insurance, Community,
-  Animal Support, and all Provider/Seller/Shelter/Admin surfaces are
-  explicitly out of scope for this handoff, per the spec.
+- Full Vet marketplace/booking, AI Health, Commerce, Travel, Insurance,
+  Community, Animal Support, and all Provider/Seller/Shelter/Admin surfaces
+  remain explicitly out of scope, per the spec.
+- **Handoff 02 is Health *Basics*, not the Health platform**: no labs,
+  imaging, prescriptions, veterinary booking, AI Health, full medical
+  timeline, or pharmacy. `HealthSeverity` beyond `ATTENTION`
+  (`HIGHER_CONCERN`/`URGENT`/`EMERGENCY`) is defined but unwired — no logic
+  ever assigns those values yet.
+- **`SourceType.PROVIDER`/`IMPORTED_DOCUMENT`/`SYSTEM` are unreachable** —
+  every write endpoint only ever produces `OWNER`-sourced records. There is
+  no provider integration, document-import flow, or system-derived health
+  fact yet; the field exists so adding one later doesn't require a migration.
+- **`VIEW_MEDICATION` is a defined `HomeActionKind` with no ranking rule** —
+  the vocabulary exists (per the spec's "structured ActionType" requirement)
+  but nothing currently produces it as a primary or secondary action.
+- **Home surfaces only one secondary action** (`secondaryActions[0]`) in the
+  current `HomeView` UI — `HomeRankingService` can return a `COMPLETE_HEALTH`
+  primary with a `COMPLETE_CARE_PROFILE` secondary at the same time (it leads
+  the array precisely so a single-secondary-action consumer still shows it),
+  but a future screen that wants to show *all* secondary actions needs its
+  own UI, not a ranking change.
+- **No "invite a vet"/"grant temporary health access" endpoint** — the
+  `canViewHealth`/`canEditHealth` flags are fully enforced, but the only way
+  to grant them today is the existing `HOUSEHOLD`-sourced default at
+  pet-creation time (same limitation the schema-hardening checkpoint already
+  noted for `PetAccessGrant` generally).
+- **Nutrition has no dedicated permission flag** — `/pets/:petId/nutrition`
+  is gated by `canViewHealth`/`canEditHealth` since the spec didn't request a
+  separate one; revisit if nutrition data ever needs a different audience
+  than the rest of Health Basics.
 
 ## Next recommended coding handoff
 
-**Health Basics + Care Profile**, since Home's ranking already assumes a
-"health basics complete" signal (`HomeRankingService`) that nothing populates
-yet beyond weight/neutered-status on the Pet record itself. That handoff
-would also be the natural place to introduce a real `HealthModule`, replace
-the `/pets/active/health-setup` placeholder route, and start exercising the
-`HEALTH` interest captured during onboarding personalization.
+**Vet Booking / Find-a-Vet basics.** `FIND_VET` has been a stubbed Home
+action since Handoff 01 (`/vet/find`, a placeholder screen), Health Basics
+now gives it something real to link from (a vet needs to see allergies,
+active medications, and vaccination status before a visit), and the grant
+model already anticipates it — `PetAccessSource.TEMPORARY` exists and is
+enforced (see the schema-hardening checkpoint's expiry test) but has no
+issuance API yet. That handoff would plausibly introduce a minimal
+Provider/Clinic record, a booking request flow, and the first real use of a
+short-lived `TEMPORARY` grant (e.g. "share Health Basics with this vet for
+24 hours") — without yet building the full Provider/Seller marketplace,
+which stays out of scope until its own handoff.

@@ -10,6 +10,14 @@ export const DOMAIN_EVENT_TYPES = [
   "ActivePetChanged",
   "OnboardingCompleted",
   "PetProfileUpdated",
+  "HealthProfileUpdated",
+  "AllergyAdded",
+  "AllergyUpdated",
+  "ConditionAdded",
+  "MedicationAdded",
+  "VaccinationSummaryUpdated",
+  "NutritionProfileUpdated",
+  "CareProfileUpdated",
 ] as const;
 
 /**

@@ -37,6 +37,7 @@
       "account": "Your Account",
       "household": "Household",
       "petIdentity": "Meet Your Pet",
+      "healthBasics": "Pet Health Basics",
       "personalization": "Make It Yours",
       "ready": "Ready"
     },
@@ -94,12 +95,47 @@
       "title": "{name} is ready!",
       "subtitle": "Let's head to your Home.",
       "cta": "Go to Home"
+    },
+    "healthBasics": {
+      "yes": "Yes",
+      "dontKnow": "I don't know",
+      "addLater": "Add later",
+      "allergies": {
+        "title": "Any known allergies?",
+        "noneKnown": "No known allergies",
+        "namePlaceholder": "Allergy name"
+      },
+      "conditions": {
+        "title": "Any known conditions?",
+        "noneKnown": "No known conditions",
+        "namePlaceholder": "Condition name"
+      },
+      "medications": {
+        "title": "Any current medications?",
+        "noneKnown": "No current medications",
+        "namePlaceholder": "Medication name"
+      },
+      "vaccination": {
+        "title": "Vaccination status",
+        "upToDate": "Up to date",
+        "dueSoon": "Due soon",
+        "overdue": "Overdue"
+      },
+      "diet": {
+        "title": "What do they eat?",
+        "dry": "Dry food",
+        "wet": "Wet food",
+        "mixed": "Mixed"
+      }
     }
   },
   "home": {
     "title": "Today for {name}",
     "action": {
       "completeHealth": "Complete health setup",
+      "viewVaccination": "View vaccination status",
+      "viewMedication": "View medications",
+      "completeCareProfile": "Complete care profile",
       "viewProfile": "View {name}'s profile",
       "findVet": "Find veterinary care",
       "askAi": "Ask AI about {name}",
@@ -123,7 +159,128 @@
       "digitalId": "Digital ID",
       "digitalIdComingSoon": "Coming soon",
       "weight": "Weight",
-      "unknown": "Not set"
+      "unknown": "Not set",
+      "healthTeaser": "Health",
+      "careTeaser": "Care",
+      "openHealth": "Open Health",
+      "openCareProfile": "Open Care Profile"
+    }
+  },
+  "health": {
+    "attention": {
+      "vaccinationDueSoon": "Vaccination due soon.",
+      "vaccinationOverdue": "Vaccination overdue.",
+      "setupIncomplete": "Health setup is incomplete."
+    },
+    "knowledgeState": {
+      "KNOWN_PRESENT": "Known",
+      "KNOWN_NEGATIVE": "None known",
+      "UNKNOWN": "Unknown",
+      "INCOMPLETE": "Not recorded yet"
+    },
+    "vaccinationStatus": {
+      "UP_TO_DATE": "Up to date",
+      "DUE_SOON": "Due soon",
+      "OVERDUE": "Overdue",
+      "UNKNOWN": "Status unknown",
+      "INCOMPLETE": "Not recorded yet"
+    },
+    "setupStatus": {
+      "NOT_STARTED": "Not started",
+      "PARTIAL": "Partially set up",
+      "COMPLETE": "Complete"
+    },
+    "overview": {
+      "title": "Health",
+      "allergies": "Allergies",
+      "conditions": "Conditions",
+      "medications": "Medications",
+      "vaccination": "Vaccination",
+      "activeMedications": "{count} active",
+      "noActiveMedications": "None active",
+      "completeSetup": "Complete health setup"
+    },
+    "allergies": {
+      "title": "Allergies",
+      "empty": "No allergies recorded.",
+      "addAllergy": "Add allergy",
+      "name": "Name",
+      "reaction": "Reaction",
+      "reactionOptional": "Reaction (optional)",
+      "severity": "Severity",
+      "severityOptional": "Severity (optional)",
+      "severity_MILD": "Mild",
+      "severity_MODERATE": "Moderate",
+      "severity_SEVERE": "Severe",
+      "severity_UNKNOWN": "Unknown",
+      "source": "Source"
+    },
+    "conditions": {
+      "title": "Conditions",
+      "empty": "No conditions recorded.",
+      "addCondition": "Add condition",
+      "name": "Name",
+      "notes": "Notes",
+      "status_ACTIVE": "Active",
+      "status_RESOLVED": "Resolved",
+      "status_HISTORICAL": "Historical"
+    },
+    "medications": {
+      "title": "Medications",
+      "empty": "No medications recorded.",
+      "addMedication": "Add medication",
+      "name": "Name",
+      "dosage": "Dosage",
+      "unit": "Unit",
+      "frequency": "Frequency",
+      "route": "Route",
+      "instructions": "Instructions",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "status_ACTIVE": "Active",
+      "status_SCHEDULED": "Scheduled",
+      "status_COMPLETED": "Completed",
+      "status_HISTORICAL": "Historical"
+    },
+    "vaccinationSummary": {
+      "title": "Vaccination Summary",
+      "status": "Status",
+      "nextDueDate": "Next due",
+      "lastKnownDate": "Last known",
+      "notes": "Notes",
+      "save": "Save"
+    },
+    "nutrition": {
+      "title": "Nutrition Basics",
+      "dietType": "Diet type",
+      "currentFood": "Current food",
+      "feedingFrequency": "Feeding frequency",
+      "restrictions": "Restrictions",
+      "shopPlaceholder": "Shop for food (coming soon)",
+      "dietType_DRY": "Dry",
+      "dietType_WET": "Wet",
+      "dietType_RAW": "Raw",
+      "dietType_MIXED": "Mixed",
+      "dietType_PRESCRIPTION": "Prescription",
+      "dietType_OTHER": "Other",
+      "dietType_UNKNOWN": "Unknown"
+    }
+  },
+  "care": {
+    "profile": {
+      "title": "Care Profile",
+      "edit": "Edit Care Profile",
+      "readOnlyNotice": "You can view this care profile but not edit it.",
+      "temperament": "Temperament",
+      "aroundPeople": "Around people",
+      "aroundAnimals": "Around other animals",
+      "leashBehavior": "Leash behavior",
+      "handlingSensitivity": "Handling sensitivity",
+      "feedingRoutine": "Feeding routine",
+      "toiletRoutine": "Toilet routine",
+      "separationBehavior": "Separation behavior",
+      "specialInstructions": "Special instructions",
+      "empty": "Not set up yet."
     }
   },
   "theme": {

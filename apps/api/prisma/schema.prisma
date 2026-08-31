@@ -67,6 +67,7 @@ enum OnboardingChapter {
   ACCOUNT
   HOUSEHOLD
   PET_IDENTITY
+  HEALTH_BASICS
   PERSONALIZATION
   READY
 }
@@ -86,6 +87,112 @@ enum PetInterest {
   TRAVEL
   INSURANCE
   ANIMAL_SUPPORT
+}
+
+/// Shared "setup completeness" vocabulary for the three single-row-per-pet
+/// health/care summary models (HealthProfile, NutritionProfile, CareProfile).
+/// Deliberately not per-field boolean flags — see the Known Negative /
+/// Unknown / Incomplete product rule documented on HealthProfile below.
+enum SetupStatus {
+  NOT_STARTED
+  PARTIAL
+  COMPLETE
+}
+
+/// Provenance for every health/care record. OWNER is the only source fully
+/// implemented in this phase — PROVIDER/IMPORTED_DOCUMENT exist as
+/// future-compatible states with no editable integration yet, and SYSTEM is
+/// reserved for derived/setup rows. OWNER-entered data is never marked as
+/// verified provider data.
+enum SourceType {
+  OWNER
+  PROVIDER
+  IMPORTED_DOCUMENT
+  SYSTEM
+}
+
+/// Per-domain state for a list-backed health area (allergies/conditions/
+/// medications) when that list has zero rows — distinguishes an explicit
+/// "no known X" (NONE_KNOWN) from "owner doesn't know" (UNKNOWN). The absence
+/// of this field being set at all (NULL, on HealthProfile) means Incomplete —
+/// the question was never answered. Once the list has rows, the list is the
+/// source of truth and this field is no longer consulted for that domain.
+enum HealthAreaKnowledgeState {
+  NONE_KNOWN
+  UNKNOWN
+}
+
+/// Per-allergy-row confidence — distinct from HealthAreaKnowledgeState above,
+/// which describes the allergies list as a whole. KNOWN = confirmed; UNKNOWN
+/// = suspected/unconfirmed but still worth recording (e.g. an owner notices a
+/// reaction but hasn't identified the allergen with certainty).
+enum AllergyKnowledgeState {
+  KNOWN
+  UNKNOWN
+}
+
+enum AllergyStatus {
+  ACTIVE
+  RESOLVED
+}
+
+/// Never inferred — only ever set by an explicit owner/provider choice.
+enum AllergySeverity {
+  MILD
+  MODERATE
+  SEVERE
+  UNKNOWN
+}
+
+enum ConditionStatus {
+  ACTIVE
+  RESOLVED
+  HISTORICAL
+}
+
+enum MedicationStatus {
+  ACTIVE
+  SCHEDULED
+  COMPLETED
+  HISTORICAL
+}
+
+/// UNKNOWN and INCOMPLETE are deliberately distinct and neither is ever
+/// derived as OVERDUE: UNKNOWN means the owner said they don't know the
+/// vaccination status; INCOMPLETE means the question hasn't been addressed
+/// (no VaccinationSummary row exists) or vaccination has begun but isn't
+/// resolved to a concrete status yet. OVERDUE is only ever set from an
+/// explicit nextDueDate that has passed — never inferred from missing data.
+enum VaccinationStatus {
+  UP_TO_DATE
+  DUE_SOON
+  OVERDUE
+  UNKNOWN
+  INCOMPLETE
+}
+
+enum DietType {
+  DRY
+  WET
+  RAW
+  MIXED
+  PRESCRIPTION
+  OTHER
+  UNKNOWN
+}
+
+/// The full severity vocabulary the architecture must support long-term.
+/// This handoff only ever assigns NORMAL / INFORMATIONAL / ATTENTION — no
+/// urgent/emergency detection logic exists yet, but HealthSummaryService's
+/// output type is already shaped to carry the higher severities without a
+/// breaking change when that logic is built.
+enum HealthSeverity {
+  NORMAL
+  INFORMATIONAL
+  ATTENTION
+  HIGHER_CONCERN
+  URGENT
+  EMERGENCY
 }
 
 // ---------------------------------------------------------------------------
@@ -223,6 +330,14 @@ model Pet {
   onboardingProgress   OnboardingProgress[]
   interests            UserPetInterest[]
 
+  healthProfile      HealthProfile?
+  allergies          Allergy[]
+  conditions         Condition[]
+  medications        Medication[]
+  vaccinationSummary VaccinationSummary?
+  nutritionProfile   NutritionProfile?
+  careProfile        CareProfile?
+
   @@index([householdId])
   @@map("pets")
 }
@@ -351,6 +466,191 @@ model OnboardingProgress {
 
   @@unique([userId])
   @@map("onboarding_progress")
+}
+
+// ---------------------------------------------------------------------------
+// Health & Care (Handoff 02)
+//
+// Every model here uses onDelete: Restrict on its Pet relation — NOT Cascade.
+// This is a deliberate continuation of the schema-hardening FK policy: health
+// history must not be silently destroyed by a Pet row disappearing. Pets are
+// never hard-deleted through the product today (see Pet.deletedAt), so this
+// is currently inert in practice, but it is the correct default to have in
+// place before any health data exists, per the hardening checkpoint's policy
+// table ("future child domains ... must NOT default to CASCADE").
+// ---------------------------------------------------------------------------
+
+/// Pet-level health setup summary — NOT a medical diagnosis, a record of how
+/// much of the Health Basics picture has been captured. `status` is computed
+/// by HealthService from the state of the domains below (allergies,
+/// conditions, medications, vaccination, nutrition), not freely settable by
+/// clients — see HealthService.recomputeStatus(). `lastReviewedAt` is the one
+/// field a client can set directly (PATCH .../health/profile), marking that
+/// an owner has reviewed the current summary.
+model HealthProfile {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @unique @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  status SetupStatus @default(NOT_STARTED)
+
+  allergiesOverallState   HealthAreaKnowledgeState?
+  conditionsOverallState  HealthAreaKnowledgeState?
+  medicationsOverallState HealthAreaKnowledgeState?
+
+  lastReviewedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("health_profiles")
+}
+
+model Allergy {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  name     String
+  reaction String?
+  /// Never inferred from other fields — always an explicit owner/provider choice.
+  severity AllergySeverity?
+
+  knowledgeState AllergyKnowledgeState @default(KNOWN)
+  status         AllergyStatus         @default(ACTIVE)
+
+  sourceType  SourceType @default(OWNER)
+  sourceLabel String?
+
+  /// Plain UUID, no FK — same audit-reference pattern as PetAccessGrant.grantedByUserId.
+  recordedByUserId String?  @db.Uuid
+  recordedAt       DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([petId])
+  @@map("allergies")
+}
+
+model Condition {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  name   String
+  status ConditionStatus @default(ACTIVE)
+  notes  String?
+
+  sourceType  SourceType @default(OWNER)
+  sourceLabel String?
+
+  recordedByUserId String?   @db.Uuid
+  firstRecordedAt  DateTime? @db.Date
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@map("conditions")
+}
+
+/// No reminder engine and no dosage intelligence in this phase — dosage/unit
+/// are stored as entered (dosage never a float: Decimal) and simply displayed.
+model Medication {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  name          String
+  dosage        Decimal? @db.Decimal(8, 2)
+  unit          String?
+  frequencyText String?
+  route         String?
+
+  status MedicationStatus @default(ACTIVE)
+
+  startDate DateTime? @db.Date
+  endDate   DateTime? @db.Date
+
+  instructions String?
+
+  sourceType       SourceType @default(OWNER)
+  sourceLabel      String?
+  recordedByUserId String?    @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@index([status])
+  @@map("medications")
+}
+
+/// Deliberately a single summary row per pet, not a vaccine event history —
+/// out of scope for this phase. `status` is the source of truth for
+/// UNKNOWN-vs-OVERDUE: OVERDUE is only ever set explicitly (or derived from
+/// an explicit nextDueDate in the past by VaccinationService), never implied
+/// by the mere absence of data.
+model VaccinationSummary {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @unique @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  status VaccinationStatus @default(INCOMPLETE)
+
+  nextDueDate   DateTime? @db.Date
+  lastKnownDate DateTime? @db.Date
+
+  notes String?
+
+  sourceType  SourceType @default(OWNER)
+  sourceLabel String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("vaccination_summaries")
+}
+
+model NutritionProfile {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @unique @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  dietType             DietType?
+  currentFoodText      String?
+  feedingFrequencyText String?
+  restrictionsText     String?
+
+  status SetupStatus @default(NOT_STARTED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("nutrition_profiles")
+}
+
+/// Free text by design ("use readable text, not checkbox wall") — this is a
+/// human-readable behavioral/handling profile, not structured clinical data.
+model CareProfile {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @unique @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  temperamentText         String?
+  aroundPeopleText        String?
+  aroundAnimalsText       String?
+  leashBehaviorText       String?
+  handlingSensitivityText String?
+  feedingRoutineText      String?
+  toiletRoutineText       String?
+  separationBehaviorText  String?
+  specialInstructionsText String?
+
+  status SetupStatus @default(NOT_STARTED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("care_profiles")
 }
 
 // ---------------------------------------------------------------------------

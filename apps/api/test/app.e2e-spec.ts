@@ -414,4 +414,286 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       await expect(prisma.user.create({ data: { displayName: "No Contact Info" } })).rejects.toThrow();
     });
   });
+
+  describe("Health Basics + Care Profile (Handoff 02)", () => {
+    it("denies health endpoints to a user with no active grant on the pet (IDOR)", async () => {
+      const ownerIdentifier = `health-owner-${unique()}@example.com`;
+      const strangerIdentifier = `health-stranger-${unique()}@example.com`;
+      const owner = authedRequest(app, await signUp(app, logSpy, ownerIdentifier));
+      const stranger = authedRequest(app, await signUp(app, logSpy, strangerIdentifier));
+
+      const household = await owner.post("/households").send({}).expect(201);
+      const pet = await owner
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+
+      const denied = await stranger.get(`/pets/${pet.body.id}/health/summary`).expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("denies the care profile endpoints to a user with no active grant on the pet (IDOR)", async () => {
+      const ownerIdentifier = `care-owner-${unique()}@example.com`;
+      const strangerIdentifier = `care-stranger-${unique()}@example.com`;
+      const owner = authedRequest(app, await signUp(app, logSpy, ownerIdentifier));
+      const stranger = authedRequest(app, await signUp(app, logSpy, strangerIdentifier));
+
+      const household = await owner.post("/households").send({}).expect(201);
+      const pet = await owner
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+
+      const denied = await stranger.get(`/pets/${pet.body.id}/care-profile`).expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("keeps Known Negative and Unknown as distinct, never-collapsed allergy states", async () => {
+      const identifier = `knowledge-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      const untouched = await client.get(`/pets/${petId}/health/summary`).expect(200);
+      expect(untouched.body.allergyState).toBe("INCOMPLETE");
+
+      await client.patch(`/pets/${petId}/health/profile`).send({ allergiesOverallState: "NONE_KNOWN" }).expect(200);
+      const knownNegative = await client.get(`/pets/${petId}/health/summary`).expect(200);
+      expect(knownNegative.body.allergyState).toBe("KNOWN_NEGATIVE");
+
+      await client.patch(`/pets/${petId}/health/profile`).send({ allergiesOverallState: "UNKNOWN" }).expect(200);
+      const unknown = await client.get(`/pets/${petId}/health/summary`).expect(200);
+      expect(unknown.body.allergyState).toBe("UNKNOWN");
+
+      await client.post(`/pets/${petId}/health/allergies`).send({ name: "Chicken" }).expect(201);
+      const knownPresent = await client.get(`/pets/${petId}/health/summary`).expect(200);
+      expect(knownPresent.body.allergyState).toBe("KNOWN_PRESENT");
+    });
+
+    it("creates an allergy and lists it back for the pet", async () => {
+      const identifier = `allergy-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      const created = await client
+        .post(`/pets/${petId}/health/allergies`)
+        .send({ name: "Pollen", severity: "MILD" })
+        .expect(201);
+      expect(created.body.name).toBe("Pollen");
+      expect(created.body.recordedByUserId).toBeDefined();
+      expect(created.body.sourceType).toBe("OWNER");
+
+      const list = await client.get(`/pets/${petId}/health/allergies`).expect(200);
+      expect(list.body).toHaveLength(1);
+      expect(list.body[0].name).toBe("Pollen");
+    });
+
+    it("adds an active medication and reflects it in the health summary's active count", async () => {
+      const identifier = `medication-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      await client
+        .post(`/pets/${petId}/health/medications`)
+        .send({ name: "Apoquel", dosage: 16, unit: "mg", status: "ACTIVE" })
+        .expect(201);
+      await client
+        .post(`/pets/${petId}/health/medications`)
+        .send({ name: "Old prescription", status: "COMPLETED" })
+        .expect(201);
+
+      const summary = await client.get(`/pets/${petId}/health/summary`).expect(200);
+      expect(summary.body.activeMedicationCount).toBe(1);
+      expect(summary.body.medicationsState).toBe("KNOWN_PRESENT");
+    });
+
+    it("never derives OVERDUE from an UNKNOWN or unset vaccination status", async () => {
+      const identifier = `vax-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Milo", species: "CAT", approximateAgeMonths: 6 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      const untouched = await client.get(`/pets/${petId}/health/vaccination-summary`).expect(200);
+      expect(untouched.body.status).toBe("INCOMPLETE");
+
+      const declaredUnknown = await client
+        .put(`/pets/${petId}/health/vaccination-summary`)
+        .send({ status: "UNKNOWN" })
+        .expect(200);
+      expect(declaredUnknown.body.status).toBe("UNKNOWN");
+
+      const summary = await client.get(`/pets/${petId}/health/summary`).expect(200);
+      expect(summary.body.vaccinationStatus).not.toBe("OVERDUE");
+      expect(summary.body.vaccinationStatus).toBe("UNKNOWN");
+    });
+
+    it("updates the care profile and recomputes its setup status", async () => {
+      const identifier = `care-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      const initial = await client.get(`/pets/${petId}/care-profile`).expect(200);
+      expect(initial.body.status).toBe("NOT_STARTED");
+
+      const partial = await client
+        .put(`/pets/${petId}/care-profile`)
+        .send({ temperamentText: "Calm and friendly" })
+        .expect(200);
+      expect(partial.body.status).toBe("PARTIAL");
+
+      const full = await client
+        .put(`/pets/${petId}/care-profile`)
+        .send({
+          temperamentText: "Calm and friendly",
+          aroundPeopleText: "Loves everyone",
+          aroundAnimalsText: "Gets along with cats",
+          leashBehaviorText: "Walks well on leash",
+          handlingSensitivityText: "Sensitive around paws",
+          feedingRoutineText: "Twice a day",
+          toiletRoutineText: "Three walks a day",
+          separationBehaviorText: "Mild anxiety alone",
+          specialInstructionsText: "None",
+        })
+        .expect(200);
+      expect(full.body.status).toBe("COMPLETE");
+    });
+
+    it("ranks viewing vaccination status as Home's primary action when it is due soon", async () => {
+      const identifier = `home-vax-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      await client.put(`/pets/${petId}/health/vaccination-summary`).send({ status: "DUE_SOON" }).expect(200);
+
+      const home = await client.get("/home").expect(200);
+      expect(home.body.primaryAction.kind).toBe("VIEW_VACCINATION");
+      expect(home.body.primaryAction.href).toContain(petId);
+    });
+
+    it("never surfaces a health recommendation on Home when the caller lacks canViewHealth", async () => {
+      const ownerIdentifier = `home-perm-owner-${unique()}@example.com`;
+      const limitedIdentifier = `home-perm-limited-${unique()}@example.com`;
+      const owner = authedRequest(app, await signUp(app, logSpy, ownerIdentifier));
+      const limitedCookies = await signUp(app, logSpy, limitedIdentifier);
+      const limited = authedRequest(app, limitedCookies);
+      const limitedSession = await limited.get("/auth/session").expect(200);
+      const limitedId: string = limitedSession.body.user.id;
+
+      const household = await owner.post("/households").send({}).expect(201);
+      const householdId = household.body.id;
+      const pet = await owner
+        .post(`/households/${householdId}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const petId = pet.body.id;
+
+      // Vaccination is due soon — an owner or family member would see VIEW_VACCINATION.
+      await owner.put(`/pets/${petId}/health/vaccination-summary`).send({ status: "DUE_SOON" }).expect(200);
+
+      // Added to the household *after* the pet exists, so applyHouseholdDefaults never
+      // ran for them on this pet — a manual grant gives identity access only, no health.
+      await prisma.householdMember.create({ data: { householdId, userId: limitedId, role: HouseholdRole.FAMILY } });
+      await prisma.petAccessGrant.create({
+        data: { petId, userId: limitedId, source: PetAccessSource.MANUAL, canViewIdentity: true },
+      });
+
+      await limited.put(`/households/${householdId}/active-pet`).send({ petId }).expect(200);
+
+      const home = await limited.get("/home").expect(200);
+      expect(home.body.primaryAction.kind).not.toBe("VIEW_VACCINATION");
+      expect(home.body.primaryAction.kind).not.toBe("COMPLETE_HEALTH");
+    });
+
+    it("keeps the Health summary scoped to the active pet — switching pets never leaks the previous pet's data", async () => {
+      const identifier = `switch-health-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      const household = await client.post("/households").send({}).expect(201);
+      const householdId = household.body.id;
+      const luna = await client
+        .post(`/households/${householdId}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const milo = await client
+        .post(`/households/${householdId}/pets`)
+        .send({ name: "Milo", species: "CAT", approximateAgeMonths: 6 })
+        .expect(201);
+
+      await client.put(`/pets/${luna.body.id}/health/vaccination-summary`).send({ status: "DUE_SOON" }).expect(200);
+      await client.post(`/pets/${luna.body.id}/health/allergies`).send({ name: "Pollen" }).expect(201);
+
+      const homeWithLuna = await client.get("/home").expect(200);
+      expect(homeWithLuna.body.primaryAction.href).toContain(luna.body.id);
+      expect(homeWithLuna.body.primaryAction.kind).toBe("VIEW_VACCINATION");
+
+      await client.put(`/households/${householdId}/active-pet`).send({ petId: milo.body.id }).expect(200);
+
+      const miloSummary = await client.get(`/pets/${milo.body.id}/health/summary`).expect(200);
+      expect(miloSummary.body.allergyState).toBe("INCOMPLETE");
+      expect(miloSummary.body.vaccinationStatus).toBe("INCOMPLETE");
+
+      const homeWithMilo = await client.get("/home").expect(200);
+      expect(homeWithMilo.body.primaryAction.href).toContain(milo.body.id);
+      expect(homeWithMilo.body.primaryAction.href).not.toContain(luna.body.id);
+      expect(homeWithMilo.body.primaryAction.kind).not.toBe("VIEW_VACCINATION");
+    });
+
+    it("resumes onboarding into the Health Basics chapter across requests", async () => {
+      const identifier = `onboard-health-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      await client
+        .put("/onboarding/progress")
+        .send({ chapter: "HEALTH_BASICS", step: "health-allergies", status: "COMPLETED" })
+        .expect(200);
+
+      const resumed = await client.get("/onboarding").expect(200);
+      expect(resumed.body.chapter).toBe("HEALTH_BASICS");
+      expect(resumed.body.completedSteps).toContain("health-allergies");
+    });
+
+    it("completes onboarding even when every Health Basics question was left unanswered", async () => {
+      const identifier = `onboard-skip-health-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+
+      // No health/nutrition/care-profile endpoint is ever called for this user.
+      const completed = await client.post("/onboarding/complete").send({}).expect(201);
+      expect(completed.body.status).toBe("COMPLETED");
+      expect(completed.body.chapter).toBe("READY");
+    });
+  });
 });

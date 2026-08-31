@@ -37,6 +37,7 @@
       "account": "حساب شما",
       "household": "خانواده",
       "petIdentity": "با حیوان خانگی خود آشنا شوید",
+      "healthBasics": "اطلاعات پایه سلامت",
       "personalization": "شخصی‌سازی",
       "ready": "آماده"
     },
@@ -94,12 +95,47 @@
       "title": "{name} آماده است!",
       "subtitle": "بریم به صفحه اصلی.",
       "cta": "رفتن به صفحه اصلی"
+    },
+    "healthBasics": {
+      "yes": "بله",
+      "dontKnow": "نمی‌دانم",
+      "addLater": "بعداً اضافه می‌کنم",
+      "allergies": {
+        "title": "آیا حساسیت شناخته‌شده‌ای دارد؟",
+        "noneKnown": "حساسیت شناخته‌شده‌ای ندارد",
+        "namePlaceholder": "نام حساسیت"
+      },
+      "conditions": {
+        "title": "آیا بیماری شناخته‌شده‌ای دارد؟",
+        "noneKnown": "بیماری شناخته‌شده‌ای ندارد",
+        "namePlaceholder": "نام بیماری"
+      },
+      "medications": {
+        "title": "آیا داروی مصرفی دارد؟",
+        "noneKnown": "داروی مصرفی ندارد",
+        "namePlaceholder": "نام دارو"
+      },
+      "vaccination": {
+        "title": "وضعیت واکسیناسیون",
+        "upToDate": "به‌روز است",
+        "dueSoon": "به‌زودی سررسید می‌شود",
+        "overdue": "سررسید گذشته است"
+      },
+      "diet": {
+        "title": "معمولاً چه چیزی می‌خورد؟",
+        "dry": "غذای خشک",
+        "wet": "غذای کنسروی",
+        "mixed": "ترکیبی"
+      }
     }
   },
   "home": {
     "title": "امروز برای {name}",
     "action": {
       "completeHealth": "تکمیل اطلاعات سلامت",
+      "viewVaccination": "مشاهده وضعیت واکسن",
+      "viewMedication": "مشاهده داروها",
+      "completeCareProfile": "تکمیل پروفایل مراقبت",
       "viewProfile": "مشاهده پروفایل {name}",
       "findVet": "یافتن دامپزشک",
       "askAi": "پرسش از هوش مصنوعی درباره {name}",
@@ -123,7 +159,128 @@
       "digitalId": "شناسه دیجیتال",
       "digitalIdComingSoon": "به‌زودی",
       "weight": "وزن",
-      "unknown": "ثبت نشده"
+      "unknown": "ثبت نشده",
+      "healthTeaser": "سلامت",
+      "careTeaser": "مراقبت",
+      "openHealth": "مشاهده سلامت",
+      "openCareProfile": "مشاهده پروفایل مراقبت"
+    }
+  },
+  "health": {
+    "attention": {
+      "vaccinationDueSoon": "واکسن به‌زودی سررسید می‌شود.",
+      "vaccinationOverdue": "واکسن سررسید گذشته است.",
+      "setupIncomplete": "اطلاعات سلامت کامل نیست."
+    },
+    "knowledgeState": {
+      "KNOWN_PRESENT": "ثبت شده",
+      "KNOWN_NEGATIVE": "موردی ثبت نشده",
+      "UNKNOWN": "نامشخص",
+      "INCOMPLETE": "هنوز ثبت نشده"
+    },
+    "vaccinationStatus": {
+      "UP_TO_DATE": "به‌روز",
+      "DUE_SOON": "به‌زودی سررسید",
+      "OVERDUE": "سررسید گذشته",
+      "UNKNOWN": "وضعیت نامشخص",
+      "INCOMPLETE": "هنوز ثبت نشده"
+    },
+    "setupStatus": {
+      "NOT_STARTED": "شروع نشده",
+      "PARTIAL": "ناقص",
+      "COMPLETE": "کامل"
+    },
+    "overview": {
+      "title": "سلامت",
+      "allergies": "حساسیت‌ها",
+      "conditions": "بیماری‌ها",
+      "medications": "داروها",
+      "vaccination": "واکسیناسیون",
+      "activeMedications": "{count} دارو فعال",
+      "noActiveMedications": "بدون داروی فعال",
+      "completeSetup": "تکمیل اطلاعات سلامت"
+    },
+    "allergies": {
+      "title": "حساسیت‌ها",
+      "empty": "حساسیتی ثبت نشده است.",
+      "addAllergy": "افزودن حساسیت",
+      "name": "نام",
+      "reaction": "واکنش",
+      "reactionOptional": "واکنش (اختیاری)",
+      "severity": "شدت",
+      "severityOptional": "شدت (اختیاری)",
+      "severity_MILD": "خفیف",
+      "severity_MODERATE": "متوسط",
+      "severity_SEVERE": "شدید",
+      "severity_UNKNOWN": "نامشخص",
+      "source": "منبع"
+    },
+    "conditions": {
+      "title": "بیماری‌ها",
+      "empty": "بیماری‌ای ثبت نشده است.",
+      "addCondition": "افزودن بیماری",
+      "name": "نام",
+      "notes": "یادداشت",
+      "status_ACTIVE": "فعال",
+      "status_RESOLVED": "برطرف‌شده",
+      "status_HISTORICAL": "سابقه"
+    },
+    "medications": {
+      "title": "داروها",
+      "empty": "دارویی ثبت نشده است.",
+      "addMedication": "افزودن دارو",
+      "name": "نام",
+      "dosage": "دوز",
+      "unit": "واحد",
+      "frequency": "دفعات مصرف",
+      "route": "روش مصرف",
+      "instructions": "دستور مصرف",
+      "startDate": "تاریخ شروع",
+      "endDate": "تاریخ پایان",
+      "status_ACTIVE": "فعال",
+      "status_SCHEDULED": "زمان‌بندی‌شده",
+      "status_COMPLETED": "تمام‌شده",
+      "status_HISTORICAL": "سابقه"
+    },
+    "vaccinationSummary": {
+      "title": "خلاصه واکسیناسیون",
+      "status": "وضعیت",
+      "nextDueDate": "سررسید بعدی",
+      "lastKnownDate": "آخرین واکسن ثبت‌شده",
+      "notes": "یادداشت",
+      "save": "ذخیره"
+    },
+    "nutrition": {
+      "title": "اطلاعات پایه تغذیه",
+      "dietType": "نوع رژیم غذایی",
+      "currentFood": "غذای فعلی",
+      "feedingFrequency": "دفعات تغذیه",
+      "restrictions": "محدودیت‌ها",
+      "shopPlaceholder": "خرید غذا (به‌زودی)",
+      "dietType_DRY": "خشک",
+      "dietType_WET": "کنسروی",
+      "dietType_RAW": "خام",
+      "dietType_MIXED": "ترکیبی",
+      "dietType_PRESCRIPTION": "تجویزی",
+      "dietType_OTHER": "سایر",
+      "dietType_UNKNOWN": "نامشخص"
+    }
+  },
+  "care": {
+    "profile": {
+      "title": "پروفایل مراقبت",
+      "edit": "ویرایش پروفایل مراقبت",
+      "readOnlyNotice": "شما فقط می‌توانید این پروفایل مراقبت را مشاهده کنید.",
+      "temperament": "خلق‌وخو",
+      "aroundPeople": "رفتار با افراد",
+      "aroundAnimals": "رفتار با سایر حیوانات",
+      "leashBehavior": "رفتار هنگام قدم زدن با قلاده",
+      "handlingSensitivity": "حساسیت هنگام لمس شدن",
+      "feedingRoutine": "روال غذا دادن",
+      "toiletRoutine": "روال دستشویی رفتن",
+      "separationBehavior": "رفتار هنگام دوری از صاحب",
+      "specialInstructions": "نکات ویژه",
+      "empty": "هنوز تنظیم نشده است."
     }
   },
   "theme": {

@@ -50,6 +50,7 @@ export enum OnboardingChapter {
   ACCOUNT = "ACCOUNT",
   HOUSEHOLD = "HOUSEHOLD",
   PET_IDENTITY = "PET_IDENTITY",
+  HEALTH_BASICS = "HEALTH_BASICS",
   PERSONALIZATION = "PERSONALIZATION",
   READY = "READY",
 }
@@ -73,9 +74,119 @@ export enum PetInterest {
 
 export enum HomeActionKind {
   COMPLETE_HEALTH = "COMPLETE_HEALTH",
+  VIEW_VACCINATION = "VIEW_VACCINATION",
+  VIEW_MEDICATION = "VIEW_MEDICATION",
+  COMPLETE_CARE_PROFILE = "COMPLETE_CARE_PROFILE",
   FIND_VET = "FIND_VET",
   VIEW_PROFILE = "VIEW_PROFILE",
   ASK_AI = "ASK_AI",
+}
+
+// ---------------------------------------------------------------------------
+// Health & Care (Handoff 02)
+// ---------------------------------------------------------------------------
+
+/** Shared "setup completeness" vocabulary for HealthProfile/NutritionProfile/CareProfile. */
+export enum SetupStatus {
+  NOT_STARTED = "NOT_STARTED",
+  PARTIAL = "PARTIAL",
+  COMPLETE = "COMPLETE",
+}
+
+/** Provenance for every health/care record. OWNER is the only source fully editable in this phase. */
+export enum SourceType {
+  OWNER = "OWNER",
+  PROVIDER = "PROVIDER",
+  IMPORTED_DOCUMENT = "IMPORTED_DOCUMENT",
+  SYSTEM = "SYSTEM",
+}
+
+/** Per-domain state for allergies/conditions/medications when that list has zero rows. NULL on HealthProfile = Incomplete. */
+export enum HealthAreaKnowledgeState {
+  NONE_KNOWN = "NONE_KNOWN",
+  UNKNOWN = "UNKNOWN",
+}
+
+/** Per-allergy-row confidence, distinct from HealthAreaKnowledgeState (which describes the list as a whole). */
+export enum AllergyKnowledgeState {
+  KNOWN = "KNOWN",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum AllergyStatus {
+  ACTIVE = "ACTIVE",
+  RESOLVED = "RESOLVED",
+}
+
+/** Never inferred — always an explicit owner/provider choice. */
+export enum AllergySeverity {
+  MILD = "MILD",
+  MODERATE = "MODERATE",
+  SEVERE = "SEVERE",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum ConditionStatus {
+  ACTIVE = "ACTIVE",
+  RESOLVED = "RESOLVED",
+  HISTORICAL = "HISTORICAL",
+}
+
+export enum MedicationStatus {
+  ACTIVE = "ACTIVE",
+  SCHEDULED = "SCHEDULED",
+  COMPLETED = "COMPLETED",
+  HISTORICAL = "HISTORICAL",
+}
+
+/** UNKNOWN and INCOMPLETE are distinct and neither is ever derived as OVERDUE. */
+export enum VaccinationStatus {
+  UP_TO_DATE = "UP_TO_DATE",
+  DUE_SOON = "DUE_SOON",
+  OVERDUE = "OVERDUE",
+  UNKNOWN = "UNKNOWN",
+  INCOMPLETE = "INCOMPLETE",
+}
+
+export enum DietType {
+  DRY = "DRY",
+  WET = "WET",
+  RAW = "RAW",
+  MIXED = "MIXED",
+  PRESCRIPTION = "PRESCRIPTION",
+  OTHER = "OTHER",
+  UNKNOWN = "UNKNOWN",
+}
+
+/**
+ * Full severity vocabulary the architecture must support long-term. This
+ * handoff only ever assigns NORMAL / INFORMATIONAL / ATTENTION.
+ */
+export enum HealthSeverity {
+  NORMAL = "NORMAL",
+  INFORMATIONAL = "INFORMATIONAL",
+  ATTENTION = "ATTENTION",
+  HIGHER_CONCERN = "HIGHER_CONCERN",
+  URGENT = "URGENT",
+  EMERGENCY = "EMERGENCY",
+}
+
+/**
+ * The consumer-facing Known Negative / Unknown / Incomplete / Known Present
+ * vocabulary for a list-backed health domain (allergies, conditions,
+ * medications) as shown in HealthSummaryDto. Never collapsed to a boolean.
+ */
+export enum KnowledgeState {
+  KNOWN_PRESENT = "KNOWN_PRESENT",
+  KNOWN_NEGATIVE = "KNOWN_NEGATIVE",
+  UNKNOWN = "UNKNOWN",
+  INCOMPLETE = "INCOMPLETE",
+}
+
+export enum HealthAttentionType {
+  VACCINATION_DUE = "VACCINATION_DUE",
+  HEALTH_SETUP_INCOMPLETE = "HEALTH_SETUP_INCOMPLETE",
+  CARE_PROFILE_INCOMPLETE = "CARE_PROFILE_INCOMPLETE",
 }
 
 /** Money is always an integer minor-unit amount + ISO currency code; never a float. */
@@ -157,4 +268,128 @@ export interface HomeResponseDto {
   activePet: PetDto | null;
   primaryAction: HomeActionDto;
   secondaryActions: HomeActionDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Health & Care DTOs (Handoff 02)
+// ---------------------------------------------------------------------------
+
+export interface HealthProfileDto {
+  petId: string;
+  status: SetupStatus;
+  allergiesOverallState: HealthAreaKnowledgeState | null;
+  conditionsOverallState: HealthAreaKnowledgeState | null;
+  medicationsOverallState: HealthAreaKnowledgeState | null;
+  lastReviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AllergyDto {
+  id: string;
+  petId: string;
+  name: string;
+  reaction: string | null;
+  severity: AllergySeverity | null;
+  knowledgeState: AllergyKnowledgeState;
+  status: AllergyStatus;
+  sourceType: SourceType;
+  sourceLabel: string | null;
+  recordedByUserId: string | null;
+  recordedAt: string;
+  updatedAt: string;
+}
+
+export interface ConditionDto {
+  id: string;
+  petId: string;
+  name: string;
+  status: ConditionStatus;
+  notes: string | null;
+  sourceType: SourceType;
+  sourceLabel: string | null;
+  recordedByUserId: string | null;
+  firstRecordedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MedicationDto {
+  id: string;
+  petId: string;
+  name: string;
+  dosage: number | null;
+  unit: string | null;
+  frequencyText: string | null;
+  route: string | null;
+  status: MedicationStatus;
+  startDate: string | null;
+  endDate: string | null;
+  instructions: string | null;
+  sourceType: SourceType;
+  sourceLabel: string | null;
+  recordedByUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VaccinationSummaryDto {
+  petId: string;
+  status: VaccinationStatus;
+  nextDueDate: string | null;
+  lastKnownDate: string | null;
+  notes: string | null;
+  sourceType: SourceType;
+  sourceLabel: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NutritionProfileDto {
+  petId: string;
+  dietType: DietType | null;
+  currentFoodText: string | null;
+  feedingFrequencyText: string | null;
+  restrictionsText: string | null;
+  status: SetupStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CareProfileDto {
+  petId: string;
+  temperamentText: string | null;
+  aroundPeopleText: string | null;
+  aroundAnimalsText: string | null;
+  leashBehaviorText: string | null;
+  handlingSensitivityText: string | null;
+  feedingRoutineText: string | null;
+  toiletRoutineText: string | null;
+  separationBehaviorText: string | null;
+  specialInstructionsText: string | null;
+  status: SetupStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HealthAttentionDto {
+  type: HealthAttentionType;
+  severity: HealthSeverity;
+  titleKey: string;
+  action: HomeActionKind;
+}
+
+/**
+ * The one consumer-facing summary for Home/Pet Profile — HealthSummaryService
+ * never exposes raw Allergy/Condition/Medication rows to those surfaces.
+ */
+export interface HealthSummaryDto {
+  status: SetupStatus;
+  allergyState: KnowledgeState;
+  conditionsState: KnowledgeState;
+  activeMedicationCount: number;
+  medicationsState: KnowledgeState;
+  vaccinationStatus: VaccinationStatus;
+  nextVaccinationDueAt: string | null;
+  primaryAttention: HealthAttentionDto | null;
 }

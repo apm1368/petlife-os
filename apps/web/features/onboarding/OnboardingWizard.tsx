@@ -16,8 +16,26 @@ import { BreedStep } from "./steps/BreedStep";
 import { SexStep } from "./steps/SexStep";
 import { PersonalizationStep } from "./steps/PersonalizationStep";
 import { ReadyStep } from "./steps/ReadyStep";
+import { KnowledgeAreaStep } from "./steps/health/KnowledgeAreaStep";
+import { VaccinationBasicsStep } from "./steps/health/VaccinationBasicsStep";
+import { DietBasicsStep } from "./steps/health/DietBasicsStep";
 
-const STEP_ORDER = ["household", "species", "pet-name", "age", "pet-photo", "breed", "sex", "personalization", "ready"] as const;
+const STEP_ORDER = [
+  "household",
+  "species",
+  "pet-name",
+  "age",
+  "pet-photo",
+  "breed",
+  "sex",
+  "health-allergies",
+  "health-conditions",
+  "health-medications",
+  "health-vaccination",
+  "health-diet",
+  "personalization",
+  "ready",
+] as const;
 type Step = (typeof STEP_ORDER)[number];
 
 export function OnboardingWizard() {
@@ -90,7 +108,38 @@ export function OnboardingWizard() {
     case "breed":
       return <BreedStep onNext={() => goTo("sex")} onSkip={() => goTo("sex")} />;
     case "sex":
-      return <SexStep onNext={() => goTo("personalization")} onSkip={() => goTo("personalization")} />;
+      return <SexStep onNext={() => goTo("health-allergies")} onSkip={() => goTo("health-allergies")} />;
+    case "health-allergies":
+      return (
+        <KnowledgeAreaStep
+          domain="allergies"
+          titleKey="allergies.title"
+          namePlaceholderKey="allergies.namePlaceholder"
+          onNext={() => goTo("health-conditions")}
+        />
+      );
+    case "health-conditions":
+      return (
+        <KnowledgeAreaStep
+          domain="conditions"
+          titleKey="conditions.title"
+          namePlaceholderKey="conditions.namePlaceholder"
+          onNext={() => goTo("health-medications")}
+        />
+      );
+    case "health-medications":
+      return (
+        <KnowledgeAreaStep
+          domain="medications"
+          titleKey="medications.title"
+          namePlaceholderKey="medications.namePlaceholder"
+          onNext={() => goTo("health-vaccination")}
+        />
+      );
+    case "health-vaccination":
+      return <VaccinationBasicsStep onNext={() => goTo("health-diet")} />;
+    case "health-diet":
+      return <DietBasicsStep onNext={() => goTo("personalization")} />;
     case "personalization":
       return <PersonalizationStep onNext={() => goTo("ready")} />;
     case "ready":

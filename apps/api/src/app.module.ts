@@ -21,6 +21,9 @@ import { PetsModule } from "./modules/pets/pets.module";
 import { OnboardingModule } from "./modules/onboarding/onboarding.module";
 import { HomeModule } from "./modules/home/home.module";
 import { StorageModule } from "./modules/storage/storage.module";
+import { PetHealthModule } from "./modules/health/health.module";
+import { NutritionModule } from "./modules/nutrition/nutrition.module";
+import { CareProfileModule } from "./modules/care-profile/care-profile.module";
 
 @Module({
   imports: [
@@ -46,6 +49,9 @@ import { StorageModule } from "./modules/storage/storage.module";
     OnboardingModule,
     HomeModule,
     StorageModule,
+    PetHealthModule,
+    NutritionModule,
+    CareProfileModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
