@@ -196,6 +196,112 @@ enum HealthSeverity {
 }
 
 // ---------------------------------------------------------------------------
+// Provider / booking (Handoff 03)
+// ---------------------------------------------------------------------------
+
+enum ProviderType {
+  VET_CLINIC
+  VET_HOSPITAL
+  VETERINARIAN
+}
+
+/// Only VERIFIED providers appear in default consumer discovery
+/// (ProvidersService.searchVets) — every other status is either not yet
+/// reviewed or no longer eligible to be shown.
+enum ProviderVerificationStatus {
+  NOT_STARTED
+  SUBMITTED
+  NEEDS_INFORMATION
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+/// A provider-organization membership role — deliberately NOT a pet-data
+/// permission source. PetAccessGrant remains the only source of truth for
+/// what a provider user can see about a pet; this only controls what they
+/// can do inside their own organization's data (out of scope this phase).
+enum ProviderUserRole {
+  OWNER
+  VET
+  STAFF
+}
+
+/// Kept extensible on purpose — more service types will be added as the
+/// product grows, without ever needing a "type of type" indirection.
+enum ProviderServiceType {
+  GENERAL_VET_VISIT
+  VACCINATION
+  FOLLOW_UP
+  CONSULTATION
+}
+
+enum AvailabilityExceptionType {
+  BLOCKED
+  AVAILABLE_OVERRIDE
+}
+
+/// HOLD exists in the vocabulary for completeness but is never the status of
+/// a persisted Booking row — a hold lives only in Redis (see
+/// BookingHoldService) until it is either confirmed (the Booking row is
+/// created directly at CONFIRMED, there being no real payment-authorization
+/// gate in this phase) or it expires and is simply discarded.
+/// CHECKED_IN/IN_PROGRESS/COMPLETED/NO_SHOW/CANCELLED_BY_PROVIDER are part of
+/// the vocabulary this phase's architecture must support but no endpoint
+/// transitions a booking to them yet — see README Known limitations.
+enum BookingStatus {
+  HOLD
+  PENDING_CONFIRMATION
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED_BY_USER
+  CANCELLED_BY_PROVIDER
+  NO_SHOW
+}
+
+/// Deliberately a separate state machine from BookingStatus — a booking can
+/// be CONFIRMED while payment is still PENDING, or CANCELLED while a refund
+/// is still REFUND_PENDING. No real payment gateway exists this phase (see
+/// README Known limitations), so every booking's paymentStatus is currently
+/// always NOT_REQUIRED; the full vocabulary exists so wiring a real gateway
+/// later needs no schema change.
+enum PaymentStatus {
+  NOT_REQUIRED
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  REFUND_PENDING
+  REFUNDED
+}
+
+/// What a booking-confirmation-time TEMPORARY PetAccessGrant actually
+/// exposes. Never "full health record" by default — see
+/// BookingHealthAccessService and the README section on health data
+/// minimization.
+enum HealthAccessScopePreset {
+  MINIMAL_VET_CONTEXT
+  HEALTH_BASICS
+  SELECTED_HEALTH_DATA
+}
+
+/// Only VET_APPOINTMENT exists this phase; the enum (rather than a plain
+/// string) exists so a future calendar source (grooming, boarding, ...) is a
+/// vocabulary addition, not a schema change.
+enum CareCalendarEventType {
+  VET_APPOINTMENT
+}
+
+enum CareCalendarEventStatus {
+  SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+// ---------------------------------------------------------------------------
 // Core identity
 // ---------------------------------------------------------------------------
 
@@ -220,6 +326,8 @@ model User {
   activePetPreferences ActivePetPreference[]
   onboardingProgress   OnboardingProgress[]
   petInterests         UserPetInterest[]
+  providerProfiles     ProviderUser[]
+  bookings             Booking[]
 
   @@map("users")
 }
@@ -252,6 +360,8 @@ model Household {
   pets                 Pet[]
   activePetPreferences ActivePetPreference[]
   onboardingProgress   OnboardingProgress[]
+  bookings             Booking[]
+  careCalendarEvents   CareCalendarEvent[]
 
   @@map("households")
 }
@@ -338,6 +448,9 @@ model Pet {
   nutritionProfile   NutritionProfile?
   careProfile        CareProfile?
 
+  bookings           Booking[]
+  careCalendarEvents CareCalendarEvent[]
+
   @@index([householdId])
   @@map("pets")
 }
@@ -392,6 +505,8 @@ model PetAccessGrant {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  bookingHealthAccess BookingHealthAccess?
 
   @@index([petId, userId])
   @@index([expiresAt])
@@ -651,6 +766,288 @@ model CareProfile {
   updatedAt DateTime @updatedAt
 
   @@map("care_profiles")
+}
+
+// ---------------------------------------------------------------------------
+// Provider / Vet Booking (Handoff 03)
+// ---------------------------------------------------------------------------
+
+model ProviderOrganization {
+  id                 String                     @id @default(uuid()) @db.Uuid
+  name               String
+  type               ProviderType
+  verificationStatus ProviderVerificationStatus @default(NOT_STARTED)
+
+  phone       String?
+  email       String?
+  description String?
+  logoUrl     String?
+  websiteUrl  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locations              ProviderLocation[]
+  providerUsers          ProviderUser[]
+  services               ProviderService[]
+  availabilityRules      ProviderAvailabilityRule[]
+  availabilityExceptions ProviderAvailabilityException[]
+  bookings               Booking[]
+
+  @@index([verificationStatus])
+  @@map("provider_organizations")
+}
+
+model ProviderLocation {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+
+  name        String?
+  addressLine String
+  city        String
+  region      String?
+  countryCode String
+  latitude    Float?
+  longitude   Float?
+  phone       String?
+  /// IANA timezone (e.g. "Asia/Tehran") — authoritative for this location's
+  /// appointment times. See README "Timezone behavior".
+  timezone    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services               ProviderService[]
+  availabilityRules      ProviderAvailabilityRule[]
+  availabilityExceptions ProviderAvailabilityException[]
+  bookings               Booking[]
+
+  @@index([providerOrganizationId])
+  @@index([city])
+  @@map("provider_locations")
+}
+
+/// A person's membership in a provider organization. Deliberately NOT a pet
+/// data permission source — see the doc comment on ProviderUserRole.
+model ProviderUser {
+  id                     String               @id @default(uuid()) @db.Uuid
+  userId                 String               @db.Uuid
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+
+  role         ProviderUserRole @default(VET)
+  displayTitle String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  availabilityRules      ProviderAvailabilityRule[]
+  availabilityExceptions ProviderAvailabilityException[]
+  bookings               Booking[]
+
+  @@index([providerOrganizationId])
+  @@index([userId])
+  @@map("provider_users")
+}
+
+model ProviderService {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  locationId             String?              @db.Uuid
+  location               ProviderLocation?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  name        String
+  description String?
+  type        ProviderServiceType
+
+  durationMinutes Int
+  priceAmount     Decimal? @db.Decimal(10, 2)
+  currency        String?
+
+  supportsDog Boolean @default(true)
+  supportsCat Boolean @default(true)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  availabilityRules ProviderAvailabilityRule[]
+  bookings          Booking[]
+
+  @@index([providerOrganizationId])
+  @@index([type])
+  @@map("provider_services")
+}
+
+/// A recurring weekly availability window. Slot generation (SlotGeneratorService)
+/// projects these rules across a requested date range — no slot ever exists
+/// as its own persisted row; slots are always computed on read.
+model ProviderAvailabilityRule {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  locationId             String               @db.Uuid
+  location               ProviderLocation     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: SetNull)
+  serviceId              String?              @db.Uuid
+  service                ProviderService?     @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  /// 0 = Sunday .. 6 = Saturday, evaluated in `timezone` below.
+  dayOfWeek      Int
+  /// "HH:mm" 24-hour local time, e.g. "09:00".
+  startLocalTime String
+  endLocalTime   String
+
+  effectiveFrom  DateTime? @db.Date
+  effectiveUntil DateTime? @db.Date
+
+  timezone String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerOrganizationId, locationId])
+  @@map("provider_availability_rules")
+}
+
+/// A one-off override of the recurring rules above — either blocking an
+/// otherwise-available window (holiday, time off) or opening one that the
+/// recurring rules don't cover (a one-time extra clinic day).
+model ProviderAvailabilityException {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  locationId             String               @db.Uuid
+  location               ProviderLocation     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: SetNull)
+
+  startAt DateTime
+  endAt   DateTime
+  type    AvailabilityExceptionType
+  reason  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerOrganizationId, locationId])
+  @@index([startAt, endAt])
+  @@map("provider_availability_exceptions")
+}
+
+/// The persisted booking record. A hold (Redis-only, see BookingHoldService)
+/// never becomes a row here until it is confirmed — at which point a row is
+/// created directly at CONFIRMED, since there is no real payment-authorization
+/// gate in this phase. onDelete is Restrict everywhere (never Cascade) per
+/// the FK policy established in the schema-hardening checkpoint: a booking is
+/// a factual business record, not something that should silently vanish if
+/// its pet/household/provider row is ever removed.
+model Booking {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerLocationId     String               @db.Uuid
+  providerLocation       ProviderLocation     @relation(fields: [providerLocationId], references: [id], onDelete: Restrict)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: SetNull)
+  providerServiceId      String               @db.Uuid
+  providerService        ProviderService      @relation(fields: [providerServiceId], references: [id], onDelete: Restrict)
+
+  startAt  DateTime
+  endAt    DateTime
+  /// The provider location's timezone at booking time — authoritative for
+  /// this appointment's local time, independent of the viewer's own locale.
+  timezone String
+
+  bookingStatus BookingStatus @default(CONFIRMED)
+  paymentStatus PaymentStatus @default(NOT_REQUIRED)
+
+  reasonForVisit String?
+  ownerNotes     String?
+
+  cancelledAt     DateTime?
+  cancelledReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  healthAccess BookingHealthAccess?
+
+  @@index([petId])
+  @@index([householdId])
+  @@index([userId])
+  @@index([providerLocationId, startAt])
+  @@map("bookings")
+}
+
+/// The explicit link between a Booking and the TEMPORARY PetAccessGrant it
+/// created — see PR spec section 23. Lets the system audit why a grant
+/// exists, revoke it when its booking is cancelled, and (later) extend it,
+/// without guessing from `PetAccessGrant.reason` free text alone.
+model BookingHealthAccess {
+  id        String  @id @default(uuid()) @db.Uuid
+  bookingId String  @unique @db.Uuid
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  petAccessGrantId String         @unique @db.Uuid
+  petAccessGrant   PetAccessGrant @relation(fields: [petAccessGrantId], references: [id], onDelete: Restrict)
+
+  scopePreset HealthAccessScopePreset
+
+  createdAt DateTime @default(now())
+
+  @@map("booking_health_access")
+}
+
+/// A read/display projection over Booking (and, later, other source types).
+/// Booking remains the editable source of truth — this row is kept in sync
+/// whenever a booking's schedule or status changes and is never edited
+/// independently. `sourceId` is a plain UUID reference (no FK), the same
+/// precedent as PetAccessGrant.grantedByUserId: the source's own table can
+/// vary by sourceType later without this model needing a new nullable FK
+/// column per source.
+model CareCalendarEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  sourceType CareCalendarEventType
+  sourceId   String                @db.Uuid
+
+  type   CareCalendarEventType
+  status CareCalendarEventStatus @default(SCHEDULED)
+
+  startAt  DateTime
+  endAt    DateTime
+  timezone String
+
+  /// i18n key, not localized copy — the frontend maps this + `actionType` to
+  /// display strings, mirroring the HomeActionKind/labelKey pattern from
+  /// Handoff 01/02 rather than storing hard-coded text server-side.
+  titleKey   String
+  actionType String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sourceType, sourceId])
+  @@index([householdId, petId])
+  @@index([startAt])
+  @@map("care_calendar_events")
 }
 
 // ---------------------------------------------------------------------------

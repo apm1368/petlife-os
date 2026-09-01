@@ -14,6 +14,16 @@ export interface HomeRankingCareInput {
   profileStatus: SetupStatus;
 }
 
+/**
+ * Not permission-gated the way health/care are — a booking is either
+ * scoped to the caller's own household or it isn't visible at all (see
+ * HomeService), so there's no separate "visible" flag to trust here.
+ */
+export interface HomeRankingBookingInput {
+  hasUpcoming: boolean;
+  bookingId: string | null;
+}
+
 export interface HomeRankingInput {
   hasActivePet: boolean;
   /** The active pet's real ID, used to build concrete hrefs — null iff hasActivePet is false. */
@@ -21,6 +31,7 @@ export interface HomeRankingInput {
   interests: PetInterest[];
   health: HomeRankingHealthInput;
   care: HomeRankingCareInput;
+  booking: HomeRankingBookingInput;
 }
 
 /**
@@ -32,8 +43,12 @@ export interface HomeRankingInput {
  * completely and never second-guesses it.
  *
  * Priority order: vaccination due/overdue > health setup incomplete >
- * (fallback) VET interest or Ask AI, with a care-profile-incomplete
- * secondary action folded in only once neither health condition fired.
+ * upcoming Vet booking > (fallback) VET interest or Ask AI, with a
+ * care-profile-incomplete secondary action folded in only once none of the
+ * above fired. An ordinary upcoming booking deliberately never outranks a
+ * vaccination-due or health-incomplete signal — there is no
+ * emergency/critical-health severity logic yet (see HealthSeverity), so a
+ * routine appointment is never treated as more urgent than either.
  */
 @Injectable()
 export class HomeRankingService {
@@ -70,6 +85,17 @@ export class HomeRankingService {
           secondaryActions: [viewProfile],
         };
       }
+    }
+
+    if (input.booking.hasUpcoming && input.booking.bookingId) {
+      return {
+        primaryAction: {
+          kind: HomeActionKind.VIEW_BOOKING,
+          labelKey: "home.action.viewBooking",
+          href: `/bookings/${input.booking.bookingId}`,
+        },
+        secondaryActions: [viewProfile],
+      };
     }
 
     // Care leads the secondary list (not just appended) so a single-secondary-action

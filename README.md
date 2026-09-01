@@ -20,6 +20,19 @@ teasers, and a product-wide rule that a health fact is always one of **Known
 Present / Known Negative / Unknown / Incomplete**, never collapsed to a
 boolean.
 
+Coding Handoff 03: **Find a Vet + Vet Booking Basics + Temporary Health
+Access + Care Calendar Integration** — see
+[Find a Vet + Vet Booking Basics (Handoff 03)](#find-a-vet--vet-booking-basics-handoff-03)
+below. This is deliberately *not* the full Vet Clinical OS: no EMR, AI Vet
+Scribe, labs/imaging orders, prescriptions, pharmacy, real payment capture,
+provider settlements, or a provider-facing dashboard. What's here proves the
+full loop — **Pet Context → Vet Discovery → Booking → Permissioned Health
+Sharing → Care Calendar** — with a real provider/availability/booking data
+model, Redis-backed slot holds, PostgreSQL as the only source of truth for
+booking history, and booking-confirmation-time health sharing built entirely
+on the existing grant-union `PetAccessGrant` model (a new `TEMPORARY` grant,
+never a mutation of the household's own grant).
+
 ## Architecture
 
 **Monorepo:** pnpm workspaces + Turborepo.
@@ -60,7 +73,11 @@ Modular monolith, one NestJS module per bounded concern:
   colliding with the unrelated infra health-check module at `src/health/`)
 - `NutritionModule` — diet/nutrition basics (`/pets/:petId/nutrition`)
 - `CareProfileModule` — free-text behavioral/handling profile (`/pets/:petId/care-profile`)
-- `HomeModule` — deterministic Home ranking, now permission-aware over health/care data
+- `ProvidersModule` — vet discovery, vet profile, `SlotGeneratorService` (deterministic availability projection)
+- `BookingModule` — `BookingHoldService` (Redis holds), `BookingHealthAccessService`
+  (temporary grants), the booking state machine and its API
+- `CareCalendarModule` — the read/display projection over `Booking`
+- `HomeModule` — deterministic Home ranking, now also reacting to an upcoming Vet booking
 - `StorageModule` — S3-compatible object storage abstraction (local dev fallback)
 
 Cross-cutting infrastructure lives in `src/common`:
@@ -479,6 +496,258 @@ not yet wired to a ranking rule), `COMPLETE_CARE_PROFILE`. Every action's
 itself (a client-side redirect to `/pets/{activePetId}`) still exists for any
 future top-level "current pet" deep link.
 
+## Find a Vet + Vet Booking Basics (Handoff 03)
+
+Proves the full loop: **Pet Context → Vet Discovery → Booking → Permissioned
+Health Sharing → Care Calendar**, plus Home/Pet Profile reacting to an
+upcoming appointment. Explicitly **not** implemented: EMR, AI Vet Scribe,
+labs/imaging orders, prescriptions, pharmacy, real payment capture, refunds,
+provider settlements, provider reviews, advanced geo ranking, recurring
+booking, or a provider-facing dashboard — see
+[Known limitations](#known-limitations--deliberate-simplifications).
+
+### Provider / availability model
+
+- **`ProviderOrganization`** — a clinic/hospital/independent vet
+  (`type`), with a `verificationStatus` (`NOT_STARTED` → … → `VERIFIED` /
+  `REJECTED` / `SUSPENDED`). **Only `VERIFIED` providers appear in default
+  consumer discovery** (`GET /providers/vets`) — every other status exists
+  purely for a future verification workflow.
+- **`ProviderLocation`** — one organization can have multiple; each carries
+  its own IANA `timezone`, which is authoritative for every booking made
+  against it (see [Timezone behavior](#timezone-behavior) below).
+- **`ProviderUser`** — a person's membership in a provider organization
+  (`OWNER`/`VET`/`STAFF`). **Deliberately not a pet-data permission
+  source** — `PetAccessGrant` remains the only source of truth for what a
+  provider user can see about a pet; a `ProviderUser` row says nothing about
+  pet access on its own.
+- **`ProviderService`** — a bookable offering (`GENERAL_VET_VISIT` /
+  `VACCINATION` / `FOLLOW_UP` / `CONSULTATION`, extensible), with
+  `durationMinutes`, an optional `priceAmount`/`currency`, and
+  `supportsDog`/`supportsCat` flags used for species-compatibility checks.
+- **`ProviderAvailabilityRule`** — a recurring weekly window
+  (`dayOfWeek`, `startLocalTime`/`endLocalTime`, `timezone`), optionally
+  scoped to one `providerUserId`/`serviceId` or left generic (`null` =
+  applies to any). **No slot is ever its own persisted row** — every slot is
+  computed on read by `SlotGeneratorService` projecting these rules (and any
+  `ProviderAvailabilityException` — `BLOCKED` or `AVAILABLE_OVERRIDE`) across
+  the requested date range, using only `Intl.DateTimeFormat`'s built-in ICU
+  timezone/calendar support (no external date library dependency).
+
+### Slot holds (Redis, not authoritative)
+
+`POST /booking-holds` creates a short-lived Redis-only reservation
+(`BOOKING_HOLD_TTL_SECONDS`, default **600 seconds / 10 minutes** — long
+enough to review and share health data without feeling rushed, short enough
+that an abandoned hold doesn't block a popular slot for long) via
+`BookingHoldService`. It does two things: stores what the holder was booking
+(so `POST /bookings` doesn't have to re-collect it) and takes a short-lived
+`SET NX` lock keyed on the exact slot, so a second user can't hold the
+identical instant while the first hold is live. **Redis is never
+authoritative for booking history** — a hold that expires or is never
+confirmed simply vanishes, leaving no record; PostgreSQL's `bookings` table
+is the only source of truth once a booking is actually confirmed.
+
+### Booking state machine
+
+`BookingStatus` (`HOLD` / `PENDING_CONFIRMATION` / `CONFIRMED` /
+`CHECKED_IN` / `IN_PROGRESS` / `COMPLETED` / `CANCELLED_BY_USER` /
+`CANCELLED_BY_PROVIDER` / `NO_SHOW`) and `PaymentStatus` (`NOT_REQUIRED` /
+`PENDING` / `AUTHORIZED` / `PAID` / `FAILED` / `REFUND_PENDING` /
+`REFUNDED`) are deliberately separate state machines — a booking can be
+`CONFIRMED` while payment is still `PENDING`. In this phase:
+
+- A `Booking` row is created **directly at `CONFIRMED`** when a hold is
+  confirmed — there is no real payment-authorization gate, so
+  `PENDING_CONFIRMATION` is never actually used. `HOLD` is likewise never a
+  persisted row's status (see above). `CHECKED_IN`/`IN_PROGRESS`/`COMPLETED`/
+  `NO_SHOW`/`CANCELLED_BY_PROVIDER` are part of the vocabulary the
+  architecture must support but no endpoint transitions a booking to them
+  yet.
+- Every booking's `paymentStatus` is always `NOT_REQUIRED` — no payment
+  gateway exists this phase; the full vocabulary is there so wiring a real
+  one later needs no schema change.
+- **Double-booking prevention** is layered: the Redis slot-lock is a
+  best-effort first line, `SlotGeneratorService` re-checks the slot is still
+  `AVAILABLE` at hold-creation time, and — the actual, unconditional
+  guarantee — two **partial unique indexes** on `bookings`
+  (`(providerLocationId, providerUserId, startAt)` and
+  `(providerLocationId, startAt)` for no-specific-provider-user bookings,
+  both `WHERE bookingStatus NOT IN (CANCELLED_BY_USER, CANCELLED_BY_PROVIDER)`)
+  make it impossible for the same slot to be confirmed twice even under a
+  concurrent race — `BookingsService.confirm()` catches the resulting
+  Postgres unique-violation and reports `BOOKING_CONFLICT`. A `CHECK
+  (endAt > startAt)` constraint exists on both `bookings` and
+  `care_calendar_events`. All three are raw SQL in the migration — Prisma's
+  schema DSL can't express partial indexes or multi-column CHECKs.
+- **Idempotency**: `POST /bookings` uses the existing `IdempotencyInterceptor`
+  (`Idempotency-Key` header) — a retried confirm with the same key replays
+  the first response rather than re-executing the handler, so it never
+  double-books even though the underlying hold is consumed (deleted) by the
+  first successful attempt.
+
+### Temporary health access
+
+At booking confirmation, the caller optionally names a `HealthAccessScopePreset`
+(`MINIMAL_VET_CONTEXT` / `HEALTH_BASICS` — the default — /
+`SELECTED_HEALTH_DATA`). If the booking has an assigned `providerUserId`,
+`BookingHealthAccessService.grantForBooking()`:
+
+1. Creates a brand-new, independent `PetAccessGrant` (`source: TEMPORARY`,
+   `reason: "VET_BOOKING"`) for the vet's own user account —
+   **never mutates or overwrites the household's own grant**, per the
+   grant-union model from the schema-hardening checkpoint. `startsAt` is the
+   moment of confirmation; `expiresAt` is the appointment's end time plus
+   `BOOKING_HEALTH_ACCESS_BUFFER_HOURS` (default **24 hours**, for a
+   same-day follow-up note).
+2. Records a `BookingHealthAccess` row linking the booking, the grant, and
+   the chosen preset — the explicit audit trail for "why does this grant
+   exist", and what lets cancellation find and revoke exactly this grant.
+
+**Health data minimization**: `HEALTH_BASICS` grants `canViewIdentity` +
+`canViewHealth` + `canViewCareProfile`, never `canEdit*` and never
+`canViewLocation`/`canManageAccess` — matching the spec's recommended
+default exactly. `MINIMAL_VET_CONTEXT` grants identity only, no health or
+care-profile access at all. **`SELECTED_HEALTH_DATA` is not yet distinct
+from `HEALTH_BASICS`** — there is no per-field health-data selection UI or
+API this phase (`HealthSummaryService` returns one derived summary, not
+addressable per-allergy/per-medication toggles); the preset exists in the
+vocabulary and the picker so the UI/API shape doesn't change when granular
+selection is built later.
+
+If the booking is cancelled before the appointment, `revokeForBooking()`
+soft-revokes that specific grant (`revokedAt`/`revokedByUserId`) — the row
+itself is preserved as an audit record, exactly like every other
+`PetAccessGrant` revocation. If the booking completes normally, the grant
+simply expires on schedule; **there is no cleanup job**, because
+`PetAccessService.getEffectivePermissions()` already excludes any
+expired-or-revoked grant from the active-grant union at request time — see
+the schema-hardening checkpoint's effective-permission algorithm.
+
+### Care Calendar (a projection, not a second source of truth)
+
+`CareCalendarEvent` exists to represent "things happening for this pet in
+one shared, generic shape (only `VET_APPOINTMENT` right now)" — but
+**`Booking` remains the editable source of truth**. `CareCalendarService`
+keeps one event row in sync whenever a booking's schedule or status changes
+(`upsertForBooking()` on confirm, `markCancelled()` on cancel) and never
+accepts an independent edit. `sourceId` is a plain UUID reference with no FK
+— the same precedent as `PetAccessGrant.grantedByUserId` — so a future
+calendar source (grooming, boarding, …) is a vocabulary addition to
+`CareCalendarEventType`, not a new nullable FK column per source. `titleKey`/
+`actionType` are i18n keys and a `HomeActionKind`, not localized copy stored
+server-side — the same `labelKey` pattern `HomeActionDto` has used since
+Handoff 01.
+
+### Dual calendar behavior
+
+Persian UI shows **Jalali** dates, English UI shows **Gregorian** — both via
+the ICU calendars built into `Intl.DateTimeFormat` (`fa-IR-u-ca-persian` /
+`en-US-u-ca-gregory`), not a custom conversion algorithm or an extra
+dependency (`apps/web/lib/date/appointment-date.ts`). The backend only ever
+stores and returns canonical UTC instants (`startAt`/`endAt` as ISO strings)
+— no duplicate Jalali date is ever persisted; the calendar choice is a pure
+display concern resolved at render time from the active locale.
+
+### Timezone behavior
+
+`Booking.timezone` (copied from the provider location at hold-creation time)
+is authoritative for that appointment's displayed time — the UI always
+formats an appointment's date/time in the provider's own timezone, labeled
+clearly, rather than silently converting to the viewer's local timezone.
+This is a deliberate simplification: there is no browser-timezone detection
+or "your time vs. their time" dual display this phase — see Known
+limitations.
+
+### API endpoints (Handoff 03 additions)
+
+```
+GET    /providers/vets                              (city, species, serviceType, verifiedOnly, search)
+GET    /providers/vets/:providerId
+GET    /providers/vets/:providerId/availability      (locationId, serviceId, from, to, petId?, providerUserId?)
+
+POST   /booking-holds                                (requires canBookCare on the pet)
+POST   /bookings                                     (Idempotency-Key supported; requires canBookCare)
+GET    /bookings                                     (upcoming, past, petId)
+GET    /bookings/:id
+POST   /bookings/:id/cancel
+
+GET    /care-calendar                                (petId?)
+```
+
+Health/booking IDOR protection reuses the same `PetAccessGuard` as every
+other pet endpoint — extended in this handoff to also read `petId` from the
+request **body** (`request.body.petId`), not only route params, since
+`POST /booking-holds`/`POST /bookings` carry the pet id in their payload
+rather than the URL.
+
+### Error codes (Handoff 03 additions)
+
+```
+SLOT_UNAVAILABLE        409  the requested slot is no longer AVAILABLE
+HOLD_EXPIRED            410  the hold id doesn't exist (expired, already consumed, or never existed)
+BOOKING_CONFLICT        409  Postgres rejected a confirm as a duplicate of an already-confirmed slot
+PROVIDER_NOT_VERIFIED   400  the provider is not VERIFIED
+SERVICE_NOT_AVAILABLE   400  the service exists but isActive is false
+PET_NOT_SUPPORTED       400  the service doesn't support the pet's species
+BOOKING_NOT_CANCELLABLE 400  the booking is already in a terminal (or already-cancelled) state
+```
+
+`PET_ACCESS_DENIED` (introduced in Handoff 01) is reused for every
+booking/health authorization denial in this handoff rather than adding a
+separate `ACCESS_DENIED` code, to keep one error code per concept across the
+whole API.
+
+### UI screens (Handoff 03 additions)
+
+- **Find Vet** (`/vet/find`) — provider cards showing name, verification,
+  location, supported services, and next available slot; never a fabricated
+  distance when geo data is missing.
+- **Vet Profile** (`/vet/[providerId]`) — locations, services (with
+  duration), a "Book" action per service.
+- **Booking wizard** (`/vet/[providerId]/book`) — one route, three internal
+  steps (mirroring the Onboarding wizard's single-route-internal-steps
+  pattern): **Slot Picker** (a horizontal date strip + time buttons, not a
+  full calendar widget, with loading/empty/retry states), **Review
+  Booking** (pet/vet/service/location/date-time/price/payment-placeholder/
+  reason), and **Health Sharing** (Who/What/Why/Until-When permission
+  language, the three scope presets, editable before confirming).
+- **Booking Confirmation** — not a separate screen: `/bookings/[id]` itself
+  renders a "confirmed" banner (Calendar added, health access expiry) when
+  navigated to with `?confirmed=1` straight from the wizard, then falls
+  through to the same full **Booking Detail** view below it.
+- **Booking Detail** (`/bookings/[id]`) — status and payment status shown
+  *separately*, pet/provider/service/location/time, shared health access
+  scope + expiry, Cancel (with an impact-aware confirmation dialog). No
+  reschedule this phase.
+- **Care Calendar** (`/care-calendar`) — deliberately minimal: a scannable
+  list of upcoming events that link back to the real Booking Detail screen,
+  not the full calendar product.
+- **Pet Profile / Home integration** — an "Upcoming vet visit" teaser on Pet
+  Profile, and Home's ranking rule chain below.
+
+### Home ranking changes (Handoff 03)
+
+`HomeRankingInput` gained `booking: { hasUpcoming, bookingId }`, resolved by
+`HomeService` from `prisma.booking.findFirst({ petId: activePet.id,
+bookingStatus: CONFIRMED, startAt: { gte: now } })` — scoped to the active
+pet specifically, so switching pets never leaks one pet's upcoming visit
+into another's context. The updated rule chain:
+
+1. No active pet → suggest adding one.
+2. `health.visible` and vaccination `DUE_SOON`/`OVERDUE` → `VIEW_VACCINATION`.
+3. `health.visible` and `health.profileStatus !== COMPLETE` → `COMPLETE_HEALTH`.
+4. **New:** an upcoming `CONFIRMED` booking exists → `VIEW_BOOKING`
+   (`/bookings/{id}`).
+5. Otherwise, the existing care-profile-incomplete secondary + `VET`
+   interest/Ask AI fallback, unchanged from Handoff 02.
+
+**An ordinary upcoming booking deliberately never outranks a vaccination-due
+or health-incomplete signal** (steps 2–3 are checked first) — there is no
+emergency/critical-health severity logic yet (`HealthSeverity` beyond
+`ATTENTION` is still unused), so a routine appointment is never treated as
+more urgent than either.
+
 ## API endpoints
 
 ```
@@ -531,6 +800,16 @@ PUT    /pets/:petId/nutrition
 GET    /pets/:petId/care-profile
 PUT    /pets/:petId/care-profile
 
+GET    /providers/vets
+GET    /providers/vets/:providerId
+GET    /providers/vets/:providerId/availability
+POST   /booking-holds
+POST   /bookings                                (Idempotency-Key supported)
+GET    /bookings
+GET    /bookings/:id
+POST   /bookings/:id/cancel
+GET    /care-calendar
+
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
 GET    /health/ready
@@ -564,7 +843,10 @@ pnpm db:seed                     # Sarah + Luna (Golden Retriever, vaccination
                                   # due soon, no known allergies, complete diet
                                   # profile, partial care profile) + Milo (DSH,
                                   # unknown vaccination, unknown allergies,
-                                  # minimal care profile)
+                                  # minimal care profile) + Tehran Pet Care
+                                  # Clinic (VERIFIED, Dr. Sara Vet, General Vet
+                                  # Visit/Vaccination/Follow-up, available
+                                  # every day 09:00-18:00 Asia/Tehran)
 
 pnpm dev                         # api on :4000, web on :3000
 ```
@@ -604,7 +886,18 @@ pnpm --filter @petlife/api test:e2e
   read-only-vs-editable rendering by permission, and a Persian-locale RTL
   test asserting a Latin drug name + numeric dosage ("Apoquel — 16 mg")
   renders untouched inside a `dir="auto"` element regardless of the
-  surrounding page direction.
+  surrounding page direction — plus, new in Handoff 03: a pure-function suite
+  for `formatAppointmentDateTime`/`formatDateKey` asserting the Persian
+  locale renders Jalali (year `۱۴۰۵`, no `2026` anywhere) while English
+  renders Gregorian for the exact same instant, and that a slot is grouped by
+  its calendar date *in the provider's timezone*, not UTC; Find Vet rendering
+  a verified badge, its services, and next-available time, plus empty/
+  no-availability states; the Booking wizard walking Slot Picker → Review →
+  Health Sharing end to end (mocked services) and asserting the Who/What/
+  Why/Until-When permission copy and all three scope presets render; and
+  Booking Detail rendering the just-confirmed banner, a confirmed booking's
+  shared-health-access summary, and a cancelled booking's status label with
+  no Cancel action offered.
 - **API e2e tests** (`apps/api/test/app.e2e-spec.ts`, Supertest against a
   real Nest app + Postgres + Redis): OTP → session, IDOR denial on a pet the
   user has no `PetAccessGrant` for, household + pet creation with optional
@@ -633,7 +926,26 @@ pnpm --filter @petlife/api test:e2e
   summary staying scoped to whichever pet is queried when switching between
   Luna and Milo, onboarding resuming into the `HEALTH_BASICS` chapter, and
   onboarding completing successfully when every Health Basics question was
-  left unanswered.
+  left unanswered — plus a `"Find a Vet + Vet Booking Basics (Handoff 03)"`
+  block: only `VERIFIED` providers are returned by default, a booking hold
+  is rejected with `PET_NOT_SUPPORTED` when the service doesn't support the
+  pet's species, availability generation produces a real 30-minute
+  `AVAILABLE` slot, confirming against a hold that no longer exists reports
+  `HOLD_EXPIRED`, a second hold on an already-confirmed slot is rejected
+  with `SLOT_UNAVAILABLE`, a retried confirmation with the same
+  `Idempotency-Key` produces exactly one `Booking` row, a booking is
+  recorded against the pet that was actually held (not just any pet in the
+  household), a booking hold is denied to a user with no active access to
+  the pet (IDOR), confirming creates a `TEMPORARY` grant for the assigned
+  vet without altering the household's own grants, cancelling a booking
+  revokes that specific grant, an expired temporary grant stops
+  authorizing, a confirmed booking projects into `GET /care-calendar` and
+  disappears from it once cancelled, Home surfaces `VIEW_BOOKING` once
+  Health Basics are otherwise complete, switching the active pet away from
+  the one with the booking never surfaces it on Home, reading a booking is
+  denied to a user with no active access to its pet, and the vet's
+  temporary grant is gated at exactly `canViewHealth`/`canEditHealth` — view
+  succeeds, edit is still denied.
 
   The e2e suite needs its own database (kept separate from your dev data):
 
@@ -668,6 +980,28 @@ e2e tests → build, against real Postgres/Redis service containers.
   → Milo's own Health Overview (`Incomplete`, not Luna's `None known`) — all
   15 checkpoints passed, explicitly confirming that switching the active pet
   never leaks one pet's health data into another's context.
+
+- **Browser E2E (Handoff 03, manual verification against a real Chromium)**:
+  signed in as Sarah with Luna active (Health Basics pre-cleared via direct
+  API calls, since the ranking rules deliberately never let an ordinary
+  booking outrank a due vaccination or an incomplete health setup — see
+  "Home ranking changes" above) → Find a Vet → opened the verified "Tehran
+  Pet Care Clinic" → General Vet Visit → Booking Wizard showed real
+  generated slots → picked one → Review Booking (clinic/service/location/
+  time shown) → Health Sharing (explicitly selected "Health Basics
+  (recommended)", with the Who/What/Why/Until copy all present) → Confirm
+  booking → landed on Booking Detail with the just-confirmed banner and the
+  shared health-access summary → the booking appeared in the Care Calendar
+  → Home surfaced "View upcoming vet visit" as the primary action → in a
+  second, independently signed-in browser context as the assigned vet
+  (`dr.sara.vet@example.com`), a real `GET` for Luna's health summary
+  returned `200` (the temporary grant genuinely works, not just a DB row)
+  → cancelled the booking from Booking Detail → status changed to
+  "Cancelled by you" → the booking disappeared from the Care Calendar → the
+  same vet session's next `GET` for Luna's health summary returned `403`
+  (grant revoked) → Home no longer showed the booking → switched the active
+  pet to Milo and confirmed Milo's Pet Profile never showed Luna's
+  (cancelled) booking teaser — all 18 checkpoints passed.
 
 ## What's implemented
 
@@ -706,6 +1040,32 @@ profile) and Milo (unknown vaccination, unknown allergies, a minimal care
 profile); backend + frontend unit/e2e tests for the scenarios above; and a
 full manual browser E2E pass (see above) confirming Luna/Milo health-data
 isolation end to end.
+
+Everything in the Handoff 03 acceptance criteria: discovery of `VERIFIED`
+vets only by default (`GET /providers/vets`), with a real vet profile,
+deterministic slot generation from recurring availability rules plus one-off
+exceptions (no ML, no external scheduling provider), Redis-backed slot holds
+(`BOOKING_HOLD_TTL_SECONDS`, default 600s) that are never the source of
+truth for booking history, a `Booking` state machine persisted in
+PostgreSQL with a separate `PaymentStatus` state machine, double-booking
+prevention enforced by partial unique indexes at the database level (not
+just the hold or the slot generator), idempotent booking confirmation via
+the existing `IdempotencyInterceptor`, temporary vet health access issued
+through the same grant-union `PetAccessGrant` model used everywhere else
+(source `TEMPORARY`, reason `VET_BOOKING`, expiring `endAt` +
+`BOOKING_HEALTH_ACCESS_BUFFER_HOURS`, never mutating the household's own
+grant), an explicit `BookingHealthAccess` audit link between a booking and
+the grant it created, cancellation that revokes the temporary grant and
+never deletes the booking, a `CareCalendarEvent` projection that is created
+on confirm and marked cancelled on cancel (the `Booking` row stays the only
+editable source of truth), Jalali/Gregorian dual display built entirely on
+ICU (`Intl.DateTimeFormat` with `-u-ca-persian`/`-u-ca-gregory`, no new date
+library), a `HomeRankingService` rule for an upcoming confirmed booking that
+never outranks a due vaccination or an incomplete health setup, a Pet
+Profile "Upcoming vet visit" teaser, and a full manual browser E2E pass (see
+above) confirming the temporary grant genuinely authorizes and is genuinely
+revoked, that Luna's booking never leaks into Milo's context, and that
+cancellation updates the booking, the grant, and the calendar consistently.
 
 ## Known limitations / deliberate simplifications
 
@@ -753,9 +1113,13 @@ isolation end to end.
 - **Accessibility**: components use semantic roles/labels, visible focus
   rings, `role="alert"` for errors, and `prefers-reduced-motion` handling
   globally — not independently audited with a screen reader.
-- Full Vet marketplace/booking, AI Health, Commerce, Travel, Insurance,
-  Community, Animal Support, and all Provider/Seller/Shelter/Admin surfaces
-  remain explicitly out of scope, per the spec.
+- Full Vet marketplace/booking is now partially in scope (see Handoff 03
+  below) but the full Provider OS (clinic queue, clinical visit notes, EMR,
+  AI Vet Scribe, labs, imaging, prescriptions, pharmacy, payment capture,
+  refunds, settlements, provider reviews, recurring bookings, live service
+  tracking) is not. AI Health, Commerce, Travel, Insurance, Community,
+  Animal Support, and all Seller/Shelter/Admin surfaces remain explicitly
+  out of scope, per the spec.
 - **Handoff 02 is Health *Basics*, not the Health platform**: no labs,
   imaging, prescriptions, veterinary booking, AI Health, full medical
   timeline, or pharmacy. `HealthSeverity` beyond `ATTENTION`
@@ -774,26 +1138,64 @@ isolation end to end.
   the array precisely so a single-secondary-action consumer still shows it),
   but a future screen that wants to show *all* secondary actions needs its
   own UI, not a ranking change.
-- **No "invite a vet"/"grant temporary health access" endpoint** — the
-  `canViewHealth`/`canEditHealth` flags are fully enforced, but the only way
-  to grant them today is the existing `HOUSEHOLD`-sourced default at
-  pet-creation time (same limitation the schema-hardening checkpoint already
-  noted for `PetAccessGrant` generally).
+- **The only way to issue a `TEMPORARY` `PetAccessGrant` today is booking
+  confirmation** (Handoff 03) — there's still no general-purpose "invite a
+  sitter"/"share with anyone" endpoint; a household's own `HOUSEHOLD`-sourced
+  grant is still the only other source, via `applyHouseholdDefaults()` at
+  pet-creation time.
 - **Nutrition has no dedicated permission flag** — `/pets/:petId/nutrition`
   is gated by `canViewHealth`/`canEditHealth` since the spec didn't request a
   separate one; revisit if nutrition data ever needs a different audience
   than the rest of Health Basics.
+- **`PaymentStatus` never leaves `NOT_REQUIRED`** — no payment gateway
+  integration exists yet; the state machine (`PENDING`/`AUTHORIZED`/`PAID`/
+  `FAILED`/`REFUND_PENDING`/`REFUNDED`) is modeled and displayed separately
+  from `BookingStatus` in the UI, but nothing ever transitions it.
+- **`SELECTED_HEALTH_DATA` is not yet distinct from `HEALTH_BASICS`** —
+  `BookingHealthAccessService`'s `SCOPE_PRESET_FLAGS` maps both presets to
+  the same permission flags today, since there's no per-field health-data
+  selection UI yet; the preset is stored and shown correctly, it just
+  doesn't (yet) grant a narrower or wider scope than Health Basics.
+- **No reschedule** — `BookingStatus` has no `RESCHEDULED` state; a booking
+  can only be cancelled and a new one created from scratch.
+- **No provider dashboard/Provider OS** — availability is seeded directly
+  via `prisma/seed.ts`; there's no clinic-facing UI to manage
+  `ProviderAvailabilityRule`/`ProviderAvailabilityException` rows, view a
+  booking queue, or manage `ProviderUser`s. `ProviderUser` is explicitly not
+  a pet-data permission source (`PetAccessGrant`/`BookingHealthAccess`
+  remain the only source of truth for what a vet can see).
+- **Appointment time is always shown in the provider's local timezone**, not
+  converted to the viewer's device timezone — acceptable since bookings are
+  currently Tehran-only via seed data, but a future handoff adding
+  multi-timezone providers should show "provider local time" and "your
+  time" side by side when they differ, per the spec.
+- **Most `BookingStatus` values are unreachable in this phase** —
+  `PENDING_CONFIRMATION`/`CHECKED_IN`/`IN_PROGRESS`/`COMPLETED`/`NO_SHOW`/
+  `CANCELLED_BY_PROVIDER` are modeled (booking confirmation goes straight
+  from a consumed hold to `CONFIRMED`) but nothing currently transitions a
+  booking through them; they exist for a future Provider OS / clinic
+  check-in flow to use without a schema change.
+- **No cleanup job for expired temporary grants** — enforcement is
+  request-time (`expiresAt` is checked on every authorization check), so an
+  expired grant simply stops authorizing; it is never deleted or archived.
+- **No geolocation/distance ranking** — `GET /providers/vets` filters by
+  `city` as plain text; there's no lat/long-based "nearest clinic" sort, and
+  the UI never fabricates a distance when location data is missing.
 
 ## Next recommended coding handoff
 
-**Vet Booking / Find-a-Vet basics.** `FIND_VET` has been a stubbed Home
-action since Handoff 01 (`/vet/find`, a placeholder screen), Health Basics
-now gives it something real to link from (a vet needs to see allergies,
-active medications, and vaccination status before a visit), and the grant
-model already anticipates it — `PetAccessSource.TEMPORARY` exists and is
-enforced (see the schema-hardening checkpoint's expiry test) but has no
-issuance API yet. That handoff would plausibly introduce a minimal
-Provider/Clinic record, a booking request flow, and the first real use of a
-short-lived `TEMPORARY` grant (e.g. "share Health Basics with this vet for
-24 hours") — without yet building the full Provider/Seller marketplace,
-which stays out of scope until its own handoff.
+**Care Calendar (full product) + reminders, or minimal Provider OS —
+whichever the business prioritizes next.** Handoff 03 deliberately built
+only enough Care Calendar to prove one projection (`VET_APPOINTMENT`) works
+end to end; `CareCalendarEvent.type`/`sourceType` are already generic enough
+to add vaccination-due dates, medication schedules, and grooming/other care
+tasks as new source types without a schema change, plus the first real
+notification/reminder surface (e.g. "appointment tomorrow at 10:00"), which
+doesn't exist anywhere yet. Alternatively, since bookings currently rely on
+hand-seeded availability with no clinic-facing UI, a minimal Provider OS
+(sign in as a `ProviderUser`, manage `ProviderAvailabilityRule`/
+`ProviderAvailabilityException` rows, see a simple booking queue) would let
+providers other than the seed fixture actually use the system. Either
+handoff should keep `Booking` as the sole source of truth for booking state
+and continue treating `PetAccessGrant` as the only source of truth for what
+a vet or provider can see — no new permission model.

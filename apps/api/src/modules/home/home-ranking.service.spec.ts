@@ -1,5 +1,5 @@
 import { HomeActionKind, PetInterest, SetupStatus, VaccinationStatus } from "@petlife/types";
-import { HomeRankingService, type HomeRankingCareInput, type HomeRankingHealthInput } from "./home-ranking.service";
+import { HomeRankingService, type HomeRankingBookingInput, type HomeRankingCareInput, type HomeRankingHealthInput } from "./home-ranking.service";
 
 const HEALTH_HIDDEN: HomeRankingHealthInput = {
   visible: false,
@@ -13,6 +13,7 @@ const HEALTH_COMPLETE: HomeRankingHealthInput = {
 };
 const CARE_HIDDEN: HomeRankingCareInput = { visible: false, profileStatus: SetupStatus.NOT_STARTED };
 const CARE_COMPLETE: HomeRankingCareInput = { visible: true, profileStatus: SetupStatus.COMPLETE };
+const NO_BOOKING: HomeRankingBookingInput = { hasUpcoming: false, bookingId: null };
 
 describe("HomeRankingService", () => {
   const ranking = new HomeRankingService();
@@ -24,6 +25,7 @@ describe("HomeRankingService", () => {
       interests: [],
       health: HEALTH_HIDDEN,
       care: CARE_HIDDEN,
+      booking: NO_BOOKING,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_PROFILE);
     expect(result.secondaryActions).toHaveLength(0);
@@ -36,6 +38,7 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.VET],
       health: { visible: true, vaccinationStatus: VaccinationStatus.DUE_SOON, profileStatus: SetupStatus.COMPLETE },
       care: CARE_HIDDEN,
+      booking: NO_BOOKING,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_VACCINATION);
     expect(result.primaryAction.href).toBe("/pets/pet-1/health/vaccination");
@@ -48,6 +51,7 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.VET],
       health: { visible: true, vaccinationStatus: VaccinationStatus.UP_TO_DATE, profileStatus: SetupStatus.PARTIAL },
       care: CARE_HIDDEN,
+      booking: NO_BOOKING,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.COMPLETE_HEALTH);
   });
@@ -59,6 +63,7 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.VET],
       health: { visible: false, vaccinationStatus: VaccinationStatus.OVERDUE, profileStatus: SetupStatus.NOT_STARTED },
       care: CARE_HIDDEN,
+      booking: NO_BOOKING,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.FIND_VET);
   });
@@ -70,6 +75,7 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.VET],
       health: HEALTH_COMPLETE,
       care: CARE_HIDDEN,
+      booking: NO_BOOKING,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.FIND_VET);
   });
@@ -81,6 +87,7 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.SHOPPING],
       health: HEALTH_COMPLETE,
       care: CARE_HIDDEN,
+      booking: NO_BOOKING,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.ASK_AI);
   });
@@ -92,6 +99,7 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.DAILY_CARE],
       health: HEALTH_COMPLETE,
       care: { visible: true, profileStatus: SetupStatus.PARTIAL },
+      booking: NO_BOOKING,
     });
     expect(result.secondaryActions.some((a) => a.kind === HomeActionKind.COMPLETE_CARE_PROFILE)).toBe(true);
   });
@@ -103,6 +111,7 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.DAILY_CARE],
       health: HEALTH_COMPLETE,
       care: CARE_HIDDEN,
+      booking: NO_BOOKING,
     });
     expect(result.secondaryActions.some((a) => a.kind === HomeActionKind.COMPLETE_CARE_PROFILE)).toBe(false);
   });
@@ -114,7 +123,45 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.DAILY_CARE],
       health: HEALTH_COMPLETE,
       care: CARE_COMPLETE,
+      booking: NO_BOOKING,
     });
     expect(result.secondaryActions.some((a) => a.kind === HomeActionKind.COMPLETE_CARE_PROFILE)).toBe(false);
+  });
+
+  it("surfaces an upcoming Vet booking as the primary action once health and care are handled", () => {
+    const result = ranking.rank({
+      hasActivePet: true,
+      activePetId: "pet-1",
+      interests: [PetInterest.VET],
+      health: HEALTH_COMPLETE,
+      care: CARE_COMPLETE,
+      booking: { hasUpcoming: true, bookingId: "booking-1" },
+    });
+    expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_BOOKING);
+    expect(result.primaryAction.href).toBe("/bookings/booking-1");
+  });
+
+  it("never lets an ordinary upcoming booking override a due vaccination", () => {
+    const result = ranking.rank({
+      hasActivePet: true,
+      activePetId: "pet-1",
+      interests: [],
+      health: { visible: true, vaccinationStatus: VaccinationStatus.DUE_SOON, profileStatus: SetupStatus.COMPLETE },
+      care: CARE_HIDDEN,
+      booking: { hasUpcoming: true, bookingId: "booking-1" },
+    });
+    expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_VACCINATION);
+  });
+
+  it("never lets an ordinary upcoming booking override an incomplete health setup", () => {
+    const result = ranking.rank({
+      hasActivePet: true,
+      activePetId: "pet-1",
+      interests: [],
+      health: { visible: true, vaccinationStatus: VaccinationStatus.UP_TO_DATE, profileStatus: SetupStatus.PARTIAL },
+      care: CARE_HIDDEN,
+      booking: { hasUpcoming: true, bookingId: "booking-1" },
+    });
+    expect(result.primaryAction.kind).toBe(HomeActionKind.COMPLETE_HEALTH);
   });
 });

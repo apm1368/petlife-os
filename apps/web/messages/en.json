@@ -8,7 +8,8 @@
     "cancel": "Cancel",
     "retry": "Retry",
     "loading": "Loading",
-    "optional": "Optional"
+    "optional": "Optional",
+    "selected": "Selected"
   },
   "auth": {
     "welcome": {
@@ -139,7 +140,8 @@
       "viewProfile": "View {name}'s profile",
       "findVet": "Find veterinary care",
       "askAi": "Ask AI about {name}",
-      "addPet": "Add your first pet"
+      "addPet": "Add your first pet",
+      "viewBooking": "View upcoming vet visit"
     },
     "sections": {
       "ai": "Ask AI",
@@ -163,7 +165,9 @@
       "healthTeaser": "Health",
       "careTeaser": "Care",
       "openHealth": "Open Health",
-      "openCareProfile": "Open Care Profile"
+      "openCareProfile": "Open Care Profile",
+      "upcomingVisitTeaser": "Upcoming vet visit",
+      "viewBooking": "View booking"
     }
   },
   "health": {
@@ -291,5 +295,141 @@
   "errors": {
     "generic": "Something went wrong.",
     "offline": "You're offline. Some actions may not work."
+  },
+  "vet": {
+    "find": {
+      "title": "Find a Vet",
+      "subtitle": "Veterinary care for {name}",
+      "empty": "No vets found yet.",
+      "verified": "Verified",
+      "nextAvailable": "Next available {when}",
+      "noAvailability": "No availability found"
+    },
+    "profile": {
+      "verified": "Verified",
+      "locations": "Locations",
+      "services": "Services",
+      "duration": "{minutes} min",
+      "book": "Book"
+    },
+    "booking": {
+      "noDraft": "Start by choosing a service from the vet's profile.",
+      "backToProfile": "Back to profile",
+      "slotPicker": {
+        "title": "Choose a time",
+        "incompatible": "This provider doesn't support your pet's species for this service.",
+        "noSlots": "No available times in the next week."
+      },
+      "review": {
+        "title": "Review your booking",
+        "pet": "Pet",
+        "provider": "Vet / Clinic",
+        "service": "Service",
+        "location": "Location",
+        "dateTime": "Date & time",
+        "price": "Price",
+        "paymentStatus": "Payment",
+        "paymentPlaceholder": "Not required yet",
+        "reasonLabel": "Reason for visit (optional)"
+      },
+      "healthSharing": {
+        "title": "Share health info with the clinic",
+        "who": "Who",
+        "why": "Why",
+        "whyValue": "For this appointment",
+        "until": "Until",
+        "what": "What to share",
+        "confirm": "Confirm booking",
+        "preset": {
+          "MINIMAL_VET_CONTEXT": {
+            "title": "Minimal context",
+            "description": "Just your pet's basic identity — no health details."
+          },
+          "HEALTH_BASICS": {
+            "title": "Health Basics (recommended)",
+            "description": "Allergies, current medications, and Care Profile."
+          },
+          "SELECTED_HEALTH_DATA": {
+            "title": "Selected health data",
+            "description": "Same as Health Basics for now — picking individual items is coming later."
+          }
+        }
+      },
+      "errors": {
+        "SLOT_UNAVAILABLE": "That time is no longer available. Please choose another slot.",
+        "HOLD_EXPIRED": "This hold has expired. Please choose a slot again.",
+        "BOOKING_CONFLICT": "This slot was just booked by someone else. Please choose another slot.",
+        "PROVIDER_NOT_VERIFIED": "This provider is not yet verified.",
+        "SERVICE_NOT_AVAILABLE": "This service is not currently available.",
+        "PET_NOT_SUPPORTED": "This provider doesn't support your pet's species for this service.",
+        "PET_ACCESS_DENIED": "You don't have access to book for this pet.",
+        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled."
+      }
+    },
+    "bookingDetail": {
+      "title": "Booking",
+      "pet": "Pet",
+      "provider": "Vet / Clinic",
+      "service": "Service",
+      "location": "Location",
+      "dateTime": "Date & time",
+      "reason": "Reason for visit",
+      "cancelledReason": "Cancellation reason",
+      "cancel": "Cancel booking",
+      "status": {
+        "HOLD": "Held",
+        "PENDING_CONFIRMATION": "Pending confirmation",
+        "CONFIRMED": "Confirmed",
+        "CHECKED_IN": "Checked in",
+        "IN_PROGRESS": "In progress",
+        "COMPLETED": "Completed",
+        "CANCELLED_BY_USER": "Cancelled by you",
+        "CANCELLED_BY_PROVIDER": "Cancelled by provider",
+        "NO_SHOW": "No-show"
+      },
+      "paymentStatus": {
+        "NOT_REQUIRED": "Not required",
+        "PENDING": "Pending",
+        "AUTHORIZED": "Authorized",
+        "PAID": "Paid",
+        "FAILED": "Failed",
+        "REFUND_PENDING": "Refund pending",
+        "REFUNDED": "Refunded"
+      },
+      "healthAccess": {
+        "title": "Health access shared",
+        "scope": "Scope",
+        "expiresAt": "Expires",
+        "preset": {
+          "MINIMAL_VET_CONTEXT": "Minimal context",
+          "HEALTH_BASICS": "Health Basics",
+          "SELECTED_HEALTH_DATA": "Selected health data"
+        }
+      },
+      "cancelDialog": {
+        "title": "Cancel this booking?",
+        "body": "The clinic will no longer hold this time for you.",
+        "healthAccessImpact": "The temporary health access you shared for this visit will also be revoked.",
+        "confirm": "Yes, cancel booking"
+      },
+      "confirmedBanner": {
+        "title": "Booking confirmed",
+        "calendarAdded": "Added to your Care Calendar.",
+        "healthAccessUntil": "Health access shared with the clinic until {when}.",
+        "openCalendar": "Open Care Calendar"
+      }
+    }
+  },
+  "careCalendar": {
+    "title": "Care Calendar",
+    "empty": "Nothing scheduled yet.",
+    "event": {
+      "VET_APPOINTMENT": "Vet appointment"
+    },
+    "status": {
+      "SCHEDULED": "Scheduled",
+      "CANCELLED": "Cancelled",
+      "COMPLETED": "Completed"
+    }
   }
 }

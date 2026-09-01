@@ -24,6 +24,9 @@ import { StorageModule } from "./modules/storage/storage.module";
 import { PetHealthModule } from "./modules/health/health.module";
 import { NutritionModule } from "./modules/nutrition/nutrition.module";
 import { CareProfileModule } from "./modules/care-profile/care-profile.module";
+import { ProvidersModule } from "./modules/providers/providers.module";
+import { BookingModule } from "./modules/booking/booking.module";
+import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module";
 
 @Module({
   imports: [
@@ -52,6 +55,9 @@ import { CareProfileModule } from "./modules/care-profile/care-profile.module";
     PetHealthModule,
     NutritionModule,
     CareProfileModule,
+    ProvidersModule,
+    BookingModule,
+    CareCalendarModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

@@ -29,6 +29,17 @@ const envSchema = z.object({
   STORAGE_S3_SECRET_ACCESS_KEY: z.string().optional(),
   STORAGE_LOCAL_DIR: z.string().default("./local-storage"),
   STORAGE_PUBLIC_BASE_URL: z.string().default("http://localhost:4000/uploads"),
+
+  /// How long a Redis-backed slot hold (POST /booking-holds) stays valid
+  /// before it silently expires and the slot becomes bookable by anyone
+  /// again. 10 minutes — long enough to fill in a reason-for-visit and
+  /// review health sharing without feeling rushed, short enough that an
+  /// abandoned hold doesn't block a popular slot for long.
+  BOOKING_HOLD_TTL_SECONDS: z.coerce.number().int().positive().default(600),
+  /// How long after a booking's scheduled end time its TEMPORARY health
+  /// access grant remains valid — covers a same-day follow-up note from the
+  /// vet after the appointment itself has ended.
+  BOOKING_HEALTH_ACCESS_BUFFER_HOURS: z.coerce.number().int().positive().default(24),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

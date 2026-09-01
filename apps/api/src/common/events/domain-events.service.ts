@@ -18,6 +18,14 @@ export const DOMAIN_EVENT_TYPES = [
   "VaccinationSummaryUpdated",
   "NutritionProfileUpdated",
   "CareProfileUpdated",
+  "ProviderViewed",
+  "BookingHoldCreated",
+  "BookingCreated",
+  "BookingConfirmed",
+  "BookingCancelled",
+  "TemporaryPetAccessGranted",
+  "TemporaryPetAccessRevoked",
+  "CareCalendarEventCreated",
 ] as const;
 
 /**

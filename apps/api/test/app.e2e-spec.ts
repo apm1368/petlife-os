@@ -1,6 +1,13 @@
 import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
-import { PetAccessSource, HouseholdRole } from "@prisma/client";
+import {
+  PetAccessSource,
+  HouseholdRole,
+  ProviderType,
+  ProviderVerificationStatus,
+  ProviderServiceType,
+  ProviderUserRole,
+} from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
@@ -694,6 +701,378 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const completed = await client.post("/onboarding/complete").send({}).expect(201);
       expect(completed.body.status).toBe("COMPLETED");
       expect(completed.body.chapter).toBe("READY");
+    });
+  });
+
+  describe("Find a Vet + Vet Booking Basics (Handoff 03)", () => {
+    /**
+     * A verified clinic with one service and availability every day,
+     * 00:00-23:30 UTC in 30-minute slots — deliberately timezone-simple and
+     * wide enough that a slot is always bookable "right now" regardless of
+     * when this suite actually runs.
+     */
+    async function seedVerifiedClinic() {
+      const vetUser = await prisma.user.create({
+        data: { email: `vet-${unique()}@example.com`, displayName: "Dr. Test Vet" },
+      });
+      const organization = await prisma.providerOrganization.create({
+        data: { name: `Test Clinic ${unique()}`, type: ProviderType.VET_CLINIC, verificationStatus: ProviderVerificationStatus.VERIFIED },
+      });
+      const location = await prisma.providerLocation.create({
+        data: { providerOrganizationId: organization.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US", timezone: "UTC" },
+      });
+      const providerUser = await prisma.providerUser.create({
+        data: { userId: vetUser.id, providerOrganizationId: organization.id, role: ProviderUserRole.VET },
+      });
+      const service = await prisma.providerService.create({
+        data: {
+          providerOrganizationId: organization.id,
+          locationId: location.id,
+          name: "General Vet Visit",
+          type: ProviderServiceType.GENERAL_VET_VISIT,
+          durationMinutes: 30,
+        },
+      });
+      await prisma.providerAvailabilityRule.createMany({
+        data: Array.from({ length: 7 }, (_, dayOfWeek) => ({
+          providerOrganizationId: organization.id,
+          locationId: location.id,
+          providerUserId: providerUser.id,
+          dayOfWeek,
+          startLocalTime: "00:00",
+          endLocalTime: "23:30",
+          timezone: "UTC",
+        })),
+      });
+      return { vetUser, organization, location, providerUser, service };
+    }
+
+    async function firstAvailableSlot(client: ReturnType<typeof authedRequest>, providerId: string, locationId: string, serviceId: string) {
+      const from = new Date().toISOString();
+      const to = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+      const res = await client
+        .get(`/providers/vets/${providerId}/availability?locationId=${locationId}&serviceId=${serviceId}&from=${from}&to=${to}`)
+        .expect(200);
+      const slot = res.body.slots.find((s: { state: string }) => s.state === "AVAILABLE");
+      if (!slot) throw new Error("No available slot found in fixture window");
+      return slot;
+    }
+
+    async function setupOwnerWithPet() {
+      const identifier = `vet-owner-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Rex", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      return { client, householdId: household.body.id, petId: pet.body.id };
+    }
+
+    it("returns only VERIFIED providers by default", async () => {
+      const { client } = await setupOwnerWithPet();
+      const { organization } = await seedVerifiedClinic();
+      const unverified = await prisma.providerOrganization.create({
+        data: { name: `Unverified Clinic ${unique()}`, type: ProviderType.VET_CLINIC, verificationStatus: ProviderVerificationStatus.SUBMITTED },
+      });
+
+      const results = await client.get("/providers/vets").expect(200);
+      const ids = results.body.map((p: { id: string }) => p.id);
+      expect(ids).toContain(organization.id);
+      expect(ids).not.toContain(unverified.id);
+    });
+
+    it("rejects a booking hold when the service doesn't support the pet's species", async () => {
+      const { client, householdId } = await setupOwnerWithPet();
+      const cat = await client
+        .post(`/households/${householdId}/pets`)
+        .send({ name: "Whiskers", species: "CAT", approximateAgeMonths: 12 })
+        .expect(201);
+      const { organization, location, service } = await seedVerifiedClinic();
+      await prisma.providerService.update({ where: { id: service.id }, data: { supportsCat: false } });
+
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+      const denied = await client
+        .post("/booking-holds")
+        .send({ petId: cat.body.id, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(400);
+      expect(denied.body.error.code).toBe("PET_NOT_SUPPORTED");
+    });
+
+    it("generates deterministic availability slots for the requested range", async () => {
+      const { client } = await setupOwnerWithPet();
+      const { organization, location, service } = await seedVerifiedClinic();
+
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+      expect(slot.state).toBe("AVAILABLE");
+      expect(new Date(slot.endAt).getTime() - new Date(slot.startAt).getTime()).toBe(30 * 60 * 1000);
+    });
+
+    it("reports HOLD_EXPIRED when confirming with a hold that no longer exists", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+
+      const response = await client
+        .post("/bookings")
+        .send({ holdId: "00000000-0000-0000-0000-000000000000", petId })
+        .expect(410);
+      expect(response.body.error.code).toBe("HOLD_EXPIRED");
+    });
+
+    it("prevents double-booking the same slot", async () => {
+      const first = await setupOwnerWithPet();
+      const second = await setupOwnerWithPet();
+      const { organization, location, service } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(first.client, organization.id, location.id, service.id);
+
+      const hold1 = await first.client
+        .post("/booking-holds")
+        .send({ petId: first.petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      await first.client.post("/bookings").send({ holdId: hold1.body.holdId, petId: first.petId }).expect(201);
+
+      // The slot is now BOOKED — a fresh hold attempt on the exact same instant must be rejected.
+      const secondHold = await second.client
+        .post("/booking-holds")
+        .send({ petId: second.petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(409);
+      expect(secondHold.body.error.code).toBe("SLOT_UNAVAILABLE");
+    });
+
+    it("treats a retried booking confirmation with the same Idempotency-Key as a single booking", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+
+      const idempotencyKey = `confirm-${unique()}`;
+      const first = await client
+        .post("/bookings")
+        .set("Idempotency-Key", idempotencyKey)
+        .send({ holdId: hold.body.holdId, petId })
+        .expect(201);
+      const second = await client
+        .post("/bookings")
+        .set("Idempotency-Key", idempotencyKey)
+        .send({ holdId: hold.body.holdId, petId })
+        .expect(201);
+
+      expect(second.body.id).toBe(first.body.id);
+      const count = await prisma.booking.count({ where: { petId } });
+      expect(count).toBe(1);
+    });
+
+    it("records the booking against the pet that was actually held, not just any pet in the household", async () => {
+      const { client, householdId, petId } = await setupOwnerWithPet();
+      const otherPet = await client
+        .post(`/households/${householdId}/pets`)
+        .send({ name: "Milo", species: "CAT", approximateAgeMonths: 12 })
+        .expect(201);
+      const { organization, location, service } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      const booking = await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      expect(booking.body.petId).toBe(petId);
+      expect(booking.body.petId).not.toBe(otherPet.body.id);
+    });
+
+    it("denies a booking hold for a user with no active access to the pet (IDOR)", async () => {
+      const { petId } = await setupOwnerWithPet();
+      const stranger = authedRequest(app, await signUp(app, logSpy, `vet-stranger-${unique()}@example.com`));
+      const { organization, location, service } = await seedVerifiedClinic();
+
+      const slot = await firstAvailableSlot(stranger, organization.id, location.id, service.id);
+      const denied = await stranger
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("creates a TEMPORARY health-access grant for the assigned vet on confirmation, without touching the household grant", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service, vetUser } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const householdGrantsBefore = await prisma.petAccessGrant.findMany({ where: { petId, source: PetAccessSource.HOUSEHOLD } });
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      await client.post("/bookings").send({ holdId: hold.body.holdId, petId, healthAccessSelection: "HEALTH_BASICS" }).expect(201);
+
+      const vetGrant = await prisma.petAccessGrant.findFirst({ where: { petId, userId: vetUser.id, source: PetAccessSource.TEMPORARY } });
+      expect(vetGrant).not.toBeNull();
+      expect(vetGrant?.canViewHealth).toBe(true);
+      expect(vetGrant?.canEditHealth).toBe(false);
+
+      const householdGrantsAfter = await prisma.petAccessGrant.findMany({ where: { petId, source: PetAccessSource.HOUSEHOLD } });
+      expect(householdGrantsAfter).toHaveLength(householdGrantsBefore.length);
+      expect(householdGrantsAfter.map((g) => ({ ...g, updatedAt: undefined }))).toEqual(
+        householdGrantsBefore.map((g) => ({ ...g, updatedAt: undefined })),
+      );
+    });
+
+    it("revokes the temporary health-access grant when its booking is cancelled", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service, vetUser } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      const booking = await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      await client.post(`/bookings/${booking.body.id}/cancel`).send({ reason: "Can't make it" }).expect(201);
+
+      const vetGrant = await prisma.petAccessGrant.findFirst({ where: { petId, userId: vetUser.id, source: PetAccessSource.TEMPORARY } });
+      expect(vetGrant?.revokedAt).not.toBeNull();
+
+      const vetClient = authedRequest(app, await signUp(app, logSpy, vetUser.email!));
+      const denied = await vetClient.get(`/pets/${petId}/health/summary`).expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("stops authorizing the vet once their temporary grant has expired", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service, vetUser } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      await prisma.petAccessGrant.updateMany({
+        where: { petId, userId: vetUser.id, source: PetAccessSource.TEMPORARY },
+        data: { expiresAt: new Date(Date.now() - 60_000) },
+      });
+
+      const vetClient = authedRequest(app, await signUp(app, logSpy, vetUser.email!));
+      const denied = await vetClient.get(`/pets/${petId}/health/summary`).expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("projects a confirmed booking into the Care Calendar, and removes it once cancelled", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      const booking = await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      const calendarBefore = await client.get("/care-calendar").expect(200);
+      expect(calendarBefore.body.some((e: { bookingId: string }) => e.bookingId === booking.body.id)).toBe(true);
+
+      await client.post(`/bookings/${booking.body.id}/cancel`).send({}).expect(201);
+
+      const calendarAfter = await client.get("/care-calendar").expect(200);
+      expect(calendarAfter.body.some((e: { bookingId: string }) => e.bookingId === booking.body.id)).toBe(false);
+    });
+
+    it("surfaces an upcoming confirmed booking on Home once health basics are otherwise complete", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service } = await seedVerifiedClinic();
+
+      // Satisfy every Health Basics domain so COMPLETE_HEALTH never outranks the booking.
+      await client.patch(`/pets/${petId}/health/profile`).send({
+        allergiesOverallState: "NONE_KNOWN",
+        conditionsOverallState: "NONE_KNOWN",
+        medicationsOverallState: "NONE_KNOWN",
+      });
+      await client.put(`/pets/${petId}/health/vaccination-summary`).send({ status: "UP_TO_DATE" });
+
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      const booking = await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      const home = await client.get("/home").expect(200);
+      expect(home.body.primaryAction.kind).toBe("VIEW_BOOKING");
+      expect(home.body.primaryAction.href).toBe(`/bookings/${booking.body.id}`);
+    });
+
+    it("keeps a Milo-context switch from ever surfacing Luna's booking on Home", async () => {
+      const identifier = `vet-switch-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const luna = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Luna", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      const milo = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Milo", species: "CAT", approximateAgeMonths: 12 })
+        .expect(201);
+
+      const { organization, location, service } = await seedVerifiedClinic();
+      await client.patch(`/pets/${luna.body.id}/health/profile`).send({
+        allergiesOverallState: "NONE_KNOWN",
+        conditionsOverallState: "NONE_KNOWN",
+        medicationsOverallState: "NONE_KNOWN",
+      });
+      await client.put(`/pets/${luna.body.id}/health/vaccination-summary`).send({ status: "UP_TO_DATE" });
+
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId: luna.body.id, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      await client.post("/bookings").send({ holdId: hold.body.holdId, petId: luna.body.id }).expect(201);
+
+      await client.put(`/households/${household.body.id}/active-pet`).send({ petId: milo.body.id }).expect(200);
+
+      const home = await client.get("/home").expect(200);
+      expect(home.body.primaryAction.kind).not.toBe("VIEW_BOOKING");
+    });
+
+    it("denies reading a booking to a user with no active access to its pet", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      const booking = await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      const stranger = authedRequest(app, await signUp(app, logSpy, `vet-read-stranger-${unique()}@example.com`));
+      const denied = await stranger.get(`/bookings/${booking.body.id}`).expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("gates the vet's temporary access at canViewHealth/canEditHealth exactly — view works, edit does not", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service, vetUser } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      await client.post("/bookings").send({ holdId: hold.body.holdId, petId, healthAccessSelection: "HEALTH_BASICS" }).expect(201);
+
+      const vetClient = authedRequest(app, await signUp(app, logSpy, vetUser.email!));
+      await vetClient.get(`/pets/${petId}/health/summary`).expect(200);
+      const editDenied = await vetClient.patch(`/pets/${petId}/health/profile`).send({ allergiesOverallState: "NONE_KNOWN" }).expect(403);
+      expect(editDenied.body.error.code).toBe("PET_ACCESS_DENIED");
     });
   });
 });

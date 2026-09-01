@@ -27,8 +27,11 @@ export class PetAccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<AuthedRequest>();
-    const petId = String(request.params.petId ?? request.params.id ?? "");
+    const request = context.switchToHttp().getRequest<AuthedRequest & { body?: { petId?: string } }>();
+    // Route params first (the common case); falls back to a body-carried petId
+    // for create endpoints where the pet being acted on isn't part of the URL
+    // (e.g. POST /booking-holds, POST /bookings).
+    const petId = String(request.params.petId ?? request.params.id ?? request.body?.petId ?? "");
     const user = request.user;
     if (!user || !petId) throw new PetAccessDeniedException();
 

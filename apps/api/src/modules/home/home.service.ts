@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
+import { BookingStatus } from "@prisma/client";
 import { SetupStatus, VaccinationStatus, type PetInterest } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { HealthSummaryService } from "../health/health-summary.service";
 import { CareProfileService } from "../care-profile/care-profile.service";
-import { HomeRankingService, type HomeRankingHealthInput, type HomeRankingCareInput } from "./home-ranking.service";
+import { HomeRankingService, type HomeRankingHealthInput, type HomeRankingCareInput, type HomeRankingBookingInput } from "./home-ranking.service";
 
 const HEALTH_NOT_VISIBLE: HomeRankingHealthInput = {
   visible: false,
@@ -13,6 +14,7 @@ const HEALTH_NOT_VISIBLE: HomeRankingHealthInput = {
 };
 
 const CARE_NOT_VISIBLE: HomeRankingCareInput = { visible: false, profileStatus: SetupStatus.NOT_STARTED };
+const NO_UPCOMING_BOOKING: HomeRankingBookingInput = { hasUpcoming: false, bookingId: null };
 
 @Injectable()
 export class HomeService {
@@ -37,6 +39,7 @@ export class HomeService {
         interests: [],
         health: HEALTH_NOT_VISIBLE,
         care: CARE_NOT_VISIBLE,
+        booking: NO_UPCOMING_BOOKING,
       });
       return { activePet: null, primaryAction, secondaryActions };
     }
@@ -55,6 +58,7 @@ export class HomeService {
         interests: [],
         health: HEALTH_NOT_VISIBLE,
         care: CARE_NOT_VISIBLE,
+        booking: NO_UPCOMING_BOOKING,
       });
       return { activePet: null, primaryAction, secondaryActions };
     }
@@ -82,12 +86,21 @@ export class HomeService {
           .then((profile) => ({ visible: true, profileStatus: profile.status as unknown as SetupStatus }))
       : CARE_NOT_VISIBLE;
 
+    // Scoped to activePet.id specifically (never "any booking in the household") so
+    // switching the active pet never leaks one pet's upcoming visit into another's context.
+    const upcomingBooking = await this.prisma.booking.findFirst({
+      where: { petId: activePet.id, bookingStatus: BookingStatus.CONFIRMED, startAt: { gte: new Date() } },
+      orderBy: { startAt: "asc" },
+    });
+    const booking: HomeRankingBookingInput = { hasUpcoming: Boolean(upcomingBooking), bookingId: upcomingBooking?.id ?? null };
+
     const { primaryAction, secondaryActions } = this.ranking.rank({
       hasActivePet: true,
       activePetId: activePet.id,
       interests,
       health,
       care,
+      booking,
     });
 
     return { activePet, primaryAction, secondaryActions };

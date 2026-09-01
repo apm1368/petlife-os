@@ -4,6 +4,10 @@ import {
   HouseholdRole,
   PetSpecies,
   PrismaClient,
+  ProviderServiceType,
+  ProviderType,
+  ProviderUserRole,
+  ProviderVerificationStatus,
   SetupStatus,
   VaccinationStatus,
 } from "@prisma/client";
@@ -130,6 +134,99 @@ async function main() {
       lastCompletedAt: new Date(),
     },
   });
+
+  // Tehran Pet Care Clinic: a single VERIFIED provider with one vet, one
+  // location, three services, and open-ended weekly availability on all
+  // seven days so a slot is always bookable "today or tomorrow" regardless
+  // of when this seed (or the browser E2E against it) actually runs.
+  const drSaraUser = await prisma.user.upsert({
+    where: { email: "dr.sara.vet@example.com" },
+    update: {},
+    create: { email: "dr.sara.vet@example.com", displayName: "Dr. Sara Vet", locale: "en" },
+  });
+
+  const clinic = await prisma.providerOrganization.create({
+    data: {
+      name: "Tehran Pet Care Clinic",
+      type: ProviderType.VET_CLINIC,
+      verificationStatus: ProviderVerificationStatus.VERIFIED,
+      description: "General veterinary care for dogs and cats.",
+      phone: "+98 21 5555 0100",
+    },
+  });
+
+  const clinicLocation = await prisma.providerLocation.create({
+    data: {
+      providerOrganizationId: clinic.id,
+      name: "Tehran Pet Care Clinic — Vanak",
+      addressLine: "12 Vanak St.",
+      city: "Tehran",
+      countryCode: "IR",
+      timezone: "Asia/Tehran",
+      phone: "+98 21 5555 0100",
+    },
+  });
+
+  const drSara = await prisma.providerUser.create({
+    data: {
+      userId: drSaraUser.id,
+      providerOrganizationId: clinic.id,
+      role: ProviderUserRole.VET,
+      displayTitle: "DVM",
+    },
+  });
+
+  const [generalVisit] = await Promise.all([
+    prisma.providerService.create({
+      data: {
+        providerOrganizationId: clinic.id,
+        locationId: clinicLocation.id,
+        name: "General Vet Visit",
+        type: ProviderServiceType.GENERAL_VET_VISIT,
+        durationMinutes: 30,
+        priceAmount: 450000,
+        currency: "IRR",
+      },
+    }),
+    prisma.providerService.create({
+      data: {
+        providerOrganizationId: clinic.id,
+        locationId: clinicLocation.id,
+        name: "Vaccination",
+        type: ProviderServiceType.VACCINATION,
+        durationMinutes: 20,
+        priceAmount: 300000,
+        currency: "IRR",
+      },
+    }),
+    prisma.providerService.create({
+      data: {
+        providerOrganizationId: clinic.id,
+        locationId: clinicLocation.id,
+        name: "Follow-up",
+        type: ProviderServiceType.FOLLOW_UP,
+        durationMinutes: 15,
+        priceAmount: 200000,
+        currency: "IRR",
+      },
+    }),
+  ]);
+
+  await prisma.providerAvailabilityRule.createMany({
+    data: Array.from({ length: 7 }, (_, dayOfWeek) => ({
+      providerOrganizationId: clinic.id,
+      locationId: clinicLocation.id,
+      providerUserId: drSara.id,
+      dayOfWeek,
+      startLocalTime: "09:00",
+      endLocalTime: "18:00",
+      timezone: "Asia/Tehran",
+    })),
+  });
+
+  console.log(
+    `Seeded provider: clinic=${clinic.id} location=${clinicLocation.id} vet=${drSara.id} generalVisitService=${generalVisit.id}`,
+  );
 
   console.log(`Seeded: user=${sarah.email} household=${household.id} pets=[Luna:${luna.id}, Milo:${milo.id}]`);
 }

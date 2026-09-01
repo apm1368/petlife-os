@@ -1,5 +1,5 @@
-import { PlaceholderView } from "@/features/shared/PlaceholderView";
+import { FindVetView } from "@/features/vet/FindVetView";
 
 export default function FindVetPage() {
-  return <PlaceholderView title="Find veterinary care" description="The vet marketplace is coming in a future release." />;
+  return <FindVetView />;
 }

@@ -8,7 +8,8 @@
     "cancel": "انصراف",
     "retry": "تلاش دوباره",
     "loading": "در حال بارگذاری",
-    "optional": "اختیاری"
+    "optional": "اختیاری",
+    "selected": "انتخاب‌شده"
   },
   "auth": {
     "welcome": {
@@ -139,7 +140,8 @@
       "viewProfile": "مشاهده پروفایل {name}",
       "findVet": "یافتن دامپزشک",
       "askAi": "پرسش از هوش مصنوعی درباره {name}",
-      "addPet": "افزودن اولین حیوان خانگی"
+      "addPet": "افزودن اولین حیوان خانگی",
+      "viewBooking": "مشاهده نوبت دامپزشکی"
     },
     "sections": {
       "ai": "پرسش از هوش مصنوعی",
@@ -163,7 +165,9 @@
       "healthTeaser": "سلامت",
       "careTeaser": "مراقبت",
       "openHealth": "مشاهده سلامت",
-      "openCareProfile": "مشاهده پروفایل مراقبت"
+      "openCareProfile": "مشاهده پروفایل مراقبت",
+      "upcomingVisitTeaser": "نوبت دامپزشکی پیش رو",
+      "viewBooking": "مشاهده نوبت"
     }
   },
   "health": {
@@ -291,5 +295,141 @@
   "errors": {
     "generic": "مشکلی پیش آمد.",
     "offline": "شما آفلاین هستید. برخی عملیات ممکن است کار نکنند."
+  },
+  "vet": {
+    "find": {
+      "title": "پیدا کردن دامپزشک",
+      "subtitle": "مراقبت دامپزشکی برای {name}",
+      "empty": "دامپزشکی پیدا نشد.",
+      "verified": "تأییدشده",
+      "nextAvailable": "نزدیک‌ترین نوبت خالی: {when}",
+      "noAvailability": "نوبت خالی پیدا نشد"
+    },
+    "profile": {
+      "verified": "تأییدشده",
+      "locations": "آدرس‌ها",
+      "services": "خدمات",
+      "duration": "{minutes} دقیقه",
+      "book": "رزرو نوبت"
+    },
+    "booking": {
+      "noDraft": "برای شروع، یک خدمت را از پروفایل دامپزشک انتخاب کنید.",
+      "backToProfile": "بازگشت به پروفایل",
+      "slotPicker": {
+        "title": "انتخاب زمان",
+        "incompatible": "این مرکز برای این خدمت، گونه حیوان شما را پشتیبانی نمی‌کند.",
+        "noSlots": "در هفته پیش رو نوبت خالی وجود ندارد."
+      },
+      "review": {
+        "title": "بررسی نوبت",
+        "pet": "حیوان خانگی",
+        "provider": "دامپزشک / کلینیک",
+        "service": "خدمت",
+        "location": "آدرس",
+        "dateTime": "تاریخ و ساعت",
+        "price": "هزینه",
+        "paymentStatus": "وضعیت پرداخت",
+        "paymentPlaceholder": "هنوز نیازی نیست",
+        "reasonLabel": "دلیل مراجعه (اختیاری)"
+      },
+      "healthSharing": {
+        "title": "اشتراک‌گذاری اطلاعات سلامت با کلینیک",
+        "who": "با چه کسی",
+        "why": "به چه دلیل",
+        "whyValue": "برای همین نوبت",
+        "until": "تا چه زمانی",
+        "what": "چه اطلاعاتی",
+        "confirm": "تأیید نهایی نوبت",
+        "preset": {
+          "MINIMAL_VET_CONTEXT": {
+            "title": "حداقل اطلاعات",
+            "description": "فقط مشخصات پایه حیوان خانگی — بدون جزئیات سلامت."
+          },
+          "HEALTH_BASICS": {
+            "title": "اطلاعات پایه سلامت (پیشنهادی)",
+            "description": "حساسیت‌ها، داروهای فعلی، و پروفایل مراقبت."
+          },
+          "SELECTED_HEALTH_DATA": {
+            "title": "اطلاعات منتخب سلامت",
+            "description": "فعلاً مانند اطلاعات پایه سلامت است — انتخاب موردی بعداً اضافه می‌شود."
+          }
+        }
+      },
+      "errors": {
+        "SLOT_UNAVAILABLE": "این زمان دیگر در دسترس نیست. لطفاً زمان دیگری انتخاب کنید.",
+        "HOLD_EXPIRED": "این رزرو موقت منقضی شده. لطفاً دوباره زمانی را انتخاب کنید.",
+        "BOOKING_CONFLICT": "این زمان همین الان توسط شخص دیگری رزرو شد. لطفاً زمان دیگری انتخاب کنید.",
+        "PROVIDER_NOT_VERIFIED": "این مرکز هنوز تأیید نشده است.",
+        "SERVICE_NOT_AVAILABLE": "این خدمت در حال حاضر در دسترس نیست.",
+        "PET_NOT_SUPPORTED": "این مرکز برای این خدمت، گونه حیوان شما را پشتیبانی نمی‌کند.",
+        "PET_ACCESS_DENIED": "شما دسترسی رزرو نوبت برای این حیوان خانگی را ندارید.",
+        "BOOKING_NOT_CANCELLABLE": "این نوبت دیگر قابل لغو نیست."
+      }
+    },
+    "bookingDetail": {
+      "title": "نوبت",
+      "pet": "حیوان خانگی",
+      "provider": "دامپزشک / کلینیک",
+      "service": "خدمت",
+      "location": "آدرس",
+      "dateTime": "تاریخ و ساعت",
+      "reason": "دلیل مراجعه",
+      "cancelledReason": "دلیل لغو",
+      "cancel": "لغو نوبت",
+      "status": {
+        "HOLD": "رزرو موقت",
+        "PENDING_CONFIRMATION": "در انتظار تأیید",
+        "CONFIRMED": "تأییدشده",
+        "CHECKED_IN": "پذیرش شده",
+        "IN_PROGRESS": "در حال انجام",
+        "COMPLETED": "انجام‌شده",
+        "CANCELLED_BY_USER": "لغوشده توسط شما",
+        "CANCELLED_BY_PROVIDER": "لغوشده توسط مرکز",
+        "NO_SHOW": "عدم حضور"
+      },
+      "paymentStatus": {
+        "NOT_REQUIRED": "نیازی نیست",
+        "PENDING": "در انتظار",
+        "AUTHORIZED": "تأییدشده",
+        "PAID": "پرداخت‌شده",
+        "FAILED": "ناموفق",
+        "REFUND_PENDING": "در انتظار بازگشت وجه",
+        "REFUNDED": "وجه بازگشت داده شد"
+      },
+      "healthAccess": {
+        "title": "دسترسی سلامت به اشتراک گذاشته‌شده",
+        "scope": "محدوده",
+        "expiresAt": "تا تاریخ",
+        "preset": {
+          "MINIMAL_VET_CONTEXT": "حداقل اطلاعات",
+          "HEALTH_BASICS": "اطلاعات پایه سلامت",
+          "SELECTED_HEALTH_DATA": "اطلاعات منتخب سلامت"
+        }
+      },
+      "cancelDialog": {
+        "title": "این نوبت لغو شود؟",
+        "body": "کلینیک دیگر این زمان را برای شما نگه نمی‌دارد.",
+        "healthAccessImpact": "دسترسی موقت سلامتی که برای این نوبت به اشتراک گذاشتید نیز لغو خواهد شد.",
+        "confirm": "بله، نوبت لغو شود"
+      },
+      "confirmedBanner": {
+        "title": "نوبت تأیید شد",
+        "calendarAdded": "به تقویم مراقبت شما اضافه شد.",
+        "healthAccessUntil": "اطلاعات سلامت تا {when} با کلینیک به اشتراک گذاشته شده است.",
+        "openCalendar": "باز کردن تقویم مراقبت"
+      }
+    }
+  },
+  "careCalendar": {
+    "title": "تقویم مراقبت",
+    "empty": "هنوز چیزی برنامه‌ریزی نشده.",
+    "event": {
+      "VET_APPOINTMENT": "نوبت دامپزشکی"
+    },
+    "status": {
+      "SCHEDULED": "برنامه‌ریزی‌شده",
+      "CANCELLED": "لغوشده",
+      "COMPLETED": "انجام‌شده"
+    }
   }
 }

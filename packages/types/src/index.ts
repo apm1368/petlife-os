@@ -78,6 +78,7 @@ export enum HomeActionKind {
   VIEW_MEDICATION = "VIEW_MEDICATION",
   COMPLETE_CARE_PROFILE = "COMPLETE_CARE_PROFILE",
   FIND_VET = "FIND_VET",
+  VIEW_BOOKING = "VIEW_BOOKING",
   VIEW_PROFILE = "VIEW_PROFILE",
   ASK_AI = "ASK_AI",
 }
@@ -392,4 +393,215 @@ export interface HealthSummaryDto {
   vaccinationStatus: VaccinationStatus;
   nextVaccinationDueAt: string | null;
   primaryAttention: HealthAttentionDto | null;
+}
+
+// ---------------------------------------------------------------------------
+// Find a Vet + Vet Booking Basics (Handoff 03)
+// ---------------------------------------------------------------------------
+
+export enum ProviderType {
+  VET_CLINIC = "VET_CLINIC",
+  VET_HOSPITAL = "VET_HOSPITAL",
+  VETERINARIAN = "VETERINARIAN",
+}
+
+/** Only VERIFIED providers appear in default consumer discovery. */
+export enum ProviderVerificationStatus {
+  NOT_STARTED = "NOT_STARTED",
+  SUBMITTED = "SUBMITTED",
+  NEEDS_INFORMATION = "NEEDS_INFORMATION",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  VERIFIED = "VERIFIED",
+  REJECTED = "REJECTED",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum ProviderUserRole {
+  OWNER = "OWNER",
+  VET = "VET",
+  STAFF = "STAFF",
+}
+
+export enum ProviderServiceType {
+  GENERAL_VET_VISIT = "GENERAL_VET_VISIT",
+  VACCINATION = "VACCINATION",
+  FOLLOW_UP = "FOLLOW_UP",
+  CONSULTATION = "CONSULTATION",
+}
+
+/**
+ * HOLD/PENDING_CONFIRMATION are part of the vocabulary but never the status
+ * of a persisted Booking in this phase — see BookingHoldService and the
+ * README. CHECKED_IN/IN_PROGRESS/COMPLETED/NO_SHOW/CANCELLED_BY_PROVIDER
+ * exist for architecture completeness; no endpoint transitions a booking to
+ * them yet.
+ */
+export enum BookingStatus {
+  HOLD = "HOLD",
+  PENDING_CONFIRMATION = "PENDING_CONFIRMATION",
+  CONFIRMED = "CONFIRMED",
+  CHECKED_IN = "CHECKED_IN",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED_BY_USER = "CANCELLED_BY_USER",
+  CANCELLED_BY_PROVIDER = "CANCELLED_BY_PROVIDER",
+  NO_SHOW = "NO_SHOW",
+}
+
+/** Deliberately separate from BookingStatus — see the doc comment in schema.prisma. */
+export enum PaymentStatus {
+  NOT_REQUIRED = "NOT_REQUIRED",
+  PENDING = "PENDING",
+  AUTHORIZED = "AUTHORIZED",
+  PAID = "PAID",
+  FAILED = "FAILED",
+  REFUND_PENDING = "REFUND_PENDING",
+  REFUNDED = "REFUNDED",
+}
+
+/** What a booking-confirmation-time TEMPORARY grant actually exposes — never "full health record" by default. */
+export enum HealthAccessScopePreset {
+  MINIMAL_VET_CONTEXT = "MINIMAL_VET_CONTEXT",
+  HEALTH_BASICS = "HEALTH_BASICS",
+  SELECTED_HEALTH_DATA = "SELECTED_HEALTH_DATA",
+}
+
+export enum CareCalendarEventType {
+  VET_APPOINTMENT = "VET_APPOINTMENT",
+}
+
+export enum CareCalendarEventStatus {
+  SCHEDULED = "SCHEDULED",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
+}
+
+export interface ProviderLocationDto {
+  id: string;
+  providerOrganizationId: string;
+  name: string | null;
+  addressLine: string;
+  city: string;
+  region: string | null;
+  countryCode: string;
+  latitude: number | null;
+  longitude: number | null;
+  phone: string | null;
+  timezone: string;
+}
+
+export interface ProviderServiceDto {
+  id: string;
+  providerOrganizationId: string;
+  locationId: string | null;
+  name: string;
+  description: string | null;
+  type: ProviderServiceType;
+  durationMinutes: number;
+  priceAmount: number | null;
+  currency: string | null;
+  supportsDog: boolean;
+  supportsCat: boolean;
+  isActive: boolean;
+}
+
+/** A search-result row — cheap-to-compute summary, not the full profile. */
+export interface ProviderSummaryDto {
+  id: string;
+  name: string;
+  type: ProviderType;
+  verificationStatus: ProviderVerificationStatus;
+  description: string | null;
+  logoUrl: string | null;
+  locations: ProviderLocationDto[];
+  services: ProviderServiceDto[];
+  nextAvailableSlotStart: string | null;
+}
+
+export interface ProviderProfileDto {
+  id: string;
+  name: string;
+  type: ProviderType;
+  verificationStatus: ProviderVerificationStatus;
+  phone: string | null;
+  email: string | null;
+  description: string | null;
+  logoUrl: string | null;
+  websiteUrl: string | null;
+  locations: ProviderLocationDto[];
+  services: ProviderServiceDto[];
+}
+
+export type SlotAvailabilityState = "AVAILABLE" | "BOOKED" | "BLOCKED";
+
+export interface AvailabilitySlotDto {
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  state: SlotAvailabilityState;
+  providerUserId: string | null;
+}
+
+export interface AvailabilityResponseDto {
+  slots: AvailabilitySlotDto[];
+  /** false only when a petId was supplied and the service doesn't support that species. */
+  petCompatible: boolean;
+}
+
+export interface BookingHoldDto {
+  holdId: string;
+  expiresAt: string;
+  petId: string;
+  providerOrganizationId: string;
+  providerLocationId: string;
+  providerUserId: string | null;
+  providerServiceId: string;
+  slotStart: string;
+  slotEnd: string;
+  timezone: string;
+}
+
+export interface BookingHealthAccessSummaryDto {
+  scopePreset: HealthAccessScopePreset;
+  expiresAt: string;
+}
+
+export interface BookingDto {
+  id: string;
+  householdId: string;
+  petId: string;
+  userId: string;
+  providerOrganizationId: string;
+  providerLocationId: string;
+  providerUserId: string | null;
+  providerServiceId: string;
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  bookingStatus: BookingStatus;
+  paymentStatus: PaymentStatus;
+  reasonForVisit: string | null;
+  ownerNotes: string | null;
+  cancelledAt: string | null;
+  cancelledReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  provider: ProviderSummaryDto | null;
+  location: ProviderLocationDto | null;
+  service: ProviderServiceDto | null;
+  healthAccess: BookingHealthAccessSummaryDto | null;
+}
+
+export interface CareCalendarEventDto {
+  id: string;
+  householdId: string;
+  petId: string;
+  type: CareCalendarEventType;
+  status: CareCalendarEventStatus;
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  titleKey: string;
+  actionType: string | null;
+  bookingId: string;
 }

@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Avatar, Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
-import type { HealthSummaryDto, CareProfileDto, PetDto } from "@petlife/types";
+import type { BookingDto, HealthSummaryDto, CareProfileDto, PetDto } from "@petlife/types";
 import { PetLifecycleStatus } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { healthService } from "@/services/health.service";
 import { careProfileService } from "@/services/care-profile.service";
+import { bookingsService } from "@/services/bookings.service";
+import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { usePetStore } from "@/stores/pet-store";
 
 export function PetProfileView({ petId }: { petId: string }) {
@@ -28,6 +30,7 @@ export function PetProfileView({ petId }: { petId: string }) {
 
   const [healthSummary, setHealthSummary] = useState<HealthSummaryDto | null>(null);
   const [careProfile, setCareProfile] = useState<CareProfileDto | null>(null);
+  const [upcomingBooking, setUpcomingBooking] = useState<BookingDto | null>(null);
 
   async function load() {
     setError(false);
@@ -59,9 +62,20 @@ export function PetProfileView({ petId }: { petId: string }) {
     }
   }
 
+  async function loadUpcomingBooking() {
+    setUpcomingBooking(null);
+    try {
+      const bookings = await bookingsService.list({ upcoming: true, petId });
+      setUpcomingBooking(bookings[0] ?? null);
+    } catch {
+      // A booking teaser is a nice-to-have — never block the rest of the profile on it.
+    }
+  }
+
   useEffect(() => {
     void load();
     void loadTeasers();
+    void loadUpcomingBooking();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
@@ -143,6 +157,20 @@ export function PetProfileView({ petId }: { petId: string }) {
           </div>
           <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/care`)}>
             {t("openCareProfile")}
+          </Button>
+        </ContextSurface>
+      ) : null}
+
+      {upcomingBooking ? (
+        <ContextSurface className="flex items-center justify-between">
+          <div>
+            <p className="text-body text-text-primary">{t("upcomingVisitTeaser")}</p>
+            <p className="text-metadata text-text-secondary">
+              {formatAppointmentDateTime(upcomingBooking.startAt, locale as "fa" | "en", upcomingBooking.timezone)}
+            </p>
+          </div>
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/bookings/${upcomingBooking.id}`)}>
+            {t("viewBooking")}
           </Button>
         </ContextSurface>
       ) : null}
