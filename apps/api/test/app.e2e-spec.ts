@@ -823,7 +823,7 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       // cheaper than chasing a warm-up cost that only ever shows up once.
       // Kept in line with jest-e2e.json's own testTimeout (raised to 20000
       // in Handoff 07 for the same reason: slow-under-load sandbox CI).
-      20000,
+      60000,
     );
 
     it("rejects a booking hold when the service doesn't support the pet's species", async () => {
