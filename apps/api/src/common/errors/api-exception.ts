@@ -126,3 +126,71 @@ export class PetContextIncompleteException extends ApiException {
     super("PET_CONTEXT_INCOMPLETE", "This pet's profile needs more information before this service can be booked.", HttpStatus.BAD_REQUEST, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Minimal Provider OS (Handoff 05)
+// ---------------------------------------------------------------------------
+
+/**
+ * Covers every "not allowed to operate here" case: no ProviderUser
+ * membership at all, an ambiguous multi-org context with no explicit choice
+ * (details.reason = "AMBIGUOUS_CONTEXT"), a role too low for the action, or a
+ * booking/resource that belongs to a different provider organization
+ * (details.reason = "CROSS_ORGANIZATION") — deliberately 403, not 404, since
+ * these are legitimate authenticated provider users, just the wrong scope.
+ */
+export class ProviderAccessDeniedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PROVIDER_ACCESS_DENIED", "You do not have access to this provider resource.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+export class ProviderOrgNotVerifiedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PROVIDER_NOT_VERIFIED", "Your organization must be verified before taking this action.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+export class BookingNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("BOOKING_NOT_FOUND", "Booking not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidBookingTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_BOOKING_TRANSITION", "This booking cannot move to that state right now.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/**
+ * Never thrown to silently cancel or move a booking — it is the explicit
+ * "3 confirmed bookings exist in this blocked period" gate (spec section 9);
+ * passing acknowledgeConflict: true on the same request proceeds anyway.
+ */
+export class AvailabilityConflictException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("AVAILABILITY_CONFLICT", "This change conflicts with existing confirmed bookings.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ServiceHasFutureBookingsException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SERVICE_HAS_FUTURE_BOOKINGS", "This change is not allowed while future bookings exist for this service.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/**
+ * Part of the vocabulary for a booking-linked PetAccessGrant that has
+ * lapsed — kept distinct from ProviderAccessDeniedException since this is
+ * about pet-data authorization, not provider-operational authorization (see
+ * the doc comment on ProviderUserRole). Not yet thrown by any endpoint this
+ * phase: ProviderBookingDetailDto.access.state = "EXPIRED" already surfaces
+ * this as a graceful 200 UI state rather than a page-level error — see
+ * README Known limitations.
+ */
+export class AccessExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ACCESS_EXPIRED", "This access has expired.", HttpStatus.FORBIDDEN, details);
+  }
+}

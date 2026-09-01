@@ -1035,6 +1035,238 @@ Two wizard components — the original vet-only `BookingWizard`
 into one component this phase, to avoid destabilizing the already-shipped,
 already-tested vet flow. Both call the exact same backend endpoints.
 
+## Minimal Provider OS (Handoff 05)
+
+A dedicated, minimal Provider OS — sign in, see today's work, manage
+availability, see and act on bookings — extending the exact same
+User+Session auth, `ProviderUser`/`ProviderOrganization`/`Booking`/
+`PetAccessGrant` models Handoffs 03-04 built. No second auth system, no
+second booking state machine, no pet-data permission model change.
+
+### Provider authorization is a separate axis from pet-data authorization
+
+`ProviderUserRole` (`OWNER`/`VET`/`STAFF`, unchanged from Handoff 03)
+controls only provider-side operational actions — viewing bookings,
+managing availability, cancelling bookings, editing services, viewing the
+team. It is never consulted by `PetAccessGuard`, and `PetAccessGrant`/
+`BookingPetAccess` remain the only source of truth for what a provider can
+see about a pet. `ProviderAuthGuard` (mirrors `PetAccessGuard`'s shape) is
+a completely separate guard: it resolves the caller's active provider
+organization and, when a handler declares `@RequireProviderRole(...)`,
+checks role — it never touches `PetAccessGrant` at all. Every Provider OS
+service method that also needs pet data (`ProviderBookingsService.getById`)
+resolves that access itself, from the *specific* `BookingPetAccess` link
+for that booking, not from a general permission check — see "Pet-data
+access" below.
+
+### Provider context (`ProviderContextPreference`)
+
+A user may belong to more than one `ProviderOrganization` (multiple
+`ProviderUser` rows for the same `userId`). `ProviderContextService`
+mirrors `ActivePetPreference`'s exact pattern: a user with exactly one
+membership never needs to choose (it's resolved automatically); a user
+with more than one must set `ProviderContextPreference` explicitly via
+`PUT /provider/me/context` — the organization is **never** inferred when
+ambiguous. `GET /provider/me/context` never throws (even when ambiguous or
+when the user has no membership at all) so the Provider Shell can always
+render a "choose an organization" picker; every other Provider OS route,
+via `ProviderAuthGuard`, throws `PROVIDER_ACCESS_DENIED` with
+`details.reason: "AMBIGUOUS_CONTEXT"` (including the candidate
+organizations) if no explicit choice can be resolved.
+
+### Availability management (reuses the Handoff 03 models, no second engine)
+
+`ProviderAvailabilityService` is CRUD over the existing
+`ProviderAvailabilityRule`/`ProviderAvailabilityException` rows — the same
+rows `SlotGeneratorService` already projects into slots; nothing about
+slot generation changed. Per the Stage 1 architecture review, conflict
+detection (spec section 9 — "do not silently cancel or move a booking")
+applies only to `BLOCKED` exceptions, not recurring rules: creating or
+updating a `BLOCKED` exception that overlaps a `CONFIRMED`/`CHECKED_IN`/
+`IN_PROGRESS` booking at that location (and, if set, that provider user)
+returns `409 AVAILABILITY_CONFLICT` with the conflicting booking count/ids
+unless the request also sets `acknowledgeConflict: true` — and even then,
+creating the exception **never** touches the conflicting bookings; the
+provider has just explicitly acknowledged the overlap exists. Recurring
+rules run no such check (reconciling a rule against every future booking
+is disproportionately complex for this phase — documented, not silently
+skipped).
+
+### Booking operational transitions (finally reaching the existing vocabulary)
+
+`BookingStatus` already had `CHECKED_IN`/`IN_PROGRESS`/`COMPLETED`/
+`CANCELLED_BY_PROVIDER` in its vocabulary since Handoff 03 — no endpoint
+ever reached them. `ProviderBookingsService` is what finally does, via a
+strict single-step transition table (`CONFIRMED → CHECKED_IN → IN_PROGRESS
+→ COMPLETED`); any other requested transition is rejected as
+`400 INVALID_BOOKING_TRANSITION`. Category (Grooming/Training/Walking/
+Sitting/Boarding/Pet Taxi/Vet) only changes labels in the UI — it is never
+a second state machine, and Walker/Sitter/Taxi "Start Walk"/"Start
+Sitting"/"Start Trip" actions all map to the exact same `IN_PROGRESS`
+transition with no live GPS or fake tracking.
+
+- **`POST /provider/bookings/:id/confirm`** is an idempotent no-op valid
+  only from an already-`CONFIRMED` booking. This architecture (Handoff 03)
+  never persists a genuine `HOLD`/`PENDING_CONFIRMATION` row to confirm —
+  a booking is created directly at `CONFIRMED` — so there is no real state
+  to transition; the endpoint exists for spec completeness and produces an
+  auditable `ProviderBookingConfirmed` event even for the no-op case.
+- **`POST /provider/bookings/:id/cancel`** transitions to
+  `CANCELLED_BY_PROVIDER` (never deletes the row), reuses
+  `BookingPetAccessService.revokeForBooking` and
+  `CareCalendarService.markCancelled` exactly as the consumer-side cancel
+  path does (no duplicated revocation/calendar logic), and is gated only
+  by booking status (`HOLD`/`PENDING_CONFIRMATION`/`CONFIRMED`/
+  `CHECKED_IN`) — not by organization verification, since cancelling is
+  never a "marketplace exposure" action.
+- **`check-in`/`start`/`complete`** are gated by
+  `ProviderOrgNotVerifiedException` (`403 PROVIDER_NOT_VERIFIED`) when the
+  organization isn't `VERIFIED` — the one place this phase enforces "do
+  not silently allow marketplace actions" (spec section 6) as a hard block
+  rather than just a UI banner.
+- **`complete`** sets `completedAt`/`completedByProviderUserId` (a plain
+  UUID reference, no FK — same precedent as `PetAccessGrant.grantedByUserId`,
+  so deleting a `ProviderUser` later never alters booking history) and the
+  optional, deliberately small owner-visible `completionNote` (e.g. "Luna's
+  grooming was completed."), and calls the new
+  `CareCalendarService.markCompleted` (mirrors `markCancelled`) so the
+  calendar's already-modeled `COMPLETED` status is finally reached too.
+
+### Pet-data access on a booking (`ProviderPetAccessContextDto`)
+
+A provider viewing a booking's detail sees the **specific** grant that
+booking created, resolved from `BookingPetAccess` (unique per booking) —
+never the caller's general effective-permissions union across every grant
+they hold for that pet, and never a different provider user's grant. The
+response's `access.state` is always one of four explicit values, so the UI
+never needs to guess *why* something isn't visible ("no invisible provider
+access", spec section 14):
+
+| `state`    | Meaning                                                                 |
+| ---------- | ------------------------------------------------------------------------ |
+| `GRANTED`  | This booking created a grant, it belongs to the viewing provider user, and it's currently active. |
+| `NO_GRANT` | No `providerUserId` was ever assigned to this booking (see `BookingPetAccessService.grantForBooking`'s early return), so no grant exists for anyone — or the viewing provider user isn't the one it was granted to (e.g. a receptionist viewing a vet's booking). |
+| `EXPIRED`  | A grant exists and belongs to this provider user, but its `expiresAt` has passed. |
+| `REVOKED`  | A grant exists and belongs to this provider user, but it was explicitly revoked (e.g. by a cancellation). |
+
+`careProfile`/`healthSummary` in the response are `null` unless
+`access.canViewCareProfile`/`canViewHealth` are true for *this* grant —
+resolved and gated before `CareProfileService.get`/
+`HealthSummaryService.getSummary` are even called, never fetched and then
+hidden in the UI.
+
+### Provider notes vs. the owner-visible completion note
+
+`BookingProviderNote` (new model) is internal-only free text attached to a
+booking (`POST /provider/bookings/:id/notes`) — never sent to the
+customer, and never shown on any consumer-facing screen. It is
+deliberately separate from `Booking.completionNote`, the one small
+owner-visible string set only by the `complete` transition; there is no
+general provider-to-customer messaging this phase.
+
+### Provider Shell (a completely separate UI, spec section 27)
+
+`apps/web/features/provider/ProviderShell.tsx` is a dedicated layout —
+its own session check, its own bootstrap (`useProviderBootstrap` →
+`GET /provider/me/context`), its own Zustand store (`provider-store.ts`)
+— never sharing state or navigation with the consumer `AppShell`. Routes
+live under a separate `(provider)` route group so they never appear in
+consumer navigation: `/provider` (Home), `/provider/bookings` (queue),
+`/provider/bookings/:id` (detail), `/provider/calendar` (Today/Agenda/Week
+schedule), `/provider/availability` (rules/exceptions), `/provider/services`
+(admin), `/provider/team` (roster). The shell's header shows organization
+name, role, and — when the organization isn't `VERIFIED` — an explicit
+"operational restriction" banner rather than silently allowing the same
+actions a verified organization would have. A user with more than one
+provider membership sees an organization picker instead of a guessed
+default, matching the backend's "never infer implicitly when multiple
+exist" rule exactly.
+
+### Services admin (minimal, spec sections 24-25)
+
+`GET/PATCH /provider/services/:id` edits `name`/`description`/
+`priceAmount`/`durationMinutes`/`isActive`/`supportsDog`/`supportsCat`/
+`minAgeMonths`/`maxAgeMonths`/`requiresCareProfile`/`requiresHealthBasics`/
+`locationMode` — never `category`/`type`/`providerOrganizationId`/
+`locationId` (structural, out of scope for a minimal admin surface).
+`PATCH` is `OWNER`-role-only (`@RequireProviderRole(OWNER)`), the one
+place this phase distinguishes `OWNER` from `VET`/`STAFF` operationally.
+Disabling a service (`isActive: false`) never cancels its future
+bookings — `BookingsService.createHold()` already rejects new holds
+against an inactive service (Handoff 04), so "only prevents new bookings"
+falls out of existing code with no extra work; a `locationMode` change
+while future confirmed bookings exist is separately blocked with
+`409 SERVICE_HAS_FUTURE_BOOKINGS`, since changing where a service happens
+could break an already-confirmed booking's location expectations (the one
+genuine structural-change risk this phase actually guards against).
+
+### Team (read-only, spec section 26)
+
+`GET /provider/team` lists `ProviderUser` rows for the caller's active
+organization (name/role/`displayTitle`). No invitation/deactivation flow —
+`status` is always the literal `"ACTIVE"` since no deactivation mechanism
+exists yet.
+
+### Dual calendar / timezone
+
+Provider OS screens reuse the exact same `formatAppointmentDateTime`/
+`formatDayLabel`/`formatDateTimeRange` ICU helpers (`-u-ca-persian`/
+`-u-ca-gregory`) Handoffs 03-04 built — no new date library, no duplicate
+Jalali dates stored. "Today" boundaries in `ProviderOverviewService`/
+`ProviderBookingsService` use plain UTC calendar-day math rather than the
+provider location's own timezone — see Known limitations.
+
+### API endpoints (Handoff 05 additions)
+
+See the full endpoint list below (`GET/PUT /provider/me/context` through
+`GET /provider/team`).
+
+### Error codes (Handoff 05 additions)
+
+```
+PROVIDER_ACCESS_DENIED        403  no ProviderUser membership, ambiguous multi-org context with no
+                                    explicit choice, insufficient role, or a resource belonging to a
+                                    different organization (never a silent 404 for the last case)
+PROVIDER_NOT_VERIFIED         403  the organization must be VERIFIED before check-in/start/complete
+BOOKING_NOT_FOUND             404  no booking with that id
+INVALID_BOOKING_TRANSITION    400  the requested transition isn't the single next step from the
+                                    booking's current status
+AVAILABILITY_CONFLICT         409  a BLOCKED exception would overlap existing confirmed bookings;
+                                    resend with acknowledgeConflict: true to proceed anyway
+SERVICE_HAS_FUTURE_BOOKINGS   409  a locationMode change is blocked while future confirmed bookings
+                                    exist for that service
+ACCESS_EXPIRED                403  part of the vocabulary for a lapsed booking-linked grant; not yet
+                                    thrown by any endpoint — see Known limitations
+```
+
+`BOOKING_NOT_CANCELLABLE`/`PET_ACCESS_DENIED` (reused, unchanged) also
+apply to the Provider OS's own cancel/pet-context paths respectively.
+
+### UI screens (Handoff 05 additions)
+
+- **Provider Home** (`/provider`) — "what needs my attention today?":
+  today's bookings, the next booking, attention counts (pending
+  confirmations, recent cancellations, unresolved availability conflicts),
+  deliberately no vanity analytics (no lifetime totals, no revenue).
+- **Bookings queue** (`/provider/bookings`) — Today/Upcoming/Past/Cancelled
+  filters; compact rows (Pet/Owner/Service/Time/Location/Booking Status/
+  Payment Status kept visually separate).
+- **Booking Detail** (`/provider/bookings/:id`) — the four-state pet-access
+  section above, Care/Health context when granted, internal provider notes
+  (with the internal-only label always shown), and the state-appropriate
+  action bar (Confirm/Check in/Start/Complete/Cancel).
+- **Schedule** (`/provider/calendar`) — Today/Agenda/Week, grouped by day,
+  built from the exact same `GET /provider/bookings` the queue uses (no
+  new calendar engine, no drag/drop).
+- **Availability** (`/provider/availability`) — weekly rule list + add
+  form, exceptions list + add form with the explicit conflict-acknowledgement
+  flow (never a silent auto-proceed).
+- **Services** (`/provider/services`) — list with inline edit and an
+  active/disable toggle; `OWNER`-only edits surface a clear
+  "only an organization owner can change services" message rather than a
+  generic error.
+- **Team** (`/provider/team`) — read-only roster.
+
 ## API endpoints
 
 ```
@@ -1106,6 +1338,34 @@ GET    /bookings/:id
 POST   /bookings/:id/cancel
 POST   /bookings/:id/recur
 GET    /care-calendar
+
+GET    /provider/me/context
+PUT    /provider/me/context
+GET    /provider/me/overview
+
+GET    /provider/availability/rules
+POST   /provider/availability/rules
+PATCH  /provider/availability/rules/:id
+DELETE /provider/availability/rules/:id
+GET    /provider/availability/exceptions
+POST   /provider/availability/exceptions        (acknowledgeConflict to proceed past AVAILABILITY_CONFLICT)
+PATCH  /provider/availability/exceptions/:id
+DELETE /provider/availability/exceptions/:id
+
+GET    /provider/bookings                       (today, upcoming, past, cancelled, category, locationId, providerUserId)
+GET    /provider/bookings/:id
+POST   /provider/bookings/:id/confirm
+POST   /provider/bookings/:id/cancel
+POST   /provider/bookings/:id/check-in
+POST   /provider/bookings/:id/start
+POST   /provider/bookings/:id/complete
+POST   /provider/bookings/:id/notes             (internal-only BookingProviderNote)
+
+GET    /provider/services
+GET    /provider/services/:id
+PATCH  /provider/services/:id                   (OWNER role only)
+
+GET    /provider/team
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
@@ -1213,7 +1473,18 @@ pnpm --filter @petlife/api test:e2e
   check-in–check-out range instead of a single time for a multi-day
   Boarding booking and offering "Repeat weekly" only for a recurring-eligible
   category with no series yet; and My Bookings rendering the Upcoming tab by
-  default and switching to Cancelled with its own empty state.
+  default and switching to Cancelled with its own empty state. New in
+  Handoff 05: Provider Home's all-clear vs. attention-count states and its
+  today/next-booking rows; the Bookings queue's filter switching and empty
+  state; Booking Detail rendering all four `access.state` values distinctly
+  (asserting Care context renders while Health context does not when the
+  grant excludes it, and that `NO_GRANT` never renders either), the
+  Confirm/Check-in/Start/Complete action bar advancing one state at a time,
+  and the cancel dialog submitting the entered reason; the Provider Shell's
+  not-a-provider message, its multi-organization picker, and its
+  not-verified banner; Availability's explicit
+  conflict-acknowledge-and-proceed flow; and smoke tests for the Schedule
+  tab switch, the Services active/disable toggle, and the Team roster.
 - **API e2e tests** (`apps/api/test/app.e2e-spec.ts`, Supertest against a
   real Nest app + Postgres + Redis): OTP → session, IDOR denial on a pet the
   user has no `PetAccessGrant` for, household + pet creation with optional
@@ -1293,7 +1564,35 @@ pnpm --filter @petlife/api test:e2e
   access only to the first pet, and that second pet's booking list stays
   empty; and an address is required only for a service whose `LocationMode`
   actually needs one (`AT_PROVIDER` succeeds with none, `AT_CUSTOMER` is
-  rejected with `ADDRESS_REQUIRED` until one is created and supplied).
+  rejected with `ADDRESS_REQUIRED` until one is created and supplied) —
+  plus a `"Minimal Provider OS (Handoff 05)"` block: a user with no
+  `ProviderUser` membership is denied Provider OS access entirely; a
+  provider from Organization A is denied (`403`, never `404`) access to
+  Organization B's booking; a provider's booking queue contains only their
+  own organization's bookings; Care context renders while Health context
+  is withheld exactly when the booking's grant excludes it, with health
+  data never even queried in that case; a booking created with no assigned
+  `providerUserId` shows `NO_GRANT` (no grant exists for anyone); confirm
+  is idempotent from `CONFIRMED` and rejects confirming an already-cancelled
+  booking; cancelling updates `bookingStatus` to `CANCELLED_BY_PROVIDER`,
+  revokes that booking's own grant, and updates Care Calendar/Home exactly
+  like the consumer-side cancel path; check-in → start → complete advance
+  one step at a time and a skipped transition (e.g. `start` before
+  `check-in`) is rejected with `INVALID_BOOKING_TRANSITION`, including
+  after `COMPLETED` is reached; availability rules can be created, updated,
+  and deleted; a `BLOCKED` exception overlapping a confirmed booking is
+  rejected with `AVAILABILITY_CONFLICT` and the booking is provably
+  untouched, then the same request with `acknowledgeConflict: true`
+  succeeds and the booking remains `CONFIRMED`; disabling a service blocks
+  new booking holds (`SERVICE_NOT_AVAILABLE`) while leaving an existing
+  confirmed booking untouched, and is rejected for a `STAFF`-role provider
+  with `PROVIDER_ACCESS_DENIED` before an `OWNER` successfully disables it;
+  the team roster is isolated per organization; a user with more than one
+  `ProviderUser` membership is denied with `AMBIGUOUS_CONTEXT` until they
+  explicitly choose via `PUT /provider/me/context`, after which
+  `GET /provider/me/overview` reflects the chosen organization; and a
+  booking's canonical ISO timestamps are byte-identical regardless of the
+  viewing provider's own `locale` (`fa` vs. `en`).
 
   The e2e suite needs its own database (kept separate from your dev data):
 
@@ -1379,6 +1678,31 @@ e2e tests → build, against real Postgres/Redis service containers.
   timestamp → switched the active pet to Milo and confirmed Milo's Pet
   Profile never showed Luna's Grooming or Boarding booking context — all 28
   checkpoints passed.
+
+- **Browser E2E (Handoff 05, manual verification against a real Chromium)**:
+  three flows against a live API/web server, real Postgres/Redis. **Flow
+  1** — signed in as the assigned vet (`dr.sara.vet@example.com`) → Provider
+  Home showed "Tehran Pet Care Clinic" and today's vet booking for Luna →
+  opened it → Care context and Health context both visible (`GRANTED`, not
+  a silently hidden state — the vet-category grant includes health) →
+  Confirm (success message) → Check in → Start → Complete with an
+  owner-visible completion note → status persisted across a page reload →
+  switched to Sarah's own browser context and confirmed her Booking Detail
+  showed the same `Completed` status and the identical completion note.
+  **Flow 2** — a second, future-dated vet booking: confirmed it showed on
+  Sarah's Home ("View upcoming vet visit") and Care Calendar before
+  cancellation → the vet provider-cancelled it with a reason → status
+  became `Cancelled by provider` → the API confirmed
+  `CANCELLED_BY_PROVIDER` → Sarah's Care Calendar entry count dropped by
+  one and Home no longer surfaced it as the primary action → verified via
+  the Provider OS API that *this* booking's own access grant is now
+  `REVOKED` while the unrelated, already-completed first booking's own
+  grant is untouched (each booking holds its own independent grant, per
+  spec). **Flow 3** — signed in as a different organization's staff
+  (`groomer@example.com`) and navigated directly to the vet clinic's
+  booking detail URL → denied with "You do not have access to this
+  booking." in the UI and `403 PROVIDER_ACCESS_DENIED` from the API (never
+  a silent 404) — all 29 checkpoints passed.
 
 ## What's implemented
 
@@ -1476,6 +1800,37 @@ E2E pass (see above) proving the Grooming and multi-day Boarding flows,
 real temporary Care-Profile-only access and its revocation, and Luna/Milo
 context isolation end to end.
 
+Everything in the Handoff 05 acceptance criteria: a provider user entering
+a dedicated Provider OS, seeing only their own organization's data
+(bookings, team, services) with a `403 PROVIDER_ACCESS_DENIED` — never a
+silent 404 — for anything belonging to a different organization; an
+explicit organization-choice requirement (never inferred) for a user with
+more than one `ProviderUser` membership; a booking queue and detail view
+gated by the exact `BookingPetAccess` link that booking created, with four
+explicit access states rather than a boolean that hides why; availability
+CRUD over the existing Handoff 03 models with an explicit
+acknowledge-and-proceed conflict flow that never silently cancels or moves
+a booking; single-step `CONFIRMED → CHECKED_IN → IN_PROGRESS → COMPLETED`
+transitions (any other requested transition rejected) finally reaching
+`BookingStatus` values that have existed in the vocabulary since Handoff
+03; cancellation revoking exactly the temporary grant that booking
+created and updating the Care Calendar/Home exactly as the consumer-side
+cancel path does (same reused service methods, not a second
+implementation); a minimal `OWNER`-only services admin surface where
+disabling a service never cancels its future bookings; a completely
+separate Provider Shell UI (own session bootstrap, own store, own route
+group) that never mixes with consumer navigation; Jalali/Gregorian dual
+calendar support via the exact same ICU helpers used everywhere else;
+Persian RTL/English LTR and light/dark theming reused from the existing
+design system; every Handoff 01-04 backend/frontend test still green; and
+a full manual browser E2E pass (see above) proving a provider can sign in,
+open a permissioned booking, walk it through
+Confirm/Check-in/Start/Complete with the completion note visible on the
+owner's side, cancel a different booking with the temporary grant
+provably revoked and the owner's Care Calendar/Home updating, and a
+provider from one organization being denied access to another
+organization's booking end to end.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -1522,11 +1877,13 @@ context isolation end to end.
 - **Accessibility**: components use semantic roles/labels, visible focus
   rings, `role="alert"` for errors, and `prefers-reduced-motion` handling
   globally — not independently audited with a screen reader.
-- Full Vet marketplace/booking is now partially in scope (see Handoff 03
-  below) but the full Provider OS (clinic queue, clinical visit notes, EMR,
-  AI Vet Scribe, labs, imaging, prescriptions, pharmacy, payment capture,
-  refunds, settlements, provider reviews, recurring bookings, live service
-  tracking) is not. AI Health, Commerce, Travel, Insurance, Community,
+- Full Vet marketplace/booking and a Minimal Provider OS are now in scope
+  (see Handoffs 03-05 below), but the *full* Provider OS (payouts,
+  settlements, refunds, provider analytics, full provider onboarding,
+  document verification, clinical visit notes, EMR, AI Vet Scribe, labs,
+  imaging, prescriptions, pharmacy, live GPS, maps, full customer
+  messaging, photos/checklists, incident management, reviews, external PMS
+  integrations) is not. AI Health, Commerce, Travel, Insurance, Community,
   Animal Support, and all Seller/Shelter/Admin surfaces remain explicitly
   out of scope, per the spec.
 - **Handoff 02 is Health *Basics*, not the Health platform**: no labs,
@@ -1567,23 +1924,23 @@ context isolation end to end.
   doesn't (yet) grant a narrower or wider scope than Health Basics.
 - **No reschedule** — `BookingStatus` has no `RESCHEDULED` state; a booking
   can only be cancelled and a new one created from scratch.
-- **No provider dashboard/Provider OS** — availability is seeded directly
-  via `prisma/seed.ts`; there's no clinic-facing UI to manage
-  `ProviderAvailabilityRule`/`ProviderAvailabilityException` rows, view a
-  booking queue, or manage `ProviderUser`s. `ProviderUser` is explicitly not
-  a pet-data permission source (`PetAccessGrant`/`BookingPetAccess`
-  remain the only source of truth for what a vet or other provider can see).
+- **The Minimal Provider OS (Handoff 05) is real but deliberately narrow** —
+  see the dedicated section above for what it covers. `ProviderUser` remains
+  explicitly not a pet-data permission source (`PetAccessGrant`/
+  `BookingPetAccess` remain the only source of truth for what a vet or
+  other provider can see).
 - **Appointment time is always shown in the provider's local timezone**, not
   converted to the viewer's device timezone — acceptable since bookings are
   currently Tehran-only via seed data, but a future handoff adding
   multi-timezone providers should show "provider local time" and "your
   time" side by side when they differ, per the spec.
-- **Most `BookingStatus` values are unreachable in this phase** —
-  `PENDING_CONFIRMATION`/`CHECKED_IN`/`IN_PROGRESS`/`COMPLETED`/`NO_SHOW`/
-  `CANCELLED_BY_PROVIDER` are modeled (booking confirmation goes straight
-  from a consumed hold to `CONFIRMED`) but nothing currently transitions a
-  booking through them; they exist for a future Provider OS / clinic
-  check-in flow to use without a schema change.
+- **`HOLD`/`PENDING_CONFIRMATION`/`NO_SHOW` remain unreachable** —
+  `CHECKED_IN`/`IN_PROGRESS`/`COMPLETED`/`CANCELLED_BY_PROVIDER` are now
+  reachable via the Provider OS (Handoff 05); a hold is still Redis-only
+  and a confirmed booking is still created directly at `CONFIRMED` (no
+  real payment-authorization gate), so there is genuinely no persisted row
+  to move through `HOLD`/`PENDING_CONFIRMATION`. `NO_SHOW` has no endpoint
+  that sets it yet.
 - **No cleanup job for expired temporary grants** — enforcement is
   request-time (`expiresAt` is checked on every authorization check), so an
   expired grant simply stops authorizing; it is never deleted or archived.
@@ -1630,35 +1987,67 @@ context isolation end to end.
   shortcut** — since the app has no persistent bottom navigation, `/services`
   is reached via a small card on Home (or direct navigation); a future
   handoff adding real navigation chrome should route through it instead.
+- **"Today" in the Provider OS uses plain UTC calendar-day boundaries**,
+  not the provider location's own timezone — acceptable since every seeded
+  location is Tehran-only, but a future multi-timezone-provider handoff
+  should compute "today" per-location like appointment times already are.
+- **`ACCESS_EXPIRED` is part of the error vocabulary but not yet thrown** —
+  `ProviderBookingDetailDto.access.state = "EXPIRED"` already surfaces a
+  lapsed grant as a graceful 200 UI state (spec: "clear no-access states"),
+  which covers the real product need; the exception class exists for API
+  completeness in case a future endpoint needs to hard-block on it.
+- **No invitation/deactivation flow for `ProviderUser`s** —
+  `GET /provider/team` is read-only; adding a team member still means a
+  direct `prisma.providerUser.create()` (via seed data or a future admin
+  tool), and every listed member's `status` is always the literal
+  `"ACTIVE"` since there's no way to deactivate one yet.
+- **Availability conflict detection covers `BLOCKED` exceptions only** —
+  changing a recurring `ProviderAvailabilityRule` never checks it against
+  existing future bookings; reconciling a weekly rule change against every
+  affected future booking is disproportionately complex for this phase
+  (see the Stage 1 architecture review) and is deferred to a future
+  handoff if it proves necessary.
+- **Provider services admin cannot change `category`/`type`/
+  `providerOrganizationId`/`locationId`** — only the fields listed in the
+  Handoff 05 section above are editable; this is a minimal admin surface,
+  not a full catalog-management workflow, per the spec.
+- **No provider-side reschedule** — `check-in`/`start`/`complete`/`cancel`
+  are the only booking transitions; moving a booking to a different slot
+  still means cancelling and creating a new one.
+- **`POST /provider/bookings/:id/confirm` is a no-op by construction, not
+  a placeholder** — see the dedicated explanation in the Handoff 05
+  section above; this isn't unfinished work, it's what "confirm" can
+  correctly mean given this architecture's booking lifecycle.
 
 ## Next recommended coding handoff
 
-**Minimal Provider OS.** Two consecutive handoffs have now deferred it, and
-the case for it only got stronger: there are seven verified providers
-(vet, groomer, trainer, walker, sitter, boarding facility, taxi) across six
-categories, every single one hand-seeded with a fixed weekly availability
-window and no way for a real provider to sign in, adjust their hours, block
-a day off, or see who's booked them. A minimal version — sign in as an
-existing `ProviderUser`, manage that organization's
-`ProviderAvailabilityRule`/`ProviderAvailabilityException` rows, and view a
-simple read-only booking queue for the organization's own locations — would
-let providers other than the seed fixture actually use the system, without
-yet building the full Provider OS (clinic queue software, staff scheduling,
-provider-side cancellation/reschedule, payouts) that stays explicitly out
-of scope. It should keep `ProviderUser` exactly as it is today — **never** a
-pet-data permission source; `PetAccessGrant`/`BookingPetAccess` remain the
-only source of truth for what a provider can see about a pet, and a
-provider managing their own availability or viewing their own booking queue
-needs no new permission model, just a `ProviderUser`-membership check
-(mirroring `HouseholdMemberGuard`'s pattern from Handoff 01/02) scoped to
-their own `providerOrganizationId`.
+**Owner-visible provider communication + reviews basics.** The Provider OS
+(Handoff 05) closed the loop on the provider side of a booking — confirm,
+check in, start, complete, with a small owner-visible completion note —
+but there is still no way for an owner to see anything beyond that one
+note, and no way for either side to leave feedback. A minimal next step:
+(1) a read-only "provider updates" feed on the owner's booking detail
+page surfacing `BookingProviderNote`-adjacent, deliberately curated
+owner-visible events (state transitions, the completion note) as a single
+timeline rather than raw internal notes; (2) a simple post-completion
+rating (1-5 stars + optional text) stored against the `Booking`, visible
+on the provider's own profile as an aggregate — no moderation queue, no
+photo attachments, no provider response threading yet. Both extend
+`Booking` and reuse the existing owner/provider authorization boundaries
+untouched; neither needs a new permission model or a second booking state
+machine.
 
-Alternatively, if the business prioritizes the consumer side instead: Care
-Calendar (full product) + reminders. Handoff 03/04 deliberately built only
-enough Care Calendar to prove every category's projection works end to end;
-`CareCalendarEvent.type`/`sourceType` are already generic enough to add
-vaccination-due dates and medication schedules as new source types without
-a schema change, plus the first real notification/reminder surface (e.g.
-"your grooming appointment is tomorrow at 10:00"), which doesn't exist
-anywhere yet in either handoff. Whichever is chosen, keep `Booking` as the
-sole source of truth for booking state.
+Alternatively, if the business prioritizes closing Provider OS gaps
+instead: a real provider onboarding/verification workflow.
+`ProviderVerificationStatus` has supported the full
+`NOT_STARTED → SUBMITTED → UNDER_REVIEW → VERIFIED` vocabulary since
+Handoff 03, but every provider in the system today reaches `VERIFIED`
+only via `prisma/seed.ts` — there is no self-serve flow for a new
+`ProviderOrganization` to register, submit for review, or move through
+that state machine, and no admin-side review screen. This is a
+substantial scope on its own (document upload, an admin review UI, an
+applicant-facing status page) and should stay a dedicated handoff rather
+than be folded into either the review/rating work above or a future
+Provider OS enhancement pass. Whichever is chosen, keep `Booking` as the
+sole source of truth for booking state, and `PetAccessGrant`/
+`BookingPetAccess` as the only source of truth for pet-data access.

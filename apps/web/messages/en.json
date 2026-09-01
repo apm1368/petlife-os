@@ -396,6 +396,7 @@
     "dateTime": "Date & time",
     "reason": "Notes",
     "cancelledReason": "Cancellation reason",
+    "completionNote": "Completion note",
     "cancel": "Cancel booking",
     "status": {
       "HOLD": "Held",
@@ -626,6 +627,215 @@
       "SCHEDULED": "Scheduled",
       "CANCELLED": "Cancelled",
       "COMPLETED": "Completed"
+    }
+  },
+  "provider": {
+    "shell": {
+      "nav": {
+        "home": "Home",
+        "bookings": "Bookings",
+        "schedule": "Schedule",
+        "availability": "Availability",
+        "services": "Services",
+        "team": "Team"
+      },
+      "notAProvider": {
+        "title": "No provider access",
+        "body": "Your account isn't part of any provider organization.",
+        "backToApp": "Back to PET LIFE OS"
+      },
+      "chooseOrg": {
+        "title": "Choose an organization",
+        "body": "You belong to more than one provider organization. Choose which one to work in."
+      },
+      "headerRole": "{role}",
+      "role": {
+        "OWNER": "Owner",
+        "VET": "Vet",
+        "STAFF": "Staff"
+      },
+      "switchOrg": "Switch organization",
+      "notVerifiedBanner": "This organization is not yet verified. Some actions are restricted."
+    },
+    "home": {
+      "title": "Provider Home",
+      "retry": "Retry",
+      "loading": "Loading",
+      "attention": {
+        "pendingConfirmation": "{count} pending confirmation",
+        "cancellations": "{count} recent cancellations",
+        "availabilityIssues": "{count} availability conflicts",
+        "allClear": "All clear"
+      },
+      "nextBooking": "Next booking",
+      "today": "Today ({count})",
+      "noBookingsToday": "No bookings today."
+    },
+    "bookings": {
+      "title": "Bookings",
+      "retry": "Retry",
+      "loading": "Loading",
+      "empty": "No bookings found.",
+      "filter": {
+        "today": "Today",
+        "upcoming": "Upcoming",
+        "past": "Past",
+        "cancelled": "Cancelled"
+      }
+    },
+    "bookingDetail": {
+      "title": "Booking",
+      "pet": "Pet",
+      "owner": "Owner",
+      "service": "Service",
+      "location": "Location",
+      "dateTime": "Date & time",
+      "reason": "Reason",
+      "cancelledReason": "Cancellation reason",
+      "completionNote": "Completion note",
+      "access": {
+        "title": "Pet data access",
+        "state": {
+          "GRANTED": "Access granted",
+          "NO_GRANT": "No access",
+          "EXPIRED": "Access expired",
+          "REVOKED": "Access revoked"
+        },
+        "scope": "Scope",
+        "startsAt": "Starts",
+        "expiresAt": "Expires"
+      },
+      "careProfile": {
+        "title": "Care context",
+        "temperament": "Temperament",
+        "feeding": "Feeding routine",
+        "specialInstructions": "Special instructions"
+      },
+      "health": {
+        "title": "Health context",
+        "allergyState": "Allergies",
+        "vaccinationStatus": "Vaccination"
+      },
+      "actions": {
+        "confirm": "Confirm",
+        "confirmed": "Confirmed",
+        "checkIn": "Check in",
+        "start": "Start",
+        "complete": "Complete",
+        "cancel": "Cancel booking"
+      },
+      "completionNoteLabel": "Owner-visible completion note (optional)",
+      "completionNotePlaceholder": "e.g. \"Luna's grooming was completed.\"",
+      "notes": {
+        "title": "Provider notes",
+        "internalOnly": "Internal only — never shown to the customer.",
+        "label": "Add a note",
+        "placeholder": "Write a note",
+        "add": "Add",
+        "empty": "No notes yet."
+      },
+      "cancelDialog": {
+        "title": "Cancel this booking?",
+        "body": "The owner will be notified and any temporary access this booking granted will be revoked.",
+        "reasonLabel": "Reason (optional)",
+        "reasonPlaceholder": "Why is this booking being cancelled?",
+        "confirm": "Yes, cancel booking"
+      },
+      "backToQueue": "Back to bookings",
+      "errors": {
+        "PROVIDER_ACCESS_DENIED": "You do not have access to this booking.",
+        "PROVIDER_NOT_VERIFIED": "Your organization must be verified before taking this action.",
+        "BOOKING_NOT_FOUND": "Booking not found.",
+        "INVALID_BOOKING_TRANSITION": "This booking cannot move to that state right now.",
+        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled."
+      }
+    },
+    "schedule": {
+      "title": "Schedule",
+      "retry": "Retry",
+      "loading": "Loading",
+      "empty": "Nothing scheduled.",
+      "tab": {
+        "today": "Today",
+        "agenda": "Agenda",
+        "week": "Week"
+      }
+    },
+    "availability": {
+      "title": "Availability",
+      "retry": "Retry",
+      "loading": "Loading",
+      "day": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      },
+      "rules": {
+        "title": "Weekly schedule",
+        "empty": "No recurring availability set yet.",
+        "delete": "Remove",
+        "locationId": "Location ID",
+        "dayOfWeek": "Day",
+        "startLocalTime": "Start time",
+        "endLocalTime": "End time",
+        "timezone": "Timezone",
+        "add": "Add",
+        "locationRequired": "A location is required.",
+        "createFailed": "Couldn't create the rule."
+      },
+      "exceptions": {
+        "title": "Time off & extra availability",
+        "empty": "No exceptions set.",
+        "delete": "Remove",
+        "startAt": "Starts",
+        "endAt": "Ends",
+        "typeLabel": "Type",
+        "type": {
+          "BLOCKED": "Blocked",
+          "AVAILABLE_OVERRIDE": "Extra availability"
+        },
+        "reason": "Reason (optional)",
+        "add": "Add",
+        "fieldsRequired": "Location, start, and end are required.",
+        "createFailed": "Couldn't create the exception.",
+        "conflictWarning": "{count} confirmed bookings exist in this period. Blocking it will not cancel or move them.",
+        "conflictCancel": "Cancel",
+        "conflictProceed": "Block anyway"
+      }
+    },
+    "services": {
+      "title": "Services",
+      "retry": "Retry",
+      "loading": "Loading",
+      "empty": "No services yet.",
+      "active": "Active",
+      "inactive": "Disabled",
+      "minutes": "min",
+      "name": "Name",
+      "priceAmount": "Price",
+      "durationMinutes": "Duration (minutes)",
+      "cancel": "Cancel",
+      "save": "Save",
+      "edit": "Edit",
+      "disable": "Disable",
+      "enable": "Enable",
+      "saveFailed": "Couldn't save changes.",
+      "ownerOnly": "Only an organization owner can change services."
+    },
+    "team": {
+      "title": "Team",
+      "retry": "Retry",
+      "loading": "Loading",
+      "empty": "No team members yet.",
+      "role": {
+        "OWNER": "Owner",
+        "VET": "Vet",
+        "STAFF": "Staff"
+      }
     }
   }
 }

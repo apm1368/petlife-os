@@ -314,6 +314,25 @@ async function main() {
     `Seeded provider: clinic=${clinic.id} location=${clinicLocation.id} vet=${drSara.id} generalVisitService=${generalVisit.id}`,
   );
 
+  // Handoff 05: a second ProviderUser on the same organization — front-desk
+  // staff with no availability rules of their own (they don't personally
+  // perform bookable services) — gives the Provider OS's team view a real
+  // multi-person roster and a STAFF-vs-VET role contrast to test against.
+  const receptionUser = await prisma.user.upsert({
+    where: { email: "reception@example.com" },
+    update: {},
+    create: { email: "reception@example.com", displayName: "Reception Staff", locale: "en" },
+  });
+  const receptionStaff = await prisma.providerUser.create({
+    data: {
+      userId: receptionUser.id,
+      providerOrganizationId: clinic.id,
+      role: ProviderUserRole.STAFF,
+      displayTitle: "Front Desk",
+    },
+  });
+  console.log(`Seeded provider team member: clinic=${clinic.id} reception=${receptionStaff.id}`);
+
   // Handoff 04: one verified provider per remaining ServiceCategory.
   const groomer = await seedServiceProvider({
     orgName: "Happy Paws Grooming",

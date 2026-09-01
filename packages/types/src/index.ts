@@ -469,9 +469,10 @@ export enum ProviderServiceType {
 /**
  * HOLD/PENDING_CONFIRMATION are part of the vocabulary but never the status
  * of a persisted Booking in this phase — see BookingHoldService and the
- * README. CHECKED_IN/IN_PROGRESS/COMPLETED/NO_SHOW/CANCELLED_BY_PROVIDER
- * exist for architecture completeness; no endpoint transitions a booking to
- * them yet.
+ * README. CHECKED_IN/IN_PROGRESS/COMPLETED/CANCELLED_BY_PROVIDER are now
+ * reachable via the Provider OS (Handoff 05) — see ProviderBookingsService's
+ * check-in/start/complete/cancel transitions. NO_SHOW remains part of the
+ * vocabulary for architecture completeness only; no endpoint reaches it yet.
  */
 export enum BookingStatus {
   HOLD = "HOLD",
@@ -740,6 +741,11 @@ export interface BookingDto {
   ownerNotes: string | null;
   cancelledAt: string | null;
   cancelledReason: string | null;
+  /** Handoff 05: set only by the Provider OS's POST .../complete transition. */
+  completedAt: string | null;
+  completedByProviderUserId: string | null;
+  /** The deliberately small owner-visible summary (e.g. "Luna's grooming was completed.") — distinct from internal-only provider notes. */
+  completionNote: string | null;
   createdAt: string;
   updatedAt: string;
   provider: ProviderSummaryDto | null;
@@ -763,4 +769,152 @@ export interface CareCalendarEventDto {
   titleKey: string;
   actionType: string | null;
   bookingId: string;
+}
+
+// ---------------------------------------------------------------------------
+// Minimal Provider OS (Handoff 05)
+// ---------------------------------------------------------------------------
+
+/** BLOCKED closes an otherwise-available window (holiday, time off); AVAILABLE_OVERRIDE opens one the recurring rules don't cover. */
+export enum AvailabilityExceptionType {
+  BLOCKED = "BLOCKED",
+  AVAILABLE_OVERRIDE = "AVAILABLE_OVERRIDE",
+}
+
+/** One row of `ProviderContextDto.memberships` — a user's membership in one provider organization. */
+export interface ProviderMembershipSummaryDto {
+  providerUserId: string;
+  providerOrganizationId: string;
+  organizationName: string;
+  organizationType: ProviderType;
+  verificationStatus: ProviderVerificationStatus;
+  role: ProviderUserRole;
+}
+
+/**
+ * `active` is null when the user has no provider membership at all, or has
+ * more than one and has never explicitly chosen one (spec section 3: "do not
+ * infer organization implicitly when multiple exist") — the Provider Shell
+ * renders an organization picker in that case rather than guessing.
+ */
+export interface ProviderContextDto {
+  active: ProviderMembershipSummaryDto | null;
+  memberships: ProviderMembershipSummaryDto[];
+}
+
+export interface ProviderAvailabilityRuleDto {
+  id: string;
+  providerOrganizationId: string;
+  locationId: string;
+  providerUserId: string | null;
+  serviceId: string | null;
+  dayOfWeek: number;
+  startLocalTime: string;
+  endLocalTime: string;
+  effectiveFrom: string | null;
+  effectiveUntil: string | null;
+  timezone: string;
+}
+
+export interface ProviderAvailabilityExceptionDto {
+  id: string;
+  providerOrganizationId: string;
+  locationId: string;
+  providerUserId: string | null;
+  startAt: string;
+  endAt: string;
+  type: AvailabilityExceptionType;
+  reason: string | null;
+}
+
+/** A compact booking-queue row (spec section 11) — never the full customer account profile. */
+export interface ProviderBookingSummaryDto {
+  id: string;
+  petId: string;
+  petName: string;
+  petSpecies: PetSpecies;
+  ownerDisplayName: string;
+  category: ServiceCategory;
+  serviceName: string;
+  startAt: string;
+  endAt: string;
+  timezone: string;
+  locationLabel: string;
+  bookingStatus: BookingStatus;
+  paymentStatus: PaymentStatus;
+  providerUserId: string | null;
+}
+
+/**
+ * What the current provider user is actually permitted to see about this
+ * booking's pet, resolved from the booking-linked PetAccessGrant (never a
+ * different one) — "no invisible provider access" (spec section 14). state
+ * is always one of these four explicit values; the frontend renders each
+ * distinctly rather than a single boolean "hasAccess" that hides why.
+ */
+export interface ProviderPetAccessContextDto {
+  state: "GRANTED" | "NO_GRANT" | "EXPIRED" | "REVOKED";
+  scopePreset: PetAccessScopePreset | null;
+  reason: string | null;
+  startsAt: string | null;
+  expiresAt: string | null;
+  canViewCareProfile: boolean;
+  canViewHealth: boolean;
+}
+
+export interface ProviderBookingDetailDto {
+  booking: ProviderBookingSummaryDto & {
+    reasonForVisit: string | null;
+    ownerNotes: string | null;
+    cancelledAt: string | null;
+    cancelledReason: string | null;
+    completedAt: string | null;
+    completedByProviderUserId: string | null;
+    completionNote: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  pet: { id: string; name: string; species: PetSpecies; breed: string | null; photoUrl: string | null };
+  access: ProviderPetAccessContextDto;
+  careProfile: CareProfileDto | null;
+  healthSummary: HealthSummaryDto | null;
+  providerNotes: BookingProviderNoteDto[];
+}
+
+/** Internal-only — never sent to the customer. See Booking.completionNote for the small owner-visible counterpart. */
+export interface BookingProviderNoteDto {
+  id: string;
+  bookingId: string;
+  providerUserId: string | null;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Every ProviderUser row is implicitly active — no deactivation flow exists yet, so status is always this literal. */
+export interface ProviderTeamMemberDto {
+  providerUserId: string;
+  displayName: string;
+  role: ProviderUserRole;
+  displayTitle: string | null;
+  status: "ACTIVE";
+  createdAt: string;
+}
+
+/** "What needs my attention today?" (spec section 5) — deliberately no vanity analytics. */
+export interface ProviderOverviewDto {
+  organization: { id: string; name: string; verificationStatus: ProviderVerificationStatus };
+  /** The organization's first-created location — shown in the Provider Shell header (spec section 6). Orgs with more than one location this phase just show this one; picking a specific location per screen is deferred to the Availability/Schedule views themselves. */
+  location: ProviderLocationDto | null;
+  providerUser: { id: string; role: ProviderUserRole; displayTitle: string | null };
+  todaysBookings: ProviderBookingSummaryDto[];
+  nextBooking: ProviderBookingSummaryDto | null;
+  pendingConfirmationCount: number;
+  cancellationsRequiringAttentionCount: number;
+  availabilityIssueCount: number;
+  actionCounts: {
+    today: number;
+    upcoming: number;
+    pendingConfirmation: number;
+  };
 }

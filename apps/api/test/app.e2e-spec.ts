@@ -9,6 +9,8 @@ import {
   ProviderUserRole,
   ServiceCategory,
   LocationMode,
+  AvailabilityExceptionType,
+  BookingStatus,
 } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
@@ -67,6 +69,8 @@ function authedRequest(app: INestApplication, cookies: Cookies) {
       request(app.getHttpServer()).patch(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
     put: (url: string) =>
       request(app.getHttpServer()).put(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
+    delete: (url: string) =>
+      request(app.getHttpServer()).delete(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
   };
 }
 
@@ -1461,6 +1465,342 @@ describe("PET LIFE OS critical paths (e2e)", () => {
         .send({ holdId: customerHold2.body.holdId, petId, customerAddressId: address.body.id })
         .expect(201);
       expect(withAddress.body.customerAddress.id).toBe(address.body.id);
+    });
+  });
+
+  describe("Minimal Provider OS (Handoff 05)", () => {
+    async function setupOwnerWithPet() {
+      const identifier = `provideros-owner-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const pet = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Rex", species: "DOG", approximateAgeMonths: 24 })
+        .expect(201);
+      return { client, householdId: household.body.id, petId: pet.body.id };
+    }
+
+    /** A verified GROOMING organization with a single ProviderUser (STAFF by default), open availability every day 00:00-23:30 UTC. */
+    async function seedProviderOrg(opts: { verified?: boolean; role?: ProviderUserRole } = {}) {
+      const staffUser = await prisma.user.create({ data: { email: `provider-staff-${unique()}@example.com`, displayName: "Groomer Staff" } });
+      const organization = await prisma.providerOrganization.create({
+        data: { name: `Provider Org ${unique()}`, type: ProviderType.GROOMER, verificationStatus: opts.verified === false ? ProviderVerificationStatus.SUBMITTED : ProviderVerificationStatus.VERIFIED },
+      });
+      const location = await prisma.providerLocation.create({
+        data: { providerOrganizationId: organization.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US", timezone: "UTC" },
+      });
+      const providerUser = await prisma.providerUser.create({
+        data: { userId: staffUser.id, providerOrganizationId: organization.id, role: opts.role ?? ProviderUserRole.STAFF },
+      });
+      const service = await prisma.providerService.create({
+        data: {
+          providerOrganizationId: organization.id,
+          locationId: location.id,
+          name: "Full Groom",
+          type: ProviderServiceType.GROOMING_SESSION,
+          category: ServiceCategory.GROOMING,
+          locationMode: LocationMode.AT_PROVIDER,
+          durationMinutes: 60,
+        },
+      });
+      await prisma.providerAvailabilityRule.createMany({
+        data: Array.from({ length: 7 }, (_, dayOfWeek) => ({
+          providerOrganizationId: organization.id,
+          locationId: location.id,
+          providerUserId: providerUser.id,
+          dayOfWeek,
+          startLocalTime: "00:00",
+          endLocalTime: "23:30",
+          timezone: "UTC",
+        })),
+      });
+      return { staffUser, organization, location, providerUser, service };
+    }
+
+    async function firstAvailableServiceSlot(client: ReturnType<typeof authedRequest>, serviceId: string) {
+      const from = new Date().toISOString();
+      const to = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+      const res = await client.get(`/provider-services/${serviceId}/availability?from=${from}&to=${to}`).expect(200);
+      const slot = res.body.slots.find((s: { state: string }) => s.state === "AVAILABLE");
+      if (!slot) throw new Error("No available slot found in fixture window");
+      return slot;
+    }
+
+    async function confirmedBooking(owner: ReturnType<typeof authedRequest>, petId: string, org: Awaited<ReturnType<typeof seedProviderOrg>>) {
+      const slot = await firstAvailableServiceSlot(owner, org.service.id);
+      const hold = await owner
+        .post("/booking-holds")
+        .send({ petId, providerId: org.organization.id, locationId: org.location.id, serviceId: org.service.id, providerUserId: org.providerUser.id, slotStart: slot.startAt })
+        .expect(201);
+      const booking = await owner.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+      return booking.body;
+    }
+
+    it("denies Provider OS access to a user with no ProviderUser membership", async () => {
+      const client = authedRequest(app, await signUp(app, logSpy, `not-a-provider-${unique()}@example.com`));
+      const res = await client.get("/provider/me/overview").expect(403);
+      expect(res.body.error.code).toBe("PROVIDER_ACCESS_DENIED");
+    });
+
+    it("denies a provider from Organization A access to Organization B's booking", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const orgA = await seedProviderOrg();
+      const orgB = await seedProviderOrg();
+      const booking = await confirmedBooking(owner, petId, orgA);
+
+      const providerA = authedRequest(app, await signUp(app, logSpy, orgA.staffUser.email!));
+      const providerB = authedRequest(app, await signUp(app, logSpy, orgB.staffUser.email!));
+
+      await providerA.get(`/provider/bookings/${booking.id}`).expect(200);
+      const denied = await providerB.get(`/provider/bookings/${booking.id}`).expect(403);
+      expect(denied.body.error.code).toBe("PROVIDER_ACCESS_DENIED");
+    });
+
+    it("shows a provider only their own organization's bookings in the queue", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const orgA = await seedProviderOrg();
+      const orgB = await seedProviderOrg();
+      const bookingA = await confirmedBooking(owner, petId, orgA);
+      await confirmedBooking(owner, petId, orgB);
+
+      const providerA = authedRequest(app, await signUp(app, logSpy, orgA.staffUser.email!));
+      const list = await providerA.get("/provider/bookings").expect(200);
+      const ids = list.body.map((b: { id: string }) => b.id);
+      expect(ids).toContain(bookingA.id);
+      expect(ids).toHaveLength(1);
+    });
+
+    it("shows Care context but hides Health context when the booking's grant never included it, and never queries health data at all", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const org = await seedProviderOrg();
+      const booking = await confirmedBooking(owner, petId, org);
+
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+      const detail = await provider.get(`/provider/bookings/${booking.id}`).expect(200);
+      expect(detail.body.access.state).toBe("GRANTED");
+      expect(detail.body.access.canViewCareProfile).toBe(true);
+      expect(detail.body.access.canViewHealth).toBe(false);
+      expect(detail.body.careProfile).not.toBeNull();
+      expect(detail.body.healthSummary).toBeNull();
+    });
+
+    it("shows a clear NO_GRANT state when the viewing provider user was never assigned to the booking", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const org = await seedProviderOrg();
+      // Replace the staff-linked availability rule with an org-wide one (no providerUserId) so
+      // the slot generator — and therefore BookingsService.createHold — never assigns a staff
+      // member, and grantForBooking's early-return ("no specific provider staff assigned yet")
+      // means no PetAccessGrant is created at all for this booking.
+      await prisma.providerAvailabilityRule.deleteMany({ where: { providerOrganizationId: org.organization.id } });
+      await prisma.providerAvailabilityRule.createMany({
+        data: Array.from({ length: 7 }, (_, dayOfWeek) => ({
+          providerOrganizationId: org.organization.id,
+          locationId: org.location.id,
+          dayOfWeek,
+          startLocalTime: "00:00",
+          endLocalTime: "23:30",
+          timezone: "UTC",
+        })),
+      });
+
+      const slot = await firstAvailableServiceSlot(owner, org.service.id);
+      const hold = await owner
+        .post("/booking-holds")
+        .send({ petId, providerId: org.organization.id, locationId: org.location.id, serviceId: org.service.id, slotStart: slot.startAt })
+        .expect(201);
+      const booking = await owner.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+      expect(booking.body.providerUserId).toBeNull();
+
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+      const detail = await provider.get(`/provider/bookings/${booking.body.id}`).expect(200);
+      expect(detail.body.access.state).toBe("NO_GRANT");
+      expect(detail.body.careProfile).toBeNull();
+      expect(detail.body.healthSummary).toBeNull();
+    });
+
+    it("confirms a booking idempotently (CONFIRMED -> CONFIRMED) and rejects confirming a cancelled booking", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const org = await seedProviderOrg();
+      const booking = await confirmedBooking(owner, petId, org);
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+
+      const confirmed = await provider.post(`/provider/bookings/${booking.id}/confirm`).send({}).expect(201);
+      expect(confirmed.body.booking.bookingStatus).toBe("CONFIRMED");
+
+      await owner.post(`/bookings/${booking.id}/cancel`).send({}).expect(201);
+      const rejected = await provider.post(`/provider/bookings/${booking.id}/confirm`).send({}).expect(400);
+      expect(rejected.body.error.code).toBe("INVALID_BOOKING_TRANSITION");
+    });
+
+    it("cancels a booking, revokes its temporary grant, and updates Care Calendar and Home", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      await owner.patch(`/pets/${petId}/health/profile`).send({ allergiesOverallState: "NONE_KNOWN", conditionsOverallState: "NONE_KNOWN", medicationsOverallState: "NONE_KNOWN" });
+      await owner.put(`/pets/${petId}/health/vaccination-summary`).send({ status: "UP_TO_DATE" });
+      const org = await seedProviderOrg();
+      const booking = await confirmedBooking(owner, petId, org);
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+
+      await provider.get(`/pets/${petId}/care-profile`).expect(200);
+      const homeBefore = await owner.get("/home").expect(200);
+      expect(homeBefore.body.primaryAction.href).toBe(`/bookings/${booking.id}`);
+
+      const cancelled = await provider.post(`/provider/bookings/${booking.id}/cancel`).send({ reason: "Staff unavailable" }).expect(201);
+      expect(cancelled.body.booking.bookingStatus).toBe("CANCELLED_BY_PROVIDER");
+
+      const bookingRow = await prisma.booking.findUnique({ where: { id: booking.id } });
+      expect(bookingRow?.bookingStatus).toBe(BookingStatus.CANCELLED_BY_PROVIDER);
+
+      await provider.get(`/pets/${petId}/care-profile`).expect(403);
+
+      const calendar = await owner.get(`/care-calendar?petId=${petId}`).expect(200);
+      expect(calendar.body.find((e: { bookingId: string }) => e.bookingId === booking.id)).toBeUndefined();
+
+      const homeAfter = await owner.get("/home").expect(200);
+      expect(homeAfter.body.primaryAction.href).not.toBe(`/bookings/${booking.id}`);
+    });
+
+    it("walks a booking through check-in -> start -> complete, rejecting a skipped transition", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const org = await seedProviderOrg();
+      const booking = await confirmedBooking(owner, petId, org);
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+
+      const skipped = await provider.post(`/provider/bookings/${booking.id}/start`).send({}).expect(400);
+      expect(skipped.body.error.code).toBe("INVALID_BOOKING_TRANSITION");
+
+      const checkedIn = await provider.post(`/provider/bookings/${booking.id}/check-in`).send({}).expect(201);
+      expect(checkedIn.body.booking.bookingStatus).toBe("CHECKED_IN");
+
+      const started = await provider.post(`/provider/bookings/${booking.id}/start`).send({}).expect(201);
+      expect(started.body.booking.bookingStatus).toBe("IN_PROGRESS");
+
+      const completed = await provider
+        .post(`/provider/bookings/${booking.id}/complete`)
+        .send({ completionNote: "Rex's grooming was completed." })
+        .expect(201);
+      expect(completed.body.booking.bookingStatus).toBe("COMPLETED");
+      expect(completed.body.booking.completionNote).toBe("Rex's grooming was completed.");
+      expect(completed.body.booking.completedByProviderUserId).toBe(org.providerUser.id);
+
+      const ownerView = await owner.get(`/bookings/${booking.id}`).expect(200);
+      expect(ownerView.body.completionNote).toBe("Rex's grooming was completed.");
+
+      const stillCompleted = await provider.post(`/provider/bookings/${booking.id}/check-in`).send({}).expect(400);
+      expect(stillCompleted.body.error.code).toBe("INVALID_BOOKING_TRANSITION");
+    });
+
+    it("creates, updates, and deletes an availability rule", async () => {
+      const org = await seedProviderOrg();
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+
+      const created = await provider
+        .post("/provider/availability/rules")
+        .send({ locationId: org.location.id, dayOfWeek: 1, startLocalTime: "09:00", endLocalTime: "17:00", timezone: "UTC" })
+        .expect(201);
+      expect(created.body.dayOfWeek).toBe(1);
+
+      const updated = await provider.patch(`/provider/availability/rules/${created.body.id}`).send({ endLocalTime: "18:00" }).expect(200);
+      expect(updated.body.endLocalTime).toBe("18:00");
+
+      await provider.delete(`/provider/availability/rules/${created.body.id}`).expect(200);
+      const list = await provider.get("/provider/availability/rules").expect(200);
+      expect(list.body.map((r: { id: string }) => r.id)).not.toContain(created.body.id);
+    });
+
+    it("requires explicit acknowledgement before a blocked exception overlapping a confirmed booking is created, and never touches the booking itself", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const org = await seedProviderOrg();
+      const booking = await confirmedBooking(owner, petId, org);
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+
+      const conflict = await provider
+        .post("/provider/availability/exceptions")
+        .send({ locationId: org.location.id, startAt: booking.startAt, endAt: booking.endAt, type: AvailabilityExceptionType.BLOCKED, reason: "Closed" })
+        .expect(409);
+      expect(conflict.body.error.code).toBe("AVAILABILITY_CONFLICT");
+
+      const bookingUnchanged = await prisma.booking.findUnique({ where: { id: booking.id } });
+      expect(bookingUnchanged?.bookingStatus).toBe("CONFIRMED");
+
+      const acknowledged = await provider
+        .post("/provider/availability/exceptions")
+        .send({ locationId: org.location.id, startAt: booking.startAt, endAt: booking.endAt, type: AvailabilityExceptionType.BLOCKED, reason: "Closed", acknowledgeConflict: true })
+        .expect(201);
+      expect(acknowledged.body.type).toBe("BLOCKED");
+
+      const bookingStillConfirmed = await prisma.booking.findUnique({ where: { id: booking.id } });
+      expect(bookingStillConfirmed?.bookingStatus).toBe("CONFIRMED");
+    });
+
+    it("disabling a service blocks new bookings but leaves existing confirmed bookings untouched, and is OWNER-only", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const org = await seedProviderOrg({ role: ProviderUserRole.OWNER });
+      const booking = await confirmedBooking(owner, petId, org);
+      const provider = authedRequest(app, await signUp(app, logSpy, org.staffUser.email!));
+
+      const staffUser = await prisma.user.create({ data: { email: `other-staff-${unique()}@example.com`, displayName: "Other Staff" } });
+      await prisma.providerUser.create({ data: { userId: staffUser.id, providerOrganizationId: org.organization.id, role: ProviderUserRole.STAFF } });
+      const staffProvider = authedRequest(app, await signUp(app, logSpy, staffUser.email!));
+      const staffDenied = await staffProvider.patch(`/provider/services/${org.service.id}`).send({ isActive: false }).expect(403);
+      expect(staffDenied.body.error.code).toBe("PROVIDER_ACCESS_DENIED");
+
+      await provider.patch(`/provider/services/${org.service.id}`).send({ isActive: false }).expect(200);
+
+      const stillThere = await prisma.booking.findUnique({ where: { id: booking.id } });
+      expect(stillThere?.bookingStatus).toBe("CONFIRMED");
+
+      const slot = await firstAvailableServiceSlot(owner, org.service.id);
+      const denied = await owner
+        .post("/booking-holds")
+        .send({ petId, providerId: org.organization.id, locationId: org.location.id, serviceId: org.service.id, slotStart: slot.startAt })
+        .expect(400);
+      expect(denied.body.error.code).toBe("SERVICE_NOT_AVAILABLE");
+    });
+
+    it("isolates the team roster per organization", async () => {
+      const orgA = await seedProviderOrg();
+      const orgB = await seedProviderOrg();
+      const providerA = authedRequest(app, await signUp(app, logSpy, orgA.staffUser.email!));
+
+      const team = await providerA.get("/provider/team").expect(200);
+      const ids = team.body.map((m: { providerUserId: string }) => m.providerUserId);
+      expect(ids).toContain(orgA.providerUser.id);
+      expect(ids).not.toContain(orgB.providerUser.id);
+    });
+
+    it("requires an explicit organization choice for a user with more than one provider membership, then honors it", async () => {
+      const orgA = await seedProviderOrg();
+      const orgB = await seedProviderOrg();
+      const multiUser = await prisma.user.create({ data: { email: `multi-provider-${unique()}@example.com`, displayName: "Multi Org Provider" } });
+      await prisma.providerUser.create({ data: { userId: multiUser.id, providerOrganizationId: orgA.organization.id, role: ProviderUserRole.STAFF } });
+      await prisma.providerUser.create({ data: { userId: multiUser.id, providerOrganizationId: orgB.organization.id, role: ProviderUserRole.STAFF } });
+
+      const client = authedRequest(app, await signUp(app, logSpy, multiUser.email!));
+      const ambiguous = await client.get("/provider/me/overview").expect(403);
+      expect(ambiguous.body.error.code).toBe("PROVIDER_ACCESS_DENIED");
+      expect(ambiguous.body.error.details.reason).toBe("AMBIGUOUS_CONTEXT");
+
+      const context = await client.get("/provider/me/context").expect(200);
+      expect(context.body.active).toBeNull();
+      expect(context.body.memberships).toHaveLength(2);
+
+      await client.put("/provider/me/context").send({ providerOrganizationId: orgA.organization.id }).expect(200);
+      const overview = await client.get("/provider/me/overview").expect(200);
+      expect(overview.body.organization.id).toBe(orgA.organization.id);
+    });
+
+    it("returns the same canonical ISO timestamps regardless of the viewing provider's locale (fa vs en)", async () => {
+      const { client: owner, petId } = await setupOwnerWithPet();
+      const org = await seedProviderOrg();
+      const booking = await confirmedBooking(owner, petId, org);
+
+      const faProviderEmail = org.staffUser.email!;
+      const faClient = authedRequest(app, await signUp(app, logSpy, faProviderEmail));
+      await prisma.user.update({ where: { id: org.staffUser.id }, data: { locale: "fa" } });
+
+      const detail = await faClient.get(`/provider/bookings/${booking.id}`).expect(200);
+      expect(detail.body.booking.startAt).toBe(booking.startAt);
+      expect(new Date(detail.body.booking.startAt).toISOString()).toBe(detail.body.booking.startAt);
     });
   });
 });

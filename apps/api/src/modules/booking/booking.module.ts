@@ -11,5 +11,6 @@ import { BookingPetAccessService } from "./booking-pet-access.service";
   imports: [PetAccessModule, ProvidersModule, CareCalendarModule],
   controllers: [BookingsController],
   providers: [BookingsService, BookingHoldService, BookingPetAccessService],
+  exports: [BookingPetAccessService],
 })
 export class BookingModule {}

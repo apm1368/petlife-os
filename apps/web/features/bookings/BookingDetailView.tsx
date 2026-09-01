@@ -120,6 +120,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         <Row label={t("dateTime")} value={dateTimeValue} />
         {booking.reasonForVisit ? <Row label={t("reason")} value={booking.reasonForVisit} /> : null}
         {booking.cancelledReason ? <Row label={t("cancelledReason")} value={booking.cancelledReason} /> : null}
+        {booking.completionNote ? <Row label={t("completionNote")} value={booking.completionNote} /> : null}
       </ContextSurface>
 
       {booking.petAccess ? (

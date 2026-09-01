@@ -113,6 +113,14 @@ export class CareCalendarService {
     });
   }
 
+  /** Provider OS's POST .../complete transition (Handoff 05) — same updateMany shape as markCancelled. */
+  async markCompleted(bookingId: string, tx: Prisma.TransactionClient): Promise<void> {
+    await tx.careCalendarEvent.updateMany({
+      where: { sourceId: bookingId },
+      data: { status: CareCalendarEventStatus.COMPLETED },
+    });
+  }
+
   async listUpcoming(householdIds: string[], petId?: string): Promise<CareCalendarEventDto[]> {
     const events = await this.prisma.careCalendarEvent.findMany({
       where: {

@@ -412,6 +412,7 @@ model User {
   providerProfiles     ProviderUser[]
   bookings             Booking[]
   bookingSeries        BookingSeries[]
+  providerContext      ProviderContextPreference?
 
   @@map("users")
 }
@@ -881,6 +882,7 @@ model ProviderOrganization {
   availabilityExceptions ProviderAvailabilityException[]
   bookings               Booking[]
   bookingSeries          BookingSeries[]
+  contextPreferences     ProviderContextPreference[]
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -934,6 +936,7 @@ model ProviderUser {
   availabilityRules      ProviderAvailabilityRule[]
   availabilityExceptions ProviderAvailabilityException[]
   bookings               Booking[]
+  bookingProviderNotes   BookingProviderNote[]
 
   @@index([providerOrganizationId])
   @@index([userId])
@@ -1185,10 +1188,23 @@ model Booking {
   cancelledAt     DateTime?
   cancelledReason String?
 
+  /// Handoff 05: set only by the Provider OS's POST .../complete transition
+  /// (IN_PROGRESS -> COMPLETED). `completedByProviderUserId` is a plain UUID
+  /// reference (no FK), the same audit-reference precedent as
+  /// PetAccessGrant.grantedByUserId — deleting a ProviderUser later must
+  /// never alter booking history. `completionNote` is the deliberately small
+  /// owner-visible summary (spec section 21, e.g. "Luna's grooming was
+  /// completed.") — distinct from the internal-only BookingProviderNote
+  /// rows below, which are never shown to the customer.
+  completedAt               DateTime?
+  completedByProviderUserId String?   @db.Uuid
+  completionNote            String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  petAccess BookingPetAccess?
+  petAccess     BookingPetAccess?
+  providerNotes BookingProviderNote[]
 
   @@index([petId])
   @@index([householdId])
@@ -1219,6 +1235,52 @@ model BookingPetAccess {
   createdAt DateTime @default(now())
 
   @@map("booking_pet_access")
+}
+
+/// Handoff 05 (Minimal Provider OS): which provider organization's
+/// operational context a user is currently working in — the Provider OS
+/// equivalent of ActivePetPreference. A user with exactly one ProviderUser
+/// membership never needs this set explicitly (ProviderContextService
+/// resolves it automatically); a user belonging to multiple organizations
+/// must pick one explicitly (spec section 3: "do not infer organization
+/// implicitly when multiple exist"). onDelete: Cascade on both sides mirrors
+/// ActivePetPreference exactly — this is a pure UI preference, not a
+/// factual business record.
+model ProviderContextPreference {
+  id                     String               @id @default(uuid()) @db.Uuid
+  userId                 String               @unique @db.Uuid
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("provider_context_preferences")
+}
+
+/// A lightweight, provider-internal note attached to a Booking (spec section
+/// 20) — never shown to the customer. The deliberately small owner-visible
+/// counterpart is `Booking.completionNote` (spec section 21), kept as a
+/// plain field rather than a second note model since it is always at most
+/// one short string per booking. onDelete: Restrict on bookingId mirrors the
+/// FK policy for every booking-history child record; SetNull on
+/// providerUserId so removing a provider user later never erases note
+/// history.
+model BookingProviderNote {
+  id             String        @id @default(uuid()) @db.Uuid
+  bookingId      String        @db.Uuid
+  booking        Booking       @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  providerUserId String?       @db.Uuid
+  providerUser   ProviderUser? @relation(fields: [providerUserId], references: [id], onDelete: SetNull)
+
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookingId])
+  @@map("booking_provider_notes")
 }
 
 /// A read/display projection over Booking (and, later, other source types).

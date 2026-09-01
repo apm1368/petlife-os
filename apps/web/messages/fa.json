@@ -396,6 +396,7 @@
     "dateTime": "تاریخ و ساعت",
     "reason": "یادداشت",
     "cancelledReason": "دلیل لغو",
+    "completionNote": "یادداشت پایان کار",
     "cancel": "لغو نوبت",
     "status": {
       "HOLD": "رزرو موقت",
@@ -626,6 +627,215 @@
       "SCHEDULED": "برنامه‌ریزی‌شده",
       "CANCELLED": "لغوشده",
       "COMPLETED": "انجام‌شده"
+    }
+  },
+  "provider": {
+    "shell": {
+      "nav": {
+        "home": "خانه",
+        "bookings": "رزروها",
+        "schedule": "برنامه",
+        "availability": "زمان‌های در دسترس",
+        "services": "خدمات",
+        "team": "تیم"
+      },
+      "notAProvider": {
+        "title": "دسترسی ارائه‌دهنده ندارید",
+        "body": "حساب شما عضو هیچ سازمان ارائه‌دهنده‌ای نیست.",
+        "backToApp": "بازگشت به PET LIFE OS"
+      },
+      "chooseOrg": {
+        "title": "یک سازمان را انتخاب کنید",
+        "body": "شما عضو بیش از یک سازمان ارائه‌دهنده هستید. انتخاب کنید در کدام‌یک کار می‌کنید."
+      },
+      "headerRole": "{role}",
+      "role": {
+        "OWNER": "مالک",
+        "VET": "دامپزشک",
+        "STAFF": "کارمند"
+      },
+      "switchOrg": "تغییر سازمان",
+      "notVerifiedBanner": "این سازمان هنوز تأیید نشده است. برخی اقدامات محدود شده‌اند."
+    },
+    "home": {
+      "title": "خانه ارائه‌دهنده",
+      "retry": "تلاش دوباره",
+      "loading": "در حال بارگذاری",
+      "attention": {
+        "pendingConfirmation": "{count} در انتظار تأیید",
+        "cancellations": "{count} لغو اخیر",
+        "availabilityIssues": "{count} تداخل زمان‌بندی",
+        "allClear": "همه‌چیز مرتب است"
+      },
+      "nextBooking": "رزرو بعدی",
+      "today": "امروز ({count})",
+      "noBookingsToday": "امروز رزروی وجود ندارد."
+    },
+    "bookings": {
+      "title": "رزروها",
+      "retry": "تلاش دوباره",
+      "loading": "در حال بارگذاری",
+      "empty": "رزروی یافت نشد.",
+      "filter": {
+        "today": "امروز",
+        "upcoming": "پیش رو",
+        "past": "گذشته",
+        "cancelled": "لغوشده"
+      }
+    },
+    "bookingDetail": {
+      "title": "رزرو",
+      "pet": "حیوان خانگی",
+      "owner": "صاحب",
+      "service": "خدمت",
+      "location": "مکان",
+      "dateTime": "تاریخ و زمان",
+      "reason": "دلیل",
+      "cancelledReason": "دلیل لغو",
+      "completionNote": "یادداشت پایان کار",
+      "access": {
+        "title": "دسترسی به اطلاعات حیوان",
+        "state": {
+          "GRANTED": "دسترسی فعال است",
+          "NO_GRANT": "بدون دسترسی",
+          "EXPIRED": "دسترسی منقضی شده",
+          "REVOKED": "دسترسی لغو شده"
+        },
+        "scope": "محدوده",
+        "startsAt": "شروع",
+        "expiresAt": "انقضا"
+      },
+      "careProfile": {
+        "title": "زمینه مراقبتی",
+        "temperament": "خلق‌وخو",
+        "feeding": "روال تغذیه",
+        "specialInstructions": "دستورالعمل‌های ویژه"
+      },
+      "health": {
+        "title": "زمینه سلامت",
+        "allergyState": "آلرژی‌ها",
+        "vaccinationStatus": "واکسیناسیون"
+      },
+      "actions": {
+        "confirm": "تأیید",
+        "confirmed": "تأیید شد",
+        "checkIn": "پذیرش",
+        "start": "شروع",
+        "complete": "پایان",
+        "cancel": "لغو رزرو"
+      },
+      "completionNoteLabel": "یادداشت قابل مشاهده برای صاحب (اختیاری)",
+      "completionNotePlaceholder": "مثلاً «آرایش لونا انجام شد.»",
+      "notes": {
+        "title": "یادداشت‌های ارائه‌دهنده",
+        "internalOnly": "فقط داخلی — هرگز به مشتری نشان داده نمی‌شود.",
+        "label": "افزودن یادداشت",
+        "placeholder": "یادداشتی بنویسید",
+        "add": "افزودن",
+        "empty": "هنوز یادداشتی ثبت نشده است."
+      },
+      "cancelDialog": {
+        "title": "این رزرو لغو شود؟",
+        "body": "به صاحب اطلاع داده می‌شود و هر دسترسی موقتی که این رزرو ایجاد کرده لغو خواهد شد.",
+        "reasonLabel": "دلیل (اختیاری)",
+        "reasonPlaceholder": "چرا این رزرو لغو می‌شود؟",
+        "confirm": "بله، رزرو لغو شود"
+      },
+      "backToQueue": "بازگشت به رزروها",
+      "errors": {
+        "PROVIDER_ACCESS_DENIED": "شما به این رزرو دسترسی ندارید.",
+        "PROVIDER_NOT_VERIFIED": "سازمان شما باید پیش از این اقدام تأیید شود.",
+        "BOOKING_NOT_FOUND": "رزرو یافت نشد.",
+        "INVALID_BOOKING_TRANSITION": "این رزرو در حال حاضر نمی‌تواند به آن وضعیت برود.",
+        "BOOKING_NOT_CANCELLABLE": "این رزرو دیگر قابل لغو نیست."
+      }
+    },
+    "schedule": {
+      "title": "برنامه",
+      "retry": "تلاش دوباره",
+      "loading": "در حال بارگذاری",
+      "empty": "چیزی برنامه‌ریزی نشده است.",
+      "tab": {
+        "today": "امروز",
+        "agenda": "برنامه روز",
+        "week": "هفته"
+      }
+    },
+    "availability": {
+      "title": "زمان‌های در دسترس",
+      "retry": "تلاش دوباره",
+      "loading": "در حال بارگذاری",
+      "day": {
+        "sun": "یکشنبه",
+        "mon": "دوشنبه",
+        "tue": "سه‌شنبه",
+        "wed": "چهارشنبه",
+        "thu": "پنجشنبه",
+        "fri": "جمعه",
+        "sat": "شنبه"
+      },
+      "rules": {
+        "title": "برنامه هفتگی",
+        "empty": "هنوز زمان تکرارشونده‌ای تنظیم نشده است.",
+        "delete": "حذف",
+        "locationId": "شناسه مکان",
+        "dayOfWeek": "روز",
+        "startLocalTime": "زمان شروع",
+        "endLocalTime": "زمان پایان",
+        "timezone": "منطقه زمانی",
+        "add": "افزودن",
+        "locationRequired": "مکان الزامی است.",
+        "createFailed": "ایجاد قانون ممکن نشد."
+      },
+      "exceptions": {
+        "title": "مرخصی و زمان‌های اضافه",
+        "empty": "استثنایی تنظیم نشده است.",
+        "delete": "حذف",
+        "startAt": "شروع",
+        "endAt": "پایان",
+        "typeLabel": "نوع",
+        "type": {
+          "BLOCKED": "مسدود",
+          "AVAILABLE_OVERRIDE": "زمان اضافه"
+        },
+        "reason": "دلیل (اختیاری)",
+        "add": "افزودن",
+        "fieldsRequired": "مکان، شروع و پایان الزامی است.",
+        "createFailed": "ایجاد استثنا ممکن نشد.",
+        "conflictWarning": "{count} رزرو تأییدشده در این بازه وجود دارد. مسدود کردن آن‌ها را لغو یا جابه‌جا نمی‌کند.",
+        "conflictCancel": "انصراف",
+        "conflictProceed": "با این حال مسدود شود"
+      }
+    },
+    "services": {
+      "title": "خدمات",
+      "retry": "تلاش دوباره",
+      "loading": "در حال بارگذاری",
+      "empty": "هنوز خدمتی وجود ندارد.",
+      "active": "فعال",
+      "inactive": "غیرفعال",
+      "minutes": "دقیقه",
+      "name": "نام",
+      "priceAmount": "قیمت",
+      "durationMinutes": "مدت (دقیقه)",
+      "cancel": "انصراف",
+      "save": "ذخیره",
+      "edit": "ویرایش",
+      "disable": "غیرفعال کردن",
+      "enable": "فعال کردن",
+      "saveFailed": "ذخیره تغییرات ممکن نشد.",
+      "ownerOnly": "فقط مالک سازمان می‌تواند خدمات را تغییر دهد."
+    },
+    "team": {
+      "title": "تیم",
+      "retry": "تلاش دوباره",
+      "loading": "در حال بارگذاری",
+      "empty": "هنوز عضوی در تیم نیست.",
+      "role": {
+        "OWNER": "مالک",
+        "VET": "دامپزشک",
+        "STAFF": "کارمند"
+      }
     }
   }
 }

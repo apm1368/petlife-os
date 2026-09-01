@@ -33,6 +33,20 @@ export const DOMAIN_EVENT_TYPES = [
   "ServiceAccessGranted",
   "ServiceAccessRevoked",
   "BookingSeriesCreated",
+  // Minimal Provider OS (Handoff 05)
+  "ProviderContextChanged",
+  "ProviderAvailabilityRuleCreated",
+  "ProviderAvailabilityRuleUpdated",
+  "ProviderAvailabilityRuleDeleted",
+  "ProviderAvailabilityExceptionCreated",
+  "ProviderAvailabilityExceptionUpdated",
+  "ProviderAvailabilityExceptionDeleted",
+  "ProviderBookingConfirmed",
+  "ProviderBookingCancelled",
+  "BookingCheckedIn",
+  "BookingStarted",
+  "BookingCompleted",
+  "ProviderServiceUpdated",
 ] as const;
 
 /**

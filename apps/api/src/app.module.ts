@@ -29,6 +29,7 @@ import { BookingModule } from "./modules/booking/booking.module";
 import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module";
 import { ServicesModule } from "./modules/services/services.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
+import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { AddressesModule } from "./modules/addresses/addresses.module";
     CareCalendarModule,
     ServicesModule,
     AddressesModule,
+    ProviderOsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
