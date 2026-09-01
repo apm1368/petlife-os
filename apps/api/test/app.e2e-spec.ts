@@ -16,10 +16,13 @@ import {
   CheckoutStatus,
   CartStatus,
   OrderStatus,
+  FinancingIntentStatus,
 } from "@prisma/client";
 import request from "supertest";
+import { createHmac } from "node:crypto";
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { DevPaymentGateway } from "../src/modules/commerce/payments/dev-payment-gateway.service";
 
 interface Cookies {
   session?: string;
@@ -102,6 +105,23 @@ describe("PET LIFE OS critical paths (e2e)", () => {
   });
 
   const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  /**
+   * Several webhook/reconcile-driven confirmations happen off an async,
+   * fire-and-forget domain-event listener (DomainEventsService.publish uses
+   * `emitter.emit`, not `emitAsync`) rather than inside the awaited HTTP
+   * request — polling the actual DB state is a robust wait for that, unlike
+   * a fixed setTimeout which can flake under full-suite system load.
+   */
+  async function pollUntil<T>(fn: () => Promise<T>, predicate: (value: T) => boolean, timeoutMs = 5000, intervalMs = 40): Promise<T> {
+    const deadline = Date.now() + timeoutMs;
+    let last: T = await fn();
+    while (!predicate(last) && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+      last = await fn();
+    }
+    return last;
+  }
 
   it("requests and verifies an OTP to establish a session", async () => {
     const identifier = `sarah-${unique()}@example.com`;
@@ -2289,6 +2309,356 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
       const cartAfter = await prisma.cart.findFirst({ where: { id: cartBefore!.id } });
       expect(cartAfter?.status).toBe(CartStatus.CONVERTED);
+    });
+  });
+
+  describe("Real Payments + BNPL + Refund Basics + Reconciliation (Handoff 07)", () => {
+    async function setupCheckoutReady(priceAmount = 1_000_000, onHand = 10) {
+      const identifier = `payments-owner-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+      const product = await prisma.product.create({
+        data: { categoryId: category.id, title: `Product ${unique()}`, slug: `product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] },
+      });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+      const seller = await prisma.sellerOrganization.create({
+        data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" },
+      });
+      const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount, currency: "IRR" } });
+      await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand } });
+      const addressRes = await client.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+      return { client, checkout: checkout.body as { id: string; totalAmount: number }, offer, seller };
+    }
+
+    it("lists only enabled payment methods, capability-driven, and never an unsupported provider", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const options = await client.get(`/checkout/${checkout.id}/payment-options`).expect(200);
+
+      const online = options.body.filter((o: { methodType: string }) => o.methodType === "ONLINE_PAYMENT").map((o: { provider: string }) => o.provider);
+      const installments = options.body.filter((o: { methodType: string }) => o.methodType === "INSTALLMENTS").map((o: { provider: string }) => o.provider);
+      expect(online.sort()).toEqual(["DEV_SIMULATED", "STANDARD_GATEWAY"].sort());
+      expect(installments.sort()).toEqual(["DIGI_PAY", "SNAPP_PAY"].sort());
+
+      const snapp = options.body.find((o: { provider: string }) => o.provider === "SNAPP_PAY");
+      expect(snapp.capabilities.supportsEligibilityCheck).toBe(true);
+      const digi = options.body.find((o: { provider: string }) => o.provider === "DIGI_PAY");
+      expect(digi.capabilities.supportsEligibilityCheck).toBe(false);
+    });
+
+    it("confirms a checkout paid through the STANDARD_GATEWAY provider, chosen via the adapter registry rather than hard-coded", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const intent = await client.post(`/checkout/${checkout.id}/payment-intent`).send({ provider: "STANDARD_GATEWAY" }).expect(201);
+      expect(intent.body.provider).toBe("STANDARD_GATEWAY");
+
+      const paid = await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      expect(paid.body.paymentStatus).toBe("SUCCEEDED");
+      expect(paid.body.checkout.status).toBe("CONFIRMED");
+    });
+
+    it("never confirms an order from the callback endpoint alone — it is a read-only UX signal", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({ provider: "STANDARD_GATEWAY" }).expect(201);
+      const pending = await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "PENDING" }).expect(201);
+      expect(pending.body.paymentStatus).toBe("PENDING");
+
+      const intent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId: checkout.id } });
+      const callback = await request(app.getHttpServer()).get(`/payments/callback/standard_gateway?paymentIntentId=${intent.id}`).expect(200);
+      expect(callback.body.status).toBe("PENDING");
+
+      const orders = await prisma.order.findMany({ where: { checkoutId: checkout.id } });
+      expect(orders).toHaveLength(0);
+      const checkoutRow = await prisma.checkout.findUnique({ where: { id: checkout.id } });
+      expect(checkoutRow?.status).toBe(CheckoutStatus.PAYMENT_PENDING);
+    });
+
+    it("acknowledges a duplicate webhook delivery without creating a second order, transaction, or ledger entry", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+      await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "PENDING" }).expect(201);
+      const intent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId: checkout.id } });
+      const eventId = `evt_${unique()}`;
+
+      const first = await request(app.getHttpServer())
+        .post("/payments/webhooks/dev_simulated")
+        .send({ paymentIntentId: intent.id, eventId, status: "SUCCEEDED" })
+        .expect(201);
+      expect(first.body.processed).toBe(true);
+      // resolvePendingIntent's own order-confirmation is driven by an
+      // async, fire-and-forget domain-event listener (PaymentEventsListener,
+      // same pattern as the Handoff 06 "resolves a pending intent" test) —
+      // poll for it to finish before asserting on Order/Ledger state.
+      await pollUntil(
+        () => prisma.order.findMany({ where: { checkoutId: checkout.id } }),
+        (orders) => orders.length > 0,
+      );
+
+      const second = await request(app.getHttpServer())
+        .post("/payments/webhooks/dev_simulated")
+        .send({ paymentIntentId: intent.id, eventId, status: "SUCCEEDED" })
+        .expect(201);
+      expect(second.body.duplicate).toBe(true);
+      expect(second.body.processed).toBe(false);
+
+      const orders = await prisma.order.findMany({ where: { checkoutId: checkout.id } });
+      expect(orders).toHaveLength(1);
+      const events = await pollUntil(
+        () => prisma.paymentProviderEvent.findMany({ where: { paymentIntentId: intent.id } }),
+        (rows) => (rows[0]?.attemptCount ?? 0) >= 1,
+      );
+      expect(events).toHaveLength(1);
+      // attemptCount defaults to 0 on creation; one duplicate delivery increments it once.
+      expect(events[0]?.attemptCount).toBe(1);
+      const ledgerTx = await prisma.ledgerTransaction.findMany({ where: { referenceType: "PAYMENT", referenceId: checkout.id } });
+      expect(ledgerTx).toHaveLength(1);
+    });
+
+    it("rejects an invalid webhook signature once a secret is configured, and accepts a correctly-signed one", async () => {
+      // StandardGatewayAdapter's `secret` field is fixed at construction
+      // from STANDARD_GATEWAY_API_KEY (mirroring how a real provider client
+      // is configured once at boot), so exercising this needs a fresh
+      // instance built with the env var already set — not a second live
+      // NestJS application sharing this test file's Postgres/Redis
+      // connections and event bus for the duration of one assertion. This
+      // still genuinely exercises the real HMAC verification mechanism
+      // (see the adapter's own doc comment), just without the unrelated
+      // cost/risk of standing up a whole second app mid-suite.
+      process.env.STANDARD_GATEWAY_API_KEY = "test-secret";
+      try {
+        const { StandardGatewayAdapter: FreshStandardGatewayAdapter } = await import("../src/modules/commerce/payments/standard-gateway.adapter");
+        const adapter = new FreshStandardGatewayAdapter();
+        const payload = { paymentIntentId: "intent-1", eventId: "evt-1", status: "SUCCEEDED" };
+
+        expect(adapter.verifyWebhookSignature(payload, "not-the-right-signature")).toBe(false);
+        expect(adapter.verifyWebhookSignature(payload, undefined)).toBe(false);
+
+        const correctSignature = createHmac("sha256", "test-secret").update(JSON.stringify(payload)).digest("hex");
+        expect(adapter.verifyWebhookSignature(payload, correctSignature)).toBe(true);
+      } finally {
+        delete process.env.STANDARD_GATEWAY_API_KEY;
+      }
+    });
+
+    it("walks a full BNPL flow to APPROVED, confirming Orders and recording balanced ledger entries", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const intentRes = await client.post(`/checkout/${checkout.id}/financing-intent`).send({ provider: "SNAPP_PAY" }).expect(201);
+      expect(intentRes.body.status).toBe("CREATED");
+
+      const eligibility = await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/eligibility`).send({}).expect(201);
+      expect(eligibility.body.status).toBe("ELIGIBLE");
+
+      const plans = await client.get(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/plans`).expect(200);
+      expect(plans.body.length).toBeGreaterThan(0);
+      expect(plans.body[0].totalPayableAmount).toBeGreaterThan(checkout.totalAmount);
+      expect(Number.isInteger(plans.body[0].totalPayableAmount)).toBe(true);
+
+      const selected = await client
+        .post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/select-plan`)
+        .send({ providerPlanId: plans.body[0].providerPlanId })
+        .expect(201);
+      expect(selected.body.status).toBe("PLAN_SELECTED");
+      expect(selected.body.selectedPlan.providerPlanId).toBe(plans.body[0].providerPlanId);
+
+      const authorized = await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/authorize`).send({ mode: "APPROVE" }).expect(201);
+      expect(authorized.body.paymentStatus).toBe("SUCCEEDED");
+      expect(authorized.body.orderIds).toHaveLength(1);
+      expect(authorized.body.checkout.status).toBe("CONFIRMED");
+
+      const financingRow = await prisma.financingIntent.findUniqueOrThrow({ where: { id: intentRes.body.id } });
+      expect(financingRow.status).toBe(FinancingIntentStatus.APPROVED);
+
+      const ledgerTx = await prisma.ledgerTransaction.findFirstOrThrow({ where: { referenceType: "PAYMENT", referenceId: checkout.id }, include: { entries: true } });
+      const debits = ledgerTx.entries.filter((e) => e.direction === "DEBIT").reduce((sum, e) => sum + e.amount, 0);
+      const credits = ledgerTx.entries.filter((e) => e.direction === "CREDIT").reduce((sum, e) => sum + e.amount, 0);
+      expect(debits).toBe(credits);
+      expect(debits).toBe(checkout.totalAmount);
+    });
+
+    it("declines an installment authorization without confirming Orders, leaving the checkout recoverable", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const intentRes = await client.post(`/checkout/${checkout.id}/financing-intent`).send({ provider: "SNAPP_PAY" }).expect(201);
+      const plans = await client.get(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/plans`).expect(200);
+      await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/select-plan`).send({ providerPlanId: plans.body[0].providerPlanId }).expect(201);
+
+      const declined = await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/authorize`).send({ mode: "DECLINE" }).expect(201);
+      expect(declined.body.paymentStatus).toBe("FAILED");
+      expect(declined.body.orderIds).toHaveLength(0);
+      expect(declined.body.checkout.status).not.toBe("CONFIRMED");
+
+      const financingRow = await prisma.financingIntent.findUniqueOrThrow({ where: { id: intentRes.body.id } });
+      expect(financingRow.status).toBe(FinancingIntentStatus.DECLINED);
+      const orders = await prisma.order.findMany({ where: { checkoutId: checkout.id } });
+      expect(orders).toHaveLength(0);
+    });
+
+    it("recovers a declined installment checkout by switching to online payment on the very same checkout", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const intentRes = await client.post(`/checkout/${checkout.id}/financing-intent`).send({ provider: "SNAPP_PAY" }).expect(201);
+      const plans = await client.get(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/plans`).expect(200);
+      await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/select-plan`).send({ providerPlanId: plans.body[0].providerPlanId }).expect(201);
+      await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/authorize`).send({ mode: "DECLINE" }).expect(201);
+
+      const paymentIntent = await client.post(`/checkout/${checkout.id}/payment-intent`).send({ provider: "DEV_SIMULATED" }).expect(201);
+      expect(paymentIntent.body.provider).toBe("DEV_SIMULATED");
+      const paid = await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      expect(paid.body.paymentStatus).toBe("SUCCEEDED");
+      expect(paid.body.orderIds).toHaveLength(1);
+    });
+
+    it("never fakes an eligibility check for a provider that doesn't support one", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const intentRes = await client.post(`/checkout/${checkout.id}/financing-intent`).send({ provider: "DIGI_PAY" }).expect(201);
+      const eligibility = await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/eligibility`).send({}).expect(201);
+      expect(eligibility.body.status).toBe("ELIGIBLE");
+    });
+
+    it("does not confirm an order while a financing authorization is pending, then confirms it once a webhook resolves it", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const intentRes = await client.post(`/checkout/${checkout.id}/financing-intent`).send({ provider: "DIGI_PAY" }).expect(201);
+      const plans = await client.get(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/plans`).expect(200);
+      await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/select-plan`).send({ providerPlanId: plans.body[0].providerPlanId }).expect(201);
+
+      const pending = await client.post(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/authorize`).send({ mode: "PENDING" }).expect(201);
+      expect(pending.body.paymentStatus).toBe("PENDING");
+      expect(await prisma.order.findMany({ where: { checkoutId: checkout.id } })).toHaveLength(0);
+
+      await request(app.getHttpServer())
+        .post("/payments/webhooks/digi_pay")
+        .send({ financingIntentId: intentRes.body.id, eventId: `evt_${unique()}`, status: "SUCCEEDED" })
+        .expect(201);
+
+      const orders = await pollUntil(
+        () => prisma.order.findMany({ where: { checkoutId: checkout.id } }),
+        (rows) => rows.length > 0,
+      );
+      const financingRow = await prisma.financingIntent.findUniqueOrThrow({ where: { id: intentRes.body.id } });
+      expect(financingRow.status).toBe(FinancingIntentStatus.APPROVED);
+      expect(orders).toHaveLength(1);
+    });
+
+    it("refunds a confirmed order in full, updating financial state with a balanced reversing ledger entry", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const orderId = paid.body.orderIds[0];
+
+      const refund = await client.post(`/orders/${orderId}/refunds`).send({ reason: "Changed my mind" }).expect(201);
+      expect(refund.body.status).toBe("SUCCEEDED");
+
+      const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+      expect(order.status).toBe(OrderStatus.REFUNDED);
+
+      const refundLedgerTx = await prisma.ledgerTransaction.findFirstOrThrow({ where: { referenceType: "REFUND", referenceId: refund.body.id }, include: { entries: true } });
+      const debits = refundLedgerTx.entries.filter((e) => e.direction === "DEBIT").reduce((sum, e) => sum + e.amount, 0);
+      const credits = refundLedgerTx.entries.filter((e) => e.direction === "CREDIT").reduce((sum, e) => sum + e.amount, 0);
+      expect(debits).toBe(credits);
+      expect(debits).toBe(checkout.totalAmount);
+    });
+
+    it("rejects a partial refund amount — only a full refund of the order total is supported this phase", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const orderId = paid.body.orderIds[0];
+
+      const rejected = await client.post(`/orders/${orderId}/refunds`).send({ amount: Math.floor(checkout.totalAmount / 2) }).expect(400);
+      expect(rejected.body.error.code).toBe("REFUND_NOT_SUPPORTED");
+    });
+
+    it("rejects refunding an order a second time", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const orderId = paid.body.orderIds[0];
+
+      await client.post(`/orders/${orderId}/refunds`).send({}).expect(201);
+      const secondAttempt = await client.post(`/orders/${orderId}/refunds`).send({}).expect(400);
+      expect(secondAttempt.body.error.code).toBe("REFUND_NOT_SUPPORTED");
+    });
+
+    it("reconciliation logs a NONE action and an audit row when local and remote already agree", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+      await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "PENDING" }).expect(201);
+      const intent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId: checkout.id } });
+
+      const reconcile = await client.post(`/payments/reconcile/${intent.id}`).send({}).expect(201);
+      expect(reconcile.body.action).toBe("NONE");
+      expect(reconcile.body.localStatus).toBe("PENDING");
+      expect(reconcile.body.remoteStatus).toBe("PENDING");
+      expect(await prisma.order.findMany({ where: { checkoutId: checkout.id } })).toHaveLength(0);
+
+      const log = await prisma.reconciliationLog.findFirst({ where: { referenceId: intent.id } });
+      expect(log).not.toBeNull();
+    });
+
+    it("reconciliation logs an explicit UNKNOWN_REMOTE_STATE when there is no provider reference yet", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const intentRes = await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+
+      const reconcile = await client.post(`/payments/reconcile/${intentRes.body.id}`).send({}).expect(201);
+      expect(reconcile.body.action).toBe("UNKNOWN_REMOTE_STATE");
+      expect(reconcile.body.remoteStatus).toBe("UNKNOWN");
+    });
+
+    it("resolves a local-pending/provider-resolved disagreement via reconciliation, confirming the order exactly once", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+      await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "PENDING" }).expect(201);
+      const intent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId: checkout.id } });
+      const attempt = await prisma.paymentAttempt.findFirstOrThrow({ where: { paymentIntentId: intent.id } });
+
+      // Simulate "the provider actually captured the charge, but its
+      // webhook never reached us" by advancing the sandbox gateway's own
+      // in-memory remote-state map directly, rather than adding a test-only
+      // backdoor API — DevPaymentGateway is a real singleton for the app's
+      // lifetime, exactly like a real gateway's own remote state would be.
+      const gateway = app.get(DevPaymentGateway);
+      (gateway as unknown as { statuses: Map<string, string> }).statuses.set(attempt.providerReference!, "SUCCEEDED");
+
+      const reconcile = await client.post(`/payments/reconcile/${intent.id}`).send({}).expect(201);
+      expect(reconcile.body.action).toBe("RESOLVED_SUCCEEDED");
+      // As above: resolvePendingIntent's order confirmation happens off an
+      // async fire-and-forget domain event, not before this response returns.
+      await pollUntil(
+        () => prisma.order.findMany({ where: { checkoutId: checkout.id } }),
+        (rows) => rows.length > 0,
+      );
+
+      const checkoutAfter = await prisma.checkout.findUnique({ where: { id: checkout.id } });
+      expect(checkoutAfter?.status).toBe(CheckoutStatus.CONFIRMED);
+      const orders = await prisma.order.findMany({ where: { checkoutId: checkout.id } });
+      expect(orders).toHaveLength(1);
+
+      // A second reconciliation check against the now-agreeing state must
+      // never duplicate the order it already confirmed.
+      await client.post(`/payments/reconcile/${intent.id}`).send({}).expect(201);
+      expect(await prisma.order.findMany({ where: { checkoutId: checkout.id } })).toHaveLength(1);
+    });
+
+    it("keeps every financing amount a plain integer, never a fractional IRR value", async () => {
+      const { client, checkout } = await setupCheckoutReady(123_456);
+      const intentRes = await client.post(`/checkout/${checkout.id}/financing-intent`).send({ provider: "SNAPP_PAY" }).expect(201);
+      const plans = await client.get(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}/plans`).expect(200);
+      for (const plan of plans.body) {
+        expect(Number.isInteger(plan.totalPayableAmount)).toBe(true);
+        if (plan.installmentAmount != null) expect(Number.isInteger(plan.installmentAmount)).toBe(true);
+        if (plan.feeAmount != null) expect(Number.isInteger(plan.feeAmount)).toBe(true);
+      }
+    });
+
+    it("denies a user from reading another user's financing intent or ops view (IDOR)", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      const stranger = authedRequest(app, await signUp(app, logSpy, `stranger-${unique()}@example.com`));
+      const intentRes = await client.post(`/checkout/${checkout.id}/financing-intent`).send({ provider: "SNAPP_PAY" }).expect(201);
+
+      const deniedIntent = await stranger.get(`/checkout/${checkout.id}/financing-intent/${intentRes.body.id}`).expect(404);
+      expect(deniedIntent.body.error.code).toBe("CHECKOUT_NOT_FOUND");
+
+      const deniedOps = await stranger.get(`/checkout/${checkout.id}/ops`).expect(404);
+      expect(deniedOps.body.error.code).toBe("CHECKOUT_NOT_FOUND");
     });
   });
 });

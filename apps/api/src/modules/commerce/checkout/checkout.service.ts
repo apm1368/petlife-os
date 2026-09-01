@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CartStatus, CheckoutStatus, DeliveryMethod, FinancingIntentStatus, PaymentMethodType, PaymentProvider, SellerOfferStatus } from "@prisma/client";
+import { CartStatus, CheckoutStatus, DeliveryMethod, FinancingIntentStatus, PaymentIntentStatus, PaymentMethodType, PaymentProvider, SellerOfferStatus } from "@prisma/client";
 import type {
   CartDto,
   CartLineDto,
@@ -204,12 +204,20 @@ export class CheckoutService {
       throw new ValidationApiException({ field: "status", reason: "An address is required before a payment intent can be created" });
     }
     if (checkout.paymentMethodType === PaymentMethodType.INSTALLMENTS) {
-      throw new ValidationApiException({ field: "paymentMethodType", reason: "This checkout already chose installments — create a financing intent instead" });
+      const activeFinancing = await this.financing.getLatestForCheckout(id);
+      const terminalFinancingFailures: FinancingIntentStatus[] = [FinancingIntentStatus.DECLINED, FinancingIntentStatus.CANCELLED, FinancingIntentStatus.EXPIRED];
+      const isTerminalFailure = activeFinancing && terminalFinancingFailures.includes(activeFinancing.status);
+      if (!isTerminalFailure) {
+        throw new ValidationApiException({ field: "paymentMethodType", reason: "This checkout has an active installment attempt — let it resolve before switching to online payment" });
+      }
     }
 
     // Choosing to pay online (spec section 11) is committed here, the first
-    // time a PaymentIntent is created for this checkout — never inferred
-    // ahead of time, and never changeable afterward.
+    // time a PaymentIntent is created for this checkout — not inferred ahead
+    // of time, and not switchable while another method's attempt is still
+    // in flight. It IS switchable after that attempt reaches a terminal
+    // failure (spec sections 40-41's declined/failed recovery UX explicitly
+    // offers an alternate payment method on the very same checkout).
     if (checkout.paymentMethodType !== PaymentMethodType.ONLINE_PAYMENT) {
       await this.prisma.checkout.update({ where: { id }, data: { paymentMethodType: PaymentMethodType.ONLINE_PAYMENT } });
     }
@@ -339,7 +347,12 @@ export class CheckoutService {
       throw new ValidationApiException({ field: "status", reason: "An address is required before a financing intent can be created" });
     }
     if (checkout.paymentMethodType === PaymentMethodType.ONLINE_PAYMENT) {
-      throw new ValidationApiException({ field: "paymentMethodType", reason: "This checkout already chose online payment — create a payment intent instead" });
+      const activePayment = await this.payments.getIntent(id);
+      const terminalPaymentFailures: PaymentIntentStatus[] = [PaymentIntentStatus.FAILED, PaymentIntentStatus.CANCELLED];
+      const isTerminalFailure = activePayment && terminalPaymentFailures.includes(activePayment.status);
+      if (!isTerminalFailure) {
+        throw new ValidationApiException({ field: "paymentMethodType", reason: "This checkout has an active online payment attempt — let it resolve before switching to installments" });
+      }
     }
     if (checkout.paymentMethodType !== PaymentMethodType.INSTALLMENTS) {
       await this.prisma.checkout.update({ where: { id }, data: { paymentMethodType: PaymentMethodType.INSTALLMENTS } });
