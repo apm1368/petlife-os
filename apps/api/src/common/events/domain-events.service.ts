@@ -47,6 +47,23 @@ export const DOMAIN_EVENT_TYPES = [
   "BookingStarted",
   "BookingCompleted",
   "ProviderServiceUpdated",
+  // Commerce Core (Handoff 06)
+  "ProductViewed",
+  "OfferSelected",
+  "CartCreated",
+  "CartItemAdded",
+  "CartItemUpdated",
+  "CartItemRemoved",
+  "CheckoutCreated",
+  "InventoryReserved",
+  "InventoryReleased",
+  "PaymentIntentCreated",
+  "PaymentAttemptStarted",
+  "PaymentSucceeded",
+  "PaymentFailed",
+  "OrderCreated",
+  "OrderConfirmed",
+  "CartConverted",
 ] as const;
 
 /**

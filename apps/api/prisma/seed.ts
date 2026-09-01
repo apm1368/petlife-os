@@ -9,12 +9,144 @@ import {
   ProviderType,
   ProviderUserRole,
   ProviderVerificationStatus,
+  SellerStatus,
+  SellerVerificationStatus,
   ServiceCategory,
   SetupStatus,
   VaccinationStatus,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+/**
+ * Commerce Core fixtures (Handoff 06): two VERIFIED+ACTIVE sellers so every
+ * variant with more than one offer proves the multi-seller cart/order split,
+ * one seller still under review (never purchasable, proving the
+ * verification gate), a Food product that only supports dogs and only
+ * adults with a CHICKEN allergen tag (a real POTENTIAL_SAFETY_CONFLICT/
+ * SPECIES_MISMATCH fixture once a test pet's own allergy or species is
+ * checked against it), a kitten-only Food product (a real AGE_TOO_OLD/
+ * NOT_RECOMMENDED fixture against Milo, who is already 18 months old), an
+ * unrestricted Treats product (LIKELY_COMPATIBLE — nothing to actively
+ * confirm), a Grooming product that requires a completed Health Basics
+ * review (NEEDS_REVIEW until then), and an Accessories product old enough
+ * for both Luna and Milo to be a genuine, actively-confirmed COMPATIBLE
+ * example.
+ */
+async function seedCommerce() {
+  const [royalCanin, petLifeBasics] = await Promise.all([
+    prisma.brand.create({ data: { name: "Royal Canin", slug: "royal-canin" } }),
+    prisma.brand.create({ data: { name: "PetLife Basics", slug: "petlife-basics" } }),
+  ]);
+
+  const [foodCategory, treatsCategory, groomingCategory, accessoriesCategory] = await Promise.all([
+    prisma.productCategory.create({ data: { name: "Food", slug: "food" } }),
+    prisma.productCategory.create({ data: { name: "Treats", slug: "treats" } }),
+    prisma.productCategory.create({ data: { name: "Grooming", slug: "grooming" } }),
+    prisma.productCategory.create({ data: { name: "Accessories", slug: "accessories" } }),
+  ]);
+
+  const [petBazaar, golestan, underReviewSeller] = await Promise.all([
+    prisma.sellerOrganization.create({ data: { name: "Pet Bazaar Tehran", verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "IR", city: "Tehran" } }),
+    prisma.sellerOrganization.create({ data: { name: "Golestan Pet Supplies", verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "IR", city: "Tehran" } }),
+    prisma.sellerOrganization.create({ data: { name: "New Pet Shop (Under Review)", verificationStatus: SellerVerificationStatus.SUBMITTED, status: SellerStatus.ACTIVE, countryCode: "IR", city: "Tehran" } }),
+  ]);
+
+  const adultDogFood = await prisma.product.create({
+    data: {
+      brandId: royalCanin.id,
+      categoryId: foodCategory.id,
+      title: "Royal Canin Adult Dog Food",
+      slug: "royal-canin-adult-dog-food",
+      description: "Complete dry food for adult dogs.",
+      supportsDog: true,
+      supportsCat: false,
+      minAgeMonths: 12,
+      allergenTags: ["CHICKEN"],
+      variants: {
+        create: [
+          { sku: "RC-ADULT-DOG-2KG", title: "2kg", weightValue: 2, weightUnit: "KG" },
+          { sku: "RC-ADULT-DOG-5KG", title: "5kg", weightValue: 5, weightUnit: "KG" },
+        ],
+      },
+    },
+    include: { variants: true },
+  });
+
+  const kittenFood = await prisma.product.create({
+    data: {
+      brandId: royalCanin.id,
+      categoryId: foodCategory.id,
+      title: "Royal Canin Kitten Food",
+      slug: "royal-canin-kitten-food",
+      description: "Complete dry food for kittens up to 12 months.",
+      supportsDog: false,
+      supportsCat: true,
+      maxAgeMonths: 12,
+      variants: { create: [{ sku: "RC-KITTEN-CAT-2KG", title: "2kg", weightValue: 2, weightUnit: "KG" }] },
+    },
+    include: { variants: true },
+  });
+
+  const trainingTreats = await prisma.product.create({
+    data: {
+      brandId: petLifeBasics.id,
+      categoryId: treatsCategory.id,
+      title: "Grain-Free Training Treats",
+      slug: "grain-free-training-treats",
+      description: "Small, soft training treats for dogs and cats.",
+      variants: { create: [{ sku: "PLB-TREATS-200G", title: "200g", weightValue: 0.2, weightUnit: "KG" }] },
+    },
+    include: { variants: true },
+  });
+
+  const groomingWipes = await prisma.product.create({
+    data: {
+      brandId: petLifeBasics.id,
+      categoryId: groomingCategory.id,
+      title: "Calming Grooming Wipes",
+      slug: "calming-grooming-wipes",
+      description: "Fragrance-light wipes for sensitive skin.",
+      requiresHealthReview: true,
+      variants: { create: [{ sku: "PLB-WIPES-30", title: "Pack of 30" }] },
+    },
+    include: { variants: true },
+  });
+
+  const travelCarrier = await prisma.product.create({
+    data: {
+      brandId: petLifeBasics.id,
+      categoryId: accessoriesCategory.id,
+      title: "Soft-Sided Travel Carrier",
+      slug: "soft-sided-travel-carrier",
+      description: "Ventilated carrier for car rides and vet visits.",
+      minAgeMonths: 3,
+      variants: { create: [{ sku: "PLB-CARRIER-M", title: "Medium" }] },
+    },
+    include: { variants: true },
+  });
+
+  async function createOffer(sellerId: string, variantId: string, priceAmount: number, onHand: number) {
+    const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: sellerId, productVariantId: variantId, priceAmount, currency: "IRR" } });
+    await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand } });
+    return offer;
+  }
+
+  await Promise.all([
+    createOffer(petBazaar.id, adultDogFood.variants[0]!.id, 1_200_000, 50),
+    createOffer(golestan.id, adultDogFood.variants[0]!.id, 1_150_000, 30),
+    createOffer(petBazaar.id, adultDogFood.variants[1]!.id, 2_800_000, 20),
+    createOffer(golestan.id, kittenFood.variants[0]!.id, 1_100_000, 25),
+    createOffer(petBazaar.id, trainingTreats.variants[0]!.id, 180_000, 100),
+    createOffer(golestan.id, groomingWipes.variants[0]!.id, 220_000, 40),
+    createOffer(petBazaar.id, travelCarrier.variants[0]!.id, 3_500_000, 15),
+    createOffer(golestan.id, travelCarrier.variants[0]!.id, 3_650_000, 10),
+    // Never discoverable — the seller is still under review.
+    createOffer(underReviewSeller.id, trainingTreats.variants[0]!.id, 150_000, 20),
+  ]);
+
+  console.log(`Seeded commerce: sellers=[${petBazaar.id}, ${golestan.id}] products=[${adultDogFood.id}, ${kittenFood.id}, ${trainingTreats.id}, ${groomingWipes.id}, ${travelCarrier.id}]`);
+}
 
 /**
  * Handoff 04: one verified provider per non-vet ServiceCategory, each with a
@@ -427,6 +559,8 @@ async function main() {
   );
 
   console.log(`Seeded: user=${sarah.email} household=${household.id} pets=[Luna:${luna.id}, Milo:${milo.id}]`);
+
+  await seedCommerce();
 }
 
 main()

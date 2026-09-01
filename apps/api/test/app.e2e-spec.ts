@@ -11,6 +11,11 @@ import {
   LocationMode,
   AvailabilityExceptionType,
   BookingStatus,
+  SellerVerificationStatus,
+  SellerStatus,
+  CheckoutStatus,
+  CartStatus,
+  OrderStatus,
 } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
@@ -777,18 +782,27 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       return { client, householdId: household.body.id, petId: pet.body.id };
     }
 
-    it("returns only VERIFIED providers by default", async () => {
-      const { client } = await setupOwnerWithPet();
-      const { organization } = await seedVerifiedClinic();
-      const unverified = await prisma.providerOrganization.create({
-        data: { name: `Unverified Clinic ${unique()}`, type: ProviderType.VET_CLINIC, verificationStatus: ProviderVerificationStatus.SUBMITTED },
-      });
+    it(
+      "returns only VERIFIED providers by default",
+      async () => {
+        const { client } = await setupOwnerWithPet();
+        const { organization } = await seedVerifiedClinic();
+        const unverified = await prisma.providerOrganization.create({
+          data: { name: `Unverified Clinic ${unique()}`, type: ProviderType.VET_CLINIC, verificationStatus: ProviderVerificationStatus.SUBMITTED },
+        });
 
-      const results = await client.get("/providers/vets").expect(200);
-      const ids = results.body.map((p: { id: string }) => p.id);
-      expect(ids).toContain(organization.id);
-      expect(ids).not.toContain(unverified.id);
-    });
+        const results = await client.get("/providers/vets").expect(200);
+        const ids = results.body.map((p: { id: string }) => p.id);
+        expect(ids).toContain(organization.id);
+        expect(ids).not.toContain(unverified.id);
+      },
+      // This is the first test in the suite to exercise the providers-search
+      // path; a cold Prisma connection-pool warm-up on this sandbox's Postgres
+      // has been observed to occasionally exceed Jest's 5s default here even
+      // though the request itself is fast — a generous explicit timeout is
+      // cheaper than chasing a warm-up cost that only ever shows up once.
+      15000,
+    );
 
     it("rejects a booking hold when the service doesn't support the pet's species", async () => {
       const { client, householdId } = await setupOwnerWithPet();
@@ -1801,6 +1815,480 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const detail = await faClient.get(`/provider/bookings/${booking.id}`).expect(200);
       expect(detail.body.booking.startAt).toBe(booking.startAt);
       expect(new Date(detail.body.booking.startAt).toISOString()).toBe(detail.body.booking.startAt);
+    });
+  });
+
+  describe("Commerce Core (Handoff 06)", () => {
+    async function setupOwnerWithPets() {
+      const identifier = `commerce-owner-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const dog = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Rex", species: "DOG", approximateAgeMonths: 36 })
+        .expect(201);
+      const cat = await client
+        .post(`/households/${household.body.id}/pets`)
+        .send({ name: "Whiskers", species: "CAT", approximateAgeMonths: 18 })
+        .expect(201);
+      return { client, householdId: household.body.id, dogId: dog.body.id, catId: cat.body.id };
+    }
+
+    async function seedCategory() {
+      return prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+    }
+
+    async function seedProduct(opts: {
+      supportsDog?: boolean;
+      supportsCat?: boolean;
+      minAgeMonths?: number;
+      maxAgeMonths?: number;
+      allergenTags?: string[];
+      requiresHealthReview?: boolean;
+    } = {}) {
+      const category = await seedCategory();
+      const product = await prisma.product.create({
+        data: {
+          categoryId: category.id,
+          title: `Test Product ${unique()}`,
+          slug: `test-product-${unique()}`,
+          supportsDog: opts.supportsDog ?? true,
+          supportsCat: opts.supportsCat ?? true,
+          minAgeMonths: opts.minAgeMonths,
+          maxAgeMonths: opts.maxAgeMonths,
+          allergenTags: opts.allergenTags ?? [],
+          requiresHealthReview: opts.requiresHealthReview ?? false,
+        },
+      });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+      return { product, variant };
+    }
+
+    async function seedSeller(verified = true) {
+      return prisma.sellerOrganization.create({
+        data: {
+          name: `Seller ${unique()}`,
+          verificationStatus: verified ? SellerVerificationStatus.VERIFIED : SellerVerificationStatus.SUBMITTED,
+          status: SellerStatus.ACTIVE,
+          countryCode: "US",
+        },
+      });
+    }
+
+    async function seedOffer(sellerId: string, variantId: string, priceAmount: number, onHand: number) {
+      const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: sellerId, productVariantId: variantId, priceAmount, currency: "IRR" } });
+      await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand } });
+      return offer;
+    }
+
+    async function seedAddress(client: ReturnType<typeof authedRequest>, householdId: string) {
+      const res = await client.post("/addresses").send({ householdId, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
+      return res.body.id as string;
+    }
+
+    it("returns Product -> Variant -> Offer as distinct objects from discovery", async () => {
+      const { client, dogId } = await setupOwnerWithPets();
+      const { product, variant } = await seedProduct();
+      const seller = await seedSeller();
+      await seedOffer(seller.id, variant.id, 100_000, 10);
+
+      const detail = await client.get(`/shop/products/${product.id}?petId=${dogId}`).expect(200);
+      expect(detail.body.id).toBe(product.id);
+      expect(detail.body.variants[0].id).toBe(variant.id);
+      expect(detail.body.offers[0].productVariantId).toBe(variant.id);
+      expect(detail.body.offers[0].sellerOrganization.id).toBe(seller.id);
+    });
+
+    it("never surfaces an unverified seller's offer, and rejects adding it to a cart", async () => {
+      const { client } = await setupOwnerWithPets();
+      const { product, variant } = await seedProduct();
+      const unverifiedSeller = await seedSeller(false);
+      const offer = await seedOffer(unverifiedSeller.id, variant.id, 100_000, 10);
+
+      const results = await client.get(`/shop/products?search=${encodeURIComponent(product.title)}`).expect(200);
+      const found = results.body.find((p: { id: string }) => p.id === product.id);
+      expect(found.bestOffer).toBeNull();
+
+      const denied = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(400);
+      expect(denied.body.error.code).toBe("OFFER_NOT_AVAILABLE");
+    });
+
+    it("enforces inventory constraints at the database level", async () => {
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 5);
+
+      await expect(prisma.inventoryItem.update({ where: { sellerOfferId: offer.id }, data: { reserved: 6 } })).rejects.toThrow();
+      await expect(prisma.inventoryItem.update({ where: { sellerOfferId: offer.id }, data: { onHand: -1 } })).rejects.toThrow();
+    });
+
+    it("evaluates deterministic pet compatibility: species mismatch, unrestricted product, and health-review gating", async () => {
+      const { client, dogId, catId } = await setupOwnerWithPets();
+      const { product: dogOnlyFood } = await seedProduct({ supportsDog: true, supportsCat: false });
+      const { product: unrestricted } = await seedProduct();
+      const { product: needsReview } = await seedProduct({ requiresHealthReview: true });
+
+      const catDetail = await client.get(`/shop/products/${dogOnlyFood.id}?petId=${catId}`).expect(200);
+      expect(catDetail.body.compatibility.status).toBe("NOT_RECOMMENDED");
+      expect(catDetail.body.compatibility.reasons).toContain("SPECIES_MISMATCH");
+
+      const unrestrictedDetail = await client.get(`/shop/products/${unrestricted.id}?petId=${dogId}`).expect(200);
+      expect(unrestrictedDetail.body.compatibility.status).toBe("LIKELY_COMPATIBLE");
+
+      const reviewDetail = await client.get(`/shop/products/${needsReview.id}?petId=${dogId}`).expect(200);
+      expect(reviewDetail.body.compatibility.status).toBe("NEEDS_REVIEW");
+      expect(reviewDetail.body.compatibility.reasons).toContain("HEALTH_REVIEW_REQUIRED");
+    });
+
+    it("keeps target-pet compatibility fully isolated between two pets in the same household", async () => {
+      const { client, dogId, catId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct({ supportsDog: true, supportsCat: false });
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+
+      const cart = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1, targetPetId: dogId }).expect(201);
+      const dogLine = cart.body.sellerGroups[0].lines[0];
+      expect(dogLine.compatibility.status).not.toBe("NOT_RECOMMENDED");
+
+      await client.delete(`/cart/items/${dogLine.id}`).expect(200);
+      const catCart = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1, targetPetId: catId }).expect(201);
+      const catLine = catCart.body.sellerGroups[0].lines[0];
+      expect(catLine.compatibility.status).toBe("NOT_RECOMMENDED");
+      expect(catLine.compatibility.reasons).toContain("SPECIES_MISMATCH");
+    });
+
+    it("denies targeting a pet the caller has no access to (IDOR)", async () => {
+      const { client } = await setupOwnerWithPets();
+      const stranger = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+
+      const denied = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1, targetPetId: stranger.dogId }).expect(403);
+      expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
+    });
+
+    it("adds, updates, and removes a cart line", async () => {
+      const { client } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+
+      const added = await client.post("/cart/items").send({ offerId: offer.id, quantity: 2 }).expect(201);
+      const line = added.body.sellerGroups[0].lines[0];
+      expect(line.quantity).toBe(2);
+      expect(line.lineTotal).toBe(200_000);
+
+      const updated = await client.patch(`/cart/items/${line.id}`).send({ quantity: 5 }).expect(200);
+      expect(updated.body.sellerGroups[0].lines[0].quantity).toBe(5);
+
+      const removed = await client.delete(`/cart/items/${line.id}`).expect(200);
+      expect(removed.body.sellerGroups).toHaveLength(0);
+    });
+
+    it("groups a multi-seller cart by seller, one group per seller", async () => {
+      const { client } = await setupOwnerWithPets();
+      const { variant: variantA } = await seedProduct();
+      const { variant: variantB } = await seedProduct();
+      const sellerA = await seedSeller();
+      const sellerB = await seedSeller();
+      const offerA = await seedOffer(sellerA.id, variantA.id, 100_000, 10);
+      const offerB = await seedOffer(sellerB.id, variantB.id, 200_000, 10);
+
+      await client.post("/cart/items").send({ offerId: offerA.id, quantity: 1 }).expect(201);
+      const cart = await client.post("/cart/items").send({ offerId: offerB.id, quantity: 1 }).expect(201);
+
+      expect(cart.body.sellerGroups).toHaveLength(2);
+      const sellerIds = cart.body.sellerGroups.map((g: { sellerOrganization: { id: string } }) => g.sellerOrganization.id).sort();
+      expect(sellerIds).toEqual([sellerA.id, sellerB.id].sort());
+    });
+
+    it("flags a price change since the item was added, without trusting the stale snapshot for the total", async () => {
+      const { client } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+
+      const added = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const lineId = added.body.sellerGroups[0].lines[0].id;
+
+      await prisma.sellerOffer.update({ where: { id: offer.id }, data: { priceAmount: 150_000 } });
+
+      const cart = await client.get("/cart").expect(200);
+      const line = cart.body.sellerGroups[0].lines.find((l: { id: string }) => l.id === lineId);
+      expect(line.priceChanged).toBe(true);
+      expect(line.currentPriceAmount).toBe(150_000);
+      expect(line.lineTotal).toBe(150_000);
+
+      const checkout = await client.post("/checkout").send({}).expect(201);
+      expect(checkout.body.validationIssues.some((i: { code: string }) => i.code === "PRICE_CHANGED")).toBe(true);
+      expect(checkout.body.subtotalAmount).toBe(150_000);
+    });
+
+    it("rejects checkout creation when the requested quantity exceeds available inventory", async () => {
+      const { client } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 2);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 5 }).expect(201);
+      const denied = await client.post("/checkout").send({}).expect(400);
+      expect(denied.body.error.details.reason).toBe("INSUFFICIENT_INVENTORY");
+    });
+
+    it("creates an inventory reservation transactionally when a checkout is created", async () => {
+      const { client } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 3 }).expect(201);
+      const checkout = await client.post("/checkout").send({}).expect(201);
+
+      const inventory = await prisma.inventoryItem.findUnique({ where: { sellerOfferId: offer.id } });
+      expect(inventory?.reserved).toBe(3);
+      const reservation = await prisma.inventoryReservation.findFirst({ where: { checkoutId: checkout.body.id, sellerOfferId: offer.id } });
+      expect(reservation?.status).toBe("ACTIVE");
+      expect(reservation?.quantity).toBe(3);
+    });
+
+    it("rejects paying an expired checkout and releases its reservation", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 2 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+
+      await prisma.checkout.update({ where: { id: checkout.body.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      const denied = await client.post(`/checkout/${checkout.body.id}/pay`).send({}).expect(410);
+      expect(denied.body.error.code).toBe("CHECKOUT_EXPIRED");
+
+      const inventory = await prisma.inventoryItem.findUnique({ where: { sellerOfferId: offer.id } });
+      expect(inventory?.reserved).toBe(0);
+    });
+
+    it("confirms a checkout on a successful simulated payment", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+
+      expect(paid.body.paymentStatus).toBe("SUCCEEDED");
+      expect(paid.body.checkout.status).toBe("CONFIRMED");
+      expect(paid.body.orderIds).toHaveLength(1);
+    });
+
+    it("preserves the cart and reservation on a simulated payment failure, and allows a successful retry", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+
+      const failed = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "FAILURE" }).expect(201);
+      expect(failed.body.paymentStatus).toBe("FAILED");
+      expect(failed.body.checkout.status).not.toBe("CONFIRMED");
+      expect(failed.body.orderIds).toHaveLength(0);
+
+      const cartRow = await prisma.cart.findFirst({ where: { userId: (await prisma.checkout.findUnique({ where: { id: checkout.body.id } }))!.userId } });
+      expect(cartRow?.status).toBe(CartStatus.ACTIVE);
+      const inventory = await prisma.inventoryItem.findUnique({ where: { sellerOfferId: offer.id } });
+      expect(inventory?.reserved).toBe(1);
+
+      const retried = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      expect(retried.body.paymentStatus).toBe("SUCCEEDED");
+      expect(retried.body.orderIds).toHaveLength(1);
+    });
+
+    it("does not confirm an order while payment is pending, then confirms it once a webhook resolves the intent", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 1);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const pending = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "PENDING" }).expect(201);
+      expect(pending.body.paymentStatus).toBe("PENDING");
+      expect(pending.body.checkout.status).toBe("PAYMENT_PENDING");
+
+      const ordersDuringPending = await prisma.order.findMany({ where: { checkoutId: checkout.body.id } });
+      expect(ordersDuringPending).toHaveLength(0);
+
+      const intent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId: checkout.body.id } });
+      await request(app.getHttpServer())
+        .post("/payments/webhooks/dev_simulated")
+        .send({ paymentIntentId: intent.id, eventId: `evt_${unique()}`, status: "SUCCEEDED" })
+        .expect(201);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const ordersAfterWebhook = await prisma.order.findMany({ where: { checkoutId: checkout.body.id } });
+      expect(ordersAfterWebhook).toHaveLength(1);
+      const checkoutAfter = await prisma.checkout.findUnique({ where: { id: checkout.body.id } });
+      expect(checkoutAfter?.status).toBe(CheckoutStatus.CONFIRMED);
+    });
+
+    it("creates one Order per seller for a single multi-seller Checkout", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant: variantA } = await seedProduct();
+      const { variant: variantB } = await seedProduct();
+      const sellerA = await seedSeller();
+      const sellerB = await seedSeller();
+      const offerA = await seedOffer(sellerA.id, variantA.id, 100_000, 10);
+      const offerB = await seedOffer(sellerB.id, variantB.id, 200_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offerA.id, quantity: 1 }).expect(201);
+      await client.post("/cart/items").send({ offerId: offerB.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+
+      expect(paid.body.orderIds).toHaveLength(2);
+      const orders = await prisma.order.findMany({ where: { checkoutId: checkout.body.id } });
+      expect(orders.map((o) => o.sellerOrganizationId).sort()).toEqual([sellerA.id, sellerB.id].sort());
+      for (const order of orders) expect(order.status).toBe(OrderStatus.CONFIRMED);
+    });
+
+    it("preserves an immutable commercial snapshot on the Order even after the Product/Offer later change", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { product, variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const orderId = paid.body.orderIds[0];
+
+      await prisma.product.update({ where: { id: product.id }, data: { title: "Renamed Later" } });
+      await prisma.sellerOffer.update({ where: { id: offer.id }, data: { priceAmount: 999_999 } });
+
+      const orderDetail = await client.get(`/orders/${orderId}`).expect(200);
+      expect(orderDetail.body.items[0].productTitleSnapshot).toBe(product.title);
+      expect(orderDetail.body.items[0].unitPrice).toBe(100_000);
+    });
+
+    it("consumes inventory exactly once even if the same checkout's pay endpoint is called again", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 3 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+
+      const afterFirst = await prisma.inventoryItem.findUnique({ where: { sellerOfferId: offer.id } });
+      expect(afterFirst?.onHand).toBe(7);
+      expect(afterFirst?.reserved).toBe(0);
+
+      const retried = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(409);
+      expect(retried.body.error.code).toBe("PAYMENT_ALREADY_COMPLETED");
+
+      const afterSecond = await prisma.inventoryItem.findUnique({ where: { sellerOfferId: offer.id } });
+      expect(afterSecond?.onHand).toBe(7);
+      expect(afterSecond?.reserved).toBe(0);
+
+      const orders = await prisma.order.findMany({ where: { checkoutId: checkout.body.id } });
+      expect(orders).toHaveLength(1);
+    });
+
+    it("denies a user from reading another user's order", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const stranger = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+
+      const denied = await stranger.client.get(`/orders/${paid.body.orderIds[0]}`).expect(404);
+      expect(denied.body.error.code).toBe("ORDER_NOT_FOUND");
+    });
+
+    it("keeps every commerce amount a plain integer, never a fractional IRR value", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 123_456, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      const cart = await client.post("/cart/items").send({ offerId: offer.id, quantity: 3 }).expect(201);
+      expect(Number.isInteger(cart.body.sellerGroups[0].lines[0].lineTotal)).toBe(true);
+      expect(Number.isInteger(cart.body.subtotalAmount)).toBe(true);
+
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+      expect(Number.isInteger(checkout.body.totalAmount)).toBe(true);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const order = await client.get(`/orders/${paid.body.orderIds[0]}`).expect(200);
+      expect(Number.isInteger(order.body.totalAmount)).toBe(true);
+      expect(Number.isInteger(order.body.items[0].unitPrice)).toBe(true);
+    });
+
+    it("surfaces a potential safety conflict and blocks checkout until explicitly acknowledged", async () => {
+      const { client, dogId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct({ allergenTags: ["CHICKEN"] });
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+
+      await client.post(`/pets/${dogId}/health/allergies`).send({ name: "Chicken" }).expect(201);
+
+      const cart = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1, targetPetId: dogId }).expect(201);
+      const line = cart.body.sellerGroups[0].lines[0];
+      expect(line.compatibility.status).toBe("POTENTIAL_SAFETY_CONFLICT");
+      expect(line.compatibility.reasons).toContain("ALLERGEN_CONFLICT");
+
+      const blocked = await client.post("/checkout").send({}).expect(400);
+      expect(blocked.body.error.code).toBe("SAFETY_CONFLICT");
+
+      const acknowledged = await client.post("/checkout").send({ acknowledgeSafetyConflict: true }).expect(201);
+      expect(acknowledged.body.id).toBeDefined();
+    });
+
+    it("converts the cart only once payment is confirmed, never at checkout creation", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
+      const { variant } = await seedProduct();
+      const seller = await seedSeller();
+      const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
+      const addressId = await seedAddress(client, householdId);
+
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
+
+      const userId = (await prisma.checkout.findUnique({ where: { id: checkout.body.id } }))!.userId;
+      const cartBefore = await prisma.cart.findFirst({ where: { userId } });
+      expect(cartBefore?.status).toBe(CartStatus.ACTIVE);
+
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+
+      const cartAfter = await prisma.cart.findFirst({ where: { id: cartBefore!.id } });
+      expect(cartAfter?.status).toBe(CartStatus.CONVERTED);
     });
   });
 });

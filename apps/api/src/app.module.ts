@@ -30,6 +30,11 @@ import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module
 import { ServicesModule } from "./modules/services/services.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
 import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
+import { CatalogModule } from "./modules/commerce/catalog/catalog.module";
+import { CartModule } from "./modules/commerce/cart/cart.module";
+import { CheckoutModule } from "./modules/commerce/checkout/checkout.module";
+import { PaymentsModule } from "./modules/commerce/payments/payments.module";
+import { OrdersModule } from "./modules/commerce/orders/orders.module";
 
 @Module({
   imports: [
@@ -64,6 +69,11 @@ import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
     ServicesModule,
     AddressesModule,
     ProviderOsModule,
+    CatalogModule,
+    CartModule,
+    CheckoutModule,
+    PaymentsModule,
+    OrdersModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

@@ -154,12 +154,15 @@
     "sections": {
       "ai": "Ask AI",
       "upcoming": "Upcoming",
-      "exploreServices": "Explore Services"
+      "exploreServices": "Explore Services",
+      "shop": "Shop"
     },
     "aiPlaceholder": "AI guidance is coming soon.",
     "upcomingPlaceholder": "Nothing scheduled yet.",
     "exploreServicesHint": "Grooming, training, walking, sitting, boarding, and pet taxi.",
-    "exploreServicesAction": "Explore"
+    "exploreServicesAction": "Explore",
+    "shopHint": "Food, treats, grooming supplies, and more.",
+    "shopAction": "Browse"
   },
   "pets": {
     "myPets": "My Pets",
@@ -835,6 +838,176 @@
         "OWNER": "Owner",
         "VET": "Vet",
         "STAFF": "Staff"
+      }
+    }
+  },
+  "commerce": {
+    "shopHome": {
+      "title": "Shop",
+      "subtitle": "For {name}",
+      "categories": "Categories",
+      "browseAll": "Browse all products",
+      "loading": "Loading"
+    },
+    "results": {
+      "title": "Products",
+      "loading": "Loading",
+      "retry": "Retry",
+      "empty": "No products found."
+    },
+    "productCard": {
+      "fromPrice": "From {price}",
+      "noAvailability": "No availability"
+    },
+    "compatibility": {
+      "status": {
+        "COMPATIBLE": "Compatible",
+        "LIKELY_COMPATIBLE": "Likely compatible",
+        "NEEDS_REVIEW": "Needs review",
+        "NOT_RECOMMENDED": "Not recommended",
+        "POTENTIAL_SAFETY_CONFLICT": "Potential safety conflict",
+        "UNKNOWN": "More info needed"
+      },
+      "reason": {
+        "SPECIES_MISMATCH": "Not made for this species",
+        "AGE_TOO_YOUNG": "Not recommended below the required age",
+        "AGE_TOO_OLD": "Not recommended above the intended age range",
+        "AGE_UNKNOWN": "Pet's age isn't on file",
+        "WEIGHT_TOO_LOW": "Below the recommended weight range",
+        "WEIGHT_TOO_HIGH": "Above the recommended weight range",
+        "WEIGHT_UNKNOWN": "Pet's weight isn't on file",
+        "ALLERGEN_CONFLICT": "Conflicts with a known allergy",
+        "HEALTH_REVIEW_REQUIRED": "Needs a completed health profile first",
+        "NO_ACTIVE_PET": "No active pet selected"
+      }
+    },
+    "detail": {
+      "title": "Product",
+      "loading": "Loading",
+      "retry": "Retry",
+      "shoppingFor": "Shopping for {name}",
+      "variant": "Variant",
+      "offer": "Seller",
+      "noOffers": "No sellers currently offer this variant",
+      "verified": "Verified",
+      "inStock": "{count} in stock",
+      "outOfStock": "Out of stock",
+      "deliveryPlaceholder": "Delivery details coming soon",
+      "quantity": "Quantity",
+      "addToCart": "Add to cart",
+      "goToCart": "Go to cart",
+      "addFailed": "Couldn't add this to your cart. Please try again."
+    },
+    "cart": {
+      "title": "Cart",
+      "loading": "Loading",
+      "retry": "Retry",
+      "empty": "Your cart is empty.",
+      "browseShop": "Browse the shop",
+      "safetyConflictBanner": "One or more items may conflict with a pet's known allergy. You'll be asked to confirm at checkout.",
+      "forPet": "For {name}",
+      "noTargetPet": "No pet selected for this item",
+      "remove": "Remove",
+      "priceChanged": "Price updated since added",
+      "sellerSubtotal": "Seller subtotal",
+      "subtotal": "Subtotal",
+      "proceedToCheckout": "Proceed to checkout"
+    },
+    "checkout": {
+      "address": {
+        "title": "Delivery address",
+        "addNew": "Add a new address",
+        "addressLine": "Address",
+        "city": "City",
+        "countryCode": "Country code",
+        "save": "Save address"
+      },
+      "delivery": {
+        "title": "Delivery method",
+        "method": {
+          "STANDARD": "Standard",
+          "EXPRESS": "Express"
+        }
+      },
+      "safetyAck": {
+        "title": "Please confirm before continuing",
+        "warning": "Potential safety conflict",
+        "description": "At least one item in your cart may conflict with a pet's known allergy. Please confirm you want to continue with this order.",
+        "acknowledge": "I understand, continue"
+      },
+      "review": {
+        "title": "Review your order",
+        "subtotal": "Subtotal",
+        "delivery": "Delivery",
+        "total": "Total"
+      },
+      "payment": {
+        "title": "Payment",
+        "amountDue": "Amount due",
+        "devLabel": "Development Payment",
+        "simulateSuccess": "Simulate successful payment",
+        "simulateFailure": "Simulate failed payment",
+        "simulatePending": "Simulate pending payment",
+        "onlinePayment": "Pay online"
+      },
+      "pending": {
+        "title": "Payment pending",
+        "status": "Waiting for confirmation",
+        "description": "We're waiting on confirmation from the payment provider. This can take a moment — check back shortly.",
+        "refresh": "Check status"
+      },
+      "paymentFailed": {
+        "title": "Payment failed",
+        "generic": "Your payment could not be completed.",
+        "preserved": "Nothing was charged, and your cart has been preserved.",
+        "returnToCart": "Return to cart",
+        "tryAgain": "Try again"
+      },
+      "createFailed": "Couldn't start checkout. Please try again."
+    },
+    "confirmation": {
+      "title": "Order confirmed",
+      "subtitle": "{count, plural, one {1 order was} other {# orders were}} placed",
+      "orderStatus": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "CANCELLED": "Cancelled"
+      },
+      "total": "Total",
+      "viewOrders": "View my orders",
+      "continueShopping": "Continue shopping"
+    },
+    "myOrders": {
+      "title": "My Orders",
+      "loading": "Loading",
+      "retry": "Retry",
+      "empty": "You haven't placed any orders yet.",
+      "browseShop": "Browse the shop",
+      "itemCount": "{count, plural, one {1 item} other {# items}}",
+      "status": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "CANCELLED": "Cancelled"
+      }
+    },
+    "orderDetail": {
+      "title": "Order",
+      "loading": "Loading",
+      "retry": "Retry",
+      "quantityAndUnitPrice": "Qty {quantity} × {price}",
+      "forPet": "For {name}",
+      "unknownPet": "a pet no longer on this account",
+      "subtotal": "Subtotal",
+      "delivery": "Delivery",
+      "total": "Total",
+      "shippingAddress": "Shipping address",
+      "fulfillment": "Fulfillment",
+      "fulfillmentPlaceholder": "Fulfillment tracking coming soon",
+      "placedAt": "Placed {when}",
+      "status": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "CANCELLED": "Cancelled"
       }
     }
   }

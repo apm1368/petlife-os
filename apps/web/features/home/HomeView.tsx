@@ -13,7 +13,7 @@ export function HomeView() {
   const tCommon = useTranslations("common");
   const router = useRouter();
   const locale = useLocale();
-  const { pets, activePetId, switchActivePet } = useActivePet();
+  const { pets, activePetId, switchActivePet, isSwitching } = useActivePet();
 
   const [home, setHome] = useState<HomeResponseDto | null>(null);
   const [error, setError] = useState(false);
@@ -29,9 +29,14 @@ export function HomeView() {
   }
 
   useEffect(() => {
-    // Home is context-driven by the active pet — refetch whenever it changes.
+    // Home is context-driven by the active pet — refetch whenever it
+    // changes. The optimistic switcher flips `activePetId` locally before
+    // the server-side PUT .../active-pet commits, so a refetch triggered by
+    // that same instant can race the PUT and read back the *old* active pet
+    // — refetching again once `isSwitching` drops back to false (the PUT
+    // has resolved) corrects that without giving up the instant-feeling UI.
     void load();
-  }, [activePetId]);
+  }, [activePetId, isSwitching]);
 
   if (error) {
     return <ErrorRecovery title={tCommon("loading")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
@@ -88,6 +93,16 @@ export function HomeView() {
         </div>
         <Button variant="secondary" onClick={() => router.push(`/${locale}/services`)}>
           {t("exploreServicesAction")}
+        </Button>
+      </ContextSurface>
+
+      <ContextSurface className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-section-title text-text-primary">{t("sections.shop")}</h2>
+          <p className="mt-1 text-body text-text-secondary">{t("shopHint")}</p>
+        </div>
+        <Button variant="secondary" onClick={() => router.push(`/${locale}/shop`)}>
+          {t("shopAction")}
         </Button>
       </ContextSurface>
     </div>

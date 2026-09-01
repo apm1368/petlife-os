@@ -918,3 +918,349 @@ export interface ProviderOverviewDto {
     pendingConfirmation: number;
   };
 }
+
+// ---------------------------------------------------------------------------
+// Commerce Core (Handoff 06)
+// ---------------------------------------------------------------------------
+
+export enum SellerVerificationStatus {
+  NOT_STARTED = "NOT_STARTED",
+  SUBMITTED = "SUBMITTED",
+  NEEDS_INFORMATION = "NEEDS_INFORMATION",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  VERIFIED = "VERIFIED",
+  REJECTED = "REJECTED",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum SellerStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum ProductStatus {
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  ARCHIVED = "ARCHIVED",
+}
+
+export enum ProductCategoryStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
+export enum BrandStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
+export enum SellerOfferStatus {
+  ACTIVE = "ACTIVE",
+  PAUSED = "PAUSED",
+  OUT_OF_STOCK = "OUT_OF_STOCK",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum CartStatus {
+  ACTIVE = "ACTIVE",
+  CONVERTED = "CONVERTED",
+  ABANDONED = "ABANDONED",
+}
+
+/** PARTIALLY_CONFIRMED exists for the "N orders, not all succeed" case; unreached this phase — see README Known limitations. */
+export enum CheckoutStatus {
+  DRAFT = "DRAFT",
+  READY_FOR_PAYMENT = "READY_FOR_PAYMENT",
+  PAYMENT_PENDING = "PAYMENT_PENDING",
+  CONFIRMED = "CONFIRMED",
+  PARTIALLY_CONFIRMED = "PARTIALLY_CONFIRMED",
+  FAILED = "FAILED",
+  EXPIRED = "EXPIRED",
+}
+
+export enum InventoryReservationStatus {
+  ACTIVE = "ACTIVE",
+  CONSUMED = "CONSUMED",
+  RELEASED = "RELEASED",
+  EXPIRED = "EXPIRED",
+}
+
+/** PREPARING/READY_FOR_FULFILLMENT/FULFILLED/PARTIALLY_REFUNDED/REFUNDED are modeled but unreachable this phase — only PENDING/CONFIRMED/CANCELLED are. */
+export enum OrderStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  PREPARING = "PREPARING",
+  READY_FOR_FULFILLMENT = "READY_FOR_FULFILLMENT",
+  FULFILLED = "FULFILLED",
+  CANCELLED = "CANCELLED",
+  PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED",
+  REFUNDED = "REFUNDED",
+}
+
+export enum DeliveryMethod {
+  STANDARD = "STANDARD",
+  EXPRESS = "EXPRESS",
+}
+
+export enum PaymentIntentStatus {
+  REQUIRES_PAYMENT_METHOD = "REQUIRES_PAYMENT_METHOD",
+  PENDING = "PENDING",
+  AUTHORIZED = "AUTHORIZED",
+  CAPTURED = "CAPTURED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+}
+
+/** Only DEV_SIMULATED exists this phase — see README "Payment abstraction". */
+export enum PaymentProvider {
+  DEV_SIMULATED = "DEV_SIMULATED",
+}
+
+export enum PaymentAttemptStatus {
+  STARTED = "STARTED",
+  PENDING = "PENDING",
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum TransactionType {
+  CHARGE = "CHARGE",
+  REFUND = "REFUND",
+}
+
+export enum TransactionStatus {
+  PENDING = "PENDING",
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+}
+
+/**
+ * ProductCompatibilityService's output vocabulary (spec section 11).
+ * POTENTIAL_SAFETY_CONFLICT always outranks every other state, including a
+ * discount/promotion/sponsored placement (spec section 13) — the frontend
+ * must never let a user miss it. NEEDS_REVIEW/UNKNOWN cover missing data;
+ * the service never defaults to COMPATIBLE when a required fact (age,
+ * weight, allergy data) is simply unknown rather than actually confirmed.
+ */
+export enum ProductCompatibilityStatus {
+  COMPATIBLE = "COMPATIBLE",
+  LIKELY_COMPATIBLE = "LIKELY_COMPATIBLE",
+  NEEDS_REVIEW = "NEEDS_REVIEW",
+  NOT_RECOMMENDED = "NOT_RECOMMENDED",
+  POTENTIAL_SAFETY_CONFLICT = "POTENTIAL_SAFETY_CONFLICT",
+  UNKNOWN = "UNKNOWN",
+}
+
+/** Reason codes, not localized copy — the frontend maps each to display text, mirroring PetCompatibilityReason (Handoff 04). */
+export type ProductCompatibilityReason =
+  | "SPECIES_MISMATCH"
+  | "AGE_TOO_YOUNG"
+  | "AGE_TOO_OLD"
+  | "AGE_UNKNOWN"
+  | "WEIGHT_TOO_LOW"
+  | "WEIGHT_TOO_HIGH"
+  | "WEIGHT_UNKNOWN"
+  | "ALLERGEN_CONFLICT"
+  | "HEALTH_REVIEW_REQUIRED"
+  | "NO_ACTIVE_PET";
+
+export interface ProductCompatibilityDto {
+  status: ProductCompatibilityStatus;
+  reasons: ProductCompatibilityReason[];
+}
+
+export interface BrandDto {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  status: BrandStatus;
+}
+
+export interface ProductCategoryDto {
+  id: string;
+  parentId: string | null;
+  name: string;
+  slug: string;
+  status: ProductCategoryStatus;
+}
+
+export interface ProductVariantDto {
+  id: string;
+  productId: string;
+  sku: string;
+  barcode: string | null;
+  title: string | null;
+  attributes: Record<string, string> | null;
+  weightValue: number | null;
+  weightUnit: WeightUnit | null;
+  isActive: boolean;
+}
+
+export interface SellerOrganizationSummaryDto {
+  id: string;
+  name: string;
+  verificationStatus: SellerVerificationStatus;
+  status: SellerStatus;
+  city: string | null;
+}
+
+export interface SellerOfferDto {
+  id: string;
+  sellerOrganization: SellerOrganizationSummaryDto;
+  productVariantId: string;
+  priceAmount: number;
+  compareAtAmount: number | null;
+  currency: string;
+  status: SellerOfferStatus;
+  /** onHand - reserved, computed server-side, never a stored column. */
+  availableQuantity: number;
+}
+
+/** One (product, variant) discovery/listing row — the cheapest ACTIVE offer is `bestOffer`; every ACTIVE offer is in `offers`. */
+export interface ProductSummaryDto {
+  id: string;
+  title: string;
+  slug: string;
+  brand: BrandDto | null;
+  category: ProductCategoryDto;
+  variantId: string;
+  variantTitle: string | null;
+  bestOffer: SellerOfferDto | null;
+  /** Only present when the request carried a petId. */
+  compatibility: ProductCompatibilityDto | null;
+}
+
+export interface ProductDetailDto {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  brand: BrandDto | null;
+  category: ProductCategoryDto;
+  status: ProductStatus;
+  variants: ProductVariantDto[];
+  /** All ACTIVE offers across all variants, for the offer-selection step. */
+  offers: SellerOfferDto[];
+  compatibility: ProductCompatibilityDto | null;
+}
+
+export interface CartLineDto {
+  id: string;
+  sellerOffer: SellerOfferDto;
+  productId: string;
+  productTitle: string;
+  variantTitle: string | null;
+  variantSku: string;
+  targetPetId: string | null;
+  targetPetName: string | null;
+  quantity: number;
+  unitPriceSnapshot: number;
+  currentPriceAmount: number;
+  priceChanged: boolean;
+  currency: string;
+  lineTotal: number;
+  compatibility: ProductCompatibilityDto | null;
+}
+
+export interface CartSellerGroupDto {
+  sellerOrganization: SellerOrganizationSummaryDto;
+  lines: CartLineDto[];
+  subtotalAmount: number;
+}
+
+export interface CartDto {
+  id: string;
+  status: CartStatus;
+  sellerGroups: CartSellerGroupDto[];
+  totalItems: number;
+  subtotalAmount: number;
+  currency: string;
+  hasSafetyConflict: boolean;
+}
+
+export interface CheckoutValidationIssueDto {
+  code: string;
+  cartLineId: string | null;
+  message: string;
+}
+
+export interface CheckoutDto {
+  id: string;
+  status: CheckoutStatus;
+  addressId: string | null;
+  deliveryMethod: DeliveryMethod;
+  subtotalAmount: number;
+  deliveryAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  currency: string;
+  sellerGroups: CartSellerGroupDto[];
+  expiresAt: string | null;
+  validationIssues: CheckoutValidationIssueDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PayCheckoutResultDto {
+  checkout: CheckoutDto;
+  paymentStatus: "SUCCEEDED" | "FAILED" | "PENDING";
+  failureCode?: string;
+  failureMessage?: string;
+  orderIds: string[];
+}
+
+export interface PaymentIntentDto {
+  id: string;
+  checkoutId: string;
+  amount: number;
+  currency: string;
+  status: PaymentIntentStatus;
+  provider: PaymentProvider;
+}
+
+export interface OrderItemDto {
+  id: string;
+  productId: string;
+  productVariantId: string;
+  productTitleSnapshot: string;
+  variantTitleSnapshot: string | null;
+  skuSnapshot: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  targetPetId: string | null;
+  compatibilitySnapshot: ProductCompatibilityDto | null;
+}
+
+export interface OrderSummaryDto {
+  id: string;
+  checkoutId: string;
+  sellerOrganization: SellerOrganizationSummaryDto;
+  status: OrderStatus;
+  itemCount: number;
+  totalAmount: number;
+  currency: string;
+  createdAt: string;
+  confirmedAt: string | null;
+}
+
+export interface OrderDetailDto {
+  id: string;
+  checkoutId: string;
+  sellerOrganization: SellerOrganizationSummaryDto;
+  status: OrderStatus;
+  subtotalAmount: number;
+  deliveryAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  currency: string;
+  shippingAddress: CustomerAddressDto | null;
+  items: OrderItemDto[];
+  createdAt: string;
+  updatedAt: string;
+  confirmedAt: string | null;
+}

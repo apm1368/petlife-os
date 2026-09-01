@@ -154,12 +154,15 @@
     "sections": {
       "ai": "پرسش از هوش مصنوعی",
       "upcoming": "پیش‌ رو",
-      "exploreServices": "کاوش خدمات"
+      "exploreServices": "کاوش خدمات",
+      "shop": "فروشگاه"
     },
     "aiPlaceholder": "راهنمایی هوش مصنوعی به‌زودی فعال می‌شود.",
     "upcomingPlaceholder": "چیزی برنامه‌ریزی نشده است.",
     "exploreServicesHint": "آرایش، آموزش، پیاده‌روی، نگهداری، اقامت و تاکسی حیوانات.",
-    "exploreServicesAction": "کاوش"
+    "exploreServicesAction": "کاوش",
+    "shopHint": "غذا، تنقلات، لوازم آرایشی و بیشتر.",
+    "shopAction": "مشاهده"
   },
   "pets": {
     "myPets": "حیوانات خانگی من",
@@ -835,6 +838,176 @@
         "OWNER": "مالک",
         "VET": "دامپزشک",
         "STAFF": "کارمند"
+      }
+    }
+  },
+  "commerce": {
+    "shopHome": {
+      "title": "فروشگاه",
+      "subtitle": "برای {name}",
+      "categories": "دسته‌بندی‌ها",
+      "browseAll": "مشاهده همه محصولات",
+      "loading": "در حال بارگذاری"
+    },
+    "results": {
+      "title": "محصولات",
+      "loading": "در حال بارگذاری",
+      "retry": "تلاش مجدد",
+      "empty": "محصولی پیدا نشد."
+    },
+    "productCard": {
+      "fromPrice": "شروع از {price}",
+      "noAvailability": "موجود نیست"
+    },
+    "compatibility": {
+      "status": {
+        "COMPATIBLE": "سازگار",
+        "LIKELY_COMPATIBLE": "احتمالاً سازگار",
+        "NEEDS_REVIEW": "نیاز به بررسی",
+        "NOT_RECOMMENDED": "توصیه نمی‌شود",
+        "POTENTIAL_SAFETY_CONFLICT": "احتمال تداخل ایمنی",
+        "UNKNOWN": "اطلاعات بیشتری لازم است"
+      },
+      "reason": {
+        "SPECIES_MISMATCH": "برای این گونه ساخته نشده است",
+        "AGE_TOO_YOUNG": "برای سن کمتر از حد لازم توصیه نمی‌شود",
+        "AGE_TOO_OLD": "برای سن بالاتر از بازه مورد نظر توصیه نمی‌شود",
+        "AGE_UNKNOWN": "سن حیوان خانگی ثبت نشده است",
+        "WEIGHT_TOO_LOW": "کمتر از بازه وزنی توصیه‌شده",
+        "WEIGHT_TOO_HIGH": "بیشتر از بازه وزنی توصیه‌شده",
+        "WEIGHT_UNKNOWN": "وزن حیوان خانگی ثبت نشده است",
+        "ALLERGEN_CONFLICT": "با یک حساسیت شناخته‌شده تداخل دارد",
+        "HEALTH_REVIEW_REQUIRED": "ابتدا نیاز به تکمیل پروفایل سلامت دارد",
+        "NO_ACTIVE_PET": "هیچ حیوان خانگی فعالی انتخاب نشده است"
+      }
+    },
+    "detail": {
+      "title": "محصول",
+      "loading": "در حال بارگذاری",
+      "retry": "تلاش مجدد",
+      "shoppingFor": "در حال خرید برای {name}",
+      "variant": "نوع",
+      "offer": "فروشنده",
+      "noOffers": "در حال حاضر هیچ فروشنده‌ای این نوع را ارائه نمی‌دهد",
+      "verified": "تأیید شده",
+      "inStock": "{count} عدد موجود",
+      "outOfStock": "ناموجود",
+      "deliveryPlaceholder": "جزئیات ارسال به‌زودی",
+      "quantity": "تعداد",
+      "addToCart": "افزودن به سبد خرید",
+      "goToCart": "رفتن به سبد خرید",
+      "addFailed": "افزودن به سبد خرید ممکن نشد. لطفاً دوباره تلاش کنید."
+    },
+    "cart": {
+      "title": "سبد خرید",
+      "loading": "در حال بارگذاری",
+      "retry": "تلاش مجدد",
+      "empty": "سبد خرید شما خالی است.",
+      "browseShop": "مشاهده فروشگاه",
+      "safetyConflictBanner": "یک یا چند کالا ممکن است با حساسیت شناخته‌شده یکی از حیوانات خانگی تداخل داشته باشد. در زمان پرداخت از شما تأیید گرفته می‌شود.",
+      "forPet": "برای {name}",
+      "noTargetPet": "حیوان خانگی برای این کالا انتخاب نشده است",
+      "remove": "حذف",
+      "priceChanged": "قیمت از زمان افزودن تغییر کرده است",
+      "sellerSubtotal": "جمع فروشنده",
+      "subtotal": "جمع جزء",
+      "proceedToCheckout": "ادامه تا پرداخت"
+    },
+    "checkout": {
+      "address": {
+        "title": "آدرس تحویل",
+        "addNew": "افزودن آدرس جدید",
+        "addressLine": "آدرس",
+        "city": "شهر",
+        "countryCode": "کد کشور",
+        "save": "ذخیره آدرس"
+      },
+      "delivery": {
+        "title": "روش ارسال",
+        "method": {
+          "STANDARD": "استاندارد",
+          "EXPRESS": "فوری"
+        }
+      },
+      "safetyAck": {
+        "title": "لطفاً قبل از ادامه تأیید کنید",
+        "warning": "احتمال تداخل ایمنی",
+        "description": "حداقل یک کالا در سبد خرید شما ممکن است با حساسیت شناخته‌شده یکی از حیوانات خانگی تداخل داشته باشد. لطفاً برای ادامه این سفارش تأیید کنید.",
+        "acknowledge": "متوجه شدم، ادامه می‌دهم"
+      },
+      "review": {
+        "title": "بررسی سفارش",
+        "subtotal": "جمع جزء",
+        "delivery": "ارسال",
+        "total": "جمع کل"
+      },
+      "payment": {
+        "title": "پرداخت",
+        "amountDue": "مبلغ قابل پرداخت",
+        "devLabel": "پرداخت آزمایشی",
+        "simulateSuccess": "شبیه‌سازی پرداخت موفق",
+        "simulateFailure": "شبیه‌سازی پرداخت ناموفق",
+        "simulatePending": "شبیه‌سازی پرداخت در انتظار",
+        "onlinePayment": "پرداخت آنلاین"
+      },
+      "pending": {
+        "title": "پرداخت در انتظار تأیید",
+        "status": "در انتظار تأیید",
+        "description": "منتظر تأیید از سمت درگاه پرداخت هستیم. این ممکن است کمی طول بکشد — کمی بعد دوباره بررسی کنید.",
+        "refresh": "بررسی وضعیت"
+      },
+      "paymentFailed": {
+        "title": "پرداخت ناموفق بود",
+        "generic": "پرداخت شما تکمیل نشد.",
+        "preserved": "هیچ مبلغی کسر نشد و سبد خرید شما حفظ شده است.",
+        "returnToCart": "بازگشت به سبد خرید",
+        "tryAgain": "تلاش مجدد"
+      },
+      "createFailed": "شروع پرداخت ممکن نشد. لطفاً دوباره تلاش کنید."
+    },
+    "confirmation": {
+      "title": "سفارش تأیید شد",
+      "subtitle": "{count, plural, one {۱ سفارش} other {# سفارش}} ثبت شد",
+      "orderStatus": {
+        "PENDING": "در انتظار",
+        "CONFIRMED": "تأیید شده",
+        "CANCELLED": "لغو شده"
+      },
+      "total": "جمع کل",
+      "viewOrders": "مشاهده سفارش‌های من",
+      "continueShopping": "ادامه خرید"
+    },
+    "myOrders": {
+      "title": "سفارش‌های من",
+      "loading": "در حال بارگذاری",
+      "retry": "تلاش مجدد",
+      "empty": "هنوز سفارشی ثبت نکرده‌اید.",
+      "browseShop": "مشاهده فروشگاه",
+      "itemCount": "{count, plural, one {۱ کالا} other {# کالا}}",
+      "status": {
+        "PENDING": "در انتظار",
+        "CONFIRMED": "تأیید شده",
+        "CANCELLED": "لغو شده"
+      }
+    },
+    "orderDetail": {
+      "title": "سفارش",
+      "loading": "در حال بارگذاری",
+      "retry": "تلاش مجدد",
+      "quantityAndUnitPrice": "تعداد {quantity} × {price}",
+      "forPet": "برای {name}",
+      "unknownPet": "حیوان خانگی که دیگر در این حساب نیست",
+      "subtotal": "جمع جزء",
+      "delivery": "ارسال",
+      "total": "جمع کل",
+      "shippingAddress": "آدرس ارسال",
+      "fulfillment": "وضعیت انجام سفارش",
+      "fulfillmentPlaceholder": "پیگیری انجام سفارش به‌زودی",
+      "placedAt": "ثبت‌شده {when}",
+      "status": {
+        "PENDING": "در انتظار",
+        "CONFIRMED": "تأیید شده",
+        "CANCELLED": "لغو شده"
       }
     }
   }

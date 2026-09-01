@@ -385,6 +385,142 @@ enum BookingSeriesStatus {
 }
 
 // ---------------------------------------------------------------------------
+// Commerce Core (Handoff 06) — Product/Variant/Offer/Cart/Checkout/Order/Payment
+// ---------------------------------------------------------------------------
+
+/// Deliberately its own vocabulary, not a reuse of ProviderVerificationStatus
+/// — a SellerOrganization is a different kind of party (goods, not services)
+/// even though the review states happen to line up 1:1 today.
+enum SellerVerificationStatus {
+  NOT_STARTED
+  SUBMITTED
+  NEEDS_INFORMATION
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+/// Separate axis from verification — a VERIFIED seller can still be
+/// deactivated/suspended without losing its review history.
+enum SellerStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ProductCategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum BrandStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SellerOfferStatus {
+  ACTIVE
+  PAUSED
+  OUT_OF_STOCK
+  SUSPENDED
+}
+
+enum CartStatus {
+  ACTIVE
+  CONVERTED
+  ABANDONED
+}
+
+/// PARTIALLY_CONFIRMED exists for the "N orders, not all succeed" case (spec
+/// section 32) — this phase's happy-path payment flow never produces it
+/// (DevPaymentGateway's SUCCESS mode confirms every seller's Order in the
+/// same transaction), but the data model supports it without a migration
+/// once a real multi-capture gateway exists.
+enum CheckoutStatus {
+  DRAFT
+  READY_FOR_PAYMENT
+  PAYMENT_PENDING
+  CONFIRMED
+  PARTIALLY_CONFIRMED
+  FAILED
+  EXPIRED
+}
+
+enum InventoryReservationStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
+  EXPIRED
+}
+
+/// PREPARING/READY_FOR_FULFILLMENT/FULFILLED/PARTIALLY_REFUNDED/REFUNDED are
+/// part of the vocabulary this phase's architecture must support (spec
+/// section 30) but nothing transitions an Order to them yet — only
+/// PENDING/CONFIRMED/CANCELLED are reachable. See README Known limitations.
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY_FOR_FULFILLMENT
+  FULFILLED
+  CANCELLED
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+/// A placeholder axis only — no delivery integration this phase (spec
+/// section 47); both values currently produce the same dev-calculated
+/// deliveryAmount.
+enum DeliveryMethod {
+  STANDARD
+  EXPRESS
+}
+
+enum PaymentIntentStatus {
+  REQUIRES_PAYMENT_METHOD
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  CANCELLED
+}
+
+/// Only DEV_SIMULATED exists this phase — the enum shape (not a plain
+/// string) is what proves the adapter architecture: adding SNAPPPAY/DIGIPAY
+/// later is a new enum value plus a new PaymentGateway implementation, never
+/// a change to Checkout's own business logic (spec section 34).
+enum PaymentProvider {
+  DEV_SIMULATED
+}
+
+enum PaymentAttemptStatus {
+  STARTED
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum TransactionType {
+  CHARGE
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+// ---------------------------------------------------------------------------
 // Core identity
 // ---------------------------------------------------------------------------
 
@@ -413,6 +549,9 @@ model User {
   bookings             Booking[]
   bookingSeries        BookingSeries[]
   providerContext      ProviderContextPreference?
+  carts                Cart[]
+  checkouts            Checkout[]
+  orders               Order[]
 
   @@map("users")
 }
@@ -449,6 +588,9 @@ model Household {
   careCalendarEvents   CareCalendarEvent[]
   addresses            CustomerAddress[]
   bookingSeries        BookingSeries[]
+  carts                Cart[]
+  checkouts            Checkout[]
+  orders               Order[]
 
   @@map("households")
 }
@@ -538,6 +680,8 @@ model Pet {
   bookings           Booking[]
   careCalendarEvents CareCalendarEvent[]
   bookingSeries      BookingSeries[]
+  cartLines          CartLine[]
+  orderItems         OrderItem[]
 
   @@index([householdId])
   @@map("pets")
@@ -1084,8 +1228,10 @@ model CustomerAddress {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  bookingsAsCustomerAddress Booking[] @relation("BookingCustomerAddress")
-  bookingsAsDropoffAddress  Booking[] @relation("BookingDropoffAddress")
+  bookingsAsCustomerAddress Booking[]  @relation("BookingCustomerAddress")
+  bookingsAsDropoffAddress  Booking[]  @relation("BookingDropoffAddress")
+  checkouts                 Checkout[]
+  ordersAsShippingAddress   Order[]
 
   @@index([householdId])
   @@map("customer_addresses")
@@ -1320,6 +1466,471 @@ model CareCalendarEvent {
   @@index([householdId, petId])
   @@index([startAt])
   @@map("care_calendar_events")
+}
+
+// ---------------------------------------------------------------------------
+// Commerce Core (Handoff 06)
+// ---------------------------------------------------------------------------
+
+/// A goods seller — deliberately its own model from ProviderOrganization
+/// (services). Only VERIFIED + ACTIVE sellers ever expose purchasable
+/// SellerOffers (see ShopService); a seller under review or suspended stays
+/// fully readable for admin/history purposes, just never discoverable.
+model SellerOrganization {
+  id                 String                   @id @default(uuid()) @db.Uuid
+  name               String
+  verificationStatus SellerVerificationStatus @default(NOT_STARTED)
+  status             SellerStatus             @default(ACTIVE)
+  countryCode        String
+  city               String?
+  logoUrl            String?
+  description        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  offers SellerOffer[]
+  orders Order[]
+
+  @@index([verificationStatus, status])
+  @@map("seller_organizations")
+}
+
+model Brand {
+  id      String      @id @default(uuid()) @db.Uuid
+  name    String
+  slug    String      @unique
+  logoUrl String?
+  status  BrandStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@map("brands")
+}
+
+/// A minimal, self-referencing hierarchy (spec section 5) — parentId is
+/// nullable for a top-level category. onDelete: SetNull on the self-relation
+/// means removing a parent category never deletes its children, it just
+/// orphans them to the root level.
+model ProductCategory {
+  id       String            @id @default(uuid()) @db.Uuid
+  parentId String?           @db.Uuid
+  parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children ProductCategory[] @relation("CategoryHierarchy")
+
+  name   String
+  slug   String                @unique
+  status ProductCategoryStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@map("product_categories")
+}
+
+/// Catalog identity only — never seller price/inventory (spec section 4:
+/// "Do NOT put seller price/inventory on Product"). The compatibility
+/// fields below are the Commerce Core's equivalent of ProviderService's
+/// minAgeMonths/maxAgeMonths/minWeightKg/maxWeightKg/supportsDog/supportsCat
+/// (Handoff 04) — same shape, same "known negative vs. missing data" rules
+/// in ProductCompatibilityService, deliberately not a new representation
+/// (e.g. not a speciesCompatibility array) so the two compatibility engines
+/// stay easy to compare and maintain side by side.
+model Product {
+  id         String          @id @default(uuid()) @db.Uuid
+  brandId    String?         @db.Uuid
+  brand      Brand?          @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  categoryId String          @db.Uuid
+  category   ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  title       String
+  slug        String  @unique
+  description String?
+
+  supportsDog          Boolean  @default(true)
+  supportsCat          Boolean  @default(true)
+  minAgeMonths         Int?
+  maxAgeMonths         Int?
+  minWeightKg          Decimal? @db.Decimal(6, 2)
+  maxWeightKg          Decimal? @db.Decimal(6, 2)
+  /// Normalized (upper-case) ingredient/allergen tags (e.g. "CHICKEN",
+  /// "GRAIN") — matched literally against the pet's own recorded Allergy
+  /// names by ProductCompatibilityService. Deliberately a flat string match,
+  /// never inferred ingredient parsing or medical reasoning (spec section
+  /// 12: "deterministic rules only").
+  allergenTags         String[]
+  /// When true, NEEDS_REVIEW is forced until the pet's Health Basics are
+  /// COMPLETE — mirrors ProviderService.requiresHealthBasics exactly.
+  requiresHealthReview Boolean  @default(false)
+
+  status ProductStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  variants   ProductVariant[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@map("products")
+}
+
+/// A purchasable unit of a Product (spec section 7) — e.g. "2kg Chicken" vs.
+/// "5kg Chicken". `attributes` is Json for genuinely free-form facets (color,
+/// flavor); the two facets that actually drive compatibility/logistics
+/// (weight) are kept as real structured columns rather than dumped into
+/// that Json, per the spec's explicit "avoid dumping all variant identity
+/// into free JSON" instruction.
+model ProductVariant {
+  id        String  @id @default(uuid()) @db.Uuid
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  sku     String  @unique
+  barcode String?
+  title   String?
+
+  attributes Json?
+
+  weightValue Decimal?    @db.Decimal(6, 2)
+  weightUnit  WeightUnit?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  offers     SellerOffer[]
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+/// One Variant may have multiple Offers from different sellers (spec
+/// section 8) — price/inventory live here, never on Product/Variant.
+model SellerOffer {
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  productVariantId     String             @db.Uuid
+  productVariant       ProductVariant     @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+
+  /// Integer IRR (Rial), never a fractional/floating amount — see README
+  /// "IRR/Toman behavior". The UI divides by 10 to render Toman for display.
+  priceAmount     Int
+  compareAtAmount Int?
+  currency        String @default("IRR")
+
+  status SellerOfferStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inventoryItem InventoryItem?
+  cartLines     CartLine[]
+  reservations  InventoryReservation[]
+  orderItems    OrderItem[]
+
+  @@index([productVariantId])
+  @@index([sellerOrganizationId])
+  @@map("seller_offers")
+}
+
+/// The single authoritative inventory record per Offer (spec section 9) —
+/// PostgreSQL, never Redis. `available` (onHand - reserved) is always
+/// computed on read, never stored, so it can never drift out of sync with
+/// the two real columns. The schema_hardening-style raw-SQL CHECK
+/// constraints enforcing onHand >= 0, reserved >= 0, and reserved <= onHand
+/// live in this handoff's migration (see migration.sql) — Prisma's DSL
+/// can't express multi-column CHECKs, same precedent as the users
+/// contact-info CHECK from the original schema hardening pass.
+model InventoryItem {
+  id            String      @id @default(uuid()) @db.Uuid
+  sellerOfferId String      @unique @db.Uuid
+  sellerOffer   SellerOffer @relation(fields: [sellerOfferId], references: [id], onDelete: Cascade)
+
+  onHand   Int @default(0)
+  reserved Int @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@map("inventory_items")
+}
+
+/// A persistent, server-side cart (spec section 18) — never localStorage-only.
+/// ABANDONED exists in the vocabulary for a future cleanup job; nothing sets
+/// it yet (see README Known limitations).
+model Cart {
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdId String?    @db.Uuid
+  household   Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  status CartStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lines     CartLine[]
+  checkouts Checkout[]
+
+  @@index([userId, status])
+  @@map("carts")
+}
+
+/// `targetPetId` is optional and, when set, purely a compatibility/context
+/// hint — never a pet-data permission grant (CartService still verifies the
+/// caller has some effective access to that pet before accepting it, the
+/// same IDOR-prevention pattern used everywhere else, but no PetAccessGrant
+/// is created or consulted beyond that check). No DB-level unique constraint
+/// on (cartId, sellerOfferId, targetPetId): Postgres treats NULL as distinct
+/// in unique indexes, which would let two "no target pet" lines for the same
+/// offer coexist — CartService.addItem() finds-or-increments explicitly
+/// instead, sidestepping that quirk entirely (see README Known limitations).
+model CartLine {
+  id            String      @id @default(uuid()) @db.Uuid
+  cartId        String      @db.Uuid
+  cart          Cart        @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  sellerOfferId String      @db.Uuid
+  sellerOffer   SellerOffer @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+  targetPetId   String?     @db.Uuid
+  targetPet     Pet?        @relation(fields: [targetPetId], references: [id], onDelete: SetNull)
+
+  quantity Int
+
+  /// The offer's price at the moment this line was added/last updated —
+  /// display-only. Checkout always revalidates against the Offer's current
+  /// price and never trusts this snapshot (spec section 20).
+  unitPriceSnapshot Int
+  currency          String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cartId])
+  @@map("cart_lines")
+}
+
+/// A checkout attempt over a snapshot of the cart's lines at creation time
+/// (spec section 25). One Cart may have more than one Checkout row over its
+/// lifetime (an expired/failed attempt followed by a fresh one) — onDelete:
+/// Restrict on cartId means a checkout, once created, is a permanent
+/// financial-adjacent record even if the cart itself is later touched.
+model Checkout {
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  user        User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  householdId String?    @db.Uuid
+  household   Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  cartId      String     @db.Uuid
+  cart        Cart       @relation(fields: [cartId], references: [id], onDelete: Restrict)
+
+  addressId      String?          @db.Uuid
+  address        CustomerAddress? @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  deliveryMethod DeliveryMethod   @default(STANDARD)
+
+  status CheckoutStatus @default(DRAFT)
+
+  subtotalAmount Int     @default(0)
+  deliveryAmount Int     @default(0)
+  discountAmount Int     @default(0)
+  totalAmount    Int     @default(0)
+  currency       String  @default("IRR")
+  /// Placeholder only (spec section 46) — no promotion/campaign engine exists to validate this against.
+  promotionCode  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  expiresAt DateTime?
+
+  reservations   InventoryReservation[]
+  orders         Order[]
+  paymentIntents PaymentIntent[]
+
+  @@index([userId])
+  @@index([cartId])
+  @@map("checkouts")
+}
+
+/// Reserves inventory for the duration of a checkout attempt (spec section
+/// 27) — reservation and InventoryItem.reserved move together inside the
+/// same transaction (see InventoryReservationService). A 15-minute
+/// `expiresAt` (see README) is the documented timeout; correctness at
+/// use/confirm time comes from checking `status`/`expiresAt` directly
+/// against `now()`, never from assuming a cleanup worker already ran one
+/// (spec section 28) — an actual expiry sweep is future work.
+model InventoryReservation {
+  id            String      @id @default(uuid()) @db.Uuid
+  checkoutId    String      @db.Uuid
+  checkout      Checkout    @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  sellerOfferId String      @db.Uuid
+  sellerOffer   SellerOffer @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+
+  quantity Int
+
+  status    InventoryReservationStatus @default(ACTIVE)
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([checkoutId])
+  @@index([sellerOfferId, status])
+  @@map("inventory_reservations")
+}
+
+/// One Order per seller per Checkout (spec section 29, "1 Checkout → N
+/// Orders") — `@@unique([checkoutId, sellerOrganizationId])` is what makes
+/// order creation on payment confirmation idempotent: a retried
+/// confirmation attempt hits this constraint (the same P2002-catch pattern
+/// BookingsService already uses for slot double-booking) instead of ever
+/// creating a duplicate Order for the same seller. `shippingAddressSnapshot`
+/// preserves the delivery address as it was at order time even if the
+/// referenced CustomerAddress is later edited — history must never silently
+/// change (spec section 31's snapshot principle, applied to the address
+/// too).
+model Order {
+  id                   String             @id @default(uuid()) @db.Uuid
+  checkoutId           String             @db.Uuid
+  checkout             Checkout           @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  userId               String             @db.Uuid
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  householdId          String?            @db.Uuid
+  household            Household?         @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  status OrderStatus @default(PENDING)
+
+  subtotalAmount Int
+  deliveryAmount Int
+  discountAmount Int
+  totalAmount    Int
+  currency       String
+
+  shippingAddressId       String?          @db.Uuid
+  shippingAddress         CustomerAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
+  shippingAddressSnapshot Json
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+
+  items OrderItem[]
+
+  @@unique([checkoutId, sellerOrganizationId])
+  @@index([userId])
+  @@index([sellerOrganizationId])
+  @@map("orders")
+}
+
+/// The immutable commercial snapshot of a purchased line (spec section 31)
+/// — an old Order must never be rendered from mutable Product/Offer rows
+/// alone, so title/sku/price are all copied at order-creation time.
+/// `compatibilitySnapshot` preserves what ProductCompatibilityService
+/// reported at purchase time (Json, since PetCompatibilityDto-shaped
+/// payloads vary in reason-code count) — a later change to the product's
+/// own compatibility metadata must never rewrite order history.
+model OrderItem {
+  id               String         @id @default(uuid()) @db.Uuid
+  orderId          String         @db.Uuid
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId        String         @db.Uuid
+  product          Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productVariantId String         @db.Uuid
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  sellerOfferId    String         @db.Uuid
+  sellerOffer      SellerOffer    @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+
+  productTitleSnapshot String
+  variantTitleSnapshot String?
+  skuSnapshot          String
+
+  quantity   Int
+  unitPrice  Int
+  totalPrice Int
+
+  targetPetId           String? @db.Uuid
+  targetPet             Pet?    @relation(fields: [targetPetId], references: [id], onDelete: SetNull)
+  compatibilitySnapshot Json
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+/// Provider-agnostic payment abstraction (spec section 33-34) — Checkout's
+/// own business logic only ever talks to this model and the PaymentGateway
+/// interface, never to a specific provider's API shape.
+model PaymentIntent {
+  id         String   @id @default(uuid()) @db.Uuid
+  checkoutId String   @db.Uuid
+  checkout   Checkout @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+
+  amount   Int
+  currency String
+
+  status         PaymentIntentStatus @default(REQUIRES_PAYMENT_METHOD)
+  provider       PaymentProvider     @default(DEV_SIMULATED)
+  idempotencyKey String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempts     PaymentAttempt[]
+  transactions Transaction[]
+
+  @@index([checkoutId])
+  @@map("payment_intents")
+}
+
+model PaymentAttempt {
+  id                String          @id @default(uuid()) @db.Uuid
+  paymentIntentId   String          @db.Uuid
+  paymentIntent     PaymentIntent   @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+  provider          PaymentProvider
+  providerReference String?
+
+  status         PaymentAttemptStatus @default(STARTED)
+  failureCode    String?
+  failureMessage String?
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  transactions Transaction[]
+
+  @@index([paymentIntentId])
+  @@map("payment_attempts")
+}
+
+/// No ledger/settlement modeling yet (spec section 36) — this is a flat
+/// history of charge/refund attempts, one row per gateway-reported result.
+model Transaction {
+  id               String          @id @default(uuid()) @db.Uuid
+  paymentIntentId  String          @db.Uuid
+  paymentIntent    PaymentIntent   @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+  paymentAttemptId String?         @db.Uuid
+  paymentAttempt   PaymentAttempt? @relation(fields: [paymentAttemptId], references: [id], onDelete: SetNull)
+
+  type     TransactionType
+  amount   Int
+  currency String
+  status   TransactionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  @@index([paymentIntentId])
+  @@map("transactions")
 }
 
 // ---------------------------------------------------------------------------

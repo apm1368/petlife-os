@@ -194,3 +194,105 @@ export class AccessExpiredException extends ApiException {
     super("ACCESS_EXPIRED", "This access has expired.", HttpStatus.FORBIDDEN, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Commerce Core (Handoff 06)
+// ---------------------------------------------------------------------------
+
+export class ProductNotAvailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PRODUCT_NOT_AVAILABLE", "This product is not currently available.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class OfferNotAvailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("OFFER_NOT_AVAILABLE", "This offer is not currently available.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class SellerNotAvailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_NOT_AVAILABLE", "This seller is not currently verified/active.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class InsufficientInventoryException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INSUFFICIENT_INVENTORY", "There isn't enough stock available for this quantity.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class PriceChangedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PRICE_CHANGED", "This item's price has changed since it was added to your cart.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/**
+ * Not a hard block — surfaced so the caller can re-review before proceeding
+ * (spec section 23: "prefer explicit acknowledgement, unless product
+ * metadata marks hard block"). Checkout creation returns this in
+ * `validationIssues`, not as a thrown exception, for NEEDS_REVIEW/
+ * NOT_RECOMMENDED; see SAFETY_CONFLICT below for the one status this phase
+ * treats as a hard block.
+ */
+export class CompatibilityReviewRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMPATIBILITY_REVIEW_REQUIRED", "This item needs your review before it can be purchased for this pet.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/**
+ * POTENTIAL_SAFETY_CONFLICT must outrank any commerce incentive (spec
+ * section 13) — thrown only when a checkout is created/paid without the
+ * required explicit acknowledgement for a line the compatibility engine
+ * flagged as a safety conflict.
+ */
+export class SafetyConflictException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SAFETY_CONFLICT", "This item may not be safe for this pet. Please review before continuing.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class CartEmptyException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CART_EMPTY", "Your cart is empty.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class CheckoutExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CHECKOUT_EXPIRED", "This checkout has expired. Please start again.", HttpStatus.GONE, details);
+  }
+}
+
+export class PaymentFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_FAILED", "Payment was not completed.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class PaymentPendingException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_PENDING", "Payment is still being confirmed.", HttpStatus.ACCEPTED, details);
+  }
+}
+
+export class PaymentAlreadyCompletedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_ALREADY_COMPLETED", "This checkout has already been paid.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class OrderNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ORDER_NOT_FOUND", "Order not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class CheckoutNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CHECKOUT_NOT_FOUND", "Checkout not found.", HttpStatus.NOT_FOUND, details);
+  }
+}

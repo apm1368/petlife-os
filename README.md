@@ -1267,6 +1267,328 @@ apply to the Provider OS's own cancel/pet-context paths respectively.
   generic error.
 - **Team** (`/provider/team`) — read-only roster.
 
+## Commerce Core (Handoff 06)
+
+Cart → Checkout → Order commerce as a modular monolith (Catalog, Sellers,
+Inventory, Cart, Checkout, Orders, Payments, `ProductCompatibility` —
+separate modules under `apps/api/src/modules/commerce/`, no
+microservices). Reuses the existing session auth, `PetAccessGrant`
+authorization, `CustomerAddress`, transactional outbox, and
+`IdempotencyInterceptor` — no second auth system, no second address
+system, no second idempotency framework.
+
+### Product → Variant → Offer → Seller → Inventory (never collapsed)
+
+Five strictly separate concepts, per the spec's core architecture:
+
+| Model | Owns | Never owns |
+| --- | --- | --- |
+| `Product` | catalog identity — title/slug/description/brand/category, plus the compatibility-input fields (`supportsDog`/`supportsCat`/`minAgeMonths`/`maxAgeMonths`/`minWeightKg`/`maxWeightKg`/`allergenTags`/`requiresHealthReview`) | price, inventory, or a seller |
+| `ProductVariant` | one purchasable configuration of a Product — `sku`/`barcode`/`title`/`attributes`/`weightValue`/`weightUnit` | price or inventory |
+| `SellerOffer` | one seller's price (`priceAmount`/`compareAtAmount`/`currency`) for one Variant | inventory count, catalog identity |
+| `SellerOrganization` | `verificationStatus`/`status`/business identity | product or price data |
+| `InventoryItem` | `onHand`/`reserved` for exactly one `SellerOffer` | catalog or seller identity |
+
+One Variant can have offers from many sellers (`Product → ProductVariant →
+[SellerOffer × N sellers] → InventoryItem`); `GET /shop/products/:id/offers`
+returns every `ACTIVE` offer across every variant so the offer-selection
+step can show them side by side. A `Product` deliberately mirrors
+`ProviderService`'s exact compatibility-field shape (age/weight/species)
+rather than the spec's literal `speciesCompatibility` array — documented
+here as a clean, intentional equivalent, not a deviation.
+
+Only a **`VERIFIED` + `ACTIVE`** `SellerOrganization`'s offers are ever
+discoverable or purchasable — `CatalogService`'s `ACTIVE_OFFER_WHERE`
+filter and `CartService.addItem`'s own re-check both enforce this
+independently (never trust a stale/cached "verified" flag from the
+browsing step). The seed data includes one seller stuck at `SUBMITTED`
+specifically to prove this gate: its offers never appear in discovery and
+adding one to a cart is rejected.
+
+### Inventory (`InventoryItem`) — PostgreSQL is the only source of truth
+
+`onHand`/`reserved` live in Postgres, never Redis or an in-memory cache;
+`available = onHand - reserved` is always computed, never stored. Three
+raw-SQL `CHECK` constraints (Prisma's DSL can't express multi-column
+checks — same precedent as the original `schema_hardening` migration's
+`users` contact-info `CHECK`) make the invariant impossible to violate at
+the database layer even if application code has a bug:
+
+```sql
+CHECK ("onHand" >= 0)
+CHECK ("reserved" >= 0)
+CHECK ("reserved" <= "onHand")
+```
+
+`InventoryReservationService.reserve()` takes a `SELECT ... FOR UPDATE`
+row lock on the `InventoryItem` row before reading `onHand`/`reserved`, so
+two concurrent checkouts racing for the last unit of stock serialize
+correctly instead of both succeeding.
+
+### `ProductCompatibilityService` — deterministic, never defaults to COMPATIBLE
+
+Mirrors `PetServiceCompatibilityService`'s escalate-to-worst-status
+pattern (Handoff 04) but with a six-value vocabulary:
+
+```
+COMPATIBLE                    a real constraint was actively evaluated and passed
+LIKELY_COMPATIBLE             nothing applicable to actively confirm (e.g. an unrestricted product)
+NEEDS_REVIEW                  a required fact is missing, or requiresHealthReview until Health Basics is COMPLETE
+NOT_RECOMMENDED               an actual constraint violation (species/age/weight)
+POTENTIAL_SAFETY_CONFLICT     a known active allergy matches an allergenTag — always outranks every other status
+UNKNOWN                       no active pet in context at all
+```
+
+`COMPATIBLE` is earned, not assumed: the service tracks whether *any*
+constraint was actively evaluated and passed (species match, age/weight
+within range, health review complete, no allergen conflict); a product
+with zero applicable constraints stays `LIKELY_COMPATIBLE` rather than
+claiming a real endorsement it never checked. `POTENTIAL_SAFETY_CONFLICT`
+is the highest-ranked status precisely so it can never be outranked by a
+discount, promotion, or seller ranking (there are none of those this
+phase, but the rank ordering is what future promotion work must respect).
+The allergen check requires `canViewHealth` (via
+`PetAccessService.getEffectivePermissions`) *before* even querying
+`Allergy` rows — a caller without health-data access sees `NEEDS_REVIEW`,
+never a false `COMPATIBLE` and never a permission leak. Reason codes
+(`SPECIES_MISMATCH`/`AGE_TOO_OLD`/`ALLERGEN_CONFLICT`/etc.) are returned
+alongside the status — the frontend always shows the reason, never just a
+color.
+
+### Cart — persistent, server-side, priced live
+
+`Cart`/`CartLine` are real Postgres rows (`status`: `ACTIVE`/`CONVERTED`/
+`ABANDONED`), not a client-only or Redis-only structure — `GET /cart`
+always reflects the same cart across devices/sessions. Each line snapshots
+the price at add-time (`unitPriceSnapshot`) but the cart response always
+computes `currentPriceAmount` from the *live* offer and flags
+`priceChanged` when they differ — the UI shows the current price with a
+"price changed" indicator, never the stale snapshot silently presented as
+current. `CartLine.targetPetId` is nullable and per-line (not per-cart),
+so two lines in the same cart can target different pets, and changing
+which pet a line targets (implicitly, by re-adding under a different
+active pet) recomputes that line's compatibility independently — no
+`targetPetId` uniqueness constraint exists because Postgres treats `NULL`
+as distinct in unique indexes (two "no target pet" lines for the same
+offer would NOT collide against such a constraint); `CartService.addItem`
+instead does an explicit `findFirst` + increment at the application layer,
+sidestepping the SQL semantics issue directly. `GET /cart`'s response
+groups lines by seller (`sellerGroups`) and reports `hasSafetyConflict`
+whenever any line is `POTENTIAL_SAFETY_CONFLICT`, so the cart screen can
+show one banner instead of forcing the reader to scan every line.
+
+### Checkout — revalidates everything, never trusts the cart blindly
+
+`POST /checkout` snapshots the cart into an immutable-for-this-attempt
+`Checkout` row and revalidates every line: offer still `ACTIVE`, seller
+still `VERIFIED`+`ACTIVE`, inventory still sufficient, price still current
+(price drift is surfaced as a `CheckoutValidationIssueDto`, not a hard
+block), and — the one hard block — any `POTENTIAL_SAFETY_CONFLICT` line
+requires `acknowledgeSafetyConflict: true` on the request or the whole
+checkout is rejected with `409 SAFETY_CONFLICT` (never a silent
+downgrade). `CheckoutStatus` (`DRAFT`/`READY_FOR_PAYMENT`/
+`PAYMENT_PENDING`/`CONFIRMED`/`PARTIALLY_CONFIRMED`/`FAILED`/`EXPIRED`) is
+kept completely separate from `OrderStatus`/`PaymentIntentStatus` — see
+"Financial state separation" below. Every successful `POST /checkout` also
+reserves inventory for every line inside the *same* Prisma `$transaction`
+that creates the `Checkout` row, so a checkout is never left holding
+inventory it didn't actually reserve (or vice versa).
+
+### Inventory reservation — a real row, a 15-minute TTL, checked at use-time
+
+`InventoryReservation` (`ACTIVE`/`CONSUMED`/`RELEASED`/`EXPIRED`) is a
+genuine table, not just a TTL key — `RESERVATION_TTL_MINUTES = 15`
+(exported constant in `inventory-reservation.service.ts`) is the chosen
+timeout, long enough to complete address/payment steps without feeling
+rushed, short enough that abandoned checkouts don't lock up stock for
+long. Correctness never depends solely on a background sweep: `pay()`
+checks `checkout.expiresAt` itself and returns `410 CHECKOUT_EXPIRED`
+(releasing the reservation inline) if the checkout has expired by the time
+payment is attempted, rather than trusting that a cron job already cleaned
+it up. `reserve()`/`releaseAllForCheckout()`/`consumeAllForCheckout()` are
+the only three places `InventoryItem.reserved` is ever mutated, each
+inside a transaction.
+
+### "1 Checkout → N Orders" (the architecture's central rule)
+
+A `Checkout` can span multiple sellers; a successful payment creates
+**exactly one `Order` per seller represented in that checkout's cart
+lines**, never one combined order and never one order per line.
+`Order.@@unique([checkoutId, sellerOrganizationId])` is what makes this
+both structural and idempotent: `OrdersService.createForCheckout()` groups
+lines by seller and creates one `Order` + its `OrderItem`s per group
+inside the same transaction that consumes the reservation and confirms
+the checkout; if the same checkout's confirmation is triggered twice (a
+retried `pay()` call, or a race between the synchronous path and a
+webhook — see below), the second attempt's `Order` creation hits the
+unique constraint (Prisma `P2002`) and the service catches it and returns
+the *existing* order instead of erroring or duplicating — the same
+double-booking guard pattern `BookingsService` already used in Handoff 03.
+Each `OrderItem` carries a fully immutable commercial snapshot
+(`productTitleSnapshot`/`variantTitleSnapshot`/`skuSnapshot`/`quantity`/
+`unitPrice`/`totalPrice`/`targetPetId`/`compatibilitySnapshot`) taken at
+order-creation time — a `Product` or `SellerOffer` changing *after* the
+order exists never alters what the order shows, by construction, not by
+convention.
+
+### Payment abstraction — `PaymentGateway` interface, one real implementation
+
+```
+PaymentIntent   REQUIRES_PAYMENT_METHOD → PENDING/AUTHORIZED → CAPTURED (or FAILED/CANCELLED)
+PaymentAttempt  STARTED → PENDING/SUCCEEDED/FAILED/CANCELLED  (one per charge attempt)
+Transaction     CHARGE|REFUND, PENDING/SUCCEEDED/FAILED       (the ledger-adjacent audit row)
+```
+
+`PaymentGateway` is a plain interface (`charge(input): Promise<PaymentChargeResult>`)
+behind a DI token (`PAYMENT_GATEWAY`); `DevPaymentGateway` is the only
+implementation this phase (`PaymentProvider.DEV_SIMULATED` is the only
+enum value — no `SnappPay`/`DigiPay`/real gateway integration exists or is
+stubbed with fake credentials). It never talks to a network; a `mode`
+parameter (`SUCCESS`/`FAILURE`/`PENDING`, default `SUCCESS`) picked by the
+caller decides the outcome, which is exactly what the checkout flow's
+"Development Payment" UI exposes as three explicit buttons in dev/test
+only — production copy would say "Online Payment" with no mode choice and
+no mention of "DevPaymentGateway" anywhere in the UI. The full flow: create
+Checkout → reserve inventory → create `PaymentIntent` → `DevPaymentGateway`
+authorize/capture → on success, consume the reservation, create the
+Order(s), mark the Checkout `CONFIRMED`, convert the Cart — all inside one
+transaction (`CheckoutService.finalizeSuccessfulPayment`).
+
+- **Failure** (`mode: "FAILURE"`) never confirms an order and deliberately
+  leaves the reservation `ACTIVE` (not released) — cart and checkout stay
+  fully recoverable, and a retry doesn't lose its place in the stock queue;
+  a reservation is only ever released on genuine expiry.
+- **Pending** (`mode: "PENDING"`) sets `Checkout.PAYMENT_PENDING` with no
+  order confirmation yet — the future-safe async path below is what
+  eventually resolves it.
+
+### Webhook slot + the synchronous/async race it had to avoid
+
+`POST /payments/webhooks/:provider` exists and is fully tested end to end
+for `dev_simulated` — no other provider is implemented or claimed.
+`WebhookSignatureVerifier` is a real interface (`DevWebhookSignatureVerifier`
+always returns `true`, documented as dev-only) so a real gateway's
+signature check has a slot to drop into later without changing the
+controller. Resolving a pending intent via webhook
+(`PaymentsService.resolvePendingIntent`) publishes `PaymentSucceeded` with
+`viaWebhook: true`; **`PaymentEventsListener` only acts on that event when
+`viaWebhook` is true** — this flag exists specifically because
+`EventEmitter2.emit()` invokes listeners without awaiting them, so if the
+listener reacted to *every* `PaymentSucceeded` (including the one the
+synchronous `pay()` handler's own call chain implicitly triggers), it
+would race that handler's direct call to `finalizeSuccessfulPayment()`,
+risking a double order-creation attempt. `finalizeSuccessfulPayment` is
+itself idempotent (checks for an already-`CONFIRMED` checkout and returns
+the existing order ids), so the flag is defense in depth on top of an
+already-safe function, not the only thing preventing a duplicate.
+
+### Idempotency
+
+`POST /checkout`, `POST /checkout/:id/payment-intent`, and
+`POST /checkout/:id/pay` all accept the existing `Idempotency-Key` header
+via the existing `IdempotencyInterceptor` (Redis-cached-response, same
+mechanism as pet creation and booking confirmation) — a retried request
+with the same key returns the original response rather than reserving
+inventory, charging, or creating orders a second time.
+`PaymentsService.createIntent()` is separately idempotent at the
+service layer (reuses an existing non-terminal intent for the checkout
+rather than creating a second one), and order creation is idempotent via
+the `Order` unique constraint described above — three independent layers,
+each guarding a different retry path.
+
+### Financial state separation (no giant enum)
+
+`CheckoutStatus`, `OrderStatus`, `PaymentIntentStatus`,
+`PaymentAttemptStatus`, and `TransactionStatus` are five separate enums on
+five separate models — a checkout being `CONFIRMED` says nothing directly
+about an individual order's `OrderStatus`, and a `PaymentIntent` reaching
+`CAPTURED` is a separate fact from the `Order` rows it caused to be
+created. `OrderStatus` defines the full future vocabulary (`PREPARING`/
+`READY_FOR_FULFILLMENT`/`FULFILLED`/`PARTIALLY_REFUNDED`/`REFUNDED`) but
+only `PENDING`/`CONFIRMED`/`CANCELLED` are reachable this phase — the rest
+exist so a future fulfillment/returns handoff doesn't need a migration to
+add them.
+
+### IRR is the integer source of truth; Toman is a display-only transform
+
+Every money column (`SellerOffer.priceAmount`, `Cart`/`Checkout`/`Order`
+totals, `PaymentIntent.amount`, `Transaction.amount`) is a plain Prisma
+`Int` storing IRR — never a float, and, deliberately, never `Decimal`
+either (a departure from `ProviderService.priceAmount`'s `Decimal`
+pattern from Handoffs 03-04, made explicit here because the spec requires
+"never floating point" and an integer minor-unit is the simplest way to
+guarantee it). The frontend's one and only currency-formatting function,
+`formatCurrency()` (`apps/web/lib/currency/format-currency.ts`), divides
+by 10 to display Toman (1 Toman = 10 Rial is a fixed, well-defined ratio —
+never a real-time exchange rate, so this division is safe in a way a
+currency conversion never would be) and is the only place in the entire
+frontend that ever performs this conversion.
+
+### Price snapshot vs. commercial snapshot (three distinct concepts, on purpose)
+
+1. **`CartLine.unitPriceSnapshot`** — the price at add-time; shown to the
+   user only as a "did the price change?" comparison against the live
+   offer, never as the authoritative total.
+2. **`Checkout` totals** — computed from the *validated, current* price at
+   checkout-creation time; this is what payment actually charges.
+3. **`OrderItem.unitPrice`/`totalPrice`/snapshots** — frozen forever at
+   order-creation time; nothing that happens to the `Product` or
+   `SellerOffer` afterward can ever change what an `Order` displays.
+
+### Transaction boundaries
+
+Every multi-row mutation that must be all-or-nothing is wrapped in a
+single Prisma `$transaction`: checkout creation + inventory reservation
+(`CheckoutService.create`), and the entire successful-payment path —
+consume reservation → create Order(s) → confirm Checkout → convert Cart
+(`CheckoutService.finalizeSuccessfulPayment`). Domain events for these
+critical operations (`InventoryReserved`, `OrderCreated`, `OrderConfirmed`,
+`CartConverted`, `PaymentSucceeded`) are published inside the same
+transaction where practical, following the existing outbox pattern —
+no new event infrastructure.
+
+### Consumer UI (`apps/web/features/commerce/`)
+
+Shop Home (`/shop`) → Product Results (`/shop/products`) → Product Detail
+(`/shop/products/:id`, hierarchy: Pet Context → Compatibility → Product →
+Variant → Offer → Add to Cart, compatibility always shown above the CTA)
+→ Cart (`/cart`, grouped by seller) → Checkout (`/checkout`, one route
+with internal steps — address/delivery → review → payment → pending/failed
+— mirroring `ServiceBookingWizard`'s established "one route, internal
+steps" pattern) → Order Confirmation (`/checkout/:id/confirmation`, each
+seller's Order shown as its own block) → My Orders (`/orders`, an Order is
+its own record, never re-derived solely from its Checkout) → Order Detail
+(`/orders/:id`). No fake ratings, no "best price" labeling, no sponsored
+placement anywhere in the product list or offer selection — every offer
+shows seller name, price, availability, and verification, and the user
+decides. Home gets one small, non-aggressive "Shop" card (mirroring the
+existing "Explore Services" card) — no commerce dashboard, no upsell
+carousel.
+
+### API endpoints (Handoff 06 additions)
+
+See the full endpoint list below (`GET /shop/categories` through
+`GET /orders/:id`).
+
+### Error codes (Handoff 06 additions)
+
+```
+PRODUCT_NOT_AVAILABLE          404  product missing or not ACTIVE
+OFFER_NOT_AVAILABLE            409  offer missing, not ACTIVE, or its seller no longer VERIFIED+ACTIVE
+SELLER_NOT_AVAILABLE           409  the offer's seller isn't VERIFIED+ACTIVE (surfaced at add-to-cart/checkout)
+INSUFFICIENT_INVENTORY         409  requested quantity exceeds onHand - reserved at reservation time
+PRICE_CHANGED                  -    non-blocking CheckoutValidationIssueDto, not an exception
+COMPATIBILITY_REVIEW_REQUIRED  -    non-blocking CheckoutValidationIssueDto, not an exception
+SAFETY_CONFLICT                400  a POTENTIAL_SAFETY_CONFLICT line exists and acknowledgeSafetyConflict wasn't set
+CART_EMPTY                     400  checkout attempted against a cart with no lines
+CHECKOUT_EXPIRED                410  payment attempted after checkout.expiresAt; reservation released
+PAYMENT_FAILED                  -    surfaced via PayCheckoutResultDto.paymentStatus, not an exception
+PAYMENT_PENDING                202  createPaymentIntent/pay against a checkout still PAYMENT_PENDING
+PAYMENT_ALREADY_COMPLETED      409  pay() called again on an already-CONFIRMED checkout
+ORDER_NOT_FOUND                404  no such order, or it belongs to a different user (never a 403 — no IDOR leak)
+CHECKOUT_NOT_FOUND             404  no such checkout, or it belongs to a different user
+```
+
 ## API endpoints
 
 ```
@@ -1367,6 +1689,29 @@ PATCH  /provider/services/:id                   (OWNER role only)
 
 GET    /provider/team
 
+GET    /shop/categories
+GET    /shop/products                           (category, species, search, petId filters)
+GET    /shop/products/:id                       (petId optional — missing Active Pet never blocks browsing)
+GET    /shop/products/:id/offers
+
+GET    /cart
+POST   /cart/items                              (Idempotency-Key supported)
+PATCH  /cart/items/:id
+DELETE /cart/items/:id
+DELETE /cart
+
+POST   /checkout                                (Idempotency-Key supported; acknowledgeSafetyConflict to proceed past SAFETY_CONFLICT)
+GET    /checkout/:id
+PATCH  /checkout/:id
+POST   /checkout/:id/revalidate
+POST   /checkout/:id/payment-intent             (Idempotency-Key supported)
+POST   /checkout/:id/pay                        (Idempotency-Key supported; mode: SUCCESS|FAILURE|PENDING, dev only)
+
+POST   /payments/webhooks/:provider             (no session/CSRF — server-to-server; dev_simulated only)
+
+GET    /orders
+GET    /orders/:id
+
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
 GET    /health/ready
@@ -1409,6 +1754,18 @@ pnpm db:seed                     # Sarah + Luna (Golden Retriever, vaccination
                                   # City Paws Walking, Cozy Home Sitting,
                                   # Tehran Pet Boarding, PetGo Taxi), each with
                                   # one service and the same daily availability
+                                  # + Commerce Core: 2 VERIFIED sellers (Pet
+                                  # Bazaar Tehran, Golestan Pet Supplies) + 1
+                                  # SUBMITTED seller (never discoverable) +
+                                  # 5 products across Food/Treats/Grooming/
+                                  # Accessories (Royal Canin Adult Dog Food —
+                                  # dog-only + CHICKEN allergen, Royal Canin
+                                  # Kitten Food — cat-only + maxAge 12mo,
+                                  # naturally NOT_RECOMMENDED for the 18mo
+                                  # Milo, Grain-Free Training Treats —
+                                  # unrestricted, Calming Grooming Wipes —
+                                  # requiresHealthReview, Soft-Sided Travel
+                                  # Carrier — sold by both VERIFIED sellers)
 
 pnpm dev                         # api on :4000, web on :3000
 ```
@@ -1484,7 +1841,27 @@ pnpm --filter @petlife/api test:e2e
   not-a-provider message, its multi-organization picker, and its
   not-verified banner; Availability's explicit
   conflict-acknowledge-and-proceed flow; and smoke tests for the Schedule
-  tab switch, the Services active/disable toggle, and the Team roster.
+  tab switch, the Services active/disable toggle, and the Team roster. New
+  in Handoff 06: `formatCurrency` asserting the IRR→Toman ÷10 display
+  transform rounds rather than truncates and never renders a fractional
+  Toman; Product Card rendering price/brand without ever labeling anything
+  "best" and surfacing a `POTENTIAL_SAFETY_CONFLICT` with an urgent tone
+  rather than hiding it; Product Results scoping its search call to the
+  active pet and rendering an empty state; Product Detail re-scoping the
+  offer list when a different variant is selected and calling
+  `addCartItem` with the selected offer/quantity/active-pet-id; Cart
+  rendering one group per seller, a price-changed flag without trusting
+  the stale total, a safety-conflict banner, and a per-line remove action;
+  Checkout walking address → review → payment and asserting all three
+  payment outcomes (success routes to Confirmation with the returned order
+  ids, pending never calls `router.push`, failure shows the
+  cart-preserved copy with a working retry) plus the explicit
+  acknowledge-and-retry flow for a `SAFETY_CONFLICT` response; Order
+  Confirmation rendering each seller's Order as its own block; My Orders
+  and Order Detail rendering an order's own fields (never re-derived
+  solely from a Checkout) including its immutable product/variant/price
+  snapshot and target pet; and Shop Home rendering categories and a
+  discovery list scoped to the active pet with no ranking language.
 - **API e2e tests** (`apps/api/test/app.e2e-spec.ts`, Supertest against a
   real Nest app + Postgres + Redis): OTP → session, IDOR denial on a pet the
   user has no `PetAccessGrant` for, household + pet creation with optional
@@ -1592,7 +1969,44 @@ pnpm --filter @petlife/api test:e2e
   explicitly choose via `PUT /provider/me/context`, after which
   `GET /provider/me/overview` reflects the chosen organization; and a
   booking's canonical ISO timestamps are byte-identical regardless of the
-  viewing provider's own `locale` (`fa` vs. `en`).
+  viewing provider's own `locale` (`fa` vs. `en`) — plus a `"Commerce Core
+  (Handoff 06)"` block: discovery returns Product/Variant/Offer as
+  genuinely distinct objects; an unverified seller's offer never appears
+  in discovery and adding it to a cart is rejected; raw Prisma updates
+  that would push `reserved` above `onHand` or `onHand` below zero are
+  rejected by the database's own `CHECK` constraints, not just application
+  code; the compatibility engine reports a species mismatch, an
+  unrestricted product as `LIKELY_COMPATIBLE`, and a `requiresHealthReview`
+  product as `NEEDS_REVIEW` until Health Basics is complete; two pets in
+  the same household get fully independent compatibility results for the
+  same product; targeting a pet the caller has no access to is denied
+  (IDOR); a cart line can be added, its quantity updated, and removed; a
+  cart with offers from two sellers groups into two separate seller
+  blocks; a price increase since a line was added is flagged without the
+  response trusting the stale snapshot for the total; a checkout request
+  exceeding available inventory is rejected before any reservation is
+  made; a successful checkout creates a real `InventoryReservation` row
+  inside the same transaction; a checkout whose `expiresAt` has passed is
+  rejected at payment time and its reservation is released; a simulated
+  successful payment confirms the checkout, creates the Order(s), and
+  consumes the reservation; a simulated failed payment leaves the cart and
+  reservation untouched and a subsequent retry on the same checkout
+  succeeds; a checkout left `PAYMENT_PENDING` creates no Order until a
+  webhook call to `POST /payments/webhooks/dev_simulated` resolves the
+  intent, at which point the Order is created; a single multi-seller
+  Checkout produces exactly one `Order` per seller; an `Order`'s
+  product/variant/price snapshot is provably unchanged even after the
+  underlying Product and Offer are mutated post-purchase; calling `pay()`
+  again on an already-`CONFIRMED` checkout returns `409
+  PAYMENT_ALREADY_COMPLETED` rather than consuming inventory or creating
+  Orders twice; reading another user's order returns `404
+  ORDER_NOT_FOUND` (never a 403 that would confirm the order exists); every
+  commerce amount asserted throughout the suite is a plain JavaScript
+  integer, never a fractional IRR value; a product with a matching active
+  allergy is blocked at checkout with `409 SAFETY_CONFLICT` until
+  `acknowledgeSafetyConflict: true` is sent, after which it succeeds; and
+  the cart is converted only once payment is confirmed, never merely at
+  checkout creation.
 
   The e2e suite needs its own database (kept separate from your dev data):
 
@@ -1703,6 +2117,39 @@ e2e tests → build, against real Postgres/Redis service containers.
   booking detail URL → denied with "You do not have access to this
   booking." in the UI and `403 PROVIDER_ACCESS_DENIED` from the API (never
   a silent 404) — all 29 checkpoints passed.
+
+- **Browser E2E (Handoff 06, automated Playwright run against a real
+  Chromium, live api/web dev servers, and a freshly-seeded Postgres)**:
+  four flows, all passing. **Flow 1** — signed in as Sarah with Luna
+  active → Shop → opened Royal Canin Adult Dog Food (`Compatible` for
+  Luna, a dog) → Add to cart → Cart showed the product → Checkout →
+  created a new address inline (the household had none yet) → Review →
+  simulated a successful payment → landed on Order Confirmation showing
+  `Confirmed` → My Orders showed the same order as its own record with a
+  `Confirmed` status, not merely re-derived from the checkout. **Flow 2**
+  — added Grain-Free Training Treats (Pet Bazaar Tehran's only offer) and
+  Calming Grooming Wipes (Golestan Pet Supplies' only offer) to the cart →
+  Cart correctly grouped the two lines under their two separate sellers →
+  Checkout review still showed both seller groups → one simulated
+  successful payment produced **exactly two** separate `Confirmed` Order
+  blocks on the Confirmation page, one per seller — proving "1 Checkout →
+  N Orders" end to end. **Flow 3** — added the Soft-Sided Travel Carrier →
+  simulated a failed payment → the Payment Failed screen showed the
+  non-alarming "nothing was charged, your cart has been preserved" copy →
+  navigating back to the cart confirmed the line was still there → retried
+  checkout on the same cart with a successful payment → the Confirmation
+  page showed **exactly one** `Confirmed` Order, proving the earlier
+  failed attempt left no orphaned or duplicate Order. **Flow 4** — with
+  Luna active, opened Royal Canin Adult Dog Food and confirmed
+  `Compatible` (a dog, no allergy conflict) → switched the active pet to
+  Milo via the Home switcher → revisited the exact same product URL →
+  the page now showed "Shopping for Milo" (no leftover Luna label) and
+  `Not recommended` (species mismatch — the product is dog-only) — proving
+  compatibility genuinely recomputes per pet with no context leak. This
+  run also caught and fixed a real, pre-existing race in `HomeView`'s
+  active-pet refetch (see Known limitations) that was silently returning
+  the *previous* active pet's Home data for a few seconds after every
+  switch — a bug this handoff's own flow 4 requirement is what surfaced it.
 
 ## What's implemented
 
@@ -1830,6 +2277,43 @@ owner's side, cancel a different booking with the temporary grant
 provably revoked and the owner's Care Calendar/Home updating, and a
 provider from one organization being denied access to another
 organization's booking end to end.
+
+Everything in the Handoff 06 acceptance criteria: a strict
+`Product → ProductVariant → SellerOffer → SellerOrganization` model with
+`InventoryItem` as the sole (PostgreSQL, never Redis) authority for stock,
+enforced by raw-SQL `CHECK` constraints preventing negative or
+over-reserved inventory at the database layer; only `VERIFIED`+`ACTIVE`
+sellers' offers ever discoverable or purchasable; a deterministic
+`ProductCompatibilityService` that never defaults to `COMPATIBLE` when
+data is missing and always ranks `POTENTIAL_SAFETY_CONFLICT` highest; a
+persistent server-side `Cart` that always shows the live offer price with
+an explicit "price changed" flag rather than trusting a stale snapshot;
+`Checkout` that revalidates offer/seller/inventory/price/compatibility and
+hard-blocks an unacknowledged safety conflict; a real, transactional
+`InventoryReservation` with a documented 15-minute TTL, checked at
+use-time rather than relying solely on background cleanup; a
+`PaymentGateway` interface with `DevPaymentGateway` as its one real,
+network-free implementation (`SUCCESS`/`FAILURE`/`PENDING` modes) plus a
+webhook slot proven end-to-end for `dev_simulated`; "1 Checkout → N
+Orders" enforced structurally via `Order.@@unique([checkoutId,
+sellerOrganizationId])` and made idempotent via the same P2002-catch
+pattern `BookingsService` already established; every `OrderItem`
+preserving an immutable commercial snapshot even after the underlying
+Product/Offer later changes; `Idempotency-Key` support on checkout
+creation, payment-intent creation, and payment; five separate financial
+state enums (never one giant one); IRR stored as a plain integer
+everywhere, with Toman shown only via one documented display-only
+÷10 transform; a full consumer Shop → Cart → Checkout → Order Confirmation
+→ My Orders → Order Detail UI with no fake ratings, no "best price"
+labeling, and no sponsored placement; a fixed, pre-existing race in
+`HomeView`'s active-pet refetch found and corrected while validating the
+"switch pet, compatibility recomputes" flow (see Known limitations); every
+Handoff 01-05 backend/frontend test still green; and a full browser E2E
+pass (see below) proving the full happy-path purchase, a multi-seller cart
+producing two independent Orders from one Checkout, a simulated payment
+failure that preserves the cart and permits a successful retry with no
+duplicate Order, and a pet switch that correctly recomputes a product's
+compatibility with no context leak.
 
 ## Known limitations / deliberate simplifications
 
@@ -2018,36 +2502,108 @@ organization's booking end to end.
   a placeholder** — see the dedicated explanation in the Handoff 05
   section above; this isn't unfinished work, it's what "confirm" can
   correctly mean given this architecture's booking lifecycle.
+- **No real payment gateway, financing, or delivery integration** — per
+  the spec's explicit scope: no SnappPay/DigiPay/installment financing, no
+  AloPeyk/SnappBox/delivery tracking, no Torob/Digikala listing sync.
+  `DeliveryMethod` (`STANDARD`/`EXPRESS`) is a placeholder whose amount is
+  a fixed dev-calculated constant (`DELIVERY_AMOUNT_BY_METHOD`), not a real
+  carrier rate.
+- **No seller-facing commerce surface** — sellers are seed-data-only this
+  phase (`SellerOrganization`/`SellerOffer`/`InventoryItem` are all created
+  via `prisma/seed.ts`); there is no seller dashboard, no seller order
+  view, no seller-side inventory management endpoint, and no settlement/
+  payout logic. `docs/architecture` for the *full* Seller OS is a future
+  handoff, mirroring how Provider OS (Handoff 05) followed the booking
+  engine (Handoff 03).
+- **No promotion engine** — `Checkout.discountAmount`/`promotionCode` are
+  placeholder fields only; nothing ever sets a non-zero discount or
+  validates a code this phase.
+- **No returns/refunds execution** — `TransactionType.REFUND` and
+  `PaymentIntentStatus`/`OrderStatus`'s refund-adjacent values
+  (`PARTIALLY_REFUNDED`/`REFUNDED`) exist in the vocabulary but nothing
+  ever creates a refund `Transaction` or transitions an `Order` into
+  either state; a future handoff needs a real refund flow before those
+  values become reachable.
+- **No pharmacy, subscription, or prescription commerce** — `Product`/
+  `SellerOffer` model general retail goods only; there is no prescription
+  verification, recurring-order/subscription billing, or controlled-item
+  handling.
+- **No review/rating surface for products or sellers** — `SellerOffer`/
+  `Product` carry no rating fields, and the product card/detail UI
+  deliberately never fabricates one (spec: "no fake ratings").
+- **No advanced recommendations** — Shop Home's product list is every
+  active product filtered by the request's `petId`/`category`/`search`,
+  using the exact same deterministic `ProductCompatibilityService` every
+  other Shop screen uses; there is no personalization, ranking model, or
+  "customers also bought" feature.
+- **A pre-existing race in `HomeView`'s active-pet refetch was found and
+  fixed while validating this handoff's "switch pet" flow, not introduced
+  by it**: `useActivePet.switchActivePet` optimistically flips
+  `activePetId` in the client store *before* the server-side
+  `PUT .../active-pet` call resolves; `HomeView`'s effect (which depends on
+  `activePetId`) could fire its `GET /home` refetch in that same instant
+  and read back the *previous* active pet, with nothing ever re-triggering
+  a correcting refetch once the PUT actually completed. Fixed by also
+  depending on `useActivePet().isSwitching` — a second refetch now fires
+  the moment the switch's own request settles. `ProductDetailView`/other
+  screens that read `activePet` directly from the store (rather than via a
+  server round-trip keyed only on the pre-switch instant) were never
+  affected; this was specifically a Home-heading staleness bug.
+- **`InventoryReservation` cleanup is request-time only, like `PetAccessGrant`
+  expiry** — an expired-but-still-`ACTIVE` reservation row is corrected the
+  next time it's read/used (`pay()` checks `expiresAt` itself), never by a
+  background sweep; there is no cron/worker that proactively flips expired
+  reservations to `EXPIRED` or releases their inventory ahead of time.
+- **Checkout price revalidation surfaces drift, but doesn't re-price
+  automatically** — a `PRICE_CHANGED` `CheckoutValidationIssueDto` is
+  returned for the caller to see and decide on; there is no
+  "auto-accept the new price and continue" endpoint, and no requirement
+  that the frontend block progress on it (only `SAFETY_CONFLICT` hard-blocks).
+- **`CheckoutStatus.PARTIALLY_CONFIRMED` is defined but never reached** —
+  the architecture is designed to support one seller's `Order` confirming
+  while another in the same multi-seller checkout fails (each `Order`
+  creation is independent, per-seller, inside the loop), but this phase's
+  `DevPaymentGateway` only ever fails or succeeds the *entire* payment
+  attempt, so a genuinely partial outcome never currently occurs; a future
+  handoff introducing per-seller payment splits or partial captures should
+  wire this status rather than add a new one.
 
 ## Next recommended coding handoff
 
-**Owner-visible provider communication + reviews basics.** The Provider OS
-(Handoff 05) closed the loop on the provider side of a booking — confirm,
-check in, start, complete, with a small owner-visible completion note —
-but there is still no way for an owner to see anything beyond that one
-note, and no way for either side to leave feedback. A minimal next step:
-(1) a read-only "provider updates" feed on the owner's booking detail
-page surfacing `BookingProviderNote`-adjacent, deliberately curated
-owner-visible events (state transitions, the completion note) as a single
-timeline rather than raw internal notes; (2) a simple post-completion
-rating (1-5 stars + optional text) stored against the `Booking`, visible
-on the provider's own profile as an aggregate — no moderation queue, no
-photo attachments, no provider response threading yet. Both extend
-`Booking` and reuse the existing owner/provider authorization boundaries
-untouched; neither needs a new permission model or a second booking state
-machine.
+**A minimal Seller OS**, directly mirroring how Handoff 05's minimal
+Provider OS followed the vet booking engine (Handoff 03). Commerce Core
+(Handoff 06) built a complete consumer purchase loop, but every
+`SellerOrganization`/`SellerOffer`/`InventoryItem` exists only via
+`prisma/seed.ts` today — there is no seller-facing surface at all. A
+minimal next step, reusing the exact same session auth and authorization
+pattern `ProviderAuthGuard`/`ProviderContextService` already established
+(a `SellerUser`/`SellerOrganization` membership model, a `SellerAuthGuard`
+that is a completely separate axis from pet-data authorization, exactly
+as `ProviderAuthGuard` is): (1) a seller order queue
+(`GET /seller/orders`, `GET /seller/orders/:id`) scoped to that seller's
+own `Order` rows only (never another seller's — same "403, never a silent
+404" IDOR posture as Provider OS); (2) inventory management
+(`PATCH /seller/offers/:id/inventory` to adjust `onHand`, reusing the
+exact same `InventoryReservationService` invariants — never a second
+stock-tracking path); (3) basic order-status progression
+(`PENDING → CONFIRMED → PREPARING → READY_FOR_FULFILLMENT → FULFILLED`,
+finally reaching the `OrderStatus` values Handoff 06 defined but never
+made reachable) with the same "single-step transition, reject anything
+else" discipline `ProviderBookingsService` used. No settlement, no
+payouts, no seller-side pricing/catalog editing yet — those are
+substantial enough to stay a dedicated follow-up, exactly as Provider
+OS's own verification workflow was deferred past Handoff 05.
 
-Alternatively, if the business prioritizes closing Provider OS gaps
-instead: a real provider onboarding/verification workflow.
-`ProviderVerificationStatus` has supported the full
-`NOT_STARTED → SUBMITTED → UNDER_REVIEW → VERIFIED` vocabulary since
-Handoff 03, but every provider in the system today reaches `VERIFIED`
-only via `prisma/seed.ts` — there is no self-serve flow for a new
-`ProviderOrganization` to register, submit for review, or move through
-that state machine, and no admin-side review screen. This is a
-substantial scope on its own (document upload, an admin review UI, an
-applicant-facing status page) and should stay a dedicated handoff rather
-than be folded into either the review/rating work above or a future
-Provider OS enhancement pass. Whichever is chosen, keep `Booking` as the
-sole source of truth for booking state, and `PetAccessGrant`/
-`BookingPetAccess` as the only source of truth for pet-data access.
+Alternatively, if the business prioritizes closing the payment/fulfillment
+gap instead: real payment gateway integration (a second `PaymentGateway`
+implementation — e.g. `SnappPay` or `DigiPay` — behind the existing
+interface, with `DevPaymentGateway` untouched for tests) plus delivery
+integration (`AloPeyk`/`SnappBox` behind the existing `DeliveryMethod`
+placeholder). Both slot into interfaces this handoff deliberately built
+for exactly this purpose (`PaymentGateway`, `WebhookSignatureVerifier`,
+`DeliveryMethod`) — no schema migration should be needed for the payment
+side, only a new class and its webhook signature verification. Whichever
+is chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly separate
+(never collapse catalog identity, price, and stock back into one model),
+keep "1 Checkout → N Orders" as the non-negotiable invariant, and keep
+IRR as the only stored currency unit.
