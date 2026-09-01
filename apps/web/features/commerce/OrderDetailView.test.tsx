@@ -1,11 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import type { OrderDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { commerceService } from "@/services/commerce.service";
 import { OrderDetailView } from "./OrderDetailView";
 
-vi.mock("@/services/commerce.service", () => ({ commerceService: { getOrder: vi.fn() } }));
+vi.mock("@/services/commerce.service", () => ({ commerceService: { getOrder: vi.fn(), requestRefund: vi.fn() } }));
 vi.mock("@/stores/pet-store", () => ({
   usePetStore: (selector: (state: { pets: { id: string; name: string }[] }) => unknown) => selector({ pets: [{ id: "pet-1", name: "Luna" }] }),
 }));
@@ -60,6 +60,7 @@ const ORDER: OrderDetailDto = {
 describe("OrderDetailView", () => {
   beforeEach(() => {
     vi.mocked(commerceService.getOrder).mockReset();
+    vi.mocked(commerceService.requestRefund).mockReset();
   });
 
   it("preserves the immutable commercial snapshot: product title, variant, sku-derived price, and target pet", async () => {
@@ -72,5 +73,61 @@ describe("OrderDetailView", () => {
     expect(screen.getByText("For Luna")).toBeTruthy();
     expect(screen.getByText("12 Valiasr St.")).toBeTruthy();
     expect(screen.getByText("Fulfillment tracking coming soon")).toBeTruthy();
+  });
+
+  it("shows Payment status and Financing status as separate, never-collapsed badges", async () => {
+    vi.mocked(commerceService.getOrder).mockResolvedValue({ ...ORDER, financingStatus: "APPROVED" as never });
+
+    renderWithIntl(<OrderDetailView orderId="order-1" />);
+
+    await waitFor(() => expect(screen.getByText("Payment status")).toBeTruthy());
+    expect(screen.getByText("Paid")).toBeTruthy();
+    expect(screen.getByText("Financing status")).toBeTruthy();
+    expect(screen.getByText("Approved")).toBeTruthy();
+  });
+
+  it("lets the owner request a refund on a confirmed order and shows the resulting status", async () => {
+    vi.mocked(commerceService.getOrder).mockResolvedValueOnce(ORDER).mockResolvedValueOnce({
+      ...ORDER,
+      refunds: [
+        {
+          id: "refund-1",
+          paymentIntentId: "intent-1",
+          financingIntentId: null,
+          orderId: "order-1",
+          amount: 1_250_000,
+          currency: "IRR",
+          status: "SUCCEEDED" as never,
+          reason: "Changed my mind",
+          providerReference: "dev_refund_1",
+          createdAt: "2026-01-02T00:00:00.000Z",
+          updatedAt: "2026-01-02T00:00:05.000Z",
+          completedAt: "2026-01-02T00:00:05.000Z",
+        },
+      ],
+    });
+    vi.mocked(commerceService.requestRefund).mockResolvedValue({
+      id: "refund-1",
+      paymentIntentId: "intent-1",
+      financingIntentId: null,
+      orderId: "order-1",
+      amount: 1_250_000,
+      currency: "IRR",
+      status: "SUCCEEDED" as never,
+      reason: "Changed my mind",
+      providerReference: "dev_refund_1",
+      createdAt: "2026-01-02T00:00:00.000Z",
+      updatedAt: "2026-01-02T00:00:05.000Z",
+      completedAt: "2026-01-02T00:00:05.000Z",
+    });
+
+    renderWithIntl(<OrderDetailView orderId="order-1" />);
+    await waitFor(() => expect(screen.getByText("Submit request")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Submit request"));
+
+    await waitFor(() => expect(commerceService.requestRefund).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText("Refunded")).toBeTruthy());
+    expect(screen.queryByText("Submit request")).toBeNull();
   });
 });

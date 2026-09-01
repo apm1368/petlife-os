@@ -11,7 +11,19 @@ const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/hooks/use-active-pet", () => ({ useActivePet: () => ({ householdId: "household-1" }) }));
 vi.mock("@/services/commerce.service", () => ({
-  commerceService: { getCart: vi.fn(), createCheckout: vi.fn(), createPaymentIntent: vi.fn(), pay: vi.fn(), getCheckout: vi.fn(), getPaymentOptions: vi.fn() },
+  commerceService: {
+    getCart: vi.fn(),
+    createCheckout: vi.fn(),
+    createPaymentIntent: vi.fn(),
+    pay: vi.fn(),
+    getCheckout: vi.fn(),
+    getPaymentOptions: vi.fn(),
+    createFinancingIntent: vi.fn(),
+    checkFinancingEligibility: vi.fn(),
+    getFinancingPlans: vi.fn(),
+    selectFinancingPlan: vi.fn(),
+    authorizeFinancing: vi.fn(),
+  },
 }));
 vi.mock("@/services/addresses.service", () => ({ addressesService: { list: vi.fn() } }));
 
@@ -109,12 +121,82 @@ async function advanceToPayment() {
   await waitFor(() => expect(screen.getByText("Payment")).toBeTruthy());
 }
 
+async function advanceToInstallmentPlans() {
+  vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+  vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+  vi.mocked(commerceService.createCheckout).mockResolvedValue(CHECKOUT);
+  vi.mocked(commerceService.getPaymentOptions).mockResolvedValue([
+    {
+      provider: "SNAPP_PAY" as never,
+      methodType: "INSTALLMENTS" as never,
+      capabilities: { supportsDirectPayment: false, supportsInstallments: true, supportsRefund: true, supportsPartialRefund: false, supportsAsyncWebhook: true, supportsEligibilityCheck: true },
+    },
+  ]);
+  vi.mocked(commerceService.createFinancingIntent).mockResolvedValue({
+    id: "financing-1",
+    checkoutId: CHECKOUT.id,
+    provider: "SNAPP_PAY" as never,
+    amount: CHECKOUT.totalAmount,
+    currency: CHECKOUT.currency,
+    status: "CREATED" as never,
+    eligibility: null,
+    availablePlans: [],
+    selectedPlan: null,
+    expiresAt: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  });
+  vi.mocked(commerceService.checkFinancingEligibility).mockResolvedValue({ status: "ELIGIBLE" as never });
+  vi.mocked(commerceService.getFinancingPlans).mockResolvedValue([
+    { providerPlanId: "plan-3", installmentCount: 3, downPaymentAmount: 0, installmentAmount: 425_000, feeAmount: 25_000, totalPayableAmount: 1_275_000, currency: "IRR", firstDueAt: null },
+  ]);
+  vi.mocked(commerceService.selectFinancingPlan).mockResolvedValue({
+    id: "financing-1",
+    checkoutId: CHECKOUT.id,
+    provider: "SNAPP_PAY" as never,
+    amount: CHECKOUT.totalAmount,
+    currency: CHECKOUT.currency,
+    status: "PLAN_SELECTED" as never,
+    eligibility: "ELIGIBLE" as never,
+    availablePlans: [],
+    selectedPlan: { id: "snapshot-1", providerPlanId: "plan-3", installmentCount: 3, downPaymentAmount: 0, installmentAmount: 425_000, feeAmount: 25_000, totalPayableAmount: 1_275_000, currency: "IRR", firstDueAt: null },
+    expiresAt: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  });
+
+  renderWithIntl(<CheckoutView />);
+
+  await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
+  fireEvent.click(screen.getByText("12 Valiasr St."));
+  fireEvent.click(screen.getByText("Continue"));
+
+  await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
+  fireEvent.click(screen.getByText("Continue"));
+
+  await waitFor(() => expect(screen.getByText("SnappPay")).toBeTruthy());
+  fireEvent.click(screen.getByText("SnappPay"));
+
+  await waitFor(() => expect(screen.getByText("You're eligible for installments")).toBeTruthy());
+  fireEvent.click(screen.getByText("Continue"));
+
+  await waitFor(() => expect(screen.getByText("Choose a plan")).toBeTruthy());
+  fireEvent.click(screen.getByText("3 installments"));
+
+  await waitFor(() => expect(screen.getByText("Confirm installment plan")).toBeTruthy());
+}
+
 describe("CheckoutView", () => {
   beforeEach(() => {
     vi.mocked(commerceService.getCart).mockReset();
     vi.mocked(commerceService.createCheckout).mockReset();
     vi.mocked(commerceService.createPaymentIntent).mockReset();
     vi.mocked(commerceService.getPaymentOptions).mockReset();
+    vi.mocked(commerceService.createFinancingIntent).mockReset();
+    vi.mocked(commerceService.checkFinancingEligibility).mockReset();
+    vi.mocked(commerceService.getFinancingPlans).mockReset();
+    vi.mocked(commerceService.selectFinancingPlan).mockReset();
+    vi.mocked(commerceService.authorizeFinancing).mockReset();
     vi.mocked(commerceService.pay).mockReset();
     vi.mocked(commerceService.getCheckout).mockReset();
     vi.mocked(addressesService.list).mockReset();
@@ -162,6 +244,36 @@ describe("CheckoutView", () => {
     fireEvent.click(screen.getByText("Try again"));
 
     await waitFor(() => expect(screen.getByText("Payment")).toBeTruthy());
+  });
+
+  it("walks the BNPL flow to APPROVED and routes to the confirmation page", async () => {
+    await advanceToInstallmentPlans();
+    vi.mocked(commerceService.authorizeFinancing).mockResolvedValue({
+      checkout: { ...CHECKOUT, status: "CONFIRMED" as never },
+      paymentStatus: "SUCCEEDED",
+      orderIds: ["order-1"],
+    });
+
+    fireEvent.click(screen.getByText("Simulate approval"));
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/en/checkout/checkout-1/confirmation?orders=order-1"));
+  });
+
+  it("shows a non-shaming declined screen with a path back to another payment method", async () => {
+    await advanceToInstallmentPlans();
+    vi.mocked(commerceService.authorizeFinancing).mockResolvedValue({
+      checkout: CHECKOUT,
+      paymentStatus: "FAILED",
+      failureMessage: "The installment provider did not approve this request.",
+      orderIds: [],
+    });
+
+    fireEvent.click(screen.getByText("Simulate decline"));
+
+    await waitFor(() => expect(screen.getByText("Installment request was not approved")).toBeTruthy());
+    expect(screen.getByText("The installment provider did not approve this request.")).toBeTruthy();
+    expect(screen.getByText("Try another provider")).toBeTruthy();
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("prompts for explicit acknowledgement on a potential safety conflict, then retries with it set", async () => {
