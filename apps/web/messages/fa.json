@@ -1020,7 +1020,9 @@
       "orderStatus": {
         "PENDING": "در انتظار",
         "CONFIRMED": "تأیید شده",
-        "CANCELLED": "لغو شده"
+        "CANCELLED": "لغو شده",
+        "PARTIALLY_REFUNDED": "بازپرداخت جزئی",
+        "REFUNDED": "بازپرداخت شد"
       },
       "total": "جمع کل",
       "viewOrders": "مشاهده سفارش‌های من",
@@ -1036,7 +1038,9 @@
       "status": {
         "PENDING": "در انتظار",
         "CONFIRMED": "تأیید شده",
-        "CANCELLED": "لغو شده"
+        "CANCELLED": "لغو شده",
+        "PARTIALLY_REFUNDED": "بازپرداخت جزئی",
+        "REFUNDED": "بازپرداخت شد"
       }
     },
     "orderDetail": {
@@ -1056,7 +1060,9 @@
       "status": {
         "PENDING": "در انتظار",
         "CONFIRMED": "تأیید شده",
-        "CANCELLED": "لغو شده"
+        "CANCELLED": "لغو شده",
+        "PARTIALLY_REFUNDED": "بازپرداخت جزئی",
+        "REFUNDED": "بازپرداخت شد"
       },
       "paymentStatusLabel": "وضعیت پرداخت",
       "financingStatusLabel": "وضعیت اقساط",

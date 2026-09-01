@@ -1020,7 +1020,9 @@
       "orderStatus": {
         "PENDING": "Pending",
         "CONFIRMED": "Confirmed",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "PARTIALLY_REFUNDED": "Partially refunded",
+        "REFUNDED": "Refunded"
       },
       "total": "Total",
       "viewOrders": "View my orders",
@@ -1036,7 +1038,9 @@
       "status": {
         "PENDING": "Pending",
         "CONFIRMED": "Confirmed",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "PARTIALLY_REFUNDED": "Partially refunded",
+        "REFUNDED": "Refunded"
       }
     },
     "orderDetail": {
@@ -1056,7 +1060,9 @@
       "status": {
         "PENDING": "Pending",
         "CONFIRMED": "Confirmed",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "PARTIALLY_REFUNDED": "Partially refunded",
+        "REFUNDED": "Refunded"
       },
       "paymentStatusLabel": "Payment status",
       "financingStatusLabel": "Financing status",
