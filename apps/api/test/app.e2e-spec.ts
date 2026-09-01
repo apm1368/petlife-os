@@ -821,7 +821,9 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       // has been observed to occasionally exceed Jest's 5s default here even
       // though the request itself is fast — a generous explicit timeout is
       // cheaper than chasing a warm-up cost that only ever shows up once.
-      15000,
+      // Kept in line with jest-e2e.json's own testTimeout (raised to 20000
+      // in Handoff 07 for the same reason: slow-under-load sandbox CI).
+      20000,
     );
 
     it("rejects a booking hold when the service doesn't support the pet's species", async () => {
