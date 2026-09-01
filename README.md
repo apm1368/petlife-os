@@ -1589,6 +1589,249 @@ ORDER_NOT_FOUND                404  no such order, or it belongs to a different 
 CHECKOUT_NOT_FOUND             404  no such checkout, or it belongs to a different user
 ```
 
+## Real Payments + BNPL + Refund Basics + Reconciliation (Handoff 07)
+
+Schema: `prisma/migrations/20260902000000_real_payments_bnpl_ledger`
+(purely additive — generated via `prisma migrate diff` against the edited
+schema, then hand-appended with four `CHECK` constraints Prisma's DSL
+can't express: positive `installmentCount`/`totalPayableAmount` on
+`FinancingPlanSnapshot`, positive `amount` on `Refund`, positive `amount`
+on `LedgerEntry`). New enums: `PaymentMethodType`, `FinancingIntentStatus`,
+`FinancingEligibilityStatus` (not persisted — computed from
+`FinancingIntentStatus`), `RefundStatus`, `ProviderEventStatus`,
+`LedgerAccountCode`, `LedgerEntryDirection`; `PaymentProvider` gained
+`STANDARD_GATEWAY`/`SNAPP_PAY`/`DIGI_PAY`; `CheckoutStatus` gained
+`PAYMENT_SUCCEEDED_ORDER_ISSUE`. New models: `FinancingIntent`,
+`FinancingPlanSnapshot`, `Refund`, `PaymentProviderEvent`,
+`ReconciliationLog`, `LedgerAccount`, `LedgerTransaction`, `LedgerEntry`.
+
+### Provider adapter architecture — never a hard-coded `if (provider === ...)`
+
+`PaymentGateway` (`charge`/`getStatus`/`refund`/`verifyWebhookSignature`,
+plus `readonly provider`/`readonly capabilities`) is the interface every
+direct-payment provider implements; `FinancingProvider`
+(`authorize`/`getStatus`/`refund`/`verifyWebhookSignature`, with
+`checkEligibility`/`getPlans` deliberately **optional** methods) is a
+wholly separate interface for installment providers — the two are never
+unified into one "payment" interface, mirroring spec section 6's "do not
+collapse into one payment status" at the type-design level, not just the
+database level. `PROVIDER_CAPABILITIES` (`ProviderCapabilities`:
+`supportsDirectPayment`/`supportsInstallments`/`supportsRefund`/
+`supportsPartialRefund`/`supportsAsyncWebhook`/`supportsEligibilityCheck`)
+is a single static map consulted everywhere — `CheckoutService`,
+`getPaymentOptions`, the consumer UI's method-selection screen — instead
+of branching on provider identity. `PaymentGatewayRegistry`/
+`FinancingProviderRegistry` resolve `PaymentProvider → adapter instance`
+and gate on the matching `*_ENABLED` env flag, throwing
+`PAYMENT_PROVIDER_UNAVAILABLE`/`FINANCING_NOT_AVAILABLE` for a
+disabled/unknown provider before a durable `PaymentIntent`/
+`FinancingIntent` row is ever created for it.
+
+### Provider documentation status (spec section 10 — never invent an endpoint)
+
+No merchant account, API credentials, or official integration docs exist
+for any real provider in this project. Rather than scrape or guess at
+undocumented behavior, every non-`DEV_SIMULATED` adapter is built as a
+documented sandbox stub, with its own class-level doc comment stating
+exactly what is real and what is a documented gap:
+
+- **`StandardGatewayAdapter`** (provider-neutral "real gateway" slot,
+  spec section 7): `charge()` resolves synchronously from a caller-supplied
+  `mode` (`SUCCESS`/`FAILURE`/`PENDING`) exactly like `DevPaymentGateway`,
+  since there is no live gateway to redirect to — this is the one
+  documented gap. `verifyWebhookSignature()` is **not** a stub: it
+  implements a real HMAC-SHA256 check against `STANDARD_GATEWAY_API_KEY`
+  when one is configured (falls back to always-accept when unconfigured,
+  which is the sandbox's honest default), so the signature-verification
+  *mechanism* is genuinely exercised even though no live provider ever
+  signs a real payload with it here.
+- **`SnappPayAdapter`/`DigiPayAdapter`**: official docs source, auth
+  mechanism, sandbox availability, required credentials, webhook
+  signature scheme, idempotency support, and reconciliation/status-query
+  capability are all explicitly marked UNKNOWN in each adapter's doc
+  comment. `checkEligibility()`/`getPlans()`/`authorize()`/`refund()` are
+  illustrative-only, `mode`-driven sandbox behavior (3/6/12-installment
+  plans at a flat 2% fee for SnappPay; 4/8-installment for DigiPay — both
+  purely illustrative numbers, not real provider terms).
+  `verifyWebhookSignature()` always accepts (real scheme UNKNOWN — never
+  faked as "verified"). `SnappPayAdapter` is the only provider with
+  `checkEligibility` (`capabilities.supportsEligibilityCheck: true`);
+  `DigiPayAdapter` has no such method at all — `FinancingService`
+  never fakes an eligibility check for it, it skips straight to plans/
+  authorization per spec section 12. Neither provider claims
+  `supportsPartialRefund` (spec: "never claim partial refund support for
+  SnappPay/DigiPay unless official docs confirm it").
+
+### BNPL: `FinancingIntent`, kept separate from `PaymentIntentStatus`
+
+`FinancingIntent` (`CREATED → ELIGIBILITY_PENDING → ELIGIBLE/NOT_ELIGIBLE →
+PLAN_SELECTED → AUTHORIZATION_PENDING → APPROVED/DECLINED`, plus
+`CANCELLED`/`EXPIRED`/`REFUND_PENDING`/`PARTIALLY_REFUNDED`/`REFUNDED`) is
+its own state machine — a `FinancingIntent` never reaches `CAPTURED` or
+any other `PaymentIntentStatus` value, and `PaymentIntent` never gains a
+BNPL-specific status. `FinancingPlanSnapshot` stores the selected plan's
+`installmentCount`/`downPaymentAmount`/`installmentAmount`/`feeAmount`/
+`totalPayableAmount`/`firstDueAt` at selection time — never re-read from
+mutable provider plan data later, so a plan a customer agreed to can't
+silently change underneath them. `FinancingService.createIntent()` is
+idempotent per checkout+provider (reuses a non-terminal existing intent);
+`checkEligibility()`/`getPlans()`/`selectPlan()`/`authorize()` mirror
+`PaymentsService`'s create→act→resolve shape exactly, against
+`FinancingIntent`'s own state instead of `PaymentIntentStatus`.
+Server-side `authorize()` is authoritative (spec section 14: "never
+confirm Orders solely from browser return parameters") — the sandbox
+`mode` parameter is a dev-only convenience for exercising every outcome
+deterministically, documented as something a real integration would omit
+entirely in favor of the provider's own redirect/webhook outcome.
+
+### Webhook + callback: authoritative vs. UX-signal-only, and real idempotency
+
+`PaymentWebhooksController` (deliberately declared inside `CheckoutModule`
+rather than `PaymentsModule`/`FinancingModule`, since it's the one place
+both `PaymentsService` and `FinancingService` can be injected together
+without a module import cycle) exposes `POST /payments/webhooks/:provider`
+(authoritative — no `SessionAuthGuard`, since a real gateway calls this
+unauthenticated as itself, authenticated only by its own signature) and
+`GET /payments/callback/:provider` (pure read, UX-signal-only, never
+writes state — the frontend's redirect/processing screens call this only
+to render a hint, never to confirm anything). The actual duplicate-
+delivery guard is `PaymentProviderEvent`'s `@@unique([provider,
+providerEventId])` constraint: `ProviderEventsService.recordIfNew()`
+attempts the insert first and catches the resulting `P2002` as the
+duplicate signal — checked *before* any `PaymentIntent`/`FinancingIntent`
+mutation is even attempted, so a replayed webhook is acknowledged
+(`{received: true, processed: false, duplicate: true}`) without touching
+financial state a second time. Raw payloads are deliberately never stored
+(`payloadHash` only — spec section 17: "prefer redaction/minimal
+retention"). `resolvePendingIntent()`/`resolveAuthorization()` are the
+same idempotent resolve methods a webhook, a reconciliation check, and (for
+the synchronous sandbox happy path) the direct `pay()`/`authorize()` call
+all funnel through — never three separate code paths for one outcome.
+
+### Refund basics — full refund only, no seller settlement yet
+
+`RefundsService` (spec sections 23-26) is a consumer/dev convenience
+surface, not a real dispute workflow: any signed-in owner of the order can
+request a refund (no admin/support role model exists yet), and only a
+full refund of the order total is supported — a partial `amount` is
+rejected with `REFUND_NOT_SUPPORTED` regardless of provider, since no
+provider here has a confirmed partial-refund capability. `refundPayment()`
+and `refundFinancing()` are genuinely separate code paths (spec: "BNPL
+refund must not be treated identical to a card refund") — the financing
+path stores the provider's own reported outcome verbatim and never
+computes an installment-schedule adjustment itself. `RefundsService` also
+backs the emergency recovery path for spec section 21's "Paid but order
+cannot confirm": if `CheckoutService.finalizeSuccessfulPayment()`'s
+order-creation transaction throws after money has already moved (e.g. the
+inventory reservation expired in the gap between payment and
+confirmation), the checkout moves to the explicit
+`PAYMENT_SUCCEEDED_ORDER_ISSUE` state and `refundForUnconfirmedCheckout()`
+is attempted automatically (with `orderId: null`, since no `Order` exists
+to attach it to) — if even that throws, the checkout stays flagged for
+manual follow-up via `getOpsView`, rather than retrying silently forever
+or hiding behind a generic `FAILED`.
+
+### Reconciliation — resolves disagreements by replaying the same resolve path
+
+`ReconciliationService` never writes `PaymentIntent`/`FinancingIntent`
+status directly — `reconcilePaymentIntent()`/`reconcileFinancingIntent()`
+call the gateway/provider's `getStatus()`, map the canonical remote status
+(`PENDING`/`AUTHORIZED`/`CAPTURED`/`FAILED`/`CANCELLED`/`UNKNOWN` for
+payments; `APPROVED`/`DECLINED`/`PENDING`/`CANCELLED`/`UNKNOWN` for
+financing — `UNKNOWN` stays explicit, never silently treated as any other
+state), and when local is still pending and remote has resolved, drive it
+through the exact same `resolvePendingIntent()`/`resolveAuthorization()` a
+real webhook would use. Every check appends one `ReconciliationLog` row
+regardless of outcome — including a plain `NONE` action when local and
+remote already agree, and `UNKNOWN_REMOTE_STATE` when there's no provider
+reference to query yet — so "was this ever checked?" is always answerable
+from data, not just from a log line. No scheduler exists yet (spec: "no
+full scheduler required yet this phase") — `POST
+/payments/reconcile/:paymentIntentId` and `POST
+/financing/reconcile/:financingIntentId` are manual/job-friendly triggers.
+
+### Double-entry ledger — application-enforced balancing, IRR integers only
+
+`LedgerService.recordBalanced()` is the sole write path for
+`LedgerTransaction`/`LedgerEntry`: it computes `sum(debits)` and
+`sum(credits)` across the entries it's about to write and throws before
+writing anything if they don't match exactly — enforced in application
+code rather than a database `CHECK`, since "debits equal credits across
+sibling rows" is inherently a multi-row invariant Postgres can't express
+as a single-row constraint. Five seeded accounts
+(`CASH_GATEWAY_RECEIVABLE`/`CUSTOMER_PAYMENT_CLEARING`/`SELLER_PAYABLE`/
+`REFUND_PAYABLE`/`PLATFORM_REVENUE`), upserted idempotently on module
+init. Two entry points are currently wired: `recordPaymentSucceeded()`
+(debit `CASH_GATEWAY_RECEIVABLE` / credit `CUSTOMER_PAYMENT_CLEARING`),
+called inside the same transaction as order confirmation for both a
+standard payment and an approved BNPL intent — the same conservative
+clearing-account treatment for both, since this phase makes no assumption
+about a provider's specific settlement timing/fees; and
+`recordRefundSucceeded()` (the exact reverse entries), called inside the
+same transaction as the refund's own state update — never edited into the
+original transaction, always a new, reversing one. `SELLER_PAYABLE`/
+`PLATFORM_REVENUE` are seeded placeholders only; nothing posts to them
+yet (no seller settlement this phase). IRR remains the one stored,
+authoritative amount everywhere, including every `LedgerEntry.amount` — a
+`CHECK (amount > 0)` constraint at the database level rejects a zero or
+negative entry regardless of application-code correctness.
+
+### Consumer UI (`apps/web/features/commerce/`)
+
+Checkout gained a **Method** step between Review and Payment
+(`getPaymentOptions` — capability-driven, never shows a disabled or
+unsupported provider) branching into the existing dev-mode Payment step
+(now provider-parameterized) or a new BNPL sub-flow: **Eligibility**
+(skipped straight to Plans for a provider without the capability, per
+spec section 12) → **Plans** (every plan always shows total payable, down
+payment, per-installment amount, and fee — spec: "no hidden fees") →
+**Authorize** (dev-mode approve/decline/pending buttons, mirroring the
+standard Payment step) → **Declined** (non-shaming "Installment request
+was not approved" with Try another provider / Retry / Return to cart —
+never a dead end) or **Pending**/**Confirmation** exactly like the
+standard flow. A checkout that commits to one method can still switch to
+the other once that method's own attempt reaches a terminal failure
+(declined/failed/cancelled/expired) — never while an attempt is still in
+flight or after success — which is what makes the declined-BNPL "Pay
+Online instead" and the standard-failure "Choose installments instead"
+recovery actions actually work rather than just being unreachable UI
+copy. My Orders and Order Detail now show **Payment status**,
+**Financing status**, and **Refund status** as separate badges (per
+order/refund row respectively) — never one collapsed status. Order Detail
+gained a refund-request control (full refund only, matching the backend)
+and doubles as a minimal payment receipt (amount/provider/reference/date/
+status — not a tax invoice, since no legally-valid invoicing exists yet).
+A new minimal internal ops view (`/checkout/:id/ops`, spec section 45 —
+not a full Admin CRM) lists every `PaymentIntent`/`PaymentAttempt`/
+`Transaction`/`FinancingIntent`/`Refund`/webhook event/reconciliation-log
+row for a checkout, reachable only by that checkout's own owner (no
+separate admin/support role model exists yet).
+
+### API endpoints (Handoff 07 additions)
+
+See the full endpoint list below (`GET /checkout/:id/payment-options`
+through `POST /financing/reconcile/:financingIntentId`).
+
+### Error codes (Handoff 07 additions)
+
+```
+PAYMENT_PROVIDER_UNAVAILABLE      503  provider disabled or unknown, resolved before any durable row is created
+PAYMENT_AUTHORIZATION_FAILED      400  a standard-gateway charge attempt failed
+PAYMENT_STATE_UNKNOWN             409  reserved for a genuinely unknown remote payment state (not yet thrown)
+FINANCING_NOT_AVAILABLE           400  financing provider disabled or unknown
+FINANCING_NOT_ELIGIBLE            400  reserved for a hard eligibility rejection (not yet thrown — see below)
+FINANCING_DECLINED                -    surfaced via PayCheckoutResultDto.paymentStatus, not an exception (mirrors card FAILED)
+FINANCING_EXPIRED                 410  authorization attempted after a FinancingIntent's expiresAt
+INVALID_FINANCING_PLAN            400  select-plan called with a providerPlanId the adapter no longer offers
+WEBHOOK_SIGNATURE_INVALID         400  verifyWebhookSignature() returned false for the delivered payload
+REFUND_NOT_SUPPORTED              400  no captured payment/approved financing to refund, unsupported provider, or a partial amount requested
+REFUND_FAILED                     400  the provider's own refund attempt reported failure
+INVENTORY_CHANGED_AFTER_PAYMENT   -    reserved vocabulary for a future inventory-revalidation-after-payment case (not yet thrown)
+PAYMENT_ORDER_CONFIRMATION_ISSUE  -    never thrown as a request-blocking error — surfaced only as Checkout.PAYMENT_SUCCEEDED_ORDER_ISSUE
+FINANCING_INTENT_NOT_FOUND        404  no such financing intent, or it belongs to a different user's checkout
+REFUND_NOT_FOUND                  404  no such refund, or its order belongs to a different user
+```
+
 ## API endpoints
 
 ```
@@ -1704,13 +1947,27 @@ POST   /checkout                                (Idempotency-Key supported; ackn
 GET    /checkout/:id
 PATCH  /checkout/:id
 POST   /checkout/:id/revalidate
-POST   /checkout/:id/payment-intent             (Idempotency-Key supported)
+POST   /checkout/:id/payment-intent             (Idempotency-Key supported; provider: DEV_SIMULATED|STANDARD_GATEWAY)
 POST   /checkout/:id/pay                        (Idempotency-Key supported; mode: SUCCESS|FAILURE|PENDING, dev only)
+GET    /checkout/:id/payment-options             (capability-driven — never lists a disabled/unsupported provider)
+POST   /checkout/:id/financing-intent           (provider: SNAPP_PAY|DIGI_PAY)
+GET    /checkout/:id/financing-intent/:financingId
+POST   /checkout/:id/financing-intent/:financingId/eligibility
+GET    /checkout/:id/financing-intent/:financingId/plans
+POST   /checkout/:id/financing-intent/:financingId/select-plan
+POST   /checkout/:id/financing-intent/:financingId/authorize  (Idempotency-Key supported; mode: APPROVE|DECLINE|PENDING, dev only)
+GET    /checkout/:id/ops                        (internal payment/financing inspection — owner-only)
 
-POST   /payments/webhooks/:provider             (no session/CSRF — server-to-server; dev_simulated only)
+POST   /payments/webhooks/:provider             (no session/CSRF — server-to-server; dev_simulated|standard_gateway|snapp_pay|digi_pay)
+GET    /payments/callback/:provider             (read-only UX signal — never confirms an order)
+POST   /payments/reconcile/:paymentIntentId
+POST   /financing/reconcile/:financingIntentId
 
 GET    /orders
 GET    /orders/:id
+POST   /orders/:orderId/refunds                 (Idempotency-Key supported; full refund only this phase)
+GET    /orders/:orderId/refunds
+GET    /refunds/:id
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
@@ -1861,7 +2118,18 @@ pnpm --filter @petlife/api test:e2e
   and Order Detail rendering an order's own fields (never re-derived
   solely from a Checkout) including its immutable product/variant/price
   snapshot and target pet; and Shop Home rendering categories and a
-  discovery list scoped to the active pet with no ranking language.
+  discovery list scoped to the active pet with no ranking language. New in
+  Handoff 07: Checkout's Method step routing an `ONLINE_PAYMENT` capability
+  straight to the existing Payment step and an `INSTALLMENTS` capability
+  through Eligibility → Plans → Authorize, asserting a BNPL approval routes
+  to Order Confirmation with the returned order id and a decline renders
+  the non-shaming "Installment request was not approved" screen with a
+  working "Try another provider" action (never `router.push`); Order
+  Detail rendering Payment status and Financing status as separate,
+  never-collapsed badges and a refund request updating to show the
+  resulting `SUCCEEDED` status; and a smoke test for the internal
+  Checkout Ops view rendering a checkout's payment intents and an explicit
+  empty state for every record type with none.
 - **API e2e tests** (`apps/api/test/app.e2e-spec.ts`, Supertest against a
   real Nest app + Postgres + Redis): OTP → session, IDOR denial on a pet the
   user has no `PetAccessGrant` for, household + pet creation with optional
@@ -2006,7 +2274,49 @@ pnpm --filter @petlife/api test:e2e
   allergy is blocked at checkout with `409 SAFETY_CONFLICT` until
   `acknowledgeSafetyConflict: true` is sent, after which it succeeds; and
   the cart is converted only once payment is confirmed, never merely at
-  checkout creation.
+  checkout creation — plus a `"Real Payments + BNPL + Refund Basics +
+  Reconciliation (Handoff 07)"` block: `GET /checkout/:id/payment-options`
+  lists exactly the enabled providers with their real capability flags
+  (`SNAPP_PAY.supportsEligibilityCheck: true`,
+  `DIGI_PAY.supportsEligibilityCheck: false`) and never a disabled one; a
+  checkout paid through `STANDARD_GATEWAY` confirms exactly like
+  `DEV_SIMULATED` (proving the provider is chosen via the adapter
+  registry, never hard-coded); `GET /payments/callback/:provider` is
+  proven read-only — calling it while a payment is `PENDING` creates no
+  Order and leaves the checkout `PAYMENT_PENDING`; a duplicate webhook
+  delivery (same `eventId`) is acknowledged as `{duplicate: true}` without
+  creating a second Order, a second `LedgerTransaction`, or reprocessing —
+  `PaymentProviderEvent.attemptCount` increments instead of a new row
+  being created; `StandardGatewayAdapter.verifyWebhookSignature()`
+  genuinely rejects a forged signature and accepts a correctly-computed
+  HMAC once a secret is configured; a full BNPL flow (create financing
+  intent → eligibility `ELIGIBLE` → plans, each with an integer
+  `totalPayableAmount` strictly greater than the checkout total → select
+  plan → authorize `APPROVE`) confirms the Order and records a balanced
+  ledger transaction (`sum(debits) === sum(credits) === totalAmount`); a
+  `DECLINE` authorization confirms no Order and leaves `FinancingIntent`
+  `DECLINED` with the checkout still recoverable — proven by then
+  switching the *same* checkout to `DEV_SIMULATED` online payment and
+  succeeding (the payment-method-switch guard genuinely permits recovery
+  after a terminal failure, not just before any attempt); DigiPay's
+  eligibility endpoint returns `ELIGIBLE` immediately rather than faking a
+  real check, since the adapter has no `checkEligibility` method; a
+  `PENDING` financing authorization creates no Order until a webhook to
+  `POST /payments/webhooks/digi_pay` resolves it, at which point
+  `FinancingIntent` becomes `APPROVED` and the Order is created; a full
+  refund on a confirmed order returns `SUCCEEDED`, flips the Order to
+  `REFUNDED`, and records a reversing ledger transaction that is itself
+  balanced; a partial refund amount is rejected with
+  `REFUND_NOT_SUPPORTED`, as is refunding an already-refunded order;
+  reconciliation logs an explicit `NONE` action (with an audit row) when
+  local and remote already agree, `UNKNOWN_REMOTE_STATE` when there is no
+  provider reference yet to query, and `RESOLVED_SUCCEEDED` — confirming
+  the Order exactly once, including against a second, redundant
+  reconciliation check — when local is `PENDING` and the provider's own
+  remote state has since resolved; every financing plan amount for an
+  odd (non-round) checkout total is asserted to stay a plain integer; and
+  reading another user's financing intent or checkout ops view returns
+  `404 CHECKOUT_NOT_FOUND` (IDOR).
 
   The e2e suite needs its own database (kept separate from your dev data):
 
@@ -2150,6 +2460,43 @@ e2e tests → build, against real Postgres/Redis service containers.
   active-pet refetch (see Known limitations) that was silently returning
   the *previous* active pet's Home data for a few seconds after every
   switch — a bug this handoff's own flow 4 requirement is what surfaced it.
+
+- **Browser E2E (Handoff 07, automated Playwright run against a real
+  Chromium, live api/web dev servers, and a freshly-seeded Postgres)**: all
+  5 required flows passing. **Flow A (Standard Payment)** — signed in as
+  Sarah → Shop → added a product → Cart → Checkout → Method screen showed
+  "Pay online" and "SnappPay" (never a disabled provider) → chose Pay
+  online → simulated a successful payment → landed on Order Confirmation
+  showing "Confirmed" → the order was independently visible via
+  `GET /orders` with `status: CONFIRMED`. **Flow B (BNPL Approved)** —
+  same cart → Method → SnappPay → Eligibility screen showed "You're
+  eligible for installments" → Plans showed a real installment count/total
+  payable → selected a plan → Confirm installment plan → simulated
+  approval → Order Confirmation → the order's `financingStatus` was
+  `APPROVED` via the API. **Flow C (BNPL Declined)** — identical up to
+  Confirm installment plan → simulated a decline → the non-shaming
+  "Installment request was not approved" screen rendered with both "Try
+  another provider" and "Return to cart" present → clicked "Try another
+  provider" → landed back on the Method screen (not stuck) → chose Pay
+  online on the *same* checkout and reached the Payment step — proving the
+  decline-recovery path genuinely works end to end, not just in isolated
+  unit tests. **Flow D (Duplicate Webhook)** — Checkout → Pay online →
+  simulated a pending payment → captured the `PaymentIntent` id via the
+  new Ops view (`GET /checkout/:id/ops`) → posted the identical webhook
+  payload twice to `POST /payments/webhooks/dev_simulated` — the first
+  delivery returned `processed: true`, the second returned
+  `duplicate: true` — then confirmed via `GET /orders` that exactly one
+  Order existed and the Checkout page itself showed "Order confirmed"
+  after the (single, non-duplicated) confirmation. **Flow E (Refund)** —
+  opened the Flow A order's Order Detail page → submitted a refund request
+  with a reason → the UI updated to show the refund's status as
+  "Refunded" → independently confirmed via the API that the `Refund` row
+  was `SUCCEEDED` and the `Order.status` had flipped to `REFUNDED`. This
+  run caught and fixed a real bug: `Order.status` reaching `REFUNDED` had
+  no `en`/`fa` translation (Handoff 06 only ever reached
+  `PENDING`/`CONFIRMED`/`CANCELLED`), which threw a console
+  `MISSING_MESSAGE` error on Order Detail, My Orders, and Order
+  Confirmation until fixed.
 
 ## What's implemented
 
@@ -2314,6 +2661,42 @@ producing two independent Orders from one Checkout, a simulated payment
 failure that preserves the cart and permits a successful retry with no
 duplicate Order, and a pet switch that correctly recomputes a product's
 compatibility with no context leak.
+
+Everything in the Handoff 07 acceptance criteria: a `PaymentGateway`/
+`FinancingProvider` adapter architecture with a `STANDARD_GATEWAY`
+provider-neutral real-gateway slot and honestly-documented `SnappPay`/
+`DigiPay` sandbox stubs (no scraped or invented endpoints — every
+UNKNOWN in each adapter's doc comment reflects a genuine absence of
+official docs/credentials for this project); `FinancingIntent`/
+`FinancingPlanSnapshot` kept structurally separate from
+`PaymentIntentStatus`, never one collapsed status; a callback endpoint
+that is provably read-only and a webhook endpoint that is the sole
+authoritative confirmation path, with real `@@unique([provider,
+providerEventId])`-backed duplicate-delivery idempotency (a replayed
+webhook is acknowledged without a second Order, Transaction, or ledger
+entry); the full BNPL eligibility → plans → authorize flow working
+end to end for both an approval and a decline, with a genuinely
+recoverable checkout afterward (a fixed gap where switching payment
+methods was permanently blocked once committed was found and fixed
+while proving this); refund basics (full refund only, a genuinely
+separate BNPL-vs-card code path, and the emergency
+`PAYMENT_SUCCEEDED_ORDER_ISSUE` recovery path for "paid but order cannot
+confirm"); a reconciliation service that resolves a local/remote
+disagreement by replaying the same idempotent resolve path a webhook
+would, with an audit-friendly log row for every check regardless of
+outcome; a double-entry ledger with application-enforced balancing
+(`sum(debits) === sum(credits)`, checked before every write) recording
+both a successful payment and its reversing refund; IRR remaining the
+one stored, authoritative integer amount everywhere, including every new
+`LedgerEntry`; a consumer UI that separates Payment/Financing/Refund
+status into distinct badges and never shows "Order confirmed" before the
+backend has actually confirmed it; a minimal internal payment/financing
+ops view reachable only by a checkout's own owner; every Handoff 01-06
+backend/frontend test still green; and a full browser E2E pass (see
+above) proving a standard payment, an approved BNPL purchase, a declined
+BNPL purchase that recovers to online payment on the same checkout, a
+duplicate webhook delivery that produces no duplicate financial records,
+and a full refund, all end to end against a real browser.
 
 ## Known limitations / deliberate simplifications
 
@@ -2502,28 +2885,62 @@ compatibility with no context leak.
   a placeholder** — see the dedicated explanation in the Handoff 05
   section above; this isn't unfinished work, it's what "confirm" can
   correctly mean given this architecture's booking lifecycle.
-- **No real payment gateway, financing, or delivery integration** — per
-  the spec's explicit scope: no SnappPay/DigiPay/installment financing, no
-  AloPeyk/SnappBox/delivery tracking, no Torob/Digikala listing sync.
-  `DeliveryMethod` (`STANDARD`/`EXPRESS`) is a placeholder whose amount is
-  a fixed dev-calculated constant (`DELIVERY_AMOUNT_BY_METHOD`), not a real
-  carrier rate.
-- **No seller-facing commerce surface** — sellers are seed-data-only this
-  phase (`SellerOrganization`/`SellerOffer`/`InventoryItem` are all created
-  via `prisma/seed.ts`); there is no seller dashboard, no seller order
-  view, no seller-side inventory management endpoint, and no settlement/
-  payout logic. `docs/architecture` for the *full* Seller OS is a future
-  handoff, mirroring how Provider OS (Handoff 05) followed the booking
-  engine (Handoff 03).
+- **No real merchant credentials for any payment/financing provider**
+  (Handoff 07) — `StandardGatewayAdapter`/`SnappPayAdapter`/
+  `DigiPayAdapter` are documented sandbox stubs (see the Handoff 07
+  section above for exactly what's real vs. UNKNOWN per provider); no
+  live redirect/authorization round-trip, real installment terms, or real
+  webhook signature scheme exists for any of them. No delivery
+  integration exists either: `DeliveryMethod` (`STANDARD`/`EXPRESS`) is
+  still a placeholder whose amount is a fixed dev-calculated constant
+  (`DELIVERY_AMOUNT_BY_METHOD`), not a real carrier rate — AloPeyk/
+  SnappBox/Torob/Digikala remain explicitly out of scope.
+- **No seller-facing commerce surface, and no seller settlement** —
+  sellers are seed-data-only this phase (`SellerOrganization`/
+  `SellerOffer`/`InventoryItem` are all created via `prisma/seed.ts`);
+  there is no seller dashboard, no seller order view, no seller-side
+  inventory management endpoint, and nothing ever posts to the ledger's
+  `SELLER_PAYABLE`/`PLATFORM_REVENUE` accounts (seeded placeholders only
+  since Handoff 07). `docs/architecture` for the *full* Seller OS is a
+  future handoff, mirroring how Provider OS (Handoff 05) followed the
+  booking engine (Handoff 03).
 - **No promotion engine** — `Checkout.discountAmount`/`promotionCode` are
   placeholder fields only; nothing ever sets a non-zero discount or
   validates a code this phase.
-- **No returns/refunds execution** — `TransactionType.REFUND` and
-  `PaymentIntentStatus`/`OrderStatus`'s refund-adjacent values
-  (`PARTIALLY_REFUNDED`/`REFUNDED`) exist in the vocabulary but nothing
-  ever creates a refund `Transaction` or transitions an `Order` into
-  either state; a future handoff needs a real refund flow before those
-  values become reachable.
+- **Refunds are full-only, consumer/dev-initiated, and never reach
+  `PARTIALLY_REFUNDED`** (Handoff 07 implemented the rest) — `Refund`
+  entities and a full `REFUND_NOT_SUPPORTED` rejection path for any
+  partial amount exist and are exercised end to end, but no provider here
+  has a confirmed partial-refund capability, so `OrderStatus.
+  PARTIALLY_REFUNDED`/`FinancingIntentStatus.PARTIALLY_REFUNDED` stay
+  unreachable; there is also no admin/support role model yet, so any
+  signed-in owner of an order can request its refund (spec: "consumer
+  refund initiation may be limited... implement internal/dev refund route
+  and owner-visible status only").
+- **Reconciliation has no scheduler** — `POST
+  /payments/reconcile/:paymentIntentId`/`POST
+  /financing/reconcile/:financingIntentId` are manual/job-friendly
+  triggers only; nothing periodically calls them yet. Because every
+  sandbox adapter derives its "remote" status from the same `mode` input
+  that sets the local status in one atomic step, a genuine local/remote
+  disagreement can't currently arise through the public API alone — the
+  `RESOLVED_SUCCEEDED`/`RESOLVED_FAILED` branches are proven by advancing
+  a gateway's own in-memory status map directly in a test (see the
+  reconciliation e2e scenario above), not by a real missed-webhook race.
+- **No admin/support role model** — the internal payment/financing ops
+  view (`GET /checkout/:id/ops`) and the refund endpoints are reachable
+  only by session auth plus ownership, exactly like every other consumer
+  endpoint; there is no separate ops/support account type, and no audit
+  trail of *who* looked at a checkout's payment history beyond the
+  request logs themselves.
+- **The payment-method-switch guard only unblocks after a terminal
+  failure, never mid-flight** (Handoff 07) — once a checkout commits to
+  `ONLINE_PAYMENT` or `INSTALLMENTS`, switching to the other method is
+  rejected while that method's own attempt is still pending/in-progress;
+  it becomes possible again only once that attempt reaches
+  `FAILED`/`CANCELLED` (payment) or `DECLINED`/`CANCELLED`/`EXPIRED`
+  (financing) — by design, but worth knowing if a future handoff wants a
+  "cancel and switch immediately" affordance instead.
 - **No pharmacy, subscription, or prescription commerce** — `Product`/
   `SellerOffer` model general retail goods only; there is no prescription
   verification, recurring-order/subscription billing, or controlled-item
@@ -2571,39 +2988,54 @@ compatibility with no context leak.
 ## Next recommended coding handoff
 
 **A minimal Seller OS**, directly mirroring how Handoff 05's minimal
-Provider OS followed the vet booking engine (Handoff 03). Commerce Core
-(Handoff 06) built a complete consumer purchase loop, but every
-`SellerOrganization`/`SellerOffer`/`InventoryItem` exists only via
-`prisma/seed.ts` today — there is no seller-facing surface at all. A
-minimal next step, reusing the exact same session auth and authorization
-pattern `ProviderAuthGuard`/`ProviderContextService` already established
-(a `SellerUser`/`SellerOrganization` membership model, a `SellerAuthGuard`
-that is a completely separate axis from pet-data authorization, exactly
-as `ProviderAuthGuard` is): (1) a seller order queue
-(`GET /seller/orders`, `GET /seller/orders/:id`) scoped to that seller's
-own `Order` rows only (never another seller's — same "403, never a silent
-404" IDOR posture as Provider OS); (2) inventory management
-(`PATCH /seller/offers/:id/inventory` to adjust `onHand`, reusing the
-exact same `InventoryReservationService` invariants — never a second
-stock-tracking path); (3) basic order-status progression
+Provider OS followed the vet booking engine (Handoff 03), and now a more
+natural next step than before: Handoff 07 gave the platform a double-entry
+ledger with `SELLER_PAYABLE`/`PLATFORM_REVENUE` accounts already seeded
+but never posted to, and a real (if sandboxed) payment/BNPL/refund
+pipeline for a Seller OS to sit on top of, so this handoff can focus on
+the seller-facing surface itself rather than blocking on payments
+infrastructure. Every `SellerOrganization`/`SellerOffer`/`InventoryItem`
+still exists only via `prisma/seed.ts` today — there is no seller-facing
+surface at all. A minimal next step, reusing the exact same session auth
+and authorization pattern `ProviderAuthGuard`/`ProviderContextService`
+already established (a `SellerUser`/`SellerOrganization` membership
+model, a `SellerAuthGuard` that is a completely separate axis from
+pet-data authorization, exactly as `ProviderAuthGuard` is): (1) a seller
+order queue (`GET /seller/orders`, `GET /seller/orders/:id`) scoped to
+that seller's own `Order` rows only (never another seller's — same "403,
+never a silent 404" IDOR posture as Provider OS); (2) inventory
+management (`PATCH /seller/offers/:id/inventory` to adjust `onHand`,
+reusing the exact same `InventoryReservationService` invariants — never a
+second stock-tracking path); (3) basic order-status progression
 (`PENDING → CONFIRMED → PREPARING → READY_FOR_FULFILLMENT → FULFILLED`,
 finally reaching the `OrderStatus` values Handoff 06 defined but never
 made reachable) with the same "single-step transition, reject anything
-else" discipline `ProviderBookingsService` used. No settlement, no
-payouts, no seller-side pricing/catalog editing yet — those are
-substantial enough to stay a dedicated follow-up, exactly as Provider
-OS's own verification workflow was deferred past Handoff 05.
+else" discipline `ProviderBookingsService` used; and (4), now genuinely
+in scope given Handoff 07's ledger foundation, a first real posting to
+`SELLER_PAYABLE` (e.g. crediting it — and correspondingly debiting
+`CUSTOMER_PAYMENT_CLEARING` — for the seller's share once an Order is
+`FULFILLED`), still through `LedgerService.recordBalanced()`, never a new
+write path. Full settlement/payout execution, refund-adjusted seller
+payables, and seller-side pricing/catalog editing are substantial enough
+to stay a dedicated follow-up past this one, exactly as Provider OS's own
+verification workflow was deferred past Handoff 05.
 
-Alternatively, if the business prioritizes closing the payment/fulfillment
-gap instead: real payment gateway integration (a second `PaymentGateway`
-implementation — e.g. `SnappPay` or `DigiPay` — behind the existing
-interface, with `DevPaymentGateway` untouched for tests) plus delivery
+Alternatively, if the business prioritizes closing the remaining
+payment-provider gap instead of building the Seller OS: once real
+merchant credentials/official docs for SnappPay, DigiPay, or a standard
+gateway become available, swap the corresponding adapter's sandbox
+`mode`-driven bodies for real HTTP calls and a real webhook signature
+scheme, without touching `PaymentGateway`/`FinancingProvider`'s shape —
+every adapter already implements the full interface `PROVIDER_CAPABILITIES`
+declares, so a real integration is a same-class rewrite, not a new
+architecture. `validatePaymentConfig()` already refuses to boot with
+`PAYMENT_SANDBOX_MODE=production` unless the enabled provider's credential
+env vars are set, specifically to make this transition safe. Delivery
 integration (`AloPeyk`/`SnappBox` behind the existing `DeliveryMethod`
-placeholder). Both slot into interfaces this handoff deliberately built
-for exactly this purpose (`PaymentGateway`, `WebhookSignatureVerifier`,
-`DeliveryMethod`) — no schema migration should be needed for the payment
-side, only a new class and its webhook signature verification. Whichever
-is chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly separate
+placeholder) remains a separate, still-untouched gap. Whichever is
+chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly separate
 (never collapse catalog identity, price, and stock back into one model),
-keep "1 Checkout → N Orders" as the non-negotiable invariant, and keep
-IRR as the only stored currency unit.
+keep "1 Checkout → N Orders" as the non-negotiable invariant, keep IRR as
+the only stored currency unit, and keep every financial write going
+through `LedgerService.recordBalanced()` — never a second ledger-write
+path, no matter how small the change looks.
