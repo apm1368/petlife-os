@@ -1,14 +1,21 @@
 import type {
   CartDto,
   CheckoutDto,
+  CheckoutOpsDto,
+  FinancingEligibilityStatus,
+  FinancingIntentDto,
+  FinancingPlanOptionDto,
   DeliveryMethod,
   OrderDetailDto,
   OrderSummaryDto,
   PayCheckoutResultDto,
   PaymentIntentDto,
+  PaymentMethodOptionDto,
+  PaymentProvider,
   ProductCategoryDto,
   ProductDetailDto,
   ProductSummaryDto,
+  RefundDto,
   SellerOfferDto,
 } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
@@ -47,11 +54,29 @@ export const commerceService = {
   getCheckout: (id: string) => apiFetch<CheckoutDto>(`/checkout/${id}`),
   updateCheckout: (id: string, input: { addressId?: string; deliveryMethod?: DeliveryMethod }) =>
     apiFetch<CheckoutDto>(`/checkout/${id}`, { method: "PATCH", body: input }),
-  createPaymentIntent: (id: string, idempotencyKey?: string) =>
-    apiFetch<PaymentIntentDto>(`/checkout/${id}/payment-intent`, { method: "POST", idempotencyKey }),
+  createPaymentIntent: (id: string, provider?: PaymentProvider, idempotencyKey?: string) =>
+    apiFetch<PaymentIntentDto>(`/checkout/${id}/payment-intent`, { method: "POST", body: { provider }, idempotencyKey }),
   pay: (id: string, mode: "SUCCESS" | "FAILURE" | "PENDING" | undefined, idempotencyKey?: string) =>
     apiFetch<PayCheckoutResultDto>(`/checkout/${id}/pay`, { method: "POST", body: { mode }, idempotencyKey }),
 
+  getPaymentOptions: (id: string) => apiFetch<PaymentMethodOptionDto[]>(`/checkout/${id}/payment-options`),
+  createFinancingIntent: (id: string, provider: PaymentProvider, idempotencyKey?: string) =>
+    apiFetch<FinancingIntentDto>(`/checkout/${id}/financing-intent`, { method: "POST", body: { provider }, idempotencyKey }),
+  getFinancingIntent: (id: string, financingId: string) => apiFetch<FinancingIntentDto>(`/checkout/${id}/financing-intent/${financingId}`),
+  checkFinancingEligibility: (id: string, financingId: string) =>
+    apiFetch<{ status: FinancingEligibilityStatus }>(`/checkout/${id}/financing-intent/${financingId}/eligibility`, { method: "POST" }),
+  getFinancingPlans: (id: string, financingId: string) => apiFetch<FinancingPlanOptionDto[]>(`/checkout/${id}/financing-intent/${financingId}/plans`),
+  selectFinancingPlan: (id: string, financingId: string, providerPlanId: string) =>
+    apiFetch<FinancingIntentDto>(`/checkout/${id}/financing-intent/${financingId}/select-plan`, { method: "POST", body: { providerPlanId } }),
+  authorizeFinancing: (id: string, financingId: string, mode: "APPROVE" | "DECLINE" | "PENDING" | undefined, idempotencyKey?: string) =>
+    apiFetch<PayCheckoutResultDto>(`/checkout/${id}/financing-intent/${financingId}/authorize`, { method: "POST", body: { mode }, idempotencyKey }),
+  getOpsView: (id: string) => apiFetch<CheckoutOpsDto>(`/checkout/${id}/ops`),
+
   listOrders: () => apiFetch<OrderSummaryDto[]>("/orders"),
   getOrder: (id: string) => apiFetch<OrderDetailDto>(`/orders/${id}`),
+
+  requestRefund: (orderId: string, reason?: string, amount?: number, idempotencyKey?: string) =>
+    apiFetch<RefundDto>(`/orders/${orderId}/refunds`, { method: "POST", body: { reason, amount }, idempotencyKey }),
+  listRefunds: (orderId: string) => apiFetch<RefundDto[]>(`/orders/${orderId}/refunds`),
+  getRefund: (id: string) => apiFetch<RefundDto>(`/refunds/${id}`),
 };

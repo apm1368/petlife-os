@@ -11,7 +11,7 @@ const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/hooks/use-active-pet", () => ({ useActivePet: () => ({ householdId: "household-1" }) }));
 vi.mock("@/services/commerce.service", () => ({
-  commerceService: { getCart: vi.fn(), createCheckout: vi.fn(), createPaymentIntent: vi.fn(), pay: vi.fn(), getCheckout: vi.fn() },
+  commerceService: { getCart: vi.fn(), createCheckout: vi.fn(), createPaymentIntent: vi.fn(), pay: vi.fn(), getCheckout: vi.fn(), getPaymentOptions: vi.fn() },
 }));
 vi.mock("@/services/addresses.service", () => ({ addressesService: { list: vi.fn() } }));
 
@@ -35,6 +35,7 @@ const EMPTY_CART: CartDto = { id: "cart-1", status: "ACTIVE" as never, totalItem
 const CHECKOUT: CheckoutDto = {
   id: "checkout-1",
   status: "READY_FOR_PAYMENT" as never,
+  paymentMethodType: null,
   addressId: "address-1",
   deliveryMethod: "STANDARD" as never,
   subtotalAmount: 1_250_000,
@@ -77,6 +78,13 @@ async function advanceToPayment() {
   vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
   vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
   vi.mocked(commerceService.createCheckout).mockResolvedValue(CHECKOUT);
+  vi.mocked(commerceService.getPaymentOptions).mockResolvedValue([
+    {
+      provider: "DEV_SIMULATED" as never,
+      methodType: "ONLINE_PAYMENT" as never,
+      capabilities: { supportsDirectPayment: true, supportsInstallments: false, supportsRefund: true, supportsPartialRefund: true, supportsAsyncWebhook: true, supportsEligibilityCheck: false },
+    },
+  ]);
   vi.mocked(commerceService.createPaymentIntent).mockResolvedValue({
     id: "intent-1",
     checkoutId: CHECKOUT.id,
@@ -95,6 +103,9 @@ async function advanceToPayment() {
   await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
   fireEvent.click(screen.getByText("Continue"));
 
+  await waitFor(() => expect(screen.getByText("How would you like to pay?")).toBeTruthy());
+  fireEvent.click(screen.getByText("Pay online"));
+
   await waitFor(() => expect(screen.getByText("Payment")).toBeTruthy());
 }
 
@@ -103,6 +114,7 @@ describe("CheckoutView", () => {
     vi.mocked(commerceService.getCart).mockReset();
     vi.mocked(commerceService.createCheckout).mockReset();
     vi.mocked(commerceService.createPaymentIntent).mockReset();
+    vi.mocked(commerceService.getPaymentOptions).mockReset();
     vi.mocked(commerceService.pay).mockReset();
     vi.mocked(commerceService.getCheckout).mockReset();
     vi.mocked(addressesService.list).mockReset();

@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 /** My Orders (spec section 61) — an Order is its own record, never re-derived solely from its Checkout. */
 export function MyOrdersView() {
   const t = useTranslations("commerce.myOrders");
+  const tStatus = useTranslations("commerce.statusLabels");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
 
@@ -48,6 +49,13 @@ export function MyOrdersView() {
               </StatusLabel>
             </div>
             <p className="text-metadata text-text-secondary">{t("itemCount", { count: order.itemCount })}</p>
+            {order.paymentStatus || order.financingStatus || order.refundStatus ? (
+              <div className="flex flex-wrap gap-1.5">
+                {order.paymentStatus ? <StatusLabel tone="neutral">{tStatus(`payment.${order.paymentStatus}`)}</StatusLabel> : null}
+                {order.financingStatus ? <StatusLabel tone="neutral">{tStatus(`financing.${order.financingStatus}`)}</StatusLabel> : null}
+                {order.refundStatus ? <StatusLabel tone="neutral">{tStatus(`refund.${order.refundStatus}`)}</StatusLabel> : null}
+              </div>
+            ) : null}
             <div className="flex items-center justify-between gap-3">
               <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(order.createdAt))}</span>
               <span className="text-body text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>

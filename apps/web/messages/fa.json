@@ -961,9 +961,58 @@
         "generic": "پرداخت شما تکمیل نشد.",
         "preserved": "هیچ مبلغی کسر نشد و سبد خرید شما حفظ شده است.",
         "returnToCart": "بازگشت به سبد خرید",
-        "tryAgain": "تلاش مجدد"
+        "tryAgain": "تلاش مجدد",
+        "chooseInstallments": "در عوض پرداخت اقساطی را انتخاب کنید"
       },
-      "createFailed": "شروع پرداخت ممکن نشد. لطفاً دوباره تلاش کنید."
+      "createFailed": "شروع پرداخت ممکن نشد. لطفاً دوباره تلاش کنید.",
+      "method": {
+        "title": "چگونه می‌خواهید پرداخت کنید؟",
+        "onlinePayment": "پرداخت آنلاین",
+        "installments": "پرداخت اقساطی",
+        "chooseProvider": "انتخاب طرح",
+        "chooseAnother": "انتخاب روش دیگر",
+        "noneAvailable": "در حال حاضر هیچ روش پرداختی در دسترس نیست.",
+        "provider": {
+          "DEV_SIMULATED": "درگاه آزمایشی",
+          "STANDARD_GATEWAY": "پرداخت آنلاین",
+          "SNAPP_PAY": "اسنپ‌پی",
+          "DIGI_PAY": "دیجی‌پی"
+        }
+      },
+      "financingEligibility": {
+        "title": "بررسی واجد شرایط بودن",
+        "status": {
+          "CHECKING": "در حال بررسی واجد شرایط بودن شما…",
+          "ELIGIBLE": "شما واجد شرایط پرداخت اقساطی هستید",
+          "NOT_ELIGIBLE": "در حال حاضر واجد شرایط پرداخت اقساطی نیستید",
+          "NEEDS_VERIFICATION": "نیاز به تأیید بیشتر است",
+          "ERROR": "بررسی واجد شرایط بودن ممکن نشد"
+        },
+        "notEligibleHint": "همچنان می‌توانید به‌صورت آنلاین پرداخت کنید."
+      },
+      "financingPlans": {
+        "title": "انتخاب طرح اقساط",
+        "installmentCount": "{count, plural, one {۱ قسط} other {# قسط}}",
+        "downPayment": "پیش‌پرداخت",
+        "installmentAmount": "مبلغ هر قسط",
+        "fee": "کارمزد",
+        "totalPayable": "مجموع قابل پرداخت",
+        "none": "در حال حاضر طرحی در دسترس نیست."
+      },
+      "financingAuthorize": {
+        "title": "تأیید طرح اقساط",
+        "redirectNotice": "به‌صورت امن با {provider} ادامه خواهید داد.",
+        "simulateApprove": "شبیه‌سازی تأیید",
+        "simulateDecline": "شبیه‌سازی رد درخواست",
+        "simulatePending": "شبیه‌سازی در انتظار",
+        "authorize": "ادامه با ارائه‌دهنده"
+      },
+      "financingDeclined": {
+        "title": "درخواست اقساط تأیید نشد",
+        "generic": "این طرح اقساط تأیید نشد.",
+        "tryAnother": "امتحان ارائه‌دهنده دیگر",
+        "retry": "تلاش مجدد"
+      }
     },
     "confirmation": {
       "title": "سفارش تأیید شد",
@@ -1008,7 +1057,73 @@
         "PENDING": "در انتظار",
         "CONFIRMED": "تأیید شده",
         "CANCELLED": "لغو شده"
+      },
+      "paymentStatusLabel": "وضعیت پرداخت",
+      "financingStatusLabel": "وضعیت اقساط",
+      "refunds": {
+        "title": "بازپرداخت‌ها",
+        "requestButton": "درخواست بازپرداخت",
+        "reasonPlaceholder": "دلیل (اختیاری)",
+        "submit": "ارسال درخواست",
+        "requestFailed": "ارسال درخواست بازپرداخت ممکن نشد. لطفاً دوباره تلاش کنید.",
+        "none": "بازپرداختی برای این سفارش ثبت نشده است.",
+        "providerReference": "شناسه ارائه‌دهنده",
+        "requestedAt": "درخواست‌شده در {when}"
+      },
+      "viewPaymentDetails": "مشاهده جزئیات پرداخت و اقساط"
+    },
+    "statusLabels": {
+      "payment": {
+        "REQUIRES_PAYMENT_METHOD": "در انتظار پرداخت",
+        "PENDING": "در انتظار",
+        "AUTHORIZED": "تأیید شده",
+        "CAPTURED": "پرداخت‌شده",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغو شده"
+      },
+      "financing": {
+        "CREATED": "شروع شده",
+        "ELIGIBILITY_PENDING": "در حال بررسی واجد شرایط بودن",
+        "ELIGIBLE": "واجد شرایط",
+        "NOT_ELIGIBLE": "غیر واجد شرایط",
+        "PLAN_SELECTED": "طرح انتخاب شد",
+        "AUTHORIZATION_PENDING": "در انتظار تأیید",
+        "APPROVED": "تأیید شد",
+        "DECLINED": "رد شد",
+        "CANCELLED": "لغو شده",
+        "EXPIRED": "منقضی شده",
+        "REFUND_PENDING": "بازپرداخت در انتظار",
+        "PARTIALLY_REFUNDED": "بازپرداخت جزئی",
+        "REFUNDED": "بازپرداخت شد"
+      },
+      "refund": {
+        "REQUESTED": "درخواست شده",
+        "PROCESSING": "در حال پردازش",
+        "SUCCEEDED": "بازپرداخت شد",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغو شده"
       }
+    },
+    "ops": {
+      "title": "پرداخت و اقساط (داخلی)",
+      "loading": "در حال بارگذاری",
+      "retry": "تلاش مجدد",
+      "checkout": "سبد خرید",
+      "paymentIntents": "درخواست‌های پرداخت",
+      "financingIntents": "درخواست‌های اقساط",
+      "refunds": "بازپرداخت‌ها",
+      "providerEvents": "رویدادهای وب‌هوک ارائه‌دهنده",
+      "reconciliationLogs": "گزارش تطبیق",
+      "none": "موردی ثبت نشده است.",
+      "provider": "ارائه‌دهنده",
+      "status": "وضعیت",
+      "amount": "مبلغ",
+      "createdAt": "ایجاد شده",
+      "eventType": "نوع رویداد",
+      "attemptCount": "تعداد تلاش",
+      "action": "اقدام",
+      "localStatus": "محلی",
+      "remoteStatus": "از راه دور"
     }
   }
 }

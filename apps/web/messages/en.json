@@ -961,9 +961,58 @@
         "generic": "Your payment could not be completed.",
         "preserved": "Nothing was charged, and your cart has been preserved.",
         "returnToCart": "Return to cart",
-        "tryAgain": "Try again"
+        "tryAgain": "Try again",
+        "chooseInstallments": "Choose installments instead"
       },
-      "createFailed": "Couldn't start checkout. Please try again."
+      "createFailed": "Couldn't start checkout. Please try again.",
+      "method": {
+        "title": "How would you like to pay?",
+        "onlinePayment": "Pay online",
+        "installments": "Installments",
+        "chooseProvider": "Choose a plan",
+        "chooseAnother": "Choose another method",
+        "noneAvailable": "No payment methods are currently available.",
+        "provider": {
+          "DEV_SIMULATED": "Development Gateway",
+          "STANDARD_GATEWAY": "Online Payment",
+          "SNAPP_PAY": "SnappPay",
+          "DIGI_PAY": "DigiPay"
+        }
+      },
+      "financingEligibility": {
+        "title": "Checking eligibility",
+        "status": {
+          "CHECKING": "Checking your eligibility…",
+          "ELIGIBLE": "You're eligible for installments",
+          "NOT_ELIGIBLE": "Not eligible for installments right now",
+          "NEEDS_VERIFICATION": "Additional verification needed",
+          "ERROR": "Couldn't check eligibility"
+        },
+        "notEligibleHint": "You can still pay online instead."
+      },
+      "financingPlans": {
+        "title": "Choose a plan",
+        "installmentCount": "{count, plural, one {1 installment} other {# installments}}",
+        "downPayment": "Down payment",
+        "installmentAmount": "Per installment",
+        "fee": "Fee",
+        "totalPayable": "Total payable",
+        "none": "No plans are currently available."
+      },
+      "financingAuthorize": {
+        "title": "Confirm installment plan",
+        "redirectNotice": "You'll continue securely with {provider}.",
+        "simulateApprove": "Simulate approval",
+        "simulateDecline": "Simulate decline",
+        "simulatePending": "Simulate pending",
+        "authorize": "Continue with provider"
+      },
+      "financingDeclined": {
+        "title": "Installment request was not approved",
+        "generic": "This installment plan wasn't approved.",
+        "tryAnother": "Try another provider",
+        "retry": "Try again"
+      }
     },
     "confirmation": {
       "title": "Order confirmed",
@@ -1008,7 +1057,73 @@
         "PENDING": "Pending",
         "CONFIRMED": "Confirmed",
         "CANCELLED": "Cancelled"
+      },
+      "paymentStatusLabel": "Payment status",
+      "financingStatusLabel": "Financing status",
+      "refunds": {
+        "title": "Refunds",
+        "requestButton": "Request a refund",
+        "reasonPlaceholder": "Reason (optional)",
+        "submit": "Submit request",
+        "requestFailed": "Couldn't submit the refund request. Please try again.",
+        "none": "No refunds for this order.",
+        "providerReference": "Provider reference",
+        "requestedAt": "Requested {when}"
+      },
+      "viewPaymentDetails": "View payment & financing details"
+    },
+    "statusLabels": {
+      "payment": {
+        "REQUIRES_PAYMENT_METHOD": "Awaiting payment",
+        "PENDING": "Pending",
+        "AUTHORIZED": "Authorized",
+        "CAPTURED": "Paid",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "financing": {
+        "CREATED": "Started",
+        "ELIGIBILITY_PENDING": "Checking eligibility",
+        "ELIGIBLE": "Eligible",
+        "NOT_ELIGIBLE": "Not eligible",
+        "PLAN_SELECTED": "Plan selected",
+        "AUTHORIZATION_PENDING": "Awaiting approval",
+        "APPROVED": "Approved",
+        "DECLINED": "Declined",
+        "CANCELLED": "Cancelled",
+        "EXPIRED": "Expired",
+        "REFUND_PENDING": "Refund pending",
+        "PARTIALLY_REFUNDED": "Partially refunded",
+        "REFUNDED": "Refunded"
+      },
+      "refund": {
+        "REQUESTED": "Requested",
+        "PROCESSING": "Processing",
+        "SUCCEEDED": "Refunded",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
       }
+    },
+    "ops": {
+      "title": "Payment & Financing (internal)",
+      "loading": "Loading",
+      "retry": "Retry",
+      "checkout": "Checkout",
+      "paymentIntents": "Payment intents",
+      "financingIntents": "Financing intents",
+      "refunds": "Refunds",
+      "providerEvents": "Provider webhook events",
+      "reconciliationLogs": "Reconciliation log",
+      "none": "None recorded.",
+      "provider": "Provider",
+      "status": "Status",
+      "amount": "Amount",
+      "createdAt": "Created",
+      "eventType": "Event type",
+      "attemptCount": "Attempts",
+      "action": "Action",
+      "localStatus": "Local",
+      "remoteStatus": "Remote"
     }
   }
 }
