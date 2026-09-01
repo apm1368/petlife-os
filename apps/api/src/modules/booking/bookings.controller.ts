@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
-import { IsBooleanString, IsOptional, IsUUID } from "class-validator";
+import { IsBooleanString, IsInt, IsOptional, IsUUID, Max, Min } from "class-validator";
+import { Type } from "class-transformer";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { PetAccessGuard } from "../../common/auth/pet-access.guard";
 import { RequirePetAccess } from "../../common/auth/require-pet-access.decorator";
@@ -21,8 +22,20 @@ class ListBookingsDto {
   past?: string;
 
   @IsOptional()
+  @IsBooleanString()
+  cancelled?: string;
+
+  @IsOptional()
   @IsUUID()
   petId?: string;
+}
+
+class CreateSeriesDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(2)
+  @Max(8)
+  occurrences!: number;
 }
 
 @Controller()
@@ -50,6 +63,7 @@ export class BookingsController {
     return this.bookingsService.list(user.id, {
       upcoming: query.upcoming === "true",
       past: query.past === "true",
+      cancelled: query.cancelled === "true",
       petId: query.petId,
     });
   }
@@ -62,5 +76,10 @@ export class BookingsController {
   @Post("bookings/:id/cancel")
   cancel(@CurrentUser() user: SessionUser, @Param("id") id: string, @Body() dto: CancelBookingDto) {
     return this.bookingsService.cancel(user.id, id, dto);
+  }
+
+  @Post("bookings/:id/recur")
+  recur(@CurrentUser() user: SessionUser, @Param("id") id: string, @Body() dto: CreateSeriesDto) {
+    return this.bookingsService.createWeeklySeries(user.id, id, dto.occurrences);
   }
 }

@@ -1,12 +1,15 @@
 import { create } from "zustand";
-import { HealthAccessScopePreset } from "@petlife/types";
+import { LocationMode, ServiceCategory } from "@petlife/types";
+import type { PetAccessScopePreset } from "@petlife/types";
 
 export interface BookingDraft {
   petId: string | null;
+  category: ServiceCategory | null;
   providerId: string | null;
   providerName: string;
   locationId: string | null;
   locationLabel: string;
+  locationMode: LocationMode | null;
   serviceId: string | null;
   serviceName: string;
   durationMinutes: number;
@@ -19,7 +22,9 @@ export interface BookingDraft {
   holdId: string | null;
   holdExpiresAt: string | null;
   reasonForVisit: string;
-  healthAccessSelection: HealthAccessScopePreset;
+  accessSelection: PetAccessScopePreset | null;
+  customerAddressId: string | null;
+  dropoffAddressId: string | null;
   confirmIdempotencyKey: string;
 }
 
@@ -30,10 +35,12 @@ interface BookingState extends BookingDraft {
 
 const initialDraft: BookingDraft = {
   petId: null,
+  category: null,
   providerId: null,
   providerName: "",
   locationId: null,
   locationLabel: "",
+  locationMode: null,
   serviceId: null,
   serviceName: "",
   durationMinutes: 0,
@@ -46,11 +53,13 @@ const initialDraft: BookingDraft = {
   holdId: null,
   holdExpiresAt: null,
   reasonForVisit: "",
-  healthAccessSelection: HealthAccessScopePreset.HEALTH_BASICS,
+  accessSelection: null,
+  customerAddressId: null,
+  dropoffAddressId: null,
   confirmIdempotencyKey: "",
 };
 
-/** Holds in-progress booking choices across the Find Vet -> Slot -> Review -> Health Sharing -> Confirm flow. */
+/** Holds in-progress booking choices across the Explore Services -> Slot/Range -> Review -> Care Sharing -> Confirm flow, for any service category. */
 export const useBookingStore = create<BookingState>((set) => ({
   ...initialDraft,
   update: (patch) => set(patch),

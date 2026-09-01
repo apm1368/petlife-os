@@ -13,8 +13,19 @@ export class CreateBookingHoldDto {
   @IsUUID()
   serviceId!: string;
 
+  /** Fixed-length-slot categories (VET/GROOMING/TRAINING/WALKING/PET_TAXI) — mutually exclusive with rangeStart/rangeEnd. */
+  @IsOptional()
   @IsDateString()
-  slotStart!: string;
+  slotStart?: string;
+
+  /** Date-range categories (SITTING/BOARDING) — check-in/check-out, mutually exclusive with slotStart. */
+  @IsOptional()
+  @IsDateString()
+  rangeStart?: string;
+
+  @IsOptional()
+  @IsDateString()
+  rangeEnd?: string;
 
   @IsOptional()
   @IsUUID()

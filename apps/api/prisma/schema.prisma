@@ -199,10 +199,51 @@ enum HealthSeverity {
 // Provider / booking (Handoff 03)
 // ---------------------------------------------------------------------------
 
+/// A coarse "kind of business" classification — deliberately independent from
+/// ServiceCategory (see below), which is the authoritative taxonomy used for
+/// discovery/compatibility/filtering. A provider's `type` is closer to
+/// self-described business identity (e.g. what shows on their profile
+/// header); a MULTI_SERVICE_PROVIDER can offer services across several
+/// categories (e.g. a clinic that also grooms), and each ProviderService
+/// carries its own `category` rather than inferring one from the org's type.
 enum ProviderType {
   VET_CLINIC
   VET_HOSPITAL
   VETERINARIAN
+  GROOMER
+  TRAINER
+  WALKER
+  SITTER
+  BOARDING
+  PET_TAXI
+  MULTI_SERVICE_PROVIDER
+}
+
+/// The canonical service taxonomy (Handoff 04) — discovery, compatibility,
+/// and Home/Care Calendar integration all key off this field, never off a
+/// display string or ProviderServiceType. VET is retained as a category so
+/// Handoff 03's vet booking flow is just one category among several here,
+/// not a special case.
+enum ServiceCategory {
+  VET
+  GROOMING
+  TRAINING
+  WALKING
+  SITTING
+  BOARDING
+  PET_TAXI
+}
+
+/// Where a booked service actually happens. AT_PROVIDER needs no address
+/// (clinic/grooming salon/boarding facility); AT_CUSTOMER and MOBILE require
+/// a CustomerAddress (sitting/training/walking, or a provider that travels to
+/// the customer); TRANSPORT (pet taxi) requires both a pickup and a dropoff
+/// CustomerAddress. See BookingsService for the exact ADDRESS_REQUIRED rule.
+enum LocationMode {
+  AT_PROVIDER
+  AT_CUSTOMER
+  MOBILE
+  TRANSPORT
 }
 
 /// Only VERIFIED providers appear in default consumer discovery
@@ -235,6 +276,12 @@ enum ProviderServiceType {
   VACCINATION
   FOLLOW_UP
   CONSULTATION
+  GROOMING_SESSION
+  TRAINING_SESSION
+  DOG_WALK
+  PET_SITTING
+  BOARDING_STAY
+  PET_TAXI_RIDE
 }
 
 enum AvailabilityExceptionType {
@@ -280,23 +327,59 @@ enum PaymentStatus {
 
 /// What a booking-confirmation-time TEMPORARY PetAccessGrant actually
 /// exposes. Never "full health record" by default — see
-/// BookingHealthAccessService and the README section on health data
-/// minimization.
-enum HealthAccessScopePreset {
+/// BookingPetAccessService and the README section on data minimization.
+/// Renamed from HealthAccessScopePreset (Handoff 03) now that booking access
+/// spans every service category, not just vet visits — MINIMAL_VET_CONTEXT/
+/// HEALTH_BASICS/SELECTED_HEALTH_DATA are the original vet-only presets,
+/// preserved unchanged for existing vet bookings; the *_BASIC presets are the
+/// new per-category Care Profile-only presets (Handoff 04 section 7).
+enum PetAccessScopePreset {
   MINIMAL_VET_CONTEXT
   HEALTH_BASICS
   SELECTED_HEALTH_DATA
+  GROOMING_BASIC
+  TRAINING_BASIC
+  WALKING_BASIC
+  SITTING_BASIC
+  BOARDING_BASIC
+  TAXI_BASIC
 }
 
-/// Only VET_APPOINTMENT exists this phase; the enum (rather than a plain
-/// string) exists so a future calendar source (grooming, boarding, ...) is a
-/// vocabulary addition, not a schema change.
+/// Mirrors ServiceCategory (Handoff 04) so a Care Calendar row's type is
+/// always derivable from the booking category that created it, rather than
+/// being its own independent vocabulary. VET_APPOINTMENT is Handoff 03's
+/// original value, kept unchanged for existing vet bookings.
 enum CareCalendarEventType {
   VET_APPOINTMENT
+  GROOMING_APPOINTMENT
+  TRAINING_SESSION
+  WALK
+  SITTING
+  BOARDING
+  PET_TAXI
 }
 
 enum CareCalendarEventStatus {
   SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+/// Recurrence is intentionally minimal this phase (Handoff 04 section 25) —
+/// only a flat "repeat weekly N times" shape, generated up front at series
+/// creation. No custom interval/day-of-week picker.
+enum BookingSeriesFrequency {
+  ONE_TIME
+  WEEKLY
+}
+
+/// PAUSED/COMPLETED are part of the vocabulary this phase's architecture must
+/// support (spec section 27) but nothing transitions a series to them yet —
+/// only ACTIVE (the default) and CANCELLED are reachable. See README Known
+/// limitations.
+enum BookingSeriesStatus {
+  ACTIVE
+  PAUSED
   CANCELLED
   COMPLETED
 }
@@ -328,6 +411,7 @@ model User {
   petInterests         UserPetInterest[]
   providerProfiles     ProviderUser[]
   bookings             Booking[]
+  bookingSeries        BookingSeries[]
 
   @@map("users")
 }
@@ -362,6 +446,8 @@ model Household {
   onboardingProgress   OnboardingProgress[]
   bookings             Booking[]
   careCalendarEvents   CareCalendarEvent[]
+  addresses            CustomerAddress[]
+  bookingSeries        BookingSeries[]
 
   @@map("households")
 }
@@ -450,6 +536,7 @@ model Pet {
 
   bookings           Booking[]
   careCalendarEvents CareCalendarEvent[]
+  bookingSeries      BookingSeries[]
 
   @@index([householdId])
   @@map("pets")
@@ -506,7 +593,7 @@ model PetAccessGrant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  bookingHealthAccess BookingHealthAccess?
+  bookingPetAccess BookingPetAccess?
 
   @@index([petId, userId])
   @@index([expiresAt])
@@ -793,6 +880,7 @@ model ProviderOrganization {
   availabilityRules      ProviderAvailabilityRule[]
   availabilityExceptions ProviderAvailabilityException[]
   bookings               Booking[]
+  bookingSeries          BookingSeries[]
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -862,6 +950,9 @@ model ProviderService {
   name        String
   description String?
   type        ProviderServiceType
+  /// The authoritative taxonomy field — see the doc comment on ServiceCategory.
+  /// Never inferred from `type` or `name` at read time.
+  category    ServiceCategory
 
   durationMinutes Int
   priceAmount     Decimal? @db.Decimal(10, 2)
@@ -870,6 +961,27 @@ model ProviderService {
   supportsDog Boolean @default(true)
   supportsCat Boolean @default(true)
 
+  /// Compatibility bounds (Handoff 04) — nullable means "no restriction on
+  /// this axis". Weight is stored normalized to kg (rather than the spec's
+  /// literal minWeight/maxWeight) because Pet.latestWeightValue carries its
+  /// own WeightUnit (KG or LB); comparing raw values without a shared unit
+  /// would silently misjudge compatibility. PetServiceCompatibilityService
+  /// converts a pet's weight to kg before comparing.
+  minAgeMonths Int?
+  maxAgeMonths Int?
+  minWeightKg  Decimal? @db.Decimal(6, 2)
+  maxWeightKg  Decimal? @db.Decimal(6, 2)
+
+  /// When true, PetServiceCompatibilityService reports NEEDS_REVIEW (never
+  /// COMPATIBLE) until the pet's Care Profile / Health Basics setup is
+  /// COMPLETE — see spec section 5 ("never call a service compatible when
+  /// required context is missing").
+  requiresCareProfile  Boolean @default(false)
+  requiresHealthBasics Boolean @default(false)
+
+  /// Where this service happens — see the doc comment on LocationMode.
+  locationMode LocationMode @default(AT_PROVIDER)
+
   isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
@@ -877,9 +989,11 @@ model ProviderService {
 
   availabilityRules ProviderAvailabilityRule[]
   bookings          Booking[]
+  bookingSeries     BookingSeries[]
 
   @@index([providerOrganizationId])
   @@index([type])
+  @@index([category])
   @@map("provider_services")
 }
 
@@ -940,6 +1054,75 @@ model ProviderAvailabilityException {
   @@map("provider_availability_exceptions")
 }
 
+/// A household-owned address used when a service happens somewhere other
+/// than the provider's own location (see LocationMode). Deliberately its own
+/// small model rather than long address strings inlined on Booking, so the
+/// same address can be reused/listed across multiple bookings. onDelete on
+/// its Booking relations is Restrict (see Booking's own doc comment) — an
+/// address referenced by any booking history cannot be silently removed;
+/// this phase has no delete endpoint for addresses at all (create + list
+/// only — see README Known limitations).
+model CustomerAddress {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  label        String?
+  recipient    String?
+  phone        String?
+  addressLine  String
+  city         String
+  region       String?
+  countryCode  String
+  latitude     Float?
+  longitude    Float?
+  instructions String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookingsAsCustomerAddress Booking[] @relation("BookingCustomerAddress")
+  bookingsAsDropoffAddress  Booking[] @relation("BookingDropoffAddress")
+
+  @@index([householdId])
+  @@map("customer_addresses")
+}
+
+/// The recurring definition behind a weekly series of bookings (Handoff 04
+/// section 26) — WALKING/TRAINING/GROOMING only, enforced in
+/// RecurringBookingService rather than a DB constraint. Bookings remain the
+/// actual occurrences (see Booking.bookingSeriesId below); this row is never
+/// itself a bookable/cancellable unit end-users interact with directly this
+/// phase — cancelling one occurrence (POST /bookings/:id/cancel) never
+/// touches this row or any sibling occurrence, by design (spec: "a
+/// failed/cancelled occurrence must not destroy whole series").
+model BookingSeries {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerServiceId      String               @db.Uuid
+  providerService        ProviderService      @relation(fields: [providerServiceId], references: [id], onDelete: Restrict)
+
+  frequency BookingSeriesFrequency
+  status    BookingSeriesStatus    @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([householdId])
+  @@index([petId])
+  @@map("booking_series")
+}
+
 /// The persisted booking record. A hold (Redis-only, see BookingHoldService)
 /// never becomes a row here until it is confirmed — at which point a row is
 /// created directly at CONFIRMED, since there is no real payment-authorization
@@ -947,6 +1130,16 @@ model ProviderAvailabilityException {
 /// the FK policy established in the schema-hardening checkpoint: a booking is
 /// a factual business record, not something that should silently vanish if
 /// its pet/household/provider row is ever removed.
+///
+/// `category` and `locationMode` (Handoff 04) are deliberately denormalized
+/// from ProviderService at booking-confirmation time rather than always
+/// joined — a booking must keep showing what it was actually booked as even
+/// if the service's own category/locationMode is edited later, and it lets
+/// My Bookings / Home / Care Calendar filter and label by category without a
+/// join. `startAt`/`endAt` already generically support any duration — a
+/// 30-minute vet slot and a multi-night Boarding stay use the exact same two
+/// columns; no schema change was needed to support date-range bookings (see
+/// README "Multi-day bookings").
 model Booking {
   id          String    @id @default(uuid()) @db.Uuid
   householdId String    @db.Uuid
@@ -964,6 +1157,18 @@ model Booking {
   providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: SetNull)
   providerServiceId      String               @db.Uuid
   providerService        ProviderService      @relation(fields: [providerServiceId], references: [id], onDelete: Restrict)
+
+  category     ServiceCategory
+  locationMode LocationMode
+
+  customerAddressId String?          @db.Uuid
+  customerAddress   CustomerAddress? @relation("BookingCustomerAddress", fields: [customerAddressId], references: [id], onDelete: Restrict)
+  /// TRANSPORT (pet taxi) only — customerAddressId is the pickup address, this is the dropoff.
+  dropoffAddressId  String?          @db.Uuid
+  dropoffAddress    CustomerAddress? @relation("BookingDropoffAddress", fields: [dropoffAddressId], references: [id], onDelete: Restrict)
+
+  bookingSeriesId String?        @db.Uuid
+  bookingSeries   BookingSeries? @relation(fields: [bookingSeriesId], references: [id], onDelete: SetNull)
 
   startAt  DateTime
   endAt    DateTime
@@ -983,20 +1188,25 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  healthAccess BookingHealthAccess?
+  petAccess BookingPetAccess?
 
   @@index([petId])
   @@index([householdId])
   @@index([userId])
   @@index([providerLocationId, startAt])
+  @@index([bookingSeriesId])
   @@map("bookings")
 }
 
 /// The explicit link between a Booking and the TEMPORARY PetAccessGrant it
-/// created — see PR spec section 23. Lets the system audit why a grant
-/// exists, revoke it when its booking is cancelled, and (later) extend it,
-/// without guessing from `PetAccessGrant.reason` free text alone.
-model BookingHealthAccess {
+/// created — see PR spec section 23 (Handoff 03) and section 9 (Handoff 04).
+/// Renamed from BookingHealthAccess now that booking-time access spans every
+/// service category, not just health data (a groomer's grant is Care
+/// Profile-only, for example) — see the migration for the safe rename.
+/// Lets the system audit why a grant exists, revoke it when its booking is
+/// cancelled, and (later) extend it, without guessing from
+/// `PetAccessGrant.reason` free text alone.
+model BookingPetAccess {
   id        String  @id @default(uuid()) @db.Uuid
   bookingId String  @unique @db.Uuid
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
@@ -1004,11 +1214,11 @@ model BookingHealthAccess {
   petAccessGrantId String         @unique @db.Uuid
   petAccessGrant   PetAccessGrant @relation(fields: [petAccessGrantId], references: [id], onDelete: Restrict)
 
-  scopePreset HealthAccessScopePreset
+  scopePreset PetAccessScopePreset
 
   createdAt DateTime @default(now())
 
-  @@map("booking_health_access")
+  @@map("booking_pet_access")
 }
 
 /// A read/display projection over Booking (and, later, other source types).

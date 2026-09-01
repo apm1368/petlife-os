@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { CareCalendarEventDto } from "@petlife/types";
-import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
+import { formatDateTimeRange } from "@/lib/date/appointment-date";
 import { careCalendarService } from "@/services/care-calendar.service";
 
 /**
@@ -49,7 +49,7 @@ export function CareCalendarView() {
           <ContextSurface className="flex items-center justify-between gap-3">
             <div>
               <p className="text-body text-text-primary">{t(`event.${event.type}`)}</p>
-              <p className="text-metadata text-text-secondary">{formatAppointmentDateTime(event.startAt, locale, event.timezone)}</p>
+              <p className="text-metadata text-text-secondary">{formatDateTimeRange(event.startAt, event.endAt, locale, event.timezone)}</p>
             </div>
             <StatusLabel tone={event.status === "SCHEDULED" ? "success" : "neutral"}>{t(`status.${event.status}`)}</StatusLabel>
           </ContextSurface>

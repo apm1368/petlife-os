@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsString, IsUUID, Length } from "class-validator";
-import { HealthAccessScopePreset } from "@petlife/types";
+import { PetAccessScopePreset } from "@petlife/types";
 
 export class CreateBookingDto {
   @IsUUID()
@@ -18,8 +18,18 @@ export class CreateBookingDto {
   @Length(1, 2000)
   ownerNotes?: string;
 
-  /** Defaults to HEALTH_BASICS (see spec section 21) when omitted — never "full health record". */
+  /** Defaults to a sensible per-category preset (see DEFAULT_SCOPE_PRESET_BY_CATEGORY) when omitted — never "full record". */
   @IsOptional()
-  @IsEnum(HealthAccessScopePreset)
-  healthAccessSelection?: HealthAccessScopePreset;
+  @IsEnum(PetAccessScopePreset)
+  accessSelection?: PetAccessScopePreset;
+
+  /** Required when the service's LocationMode is AT_CUSTOMER/MOBILE (the service address) or TRANSPORT (the pickup address). */
+  @IsOptional()
+  @IsUUID()
+  customerAddressId?: string;
+
+  /** TRANSPORT (pet taxi) only — the dropoff address. */
+  @IsOptional()
+  @IsUUID()
+  dropoffAddressId?: string;
 }

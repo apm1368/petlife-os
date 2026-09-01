@@ -141,14 +141,25 @@
       "findVet": "یافتن دامپزشک",
       "askAi": "پرسش از هوش مصنوعی درباره {name}",
       "addPet": "افزودن اولین حیوان خانگی",
-      "viewBooking": "مشاهده نوبت دامپزشکی"
+      "viewBooking": {
+        "vet": "مشاهده نوبت دامپزشکی پیش رو",
+        "grooming": "مشاهده نوبت آرایش پیش رو",
+        "training": "مشاهده جلسه آموزش پیش رو",
+        "walking": "مشاهده پیاده‌روی پیش رو",
+        "sitting": "مشاهده نگهداری پیش رو",
+        "boarding": "مشاهده اقامت پیش رو",
+        "petTaxi": "مشاهده سفر تاکسی حیوانات پیش رو"
+      }
     },
     "sections": {
       "ai": "پرسش از هوش مصنوعی",
-      "upcoming": "پیش‌ رو"
+      "upcoming": "پیش‌ رو",
+      "exploreServices": "کاوش خدمات"
     },
     "aiPlaceholder": "راهنمایی هوش مصنوعی به‌زودی فعال می‌شود.",
-    "upcomingPlaceholder": "چیزی برنامه‌ریزی نشده است."
+    "upcomingPlaceholder": "چیزی برنامه‌ریزی نشده است.",
+    "exploreServicesHint": "آرایش، آموزش، پیاده‌روی، نگهداری، اقامت و تاکسی حیوانات.",
+    "exploreServicesAction": "کاوش"
   },
   "pets": {
     "myPets": "حیوانات خانگی من",
@@ -166,7 +177,15 @@
       "careTeaser": "مراقبت",
       "openHealth": "مشاهده سلامت",
       "openCareProfile": "مشاهده پروفایل مراقبت",
-      "upcomingVisitTeaser": "نوبت دامپزشکی پیش رو",
+      "upcomingServiceTeaser": {
+        "VET": "نوبت دامپزشکی پیش رو",
+        "GROOMING": "نوبت آرایش پیش رو",
+        "TRAINING": "جلسه آموزش پیش رو",
+        "WALKING": "پیاده‌روی پیش رو",
+        "SITTING": "نگهداری پیش رو",
+        "BOARDING": "اقامت پیش رو",
+        "PET_TAXI": "سفر تاکسی حیوانات پیش رو"
+      },
       "viewBooking": "مشاهده نوبت"
     }
   },
@@ -365,17 +384,219 @@
         "PET_ACCESS_DENIED": "شما دسترسی رزرو نوبت برای این حیوان خانگی را ندارید.",
         "BOOKING_NOT_CANCELLABLE": "این نوبت دیگر قابل لغو نیست."
       }
+    }
+  },
+  "bookingDetail": {
+    "title": "نوبت",
+    "pet": "حیوان خانگی",
+    "provider": "ارائه‌دهنده",
+    "service": "خدمت",
+    "location": "آدرس",
+    "dropoffLocation": "آدرس مقصد",
+    "dateTime": "تاریخ و ساعت",
+    "reason": "یادداشت",
+    "cancelledReason": "دلیل لغو",
+    "cancel": "لغو نوبت",
+    "status": {
+      "HOLD": "رزرو موقت",
+      "PENDING_CONFIRMATION": "در انتظار تأیید",
+      "CONFIRMED": "تأییدشده",
+      "CHECKED_IN": "پذیرش شده",
+      "IN_PROGRESS": "در حال انجام",
+      "COMPLETED": "انجام‌شده",
+      "CANCELLED_BY_USER": "لغوشده توسط شما",
+      "CANCELLED_BY_PROVIDER": "لغوشده توسط مرکز",
+      "NO_SHOW": "عدم حضور"
     },
-    "bookingDetail": {
-      "title": "نوبت",
-      "pet": "حیوان خانگی",
-      "provider": "دامپزشک / کلینیک",
-      "service": "خدمت",
-      "location": "آدرس",
-      "dateTime": "تاریخ و ساعت",
-      "reason": "دلیل مراجعه",
-      "cancelledReason": "دلیل لغو",
-      "cancel": "لغو نوبت",
+    "paymentStatus": {
+      "NOT_REQUIRED": "نیازی نیست",
+      "PENDING": "در انتظار",
+      "AUTHORIZED": "تأییدشده",
+      "PAID": "پرداخت‌شده",
+      "FAILED": "ناموفق",
+      "REFUND_PENDING": "در انتظار بازگشت وجه",
+      "REFUNDED": "وجه بازگشت داده شد"
+    },
+    "careAccess": {
+      "title": "دسترسی مراقبت به اشتراک گذاشته‌شده",
+      "scope": "محدوده",
+      "expiresAt": "تا تاریخ",
+      "preset": {
+        "MINIMAL_VET_CONTEXT": "حداقل اطلاعات",
+        "HEALTH_BASICS": "اطلاعات پایه سلامت",
+        "SELECTED_HEALTH_DATA": "اطلاعات منتخب سلامت",
+        "GROOMING_BASIC": "پروفایل مراقبت (پایه آرایش)",
+        "TRAINING_BASIC": "پروفایل مراقبت (پایه آموزش)",
+        "WALKING_BASIC": "پروفایل مراقبت (پایه پیاده‌روی)",
+        "SITTING_BASIC": "پروفایل مراقبت (پایه نگهداری)",
+        "BOARDING_BASIC": "پروفایل مراقبت + وضعیت واکسن (پایه اقامت)",
+        "TAXI_BASIC": "پروفایل مراقبت (پایه تاکسی حیوانات)"
+      }
+    },
+    "recurring": {
+      "prompt": "این نوبت به‌صورت هفتگی رزرو شود؟",
+      "action": "تکرار هفتگی",
+      "started": "{count} نوبت هفتگی ایجاد شد."
+    },
+    "cancelDialog": {
+      "title": "این نوبت لغو شود؟",
+      "body": "ارائه‌دهنده دیگر این زمان را برای شما نگه نمی‌دارد.",
+      "careAccessImpact": "دسترسی موقت مراقبتی که برای این نوبت به اشتراک گذاشتید نیز لغو خواهد شد.",
+      "confirm": "بله، نوبت لغو شود"
+    },
+    "confirmedBanner": {
+      "title": "نوبت تأیید شد",
+      "calendarAdded": "به تقویم مراقبت شما اضافه شد.",
+      "careAccessUntil": "دسترسی مراقبت تا {when} با ارائه‌دهنده به اشتراک گذاشته شده است.",
+      "openCalendar": "باز کردن تقویم مراقبت"
+    }
+  },
+  "services": {
+    "explore": {
+      "title": "کاوش خدمات",
+      "subtitle": "برای {name}",
+      "category": {
+        "VET": "مراقبت دامپزشکی",
+        "GROOMING": "آرایش",
+        "TRAINING": "آموزش",
+        "WALKING": "پیاده‌روی",
+        "SITTING": "نگهداری",
+        "BOARDING": "اقامت",
+        "PET_TAXI": "تاکسی حیوانات"
+      },
+      "categoryHint": {
+        "VET": "معاینه، واکسیناسیون و ویزیت",
+        "GROOMING": "استحمام، کوتاهی مو و آرایش کامل",
+        "TRAINING": "جلسات اطاعت‌پذیری و رفتار",
+        "WALKING": "پیاده‌روی برنامه‌ریزی‌شده",
+        "SITTING": "نگهداری در منزل",
+        "BOARDING": "اقامت یک یا چند شبه",
+        "PET_TAXI": "سفر به و از قرار ملاقات‌ها"
+      }
+    },
+    "results": {
+      "title": "ارائه‌دهندگان",
+      "loading": "در حال بارگذاری",
+      "retry": "تلاش دوباره",
+      "subtitle": "برای {name}",
+      "empty": "هنوز ارائه‌دهنده‌ای پیدا نشد.",
+      "verified": "تأییدشده",
+      "nextAvailable": "نزدیک‌ترین نوبت خالی: {when}",
+      "noAvailability": "نوبت خالی پیدا نشد"
+    },
+    "compatibility": {
+      "status": {
+        "COMPATIBLE": "سازگار",
+        "NEEDS_REVIEW": "نیاز به بررسی",
+        "NOT_SUPPORTED": "پشتیبانی نمی‌شود",
+        "UNKNOWN": "نیاز به اطلاعات بیشتر"
+      }
+    },
+    "booking": {
+      "noDraft": "برای شروع، یک ارائه‌دهنده را از نتایج خدمت انتخاب کنید.",
+      "backToResults": "بازگشت به نتایج",
+      "slotPicker": {
+        "title": "انتخاب زمان",
+        "incompatible": "این ارائه‌دهنده برای این خدمت، گونه حیوان شما را پشتیبانی نمی‌کند.",
+        "noSlots": "در هفته پیش رو نوبت خالی وجود ندارد."
+      },
+      "dateRange": {
+        "title": "انتخاب تاریخ ورود و خروج",
+        "checkIn": "تاریخ ورود",
+        "checkOut": "تاریخ خروج"
+      },
+      "address": {
+        "title": "این خدمت کجا انجام شود؟",
+        "addNew": "افزودن آدرس جدید",
+        "addressLine": "آدرس",
+        "city": "شهر",
+        "countryCode": "کد کشور",
+        "save": "ذخیره آدرس"
+      },
+      "review": {
+        "title": "بررسی نوبت",
+        "pet": "حیوان خانگی",
+        "provider": "ارائه‌دهنده",
+        "service": "خدمت",
+        "location": "آدرس",
+        "atCustomerLocation": "آدرس شما",
+        "dateTime": "تاریخ و ساعت",
+        "price": "هزینه",
+        "paymentStatus": "وضعیت پرداخت",
+        "paymentPlaceholder": "هنوز نیازی نیست",
+        "notesLabel": "یادداشت (اختیاری)"
+      },
+      "careSharing": {
+        "title": "اشتراک‌گذاری اطلاعات مراقبت با ارائه‌دهنده",
+        "who": "با چه کسی",
+        "why": "به چه دلیل",
+        "whyValue": "برای این نوبت {service}",
+        "until": "تا چه زمانی",
+        "what": "چه اطلاعاتی",
+        "confirm": "تأیید نهایی نوبت",
+        "preset": {
+          "GROOMING_BASIC": {
+            "title": "اطلاعات پایه آرایش",
+            "description": "خلق‌وخو، حساسیت هنگام لمس، و نکات پوست/مو از پروفایل مراقبت."
+          },
+          "TRAINING_BASIC": {
+            "title": "اطلاعات پایه آموزش",
+            "description": "خلق‌وخو و نکات رفتاری از پروفایل مراقبت."
+          },
+          "WALKING_BASIC": {
+            "title": "اطلاعات پایه پیاده‌روی",
+            "description": "رفتار با قلاده، خلق‌وخو، و نکات ویژه از پروفایل مراقبت."
+          },
+          "SITTING_BASIC": {
+            "title": "اطلاعات پایه نگهداری",
+            "description": "روال غذا دادن، روال دستشویی، و رفتار هنگام دوری از پروفایل مراقبت."
+          },
+          "BOARDING_BASIC": {
+            "title": "اطلاعات پایه اقامت",
+            "description": "پروفایل مراقبت به‌همراه وضعیت واکسن، در صورت نیاز."
+          },
+          "TAXI_BASIC": {
+            "title": "اطلاعات پایه تاکسی حیوانات",
+            "description": "خلق‌وخو و نکات مربوط به قفس/جابه‌جایی از پروفایل مراقبت."
+          }
+        }
+      },
+      "errors": {
+        "SLOT_UNAVAILABLE": "این زمان دیگر در دسترس نیست. لطفاً زمان دیگری انتخاب کنید.",
+        "HOLD_EXPIRED": "این رزرو موقت منقضی شده. لطفاً دوباره انتخاب کنید.",
+        "BOOKING_CONFLICT": "این زمان همین الان توسط شخص دیگری رزرو شد. لطفاً زمان دیگری انتخاب کنید.",
+        "PROVIDER_NOT_VERIFIED": "این ارائه‌دهنده هنوز تأیید نشده است.",
+        "SERVICE_NOT_AVAILABLE": "این خدمت در حال حاضر در دسترس نیست.",
+        "PET_NOT_SUPPORTED": "این ارائه‌دهنده برای این خدمت، گونه حیوان شما را پشتیبانی نمی‌کند.",
+        "PET_ACCESS_DENIED": "شما دسترسی رزرو نوبت برای این حیوان خانگی را ندارید.",
+        "PET_CONTEXT_INCOMPLETE": "پروفایل این حیوان خانگی برای رزرو این خدمت نیاز به اطلاعات بیشتری دارد.",
+        "ADDRESS_REQUIRED": "این خدمت پیش از رزرو به یک آدرس نیاز دارد.",
+        "BOOKING_NOT_CANCELLABLE": "این نوبت دیگر قابل لغو نیست."
+      }
+    }
+  },
+  "bookings": {
+    "myBookings": {
+      "title": "نوبت‌های من",
+      "tab": {
+        "upcoming": "پیش رو",
+        "past": "گذشته",
+        "cancelled": "لغوشده"
+      },
+      "empty": {
+        "upcoming": "نوبت پیش رویی وجود ندارد.",
+        "past": "نوبت گذشته‌ای وجود ندارد.",
+        "cancelled": "نوبت لغوشده‌ای وجود ندارد."
+      },
+      "category": {
+        "VET": "ویزیت دامپزشکی",
+        "GROOMING": "آرایش",
+        "TRAINING": "آموزش",
+        "WALKING": "پیاده‌روی",
+        "SITTING": "نگهداری",
+        "BOARDING": "اقامت",
+        "PET_TAXI": "تاکسی حیوانات"
+      },
       "status": {
         "HOLD": "رزرو موقت",
         "PENDING_CONFIRMATION": "در انتظار تأیید",
@@ -386,37 +607,6 @@
         "CANCELLED_BY_USER": "لغوشده توسط شما",
         "CANCELLED_BY_PROVIDER": "لغوشده توسط مرکز",
         "NO_SHOW": "عدم حضور"
-      },
-      "paymentStatus": {
-        "NOT_REQUIRED": "نیازی نیست",
-        "PENDING": "در انتظار",
-        "AUTHORIZED": "تأییدشده",
-        "PAID": "پرداخت‌شده",
-        "FAILED": "ناموفق",
-        "REFUND_PENDING": "در انتظار بازگشت وجه",
-        "REFUNDED": "وجه بازگشت داده شد"
-      },
-      "healthAccess": {
-        "title": "دسترسی سلامت به اشتراک گذاشته‌شده",
-        "scope": "محدوده",
-        "expiresAt": "تا تاریخ",
-        "preset": {
-          "MINIMAL_VET_CONTEXT": "حداقل اطلاعات",
-          "HEALTH_BASICS": "اطلاعات پایه سلامت",
-          "SELECTED_HEALTH_DATA": "اطلاعات منتخب سلامت"
-        }
-      },
-      "cancelDialog": {
-        "title": "این نوبت لغو شود؟",
-        "body": "کلینیک دیگر این زمان را برای شما نگه نمی‌دارد.",
-        "healthAccessImpact": "دسترسی موقت سلامتی که برای این نوبت به اشتراک گذاشتید نیز لغو خواهد شد.",
-        "confirm": "بله، نوبت لغو شود"
-      },
-      "confirmedBanner": {
-        "title": "نوبت تأیید شد",
-        "calendarAdded": "به تقویم مراقبت شما اضافه شد.",
-        "healthAccessUntil": "اطلاعات سلامت تا {when} با کلینیک به اشتراک گذاشته شده است.",
-        "openCalendar": "باز کردن تقویم مراقبت"
       }
     }
   },
@@ -424,7 +614,13 @@
     "title": "تقویم مراقبت",
     "empty": "هنوز چیزی برنامه‌ریزی نشده.",
     "event": {
-      "VET_APPOINTMENT": "نوبت دامپزشکی"
+      "VET_APPOINTMENT": "نوبت دامپزشکی",
+      "GROOMING_APPOINTMENT": "نوبت آرایش",
+      "TRAINING_SESSION": "جلسه آموزش",
+      "WALK": "پیاده‌روی",
+      "SITTING": "نگهداری",
+      "BOARDING": "اقامت",
+      "PET_TAXI": "سفر تاکسی حیوانات"
     },
     "status": {
       "SCHEDULED": "برنامه‌ریزی‌شده",

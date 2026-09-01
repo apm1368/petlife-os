@@ -5,11 +5,11 @@ import { CareCalendarModule } from "../care-calendar/care-calendar.module";
 import { BookingsController } from "./bookings.controller";
 import { BookingsService } from "./bookings.service";
 import { BookingHoldService } from "./booking-hold.service";
-import { BookingHealthAccessService } from "./booking-health-access.service";
+import { BookingPetAccessService } from "./booking-pet-access.service";
 
 @Module({
   imports: [PetAccessModule, ProvidersModule, CareCalendarModule],
   controllers: [BookingsController],
-  providers: [BookingsService, BookingHoldService, BookingHealthAccessService],
+  providers: [BookingsService, BookingHoldService, BookingPetAccessService],
 })
 export class BookingModule {}

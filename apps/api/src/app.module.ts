@@ -27,6 +27,8 @@ import { CareProfileModule } from "./modules/care-profile/care-profile.module";
 import { ProvidersModule } from "./modules/providers/providers.module";
 import { BookingModule } from "./modules/booking/booking.module";
 import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module";
+import { ServicesModule } from "./modules/services/services.module";
+import { AddressesModule } from "./modules/addresses/addresses.module";
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module
     ProvidersModule,
     BookingModule,
     CareCalendarModule,
+    ServicesModule,
+    AddressesModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

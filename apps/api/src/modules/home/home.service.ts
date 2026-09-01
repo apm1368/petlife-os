@@ -14,7 +14,7 @@ const HEALTH_NOT_VISIBLE: HomeRankingHealthInput = {
 };
 
 const CARE_NOT_VISIBLE: HomeRankingCareInput = { visible: false, profileStatus: SetupStatus.NOT_STARTED };
-const NO_UPCOMING_BOOKING: HomeRankingBookingInput = { hasUpcoming: false, bookingId: null };
+const NO_UPCOMING_BOOKING: HomeRankingBookingInput = { hasUpcoming: false, bookingId: null, category: null };
 
 @Injectable()
 export class HomeService {
@@ -92,7 +92,11 @@ export class HomeService {
       where: { petId: activePet.id, bookingStatus: BookingStatus.CONFIRMED, startAt: { gte: new Date() } },
       orderBy: { startAt: "asc" },
     });
-    const booking: HomeRankingBookingInput = { hasUpcoming: Boolean(upcomingBooking), bookingId: upcomingBooking?.id ?? null };
+    const booking: HomeRankingBookingInput = {
+      hasUpcoming: Boolean(upcomingBooking),
+      bookingId: upcomingBooking?.id ?? null,
+      category: (upcomingBooking?.category as unknown as HomeRankingBookingInput["category"]) ?? null,
+    };
 
     const { primaryAction, secondaryActions } = this.ranking.rank({
       hasActivePet: true,

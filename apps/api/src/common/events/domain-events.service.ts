@@ -19,13 +19,20 @@ export const DOMAIN_EVENT_TYPES = [
   "NutritionProfileUpdated",
   "CareProfileUpdated",
   "ProviderViewed",
-  "BookingHoldCreated",
-  "BookingCreated",
-  "BookingConfirmed",
-  "BookingCancelled",
-  "TemporaryPetAccessGranted",
-  "TemporaryPetAccessRevoked",
   "CareCalendarEventCreated",
+  // Services Marketplace Basics (Handoff 04) — generalized names replacing
+  // the Handoff 03 vet-only vocabulary (BookingHoldCreated/BookingCreated/
+  // BookingConfirmed/BookingCancelled/TemporaryPetAccessGranted/
+  // TemporaryPetAccessRevoked) now that the same booking engine spans every
+  // service category, not just vet visits.
+  "ServiceViewed",
+  "ServiceCompatibilityEvaluated",
+  "ServiceBookingStarted",
+  "ServiceBookingConfirmed",
+  "ServiceBookingCancelled",
+  "ServiceAccessGranted",
+  "ServiceAccessRevoked",
+  "BookingSeriesCreated",
 ] as const;
 
 /**

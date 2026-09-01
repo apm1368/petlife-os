@@ -5,14 +5,20 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, ContextSurface, Dialog, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { BookingDto } from "@petlife/types";
-import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
+import { formatAppointmentDateTime, formatDateTimeRange } from "@/lib/date/appointment-date";
 import { bookingsService } from "@/services/bookings.service";
 import { petsService } from "@/services/pets.service";
 
 const CANCELLABLE = new Set(["HOLD", "PENDING_CONFIRMATION", "CONFIRMED"]);
+const RECURRING_CATEGORIES = new Set(["WALKING", "TRAINING", "GROOMING"]);
 
+/**
+ * Generic across every service category (Handoff 04) — a booking's
+ * `category` decides display copy (e.g. "Care access" instead of a
+ * vet-specific "Health access"), never a different component per category.
+ */
 export function BookingDetailView({ bookingId }: { bookingId: string }) {
-  const t = useTranslations("vet.bookingDetail");
+  const t = useTranslations("bookingDetail");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
@@ -24,6 +30,8 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
   const [error, setError] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [isStartingSeries, setIsStartingSeries] = useState(false);
+  const [seriesMessage, setSeriesMessage] = useState<string | null>(null);
 
   async function load() {
     setError(false);
@@ -53,10 +61,21 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
     }
   }
 
+  async function startWeeklySeries() {
+    setIsStartingSeries(true);
+    try {
+      const result = await bookingsService.recur(bookingId, 4);
+      setSeriesMessage(t("recurring.started", { count: result.createdBookingIds.length }));
+    } finally {
+      setIsStartingSeries(false);
+    }
+  }
+
   if (error) return <ErrorRecovery title={tCommon("loading")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
   if (!booking) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const isCancelled = booking.bookingStatus.startsWith("CANCELLED");
+  const dateTimeValue = formatDateTimeRange(booking.startAt, booking.endAt, locale, booking.timezone);
 
   return (
     <div className="flex flex-col gap-5">
@@ -64,10 +83,10 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         <ContextSurface className="flex flex-col gap-2 border-brand-mint">
           <p className="text-section-title text-text-primary">{t("confirmedBanner.title")}</p>
           <p className="text-body text-text-secondary">{t("confirmedBanner.calendarAdded")}</p>
-          {booking.healthAccess ? (
+          {booking.petAccess ? (
             <p className="text-metadata text-text-secondary">
-              {t("confirmedBanner.healthAccessUntil", {
-                when: formatAppointmentDateTime(booking.healthAccess.expiresAt, locale, booking.timezone),
+              {t("confirmedBanner.careAccessUntil", {
+                when: formatAppointmentDateTime(booking.petAccess.expiresAt, locale, booking.timezone),
               })}
             </p>
           ) : null}
@@ -93,17 +112,31 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         <Row label={t("pet")} value={petName} />
         <Row label={t("provider")} value={booking.provider?.name ?? ""} />
         <Row label={t("service")} value={booking.service?.name ?? ""} />
-        <Row label={t("location")} value={booking.location ? `${booking.location.addressLine}, ${booking.location.city}` : ""} />
-        <Row label={t("dateTime")} value={formatAppointmentDateTime(booking.startAt, locale, booking.timezone)} />
+        <Row
+          label={t("location")}
+          value={booking.customerAddress ? `${booking.customerAddress.addressLine}, ${booking.customerAddress.city}` : booking.location ? `${booking.location.addressLine}, ${booking.location.city}` : ""}
+        />
+        {booking.dropoffAddress ? <Row label={t("dropoffLocation")} value={`${booking.dropoffAddress.addressLine}, ${booking.dropoffAddress.city}`} /> : null}
+        <Row label={t("dateTime")} value={dateTimeValue} />
         {booking.reasonForVisit ? <Row label={t("reason")} value={booking.reasonForVisit} /> : null}
         {booking.cancelledReason ? <Row label={t("cancelledReason")} value={booking.cancelledReason} /> : null}
       </ContextSurface>
 
-      {booking.healthAccess ? (
+      {booking.petAccess ? (
         <ContextSurface className="flex flex-col gap-2">
-          <h2 className="text-section-title text-text-primary">{t("healthAccess.title")}</h2>
-          <Row label={t("healthAccess.scope")} value={t(`healthAccess.preset.${booking.healthAccess.scopePreset}`)} />
-          <Row label={t("healthAccess.expiresAt")} value={formatAppointmentDateTime(booking.healthAccess.expiresAt, locale, booking.timezone)} />
+          <h2 className="text-section-title text-text-primary">{t("careAccess.title")}</h2>
+          <Row label={t("careAccess.scope")} value={t(`careAccess.preset.${booking.petAccess.scopePreset}`)} />
+          <Row label={t("careAccess.expiresAt")} value={formatAppointmentDateTime(booking.petAccess.expiresAt, locale, booking.timezone)} />
+        </ContextSurface>
+      ) : null}
+
+      {!isCancelled && RECURRING_CATEGORIES.has(booking.category) && !booking.bookingSeriesId ? (
+        <ContextSurface className="flex flex-col gap-2">
+          <p className="text-body text-text-primary">{t("recurring.prompt")}</p>
+          <Button variant="secondary" isLoading={isStartingSeries} onClick={startWeeklySeries}>
+            {t("recurring.action")}
+          </Button>
+          {seriesMessage ? <p className="text-metadata text-text-secondary">{seriesMessage}</p> : null}
         </ContextSurface>
       ) : null}
 
@@ -116,7 +149,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
       <Dialog open={showCancelDialog} onClose={() => setShowCancelDialog(false)} title={t("cancelDialog.title")}>
         <div className="flex flex-col gap-4">
           <p className="text-body text-text-secondary">{t("cancelDialog.body")}</p>
-          {booking.healthAccess ? <p className="text-metadata text-text-secondary">{t("cancelDialog.healthAccessImpact")}</p> : null}
+          {booking.petAccess ? <p className="text-metadata text-text-secondary">{t("cancelDialog.careAccessImpact")}</p> : null}
           <div className="flex gap-2">
             <Button variant="ghost" onClick={() => setShowCancelDialog(false)}>
               {tCommon("cancel")}

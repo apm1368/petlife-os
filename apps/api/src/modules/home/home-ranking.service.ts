@@ -1,5 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { HomeActionKind, PetInterest, SetupStatus, VaccinationStatus, type HomeActionDto } from "@petlife/types";
+import { HomeActionKind, PetInterest, ServiceCategory, SetupStatus, VaccinationStatus, type HomeActionDto } from "@petlife/types";
+
+/** Category-aware label so Home says "View upcoming grooming" rather than a one-size-fits-all "View booking" (spec section 36). */
+const BOOKING_LABEL_KEY_BY_CATEGORY: Record<ServiceCategory, string> = {
+  [ServiceCategory.VET]: "home.action.viewBooking.vet",
+  [ServiceCategory.GROOMING]: "home.action.viewBooking.grooming",
+  [ServiceCategory.TRAINING]: "home.action.viewBooking.training",
+  [ServiceCategory.WALKING]: "home.action.viewBooking.walking",
+  [ServiceCategory.SITTING]: "home.action.viewBooking.sitting",
+  [ServiceCategory.BOARDING]: "home.action.viewBooking.boarding",
+  [ServiceCategory.PET_TAXI]: "home.action.viewBooking.petTaxi",
+};
 
 /** canViewHealth-gated. When visible is false, vaccinationStatus/profileStatus must not be trusted — nothing is queried for them. */
 export interface HomeRankingHealthInput {
@@ -18,10 +29,14 @@ export interface HomeRankingCareInput {
  * Not permission-gated the way health/care are — a booking is either
  * scoped to the caller's own household or it isn't visible at all (see
  * HomeService), so there's no separate "visible" flag to trust here.
+ * `category` (Handoff 04) drives which labelKey is shown — any service
+ * category can surface here, not just vet visits (see
+ * BOOKING_LABEL_KEY_BY_CATEGORY) — but the priority position never changes.
  */
 export interface HomeRankingBookingInput {
   hasUpcoming: boolean;
   bookingId: string | null;
+  category: ServiceCategory | null;
 }
 
 export interface HomeRankingInput {
@@ -43,12 +58,17 @@ export interface HomeRankingInput {
  * completely and never second-guesses it.
  *
  * Priority order: vaccination due/overdue > health setup incomplete >
- * upcoming Vet booking > (fallback) VET interest or Ask AI, with a
- * care-profile-incomplete secondary action folded in only once none of the
- * above fired. An ordinary upcoming booking deliberately never outranks a
- * vaccination-due or health-incomplete signal — there is no
- * emergency/critical-health severity logic yet (see HealthSeverity), so a
- * routine appointment is never treated as more urgent than either.
+ * upcoming service booking (any category — vet, grooming, training,
+ * walking, sitting, boarding, pet taxi) > (fallback) VET interest or Ask AI,
+ * with a care-profile-incomplete secondary action folded in only once none
+ * of the above fired. An ordinary upcoming booking deliberately never
+ * outranks a vaccination-due or health-incomplete signal, regardless of its
+ * category — there is no emergency/critical-health severity logic yet (see
+ * HealthSeverity), so a routine appointment (a grooming slot or a walk, same
+ * as a vet visit) is never treated as more urgent than either. Home only
+ * ever surfaces at most one upcoming-booking action at a time — it does not
+ * attempt to summarize multiple categories together (spec section 36: "do
+ * not overwhelm Home").
  */
 @Injectable()
 export class HomeRankingService {
@@ -88,10 +108,11 @@ export class HomeRankingService {
     }
 
     if (input.booking.hasUpcoming && input.booking.bookingId) {
+      const labelKey = input.booking.category ? BOOKING_LABEL_KEY_BY_CATEGORY[input.booking.category] : "home.action.viewBooking.vet";
       return {
         primaryAction: {
           kind: HomeActionKind.VIEW_BOOKING,
-          labelKey: "home.action.viewBooking",
+          labelKey,
           href: `/bookings/${input.booking.bookingId}`,
         },
         secondaryActions: [viewProfile],

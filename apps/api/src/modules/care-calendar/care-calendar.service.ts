@@ -1,8 +1,29 @@
 import { Injectable } from "@nestjs/common";
-import { CareCalendarEventStatus, CareCalendarEventType, type Booking, type Prisma } from "@prisma/client";
+import { CareCalendarEventStatus, CareCalendarEventType, ServiceCategory, type Booking, type Prisma } from "@prisma/client";
 import { HomeActionKind, type CareCalendarEventDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
+
+/** ServiceCategory -> the calendar event vocabulary it projects as. Every Booking category maps to exactly one type. */
+const CALENDAR_TYPE_BY_CATEGORY: Record<ServiceCategory, CareCalendarEventType> = {
+  [ServiceCategory.VET]: CareCalendarEventType.VET_APPOINTMENT,
+  [ServiceCategory.GROOMING]: CareCalendarEventType.GROOMING_APPOINTMENT,
+  [ServiceCategory.TRAINING]: CareCalendarEventType.TRAINING_SESSION,
+  [ServiceCategory.WALKING]: CareCalendarEventType.WALK,
+  [ServiceCategory.SITTING]: CareCalendarEventType.SITTING,
+  [ServiceCategory.BOARDING]: CareCalendarEventType.BOARDING,
+  [ServiceCategory.PET_TAXI]: CareCalendarEventType.PET_TAXI,
+};
+
+const TITLE_KEY_BY_CATEGORY: Record<ServiceCategory, string> = {
+  [ServiceCategory.VET]: "careCalendar.event.vetAppointment",
+  [ServiceCategory.GROOMING]: "careCalendar.event.grooming",
+  [ServiceCategory.TRAINING]: "careCalendar.event.training",
+  [ServiceCategory.WALKING]: "careCalendar.event.walk",
+  [ServiceCategory.SITTING]: "careCalendar.event.sitting",
+  [ServiceCategory.BOARDING]: "careCalendar.event.boarding",
+  [ServiceCategory.PET_TAXI]: "careCalendar.event.petTaxi",
+};
 
 function toDto(event: {
   id: string;
@@ -35,7 +56,12 @@ function toDto(event: {
 /**
  * Booking remains the editable source of truth (see the doc comment on
  * CareCalendarEvent in schema.prisma) — every method here is a read
- * projection or a sync-on-change, never an independent edit surface.
+ * projection or a sync-on-change, never an independent edit surface. The
+ * event's sourceType/type is derived from the booking's category (Handoff
+ * 04) rather than being hard-coded to VET_APPOINTMENT — a multi-day
+ * Sitting/Boarding booking projects the exact same startAt/endAt range it
+ * was booked with, so the calendar naturally renders a date-range event with
+ * no schema change (see README "Multi-day bookings").
  */
 @Injectable()
 export class CareCalendarService {
@@ -45,8 +71,11 @@ export class CareCalendarService {
   ) {}
 
   async upsertForBooking(booking: Booking, tx: Prisma.TransactionClient): Promise<void> {
+    const type = CALENDAR_TYPE_BY_CATEGORY[booking.category];
+    const titleKey = TITLE_KEY_BY_CATEGORY[booking.category];
+
     const event = await tx.careCalendarEvent.upsert({
-      where: { sourceType_sourceId: { sourceType: CareCalendarEventType.VET_APPOINTMENT, sourceId: booking.id } },
+      where: { sourceType_sourceId: { sourceType: type, sourceId: booking.id } },
       update: {
         startAt: booking.startAt,
         endAt: booking.endAt,
@@ -56,14 +85,14 @@ export class CareCalendarService {
       create: {
         householdId: booking.householdId,
         petId: booking.petId,
-        sourceType: CareCalendarEventType.VET_APPOINTMENT,
+        sourceType: type,
         sourceId: booking.id,
-        type: CareCalendarEventType.VET_APPOINTMENT,
+        type,
         status: CareCalendarEventStatus.SCHEDULED,
         startAt: booking.startAt,
         endAt: booking.endAt,
         timezone: booking.timezone,
-        titleKey: "careCalendar.event.vetAppointment",
+        titleKey,
         actionType: HomeActionKind.VIEW_BOOKING,
       },
     });
@@ -76,12 +105,12 @@ export class CareCalendarService {
   }
 
   async markCancelled(bookingId: string, tx: Prisma.TransactionClient): Promise<void> {
-    await tx.careCalendarEvent
-      .update({
-        where: { sourceType_sourceId: { sourceType: CareCalendarEventType.VET_APPOINTMENT, sourceId: bookingId } },
-        data: { status: CareCalendarEventStatus.CANCELLED },
-      })
-      .catch(() => undefined); // No calendar row yet is not an error — cancellation still proceeds.
+    // sourceType is unknown here without a lookup, but sourceId + a status update needs an
+    // exact composite key match — updateMany avoids a second read just to learn the category.
+    await tx.careCalendarEvent.updateMany({
+      where: { sourceId: bookingId },
+      data: { status: CareCalendarEventStatus.CANCELLED },
+    });
   }
 
   async listUpcoming(householdIds: string[], petId?: string): Promise<CareCalendarEventDto[]> {

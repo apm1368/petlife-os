@@ -10,7 +10,7 @@ import { petsService } from "@/services/pets.service";
 import { healthService } from "@/services/health.service";
 import { careProfileService } from "@/services/care-profile.service";
 import { bookingsService } from "@/services/bookings.service";
-import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
+import { formatDateTimeRange } from "@/lib/date/appointment-date";
 import { usePetStore } from "@/stores/pet-store";
 
 export function PetProfileView({ petId }: { petId: string }) {
@@ -164,9 +164,9 @@ export function PetProfileView({ petId }: { petId: string }) {
       {upcomingBooking ? (
         <ContextSurface className="flex items-center justify-between">
           <div>
-            <p className="text-body text-text-primary">{t("upcomingVisitTeaser")}</p>
+            <p className="text-body text-text-primary">{t(`upcomingServiceTeaser.${upcomingBooking.category}`)}</p>
             <p className="text-metadata text-text-secondary">
-              {formatAppointmentDateTime(upcomingBooking.startAt, locale as "fa" | "en", upcomingBooking.timezone)}
+              {formatDateTimeRange(upcomingBooking.startAt, upcomingBooking.endAt, locale as "fa" | "en", upcomingBooking.timezone)}
             </p>
           </div>
           <Button variant="secondary" onClick={() => router.push(`/${locale}/bookings/${upcomingBooking.id}`)}>

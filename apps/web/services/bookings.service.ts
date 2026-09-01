@@ -1,4 +1,4 @@
-import type { BookingDto, BookingHoldDto, HealthAccessScopePreset } from "@petlife/types";
+import type { BookingDto, BookingHoldDto, BookingSeriesDto, PetAccessScopePreset } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
 export interface CreateBookingHoldInput {
@@ -6,7 +6,11 @@ export interface CreateBookingHoldInput {
   providerId: string;
   locationId: string;
   serviceId: string;
-  slotStart: string;
+  /** Fixed-slot categories — mutually exclusive with rangeStart/rangeEnd. */
+  slotStart?: string;
+  /** Date-range categories (Sitting/Boarding) — mutually exclusive with slotStart. */
+  rangeStart?: string;
+  rangeEnd?: string;
   providerUserId?: string | null;
 }
 
@@ -15,7 +19,9 @@ export interface ConfirmBookingInput {
   petId: string;
   reasonForVisit?: string;
   ownerNotes?: string;
-  healthAccessSelection?: HealthAccessScopePreset;
+  accessSelection?: PetAccessScopePreset;
+  customerAddressId?: string;
+  dropoffAddressId?: string;
 }
 
 export const bookingsService = {
@@ -24,10 +30,11 @@ export const bookingsService = {
   confirm: (input: ConfirmBookingInput, idempotencyKey: string) =>
     apiFetch<BookingDto>("/bookings", { method: "POST", body: input, idempotencyKey }),
 
-  list: (filter: { upcoming?: boolean; past?: boolean; petId?: string } = {}) => {
+  list: (filter: { upcoming?: boolean; past?: boolean; cancelled?: boolean; petId?: string } = {}) => {
     const search = new URLSearchParams();
     if (filter.upcoming) search.set("upcoming", "true");
     if (filter.past) search.set("past", "true");
+    if (filter.cancelled) search.set("cancelled", "true");
     if (filter.petId) search.set("petId", filter.petId);
     const query = search.toString();
     return apiFetch<BookingDto[]>(`/bookings${query ? `?${query}` : ""}`);
@@ -36,4 +43,10 @@ export const bookingsService = {
   getById: (id: string) => apiFetch<BookingDto>(`/bookings/${id}`),
 
   cancel: (id: string, reason?: string) => apiFetch<BookingDto>(`/bookings/${id}/cancel`, { method: "POST", body: { reason } }),
+
+  recur: (bookingId: string, occurrences: number) =>
+    apiFetch<{ series: BookingSeriesDto; createdBookingIds: string[]; skippedStarts: string[] }>(`/bookings/${bookingId}/recur`, {
+      method: "POST",
+      body: { occurrences },
+    }),
 };

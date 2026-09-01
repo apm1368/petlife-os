@@ -1,4 +1,4 @@
-import { HomeActionKind, PetInterest, SetupStatus, VaccinationStatus } from "@petlife/types";
+import { HomeActionKind, PetInterest, ServiceCategory, SetupStatus, VaccinationStatus } from "@petlife/types";
 import { HomeRankingService, type HomeRankingBookingInput, type HomeRankingCareInput, type HomeRankingHealthInput } from "./home-ranking.service";
 
 const HEALTH_HIDDEN: HomeRankingHealthInput = {
@@ -13,7 +13,7 @@ const HEALTH_COMPLETE: HomeRankingHealthInput = {
 };
 const CARE_HIDDEN: HomeRankingCareInput = { visible: false, profileStatus: SetupStatus.NOT_STARTED };
 const CARE_COMPLETE: HomeRankingCareInput = { visible: true, profileStatus: SetupStatus.COMPLETE };
-const NO_BOOKING: HomeRankingBookingInput = { hasUpcoming: false, bookingId: null };
+const NO_BOOKING: HomeRankingBookingInput = { hasUpcoming: false, bookingId: null, category: null };
 
 describe("HomeRankingService", () => {
   const ranking = new HomeRankingService();
@@ -135,10 +135,23 @@ describe("HomeRankingService", () => {
       interests: [PetInterest.VET],
       health: HEALTH_COMPLETE,
       care: CARE_COMPLETE,
-      booking: { hasUpcoming: true, bookingId: "booking-1" },
+      booking: { hasUpcoming: true, bookingId: "booking-1", category: ServiceCategory.VET },
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_BOOKING);
     expect(result.primaryAction.href).toBe("/bookings/booking-1");
+  });
+
+  it("uses a category-specific label for a non-vet upcoming service booking", () => {
+    const result = ranking.rank({
+      hasActivePet: true,
+      activePetId: "pet-1",
+      interests: [PetInterest.VET],
+      health: HEALTH_COMPLETE,
+      care: CARE_COMPLETE,
+      booking: { hasUpcoming: true, bookingId: "booking-2", category: ServiceCategory.GROOMING },
+    });
+    expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_BOOKING);
+    expect(result.primaryAction.labelKey).toBe("home.action.viewBooking.grooming");
   });
 
   it("never lets an ordinary upcoming booking override a due vaccination", () => {
@@ -148,7 +161,7 @@ describe("HomeRankingService", () => {
       interests: [],
       health: { visible: true, vaccinationStatus: VaccinationStatus.DUE_SOON, profileStatus: SetupStatus.COMPLETE },
       care: CARE_HIDDEN,
-      booking: { hasUpcoming: true, bookingId: "booking-1" },
+      booking: { hasUpcoming: true, bookingId: "booking-1", category: ServiceCategory.VET },
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_VACCINATION);
   });
@@ -160,7 +173,7 @@ describe("HomeRankingService", () => {
       interests: [],
       health: { visible: true, vaccinationStatus: VaccinationStatus.UP_TO_DATE, profileStatus: SetupStatus.PARTIAL },
       care: CARE_HIDDEN,
-      booking: { hasUpcoming: true, bookingId: "booking-1" },
+      booking: { hasUpcoming: true, bookingId: "booking-1", category: ServiceCategory.VET },
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.COMPLETE_HEALTH);
   });

@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   useSearchParams: () => searchParamsMock,
 }));
-vi.mock("@/services/bookings.service", () => ({ bookingsService: { getById: vi.fn(), cancel: vi.fn() } }));
+vi.mock("@/services/bookings.service", () => ({ bookingsService: { getById: vi.fn(), cancel: vi.fn(), recur: vi.fn() } }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn() } }));
 
 const PET: PetDto = {
@@ -44,6 +44,8 @@ const BASE_BOOKING: BookingDto = {
   providerLocationId: "loc-1",
   providerUserId: "provider-user-1",
   providerServiceId: "svc-1",
+  category: "VET" as never,
+  locationMode: "AT_PROVIDER" as never,
   startAt: "2026-09-10T05:30:00.000Z",
   endAt: "2026-09-10T06:00:00.000Z",
   timezone: "Asia/Tehran",
@@ -86,14 +88,25 @@ const BASE_BOOKING: BookingDto = {
     name: "General Vet Visit",
     description: null,
     type: "GENERAL_VET_VISIT" as never,
+    category: "VET" as never,
     durationMinutes: 30,
     priceAmount: null,
     currency: null,
     supportsDog: true,
     supportsCat: true,
+    minAgeMonths: null,
+    maxAgeMonths: null,
+    minWeightKg: null,
+    maxWeightKg: null,
+    requiresCareProfile: false,
+    requiresHealthBasics: false,
+    locationMode: "AT_PROVIDER" as never,
     isActive: true,
   },
-  healthAccess: { scopePreset: "HEALTH_BASICS" as never, expiresAt: "2026-09-11T06:00:00.000Z" },
+  customerAddress: null,
+  dropoffAddress: null,
+  bookingSeriesId: null,
+  petAccess: { scopePreset: "HEALTH_BASICS" as never, expiresAt: "2026-09-11T06:00:00.000Z" },
 };
 
 describe("BookingDetailView", () => {
@@ -103,7 +116,7 @@ describe("BookingDetailView", () => {
     searchParamsMock.delete("confirmed");
   });
 
-  it("shows the confirmed status and the shared health access scope for a confirmed booking", async () => {
+  it("shows the confirmed status and the shared care access scope for a confirmed booking", async () => {
     vi.mocked(bookingsService.getById).mockResolvedValue(BASE_BOOKING);
 
     renderWithIntl(<BookingDetailView bookingId="booking-1" />);
@@ -113,7 +126,7 @@ describe("BookingDetailView", () => {
     expect(screen.getByRole("button", { name: "Cancel booking" })).toBeTruthy();
   });
 
-  it("shows the just-confirmed banner with the calendar and health-access copy when navigated to with ?confirmed=1", async () => {
+  it("shows the just-confirmed banner with the calendar and care-access copy when navigated to with ?confirmed=1", async () => {
     searchParamsMock.set("confirmed", "1");
     vi.mocked(bookingsService.getById).mockResolvedValue(BASE_BOOKING);
 
@@ -135,5 +148,33 @@ describe("BookingDetailView", () => {
     await waitFor(() => expect(screen.getByText("Cancelled by you")).toBeTruthy());
     expect(screen.getByText("Change of plans")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Cancel booking" })).toBeNull();
+  });
+
+  it("shows a check-in – check-out date range instead of a single time for a multi-day Boarding booking", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      category: "BOARDING" as never,
+      startAt: "2026-09-10T12:00:00.000Z",
+      endAt: "2026-09-13T12:00:00.000Z",
+      petAccess: { scopePreset: "BOARDING_BASIC" as never, expiresAt: "2026-09-14T12:00:00.000Z" },
+    });
+
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />);
+
+    await waitFor(() => expect(screen.getByText("Confirmed")).toBeTruthy());
+    expect(screen.getByText(/–/)).toBeTruthy();
+  });
+
+  it("offers to start a weekly series for a recurring-eligible category with no series yet", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      category: "GROOMING" as never,
+      petAccess: { scopePreset: "GROOMING_BASIC" as never, expiresAt: "2026-09-11T06:00:00.000Z" },
+    });
+
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />);
+
+    await waitFor(() => expect(screen.getByText("Confirmed")).toBeTruthy());
+    expect(screen.getByRole("button", { name: "Repeat weekly" })).toBeTruthy();
   });
 });

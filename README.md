@@ -33,6 +33,22 @@ booking history, and booking-confirmation-time health sharing built entirely
 on the existing grant-union `PetAccessGrant` model (a new `TEMPORARY` grant,
 never a mutation of the household's own grant).
 
+Coding Handoff 04: **Services Marketplace Basics** — see
+[Services Marketplace Basics (Handoff 04)](#services-marketplace-basics-handoff-04)
+below. This *extends* Handoff 03's provider/booking engine to six more
+categories — Grooming, Training, Walking, Sitting, Boarding, Pet Taxi —
+rather than building a second system: the same `ProviderOrganization`/
+`ProviderService`/`SlotGeneratorService`/`Booking` model now carries a
+`ServiceCategory` and `LocationMode`, a deterministic
+`PetServiceCompatibilityService` decides `COMPATIBLE`/`NEEDS_REVIEW`/
+`NOT_SUPPORTED`/`UNKNOWN` without ever hiding its reason, temporary Care
+access is Care-Profile-only by category (never health data by default),
+multi-day Sitting/Boarding bookings reuse the exact same `startAt`/`endAt`
+columns as a 30-minute vet slot, and a conservative weekly-recurrence
+feature covers Walking/Training/Grooming. Still explicitly out of scope: a
+provider-facing dashboard, live GPS/tracking, messaging, payments/payouts,
+and provider reviews.
+
 ## Architecture
 
 **Monorepo:** pnpm workspaces + Turborepo.
@@ -74,10 +90,16 @@ Modular monolith, one NestJS module per bounded concern:
 - `NutritionModule` — diet/nutrition basics (`/pets/:petId/nutrition`)
 - `CareProfileModule` — free-text behavioral/handling profile (`/pets/:petId/care-profile`)
 - `ProvidersModule` — vet discovery, vet profile, `SlotGeneratorService` (deterministic availability projection)
-- `BookingModule` — `BookingHoldService` (Redis holds), `BookingHealthAccessService`
-  (temporary grants), the booking state machine and its API
+- `ServicesModule` — category-generic discovery (`GET /services/categories`,
+  `GET /providers/services`, `GET /provider-services/:serviceId[/availability]`)
+  and `PetServiceCompatibilityService` (Handoff 04)
+- `AddressesModule` — `CustomerAddress` create/list (Handoff 04)
+- `BookingModule` — `BookingHoldService` (Redis holds), `BookingPetAccessService`
+  (temporary grants, renamed from `BookingHealthAccessService` in Handoff 04),
+  the booking state machine (every category, including multi-day and
+  recurring) and its API
 - `CareCalendarModule` — the read/display projection over `Booking`
-- `HomeModule` — deterministic Home ranking, now also reacting to an upcoming Vet booking
+- `HomeModule` — deterministic Home ranking, now also reacting to an upcoming booking of any service category
 - `StorageModule` — S3-compatible object storage abstraction (local dev fallback)
 
 Cross-cutting infrastructure lives in `src/common`:
@@ -748,6 +770,271 @@ emergency/critical-health severity logic yet (`HealthSeverity` beyond
 `ATTENTION` is still unused), so a routine appointment is never treated as
 more urgent than either.
 
+## Services Marketplace Basics (Handoff 04)
+
+Proves **Pet Context → Explore Services → Compatible Provider →
+Availability → Booking → Permissioned Care Context → Service Outcome
+Placeholder** across six new categories — Grooming, Training, Walking,
+Sitting, Boarding, Pet Taxi — by *extending* the exact same
+provider/availability/booking engine Handoff 03 built for vets, never a
+second system. Explicitly **not** implemented: a provider dashboard or
+availability-editor UI, live walking GPS, a live sitter timeline, taxi
+driver tracking, messaging/chat, service photos/outcomes, an incident
+system, provider payouts, real payments/refunds, provider reviews,
+PostGIS-style nearby ranking, or any commerce/delivery integration — see
+[Known limitations](#known-limitations--deliberate-simplifications).
+
+### Provider reuse: `ProviderType` vs. `ServiceCategory`
+
+A provider's `type` (`VET_CLINIC`/…/`GROOMER`/`TRAINER`/`WALKER`/`SITTER`/
+`BOARDING`/`PET_TAXI`/`MULTI_SERVICE_PROVIDER`) and a service's `category`
+(`VET`/`GROOMING`/`TRAINING`/`WALKING`/`SITTING`/`BOARDING`/`PET_TAXI`) are
+**deliberately two separate fields, not one derived from the other**.
+`type` is coarse, self-described business identity — closer to what shows
+on a profile header, and a `MULTI_SERVICE_PROVIDER` can legitimately offer
+services across several categories. `category` on `ProviderService` is the
+one authoritative taxonomy every discovery/compatibility/Home/Care Calendar
+rule keys off — never inferred from `type`, `ProviderServiceType`, or a
+display string. This is the same "don't infer from a string" discipline the
+spec applied to booking/calendar `titleKey`/`actionType` in Handoff 03.
+
+### Service taxonomy and compatibility
+
+`ServiceCategory` is a static, stable list (`GET /services/categories`
+returns it verbatim — never "whatever categories currently have a live
+provider"). Each `ProviderService` also carries optional compatibility
+bounds — `minAgeMonths`/`maxAgeMonths`, `minWeightKg`/`maxWeightKg` (stored
+normalized to kg, since `Pet.latestWeightValue` carries its own `WeightUnit`
+and comparing raw values without a shared unit would silently misjudge
+compatibility), and `requiresCareProfile`/`requiresHealthBasics` flags.
+
+`PetServiceCompatibilityService.evaluate(pet, service)` is a deterministic,
+no-ML check returning `{ status, reasons[] }`:
+
+- **`NOT_SUPPORTED`** — a genuinely disqualifying, *known* fact: wrong
+  species, or an age/weight value that is known and outside the service's
+  stated range.
+- **`UNKNOWN`** — a restriction exists (age or weight bounds) but the pet's
+  own value is missing — never silently treated as compatible.
+- **`NEEDS_REVIEW`** — the service requires a complete Care Profile and/or
+  Health Basics and the pet's is not `COMPLETE` (including `PARTIAL`) —
+  advisory, shown on every discovery/detail screen, **never a hard block**
+  on its own.
+- **`COMPATIBLE`** — none of the above.
+
+Reasons are typed codes (`SPECIES_UNSUPPORTED`, `AGE_TOO_YOUNG`/`_TOO_OLD`/
+`_UNKNOWN`, `WEIGHT_TOO_LOW`/`_TOO_HIGH`/`_UNKNOWN`, `CARE_PROFILE_REQUIRED`,
+`HEALTH_BASICS_REQUIRED`), never localized copy — the frontend maps each to
+display text, and **the reason is never hidden**, only ever shown alongside
+its status.
+
+The one place required context *does* hard-block a booking is
+confirmation-time, and only for the extreme case: `BookingsService.confirm()`
+throws `PET_CONTEXT_INCOMPLETE` when a required Care Profile/Health Basics
+is entirely `NOT_STARTED` (nothing filled in at all). A `PARTIAL` profile is
+allowed through — surfaced only as the advisory `NEEDS_REVIEW` above — so
+the compatibility screen and the confirm gate agree on what "needs review"
+vs. "actually blocked" means.
+
+### Care access presets and `BookingPetAccess` (renamed from `BookingHealthAccess`)
+
+Booking-time access now spans every category, not just vet visits, so the
+Handoff 03 vet-only vocabulary was generalized rather than duplicated:
+
+- **`HealthAccessScopePreset` → `PetAccessScopePreset`** — the three
+  original vet presets (`MINIMAL_VET_CONTEXT`/`HEALTH_BASICS`/
+  `SELECTED_HEALTH_DATA`) are unchanged; six new `*_BASIC` presets
+  (`GROOMING_BASIC`/`TRAINING_BASIC`/`WALKING_BASIC`/`SITTING_BASIC`/
+  `BOARDING_BASIC`/`TAXI_BASIC`) were added to the same enum.
+- **`BookingHealthAccess` → `BookingPetAccess`** — same audit-link shape
+  (`bookingId` ↔ `petAccessGrantId` ↔ `scopePreset`), same table, renamed.
+- The migration performs a true SQL **rename** (`ALTER TYPE ... RENAME TO`,
+  `ALTER TABLE ... RENAME TO` plus renaming its constraints/indexes) rather
+  than Prisma's default drop-and-recreate — **every existing Handoff 03
+  vet-booking access grant is preserved with zero data loss**; see the
+  migration file's header comment for the exact statements.
+
+Every non-vet preset is **Care Profile-only by default** —
+`canViewHealth: false`, `canViewCareProfile: true` — matching the spec's
+"never grant health data unless the service actually needs it." The one
+exception is `BOARDING_BASIC`, which also sets `canViewHealth: true`,
+because boarding requirements routinely include "vaccination status where
+applicable" and there is no narrower, field-level scope this phase (the
+same limitation already noted for `SELECTED_HEALTH_DATA`). `canViewLocation`
+is not baked into any preset — it is computed per booking from the
+service's `LocationMode` (`true` for anything except `AT_PROVIDER`), since
+"can the provider see the customer's address" is a fact about *where* the
+service happens, not which category it is. `DEFAULT_SCOPE_PRESET_BY_CATEGORY`
+picks the right preset automatically when a booking doesn't explicitly
+choose one — never "full record" by default, for any category.
+
+### Location modes and addresses
+
+`ProviderService.locationMode` — `AT_PROVIDER` / `AT_CUSTOMER` / `MOBILE` /
+`TRANSPORT` — decides whether a booking needs an address, denormalized onto
+`Booking.locationMode` at confirmation time (same "denormalize what was
+actually booked" pattern as `Booking.category`). A new, deliberately minimal
+`CustomerAddress` model (`POST /addresses` + `GET /addresses` only — no
+update/delete endpoint this phase, since an address referenced by any
+booking is `onDelete: Restrict`) backs it:
+
+- `AT_PROVIDER` (clinic/grooming salon/boarding facility) — no address at all.
+- `AT_CUSTOMER`/`MOBILE` (sitting/training/walking, or a provider that
+  travels to the customer) — `Booking.customerAddressId` required.
+- `TRANSPORT` (pet taxi) — **both** `customerAddressId` (pickup) and
+  `dropoffAddressId` (dropoff) required.
+
+`BookingsService.confirm()` enforces this and throws `ADDRESS_REQUIRED`
+(with which field is missing) when a required address wasn't supplied — an
+`AT_PROVIDER` booking never even looks at address fields, so a stray value
+sent by mistake is simply ignored rather than stored.
+
+### Multi-day bookings (Sitting/Boarding)
+
+`Booking.startAt`/`endAt` already generically support any duration — the
+exact same two columns that represented a 30-minute vet slot now represent
+a multi-night Boarding stay, **no schema change was needed**. What *did*
+need extending was the booking flow itself: Sitting/Boarding are booked as
+a check-in/check-out **date range** chosen directly by the user, not a
+discrete slot picked from `SlotGeneratorService` output (there is no
+meaningful way to enumerate every possible multi-day range as "slots").
+`BookingsService.createHold()` branches on category:
+
+- Fixed-length categories (Vet/Grooming/Training/Walking/Pet Taxi) — the
+  existing `SlotGeneratorService` flow, unchanged.
+- `SITTING`/`BOARDING` — the client sends `rangeStart`/`rangeEnd` directly;
+  the service checks for any overlapping active booking at that provider
+  location (`SLOT_UNAVAILABLE` if found) and creates the hold over that
+  exact range.
+
+**Double-booking prevention for date ranges** needed a real DB-level
+guarantee beyond the Handoff 03 exact-`startAt` partial unique indexes
+(which only catch identical-start collisions, not partial overlaps between
+two different ranges): a Postgres **`EXCLUDE` constraint** using
+`btree_gist` — `EXCLUDE USING gist ("providerLocationId" WITH =,
+tsrange("startAt","endAt") WITH &&) WHERE (category IN ('SITTING',
+'BOARDING') AND bookingStatus NOT IN (...cancelled...))` — makes two
+genuinely overlapping Boarding/Sitting bookings at the same location
+impossible even under a concurrent race, the same "app check plus a real DB
+constraint as the actual guarantee" pattern as Handoff 03's slot holds.
+
+### Recurring bookings (Walking/Training/Grooming only)
+
+A new `BookingSeries` model (`ONE_TIME`/`WEEKLY` `frequency`,
+`ACTIVE`/`PAUSED`/`CANCELLED`/`COMPLETED` `status` — only `ACTIVE`/
+`CANCELLED` are reachable this phase) backs a conservative recurrence
+feature: `POST /bookings/:id/recur` takes an already-`CONFIRMED` booking in
+one of the three eligible categories and generates up to 7 additional
+weekly occurrences (2–8 total), each independently validated against
+`SlotGeneratorService` — **a date that's no longer available is simply
+skipped**, never failing the whole series. Every occurrence is a completely
+normal `Booking` row (`bookingSeriesId` just links it back); **cancelling
+one occurrence via the existing `POST /bookings/:id/cancel` never touches
+the series row or any sibling occurrence** — series and occurrence are
+deliberately kept independent, exactly as the spec requires. There is no
+series-wide cancel/pause endpoint this phase — see Known limitations.
+
+### Home ranking and Care Calendar generalization
+
+`HomeRankingBookingInput` gained `category`, used only to pick a
+category-specific `labelKey` (`home.action.viewBooking.grooming`, `.walking`,
+etc.) — **the priority position is unchanged**: an upcoming booking of *any*
+category still sits after vaccination-due/health-incomplete and before the
+care-fallback, per the same reasoning as Handoff 03 (no emergency-health
+severity logic exists yet, so no booking — vet or otherwise — is ever
+treated as more urgent). Home surfaces at most one upcoming-booking action
+at a time regardless of how many categories have bookings, per the spec's
+"do not overwhelm Home."
+
+`CareCalendarEventType` gained `GROOMING_APPOINTMENT`/`TRAINING_SESSION`/
+`WALK`/`SITTING`/`BOARDING`/`PET_TAXI` alongside the original
+`VET_APPOINTMENT`; `CareCalendarService` maps a booking's `category` to the
+right type and `titleKey` via a lookup table, with zero other logic change
+— a Sitting/Boarding event's `startAt`/`endAt` are the exact multi-day range
+the booking was confirmed with, so the calendar renders it as a genuine
+date range (`apps/web/lib/date/appointment-date.ts`'s `formatDateTimeRange`
+collapses to a single timestamp only when start and end fall on the same
+calendar day).
+
+### API endpoints (Handoff 04 additions)
+
+```
+GET    /services/categories
+GET    /providers/services                           (category, city, species, verifiedOnly, search, petId?)
+GET    /provider-services/:serviceId                  (petId?)
+GET    /provider-services/:serviceId/availability     (locationId?, from, to, petId?, providerUserId?)
+
+POST   /addresses
+GET    /addresses                                     (householdId)
+
+POST   /booking-holds                                 (slotStart, OR rangeStart+rangeEnd for Sitting/Boarding)
+POST   /bookings                                      (accessSelection, customerAddressId?, dropoffAddressId?)
+GET    /bookings                                      (upcoming, past, cancelled, petId)
+POST   /bookings/:id/recur                            (occurrences: 2-8; Walking/Training/Grooming only)
+```
+
+`POST /bookings`'s `healthAccessSelection` field is renamed
+`accessSelection` (any `PetAccessScopePreset`, not just the vet-only ones);
+existing `POST /booking-holds`/`POST /bookings`/`GET /bookings`/
+`GET /bookings/:id`/`POST /bookings/:id/cancel` routes and behavior are
+otherwise unchanged and still power the Handoff 03 vet flow directly — no
+second booking engine.
+
+### Error codes (Handoff 04 additions)
+
+```
+PET_CONTEXT_INCOMPLETE  400  a required Care Profile/Health Basics is entirely NOT_STARTED (see above)
+ADDRESS_REQUIRED        400  the service's LocationMode needs an address that wasn't supplied
+```
+
+`SLOT_UNAVAILABLE`/`HOLD_EXPIRED`/`BOOKING_CONFLICT`/`PROVIDER_NOT_VERIFIED`/
+`SERVICE_NOT_AVAILABLE`/`PET_NOT_SUPPORTED`/`BOOKING_NOT_CANCELLABLE` and the
+reused `PET_ACCESS_DENIED` (from Handoff 01/03) apply unchanged across every
+category.
+
+### UI screens (Handoff 04 additions)
+
+- **Explore Services** (`/services`) — category tiles (Grooming/Training/
+  Walking/Sitting/Boarding/Pet Taxi) with the active pet's context visible;
+  switching the active pet before navigating here always recalculates
+  compatibility from scratch on the next screen (no caching).
+- **Service Results** (`/services/[category]`) — provider/service cards
+  with verification, price, next availability, and a compatibility badge
+  that always shows its reason, never hides it.
+- **Service Booking Wizard** (`/services/[category]/[serviceId]/book`) — one
+  route, internal steps mirroring the Handoff 03 wizard's pattern: a
+  **Slot Picker** for fixed-length categories or a **check-in/check-out
+  date-range step** for Sitting/Boarding, an **Address** step inserted only
+  when the service's `LocationMode` needs one, **Review**, and **Care
+  Sharing** (Who/What/Why/Until copy, the category's specific preset shown
+  and explained rather than a picker — the spec's own Care Sharing examples
+  show one recommended preset per category, not a multi-choice picker like
+  the vet flow's three vet-specific presets).
+- **My Bookings** (`/bookings`) — Upcoming/Past/Cancelled tabs across every
+  pet and category in one list, category-labeled rows; vet and marketplace
+  bookings appear together since they're the same `Booking` entity.
+- **Booking Detail** (`/bookings/[id]`, generalized) — moved from
+  `features/vet/` to `features/bookings/` now that it's category-generic:
+  "Health access" copy became "Care access", the date/time row renders a
+  range for multi-day bookings, a dropoff address row appears for Pet Taxi,
+  and a "Repeat weekly" action appears for Walking/Training/Grooming
+  bookings with no series yet.
+- **Care Calendar** (`/care-calendar`) — unchanged screen, now renders every
+  category's event type and multi-day ranges via the same date-range helper.
+- **Pet Profile / Home** — the "Upcoming vet visit" teaser became a
+  category-aware "Upcoming service" teaser; Home's primary action label is
+  category-specific (see above).
+- **Explore Services entry point** — a small "Explore Services" card was
+  added to Home (linking to `/services`), since the app has no persistent
+  bottom navigation; every other screen is still reached by direct
+  navigation/links, consistent with Handoff 01–03.
+
+Two wizard components — the original vet-only `BookingWizard`
+(`features/vet/`) and the new, category-generic `ServiceBookingWizard`
+(`features/services/`) — intentionally coexist rather than being merged
+into one component this phase, to avoid destabilizing the already-shipped,
+already-tested vet flow. Both call the exact same backend endpoints.
+
 ## API endpoints
 
 ```
@@ -803,11 +1090,21 @@ PUT    /pets/:petId/care-profile
 GET    /providers/vets
 GET    /providers/vets/:providerId
 GET    /providers/vets/:providerId/availability
+
+GET    /services/categories
+GET    /providers/services
+GET    /provider-services/:serviceId
+GET    /provider-services/:serviceId/availability
+
+POST   /addresses
+GET    /addresses
+
 POST   /booking-holds
 POST   /bookings                                (Idempotency-Key supported)
 GET    /bookings
 GET    /bookings/:id
 POST   /bookings/:id/cancel
+POST   /bookings/:id/recur
 GET    /care-calendar
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
@@ -846,7 +1143,12 @@ pnpm db:seed                     # Sarah + Luna (Golden Retriever, vaccination
                                   # minimal care profile) + Tehran Pet Care
                                   # Clinic (VERIFIED, Dr. Sara Vet, General Vet
                                   # Visit/Vaccination/Follow-up, available
-                                  # every day 09:00-18:00 Asia/Tehran)
+                                  # every day 09:00-18:00 Asia/Tehran) + one
+                                  # VERIFIED provider per remaining category
+                                  # (Happy Paws Grooming, Good Dog Training,
+                                  # City Paws Walking, Cozy Home Sitting,
+                                  # Tehran Pet Boarding, PetGo Taxi), each with
+                                  # one service and the same daily availability
 
 pnpm dev                         # api on :4000, web on :3000
 ```
@@ -897,7 +1199,21 @@ pnpm --filter @petlife/api test:e2e
   Why/Until-When permission copy and all three scope presets render; and
   Booking Detail rendering the just-confirmed banner, a confirmed booking's
   shared-health-access summary, and a cancelled booking's status label with
-  no Cancel action offered.
+  no Cancel action offered. New in Handoff 04: Explore Services rendering a
+  tile per category with the active pet's name; Service Results showing a
+  verified badge and every compatibility status (`COMPATIBLE`/
+  `NEEDS_REVIEW`) with its reason never hidden, plus an empty state; the
+  generalized Service Booking Wizard walking a fixed-slot (Grooming) flow
+  through Review → Care Sharing (asserting the category-specific preset
+  copy, not a vet-only one), a date-range (Boarding) flow asserting
+  `createHold` is called with `rangeStart`/`rangeEnd` instead of `slotStart`,
+  and an `AT_CUSTOMER` (Walking) flow asserting the Address step is inserted
+  before Review with Continue disabled until an address is chosen; the
+  generalized Booking Detail (now `features/bookings/`) rendering a
+  check-in–check-out range instead of a single time for a multi-day
+  Boarding booking and offering "Repeat weekly" only for a recurring-eligible
+  category with no series yet; and My Bookings rendering the Upcoming tab by
+  default and switching to Cancelled with its own empty state.
 - **API e2e tests** (`apps/api/test/app.e2e-spec.ts`, Supertest against a
   real Nest app + Postgres + Redis): OTP → session, IDOR denial on a pet the
   user has no `PetAccessGrant` for, household + pet creation with optional
@@ -945,7 +1261,39 @@ pnpm --filter @petlife/api test:e2e
   the one with the booking never surfaces it on Home, reading a booking is
   denied to a user with no active access to its pet, and the vet's
   temporary grant is gated at exactly `canViewHealth`/`canEditHealth` — view
-  succeeds, edit is still denied.
+  succeeds, edit is still denied — plus a `"Services Marketplace Basics
+  (Handoff 04)"` block: `GET /services/categories` returns the full
+  canonical taxonomy; only `VERIFIED` providers are returned when
+  discovering non-vet services; a species-incompatible service reports
+  `NOT_SUPPORTED` on the detail endpoint *and* rejects the hold with
+  `PET_NOT_SUPPORTED`; a service requiring an incomplete Care Profile
+  reports `NEEDS_REVIEW` (not a hard block); `SlotGeneratorService` is
+  genuinely reused (a real `AVAILABLE` slot comes back for a non-vet
+  service); holding and confirming a Grooming booking grants
+  `GROOMING_BASIC` (Care Profile only, `canViewHealth: false`) to the
+  assigned staff member; the household's own `HOUSEHOLD`-sourced grants are
+  byte-for-byte unaffected (same row ids, same flags) by that new grant;
+  cancelling revokes the grant and a second, independently-authenticated
+  session (the groomer's own account, verified via a real `GET` for the
+  pet's Care Profile) loses access; a booking hold is denied to a user with
+  no access to the pet (IDOR); `GET /bookings` isolates by household/user
+  and the new `cancelled` filter returns exactly the cancelled set while
+  `upcoming` excludes it; Home surfaces `VIEW_BOOKING` with a
+  `home.action.viewBooking.grooming` label for a non-vet category; a
+  confirmed Grooming booking projects into the Care Calendar as
+  `GROOMING_APPOINTMENT`; a multi-day Boarding hold is created from
+  `rangeStart`/`rangeEnd`, confirms with `startAt`/`endAt` matching exactly,
+  projects that same range into the calendar, and a second, genuinely
+  overlapping Boarding request at the same location is rejected with
+  `SLOT_UNAVAILABLE` (the DB `EXCLUDE` constraint is the real guarantee, not
+  just this check); `POST /bookings/:id/recur` creates independent weekly
+  occurrences sharing one `bookingSeriesId`, and cancelling one occurrence
+  leaves the series `ACTIVE` and every sibling occurrence still `CONFIRMED`;
+  a second pet's Care Profile stays fully inaccessible to a groomer granted
+  access only to the first pet, and that second pet's booking list stays
+  empty; and an address is required only for a service whose `LocationMode`
+  actually needs one (`AT_PROVIDER` succeeds with none, `AT_CUSTOMER` is
+  rejected with `ADDRESS_REQUIRED` until one is created and supplied).
 
   The e2e suite needs its own database (kept separate from your dev data):
 
@@ -1003,6 +1351,35 @@ e2e tests → build, against real Postgres/Redis service containers.
   pet to Milo and confirmed Milo's Pet Profile never showed Luna's
   (cancelled) booking teaser — all 18 checkpoints passed.
 
+- **Browser E2E (Handoff 04, manual verification against a real Chromium)**:
+  signed in as Sarah with Luna active (Health Basics pre-cleared via direct
+  API calls, same rationale as Handoff 03) → Explore Services → Grooming →
+  Service Results showed the verified "Happy Paws Grooming" with Luna's
+  compatibility shown as "Compatible" (never hidden) → opened its Booking
+  Wizard → real generated slots → picked one → Review Booking → Care
+  Sharing showed the Grooming-specific "Grooming basics" preset (not a
+  vet-only one) → Confirm booking → Booking Detail with the just-confirmed
+  banner → the booking appeared in the Care Calendar as "Grooming
+  appointment" → Home surfaced "View upcoming grooming" (the
+  category-specific label, not the vet-only string) as the primary action →
+  in a second, independently signed-in browser context as the groomer's own
+  staff account (`groomer@example.com`), a real `GET` for Luna's Care
+  Profile returned `200` while a `GET` for her health summary returned
+  `403` (the temporary grant is genuinely Care-Profile-only, never health
+  data by default for a non-vet category) → cancelled the booking → status
+  changed to "Cancelled by you" → the booking disappeared from the Care
+  Calendar → the same groomer session's next `GET` for the Care Profile
+  returned `403` (grant revoked) → Home no longer showed the booking → then
+  a second flow: Explore Services → Boarding → opened the verified "Tehran
+  Pet Boarding" → chose a check-in and a check-out date (a genuine multi-day
+  range, no slot grid) → Review Booking rendered a check-in–check-out date
+  range rather than a single time → Care Sharing showed the
+  Boarding-specific preset → Confirm booking → the multi-day booking
+  appeared in the Care Calendar rendering its full date range, not a single
+  timestamp → switched the active pet to Milo and confirmed Milo's Pet
+  Profile never showed Luna's Grooming or Boarding booking context — all 28
+  checkpoints passed.
+
 ## What's implemented
 
 Everything in the acceptance criteria of the coding handoff: Persian
@@ -1054,18 +1431,50 @@ the existing `IdempotencyInterceptor`, temporary vet health access issued
 through the same grant-union `PetAccessGrant` model used everywhere else
 (source `TEMPORARY`, reason `VET_BOOKING`, expiring `endAt` +
 `BOOKING_HEALTH_ACCESS_BUFFER_HOURS`, never mutating the household's own
-grant), an explicit `BookingHealthAccess` audit link between a booking and
-the grant it created, cancellation that revokes the temporary grant and
-never deletes the booking, a `CareCalendarEvent` projection that is created
-on confirm and marked cancelled on cancel (the `Booking` row stays the only
-editable source of truth), Jalali/Gregorian dual display built entirely on
-ICU (`Intl.DateTimeFormat` with `-u-ca-persian`/`-u-ca-gregory`, no new date
+grant), an explicit audit link (`BookingPetAccess`, generalized/renamed from
+`BookingHealthAccess` in Handoff 04) between a booking and the grant it
+created, cancellation that revokes the temporary grant and never deletes
+the booking, a `CareCalendarEvent` projection that is created on confirm
+and marked cancelled on cancel (the `Booking` row stays the only editable
+source of truth), Jalali/Gregorian dual display built entirely on ICU
+(`Intl.DateTimeFormat` with `-u-ca-persian`/`-u-ca-gregory`, no new date
 library), a `HomeRankingService` rule for an upcoming confirmed booking that
 never outranks a due vaccination or an incomplete health setup, a Pet
 Profile "Upcoming vet visit" teaser, and a full manual browser E2E pass (see
 above) confirming the temporary grant genuinely authorizes and is genuinely
 revoked, that Luna's booking never leaks into Milo's context, and that
 cancellation updates the booking, the grant, and the calendar consistently.
+
+Everything in the Handoff 04 acceptance criteria: a canonical
+`ServiceCategory` taxonomy discoverable via `GET /services/categories`;
+non-vet provider/service discovery reusing the exact same
+`ProviderOrganization`/`ProviderLocation`/`ProviderService`/
+`SlotGeneratorService`/`BookingHoldService`/`Booking` engine Handoff 03
+built (no second booking system); a deterministic, no-ML
+`PetServiceCompatibilityService` that never reports a service compatible
+when required context — species, age, weight, Care Profile, Health Basics —
+is genuinely missing rather than actually disqualifying; Grooming,
+Training, Walking, Sitting, Boarding, and Pet Taxi all representable
+through the same `Booking`/`ServiceCategory`/`LocationMode` fields, with no
+per-category table; temporary Care access issued through the same
+grant-union `PetAccessGrant` model, Care-Profile-only by default per
+category (never health data unless the category or an explicit choice
+needs it); the household's own grant provably unaffected (same row,
+`updatedAt` excluded) by a new category-specific grant; cancellation
+revoking exactly the grant that booking created; Home and the Care Calendar
+reacting to *any* category's upcoming booking with a category-specific
+label/event type, never more than one action shown at once; multi-day
+Sitting/Boarding bookings using the exact same `startAt`/`endAt` columns as
+every fixed-slot category, with a real Postgres `EXCLUDE` constraint (not
+just an application check) preventing two overlapping stays at the same
+location; pet context fully isolated (a second pet's Care Profile stays
+inaccessible to a groomer granted access only to the first, and its booking
+list stays empty); Jalali and Gregorian both rendering correctly for
+multi-day ranges via the same date-range helper used everywhere else; every
+Handoff 01–03 backend/frontend test still green; and a full manual browser
+E2E pass (see above) proving the Grooming and multi-day Boarding flows,
+real temporary Care-Profile-only access and its revocation, and Luna/Milo
+context isolation end to end.
 
 ## Known limitations / deliberate simplifications
 
@@ -1152,7 +1561,7 @@ cancellation updates the booking, the grant, and the calendar consistently.
   `FAILED`/`REFUND_PENDING`/`REFUNDED`) is modeled and displayed separately
   from `BookingStatus` in the UI, but nothing ever transitions it.
 - **`SELECTED_HEALTH_DATA` is not yet distinct from `HEALTH_BASICS`** —
-  `BookingHealthAccessService`'s `SCOPE_PRESET_FLAGS` maps both presets to
+  `BookingPetAccessService`'s `SCOPE_PRESET_FLAGS` maps both presets to
   the same permission flags today, since there's no per-field health-data
   selection UI yet; the preset is stored and shown correctly, it just
   doesn't (yet) grant a narrower or wider scope than Health Basics.
@@ -1162,8 +1571,8 @@ cancellation updates the booking, the grant, and the calendar consistently.
   via `prisma/seed.ts`; there's no clinic-facing UI to manage
   `ProviderAvailabilityRule`/`ProviderAvailabilityException` rows, view a
   booking queue, or manage `ProviderUser`s. `ProviderUser` is explicitly not
-  a pet-data permission source (`PetAccessGrant`/`BookingHealthAccess`
-  remain the only source of truth for what a vet can see).
+  a pet-data permission source (`PetAccessGrant`/`BookingPetAccess`
+  remain the only source of truth for what a vet or other provider can see).
 - **Appointment time is always shown in the provider's local timezone**, not
   converted to the viewer's device timezone — acceptable since bookings are
   currently Tehran-only via seed data, but a future handoff adding
@@ -1181,21 +1590,75 @@ cancellation updates the booking, the grant, and the calendar consistently.
 - **No geolocation/distance ranking** — `GET /providers/vets` filters by
   `city` as plain text; there's no lat/long-based "nearest clinic" sort, and
   the UI never fabricates a distance when location data is missing.
+- **No series-wide cancel/pause endpoint** — `BookingSeries.status` supports
+  `PAUSED`/`COMPLETED` in the vocabulary but only `ACTIVE`/`CANCELLED` are
+  ever set (and nothing sets `CANCELLED` yet); the only way to affect a
+  series today is cancelling occurrences one at a time via the existing
+  `POST /bookings/:id/cancel`, which deliberately never touches the series
+  row or any sibling occurrence.
+- **No address update/delete endpoint** — `CustomerAddress` supports create
+  and list only; an address referenced by any booking is `onDelete:
+  Restrict`, so a delete endpoint would first need to decide what happens
+  to that booking history, which is out of scope this phase.
+- **`SELECTED_HEALTH_DATA`/`BOARDING_BASIC` are the only non-identity
+  presets that ever include health data**, and neither offers field-level
+  selection — every other category preset (`GROOMING_BASIC`/
+  `TRAINING_BASIC`/`WALKING_BASIC`/`SITTING_BASIC`/`TAXI_BASIC`) is strictly
+  Care-Profile-only, with no way to additionally share, say, just allergies
+  for a specific booking.
+- **Compatibility bounds are informational at hold-time, not enforced** —
+  `PetServiceCompatibilityService`'s `NOT_SUPPORTED`/`NEEDS_REVIEW`/
+  `UNKNOWN` statuses are surfaced on every discovery/detail screen, but
+  `BookingsService.createHold()` only ever hard-blocks on species
+  (`PET_NOT_SUPPORTED`) and a completely empty required profile
+  (`PET_CONTEXT_INCOMPLETE`) — an age/weight mismatch does not itself block
+  a hold or confirmation this phase.
+- **Boarding/Sitting have no capacity/kennel-inventory model** — the
+  provider-location-level `EXCLUDE` constraint prevents two overlapping
+  stays at the same location entirely, which is correct for a
+  single-capacity provider but would need a real inventory model (multiple
+  concurrent kennels/rooms) to support a facility that can host more than
+  one pet at once; out of scope per the spec ("do not build kennel
+  inventory").
+- **Two wizard components exist side by side** — `features/vet/BookingWizard`
+  (vet-only, three fixed presets) and `features/services/ServiceBookingWizard`
+  (every other category, one recommended preset per category, plus the
+  date-range/address steps) were not merged into one component this phase,
+  to avoid destabilizing the already-shipped, already-tested vet flow; both
+  call the exact same backend endpoints.
+- **Discovery has no "book directly from the Explore Services entry point"
+  shortcut** — since the app has no persistent bottom navigation, `/services`
+  is reached via a small card on Home (or direct navigation); a future
+  handoff adding real navigation chrome should route through it instead.
 
 ## Next recommended coding handoff
 
-**Care Calendar (full product) + reminders, or minimal Provider OS —
-whichever the business prioritizes next.** Handoff 03 deliberately built
-only enough Care Calendar to prove one projection (`VET_APPOINTMENT`) works
-end to end; `CareCalendarEvent.type`/`sourceType` are already generic enough
-to add vaccination-due dates, medication schedules, and grooming/other care
-tasks as new source types without a schema change, plus the first real
-notification/reminder surface (e.g. "appointment tomorrow at 10:00"), which
-doesn't exist anywhere yet. Alternatively, since bookings currently rely on
-hand-seeded availability with no clinic-facing UI, a minimal Provider OS
-(sign in as a `ProviderUser`, manage `ProviderAvailabilityRule`/
-`ProviderAvailabilityException` rows, see a simple booking queue) would let
-providers other than the seed fixture actually use the system. Either
-handoff should keep `Booking` as the sole source of truth for booking state
-and continue treating `PetAccessGrant` as the only source of truth for what
-a vet or provider can see — no new permission model.
+**Minimal Provider OS.** Two consecutive handoffs have now deferred it, and
+the case for it only got stronger: there are seven verified providers
+(vet, groomer, trainer, walker, sitter, boarding facility, taxi) across six
+categories, every single one hand-seeded with a fixed weekly availability
+window and no way for a real provider to sign in, adjust their hours, block
+a day off, or see who's booked them. A minimal version — sign in as an
+existing `ProviderUser`, manage that organization's
+`ProviderAvailabilityRule`/`ProviderAvailabilityException` rows, and view a
+simple read-only booking queue for the organization's own locations — would
+let providers other than the seed fixture actually use the system, without
+yet building the full Provider OS (clinic queue software, staff scheduling,
+provider-side cancellation/reschedule, payouts) that stays explicitly out
+of scope. It should keep `ProviderUser` exactly as it is today — **never** a
+pet-data permission source; `PetAccessGrant`/`BookingPetAccess` remain the
+only source of truth for what a provider can see about a pet, and a
+provider managing their own availability or viewing their own booking queue
+needs no new permission model, just a `ProviderUser`-membership check
+(mirroring `HouseholdMemberGuard`'s pattern from Handoff 01/02) scoped to
+their own `providerOrganizationId`.
+
+Alternatively, if the business prioritizes the consumer side instead: Care
+Calendar (full product) + reminders. Handoff 03/04 deliberately built only
+enough Care Calendar to prove every category's projection works end to end;
+`CareCalendarEvent.type`/`sourceType` are already generic enough to add
+vaccination-due dates and medication schedules as new source types without
+a schema change, plus the first real notification/reminder surface (e.g.
+"your grooming appointment is tomorrow at 10:00"), which doesn't exist
+anywhere yet in either handoff. Whichever is chosen, keep `Booking` as the
+sole source of truth for booking state.

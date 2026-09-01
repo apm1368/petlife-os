@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
-import { HealthAccessScopePreset, type AvailabilitySlotDto, type PetDto } from "@petlife/types";
+import { PetAccessScopePreset, type AvailabilitySlotDto, type PetDto } from "@petlife/types";
 import { formatAppointmentDateTime, formatDateKey, formatDayLabel, formatTimeLabel } from "@/lib/date/appointment-date";
 import { providersService } from "@/services/providers.service";
 import { bookingsService } from "@/services/bookings.service";
@@ -15,9 +15,9 @@ import { useBookingStore } from "@/stores/booking-store";
 type Step = "slot" | "review" | "health-sharing" | "submitting";
 
 const SCOPE_PRESETS = [
-  HealthAccessScopePreset.MINIMAL_VET_CONTEXT,
-  HealthAccessScopePreset.HEALTH_BASICS,
-  HealthAccessScopePreset.SELECTED_HEALTH_DATA,
+  PetAccessScopePreset.MINIMAL_VET_CONTEXT,
+  PetAccessScopePreset.HEALTH_BASICS,
+  PetAccessScopePreset.SELECTED_HEALTH_DATA,
 ];
 
 export function BookingWizard({ providerId }: { providerId: string }) {
@@ -75,7 +75,7 @@ export function BookingWizard({ providerId }: { providerId: string }) {
           holdId: draft.holdId!,
           petId: draft.petId!,
           reasonForVisit: draft.reasonForVisit.trim() || undefined,
-          healthAccessSelection: draft.healthAccessSelection,
+          accessSelection: draft.accessSelection ?? undefined,
         },
         draft.confirmIdempotencyKey,
       );
@@ -152,15 +152,15 @@ export function BookingWizard({ providerId }: { providerId: string }) {
           <button
             key={preset}
             type="button"
-            onClick={() => updateBooking({ healthAccessSelection: preset })}
+            onClick={() => updateBooking({ accessSelection: preset })}
             className="w-full text-start"
           >
-            <ContextSurface className={`flex items-center justify-between gap-3 ${draft.healthAccessSelection === preset ? "border-brand-mint" : ""}`}>
+            <ContextSurface className={`flex items-center justify-between gap-3 ${draft.accessSelection === preset ? "border-brand-mint" : ""}`}>
               <div>
                 <p className="text-body text-text-primary">{t(`healthSharing.preset.${preset}.title`)}</p>
                 <p className="text-metadata text-text-secondary">{t(`healthSharing.preset.${preset}.description`)}</p>
               </div>
-              {draft.healthAccessSelection === preset ? <StatusLabel tone="success">{tCommon("selected")}</StatusLabel> : null}
+              {draft.accessSelection === preset ? <StatusLabel tone="success">{tCommon("selected")}</StatusLabel> : null}
             </ContextSurface>
           </button>
         ))}

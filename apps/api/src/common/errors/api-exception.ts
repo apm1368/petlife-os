@@ -104,3 +104,25 @@ export class BookingNotCancellableException extends ApiException {
     super("BOOKING_NOT_CANCELLABLE", "This booking can no longer be cancelled.", HttpStatus.BAD_REQUEST, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Services Marketplace Basics (Handoff 04)
+// ---------------------------------------------------------------------------
+
+export class AddressRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADDRESS_REQUIRED", "This service needs an address before it can be booked.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/**
+ * Thrown only when a service's required Care Profile/Health Basics context
+ * is entirely NOT_STARTED — a PARTIAL profile is allowed through (surfaced
+ * instead as PetCompatibilityStatus.NEEDS_REVIEW, an advisory, not a block).
+ * See PetServiceCompatibilityService and BookingsService.confirm().
+ */
+export class PetContextIncompleteException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PET_CONTEXT_INCOMPLETE", "This pet's profile needs more information before this service can be booked.", HttpStatus.BAD_REQUEST, details);
+  }
+}

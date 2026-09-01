@@ -2,17 +2,97 @@ import {
   DietType,
   HealthAreaKnowledgeState,
   HouseholdRole,
+  LocationMode,
   PetSpecies,
   PrismaClient,
   ProviderServiceType,
   ProviderType,
   ProviderUserRole,
   ProviderVerificationStatus,
+  ServiceCategory,
   SetupStatus,
   VaccinationStatus,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+/**
+ * Handoff 04: one verified provider per non-vet ServiceCategory, each with a
+ * single service and open-ended weekly availability (same "always bookable
+ * today or tomorrow" rationale as the Tehran Pet Care Clinic seed above).
+ * Sitting/Boarding are booked as a date range rather than a picked slot (see
+ * BookingsService), so their availability rule/durationMinutes only feed the
+ * discovery "next available" preview, never the actual booked range.
+ */
+async function seedServiceProvider(opts: {
+  orgName: string;
+  orgType: ProviderType;
+  staffEmail: string;
+  staffName: string;
+  serviceName: string;
+  serviceType: ProviderServiceType;
+  category: ServiceCategory;
+  durationMinutes: number;
+  priceAmount: number;
+  locationMode: LocationMode;
+  requiresCareProfile?: boolean;
+  supportsCat?: boolean;
+}) {
+  const staffUser = await prisma.user.upsert({
+    where: { email: opts.staffEmail },
+    update: {},
+    create: { email: opts.staffEmail, displayName: opts.staffName, locale: "en" },
+  });
+
+  const organization = await prisma.providerOrganization.create({
+    data: { name: opts.orgName, type: opts.orgType, verificationStatus: ProviderVerificationStatus.VERIFIED },
+  });
+
+  const location = await prisma.providerLocation.create({
+    data: {
+      providerOrganizationId: organization.id,
+      name: `${opts.orgName} — Tehran`,
+      addressLine: "1 Valiasr St.",
+      city: "Tehran",
+      countryCode: "IR",
+      timezone: "Asia/Tehran",
+    },
+  });
+
+  const staff = await prisma.providerUser.create({
+    data: { userId: staffUser.id, providerOrganizationId: organization.id, role: ProviderUserRole.STAFF },
+  });
+
+  const service = await prisma.providerService.create({
+    data: {
+      providerOrganizationId: organization.id,
+      locationId: location.id,
+      name: opts.serviceName,
+      type: opts.serviceType,
+      category: opts.category,
+      durationMinutes: opts.durationMinutes,
+      priceAmount: opts.priceAmount,
+      currency: "IRR",
+      locationMode: opts.locationMode,
+      requiresCareProfile: opts.requiresCareProfile ?? false,
+      supportsCat: opts.supportsCat ?? true,
+    },
+  });
+
+  await prisma.providerAvailabilityRule.createMany({
+    data: Array.from({ length: 7 }, (_, dayOfWeek) => ({
+      providerOrganizationId: organization.id,
+      locationId: location.id,
+      providerUserId: staff.id,
+      dayOfWeek,
+      startLocalTime: "09:00",
+      endLocalTime: "18:00",
+      timezone: "Asia/Tehran",
+    })),
+  });
+
+  return { organization, location, staff, service };
+}
 
 async function main() {
   const sarah = await prisma.user.upsert({
@@ -183,6 +263,8 @@ async function main() {
         locationId: clinicLocation.id,
         name: "General Vet Visit",
         type: ProviderServiceType.GENERAL_VET_VISIT,
+        category: ServiceCategory.VET,
+        locationMode: LocationMode.AT_PROVIDER,
         durationMinutes: 30,
         priceAmount: 450000,
         currency: "IRR",
@@ -194,6 +276,8 @@ async function main() {
         locationId: clinicLocation.id,
         name: "Vaccination",
         type: ProviderServiceType.VACCINATION,
+        category: ServiceCategory.VET,
+        locationMode: LocationMode.AT_PROVIDER,
         durationMinutes: 20,
         priceAmount: 300000,
         currency: "IRR",
@@ -205,6 +289,8 @@ async function main() {
         locationId: clinicLocation.id,
         name: "Follow-up",
         type: ProviderServiceType.FOLLOW_UP,
+        category: ServiceCategory.VET,
+        locationMode: LocationMode.AT_PROVIDER,
         durationMinutes: 15,
         priceAmount: 200000,
         currency: "IRR",
@@ -226,6 +312,99 @@ async function main() {
 
   console.log(
     `Seeded provider: clinic=${clinic.id} location=${clinicLocation.id} vet=${drSara.id} generalVisitService=${generalVisit.id}`,
+  );
+
+  // Handoff 04: one verified provider per remaining ServiceCategory.
+  const groomer = await seedServiceProvider({
+    orgName: "Happy Paws Grooming",
+    orgType: ProviderType.GROOMER,
+    staffEmail: "groomer@example.com",
+    staffName: "Happy Paws Groomer",
+    serviceName: "Full Groom & Bath",
+    serviceType: ProviderServiceType.GROOMING_SESSION,
+    category: ServiceCategory.GROOMING,
+    durationMinutes: 60,
+    priceAmount: 550000,
+    locationMode: LocationMode.AT_PROVIDER,
+  });
+
+  const trainer = await seedServiceProvider({
+    orgName: "Good Dog Training",
+    orgType: ProviderType.TRAINER,
+    staffEmail: "trainer@example.com",
+    staffName: "Good Dog Trainer",
+    serviceName: "Basic Obedience Session",
+    serviceType: ProviderServiceType.TRAINING_SESSION,
+    category: ServiceCategory.TRAINING,
+    durationMinutes: 45,
+    priceAmount: 700000,
+    locationMode: LocationMode.AT_PROVIDER,
+    requiresCareProfile: true,
+    supportsCat: false,
+  });
+
+  const walker = await seedServiceProvider({
+    orgName: "City Paws Walking",
+    orgType: ProviderType.WALKER,
+    staffEmail: "walker@example.com",
+    staffName: "City Paws Walker",
+    serviceName: "30-Minute Walk",
+    serviceType: ProviderServiceType.DOG_WALK,
+    category: ServiceCategory.WALKING,
+    durationMinutes: 30,
+    priceAmount: 250000,
+    locationMode: LocationMode.AT_CUSTOMER,
+    supportsCat: false,
+  });
+
+  const sitter = await seedServiceProvider({
+    orgName: "Cozy Home Sitting",
+    orgType: ProviderType.SITTER,
+    staffEmail: "sitter@example.com",
+    staffName: "Cozy Home Sitter",
+    serviceName: "In-Home Pet Sitting",
+    serviceType: ProviderServiceType.PET_SITTING,
+    category: ServiceCategory.SITTING,
+    durationMinutes: 60,
+    priceAmount: 400000,
+    locationMode: LocationMode.AT_CUSTOMER,
+  });
+
+  const boarding = await seedServiceProvider({
+    orgName: "Tehran Pet Boarding",
+    orgType: ProviderType.BOARDING,
+    staffEmail: "boarding@example.com",
+    staffName: "Tehran Pet Boarding Staff",
+    serviceName: "Overnight Boarding",
+    serviceType: ProviderServiceType.BOARDING_STAY,
+    category: ServiceCategory.BOARDING,
+    durationMinutes: 60,
+    priceAmount: 900000,
+    locationMode: LocationMode.AT_PROVIDER,
+  });
+
+  const petTaxi = await seedServiceProvider({
+    orgName: "PetGo Taxi",
+    orgType: ProviderType.PET_TAXI,
+    staffEmail: "taxi@example.com",
+    staffName: "PetGo Driver",
+    serviceName: "Vet Visit Ride",
+    serviceType: ProviderServiceType.PET_TAXI_RIDE,
+    category: ServiceCategory.PET_TAXI,
+    durationMinutes: 30,
+    priceAmount: 350000,
+    locationMode: LocationMode.TRANSPORT,
+  });
+
+  console.log(
+    [
+      `groomer=${groomer.organization.id}`,
+      `trainer=${trainer.organization.id}`,
+      `walker=${walker.organization.id}`,
+      `sitter=${sitter.organization.id}`,
+      `boarding=${boarding.organization.id}`,
+      `petTaxi=${petTaxi.organization.id}`,
+    ].join(" "),
   );
 
   console.log(`Seeded: user=${sarah.email} household=${household.id} pets=[Luna:${luna.id}, Milo:${milo.id}]`);

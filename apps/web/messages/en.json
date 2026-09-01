@@ -141,14 +141,25 @@
       "findVet": "Find veterinary care",
       "askAi": "Ask AI about {name}",
       "addPet": "Add your first pet",
-      "viewBooking": "View upcoming vet visit"
+      "viewBooking": {
+        "vet": "View upcoming vet visit",
+        "grooming": "View upcoming grooming",
+        "training": "View upcoming training session",
+        "walking": "View upcoming walk",
+        "sitting": "View upcoming sitting",
+        "boarding": "View upcoming boarding",
+        "petTaxi": "View upcoming pet taxi ride"
+      }
     },
     "sections": {
       "ai": "Ask AI",
-      "upcoming": "Upcoming"
+      "upcoming": "Upcoming",
+      "exploreServices": "Explore Services"
     },
     "aiPlaceholder": "AI guidance is coming soon.",
-    "upcomingPlaceholder": "Nothing scheduled yet."
+    "upcomingPlaceholder": "Nothing scheduled yet.",
+    "exploreServicesHint": "Grooming, training, walking, sitting, boarding, and pet taxi.",
+    "exploreServicesAction": "Explore"
   },
   "pets": {
     "myPets": "My Pets",
@@ -166,7 +177,15 @@
       "careTeaser": "Care",
       "openHealth": "Open Health",
       "openCareProfile": "Open Care Profile",
-      "upcomingVisitTeaser": "Upcoming vet visit",
+      "upcomingServiceTeaser": {
+        "VET": "Upcoming vet visit",
+        "GROOMING": "Upcoming grooming",
+        "TRAINING": "Upcoming training session",
+        "WALKING": "Upcoming walk",
+        "SITTING": "Upcoming sitting",
+        "BOARDING": "Upcoming boarding",
+        "PET_TAXI": "Upcoming pet taxi ride"
+      },
       "viewBooking": "View booking"
     }
   },
@@ -365,17 +384,219 @@
         "PET_ACCESS_DENIED": "You don't have access to book for this pet.",
         "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled."
       }
+    }
+  },
+  "bookingDetail": {
+    "title": "Booking",
+    "pet": "Pet",
+    "provider": "Provider",
+    "service": "Service",
+    "location": "Location",
+    "dropoffLocation": "Dropoff location",
+    "dateTime": "Date & time",
+    "reason": "Notes",
+    "cancelledReason": "Cancellation reason",
+    "cancel": "Cancel booking",
+    "status": {
+      "HOLD": "Held",
+      "PENDING_CONFIRMATION": "Pending confirmation",
+      "CONFIRMED": "Confirmed",
+      "CHECKED_IN": "Checked in",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED_BY_USER": "Cancelled by you",
+      "CANCELLED_BY_PROVIDER": "Cancelled by provider",
+      "NO_SHOW": "No-show"
     },
-    "bookingDetail": {
-      "title": "Booking",
-      "pet": "Pet",
-      "provider": "Vet / Clinic",
-      "service": "Service",
-      "location": "Location",
-      "dateTime": "Date & time",
-      "reason": "Reason for visit",
-      "cancelledReason": "Cancellation reason",
-      "cancel": "Cancel booking",
+    "paymentStatus": {
+      "NOT_REQUIRED": "Not required",
+      "PENDING": "Pending",
+      "AUTHORIZED": "Authorized",
+      "PAID": "Paid",
+      "FAILED": "Failed",
+      "REFUND_PENDING": "Refund pending",
+      "REFUNDED": "Refunded"
+    },
+    "careAccess": {
+      "title": "Care access shared",
+      "scope": "Scope",
+      "expiresAt": "Expires",
+      "preset": {
+        "MINIMAL_VET_CONTEXT": "Minimal context",
+        "HEALTH_BASICS": "Health Basics",
+        "SELECTED_HEALTH_DATA": "Selected health data",
+        "GROOMING_BASIC": "Care Profile (grooming basics)",
+        "TRAINING_BASIC": "Care Profile (training basics)",
+        "WALKING_BASIC": "Care Profile (walking basics)",
+        "SITTING_BASIC": "Care Profile (sitting basics)",
+        "BOARDING_BASIC": "Care Profile + vaccination status (boarding basics)",
+        "TAXI_BASIC": "Care Profile (pet taxi basics)"
+      }
+    },
+    "recurring": {
+      "prompt": "Book this on a weekly schedule?",
+      "action": "Repeat weekly",
+      "started": "Created {count} weekly bookings."
+    },
+    "cancelDialog": {
+      "title": "Cancel this booking?",
+      "body": "The provider will no longer hold this time for you.",
+      "careAccessImpact": "The temporary care access you shared for this booking will also be revoked.",
+      "confirm": "Yes, cancel booking"
+    },
+    "confirmedBanner": {
+      "title": "Booking confirmed",
+      "calendarAdded": "Added to your Care Calendar.",
+      "careAccessUntil": "Care access shared with the provider until {when}.",
+      "openCalendar": "Open Care Calendar"
+    }
+  },
+  "services": {
+    "explore": {
+      "title": "Explore Services",
+      "subtitle": "For {name}",
+      "category": {
+        "VET": "Veterinary care",
+        "GROOMING": "Grooming",
+        "TRAINING": "Training",
+        "WALKING": "Walking",
+        "SITTING": "Sitting",
+        "BOARDING": "Boarding",
+        "PET_TAXI": "Pet Taxi"
+      },
+      "categoryHint": {
+        "VET": "Checkups, vaccinations, and visits",
+        "GROOMING": "Baths, haircuts, and full grooms",
+        "TRAINING": "Obedience and behavior sessions",
+        "WALKING": "Scheduled walks",
+        "SITTING": "In-home pet sitting",
+        "BOARDING": "Overnight and multi-day stays",
+        "PET_TAXI": "Rides to and from appointments"
+      }
+    },
+    "results": {
+      "title": "Providers",
+      "loading": "Loading",
+      "retry": "Retry",
+      "subtitle": "For {name}",
+      "empty": "No providers found yet.",
+      "verified": "Verified",
+      "nextAvailable": "Next available {when}",
+      "noAvailability": "No availability found"
+    },
+    "compatibility": {
+      "status": {
+        "COMPATIBLE": "Compatible",
+        "NEEDS_REVIEW": "Needs review",
+        "NOT_SUPPORTED": "Not supported",
+        "UNKNOWN": "More info needed"
+      }
+    },
+    "booking": {
+      "noDraft": "Start by choosing a provider from the service results.",
+      "backToResults": "Back to results",
+      "slotPicker": {
+        "title": "Choose a time",
+        "incompatible": "This provider doesn't support your pet's species for this service.",
+        "noSlots": "No available times in the next week."
+      },
+      "dateRange": {
+        "title": "Choose check-in and check-out",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out"
+      },
+      "address": {
+        "title": "Where should this happen?",
+        "addNew": "Add a new address",
+        "addressLine": "Address",
+        "city": "City",
+        "countryCode": "Country code",
+        "save": "Save address"
+      },
+      "review": {
+        "title": "Review your booking",
+        "pet": "Pet",
+        "provider": "Provider",
+        "service": "Service",
+        "location": "Location",
+        "atCustomerLocation": "Your address",
+        "dateTime": "Date & time",
+        "price": "Price",
+        "paymentStatus": "Payment",
+        "paymentPlaceholder": "Not required yet",
+        "notesLabel": "Notes (optional)"
+      },
+      "careSharing": {
+        "title": "Share care info with the provider",
+        "who": "Who",
+        "why": "Why",
+        "whyValue": "For this {service} booking",
+        "until": "Until",
+        "what": "What to share",
+        "confirm": "Confirm booking",
+        "preset": {
+          "GROOMING_BASIC": {
+            "title": "Grooming basics",
+            "description": "Temperament, handling sensitivity, and coat/skin notes from the Care Profile."
+          },
+          "TRAINING_BASIC": {
+            "title": "Training basics",
+            "description": "Temperament and behavior notes from the Care Profile."
+          },
+          "WALKING_BASIC": {
+            "title": "Walking basics",
+            "description": "Leash behavior, temperament, and special instructions from the Care Profile."
+          },
+          "SITTING_BASIC": {
+            "title": "Sitting basics",
+            "description": "Feeding routine, toilet routine, and separation behavior from the Care Profile."
+          },
+          "BOARDING_BASIC": {
+            "title": "Boarding basics",
+            "description": "Care Profile plus vaccination status, where applicable."
+          },
+          "TAXI_BASIC": {
+            "title": "Pet taxi basics",
+            "description": "Temperament and handling/crate notes from the Care Profile."
+          }
+        }
+      },
+      "errors": {
+        "SLOT_UNAVAILABLE": "That time is no longer available. Please choose another.",
+        "HOLD_EXPIRED": "This hold has expired. Please choose again.",
+        "BOOKING_CONFLICT": "This slot was just booked by someone else. Please choose another.",
+        "PROVIDER_NOT_VERIFIED": "This provider is not yet verified.",
+        "SERVICE_NOT_AVAILABLE": "This service is not currently available.",
+        "PET_NOT_SUPPORTED": "This provider doesn't support your pet's species for this service.",
+        "PET_ACCESS_DENIED": "You don't have access to book for this pet.",
+        "PET_CONTEXT_INCOMPLETE": "This pet's profile needs more information before this service can be booked.",
+        "ADDRESS_REQUIRED": "This service needs an address before it can be booked.",
+        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled."
+      }
+    }
+  },
+  "bookings": {
+    "myBookings": {
+      "title": "My Bookings",
+      "tab": {
+        "upcoming": "Upcoming",
+        "past": "Past",
+        "cancelled": "Cancelled"
+      },
+      "empty": {
+        "upcoming": "No upcoming bookings.",
+        "past": "No past bookings.",
+        "cancelled": "No cancelled bookings."
+      },
+      "category": {
+        "VET": "Vet visit",
+        "GROOMING": "Grooming",
+        "TRAINING": "Training",
+        "WALKING": "Walking",
+        "SITTING": "Sitting",
+        "BOARDING": "Boarding",
+        "PET_TAXI": "Pet Taxi"
+      },
       "status": {
         "HOLD": "Held",
         "PENDING_CONFIRMATION": "Pending confirmation",
@@ -386,37 +607,6 @@
         "CANCELLED_BY_USER": "Cancelled by you",
         "CANCELLED_BY_PROVIDER": "Cancelled by provider",
         "NO_SHOW": "No-show"
-      },
-      "paymentStatus": {
-        "NOT_REQUIRED": "Not required",
-        "PENDING": "Pending",
-        "AUTHORIZED": "Authorized",
-        "PAID": "Paid",
-        "FAILED": "Failed",
-        "REFUND_PENDING": "Refund pending",
-        "REFUNDED": "Refunded"
-      },
-      "healthAccess": {
-        "title": "Health access shared",
-        "scope": "Scope",
-        "expiresAt": "Expires",
-        "preset": {
-          "MINIMAL_VET_CONTEXT": "Minimal context",
-          "HEALTH_BASICS": "Health Basics",
-          "SELECTED_HEALTH_DATA": "Selected health data"
-        }
-      },
-      "cancelDialog": {
-        "title": "Cancel this booking?",
-        "body": "The clinic will no longer hold this time for you.",
-        "healthAccessImpact": "The temporary health access you shared for this visit will also be revoked.",
-        "confirm": "Yes, cancel booking"
-      },
-      "confirmedBanner": {
-        "title": "Booking confirmed",
-        "calendarAdded": "Added to your Care Calendar.",
-        "healthAccessUntil": "Health access shared with the clinic until {when}.",
-        "openCalendar": "Open Care Calendar"
       }
     }
   },
@@ -424,7 +614,13 @@
     "title": "Care Calendar",
     "empty": "Nothing scheduled yet.",
     "event": {
-      "VET_APPOINTMENT": "Vet appointment"
+      "VET_APPOINTMENT": "Vet appointment",
+      "GROOMING_APPOINTMENT": "Grooming appointment",
+      "TRAINING_SESSION": "Training session",
+      "WALK": "Walk",
+      "SITTING": "Sitting",
+      "BOARDING": "Boarding",
+      "PET_TAXI": "Pet Taxi ride"
     },
     "status": {
       "SCHEDULED": "Scheduled",

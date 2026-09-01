@@ -403,6 +403,37 @@ export enum ProviderType {
   VET_CLINIC = "VET_CLINIC",
   VET_HOSPITAL = "VET_HOSPITAL",
   VETERINARIAN = "VETERINARIAN",
+  GROOMER = "GROOMER",
+  TRAINER = "TRAINER",
+  WALKER = "WALKER",
+  SITTER = "SITTER",
+  BOARDING = "BOARDING",
+  PET_TAXI = "PET_TAXI",
+  MULTI_SERVICE_PROVIDER = "MULTI_SERVICE_PROVIDER",
+}
+
+/**
+ * The canonical service taxonomy (Handoff 04) — deliberately independent of
+ * ProviderType: a provider's `type` is coarse self-described business
+ * identity, while every ProviderService carries its own `category` here,
+ * never inferred from the org's type or a display string.
+ */
+export enum ServiceCategory {
+  VET = "VET",
+  GROOMING = "GROOMING",
+  TRAINING = "TRAINING",
+  WALKING = "WALKING",
+  SITTING = "SITTING",
+  BOARDING = "BOARDING",
+  PET_TAXI = "PET_TAXI",
+}
+
+/** Where a booked service actually happens — see ProviderServiceDto.locationMode. */
+export enum LocationMode {
+  AT_PROVIDER = "AT_PROVIDER",
+  AT_CUSTOMER = "AT_CUSTOMER",
+  MOBILE = "MOBILE",
+  TRANSPORT = "TRANSPORT",
 }
 
 /** Only VERIFIED providers appear in default consumer discovery. */
@@ -427,6 +458,12 @@ export enum ProviderServiceType {
   VACCINATION = "VACCINATION",
   FOLLOW_UP = "FOLLOW_UP",
   CONSULTATION = "CONSULTATION",
+  GROOMING_SESSION = "GROOMING_SESSION",
+  TRAINING_SESSION = "TRAINING_SESSION",
+  DOG_WALK = "DOG_WALK",
+  PET_SITTING = "PET_SITTING",
+  BOARDING_STAY = "BOARDING_STAY",
+  PET_TAXI_RIDE = "PET_TAXI_RIDE",
 }
 
 /**
@@ -459,15 +496,80 @@ export enum PaymentStatus {
   REFUNDED = "REFUNDED",
 }
 
-/** What a booking-confirmation-time TEMPORARY grant actually exposes — never "full health record" by default. */
-export enum HealthAccessScopePreset {
+/**
+ * What a booking-confirmation-time TEMPORARY grant actually exposes — never
+ * "full health record"/"full Care Profile" by default. Renamed from
+ * HealthAccessScopePreset (Handoff 03) now that booking access spans every
+ * service category — the first three values are the original vet-only
+ * presets, unchanged; the *_BASIC presets are the new per-category
+ * Care-Profile-only presets (Handoff 04).
+ */
+export enum PetAccessScopePreset {
   MINIMAL_VET_CONTEXT = "MINIMAL_VET_CONTEXT",
   HEALTH_BASICS = "HEALTH_BASICS",
   SELECTED_HEALTH_DATA = "SELECTED_HEALTH_DATA",
+  GROOMING_BASIC = "GROOMING_BASIC",
+  TRAINING_BASIC = "TRAINING_BASIC",
+  WALKING_BASIC = "WALKING_BASIC",
+  SITTING_BASIC = "SITTING_BASIC",
+  BOARDING_BASIC = "BOARDING_BASIC",
+  TAXI_BASIC = "TAXI_BASIC",
 }
 
+/** Mirrors ServiceCategory — a calendar row's type is always derivable from the booking category that created it. */
 export enum CareCalendarEventType {
   VET_APPOINTMENT = "VET_APPOINTMENT",
+  GROOMING_APPOINTMENT = "GROOMING_APPOINTMENT",
+  TRAINING_SESSION = "TRAINING_SESSION",
+  WALK = "WALK",
+  SITTING = "SITTING",
+  BOARDING = "BOARDING",
+  PET_TAXI = "PET_TAXI",
+}
+
+/** BookingSeries recurrence is intentionally minimal — a flat "repeat weekly N times" shape, no custom interval picker. */
+export enum BookingSeriesFrequency {
+  ONE_TIME = "ONE_TIME",
+  WEEKLY = "WEEKLY",
+}
+
+/** PAUSED/COMPLETED exist for architecture completeness; only ACTIVE/CANCELLED are reachable this phase. */
+export enum BookingSeriesStatus {
+  ACTIVE = "ACTIVE",
+  PAUSED = "PAUSED",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
+}
+
+/**
+ * PetServiceCompatibilityService's output vocabulary (Handoff 04 section 5).
+ * NEEDS_REVIEW and UNKNOWN are deliberately distinct from NOT_SUPPORTED — a
+ * service is never called compatible when required context (age, weight,
+ * Care Profile, Health Basics) is simply missing rather than actually
+ * disqualifying.
+ */
+export enum PetCompatibilityStatus {
+  COMPATIBLE = "COMPATIBLE",
+  NEEDS_REVIEW = "NEEDS_REVIEW",
+  NOT_SUPPORTED = "NOT_SUPPORTED",
+  UNKNOWN = "UNKNOWN",
+}
+
+/** Reason codes, not localized copy — the frontend maps each to display text. */
+export type PetCompatibilityReason =
+  | "SPECIES_UNSUPPORTED"
+  | "AGE_TOO_YOUNG"
+  | "AGE_TOO_OLD"
+  | "AGE_UNKNOWN"
+  | "WEIGHT_TOO_LOW"
+  | "WEIGHT_TOO_HIGH"
+  | "WEIGHT_UNKNOWN"
+  | "CARE_PROFILE_REQUIRED"
+  | "HEALTH_BASICS_REQUIRED";
+
+export interface PetCompatibilityDto {
+  status: PetCompatibilityStatus;
+  reasons: PetCompatibilityReason[];
 }
 
 export enum CareCalendarEventStatus {
@@ -497,12 +599,52 @@ export interface ProviderServiceDto {
   name: string;
   description: string | null;
   type: ProviderServiceType;
+  category: ServiceCategory;
   durationMinutes: number;
   priceAmount: number | null;
   currency: string | null;
   supportsDog: boolean;
   supportsCat: boolean;
+  minAgeMonths: number | null;
+  maxAgeMonths: number | null;
+  minWeightKg: number | null;
+  maxWeightKg: number | null;
+  requiresCareProfile: boolean;
+  requiresHealthBasics: boolean;
+  locationMode: LocationMode;
   isActive: boolean;
+}
+
+export interface CustomerAddressDto {
+  id: string;
+  householdId: string;
+  label: string | null;
+  recipient: string | null;
+  phone: string | null;
+  addressLine: string;
+  city: string;
+  region: string | null;
+  countryCode: string;
+  latitude: number | null;
+  longitude: number | null;
+  instructions: string | null;
+}
+
+/** A single (provider, service) discovery result row — one provider can appear multiple times, once per matching service. */
+export interface ServiceSearchResultDto {
+  provider: ProviderSummaryDto;
+  service: ProviderServiceDto;
+  location: ProviderLocationDto | null;
+  /** Only present when the request carried a petId. */
+  compatibility: PetCompatibilityDto | null;
+  nextAvailableSlotStart: string | null;
+}
+
+export interface ServiceDetailDto {
+  provider: ProviderProfileDto;
+  service: ProviderServiceDto;
+  locationOptions: ProviderLocationDto[];
+  compatibility: PetCompatibilityDto | null;
 }
 
 /** A search-result row — cheap-to-compute summary, not the full profile. */
@@ -561,9 +703,21 @@ export interface BookingHoldDto {
   timezone: string;
 }
 
-export interface BookingHealthAccessSummaryDto {
-  scopePreset: HealthAccessScopePreset;
+/** Renamed from BookingHealthAccessSummaryDto — see PetAccessScopePreset. */
+export interface BookingPetAccessSummaryDto {
+  scopePreset: PetAccessScopePreset;
   expiresAt: string;
+}
+
+export interface BookingSeriesDto {
+  id: string;
+  householdId: string;
+  petId: string;
+  userId: string;
+  providerOrganizationId: string;
+  providerServiceId: string;
+  frequency: BookingSeriesFrequency;
+  status: BookingSeriesStatus;
 }
 
 export interface BookingDto {
@@ -575,6 +729,8 @@ export interface BookingDto {
   providerLocationId: string;
   providerUserId: string | null;
   providerServiceId: string;
+  category: ServiceCategory;
+  locationMode: LocationMode;
   startAt: string;
   endAt: string;
   timezone: string;
@@ -589,7 +745,10 @@ export interface BookingDto {
   provider: ProviderSummaryDto | null;
   location: ProviderLocationDto | null;
   service: ProviderServiceDto | null;
-  healthAccess: BookingHealthAccessSummaryDto | null;
+  customerAddress: CustomerAddressDto | null;
+  dropoffAddress: CustomerAddressDto | null;
+  bookingSeriesId: string | null;
+  petAccess: BookingPetAccessSummaryDto | null;
 }
 
 export interface CareCalendarEventDto {

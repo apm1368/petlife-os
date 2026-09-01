@@ -1,12 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ProviderVerificationStatus as PrismaVerificationStatus, type Prisma, type ProviderLocation, type ProviderOrganization, type ProviderService, type ProviderServiceType as PrismaServiceType } from "@prisma/client";
-import type {
-  AvailabilityResponseDto,
-  ProviderLocationDto,
-  ProviderProfileDto,
-  ProviderServiceDto,
-  ProviderSummaryDto,
-} from "@petlife/types";
+import type { AvailabilityResponseDto, ProviderProfileDto, ProviderSummaryDto } from "@petlife/types";
 import { PetSpecies } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../common/errors/api-exception";
@@ -14,39 +8,7 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import type { SearchVetsDto } from "./dto/search-vets.dto";
 import type { GetAvailabilityDto } from "./dto/get-availability.dto";
 import { SlotGeneratorService } from "./slot-generator.service";
-
-function toLocationDto(location: ProviderLocation): ProviderLocationDto {
-  return {
-    id: location.id,
-    providerOrganizationId: location.providerOrganizationId,
-    name: location.name,
-    addressLine: location.addressLine,
-    city: location.city,
-    region: location.region,
-    countryCode: location.countryCode,
-    latitude: location.latitude,
-    longitude: location.longitude,
-    phone: location.phone,
-    timezone: location.timezone,
-  };
-}
-
-function toServiceDto(service: ProviderService): ProviderServiceDto {
-  return {
-    id: service.id,
-    providerOrganizationId: service.providerOrganizationId,
-    locationId: service.locationId,
-    name: service.name,
-    description: service.description,
-    type: service.type as ProviderServiceDto["type"],
-    durationMinutes: service.durationMinutes,
-    priceAmount: service.priceAmount ? Number(service.priceAmount) : null,
-    currency: service.currency,
-    supportsDog: service.supportsDog,
-    supportsCat: service.supportsCat,
-    isActive: service.isActive,
-  };
-}
+import { toProviderLocationDto as toLocationDto, toProviderServiceDto as toServiceDto } from "./provider-dto.mapper";
 
 type OrgWithRelations = ProviderOrganization & { locations: ProviderLocation[]; services: ProviderService[] };
 

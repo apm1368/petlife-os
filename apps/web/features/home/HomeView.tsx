@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { ContextSurface, EmptyState, ErrorRecovery, PriorityAction, Skeleton, ActivePetSwitcher } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, ErrorRecovery, PriorityAction, Skeleton, ActivePetSwitcher } from "@petlife/ui";
 import type { HomeResponseDto } from "@petlife/types";
 import { homeService } from "@/services/home.service";
 import { useActivePet } from "@/hooks/use-active-pet";
@@ -79,6 +79,16 @@ export function HomeView() {
       <ContextSurface>
         <h2 className="text-section-title text-text-primary">{t("sections.upcoming")}</h2>
         <p className="mt-1 text-body text-text-secondary">{t("upcomingPlaceholder")}</p>
+      </ContextSurface>
+
+      <ContextSurface className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-section-title text-text-primary">{t("sections.exploreServices")}</h2>
+          <p className="mt-1 text-body text-text-secondary">{t("exploreServicesHint")}</p>
+        </div>
+        <Button variant="secondary" onClick={() => router.push(`/${locale}/services`)}>
+          {t("exploreServicesAction")}
+        </Button>
       </ContextSurface>
     </div>
   );
