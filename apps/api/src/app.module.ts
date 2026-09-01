@@ -34,6 +34,10 @@ import { CatalogModule } from "./modules/commerce/catalog/catalog.module";
 import { CartModule } from "./modules/commerce/cart/cart.module";
 import { CheckoutModule } from "./modules/commerce/checkout/checkout.module";
 import { PaymentsModule } from "./modules/commerce/payments/payments.module";
+import { FinancingModule } from "./modules/commerce/financing/financing.module";
+import { LedgerModule } from "./modules/commerce/ledger/ledger.module";
+import { RefundsModule } from "./modules/commerce/refunds/refunds.module";
+import { ReconciliationModule } from "./modules/commerce/reconciliation/reconciliation.module";
 import { OrdersModule } from "./modules/commerce/orders/orders.module";
 
 @Module({
@@ -73,6 +77,10 @@ import { OrdersModule } from "./modules/commerce/orders/orders.module";
     CartModule,
     CheckoutModule,
     PaymentsModule,
+    FinancingModule,
+    LedgerModule,
+    RefundsModule,
+    ReconciliationModule,
     OrdersModule,
   ],
   providers: [

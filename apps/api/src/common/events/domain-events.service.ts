@@ -64,6 +64,22 @@ export const DOMAIN_EVENT_TYPES = [
   "OrderCreated",
   "OrderConfirmed",
   "CartConverted",
+  // Real Payments + BNPL + Refund Basics + Reconciliation (Handoff 07)
+  "PaymentProviderRedirectCreated",
+  "PaymentAuthorized",
+  "PaymentCaptured",
+  "PaymentDeclined",
+  "PaymentPending",
+  "FinancingIntentCreated",
+  "FinancingEligibilityChecked",
+  "FinancingPlanSelected",
+  "FinancingApproved",
+  "FinancingDeclined",
+  "RefundRequested",
+  "RefundSucceeded",
+  "RefundFailed",
+  "PaymentReconciled",
+  "FinancialLedgerTransactionCreated",
 ] as const;
 
 /**

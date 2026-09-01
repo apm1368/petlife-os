@@ -1,9 +1,10 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { PaymentAttemptStatus, PaymentIntentStatus, Prisma, TransactionStatus, TransactionType, type PaymentIntent } from "@prisma/client";
+import { Injectable } from "@nestjs/common";
+import { PaymentAttemptStatus, PaymentIntentStatus, PaymentProvider, Prisma, TransactionStatus, TransactionType, type PaymentIntent } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { PaymentAlreadyCompletedException } from "../../../common/errors/api-exception";
-import { PAYMENT_GATEWAY, type PaymentChargeMode, type PaymentGateway } from "./payment-gateway.interface";
+import { PaymentGatewayRegistry } from "./payment-gateway-registry.service";
+import type { PaymentChargeMode } from "./payment-gateway.interface";
 
 type QueryClient = PrismaService | Prisma.TransactionClient;
 
@@ -33,34 +34,49 @@ export interface ChargeOutcome {
 }
 
 /**
- * Payment core (spec sections 33-36) — every method here only ever talks to
- * PaymentIntent/PaymentAttempt/Transaction and the PaymentGateway interface,
- * never to Checkout/Order/Inventory directly. CheckoutService is the
- * orchestrator that decides what a charge outcome *means* for the
- * checkout; this service only decides what it means for the payment
- * records themselves. That separation is what keeps a future real gateway
- * a drop-in PaymentGateway implementation instead of a Checkout rewrite.
+ * Payment core (spec sections 33-36, and Handoff 07 sections 3, 47) — every
+ * method here only ever talks to PaymentIntent/PaymentAttempt/Transaction
+ * and the PaymentGateway interface (resolved per-intent via
+ * PaymentGatewayRegistry, never a single injected gateway), never to
+ * Checkout/Order/Inventory directly. CheckoutService is the orchestrator
+ * that decides what a charge outcome *means* for the checkout; this service
+ * only decides what it means for the payment records themselves.
  */
 @Injectable()
 export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
-    @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
+    private readonly gateways: PaymentGatewayRegistry,
   ) {}
 
-  /** Idempotent: an existing non-terminal intent for this checkout is reused rather than duplicated. */
-  async createIntent(checkoutId: string, amount: number, currency: string, idempotencyKey?: string, client: QueryClient = this.prisma): Promise<PaymentIntent> {
+  /** Idempotent: an existing non-terminal intent for this checkout is reused rather than duplicated. Defaults to DEV_SIMULATED — the only provider Handoff 06's ONLINE_PAYMENT flow ever used before this handoff added others. */
+  async createIntent(
+    checkoutId: string,
+    amount: number,
+    currency: string,
+    provider: PaymentProvider = PaymentProvider.DEV_SIMULATED,
+    idempotencyKey?: string,
+    client: QueryClient = this.prisma,
+  ): Promise<PaymentIntent> {
     const existing = await client.paymentIntent.findFirst({
       where: { checkoutId, status: { in: [PaymentIntentStatus.REQUIRES_PAYMENT_METHOD, PaymentIntentStatus.PENDING] } },
       orderBy: { createdAt: "desc" },
     });
     if (existing) return existing;
 
+    // Confirms the provider is actually enabled/known before creating a
+    // durable record for it — never persist an intent for a provider that
+    // can't ever be charged.
+    this.gateways.resolve(provider);
+
     const intent = await client.paymentIntent.create({
-      data: { checkoutId, amount, currency, idempotencyKey: idempotencyKey ?? null },
+      data: { checkoutId, amount, currency, provider, idempotencyKey: idempotencyKey ?? null },
     });
-    await this.events.publish("PaymentIntentCreated", { paymentIntentId: intent.id, checkoutId, amount }, { aggregateType: "PaymentIntent", aggregateId: intent.id });
+    await this.events.publish("PaymentIntentCreated", { paymentIntentId: intent.id, checkoutId, amount, provider }, { aggregateType: "PaymentIntent", aggregateId: intent.id });
+    if (provider !== PaymentProvider.DEV_SIMULATED) {
+      await this.events.publish("PaymentProviderRedirectCreated", { paymentIntentId: intent.id, checkoutId, provider }, { aggregateType: "PaymentIntent", aggregateId: intent.id });
+    }
     return intent;
   }
 
@@ -80,7 +96,8 @@ export class PaymentsService {
     });
     await this.events.publish("PaymentAttemptStarted", { paymentIntentId: intentId, paymentAttemptId: attempt.id }, { aggregateType: "PaymentIntent", aggregateId: intentId });
 
-    const result = await this.gateway.charge({ amount: intent.amount, currency: intent.currency, mode });
+    const gateway = this.gateways.resolve(intent.provider);
+    const result = await gateway.charge({ amount: intent.amount, currency: intent.currency, mode });
 
     await client.paymentAttempt.update({
       where: { id: attempt.id },
@@ -105,17 +122,26 @@ export class PaymentsService {
 
     const updatedIntent = await client.paymentIntent.update({ where: { id: intentId }, data: { status: toIntentStatus(result.status) } });
 
-    await this.events.publish(
-      result.status === "SUCCEEDED" ? "PaymentSucceeded" : "PaymentFailed",
-      { paymentIntentId: intentId, checkoutId: intent.checkoutId, status: result.status },
-      { aggregateType: "PaymentIntent", aggregateId: intentId },
-    );
+    await this.publishOutcomeEvents(intentId, intent.checkoutId, result.status, false);
 
     return { intent: updatedIntent, status: result.status, failureCode: result.failureCode, failureMessage: result.failureMessage };
   }
 
   async getIntent(checkoutId: string): Promise<PaymentIntent | null> {
     return this.prisma.paymentIntent.findFirst({ where: { checkoutId }, orderBy: { createdAt: "desc" } });
+  }
+
+  async getIntentById(intentId: string): Promise<PaymentIntent | null> {
+    return this.prisma.paymentIntent.findUnique({ where: { id: intentId } });
+  }
+
+  /** The latest gateway-reported reference for this intent — what a reconciliation/refund call queries the provider by. */
+  async getLatestProviderReference(intentId: string): Promise<string | null> {
+    const attempt = await this.prisma.paymentAttempt.findFirst({
+      where: { paymentIntentId: intentId, providerReference: { not: null } },
+      orderBy: { createdAt: "desc" },
+    });
+    return attempt?.providerReference ?? null;
   }
 
   /**
@@ -126,11 +152,9 @@ export class PaymentsService {
    * gateway's webhook would report a delayed authorization result.
    * Idempotent by construction: an intent that has already reached a
    * terminal status (CAPTURED/FAILED) treats a repeat webhook call as a
-   * safe no-op rather than reprocessing it — the "provider event ID"
-   * (`eventId`) is stored as the resolving PaymentAttempt's
-   * `providerReference` for traceability, not as a separate dedup table
-   * (see README "Payment abstraction" for why a fuller idempotency-key
-   * ledger is future work).
+   * safe no-op rather than reprocessing it — duplicate-delivery safety at
+   * the transport level is PaymentProviderEvent's own unique constraint
+   * (see ProviderEventsService), this is the second, intent-level layer.
    */
   async resolvePendingIntent(intentId: string, eventId: string, status: "SUCCEEDED" | "FAILED"): Promise<ChargeOutcome | null> {
     const intent = await this.prisma.paymentIntent.findUnique({ where: { id: intentId } });
@@ -154,12 +178,22 @@ export class PaymentsService {
     });
     const updatedIntent = await this.prisma.paymentIntent.update({ where: { id: intentId }, data: { status: toIntentStatus(status) } });
 
-    await this.events.publish(
-      status === "SUCCEEDED" ? "PaymentSucceeded" : "PaymentFailed",
-      { paymentIntentId: intentId, checkoutId: intent.checkoutId, status, viaWebhook: true },
-      { aggregateType: "PaymentIntent", aggregateId: intentId },
-    );
+    await this.publishOutcomeEvents(intentId, intent.checkoutId, status, true);
 
     return { intent: updatedIntent, status };
+  }
+
+  private async publishOutcomeEvents(intentId: string, checkoutId: string, status: "SUCCEEDED" | "FAILED" | "PENDING", viaWebhook: boolean): Promise<void> {
+    const base = { paymentIntentId: intentId, checkoutId, status, viaWebhook: viaWebhook || undefined };
+    if (status === "SUCCEEDED") {
+      await this.events.publish("PaymentAuthorized", base, { aggregateType: "PaymentIntent", aggregateId: intentId });
+      await this.events.publish("PaymentCaptured", base, { aggregateType: "PaymentIntent", aggregateId: intentId });
+      await this.events.publish("PaymentSucceeded", base, { aggregateType: "PaymentIntent", aggregateId: intentId });
+    } else if (status === "FAILED") {
+      await this.events.publish("PaymentDeclined", base, { aggregateType: "PaymentIntent", aggregateId: intentId });
+      await this.events.publish("PaymentFailed", base, { aggregateType: "PaymentIntent", aggregateId: intentId });
+    } else {
+      await this.events.publish("PaymentPending", base, { aggregateType: "PaymentIntent", aggregateId: intentId });
+    }
   }
 }

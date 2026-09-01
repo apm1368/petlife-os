@@ -40,10 +40,47 @@ const envSchema = z.object({
   /// access grant remains valid — covers a same-day follow-up note from the
   /// vet after the appointment itself has ended.
   BOOKING_HEALTH_ACCESS_BUFFER_HOURS: z.coerce.number().int().positive().default(24),
+
+  /// Real Payments + BNPL (Handoff 07). "sandbox" is the only mode this
+  /// project can ever safely run in — no real merchant credentials exist
+  /// for any provider (see README "Provider documentation safety"), so
+  /// "production" is validated (see validateEnv below) rather than merely
+  /// documented, precisely to prevent ever calling a real endpoint that was
+  /// never actually wired up.
+  PAYMENT_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
+  STANDARD_GATEWAY_ENABLED: z.coerce.boolean().default(true),
+  SNAPPAY_ENABLED: z.coerce.boolean().default(true),
+  DIGIPAY_ENABLED: z.coerce.boolean().default(true),
+  /// Optional and unused by the sandbox-stub adapters — present only so a
+  /// real integration has a place to read credentials from without a schema
+  /// change, and so startup validation can require them in "production" mode.
+  STANDARD_GATEWAY_MERCHANT_ID: z.string().optional(),
+  STANDARD_GATEWAY_API_KEY: z.string().optional(),
+  SNAPPAY_MERCHANT_ID: z.string().optional(),
+  SNAPPAY_API_KEY: z.string().optional(),
+  DIGIPAY_MERCHANT_ID: z.string().optional(),
+  DIGIPAY_API_KEY: z.string().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
 
+/// Handoff 07 (spec section 53) — "sandbox" is safe with no credentials at
+/// all (every adapter is a documented stub); "production" would call a real
+/// endpoint, so a provider enabled without its credentials configured fails
+/// startup instead of silently running the sandbox stub against real money.
+function validatePaymentConfig(env: AppEnv): void {
+  if (env.PAYMENT_SANDBOX_MODE !== "production") return;
+  const missing: string[] = [];
+  if (env.STANDARD_GATEWAY_ENABLED && !(env.STANDARD_GATEWAY_MERCHANT_ID && env.STANDARD_GATEWAY_API_KEY)) missing.push("STANDARD_GATEWAY_MERCHANT_ID/STANDARD_GATEWAY_API_KEY");
+  if (env.SNAPPAY_ENABLED && !(env.SNAPPAY_MERCHANT_ID && env.SNAPPAY_API_KEY)) missing.push("SNAPPAY_MERCHANT_ID/SNAPPAY_API_KEY");
+  if (env.DIGIPAY_ENABLED && !(env.DIGIPAY_MERCHANT_ID && env.DIGIPAY_API_KEY)) missing.push("DIGIPAY_MERCHANT_ID/DIGIPAY_API_KEY");
+  if (missing.length > 0) {
+    throw new Error(`PAYMENT_SANDBOX_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
-  return loadEnv(envSchema, source);
+  const env = loadEnv(envSchema, source);
+  validatePaymentConfig(env);
+  return env;
 }

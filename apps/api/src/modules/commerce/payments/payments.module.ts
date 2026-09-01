@@ -1,12 +1,13 @@
 import { Module } from "@nestjs/common";
-import { PaymentsController } from "./payments.controller";
 import { PaymentsService } from "./payments.service";
 import { DevPaymentGateway } from "./dev-payment-gateway.service";
-import { PAYMENT_GATEWAY } from "./payment-gateway.interface";
+import { StandardGatewayAdapter } from "./standard-gateway.adapter";
+import { PaymentGatewayRegistry } from "./payment-gateway-registry.service";
+import { ProviderEventsService } from "./provider-events.service";
 
+/** No controller here on purpose — the webhook/callback routes live in CheckoutModule's PaymentWebhooksController, since that's the one place both PaymentsService and FinancingService can be injected together without a module import cycle (see its doc comment). */
 @Module({
-  controllers: [PaymentsController],
-  providers: [PaymentsService, { provide: PAYMENT_GATEWAY, useClass: DevPaymentGateway }],
-  exports: [PaymentsService],
+  providers: [PaymentsService, DevPaymentGateway, StandardGatewayAdapter, PaymentGatewayRegistry, ProviderEventsService],
+  exports: [PaymentsService, PaymentGatewayRegistry, ProviderEventsService],
 })
 export class PaymentsModule {}

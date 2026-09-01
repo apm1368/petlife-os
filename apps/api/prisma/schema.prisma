@@ -452,6 +452,22 @@ enum CheckoutStatus {
   PARTIALLY_CONFIRMED
   FAILED
   EXPIRED
+  /// Handoff 07 (spec section 21) — payment/financing was approved by the
+  /// provider but Order confirmation itself failed (e.g. inventory became
+  /// unavailable between authorization and confirmation). Deliberately
+  /// distinct from FAILED (money moved) and CONFIRMED (orders exist) — see
+  /// CheckoutService.finalizeSuccessfulPayment and README "Paid but order
+  /// cannot confirm".
+  PAYMENT_SUCCEEDED_ORDER_ISSUE
+}
+
+/// Handoff 07 (spec section 11) — chosen once, before a PaymentIntent or
+/// FinancingIntent exists for the checkout. Deliberately just these two
+/// canonical types; which specific provider/plan is chosen within
+/// INSTALLMENTS lives on FinancingIntent, never here.
+enum PaymentMethodType {
+  ONLINE_PAYMENT
+  INSTALLMENTS
 }
 
 enum InventoryReservationStatus {
@@ -493,12 +509,18 @@ enum PaymentIntentStatus {
   CANCELLED
 }
 
-/// Only DEV_SIMULATED exists this phase — the enum shape (not a plain
-/// string) is what proves the adapter architecture: adding SNAPPPAY/DIGIPAY
-/// later is a new enum value plus a new PaymentGateway implementation, never
-/// a change to Checkout's own business logic (spec section 34).
+/// Handoff 06 shipped only DEV_SIMULATED to prove the adapter shape; Handoff
+/// 07 (spec section 3) adds the canonical registry's other members —
+/// STANDARD_GATEWAY (a provider-neutral, real-shaped adapter, sandbox-only
+/// since no merchant credentials exist for this project — see README) and
+/// the two BNPL providers. Each is still just an enum value plus an adapter
+/// class; CheckoutService/FinancingService never branch on provider identity
+/// themselves (see PROVIDER_CAPABILITIES in payment-provider-registry.ts).
 enum PaymentProvider {
   DEV_SIMULATED
+  STANDARD_GATEWAY
+  SNAPP_PAY
+  DIGI_PAY
 }
 
 enum PaymentAttemptStatus {
@@ -518,6 +540,65 @@ enum TransactionStatus {
   PENDING
   SUCCEEDED
   FAILED
+}
+
+/// Handoff 07 (spec section 4) — a separate state machine from
+/// PaymentIntentStatus on purpose (spec section 6: "do not collapse into one
+/// payment status"). A FinancingIntent never reaches CAPTURED/AUTHORIZED —
+/// those are PaymentIntent-only vocabulary.
+enum FinancingIntentStatus {
+  CREATED
+  ELIGIBILITY_PENDING
+  ELIGIBLE
+  NOT_ELIGIBLE
+  PLAN_SELECTED
+  AUTHORIZATION_PENDING
+  APPROVED
+  DECLINED
+  CANCELLED
+  EXPIRED
+  REFUND_PENDING
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+/// Handoff 07 (spec section 23) — deliberately its own enum, never reusing
+/// PaymentAttemptStatus/TransactionStatus, since a refund's lifecycle (an
+/// explicit REQUESTED step before any provider call) differs from a charge
+/// attempt's.
+enum RefundStatus {
+  REQUESTED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+/// Handoff 07 (spec section 17) — tracks a raw provider webhook delivery
+/// through its idempotent processing, independent of whatever
+/// PaymentIntent/FinancingIntent status it ultimately caused.
+enum ProviderEventStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+  IGNORED_DUPLICATE
+}
+
+/// Handoff 07 (spec section 31) — the initial conceptual chart of accounts.
+/// SELLER_PAYABLE and PLATFORM_REVENUE are seeded as placeholder rows only
+/// (spec: "do not implement seller settlement yet" / "do not invent provider
+/// fees") — nothing posts to them this phase; see README "Ledger accounts".
+enum LedgerAccountCode {
+  CASH_GATEWAY_RECEIVABLE
+  CUSTOMER_PAYMENT_CLEARING
+  SELLER_PAYABLE
+  REFUND_PAYABLE
+  PLATFORM_REVENUE
+}
+
+enum LedgerEntryDirection {
+  DEBIT
+  CREDIT
 }
 
 // ---------------------------------------------------------------------------
@@ -1737,6 +1818,11 @@ model Checkout {
   address        CustomerAddress? @relation(fields: [addressId], references: [id], onDelete: Restrict)
   deliveryMethod DeliveryMethod   @default(STANDARD)
 
+  /// Handoff 07 (spec section 11) — null until the payment step; chosen once,
+  /// before a PaymentIntent (ONLINE_PAYMENT) or FinancingIntent (INSTALLMENTS)
+  /// is created for this checkout.
+  paymentMethodType PaymentMethodType?
+
   status CheckoutStatus @default(DRAFT)
 
   subtotalAmount Int     @default(0)
@@ -1751,9 +1837,10 @@ model Checkout {
   updatedAt DateTime  @updatedAt
   expiresAt DateTime?
 
-  reservations   InventoryReservation[]
-  orders         Order[]
-  paymentIntents PaymentIntent[]
+  reservations     InventoryReservation[]
+  orders           Order[]
+  paymentIntents   PaymentIntent[]
+  financingIntents FinancingIntent[]
 
   @@index([userId])
   @@index([cartId])
@@ -1824,7 +1911,8 @@ model Order {
   updatedAt   DateTime  @updatedAt
   confirmedAt DateTime?
 
-  items OrderItem[]
+  items   OrderItem[]
+  refunds Refund[]
 
   @@unique([checkoutId, sellerOrganizationId])
   @@index([userId])
@@ -1886,8 +1974,10 @@ model PaymentIntent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  attempts     PaymentAttempt[]
-  transactions Transaction[]
+  attempts       PaymentAttempt[]
+  transactions   Transaction[]
+  refunds        Refund[]
+  providerEvents PaymentProviderEvent[]
 
   @@index([checkoutId])
   @@map("payment_intents")
@@ -1931,6 +2021,209 @@ model Transaction {
 
   @@index([paymentIntentId])
   @@map("transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Real Payments + BNPL + Refunds + Reconciliation + Ledger (Handoff 07)
+// ---------------------------------------------------------------------------
+
+/// A BNPL/financing attempt for a Checkout — deliberately its own model and
+/// state machine (spec sections 4, 6), never overloading PaymentIntent.
+/// `selectedPlanId` points at exactly one of this intent's own
+/// `planSnapshots` once the user picks one (see FinancingPlanSnapshot).
+model FinancingIntent {
+  id         String   @id @default(uuid()) @db.Uuid
+  checkoutId String   @db.Uuid
+  checkout   Checkout @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+
+  provider PaymentProvider
+
+  amount   Int
+  currency String @default("IRR")
+
+  status FinancingIntentStatus @default(CREATED)
+
+  selectedPlanId    String?                @unique @db.Uuid
+  selectedPlan      FinancingPlanSnapshot? @relation("SelectedPlan", fields: [selectedPlanId], references: [id], onDelete: SetNull)
+  providerReference String?
+
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  planSnapshots  FinancingPlanSnapshot[] @relation("FinancingIntentPlans")
+  refunds        Refund[]
+  providerEvents PaymentProviderEvent[]
+
+  @@index([checkoutId])
+  @@map("financing_intents")
+}
+
+/// An immutable snapshot of one provider-offered installment plan at the
+/// moment it was selected (spec section 5) — the intent's own
+/// `totalPayableAmount`/schedule must never be recomputed from live,
+/// mutable provider plan data later.
+model FinancingPlanSnapshot {
+  id                String          @id @default(uuid()) @db.Uuid
+  financingIntentId String          @db.Uuid
+  financingIntent   FinancingIntent @relation("FinancingIntentPlans", fields: [financingIntentId], references: [id], onDelete: Cascade)
+
+  providerPlanId     String
+  installmentCount   Int
+  downPaymentAmount  Int?
+  installmentAmount  Int?
+  feeAmount          Int?
+  totalPayableAmount Int
+  currency           String @default("IRR")
+
+  firstDueAt   DateTime?
+  scheduleJson Json?
+
+  createdAt DateTime @default(now())
+
+  selectedByIntent FinancingIntent? @relation("SelectedPlan")
+
+  @@index([financingIntentId])
+  @@map("financing_plan_snapshots")
+}
+
+/// Refund basics (spec sections 23-26) — against a standard PaymentIntent or
+/// a FinancingIntent (never both), optionally tied to the specific Order it
+/// refunds. Append-only like every other financial record here (spec
+/// section 34): a failed refund attempt is a new row's FAILED status, never
+/// a correction to a prior row.
+model Refund {
+  id                String           @id @default(uuid()) @db.Uuid
+  paymentIntentId   String?          @db.Uuid
+  paymentIntent     PaymentIntent?   @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+  financingIntentId String?          @db.Uuid
+  financingIntent   FinancingIntent? @relation(fields: [financingIntentId], references: [id], onDelete: Restrict)
+  orderId           String?          @db.Uuid
+  order             Order?           @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  amount   Int
+  currency String @default("IRR")
+
+  status            RefundStatus @default(REQUESTED)
+  reason            String?
+  providerReference String?
+
+  /// Plain UUIDs, no FK — same precedent as Booking.completedByProviderUserId:
+  /// a refund's audit trail must survive the requesting user being deleted.
+  requestedByUserId      String? @db.Uuid
+  requestedByAdminUserId String? @db.Uuid
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  @@index([paymentIntentId])
+  @@index([financingIntentId])
+  @@index([orderId])
+  @@map("refunds")
+}
+
+/// One row per raw provider webhook delivery (spec section 17) — the
+/// `@@unique([provider, providerEventId])` constraint is the actual
+/// duplicate-webhook/replay guard (spec sections 15-16, 18), checked before
+/// any PaymentIntent/FinancingIntent mutation is attempted. Deliberately no
+/// raw payload column: minimal retention is preferred over storing gateway
+/// payloads that may carry sensitive data (spec section 17's "prefer
+/// redaction/minimal retention"); `payloadHash` is enough to detect an
+/// unexpected re-delivery with a different body under the same event id.
+model PaymentProviderEvent {
+  id              String          @id @default(uuid()) @db.Uuid
+  provider        PaymentProvider
+  providerEventId String
+  eventType       String
+
+  paymentIntentId   String?          @db.Uuid
+  paymentIntent     PaymentIntent?   @relation(fields: [paymentIntentId], references: [id], onDelete: SetNull)
+  financingIntentId String?          @db.Uuid
+  financingIntent   FinancingIntent? @relation(fields: [financingIntentId], references: [id], onDelete: SetNull)
+
+  status ProviderEventStatus @default(RECEIVED)
+
+  receivedAt   DateTime  @default(now())
+  processedAt  DateTime?
+  attemptCount Int       @default(0)
+  lastError    String?
+
+  payloadHash String?
+
+  @@unique([provider, providerEventId])
+  @@map("payment_provider_events")
+}
+
+/// Audit-friendly reconciliation record (spec sections 27-29) — every
+/// ReconciliationService run appends one row per intent it checked,
+/// regardless of outcome (including a plain "already agreed" NONE action),
+/// so "did anyone ever check this?" is always answerable from data, not
+/// application logs.
+model ReconciliationLog {
+  id            String          @id @default(uuid()) @db.Uuid
+  provider      PaymentProvider
+  /// "PAYMENT_INTENT" | "FINANCING_INTENT"
+  referenceType String
+  referenceId   String          @db.Uuid
+  localStatus   String
+  remoteStatus  String
+  /// "NONE" | "RESOLVED_SUCCEEDED" | "RESOLVED_FAILED" | "UNKNOWN_REMOTE_STATE"
+  action        String
+  createdAt     DateTime        @default(now())
+
+  @@index([referenceType, referenceId])
+  @@map("reconciliation_logs")
+}
+
+/// Double-entry ledger foundation (spec sections 30-34) — a small, seeded
+/// chart of accounts (see prisma/seed.ts). Never mutated once created except
+/// by appending new, reversing entries (spec section 34); a LedgerTransaction
+/// is only ever considered valid when its entries' debits equal its
+/// credits (enforced in LedgerService.recordBalanced, not the database,
+/// since "sum across sibling rows" isn't expressible as a single-row CHECK).
+model LedgerAccount {
+  id        String            @id @default(uuid()) @db.Uuid
+  code      LedgerAccountCode @unique
+  name      String
+  currency  String            @default("IRR")
+  createdAt DateTime          @default(now())
+
+  entries LedgerEntry[]
+
+  @@map("ledger_accounts")
+}
+
+model LedgerTransaction {
+  id            String   @id @default(uuid()) @db.Uuid
+  description   String
+  /// "PAYMENT" | "REFUND" — which financial event this transaction records.
+  referenceType String
+  referenceId   String   @db.Uuid
+  currency      String   @default("IRR")
+  createdAt     DateTime @default(now())
+
+  entries LedgerEntry[]
+
+  @@index([referenceType, referenceId])
+  @@map("ledger_transactions")
+}
+
+model LedgerEntry {
+  id                  String            @id @default(uuid()) @db.Uuid
+  ledgerTransactionId String            @db.Uuid
+  ledgerTransaction   LedgerTransaction @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
+  ledgerAccountId     String            @db.Uuid
+  ledgerAccount       LedgerAccount     @relation(fields: [ledgerAccountId], references: [id], onDelete: Restrict)
+
+  direction LedgerEntryDirection
+  amount    Int
+
+  createdAt DateTime @default(now())
+
+  @@index([ledgerTransactionId])
+  @@index([ledgerAccountId])
+  @@map("ledger_entries")
 }
 
 // ---------------------------------------------------------------------------

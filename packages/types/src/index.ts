@@ -978,6 +978,14 @@ export enum CheckoutStatus {
   PARTIALLY_CONFIRMED = "PARTIALLY_CONFIRMED",
   FAILED = "FAILED",
   EXPIRED = "EXPIRED",
+  /** Handoff 07 — payment/financing was approved but Order confirmation itself failed (e.g. inventory unavailable). See README "Paid but order cannot confirm". */
+  PAYMENT_SUCCEEDED_ORDER_ISSUE = "PAYMENT_SUCCEEDED_ORDER_ISSUE",
+}
+
+/** Handoff 07 — chosen once, before a PaymentIntent (ONLINE_PAYMENT) or FinancingIntent (INSTALLMENTS) exists for the checkout. */
+export enum PaymentMethodType {
+  ONLINE_PAYMENT = "ONLINE_PAYMENT",
+  INSTALLMENTS = "INSTALLMENTS",
 }
 
 export enum InventoryReservationStatus {
@@ -1013,9 +1021,12 @@ export enum PaymentIntentStatus {
   CANCELLED = "CANCELLED",
 }
 
-/** Only DEV_SIMULATED exists this phase — see README "Payment abstraction". */
+/** Handoff 07 adds STANDARD_GATEWAY/SNAPP_PAY/DIGI_PAY to the DEV_SIMULATED-only Handoff 06 registry — see README "Provider adapter architecture". */
 export enum PaymentProvider {
   DEV_SIMULATED = "DEV_SIMULATED",
+  STANDARD_GATEWAY = "STANDARD_GATEWAY",
+  SNAPP_PAY = "SNAPP_PAY",
+  DIGI_PAY = "DIGI_PAY",
 }
 
 export enum PaymentAttemptStatus {
@@ -1035,6 +1046,134 @@ export enum TransactionStatus {
   PENDING = "PENDING",
   SUCCEEDED = "SUCCEEDED",
   FAILED = "FAILED",
+}
+
+/**
+ * BNPL/financing state machine (Handoff 07, spec section 4) — deliberately
+ * separate from PaymentIntentStatus (spec section 6: "do not collapse into
+ * one payment status"). A FinancingIntent never reaches CAPTURED/AUTHORIZED.
+ */
+export enum FinancingIntentStatus {
+  CREATED = "CREATED",
+  ELIGIBILITY_PENDING = "ELIGIBILITY_PENDING",
+  ELIGIBLE = "ELIGIBLE",
+  NOT_ELIGIBLE = "NOT_ELIGIBLE",
+  PLAN_SELECTED = "PLAN_SELECTED",
+  AUTHORIZATION_PENDING = "AUTHORIZATION_PENDING",
+  APPROVED = "APPROVED",
+  DECLINED = "DECLINED",
+  CANCELLED = "CANCELLED",
+  EXPIRED = "EXPIRED",
+  REFUND_PENDING = "REFUND_PENDING",
+  PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED",
+  REFUNDED = "REFUNDED",
+}
+
+/** Pre-check eligibility vocabulary (spec section 12) — never faked for a provider that doesn't support pre-check; that provider's flow skips straight to authorization. */
+export enum FinancingEligibilityStatus {
+  CHECKING = "CHECKING",
+  ELIGIBLE = "ELIGIBLE",
+  NOT_ELIGIBLE = "NOT_ELIGIBLE",
+  NEEDS_VERIFICATION = "NEEDS_VERIFICATION",
+  ERROR = "ERROR",
+}
+
+export enum RefundStatus {
+  REQUESTED = "REQUESTED",
+  PROCESSING = "PROCESSING",
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+}
+
+/** A raw provider webhook delivery's own processing state (Handoff 07, spec section 17) — independent of whatever PaymentIntent/FinancingIntent status it ultimately caused. */
+export enum ProviderEventStatus {
+  RECEIVED = "RECEIVED",
+  PROCESSED = "PROCESSED",
+  FAILED = "FAILED",
+  IGNORED_DUPLICATE = "IGNORED_DUPLICATE",
+}
+
+/** Initial conceptual chart of accounts (spec section 31) — SELLER_PAYABLE/PLATFORM_REVENUE are seeded placeholders only; nothing posts to them this phase. */
+export enum LedgerAccountCode {
+  CASH_GATEWAY_RECEIVABLE = "CASH_GATEWAY_RECEIVABLE",
+  CUSTOMER_PAYMENT_CLEARING = "CUSTOMER_PAYMENT_CLEARING",
+  SELLER_PAYABLE = "SELLER_PAYABLE",
+  REFUND_PAYABLE = "REFUND_PAYABLE",
+  PLATFORM_REVENUE = "PLATFORM_REVENUE",
+}
+
+export enum LedgerEntryDirection {
+  DEBIT = "DEBIT",
+  CREDIT = "CREDIT",
+}
+
+/**
+ * Provider capability metadata (spec section 3) — the frontend/backend both
+ * branch on these flags, never on provider identity directly, so adding a
+ * fifth provider later never means a new `if (provider === ...)` anywhere in
+ * product code.
+ */
+export interface ProviderCapabilities {
+  supportsDirectPayment: boolean;
+  supportsInstallments: boolean;
+  supportsRefund: boolean;
+  supportsPartialRefund: boolean;
+  supportsAsyncWebhook: boolean;
+  supportsEligibilityCheck: boolean;
+}
+
+export interface PaymentMethodOptionDto {
+  provider: PaymentProvider;
+  methodType: PaymentMethodType;
+  capabilities: ProviderCapabilities;
+}
+
+export interface FinancingPlanOptionDto {
+  providerPlanId: string;
+  installmentCount: number;
+  downPaymentAmount: number | null;
+  installmentAmount: number | null;
+  feeAmount: number | null;
+  totalPayableAmount: number;
+  currency: string;
+  firstDueAt: string | null;
+}
+
+export interface FinancingPlanSnapshotDto extends FinancingPlanOptionDto {
+  id: string;
+}
+
+export interface FinancingIntentDto {
+  id: string;
+  checkoutId: string;
+  provider: PaymentProvider;
+  amount: number;
+  currency: string;
+  status: FinancingIntentStatus;
+  eligibility: FinancingEligibilityStatus | null;
+  availablePlans: FinancingPlanOptionDto[];
+  selectedPlan: FinancingPlanSnapshotDto | null;
+  failureCode?: string;
+  failureMessage?: string;
+  expiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RefundDto {
+  id: string;
+  paymentIntentId: string | null;
+  financingIntentId: string | null;
+  orderId: string | null;
+  amount: number;
+  currency: string;
+  status: RefundStatus;
+  reason: string | null;
+  providerReference: string | null;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
 }
 
 /**
@@ -1193,6 +1332,7 @@ export interface CheckoutDto {
   status: CheckoutStatus;
   addressId: string | null;
   deliveryMethod: DeliveryMethod;
+  paymentMethodType: PaymentMethodType | null;
   subtotalAmount: number;
   deliveryAmount: number;
   discountAmount: number;
@@ -1236,11 +1376,22 @@ export interface OrderItemDto {
   compatibilitySnapshot: ProductCompatibilityDto | null;
 }
 
+/**
+ * Handoff 07 (spec section 42): Order/Payment/Financing/Refund states are
+ * always shown separately, never collapsed into one ambiguous badge.
+ * `paymentStatus`/`financingStatus` reflect the checkout's own latest
+ * PaymentIntent/FinancingIntent (an Order never stores its own copy of
+ * these — see README); `refundStatus` is this Order's own most recent
+ * Refund, if any.
+ */
 export interface OrderSummaryDto {
   id: string;
   checkoutId: string;
   sellerOrganization: SellerOrganizationSummaryDto;
   status: OrderStatus;
+  paymentStatus: PaymentIntentStatus | null;
+  financingStatus: FinancingIntentStatus | null;
+  refundStatus: RefundStatus | null;
   itemCount: number;
   totalAmount: number;
   currency: string;
@@ -1253,6 +1404,9 @@ export interface OrderDetailDto {
   checkoutId: string;
   sellerOrganization: SellerOrganizationSummaryDto;
   status: OrderStatus;
+  paymentStatus: PaymentIntentStatus | null;
+  financingStatus: FinancingIntentStatus | null;
+  refunds: RefundDto[];
   subtotalAmount: number;
   deliveryAmount: number;
   discountAmount: number;
@@ -1263,4 +1417,61 @@ export interface OrderDetailDto {
   createdAt: string;
   updatedAt: string;
   confirmedAt: string | null;
+}
+
+/** Minimal internal payment-ops view (spec section 45) — reachable only by the checkout's own owner (no real admin/support role exists yet; see README Known limitations). */
+export interface PaymentProviderEventDto {
+  id: string;
+  provider: PaymentProvider;
+  providerEventId: string;
+  eventType: string;
+  status: ProviderEventStatus;
+  receivedAt: string;
+  processedAt: string | null;
+  attemptCount: number;
+  lastError: string | null;
+}
+
+export interface ReconciliationLogDto {
+  id: string;
+  provider: PaymentProvider;
+  referenceType: "PAYMENT_INTENT" | "FINANCING_INTENT";
+  referenceId: string;
+  localStatus: string;
+  remoteStatus: string;
+  action: "NONE" | "RESOLVED_SUCCEEDED" | "RESOLVED_FAILED" | "UNKNOWN_REMOTE_STATE";
+  createdAt: string;
+}
+
+export interface PaymentAttemptDto {
+  id: string;
+  paymentIntentId: string;
+  provider: PaymentProvider;
+  providerReference: string | null;
+  status: PaymentAttemptStatus;
+  failureCode: string | null;
+  failureMessage: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface TransactionDto {
+  id: string;
+  paymentIntentId: string;
+  type: TransactionType;
+  amount: number;
+  currency: string;
+  status: TransactionStatus;
+  createdAt: string;
+}
+
+export interface CheckoutOpsDto {
+  checkout: CheckoutDto;
+  paymentIntents: PaymentIntentDto[];
+  paymentAttempts: PaymentAttemptDto[];
+  transactions: TransactionDto[];
+  financingIntents: FinancingIntentDto[];
+  refunds: RefundDto[];
+  providerEvents: PaymentProviderEventDto[];
+  reconciliationLogs: ReconciliationLogDto[];
 }

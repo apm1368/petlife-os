@@ -296,3 +296,99 @@ export class CheckoutNotFoundException extends ApiException {
     super("CHECKOUT_NOT_FOUND", "Checkout not found.", HttpStatus.NOT_FOUND, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Real Payments + BNPL + Refund Basics + Reconciliation (Handoff 07)
+// ---------------------------------------------------------------------------
+
+export class PaymentProviderUnavailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_PROVIDER_UNAVAILABLE", "This payment provider is not currently available.", HttpStatus.SERVICE_UNAVAILABLE, details);
+  }
+}
+
+export class PaymentAuthorizationFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_AUTHORIZATION_FAILED", "The payment provider declined this authorization.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** Distinct from PaymentPendingException below — this one means the provider's own status query came back neither terminal nor pending in any recognizable way (spec section 28: "UNKNOWN must remain explicit"). */
+export class PaymentStateUnknownException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_STATE_UNKNOWN", "The payment provider's current status could not be determined.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class FinancingNotAvailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("FINANCING_NOT_AVAILABLE", "Installment payment is not available for this provider or amount.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class FinancingNotEligibleException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("FINANCING_NOT_ELIGIBLE", "This checkout is not eligible for installment payment.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class FinancingDeclinedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("FINANCING_DECLINED", "The installment provider declined this request.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class FinancingExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("FINANCING_EXPIRED", "This installment request has expired.", HttpStatus.GONE, details);
+  }
+}
+
+export class InvalidFinancingPlanException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_FINANCING_PLAN", "The selected installment plan is not valid for this request.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class WebhookSignatureInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("WEBHOOK_SIGNATURE_INVALID", "The webhook signature could not be verified.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class RefundNotSupportedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFUND_NOT_SUPPORTED", "This refund is not supported by the provider.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class RefundFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFUND_FAILED", "The refund could not be completed.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class InventoryChangedAfterPaymentException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVENTORY_CHANGED_AFTER_PAYMENT", "Inventory changed after payment and could not be safely confirmed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Never thrown as a request-blocking error this phase — surfaced only as Checkout.PAYMENT_SUCCEEDED_ORDER_ISSUE in the response body (spec section 21) so the caller never sees a bare 4xx for money that already moved. Kept here for API completeness/documentation. */
+export class PaymentOrderConfirmationIssueException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_ORDER_CONFIRMATION_ISSUE", "Payment succeeded but the order could not be confirmed automatically.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class FinancingIntentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("FINANCING_INTENT_NOT_FOUND", "Financing intent not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class RefundNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFUND_NOT_FOUND", "Refund not found.", HttpStatus.NOT_FOUND, details);
+  }
+}

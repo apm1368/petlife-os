@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { OrderStatus, Prisma } from "@prisma/client";
-import type { CartLineDto, OrderDetailDto, OrderItemDto, OrderSummaryDto, ProductCompatibilityDto } from "@petlife/types";
+import { OrderStatus, Prisma, type FinancingIntent, type PaymentIntent, type Refund } from "@prisma/client";
+import type { CartLineDto, FinancingIntentStatus, OrderDetailDto, OrderItemDto, OrderSummaryDto, PaymentIntentStatus, ProductCompatibilityDto, RefundStatus } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { OrderNotFoundException } from "../../../common/errors/api-exception";
@@ -31,6 +31,13 @@ function toOrderItemDto(item: OrderWithRelations["items"][number]): OrderItemDto
     targetPetId: item.targetPetId,
     compatibilitySnapshot: item.compatibilitySnapshot as unknown as ProductCompatibilityDto | null,
   };
+}
+
+/** Picks the single "most relevant" intent per checkout for the summary/detail views (spec section 42) — a captured/approved one wins over a merely-pending one, which wins over anything else. */
+function pickMostRelevant<T extends { status: string; createdAt: Date }>(rows: T[], terminalGoodStatuses: string[]): T | undefined {
+  const terminal = rows.find((r) => terminalGoodStatuses.includes(r.status));
+  if (terminal) return terminal;
+  return rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
 }
 
 /**
@@ -126,7 +133,17 @@ export class OrdersService {
 
   async list(userId: string): Promise<OrderSummaryDto[]> {
     const orders = await this.prisma.order.findMany({ where: { userId }, include: ORDER_INCLUDE, orderBy: { createdAt: "desc" } });
-    return orders.map((order) => this.toSummaryDto(order));
+    if (orders.length === 0) return [];
+
+    const checkoutIds = [...new Set(orders.map((o) => o.checkoutId))];
+    const orderIds = orders.map((o) => o.id);
+    const [paymentIntents, financingIntents, refunds] = await Promise.all([
+      this.prisma.paymentIntent.findMany({ where: { checkoutId: { in: checkoutIds } } }),
+      this.prisma.financingIntent.findMany({ where: { checkoutId: { in: checkoutIds } } }),
+      this.prisma.refund.findMany({ where: { orderId: { in: orderIds } }, orderBy: { createdAt: "desc" } }),
+    ]);
+
+    return orders.map((order) => this.toSummaryDto(order, paymentIntents, financingIntents, refunds));
   }
 
   async getById(userId: string, id: string): Promise<OrderDetailDto> {
@@ -134,11 +151,22 @@ export class OrdersService {
     if (!order) throw new OrderNotFoundException({ orderId: id });
     if (order.userId !== userId) throw new OrderNotFoundException({ orderId: id });
 
+    const [paymentIntents, financingIntents, refunds] = await Promise.all([
+      this.prisma.paymentIntent.findMany({ where: { checkoutId: order.checkoutId } }),
+      this.prisma.financingIntent.findMany({ where: { checkoutId: order.checkoutId } }),
+      this.prisma.refund.findMany({ where: { orderId: id }, orderBy: { createdAt: "desc" } }),
+    ]);
+    const paymentStatus = pickMostRelevant(paymentIntents, ["CAPTURED"])?.status as PaymentIntentStatus | undefined;
+    const financingStatus = pickMostRelevant(financingIntents, ["APPROVED"])?.status as FinancingIntentStatus | undefined;
+
     return {
       id: order.id,
       checkoutId: order.checkoutId,
       sellerOrganization: toSellerSummaryDto(order.sellerOrganization),
       status: order.status as unknown as OrderDetailDto["status"],
+      paymentStatus: paymentStatus ?? null,
+      financingStatus: financingStatus ?? null,
+      refunds: refunds.map((r) => this.toRefundDto(r)),
       subtotalAmount: order.subtotalAmount,
       deliveryAmount: order.deliveryAmount,
       discountAmount: order.discountAmount,
@@ -167,12 +195,42 @@ export class OrdersService {
     };
   }
 
-  private toSummaryDto(order: OrderWithRelations): OrderSummaryDto {
+  private toRefundDto(r: Refund) {
+    return {
+      id: r.id,
+      paymentIntentId: r.paymentIntentId,
+      financingIntentId: r.financingIntentId,
+      orderId: r.orderId,
+      amount: r.amount,
+      currency: r.currency,
+      status: r.status as unknown as RefundStatus,
+      reason: r.reason,
+      providerReference: r.providerReference,
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+      completedAt: r.completedAt?.toISOString() ?? null,
+    };
+  }
+
+  private toSummaryDto(order: OrderWithRelations, paymentIntents: PaymentIntent[], financingIntents: FinancingIntent[], refunds: Refund[]): OrderSummaryDto {
+    const paymentStatus = pickMostRelevant(
+      paymentIntents.filter((i) => i.checkoutId === order.checkoutId),
+      ["CAPTURED"],
+    )?.status as PaymentIntentStatus | undefined;
+    const financingStatus = pickMostRelevant(
+      financingIntents.filter((i) => i.checkoutId === order.checkoutId),
+      ["APPROVED"],
+    )?.status as FinancingIntentStatus | undefined;
+    const refundStatus = refunds.find((r) => r.orderId === order.id)?.status as unknown as RefundStatus | undefined;
+
     return {
       id: order.id,
       checkoutId: order.checkoutId,
       sellerOrganization: toSellerSummaryDto(order.sellerOrganization),
       status: order.status as unknown as OrderSummaryDto["status"],
+      paymentStatus: paymentStatus ?? null,
+      financingStatus: financingStatus ?? null,
+      refundStatus: refundStatus ?? null,
       itemCount: order.items.reduce((sum, i) => sum + i.quantity, 0),
       totalAmount: order.totalAmount,
       currency: order.currency,
