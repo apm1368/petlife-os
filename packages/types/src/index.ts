@@ -1981,6 +1981,7 @@ export enum NotificationCategory {
   PET_ACCESS = "PET_ACCESS",
   SYSTEM = "SYSTEM",
   MARKETING = "MARKETING",
+  SUPPORT = "SUPPORT",
 }
 
 export enum NotificationPriority {
@@ -2069,4 +2070,530 @@ export interface NotificationPreferencesDto {
 export interface UpdateNotificationPreferencesDto {
   preferences?: Array<{ category: NotificationCategory; channel: NotificationChannel; enabled: boolean }>;
   quietHours?: { enabled: boolean; startTime: string; endTime: string; timezone: string };
+}
+
+// ---------------------------------------------------------------------------
+// Admin CRM + Support + Disputes + Trust Operations (Handoff 11)
+// ---------------------------------------------------------------------------
+
+export enum AdminRole {
+  SUPER_ADMIN = "SUPER_ADMIN",
+  ADMIN = "ADMIN",
+  SUPPORT = "SUPPORT",
+  TRUST_SAFETY = "TRUST_SAFETY",
+  FINANCE = "FINANCE",
+  OPERATIONS = "OPERATIONS",
+  CONTENT = "CONTENT",
+  VERIFICATION = "VERIFICATION",
+  READ_ONLY = "READ_ONLY",
+}
+
+export enum AdminMembershipStatus {
+  ACTIVE = "ACTIVE",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum AdminPriority {
+  LOW = "LOW",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
+}
+
+export enum SupportCaseStatus {
+  OPEN = "OPEN",
+  IN_PROGRESS = "IN_PROGRESS",
+  WAITING_ON_USER = "WAITING_ON_USER",
+  WAITING_ON_INTERNAL = "WAITING_ON_INTERNAL",
+  RESOLVED = "RESOLVED",
+  CLOSED = "CLOSED",
+}
+
+export enum SupportCaseCategory {
+  ACCOUNT = "ACCOUNT",
+  PET = "PET",
+  HEALTH = "HEALTH",
+  BOOKING = "BOOKING",
+  SERVICE = "SERVICE",
+  PAYMENT = "PAYMENT",
+  REFUND = "REFUND",
+  ORDER = "ORDER",
+  DELIVERY = "DELIVERY",
+  SELLER = "SELLER",
+  PROVIDER = "PROVIDER",
+  MARKETPLACE = "MARKETPLACE",
+  TRUST_SAFETY = "TRUST_SAFETY",
+  OTHER = "OTHER",
+}
+
+export enum SupportMessageAuthorType {
+  USER = "USER",
+  ADMIN = "ADMIN",
+  SYSTEM = "SYSTEM",
+}
+
+export enum SupportMessageVisibility {
+  PUBLIC = "PUBLIC",
+  INTERNAL = "INTERNAL",
+}
+
+export enum InternalNoteEntityType {
+  USER = "USER",
+  HOUSEHOLD = "HOUSEHOLD",
+  PET = "PET",
+  SUPPORT_CASE = "SUPPORT_CASE",
+  DISPUTE = "DISPUTE",
+  TRUST_CASE = "TRUST_CASE",
+}
+
+export enum AdminTaskStatus {
+  OPEN = "OPEN",
+  IN_PROGRESS = "IN_PROGRESS",
+  DONE = "DONE",
+  CANCELLED = "CANCELLED",
+}
+
+export enum DisputeSubjectType {
+  BOOKING = "BOOKING",
+  ORDER = "ORDER",
+  PAYMENT = "PAYMENT",
+  REFUND = "REFUND",
+  SHIPMENT = "SHIPMENT",
+  PROVIDER = "PROVIDER",
+  SELLER = "SELLER",
+}
+
+/** Domain outcome (who the dispute was decided in favor of) is deliberately separate from payment/refund state — see the Dispute model's own doc comment in schema.prisma. */
+export enum DisputeStatus {
+  OPEN = "OPEN",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  AWAITING_EVIDENCE = "AWAITING_EVIDENCE",
+  RESOLVED_CUSTOMER = "RESOLVED_CUSTOMER",
+  RESOLVED_PROVIDER = "RESOLVED_PROVIDER",
+  RESOLVED_SELLER = "RESOLVED_SELLER",
+  PARTIAL_RESOLUTION = "PARTIAL_RESOLUTION",
+  REJECTED = "REJECTED",
+  CLOSED = "CLOSED",
+}
+
+export enum DisputeEvidenceActorType {
+  USER = "USER",
+  ADMIN = "ADMIN",
+}
+
+export enum TrustSubjectType {
+  USER = "USER",
+  HOUSEHOLD = "HOUSEHOLD",
+  PROVIDER = "PROVIDER",
+  SELLER = "SELLER",
+  LISTING = "LISTING",
+  REVIEW = "REVIEW",
+  COMMUNITY_CONTENT = "COMMUNITY_CONTENT",
+  PET_INCIDENT = "PET_INCIDENT",
+}
+
+export enum TrustCaseSeverity {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+}
+
+export enum TrustCaseStatus {
+  OPEN = "OPEN",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  RESOLVED = "RESOLVED",
+  CLOSED = "CLOSED",
+}
+
+export enum TrustActionType {
+  WARNING = "WARNING",
+  RESTRICT = "RESTRICT",
+  SUSPEND = "SUSPEND",
+  REMOVE_CONTENT = "REMOVE_CONTENT",
+  REQUIRE_REVERIFICATION = "REQUIRE_REVERIFICATION",
+  RESTORE = "RESTORE",
+  NO_ACTION = "NO_ACTION",
+}
+
+export enum AppealStatus {
+  SUBMITTED = "SUBMITTED",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  UPHELD = "UPHELD",
+  OVERTURNED = "OVERTURNED",
+  PARTIALLY_OVERTURNED = "PARTIALLY_OVERTURNED",
+}
+
+/** Below the configured IRR threshold a single FINANCE-permission admin may go straight to EXECUTED; at/above it, a *different* admin must APPROVE first. */
+export enum AdminRefundApprovalStatus {
+  REQUESTED = "REQUESTED",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  EXECUTED = "EXECUTED",
+}
+
+/** A minimal actor summary — never the full AdminUserDto — for embedding on cards/lists (assignee, author, requester) without re-fetching the whole admin roster. */
+export interface AdminActorSummaryDto {
+  id: string;
+  displayName: string;
+  role: AdminRole;
+}
+
+export interface AdminUserDto {
+  id: string;
+  userId: string;
+  displayName: string;
+  emailMasked: string | null;
+  role: AdminRole;
+  status: AdminMembershipStatus;
+  createdAt: string;
+  lastActiveAt: string | null;
+}
+
+export interface SupportMessageDto {
+  id: string;
+  caseId: string;
+  authorType: SupportMessageAuthorType;
+  author: AdminActorSummaryDto | { id: string; displayName: string } | null;
+  body: string;
+  visibility: SupportMessageVisibility;
+  createdAt: string;
+}
+
+export interface InternalNoteDto {
+  id: string;
+  entityType: InternalNoteEntityType;
+  entityId: string;
+  author: AdminActorSummaryDto;
+  body: string;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+/** List-row shape — omits messages/notes, which only the detail endpoint returns. */
+export interface SupportCaseSummaryDto {
+  id: string;
+  caseNumber: string;
+  requesterUserId: string;
+  requesterDisplayName: string;
+  householdId: string | null;
+  petId: string | null;
+  subject: string;
+  category: SupportCaseCategory;
+  priority: AdminPriority;
+  status: SupportCaseStatus;
+  assignedAdmin: AdminActorSummaryDto | null;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+  closedAt: string | null;
+}
+
+export interface SupportCaseDetailDto extends SupportCaseSummaryDto {
+  description: string;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
+  createdByAdmin: AdminActorSummaryDto | null;
+  messages: SupportMessageDto[];
+  internalNotes: InternalNoteDto[];
+}
+
+export interface AdminTaskDto {
+  id: string;
+  title: string;
+  description: string | null;
+  assigneeAdmin: AdminActorSummaryDto | null;
+  dueAt: string | null;
+  status: AdminTaskStatus;
+  priority: AdminPriority;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
+  createdByAdmin: AdminActorSummaryDto;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DisputeEvidenceDto {
+  id: string;
+  disputeId: string;
+  actorType: DisputeEvidenceActorType;
+  actor: AdminActorSummaryDto | { id: string; displayName: string } | null;
+  statement: string;
+  attachmentRef: string | null;
+  createdAt: string;
+}
+
+export interface DisputeDto {
+  id: string;
+  subjectType: DisputeSubjectType;
+  subjectId: string;
+  raisedByUserId: string | null;
+  supportCaseId: string | null;
+  claim: string;
+  status: DisputeStatus;
+  assignedAdmin: AdminActorSummaryDto | null;
+  resolutionSummary: string | null;
+  evidence: DisputeEvidenceDto[];
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+  closedAt: string | null;
+}
+
+export interface TrustActionDto {
+  id: string;
+  trustCaseId: string;
+  actionType: TrustActionType;
+  reason: string;
+  performedByAdmin: AdminActorSummaryDto;
+  createdAt: string;
+  appeal: AppealDto | null;
+}
+
+export interface AppealDto {
+  id: string;
+  trustActionId: string;
+  appellantUserId: string;
+  reason: string;
+  status: AppealStatus;
+  resolution: string | null;
+  reviewerAdmin: AdminActorSummaryDto | null;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+}
+
+export interface TrustCaseDto {
+  id: string;
+  subjectType: TrustSubjectType;
+  subjectId: string;
+  reason: string;
+  severity: TrustCaseSeverity;
+  status: TrustCaseStatus;
+  assignedAdmin: AdminActorSummaryDto | null;
+  openedByAdmin: AdminActorSummaryDto;
+  actions: TrustActionDto[];
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+}
+
+/** Wraps (never replaces) RefundsService.request() — see the AdminRefundApproval model's own doc comment. `refundId` is set only once EXECUTED actually calls the refund flow. */
+export interface AdminRefundApprovalDto {
+  id: string;
+  orderId: string;
+  amount: number;
+  reason: string;
+  status: AdminRefundApprovalStatus;
+  requestedByAdmin: AdminActorSummaryDto;
+  approvedByAdmin: AdminActorSummaryDto | null;
+  refundId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  executedAt: string | null;
+}
+
+export interface AdminAuditLogDto {
+  id: string;
+  adminUser: AdminActorSummaryDto;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  reason: string | null;
+  beforeSummary: Record<string, unknown> | null;
+  afterSummary: Record<string, unknown> | null;
+  requestId: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Customer/Household/Pet 360 + operational search (Handoff 11)
+// ---------------------------------------------------------------------------
+
+/** A list-row/search-result shape — masked contact info by default (spec: "PII masking by default, with audited reveal"). */
+export interface AdminCustomerListItemDto {
+  id: string;
+  displayName: string;
+  emailMasked: string | null;
+  phoneMasked: string | null;
+  createdAt: string;
+}
+
+export interface AdminPetSummaryDto {
+  id: string;
+  name: string;
+  species: PetSpecies;
+  lifecycleStatus: PetLifecycleStatus;
+}
+
+export interface AdminHouseholdSummaryDto {
+  id: string;
+  name: string | null;
+  city: string | null;
+  memberCount: number;
+  pets: AdminPetSummaryDto[];
+}
+
+export interface AdminOrderSummaryDto {
+  id: string;
+  status: OrderStatus;
+  totalAmount: number;
+  currency: string;
+  createdAt: string;
+}
+
+export interface AdminBookingSummaryDto {
+  id: string;
+  category: string;
+  bookingStatus: string;
+  startAt: string;
+  petId: string;
+}
+
+/** One entry in the merged, application-code-composed activity feed (mirrors Handoff 09's own "unified view via in-app merge" precedent — never a query against the internal DomainEvent outbox table, which lacks direct userId/householdId columns). */
+export interface ActivityTimelineEntryDto {
+  type: "order" | "booking" | "support_case" | "dispute" | "notification";
+  id: string;
+  summary: string;
+  occurredAt: string;
+}
+
+/** The single navigable "understand this household" view (spec: "Customer -> Household -> Pet -> Activity -> Transactions -> Support issue -> Action -> Resolution -> Audit trail"). Contact fields stay masked until a `customer.pii.reveal`-permitted admin calls the reveal endpoint. */
+export interface Customer360Dto {
+  user: AdminCustomerListItemDto;
+  households: AdminHouseholdSummaryDto[];
+  recentOrders: AdminOrderSummaryDto[];
+  recentBookings: AdminBookingSummaryDto[];
+  supportCases: SupportCaseSummaryDto[];
+  disputes: DisputeDto[];
+  internalNotes: InternalNoteDto[];
+  communications: NotificationDto[];
+  activityTimeline: ActivityTimelineEntryDto[];
+}
+
+export interface AdminPiiRevealDto {
+  field: "email" | "phone";
+  value: string;
+}
+
+export interface AdminSearchResultDto {
+  customers: AdminCustomerListItemDto[];
+  orders: AdminOrderSummaryDto[];
+  supportCases: SupportCaseSummaryDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Minimal financial visibility (Handoff 11) — read-only inspection.
+// Refund *initiation* never happens here; see AdminRefundApprovalDto above.
+// ---------------------------------------------------------------------------
+
+export interface AdminPaymentAttemptDto {
+  id: string;
+  provider: PaymentProvider;
+  status: PaymentAttemptStatus;
+  failureCode: string | null;
+  failureMessage: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface AdminTransactionDto {
+  id: string;
+  type: TransactionType;
+  amount: number;
+  currency: string;
+  status: TransactionStatus;
+  createdAt: string;
+}
+
+export interface AdminRefundDto {
+  id: string;
+  amount: number;
+  currency: string;
+  status: RefundStatus;
+  reason: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface AdminPaymentIntentDto {
+  id: string;
+  amount: number;
+  currency: string;
+  status: PaymentIntentStatus;
+  provider: PaymentProvider;
+  createdAt: string;
+  attempts: AdminPaymentAttemptDto[];
+  transactions: AdminTransactionDto[];
+  refunds: AdminRefundDto[];
+}
+
+export interface AdminLedgerEntryDto {
+  id: string;
+  direction: LedgerEntryDirection;
+  amount: number;
+  accountCode: LedgerAccountCode;
+  accountName: string;
+  createdAt: string;
+}
+
+/** Read-only (spec: "refund initiation ONLY through existing H07 RefundsService, never direct ledger mutation") — this view never writes anything. */
+export interface AdminOrderFinancialsDto {
+  orderId: string;
+  paymentIntents: AdminPaymentIntentDto[];
+  ledgerEntries: AdminLedgerEntryDto[];
+}
+
+/** Minimal admin-facing org summaries, used to locate a Provider/Seller for verification overrides or as a TrustCase subject — never the seller/provider's own operational DTOs, which carry fields (context, membership) an internal admin view has no use for. */
+export interface AdminProviderOrgSummaryDto {
+  id: string;
+  name: string;
+  type: string;
+  verificationStatus: ProviderVerificationStatus;
+  createdAt: string;
+}
+
+export interface AdminSellerOrgSummaryDto {
+  id: string;
+  name: string;
+  status: SellerStatus;
+  verificationStatus: SellerVerificationStatus;
+  createdAt: string;
+}
+
+export interface AdminDashboardSummaryDto {
+  openSupportCases: number;
+  openDisputes: number;
+  openTrustCases: number;
+  pendingRefundApprovals: number;
+  openTasks: number;
+}
+
+/** The admin-domain mirror of AdminPermission (apps/api's own admin-permissions.ts) — kept as a plain string union here since the frontend only ever compares/display-filters against it, never re-derives access decisions (the backend is always the source of truth; hiding a nav item is a convenience, never a security boundary). */
+export type AdminPermissionName =
+  | "customer.view"
+  | "customer.pii.reveal"
+  | "support.view"
+  | "support.manage"
+  | "dispute.view"
+  | "dispute.manage"
+  | "trust.view"
+  | "trust.manage"
+  | "verification.manage"
+  | "finance.view"
+  | "finance.refund.request"
+  | "finance.refund.approve"
+  | "finance.refund.execute"
+  | "task.manage"
+  | "audit.view"
+  | "admin.manage";
+
+/** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
+export interface AdminSessionContextDto {
+  isAdmin: boolean;
+  adminUserId: string | null;
+  displayName: string | null;
+  role: AdminRole | null;
+  permissions: AdminPermissionName[];
 }

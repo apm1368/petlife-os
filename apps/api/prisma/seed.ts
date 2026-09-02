@@ -1,7 +1,10 @@
 import {
+  AdminMembershipStatus,
+  AdminRole,
   DietType,
   HealthAreaKnowledgeState,
   HouseholdRole,
+  InternalNoteEntityType,
   LocationMode,
   PetSpecies,
   PrismaClient,
@@ -13,6 +16,9 @@ import {
   SellerVerificationStatus,
   ServiceCategory,
   SetupStatus,
+  SupportCaseCategory,
+  SupportMessageAuthorType,
+  SupportMessageVisibility,
   VaccinationStatus,
 } from "@prisma/client";
 
@@ -224,6 +230,54 @@ async function seedServiceProvider(opts: {
   });
 
   return { organization, location, staff, service };
+}
+
+/**
+ * Admin CRM + Support + Disputes + Trust Operations fixtures (Handoff 11).
+ * Two dedicated AdminUser identities — never Sarah's own consumer account,
+ * mirroring the spec's "no implicit access through normal user session
+ * alone" requirement even in seed data — plus one representative, already
+ * OPEN SupportCase (with a public reply and an internal note) so a manual
+ * QA session lands on real content in the Support workspace immediately,
+ * without first having to create a case through the API. Both admin emails
+ * sign in through the same OTP flow as any consumer account (DevOtpProvider
+ * logs the code) — there is no separate admin credential system.
+ */
+async function seedAdmin(requesterUserId: string, requesterDisplayName: string) {
+  const [rootAdminUser, supportAdminUser] = await Promise.all([
+    prisma.user.upsert({ where: { email: "admin@example.com" }, update: {}, create: { email: "admin@example.com", displayName: "Root Admin", locale: "en" } }),
+    prisma.user.upsert({ where: { email: "support-admin@example.com" }, update: {}, create: { email: "support-admin@example.com", displayName: "Support Agent", locale: "en" } }),
+  ]);
+
+  const [rootAdmin, supportAdmin] = await Promise.all([
+    prisma.adminUser.upsert({ where: { userId: rootAdminUser.id }, update: {}, create: { userId: rootAdminUser.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } }),
+    prisma.adminUser.upsert({ where: { userId: supportAdminUser.id }, update: {}, create: { userId: supportAdminUser.id, role: AdminRole.SUPPORT, status: AdminMembershipStatus.ACTIVE } }),
+  ]);
+
+  const existingCase = await prisma.supportCase.findFirst({ where: { requesterUserId, caseNumber: "CASE-000001" } });
+  if (!existingCase) {
+    const seqRows = await prisma.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('support_case_number_seq') AS nextval`;
+    const supportCase = await prisma.supportCase.create({
+      data: {
+        caseNumber: `CASE-${seqRows[0]!.nextval.toString().padStart(6, "0")}`,
+        requesterUserId,
+        subject: "Trouble booking a grooming appointment",
+        description: "The booking calendar shows no available slots for the next two weeks.",
+        category: SupportCaseCategory.BOOKING,
+        assignedAdminId: supportAdmin.id,
+        createdByAdminId: supportAdmin.id,
+      },
+    });
+    await prisma.supportMessage.create({
+      data: { caseId: supportCase.id, authorType: SupportMessageAuthorType.ADMIN, authorAdminId: supportAdmin.id, body: `Hi ${requesterDisplayName}, looking into this now.`, visibility: SupportMessageVisibility.PUBLIC },
+    });
+    await prisma.internalNote.create({
+      data: { entityType: InternalNoteEntityType.SUPPORT_CASE, entityId: supportCase.id, authorAdminId: supportAdmin.id, body: "Looks like a slot-generation bug for this provider — escalate to engineering if not resolved by EOD." },
+    });
+  }
+
+  console.log(`Seeded admin: root=${rootAdminUser.email} support=${supportAdminUser.email} (both sign in via OTP, same as any consumer account)`);
+  return { rootAdmin, supportAdmin };
 }
 
 async function main() {
@@ -561,6 +615,7 @@ async function main() {
   console.log(`Seeded: user=${sarah.email} household=${household.id} pets=[Luna:${luna.id}, Milo:${milo.id}]`);
 
   await seedCommerce();
+  await seedAdmin(sarah.id, sarah.displayName);
 }
 
 main()

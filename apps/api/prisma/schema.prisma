@@ -863,6 +863,13 @@ model User {
   notificationPreferences NotificationPreference[]
   notificationQuietHours  NotificationQuietHours?
 
+  adminUser             AdminUser?
+  supportCasesRequested SupportCase[]
+  supportMessages       SupportMessage[]
+  disputesRaised        Dispute[]
+  disputeEvidence       DisputeEvidence[]
+  appeals               Appeal[]
+
   @@map("users")
 }
 
@@ -901,6 +908,7 @@ model Household {
   carts                Cart[]
   checkouts            Checkout[]
   orders               Order[]
+  supportCases         SupportCase[]
 
   @@map("households")
 }
@@ -992,6 +1000,7 @@ model Pet {
   bookingSeries      BookingSeries[]
   cartLines          CartLine[]
   orderItems         OrderItem[]
+  supportCases       SupportCase[]
 
   @@index([householdId])
   @@map("pets")
@@ -2212,13 +2221,14 @@ model Order {
   updatedAt   DateTime  @updatedAt
   confirmedAt DateTime?
 
-  items            OrderItem[]
-  refunds          Refund[]
-  fulfillments     Fulfillment[]
-  shippingQuotes   ShippingQuote[]
+  items                OrderItem[]
+  refunds              Refund[]
+  fulfillments         Fulfillment[]
+  shippingQuotes       ShippingQuote[]
   /// Present only when this Order originated from a marketplace channel
   /// (spec section 25) — absent for every ordinary PET LIFE OS checkout Order.
-  marketplaceOrder MarketplaceOrder?
+  marketplaceOrder     MarketplaceOrder?
+  adminRefundApprovals AdminRefundApproval[]
 
   @@unique([checkoutId, sellerOrganizationId])
   @@index([userId])
@@ -2987,6 +2997,11 @@ enum NotificationCategory {
   PET_ACCESS
   SYSTEM
   MARKETING
+  /// Handoff 11 — support-case replies/status updates, routed through the
+  /// same NotificationOrchestrator as every other category (spec: "Support
+  /// notifications via H10's NotificationOrchestrator, never call SMS
+  /// directly").
+  SUPPORT
 }
 
 enum NotificationPriority {
@@ -3152,6 +3167,526 @@ model NotificationQuietHours {
   updatedAt DateTime @updatedAt
 
   @@map("notification_quiet_hours")
+}
+
+// ---------------------------------------------------------------------------
+// Admin CRM, Support, Disputes, Trust & Safety, Audit (Handoff 11)
+// ---------------------------------------------------------------------------
+
+/// Least-privilege roles (spec: "do not make every admin all-powerful").
+/// Permission resolution is a pure code-level static map
+/// (ROLE_PERMISSIONS in admin-permissions.ts), mirroring how
+/// PROVIDER_CAPABILITIES/SHIPPING_PROVIDER_CAPABILITIES are static maps
+/// rather than DB-stored rows — no AdminPermission table exists; backend
+/// authorization is the source of truth, never the frontend.
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  SUPPORT
+  TRUST_SAFETY
+  FINANCE
+  OPERATIONS
+  CONTENT
+  VERIFICATION
+  READ_ONLY
+}
+
+enum AdminMembershipStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum AdminPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum SupportCaseStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_USER
+  WAITING_ON_INTERNAL
+  RESOLVED
+  CLOSED
+}
+
+enum SupportCaseCategory {
+  ACCOUNT
+  PET
+  HEALTH
+  BOOKING
+  SERVICE
+  PAYMENT
+  REFUND
+  ORDER
+  DELIVERY
+  SELLER
+  PROVIDER
+  MARKETPLACE
+  TRUST_SAFETY
+  OTHER
+}
+
+enum SupportMessageAuthorType {
+  USER
+  ADMIN
+  SYSTEM
+}
+
+/// Enforced at the query layer, never just UI hiding (spec: "internal notes
+/// must never leak to end users. Be strict here.") — the consumer-facing
+/// support endpoints this handoff does not add never select INTERNAL rows
+/// in the first place, and no consumer route exists that could.
+enum SupportMessageVisibility {
+  PUBLIC
+  INTERNAL
+}
+
+enum InternalNoteEntityType {
+  USER
+  HOUSEHOLD
+  PET
+  SUPPORT_CASE
+  DISPUTE
+  TRUST_CASE
+}
+
+enum AdminTaskStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+/// Deliberately a generic (subjectType, subjectId) pair rather than one FK
+/// column per possible related entity — mirrors Notification's own
+/// entityType/entityId pattern (Handoff 10).
+enum DisputeSubjectType {
+  BOOKING
+  ORDER
+  PAYMENT
+  REFUND
+  SHIPMENT
+  PROVIDER
+  SELLER
+}
+
+/// Domain outcome and payment/refund state are deliberately kept separate
+/// (spec: "be careful: domain outcome and payment/refund state must remain
+/// separate... do not collapse these into one status") — RESOLVED_* here
+/// describes who the dispute was decided in favor of, never whether a
+/// refund happened. A resolution "triggering" a refund means an admin
+/// separately calls the existing refund flow afterward; nothing here does
+/// it automatically, and Dispute carries no FK to Refund.
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  AWAITING_EVIDENCE
+  RESOLVED_CUSTOMER
+  RESOLVED_PROVIDER
+  RESOLVED_SELLER
+  PARTIAL_RESOLUTION
+  REJECTED
+  CLOSED
+}
+
+enum DisputeEvidenceActorType {
+  USER
+  ADMIN
+}
+
+enum TrustSubjectType {
+  USER
+  HOUSEHOLD
+  PROVIDER
+  SELLER
+  LISTING
+  REVIEW
+  COMMUNITY_CONTENT
+  PET_INCIDENT
+}
+
+enum TrustCaseSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TrustCaseStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum TrustActionType {
+  WARNING
+  RESTRICT
+  SUSPEND
+  REMOVE_CONTENT
+  REQUIRE_REVERIFICATION
+  RESTORE
+  NO_ACTION
+}
+
+enum AppealStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  UPHELD
+  OVERTURNED
+  PARTIALLY_OVERTURNED
+}
+
+/// Two-person control foundation for high-risk refunds (spec: "refund above
+/// threshold -> REQUESTED -> APPROVED -> EXECUTED"). Below
+/// `ADMIN_REFUND_APPROVAL_THRESHOLD_IRR`, a single FINANCE-permission admin
+/// may go straight to EXECUTED; at/above it, a *different* admin than the
+/// requester must APPROVE before EXECUTED is reachable — enforced in
+/// AdminRefundService, not just documented.
+enum AdminRefundApprovalStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  EXECUTED
+}
+
+/// Internal platform access is a completely separate identity axis from
+/// consumer session/PetAccessGrant/SellerMembership/ProviderUser — a
+/// consumer session alone never grants any /admin route (spec: "no
+/// implicit access through normal user session alone"). Mirrors
+/// SellerMembership/ProviderUser's own shape (role + status keyed to a
+/// real User) rather than inventing a parallel credential system.
+model AdminUser {
+  id     String                @id @default(uuid()) @db.Uuid
+  userId String                @unique @db.Uuid
+  user   User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  role   AdminRole
+  status AdminMembershipStatus @default(ACTIVE)
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastActiveAt DateTime?
+
+  assignedSupportCases SupportCase[]         @relation("AssignedSupportCases")
+  authoredSupportCases SupportCase[]         @relation("CreatedSupportCases")
+  supportMessages      SupportMessage[]
+  internalNotes        InternalNote[]
+  assignedTasks        AdminTask[]           @relation("AssignedTasks")
+  createdTasks         AdminTask[]           @relation("CreatedTasks")
+  assignedDisputes     Dispute[]             @relation("AssignedDisputes")
+  disputeEvidence      DisputeEvidence[]
+  assignedTrustCases   TrustCase[]           @relation("AssignedTrustCases")
+  openedTrustCases     TrustCase[]           @relation("OpenedTrustCases")
+  trustActions         TrustAction[]
+  reviewedAppeals      Appeal[]
+  auditLogs            AdminAuditLog[]
+  requestedRefunds     AdminRefundApproval[] @relation("RequestedRefunds")
+  approvedRefunds      AdminRefundApproval[] @relation("ApprovedRefunds")
+
+  @@map("admin_users")
+}
+
+model SupportCase {
+  id         String @id @default(uuid()) @db.Uuid
+  /// Human-readable reference (e.g. "CASE-000123"), generated from a
+  /// dedicated Postgres sequence — never derived from `id` (a UUID makes a
+  /// poor reference to read aloud on a support call).
+  caseNumber String @unique
+
+  requesterUserId String     @db.Uuid
+  requesterUser   User       @relation(fields: [requesterUserId], references: [id], onDelete: Restrict)
+  householdId     String?    @db.Uuid
+  household       Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  petId           String?    @db.Uuid
+  pet             Pet?       @relation(fields: [petId], references: [id], onDelete: SetNull)
+
+  /// Generic link to whatever the case is actually about (an Order id, a
+  /// Booking id, ...) — deliberately not a typed FK per possible target,
+  /// mirroring Notification/Dispute's own entityType/entityId shape.
+  relatedEntityType String?
+  relatedEntityId   String?
+
+  subject     String
+  description String
+  category    SupportCaseCategory
+  priority    AdminPriority       @default(NORMAL)
+  status      SupportCaseStatus   @default(OPEN)
+
+  assignedAdminId  String?    @db.Uuid
+  assignedAdmin    AdminUser? @relation("AssignedSupportCases", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  createdByAdminId String?    @db.Uuid
+  createdByAdmin   AdminUser? @relation("CreatedSupportCases", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+  closedAt   DateTime?
+
+  messages SupportMessage[]
+  disputes Dispute[]
+
+  @@index([requesterUserId])
+  @@index([status, priority])
+  @@index([assignedAdminId])
+  @@map("support_cases")
+}
+
+model SupportMessage {
+  id     String      @id @default(uuid()) @db.Uuid
+  caseId String      @db.Uuid
+  case   SupportCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  authorType    SupportMessageAuthorType
+  authorUserId  String?                  @db.Uuid
+  authorUser    User?                    @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+  authorAdminId String?                  @db.Uuid
+  authorAdmin   AdminUser?               @relation(fields: [authorAdminId], references: [id], onDelete: SetNull)
+
+  body       String
+  visibility SupportMessageVisibility
+
+  createdAt DateTime @default(now())
+
+  @@index([caseId, createdAt])
+  @@map("support_messages")
+}
+
+/// Append-only by convention (no delete endpoint exists; an edit updates
+/// `updatedAt` but the row is never removed — spec: "do not allow silent
+/// deletion without audit"). Polymorphic (entityType, entityId) — one table
+/// for every CRM entity that can carry internal notes, not one table per
+/// entity type.
+model InternalNote {
+  id            String                 @id @default(uuid()) @db.Uuid
+  entityType    InternalNoteEntityType
+  entityId      String
+  authorAdminId String                 @db.Uuid
+  authorAdmin   AdminUser              @relation(fields: [authorAdminId], references: [id], onDelete: Restrict)
+  body          String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+
+  @@index([entityType, entityId, createdAt])
+  @@map("internal_notes")
+}
+
+model AdminTask {
+  id              String          @id @default(uuid()) @db.Uuid
+  title           String
+  description     String?
+  assigneeAdminId String?         @db.Uuid
+  assigneeAdmin   AdminUser?      @relation("AssignedTasks", fields: [assigneeAdminId], references: [id], onDelete: SetNull)
+  dueAt           DateTime?
+  status          AdminTaskStatus @default(OPEN)
+  priority        AdminPriority   @default(NORMAL)
+
+  relatedEntityType String?
+  relatedEntityId   String?
+
+  createdByAdminId String    @db.Uuid
+  createdByAdmin   AdminUser @relation("CreatedTasks", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, dueAt])
+  @@index([assigneeAdminId])
+  @@map("admin_tasks")
+}
+
+model Dispute {
+  id          String             @id @default(uuid()) @db.Uuid
+  subjectType DisputeSubjectType
+  subjectId   String
+
+  raisedByUserId String?      @db.Uuid
+  raisedByUser   User?        @relation(fields: [raisedByUserId], references: [id], onDelete: SetNull)
+  supportCaseId  String?      @db.Uuid
+  supportCase    SupportCase? @relation(fields: [supportCaseId], references: [id], onDelete: SetNull)
+
+  claim  String
+  status DisputeStatus @default(OPEN)
+
+  assignedAdminId String?    @db.Uuid
+  assignedAdmin   AdminUser? @relation("AssignedDisputes", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+
+  resolutionSummary String?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+  closedAt   DateTime?
+
+  evidence DisputeEvidence[]
+
+  @@index([subjectType, subjectId])
+  @@index([status])
+  @@index([assignedAdminId])
+  @@map("disputes")
+}
+
+/// MVP evidence is a text statement plus an optional metadata-only
+/// attachment reference (spec: "if attachment upload is too much,
+/// implement metadata hooks only and document limitation") — no file
+/// upload endpoint exists this phase; `attachmentRef` is never populated by
+/// any code path today.
+model DisputeEvidence {
+  id        String  @id @default(uuid()) @db.Uuid
+  disputeId String  @db.Uuid
+  dispute   Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+
+  actorType    DisputeEvidenceActorType
+  actorUserId  String?                  @db.Uuid
+  actorUser    User?                    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorAdminId String?                  @db.Uuid
+  actorAdmin   AdminUser?               @relation(fields: [actorAdminId], references: [id], onDelete: SetNull)
+
+  statement     String
+  attachmentRef String?
+
+  createdAt DateTime @default(now())
+
+  @@index([disputeId, createdAt])
+  @@map("dispute_evidence")
+}
+
+model TrustCase {
+  id          String            @id @default(uuid()) @db.Uuid
+  subjectType TrustSubjectType
+  subjectId   String
+  reason      String
+  severity    TrustCaseSeverity @default(MEDIUM)
+  status      TrustCaseStatus   @default(OPEN)
+
+  assignedAdminId String?    @db.Uuid
+  assignedAdmin   AdminUser? @relation("AssignedTrustCases", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  openedByAdminId String     @db.Uuid
+  openedByAdmin   AdminUser  @relation("OpenedTrustCases", fields: [openedByAdminId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  closedAt  DateTime?
+
+  actions TrustAction[]
+
+  @@index([subjectType, subjectId])
+  @@index([status, severity])
+  @@map("trust_cases")
+}
+
+/// Never a hard delete of the underlying business/user record (spec: "do
+/// not blindly hard-delete business/user records; prefer explicit
+/// operational states") — a SUSPEND/RESTRICT action is recorded here and
+/// separately applied by AdminTrustService to the subject's own existing
+/// status field (e.g. SellerOrganization.status, ProviderOrganization has
+/// no suspend field yet — see Known limitations), never by deleting a row.
+model TrustAction {
+  id          String    @id @default(uuid()) @db.Uuid
+  trustCaseId String    @db.Uuid
+  trustCase   TrustCase @relation(fields: [trustCaseId], references: [id], onDelete: Cascade)
+
+  actionType TrustActionType
+  reason     String
+
+  performedByAdminId String    @db.Uuid
+  performedByAdmin   AdminUser @relation(fields: [performedByAdminId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  appeal Appeal?
+
+  @@index([trustCaseId])
+  @@map("trust_actions")
+}
+
+/// Backend foundation only this phase (spec: "if appeals UI is too much for
+/// H11, backend foundation is acceptable, but document it clearly") — a
+/// minimal read/create/resolve API exists, but no dedicated appeals
+/// frontend page.
+model Appeal {
+  id            String      @id @default(uuid()) @db.Uuid
+  trustActionId String      @unique @db.Uuid
+  trustAction   TrustAction @relation(fields: [trustActionId], references: [id], onDelete: Cascade)
+
+  appellantUserId String @db.Uuid
+  appellantUser   User   @relation(fields: [appellantUserId], references: [id], onDelete: Restrict)
+
+  reason     String
+  status     AppealStatus @default(SUBMITTED)
+  resolution String?
+
+  reviewerAdminId String?    @db.Uuid
+  reviewerAdmin   AdminUser? @relation(fields: [reviewerAdminId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+
+  @@map("appeals")
+}
+
+/// Two-person control foundation for high-risk refunds — see
+/// AdminRefundApprovalStatus's own doc comment. Wraps (never replaces)
+/// RefundsService.request(): EXECUTED is the only status that has actually
+/// called it. `idempotencyKey` prevents a double-click from creating two
+/// approval rows for the same logical request.
+model AdminRefundApproval {
+  id      String @id @default(uuid()) @db.Uuid
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  amount         Int
+  reason         String
+  idempotencyKey String? @unique
+
+  status AdminRefundApprovalStatus @default(REQUESTED)
+
+  requestedByAdminId String     @db.Uuid
+  requestedByAdmin   AdminUser  @relation("RequestedRefunds", fields: [requestedByAdminId], references: [id], onDelete: Restrict)
+  approvedByAdminId  String?    @db.Uuid
+  approvedByAdmin    AdminUser? @relation("ApprovedRefunds", fields: [approvedByAdminId], references: [id], onDelete: SetNull)
+
+  refundId String? @unique @db.Uuid
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  executedAt DateTime?
+
+  @@index([orderId])
+  @@index([status])
+  @@map("admin_refund_approvals")
+}
+
+/// Every consequential admin mutation writes one row here (spec: "at
+/// minimum: admin actor, action, entity type, entity ID, before/after
+/// summary where appropriate, reason, requestId, createdAt"). `action` is
+/// deliberately plain text, not a Postgres enum — mirrors DomainEvent.type
+/// exactly (action vocabulary will grow; a DB enum would need a migration
+/// per new one). Type safety instead lives in `AdminAuditAction`, a
+/// TypeScript union in admin-audit-log.service.ts.
+model AdminAuditLog {
+  id          String    @id @default(uuid()) @db.Uuid
+  adminUserId String    @db.Uuid
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Restrict)
+
+  action        String
+  entityType    String
+  entityId      String?
+  reason        String?
+  beforeSummary Json?
+  afterSummary  Json?
+  requestId     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([adminUserId, createdAt])
+  @@index([entityType, entityId])
+  @@map("admin_audit_logs")
 }
 
 // ---------------------------------------------------------------------------

@@ -1412,5 +1412,307 @@
         "end": "تا"
       }
     }
+  },
+  "admin": {
+    "shell": {
+      "title": "مدیریت پت‌لایف",
+      "notAnAdmin": {
+        "title": "دسترسی مدیریتی ندارید",
+        "body": "حساب شما به بخش مدیریت داخلی دسترسی ندارد.",
+        "backToApp": "بازگشت به پت‌لایف"
+      },
+      "role": {
+        "SUPER_ADMIN": "مدیر ارشد",
+        "ADMIN": "مدیر",
+        "SUPPORT": "پشتیبانی",
+        "TRUST_SAFETY": "اعتماد و امنیت",
+        "FINANCE": "مالی",
+        "OPERATIONS": "عملیات",
+        "CONTENT": "محتوا",
+        "VERIFICATION": "احراز هویت",
+        "READ_ONLY": "فقط مشاهده"
+      },
+      "nav": {
+        "dashboard": "داشبورد",
+        "customers": "مشتریان",
+        "support": "پشتیبانی",
+        "disputes": "اختلافات",
+        "trust": "اعتماد و امنیت",
+        "providers": "ارائه‌دهندگان",
+        "sellers": "فروشندگان",
+        "transactions": "تراکنش‌ها",
+        "tasks": "وظایف",
+        "audit": "گزارش رویدادها"
+      }
+    },
+    "common": {
+      "loading": "در حال بارگذاری…",
+      "retry": "تلاش دوباره",
+      "empty": "چیزی برای نمایش نیست.",
+      "save": "ذخیره",
+      "cancel": "انصراف",
+      "reasonLabel": "دلیل",
+      "reasonPlaceholder": "الزامی — دلیل را بنویسید",
+      "assign": "واگذاری",
+      "assigneeLabel": "شناسه مدیر مسئول",
+      "backToList": "بازگشت به فهرست"
+    },
+    "dashboard": {
+      "title": "داشبورد",
+      "cards": {
+        "openSupportCases": "درخواست‌های پشتیبانی باز",
+        "openDisputes": "اختلافات باز",
+        "openTrustCases": "پرونده‌های اعتماد و امنیت باز",
+        "pendingRefundApprovals": "درخواست‌های بازگشت وجه در انتظار تأیید",
+        "openTasks": "وظایف باز"
+      }
+    },
+    "customers": {
+      "title": "مشتریان",
+      "searchPlaceholder": "جستجو بر اساس نام، ایمیل یا شماره تماس",
+      "view": "مشاهده کامل"
+    },
+    "customer360": {
+      "notFound": "مشتری پیدا نشد.",
+      "sections": {
+        "contact": "اطلاعات تماس",
+        "households": "خانواده‌ها و حیوانات خانگی",
+        "recentOrders": "سفارش‌های اخیر",
+        "recentBookings": "نوبت‌های اخیر",
+        "supportCases": "درخواست‌های پشتیبانی",
+        "disputes": "اختلافات",
+        "internalNotes": "یادداشت‌های داخلی",
+        "communications": "تاریخچه ارتباطات",
+        "activity": "جدول زمانی فعالیت"
+      },
+      "reveal": {
+        "email": "نمایش ایمیل",
+        "phone": "نمایش شماره تماس",
+        "submit": "نمایش",
+        "revealedAs": "نمایش داده شد: {value}"
+      },
+      "addNote": {
+        "placeholder": "یک یادداشت داخلی اضافه کنید (هرگز به مشتری نشان داده نمی‌شود)",
+        "submit": "افزودن یادداشت"
+      },
+      "pets": "{count} حیوان خانگی"
+    },
+    "support": {
+      "title": "درخواست‌های پشتیبانی",
+      "newCase": "درخواست جدید",
+      "createTitle": "ایجاد درخواست پشتیبانی",
+      "filter": {
+        "allStatuses": "همه وضعیت‌ها"
+      },
+      "status": {
+        "OPEN": "باز",
+        "IN_PROGRESS": "در حال بررسی",
+        "WAITING_ON_USER": "در انتظار پاسخ کاربر",
+        "WAITING_ON_INTERNAL": "در انتظار بررسی داخلی",
+        "RESOLVED": "حل‌شده",
+        "CLOSED": "بسته‌شده"
+      },
+      "category": {
+        "ACCOUNT": "حساب کاربری",
+        "PET": "حیوان خانگی",
+        "HEALTH": "سلامت",
+        "BOOKING": "نوبت",
+        "SERVICE": "خدمت",
+        "PAYMENT": "پرداخت",
+        "REFUND": "بازگشت وجه",
+        "ORDER": "سفارش",
+        "DELIVERY": "ارسال",
+        "SELLER": "فروشنده",
+        "PROVIDER": "ارائه‌دهنده",
+        "MARKETPLACE": "بازارگاه",
+        "TRUST_SAFETY": "اعتماد و امنیت",
+        "OTHER": "سایر"
+      },
+      "priority": {
+        "LOW": "کم",
+        "NORMAL": "معمولی",
+        "HIGH": "بالا",
+        "URGENT": "فوری"
+      },
+      "form": {
+        "requesterUserId": "شناسه کاربر درخواست‌دهنده",
+        "subject": "موضوع",
+        "description": "توضیحات",
+        "category": "دسته‌بندی",
+        "priority": "اولویت",
+        "submit": "ایجاد درخواست"
+      },
+      "detail": {
+        "caseNumber": "درخواست {number}",
+        "requester": "درخواست‌دهنده: {name}",
+        "assignTo": "واگذاری به مدیر",
+        "changeStatus": "تغییر وضعیت",
+        "messages": "پیام‌ها",
+        "composePlaceholder": "پاسخ خود را بنویسید…",
+        "visibilityPublic": "پاسخ عمومی",
+        "visibilityInternal": "یادداشت داخلی (هرگز برای مشتری ارسال نمی‌شود)",
+        "send": "ارسال",
+        "notes": "یادداشت‌های داخلی"
+      }
+    },
+    "disputes": {
+      "title": "اختلافات",
+      "newDispute": "اختلاف جدید",
+      "createTitle": "ثبت اختلاف",
+      "status": {
+        "OPEN": "باز",
+        "UNDER_REVIEW": "در حال بررسی",
+        "AWAITING_EVIDENCE": "در انتظار مدارک",
+        "RESOLVED_CUSTOMER": "به نفع مشتری حل شد",
+        "RESOLVED_PROVIDER": "به نفع ارائه‌دهنده حل شد",
+        "RESOLVED_SELLER": "به نفع فروشنده حل شد",
+        "PARTIAL_RESOLUTION": "حل جزئی",
+        "REJECTED": "رد شد",
+        "CLOSED": "بسته شد"
+      },
+      "subjectType": {
+        "BOOKING": "نوبت",
+        "ORDER": "سفارش",
+        "PAYMENT": "پرداخت",
+        "REFUND": "بازگشت وجه",
+        "SHIPMENT": "مرسوله",
+        "PROVIDER": "ارائه‌دهنده",
+        "SELLER": "فروشنده"
+      },
+      "form": {
+        "subjectType": "نوع موضوع",
+        "subjectId": "شناسه موضوع",
+        "raisedByUserId": "ثبت‌شده توسط (شناسه کاربر، اختیاری)",
+        "claim": "ادعا",
+        "submit": "ثبت اختلاف"
+      },
+      "detail": {
+        "claim": "ادعا",
+        "resolution": "خلاصه نتیجه",
+        "evidence": "مدارک",
+        "addEvidence": "افزودن مدرک",
+        "evidencePlaceholder": "شرح مدرک",
+        "changeStatus": "تغییر وضعیت",
+        "financialNote": "وضعیت مالی (بازگشت وجه) جدا پیگیری می‌شود — حل اختلاف به‌طور خودکار باعث بازگشت وجه نمی‌شود."
+      }
+    },
+    "trust": {
+      "title": "اعتماد و امنیت",
+      "newCase": "ایجاد پرونده",
+      "createTitle": "ایجاد پرونده اعتماد و امنیت",
+      "status": {
+        "OPEN": "باز",
+        "UNDER_REVIEW": "در حال بررسی",
+        "RESOLVED": "حل‌شده",
+        "CLOSED": "بسته‌شده"
+      },
+      "severity": {
+        "LOW": "کم",
+        "MEDIUM": "متوسط",
+        "HIGH": "بالا",
+        "CRITICAL": "بحرانی"
+      },
+      "subjectType": {
+        "USER": "کاربر",
+        "HOUSEHOLD": "خانواده",
+        "PROVIDER": "ارائه‌دهنده",
+        "SELLER": "فروشنده",
+        "LISTING": "آگهی",
+        "REVIEW": "نظر",
+        "COMMUNITY_CONTENT": "محتوای انجمن",
+        "PET_INCIDENT": "حادثه مربوط به حیوان خانگی"
+      },
+      "actionType": {
+        "WARNING": "اخطار",
+        "RESTRICT": "محدودسازی",
+        "SUSPEND": "تعلیق",
+        "REMOVE_CONTENT": "حذف محتوا",
+        "REQUIRE_REVERIFICATION": "نیاز به احراز هویت مجدد",
+        "RESTORE": "بازگردانی",
+        "NO_ACTION": "بدون اقدام"
+      },
+      "form": {
+        "subjectType": "نوع موضوع",
+        "subjectId": "شناسه موضوع",
+        "reason": "دلیل",
+        "severity": "شدت",
+        "submit": "ایجاد پرونده"
+      },
+      "detail": {
+        "changeStatus": "تغییر وضعیت",
+        "actions": "اقدامات انجام‌شده",
+        "takeAction": "ثبت اقدام",
+        "actionReason": "دلیل",
+        "appeal": "تجدیدنظر",
+        "submitAppeal": "ثبت درخواست تجدیدنظر",
+        "appellantUserId": "شناسه کاربر معترض",
+        "appealReason": "دلیل تجدیدنظر",
+        "resolveAppeal": "نتیجه‌گیری تجدیدنظر",
+        "resolution": "نتیجه"
+      },
+      "appealStatus": {
+        "SUBMITTED": "ثبت‌شده",
+        "UNDER_REVIEW": "در حال بررسی",
+        "UPHELD": "تأیید شد",
+        "OVERTURNED": "رد شد",
+        "PARTIALLY_OVERTURNED": "جزئاً رد شد"
+      }
+    },
+    "orgs": {
+      "providersTitle": "ارائه‌دهندگان",
+      "sellersTitle": "فروشندگان",
+      "searchPlaceholder": "جستجو بر اساس نام",
+      "verification": {
+        "changeStatus": "تغییر وضعیت احراز هویت",
+        "submit": "به‌روزرسانی"
+      }
+    },
+    "transactions": {
+      "title": "تراکنش‌ها",
+      "orderIdPlaceholder": "شناسه سفارش",
+      "lookup": "جستجو",
+      "paymentIntents": "تراکنش‌های پرداخت",
+      "ledgerEntries": "دفتر مالی",
+      "refund": {
+        "title": "درخواست بازگشت وجه",
+        "amount": "مبلغ",
+        "reason": "دلیل",
+        "submit": "ثبت درخواست",
+        "approve": "تأیید",
+        "reject": "رد",
+        "execute": "اجرا",
+        "status": {
+          "REQUESTED": "درخواست‌شده",
+          "APPROVED": "تأییدشده",
+          "REJECTED": "ردشده",
+          "EXECUTED": "اجراشده"
+        }
+      }
+    },
+    "tasks": {
+      "title": "وظایف",
+      "newTask": "وظیفه جدید",
+      "createTitle": "ایجاد وظیفه",
+      "status": {
+        "OPEN": "باز",
+        "IN_PROGRESS": "در حال انجام",
+        "DONE": "انجام‌شده",
+        "CANCELLED": "لغوشده"
+      },
+      "form": {
+        "title": "عنوان",
+        "description": "توضیحات",
+        "dueAt": "مهلت انجام",
+        "submit": "ایجاد"
+      }
+    },
+    "audit": {
+      "title": "گزارش رویدادها",
+      "entityType": "نوع موجودیت",
+      "entityId": "شناسه موجودیت",
+      "action": "اقدام",
+      "reason": "دلیل",
+      "by": "توسط {name}"
+    }
   }
 }

@@ -29,6 +29,17 @@ import {
   NotificationChannel,
   NotificationDeliveryStatus,
   NotificationFailureKind,
+  AdminRole,
+  AdminMembershipStatus,
+  SupportCaseCategory,
+  SupportCaseStatus,
+  SupportMessageVisibility,
+  DisputeStatus,
+  DisputeSubjectType,
+  DisputeEvidenceActorType,
+  TrustSubjectType,
+  TrustActionType,
+  AdminRefundApprovalStatus,
 } from "@prisma/client";
 import request from "supertest";
 import { createHmac, randomUUID } from "node:crypto";
@@ -3935,6 +3946,338 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       // DEV is the active provider in this test environment (MESSAGING_PROVIDER=dev) — never DELIVERED, since even DEV's own contract only confirms SENT synchronously; DELIVERED requires a separate, explicit status check this phase.
       expect(delivery.status).toBe(NotificationDeliveryStatus.SENT);
       expect(delivery.status).not.toBe(NotificationDeliveryStatus.DELIVERED);
+    });
+  });
+
+  describe("Admin CRM + Support + Disputes + Trust Operations (Handoff 11)", () => {
+    async function setupAdmin(role: AdminRole, status: AdminMembershipStatus = AdminMembershipStatus.ACTIVE) {
+      const identifier = `admin-${role.toLowerCase()}-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const user = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      const adminUser = await prisma.adminUser.create({ data: { userId: user.id, role, status } });
+      return { client, userId: user.id, adminUserId: adminUser.id };
+    }
+
+    async function setupCustomer() {
+      const identifier = `admin-customer-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const user = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      const household = await client.post("/households").send({}).expect(201);
+      await client.post(`/households/${household.body.id}/pets`).send({ name: "Milo", species: "CAT", approximateAgeMonths: 12 }).expect(201);
+      return { client, userId: user.id, householdId: household.body.id as string };
+    }
+
+    async function setupPaidOrder(priceAmount = 1_000_000) {
+      const identifier = `admin-buyer-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const buyerUser = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      const household = await client.post("/households").send({}).expect(201);
+      const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+      const product = await prisma.product.create({ data: { categoryId: category.id, title: `Product ${unique()}`, slug: `product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] } });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+      const seller = await prisma.sellerOrganization.create({ data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" } });
+      const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount, currency: "IRR" } });
+      await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand: 10 } });
+      const addressRes = await client.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const orderId = paid.body.orderIds[0] as string;
+      return { client, userId: buyerUser.id, orderId, sellerId: seller.id };
+    }
+
+    // --- Flow A: Admin Authorization ---------------------------------------
+
+    it("Flow A: rejects a plain consumer session, an insufficient-permission admin, and a suspended admin; accepts a properly-permissioned admin", async () => {
+      const consumer = await setupCustomer();
+      const deniedConsumer = await consumer.client.get("/admin/dashboard").expect(403);
+      expect(deniedConsumer.body.error.code).toBe("ADMIN_ACCESS_DENIED");
+      expect(deniedConsumer.body.error.details.reason).toBe("NOT_AN_ADMIN");
+
+      const readOnly = await setupAdmin(AdminRole.READ_ONLY);
+      const deniedPermission = await readOnly.client.post("/admin/support").send({ requesterUserId: consumer.userId, subject: "x", description: "y", category: SupportCaseCategory.OTHER }).expect(403);
+      expect(deniedPermission.body.error.details.reason).toBe("INSUFFICIENT_PERMISSION");
+
+      const suspended = await setupAdmin(AdminRole.SUPPORT, AdminMembershipStatus.SUSPENDED);
+      const deniedSuspended = await suspended.client.get("/admin/dashboard").expect(403);
+      expect(deniedSuspended.body.error.details.reason).toBe("ADMIN_SUSPENDED");
+
+      const support = await setupAdmin(AdminRole.SUPPORT);
+      await support.client.get("/admin/dashboard").expect(200);
+    });
+
+    // --- Flow B: Customer 360 Isolation -------------------------------------
+
+    it("Flow B: Customer 360 never mixes in another customer's household", async () => {
+      const customerA = await setupCustomer();
+      const customerB = await setupCustomer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const viewA = await support.client.get(`/admin/customers/${customerA.userId}`).expect(200);
+      expect(viewA.body.households).toHaveLength(1);
+      expect(viewA.body.households[0].id).toBe(customerA.householdId);
+      expect(viewA.body.households.find((h: { id: string }) => h.id === customerB.householdId)).toBeUndefined();
+    });
+
+    // --- Flow C: Support Case full lifecycle --------------------------------
+
+    it("Flow C: create -> assign -> note -> reply -> resolve -> audit, with H10 notifications fired", async () => {
+      const customer = await setupCustomer();
+      const supportA = await setupAdmin(AdminRole.SUPPORT);
+      const supportB = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await supportA.client
+        .post("/admin/support")
+        .send({ requesterUserId: customer.userId, subject: "Cannot book a vet", description: "Booking fails", category: SupportCaseCategory.BOOKING })
+        .expect(201);
+      const caseId = created.body.id as string;
+      expect(created.body.caseNumber).toMatch(/^CASE-\d{6}$/);
+
+      await supportA.client.patch(`/admin/support/${caseId}/assign`).send({ assigneeAdminId: supportB.adminUserId }).expect(200);
+      await supportB.client.post(`/admin/support/${caseId}/notes`).send({ body: "Checked logs, retrying." }).expect(201);
+      await supportB.client.post(`/admin/support/${caseId}/messages`).send({ body: "We are looking into it.", visibility: SupportMessageVisibility.PUBLIC }).expect(201);
+      await supportB.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.RESOLVED }).expect(200);
+      const closed = await supportB.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.CLOSED }).expect(200);
+      expect(closed.body.status).toBe(SupportCaseStatus.CLOSED);
+
+      // audit.view is an ADMIN/SUPER_ADMIN-level permission, deliberately not granted to SUPPORT itself (least privilege) — a broader admin role checks the trail here.
+      const auditor = await setupAdmin(AdminRole.ADMIN);
+      const audit = await auditor.client.get(`/admin/audit?entityType=SUPPORT_CASE&entityId=${caseId}`).expect(200);
+      const actions = audit.body.items.map((row: { action: string }) => row.action);
+      expect(actions).toEqual(expect.arrayContaining(["support_case.created", "support_case.assigned", "support_message.posted", "support_case.status_changed"]));
+
+      const messageNotification = await pollUntil(
+        () => prisma.notification.findFirst({ where: { userId: customer.userId, type: "support.message_posted" } }),
+        (row) => row !== null,
+      );
+      expect(messageNotification!.category).toBe(NotificationCategory.SUPPORT);
+      const resolvedNotification = await pollUntil(
+        () => prisma.notification.findFirst({ where: { userId: customer.userId, type: "support.case_resolved" } }),
+        (row) => row !== null,
+      );
+      expect(resolvedNotification).not.toBeNull();
+    });
+
+    // --- Flow D: Internal Note Privacy ---------------------------------------
+
+    it("Flow D: internal notes and INTERNAL-visibility messages are never reachable outside an admin session", async () => {
+      const customer = await setupCustomer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await support.client
+        .post("/admin/support")
+        .send({ requesterUserId: customer.userId, subject: "Private matter", description: "d", category: SupportCaseCategory.OTHER })
+        .expect(201);
+      const caseId = created.body.id as string;
+      await support.client.post(`/admin/support/${caseId}/notes`).send({ body: "Sensitive internal detail — never for the customer." }).expect(201);
+      await support.client.post(`/admin/support/${caseId}/messages`).send({ body: "Internal-only reply.", visibility: SupportMessageVisibility.INTERNAL }).expect(201);
+
+      // The requester's own consumer session has no admin identity — every /admin/* route (including the one that would return this case's notes/messages) rejects it outright.
+      const deniedForRequester = await customer.client.get(`/admin/support/${caseId}`).expect(403);
+      expect(deniedForRequester.body.error.code).toBe("ADMIN_ACCESS_DENIED");
+
+      // The INTERNAL message never triggers a notification at all (only PUBLIC messages do) — confirms no leakage path through the messaging pipeline either.
+      const internalNotification = await prisma.notification.findFirst({ where: { userId: customer.userId, type: "support.message_posted" } });
+      expect(internalNotification).toBeNull();
+    });
+
+    // --- Flow E: Dispute lifecycle with financial state kept separate ------
+
+    it("Flow E: open -> evidence -> review -> resolution never creates a Refund as a side effect", async () => {
+      const { userId, orderId } = await setupPaidOrder();
+      const supportSafety = await setupAdmin(AdminRole.TRUST_SAFETY);
+
+      const opened = await supportSafety.client.post("/admin/disputes").send({ subjectType: DisputeSubjectType.ORDER, subjectId: orderId, raisedByUserId: userId, claim: "Item never arrived" }).expect(201);
+      const disputeId = opened.body.id as string;
+
+      await supportSafety.client.post(`/admin/disputes/${disputeId}/evidence`).send({ statement: "Tracking shows no delivery scan.", actorType: DisputeEvidenceActorType.ADMIN }).expect(201);
+      await supportSafety.client.patch(`/admin/disputes/${disputeId}/status`).send({ status: DisputeStatus.UNDER_REVIEW }).expect(200);
+      const resolved = await supportSafety.client.patch(`/admin/disputes/${disputeId}/status`).send({ status: DisputeStatus.RESOLVED_CUSTOMER, resolutionSummary: "Refund owed, will be processed separately." }).expect(200);
+      expect(resolved.body.status).toBe(DisputeStatus.RESOLVED_CUSTOMER);
+
+      const refundCount = await prisma.refund.count({ where: { orderId } });
+      expect(refundCount).toBe(0);
+
+      await supportSafety.client.patch(`/admin/disputes/${disputeId}/status`).send({ status: DisputeStatus.CLOSED }).expect(200);
+    });
+
+    // --- Flow F: Concurrent Dispute Resolution ------------------------------
+
+    it("Flow F: two admins racing to resolve the same dispute -> exactly one valid transition wins", async () => {
+      const { userId, orderId } = await setupPaidOrder();
+      const admin = await setupAdmin(AdminRole.TRUST_SAFETY);
+      const opened = await admin.client.post("/admin/disputes").send({ subjectType: DisputeSubjectType.ORDER, subjectId: orderId, raisedByUserId: userId, claim: "Damaged item" }).expect(201);
+      const disputeId = opened.body.id as string;
+      await admin.client.patch(`/admin/disputes/${disputeId}/status`).send({ status: DisputeStatus.UNDER_REVIEW }).expect(200);
+
+      const [a, b] = await Promise.allSettled([
+        admin.client.patch(`/admin/disputes/${disputeId}/status`).send({ status: DisputeStatus.RESOLVED_CUSTOMER }),
+        admin.client.patch(`/admin/disputes/${disputeId}/status`).send({ status: DisputeStatus.RESOLVED_SELLER }),
+      ]);
+      const statuses = [a, b].map((r) => (r.status === "fulfilled" ? r.value.status : -1));
+      expect(statuses.filter((s) => s === 200)).toHaveLength(1);
+      expect(statuses.filter((s) => s === 409)).toHaveLength(1);
+
+      const final = await prisma.dispute.findUniqueOrThrow({ where: { id: disputeId } });
+      expect([DisputeStatus.RESOLVED_CUSTOMER, DisputeStatus.RESOLVED_SELLER]).toContain(final.status);
+    });
+
+    // --- Flow G: Refund Safety ------------------------------------------------
+
+    it("Flow G: below-threshold refund executes straight through RefundsService, is idempotent, and never double-refunds", async () => {
+      const { orderId } = await setupPaidOrder(1_000_000);
+      const finance = await setupAdmin(AdminRole.FINANCE);
+      const idempotencyKey = `refund-${unique()}`;
+
+      const first = await finance.client.post("/admin/transactions/refund-approvals").set("Idempotency-Key", idempotencyKey).send({ orderId, amount: 1_000_000, reason: "Customer requested" }).expect(201);
+      const second = await finance.client.post("/admin/transactions/refund-approvals").set("Idempotency-Key", idempotencyKey).send({ orderId, amount: 1_000_000, reason: "Customer requested" }).expect(201);
+      expect(second.body.id).toBe(first.body.id);
+      expect(await prisma.adminRefundApproval.count({ where: { orderId } })).toBe(1);
+
+      const approvalId = first.body.id as string;
+      const executed = await finance.client.patch(`/admin/transactions/refund-approvals/${approvalId}/execute`).expect(200);
+      expect(executed.body.status).toBe(AdminRefundApprovalStatus.EXECUTED);
+      expect(executed.body.refundId).toBeTruthy();
+
+      // A second execute call is a safe no-op — never a second Refund.
+      const reExecuted = await finance.client.patch(`/admin/transactions/refund-approvals/${approvalId}/execute`).expect(200);
+      expect(reExecuted.body.refundId).toBe(executed.body.refundId);
+      expect(await prisma.refund.count({ where: { orderId } })).toBe(1);
+
+      // The refund went through the real ledger service, not a side-channel mutation.
+      const ledgerCount = await prisma.ledgerEntry.count({ where: { ledgerTransaction: { referenceType: "REFUND", referenceId: executed.body.refundId } } });
+      expect(ledgerCount).toBeGreaterThan(0);
+    });
+
+    it("Flow G: at-or-above-threshold refund requires a second, different admin's approval before it can execute", async () => {
+      const { orderId } = await setupPaidOrder(6_000_000);
+      const requester = await setupAdmin(AdminRole.FINANCE);
+      const approver = await setupAdmin(AdminRole.FINANCE);
+
+      const requested = await requester.client.post("/admin/transactions/refund-approvals").send({ orderId, amount: 6_000_000, reason: "Large refund" }).expect(201);
+      const approvalId = requested.body.id as string;
+
+      const blocked = await requester.client.patch(`/admin/transactions/refund-approvals/${approvalId}/execute`).expect(409);
+      expect(blocked.body.error.code).toBe("ADMIN_REFUND_APPROVAL_REQUIRED");
+
+      const selfApprove = await requester.client.patch(`/admin/transactions/refund-approvals/${approvalId}/approve`).expect(409);
+      expect(selfApprove.body.error.code).toBe("ADMIN_REFUND_SELF_APPROVAL");
+
+      await approver.client.patch(`/admin/transactions/refund-approvals/${approvalId}/approve`).expect(200);
+      const executed = await requester.client.patch(`/admin/transactions/refund-approvals/${approvalId}/execute`).expect(200);
+      expect(executed.body.status).toBe(AdminRefundApprovalStatus.EXECUTED);
+    });
+
+    // --- Flow H: Trust Action -> subject-state-update -> audit --------------
+
+    it("Flow H: a SUSPEND trust action actually moves the seller's own status field, and RESTORE reverses it", async () => {
+      const seller = await prisma.sellerOrganization.create({ data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" } });
+      const trustSafety = await setupAdmin(AdminRole.TRUST_SAFETY);
+
+      const opened = await trustSafety.client.post("/admin/trust/cases").send({ subjectType: TrustSubjectType.SELLER, subjectId: seller.id, reason: "Repeated late shipments" }).expect(201);
+      const trustCaseId = opened.body.id as string;
+
+      await trustSafety.client.post(`/admin/trust/cases/${trustCaseId}/actions`).send({ actionType: TrustActionType.SUSPEND, reason: "Pattern of non-fulfillment" }).expect(201);
+      const suspended = await prisma.sellerOrganization.findUniqueOrThrow({ where: { id: seller.id } });
+      expect(suspended.status).toBe(SellerStatus.SUSPENDED);
+
+      await trustSafety.client.post(`/admin/trust/cases/${trustCaseId}/actions`).send({ actionType: TrustActionType.RESTORE, reason: "Issue resolved" }).expect(201);
+      const restored = await prisma.sellerOrganization.findUniqueOrThrow({ where: { id: seller.id } });
+      expect(restored.status).toBe(SellerStatus.ACTIVE);
+
+      const auditor = await setupAdmin(AdminRole.ADMIN);
+      const audit = await auditor.client.get(`/admin/audit?entityType=TRUST_CASE&entityId=${trustCaseId}`).expect(200);
+      expect(audit.body.items.map((row: { action: string }) => row.action)).toEqual(expect.arrayContaining(["trust_case.opened", "trust_action.taken"]));
+    });
+
+    // --- Flow I: Seller/Provider Verification -------------------------------
+
+    it("Flow I: an authorized role transitions verification status; an unauthorized role is rejected", async () => {
+      const seller = await prisma.sellerOrganization.create({ data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.SUBMITTED, status: SellerStatus.PENDING, countryCode: "US" } });
+      const verification = await setupAdmin(AdminRole.VERIFICATION);
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const denied = await support.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "n/a" }).expect(403);
+      expect(denied.body.error.details.reason).toBe("INSUFFICIENT_PERMISSION");
+
+      const allowed = await verification.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "Documents checked" }).expect(200);
+      expect(allowed.body.verificationStatus).toBe(SellerVerificationStatus.VERIFIED);
+    });
+
+    // --- Flow J: PII Permissions ---------------------------------------------
+
+    it("Flow J: an admin without customer.pii.reveal is rejected; an authorized reveal is audited and Customer 360 stays masked afterward", async () => {
+      const customer = await setupCustomer();
+      await prisma.user.update({ where: { id: customer.userId }, data: { email: `raw-${unique()}@example.com` } });
+      const support = await setupAdmin(AdminRole.SUPPORT);
+      const trustSafety = await setupAdmin(AdminRole.TRUST_SAFETY);
+
+      const denied = await support.client.post(`/admin/customers/${customer.userId}/reveal`).send({ field: "email", reason: "Checking" }).expect(403);
+      expect(denied.body.error.details.reason).toBe("INSUFFICIENT_PERMISSION");
+
+      const revealed = await trustSafety.client.post(`/admin/customers/${customer.userId}/reveal`).send({ field: "email", reason: "Verifying identity for a dispute" }).expect(201);
+      expect(revealed.body.value).toContain("@example.com");
+
+      const view = await trustSafety.client.get(`/admin/customers/${customer.userId}`).expect(200);
+      expect(view.body.user.emailMasked).not.toBe(revealed.body.value);
+      expect(view.body.user.emailMasked).toMatch(/\*/);
+
+      const auditor = await setupAdmin(AdminRole.ADMIN);
+      const audit = await auditor.client.get(`/admin/audit?entityType=USER&entityId=${customer.userId}`).expect(200);
+      expect(audit.body.items.some((row: { action: string; reason: string | null }) => row.action === "pii.revealed" && row.reason === "Verifying identity for a dispute")).toBe(true);
+    });
+
+    // --- Flow K: Communications History --------------------------------------
+
+    it("Flow K: an H10 notification delivery is visible in Customer 360 without a second messaging history system", async () => {
+      const customer = await setupCustomer();
+      await customer.client.post("/dev/notifications/simulate").send({ userId: customer.userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT }).expect(201);
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const view = await support.client.get(`/admin/customers/${customer.userId}`).expect(200);
+      expect(view.body.communications.some((n: { type: string }) => n.type === "payment.succeeded")).toBe(true);
+    });
+
+    // --- Flow L: Cross-Admin Permission Boundaries ---------------------------
+
+    it("Flow L: a FINANCE admin cannot manage support cases, and a SUPPORT admin cannot approve refunds", async () => {
+      const customer = await setupCustomer();
+      const finance = await setupAdmin(AdminRole.FINANCE);
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const deniedSupportManage = await finance.client
+        .post("/admin/support")
+        .send({ requesterUserId: customer.userId, subject: "x", description: "y", category: SupportCaseCategory.OTHER })
+        .expect(403);
+      expect(deniedSupportManage.body.error.details.reason).toBe("INSUFFICIENT_PERMISSION");
+
+      const { orderId } = await setupPaidOrder();
+      const approval = await finance.client.post("/admin/transactions/refund-approvals").send({ orderId, amount: 1_000_000, reason: "test" }).expect(201);
+      const deniedApprove = await support.client.patch(`/admin/transactions/refund-approvals/${approval.body.id}/approve`).expect(403);
+      expect(deniedApprove.body.error.details.reason).toBe("INSUFFICIENT_PERMISSION");
+    });
+
+    // --- Concurrency: assigning the same case twice -> deterministic final state ---
+
+    it("Concurrency: two admins assigning the same support case at once still lands on exactly one deterministic assignee", async () => {
+      const customer = await setupCustomer();
+      const owner = await setupAdmin(AdminRole.SUPPORT);
+      const assigneeA = await setupAdmin(AdminRole.SUPPORT);
+      const assigneeB = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await owner.client.post("/admin/support").send({ requesterUserId: customer.userId, subject: "x", description: "y", category: SupportCaseCategory.OTHER }).expect(201);
+      const caseId = created.body.id as string;
+
+      const [a, b] = await Promise.allSettled([
+        owner.client.patch(`/admin/support/${caseId}/assign`).send({ assigneeAdminId: assigneeA.adminUserId }),
+        owner.client.patch(`/admin/support/${caseId}/assign`).send({ assigneeAdminId: assigneeB.adminUserId }),
+      ]);
+      expect(a.status === "fulfilled" && a.value.status === 200).toBe(true);
+      expect(b.status === "fulfilled" && b.value.status === 200).toBe(true);
+
+      const final = await prisma.supportCase.findUniqueOrThrow({ where: { id: caseId } });
+      expect([assigneeA.adminUserId, assigneeB.adminUserId]).toContain(final.assignedAdminId);
     });
   });
 });

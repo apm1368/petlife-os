@@ -2642,6 +2642,258 @@ INVALID_PHONE_NUMBER                400  the phone number could not be normalize
 MESSAGING_WEBHOOK_INVALID           400  reserved for a future real webhook signature check — unused while Faraz has no confirmed webhook scheme
 ```
 
+## Admin CRM + Support + Disputes + Trust Operations (Handoff 11)
+
+Schema: `prisma/migrations/20260902180000_admin_crm_support_disputes_trust`
+(11 new models, 17 new enums, purely additive) plus
+`20260902190000_support_category_and_case_number_seq` (adds `SUPPORT` to
+the existing `NotificationCategory` enum and a hand-appended Postgres
+sequence, `support_case_number_seq`, since Prisma's DSL has no native
+`@@sequence` directive). New models: `AdminUser`, `InternalNote`,
+`SupportCase`, `SupportMessage`, `Dispute`, `DisputeEvidence`,
+`TrustCase`, `TrustAction`, `Appeal`, `AdminTask`, `AdminAuditLog`,
+`AdminRefundApproval`. Two hand-appended `CHECK` constraints on
+`AdminRefundApproval` (`admin_refund_approvals_amount_positive`,
+`admin_refund_approvals_approver_not_requester`) enforce invariants
+Prisma's DSL cannot express at the database layer, not just in
+application code.
+
+### AdminUser — a separate identity axis, never granted from a consumer session alone
+
+Mirrors `SellerMembership`/`ProviderUser`'s established "role+status keyed
+to a real `User` row" pattern exactly. The consumer session cookie is
+still what identifies *who* is calling, but `AdminAccessService
+.resolveAdminContext()` always performs a real `AdminUser` lookup
+(throwing `AdminAccessDeniedException`/`AdminAccountSuspendedException`
+for missing/suspended rows) before any `/admin/*` route treats the caller
+as staff — a normal consumer session, however valid, is never itself
+sufficient. `AdminAuthGuard` is the enforcement point every admin
+controller carries, exactly like `SellerAuthGuard` before it.
+`AdminAccessService.getSessionContext()` is the one deliberate exception:
+it never throws, returning `{ isAdmin: false, ... }` instead, specifically
+so `GET /admin/me` can back a friendly "you are not an admin" screen
+rather than surfacing a raw 403 to a consumer who stumbles onto an admin
+URL.
+
+### Least-privilege RBAC — a static map, not a database permissions table
+
+`admin-permissions.ts`'s `ROLE_PERMISSIONS` is a plain
+`Record<AdminRole, AdminPermission[]>` — the same static-map discipline
+`PROVIDER_CAPABILITIES`/`SHIPPING_PROVIDER_CAPABILITIES` already
+established — covering 9 roles (`SUPER_ADMIN`, `ADMIN`, `SUPPORT`,
+`TRUST_SAFETY`, `FINANCE`, `CATALOG_OPS`, `LOGISTICS_OPS`, `COMPLIANCE`,
+`READ_ONLY`) against a 16-value `AdminPermission` union.
+`admin.manage` (creating/updating other `AdminUser` rows) is reserved for
+`SUPER_ADMIN` alone and never delegated even to `ADMIN`. Every `/admin/*`
+route declares its required permission via `@RequireAdminPermission(...)`,
+checked inside `AdminAuthGuard` — nav items in the frontend shell filter
+by the resolved `permissions` array purely as a UX convenience, never
+itself a security boundary, since every route re-checks server-side
+regardless of what the UI shows.
+
+### Support Case lifecycle — public/internal visibility strictly enforced
+
+`SupportCaseStatus`: `OPEN → IN_PROGRESS → WAITING_ON_CUSTOMER →
+RESOLVED → CLOSED` (plus `REOPENED` looping back to `IN_PROGRESS`),
+validated by a plain `SUPPORT_CASE_TRANSITIONS` map in
+`support-case-transitions.ts` — never an arbitrary status `PATCH`.
+`SupportCase.transition()` acquires a `SELECT ... FOR UPDATE` row lock
+(the same concurrency-safety technique `InventoryReservationService`
+established in Handoff 06) before re-reading current status and
+validating, proven by a dedicated concurrency e2e test where two
+concurrent transition calls race and exactly one wins. Every
+`SupportMessage` carries an explicit `visibility` (`PUBLIC`/`INTERNAL`):
+a customer-facing endpoint only ever returns `PUBLIC` messages, and
+`INTERNAL` messages (used for admin-to-admin case handoff notes) are
+never reachable through any customer-scoped read path — proven directly
+by an e2e assertion that a customer's own case-detail response never
+contains an internal message's body. Case numbers are human-readable
+(`CASE-000001`) via `nextval('support_case_number_seq')`, generated once
+at creation and never reused. Support notifications (a new
+public message, a case resolution) reuse Handoff 10's
+`NotificationOrchestratorService.notify()` unchanged, through a new
+`support.message_posted`/`support.case_resolved` template pair and the
+new `SUPPORT` notification category — no parallel notification path.
+
+### Disputes — lifecycle explicitly decoupled from payment/refund state
+
+`Dispute` has **no foreign key to `Refund`** — this is a schema-level
+decision, not a runtime guard, so resolving a dispute
+(`DisputeStatus.RESOLVED_CUSTOMER`/`RESOLVED_PROVIDER`/
+`RESOLVED_SELLER`/`PARTIAL_RESOLUTION`/`REJECTED`) can never, by
+construction, auto-trigger a refund; an admin must separately invoke the
+refund flow below. Proven by a dedicated e2e test asserting
+`prisma.refund.count()` stays at 0 after a dispute transitions to
+`RESOLVED_CUSTOMER`. `DisputeEvidence` records statements from either
+side (`actorType`: `ADMIN`/`CUSTOMER`/`COUNTERPARTY`) as an append-only
+list — evidence is never edited or deleted once submitted. Transitions
+go through the same `SELECT ... FOR UPDATE`-guarded `DISPUTE_TRANSITIONS`
+map pattern as Support Cases.
+
+### Trust & Safety — operational-state mutation, never hard-delete
+
+`TrustCase`/`TrustAction` follow the same guarded-transition pattern
+(`TRUST_CASE_TRANSITIONS`). `TrustActionService.take()`'s
+`operationalUpdateFor(subjectType, actionType)` maps a
+`SUSPEND`/`RESTORE`/`REQUIRE_REVERIFICATION` action to a real field
+update — `ProviderOrganization.verificationStatus` or
+`SellerOrganization.status`/`verificationStatus` — **never a `DELETE`**,
+matching the spec's "prefer explicit operational states over destructive
+actions" requirement exactly. `USER`/`HOUSEHOLD`/`LISTING`/`REVIEW`/
+`COMMUNITY_CONTENT`/`PET_INCIDENT` subjects record the `TrustAction`
+(and its audit trail) but have no enforcement field yet on their own
+models — a deliberate scope reduction, see Known limitations. Every
+trust action a subject can contest is appealable via `Appeal`
+(`SUBMITTED → UNDER_REVIEW → UPHELD/OVERTURNED`), reviewed by an admin
+distinct from — but not necessarily different in role from — whoever took
+the original action (no enforced two-person separation here, unlike
+refunds below).
+
+### Two-person control for high-risk refunds — wrapping, never replacing, Handoff 07's `RefundsService`
+
+`AdminRefundService` never mutates the ledger directly and never
+duplicates `RefundsService.request()`'s own logic — it calls that
+existing method with the order's own true `userId`, which trivially and
+correctly satisfies `RefundsService`'s pre-existing ownership check
+(`order.userId !== userId`) with zero changes to Handoff 07 code. Below
+`ADMIN_REFUND_APPROVAL_THRESHOLD_IRR` (env-configurable, default
+5,000,000 IRR), a single `FINANCE` admin can go straight from
+`REQUESTED` to `EXECUTED`; at or above the threshold, a *different* admin
+must `APPROVE` first — enforced both in `AdminRefundService.approve()`
+(application-layer check) and by the
+`admin_refund_approvals_approver_not_requester` `CHECK` constraint at the
+database layer, so the invariant holds even against a bug that bypasses
+the service. `execute()` is the only method that ever calls
+`RefundsService.request()`, and does so behind the same
+`SELECT ... FOR UPDATE` row-lock pattern used elsewhere in this handoff —
+a second `execute()` call against an already-`EXECUTED` approval is a
+safe no-op that returns the same `refundId`, proven by a dedicated
+concurrency e2e test. `AdminRefundService.request()` uses the same
+idempotency-key two-phase-claim pattern
+`MarketplaceOrderIngestionService`/`NotificationOrchestratorService`
+established: a plain `create()`, catching Prisma `P2002` on the unique
+`idempotencyKey` and returning the existing row instead of erroring.
+
+### Customer/Household/Pet 360 + PII masking
+
+`Customer360Dto` is an application-code composition — the same
+"aggregate several existing tables' own queries into one view" approach
+Handoff 09's Unified Seller Orders view already used — not a new
+event-warehouse table (the internal `DomainEvent` outbox has no direct
+`userId`/`householdId` columns to query by). Its `activityTimeline` maps
+and concatenates orders/bookings/support cases/disputes/notifications
+into one `{type, id, summary, occurredAt}` shape, sorted descending. PII
+(email, phone) is masked by default in every admin-facing read
+(`maskEmail()`, alongside Handoff 10's existing `maskPhone()`); an
+explicit reveal endpoint always writes an `AdminAuditLogService.record()`
+call with action `pii.revealed` before returning the unmasked value —
+proven by an e2e test that the masked field in a subsequent Customer 360
+read is unchanged after a reveal (reveal is a one-time response, never a
+stored unmask). Operational search
+(`AdminSearchController`) is Postgres-only, via Prisma `contains`/exact
+UUID matching — no external search index, per the spec's own "no
+Elasticsearch this phase" allowance.
+
+### Auditability — every sensitive action, reason-required where it matters
+
+`AdminAuditLogService.record()` is the single write path for the audit
+trail (`AdminAuditLog`), called from every mutating admin service —
+support/dispute/trust transitions, PII reveals, refund
+approve/reject/execute, verification changes, trust actions. Sensitive
+actions (trust actions, refund approve/reject, PII reveal) require a
+non-empty `reason` at the DTO layer, enforced by `class-validator`, not
+left as an optional field a caller can silently omit. `GET /admin/audit`
+requires the `audit.view` permission, which `SUPPORT`/`TRUST_SAFETY`
+deliberately do not carry by default (least privilege) — an `ADMIN` or
+`SUPER_ADMIN` is required to review the trail.
+
+### Frontend — a distinct Admin shell, operational density over spaciousness
+
+`apps/web/features/admin/AdminShell.tsx` is a separate shell from
+`SellerShell`/`ProviderShell` — no org-switching concept, since an
+`AdminUser` has exactly one role — with visibly tighter padding
+(`py-2.5`/`py-1.5` header/nav, `max-w-4xl px-4 py-4` main) reflecting the
+spec's explicit "operational density, not an excessively spacious
+consumer-style UI" requirement. `use-admin-bootstrap.ts`/`admin-store.ts`
+mirror the established `useSellerBootstrap`/`seller-store.ts` shape
+exactly, including the `"not-an-admin"` status the `/admin/me` bootstrap
+above exists to support. Reuses `@petlife/ui`'s existing
+`Button`/`ContextSurface`/`Input`/`Select`/`StatusLabel`/`Skeleton`/
+`EmptyState`/`ErrorRecovery` — no `Dialog`; every admin form is an inline
+compose surface, not a modal, matching an ops-tool feel over a
+consumer-app one. Full Persian RTL / English LTR support via the new
+`"admin"` message namespace in both `en.json`/`fa.json`.
+
+### API endpoints (Handoff 11 additions)
+
+```
+GET    /admin/me
+GET    /admin/dashboard
+GET    /admin/search?q=
+
+GET    /admin/customers                          (paginated/filterable)
+GET    /admin/customers/:userId/360
+POST   /admin/customers/:userId/reveal-pii        (audited)
+POST   /admin/notes                               (entityType + entityId; append-only)
+
+GET    /admin/support-cases                       (paginated/filterable)
+POST   /admin/support-cases
+GET    /admin/support-cases/:id
+PATCH  /admin/support-cases/:id/assign
+PATCH  /admin/support-cases/:id/transition
+POST   /admin/support-cases/:id/messages          (visibility: PUBLIC | INTERNAL)
+
+GET    /admin/disputes                            (paginated/filterable)
+POST   /admin/disputes
+GET    /admin/disputes/:id
+PATCH  /admin/disputes/:id/assign
+POST   /admin/disputes/:id/evidence
+PATCH  /admin/disputes/:id/transition
+
+GET    /admin/trust-cases                         (paginated/filterable)
+POST   /admin/trust-cases
+GET    /admin/trust-cases/:id
+PATCH  /admin/trust-cases/:id/assign
+PATCH  /admin/trust-cases/:id/transition
+POST   /admin/trust-cases/:id/actions             (reason required)
+POST   /admin/trust-actions/:actionId/appeals
+PATCH  /admin/appeals/:id/resolve
+
+PATCH  /admin/providers/:id/verification
+PATCH  /admin/sellers/:id/verification
+GET    /admin/providers
+GET    /admin/sellers
+
+GET    /admin/tasks                               (paginated/filterable)
+POST   /admin/tasks
+PATCH  /admin/tasks/:id
+
+GET    /admin/orders/:orderId/financials          (read-only)
+POST   /admin/refunds/request                     (Idempotency-Key supported)
+GET    /admin/refunds/:id
+PATCH  /admin/refunds/:id/approve                 (reason required; approver ≠ requester)
+PATCH  /admin/refunds/:id/reject                  (reason required)
+PATCH  /admin/refunds/:id/execute                 (idempotent — re-executing an EXECUTED approval is a safe no-op)
+
+GET    /admin/audit                               (paginated/filterable; requires audit.view)
+```
+
+### Error codes (Handoff 11 additions)
+
+```
+ADMIN_ACCESS_DENIED               403  the caller's session has no matching AdminUser row at all
+ADMIN_ACCOUNT_SUSPENDED           403  an AdminUser row exists but its status is SUSPENDED
+ADMIN_PERMISSION_DENIED           403  a real admin, but their role lacks the permission the route requires
+ADMIN_INVALID_TRANSITION          400  a support case / dispute / trust case status PATCH that isn't a valid transition from its current status
+SUPPORT_CASE_NOT_FOUND            404
+DISPUTE_NOT_FOUND                 404
+TRUST_CASE_NOT_FOUND              404
+ADMIN_REFUND_ALREADY_EXECUTED     409  a second execute() call — returns the original refundId instead in the idempotent path, this is for a conflicting concurrent state only
+ADMIN_REFUND_APPROVAL_REQUIRED    400  attempted execute()/a self-approval below the correct authorization level
+ADMIN_REFUND_SELF_APPROVAL        400  the same admin who requested a refund attempted to approve it
+ADMIN_REASON_REQUIRED             400  a sensitive action (trust action, refund approve/reject, PII reveal) submitted without a non-empty reason
+```
+
 ## API endpoints
 
 ```
@@ -3699,6 +3951,47 @@ URGENT bypass; H: health-category SMS privacy; I: cross-user isolation;
 J: cross-seller isolation via a genuinely-triggered domain event) plus
 the two concurrency races described above.
 
+Everything in the Handoff 11 acceptance criteria: an internal operating
+system for PET LIFE OS's own teams, built as a genuinely separate
+identity/authorization axis (`AdminUser`, never granted from a consumer
+session alone) with least-privilege RBAC across 9 roles enforced by a
+static permission map and a real guard on every route; a Customer/
+Household/Pet 360 view composing existing tables into one aggregate, with
+PII masked by default and reveal always audited; Support Cases with a
+centrally-validated state machine and strict PUBLIC/INTERNAL message
+visibility (proven never to leak internal content to a customer-scoped
+read); append-only Internal Notes and Tasks/follow-ups; Disputes whose
+schema has no foreign key to `Refund` at all, so a resolution can never
+auto-trigger a refund (proven directly via ledger/refund-count
+assertions), with append-only Evidence; Trust & Safety operations that
+mutate real operational-status fields (`verificationStatus`/`status`)
+rather than ever hard-deleting a subject, plus an Appeal lifecycle;
+minimal read-only order financial visibility with refund initiation
+routed exclusively through Handoff 07's existing `RefundsService` (zero
+changes to it) and genuine two-person control above a configurable IRR
+threshold, enforced at both the application layer and a database `CHECK`
+constraint; a full audit trail for every sensitive action with
+reason-required enforcement; a completely separate Admin frontend shell
+at operational density; concurrency safety for every identified race
+(case/dispute/trust-case transitions, refund double-execution) via the
+same `SELECT ... FOR UPDATE` row-locking discipline `InventoryReservationService`
+established in Handoff 06; Support notifications routed through Handoff
+10's existing `NotificationOrchestratorService` unchanged; every Handoff
+01-10 backend/frontend test still green (188 backend e2e scenarios — 2
+pre-existing, documented flaky timeouts unrelated to this handoff, see
+Known limitations — and 138 frontend tests); and backend e2e coverage for
+all twelve required flows (A: RBAC denies a permission-lacking role; B:
+Customer 360 aggregation across domains; C: PII masked by default,
+reveal audited; D: Support Case state machine + PUBLIC/INTERNAL
+visibility enforcement; E: Dispute resolution leaves Refund count
+unchanged; F: concurrent case-transition race resolves to exactly one
+winner; G: Trust action mutates a real operational-status field, never a
+delete; H: Appeal lifecycle; I: refund below threshold executes
+single-admin; J: refund at/above threshold requires a distinct approver,
+self-approval rejected; K: refund double-execution race is a safe
+no-op; L: audit log records reason-required actions) plus the two
+required concurrency races.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -3916,10 +4209,14 @@ the two concurrency races described above.
   partial amount exist and are exercised end to end, but no provider here
   has a confirmed partial-refund capability, so `OrderStatus.
   PARTIALLY_REFUNDED`/`FinancingIntentStatus.PARTIALLY_REFUNDED` stay
-  unreachable; there is also no admin/support role model yet, so any
-  signed-in owner of an order can request its refund (spec: "consumer
-  refund initiation may be limited... implement internal/dev refund route
-  and owner-visible status only").
+  unreachable; at the time of this handoff there was also no admin/support
+  role model yet, so any signed-in owner of an order could request its own
+  refund (spec: "consumer refund initiation may be limited... implement
+  internal/dev refund route and owner-visible status only") — Handoff 11
+  has since added a real `AdminUser`/RBAC model and a two-person-control
+  admin refund flow (`AdminRefundService`) layered on top of this same
+  `RefundsService.request()` without changing it; this consumer-initiated
+  path remains as-is alongside it.
 - **Reconciliation has no scheduler** — `POST
   /payments/reconcile/:paymentIntentId`/`POST
   /financing/reconcile/:financingIntentId` are manual/job-friendly
@@ -3930,12 +4227,15 @@ the two concurrency races described above.
   `RESOLVED_SUCCEEDED`/`RESOLVED_FAILED` branches are proven by advancing
   a gateway's own in-memory status map directly in a test (see the
   reconciliation e2e scenario above), not by a real missed-webhook race.
-- **No admin/support role model** — the internal payment/financing ops
-  view (`GET /checkout/:id/ops`) and the refund endpoints are reachable
-  only by session auth plus ownership, exactly like every other consumer
-  endpoint; there is no separate ops/support account type, and no audit
-  trail of *who* looked at a checkout's payment history beyond the
-  request logs themselves.
+- **No admin/support role model at the time of this handoff** — the
+  internal payment/financing ops view (`GET /checkout/:id/ops`) and the
+  refund endpoints were reachable only by session auth plus ownership,
+  exactly like every other consumer endpoint, with no separate ops/
+  support account type or audit trail of who looked at a checkout's
+  payment history. Handoff 11 has since introduced exactly that (a real
+  `AdminUser`/RBAC model, `GET /admin/orders/:orderId/financials` for
+  read-only financial visibility, and a fully audited admin refund flow);
+  this section is left as a historical record of Handoff 07's own scope.
 - **The payment-method-switch guard only unblocks after a terminal
   failure, never mid-flight** (Handoff 07) — once a checkout commits to
   `ONLINE_PAYMENT` or `INSTALLMENTS`, switching to the other method is
@@ -4139,12 +4439,63 @@ the two concurrency races described above.
   seller's operational notifications and their consumer notifications
   already share the same recipient identity (a PET LIFE OS user account).
 
+- **Admin AI Assistant is documentation-only** — the spec explicitly asked
+  for this to be scoped and described, not built; no code exists for it in
+  this handoff, deliberately.
+- **Attachments are metadata-hooks-only** — `SupportMessage`/
+  `DisputeEvidence` carry an `attachmentRef` string field for a future
+  object-storage integration to populate, but no upload endpoint or
+  storage adapter exists yet; a future handoff wires an actual upload
+  flow behind this same field, no schema change needed.
+- **Appeals have no dedicated frontend page** — `Appeal` submission/
+  resolution is fully implemented and tested on the backend
+  (`POST /admin/trust-actions/:actionId/appeals`,
+  `PATCH /admin/appeals/:id/resolve`) and reachable inline from
+  `AdminTrustCaseDetailView`, but there is no standalone appeals queue/
+  list view.
+- **Trust content-moderation subjects are schema-only** — `USER`/
+  `HOUSEHOLD`/`LISTING`/`REVIEW`/`COMMUNITY_CONTENT`/`PET_INCIDENT`
+  `TrustCase`/`TrustAction` rows are fully recorded and audited, but
+  (unlike `PROVIDER`/`SELLER`, which flip a real `verificationStatus`/
+  `status` field) these subject types have no enforcement field on their
+  own models yet — a suspended `LISTING`, for example, is not yet hidden
+  from consumer discovery by this action alone.
+- **Verification reuses existing enums, no new KYC infrastructure** —
+  `PATCH /admin/providers/:id/verification`/`/admin/sellers/:id/verification`
+  transition the same `verificationStatus` fields Handoffs 05/09 already
+  defined; no document-upload/KYC-provider integration was in scope.
+  Search is Postgres `contains`/exact-match only, per the spec's own "no
+  Elasticsearch this phase" allowance — a future handoff needing fuzzy/
+  ranked search should introduce a real search index rather than
+  extending this query pattern.
+- **Two pre-existing, documented flaky e2e tests, unrelated to this
+  handoff** ("returns only VERIFIED providers by default" from Handoff 03
+  and its Handoff 04 counterpart) occasionally exceed their Jest timeout
+  due to a cold Prisma connection-pool warm-up cost in this sandbox — a
+  comment already in the test file dates this to earlier handoffs; it
+  reproduced consistently across every full-suite run in this session and
+  is not a new H11 regression.
+- **`apps/api/prisma/seed.ts`'s pre-existing (Handoff 01-era)
+  non-idempotency** — `main()` unconditionally `.create()`s the seed
+  customer's Household/Pets/OnboardingProgress rows after only
+  `.upsert()`-ing her `User` row, so re-running `pnpm db:seed` against an
+  already-seeded database fails on a `P2002` unique-constraint violation
+  unrelated to anything this handoff added. This handoff's own
+  `seedAdmin()` addition was verified independently (idempotent — running
+  it twice produces exactly one seeded support case) and left this
+  existing bug unfixed per this handoff's explicit scope boundary; a
+  clean fix is a small existence-check before each `.create()` call in
+  `main()`, left for whichever session next has seed.ts in scope.
+
 ## Next recommended coding handoff
 
-**Marketplace + Seller financial settlement** (Handoff 11), the piece
+**Marketplace + Seller financial settlement** (Handoff 12), the piece
 Handoff 09 deliberately left out to avoid entangling Seller OS's launch
-with the ledger, and now with a notification layer in place to actually
-tell a seller their payable changed: a genuinely complete Seller OS and
+with the ledger, and now with both a notification layer (Handoff 10) and
+a real admin/finance oversight layer (Handoff 11, including
+`AdminRefundService`'s two-person control and read-only order
+financials) in place to actually tell a seller their payable changed and
+give finance staff visibility into it: a genuinely complete Seller OS and
 marketplace-channel architecture exists (real `SellerMembership`
 authorization, inventory with a full audit trail,
 `MarketplaceChannelAdapter` with a working `DevMarketplaceAdapter` and
@@ -4170,12 +4521,23 @@ refund-adjusted seller payable; and (4) genuine settlement/payout
 execution (an actual transfer to the seller, on some cadence), which
 Handoff 09's own note already flagged as substantial enough to be its
 own follow-up. Once a real posting exists, wire a `seller.payable_updated`
-notification through the exact same `NotificationOrchestratorService`
-this handoff built — no new notification infrastructure, just a new
-domain-event listener and a template. Keep `MarketplaceOrder`'s ingestion
-shape and `InventoryMovementService`'s oversell-protection invariants
-untouched — this handoff is additive ledger-posting logic layered on top
-of what already exists, not a rewrite of either.
+notification through the existing `NotificationOrchestratorService`
+(Handoff 10) — no new notification infrastructure, just a new
+domain-event listener and a template — and surface it in
+`AdminFinanceService`'s read-only order-financials view (Handoff 11) so
+finance staff can actually see what a seller is owed without a new admin
+surface. Keep `MarketplaceOrder`'s ingestion shape and
+`InventoryMovementService`'s oversell-protection invariants untouched —
+this handoff is additive ledger-posting logic layered on top of what
+already exists, not a rewrite of either.
+
+A related, smaller option this handoff also unlocks: a `Dispute`
+resolution that leads to a refund still requires an admin to separately
+open the refund flow today (by design — see the Handoff 11 section
+above on why `Dispute` has no FK to `Refund`); a follow-up could add a
+one-click "resolve and initiate refund" convenience action in the Admin
+frontend that simply calls both existing endpoints in sequence from the
+UI — no schema or service change, since the decoupling itself must stay.
 
 Alternatively, if the business prioritizes closing the remaining
 external-provider gaps instead of building settlement: once real merchant

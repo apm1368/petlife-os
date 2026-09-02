@@ -127,6 +127,16 @@ const envSchema = z.object({
   /// worker's interval never starts under NODE_ENV=test; tests call its
   /// processDueDeliveries() directly for determinism.
   NOTIFICATION_WORKER_INTERVAL_MS: z.coerce.number().int().positive().default(5000),
+
+  /// Admin CRM + Support + Disputes + Trust Operations (Handoff 11) —
+  /// two-person control threshold for refund execution (spec: "refund
+  /// above threshold -> REQUESTED -> APPROVED -> EXECUTED"). Below this
+  /// amount a single FINANCE-permission admin may go straight to EXECUTED;
+  /// at/above it, a *different* admin than the requester must APPROVE
+  /// first (AdminRefundService enforces this, not just the threshold
+  /// value). Amount is in the smallest currency unit, matching every other
+  /// amount field in the schema (Order.totalAmount, Refund.amount, ...).
+  ADMIN_REFUND_APPROVAL_THRESHOLD_IRR: z.coerce.number().int().positive().default(5_000_000),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

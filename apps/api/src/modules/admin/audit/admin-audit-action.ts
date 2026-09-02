@@ -1,0 +1,36 @@
+/**
+ * The admin audit action vocabulary. `AdminAuditLog.action` itself stays
+ * plain text in Postgres (see the model's own doc comment in
+ * schema.prisma) — this TypeScript union is where compile-time safety
+ * actually lives, mirroring DomainEventType's own relationship to
+ * DomainEvent.type. Grows as later H11 stages add mutating admin
+ * endpoints; a typo'd action fails the build rather than silently writing
+ * an unrecognized string into the audit table.
+ */
+export type AdminAuditAction =
+  | "admin_user.created"
+  | "admin_user.role_changed"
+  | "admin_user.suspended"
+  | "admin_user.reactivated"
+  | "support_case.created"
+  | "support_case.assigned"
+  | "support_case.status_changed"
+  | "support_message.posted"
+  | "internal_note.added"
+  | "admin_task.created"
+  | "admin_task.completed"
+  | "dispute.opened"
+  | "dispute.evidence_added"
+  | "dispute.status_changed"
+  | "trust_case.opened"
+  | "trust_case.assigned"
+  | "trust_case.status_changed"
+  | "trust_action.taken"
+  | "appeal.submitted"
+  | "appeal.resolved"
+  | "admin_refund_approval.requested"
+  | "admin_refund_approval.approved"
+  | "admin_refund_approval.rejected"
+  | "admin_refund_approval.executed"
+  | "verification.status_changed"
+  | "pii.revealed";

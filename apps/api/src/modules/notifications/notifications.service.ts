@@ -5,9 +5,10 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotificationNotFoundException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 
-type NotificationWithDeliveries = Notification & { deliveries: NotificationDelivery[] };
+export type NotificationWithDeliveries = Notification & { deliveries: NotificationDelivery[] };
 
-function toDto(row: NotificationWithDeliveries): NotificationDto {
+/** Exported for reuse by Admin Customer 360 (Handoff 11) — Communications History must reuse this as the source of truth rather than building a second read path. */
+export function toNotificationDto(row: NotificationWithDeliveries): NotificationDto {
   return {
     id: row.id,
     type: row.type,
@@ -54,7 +55,7 @@ export class NotificationsService {
       this.prisma.notification.findMany({ where: { userId }, include: { deliveries: true }, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.notification.count({ where: { userId } }),
     ]);
-    return toPaginatedDto(rows.map(toDto), total, page, pageSize);
+    return toPaginatedDto(rows.map(toNotificationDto), total, page, pageSize);
   }
 
   async unreadCount(userId: string): Promise<UnreadCountDto> {
@@ -70,7 +71,7 @@ export class NotificationsService {
       data: existing.readAt ? {} : { readAt: new Date() },
       include: { deliveries: true },
     });
-    return toDto(updated);
+    return toNotificationDto(updated);
   }
 
   async markAllRead(userId: string): Promise<{ updatedCount: number }> {

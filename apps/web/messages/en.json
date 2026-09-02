@@ -1412,5 +1412,307 @@
         "end": "To"
       }
     }
+  },
+  "admin": {
+    "shell": {
+      "title": "PET LIFE OS Admin",
+      "notAnAdmin": {
+        "title": "No admin access",
+        "body": "Your account does not have internal platform access.",
+        "backToApp": "Back to PET LIFE OS"
+      },
+      "role": {
+        "SUPER_ADMIN": "Super Admin",
+        "ADMIN": "Admin",
+        "SUPPORT": "Support",
+        "TRUST_SAFETY": "Trust & Safety",
+        "FINANCE": "Finance",
+        "OPERATIONS": "Operations",
+        "CONTENT": "Content",
+        "VERIFICATION": "Verification",
+        "READ_ONLY": "Read Only"
+      },
+      "nav": {
+        "dashboard": "Dashboard",
+        "customers": "Customers",
+        "support": "Support",
+        "disputes": "Disputes",
+        "trust": "Trust & Safety",
+        "providers": "Providers",
+        "sellers": "Sellers",
+        "transactions": "Transactions",
+        "tasks": "Tasks",
+        "audit": "Audit"
+      }
+    },
+    "common": {
+      "loading": "Loading…",
+      "retry": "Retry",
+      "empty": "Nothing here yet.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Required — explain why",
+      "assign": "Assign",
+      "assigneeLabel": "Assignee admin ID",
+      "backToList": "Back to list"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "cards": {
+        "openSupportCases": "Open support cases",
+        "openDisputes": "Open disputes",
+        "openTrustCases": "Open trust cases",
+        "pendingRefundApprovals": "Pending refund approvals",
+        "openTasks": "Open tasks"
+      }
+    },
+    "customers": {
+      "title": "Customers",
+      "searchPlaceholder": "Search by name, email, or phone",
+      "view": "View 360"
+    },
+    "customer360": {
+      "notFound": "Customer not found.",
+      "sections": {
+        "contact": "Contact",
+        "households": "Households & pets",
+        "recentOrders": "Recent orders",
+        "recentBookings": "Recent bookings",
+        "supportCases": "Support cases",
+        "disputes": "Disputes",
+        "internalNotes": "Internal notes",
+        "communications": "Communications history",
+        "activity": "Activity timeline"
+      },
+      "reveal": {
+        "email": "Reveal email",
+        "phone": "Reveal phone",
+        "submit": "Reveal",
+        "revealedAs": "Revealed: {value}"
+      },
+      "addNote": {
+        "placeholder": "Add an internal note (never shown to the customer)",
+        "submit": "Add note"
+      },
+      "pets": "{count} pet(s)"
+    },
+    "support": {
+      "title": "Support cases",
+      "newCase": "New case",
+      "createTitle": "Create support case",
+      "filter": {
+        "allStatuses": "All statuses"
+      },
+      "status": {
+        "OPEN": "Open",
+        "IN_PROGRESS": "In progress",
+        "WAITING_ON_USER": "Waiting on user",
+        "WAITING_ON_INTERNAL": "Waiting internally",
+        "RESOLVED": "Resolved",
+        "CLOSED": "Closed"
+      },
+      "category": {
+        "ACCOUNT": "Account",
+        "PET": "Pet",
+        "HEALTH": "Health",
+        "BOOKING": "Booking",
+        "SERVICE": "Service",
+        "PAYMENT": "Payment",
+        "REFUND": "Refund",
+        "ORDER": "Order",
+        "DELIVERY": "Delivery",
+        "SELLER": "Seller",
+        "PROVIDER": "Provider",
+        "MARKETPLACE": "Marketplace",
+        "TRUST_SAFETY": "Trust & Safety",
+        "OTHER": "Other"
+      },
+      "priority": {
+        "LOW": "Low",
+        "NORMAL": "Normal",
+        "HIGH": "High",
+        "URGENT": "Urgent"
+      },
+      "form": {
+        "requesterUserId": "Requester user ID",
+        "subject": "Subject",
+        "description": "Description",
+        "category": "Category",
+        "priority": "Priority",
+        "submit": "Create case"
+      },
+      "detail": {
+        "caseNumber": "Case {number}",
+        "requester": "Requester: {name}",
+        "assignTo": "Assign to admin",
+        "changeStatus": "Change status",
+        "messages": "Messages",
+        "composePlaceholder": "Write a reply…",
+        "visibilityPublic": "Public reply",
+        "visibilityInternal": "Internal note (never sent to the customer)",
+        "send": "Send",
+        "notes": "Internal notes"
+      }
+    },
+    "disputes": {
+      "title": "Disputes",
+      "newDispute": "New dispute",
+      "createTitle": "Open dispute",
+      "status": {
+        "OPEN": "Open",
+        "UNDER_REVIEW": "Under review",
+        "AWAITING_EVIDENCE": "Awaiting evidence",
+        "RESOLVED_CUSTOMER": "Resolved for customer",
+        "RESOLVED_PROVIDER": "Resolved for provider",
+        "RESOLVED_SELLER": "Resolved for seller",
+        "PARTIAL_RESOLUTION": "Partial resolution",
+        "REJECTED": "Rejected",
+        "CLOSED": "Closed"
+      },
+      "subjectType": {
+        "BOOKING": "Booking",
+        "ORDER": "Order",
+        "PAYMENT": "Payment",
+        "REFUND": "Refund",
+        "SHIPMENT": "Shipment",
+        "PROVIDER": "Provider",
+        "SELLER": "Seller"
+      },
+      "form": {
+        "subjectType": "Subject type",
+        "subjectId": "Subject ID",
+        "raisedByUserId": "Raised by (user ID, optional)",
+        "claim": "Claim",
+        "submit": "Open dispute"
+      },
+      "detail": {
+        "claim": "Claim",
+        "resolution": "Resolution summary",
+        "evidence": "Evidence",
+        "addEvidence": "Add evidence",
+        "evidencePlaceholder": "Statement",
+        "changeStatus": "Change status",
+        "financialNote": "Financial state (refunds) is tracked separately — resolving a dispute does not trigger a refund automatically."
+      }
+    },
+    "trust": {
+      "title": "Trust & Safety",
+      "newCase": "Open trust case",
+      "createTitle": "Open trust case",
+      "status": {
+        "OPEN": "Open",
+        "UNDER_REVIEW": "Under review",
+        "RESOLVED": "Resolved",
+        "CLOSED": "Closed"
+      },
+      "severity": {
+        "LOW": "Low",
+        "MEDIUM": "Medium",
+        "HIGH": "High",
+        "CRITICAL": "Critical"
+      },
+      "subjectType": {
+        "USER": "User",
+        "HOUSEHOLD": "Household",
+        "PROVIDER": "Provider",
+        "SELLER": "Seller",
+        "LISTING": "Listing",
+        "REVIEW": "Review",
+        "COMMUNITY_CONTENT": "Community content",
+        "PET_INCIDENT": "Pet incident"
+      },
+      "actionType": {
+        "WARNING": "Warning",
+        "RESTRICT": "Restrict",
+        "SUSPEND": "Suspend",
+        "REMOVE_CONTENT": "Remove content",
+        "REQUIRE_REVERIFICATION": "Require re-verification",
+        "RESTORE": "Restore",
+        "NO_ACTION": "No action"
+      },
+      "form": {
+        "subjectType": "Subject type",
+        "subjectId": "Subject ID",
+        "reason": "Reason",
+        "severity": "Severity",
+        "submit": "Open case"
+      },
+      "detail": {
+        "changeStatus": "Change status",
+        "actions": "Actions taken",
+        "takeAction": "Take action",
+        "actionReason": "Reason",
+        "appeal": "Appeal",
+        "submitAppeal": "Submit appeal",
+        "appellantUserId": "Appellant user ID",
+        "appealReason": "Appeal reason",
+        "resolveAppeal": "Resolve appeal",
+        "resolution": "Resolution"
+      },
+      "appealStatus": {
+        "SUBMITTED": "Submitted",
+        "UNDER_REVIEW": "Under review",
+        "UPHELD": "Upheld",
+        "OVERTURNED": "Overturned",
+        "PARTIALLY_OVERTURNED": "Partially overturned"
+      }
+    },
+    "orgs": {
+      "providersTitle": "Providers",
+      "sellersTitle": "Sellers",
+      "searchPlaceholder": "Search by name",
+      "verification": {
+        "changeStatus": "Change verification status",
+        "submit": "Update"
+      }
+    },
+    "transactions": {
+      "title": "Transactions",
+      "orderIdPlaceholder": "Order ID",
+      "lookup": "Look up",
+      "paymentIntents": "Payment intents",
+      "ledgerEntries": "Ledger entries",
+      "refund": {
+        "title": "Request refund",
+        "amount": "Amount",
+        "reason": "Reason",
+        "submit": "Request",
+        "approve": "Approve",
+        "reject": "Reject",
+        "execute": "Execute",
+        "status": {
+          "REQUESTED": "Requested",
+          "APPROVED": "Approved",
+          "REJECTED": "Rejected",
+          "EXECUTED": "Executed"
+        }
+      }
+    },
+    "tasks": {
+      "title": "Tasks",
+      "newTask": "New task",
+      "createTitle": "Create task",
+      "status": {
+        "OPEN": "Open",
+        "IN_PROGRESS": "In progress",
+        "DONE": "Done",
+        "CANCELLED": "Cancelled"
+      },
+      "form": {
+        "title": "Title",
+        "description": "Description",
+        "dueAt": "Due date",
+        "submit": "Create"
+      }
+    },
+    "audit": {
+      "title": "Audit trail",
+      "entityType": "Entity type",
+      "entityId": "Entity ID",
+      "action": "Action",
+      "reason": "Reason",
+      "by": "By {name}"
+    }
   }
 }

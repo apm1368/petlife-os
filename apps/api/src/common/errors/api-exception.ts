@@ -632,3 +632,130 @@ export class MessagingWebhookInvalidException extends ApiException {
     super("MESSAGING_WEBHOOK_INVALID", "The messaging webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Admin CRM + Support + Disputes + Trust Operations (Handoff 11)
+// ---------------------------------------------------------------------------
+
+/**
+ * Mirrors ProviderAccessDeniedException/SellerAccessDeniedException —
+ * `details.reason` distinguishes NOT_AN_ADMIN / ADMIN_SUSPENDED /
+ * INSUFFICIENT_PERMISSION. Thrown for any /admin route when the caller's
+ * session does not resolve to an ACTIVE AdminUser row with the required
+ * permission — a consumer session alone never satisfies this (spec: "no
+ * implicit access through normal user session alone").
+ */
+export class AdminAccessDeniedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADMIN_ACCESS_DENIED", "You do not have access to this admin operation.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+export class AdminUserNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADMIN_USER_NOT_FOUND", "Admin user not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** A customer (User) looked up by an admin route — distinct from AdminUserNotFoundException, which is about the internal-platform identity, not a consumer. */
+export class AdminCustomerNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADMIN_CUSTOMER_NOT_FOUND", "Customer not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SupportCaseNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_CASE_NOT_FOUND", "Support case not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown by the centralized support-case transition validator — spec: "no arbitrary status PATCH". */
+export class InvalidSupportCaseTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_SUPPORT_CASE_TRANSITION", "This support case status transition is not allowed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class AdminTaskNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADMIN_TASK_NOT_FOUND", "Task not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class DisputeNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DISPUTE_NOT_FOUND", "Dispute not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown by the centralized dispute transition validator — also the mechanism that makes concurrent-resolution races safe (see DisputeService.transition()'s optimistic status-guarded update). */
+export class InvalidDisputeTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_DISPUTE_TRANSITION", "This dispute status transition is not allowed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TrustCaseNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_CASE_NOT_FOUND", "Trust case not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidTrustCaseTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_TRUST_CASE_TRANSITION", "This trust case status transition is not allowed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class AppealNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("APPEAL_NOT_FOUND", "Appeal not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class TrustActionNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_ACTION_NOT_FOUND", "Trust action not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Appeal.trustActionId is @unique — one appeal per action (spec gives no provision for repeated appeals of the same action this phase). */
+export class AppealAlreadyExistsException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("APPEAL_ALREADY_EXISTS", "An appeal already exists for this trust action.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Used only by admin-facing lookups (e.g. verification-status overrides) — consumer-facing provider routes have their own not-found handling. */
+export class ProviderOrganizationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PROVIDER_ORGANIZATION_NOT_FOUND", "Provider organization not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class AdminRefundApprovalNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADMIN_REFUND_APPROVAL_NOT_FOUND", "Refund approval not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidAdminRefundApprovalTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_ADMIN_REFUND_APPROVAL_TRANSITION", "This refund approval status transition is not allowed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Two-person control (spec: "a *different* admin than the requester must APPROVE") — never bypassable, including by a SUPER_ADMIN. */
+export class AdminRefundSelfApprovalException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADMIN_REFUND_SELF_APPROVAL", "A refund approval must be approved by a different admin than the requester.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Thrown when a request tries to jump straight to EXECUTED for an amount at/above ADMIN_REFUND_APPROVAL_THRESHOLD_IRR without a prior APPROVED transition by a different admin. */
+export class AdminRefundApprovalRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ADMIN_REFUND_APPROVAL_REQUIRED", "This refund amount requires a second admin's approval before it can be executed.", HttpStatus.CONFLICT, details);
+  }
+}

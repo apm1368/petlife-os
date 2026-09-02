@@ -76,6 +76,15 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "یادآوری مراقبتی", body: "یک یادآوری مراقبتی برای {{petName}} ثبت شد.", smsBody: "یک یادآوری مراقبتی برای {{petName}} دارید." },
     en: { title: "Care reminder", body: "A care reminder for {{petName}} was recorded.", smsBody: "You have a care reminder for {{petName}}." },
   },
+  /** Handoff 11 — a PUBLIC-visibility admin reply on the requester's own support case. `body`/`smsBody` never include the message content itself (an internal note or a message with sensitive detail must never leak via SMS/push copy) — the recipient opens the app to read it. */
+  "support.message_posted": {
+    fa: { title: "پاسخ جدید به درخواست پشتیبانی شما", body: "یک پاسخ جدید برای درخواست پشتیبانی {{caseNumber}} ثبت شد.", smsBody: "پاسخ جدیدی برای درخواست پشتیبانی شما در پت‌لایف ثبت شد." },
+    en: { title: "New reply on your support case", body: "A new reply was posted on support case {{caseNumber}}.", smsBody: "You have a new reply on your PET LIFE OS support case." },
+  },
+  "support.case_resolved": {
+    fa: { title: "درخواست پشتیبانی شما حل شد", body: "درخواست پشتیبانی {{caseNumber}} به عنوان حل‌شده علامت‌گذاری شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف حل شد." },
+    en: { title: "Your support case was resolved", body: "Support case {{caseNumber}} was marked resolved.", smsBody: "Your PET LIFE OS support case was resolved." },
+  },
 };
 
 export function hasTemplate(key: string): boolean {
