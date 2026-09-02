@@ -41,6 +41,7 @@ import { RefundsModule } from "./modules/commerce/refunds/refunds.module";
 import { ReconciliationModule } from "./modules/commerce/reconciliation/reconciliation.module";
 import { OrdersModule } from "./modules/commerce/orders/orders.module";
 import { LogisticsModule } from "./modules/commerce/logistics/logistics.module";
+import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.module";
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { LogisticsModule } from "./modules/commerce/logistics/logistics.module";
     ReconciliationModule,
     OrdersModule,
     LogisticsModule,
+    MarketplaceModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

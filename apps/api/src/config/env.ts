@@ -80,6 +80,25 @@ const envSchema = z.object({
   SNAPPBOX_API_BASE_URL: z.string().optional(),
   SNAPPBOX_API_KEY: z.string().optional(),
   SNAPPBOX_WEBHOOK_SECRET: z.string().optional(),
+
+  /// Seller OS + Marketplace Channel Integrations (Handoff 09) — same
+  /// "sandbox is always safe, production is validated" rule as
+  /// PAYMENT_SANDBOX_MODE/SHIPPING_MODE (see validateMarketplaceConfig
+  /// below): no official Torob/Digikala merchant credentials exist for this
+  /// project (see README "Provider integration status"), so
+  /// MARKETPLACE_SANDBOX_MODE=production is rejected unless every enabled
+  /// real provider's credentials are actually configured.
+  MARKETPLACE_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
+  DEV_MARKETPLACE_ENABLED: z.coerce.boolean().default(true),
+  TOROB_ENABLED: z.coerce.boolean().default(true),
+  DIGIKALA_ENABLED: z.coerce.boolean().default(true),
+  /// Optional and unused by the sandbox-stub adapters — present only so a
+  /// real integration has a place to read credentials from without a schema
+  /// change, and so startup validation can require them in "production" mode.
+  TOROB_BASE_URL: z.string().optional(),
+  TOROB_API_KEY: z.string().optional(),
+  DIGIKALA_BASE_URL: z.string().optional(),
+  DIGIKALA_API_KEY: z.string().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -113,9 +132,24 @@ function validateShippingConfig(env: AppEnv): void {
   }
 }
 
+/// Handoff 09 (spec section 58) — "no fake production success" applies here
+/// exactly as it does to payments/shipping: a real provider enabled without
+/// its credentials configured fails startup rather than silently running
+/// DevMarketplaceAdapter-equivalent simulation against real listings/orders.
+function validateMarketplaceConfig(env: AppEnv): void {
+  if (env.MARKETPLACE_SANDBOX_MODE !== "production") return;
+  const missing: string[] = [];
+  if (env.TOROB_ENABLED && !(env.TOROB_BASE_URL && env.TOROB_API_KEY)) missing.push("TOROB_BASE_URL/TOROB_API_KEY");
+  if (env.DIGIKALA_ENABLED && !(env.DIGIKALA_BASE_URL && env.DIGIKALA_API_KEY)) missing.push("DIGIKALA_BASE_URL/DIGIKALA_API_KEY");
+  if (missing.length > 0) {
+    throw new Error(`MARKETPLACE_SANDBOX_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   const env = loadEnv(envSchema, source);
   validatePaymentConfig(env);
   validateShippingConfig(env);
+  validateMarketplaceConfig(env);
   return env;
 }

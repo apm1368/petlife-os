@@ -1701,6 +1701,7 @@ export enum MarketplaceOrderStatus {
   CANCELLED = "CANCELLED",
   RETURNED = "RETURNED",
   FAILED = "FAILED",
+  UNKNOWN = "UNKNOWN",
 }
 
 export enum DeliveryResponsibility {

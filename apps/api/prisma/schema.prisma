@@ -539,6 +539,11 @@ enum MarketplaceOrderStatus {
   CANCELLED
   RETURNED
   FAILED
+  /// An unrecognized raw provider status (spec section 29) — never guessed
+  /// into one of the above, recorded for reconciliation instead, the same
+  /// "UNKNOWN must never imply success" rule as ShipmentStatus.UNKNOWN
+  /// (Handoff 08).
+  UNKNOWN
 }
 
 /// Who actually performs last-mile delivery for a given Fulfillment (spec
