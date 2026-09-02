@@ -17,12 +17,16 @@ import {
   CartStatus,
   OrderStatus,
   FinancingIntentStatus,
+  FulfillmentStatus,
+  ShipmentStatus,
+  ShippingProvider,
 } from "@prisma/client";
 import request from "supertest";
 import { createHmac } from "node:crypto";
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { DevPaymentGateway } from "../src/modules/commerce/payments/dev-payment-gateway.service";
+import { FulfillmentTransitionService } from "../src/modules/commerce/logistics/fulfillment-transition.service";
 
 interface Cookies {
   session?: string;
@@ -2661,6 +2665,342 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
       const deniedOps = await stranger.get(`/checkout/${checkout.id}/ops`).expect(404);
       expect(deniedOps.body.error.code).toBe("CHECKOUT_NOT_FOUND");
+    });
+  });
+
+  describe("Delivery & Logistics Core (Handoff 08)", () => {
+    async function setupCheckoutReady(priceAmount = 1_000_000, onHand = 10) {
+      const identifier = `logistics-owner-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+      const product = await prisma.product.create({
+        data: { categoryId: category.id, title: `Product ${unique()}`, slug: `product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] },
+      });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+      const seller = await prisma.sellerOrganization.create({
+        data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US", city: "Tehran" },
+      });
+      const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount, currency: "IRR" } });
+      await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand } });
+      const addressRes = await client.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+      return { client, checkoutId: checkout.body.id as string, seller };
+    }
+
+    async function payAndGetOrderIds(client: ReturnType<typeof authedRequest>, checkoutId: string): Promise<string[]> {
+      await client.post(`/checkout/${checkoutId}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkoutId}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      return paid.body.orderIds as string[];
+    }
+
+    async function payAndGetOrderId(client: ReturnType<typeof authedRequest>, checkoutId: string): Promise<string> {
+      const [orderId] = await payAndGetOrderIds(client, checkoutId);
+      return orderId!;
+    }
+
+    it("requests shipping quotes from every enabled provider, deterministic price/ETA, standard + express", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const options = await client.get(`/checkout/${checkoutId}/shipping-quotes`).expect(200);
+      expect(options.body).toHaveLength(1);
+
+      const quotes = options.body[0].quotes as { provider: string; serviceLevel: string; priceIrr: number; status: string }[];
+      expect(new Set(quotes.map((q) => q.provider))).toEqual(new Set(["DEV", "ALOPEYK", "SNAPPBOX"]));
+
+      const devQuotes = quotes.filter((q) => q.provider === "DEV");
+      expect(devQuotes.map((q) => q.serviceLevel).sort()).toEqual(["EXPRESS", "STANDARD"]);
+      expect(devQuotes.find((q) => q.serviceLevel === "STANDARD")?.priceIrr).toBe(350_000);
+      expect(devQuotes.every((q) => q.status === "AVAILABLE")).toBe(true);
+    });
+
+    it("keeps every shipping quote price a plain integer, never a fractional IRR value", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const options = await client.get(`/checkout/${checkoutId}/shipping-quotes`).expect(200);
+      for (const group of options.body) {
+        for (const quote of group.quotes) expect(Number.isInteger(quote.priceIrr)).toBe(true);
+      }
+    });
+
+    it("selecting a quote recalculates the checkout's deliveryAmount/totalAmount server-side", async () => {
+      const { client, checkoutId } = await setupCheckoutReady(1_000_000);
+      const before = await client.get(`/checkout/${checkoutId}`).expect(200);
+      const options = await client.get(`/checkout/${checkoutId}/shipping-quotes`).expect(200);
+      const express = options.body[0].quotes.find((q: { provider: string; serviceLevel: string }) => q.provider === "DEV" && q.serviceLevel === "EXPRESS");
+
+      const selected = await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId: express.id }).expect(201);
+      expect(selected.body[0].quotes.find((q: { id: string }) => q.id === express.id).status).toBe("SELECTED");
+
+      const after = await client.get(`/checkout/${checkoutId}`).expect(200);
+      expect(after.body.deliveryAmount).toBe(express.priceIrr);
+      expect(after.body.totalAmount).toBe(before.body.subtotalAmount + express.priceIrr - before.body.discountAmount);
+    });
+
+    it("re-selecting the already-selected quote is a safe idempotent no-op", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const options = await client.get(`/checkout/${checkoutId}/shipping-quotes`).expect(200);
+      const quoteId = options.body[0].quotes[0].id as string;
+
+      await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId }).expect(201);
+      const second = await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId }).expect(201);
+      expect(second.body[0].quotes.find((q: { id: string }) => q.id === quoteId).status).toBe("SELECTED");
+
+      const selectedCount = (second.body[0].quotes as { status: string }[]).filter((q) => q.status === "SELECTED").length;
+      expect(selectedCount).toBe(1);
+    });
+
+    it("rejects selecting a shipping quote that belongs to a different checkout", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const { client: otherClient, checkoutId: otherCheckoutId } = await setupCheckoutReady();
+      const otherOptions = await otherClient.get(`/checkout/${otherCheckoutId}/shipping-quotes`).expect(200);
+      const foreignQuoteId = otherOptions.body[0].quotes[0].id as string;
+
+      const res = await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId: foreignQuoteId }).expect(404);
+      expect(res.body.error.code).toBe("SHIPPING_QUOTE_NOT_FOUND");
+    });
+
+    it("rejects selecting an expired shipping quote", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const options = await client.get(`/checkout/${checkoutId}/shipping-quotes`).expect(200);
+      const quoteId = options.body[0].quotes[0].id as string;
+      await prisma.shippingQuote.update({ where: { id: quoteId }, data: { expiresAt: new Date(Date.now() - 1000) } });
+
+      const res = await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId }).expect(410);
+      expect(res.body.error.code).toBe("SHIPPING_QUOTE_EXPIRED");
+    });
+
+    it("denies a stranger from reading another user's checkout shipping quotes (IDOR)", async () => {
+      const { checkoutId } = await setupCheckoutReady();
+      const stranger = authedRequest(app, await signUp(app, logSpy, `logistics-stranger-${unique()}@example.com`));
+      const denied = await stranger.get(`/checkout/${checkoutId}/shipping-quotes`).expect(404);
+      expect(denied.body.error.code).toBe("CHECKOUT_NOT_FOUND");
+    });
+
+    it("creates a Fulfillment at AWAITING_SELLER_PREPARATION automatically once payment confirms the Order", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      const fulfillment = await client.get(`/orders/${orderId}/fulfillment`).expect(200);
+      expect(fulfillment.body.status).toBe(FulfillmentStatus.AWAITING_SELLER_PREPARATION);
+      expect(fulfillment.body.orderId).toBe(orderId);
+    });
+
+    it("rejects an invalid Fulfillment transition and protects a terminal state from any further transition", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const transitions = app.get(FulfillmentTransitionService);
+
+      await expect(transitions.transition(fulfillmentRow.id, FulfillmentStatus.DELIVERED)).rejects.toMatchObject({ code: "FULFILLMENT_INVALID_TRANSITION" });
+
+      await transitions.transition(fulfillmentRow.id, FulfillmentStatus.CANCELED);
+      await expect(transitions.transition(fulfillmentRow.id, FulfillmentStatus.READY_FOR_PICKUP)).rejects.toMatchObject({ code: "FULFILLMENT_INVALID_TRANSITION" });
+    });
+
+    it("walks a Fulfillment/Shipment through the full happy path to DELIVERED via DevShippingAdapter", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+
+      await client.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(201);
+      const requested = await client.post(`/orders/${orderId}/fulfillment/request-courier`).expect(201);
+      expect(requested.body.fulfillment.status).toBe(FulfillmentStatus.PICKUP_REQUESTED);
+      expect(requested.body.shipment.status).toBe(ShipmentStatus.REQUESTED);
+      expect(requested.body.shipment.trackingCode).toBeTruthy();
+
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const shipmentRow = await prisma.shipment.findFirstOrThrow({ where: { fulfillmentId: fulfillmentRow.id } });
+      expect(shipmentRow.provider).toBe(ShippingProvider.DEV);
+
+      const milestones: ShipmentStatus[] = [ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED];
+      for (const toStatus of milestones) {
+        const res = await client.post(`/shipping/dev/simulate/${shipmentRow.providerShipmentId}`).send({ toStatus }).expect(201);
+        expect(res.body.processed).toBe(true);
+      }
+
+      const tracking = await client.get(`/orders/${orderId}/tracking`).expect(200);
+      expect(tracking.body.shipment.status).toBe(ShipmentStatus.DELIVERED);
+      expect(tracking.body.fulfillment.status).toBe(FulfillmentStatus.DELIVERED);
+      expect(tracking.body.timeline.find((m: { milestone: string }) => m.milestone === ShipmentStatus.DELIVERED).reached).toBe(true);
+
+      const orderDetail = await client.get(`/orders/${orderId}`).expect(200);
+      expect(orderDetail.body.fulfillment.status).toBe(FulfillmentStatus.DELIVERED);
+    });
+
+    it("acknowledges a duplicate shipment webhook without double-transitioning or duplicating ShipmentEvent rows", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      await client.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(201);
+      await client.post(`/orders/${orderId}/fulfillment/request-courier`).expect(201);
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const shipmentRow = await prisma.shipment.findFirstOrThrow({ where: { fulfillmentId: fulfillmentRow.id } });
+
+      const payload = { providerShipmentId: shipmentRow.providerShipmentId, providerEventId: `evt-${unique()}`, rawStatus: "assigned" };
+      const first = await request(app.getHttpServer()).post("/shipping/webhooks/dev").send(payload).expect(201);
+      expect(first.body.processed).toBe(true);
+
+      const second = await request(app.getHttpServer()).post("/shipping/webhooks/dev").send(payload).expect(201);
+      expect(second.body.duplicate).toBe(true);
+      expect(second.body.processed).toBe(false);
+
+      const eventCount = await prisma.shipmentEvent.count({ where: { shipmentId: shipmentRow.id, providerEventId: payload.providerEventId } });
+      expect(eventCount).toBe(1);
+      const updated = await prisma.shipment.findUniqueOrThrow({ where: { id: shipmentRow.id } });
+      expect(updated.status).toBe(ShipmentStatus.ASSIGNED);
+    });
+
+    it("maps an unrecognized raw provider status to UNKNOWN and never writes it over the local Shipment status", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      await client.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(201);
+      await client.post(`/orders/${orderId}/fulfillment/request-courier`).expect(201);
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const shipmentRow = await prisma.shipment.findFirstOrThrow({ where: { fulfillmentId: fulfillmentRow.id } });
+
+      const payload = { providerShipmentId: shipmentRow.providerShipmentId, providerEventId: `evt-${unique()}`, rawStatus: "totally_unrecognized_status" };
+      const res = await request(app.getHttpServer()).post("/shipping/webhooks/dev").send(payload).expect(201);
+      expect(res.body.processed).toBe(false);
+
+      const updated = await prisma.shipment.findUniqueOrThrow({ where: { id: shipmentRow.id } });
+      expect(updated.status).toBe(ShipmentStatus.REQUESTED);
+    });
+
+    it("reconciliation logs an explicit UNKNOWN_REMOTE_STATE when a Shipment has no provider reference yet", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      await prisma.shipment.create({
+        data: { fulfillmentId: fulfillmentRow.id, sequenceNumber: 1, provider: ShippingProvider.DEV, status: ShipmentStatus.CREATED, pickupAddressSnapshot: {}, deliveryAddressSnapshot: {} },
+      });
+
+      const res = await client.post(`/orders/${orderId}/shipment/reconcile`).expect(201);
+      expect(res.body.action).toBe("UNKNOWN_REMOTE_STATE");
+    });
+
+    it("reconciliation resolves a stale local/provider disagreement but never regresses a Shipment that already reached a terminal state locally", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      await client.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(201);
+      await client.post(`/orders/${orderId}/fulfillment/request-courier`).expect(201);
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const shipmentRow = await prisma.shipment.findFirstOrThrow({ where: { fulfillmentId: fulfillmentRow.id } });
+
+      // The provider's own record (DevShippingAdapter's in-memory state) advances to ASSIGNED via a real webhook...
+      await request(app.getHttpServer())
+        .post("/shipping/webhooks/dev")
+        .send({ providerShipmentId: shipmentRow.providerShipmentId, providerEventId: `evt-${unique()}`, rawStatus: "assigned" })
+        .expect(201);
+
+      // ...while local somehow already reached DELIVERED (e.g. an earlier webhook was processed) — the spec's own
+      // worked example: "Local: DELIVERED, Provider: IN_TRANSIT → keep DELIVERED, record inconsistency".
+      await prisma.shipment.update({ where: { id: shipmentRow.id }, data: { status: ShipmentStatus.DELIVERED, actualDeliveryAt: new Date() } });
+
+      const result = await client.post(`/orders/${orderId}/shipment/reconcile`).expect(201);
+      expect(result.body.action).toBe("NONE");
+      expect(result.body.localStatus).toBe(ShipmentStatus.DELIVERED);
+      expect(result.body.remoteStatus).toBe(ShipmentStatus.ASSIGNED);
+
+      const after = await prisma.shipment.findUniqueOrThrow({ where: { id: shipmentRow.id } });
+      expect(after.status).toBe(ShipmentStatus.DELIVERED);
+    });
+
+    it("gives a multi-seller checkout independent Fulfillments per seller Order", async () => {
+      const identifier = `logistics-multi-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+
+      async function sellerAndOffer() {
+        const product = await prisma.product.create({
+          data: { categoryId: category.id, title: `Product ${unique()}`, slug: `product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] },
+        });
+        const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+        const seller = await prisma.sellerOrganization.create({
+          data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" },
+        });
+        const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount: 1_000_000, currency: "IRR" } });
+        await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand: 10 } });
+        return offer;
+      }
+
+      const offerA = await sellerAndOffer();
+      const offerB = await sellerAndOffer();
+      const addressRes = await client.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
+      await client.post("/cart/items").send({ offerId: offerA.id, quantity: 1 }).expect(201);
+      await client.post("/cart/items").send({ offerId: offerB.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+
+      const orderIds = await payAndGetOrderIds(client, checkout.body.id);
+      expect(orderIds).toHaveLength(2);
+
+      const fulfillments = await Promise.all(orderIds.map((id) => client.get(`/orders/${id}/fulfillment`).expect(200)));
+      expect(fulfillments[0]!.body.id).not.toBe(fulfillments[1]!.body.id);
+      expect(fulfillments.every((f) => f.body.status === FulfillmentStatus.AWAITING_SELLER_PREPARATION)).toBe(true);
+
+      await client.post(`/orders/${orderIds[0]}/fulfillment/ready-for-pickup`).expect(201);
+      await client.post(`/orders/${orderIds[0]}/fulfillment/request-courier`).expect(201);
+
+      const first = await client.get(`/orders/${orderIds[0]}/fulfillment`).expect(200);
+      const second = await client.get(`/orders/${orderIds[1]}/fulfillment`).expect(200);
+      expect(first.body.status).toBe(FulfillmentStatus.PICKUP_REQUESTED);
+      expect(second.body.status).toBe(FulfillmentStatus.AWAITING_SELLER_PREPARATION);
+    });
+
+    it("denies a stranger from reading or mutating another user's order fulfillment/shipment/tracking (IDOR)", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      const stranger = authedRequest(app, await signUp(app, logSpy, `logistics-stranger2-${unique()}@example.com`));
+
+      expect((await stranger.get(`/orders/${orderId}/fulfillment`).expect(404)).body.error.code).toBe("ORDER_NOT_FOUND");
+      expect((await stranger.get(`/orders/${orderId}/tracking`).expect(404)).body.error.code).toBe("ORDER_NOT_FOUND");
+      expect((await stranger.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(404)).body.error.code).toBe("ORDER_NOT_FOUND");
+    });
+
+    // --- Concurrency (spec section 47) ---------------------------------
+
+    it("Race A: two concurrent requestCourier calls for the same Fulfillment create exactly one Shipment / one external create intent", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      await client.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(201);
+
+      const [r1, r2] = await Promise.all([client.post(`/orders/${orderId}/fulfillment/request-courier`), client.post(`/orders/${orderId}/fulfillment/request-courier`)]);
+      expect(r1.status).toBe(201);
+      expect(r2.status).toBe(201);
+      // Both requests must resolve to the exact same Shipment row (the id is
+      // stable from the instant the row is claimed) — the loser may briefly
+      // observe it before the winner's own async provider call has finished
+      // populating trackingCode/providerShipmentId, so those two fields are
+      // deliberately not compared here (spec's own invariant is "one
+      // canonical Shipment, one external create intent", not "identical
+      // response bodies").
+      expect(r1.body.shipment.id).toBe(r2.body.shipment.id);
+
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const shipments = await prisma.shipment.findMany({ where: { fulfillmentId: fulfillmentRow.id } });
+      expect(shipments).toHaveLength(1);
+      expect(shipments[0]!.providerShipmentId).toBeTruthy();
+      expect(shipments[0]!.status).toBe(ShipmentStatus.REQUESTED);
+    });
+
+    it("Race B: two concurrent identical webhook deliveries produce exactly one ShipmentEvent and one applied transition", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      await client.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(201);
+      await client.post(`/orders/${orderId}/fulfillment/request-courier`).expect(201);
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const shipmentRow = await prisma.shipment.findFirstOrThrow({ where: { fulfillmentId: fulfillmentRow.id } });
+
+      const payload = { providerShipmentId: shipmentRow.providerShipmentId, providerEventId: `evt-${unique()}`, rawStatus: "assigned" };
+      const [r1, r2] = await Promise.all([
+        request(app.getHttpServer()).post("/shipping/webhooks/dev").send(payload),
+        request(app.getHttpServer()).post("/shipping/webhooks/dev").send(payload),
+      ]);
+      expect(r1.status).toBe(201);
+      expect(r2.status).toBe(201);
+      expect([r1.body.processed, r2.body.processed].filter(Boolean)).toHaveLength(1);
+
+      const eventCount = await prisma.shipmentEvent.count({ where: { shipmentId: shipmentRow.id, providerEventId: payload.providerEventId } });
+      expect(eventCount).toBe(1);
+      const updated = await prisma.shipment.findUniqueOrThrow({ where: { id: shipmentRow.id } });
+      expect(updated.status).toBe(ShipmentStatus.ASSIGNED);
     });
   });
 });

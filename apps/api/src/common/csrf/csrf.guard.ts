@@ -7,14 +7,14 @@ import { CSRF_COOKIE_NAME } from "./csrf.middleware";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 /**
- * Payment gateway webhooks (Handoff 06) are server-to-server, not
- * browser-originated — there is no session cookie for a CSRF double-submit
- * token to protect, and a real gateway has no way to present one. They are
- * authenticated instead by their own signature header (see
- * WebhookSignatureVerifier), which the double-submit pattern isn't meant to
- * replace.
+ * Payment/shipping gateway webhooks (Handoff 06, 08) are server-to-server,
+ * not browser-originated — there is no session cookie for a CSRF
+ * double-submit token to protect, and a real gateway has no way to present
+ * one. They are authenticated instead by their own signature/verification
+ * mechanism (see WebhookSignatureVerifier / ShippingGateway.handleWebhook),
+ * which the double-submit pattern isn't meant to replace.
  */
-const CSRF_EXEMPT_PREFIXES = ["/payments/webhooks/"];
+const CSRF_EXEMPT_PREFIXES = ["/payments/webhooks/", "/shipping/webhooks/"];
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
