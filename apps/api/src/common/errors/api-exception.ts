@@ -488,3 +488,101 @@ export class ShippingWebhookInvalidException extends ApiException {
     super("SHIPPING_WEBHOOK_INVALID", "The shipping webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Seller OS + Marketplace Channel Integrations (Handoff 09)
+// ---------------------------------------------------------------------------
+
+/** Mirrors ProviderAccessDeniedException — `details.reason` distinguishes NOT_A_SELLER / AMBIGUOUS_CONTEXT / CROSS_ORGANIZATION / INSUFFICIENT_ROLE / SELLER_SUSPENDED. */
+export class SellerAccessDeniedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_ACCESS_DENIED", "You do not have access to this seller organization.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+export class SellerOrganizationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_ORGANIZATION_NOT_FOUND", "Seller organization not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SellerMembershipNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_MEMBERSHIP_NOT_FOUND", "Seller team member not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Spec section 48: "prevent removal of the last active OWNER". */
+export class SellerLastOwnerException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_LAST_OWNER", "A seller organization must always have at least one active owner.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class InventoryMovementInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVENTORY_MOVEMENT_INVALID", "This inventory adjustment would make stock negative.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class MarketplaceProviderUnavailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_PROVIDER_UNAVAILABLE", "This marketplace provider is not available.", HttpStatus.BAD_GATEWAY, details);
+  }
+}
+
+export class MarketplaceProviderDisabledException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_PROVIDER_DISABLED", "This marketplace provider is disabled.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class MarketplaceChannelAccountNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_CHANNEL_ACCOUNT_NOT_FOUND", "Marketplace channel account not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class MarketplaceListingNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_LISTING_NOT_FOUND", "Marketplace listing not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Spec section 46 error-UX example verbatim: "Listing mapping required". */
+export class MarketplaceListingMappingRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_LISTING_MAPPING_REQUIRED", "This offer must be mapped to a marketplace listing before it can be synced.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class MarketplaceListingCapabilityUnsupportedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_CAPABILITY_UNSUPPORTED", "This marketplace provider does not support this operation.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class MarketplaceSyncFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_SYNC_FAILED", "The marketplace provider could not complete this operation.", HttpStatus.BAD_GATEWAY, details);
+  }
+}
+
+export class MarketplaceOrderNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_ORDER_NOT_FOUND", "Marketplace order not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class MarketplaceOrderIngestionFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_ORDER_INGESTION_FAILED", "This marketplace order could not be processed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Mirrors ShippingWebhookInvalidException — never mutates state on an unverified payload. */
+export class MarketplaceWebhookInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_WEBHOOK_INVALID", "The marketplace webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
+  }
+}

@@ -96,6 +96,22 @@ export const DOMAIN_EVENT_TYPES = [
   "ShipmentFailed",
   "ShipmentCanceled",
   "ShipmentReconciled",
+  // Seller OS + Marketplace Channel Integrations (Handoff 09)
+  "SellerMembershipCreated",
+  "SellerMembershipRoleChanged",
+  "SellerMembershipDeactivated",
+  "SellerContextChanged",
+  "SellerOfferPriceChanged",
+  "SellerOfferActivated",
+  "SellerOfferDeactivated",
+  "InventoryAdjusted",
+  "MarketplaceChannelAccountConnected",
+  "MarketplaceListingPublished",
+  "MarketplaceListingSyncSucceeded",
+  "MarketplaceListingSyncFailed",
+  "MarketplaceOrderReceived",
+  "MarketplaceOrderCancelled",
+  "MarketplaceInventoryMismatchDetected",
 ] as const;
 
 /**

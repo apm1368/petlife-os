@@ -146,7 +146,10 @@ export class OrdersService {
     const orders = await this.prisma.order.findMany({ where: { userId }, include: ORDER_INCLUDE, orderBy: { createdAt: "desc" } });
     if (orders.length === 0) return [];
 
-    const checkoutIds = [...new Set(orders.map((o) => o.checkoutId))];
+    // Marketplace-origin Orders (Handoff 09) have a null checkoutId and are excluded here anyway
+    // (this query is already scoped to `where: { userId }`, and a marketplace Order's userId is
+    // null) — filtered defensively so the `in` filter below never receives a null.
+    const checkoutIds = [...new Set(orders.map((o) => o.checkoutId).filter((id): id is string => id !== null))];
     const orderIds = orders.map((o) => o.id);
     const [paymentIntents, financingIntents, refunds, fulfillments] = await Promise.all([
       this.prisma.paymentIntent.findMany({ where: { checkoutId: { in: checkoutIds } } }),
@@ -164,8 +167,8 @@ export class OrdersService {
     if (order.userId !== userId) throw new OrderNotFoundException({ orderId: id });
 
     const [paymentIntents, financingIntents, refunds, fulfillment] = await Promise.all([
-      this.prisma.paymentIntent.findMany({ where: { checkoutId: order.checkoutId } }),
-      this.prisma.financingIntent.findMany({ where: { checkoutId: order.checkoutId } }),
+      order.checkoutId ? this.prisma.paymentIntent.findMany({ where: { checkoutId: order.checkoutId } }) : Promise.resolve([]),
+      order.checkoutId ? this.prisma.financingIntent.findMany({ where: { checkoutId: order.checkoutId } }) : Promise.resolve([]),
       this.prisma.refund.findMany({ where: { orderId: id }, orderBy: { createdAt: "desc" } }),
       this.prisma.fulfillment.findUnique({ where: { orderId_sequenceNumber: { orderId: id, sequenceNumber: 1 } } }),
     ]);

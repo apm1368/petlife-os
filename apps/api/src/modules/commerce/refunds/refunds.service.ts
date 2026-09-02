@@ -49,6 +49,10 @@ export class RefundsService {
   async request(userId: string, orderId: string, reason?: string, requestedAmount?: number): Promise<RefundDto> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order || order.userId !== userId) throw new OrderNotFoundException({ orderId });
+    // A marketplace-origin Order (Handoff 09) has no PET LIFE OS checkout/PaymentIntent to refund
+    // through this path — it can never reach here anyway since its userId is null and never
+    // equals a real caller's userId above, but this keeps checkoutId's non-null narrowing honest.
+    if (!order.checkoutId) throw new OrderNotFoundException({ orderId });
     if (order.status === OrderStatus.REFUNDED) throw new RefundNotSupportedException({ orderId, reason: "Order already refunded" });
     if (requestedAmount !== undefined && requestedAmount !== order.totalAmount) {
       throw new RefundNotSupportedException({ orderId, reason: "Only a full refund of the order total is supported this phase" });

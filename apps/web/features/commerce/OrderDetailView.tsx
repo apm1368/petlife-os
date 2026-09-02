@@ -215,9 +215,11 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
         {t("placedAt", { when: new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(order.createdAt)) })}
       </p>
 
-      <Link href={`/${locale}/checkout/${order.checkoutId}/ops`} className="text-metadata text-text-secondary underline">
-        {t("viewPaymentDetails")}
-      </Link>
+      {order.checkoutId ? (
+        <Link href={`/${locale}/checkout/${order.checkoutId}/ops`} className="text-metadata text-text-secondary underline">
+          {t("viewPaymentDetails")}
+        </Link>
+      ) : null}
     </div>
   );
 }

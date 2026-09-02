@@ -256,7 +256,7 @@ export class ShippingOrchestrator {
   // no Seller OS/team auth model exists yet, see README Known limitations)
   // ---------------------------------------------------------------------
 
-  private async loadOwnedFulfillment(userId: string, fulfillmentId: string): Promise<Fulfillment & { order: { userId: string; checkoutId: string } }> {
+  private async loadOwnedFulfillment(userId: string, fulfillmentId: string): Promise<Fulfillment & { order: { userId: string | null; checkoutId: string | null } }> {
     const fulfillment = await this.prisma.fulfillment.findUnique({ where: { id: fulfillmentId }, include: { order: { select: { userId: true, checkoutId: true } } } });
     if (!fulfillment) throw new FulfillmentNotFoundException({ fulfillmentId });
     if (fulfillment.order.userId !== userId) throw new FulfillmentNotFoundException({ fulfillmentId });
@@ -270,9 +270,13 @@ export class ShippingOrchestrator {
 
   private async resolveShipmentProvider(fulfillment: Fulfillment): Promise<{ provider: ShippingProvider; providerQuoteId: string | null }> {
     const order = await this.prisma.order.findUniqueOrThrow({ where: { id: fulfillment.orderId } });
-    const selectedQuote = await this.prisma.shippingQuote.findFirst({
-      where: { checkoutId: order.checkoutId, sellerOrgId: fulfillment.sellerOrgId, status: ShippingQuoteStatus.SELECTED },
-    });
+    // A marketplace-origin Order (Handoff 09) has no checkoutId/ShippingQuote — falls through to
+    // the DEV default below, same as any checkout Order that never selected a quote.
+    const selectedQuote = order.checkoutId
+      ? await this.prisma.shippingQuote.findFirst({
+          where: { checkoutId: order.checkoutId, sellerOrgId: fulfillment.sellerOrgId, status: ShippingQuoteStatus.SELECTED },
+        })
+      : null;
     if (selectedQuote) return { provider: selectedQuote.provider, providerQuoteId: selectedQuote.providerQuoteId };
     return { provider: ShippingProvider.DEV, providerQuoteId: null };
   }

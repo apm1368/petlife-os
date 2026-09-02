@@ -1386,7 +1386,8 @@ export interface OrderItemDto {
  */
 export interface OrderSummaryDto {
   id: string;
-  checkoutId: string;
+  /** Null for a marketplace-origin Order (Handoff 09) — see MarketplaceOrder. */
+  checkoutId: string | null;
   sellerOrganization: SellerOrganizationSummaryDto;
   status: OrderStatus;
   paymentStatus: PaymentIntentStatus | null;
@@ -1402,7 +1403,8 @@ export interface OrderSummaryDto {
 
 export interface OrderDetailDto {
   id: string;
-  checkoutId: string;
+  /** Null for a marketplace-origin Order (Handoff 09) — see MarketplaceOrder. */
+  checkoutId: string | null;
   sellerOrganization: SellerOrganizationSummaryDto;
   status: OrderStatus;
   paymentStatus: PaymentIntentStatus | null;
@@ -1611,4 +1613,333 @@ export interface ShipmentTrackingDto {
   shipment: ShipmentDto | null;
   timeline: ShipmentTrackingEventDto[];
   lastUpdatedAt: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Seller OS + Marketplace Channel Integrations (Handoff 09)
+// ---------------------------------------------------------------------------
+
+export enum SellerMembershipRole {
+  OWNER = "OWNER",
+  ADMIN = "ADMIN",
+  OPERATIONS = "OPERATIONS",
+  CATALOG_MANAGER = "CATALOG_MANAGER",
+  ORDER_MANAGER = "ORDER_MANAGER",
+  FINANCE = "FINANCE",
+  SUPPORT = "SUPPORT",
+  VIEWER = "VIEWER",
+}
+
+export enum SellerMembershipStatus {
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  DEACTIVATED = "DEACTIVATED",
+}
+
+export enum InventoryMovementType {
+  MANUAL_ADJUSTMENT = "MANUAL_ADJUSTMENT",
+  ORDER_RESERVATION = "ORDER_RESERVATION",
+  ORDER_RELEASE = "ORDER_RELEASE",
+  ORDER_COMMIT = "ORDER_COMMIT",
+  MARKETPLACE_ORDER = "MARKETPLACE_ORDER",
+  MARKETPLACE_CANCELLATION = "MARKETPLACE_CANCELLATION",
+  RETURN = "RETURN",
+  RECONCILIATION = "RECONCILIATION",
+  IMPORT = "IMPORT",
+  SYSTEM_CORRECTION = "SYSTEM_CORRECTION",
+}
+
+export enum MarketplaceProvider {
+  DEV = "DEV",
+  TOROB = "TOROB",
+  DIGIKALA = "DIGIKALA",
+}
+
+export enum MarketplaceChannelAccountStatus {
+  DISCONNECTED = "DISCONNECTED",
+  PENDING = "PENDING",
+  CONNECTED = "CONNECTED",
+  DEGRADED = "DEGRADED",
+  ERROR = "ERROR",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum MarketplaceListingStatus {
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  PAUSED = "PAUSED",
+  REJECTED = "REJECTED",
+  ERROR = "ERROR",
+  ARCHIVED = "ARCHIVED",
+}
+
+export enum MarketplaceListingSyncStatus {
+  NEVER_SYNCED = "NEVER_SYNCED",
+  QUEUED = "QUEUED",
+  SYNCING = "SYNCING",
+  SYNCED = "SYNCED",
+  DEGRADED = "DEGRADED",
+  FAILED = "FAILED",
+}
+
+export enum MarketplaceOrderStatus {
+  RECEIVED = "RECEIVED",
+  CONFIRMED = "CONFIRMED",
+  PROCESSING = "PROCESSING",
+  READY_TO_FULFILL = "READY_TO_FULFILL",
+  SHIPPED = "SHIPPED",
+  DELIVERED = "DELIVERED",
+  CANCELLED = "CANCELLED",
+  RETURNED = "RETURNED",
+  FAILED = "FAILED",
+}
+
+export enum DeliveryResponsibility {
+  PETLIFE = "PETLIFE",
+  MARKETPLACE = "MARKETPLACE",
+  SELLER = "SELLER",
+  EXTERNAL = "EXTERNAL",
+}
+
+export enum PaymentSourceType {
+  PETLIFE_PAYMENT = "PETLIFE_PAYMENT",
+  MARKETPLACE_COLLECTED = "MARKETPLACE_COLLECTED",
+  CASH_ON_DELIVERY = "CASH_ON_DELIVERY",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum MarketplaceSyncOperation {
+  LISTING_PUBLISH = "LISTING_PUBLISH",
+  LISTING_UPDATE = "LISTING_UPDATE",
+  LISTING_DEACTIVATE = "LISTING_DEACTIVATE",
+  PRICE_SYNC = "PRICE_SYNC",
+  INVENTORY_SYNC = "INVENTORY_SYNC",
+  ORDER_FETCH = "ORDER_FETCH",
+  ORDER_ACK = "ORDER_ACK",
+  ORDER_CANCEL = "ORDER_CANCEL",
+  RECONCILE = "RECONCILE",
+}
+
+export enum MarketplaceSyncAttemptStatus {
+  PENDING = "PENDING",
+  SUCCESS = "SUCCESS",
+  FAILED = "FAILED",
+}
+
+export interface SellerOrganizationDetailDto {
+  id: string;
+  name: string;
+  slug: string | null;
+  verificationStatus: SellerVerificationStatus;
+  status: SellerStatus;
+  countryCode: string;
+  city: string | null;
+  logoUrl: string | null;
+  description: string | null;
+  supportContactEmail: string | null;
+  supportContactPhone: string | null;
+  defaultCurrency: string;
+  timezone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Mirrors ProviderMembershipSummaryDto (Handoff 05) — one row per organization a multi-membership user belongs to. */
+export interface SellerMembershipSummaryDto {
+  sellerMembershipId: string;
+  sellerOrganizationId: string;
+  organizationName: string;
+  verificationStatus: SellerVerificationStatus;
+  sellerStatus: SellerStatus;
+  role: SellerMembershipRole;
+}
+
+/** Mirrors ProviderContextDto — never throws; lets the Seller Shell render an organization picker when nothing is resolvable yet. */
+export interface SellerContextDto {
+  active: SellerMembershipSummaryDto | null;
+  memberships: SellerMembershipSummaryDto[];
+}
+
+export interface SellerTeamMemberDto {
+  sellerMembershipId: string;
+  userId: string;
+  displayName: string;
+  role: SellerMembershipRole;
+  status: SellerMembershipStatus;
+  invitedAt: string;
+  acceptedAt: string | null;
+  createdAt: string;
+}
+
+export interface InventoryItemDto {
+  id: string;
+  sellerOfferId: string;
+  onHand: number;
+  reserved: number;
+  /** onHand - reserved, computed server-side, never a stored column (same rule as InventoryItem in Handoff 06). */
+  available: number;
+  updatedAt: string;
+}
+
+export interface InventoryMovementDto {
+  id: string;
+  inventoryItemId: string;
+  type: InventoryMovementType;
+  quantityDelta: number;
+  quantityBefore: number;
+  quantityAfter: number;
+  source: string;
+  sourceReference: string | null;
+  reason: string | null;
+  actorUserId: string | null;
+  actorDisplayName: string | null;
+  createdAt: string;
+}
+
+/** Seller-OS view of one SellerOffer — richer than the consumer-facing SellerOfferDto (includes inventory + marketplace sync summary the shopper never needs to see). */
+export interface SellerOsOfferDto {
+  id: string;
+  productVariantId: string;
+  productTitle: string;
+  variantTitle: string | null;
+  sku: string;
+  sellerSku: string | null;
+  priceAmount: number;
+  compareAtAmount: number | null;
+  currency: string;
+  status: SellerOfferStatus;
+  inventory: InventoryItemDto | null;
+  marketplaceListingCount: number;
+  marketplaceSyncErrorCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MarketplaceProviderCapabilitiesDto {
+  supportsListingPublish: boolean;
+  supportsInventoryPush: boolean;
+  supportsPricePush: boolean;
+  supportsOrderPull: boolean;
+  supportsWebhooks: boolean;
+  supportsOrderCancellation: boolean;
+  supportsListingPause: boolean;
+  supportsReconciliation: boolean;
+  supportsVariantMapping: boolean;
+}
+
+export interface MarketplaceChannelAccountDto {
+  id: string;
+  sellerOrganizationId: string;
+  provider: MarketplaceProvider;
+  status: MarketplaceChannelAccountStatus;
+  externalSellerId: string | null;
+  displayName: string | null;
+  syncEnabled: boolean;
+  inventorySyncEnabled: boolean;
+  priceSyncEnabled: boolean;
+  orderSyncEnabled: boolean;
+  lastSuccessfulSyncAt: string | null;
+  lastAttemptedSyncAt: string | null;
+  lastErrorCode: string | null;
+  lastErrorMessage: string | null;
+  capabilities: MarketplaceProviderCapabilitiesDto;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MarketplaceListingDto {
+  id: string;
+  marketplaceChannelAccountId: string;
+  provider: MarketplaceProvider;
+  sellerOfferId: string;
+  externalListingId: string | null;
+  externalProductId: string | null;
+  externalVariantId: string | null;
+  status: MarketplaceListingStatus;
+  syncStatus: MarketplaceListingSyncStatus;
+  publishedPriceIrr: number | null;
+  publishedInventory: number | null;
+  /** The offer's current canonical availableQuantity, shown alongside publishedInventory so a mismatch is visible without a separate reconciliation call. */
+  canonicalAvailableQuantity: number | null;
+  lastSyncedAt: string | null;
+  lastProviderObservedAt: string | null;
+  lastErrorCode: string | null;
+  lastErrorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MarketplaceOrderItemDto {
+  id: string;
+  marketplaceListingId: string | null;
+  sellerOfferId: string;
+  quantity: number;
+  unitPriceAmount: number;
+  totalPriceAmount: number;
+}
+
+export interface MarketplaceOrderDto {
+  id: string;
+  provider: MarketplaceProvider;
+  marketplaceChannelAccountId: string;
+  sellerOrganizationId: string;
+  externalOrderId: string;
+  status: MarketplaceOrderStatus;
+  currency: string;
+  totalAmount: number;
+  deliveryResponsibility: DeliveryResponsibility;
+  paymentSource: PaymentSourceType;
+  placedAt: string;
+  providerUpdatedAt: string | null;
+  mappedOrderId: string | null;
+  items: MarketplaceOrderItemDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MarketplaceSyncAttemptDto {
+  id: string;
+  operation: MarketplaceSyncOperation;
+  status: MarketplaceSyncAttemptStatus;
+  attemptNumber: number;
+  errorCode: string | null;
+  errorMessage: string | null;
+  startedAt: string;
+  completedAt: string | null;
+}
+
+/** `discrepancyType: null` means the last check found no mismatch — canonical PET LIFE OS data is never overwritten either way (spec section 35-36). */
+export interface MarketplaceReconciliationResultDto {
+  discrepancyType: "INVENTORY_MISMATCH" | "PRICE_MISMATCH" | "LISTING_STATUS_MISMATCH" | "ORDER_STATUS_MISMATCH" | "UNKNOWN_PROVIDER_REFERENCE" | null;
+  canonicalValue: string | number | null;
+  providerObservedValue: string | number | null;
+  message: string;
+  checkedAt: string;
+}
+
+/** A unified seller-facing order row spanning both PET LIFE OS checkout Orders and marketplace-origin Orders (spec section 37) — `source` is DEV/TOROB/DIGIKALA only for a marketplace order, null for an ordinary checkout Order. */
+export interface SellerOrderSummaryDto {
+  orderId: string;
+  source: MarketplaceProvider | null;
+  externalOrderId: string | null;
+  status: OrderStatus;
+  paymentSource: PaymentSourceType;
+  fulfillmentStatus: FulfillmentStatus | null;
+  itemCount: number;
+  totalAmount: number;
+  currency: string;
+  createdAt: string;
+}
+
+export interface SellerDashboardDto {
+  ordersRequiringActionCount: number;
+  lowStockOfferCount: number;
+  activeOfferCount: number;
+  channelSyncErrorCount: number;
+  fulfillmentExceptionCount: number;
+  ordersToday: number;
+  unitsSoldToday: number;
+  gmvTodayAmount: number;
+  recentOrders: SellerOrderSummaryDto[];
 }

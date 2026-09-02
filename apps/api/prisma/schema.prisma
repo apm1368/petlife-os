@@ -402,11 +402,17 @@ enum SellerVerificationStatus {
 }
 
 /// Separate axis from verification — a VERIFIED seller can still be
-/// deactivated/suspended without losing its review history.
+/// deactivated/suspended without losing its review history. PENDING/
+/// RESTRICTED/CLOSED added in Handoff 09 (spec section 3) — purely additive
+/// enum values, nothing pre-existing read/wrote them, so no data migration
+/// is needed for the widened vocabulary.
 enum SellerStatus {
+  PENDING
   ACTIVE
   INACTIVE
   SUSPENDED
+  RESTRICTED
+  CLOSED
 }
 
 enum ProductStatus {
@@ -431,6 +437,147 @@ enum SellerOfferStatus {
   PAUSED
   OUT_OF_STOCK
   SUSPENDED
+}
+
+// ---------------------------------------------------------------------------
+// Seller OS + Marketplace Channel Integrations (Handoff 09)
+// ---------------------------------------------------------------------------
+
+/// Mirrors ProviderUserRole's precedent of a role vocabulary scoped to one
+/// organization type (spec section 4). OWNER is the only role that can
+/// manage other memberships; SellerAccessService is the single place that
+/// interprets what each role may do (never re-derived ad hoc in a
+/// controller).
+enum SellerMembershipRole {
+  OWNER
+  ADMIN
+  OPERATIONS
+  CATALOG_MANAGER
+  ORDER_MANAGER
+  FINANCE
+  SUPPORT
+  VIEWER
+}
+
+/// PENDING covers a dev/local invite that has not been "accepted" yet (spec
+/// section 48: "acceptable to create a dev/local invite flow" — no
+/// email/SMS delivery exists, see README). DEACTIVATED is a soft-remove:
+/// the row (and its audit trail) is preserved rather than deleted.
+enum SellerMembershipStatus {
+  PENDING
+  ACTIVE
+  DEACTIVATED
+}
+
+/// Every reason InventoryItem.onHand/reserved can ever change (spec section
+/// 8) — SellerInventoryService and MarketplaceOrderIngestionService are the
+/// only writers, and every write is paired with one of these rows.
+enum InventoryMovementType {
+  MANUAL_ADJUSTMENT
+  ORDER_RESERVATION
+  ORDER_RELEASE
+  ORDER_COMMIT
+  MARKETPLACE_ORDER
+  MARKETPLACE_CANCELLATION
+  RETURN
+  RECONCILIATION
+  IMPORT
+  SYSTEM_CORRECTION
+}
+
+/// DEV exists purely for tests/local development (spec section 21), the
+/// same role DEV plays in ShippingProvider/PaymentProvider — hard-gated out
+/// of production the same way (see marketplace-channel-registry.service.ts).
+enum MarketplaceProvider {
+  DEV
+  TOROB
+  DIGIKALA
+}
+
+enum MarketplaceChannelAccountStatus {
+  DISCONNECTED
+  PENDING
+  CONNECTED
+  DEGRADED
+  ERROR
+  SUSPENDED
+}
+
+/// Business state — "is this listing meant to be for sale" — kept separate
+/// from MarketplaceListingSyncStatus ("did the last sync succeed"), mirroring
+/// Fulfillment-status-vs-Shipment-status from Handoff 08 (spec section 16).
+enum MarketplaceListingStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  PAUSED
+  REJECTED
+  ERROR
+  ARCHIVED
+}
+
+enum MarketplaceListingSyncStatus {
+  NEVER_SYNCED
+  QUEUED
+  SYNCING
+  SYNCED
+  DEGRADED
+  FAILED
+}
+
+/// Canonical, provider-independent order lifecycle (spec section 29) —
+/// marketplace-order-status-normalizer.ts is the only place a raw provider
+/// status is mapped to one of these; an unrecognized raw status is recorded
+/// for reconciliation rather than guessed into one of these values.
+enum MarketplaceOrderStatus {
+  RECEIVED
+  CONFIRMED
+  PROCESSING
+  READY_TO_FULFILL
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+  FAILED
+}
+
+/// Who actually performs last-mile delivery for a given Fulfillment (spec
+/// section 27) — PET LIFE OS must never assume it always owns this. Added to
+/// the existing Fulfillment model (Handoff 08) with a default of PETLIFE,
+/// which is exactly what every Handoff 08 Fulfillment already implicitly was.
+enum DeliveryResponsibility {
+  PETLIFE
+  MARKETPLACE
+  SELLER
+  EXTERNAL
+}
+
+/// Who actually collected payment for an Order (spec section 28) — never
+/// fabricate a PaymentIntent for a marketplace-collected sale; this field is
+/// the honest alternative. UNKNOWN is a real, queryable state, not an error.
+enum PaymentSourceType {
+  PETLIFE_PAYMENT
+  MARKETPLACE_COLLECTED
+  CASH_ON_DELIVERY
+  UNKNOWN
+}
+
+enum MarketplaceSyncOperation {
+  LISTING_PUBLISH
+  LISTING_UPDATE
+  LISTING_DEACTIVATE
+  PRICE_SYNC
+  INVENTORY_SYNC
+  ORDER_FETCH
+  ORDER_ACK
+  ORDER_CANCEL
+  RECONCILE
+}
+
+enum MarketplaceSyncAttemptStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }
 
 enum CartStatus {
@@ -704,6 +851,9 @@ model User {
   carts                Cart[]
   checkouts            Checkout[]
   orders               Order[]
+  sellerMemberships    SellerMembership[]
+  sellerContext        SellerContextPreference?
+  inventoryMovements   InventoryMovement[]
 
   @@map("users")
 }
@@ -1638,16 +1788,67 @@ model SellerOrganization {
   logoUrl            String?
   description        String?
 
+  /// Handoff 09 (spec section 3) — all additive/optional so every existing
+  /// SellerOrganization row remains valid without a data backfill.
+  slug                String? @unique
+  supportContactEmail String?
+  supportContactPhone String?
+  defaultCurrency     String  @default("IRR")
+  timezone            String  @default("Asia/Tehran")
+  businessMetadata    Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  offers         SellerOffer[]
-  orders         Order[]
-  fulfillments   Fulfillment[]
-  shippingQuotes ShippingQuote[]
+  offers                     SellerOffer[]
+  orders                     Order[]
+  fulfillments               Fulfillment[]
+  shippingQuotes             ShippingQuote[]
+  memberships                SellerMembership[]
+  inventoryMovements         InventoryMovement[]
+  marketplaceChannelAccounts MarketplaceChannelAccount[]
+  marketplaceOrders          MarketplaceOrder[]
+  marketplaceSyncAttempts    MarketplaceSyncAttempt[]
 
   @@index([verificationStatus, status])
   @@map("seller_organizations")
+}
+
+/// The Seller OS equivalent of ProviderUser (spec section 4) — replaces
+/// Handoff 08's temporary "authenticated user owns the checkout/order"
+/// stand-in for seller operations. `@@unique([sellerOrganizationId, userId])`
+/// means one user has at most one role per seller organization (a user may
+/// still belong to several different sellers).
+model SellerMembership {
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+  userId               String             @db.Uuid
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role   SellerMembershipRole
+  status SellerMembershipStatus @default(ACTIVE)
+
+  invitedAt  DateTime  @default(now())
+  acceptedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sellerOrganizationId, userId])
+  @@index([userId])
+  @@map("seller_memberships")
+}
+
+/// The Seller OS equivalent of ProviderContextPreference — which seller
+/// organization a multi-membership user is currently operating in.
+model SellerContextPreference {
+  userId               String   @id @db.Uuid
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sellerOrganizationId String   @db.Uuid
+  updatedAt            DateTime @updatedAt
+
+  @@map("seller_context_preferences")
 }
 
 model Brand {
@@ -1782,16 +1983,25 @@ model SellerOffer {
   compareAtAmount Int?
   currency        String @default("IRR")
 
+  /// Seller-scoped SKU (spec section 18) — deliberately never the provider's
+  /// own external listing/product ID (see MarketplaceListing). NULL is
+  /// allowed and distinct in Postgres unique indexes, so several offers may
+  /// go without one; when set, it must be unique within the seller.
+  sellerSku String?
+
   status SellerOfferStatus @default(ACTIVE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  inventoryItem InventoryItem?
-  cartLines     CartLine[]
-  reservations  InventoryReservation[]
-  orderItems    OrderItem[]
+  inventoryItem         InventoryItem?
+  cartLines             CartLine[]
+  reservations          InventoryReservation[]
+  orderItems            OrderItem[]
+  marketplaceListings   MarketplaceListing[]
+  marketplaceOrderItems MarketplaceOrderItem[]
 
+  @@unique([sellerOrganizationId, sellerSku])
   @@index([productVariantId])
   @@index([sellerOrganizationId])
   @@map("seller_offers")
@@ -1814,6 +2024,8 @@ model InventoryItem {
   reserved Int @default(0)
 
   updatedAt DateTime @updatedAt
+
+  movements InventoryMovement[]
 
   @@map("inventory_items")
 }
@@ -1960,12 +2172,19 @@ model InventoryReservation {
 /// too).
 model Order {
   id                   String             @id @default(uuid()) @db.Uuid
-  checkoutId           String             @db.Uuid
-  checkout             Checkout           @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  /// Nullable as of Handoff 09 (spec section 25/27) — a marketplace-origin
+  /// Order (see the `marketplaceOrder` relation below) never had a PET LIFE
+  /// OS Checkout or a registered buyer User; both stay required/non-null for
+  /// every ordinary consumer checkout Order, which is still the only path
+  /// that ever sets them. `@@unique([checkoutId, sellerOrganizationId])`
+  /// below still holds: Postgres treats each NULL as distinct, so many
+  /// marketplace Orders for the same seller coexist freely under it.
+  checkoutId           String?            @db.Uuid
+  checkout             Checkout?          @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
   sellerOrganizationId String             @db.Uuid
   sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
-  userId               String             @db.Uuid
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId               String?            @db.Uuid
+  user                 User?              @relation(fields: [userId], references: [id], onDelete: Restrict)
   householdId          String?            @db.Uuid
   household            Household?         @relation(fields: [householdId], references: [id], onDelete: SetNull)
 
@@ -1985,10 +2204,13 @@ model Order {
   updatedAt   DateTime  @updatedAt
   confirmedAt DateTime?
 
-  items          OrderItem[]
-  refunds        Refund[]
-  fulfillments   Fulfillment[]
-  shippingQuotes ShippingQuote[]
+  items            OrderItem[]
+  refunds          Refund[]
+  fulfillments     Fulfillment[]
+  shippingQuotes   ShippingQuote[]
+  /// Present only when this Order originated from a marketplace channel
+  /// (spec section 25) — absent for every ordinary PET LIFE OS checkout Order.
+  marketplaceOrder MarketplaceOrder?
 
   @@unique([checkoutId, sellerOrganizationId])
   @@index([userId])
@@ -2370,8 +2592,13 @@ model Fulfillment {
   sellerOrganization SellerOrganization @relation(fields: [sellerOrgId], references: [id], onDelete: Restrict)
   sequenceNumber     Int                @default(1)
 
-  status          FulfillmentStatus @default(PENDING)
-  fulfillmentType FulfillmentType   @default(STANDARD_DELIVERY)
+  status                 FulfillmentStatus      @default(PENDING)
+  fulfillmentType        FulfillmentType        @default(STANDARD_DELIVERY)
+  /// Handoff 09 (spec section 27, 73) — additive with a default of PETLIFE,
+  /// which is exactly what every Handoff 08 Fulfillment already implicitly
+  /// was. A marketplace order's ingestion sets this explicitly instead of
+  /// defaulting; PET LIFE OS never auto-requests a courier when this is not PETLIFE.
+  deliveryResponsibility DeliveryResponsibility @default(PETLIFE)
 
   /// Snapshotted once, at Fulfillment-creation time (spec section 8) — a
   /// later CustomerAddress edit, or a SellerOrganization detail change, must
@@ -2486,6 +2713,238 @@ model ShipmentEvent {
   @@unique([provider, providerEventId])
   @@index([shipmentId])
   @@map("shipment_events")
+}
+
+// ---------------------------------------------------------------------------
+// Seller OS + Marketplace Channel Integrations (Handoff 09), continued
+// ---------------------------------------------------------------------------
+
+/// The append-only audit trail for every InventoryItem change (spec section
+/// 8) — SellerInventoryService (manual seller edits) and
+/// MarketplaceOrderIngestionService (marketplace-driven changes) are the
+/// only writers, and both always write exactly one of these per
+/// onHand/reserved mutation, in the same transaction. `sellerOrganizationId`
+/// is denormalized from the InventoryItem's own SellerOffer purely so seller
+/// inventory-history queries never need a join through two tables.
+model InventoryMovement {
+  id                   String             @id @default(uuid()) @db.Uuid
+  inventoryItemId      String             @db.Uuid
+  inventoryItem        InventoryItem      @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+
+  type           InventoryMovementType
+  quantityDelta  Int
+  quantityBefore Int
+  quantityAfter  Int
+
+  /// A short machine-readable origin tag (e.g. "SELLER_OS", "MARKETPLACE_TOROB", "CHECKOUT") — never a raw provider payload.
+  source          String
+  sourceReference String?
+  reason          String?
+
+  actorUserId String? @db.Uuid
+  actorUser   User?   @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([inventoryItemId, createdAt])
+  @@index([sellerOrganizationId, createdAt])
+  @@map("inventory_movements")
+}
+
+/// A seller's connection to one external marketplace (spec section 13) —
+/// `@@unique([sellerOrganizationId, provider])` means one account per
+/// provider per seller this phase (no multi-storefront-per-provider support
+/// yet). `metadata` is safe/non-secret configuration only — see the doc
+/// comment on `MarketplaceListing.metadata` and README "Credential handling"
+/// for why real secrets never live in this column.
+model MarketplaceChannelAccount {
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+
+  provider MarketplaceProvider
+  status   MarketplaceChannelAccountStatus @default(DISCONNECTED)
+
+  externalSellerId String?
+  displayName      String?
+
+  syncEnabled          Boolean @default(true)
+  inventorySyncEnabled Boolean @default(true)
+  priceSyncEnabled     Boolean @default(true)
+  orderSyncEnabled     Boolean @default(true)
+
+  lastSuccessfulSyncAt DateTime?
+  lastAttemptedSyncAt  DateTime?
+  lastErrorCode        String?
+  lastErrorMessage     String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings     MarketplaceListing[]
+  orders       MarketplaceOrder[]
+  syncAttempts MarketplaceSyncAttempt[]
+
+  @@unique([sellerOrganizationId, provider])
+  @@index([provider, status])
+  @@map("marketplace_channel_accounts")
+}
+
+/// The canonical mapping between one SellerOffer and its representation on
+/// one external channel (spec section 15) — `status` (business intent) and
+/// `syncStatus` (did the last sync call succeed) are deliberately separate
+/// axes, mirroring Fulfillment-status-vs-Shipment-status (spec section 16).
+model MarketplaceListing {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  marketplaceChannelAccountId String                    @db.Uuid
+  marketplaceChannelAccount   MarketplaceChannelAccount @relation(fields: [marketplaceChannelAccountId], references: [id], onDelete: Cascade)
+  sellerOfferId               String                    @db.Uuid
+  sellerOffer                 SellerOffer               @relation(fields: [sellerOfferId], references: [id], onDelete: Cascade)
+
+  provider MarketplaceProvider
+
+  /// Provider-specific identifiers — never assumed equal to any PET LIFE OS
+  /// id (spec section 17: "Do not assume PET LIFE OS variant ID == provider
+  /// listing ID").
+  externalListingId String?
+  externalProductId String?
+  externalVariantId String?
+
+  status     MarketplaceListingStatus     @default(DRAFT)
+  syncStatus MarketplaceListingSyncStatus @default(NEVER_SYNCED)
+
+  publishedPriceIrr      Int?
+  publishedInventory     Int?
+  lastSyncedAt           DateTime?
+  lastProviderObservedAt DateTime?
+  lastErrorCode          String?
+  lastErrorMessage       String?
+
+  /// Small, safe mapping metadata only (spec section 15) — never a raw
+  /// provider payload or a credential.
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderItems   MarketplaceOrderItem[]
+  syncAttempts MarketplaceSyncAttempt[]
+
+  @@unique([marketplaceChannelAccountId, sellerOfferId])
+  @@index([provider, externalListingId])
+  @@map("marketplace_listings")
+}
+
+/// One order as received from an external marketplace (spec section 25-26).
+/// `@@unique([provider, marketplaceChannelAccountId, externalOrderId])` is
+/// the critical idempotency guard (spec section 26) — a duplicate provider
+/// delivery of the same order hits this constraint (the same P2002-catch
+/// pattern as Order/Fulfillment/Shipment) instead of ever creating a second
+/// row. `mappedOrderId` is nullable and unique: a marketplace order is only
+/// linked to an internal Order once ingestion has validated and committed
+/// it, and never to more than one.
+model MarketplaceOrder {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  provider                    MarketplaceProvider
+  marketplaceChannelAccountId String                    @db.Uuid
+  marketplaceChannelAccount   MarketplaceChannelAccount @relation(fields: [marketplaceChannelAccountId], references: [id], onDelete: Restrict)
+  sellerOrganizationId        String                    @db.Uuid
+  sellerOrganization          SellerOrganization        @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+
+  externalOrderId String
+  status          MarketplaceOrderStatus @default(RECEIVED)
+
+  currency    String
+  totalAmount Int
+
+  deliveryResponsibility DeliveryResponsibility @default(MARKETPLACE)
+  /// Never fabricated (spec section 28) — if PET LIFE OS did not itself
+  /// collect payment, this is MARKETPLACE_COLLECTED or CASH_ON_DELIVERY,
+  /// never PETLIFE_PAYMENT, and no PaymentIntent row is ever created for it.
+  paymentSource          PaymentSourceType      @default(UNKNOWN)
+
+  /// Only what the provider legitimately supplies — never enriched or
+  /// guessed (spec section 24: "customer/shipping data only if legitimately
+  /// available").
+  buyerSnapshot    Json?
+  shippingSnapshot Json?
+
+  placedAt          DateTime
+  providerUpdatedAt DateTime?
+
+  mappedOrderId String? @unique @db.Uuid
+  mappedOrder   Order?  @relation(fields: [mappedOrderId], references: [id], onDelete: SetNull)
+
+  /// Safe reference/summary only — never a raw payload that could carry a credential (spec section 25, 34).
+  rawPayloadReference Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items MarketplaceOrderItem[]
+
+  @@unique([provider, marketplaceChannelAccountId, externalOrderId])
+  @@index([sellerOrganizationId, status])
+  @@map("marketplace_orders")
+}
+
+model MarketplaceOrderItem {
+  id                   String              @id @default(uuid()) @db.Uuid
+  marketplaceOrderId   String              @db.Uuid
+  marketplaceOrder     MarketplaceOrder    @relation(fields: [marketplaceOrderId], references: [id], onDelete: Cascade)
+  marketplaceListingId String?             @db.Uuid
+  marketplaceListing   MarketplaceListing? @relation(fields: [marketplaceListingId], references: [id], onDelete: SetNull)
+  sellerOfferId        String              @db.Uuid
+  sellerOffer          SellerOffer         @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+
+  quantity         Int
+  unitPriceAmount  Int
+  totalPriceAmount Int
+
+  createdAt DateTime @default(now())
+
+  @@index([marketplaceOrderId])
+  @@map("marketplace_order_items")
+}
+
+/// A bounded, non-worker-platform record of one sync call attempt (spec
+/// section 33-34) — "do not build an unnecessary job platform"; this is a
+/// log row written synchronously by MarketplaceSyncOrchestrator, never a
+/// queued job with its own scheduler. `responseSummary` is a small, safe
+/// summary only — never a full raw provider payload that might carry a
+/// credential (spec section 34).
+model MarketplaceSyncAttempt {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  sellerOrganizationId        String                    @db.Uuid
+  sellerOrganization          SellerOrganization        @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+  marketplaceChannelAccountId String                    @db.Uuid
+  marketplaceChannelAccount   MarketplaceChannelAccount @relation(fields: [marketplaceChannelAccountId], references: [id], onDelete: Cascade)
+  marketplaceListingId        String?                   @db.Uuid
+  marketplaceListing          MarketplaceListing?       @relation(fields: [marketplaceListingId], references: [id], onDelete: Cascade)
+
+  operation MarketplaceSyncOperation
+  status    MarketplaceSyncAttemptStatus @default(PENDING)
+
+  attemptNumber    Int     @default(1)
+  requestReference String?
+  responseSummary  Json?
+  errorCode        String?
+  errorMessage     String?
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([marketplaceChannelAccountId, createdAt])
+  @@index([marketplaceListingId])
+  @@map("marketplace_sync_attempts")
 }
 
 // ---------------------------------------------------------------------------
