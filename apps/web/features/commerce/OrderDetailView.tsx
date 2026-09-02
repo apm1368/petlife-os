@@ -4,11 +4,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
-import type { OrderDetailDto } from "@petlife/types";
+import type { OrderDetailDto, ShipmentTrackingDto } from "@petlife/types";
 import { commerceService } from "@/services/commerce.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
+import { fulfillmentTone } from "./fulfillment-tone";
 
 /**
  * Order Detail (spec section 61; Handoff 07 sections 42-43) — Order status,
@@ -24,6 +25,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
   const pets = usePetStore((s) => s.pets);
 
   const [order, setOrder] = useState<OrderDetailDto | null>(null);
+  const [tracking, setTracking] = useState<ShipmentTrackingDto | null>(null);
   const [error, setError] = useState(false);
   const [refundReason, setRefundReason] = useState("");
   const [isRequestingRefund, setIsRequestingRefund] = useState(false);
@@ -34,7 +36,15 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
     setError(false);
     setOrder(null);
     try {
-      setOrder(await commerceService.getOrder(orderId));
+      const detail = await commerceService.getOrder(orderId);
+      setOrder(detail);
+      if (detail.fulfillment) {
+        try {
+          setTracking(await commerceService.getOrderTracking(orderId));
+        } catch {
+          setTracking(null);
+        }
+      }
     } catch {
       setError(true);
     }
@@ -119,9 +129,44 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
         </ContextSurface>
       ) : null}
 
-      <ContextSurface className="flex flex-col gap-1">
+      <ContextSurface className="flex flex-col gap-2">
         <p className="text-metadata text-text-secondary">{t("fulfillment")}</p>
-        <StatusLabel tone="neutral">{t("fulfillmentPlaceholder")}</StatusLabel>
+        {order.fulfillment ? (
+          <>
+            <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tStatus(`fulfillment.${order.fulfillment.status}`)}</StatusLabel>
+            {tracking?.shipment?.trackingCode ? (
+              <p className="text-metadata text-text-secondary">
+                {t("trackingCode")}: {tracking.shipment.trackingCode}
+              </p>
+            ) : null}
+            {tracking?.shipment?.estimatedDeliveryAt && !tracking.shipment.actualDeliveryAt ? (
+              <p className="text-metadata text-text-secondary">
+                {t("estimatedDelivery", { when: new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(tracking.shipment.estimatedDeliveryAt)) })}
+              </p>
+            ) : null}
+            {tracking ? (
+              <ol className="flex flex-col gap-1" aria-label={t("fulfillment")}>
+                {tracking.timeline.map((step) => (
+                  <li key={step.milestone} className="flex items-center gap-2">
+                    <span aria-hidden="true" className={step.reached ? "text-state-positive" : "text-text-secondary"}>
+                      {step.reached ? "●" : "○"}
+                    </span>
+                    <span className={`text-metadata ${step.reached ? "text-text-primary" : "text-text-secondary"}`}>{tStatus(`fulfillment.${step.milestone}`)}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-metadata text-text-secondary">{t("trackingUnavailable")}</p>
+            )}
+            {tracking?.lastUpdatedAt ? (
+              <p className="text-metadata text-text-secondary">
+                {t("lastUpdated", { when: new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(tracking.lastUpdatedAt)) })}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <StatusLabel tone="neutral">{t("fulfillmentPlaceholder")}</StatusLabel>
+        )}
       </ContextSurface>
 
       <ContextSurface className="flex flex-col gap-3">

@@ -941,6 +941,17 @@
         "delivery": "ارسال",
         "total": "جمع کل"
       },
+      "shipping": {
+        "title": "روش ارسال هر فروشنده را انتخاب کنید",
+        "serviceLevel": {
+          "STANDARD": "ارسال عادی",
+          "EXPRESS": "ارسال سریع"
+        },
+        "eta": "تحویل تا حدود {hours, plural, one {# ساعت} other {# ساعت}} دیگر",
+        "selected": "انتخاب شد",
+        "unavailable": "در حال حاضر گزینه ارسالی موجود نیست",
+        "refresh": "به‌روزرسانی گزینه‌های ارسال"
+      },
       "payment": {
         "title": "پرداخت",
         "amountDue": "مبلغ قابل پرداخت",
@@ -1024,6 +1035,7 @@
         "PARTIALLY_REFUNDED": "بازپرداخت جزئی",
         "REFUNDED": "بازپرداخت شد"
       },
+      "delivery": "ارسال",
       "total": "جمع کل",
       "viewOrders": "مشاهده سفارش‌های من",
       "continueShopping": "ادامه خرید"
@@ -1056,6 +1068,10 @@
       "shippingAddress": "آدرس ارسال",
       "fulfillment": "وضعیت انجام سفارش",
       "fulfillmentPlaceholder": "پیگیری انجام سفارش به‌زودی",
+      "trackingCode": "کد رهگیری",
+      "estimatedDelivery": "تحویل تخمینی {when}",
+      "lastUpdated": "آخرین به‌روزرسانی {when}",
+      "trackingUnavailable": "به‌روزرسانی رهگیری موقتاً در دسترس نیست",
       "placedAt": "ثبت‌شده {when}",
       "status": {
         "PENDING": "در انتظار",
@@ -1108,6 +1124,20 @@
         "SUCCEEDED": "بازپرداخت شد",
         "FAILED": "ناموفق",
         "CANCELLED": "لغو شده"
+      },
+      "fulfillment": {
+        "PENDING": "در انتظار آماده‌سازی",
+        "AWAITING_SELLER_PREPARATION": "در حال آماده‌سازی",
+        "READY_FOR_PICKUP": "آماده تحویل به پیک",
+        "PICKUP_REQUESTED": "درخواست پیک ثبت شد",
+        "PICKUP_ASSIGNED": "پیک تخصیص داده شد",
+        "ASSIGNED": "پیک تخصیص داده شد",
+        "PICKED_UP": "تحویل به پیک",
+        "IN_TRANSIT": "در مسیر",
+        "OUT_FOR_DELIVERY": "در حال تحویل",
+        "DELIVERED": "تحویل شد",
+        "FAILED": "مشکل در ارسال",
+        "CANCELED": "لغو شد"
       }
     },
     "ops": {

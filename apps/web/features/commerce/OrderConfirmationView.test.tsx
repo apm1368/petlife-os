@@ -17,6 +17,7 @@ function order(id: string, sellerName: string): OrderDetailDto {
     paymentStatus: "CAPTURED" as never,
     financingStatus: null,
     refunds: [],
+    fulfillment: null,
     subtotalAmount: 500_000,
     deliveryAmount: 0,
     discountAmount: 0,
@@ -59,5 +60,37 @@ describe("OrderConfirmationView", () => {
     await waitFor(() => expect(screen.getByText("Pet Bazaar Tehran")).toBeTruthy());
     expect(screen.getByText("Golestan Pet Supplies")).toBeTruthy();
     expect(screen.getAllByText("Confirmed")).toHaveLength(2);
+  });
+
+  it("shows the delivery amount and a non-alarming fulfillment status, never implying courier assignment before it exists", async () => {
+    vi.mocked(commerceService.getOrder).mockResolvedValue({
+      ...order("order-1", "Pet Bazaar Tehran"),
+      deliveryAmount: 350_000,
+      fulfillment: {
+        id: "fulfillment-1",
+        orderId: "order-1",
+        sellerOrganizationId: "seller-order-1",
+        status: "AWAITING_SELLER_PREPARATION" as never,
+        pickupAddress: { recipient: "Pet Bazaar Tehran", phone: null, addressLine: null, city: "Tehran", region: null, countryCode: "IR", instructions: null },
+        deliveryAddress: { recipient: "Ali", phone: null, addressLine: "12 Valiasr St.", city: "Tehran", region: null, countryCode: "IR", instructions: null },
+        readyAt: null,
+        pickupRequestedAt: null,
+        pickupAssignedAt: null,
+        pickedUpAt: null,
+        outForDeliveryAt: null,
+        deliveredAt: null,
+        failedAt: null,
+        canceledAt: null,
+        failureCode: null,
+        failureReason: null,
+        createdAt: "2026-01-01T00:00:05.000Z",
+        updatedAt: "2026-01-01T00:00:05.000Z",
+      },
+    });
+
+    renderWithIntl(<OrderConfirmationView orderIds={["order-1"]} />);
+
+    await waitFor(() => expect(screen.getByText("Seller is preparing your order")).toBeTruthy());
+    expect(screen.queryByText(/courier/i)).toBeNull();
   });
 });

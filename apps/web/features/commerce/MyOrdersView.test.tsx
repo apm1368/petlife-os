@@ -16,6 +16,7 @@ const ORDER: OrderSummaryDto = {
   paymentStatus: "CAPTURED" as never,
   financingStatus: null,
   refundStatus: null,
+  fulfillmentStatus: null,
   itemCount: 2,
   totalAmount: 1_250_000,
   currency: "IRR",
@@ -37,6 +38,15 @@ describe("MyOrdersView", () => {
     expect(screen.getByText("Confirmed")).toBeTruthy();
     expect(screen.getByText("2 items")).toBeTruthy();
     expect(screen.getByText("125,000 Toman")).toBeTruthy();
+  });
+
+  it("shows the Fulfillment status as its own separate badge, never collapsed into Order status", async () => {
+    vi.mocked(commerceService.listOrders).mockResolvedValue([{ ...ORDER, fulfillmentStatus: "OUT_FOR_DELIVERY" as never }]);
+
+    renderWithIntl(<MyOrdersView />);
+
+    await waitFor(() => expect(screen.getByText("Out for delivery")).toBeTruthy());
+    expect(screen.getByText("Confirmed")).toBeTruthy();
   });
 
   it("shows an empty state with no orders yet", async () => {

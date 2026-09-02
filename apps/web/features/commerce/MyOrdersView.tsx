@@ -49,11 +49,16 @@ export function MyOrdersView() {
               </StatusLabel>
             </div>
             <p className="text-metadata text-text-secondary">{t("itemCount", { count: order.itemCount })}</p>
-            {order.paymentStatus || order.financingStatus || order.refundStatus ? (
+            {order.paymentStatus || order.financingStatus || order.refundStatus || order.fulfillmentStatus ? (
               <div className="flex flex-wrap gap-1.5">
                 {order.paymentStatus ? <StatusLabel tone="neutral">{tStatus(`payment.${order.paymentStatus}`)}</StatusLabel> : null}
                 {order.financingStatus ? <StatusLabel tone="neutral">{tStatus(`financing.${order.financingStatus}`)}</StatusLabel> : null}
                 {order.refundStatus ? <StatusLabel tone="neutral">{tStatus(`refund.${order.refundStatus}`)}</StatusLabel> : null}
+                {order.fulfillmentStatus ? (
+                  <StatusLabel tone={order.fulfillmentStatus === "DELIVERED" ? "success" : order.fulfillmentStatus === "FAILED" || order.fulfillmentStatus === "CANCELED" ? "urgent" : "neutral"}>
+                    {tStatus(`fulfillment.${order.fulfillmentStatus}`)}
+                  </StatusLabel>
+                ) : null}
               </div>
             ) : null}
             <div className="flex items-center justify-between gap-3">

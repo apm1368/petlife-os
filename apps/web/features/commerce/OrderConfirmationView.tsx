@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { OrderDetailDto } from "@petlife/types";
+import { fulfillmentTone } from "./fulfillment-tone";
 import { commerceService } from "@/services/commerce.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 
@@ -17,6 +18,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 export function OrderConfirmationView({ orderIds }: { orderIds: string[] }) {
   const t = useTranslations("commerce.confirmation");
   const tCommon = useTranslations("common");
+  const tFulfillment = useTranslations("commerce.statusLabels.fulfillment");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
   const [orders, setOrders] = useState<OrderDetailDto[] | null>(null);
@@ -48,10 +50,16 @@ export function OrderConfirmationView({ orderIds }: { orderIds: string[] }) {
               <span className="text-metadata text-text-primary">{formatCurrency(item.totalPrice, locale)}</span>
             </div>
           ))}
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-metadata text-text-secondary">{t("delivery")}</span>
+            <span className="text-metadata text-text-primary">{formatCurrency(order.deliveryAmount, locale)}</span>
+          </div>
           <div className="flex items-center justify-between border-t border-border-subtle pt-2">
             <span className="text-metadata text-text-secondary">{t("total")}</span>
             <span className="text-body text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
           </div>
+          {order.shippingAddress ? <p className="text-metadata text-text-secondary">{order.shippingAddress.addressLine}</p> : null}
+          {order.fulfillment ? <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tFulfillment(order.fulfillment.status)}</StatusLabel> : null}
         </ContextSurface>
       ))}
 

@@ -13,6 +13,8 @@ import {
   type FinancingPlanOptionDto,
   type PaymentMethodOptionDto,
   type PaymentProvider,
+  type SellerShippingOptionsDto,
+  type ShippingQuoteDto,
 } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { commerceService } from "@/services/commerce.service";
@@ -24,6 +26,7 @@ type Step =
   | "address"
   | "safety-ack"
   | "review"
+  | "shipping"
   | "method"
   | "payment"
   | "financing-eligibility"
@@ -67,6 +70,8 @@ export function CheckoutView() {
   const [newAddress, setNewAddress] = useState({ addressLine: "", city: "", countryCode: "" });
   const [isCreatingAddress, setIsCreatingAddress] = useState(false);
 
+  const [shippingOptions, setShippingOptions] = useState<SellerShippingOptionsDto[] | null>(null);
+  const [shippingQuoteSelectingId, setShippingQuoteSelectingId] = useState<string | null>(null);
   const [paymentOptions, setPaymentOptions] = useState<PaymentMethodOptionDto[] | null>(null);
   const [financingIntent, setFinancingIntent] = useState<FinancingIntentDto | null>(null);
   const [financingIdempotencyKey, setFinancingIdempotencyKey] = useState(() => crypto.randomUUID());
@@ -109,6 +114,45 @@ export function CheckoutView() {
       }
       setError(err instanceof ApiError ? err.message : t("createFailed"));
       setStep("address");
+    }
+  }
+
+  async function enterShippingStep() {
+    if (!checkout) return;
+    setStep("submitting");
+    try {
+      const options = await commerceService.getShippingOptions(checkout.id);
+      setShippingOptions(options);
+      setStep("shipping");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setStep("review");
+    }
+  }
+
+  async function selectShippingQuote(quoteId: string) {
+    if (!checkout) return;
+    setShippingQuoteSelectingId(quoteId);
+    setError(null);
+    try {
+      const [options, updatedCheckout] = await Promise.all([commerceService.selectShippingQuote(checkout.id, quoteId), commerceService.getCheckout(checkout.id)]);
+      setShippingOptions(options);
+      setCheckout(updatedCheckout);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("createFailed"));
+    } finally {
+      setShippingQuoteSelectingId(null);
+    }
+  }
+
+  async function refreshShippingOptions() {
+    if (!checkout) return;
+    setError(null);
+    try {
+      const options = await commerceService.refreshShippingOptions(checkout.id);
+      setShippingOptions(options);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("createFailed"));
     }
   }
 
@@ -387,6 +431,65 @@ export function CheckoutView() {
 
         <div className="flex gap-3">
           <Button variant="ghost" onClick={() => setStep("address")}>
+            {tCommon("back")}
+          </Button>
+          <Button variant="primary" className="flex-1" onClick={enterShippingStep}>
+            {tCommon("continue")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "shipping") {
+    return (
+      <div className="flex flex-col gap-5">
+        <h1 className="text-page-title text-text-primary">{t("shipping.title")}</h1>
+        {error ? (
+          <p role="alert" className="text-metadata text-state-urgent">
+            {error}
+          </p>
+        ) : null}
+
+        {(shippingOptions ?? []).map((group) => {
+          const bestByServiceLevel = new Map<string, ShippingQuoteDto>();
+          for (const quote of group.quotes) if (!bestByServiceLevel.has(quote.serviceLevel)) bestByServiceLevel.set(quote.serviceLevel, quote);
+          const selected = group.quotes.find((q) => q.status === "SELECTED");
+
+          return (
+            <div key={group.sellerOrganization.id} className="flex flex-col gap-2">
+              <p className="text-section-title text-text-primary">{group.sellerOrganization.name}</p>
+              {[...bestByServiceLevel.values()].length === 0 ? <StatusLabel tone="attention">{t("shipping.unavailable")}</StatusLabel> : null}
+              {[...bestByServiceLevel.values()].map((quote) => {
+                const isSelected = quote.id === selected?.id || quote.serviceLevel === selected?.serviceLevel;
+                const isLoading = shippingQuoteSelectingId === quote.id;
+                return (
+                  <button key={quote.id} type="button" className="w-full text-start" disabled={isLoading} onClick={() => selectShippingQuote(quote.id)}>
+                    <ContextSurface className={`flex items-center justify-between gap-3 ${isSelected ? "border-brand-mint" : ""}`}>
+                      <div className="flex flex-col">
+                        <span className="text-body text-text-primary">{t(`shipping.serviceLevel.${quote.serviceLevel}` as "shipping.serviceLevel.STANDARD" | "shipping.serviceLevel.EXPRESS")}</span>
+                        {quote.estimatedDeliveryMinutes != null ? (
+                          <span className="text-metadata text-text-secondary">{t("shipping.eta", { hours: Math.max(1, Math.round(quote.estimatedDeliveryMinutes / 60)) })}</span>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-metadata text-text-primary">{formatCurrency(quote.priceIrr, locale)}</span>
+                        {isSelected ? <StatusLabel tone="success">{t("shipping.selected")}</StatusLabel> : null}
+                      </div>
+                    </ContextSurface>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
+
+        <Button variant="ghost" onClick={refreshShippingOptions}>
+          {t("shipping.refresh")}
+        </Button>
+
+        <div className="flex gap-3">
+          <Button variant="ghost" onClick={() => setStep("review")}>
             {tCommon("back")}
           </Button>
           <Button variant="primary" className="flex-1" onClick={enterMethodStep}>

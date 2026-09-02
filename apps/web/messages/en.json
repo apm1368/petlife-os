@@ -941,6 +941,17 @@
         "delivery": "Delivery",
         "total": "Total"
       },
+      "shipping": {
+        "title": "Choose delivery for each seller",
+        "serviceLevel": {
+          "STANDARD": "Standard delivery",
+          "EXPRESS": "Express delivery"
+        },
+        "eta": "Arrives in about {hours, plural, one {# hour} other {# hours}}",
+        "selected": "Selected",
+        "unavailable": "No delivery options available right now",
+        "refresh": "Refresh delivery options"
+      },
       "payment": {
         "title": "Payment",
         "amountDue": "Amount due",
@@ -1024,6 +1035,7 @@
         "PARTIALLY_REFUNDED": "Partially refunded",
         "REFUNDED": "Refunded"
       },
+      "delivery": "Delivery",
       "total": "Total",
       "viewOrders": "View my orders",
       "continueShopping": "Continue shopping"
@@ -1056,6 +1068,10 @@
       "shippingAddress": "Shipping address",
       "fulfillment": "Fulfillment",
       "fulfillmentPlaceholder": "Fulfillment tracking coming soon",
+      "trackingCode": "Tracking code",
+      "estimatedDelivery": "Estimated delivery {when}",
+      "lastUpdated": "Last updated {when}",
+      "trackingUnavailable": "Tracking update temporarily unavailable",
       "placedAt": "Placed {when}",
       "status": {
         "PENDING": "Pending",
@@ -1108,6 +1124,20 @@
         "SUCCEEDED": "Refunded",
         "FAILED": "Failed",
         "CANCELLED": "Cancelled"
+      },
+      "fulfillment": {
+        "PENDING": "Order received",
+        "AWAITING_SELLER_PREPARATION": "Seller is preparing your order",
+        "READY_FOR_PICKUP": "Ready for pickup",
+        "PICKUP_REQUESTED": "Courier requested",
+        "PICKUP_ASSIGNED": "Courier assigned",
+        "ASSIGNED": "Courier assigned",
+        "PICKED_UP": "Picked up",
+        "IN_TRANSIT": "In transit",
+        "OUT_FOR_DELIVERY": "Out for delivery",
+        "DELIVERED": "Delivered",
+        "FAILED": "Delivery problem",
+        "CANCELED": "Cancelled"
       }
     },
     "ops": {

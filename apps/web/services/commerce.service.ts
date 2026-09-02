@@ -6,6 +6,7 @@ import type {
   FinancingIntentDto,
   FinancingPlanOptionDto,
   DeliveryMethod,
+  FulfillmentDto,
   OrderDetailDto,
   OrderSummaryDto,
   PayCheckoutResultDto,
@@ -17,6 +18,9 @@ import type {
   ProductSummaryDto,
   RefundDto,
   SellerOfferDto,
+  SellerShippingOptionsDto,
+  ShipmentDto,
+  ShipmentTrackingDto,
 } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
@@ -72,8 +76,15 @@ export const commerceService = {
     apiFetch<PayCheckoutResultDto>(`/checkout/${id}/financing-intent/${financingId}/authorize`, { method: "POST", body: { mode }, idempotencyKey }),
   getOpsView: (id: string) => apiFetch<CheckoutOpsDto>(`/checkout/${id}/ops`),
 
+  getShippingOptions: (id: string) => apiFetch<SellerShippingOptionsDto[]>(`/checkout/${id}/shipping-quotes`),
+  refreshShippingOptions: (id: string) => apiFetch<SellerShippingOptionsDto[]>(`/checkout/${id}/shipping-quotes/refresh`, { method: "POST" }),
+  selectShippingQuote: (id: string, quoteId: string) => apiFetch<SellerShippingOptionsDto[]>(`/checkout/${id}/shipping-quotes/select`, { method: "POST", body: { quoteId } }),
+
   listOrders: () => apiFetch<OrderSummaryDto[]>("/orders"),
   getOrder: (id: string) => apiFetch<OrderDetailDto>(`/orders/${id}`),
+  getOrderFulfillment: (orderId: string) => apiFetch<FulfillmentDto | null>(`/orders/${orderId}/fulfillment`),
+  getOrderShipment: (orderId: string) => apiFetch<ShipmentDto | null>(`/orders/${orderId}/shipment`),
+  getOrderTracking: (orderId: string) => apiFetch<ShipmentTrackingDto>(`/orders/${orderId}/tracking`),
 
   requestRefund: (orderId: string, reason?: string, amount?: number, idempotencyKey?: string) =>
     apiFetch<RefundDto>(`/orders/${orderId}/refunds`, { method: "POST", body: { reason, amount }, idempotencyKey }),
