@@ -2093,6 +2093,267 @@ SHIPMENT_RECONCILIATION_FAILED    502  the provider's getShipmentStatus call its
 SHIPPING_WEBHOOK_INVALID          400  gateway.handleWebhook() reported the payload invalid
 ```
 
+## Seller OS + Marketplace Channel Integrations (Handoff 09)
+
+Schema: `prisma/migrations/20260902150000_seller_os_marketplace_channels`
+(purely additive, generated via `prisma migrate diff`, then hand-appended
+with `CHECK` constraints Prisma's DSL can't express: non-negative
+`InventoryMovement.quantityBefore`/`quantityAfter`, non-negative
+`MarketplaceOrder.totalAmount`, positive `MarketplaceOrderItem.quantity`
+plus non-negative unit/total price amounts, positive
+`MarketplaceListing.publishedPriceIrr` plus non-negative
+`publishedInventory`, and positive `MarketplaceSyncAttempt.attemptNumber`),
+plus a small follow-up migration
+(`20260902160000_marketplace_order_status_unknown`) adding
+`MarketplaceOrderStatus.UNKNOWN` to the enum. New enums:
+`SellerMembershipRole` (`OWNER`/`ADMIN`/`OPERATIONS`/`CATALOG_MANAGER`/
+`ORDER_MANAGER`/`FINANCE`/`SUPPORT`/`VIEWER`), `SellerMembershipStatus`,
+`InventoryMovementType`/`InventoryMovementReason`, `MarketplaceProvider`
+(`DEV`/`TOROB`/`DIGIKALA`), `MarketplaceChannelAccountStatus`,
+`MarketplaceListingStatus`/`MarketplaceListingSyncStatus`,
+`MarketplaceOrderStatus`, `MarketplaceSyncAttemptKind`/`Status`,
+`FulfillmentDeliveryResponsibility`. New models: `SellerMembership`,
+`SellerContextPreference`, `InventoryMovement`,
+`MarketplaceChannelAccount`, `MarketplaceListing`, `MarketplaceOrder`,
+`MarketplaceOrderItem`, `MarketplaceSyncAttempt`. `SellerOffer.sellerSku`
+added; `Order.checkoutId`/`Order.userId` made nullable; `Order.
+marketplaceOrder` relation added; `Fulfillment.deliveryResponsibility`
+added.
+
+### Seller authorization — a real membership model, deliberately *not* an implicit-context copy of Provider OS
+
+`SellerMembership` (userId + sellerOrganizationId + role + status,
+`@@unique([userId, sellerOrganizationId])`) replaces Handoff 08's
+temporary "owner of the order" auth entirely. `SellerAuthGuard` mirrors
+`ProviderAuthGuard`'s shape closely — but with one deliberate divergence,
+documented in the guard's own code comment: Provider OS resolves an
+implicit "active organization" from a `ProviderContextPreference` because
+most of its routes carry no organization id in the URL; every Seller OS
+route instead carries its own `:sellerId` path param, and the guard
+*always* resolves membership from that param — never from an implicit
+context — specifically so there is no ambiguity a client could exploit by
+omitting or mismatching context state. `SellerContextPreference` still
+exists (mirroring `ProviderContextPreference`) purely to drive the
+frontend's "last active seller" convenience on login; it is never
+consulted for authorization. `RequireSellerRole(...)` + the guard's own
+`roleSatisfies()` helper implement a small role hierarchy:
+`OWNER`/`ADMIN` satisfy any requirement; `OPERATIONS`/`CATALOG_MANAGER`/
+`ORDER_MANAGER`/`FINANCE`/`SUPPORT` must be explicitly listed; `VIEWER`
+(and any handler with no `@RequireSellerRole` at all) gets read-only
+access to any `ACTIVE` member. A `SUSPENDED`/`RESTRICTED`/`CLOSED` seller
+organization still allows reads (`SellerAccessService.assertOperational()`
+is called by mutating actions only, never by a read) but rejects every
+mutating action with `SELLER_ACCESS_DENIED`/`reason: SELLER_SUSPENDED`.
+`SellerTeamService.
+assertNotLastOwner()` blocks both demoting and removing the sole
+remaining `ACTIVE` `OWNER`, so a seller organization can never be left
+with no one who can manage it.
+
+### Inventory — one new mutation surface, the reservation flow untouched
+
+`InventoryMovementService.applyOnHandDelta()` is the single new place
+`InventoryItem.onHand` is ever mutated outside Handoff 06's own Checkout-
+reservation flow (which still exclusively owns `reserved`, unchanged).
+It uses the identical `SELECT ... FOR UPDATE` raw-SQL row-lock pattern
+`InventoryReservationService` already established, checking both
+`onHand >= 0` and `available (onHand - reserved) >= 0` before applying a
+delta or an absolute set — the same oversell-protection guarantee, now
+also covering seller manual adjustments and marketplace order ingestion/
+cancellation. Every call writes an append-only `InventoryMovement` audit
+row (`type`: `MANUAL_ADJUSTMENT`/`MARKETPLACE_ORDER`/
+`MARKETPLACE_CANCELLATION`/`RECONCILIATION`; `quantityBefore`/
+`quantityAfter` always consistent by a DB `CHECK`). PET LIFE OS's own
+inventory table remains the single source of truth for stock — a
+marketplace never writes it directly, only through this service.
+
+### `MarketplaceChannelAdapter` — the same adapter-interface discipline as `PaymentGateway`/`ShippingGateway`
+
+One interface (`connect`/`publishListing`/`updateListingInventory`/
+`updateListingPrice`/`pauseListing`/`pullOrders`/`cancelOrder`, plus
+`readonly provider`/`readonly capabilities`) every provider implements;
+`MARKETPLACE_PROVIDER_CAPABILITIES` (`supportsListingPublish`/
+`supportsInventoryPush`/`supportsPricePush`/`supportsOrderPull`/
+`supportsWebhooks`/`supportsOrderCancellation`/`supportsListingPause`/
+`supportsReconciliation`/`supportsVariantMapping`) is one static map
+consulted everywhere instead of branching on provider identity.
+`MarketplaceChannelRegistryService` resolves `MarketplaceProvider →
+adapter instance` and gates on the matching `*_ENABLED` env flag, exactly
+like `ShippingProviderRegistry`. All three adapters share one generic,
+clearly-labeled deterministic simulation engine
+(`marketplace-simulation.util.ts` — no randomness in price/inventory
+echoes, only opaque ids use `randomUUID()`) and one order-status
+normalizer (`marketplace-order-status-normalizer.ts`, unrecognized raw
+status → `UNKNOWN`, never interpreted as success).
+
+- **`DevMarketplaceAdapter`** is fully functional — connect, publish,
+  inventory/price sync, pause, and a dev-only order-injection/
+  cancellation path used by the E2E suite and `MarketplaceDevController`
+  to exercise the *real* ingestion/cancellation pipeline, never a
+  shortcut around it.
+- **`TorobAdapter`/`DigikalaAdapter`** each carry an extensive
+  class-level "PROVIDER DOCUMENTATION SAFETY" doc comment — official docs
+  source, auth mechanism, sandbox availability, credentials, webhook/
+  polling model, and idempotency guarantees are all marked explicitly
+  UNKNOWN, since no genuine official documentation or credentials for
+  either provider were available to this project. Every method delegates
+  to the same simulation engine as `DevMarketplaceAdapter` when not
+  production-configured. `isProductionConfigured()` checks
+  `MARKETPLACE_SANDBOX_MODE === "production"` **and** real credentials
+  configured (`TOROB_API_KEY`/`DIGIKALA_API_KEY`); when that's false
+  (always, today), every method uses the simulation. If
+  `MARKETPLACE_SANDBOX_MODE=production` is set without real credentials,
+  the adapter throws rather than silently faking a production response —
+  never scraping, never inventing an endpoint shape, never presenting a
+  simulated value as a real Torob/Digikala API value.
+- **DEV as a channel is hard-excluded from ever looking connectable in
+  the seller-facing UI or the connect-provider list** — it exists purely
+  for internal testing/demonstration, never presented to a real seller as
+  a marketplace they can publish to.
+- **Order/cancellation ingestion has no real inbound webhook endpoint this
+  phase** — since neither Torob nor Digikala has a confirmed webhook
+  shape/signature scheme, ingestion is exercised via
+  `POST /seller-organizations/:sellerId/channels/:channelAccountId/dev/
+  simulate/order` (and `/cancellation`, `/mismatch`,
+  `/publish-rejection`), all hard-disabled outside development/test via
+  `NODE_ENV` (`MarketplaceDevController.assertDevSimulationAllowed()`,
+  covered by a dedicated unit test since e2e tests can't reliably flip
+  process-wide Nest config mid-suite) — but every one of those routes
+  drives the exact same `MarketplaceOrderIngestionService`/
+  `MarketplaceSyncOrchestratorService` pipeline a real webhook would, not
+  a shortcut around it.
+
+### Marketplace order ingestion — real idempotency, and the transaction-abort bug it surfaced
+
+`MarketplaceOrderIngestionService.ingestOrder()` is keyed for real
+duplicate-delivery idempotency by `@@unique([marketplaceChannelAccountId,
+externalOrderId])` on `MarketplaceOrder` — the provider+account+external-
+id triple is the only thing that decides "have we already seen this
+order," never a client-supplied idempotency header. Building this
+surfaced a genuine, previously-latent correctness bug worth documenting
+explicitly: catching a Prisma `P2002` unique-violation *inside* a
+`$transaction()` callback and then continuing to query on that same
+transaction client fails outright with Postgres `25P02` ("current
+transaction is aborted") — Postgres aborts the whole transaction after
+any statement error, and Prisma does not auto-savepoint around a caught
+error. The fix, now the pattern for this whole flow: the idempotency-
+guarded row is claimed via a plain, non-transactional
+`prisma.marketplaceOrder.create()` first (a P2002 here is caught cleanly,
+no ambient transaction to poison), then all the actual work — resolving
+`MarketplaceListing → SellerOffer`, decrementing inventory via
+`InventoryMovementService`, creating the internal `Order`/`OrderItem`
+rows, linking `mappedOrderId` — happens in a *separate* `$transaction()`,
+with a catch block that marks the claimed row `FAILED` (never leaves it
+stuck `PENDING`) before rethrowing if that second phase fails for any
+reason (e.g. a concurrent PET LIFE OS checkout already reserved the last
+unit — see the oversell e2e test). Two concurrent marketplace orders for
+the last unit of stock therefore both get a permanent, honest
+`MarketplaceOrder` record — one `mappedOrderId`-linked winner, one
+`FAILED` loser — rather than the loser silently vanishing.
+`OrdersService.createForCheckout()` has this exact same latent
+P2002-inside-`$transaction()` shape, but is never actually triggered in
+practice (`CheckoutService`'s own `checkout.status === CONFIRMED` short-
+circuit prevents ever reaching the retry branch) — noted here, not fixed,
+since it's out of this handoff's scope and genuinely unreachable today.
+
+### `MarketplaceOrder → Order` mapping, deliberately *without* an auto-created `Fulfillment`
+
+A marketplace order gets a real internal `Order` + `OrderItem` rows (for
+seller-side visibility/reporting in the unified Seller Orders view,
+`checkoutId`/`userId` both `null` since there is no PET LIFE OS checkout
+or registered buyer) — but no `Fulfillment`/`Shipment` is auto-created
+this phase. PET LIFE OS must never assume it owns marketplace last-mile
+delivery or silently request a courier on a seller's behalf when the
+marketplace itself is responsible for shipping; `Fulfillment.
+deliveryResponsibility` (`PETLIFE_OS`/`MARKETPLACE`) exists in the schema
+specifically so a future handoff can wire seller-choice or
+provider-declared delivery responsibility without another migration.
+Marketplace cancellation (`MarketplaceOrderIngestionService.
+cancelOrder()`) restores the exact inventory quantity the original order
+decremented, via the same `InventoryMovementService`, and is itself
+idempotent — a duplicate cancellation of an already-`CANCELED`
+`MarketplaceOrder` is a safe no-op, never a double-restore.
+
+### Listings, sync, and reconciliation — sync status and business status are separate axes, never fabricated success
+
+`MarketplaceListing.status` (`DRAFT`/`ACTIVE`/`PAUSED`/`ENDED`) is the
+seller's intended business state; `syncStatus`
+(`PENDING`/`SYNCING`/`SYNCED`/`FAILED`/`DEGRADED`) is whether the last
+attempt to reflect that state on the provider actually succeeded — the
+two are never collapsed into one field, so a paused-but-still-showing
+listing or a published-but-sync-failed listing is always visible as such,
+never hidden behind a single green checkmark.
+`MarketplaceSyncOrchestratorService` records a `MarketplaceSyncAttempt`
+row (kind: `PUBLISH`/`INVENTORY_SYNC`/`PRICE_SYNC`/`RECONCILE`; status:
+`SUCCESS`/`FAILED`) for every attempt, success or failure, and a failed
+attempt sets `syncStatus: FAILED` with `lastErrorCode`/`lastErrorMessage`
+populated — never silently retried into looking successful.
+Reconciliation compares the provider's last-observed inventory against
+PET LIFE OS's own canonical `available` quantity; a mismatch sets
+`syncStatus: DEGRADED` and is logged, but **never** overwrites canonical
+PET LIFE OS stock with what a marketplace reports — inventory truth flows
+one direction only, PET LIFE OS → marketplace, never back.
+
+### Re-pointing Handoff 08's temporary "owner of the order" seller-ops auth to real `SellerMembership`
+
+`ShippingOrchestrator.loadOwnedFulfillment` (buyer-only) is now
+`loadSellerFulfillment` — it checks for an `ACTIVE` `SellerMembership` on
+`fulfillment.sellerOrgId` directly via `PrismaService` (no `SellerOsModule`
+import, avoiding a module cycle, exactly like `RefundsService` does for
+`Order`), plus new `loadSellerOrder`/`getFulfillmentForOrderAsSeller`/
+`getShipmentForOrderAsSeller` resolvers. `OrderLogisticsController`'s four
+mutating routes (`mark ready for pickup`, `request courier`, `cancel`,
+`reconcile`) now require seller-organization membership at the *same*
+URLs — the buyer-facing tracking `GET` routes are unchanged and remain
+buyer-owned. No logistics logic was duplicated or moved; every method
+`ShippingOrchestrator` already implemented in Handoff 08 is reused as-is,
+per the spec's explicit instruction.
+
+### Frontend — a completely separate Seller Shell, mirroring Provider OS's own isolation
+
+`apps/web/features/seller/` (Dashboard, Orders, Order Detail, Offers,
+Inventory, Channels, Team, Settings) is its own route group
+(`app/[locale]/(seller)/seller/...`), own Zustand store
+(`useSellerStore`), own session-bootstrap hook — it never mixes with
+consumer or Provider OS navigation, exactly like Provider OS never mixed
+with consumer. The Channels view never hides a listing sync error behind
+a generic "connected" badge, and explicitly labels an inventory mismatch
+rather than silently trusting the provider's echoed number. The Team
+view's last-owner-safeguard rejection is surfaced by reloading true
+server state (`await load()`) rather than trusting an optimistic UI
+update, so a rejected role change can never *look* like it succeeded
+client-side. Full Persian (RTL)/English (LTR) localization via the
+existing `next-intl` "seller" namespace.
+
+### API endpoints (Handoff 09 additions)
+
+See the full endpoint list below (`GET /seller-organizations` through the
+per-channel `POST .../dev/simulate/*` routes). There is no real inbound
+marketplace webhook endpoint this phase — Torob/Digikala are sandbox-only
+(no official docs/credentials, see below), so order/cancellation
+ingestion is exercised through the dev-simulate routes, which drive the
+exact same `MarketplaceOrderIngestionService` pipeline a real webhook
+would.
+
+### Error codes (Handoff 09 additions)
+
+```
+SELLER_ACCESS_DENIED                 403  no ACTIVE SellerMembership on the target :sellerId, insufficient role, or a suspended org rejecting a mutation — `details.reason` distinguishes NOT_A_SELLER/AMBIGUOUS_CONTEXT/CROSS_ORGANIZATION/INSUFFICIENT_ROLE/SELLER_SUSPENDED/MISSING_SELLER_ID; never a silent 404
+SELLER_ORGANIZATION_NOT_FOUND        404  no such seller organization
+SELLER_MEMBERSHIP_NOT_FOUND          404  no such membership on this seller organization
+SELLER_LAST_OWNER                    409  would demote/remove the sole remaining ACTIVE OWNER
+INVENTORY_MOVEMENT_INVALID           409  the requested adjustment would make onHand or available negative
+MARKETPLACE_PROVIDER_UNAVAILABLE     502  resolved provider has no registered adapter
+MARKETPLACE_PROVIDER_DISABLED        400  provider exists but its *_ENABLED flag is off
+MARKETPLACE_CHANNEL_ACCOUNT_NOT_FOUND 404 no such channel account, or it belongs to a different seller
+MARKETPLACE_LISTING_NOT_FOUND        404  no such listing, or it belongs to a different seller
+MARKETPLACE_LISTING_MAPPING_REQUIRED 400  this offer must be mapped to a marketplace listing before it can be synced
+MARKETPLACE_CAPABILITY_UNSUPPORTED   400  the resolved provider's capability map doesn't support the requested operation
+MARKETPLACE_SYNC_FAILED              502  the provider adapter's sync call itself failed
+MARKETPLACE_ORDER_NOT_FOUND          404  no such marketplace order
+MARKETPLACE_ORDER_INGESTION_FAILED   409  order ingestion failed after claiming the idempotency row (row marked FAILED)
+MARKETPLACE_WEBHOOK_INVALID          400  reserved for a future real webhook signature check — unused while ingestion is dev-simulate-only
+```
+
 ## API endpoints
 
 ```
@@ -2242,6 +2503,51 @@ POST   /orders/:orderId/fulfillment/cancel
 POST   /orders/:orderId/shipment/reconcile
 POST   /shipping/webhooks/:provider             (no session/CSRF — server-to-server; dev|alopeyk|snappbox)
 POST   /shipping/dev/simulate/:providerShipmentId  (dev/test-only; hard-disabled outside development/test via NODE_ENV)
+
+GET    /seller-organizations                     (session-scoped; the seller organizations the caller belongs to — no :sellerId, discovered before any :sellerId route is useful)
+GET    /seller-context                           (memberships + active seller, for the seller switcher)
+POST   /seller-context                           (set the active seller preference)
+
+GET    /seller-organizations/:sellerId
+PATCH  /seller-organizations/:sellerId           (ADMIN+)
+GET    /seller-organizations/:sellerId/dashboard
+
+GET    /seller-organizations/:sellerId/members
+POST   /seller-organizations/:sellerId/members            (ADMIN+; invite)
+PATCH  /seller-organizations/:sellerId/members/:membershipId    (ADMIN+; role change, blocked by the last-owner safeguard)
+DELETE /seller-organizations/:sellerId/members/:membershipId    (ADMIN+; blocked by the last-owner safeguard)
+
+GET    /seller-organizations/:sellerId/offers              (paginated)
+GET    /seller-organizations/:sellerId/offers/:offerId
+POST   /seller-organizations/:sellerId/offers               (CATALOG_MANAGER+)
+PATCH  /seller-organizations/:sellerId/offers/:offerId       (CATALOG_MANAGER+)
+
+GET    /seller-organizations/:sellerId/inventory                        (paginated)
+PATCH  /seller-organizations/:sellerId/inventory/:inventoryItemId       (OPERATIONS/CATALOG_MANAGER+; mode: ABSOLUTE|DELTA)
+GET    /seller-organizations/:sellerId/inventory/:inventoryItemId/history   (paginated InventoryMovement audit trail)
+
+GET    /seller-organizations/:sellerId/orders                (paginated; unified PET LIFE OS + marketplace orders)
+GET    /seller-organizations/:sellerId/orders/:orderId
+
+GET    /seller-organizations/:sellerId/channels
+GET    /seller-organizations/:sellerId/channels/:channelAccountId
+POST   /seller-organizations/:sellerId/channels                          (ADMIN+; provider: DEV|TOROB|DIGIKALA)
+PATCH  /seller-organizations/:sellerId/channels/:channelAccountId        (ADMIN+; sync-flag toggles)
+POST   /seller-organizations/:sellerId/channels/:channelAccountId/reconcile   (CATALOG_MANAGER+; bounded to the first 50 listings)
+
+GET    /seller-organizations/:sellerId/marketplace-listings              (paginated)
+GET    /seller-organizations/:sellerId/marketplace-listings/:listingId
+POST   /seller-organizations/:sellerId/marketplace-listings              (create a DRAFT listing mapping)
+PATCH  /seller-organizations/:sellerId/marketplace-listings/:listingId
+POST   /seller-organizations/:sellerId/marketplace-listings/:listingId/publish
+POST   /seller-organizations/:sellerId/marketplace-listings/:listingId/sync    (re-pushes current inventory + price)
+POST   /seller-organizations/:sellerId/marketplace-listings/:listingId/deactivate
+POST   /seller-organizations/:sellerId/marketplace-listings/:listingId/reconcile
+
+POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/order               (dev/test-only; hard-disabled outside development/test via NODE_ENV)
+POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/cancellation         (dev/test-only)
+POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/mismatch             (dev/test-only)
+POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/publish-rejection    (dev/test-only)
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
@@ -3002,6 +3308,53 @@ Order/Payment independently coherent, quote expiration/refresh/reselect,
 and the two required concurrency races) executed via the same real-HTTP
 supertest-driven approach every prior handoff's "browser E2E" used.
 
+Everything in the Handoff 09 acceptance criteria: a real `SellerMembership`
+authorization model (`OWNER`/`ADMIN`/`OPERATIONS`/`CATALOG_MANAGER`/
+`ORDER_MANAGER`/`FINANCE`/`SUPPORT`/`VIEWER`) replacing Handoff 08's
+temporary "owner of the order" seller-ops auth entirely, with a
+deliberate, documented divergence from Provider OS (every route always
+resolves membership from its own `:sellerId` route param, never an
+implicit "active organization") and a last-owner safeguard that can never
+be bypassed by role-change or removal; offer/inventory management with a
+new `InventoryMovementService.applyOnHandDelta()` mutation surface that
+reuses `InventoryReservationService`'s exact row-lock oversell-protection
+pattern and writes an append-only `InventoryMovement` audit trail for
+every adjustment; a `MarketplaceChannelAdapter` interface
+(`DEV`/`TOROB`/`DIGIKALA`) mirroring `PaymentGateway`/`ShippingGateway`'s
+own adapter discipline exactly, with `DevMarketplaceAdapter` fully
+functional and Torob/Digikala built as sandbox-honest, extensively
+documented adapter boundaries (no official docs/credentials exist for
+either); `MarketplaceOrder` ingestion with real
+`@@unique([channelAccountId, externalOrderId])` idempotency, a genuinely
+tested oversell-protection race, and a corrected transactional pattern
+(claim-then-transact) after a P2002-inside-`$transaction()` bug was found
+and fixed while writing the idempotency test; marketplace orders mapped
+to real internal `Order`/`OrderItem` rows for seller-visibility without
+auto-creating a `Fulfillment` (PET LIFE OS never assumes it owns
+marketplace last-mile delivery); listing sync/reconciliation that never
+overwrites canonical PET LIFE OS inventory with what a marketplace
+reports and never hides a sync failure behind a generic success badge;
+Handoff 08's `ShippingOrchestrator` seller-ops actions (mark ready for
+pickup/request courier/cancel/reconcile) re-pointed at real
+`SellerMembership` authorization at the exact same URLs, with zero
+logistics-logic duplication; a completely separate Seller Shell UI
+(own store, own route group, own session bootstrap) with full Persian
+RTL/English LTR support; every Handoff 01-08 backend/frontend test still
+green (159 backend e2e scenarios, 110 frontend tests); and backend e2e
+coverage for all six required manual-verification flows (Flow A: seller
+dashboard reacting to an inventory/price change; Flow B: the full DEV
+marketplace publish→sync lifecycle; Flow C: an external marketplace order
+becoming a visible internal Order with inventory decremented; Flow D: a
+duplicate marketplace event producing exactly one of everything; Flow E:
+cross-seller isolation across inventory/orders/listings/team/channels;
+Flow F: a reconciliation mismatch surfacing a degraded listing state
+without touching canonical inventory) plus the two required concurrency
+races, executed via the same real-HTTP supertest-driven approach every
+prior handoff's "browser E2E" used. Torob/Digikala financial settlement
+was deliberately kept out of this handoff's scope per the spec, reserved
+for a dedicated future financial handoff (see "Next recommended coding
+handoff" below).
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -3202,14 +3555,14 @@ supertest-driven approach every prior handoff's "browser E2E" used.
   section above for the delivery/logistics architecture that now exists.
   Torob/Digikala integration remains explicitly out of scope per the spec.
 - **No seller-facing commerce surface, and no seller settlement** —
-  sellers are seed-data-only this phase (`SellerOrganization`/
-  `SellerOffer`/`InventoryItem` are all created via `prisma/seed.ts`);
-  there is no seller dashboard, no seller order view, no seller-side
-  inventory management endpoint, and nothing ever posts to the ledger's
-  `SELLER_PAYABLE`/`PLATFORM_REVENUE` accounts (seeded placeholders only
-  since Handoff 07). `docs/architecture` for the *full* Seller OS is a
-  future handoff, mirroring how Provider OS (Handoff 05) followed the
-  booking engine (Handoff 03).
+  **resolved by Handoff 09** for the commerce surface (a real Seller OS
+  dashboard/order view/inventory management/team now exists — see the
+  Handoff 09 section above); seller settlement (a first real posting to
+  `SELLER_PAYABLE`/`PLATFORM_REVENUE`) remains unimplemented — those
+  ledger accounts are still seeded placeholders only, and nothing in
+  Handoff 09 posts to them (deliberately out of scope, per the spec, to
+  avoid entangling this handoff with Ledger/Settlement — see "Next
+  recommended coding handoff" below).
 - **No promotion engine** — `Checkout.discountAmount`/`promotionCode` are
   placeholder fields only; nothing ever sets a non-zero discount or
   validates a code this phase.
@@ -3295,12 +3648,12 @@ supertest-driven approach every prior handoff's "browser E2E" used.
   own simulation engine (see the Handoff 08 section above for exactly
   what's real vs. UNKNOWN per provider); no live quote/create-shipment/
   webhook round-trip or real webhook signature scheme exists for either.
-- **No Seller OS / seller-ops auth model** (Handoff 08) — `mark ready for
-  pickup`/`request courier`/`cancel`/`reconcile` are reachable only by the
-  order's own owner (the customer), the same "no admin/support role model
-  yet" limitation Handoff 07's ops view has; a real seller would use these
-  same `ShippingOrchestrator` methods once Handoff 09 adds
-  `SellerUser`/`SellerAuthGuard`.
+- **No Seller OS / seller-ops auth model** (Handoff 08) — **resolved by
+  Handoff 09**: `mark ready for pickup`/`request courier`/`cancel`/
+  `reconcile` now require real `SellerMembership` authorization on the
+  order's own seller organization, via the exact same `ShippingOrchestrator`
+  methods (re-pointed, never duplicated) — see the Handoff 09 section
+  above.
 - **No shipping-fee ledger posting** — `LedgerService` still only records
   the full payment/refund amount (Handoff 07); the shipping-fee component
   of `deliveryAmount` is not split into its own ledger account this phase
@@ -3337,119 +3690,113 @@ supertest-driven approach every prior handoff's "browser E2E" used.
   price is unaffected (it was already locked in), but a *new* quote request
   would reflect the change — consistent with every other commercial
   snapshot in this codebase, just worth calling out explicitly here.
+- **No Torob/Digikala financial settlement** (Handoff 09) — deliberately
+  kept out of scope per the spec, to avoid entangling this handoff with
+  Ledger/Settlement; a marketplace order never posts to
+  `SELLER_PAYABLE`/`PLATFORM_REVENUE`, and there is no concept of a
+  marketplace-collected-vs-PET-LIFE-OS-collected payment split yet. A
+  future dedicated financial handoff should introduce this without
+  touching `MarketplaceOrder`'s ingestion shape.
+- **No real merchant credentials or official docs for Torob or Digikala**
+  (Handoff 09) — both adapters are documented sandbox boundaries sharing
+  `DevMarketplaceAdapter`'s own simulation engine (see the Handoff 09
+  section above for exactly what's marked UNKNOWN); no live publish/
+  inventory-push/price-push/order-pull round-trip or real webhook/polling
+  scheme exists for either, and there is no real inbound marketplace
+  webhook endpoint — ingestion is exercised entirely through the
+  dev-simulate routes, which drive the real ingestion pipeline.
+- **No auto-created Fulfillment for marketplace orders** — a marketplace
+  order becomes a real internal `Order`/`OrderItem` (for seller
+  visibility/reporting) but deliberately does not auto-create a
+  `Fulfillment`/`Shipment`; PET LIFE OS must never assume it owns
+  marketplace last-mile delivery. `Fulfillment.deliveryResponsibility`
+  (`PETLIFE_OS`/`MARKETPLACE`) exists in the schema for a future handoff
+  to wire actual delivery-responsibility logic without another migration.
+- **The unified Seller Orders view merges two queries in application
+  code, not a single SQL query** — `SellerOrderService` queries PET LIFE
+  OS checkout-origin `Order`s and marketplace-origin `Order`s separately
+  and merges/sorts them in memory; acceptable at current scale, but a
+  future handoff adding pagination-at-scale across both sources should
+  revisit this as a single query (e.g. a materialized view or a shared
+  index) rather than two.
+- **`OrdersService.createForCheckout()` has the same latent
+  P2002-inside-`$transaction()` shape** the Handoff 09 marketplace
+  ingestion bug was found and fixed in, but is never actually triggered
+  in practice — `CheckoutService`'s own `checkout.status === CONFIRMED`
+  short-circuit prevents ever reaching the vulnerable retry branch.
+  Documented here rather than fixed, since it's out of this handoff's
+  scope and genuinely unreachable through the public API today.
+- **No listing pause/reactivate distinction in the UI, and no bulk listing
+  operations** — `MarketplaceListingService` supports `publish`/
+  `deactivate`/`sync`/`reconcile` per listing; there is no "pause all
+  listings for this channel" or bulk price-update action yet.
+- **No seller invitation email/notification, and no accept/decline flow**
+  — `SellerTeamService.invite()` requires the invited person to already be
+  a registered PET LIFE OS user (looked up by email/phone) and creates
+  their `SellerMembership` directly as `ACTIVE` (auto-accepted); there is
+  no email/SMS sent, no `PENDING`-status invitation a person confirms
+  themselves, and no way to invite someone who hasn't signed up yet.
 
 ## Next recommended coding handoff
 
-**A minimal Seller OS** (Handoff 09), now with a genuinely complete
-foundation to sit on top of: Handoff 07 gave the platform a real (if
-sandboxed) payment/BNPL/refund pipeline with a double-entry ledger, and
-Handoff 08 gave it a real physical-fulfillment lifecycle
-(`Fulfillment`/`Shipment`) with seller-ops actions
-(`ShippingOrchestrator.markReadyForPickup()`/`requestCourier()`/
-`cancelFulfillment()`) already implemented and ready to be re-exposed
-under real seller authentication rather than "owner of the order." Every
-`SellerOrganization`/`SellerOffer`/`InventoryItem` still exists only via
-`prisma/seed.ts` today — there is no seller-facing surface at all. A
-minimal next step, reusing the exact same session auth and authorization
-pattern `ProviderAuthGuard`/`ProviderContextService` already established
-(a `SellerUser`/`SellerOrganization` membership model, a `SellerAuthGuard`
-that is a completely separate axis from pet-data authorization, exactly
-as `ProviderAuthGuard` is): (1) a seller order queue (`GET
-/seller/orders`, `GET /seller/orders/:id`) scoped to that seller's own
-`Order` rows only (never another seller's — same "403, never a silent
-404" IDOR posture as Provider OS); (2) inventory management (`PATCH
-/seller/offers/:id/inventory` to adjust `onHand`, reusing the exact same
-`InventoryReservationService` invariants — never a second stock-tracking
-path); (3) re-pointing the *existing* `ShippingOrchestrator` seller-ops
-methods (`markReadyForPickup`/`requestCourier`/`cancelFulfillment`/
-`reconcileShipment`) at `SellerAuthGuard` instead of "checkout owner" —
-the service layer already exists, this handoff's job is building the
-seller-facing controller/UI in front of it, not redesigning the
-orchestration; (4) basic order-status progression (`PENDING → CONFIRMED →
-PREPARING → READY_FOR_FULFILLMENT → FULFILLED`, finally reaching the
-`OrderStatus` values Handoff 06 defined but never made reachable),
-mirrored from `Fulfillment.status` reaching the equivalent milestone,
-with the same "single-step transition, reject anything else" discipline
-`ProviderBookingsService` used; and (5), now genuinely in scope, a first
-real posting to `SELLER_PAYABLE` (e.g. crediting it — and correspondingly
-debiting `CUSTOMER_PAYMENT_CLEARING` — for the seller's share once an
-Order is `FULFILLED`), still through `LedgerService.recordBalanced()`,
-never a new write path. Full settlement/payout execution, refund-adjusted
-seller payables, and seller-side pricing/catalog editing are substantial
-enough to stay a dedicated follow-up past this one, exactly as Provider
-OS's own verification workflow was deferred past Handoff 05.
+**Marketplace + Seller financial settlement** (Handoff 10), the piece
+Handoff 09 deliberately left out to avoid entangling Seller OS's launch
+with the ledger: a genuinely complete Seller OS and marketplace-channel
+architecture now exists (real `SellerMembership` authorization,
+inventory with a full audit trail, `MarketplaceChannelAdapter` with a
+working `DevMarketplaceAdapter` and sandbox-honest Torob/Digikala
+boundaries, idempotent order ingestion with real oversell protection),
+but nothing anywhere posts to `SELLER_PAYABLE`/`PLATFORM_REVENUE` for
+either a PET LIFE OS checkout order or a marketplace order — those
+ledger accounts are still Handoff 07 seed-only placeholders. A natural
+next step, reusing the exact double-entry discipline `LedgerService.
+recordBalanced()` already enforces (never a second ledger-write path,
+`sum(debits) === sum(credits)` checked before every write): (1) a first
+real posting crediting `SELLER_PAYABLE` (and debiting
+`CUSTOMER_PAYMENT_CLEARING`) for a PET LIFE OS checkout order once its
+`Fulfillment` reaches `DELIVERED`, finally giving Handoff 06/07's ledger
+foundation a real writer; (2) the marketplace-specific piece this
+handoff exists for — deciding and implementing how a *marketplace*-
+collected payment (Torob/Digikala customers pay the marketplace, not PET
+LIFE OS directly) reconciles against `MarketplaceOrder`/`Order` without
+ever fabricating a `PaymentIntent` PET LIFE OS never actually processed
+(the spec's own "never fabricate PaymentIntent for marketplace-collected
+payments" constraint from Handoff 09 carries forward unchanged); (3) a
+refund-adjusted seller payable — Handoff 07's refund flow already
+reverses a PET LIFE OS-collected payment's ledger entries, but nothing
+yet reduces a seller's payable for either a refunded PET LIFE OS order or
+a marketplace-side refund/return; and (4) genuine settlement/payout
+execution (an actual transfer to the seller, on some cadence), which
+Handoff 09's own "Next recommended coding handoff" note already flagged
+as substantial enough to be its own follow-up rather than bolted onto
+Seller OS's launch. Keep `MarketplaceOrder`'s ingestion shape and
+`InventoryMovementService`'s oversell-protection invariants untouched —
+this handoff is additive ledger-posting logic layered on top of what
+already exists, not a rewrite of either.
 
-Alternatively, if the business prioritizes closing the remaining external-
-provider gaps instead of building the Seller OS: once real merchant
+Alternatively, if the business prioritizes closing the remaining
+external-provider gaps instead of building settlement: once real merchant
 credentials/official docs for SnappPay, DigiPay, a standard payment
-gateway, AloPeyk, or SnappBox become available, swap the corresponding
-adapter's sandbox/simulation bodies for real HTTP calls and a real webhook
-signature scheme, without touching `PaymentGateway`/`FinancingProvider`/
-`ShippingGateway`'s shape — every adapter already implements the full
-interface its capability map declares, so a real integration is a
-same-class rewrite, not a new architecture. `validatePaymentConfig()`/
-`validateShippingConfig()` already refuse to boot with `PAYMENT_SANDBOX_MODE=
-production`/`SHIPPING_MODE=production` unless the enabled provider's
+gateway, AloPeyk, SnappBox, Torob, or Digikala become available, swap the
+corresponding adapter's sandbox/simulation bodies for real HTTP calls and
+a real webhook/signature scheme, without touching `PaymentGateway`/
+`FinancingProvider`/`ShippingGateway`/`MarketplaceChannelAdapter`'s shape
+— every adapter already implements the full interface its capability map
+declares, so a real integration is a same-class rewrite, not a new
+architecture. `validatePaymentConfig()`/`validateShippingConfig()`/
+`validateMarketplaceConfig()` already refuse to boot with
+`PAYMENT_SANDBOX_MODE=production`/`SHIPPING_MODE=production`/
+`MARKETPLACE_SANDBOX_MODE=production` unless the enabled provider's
 credential env vars are set, specifically to make this transition safe.
 Whichever is chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly
 separate (never collapse catalog identity, price, and stock back into one
 model), keep "1 Checkout → N Orders" and "1 Order → N Fulfillments → N
 Shipments" (schema-ready, MVP uses N=1) as the non-negotiable invariants,
-keep IRR as the only stored currency unit, and keep every financial write
-going through `LedgerService.recordBalanced()` and every Fulfillment
-status change going through `FulfillmentTransitionService.transition()`
-— never a second write path for either, no matter how small the change
+keep PET LIFE OS's own inventory as the sole source of truth for stock
+(never a marketplace), keep IRR as the only stored currency unit, and
+keep every financial write going through `LedgerService.
+recordBalanced()`, every Fulfillment status change through
+`FulfillmentTransitionService.transition()`, and every inventory mutation
+through `InventoryReservationService`/`InventoryMovementService` — never
+a second write path for any of them, no matter how small the change
 looks.
-
-**A minimal Seller OS**, directly mirroring how Handoff 05's minimal
-Provider OS followed the vet booking engine (Handoff 03), and now a more
-natural next step than before: Handoff 07 gave the platform a double-entry
-ledger with `SELLER_PAYABLE`/`PLATFORM_REVENUE` accounts already seeded
-but never posted to, and a real (if sandboxed) payment/BNPL/refund
-pipeline for a Seller OS to sit on top of, so this handoff can focus on
-the seller-facing surface itself rather than blocking on payments
-infrastructure. Every `SellerOrganization`/`SellerOffer`/`InventoryItem`
-still exists only via `prisma/seed.ts` today — there is no seller-facing
-surface at all. A minimal next step, reusing the exact same session auth
-and authorization pattern `ProviderAuthGuard`/`ProviderContextService`
-already established (a `SellerUser`/`SellerOrganization` membership
-model, a `SellerAuthGuard` that is a completely separate axis from
-pet-data authorization, exactly as `ProviderAuthGuard` is): (1) a seller
-order queue (`GET /seller/orders`, `GET /seller/orders/:id`) scoped to
-that seller's own `Order` rows only (never another seller's — same "403,
-never a silent 404" IDOR posture as Provider OS); (2) inventory
-management (`PATCH /seller/offers/:id/inventory` to adjust `onHand`,
-reusing the exact same `InventoryReservationService` invariants — never a
-second stock-tracking path); (3) basic order-status progression
-(`PENDING → CONFIRMED → PREPARING → READY_FOR_FULFILLMENT → FULFILLED`,
-finally reaching the `OrderStatus` values Handoff 06 defined but never
-made reachable) with the same "single-step transition, reject anything
-else" discipline `ProviderBookingsService` used; and (4), now genuinely
-in scope given Handoff 07's ledger foundation, a first real posting to
-`SELLER_PAYABLE` (e.g. crediting it — and correspondingly debiting
-`CUSTOMER_PAYMENT_CLEARING` — for the seller's share once an Order is
-`FULFILLED`), still through `LedgerService.recordBalanced()`, never a new
-write path. Full settlement/payout execution, refund-adjusted seller
-payables, and seller-side pricing/catalog editing are substantial enough
-to stay a dedicated follow-up past this one, exactly as Provider OS's own
-verification workflow was deferred past Handoff 05.
-
-Alternatively, if the business prioritizes closing the remaining
-payment-provider gap instead of building the Seller OS: once real
-merchant credentials/official docs for SnappPay, DigiPay, or a standard
-gateway become available, swap the corresponding adapter's sandbox
-`mode`-driven bodies for real HTTP calls and a real webhook signature
-scheme, without touching `PaymentGateway`/`FinancingProvider`'s shape —
-every adapter already implements the full interface `PROVIDER_CAPABILITIES`
-declares, so a real integration is a same-class rewrite, not a new
-architecture. `validatePaymentConfig()` already refuses to boot with
-`PAYMENT_SANDBOX_MODE=production` unless the enabled provider's credential
-env vars are set, specifically to make this transition safe. Delivery
-integration (`AloPeyk`/`SnappBox` behind the existing `DeliveryMethod`
-placeholder) remains a separate, still-untouched gap. Whichever is
-chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly separate
-(never collapse catalog identity, price, and stock back into one model),
-keep "1 Checkout → N Orders" as the non-negotiable invariant, keep IRR as
-the only stored currency unit, and keep every financial write going
-through `LedgerService.recordBalanced()` — never a second ledger-write
-path, no matter how small the change looks.

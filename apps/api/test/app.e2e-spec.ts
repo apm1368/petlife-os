@@ -3215,7 +3215,50 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(unchanged.onHand).toBe(3);
     });
 
+    it("Flow A — Seller operations: dashboard reflects an inventory update and an offer price change", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+
+      const before = await client.get(`/seller-organizations/${sellerId}/dashboard`).expect(200);
+      expect(before.body.lowStockOfferCount).toBe(0);
+      expect(before.body.activeOfferCount).toBe(1);
+
+      await client.patch(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}`).send({ mode: "ABSOLUTE", quantity: 2 }).expect(200);
+      await client.patch(`/seller-organizations/${sellerId}/offers/${offer.id}`).send({ priceAmount: 800_000 }).expect(200);
+
+      const after = await client.get(`/seller-organizations/${sellerId}/dashboard`).expect(200);
+      expect(after.body.lowStockOfferCount).toBe(1); // now below the low-stock threshold
+
+      const updatedOffer = await client.get(`/seller-organizations/${sellerId}/offers/${offer.id}`).expect(200);
+      expect(updatedOffer.body.priceAmount).toBe(800_000);
+      expect(updatedOffer.body.inventory.onHand).toBe(2);
+    });
+
     // --- Marketplace channel / listing lifecycle (spec section 11-18) --
+
+    it("Flow B — DEV marketplace: offer -> listing -> publish -> sync inventory -> sync price -> success state visible", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+
+      const created = await client.post(`/seller-organizations/${sellerId}/marketplace-listings`).send({ marketplaceChannelAccountId: channelAccountId, sellerOfferId: offer.id }).expect(201);
+      expect(created.body.status).toBe("DRAFT");
+
+      const published = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${created.body.id}/publish`).expect(201);
+      expect(published.body.status).toBe("ACTIVE");
+      expect(published.body.syncStatus).toBe("SYNCED");
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      await client.patch(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}`).send({ mode: "ABSOLUTE", quantity: 3 }).expect(200);
+      const inventorySynced = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${created.body.id}/sync`).expect(201);
+      expect(inventorySynced.body.publishedInventory).toBe(3);
+
+      await client.patch(`/seller-organizations/${sellerId}/offers/${offer.id}`).send({ priceAmount: 720_000 }).expect(200);
+      const priceSynced = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${created.body.id}/sync`).expect(201);
+      expect(priceSynced.body.publishedPriceIrr).toBe(720_000);
+      expect(priceSynced.body.syncStatus).toBe("SYNCED"); // success state visible to the seller, never silent
+    });
 
     it("creates a marketplace listing mapping", async () => {
       const { client, sellerId } = await setupSeller();
@@ -3282,7 +3325,7 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(attempts[0]!.status).toBe("FAILED");
     });
 
-    it("reconciliation detects an inventory mismatch without overwriting canonical PET LIFE OS stock", async () => {
+    it("Flow F — Reconciliation mismatch: PET LIFE OS detects the mismatch, canonical inventory unchanged, listing shows degraded state", async () => {
       const { client, sellerId } = await setupSeller();
       const offer = await createOfferWithInventory(sellerId, 10);
       const channelAccountId = await connectDevChannel(client, sellerId);
@@ -3297,9 +3340,37 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
       const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
       expect(inventoryItem.onHand).toBe(10); // never overwritten by the provider's observed value
+
+      const listingAfter = await client.get(`/seller-organizations/${sellerId}/marketplace-listings/${listing.id}`).expect(200);
+      expect(listingAfter.body.syncStatus).toBe("DEGRADED"); // the seller sees a degraded/reconciliation state, not silence
     });
 
     // --- Marketplace order ingestion (spec section 24-31) ---------------
+
+    it("Flow C — External marketplace order: MarketplaceOrder created once, internal Order visible to the seller, canonical inventory decreases", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      const externalOrderId = `flow-c-${unique()}`;
+
+      const ingested = await client
+        .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`)
+        .send({ externalOrderId, items: [{ externalListingId: listing.externalListingId, quantity: 1, unitPriceAmount: 500_000 }] })
+        .expect(201);
+
+      const marketplaceOrders = await prisma.marketplaceOrder.findMany({ where: { provider: MarketplaceProvider.DEV, marketplaceChannelAccountId: channelAccountId, externalOrderId } });
+      expect(marketplaceOrders).toHaveLength(1); // created once
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(9); // canonical inventory decreases
+
+      // The seller sees the order through the same unified Orders view real checkout Orders use.
+      const sellerOrders = await client.get(`/seller-organizations/${sellerId}/orders`).expect(200);
+      const visible = sellerOrders.body.items.find((o: { orderId: string }) => o.orderId === ingested.body.mappedOrderId);
+      expect(visible).toBeTruthy();
+      expect(visible.source).toBe("DEV");
+    });
 
     it("ingests a marketplace order: decrements inventory exactly once and maps to an internal Order", async () => {
       const { client, sellerId } = await setupSeller();
@@ -3327,7 +3398,7 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(mappedOrder.totalAmount).toBe(1_000_000);
     });
 
-    it("acknowledges a duplicate marketplace order delivery idempotently — one MarketplaceOrder, one internal Order, one inventory decrement", async () => {
+    it("Flow D — Duplicate marketplace event: one MarketplaceOrder, one internal Order, one inventory decrement", async () => {
       const { client, sellerId } = await setupSeller();
       const offer = await createOfferWithInventory(sellerId, 10);
       const channelAccountId = await connectDevChannel(client, sellerId);
@@ -3452,7 +3523,7 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
     // --- Multi-seller isolation (spec section 22, 51) --------------------
 
-    it("isolates seller data across organizations — offers, inventory, team, and channels", async () => {
+    it("Flow E — Cross-seller isolation: Seller A cannot reach Seller B's inventory, orders, listings, team, or channels", async () => {
       const { client: clientA, sellerId: sellerAId } = await setupSeller();
       const { sellerId: sellerBId } = await setupSeller();
       const offerB = await createOfferWithInventory(sellerBId);
