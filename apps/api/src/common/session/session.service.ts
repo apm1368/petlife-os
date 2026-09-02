@@ -86,6 +86,18 @@ export class SessionService {
     res.clearCookie(this.cookieName, { path: "/" });
   }
 
+  /**
+   * Revokes every session row for a user — used after a password change or
+   * reset (a credential compromise should invalidate every existing device,
+   * not just the one making the change). This cannot clear the cookie in
+   * another browser; each of those sessions simply fails to resolve on its
+   * next request, which is the correct "logged out" outcome for a cookie we
+   * have no way to reach directly.
+   */
+  async revokeAllForUser(userId: string): Promise<void> {
+    await this.prisma.session.deleteMany({ where: { userId } });
+  }
+
   readCookie(req: { cookies?: Record<string, string> }): string | undefined {
     return req.cookies?.[this.cookieName];
   }

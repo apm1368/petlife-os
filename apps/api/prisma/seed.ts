@@ -1,3 +1,4 @@
+import { hashPassword } from "../src/common/password/password-hash.util";
 import {
   AdminMembershipStatus,
   AdminRole,
@@ -616,6 +617,92 @@ async function main() {
 
   await seedCommerce();
   await seedAdmin(sarah.id, sarah.displayName);
+  await seedDemoAccount();
+}
+
+/**
+ * Handoff 12 (Authentication) — "run locally -> log in -> immediately see
+ * real product" via username/password, with zero dependency on reading an
+ * OTP code out of the server log. Written idempotently (existence-checked
+ * before any create), unlike Sarah's own seed above, which pre-dates this
+ * handoff and is documented separately as a known issue rather than fixed
+ * here — see the H12 completion report.
+ */
+const DEMO_USERNAME = "demo";
+const DEMO_PASSWORD = "dev-only-password";
+
+async function seedDemoAccount(): Promise<void> {
+  const existing = await prisma.user.findUnique({ where: { normalizedUsername: DEMO_USERNAME } });
+  if (existing) {
+    console.log(`Demo account already seeded: username=${DEMO_USERNAME} password=${DEMO_PASSWORD}`);
+    return;
+  }
+
+  const demoUser = await prisma.user.create({
+    data: {
+      username: DEMO_USERNAME,
+      normalizedUsername: DEMO_USERNAME,
+      passwordHash: await hashPassword(DEMO_PASSWORD),
+      displayName: "Demo User",
+      locale: "en",
+    },
+  });
+
+  const household = await prisma.household.create({
+    data: {
+      name: "Demo Household",
+      city: "Tehran",
+      countryCode: "IR",
+      members: { create: { userId: demoUser.id, role: HouseholdRole.OWNER } },
+    },
+  });
+
+  const buddy = await prisma.pet.create({
+    data: {
+      householdId: household.id,
+      name: "Buddy",
+      species: PetSpecies.DOG,
+      breed: "Labrador Retriever",
+      birthDate: new Date("2021-06-01"),
+      lifecycleStatus: "ACTIVE",
+    },
+  });
+
+  await prisma.petAccessGrant.create({
+    data: {
+      petId: buddy.id,
+      userId: demoUser.id,
+      canViewIdentity: true,
+      canEditIdentity: true,
+      canViewHealth: true,
+      canEditHealth: true,
+      canBookCare: true,
+      canViewCareProfile: true,
+      canEditCareProfile: true,
+      canViewLocation: true,
+      canManageAccess: true,
+      source: "HOUSEHOLD",
+    },
+  });
+
+  await prisma.activePetPreference.create({
+    data: { userId: demoUser.id, householdId: household.id, petId: buddy.id },
+  });
+
+  await prisma.onboardingProgress.create({
+    data: {
+      userId: demoUser.id,
+      householdId: household.id,
+      petId: buddy.id,
+      chapter: "READY",
+      step: "ready",
+      status: "COMPLETED",
+      completedSteps: ["welcome", "account", "household", "pet-identity", "personalization", "ready"],
+      lastCompletedAt: new Date(),
+    },
+  });
+
+  console.log(`Seeded demo account: username=${DEMO_USERNAME} password=${DEMO_PASSWORD} household=${household.id} pet=Buddy:${buddy.id}`);
 }
 
 main()

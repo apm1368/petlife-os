@@ -759,3 +759,66 @@ export class AdminRefundApprovalRequiredException extends ApiException {
     super("ADMIN_REFUND_APPROVAL_REQUIRED", "This refund amount requires a second admin's approval before it can be executed.", HttpStatus.CONFLICT, details);
   }
 }
+
+/// Authentication (Handoff 12) — Google OAuth, username/password.
+
+/** Deliberately identical message/code whether the username doesn't exist or the password is wrong — never lets a caller distinguish the two (enumeration resistance). */
+export class InvalidCredentialsException extends ApiException {
+  constructor() {
+    super("INVALID_CREDENTIALS", "The username or password you entered is incorrect.", HttpStatus.UNAUTHORIZED);
+  }
+}
+
+export class UsernameTakenException extends ApiException {
+  constructor() {
+    super("USERNAME_TAKEN", "This username is already taken.", HttpStatus.CONFLICT);
+  }
+}
+
+/** class-validator already rejects an obviously-too-short password at the DTO layer; this is for the rarer case a caller bypasses that (e.g. a future non-HTTP caller). */
+export class WeakPasswordException extends ApiException {
+  constructor() {
+    super("WEAK_PASSWORD", "Password must be at least 8 characters.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class CurrentPasswordIncorrectException extends ApiException {
+  constructor() {
+    super("CURRENT_PASSWORD_INCORRECT", "Your current password is incorrect.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+/** Thrown when GOOGLE_AUTH_ENABLED is false (or credentials are unset) — never a silent fake login. */
+export class GoogleAuthDisabledException extends ApiException {
+  constructor() {
+    super("GOOGLE_AUTH_DISABLED", "Google sign-in is not available right now.", HttpStatus.SERVICE_UNAVAILABLE);
+  }
+}
+
+/** Covers every real-flow failure mode: missing/mismatched state cookie, expired handshake, and (for the callback) a rejected/unverifiable id_token — deliberately one generic code so a caller can't probe which check failed. */
+export class GoogleAuthFailedException extends ApiException {
+  constructor() {
+    super("GOOGLE_AUTH_FAILED", "We couldn't complete Google sign-in. Please try again.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+/** A verified Google/consumer identity that already resolves to a *different* existing User than the one implied by the request — never silently merged. */
+export class AccountLinkingConflictException extends ApiException {
+  constructor() {
+    super("ACCOUNT_LINKING_CONFLICT", "This account is already linked to a different sign-in method.", HttpStatus.CONFLICT);
+  }
+}
+
+/** Deliberately generic and only used for the token-*consumption* step (reset submission) — the token-*request* step (forgot-password) never reveals whether the identifier matched anything. */
+export class PasswordResetTokenInvalidException extends ApiException {
+  constructor() {
+    super("PASSWORD_RESET_TOKEN_INVALID", "This password reset link is invalid or has expired.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+/** returnTo must be an internal, same-origin relative path — anything else (a full URL, protocol-relative //host, or a path escaping the app) is rejected rather than silently downgraded to "/", so a caller integrating against this API notices immediately. */
+export class InvalidReturnToException extends ApiException {
+  constructor() {
+    super("INVALID_RETURN_TO", "The returnTo destination is not a valid internal path.", HttpStatus.BAD_REQUEST);
+  }
+}

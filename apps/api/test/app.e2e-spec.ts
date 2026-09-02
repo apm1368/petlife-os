@@ -4280,4 +4280,216 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect([assigneeA.adminUserId, assigneeB.adminUserId]).toContain(final.assignedAdminId);
     });
   });
+
+  describe("Authentication: Google + Phone + Password + Public Browsing (Handoff 12)", () => {
+    /** unique() includes a hyphen, which RegisterDto's username pattern (letters/digits/underscore/dot only) rejects. */
+    const uniqueUsername = (prefix: string) => `${prefix}${unique().replace(/-/g, "")}`;
+
+    /** Extracts the raw token AuthPasswordResetService logs instead of sending a real email — mirrors captureOtpCode. */
+    function capturePasswordResetToken(spy: jest.SpyInstance, userId: string): string {
+      const call = spy.mock.calls.find(
+        (args) => typeof args[0] === "string" && args[0].includes("[DEV PASSWORD RESET]") && args[0].includes(`userId=${userId}`),
+      );
+      if (!call) throw new Error(`No password reset log found for ${userId}`);
+      const match = /token=(\S+)/.exec(call[0] as string);
+      if (!match) throw new Error("Could not parse reset token from log line");
+      return match[1]!;
+    }
+
+    async function registerViaHttp(username: string, password: string, extra: Record<string, unknown> = {}) {
+      const primed = await primeCsrf(app);
+      const res = await request(app.getHttpServer())
+        .post("/auth/register")
+        .set("Cookie", `petlife_csrf=${primed.csrf}`)
+        .set("x-csrf-token", primed.csrf!)
+        .send({ username, password, ...extra })
+        .expect(200);
+      const cookies: Cookies = { session: extractCookie(res.headers["set-cookie"], "petlife_session"), csrf: primed.csrf };
+      return { body: res.body, cookies };
+    }
+
+    function loginPasswordViaHttp(username: string, password: string, primed: Cookies) {
+      return request(app.getHttpServer())
+        .post("/auth/login/password")
+        .set("Cookie", `petlife_csrf=${primed.csrf}`)
+        .set("x-csrf-token", primed.csrf!)
+        .send({ username, password });
+    }
+
+    function simulateGoogleLogin(profile: { sub: string; email?: string; emailVerified?: boolean; name?: string }, primed: Cookies) {
+      return request(app.getHttpServer())
+        .post("/dev/auth/google/simulate")
+        .set("Cookie", `petlife_csrf=${primed.csrf}`)
+        .set("x-csrf-token", primed.csrf!)
+        .send(profile);
+    }
+
+    it("Flow A: anonymous browsing reaches public discovery endpoints without any session", async () => {
+      await request(app.getHttpServer()).get("/shop/categories").expect(200);
+      await request(app.getHttpServer()).get("/providers/vets").expect(200);
+      await request(app.getHttpServer()).get("/services/categories").expect(200);
+    });
+
+    it("Flow B: a private endpoint still rejects an anonymous caller", async () => {
+      const res = await request(app.getHttpServer()).get("/onboarding").expect(401);
+      expect(res.body.error.code).toBe("UNAUTHENTICATED");
+    });
+
+    it("Flow C: registers with username/password, logs out, and logs back in with the same credentials", async () => {
+      const username = uniqueUsername("user_");
+      const { body, cookies } = await registerViaHttp(username, "correct-horse-battery");
+      const userId = body.user.id;
+
+      const client = authedRequest(app, cookies);
+      await client.get("/auth/session").expect(200);
+      await client.post("/auth/logout").expect(200);
+      await client.get("/auth/session").expect(401);
+
+      const loginRes = await loginPasswordViaHttp(username, "correct-horse-battery", await primeCsrf(app)).expect(200);
+      expect(loginRes.body.user.id).toBe(userId);
+    });
+
+    it("Flow D: registration rejects a duplicate username, case-insensitively", async () => {
+      const username = uniqueUsername("dup_");
+      await registerViaHttp(username, "correct-horse-battery");
+
+      const primed = await primeCsrf(app);
+      const dupRes = await request(app.getHttpServer())
+        .post("/auth/register")
+        .set("Cookie", `petlife_csrf=${primed.csrf}`)
+        .set("x-csrf-token", primed.csrf!)
+        .send({ username: username.toUpperCase(), password: "another-password" })
+        .expect(409);
+      expect(dupRes.body.error.code).toBe("USERNAME_TAKEN");
+    });
+
+    it("Flow E: a wrong password and a nonexistent username return the identical enumeration-resistant error", async () => {
+      const username = uniqueUsername("real_");
+      await registerViaHttp(username, "correct-horse-battery");
+
+      const wrongPassword = await loginPasswordViaHttp(username, "wrong-password", await primeCsrf(app)).expect(401);
+      const noSuchUser = await loginPasswordViaHttp(uniqueUsername("nobody_"), "wrong-password", await primeCsrf(app)).expect(401);
+
+      expect(wrongPassword.body.error.code).toBe("INVALID_CREDENTIALS");
+      expect(noSuchUser.body.error.code).toBe("INVALID_CREDENTIALS");
+      expect(wrongPassword.body.error.message).toBe(noSuchUser.body.error.message);
+    });
+
+    it("Flow F: a mocked Google login creates a user, and a repeat login with the same sub never creates a duplicate", async () => {
+      const sub = `google-sub-${unique()}`;
+      const email = `googleuser-${unique()}@example.com`;
+
+      const first = await simulateGoogleLogin({ sub, email, emailVerified: true, name: "Google User" }, await primeCsrf(app)).expect(201);
+      const userId = first.body.user.id;
+
+      const second = await simulateGoogleLogin({ sub, email, emailVerified: true, name: "Google User" }, await primeCsrf(app)).expect(201);
+      expect(second.body.user.id).toBe(userId);
+
+      const identityCount = await prisma.authIdentity.count({ where: { provider: "GOOGLE", providerAccountId: sub } });
+      expect(identityCount).toBe(1);
+    });
+
+    it("Flow F2: account linking — a verified Google email matching an existing password account links to it, never creating a duplicate User", async () => {
+      const username = uniqueUsername("linkme_");
+      const email = `linkme-${unique()}@example.com`;
+      const { body } = await registerViaHttp(username, "correct-horse-battery", { email });
+      const userId = body.user.id;
+
+      const sub = `google-sub-link-${unique()}`;
+      const googleRes = await simulateGoogleLogin({ sub, email, emailVerified: true, name: "Link Me" }, await primeCsrf(app)).expect(201);
+      expect(googleRes.body.user.id).toBe(userId);
+
+      const totalUsers = await prisma.user.count({ where: { email } });
+      expect(totalUsers).toBe(1);
+    });
+
+    it("Flow F3: an unverified Google email is never trusted for account linking or creation", async () => {
+      const sub = `google-sub-unverified-${unique()}`;
+      const res = await simulateGoogleLogin({ sub, email: `unverified-${unique()}@example.com`, emailVerified: false }, await primeCsrf(app)).expect(400);
+      expect(res.body.error.code).toBe("GOOGLE_AUTH_FAILED");
+    });
+
+    it("Flow G: forgot-password always resolves the same way regardless of match, and reset invalidates the old session and old password", async () => {
+      const username = uniqueUsername("reset_");
+      const { body, cookies: oldCookies } = await registerViaHttp(username, "old-password-1");
+      const userId = body.user.id;
+
+      const oldClient = authedRequest(app, oldCookies);
+      await oldClient.get("/auth/session").expect(200);
+
+      const primedForgot = await primeCsrf(app);
+      await request(app.getHttpServer())
+        .post("/auth/password/forgot")
+        .set("Cookie", `petlife_csrf=${primedForgot.csrf}`)
+        .set("x-csrf-token", primedForgot.csrf!)
+        .send({ identifier: username })
+        .expect(200);
+
+      // A non-matching identifier resolves identically — never reveals account existence.
+      const primedForgotMiss = await primeCsrf(app);
+      await request(app.getHttpServer())
+        .post("/auth/password/forgot")
+        .set("Cookie", `petlife_csrf=${primedForgotMiss.csrf}`)
+        .set("x-csrf-token", primedForgotMiss.csrf!)
+        .send({ identifier: uniqueUsername("nobody_") })
+        .expect(200);
+
+      const token = capturePasswordResetToken(logSpy, userId);
+
+      const primedReset = await primeCsrf(app);
+      await request(app.getHttpServer())
+        .post("/auth/password/reset")
+        .set("Cookie", `petlife_csrf=${primedReset.csrf}`)
+        .set("x-csrf-token", primedReset.csrf!)
+        .send({ token, newPassword: "new-password-2" })
+        .expect(200);
+
+      // The reset revokes every existing session for the account.
+      await oldClient.get("/auth/session").expect(401);
+
+      await loginPasswordViaHttp(username, "old-password-1", await primeCsrf(app)).expect(401);
+      const newLoginRes = await loginPasswordViaHttp(username, "new-password-2", await primeCsrf(app)).expect(200);
+      expect(newLoginRes.body.user.id).toBe(userId);
+
+      // The token is single-use.
+      const primedReplay = await primeCsrf(app);
+      await request(app.getHttpServer())
+        .post("/auth/password/reset")
+        .set("Cookie", `petlife_csrf=${primedReplay.csrf}`)
+        .set("x-csrf-token", primedReplay.csrf!)
+        .send({ token, newPassword: "another-password-3" })
+        .expect(400);
+    });
+
+    it("Flow H: a freshly registered account starts with onboarding incomplete — authentication and onboarding are distinct", async () => {
+      const username = uniqueUsername("onb_");
+      const { cookies } = await registerViaHttp(username, "correct-horse-battery");
+      const client = authedRequest(app, cookies);
+      const progress = await client.get("/onboarding").expect(200);
+      expect(progress.body.status).not.toBe("COMPLETED");
+    });
+
+    it("Flow I: Provider OS and Seller OS remain private — an anonymous caller is rejected", async () => {
+      await request(app.getHttpServer()).get("/provider/me/overview").expect(401);
+      await request(app.getHttpServer()).get("/seller-context").expect(401);
+    });
+
+    it("Flow J: setting a password for the first time never requires a current password, but changing an existing one does", async () => {
+      const username = uniqueUsername("setpw_");
+      const { cookies } = await registerViaHttp(username, "initial-password-1");
+      const client = authedRequest(app, cookies);
+
+      // Already has a password (from registration) — omitting currentPassword must be rejected.
+      const missingCurrent = await client.put("/auth/password").send({ newPassword: "changed-password-2" }).expect(400);
+      expect(missingCurrent.body.error.code).toBe("CURRENT_PASSWORD_INCORRECT");
+
+      await client.put("/auth/password").send({ currentPassword: "initial-password-1", newPassword: "changed-password-2" }).expect(200);
+      await loginPasswordViaHttp(username, "changed-password-2", await primeCsrf(app)).expect(200);
+    });
+
+    it("returns the enabled auth methods without requiring a session", async () => {
+      const res = await request(app.getHttpServer()).get("/auth/methods").expect(200);
+      expect(res.body).toEqual({ google: false, phone: true, password: true });
+    });
+  });
 });

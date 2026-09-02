@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Skeleton } from "@petlife/ui";
 import { onboardingService } from "@/services/onboarding.service";
 import { petsService } from "@/services/pets.service";
 import { useOnboardingStore } from "@/stores/onboarding-store";
+import { sanitizeReturnTo } from "@/lib/auth/return-to";
 import { HouseholdStep } from "./steps/HouseholdStep";
 import { SpeciesStep } from "./steps/SpeciesStep";
 import { PetNameStep } from "./steps/PetNameStep";
@@ -38,11 +39,13 @@ const STEP_ORDER = [
 ] as const;
 type Step = (typeof STEP_ORDER)[number];
 
-export function OnboardingWizard() {
+function OnboardingWizardInner() {
   const [step, setStep] = useState<Step | null>(null);
   const update = useOnboardingStore((s) => s.update);
   const router = useRouter();
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +55,7 @@ export function OnboardingWizard() {
       if (cancelled) return;
 
       if (progress.status === "COMPLETED" && progress.chapter === "READY") {
-        router.replace(`/${locale}/home`);
+        router.replace(sanitizeReturnTo(returnTo, `/${locale}/home`));
         return;
       }
 
@@ -143,8 +146,16 @@ export function OnboardingWizard() {
     case "personalization":
       return <PersonalizationStep onNext={() => goTo("ready")} />;
     case "ready":
-      return <ReadyStep />;
+      return <ReadyStep returnTo={returnTo} />;
     default:
       return null;
   }
+}
+
+export function OnboardingWizard() {
+  return (
+    <Suspense fallback={<Skeleton className="h-64 w-full" aria-label="Loading onboarding" />}>
+      <OnboardingWizardInner />
+    </Suspense>
+  );
 }

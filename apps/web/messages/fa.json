@@ -9,14 +9,19 @@
     "retry": "تلاش دوباره",
     "loading": "در حال بارگذاری",
     "optional": "اختیاری",
-    "selected": "انتخاب‌شده"
+    "selected": "انتخاب‌شده",
+    "logIn": "ورود"
   },
   "auth": {
     "welcome": {
       "title": "به PET LIFE OS خوش آمدید",
       "subtitle": "همه چیز درباره زندگی حیوان خانگی شما، در یک جا.",
       "continueWithEmail": "ادامه با ایمیل",
-      "continueWithPhone": "ادامه با شماره موبایل"
+      "continueWithPhone": "ادامه با شماره موبایل",
+      "continueWithGoogle": "ادامه با گوگل",
+      "continueWithUsername": "ادامه با نام کاربری",
+      "createAccount": "ساخت حساب کاربری",
+      "googleAuthFailed": "ورود با گوگل ممکن نشد. لطفاً روش دیگری را امتحان کنید."
     },
     "identifier": {
       "emailLabel": "آدرس ایمیل",
@@ -31,6 +36,37 @@
       "verify": "تأیید",
       "invalid": "این کد نادرست است یا منقضی شده.",
       "rateLimited": "تلاش بیش از حد. {seconds} ثانیه دیگر دوباره امتحان کنید."
+    },
+    "password": {
+      "usernameLabel": "نام کاربری",
+      "passwordLabel": "رمز عبور",
+      "login": "ورود",
+      "forgotPassword": "رمز عبور را فراموش کرده‌اید؟",
+      "invalidCredentials": "نام کاربری یا رمز عبور نادرست است."
+    },
+    "register": {
+      "title": "ساخت حساب کاربری",
+      "usernameLabel": "نام کاربری",
+      "passwordLabel": "رمز عبور",
+      "displayNameLabel": "نام نمایشی (اختیاری)",
+      "emailLabel": "ایمیل (اختیاری)",
+      "submit": "ساخت حساب",
+      "usernameTaken": "این نام کاربری قبلاً استفاده شده است.",
+      "haveAccount": "حساب کاربری دارید؟ وارد شوید"
+    },
+    "forgot": {
+      "title": "بازیابی رمز عبور",
+      "identifierLabel": "نام کاربری یا ایمیل",
+      "submit": "ارسال لینک بازیابی",
+      "sent": "در صورت وجود حساب کاربری مطابق، لینک بازیابی ارسال شد.",
+      "backToLogin": "بازگشت به ورود"
+    },
+    "reset": {
+      "title": "تعیین رمز عبور جدید",
+      "newPasswordLabel": "رمز عبور جدید",
+      "submit": "بازنشانی رمز عبور",
+      "invalidToken": "این لینک بازیابی نامعتبر یا منقضی شده است.",
+      "success": "رمز عبور شما بازنشانی شد. اکنون می‌توانید وارد شوید."
     }
   },
   "onboarding": {

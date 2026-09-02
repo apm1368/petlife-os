@@ -9,14 +9,19 @@
     "retry": "Retry",
     "loading": "Loading",
     "optional": "Optional",
-    "selected": "Selected"
+    "selected": "Selected",
+    "logIn": "Log in"
   },
   "auth": {
     "welcome": {
       "title": "Welcome to PET LIFE OS",
       "subtitle": "Everything about your pet's life, in one place.",
       "continueWithEmail": "Continue with email",
-      "continueWithPhone": "Continue with phone"
+      "continueWithPhone": "Continue with phone",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithUsername": "Continue with username",
+      "createAccount": "Create an account",
+      "googleAuthFailed": "We couldn't sign you in with Google. Please try another method."
     },
     "identifier": {
       "emailLabel": "Email address",
@@ -31,6 +36,37 @@
       "verify": "Verify",
       "invalid": "That code is incorrect or has expired.",
       "rateLimited": "Too many attempts. Try again in {seconds}s."
+    },
+    "password": {
+      "usernameLabel": "Username",
+      "passwordLabel": "Password",
+      "login": "Log in",
+      "forgotPassword": "Forgot your password?",
+      "invalidCredentials": "The username or password you entered is incorrect."
+    },
+    "register": {
+      "title": "Create your account",
+      "usernameLabel": "Username",
+      "passwordLabel": "Password",
+      "displayNameLabel": "Display name (optional)",
+      "emailLabel": "Email (optional)",
+      "submit": "Create account",
+      "usernameTaken": "This username is already taken.",
+      "haveAccount": "Already have an account? Log in"
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "identifierLabel": "Username or email",
+      "submit": "Send reset link",
+      "sent": "If an account matches, a reset link has been sent.",
+      "backToLogin": "Back to log in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "newPasswordLabel": "New password",
+      "submit": "Reset password",
+      "invalidToken": "This reset link is invalid or has expired.",
+      "success": "Your password has been reset. You can now log in."
     }
   },
   "onboarding": {

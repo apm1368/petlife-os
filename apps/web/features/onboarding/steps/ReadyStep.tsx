@@ -8,8 +8,9 @@ import { Button, PetIdentity } from "@petlife/ui";
 import { PetLifecycleStatus } from "@petlife/types";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { onboardingService } from "@/services/onboarding.service";
+import { sanitizeReturnTo } from "@/lib/auth/return-to";
 
-export function ReadyStep() {
+export function ReadyStep({ returnTo }: { returnTo?: string | null }) {
   const t = useTranslations("onboarding.ready");
   const draft = useOnboardingStore((s) => s);
   const reset = useOnboardingStore((s) => s.reset);
@@ -30,7 +31,7 @@ export function ReadyStep() {
 
   function goToHome() {
     reset();
-    router.replace(`/${locale}/home`);
+    router.replace(sanitizeReturnTo(returnTo, `/${locale}/home`));
   }
 
   return (

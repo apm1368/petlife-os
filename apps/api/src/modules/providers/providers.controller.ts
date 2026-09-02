@@ -1,13 +1,14 @@
 import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
-import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
-import { CurrentUser } from "../../common/auth/current-user.decorator";
+import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-auth.guard";
+import { OptionalCurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { SearchVetsDto } from "./dto/search-vets.dto";
 import { GetAvailabilityDto } from "./dto/get-availability.dto";
 import { ProvidersService } from "./providers.service";
 
+/** Vet discovery is public browsing (Handoff 12) — OptionalSessionAuthGuard personalizes the response for a signed-in caller but never requires one. */
 @Controller("providers/vets")
-@UseGuards(SessionAuthGuard)
+@UseGuards(OptionalSessionAuthGuard)
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
 
@@ -17,8 +18,8 @@ export class ProvidersController {
   }
 
   @Get(":providerId")
-  getProfile(@Param("providerId") providerId: string, @CurrentUser() user: SessionUser) {
-    return this.providersService.getVetProfile(providerId, user.id);
+  getProfile(@Param("providerId") providerId: string, @OptionalCurrentUser() user: SessionUser | undefined) {
+    return this.providersService.getVetProfile(providerId, user?.id);
   }
 
   @Get(":providerId/availability")

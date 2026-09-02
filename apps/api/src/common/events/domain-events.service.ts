@@ -5,6 +5,10 @@ import { PrismaService } from "../prisma/prisma.service";
 
 export const DOMAIN_EVENT_TYPES = [
   "UserAuthenticated",
+  "UserRegistered",
+  "PasswordChanged",
+  "PasswordResetRequested",
+  "PasswordResetCompleted",
   "HouseholdCreated",
   "PetCreated",
   "ActivePetChanged",

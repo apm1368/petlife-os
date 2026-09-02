@@ -1,6 +1,8 @@
 import type { ApiErrorBody } from "@petlife/types";
 
 const API_ORIGIN = process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:4000";
+/** Exposed for the one legitimate case a caller needs a full URL rather than a fetch through apiFetch: Google's OAuth login is a real browser navigation, not an XHR. */
+export const API_BASE_URL = API_ORIGIN;
 const CSRF_COOKIE_NAME = "petlife_csrf";
 
 export class ApiError extends Error {

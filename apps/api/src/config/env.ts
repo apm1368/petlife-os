@@ -21,6 +21,34 @@ const envSchema = z.object({
   OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(30),
   OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 
+  /// Authentication (Handoff 12) — Google OAuth follows the exact same
+  /// "*_ENABLED flag, optional credentials, validated at startup" shape as
+  /// every other external provider in this codebase (Payment/Shipping/
+  /// Marketplace/Messaging). Unlike those, there is no sandbox mode: Google
+  /// sign-in is either off (GOOGLE_AUTH_ENABLED=false, the default — the
+  /// rest of the app keeps working, per spec) or genuinely configured with
+  /// real OAuth client credentials; there is no safe "simulate a real
+  /// Google login" sandbox the way DevPaymentGateway can safely simulate a
+  /// card charge, so dev/test coverage instead goes through the dedicated
+  /// dev-only /dev/auth/google/simulate endpoint (see AuthGoogleController).
+  /// z.coerce.boolean() would treat the *string* "false" as truthy (any
+  /// non-empty string coerces to true) — every other *_ENABLED flag in this
+  /// schema happens to only ever be set to "true" in .env, so that footgun
+  /// has never surfaced before now. This is the one flag actually set to
+  /// "false" in .env (Google is off by default), so it needs a real
+  /// string-literal parse instead.
+  GOOGLE_AUTH_ENABLED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_CALLBACK_URL: z.string().optional(),
+
+  /// Argon2id password hashing (see common/password/password-hash.util.ts).
+  PASSWORD_MIN_LENGTH: z.coerce.number().int().min(8).default(8),
+  PASSWORD_RESET_TOKEN_TTL_MINUTES: z.coerce.number().int().positive().default(30),
+
   STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
   STORAGE_S3_ENDPOINT: z.string().optional(),
   STORAGE_S3_REGION: z.string().optional(),
@@ -197,11 +225,29 @@ function validateMessagingConfig(env: AppEnv): void {
   }
 }
 
+/// Handoff 12 — "Google may be unavailable locally, but the app must
+/// continue working" means GOOGLE_AUTH_ENABLED=false is always valid with
+/// zero credentials configured; enabling it without every required
+/// credential is the one case that fails startup, since a half-configured
+/// Google client would otherwise fail unpredictably on the first real login
+/// attempt instead of at boot.
+function validateGoogleAuthConfig(env: AppEnv): void {
+  if (!env.GOOGLE_AUTH_ENABLED) return;
+  const missing: string[] = [];
+  if (!env.GOOGLE_CLIENT_ID) missing.push("GOOGLE_CLIENT_ID");
+  if (!env.GOOGLE_CLIENT_SECRET) missing.push("GOOGLE_CLIENT_SECRET");
+  if (!env.GOOGLE_CALLBACK_URL) missing.push("GOOGLE_CALLBACK_URL");
+  if (missing.length > 0) {
+    throw new Error(`GOOGLE_AUTH_ENABLED=true requires all Google OAuth credentials. Missing: ${missing.join(", ")}`);
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   const env = loadEnv(envSchema, source);
   validatePaymentConfig(env);
   validateShippingConfig(env);
   validateMarketplaceConfig(env);
   validateMessagingConfig(env);
+  validateGoogleAuthConfig(env);
   return env;
 }

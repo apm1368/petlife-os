@@ -49,7 +49,7 @@ export class CatalogService {
     return categories.map(toCategoryDto);
   }
 
-  async search(userId: string, filter: { category?: string; species?: PetSpecies; search?: string; petId?: string }): Promise<ProductSummaryDto[]> {
+  async search(userId: string | undefined, filter: { category?: string; species?: PetSpecies; search?: string; petId?: string }): Promise<ProductSummaryDto[]> {
     const where: Prisma.ProductWhereInput = {
       status: ProductStatus.ACTIVE,
       ...(filter.category ? { categoryId: filter.category } : {}),
@@ -69,7 +69,7 @@ export class CatalogService {
     return results;
   }
 
-  private async toSummaryDto(product: ProductWithRelations, pet: Prisma.PetGetPayload<Record<string, never>> | null, userId: string): Promise<ProductSummaryDto> {
+  private async toSummaryDto(product: ProductWithRelations, pet: Prisma.PetGetPayload<Record<string, never>> | null, userId: string | undefined): Promise<ProductSummaryDto> {
     const allOffers = product.variants.flatMap((v) => v.offers.map((o) => ({ offer: o, variant: v })));
     const cheapest = allOffers.reduce<(typeof allOffers)[number] | null>((best, current) => {
       if (!best || current.offer.priceAmount < best.offer.priceAmount) return current;
@@ -89,7 +89,7 @@ export class CatalogService {
     };
   }
 
-  async getDetail(userId: string, productId: string, petId?: string): Promise<ProductDetailDto> {
+  async getDetail(userId: string | undefined, productId: string, petId?: string): Promise<ProductDetailDto> {
     const product = await this.prisma.product.findUnique({ where: { id: productId }, include: PRODUCT_INCLUDE });
     if (!product) throw new NotFoundApiException("Product");
 

@@ -51,8 +51,15 @@ export class ProductCompatibilityService {
     private readonly petAccess: PetAccessService,
   ) {}
 
-  /** `requestingUserId` is required only to resolve canViewHealth for the allergen-conflict rule — never used to fetch or expose raw health data itself. */
-  async evaluate(pet: Pet, product: Product, requestingUserId: string): Promise<ProductCompatibilityDto> {
+  /**
+   * `requestingUserId` is used only to resolve canViewHealth for the
+   * allergen-conflict rule — never to fetch or expose raw health data
+   * itself. Optional since product discovery/detail (Handoff 12) is public:
+   * an anonymous caller (or one who explicitly passes someone else's petId)
+   * degrades to the same "no permission" NEEDS_REVIEW branch a signed-in
+   * non-member already gets — never elevated access.
+   */
+  async evaluate(pet: Pet, product: Product, requestingUserId?: string): Promise<ProductCompatibilityDto> {
     const reasons: ProductCompatibilityReason[] = [];
     let worst = ProductCompatibilityStatus.LIKELY_COMPATIBLE;
     let anyConstraintPassed = false;
@@ -121,7 +128,7 @@ export class ProductCompatibilityService {
     }
 
     if (product.allergenTags.length > 0) {
-      const effective = await this.petAccess.getEffectivePermissions(pet.id, requestingUserId);
+      const effective = requestingUserId ? await this.petAccess.getEffectivePermissions(pet.id, requestingUserId) : undefined;
       if (!effective?.canViewHealth) {
         reasons.push("HEALTH_REVIEW_REQUIRED");
         escalate(ProductCompatibilityStatus.NEEDS_REVIEW);

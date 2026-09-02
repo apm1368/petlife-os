@@ -833,16 +833,25 @@ enum ShippingQuoteStatus {
 /// no multi-column CHECK syntax, so it is not representable here. Application-layer
 /// validation in AuthService remains, but this is no longer the only guarantee.
 model User {
-  id              String          @id @default(uuid()) @db.Uuid
-  email           String?         @unique
-  phone           String?         @unique
-  displayName     String
-  avatarUrl       String?
-  locale          Locale          @default(fa)
-  themePreference ThemePreference @default(SYSTEM)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id                 String          @id @default(uuid()) @db.Uuid
+  email              String?         @unique
+  phone              String?         @unique
+  /// Case-preserved as entered; uniqueness is enforced on normalizedUsername
+  /// (lowercased) so "Sarah" and "sarah" can never collide.
+  username           String?
+  normalizedUsername String?         @unique
+  /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
+  /// account that has never set a password (OTP-only / Google-only).
+  passwordHash       String?
+  displayName        String
+  avatarUrl          String?
+  locale             Locale          @default(fa)
+  themePreference    ThemePreference @default(SYSTEM)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
+  authIdentities          AuthIdentity[]
+  passwordResetTokens     PasswordResetToken[]
   sessions                Session[]
   householdMemberships    HouseholdMember[]
   petAccessGrants         PetAccessGrant[]
@@ -871,6 +880,51 @@ model User {
   appeals               Appeal[]
 
   @@map("users")
+}
+
+enum AuthProvider {
+  GOOGLE
+}
+
+/// Links an external OAuth identity (Google, and any future OIDC provider)
+/// to exactly one User row. OTP (email/phone) and password auth do not use
+/// this table — they resolve directly against User.email/phone/normalizedUsername,
+/// which is a 1:1 relationship by construction. AuthIdentity exists so a
+/// second sign-in method (Google) can be linked to an existing account
+/// without ever creating a duplicate User.
+model AuthIdentity {
+  id                String       @id @default(uuid()) @db.Uuid
+  userId            String       @db.Uuid
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          AuthProvider
+  /// The provider's own stable subject id (Google's "sub" claim) — never the
+  /// email, which a provider account can change.
+  providerAccountId String
+  /// Cached verified email from the provider, for display/audit only — never
+  /// the join key (providerAccountId is).
+  email             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@unique([userId, provider])
+  @@map("auth_identities")
+}
+
+/// Single-use, short-lived password reset token. Only tokenHash is stored
+/// (SHA-256 of the raw token), mirroring how DevOtpProvider never stores a
+/// raw OTP code either — a leaked database row alone can never be replayed.
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 /// Server-side session record backing the HTTP-only session cookie. The cookie carries only the id.

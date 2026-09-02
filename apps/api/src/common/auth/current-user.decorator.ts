@@ -11,3 +11,9 @@ export const CurrentUser = createParamDecorator((_: unknown, ctx: ExecutionConte
   // SessionAuthGuard runs first and throws if request.user is unset, so this is safe.
   return request.user as SessionUser;
 });
+
+/** Pairs with OptionalSessionAuthGuard — request.user may genuinely be undefined for an anonymous caller. */
+export const OptionalCurrentUser = createParamDecorator((_: unknown, ctx: ExecutionContext): SessionUser | undefined => {
+  const request = ctx.switchToHttp().getRequest<AuthedRequest>();
+  return request.user;
+});

@@ -9,6 +9,7 @@ import { useActivePet } from "@/hooks/use-active-pet";
 import { commerceService } from "@/services/commerce.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
+import { buildLoginUrl } from "@/lib/auth/return-to";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
   COMPATIBLE: "success",
@@ -84,6 +85,12 @@ export function ProductDetailView({ productId }: { productId: string }) {
       await commerceService.addCartItem(selectedOffer.id, quantity, activePet?.id ?? null);
       setAdded(true);
     } catch (err) {
+      // Adding to cart is a "consequential action" on an otherwise-public page —
+      // an anonymous visitor is sent to sign in and back, not shown a raw 401.
+      if (err instanceof ApiError && err.status === 401) {
+        router.push(buildLoginUrl(locale, window.location.pathname));
+        return;
+      }
       setAddError(err instanceof ApiError ? err.message : t("addFailed"));
     } finally {
       setIsAdding(false);
