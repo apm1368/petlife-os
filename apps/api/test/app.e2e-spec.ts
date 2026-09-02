@@ -22,6 +22,9 @@ import {
   FulfillmentStatus,
   ShipmentStatus,
   ShippingProvider,
+  MarketplaceProvider,
+  MarketplaceListingSyncStatus,
+  InventoryMovementType,
 } from "@prisma/client";
 import request from "supertest";
 import { createHmac } from "node:crypto";
@@ -3068,6 +3071,465 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
       const selected = await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId: freshQuote.id }).expect(201);
       expect(selected.body[0].quotes.find((q: { id: string }) => q.id === freshQuote.id).status).toBe("SELECTED");
+    });
+  });
+
+  describe("Seller OS + Marketplace Channel Integrations (Handoff 09)", () => {
+    async function setupSeller() {
+      const identifier = `seller-owner-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const ownerUser = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      const seller = await prisma.sellerOrganization.create({
+        data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" },
+      });
+      await prisma.sellerMembership.create({
+        data: { sellerOrganizationId: seller.id, userId: ownerUser.id, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, acceptedAt: new Date() },
+      });
+      return { client, sellerId: seller.id, ownerUserId: ownerUser.id };
+    }
+
+    async function addMember(sellerId: string, role: SellerMembershipRole) {
+      const identifier = `seller-member-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const user = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      await prisma.sellerMembership.create({ data: { sellerOrganizationId: sellerId, userId: user.id, role, status: SellerMembershipStatus.ACTIVE, acceptedAt: new Date() } });
+      return { client, userId: user.id };
+    }
+
+    async function createOfferWithInventory(sellerId: string, onHand = 10) {
+      const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+      const product = await prisma.product.create({
+        data: { categoryId: category.id, title: `Product ${unique()}`, slug: `product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] },
+      });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+      const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: sellerId, productVariantId: variant.id, priceAmount: 500_000, currency: "IRR", sellerSku: `SSKU-${unique()}` } });
+      await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand } });
+      return offer;
+    }
+
+    async function connectDevChannel(client: ReturnType<typeof authedRequest>, sellerId: string): Promise<string> {
+      const res = await client.post(`/seller-organizations/${sellerId}/channels`).send({ provider: MarketplaceProvider.DEV }).expect(201);
+      return res.body.id as string;
+    }
+
+    async function createAndPublishListing(client: ReturnType<typeof authedRequest>, sellerId: string, channelAccountId: string, sellerOfferId: string) {
+      const created = await client.post(`/seller-organizations/${sellerId}/marketplace-listings`).send({ marketplaceChannelAccountId: channelAccountId, sellerOfferId }).expect(201);
+      const published = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${created.body.id}/publish`).expect(201);
+      return published.body as { id: string; externalListingId: string; status: string; syncStatus: string; publishedInventory: number; publishedPriceIrr: number };
+    }
+
+    // --- Access control (spec section 50) ------------------------------
+
+    it("a seller member can access their own seller organization", async () => {
+      const { client, sellerId } = await setupSeller();
+      const res = await client.get(`/seller-organizations/${sellerId}`).expect(200);
+      expect(res.body.id).toBe(sellerId);
+    });
+
+    it("denies cross-seller access — a member of Seller A cannot reach Seller B's organization/offers", async () => {
+      const { client: clientA } = await setupSeller();
+      const { sellerId: sellerBId } = await setupSeller();
+
+      await clientA.get(`/seller-organizations/${sellerBId}`).expect(403);
+      await clientA.get(`/seller-organizations/${sellerBId}/offers`).expect(403);
+    });
+
+    it("VIEWER cannot mutate an offer, but CATALOG_MANAGER can", async () => {
+      const { sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId);
+      const viewer = await addMember(sellerId, SellerMembershipRole.VIEWER);
+      const catalogManager = await addMember(sellerId, SellerMembershipRole.CATALOG_MANAGER);
+
+      await viewer.client.patch(`/seller-organizations/${sellerId}/offers/${offer.id}`).send({ priceAmount: 600_000 }).expect(403);
+      const updated = await catalogManager.client.patch(`/seller-organizations/${sellerId}/offers/${offer.id}`).send({ priceAmount: 600_000 }).expect(200);
+      expect(updated.body.priceAmount).toBe(600_000);
+    });
+
+    it("suspended seller rejected from operational changes but reads still work", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId);
+      await prisma.sellerOrganization.update({ where: { id: sellerId }, data: { status: SellerStatus.SUSPENDED } });
+
+      await client.get(`/seller-organizations/${sellerId}/offers`).expect(200);
+      await client.patch(`/seller-organizations/${sellerId}/offers/${offer.id}`).send({ priceAmount: 700_000 }).expect(403);
+    });
+
+    // --- Offer / Inventory management (spec section 6-8) ---------------
+
+    it("creates and updates a seller offer", async () => {
+      const { client, sellerId } = await setupSeller();
+      const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+      const product = await prisma.product.create({
+        data: { categoryId: category.id, title: `Product ${unique()}`, slug: `product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] },
+      });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+
+      const created = await client
+        .post(`/seller-organizations/${sellerId}/offers`)
+        .send({ productVariantId: variant.id, priceAmount: 250_000, initialOnHand: 5 })
+        .expect(201);
+      expect(created.body.priceAmount).toBe(250_000);
+      expect(created.body.inventory.onHand).toBe(5);
+
+      const updated = await client.patch(`/seller-organizations/${sellerId}/offers/${created.body.id}`).send({ priceAmount: 275_000 }).expect(200);
+      expect(updated.body.priceAmount).toBe(275_000);
+    });
+
+    it("adjusts inventory absolutely and by delta, returning the recomputed available quantity", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+
+      const abs = await client.patch(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}`).send({ mode: "ABSOLUTE", quantity: 20 }).expect(200);
+      expect(abs.body.inventory.onHand).toBe(20);
+      expect(abs.body.inventory.available).toBe(20);
+
+      const delta = await client.patch(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}`).send({ mode: "DELTA", quantity: -5 }).expect(200);
+      expect(delta.body.inventory.onHand).toBe(15);
+    });
+
+    it("records an InventoryMovement row for every inventory adjustment (audit trail)", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+
+      await client.patch(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}`).send({ mode: "DELTA", quantity: 5, reason: "Restock" }).expect(200);
+
+      const history = await client.get(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}/history`).expect(200);
+      expect(history.body.items).toHaveLength(1);
+      expect(history.body.items[0].type).toBe(InventoryMovementType.MANUAL_ADJUSTMENT);
+      expect(history.body.items[0].quantityBefore).toBe(10);
+      expect(history.body.items[0].quantityAfter).toBe(15);
+      expect(history.body.items[0].reason).toBe("Restock");
+    });
+
+    it("rejects an inventory adjustment that would make available stock negative", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 3);
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+
+      const res = await client.patch(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}`).send({ mode: "DELTA", quantity: -10 }).expect(409);
+      expect(res.body.error.code).toBe("INVENTORY_MOVEMENT_INVALID");
+
+      const unchanged = await prisma.inventoryItem.findUniqueOrThrow({ where: { id: inventoryItem.id } });
+      expect(unchanged.onHand).toBe(3);
+    });
+
+    // --- Marketplace channel / listing lifecycle (spec section 11-18) --
+
+    it("creates a marketplace listing mapping", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+
+      const listing = await client.post(`/seller-organizations/${sellerId}/marketplace-listings`).send({ marketplaceChannelAccountId: channelAccountId, sellerOfferId: offer.id }).expect(201);
+      expect(listing.body.status).toBe("DRAFT");
+      expect(listing.body.syncStatus).toBe("NEVER_SYNCED");
+    });
+
+    it("publishes a listing through the DEV adapter", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      expect(listing.status).toBe("ACTIVE");
+      expect(listing.syncStatus).toBe("SYNCED");
+      expect(listing.externalListingId).toBeTruthy();
+    });
+
+    it("syncs inventory for a published listing after a stock change", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      expect(listing.publishedInventory).toBe(10);
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      await client.patch(`/seller-organizations/${sellerId}/inventory/${inventoryItem.id}`).send({ mode: "ABSOLUTE", quantity: 4 }).expect(200);
+
+      const synced = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${listing.id}/sync`).expect(201);
+      expect(synced.body.publishedInventory).toBe(4);
+      expect(synced.body.syncStatus).toBe("SYNCED");
+    });
+
+    it("syncs price for a published listing after a price change", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+
+      await client.patch(`/seller-organizations/${sellerId}/offers/${offer.id}`).send({ priceAmount: 999_000 }).expect(200);
+      const synced = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${listing.id}/sync`).expect(201);
+      expect(synced.body.publishedPriceIrr).toBe(999_000);
+    });
+
+    it("records a failed MarketplaceSyncAttempt when the DEV adapter simulates a publish rejection", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const created = await client.post(`/seller-organizations/${sellerId}/marketplace-listings`).send({ marketplaceChannelAccountId: channelAccountId, sellerOfferId: offer.id }).expect(201);
+
+      const rejected = await client
+        .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/publish-rejection`)
+        .send({ listingId: created.body.id })
+        .expect(201);
+      expect(rejected.body.status).toBe("REJECTED");
+      expect(rejected.body.syncStatus).toBe("FAILED");
+
+      const attempts = await prisma.marketplaceSyncAttempt.findMany({ where: { marketplaceListingId: created.body.id } });
+      expect(attempts).toHaveLength(1);
+      expect(attempts[0]!.status).toBe("FAILED");
+    });
+
+    it("reconciliation detects an inventory mismatch without overwriting canonical PET LIFE OS stock", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+
+      await client.post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/mismatch`).send({ externalListingId: listing.externalListingId, availableQuantity: 2 }).expect(201);
+
+      const reconciled = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${listing.id}/reconcile`).expect(201);
+      expect(reconciled.body.discrepancyType).toBe("INVENTORY_MISMATCH");
+      expect(reconciled.body.canonicalValue).toBe(10);
+      expect(reconciled.body.providerObservedValue).toBe(2);
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(10); // never overwritten by the provider's observed value
+    });
+
+    // --- Marketplace order ingestion (spec section 24-31) ---------------
+
+    it("ingests a marketplace order: decrements inventory exactly once and maps to an internal Order", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      const externalOrderId = `ext-order-${unique()}`;
+
+      const ingested = await client
+        .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`)
+        .send({ externalOrderId, items: [{ externalListingId: listing.externalListingId, quantity: 2, unitPriceAmount: 500_000 }] })
+        .expect(201);
+      expect(ingested.body.externalOrderId).toBe(externalOrderId);
+      expect(ingested.body.mappedOrderId).toBeTruthy();
+      expect(ingested.body.deliveryResponsibility).toBe("MARKETPLACE");
+      expect(ingested.body.paymentSource).toBe("MARKETPLACE_COLLECTED");
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(8);
+
+      const mappedOrder = await prisma.order.findUniqueOrThrow({ where: { id: ingested.body.mappedOrderId } });
+      expect(mappedOrder.sellerOrganizationId).toBe(sellerId);
+      expect(mappedOrder.userId).toBeNull();
+      expect(mappedOrder.checkoutId).toBeNull();
+      expect(mappedOrder.totalAmount).toBe(1_000_000);
+    });
+
+    it("acknowledges a duplicate marketplace order delivery idempotently — one MarketplaceOrder, one internal Order, one inventory decrement", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      const externalOrderId = `ext-order-${unique()}`;
+      const payload = { externalOrderId, items: [{ externalListingId: listing.externalListingId, quantity: 1, unitPriceAmount: 500_000 }] };
+
+      const first = await client.post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`).send(payload).expect(201);
+      const second = await client.post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`).send(payload).expect(201);
+      expect(second.body.id).toBe(first.body.id);
+
+      const marketplaceOrders = await prisma.marketplaceOrder.findMany({ where: { provider: MarketplaceProvider.DEV, marketplaceChannelAccountId: channelAccountId, externalOrderId } });
+      expect(marketplaceOrders).toHaveLength(1);
+
+      const internalOrders = await prisma.order.findMany({ where: { sellerOrganizationId: sellerId } });
+      expect(internalOrders).toHaveLength(1);
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(9); // decremented exactly once, not twice
+    });
+
+    it("marketplace cancellation restores inventory exactly once", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      const externalOrderId = `ext-order-${unique()}`;
+      await client
+        .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`)
+        .send({ externalOrderId, items: [{ externalListingId: listing.externalListingId, quantity: 3, unitPriceAmount: 500_000 }] })
+        .expect(201);
+
+      let inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(7);
+
+      const cancelled = await client.post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/cancellation`).send({ externalOrderId }).expect(201);
+      expect(cancelled.body.status).toBe("CANCELLED");
+
+      inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(10);
+    });
+
+    it("a duplicate marketplace cancellation is a safe no-op", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 10);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      const externalOrderId = `ext-order-${unique()}`;
+      await client
+        .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`)
+        .send({ externalOrderId, items: [{ externalListingId: listing.externalListingId, quantity: 2, unitPriceAmount: 500_000 }] })
+        .expect(201);
+
+      await client.post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/cancellation`).send({ externalOrderId }).expect(201);
+      await client.post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/cancellation`).send({ externalOrderId }).expect(201);
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(10); // restored exactly once, not twice
+    });
+
+    // --- Concurrency (spec section 10, 21, 66-21) -----------------------
+
+    it("Race: two concurrent marketplace orders for the last unit of stock — exactly one succeeds, no oversell", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 1);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+
+      const [r1, r2] = await Promise.all([
+        client
+          .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`)
+          .send({ externalOrderId: `race-a-${unique()}`, items: [{ externalListingId: listing.externalListingId, quantity: 1, unitPriceAmount: 500_000 }] }),
+        client
+          .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`)
+          .send({ externalOrderId: `race-b-${unique()}`, items: [{ externalListingId: listing.externalListingId, quantity: 1, unitPriceAmount: 500_000 }] }),
+      ]);
+
+      const statuses = [r1.status, r2.status].sort();
+      expect(statuses).toEqual([201, 409]);
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(0); // never negative
+
+      // Both externalOrderIds are distinct real deliveries, so both are recorded — the loser is never
+      // silently discarded, it is a traceable FAILED row with no mappedOrderId (spec: never fake success).
+      const marketplaceOrders = await prisma.marketplaceOrder.findMany({ where: { sellerOrganizationId: sellerId } });
+      expect(marketplaceOrders).toHaveLength(2);
+      const succeeded = marketplaceOrders.filter((o) => o.mappedOrderId);
+      const failed = marketplaceOrders.filter((o) => !o.mappedOrderId);
+      expect(succeeded).toHaveLength(1);
+      expect(failed).toHaveLength(1);
+      expect(failed[0]!.status).toBe("FAILED");
+
+      const internalOrders = await prisma.order.findMany({ where: { sellerOrganizationId: sellerId } });
+      expect(internalOrders).toHaveLength(1); // only the winner ever gets an internal Order
+    });
+
+    it("a marketplace order cannot oversell stock a concurrent PET LIFE OS checkout already reserved", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId, 1);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+
+      // A PET LIFE OS checkout reserves the last unit first (a real InventoryReservation, not just onHand).
+      const buyerIdentifier = `checkout-buyer-${unique()}@example.com`;
+      const buyer = authedRequest(app, await signUp(app, logSpy, buyerIdentifier));
+      await buyer.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const household = await buyer.post("/households").send({}).expect(201);
+      const addressRes = await buyer.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
+      await buyer.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+
+      // A marketplace order for the same (now-reserved) unit must not succeed in decrementing onHand below reserved.
+      const marketplaceResult = await client
+        .post(`/seller-organizations/${sellerId}/channels/${channelAccountId}/dev/simulate/order`)
+        .send({ externalOrderId: `checkout-race-${unique()}`, items: [{ externalListingId: listing.externalListingId, quantity: 1, unitPriceAmount: 500_000 }] });
+      expect(marketplaceResult.status).toBe(409);
+
+      const inventoryItem = await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: offer.id } });
+      expect(inventoryItem.onHand).toBe(1);
+      expect(inventoryItem.reserved).toBe(1);
+    });
+
+    // --- Multi-seller isolation (spec section 22, 51) --------------------
+
+    it("isolates seller data across organizations — offers, inventory, team, and channels", async () => {
+      const { client: clientA, sellerId: sellerAId } = await setupSeller();
+      const { sellerId: sellerBId } = await setupSeller();
+      const offerB = await createOfferWithInventory(sellerBId);
+
+      await clientA.get(`/seller-organizations/${sellerBId}/offers/${offerB.id}`).expect(403);
+      await clientA.get(`/seller-organizations/${sellerBId}/inventory`).expect(403);
+      await clientA.get(`/seller-organizations/${sellerBId}/members`).expect(403);
+      await clientA.get(`/seller-organizations/${sellerBId}/channels`).expect(403);
+      await clientA.get(`/seller-organizations/${sellerAId}/offers`).expect(200); // sanity: A's own access still works
+    });
+
+    // --- Seller fulfillment action authorization (spec section 39) ------
+
+    it("seller fulfillment actions require membership in the order's own seller organization", async () => {
+      const { sellerId: unrelatedSellerId } = await setupSeller();
+      const { client: strangerMember } = await addMember(unrelatedSellerId, SellerMembershipRole.OWNER);
+
+      const { client, checkoutId } = await setupCheckoutReadyForMarketplaceTests();
+      await client.post(`/checkout/${checkoutId}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkoutId}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const [orderId] = paid.body.orderIds as string[];
+
+      // A user who is a real, active seller member — just of a different seller — is still denied.
+      await strangerMember.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(404);
+    });
+
+    async function setupCheckoutReadyForMarketplaceTests() {
+      const identifier = `marketplace-fulfillment-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const household = await client.post("/households").send({}).expect(201);
+      const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+      const product = await prisma.product.create({
+        data: { categoryId: category.id, title: `Product ${unique()}`, slug: `product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] },
+      });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `SKU-${unique()}` } });
+      const seller = await prisma.sellerOrganization.create({
+        data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" },
+      });
+      const buyerUser = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      await prisma.sellerMembership.create({
+        data: { sellerOrganizationId: seller.id, userId: buyerUser.id, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, acceptedAt: new Date() },
+      });
+      const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount: 1_000_000, currency: "IRR" } });
+      await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand: 10 } });
+      const addressRes = await client.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await client.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+      return { client, checkoutId: checkout.body.id as string };
+    }
+
+    // --- Provider secret exposure (spec section 14, 25) ------------------
+
+    it("never exposes a provider secret/credential field in a marketplace channel account API response", async () => {
+      const { client, sellerId } = await setupSeller();
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const res = await client.get(`/seller-organizations/${sellerId}/channels/${channelAccountId}`).expect(200);
+      const serialized = JSON.stringify(res.body).toLowerCase();
+      expect(serialized).not.toContain("apikey");
+      expect(serialized).not.toContain("secret");
+      expect(serialized).not.toContain("password");
+      expect(res.body.metadata).toBeUndefined();
+    });
+
+    // --- Listing sync status distinct from business status (spec 16) ----
+
+    it("keeps listing business status and sync status as separate axes", async () => {
+      const { client, sellerId } = await setupSeller();
+      const offer = await createOfferWithInventory(sellerId);
+      const channelAccountId = await connectDevChannel(client, sellerId);
+      const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
+      expect(listing.status).toBe("ACTIVE");
+      expect(listing.syncStatus).toBe(MarketplaceListingSyncStatus.SYNCED);
+
+      const deactivated = await client.post(`/seller-organizations/${sellerId}/marketplace-listings/${listing.id}/deactivate`).expect(201);
+      expect(deactivated.body.status).toBe("PAUSED");
+      // Deactivating is a business-status change; the last real sync result is untouched.
+      expect(deactivated.body.syncStatus).toBe(MarketplaceListingSyncStatus.SYNCED);
     });
   });
 });
