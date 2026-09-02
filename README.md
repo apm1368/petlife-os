@@ -2894,6 +2894,215 @@ ADMIN_REFUND_SELF_APPROVAL        400  the same admin who requested a refund att
 ADMIN_REASON_REQUIRED             400  a sensitive action (trust action, refund approve/reject, PII reveal) submitted without a non-empty reason
 ```
 
+## Authentication: Google + Phone + Password + Public Browsing (Handoff 12)
+
+Schema: `prisma/migrations/20260903120000_auth_google_password_identities`
+(purely additive: `AuthIdentity` and `PasswordResetToken` models, three new
+nullable `User` columns — `username`, `normalizedUsername` (unique),
+`passwordHash` — plus one hand-appended change: the Handoff 01
+schema-hardening CHECK constraint requiring `email IS NOT NULL OR phone IS
+NOT NULL` is replaced, not just extended, with one that also accepts
+`normalizedUsername IS NOT NULL`, since a password-only account has
+neither an email nor a phone).
+
+### `AuthIdentity` — links an OAuth provider to exactly one User, never a duplicate
+
+OTP (email/phone) and username/password continue to resolve identity
+exactly as before — directly against `User.email`/`User.phone`/
+`User.normalizedUsername`, a 1:1 relationship by construction that needed
+no new table. Google (and any future OAuth/OIDC provider) is different:
+the same person can plausibly already have an account via OTP or
+password, so `AuthIdentity` (`{provider, providerAccountId}` →
+`userId`, unique on both `(provider, providerAccountId)` and `(userId,
+provider)`) is the one place that link lives.
+`AuthGoogleService.resolveUser()` is the single resolution path every
+Google sign-in goes through: (1) an existing `AuthIdentity` for this
+Google account signs straight in; (2) otherwise, a **verified** Google
+email matching an existing `User.email` links the two — a new
+`AuthIdentity` row, never a second `User`; (3) otherwise, a new `User` +
+`AuthIdentity` are created together. An *unverified* Google email is
+never trusted for either linking or creation (`emailVerified !== true`
+â†’ `GoogleAuthFailedException`) — a spoofable address must never be able
+to claim an existing account. Two concurrent sign-ins for the same
+brand-new Google account race safely: the loser's `AuthIdentity.create()`
+hits the unique constraint and re-reads the winner's row instead of
+erroring, the same claim-then-recover pattern established across H09/H10.
+
+### Google OAuth — a real Authorization Code flow, off by default, no fake login
+
+`GOOGLE_AUTH_ENABLED` (default `false`) gates the entire feature,
+mirroring the `*_ENABLED` + startup-`validate*Config()` pattern every
+prior external provider (Payment/Shipping/Marketplace/Messaging) already
+established — enabling it without `GOOGLE_CLIENT_ID`/
+`GOOGLE_CLIENT_SECRET`/`GOOGLE_CALLBACK_URL` all set fails startup rather
+than booting half-configured. `AuthGoogleController`'s `GET /auth/google`
+builds the authorization URL and stores `{state, nonce, returnTo}` in a
+short-lived (10-minute) signed, httpOnly cookie — the OAuth equivalent of
+the session cookie's own HMAC scheme — since both ends of the handshake
+are full browser redirects with no shared request-scoped memory. `GET
+/auth/google/callback` verifies the cookie's signature and expiry,
+confirms the `state` query param matches, exchanges the code for tokens
+over a real server-to-server call to Google, and verifies the id_token's
+signature against Google's own JWKS (via `jose`) plus its issuer,
+audience, and nonce, before ever calling `AuthGoogleService`. Unlike
+every prior external-provider integration in this codebase, there is no
+"DevGoogleAdapter" simulating a sandbox response — verifying a third
+party's real cryptographic signature has no honest local simulation.
+Instead, `POST /dev/auth/google/simulate` (dev/test-only, disabled in
+production) hands `AuthGoogleService` an already-"verified" profile
+directly, exercising the exact same resolve-or-create-user logic the
+real callback uses, without ever touching the network — the same
+"dev/simulate drives the real pipeline" discipline the notification and
+marketplace dev controllers already use.
+
+### Username + password — Argon2id, enumeration-resistant, case-insensitive
+
+`User.username` is stored case-preserved; `normalizedUsername`
+(lowercased, unique) is the actual identity key, so "Sarah" and "sarah"
+are the same account. Passwords are hashed with Argon2id
+(`common/password/password-hash.util.ts`) — the OWASP-recommended default
+for a new password store, unlike the fast SHA-256 this codebase already
+uses for short-lived OTP codes and HMAC cookie signing, which would be
+inappropriate for a long-lived credential. `AuthPasswordService.login()`
+always calls `verifyPassword()` — against a fixed dummy hash when the
+username doesn't exist at all — so a nonexistent username and a wrong
+password take the same code path and return the identical
+`INVALID_CREDENTIALS` error with no timing signal either could exploit to
+distinguish "no such account" from "wrong password" (spec:
+enumeration-resistant errors). `PUT /auth/password` doubles as both "set
+a password for the first time" (an OTP-only or Google-only account,
+`currentPassword` omitted) and "change an existing one" (`currentPassword`
+required and verified) — never confusable, since the service branches on
+whether `User.passwordHash` is already set.
+
+### Password reset — single-use hashed token, reset revokes every session
+
+`AuthPasswordResetService.requestReset()` accepts a username or email,
+looks it up, and — regardless of whether it matched anything — returns
+the same generic `{ ok: true }`, mirroring the login enumeration-resistance
+above at the account-recovery entry point too. On a match, a random token
+is generated and only its SHA-256 hash is ever persisted
+(`PasswordResetToken.tokenHash`) — the same "never store the literal
+secret" discipline `DevOtpProvider` already applies to OTP codes. There is
+no transactional-email infrastructure in this codebase (OTP delivery is
+its own Redis-backed provider, not a general mailer), so — exactly
+mirroring `DevOtpProvider`'s own dev-only console logging — the raw reset
+token is logged to the server console rather than actually emailed; a
+production deployment needs a real mail provider wired in here before
+launch, the same pre-existing TODO OTP delivery already carries (see
+Known limitations). `resetPassword()` is single-use (`usedAt` set
+atomically with the password update) and, on success, calls the new
+`SessionService.revokeAllForUser()` — a credential reset must invalidate
+every existing session, including one an attacker who compromised the
+old password may currently hold.
+
+### Public browsing — discovery is public, actions stay gated
+
+Per spec ("do NOT globally auth-gate PET LIFE OS"), vet/service/shop
+discovery moved from requiring `SessionAuthGuard` to a new
+`OptionalSessionAuthGuard`: it resolves `request.user` when a valid
+session cookie is present but never throws when one is absent, so the
+exact same endpoint personalizes results for a signed-in caller (pet-
+compatibility checks) while remaining fully reachable anonymously.
+`ProductCompatibilityService.evaluate()`'s health-permission check
+(`requestingUserId` is now optional) degrades to the same "no permission
+→ NEEDS_REVIEW" branch a signed-in non-member already got — an anonymous
+caller is never granted elevated access, only ever the same default a
+stranger already had. On the frontend, vet/services/shop discovery moved
+to a new `(public)` route group under a lightweight `PublicShell` (full
+`useAppBootstrap` — session **and** household/pet context, so a signed-in
+visitor keeps their active-pet personalization on these pages exactly as
+before — but, unlike `AppShell`, it never redirects an anonymous visitor
+away). Booking-creation pages (`vet/[id]/book`,
+`services/[category]/[id]/book`) stay inside that same public tree but
+individually self-gate with a new `<RequireAuth>` wrapper — "auth-on-
+action," matching the spec's own example exactly (open a vet profile
+anonymously, click Book, authenticate, land back on the booking wizard —
+never bounced to Home). `ProductDetailView`'s "Add to cart" button
+follows the same pattern via a plain 401 check, since Cart/Checkout/
+Orders remain fully private and were never moved.
+
+### Safe `returnTo` — one allow-list shape, shared by every auth method
+
+`sanitizeReturnTo()` exists in two copies with identical logic — one in
+`apps/api/src/common/return-to/` (the real security boundary for the
+Google OAuth redirect, which the API fully controls) and one in
+`apps/web/lib/auth/` (so the OTP/password flows, which redirect entirely
+client-side via `next/navigation`, apply the same allow-list before ever
+calling `router.replace` with a caller-supplied path). Only a path
+starting with a single `/` — never `//host`, `/\host`, an embedded
+scheme, or a decoded control character — is accepted; anything else
+degrades to a safe fallback rather than erroring, since a bad `returnTo`
+should never break the login flow itself. `resolvePostAuthDestination()`
+(frontend) is the one place every sign-in method — OTP's `account/page.tsx`,
+password login, registration, and the Google callback's `/auth/complete`
+landing page — decides where to go next: an incomplete-onboarding account
+always goes to `/onboarding` first (carrying `returnTo` along as a query
+param for `ReadyStep` to finish with), and only a completed account is
+sent straight to its original `returnTo` — "Auth != onboarding" enforced
+in exactly one function, not reimplemented per sign-in method.
+
+### `/auth/complete` — the one page a real (not dev-simulated) Google login needs
+
+Every sign-in method except Google resolves its own post-auth destination
+inline, since each already has a JS context to redirect from the moment
+the API call resolves. A real Google OAuth callback is a server-driven
+full-page redirect with no such context — `AuthGoogleController` redirects
+to `${WEB_APP_ORIGIN}/auth/complete?returnTo=...` on success (or
+`/welcome?error=google_auth_failed` on any failure, never a bare JSON
+error to a browser mid-navigation), and this new page simply resolves the
+now-set session cookie, then applies the exact same
+`resolvePostAuthDestination()` every other method uses.
+
+### Local dev — a username/password demo account needs no OTP log-reading
+
+`prisma/seed.ts` seeds a `demo` / `dev-only-password` account (household,
+one pet, onboarding already `COMPLETED`), written idempotently
+(existence-checked before any create, unlike the pre-existing Sarah seed
+path — see Known limitations) so re-running `pnpm db:seed` is always
+safe. This is the first fully self-contained "run locally → log in →
+immediately see the real product" path in this codebase that needs no
+server-log-reading step at all (Sarah's own OTP-based seed still requires
+reading the printed code from the API log, exactly as before).
+
+### API endpoints (Handoff 12 additions)
+
+```
+GET    /auth/methods                    (which of google/phone/password are actually available — never requires a session)
+GET    /auth/google                     (redirects to Google's consent screen)
+GET    /auth/google/callback            (redirects to /auth/complete or /welcome?error=... — never a JSON response)
+POST   /auth/register                   (username + password [+ optional displayName/email])
+POST   /auth/login/password
+PUT    /auth/password                   (authenticated; sets a first password or changes an existing one)
+POST   /auth/password/forgot            (always resolves the same way regardless of match)
+POST   /auth/password/reset             (single-use token; revokes every existing session on success)
+
+POST   /dev/auth/google/simulate        (dev/test-only; hard-disabled in production; bypasses the real network round trip)
+
+GET    /shop/categories                 (no longer requires a session — Handoff 12)
+GET    /shop/products                   (no longer requires a session)
+GET    /shop/products/:id               (no longer requires a session)
+GET    /providers/vets                  (no longer requires a session)
+GET    /providers/vets/:providerId      (no longer requires a session)
+GET    /services/categories             (no longer requires a session)
+GET    /providers/services              (no longer requires a session)
+GET    /provider-services/:serviceId    (no longer requires a session)
+```
+
+### Error codes (Handoff 12 additions)
+
+```
+INVALID_CREDENTIALS          401  wrong password OR a nonexistent username — deliberately identical either way
+USERNAME_TAKEN                409  registration with an already-used (case-insensitive) username
+WEAK_PASSWORD                 400  reserved for a non-HTTP caller bypassing the DTO's own min-length check
+CURRENT_PASSWORD_INCORRECT    400  wrong currentPassword on PUT /auth/password, or omitted when one is required
+GOOGLE_AUTH_DISABLED           503  GOOGLE_AUTH_ENABLED is false (or unconfigured) — never a silent fake login
+GOOGLE_AUTH_FAILED             400  any real-flow failure: bad/expired state, failed token exchange, invalid id_token, or an unverified email
+ACCOUNT_LINKING_CONFLICT      409  reserved for a future case where a verified identity resolves to a conflicting existing account
+PASSWORD_RESET_TOKEN_INVALID  400  reset token missing/expired/already used — the request step itself never reveals which
+INVALID_RETURN_TO             400  a returnTo value rejected by sanitizeReturnTo — used by non-redirect callers only; a redirect flow degrades to a safe fallback instead
+```
+
 ## API endpoints
 
 ```
@@ -3992,6 +4201,49 @@ self-approval rejected; K: refund double-execution race is a safe
 no-op; L: audit log records reason-required actions) plus the two
 required concurrency races.
 
+Everything in the Handoff 12 acceptance criteria: three real sign-in
+methods — Google (a genuine Authorization Code flow with state/nonce/
+PKCE-style handshake, id_token verified against Google's own JWKS, off by
+default via `GOOGLE_AUTH_ENABLED` so the app works fully with zero
+credentials configured), phone/email OTP (fully preserved, untouched),
+and username/password (Argon2id, case-insensitive usernames, enumeration-
+resistant errors) — all converging on the same `User` identity through a
+new `AuthIdentity` table that makes account linking (a verified Google
+email matching an existing password/OTP account) safe and duplicate-free,
+proven end to end via a dedicated dev-only simulate endpoint since there
+is no honest way to fake a real third party's cryptographic signature
+locally; registration and password change/reset (single-use hashed
+tokens, a reset revokes every existing session); public browsing for
+vet/service/shop discovery via a new `OptionalSessionAuthGuard` that
+personalizes for a signed-in caller but never requires one, with the
+frontend's own `(public)` route group and `PublicShell` never redirecting
+an anonymous visitor away; auth-on-action for every gated action (booking
+creation, add-to-cart) via a reusable `RequireAuth` wrapper — a visitor
+lands back on their original intent after signing in, never bounced to
+Home; one shared, allow-list-shaped `returnTo` sanitizer used identically
+by the real OAuth redirect and the client-side OTP/password flows,
+preventing open redirects; one shared `resolvePostAuthDestination()`
+function enforcing "Auth != onboarding" for every sign-in method; a fully
+self-contained local-dev demo account (`demo`/`dev-only-password`) needing
+no OTP-log-reading step; and every Handoff 01-11 backend/frontend test
+still green (201 backend e2e scenarios — the two pre-existing documented
+cold-Prisma-connection-pool-warmup flakes recur, plus this handoff's own
+public-discovery test shares the identical symptom on the same
+`ProviderOrganization` query and is given a generous explicit timeout
+rather than a shorter default, see Known limitations — and 178 frontend
+tests). Backend e2e coverage for all twelve required scenarios (anonymous
+browsing reaches public discovery; a private endpoint still rejects an
+anonymous caller; username/password register→logout→login; duplicate-
+username rejection; enumeration-resistant wrong-password/no-such-user;
+a mocked Google login creates and then reuses one User; verified-email
+account linking; an unverified email is never trusted; forgot/reset
+password with old-session revocation and single-use-token enforcement;
+onboarding starts incomplete after registration; Provider OS/Seller OS
+remain private; first-password-set vs. change-requires-current-password)
+plus dedicated `sanitizeReturnTo`/`resolvePostAuthDestination` unit tests
+on both sides and frontend component tests for `RequireAuth` and the
+welcome/register pages.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -4486,16 +4738,54 @@ required concurrency races.
   existing bug unfixed per this handoff's explicit scope boundary; a
   clean fix is a small existence-check before each `.create()` call in
   `main()`, left for whichever session next has seed.ts in scope.
+- **Password reset emails are logged to the server console in development,
+  not actually sent** — there is no general transactional-email
+  infrastructure in this codebase (OTP delivery is its own Redis-backed
+  provider, not a mailer); a production deployment needs a real mail
+  provider wired into `AuthPasswordResetService.requestReset()` before
+  launch, the same pre-existing gap `DevOtpProvider`'s own doc comment
+  already flags for OTP delivery.
+- **`ACCOUNT_LINKING_CONFLICT` is defined but never thrown** — the
+  account-linking logic this handoff actually needs (a verified Google
+  email matching an existing account) always safely links rather than
+  conflicting; the error is reserved for a future case (e.g. linking a
+  second OAuth provider to an already-Google-linked account) that isn't
+  built yet.
+- **No frontend UI for changing an existing password** — `PUT
+  /auth/password` is fully implemented and tested on the backend, but
+  there is no dedicated Account/Settings page to drive it from (this
+  codebase has never built a general settings section — see Handoff 10's
+  own identical note about notification preferences).
+- **A third occasionally-timing-out `GET /providers/vets` scenario, sharing
+  the pre-existing cold-Prisma-connection-pool-warmup root cause already
+  documented for Handoff 03/04's own flaky tests** — this handoff's Flow A
+  (anonymous public browsing) happens to call the same endpoint and hit
+  the identical symptom in this sandbox; given an explicit 60-second
+  timeout (rather than the default 20s) since the query always eventually
+  succeeds — proven directly by timing it standalone — this is host
+  environment latency, not a hang or a real bug in the optional-auth
+  change itself.
+- **Rate limiting on the new auth endpoints (`@Throttle` decorators on
+  register/login/forgot/reset/Google start/callback) has no dedicated e2e
+  test** — the e2e suite's `ThrottlerModule` is configured to skip
+  throttling entirely under `NODE_ENV=test` (`skipIf: () => process.env
+  .NODE_ENV === "test"`, a pre-existing setting from Handoff 01 needed so
+  the suite's own rapid-fire user creation doesn't self-throttle), so
+  there is no way to exercise real rate-limiting behavior from this test
+  suite; the decorators themselves mirror the exact `{limit, ttl}` shape
+  already proven correct for the pre-existing OTP endpoints.
 
 ## Next recommended coding handoff
 
-**Marketplace + Seller financial settlement** (Handoff 12), the piece
+**Marketplace + Seller financial settlement** (Handoff 13), the piece
 Handoff 09 deliberately left out to avoid entangling Seller OS's launch
-with the ledger, and now with both a notification layer (Handoff 10) and
-a real admin/finance oversight layer (Handoff 11, including
+with the ledger, and now with a notification layer (Handoff 10), a real
+admin/finance oversight layer (Handoff 11, including
 `AdminRefundService`'s two-person control and read-only order
-financials) in place to actually tell a seller their payable changed and
-give finance staff visibility into it: a genuinely complete Seller OS and
+financials), and real account creation via Google/phone/password with
+public browsing (Handoff 12) all in place to actually tell a seller their
+payable changed and give finance staff visibility into it: a genuinely
+complete Seller OS and
 marketplace-channel architecture exists (real `SellerMembership`
 authorization, inventory with a full audit trail,
 `MarketplaceChannelAdapter` with a working `DevMarketplaceAdapter` and

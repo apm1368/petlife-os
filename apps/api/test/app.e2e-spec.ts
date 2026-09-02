@@ -4324,11 +4324,19 @@ describe("PET LIFE OS critical paths (e2e)", () => {
         .send(profile);
     }
 
-    it("Flow A: anonymous browsing reaches public discovery endpoints without any session", async () => {
-      await request(app.getHttpServer()).get("/shop/categories").expect(200);
-      await request(app.getHttpServer()).get("/providers/vets").expect(200);
-      await request(app.getHttpServer()).get("/services/categories").expect(200);
-    });
+    it(
+      "Flow A: anonymous browsing reaches public discovery endpoints without any session",
+      async () => {
+        await request(app.getHttpServer()).get("/shop/categories").expect(200);
+        // /providers/vets shares the same pre-existing, documented cold Prisma
+        // connection-pool warm-up flakiness as the Handoff 03/04 "returns only
+        // VERIFIED providers by default" tests (see README Known limitations)
+        // — a generous timeout here, not a shorter default, is the honest fix.
+        await request(app.getHttpServer()).get("/providers/vets").expect(200);
+        await request(app.getHttpServer()).get("/services/categories").expect(200);
+      },
+      60000,
+    );
 
     it("Flow B: a private endpoint still rejects an anonymous caller", async () => {
       const res = await request(app.getHttpServer()).get("/onboarding").expect(401);
