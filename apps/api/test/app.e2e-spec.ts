@@ -3002,5 +3002,61 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const updated = await prisma.shipment.findUniqueOrThrow({ where: { id: shipmentRow.id } });
       expect(updated.status).toBe(ShipmentStatus.ASSIGNED);
     });
+
+    // --- Required flows (spec sections 51-52) ---------------------------
+
+    it("Failure flow: a Shipment that fails after pickup leaves Fulfillment/Order/Payment in a coherent, recoverable state", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const orderId = await payAndGetOrderId(client, checkoutId);
+      await client.post(`/orders/${orderId}/fulfillment/ready-for-pickup`).expect(201);
+      await client.post(`/orders/${orderId}/fulfillment/request-courier`).expect(201);
+      const fulfillmentRow = await prisma.fulfillment.findFirstOrThrow({ where: { orderId } });
+      const shipmentRow = await prisma.shipment.findFirstOrThrow({ where: { fulfillmentId: fulfillmentRow.id } });
+
+      for (const toStatus of [ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP]) {
+        await client.post(`/shipping/dev/simulate/${shipmentRow.providerShipmentId}`).send({ toStatus }).expect(201);
+      }
+      const failed = await client.post(`/shipping/dev/simulate/${shipmentRow.providerShipmentId}`).send({ toStatus: ShipmentStatus.FAILED }).expect(201);
+      expect(failed.body.processed).toBe(true);
+
+      const trackingAfterFailure = await client.get(`/orders/${orderId}/tracking`).expect(200);
+      expect(trackingAfterFailure.body.shipment.status).toBe(ShipmentStatus.FAILED);
+      expect(trackingAfterFailure.body.fulfillment.status).toBe(FulfillmentStatus.FAILED);
+
+      const fulfillmentAfter = await prisma.fulfillment.findUniqueOrThrow({ where: { id: fulfillmentRow.id } });
+      expect(fulfillmentAfter.failureCode).toBeTruthy();
+      expect(fulfillmentAfter.failureReason).toBeTruthy();
+      const failureEvent = await prisma.shipmentEvent.findFirst({ where: { shipmentId: shipmentRow.id, canonicalStatus: ShipmentStatus.FAILED } });
+      expect(failureEvent).toBeTruthy();
+
+      // Order/Payment truth is independent of the shipment's own failure — money already moved and the commercial
+      // record stays coherent; only the physical-fulfillment side reflects the problem (spec section 20).
+      const orderRow = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+      expect(orderRow.status).toBe(OrderStatus.CONFIRMED);
+      const paymentIntent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId } });
+      expect(paymentIntent.status).toBe("CAPTURED");
+
+      // Recovery/support path remains reachable — reconciliation and tracking both still function on a failed shipment.
+      const reconciled = await client.post(`/orders/${orderId}/shipment/reconcile`).expect(201);
+      expect(reconciled.body.localStatus).toBe(ShipmentStatus.FAILED);
+    });
+
+    it("Quote expiration flow: an expired quote is rejected, then refreshing produces a new quote that can be selected", async () => {
+      const { client, checkoutId } = await setupCheckoutReady();
+      const firstOptions = await client.get(`/checkout/${checkoutId}/shipping-quotes`).expect(200);
+      const staleQuoteId = firstOptions.body[0].quotes.find((q: { provider: string }) => q.provider === "DEV").id as string;
+      await prisma.shippingQuote.update({ where: { id: staleQuoteId }, data: { expiresAt: new Date(Date.now() - 1000) } });
+
+      const rejected = await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId: staleQuoteId }).expect(410);
+      expect(rejected.body.error.code).toBe("SHIPPING_QUOTE_EXPIRED");
+
+      const refreshed = await client.post(`/checkout/${checkoutId}/shipping-quotes/refresh`).expect(201);
+      const freshQuote = refreshed.body[0].quotes.find((q: { provider: string; status: string }) => q.provider === "DEV" && q.status === "AVAILABLE");
+      expect(freshQuote).toBeTruthy();
+      expect(freshQuote.id).not.toBe(staleQuoteId);
+
+      const selected = await client.post(`/checkout/${checkoutId}/shipping-quotes/select`).send({ quoteId: freshQuote.id }).expect(201);
+      expect(selected.body[0].quotes.find((q: { id: string }) => q.id === freshQuote.id).status).toBe("SELECTED");
+    });
   });
 });
