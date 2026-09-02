@@ -304,7 +304,7 @@ describe("CheckoutView", () => {
     vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
     vi.mocked(commerceService.createCheckout).mockResolvedValue(CHECKOUT);
     vi.mocked(commerceService.getShippingOptions).mockResolvedValue(SHIPPING_OPTIONS);
-    vi.mocked(commerceService.selectShippingQuote).mockResolvedValue([{ ...SHIPPING_OPTIONS[0], quotes: [{ ...SHIPPING_OPTIONS[0].quotes[0], status: "SELECTED" as never }] }]);
+    vi.mocked(commerceService.selectShippingQuote).mockResolvedValue([{ ...SHIPPING_OPTIONS[0]!, quotes: [{ ...SHIPPING_OPTIONS[0]!.quotes[0]!, status: "SELECTED" as never }] }]);
     vi.mocked(commerceService.getCheckout).mockResolvedValue({ ...CHECKOUT, deliveryAmount: 350_000, totalAmount: 1_600_000 });
 
     renderWithIntl(<CheckoutView />);

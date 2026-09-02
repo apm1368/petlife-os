@@ -1832,6 +1832,267 @@ FINANCING_INTENT_NOT_FOUND        404  no such financing intent, or it belongs t
 REFUND_NOT_FOUND                  404  no such refund, or its order belongs to a different user
 ```
 
+## Delivery & Logistics Core (Handoff 08)
+
+Schema: `prisma/migrations/20260902120000_delivery_logistics_core`
+(purely additive, generated via `prisma migrate diff`, then hand-appended
+with three `CHECK` constraints Prisma's DSL can't express: positive
+`priceIrr` on `ShippingQuote`, positive `sequenceNumber` on `Fulfillment`
+and `Shipment`). New enums: `ShippingProvider` (`DEV`/`ALOPEYK`/
+`SNAPPBOX`), `FulfillmentType` (`STANDARD_DELIVERY` only, extensible),
+`FulfillmentStatus`, `ShipmentStatus`, `ShippingQuoteStatus`. New models:
+`ShippingQuote`, `Fulfillment`, `Shipment`, `ShipmentEvent`.
+
+### Domain relationship: `Order → Fulfillment → Shipment`, schema-ready for a future split
+
+`Fulfillment`/`Shipment` both carry a `sequenceNumber` (always `1` this
+phase) behind a `@@unique([orderId, sequenceNumber])`/
+`@@unique([fulfillmentId, sequenceNumber])` constraint — the exact same
+idempotency device `Order.@@unique([checkoutId, sellerOrganizationId])`
+already used (Handoff 06): a P2002 on a concurrent duplicate-create
+attempt is caught and the existing row reused, and a later handoff can
+introduce a genuine second Fulfillment/Shipment (`sequenceNumber: 2`) for
+a split shipment without a migration. Each seller's `Order` owns exactly
+one `Fulfillment` this phase; `Fulfillment.status` is the coarse
+lifecycle (`PENDING → AWAITING_SELLER_PREPARATION → READY_FOR_PICKUP →
+PICKUP_REQUESTED → PICKUP_ASSIGNED → PICKED_UP → IN_TRANSIT →
+OUT_FOR_DELIVERY → DELIVERED`, or `FAILED`/`CANCELED`), `Shipment.status`
+is the canonical, provider-normalized courier-job status
+(`CREATED/REQUESTED/ASSIGNED/PICKED_UP/IN_TRANSIT/OUT_FOR_DELIVERY/
+DELIVERED/FAILED/CANCELED/UNKNOWN`) — Order status, Payment status,
+Fulfillment status, and Shipment status all stay separate state
+machines; nothing overloads `Order.status` with shipping detail.
+
+### Checkout-time `ShippingQuote`, deliberately scoped to `checkoutId` + `sellerOrgId`, not `orderId`
+
+The spec's own suggested `ShippingQuote` shape carries an `orderId`, but
+an `Order` does not exist until payment is confirmed ("1 Checkout → N
+Orders", Handoff 06) — while shipping options must be requestable and
+selectable *before* payment so the checkout total is server-recalculated
+first. `ShippingQuote` is therefore keyed on `(checkoutId, sellerOrgId)`
+(mirroring `InventoryReservation`'s own `checkoutId`+`sellerOfferId`
+scoping) with a nullable `orderId`, backfilled once the matching seller's
+`Order` is created — a deliberate, documented adaptation, not a deviation
+taken lightly. `ShippingOrchestrator.selectShippingQuote()` is
+concurrency-safe (`updateMany({ where: { status: AVAILABLE } })` claims
+the row atomically) and idempotent (re-selecting the same quote is a
+no-op); selecting a *different* quote for the same seller un-selects the
+old one first, inside one transaction. Selecting any quote switches that
+checkout's `deliveryAmount`/`totalAmount` from the prior flat
+`DeliveryMethod`-based amount (Handoff 06, unchanged for any checkout
+that never touches this flow) to the sum of each seller's currently
+`SELECTED` quote — recalculated server-side, never trusting a client-
+supplied shipping price. At Order-creation time, each seller's `Order`
+now gets *its own* quote-driven `deliveryAmount` (a pre-existing Handoff
+06 simplification — every seller previously received the full flat
+amount — fixed as part of this handoff via an additive, optional
+parameter on `OrdersService.createForCheckout()`, never touching its
+existing call sites' behavior when no quote was ever selected). A
+`SELECTED` quote that has since expired is rejected at
+`createPaymentIntent()`/`createFinancingIntent()` time (`
+SHIPPING_QUOTE_EXPIRED`) — "if a quote expires before payment: reject →
+refresh/reselect, never silently substitute another provider/price."
+
+### `ShippingGateway` — never a hard-coded `if (provider === ...)`, mirroring Handoff 07's payment adapters exactly
+
+`ShippingGateway` (`getQuote`/`createShipment`/`cancelShipment`/
+`getShipmentStatus`/`handleWebhook`, plus `readonly provider`/`readonly
+capabilities`) is the one interface every provider implements.
+`SHIPPING_PROVIDER_CAPABILITIES` (`supportsQuote`/`supportsCancel`/
+`supportsWebhook`/`supportsStatusQuery`/`supportsTracking`) is a single
+static map, consulted everywhere instead of branching on provider
+identity. `ShippingProviderRegistry` resolves `ShippingProvider →
+adapter instance` and gates on the matching `*_ENABLED` env flag,
+throwing `SHIPPING_PROVIDER_DISABLED`/`SHIPPING_PROVIDER_UNAVAILABLE`
+before any Shipment row is created for a disabled/unknown provider.
+
+### Provider documentation status — no official AloPeyk/SnappBox docs exist for this project
+
+Exactly the same discipline as Handoff 07's `SnappPayAdapter`/
+`DigiPayAdapter`: no official AloPeyk or SnappBox merchant/API
+documentation, credentials, or sandbox was available to this project.
+Rather than invent an endpoint shape, auth mechanism, or webhook
+signature scheme, all three providers share one generic, clearly-labeled
+deterministic simulation engine (`shipping-simulation.util.ts` — no
+randomness in price/ETA/expiration, only opaque ids use `randomUUID()`):
+
+- **`DevShippingAdapter`** is fully functional and the one provider the
+  entire logistics domain is provably testable against with no external
+  credentials — including a dev/test-only webhook simulator
+  (`buildSimulatedEventPayload()`) that feeds a synthetic event through
+  the *real* `POST /shipping/webhooks/dev` pipeline rather than mutating
+  state directly, so tests genuinely exercise webhook ingestion, not a
+  shortcut around it.
+- **`AloPeykAdapter`/`SnappBoxAdapter`** each carry an extensive
+  class-level doc comment marking official docs source, auth mechanism,
+  sandbox availability, credentials, webhook signature scheme, idempotency
+  support, cancel capability, and reconciliation/status-query capability
+  as explicitly UNKNOWN. Every method delegates to the same simulation
+  engine as `DevShippingAdapter` — proving the registry/orchestrator
+  boundary genuinely supports a third/fourth provider with zero
+  `Order`/`Checkout`/`Fulfillment` code changes — while never presenting
+  a simulated field or status value as a real AloPeyk/SnappBox API value.
+  If `SHIPPING_MODE=production` and one of them is enabled, every method
+  instead returns an explicit "production integration not yet
+  implemented" result — it never silently falls back to the simulation
+  under a production flag. Reserved env vars
+  (`ALOPEYK_API_BASE_URL`/`ALOPEYK_API_KEY`/`ALOPEYK_WEBHOOK_SECRET`,
+  `SNAPPBOX_*` equivalents) exist for whenever real credentials/docs
+  become available; unused by either adapter today.
+- **`normalizeShippingProviderStatus(provider, rawStatus)`**
+  (`shipping-status-normalizer.ts`) has one explicit, tested mapping per
+  provider (DEV's own lowercase snake_case vocabulary; AloPeyk/SnappBox
+  use the same illustrative shape, explicitly marked as placeholders, not
+  confirmed real values) — an unrecognized raw status always maps to
+  `UNKNOWN` and is logged, never interpreted as success.
+
+### Fulfillment state machine — one authoritative transition policy
+
+`FulfillmentTransitionService.transition()` is the only code path that
+ever writes `Fulfillment.status`. A request to the fulfillment's current
+status is an idempotent no-op; a request to leave a terminal status
+(`DELIVERED`/`FAILED`/`CANCELED`) or take an edge the transition table
+doesn't allow is rejected with `FULFILLMENT_INVALID_TRANSITION`, never
+silently ignored or forced through. `CANCELED` is reachable from every
+state up to and including `PICKUP_ASSIGNED` (mirrors `Shipment`'s own
+`CREATED`/`REQUESTED`/`ASSIGNED` cancel-eligibility); `FAILED` is
+reachable from every courier-facing state. Only the customer-relevant
+milestones (`READY_FOR_PICKUP`, `FAILED`, `CANCELED`) publish their own
+domain event — the courier-driven mirrors are already covered by the
+matching `Shipment.*` event fired alongside them, avoiding duplicate
+consequential events on a replayed webhook.
+
+### `ShippingOrchestrator` — quotes, Fulfillment/Shipment creation, and seller-ops actions, without an `OrderService` rewrite
+
+Never imports `CheckoutModule`/`OrdersModule` (avoiding the same kind of
+import cycle Handoff 07's `PaymentsModule`/`FinancingModule` sidestepped)
+— every read/write goes through `PrismaService` directly with its own
+ownership checks, exactly like `RefundsService` does for `Order`.
+`CheckoutService.finalizeSuccessfulPayment()` calls
+`createFulfillmentsForOrders()` inside the same transaction that creates
+Orders — one Fulfillment per seller Order, immediately auto-transitioned
+to `AWAITING_SELLER_PREPARATION`. The "request courier" ops action is
+also where `Shipment` creation happens, and is the concurrency-critical
+path (spec's Race A: "two concurrent createShipment calls → one canonical
+Shipment → one external create intent"): the `Shipment` row is inserted
+(claiming `sequenceNumber: 1`) **before** the provider is ever called, so
+two concurrent calls race on the DB unique constraint rather than both
+reaching the provider — only the winner calls `gateway.createShipment()`;
+the loser reuses its result (see the e2e Race A test for the exact
+timing subtlety this uncovered: the loser may briefly observe the row
+before the winner's own async provider call has finished populating
+`trackingCode`/`providerShipmentId` — both responses always resolve to
+the same Shipment `id`, which is the actual invariant that matters, not
+byte-identical response bodies). If `gateway.createShipment()` itself
+fails, no Fulfillment transition happens at all — `READY_FOR_PICKUP` is
+left untouched, and a genuine ops retry is just calling the same action
+again, no state to undo. Seller-ops actions (`mark ready for pickup`,
+`request courier`, `cancel`, `reconcile`) are owner-authorized only this
+phase — no `SellerUser`/team-membership auth model exists yet (see Known
+limitations); `ShippingOrchestrator`'s methods are already the seller-
+scoped services a future Seller OS (Handoff 09) would call directly.
+
+### Webhooks + `ShipmentEvent` — idempotent ingestion mirroring `PaymentProviderEvent`
+
+`POST /shipping/webhooks/:provider` has no `SessionAuthGuard` (server-to-
+server, authenticated by `gateway.handleWebhook()`'s own verification,
+exactly like `POST /payments/webhooks/:provider`). `ShipmentEvent`'s
+`@@unique([provider, providerEventId])` is the actual duplicate-delivery
+guard — `ShipmentEventsService.recordIfNew()` attempts the insert first
+and catches the resulting P2002 as the duplicate signal, checked *before*
+any `Shipment`/`Fulfillment` mutation. When a provider event carries no
+stable id, `ShipmentEventsService.fingerprint()` derives a deterministic
+hash from `provider + providerShipmentId + eventType + occurredAt` —
+never a bare random UUID, so a genuine replay of the same event is still
+caught. An unknown `providerShipmentId` (no matching local `Shipment`) is
+acknowledged (`{received: true, processed: false, reason:
+"unknown_shipment"}`) without mutating anything or crashing the pipeline.
+`ShippingOrchestrator.applyShipmentStatus()` is the one place a
+`Shipment`'s canonical status is ever written after creation — both the
+webhook controller and `ShippingReconciliationService` call it, never
+mutating `status` directly. It enforces, in order: `UNKNOWN` is never
+written over anything; a terminal local status is never overwritten
+(the spec's own example — "Local: DELIVERED, Provider: IN_TRANSIT → keep
+DELIVERED, record inconsistency" — is a dedicated e2e test); and a
+non-terminal move must be forward-only along the canonical happy-path
+ordering (`FAILED`/`CANCELED` are always "forward" from any non-terminal
+state).
+
+### Reconciliation — reuses `ShipmentEvent` as the audit log, never a second near-duplicate model
+
+`ShippingReconciliationService.reconcileShipment()` never writes
+financial/domain state itself — it always drives the exact same
+`applyShipmentStatus()` a real webhook would, then appends one
+`ShipmentEvent` row (`eventType: "reconciliation.checked"`) per check
+regardless of outcome, reusing `ShipmentEvent`'s existing append-only
+shape rather than introducing a `ShippingReconciliationLog` model
+alongside the payment-side `ReconciliationLog` (they're intentionally
+different tables since `ReconciliationLog.provider` is typed
+`PaymentProvider`, not `ShippingProvider` — reuse without a type-widening
+hack). No `providerShipmentId` yet, or a provider without
+`supportsStatusQuery`, logs an explicit `UNKNOWN_REMOTE_STATE` rather
+than guessing. `POST /orders/:orderId/shipment/reconcile` is a manual/
+job-friendly trigger — no scheduler exists yet, matching Handoff 07's own
+reconciliation endpoints.
+
+### Financial integrity — server-authoritative shipping price, IRR integers only
+
+The selected `ShippingQuote.priceIrr` is the sole authoritative shipping
+price; the client can never supply one. `ShippingPackage` (weight in
+grams, converted from `ProductVariant.weightValue`/`weightUnit`;
+dimensions always `undefined` since this catalog has no length/width/
+height data — never fabricated) is built from real order/reservation
+data, never invented. No provider fee is ever assumed or invented for any
+of the three simulated providers.
+
+### Consumer UI (`apps/web/features/commerce/`)
+
+Checkout gained a **Shipping** step between Review and Method — per
+seller, delivery options deduplicated by service level (all three
+providers currently return byte-identical price/ETA via the shared
+simulation, so showing all of them individually would just look like
+duplicate rows; provider identity itself is deliberately not shown, per
+spec: "do not force customers to understand adapter/provider
+architecture"), a refresh action, and an explicit unavailable state.
+Selecting is optional — skipping proceeds with the prior flat delivery
+amount, keeping every existing Handoff 06/07 checkout test's behavior
+unchanged. Order Detail's Handoff 07-era "Fulfillment tracking coming
+soon" placeholder is now the real thing: a status badge, tracking code,
+ETA, and a fixed-checklist timeline (`reached`/pending milestones shown
+as a static list, never a live-only feed) with a last-updated time, and
+a friendly "temporarily unavailable" fallback rather than an error when
+tracking can't be fetched. Order Confirmation shows the delivery amount
+and each seller Order's current Fulfillment status with deliberately
+non-alarming copy ("Seller is preparing your order") — never implying
+courier assignment before it exists. My Orders shows Fulfillment status
+as its own separate badge alongside Payment/Financing/Refund — never
+collapsed into Order status.
+
+### API endpoints (Handoff 08 additions)
+
+See the full endpoint list below (`GET /checkout/:id/shipping-quotes`
+through `POST /shipping/dev/simulate/:providerShipmentId`).
+
+### Error codes (Handoff 08 additions)
+
+```
+SHIPPING_PROVIDER_UNAVAILABLE     503  resolved provider has no registered adapter
+SHIPPING_PROVIDER_DISABLED        400  provider exists but its *_ENABLED flag is off
+SHIPPING_QUOTE_NOT_FOUND          404  no such quote, or it belongs to a different checkout
+SHIPPING_QUOTE_EXPIRED            410  quote's expiresAt has passed, at selection or at payment-intent time
+SHIPPING_QUOTE_NOT_ELIGIBLE       400  reserved — quote/checkout mismatch beyond the 404 case above
+SHIPPING_QUOTE_ALREADY_SELECTED   409  reserved for a future stricter re-selection policy (not yet thrown)
+FULFILLMENT_NOT_FOUND             404  no such fulfillment, or its order belongs to a different user
+FULFILLMENT_INVALID_TRANSITION    409  the requested status is unreachable from the fulfillment's current status
+SHIPMENT_NOT_FOUND                404  reserved for a direct shipment lookup (not yet a standalone route)
+SHIPMENT_ALREADY_EXISTS           409  reserved vocabulary — actual idempotency is the DB unique constraint, not this exception
+SHIPMENT_CREATION_FAILED          502  the delivery provider's createShipment call failed
+SHIPMENT_CANCEL_NOT_ALLOWED       409  reserved — cancelFulfillment currently no-ops rather than throwing on an ineligible shipment
+SHIPMENT_PROVIDER_STATUS_UNKNOWN  409  reserved — UNKNOWN is currently absorbed silently by applyShipmentStatus/reconciliation, never thrown
+SHIPMENT_RECONCILIATION_FAILED    502  the provider's getShipmentStatus call itself threw
+SHIPPING_WEBHOOK_INVALID          400  gateway.handleWebhook() reported the payload invalid
+```
+
 ## API endpoints
 
 ```
@@ -1968,6 +2229,19 @@ GET    /orders/:id
 POST   /orders/:orderId/refunds                 (Idempotency-Key supported; full refund only this phase)
 GET    /orders/:orderId/refunds
 GET    /refunds/:id
+
+GET    /checkout/:id/shipping-quotes            (per-seller options; requests fresh quotes on first call)
+POST   /checkout/:id/shipping-quotes/refresh
+POST   /checkout/:id/shipping-quotes/select     (Idempotency-Key supported; re-selecting the same quote is a no-op)
+GET    /orders/:orderId/fulfillment
+GET    /orders/:orderId/shipment
+GET    /orders/:orderId/tracking                (Fulfillment + Shipment + fixed-checklist timeline)
+POST   /orders/:orderId/fulfillment/ready-for-pickup     (owner-authorized seller-ops action — no Seller OS auth yet)
+POST   /orders/:orderId/fulfillment/request-courier      (Idempotency-Key supported; creates the Shipment)
+POST   /orders/:orderId/fulfillment/cancel
+POST   /orders/:orderId/shipment/reconcile
+POST   /shipping/webhooks/:provider             (no session/CSRF — server-to-server; dev|alopeyk|snappbox)
+POST   /shipping/dev/simulate/:providerShipmentId  (dev/test-only; hard-disabled outside development/test via NODE_ENV)
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
@@ -2698,6 +2972,36 @@ BNPL purchase that recovers to online payment on the same checkout, a
 duplicate webhook delivery that produces no duplicate financial records,
 and a full refund, all end to end against a real browser.
 
+Everything in the Handoff 08 acceptance criteria: `Order → Fulfillment →
+Shipment` as its own set of state machines, schema-ready (via the
+`sequenceNumber`+unique-constraint device) for a future split-shipment
+feature without a migration; a `ShippingGateway` adapter architecture
+(`DEV`/`ALOPEYK`/`SNAPPBOX`) mirroring Handoff 07's payment adapters
+exactly, with `DevShippingAdapter` fully functional and the other two
+built as sandbox-honest, extensively-documented adapter boundaries (no
+official AloPeyk/SnappBox docs exist for this project); checkout-time
+`ShippingQuote` request/select/refresh/expiry, server-recalculating
+`Checkout.deliveryAmount`/`totalAmount` and each seller `Order`'s own
+quote-driven `deliveryAmount` (fixing a pre-existing Handoff 06
+simplification along the way); `FulfillmentTransitionService` as the one
+authoritative, terminal-protected, idempotent state-transition policy;
+concurrency-safe Shipment creation (the DB unique constraint claims the
+row before the provider is ever called, so two concurrent `request-
+courier` calls never place two courier jobs); an idempotent webhook
+pipeline (`ShipmentEvent`'s `@@unique([provider, providerEventId])`) plus
+a dev-only webhook simulator that exercises the real pipeline, not a
+shortcut around it; a reconciliation service that never regresses a
+terminal local state and reuses `ShipmentEvent` as its own audit log;
+Checkout/Order Detail/My Orders/Order Confirmation UI additions that keep
+Fulfillment status strictly separate from Order/Payment/Financing/Refund
+status; every Handoff 01-07 backend/frontend test still green (130 backend
+e2e scenarios, 98 frontend tests); and backend e2e coverage for every
+required flow (single-seller happy path to `DELIVERED`, independent
+multi-seller Fulfillments, a post-pickup Shipment failure that leaves
+Order/Payment independently coherent, quote expiration/refresh/reselect,
+and the two required concurrency races) executed via the same real-HTTP
+supertest-driven approach every prior handoff's "browser E2E" used.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -2890,11 +3194,13 @@ and a full refund, all end to end against a real browser.
   `DigiPayAdapter` are documented sandbox stubs (see the Handoff 07
   section above for exactly what's real vs. UNKNOWN per provider); no
   live redirect/authorization round-trip, real installment terms, or real
-  webhook signature scheme exists for any of them. No delivery
-  integration exists either: `DeliveryMethod` (`STANDARD`/`EXPRESS`) is
-  still a placeholder whose amount is a fixed dev-calculated constant
-  (`DELIVERY_AMOUNT_BY_METHOD`), not a real carrier rate — AloPeyk/
-  SnappBox/Torob/Digikala remain explicitly out of scope.
+  webhook signature scheme exists for any of them. `DeliveryMethod`
+  (`STANDARD`/`EXPRESS`) remains a flat, dev-calculated fallback amount
+  (`DELIVERY_AMOUNT_BY_METHOD`) for any checkout that never touches the
+  Handoff 08 shipping-quote flow; a checkout that does gets a real (if
+  simulated) per-seller `ShippingQuote` price instead — see the Handoff 08
+  section above for the delivery/logistics architecture that now exists.
+  Torob/Digikala integration remains explicitly out of scope per the spec.
 - **No seller-facing commerce surface, and no seller settlement** —
   sellers are seed-data-only this phase (`SellerOrganization`/
   `SellerOffer`/`InventoryItem` are all created via `prisma/seed.ts`);
@@ -2984,8 +3290,116 @@ and a full refund, all end to end against a real browser.
   attempt, so a genuinely partial outcome never currently occurs; a future
   handoff introducing per-seller payment splits or partial captures should
   wire this status rather than add a new one.
+- **No real merchant credentials for AloPeyk or SnappBox** (Handoff 08) —
+  both adapters are documented sandbox boundaries sharing `DevShippingAdapter`'s
+  own simulation engine (see the Handoff 08 section above for exactly
+  what's real vs. UNKNOWN per provider); no live quote/create-shipment/
+  webhook round-trip or real webhook signature scheme exists for either.
+- **No Seller OS / seller-ops auth model** (Handoff 08) — `mark ready for
+  pickup`/`request courier`/`cancel`/`reconcile` are reachable only by the
+  order's own owner (the customer), the same "no admin/support role model
+  yet" limitation Handoff 07's ops view has; a real seller would use these
+  same `ShippingOrchestrator` methods once Handoff 09 adds
+  `SellerUser`/`SellerAuthGuard`.
+- **No shipping-fee ledger posting** — `LedgerService` still only records
+  the full payment/refund amount (Handoff 07); the shipping-fee component
+  of `deliveryAmount` is not split into its own ledger account this phase
+  (no `SHIPPING_FEE`/carrier-payable account exists), since no real courier
+  invoicing relationship exists to model.
+- **No package dimensions, only weight** — `ShippingPackage.weightGrams` is
+  derived from `ProductVariant.weightValue`/`weightUnit` when present;
+  `widthCm`/`heightCm`/`lengthCm` are always `undefined` since this catalog
+  has no dimension fields, never fabricated. A future handoff adding
+  dimension fields to `ProductVariant` would need no `ShippingPackage`
+  shape change, only a real value to populate it with.
+- **`ShippingQuote` price/ETA are identical across all three providers** —
+  since `AloPeykAdapter`/`SnappBoxAdapter` currently delegate to the same
+  simulation engine as `DevShippingAdapter`, a checkout sees the same
+  STANDARD/EXPRESS price and ETA no matter which provider a customer
+  theoretically picks; the consumer UI already deduplicates by service
+  level rather than showing three identical-looking rows, but this masks
+  the fact that no real price differentiation between providers exists yet.
+- **No shipment cancellation once picked up** — `cancelFulfillment()` only
+  calls the provider's `cancelShipment()` when the Shipment is still
+  `CREATED`/`REQUESTED`/`ASSIGNED`; a shipment past `PICKED_UP` cannot be
+  cancelled through this endpoint (matches every simulated adapter's own
+  `cancelShipment` eligibility rule) — there is no "delivery in progress,
+  redirect/return to sender" workflow.
+- **No automatic Fulfillment retry after a genuine courier failure** — a
+  `FAILED` Shipment/Fulfillment is a terminal state; recovering from it
+  today means a person manually deciding what to do (e.g. a refund via the
+  existing Handoff 07 refund flow), not an automated re-attempt or a
+  second Fulfillment `sequenceNumber`. The schema supports a future
+  `sequenceNumber: 2` retry attempt; no service method creates one yet.
+- **Package/parcel weight and shipping quotes are computed at request time
+  only** — there is no persisted `ShippingPackage` record; if `ProductVariant`
+  weight data changes after a quote was issued, the already-issued quote's
+  price is unaffected (it was already locked in), but a *new* quote request
+  would reflect the change — consistent with every other commercial
+  snapshot in this codebase, just worth calling out explicitly here.
 
 ## Next recommended coding handoff
+
+**A minimal Seller OS** (Handoff 09), now with a genuinely complete
+foundation to sit on top of: Handoff 07 gave the platform a real (if
+sandboxed) payment/BNPL/refund pipeline with a double-entry ledger, and
+Handoff 08 gave it a real physical-fulfillment lifecycle
+(`Fulfillment`/`Shipment`) with seller-ops actions
+(`ShippingOrchestrator.markReadyForPickup()`/`requestCourier()`/
+`cancelFulfillment()`) already implemented and ready to be re-exposed
+under real seller authentication rather than "owner of the order." Every
+`SellerOrganization`/`SellerOffer`/`InventoryItem` still exists only via
+`prisma/seed.ts` today — there is no seller-facing surface at all. A
+minimal next step, reusing the exact same session auth and authorization
+pattern `ProviderAuthGuard`/`ProviderContextService` already established
+(a `SellerUser`/`SellerOrganization` membership model, a `SellerAuthGuard`
+that is a completely separate axis from pet-data authorization, exactly
+as `ProviderAuthGuard` is): (1) a seller order queue (`GET
+/seller/orders`, `GET /seller/orders/:id`) scoped to that seller's own
+`Order` rows only (never another seller's — same "403, never a silent
+404" IDOR posture as Provider OS); (2) inventory management (`PATCH
+/seller/offers/:id/inventory` to adjust `onHand`, reusing the exact same
+`InventoryReservationService` invariants — never a second stock-tracking
+path); (3) re-pointing the *existing* `ShippingOrchestrator` seller-ops
+methods (`markReadyForPickup`/`requestCourier`/`cancelFulfillment`/
+`reconcileShipment`) at `SellerAuthGuard` instead of "checkout owner" —
+the service layer already exists, this handoff's job is building the
+seller-facing controller/UI in front of it, not redesigning the
+orchestration; (4) basic order-status progression (`PENDING → CONFIRMED →
+PREPARING → READY_FOR_FULFILLMENT → FULFILLED`, finally reaching the
+`OrderStatus` values Handoff 06 defined but never made reachable),
+mirrored from `Fulfillment.status` reaching the equivalent milestone,
+with the same "single-step transition, reject anything else" discipline
+`ProviderBookingsService` used; and (5), now genuinely in scope, a first
+real posting to `SELLER_PAYABLE` (e.g. crediting it — and correspondingly
+debiting `CUSTOMER_PAYMENT_CLEARING` — for the seller's share once an
+Order is `FULFILLED`), still through `LedgerService.recordBalanced()`,
+never a new write path. Full settlement/payout execution, refund-adjusted
+seller payables, and seller-side pricing/catalog editing are substantial
+enough to stay a dedicated follow-up past this one, exactly as Provider
+OS's own verification workflow was deferred past Handoff 05.
+
+Alternatively, if the business prioritizes closing the remaining external-
+provider gaps instead of building the Seller OS: once real merchant
+credentials/official docs for SnappPay, DigiPay, a standard payment
+gateway, AloPeyk, or SnappBox become available, swap the corresponding
+adapter's sandbox/simulation bodies for real HTTP calls and a real webhook
+signature scheme, without touching `PaymentGateway`/`FinancingProvider`/
+`ShippingGateway`'s shape — every adapter already implements the full
+interface its capability map declares, so a real integration is a
+same-class rewrite, not a new architecture. `validatePaymentConfig()`/
+`validateShippingConfig()` already refuse to boot with `PAYMENT_SANDBOX_MODE=
+production`/`SHIPPING_MODE=production` unless the enabled provider's
+credential env vars are set, specifically to make this transition safe.
+Whichever is chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly
+separate (never collapse catalog identity, price, and stock back into one
+model), keep "1 Checkout → N Orders" and "1 Order → N Fulfillments → N
+Shipments" (schema-ready, MVP uses N=1) as the non-negotiable invariants,
+keep IRR as the only stored currency unit, and keep every financial write
+going through `LedgerService.recordBalanced()` and every Fulfillment
+status change going through `FulfillmentTransitionService.transition()`
+— never a second write path for either, no matter how small the change
+looks.
 
 **A minimal Seller OS**, directly mirroring how Handoff 05's minimal
 Provider OS followed the vet booking engine (Handoff 03), and now a more
