@@ -48,7 +48,17 @@ function buildTimeline(fulfillment: FulfillmentDto | null, shipment: ShipmentDto
   return timeline;
 }
 
-/** Order-scoped fulfillment/shipment/tracking + minimal ops actions (spec sections 26-27). Ops actions are owner-authorized only this phase — no Seller OS/team auth model exists yet (see README Known limitations; H09 owns building that). */
+/**
+ * Order-scoped fulfillment/shipment/tracking reads (spec sections 26-27) —
+ * buyer-authorized, unchanged since Handoff 08. The four ops actions below
+ * were buyer-authorized in Handoff 08 as a temporary stand-in (no Seller OS
+ * auth model existed yet); Handoff 09 replaces that with real Seller OS
+ * authorization — the caller must hold an ACTIVE SellerMembership in the
+ * order's seller organization (see ShippingOrchestrator.loadSellerOrder/
+ * loadSellerFulfillment) — while keeping the same URLs and reusing every
+ * other line of ShippingOrchestrator unchanged (spec section 39: "reuse H08
+ * services, do not duplicate logistics logic").
+ */
 @Controller("orders")
 @UseGuards(SessionAuthGuard)
 export class OrderLogisticsController {
@@ -81,7 +91,7 @@ export class OrderLogisticsController {
 
   @Post(":orderId/fulfillment/ready-for-pickup")
   async markReadyForPickup(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
-    const fulfillment = await this.shipping.getFulfillmentForOrder(user.id, orderId);
+    const fulfillment = await this.shipping.getFulfillmentForOrderAsSeller(user.id, orderId);
     if (!fulfillment) return null;
     return toFulfillmentDto(await this.shipping.markReadyForPickup(user.id, fulfillment.id));
   }
@@ -89,7 +99,7 @@ export class OrderLogisticsController {
   @Post(":orderId/fulfillment/request-courier")
   @UseInterceptors(IdempotencyInterceptor)
   async requestCourier(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
-    const fulfillment = await this.shipping.getFulfillmentForOrder(user.id, orderId);
+    const fulfillment = await this.shipping.getFulfillmentForOrderAsSeller(user.id, orderId);
     if (!fulfillment) return null;
     const { fulfillment: updated, shipment } = await this.shipping.requestCourier(user.id, fulfillment.id);
     return { fulfillment: toFulfillmentDto(updated), shipment: toShipmentDto(shipment) };
@@ -97,14 +107,14 @@ export class OrderLogisticsController {
 
   @Post(":orderId/fulfillment/cancel")
   async cancelFulfillment(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
-    const fulfillment = await this.shipping.getFulfillmentForOrder(user.id, orderId);
+    const fulfillment = await this.shipping.getFulfillmentForOrderAsSeller(user.id, orderId);
     if (!fulfillment) return null;
     return toFulfillmentDto(await this.shipping.cancelFulfillment(user.id, fulfillment.id));
   }
 
   @Post(":orderId/shipment/reconcile")
   async reconcileShipment(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
-    const shipment = await this.shipping.getShipmentForOrder(user.id, orderId);
+    const shipment = await this.shipping.getShipmentForOrderAsSeller(user.id, orderId);
     if (!shipment) return null;
     return this.reconciliation.reconcileShipment(shipment.id);
   }

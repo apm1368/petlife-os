@@ -11,6 +11,9 @@ import { SellerOfferController } from "./seller-offer.controller";
 import { SellerOfferService } from "./seller-offer.service";
 import { SellerInventoryController } from "./seller-inventory.controller";
 import { SellerInventoryService } from "./seller-inventory.service";
+import { SellerOrderController, SellerDashboardController } from "./seller-order.controller";
+import { SellerOrderService } from "./seller-order.service";
+import { SellerDashboardService } from "./seller-dashboard.service";
 
 @Module({
   imports: [InventoryModule],
@@ -21,8 +24,10 @@ import { SellerInventoryService } from "./seller-inventory.service";
     SellerTeamController,
     SellerOfferController,
     SellerInventoryController,
+    SellerOrderController,
+    SellerDashboardController,
   ],
-  providers: [SellerAccessService, SellerAuthGuard, SellerOrganizationService, SellerTeamService, SellerOfferService, SellerInventoryService],
+  providers: [SellerAccessService, SellerAuthGuard, SellerOrganizationService, SellerTeamService, SellerOfferService, SellerInventoryService, SellerOrderService, SellerDashboardService],
   exports: [SellerAccessService, SellerAuthGuard],
 })
 export class SellerOsModule {}

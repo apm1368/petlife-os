@@ -13,6 +13,8 @@ import {
   BookingStatus,
   SellerVerificationStatus,
   SellerStatus,
+  SellerMembershipRole,
+  SellerMembershipStatus,
   CheckoutStatus,
   CartStatus,
   OrderStatus,
@@ -2681,6 +2683,12 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const seller = await prisma.sellerOrganization.create({
         data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US", city: "Tehran" },
       });
+      // Handoff 09: the fulfillment ops actions below are seller-authorized, not
+      // buyer-authorized — grant the checkout's own buyer an OWNER membership on
+      // this seller so the same `client` can also drive those actions in tests
+      // that exercise both roles (a real product would use two separate users).
+      const buyerUser = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      await prisma.sellerMembership.create({ data: { sellerOrganizationId: seller.id, userId: buyerUser.id, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, acceptedAt: new Date() } });
       const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount, currency: "IRR" } });
       await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand } });
       const addressRes = await client.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
@@ -2907,6 +2915,7 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const client = authedRequest(app, await signUp(app, logSpy, identifier));
       const household = await client.post("/households").send({}).expect(201);
       const category = await prisma.productCategory.create({ data: { name: `Category ${unique()}`, slug: `category-${unique()}` } });
+      const buyerUser = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
 
       async function sellerAndOffer() {
         const product = await prisma.product.create({
@@ -2916,6 +2925,8 @@ describe("PET LIFE OS critical paths (e2e)", () => {
         const seller = await prisma.sellerOrganization.create({
           data: { name: `Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" },
         });
+        // Handoff 09: grant the buyer OWNER membership on each seller too — see setupCheckoutReady's own comment above.
+        await prisma.sellerMembership.create({ data: { sellerOrganizationId: seller.id, userId: buyerUser.id, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, acceptedAt: new Date() } });
         const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount: 1_000_000, currency: "IRR" } });
         await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand: 10 } });
         return offer;

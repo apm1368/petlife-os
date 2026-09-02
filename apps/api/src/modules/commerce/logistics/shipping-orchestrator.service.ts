@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { FulfillmentStatus, Prisma, ShipmentStatus, ShippingProvider, ShippingQuoteStatus, type Fulfillment, type Shipment, type ShippingQuote } from "@prisma/client";
+import { FulfillmentStatus, Prisma, SellerMembershipStatus, ShipmentStatus, ShippingProvider, ShippingQuoteStatus, type Fulfillment, type Shipment, type ShippingQuote } from "@prisma/client";
 import type { AddressSnapshotDto, SellerShippingOptionsDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService, type DomainEventType } from "../../../common/events/domain-events.service";
@@ -252,19 +252,29 @@ export class ShippingOrchestrator {
   }
 
   // ---------------------------------------------------------------------
-  // Seller ops actions (spec section 27 — minimal, owner-authorized only;
-  // no Seller OS/team auth model exists yet, see README Known limitations)
+  // Seller ops actions (spec section 27, 39) — Handoff 09 replaces the
+  // former "authenticated user owns the checkout/order" stand-in with real
+  // Seller OS authorization: the caller must hold an ACTIVE SellerMembership
+  // in the Fulfillment's own sellerOrgId. Queried directly via PrismaService
+  // (never importing SellerOsModule) for the same module-cycle-avoidance
+  // reason RefundsService/this class already read Checkout/Order directly —
+  // this *is* "reusing H08 services" per spec section 39, not duplicating
+  // logistics logic: only the ownership check changed, every transition/
+  // shipment-creation code path below is untouched.
   // ---------------------------------------------------------------------
 
-  private async loadOwnedFulfillment(userId: string, fulfillmentId: string): Promise<Fulfillment & { order: { userId: string | null; checkoutId: string | null } }> {
-    const fulfillment = await this.prisma.fulfillment.findUnique({ where: { id: fulfillmentId }, include: { order: { select: { userId: true, checkoutId: true } } } });
+  private async loadSellerFulfillment(userId: string, fulfillmentId: string): Promise<Fulfillment> {
+    const fulfillment = await this.prisma.fulfillment.findUnique({ where: { id: fulfillmentId } });
     if (!fulfillment) throw new FulfillmentNotFoundException({ fulfillmentId });
-    if (fulfillment.order.userId !== userId) throw new FulfillmentNotFoundException({ fulfillmentId });
+    const membership = await this.prisma.sellerMembership.findUnique({
+      where: { sellerOrganizationId_userId: { sellerOrganizationId: fulfillment.sellerOrgId, userId } },
+    });
+    if (!membership || membership.status !== SellerMembershipStatus.ACTIVE) throw new FulfillmentNotFoundException({ fulfillmentId });
     return fulfillment;
   }
 
   async markReadyForPickup(userId: string, fulfillmentId: string): Promise<Fulfillment> {
-    await this.loadOwnedFulfillment(userId, fulfillmentId);
+    await this.loadSellerFulfillment(userId, fulfillmentId);
     return this.transitions.transition(fulfillmentId, FulfillmentStatus.READY_FOR_PICKUP);
   }
 
@@ -302,7 +312,7 @@ export class ShippingOrchestrator {
    * the winner calls `gateway.createShipment`, the loser reuses its result.
    */
   async requestCourier(userId: string, fulfillmentId: string): Promise<{ fulfillment: Fulfillment; shipment: Shipment }> {
-    const fulfillment = await this.loadOwnedFulfillment(userId, fulfillmentId);
+    const fulfillment = await this.loadSellerFulfillment(userId, fulfillmentId);
 
     if (fulfillment.status !== FulfillmentStatus.READY_FOR_PICKUP) {
       const existingShipment = await this.prisma.shipment.findUnique({ where: { fulfillmentId_sequenceNumber: { fulfillmentId, sequenceNumber: 1 } } });
@@ -371,7 +381,7 @@ export class ShippingOrchestrator {
   }
 
   async cancelFulfillment(userId: string, fulfillmentId: string): Promise<Fulfillment> {
-    await this.loadOwnedFulfillment(userId, fulfillmentId);
+    await this.loadSellerFulfillment(userId, fulfillmentId);
     const shipment = await this.prisma.shipment.findUnique({ where: { fulfillmentId_sequenceNumber: { fulfillmentId, sequenceNumber: 1 } } });
 
     const cancelableStatuses: ShipmentStatus[] = [ShipmentStatus.CREATED, ShipmentStatus.REQUESTED, ShipmentStatus.ASSIGNED];
@@ -403,6 +413,28 @@ export class ShippingOrchestrator {
 
   async getShipmentForOrder(userId: string, orderId: string): Promise<Shipment | null> {
     const fulfillment = await this.getFulfillmentForOrder(userId, orderId);
+    if (!fulfillment) return null;
+    return this.prisma.shipment.findUnique({ where: { fulfillmentId_sequenceNumber: { fulfillmentId: fulfillment.id, sequenceNumber: 1 } } });
+  }
+
+  /** Seller-side counterpart of loadOwnedOrder — the ops actions below resolve "their" order this way, never via buyer ownership (spec section 39). */
+  private async loadSellerOrder(userId: string, orderId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new OrderNotFoundException({ orderId });
+    const membership = await this.prisma.sellerMembership.findUnique({
+      where: { sellerOrganizationId_userId: { sellerOrganizationId: order.sellerOrganizationId, userId } },
+    });
+    if (!membership || membership.status !== SellerMembershipStatus.ACTIVE) throw new OrderNotFoundException({ orderId });
+    return order;
+  }
+
+  async getFulfillmentForOrderAsSeller(userId: string, orderId: string): Promise<Fulfillment | null> {
+    await this.loadSellerOrder(userId, orderId);
+    return this.prisma.fulfillment.findUnique({ where: { orderId_sequenceNumber: { orderId, sequenceNumber: 1 } } });
+  }
+
+  async getShipmentForOrderAsSeller(userId: string, orderId: string): Promise<Shipment | null> {
+    const fulfillment = await this.getFulfillmentForOrderAsSeller(userId, orderId);
     if (!fulfillment) return null;
     return this.prisma.shipment.findUnique({ where: { fulfillmentId_sequenceNumber: { fulfillmentId: fulfillment.id, sequenceNumber: 1 } } });
   }
