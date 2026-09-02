@@ -392,3 +392,99 @@ export class RefundNotFoundException extends ApiException {
     super("REFUND_NOT_FOUND", "Refund not found.", HttpStatus.NOT_FOUND, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Delivery & Logistics Core (Handoff 08)
+// ---------------------------------------------------------------------------
+
+export class ShippingProviderUnavailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPPING_PROVIDER_UNAVAILABLE", "This delivery provider is currently unavailable.", HttpStatus.SERVICE_UNAVAILABLE, details);
+  }
+}
+
+export class ShippingProviderDisabledException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPPING_PROVIDER_DISABLED", "This delivery provider is not enabled.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class ShippingQuoteNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPPING_QUOTE_NOT_FOUND", "Shipping quote not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class ShippingQuoteExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPPING_QUOTE_EXPIRED", "This shipping quote has expired. Please refresh and choose again.", HttpStatus.GONE, details);
+  }
+}
+
+export class ShippingQuoteNotEligibleException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPPING_QUOTE_NOT_ELIGIBLE", "This shipping quote does not belong to the given order/checkout.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** Never thrown for a re-selection of the already-selected quote (spec section 21: "duplicate quote selection must be safe/idempotent") — only for selecting a *different* quote while checkout has moved past the shipping step. */
+export class ShippingQuoteAlreadySelectedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPPING_QUOTE_ALREADY_SELECTED", "A different shipping option has already been selected and locked in.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class FulfillmentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("FULFILLMENT_NOT_FOUND", "Fulfillment not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class FulfillmentInvalidTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("FULFILLMENT_INVALID_TRANSITION", "This fulfillment cannot move to the requested state from its current state.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ShipmentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPMENT_NOT_FOUND", "Shipment not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class ShipmentAlreadyExistsException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPMENT_ALREADY_EXISTS", "A shipment already exists for this fulfillment.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ShipmentCreationFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPMENT_CREATION_FAILED", "The delivery provider could not create this shipment.", HttpStatus.BAD_GATEWAY, details);
+  }
+}
+
+export class ShipmentCancelNotAllowedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPMENT_CANCEL_NOT_ALLOWED", "This shipment can no longer be canceled.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Explicit, never silently treated as success (spec section 6/28: "UNKNOWN must never imply success"). */
+export class ShipmentProviderStatusUnknownException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPMENT_PROVIDER_STATUS_UNKNOWN", "The delivery provider returned an unrecognized status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ShipmentReconciliationFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPMENT_RECONCILIATION_FAILED", "Reconciliation with the delivery provider failed.", HttpStatus.BAD_GATEWAY, details);
+  }
+}
+
+export class ShippingWebhookInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SHIPPING_WEBHOOK_INVALID", "The shipping webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
+  }
+}

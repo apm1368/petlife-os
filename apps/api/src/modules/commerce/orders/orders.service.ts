@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { OrderStatus, Prisma, type FinancingIntent, type PaymentIntent, type Refund } from "@prisma/client";
-import type { CartLineDto, FinancingIntentStatus, OrderDetailDto, OrderItemDto, OrderSummaryDto, PaymentIntentStatus, ProductCompatibilityDto, RefundStatus } from "@petlife/types";
+import { OrderStatus, Prisma, type Fulfillment, type FinancingIntent, type PaymentIntent, type Refund } from "@prisma/client";
+import type { CartLineDto, FinancingIntentStatus, FulfillmentStatus, OrderDetailDto, OrderItemDto, OrderSummaryDto, PaymentIntentStatus, ProductCompatibilityDto, RefundStatus } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { OrderNotFoundException } from "../../../common/errors/api-exception";
 import { toSellerSummaryDto } from "../commerce-dto.mapper";
+import { toFulfillmentDto } from "../logistics/logistics-dto.mapper";
 
 const ORDER_INCLUDE = {
   sellerOrganization: true,
@@ -67,6 +68,15 @@ export class OrdersService {
     lines: CartLineDto[],
     shippingAddressId: string | null,
     shippingAddressSnapshot: Record<string, unknown> | null,
+    /**
+     * Per-seller shipping-price override (Handoff 08) — when a seller has a
+     * SELECTED ShippingQuote, its own price becomes that Order's
+     * `deliveryAmount` instead of the checkout-wide flat amount every
+     * seller previously received in full (a pre-existing Handoff 06
+     * simplification, kept as the fallback for any checkout that never
+     * touches the shipping-quote flow — see ShippingOrchestrator).
+     */
+    deliveryAmountBySeller?: Map<string, number>,
   ): Promise<string[]> {
     const bySeller = new Map<string, CartLineDto[]>();
     for (const line of lines) {
@@ -77,7 +87,8 @@ export class OrdersService {
     const orderIds: string[] = [];
     for (const [sellerOrganizationId, sellerLines] of bySeller) {
       const subtotalAmount = sellerLines.reduce((sum, l) => sum + l.lineTotal, 0);
-      const totalAmount = subtotalAmount + checkout.deliveryAmount + checkout.discountAmount;
+      const deliveryAmount = deliveryAmountBySeller?.get(sellerOrganizationId) ?? checkout.deliveryAmount;
+      const totalAmount = subtotalAmount + deliveryAmount + checkout.discountAmount;
 
       let order;
       try {
@@ -89,7 +100,7 @@ export class OrdersService {
             householdId: checkout.householdId,
             status: OrderStatus.CONFIRMED,
             subtotalAmount,
-            deliveryAmount: checkout.deliveryAmount,
+            deliveryAmount,
             discountAmount: checkout.discountAmount,
             totalAmount,
             currency: checkout.currency,
@@ -137,13 +148,14 @@ export class OrdersService {
 
     const checkoutIds = [...new Set(orders.map((o) => o.checkoutId))];
     const orderIds = orders.map((o) => o.id);
-    const [paymentIntents, financingIntents, refunds] = await Promise.all([
+    const [paymentIntents, financingIntents, refunds, fulfillments] = await Promise.all([
       this.prisma.paymentIntent.findMany({ where: { checkoutId: { in: checkoutIds } } }),
       this.prisma.financingIntent.findMany({ where: { checkoutId: { in: checkoutIds } } }),
       this.prisma.refund.findMany({ where: { orderId: { in: orderIds } }, orderBy: { createdAt: "desc" } }),
+      this.prisma.fulfillment.findMany({ where: { orderId: { in: orderIds }, sequenceNumber: 1 } }),
     ]);
 
-    return orders.map((order) => this.toSummaryDto(order, paymentIntents, financingIntents, refunds));
+    return orders.map((order) => this.toSummaryDto(order, paymentIntents, financingIntents, refunds, fulfillments));
   }
 
   async getById(userId: string, id: string): Promise<OrderDetailDto> {
@@ -151,10 +163,11 @@ export class OrdersService {
     if (!order) throw new OrderNotFoundException({ orderId: id });
     if (order.userId !== userId) throw new OrderNotFoundException({ orderId: id });
 
-    const [paymentIntents, financingIntents, refunds] = await Promise.all([
+    const [paymentIntents, financingIntents, refunds, fulfillment] = await Promise.all([
       this.prisma.paymentIntent.findMany({ where: { checkoutId: order.checkoutId } }),
       this.prisma.financingIntent.findMany({ where: { checkoutId: order.checkoutId } }),
       this.prisma.refund.findMany({ where: { orderId: id }, orderBy: { createdAt: "desc" } }),
+      this.prisma.fulfillment.findUnique({ where: { orderId_sequenceNumber: { orderId: id, sequenceNumber: 1 } } }),
     ]);
     const paymentStatus = pickMostRelevant(paymentIntents, ["CAPTURED"])?.status as PaymentIntentStatus | undefined;
     const financingStatus = pickMostRelevant(financingIntents, ["APPROVED"])?.status as FinancingIntentStatus | undefined;
@@ -167,6 +180,7 @@ export class OrdersService {
       paymentStatus: paymentStatus ?? null,
       financingStatus: financingStatus ?? null,
       refunds: refunds.map((r) => this.toRefundDto(r)),
+      fulfillment: fulfillment ? toFulfillmentDto(fulfillment) : null,
       subtotalAmount: order.subtotalAmount,
       deliveryAmount: order.deliveryAmount,
       discountAmount: order.discountAmount,
@@ -212,7 +226,7 @@ export class OrdersService {
     };
   }
 
-  private toSummaryDto(order: OrderWithRelations, paymentIntents: PaymentIntent[], financingIntents: FinancingIntent[], refunds: Refund[]): OrderSummaryDto {
+  private toSummaryDto(order: OrderWithRelations, paymentIntents: PaymentIntent[], financingIntents: FinancingIntent[], refunds: Refund[], fulfillments: Fulfillment[]): OrderSummaryDto {
     const paymentStatus = pickMostRelevant(
       paymentIntents.filter((i) => i.checkoutId === order.checkoutId),
       ["CAPTURED"],
@@ -222,6 +236,7 @@ export class OrdersService {
       ["APPROVED"],
     )?.status as FinancingIntentStatus | undefined;
     const refundStatus = refunds.find((r) => r.orderId === order.id)?.status as unknown as RefundStatus | undefined;
+    const fulfillmentStatus = fulfillments.find((f) => f.orderId === order.id)?.status as unknown as FulfillmentStatus | undefined;
 
     return {
       id: order.id,
@@ -231,6 +246,7 @@ export class OrdersService {
       paymentStatus: paymentStatus ?? null,
       financingStatus: financingStatus ?? null,
       refundStatus: refundStatus ?? null,
+      fulfillmentStatus: fulfillmentStatus ?? null,
       itemCount: order.items.reduce((sum, i) => sum + i.quantity, 0),
       totalAmount: order.totalAmount,
       currency: order.currency,

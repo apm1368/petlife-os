@@ -60,6 +60,26 @@ const envSchema = z.object({
   SNAPPAY_API_KEY: z.string().optional(),
   DIGIPAY_MERCHANT_ID: z.string().optional(),
   DIGIPAY_API_KEY: z.string().optional(),
+
+  /// Delivery & Logistics Core (Handoff 08) — same "sandbox is always safe,
+  /// production is validated" rule as PAYMENT_SANDBOX_MODE (see
+  /// validateShippingConfig below): no official AloPeyk/SnappBox merchant
+  /// credentials exist for this project (see README "Provider integration
+  /// status"), so SHIPPING_MODE=production is rejected unless every enabled
+  /// real provider's credentials are actually configured.
+  SHIPPING_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
+  DEV_SHIPPING_ENABLED: z.coerce.boolean().default(true),
+  ALOPEYK_ENABLED: z.coerce.boolean().default(true),
+  SNAPPBOX_ENABLED: z.coerce.boolean().default(true),
+  /// Optional and unused by the sandbox-stub adapters — present only so a
+  /// real integration has a place to read credentials from without a schema
+  /// change, and so startup validation can require them in "production" mode.
+  ALOPEYK_API_BASE_URL: z.string().optional(),
+  ALOPEYK_API_KEY: z.string().optional(),
+  ALOPEYK_WEBHOOK_SECRET: z.string().optional(),
+  SNAPPBOX_API_BASE_URL: z.string().optional(),
+  SNAPPBOX_API_KEY: z.string().optional(),
+  SNAPPBOX_WEBHOOK_SECRET: z.string().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -79,8 +99,23 @@ function validatePaymentConfig(env: AppEnv): void {
   }
 }
 
+/// Handoff 08 (spec section 41-42) — "production → silent fake shipment
+/// success" is explicitly forbidden, so a real provider enabled without its
+/// credentials configured fails startup instead of silently running
+/// DevShippingAdapter-equivalent behavior against real courier jobs.
+function validateShippingConfig(env: AppEnv): void {
+  if (env.SHIPPING_MODE !== "production") return;
+  const missing: string[] = [];
+  if (env.ALOPEYK_ENABLED && !(env.ALOPEYK_API_BASE_URL && env.ALOPEYK_API_KEY)) missing.push("ALOPEYK_API_BASE_URL/ALOPEYK_API_KEY");
+  if (env.SNAPPBOX_ENABLED && !(env.SNAPPBOX_API_BASE_URL && env.SNAPPBOX_API_KEY)) missing.push("SNAPPBOX_API_BASE_URL/SNAPPBOX_API_KEY");
+  if (missing.length > 0) {
+    throw new Error(`SHIPPING_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   const env = loadEnv(envSchema, source);
   validatePaymentConfig(env);
+  validateShippingConfig(env);
   return env;
 }

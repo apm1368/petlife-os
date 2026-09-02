@@ -24,6 +24,7 @@ import {
   PaymentAlreadyCompletedException,
   SafetyConflictException,
   SellerNotAvailableException,
+  ShippingQuoteExpiredException,
   ValidationApiException,
 } from "../../../common/errors/api-exception";
 import { HouseholdsService } from "../../households/households.service";
@@ -35,6 +36,7 @@ import { FinancingService } from "../financing/financing.service";
 import { FinancingProviderRegistry } from "../financing/financing-provider-registry.service";
 import { LedgerService } from "../ledger/ledger.service";
 import { RefundsService } from "../refunds/refunds.service";
+import { ShippingOrchestrator } from "../logistics/shipping-orchestrator.service";
 import { InventoryReservationService, RESERVATION_TTL_MINUTES } from "./inventory-reservation.service";
 import type { CreateCheckoutDto, PayCheckoutDto, UpdateCheckoutDto } from "./dto/checkout.dto";
 
@@ -88,6 +90,7 @@ export class CheckoutService {
     private readonly financingProviders: FinancingProviderRegistry,
     private readonly ledger: LedgerService,
     private readonly refunds: RefundsService,
+    private readonly logistics: ShippingOrchestrator,
     private readonly events: DomainEventsService,
   ) {}
 
@@ -197,9 +200,16 @@ export class CheckoutService {
     return checkout;
   }
 
+  /** Spec section 24: "if quote expires before payment: reject → refresh/reselect. Do not silently substitute another provider/price." — a checkout with a since-expired SELECTED quote must not proceed to payment on a now-stale amount. */
+  private async assertNoExpiredSelectedShippingQuotes(checkoutId: string): Promise<void> {
+    const expiredSelected = await this.prisma.shippingQuote.findFirst({ where: { checkoutId, status: "SELECTED", expiresAt: { lte: new Date() } } });
+    if (expiredSelected) throw new ShippingQuoteExpiredException({ checkoutId, quoteId: expiredSelected.id });
+  }
+
   async createPaymentIntent(userId: string, id: string, provider: PaymentProvider = PaymentProvider.DEV_SIMULATED, idempotencyKey?: string) {
     const checkout = await this.loadOwned(userId, id);
     if (checkout.expiresAt && checkout.expiresAt < new Date()) throw new CheckoutExpiredException({ checkoutId: id });
+    await this.assertNoExpiredSelectedShippingQuotes(id);
     if (checkout.status !== CheckoutStatus.READY_FOR_PAYMENT && checkout.status !== CheckoutStatus.PAYMENT_PENDING) {
       throw new ValidationApiException({ field: "status", reason: "An address is required before a payment intent can be created" });
     }
@@ -291,6 +301,8 @@ export class CheckoutService {
     const cartDto = await this.cart.getCart(checkout.userId);
     const lines = allLines(cartDto);
     const address = checkout.addressId ? await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } }) : null;
+    const selectedQuotes = await this.prisma.shippingQuote.findMany({ where: { checkoutId, status: "SELECTED" } });
+    const deliveryAmountBySeller = selectedQuotes.length > 0 ? new Map(selectedQuotes.map((q) => [q.sellerOrgId, q.priceIrr])) : undefined;
 
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -301,6 +313,13 @@ export class CheckoutService {
           lines,
           checkout.addressId,
           address ? { addressLine: address.addressLine, city: address.city, region: address.region, countryCode: address.countryCode, recipient: address.recipient, phone: address.phone } : null,
+          deliveryAmountBySeller,
+        );
+        const createdOrders = await tx.order.findMany({ where: { id: { in: orderIds } }, select: { id: true, sellerOrganizationId: true } });
+        await this.logistics.createFulfillmentsForOrders(
+          tx,
+          checkoutId,
+          createdOrders.map((o) => ({ id: o.id, sellerOrganizationId: o.sellerOrganizationId })),
         );
         await tx.checkout.update({ where: { id: checkoutId }, data: { status: CheckoutStatus.CONFIRMED } });
         await tx.cart.update({ where: { id: checkout.cartId }, data: { status: CartStatus.CONVERTED } });
@@ -343,6 +362,7 @@ export class CheckoutService {
   async createFinancingIntent(userId: string, id: string, provider: PaymentProvider): Promise<FinancingIntentDto> {
     const checkout = await this.loadOwned(userId, id);
     if (checkout.expiresAt && checkout.expiresAt < new Date()) throw new CheckoutExpiredException({ checkoutId: id });
+    await this.assertNoExpiredSelectedShippingQuotes(id);
     if (checkout.status !== CheckoutStatus.READY_FOR_PAYMENT && checkout.status !== CheckoutStatus.PAYMENT_PENDING) {
       throw new ValidationApiException({ field: "status", reason: "An address is required before a financing intent can be created" });
     }

@@ -80,6 +80,22 @@ export const DOMAIN_EVENT_TYPES = [
   "RefundFailed",
   "PaymentReconciled",
   "FinancialLedgerTransactionCreated",
+  // Delivery & Logistics Core (Handoff 08)
+  "ShippingQuoteCreated",
+  "ShippingQuoteSelected",
+  "FulfillmentCreated",
+  "FulfillmentReadyForPickup",
+  "FulfillmentFailed",
+  "FulfillmentCanceled",
+  "ShipmentCreated",
+  "ShipmentAssigned",
+  "ShipmentPickedUp",
+  "ShipmentInTransit",
+  "ShipmentOutForDelivery",
+  "ShipmentDelivered",
+  "ShipmentFailed",
+  "ShipmentCanceled",
+  "ShipmentReconciled",
 ] as const;
 
 /**

@@ -39,6 +39,7 @@ import { LedgerModule } from "./modules/commerce/ledger/ledger.module";
 import { RefundsModule } from "./modules/commerce/refunds/refunds.module";
 import { ReconciliationModule } from "./modules/commerce/reconciliation/reconciliation.module";
 import { OrdersModule } from "./modules/commerce/orders/orders.module";
+import { LogisticsModule } from "./modules/commerce/logistics/logistics.module";
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { OrdersModule } from "./modules/commerce/orders/orders.module";
     RefundsModule,
     ReconciliationModule,
     OrdersModule,
+    LogisticsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

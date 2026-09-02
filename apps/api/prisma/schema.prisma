@@ -602,6 +602,77 @@ enum LedgerEntryDirection {
 }
 
 // ---------------------------------------------------------------------------
+// Delivery & Logistics Core (Handoff 08)
+// ---------------------------------------------------------------------------
+
+/// Canonical shipping-provider registry (spec section 1) — mirrors
+/// PaymentProvider's shape exactly (DEV_SIMULATED-equivalent plus real
+/// provider slots). ALOPEYK/SNAPPBOX are adapter boundaries only this
+/// phase — see README "Provider integration status" for what is real vs
+/// stubbed.
+enum ShippingProvider {
+  DEV
+  ALOPEYK
+  SNAPPBOX
+}
+
+/// A single, fixed value this phase (spec section 4's "fulfillmentType"
+/// field) — kept as a real enum rather than a free string so a future
+/// second value (e.g. PICKUP_IN_STORE, LOCAL_DELIVERY) is a plain enum
+/// addition, not a schema redesign.
+enum FulfillmentType {
+  STANDARD_DELIVERY
+}
+
+/// Authoritative Fulfillment lifecycle (spec section 5) — enforced
+/// exclusively by FulfillmentTransitionService; no other code path may
+/// write `status` directly. Deliberately separate from OrderStatus and
+/// ShipmentStatus (spec section 1: "keep these states separate").
+enum FulfillmentStatus {
+  PENDING
+  AWAITING_SELLER_PREPARATION
+  READY_FOR_PICKUP
+  PICKUP_REQUESTED
+  PICKUP_ASSIGNED
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  CANCELED
+}
+
+/// Canonical, provider-normalized Shipment status (spec section 6) — the
+/// one vocabulary customer-facing APIs ever expose. Raw provider status
+/// strings are preserved separately (`Shipment.rawProviderStatus`) and
+/// never leak into this enum; an unrecognized raw status maps to UNKNOWN,
+/// which must never be interpreted as success (see
+/// normalizeShippingProviderStatus).
+enum ShipmentStatus {
+  CREATED
+  REQUESTED
+  ASSIGNED
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  CANCELED
+  UNKNOWN
+}
+
+/// Spec section 7. AVAILABLE quotes may be SELECTED (at most one per
+/// checkout+seller at a time — enforced in ShippingOrchestrator, not the
+/// database); a quote past `expiresAt` is treated as EXPIRED regardless of
+/// its stored status.
+enum ShippingQuoteStatus {
+  AVAILABLE
+  UNAVAILABLE
+  EXPIRED
+  SELECTED
+}
+
+// ---------------------------------------------------------------------------
 // Core identity
 // ---------------------------------------------------------------------------
 
@@ -1570,8 +1641,10 @@ model SellerOrganization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  offers SellerOffer[]
-  orders Order[]
+  offers         SellerOffer[]
+  orders         Order[]
+  fulfillments   Fulfillment[]
+  shippingQuotes ShippingQuote[]
 
   @@index([verificationStatus, status])
   @@map("seller_organizations")
@@ -1841,6 +1914,7 @@ model Checkout {
   orders           Order[]
   paymentIntents   PaymentIntent[]
   financingIntents FinancingIntent[]
+  shippingQuotes   ShippingQuote[]
 
   @@index([userId])
   @@index([cartId])
@@ -1911,8 +1985,10 @@ model Order {
   updatedAt   DateTime  @updatedAt
   confirmedAt DateTime?
 
-  items   OrderItem[]
-  refunds Refund[]
+  items          OrderItem[]
+  refunds        Refund[]
+  fulfillments   Fulfillment[]
+  shippingQuotes ShippingQuote[]
 
   @@unique([checkoutId, sellerOrganizationId])
   @@index([userId])
@@ -2224,6 +2300,192 @@ model LedgerEntry {
   @@index([ledgerTransactionId])
   @@index([ledgerAccountId])
   @@map("ledger_entries")
+}
+
+/// A persisted shipping-price offer for one seller's share of a Checkout
+/// (spec section 7) — scoped to `checkoutId` + `sellerOrgId` rather than
+/// `orderId` as the spec's own conceptual shape suggests, because Orders
+/// (per Handoff 06/07 "1 Checkout → N Orders") do not exist until payment
+/// is confirmed, while quotes must be requestable and selectable *before*
+/// payment so the checkout total can be server-recalculated first. `orderId`
+/// is still carried, nullable, and is backfilled once the matching seller's
+/// Order is created (CheckoutService.finalizeSuccessfulPayment) — after
+/// that point it is the durable link a Fulfillment/Shipment's price
+/// provenance can be traced through. See README "Checkout shipping flow".
+model ShippingQuote {
+  id          String             @id @default(uuid()) @db.Uuid
+  checkoutId  String             @db.Uuid
+  checkout    Checkout           @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  sellerOrgId String             @db.Uuid
+  seller      SellerOrganization @relation(fields: [sellerOrgId], references: [id], onDelete: Restrict)
+  orderId     String?            @db.Uuid
+  order       Order?             @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  provider     ShippingProvider
+  /// Provider-defined free-text label (e.g. "STANDARD", "EXPRESS") — same
+  /// "closed enum would churn too often" reasoning as ReconciliationLog.action.
+  serviceLevel String
+
+  /// Integer IRR — the sole authoritative shipping price once this quote is
+  /// SELECTED (spec section 24: "client cannot supply arbitrary shipping
+  /// amount").
+  priceIrr Int
+
+  estimatedPickupMinutes   Int?
+  estimatedDeliveryMinutes Int?
+
+  providerQuoteId String?
+
+  status    ShippingQuoteStatus @default(AVAILABLE)
+  expiresAt DateTime
+
+  /// Internal-only diagnostics (spec section 7) — never returned by a
+  /// customer-facing DTO.
+  providerPayloadSnapshot Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([checkoutId])
+  @@index([sellerOrgId])
+  @@index([orderId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("shipping_quotes")
+}
+
+/// One seller Order's physical-fulfillment lifecycle (spec sections 3-4).
+/// `sequenceNumber` (always 1 this phase) plus `@@unique([orderId,
+/// sequenceNumber])` is deliberately the same idempotency device as
+/// `Order.@@unique([checkoutId, sellerOrganizationId])`: it gives
+/// concurrency-safe "at most one Fulfillment per create-intent" for free
+/// (a P2002-catch reuses the existing row) while leaving the schema able to
+/// hold a *second* Fulfillment (sequenceNumber 2) per Order for a future
+/// split-shipment feature, without a migration (spec section 3: "the schema
+/// must not make split shipment impossible later").
+model Fulfillment {
+  id                 String             @id @default(uuid()) @db.Uuid
+  orderId            String             @db.Uuid
+  order              Order              @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sellerOrgId        String             @db.Uuid
+  sellerOrganization SellerOrganization @relation(fields: [sellerOrgId], references: [id], onDelete: Restrict)
+  sequenceNumber     Int                @default(1)
+
+  status          FulfillmentStatus @default(PENDING)
+  fulfillmentType FulfillmentType   @default(STANDARD_DELIVERY)
+
+  /// Snapshotted once, at Fulfillment-creation time (spec section 8) — a
+  /// later CustomerAddress edit, or a SellerOrganization detail change, must
+  /// never rewrite this row's history. Only the fields the source model
+  /// actually has are populated; everything else is explicitly absent
+  /// rather than fabricated (see README "Address snapshots").
+  pickupAddressSnapshot   Json
+  deliveryAddressSnapshot Json
+
+  readyAt           DateTime?
+  pickupRequestedAt DateTime?
+  pickupAssignedAt  DateTime?
+  pickedUpAt        DateTime?
+  outForDeliveryAt  DateTime?
+  deliveredAt       DateTime?
+
+  failedAt   DateTime?
+  canceledAt DateTime?
+
+  failureCode   String?
+  failureReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shipments Shipment[]
+
+  @@unique([orderId, sequenceNumber])
+  @@index([orderId])
+  @@index([sellerOrgId])
+  @@index([status])
+  @@map("fulfillments")
+}
+
+/// PET LIFE OS's canonical record of one external courier job (spec section
+/// 6). `sequenceNumber` (always 1 this phase) plus `@@unique([fulfillmentId,
+/// sequenceNumber])` is the concurrency guarantee spec section 21 requires
+/// verbatim: two concurrent `createShipment(fulfillmentId)` calls race to
+/// insert sequenceNumber 1, the loser's insert hits this constraint
+/// (P2002-catch, same pattern as Order/Fulfillment above) and reuses the
+/// winner's row instead of ever calling the provider a second time — while
+/// still leaving room for a genuine reshipment (sequenceNumber 2) later.
+model Shipment {
+  id             String      @id @default(uuid()) @db.Uuid
+  fulfillmentId  String      @db.Uuid
+  fulfillment    Fulfillment @relation(fields: [fulfillmentId], references: [id], onDelete: Restrict)
+  sequenceNumber Int         @default(1)
+
+  provider           ShippingProvider
+  providerShipmentId String?
+  providerQuoteId    String?
+  trackingCode       String?
+
+  status ShipmentStatus @default(CREATED)
+
+  pickupAddressSnapshot   Json
+  deliveryAddressSnapshot Json
+
+  estimatedPickupAt   DateTime?
+  estimatedDeliveryAt DateTime?
+  actualPickupAt      DateTime?
+  actualDeliveryAt    DateTime?
+
+  /// Preserved separately from the canonical `status` (spec section 6) —
+  /// diagnostics only, never returned to a customer-facing DTO.
+  rawProviderStatus       String?
+  providerPayloadSnapshot Json?
+
+  lastReconciledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events ShipmentEvent[]
+
+  @@unique([fulfillmentId, sequenceNumber])
+  @@index([fulfillmentId])
+  @@index([provider])
+  @@index([providerShipmentId])
+  @@index([status])
+  @@index([trackingCode])
+  @@map("shipments")
+}
+
+/// Append-oriented provider event history (spec section 17) — same
+/// `@@unique([provider, providerEventId])` duplicate-webhook guard as
+/// PaymentProviderEvent. When a provider has no stable event id, the
+/// ingesting code synthesizes one (documented in
+/// shipment-events.service.ts) rather than falling back to a random UUID,
+/// so the uniqueness constraint still does real deduplication work (spec:
+/// "do not use a random UUID alone for deduplication").
+model ShipmentEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  shipmentId String   @db.Uuid
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  provider        ShippingProvider
+  providerEventId String
+
+  eventType       String
+  providerStatus  String?
+  canonicalStatus ShipmentStatus
+
+  occurredAt DateTime
+  receivedAt DateTime @default(now())
+
+  /// Internal-only diagnostics — never returned by a customer-facing DTO.
+  payloadSnapshot Json?
+
+  createdAt DateTime @default(now())
+
+  @@unique([provider, providerEventId])
+  @@index([shipmentId])
+  @@map("shipment_events")
 }
 
 // ---------------------------------------------------------------------------

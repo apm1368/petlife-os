@@ -1392,6 +1392,7 @@ export interface OrderSummaryDto {
   paymentStatus: PaymentIntentStatus | null;
   financingStatus: FinancingIntentStatus | null;
   refundStatus: RefundStatus | null;
+  fulfillmentStatus: FulfillmentStatus | null;
   itemCount: number;
   totalAmount: number;
   currency: string;
@@ -1407,6 +1408,7 @@ export interface OrderDetailDto {
   paymentStatus: PaymentIntentStatus | null;
   financingStatus: FinancingIntentStatus | null;
   refunds: RefundDto[];
+  fulfillment: FulfillmentDto | null;
   subtotalAmount: number;
   deliveryAmount: number;
   discountAmount: number;
@@ -1474,4 +1476,139 @@ export interface CheckoutOpsDto {
   refunds: RefundDto[];
   providerEvents: PaymentProviderEventDto[];
   reconciliationLogs: ReconciliationLogDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Delivery & Logistics Core (Handoff 08)
+// ---------------------------------------------------------------------------
+
+/** Mirrors the backend's PaymentProvider-shaped registry (spec section 1) — DEV plus two real-provider adapter boundaries. See README "Provider integration status" for what is real vs. stubbed for ALOPEYK/SNAPPBOX. */
+export enum ShippingProvider {
+  DEV = "DEV",
+  ALOPEYK = "ALOPEYK",
+  SNAPPBOX = "SNAPPBOX",
+}
+
+export enum FulfillmentStatus {
+  PENDING = "PENDING",
+  AWAITING_SELLER_PREPARATION = "AWAITING_SELLER_PREPARATION",
+  READY_FOR_PICKUP = "READY_FOR_PICKUP",
+  PICKUP_REQUESTED = "PICKUP_REQUESTED",
+  PICKUP_ASSIGNED = "PICKUP_ASSIGNED",
+  PICKED_UP = "PICKED_UP",
+  IN_TRANSIT = "IN_TRANSIT",
+  OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY",
+  DELIVERED = "DELIVERED",
+  FAILED = "FAILED",
+  CANCELED = "CANCELED",
+}
+
+/** Canonical, provider-normalized status only (spec section 6) — a raw provider status string is never part of this vocabulary. UNKNOWN is explicit and must never be read as success. */
+export enum ShipmentStatus {
+  CREATED = "CREATED",
+  REQUESTED = "REQUESTED",
+  ASSIGNED = "ASSIGNED",
+  PICKED_UP = "PICKED_UP",
+  IN_TRANSIT = "IN_TRANSIT",
+  OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY",
+  DELIVERED = "DELIVERED",
+  FAILED = "FAILED",
+  CANCELED = "CANCELED",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum ShippingQuoteStatus {
+  AVAILABLE = "AVAILABLE",
+  UNAVAILABLE = "UNAVAILABLE",
+  EXPIRED = "EXPIRED",
+  SELECTED = "SELECTED",
+}
+
+/**
+ * A pickup/delivery address as it was snapshotted at Fulfillment/Shipment
+ * creation time (spec section 8) — deliberately not `CustomerAddressDto`
+ * (which requires a live `id`/`householdId`): a seller pickup location has
+ * neither, and a snapshot must keep reading the same way even after the
+ * source household address is edited or deleted. Any field the source data
+ * didn't have is `null`, never fabricated.
+ */
+export interface AddressSnapshotDto {
+  recipient: string | null;
+  phone: string | null;
+  addressLine: string | null;
+  city: string | null;
+  region: string | null;
+  countryCode: string | null;
+  instructions: string | null;
+}
+
+export interface ShippingQuoteDto {
+  id: string;
+  checkoutId: string;
+  sellerOrganizationId: string;
+  provider: ShippingProvider;
+  serviceLevel: string;
+  priceIrr: number;
+  estimatedPickupMinutes: number | null;
+  estimatedDeliveryMinutes: number | null;
+  status: ShippingQuoteStatus;
+  expiresAt: string;
+  createdAt: string;
+}
+
+/** One seller's shipping-option set for a Checkout (spec section 28: "shipping options per seller"). At most one quote in `quotes` has `status: SELECTED`. */
+export interface SellerShippingOptionsDto {
+  sellerOrganization: SellerOrganizationSummaryDto;
+  quotes: ShippingQuoteDto[];
+}
+
+export interface FulfillmentDto {
+  id: string;
+  orderId: string;
+  sellerOrganizationId: string;
+  status: FulfillmentStatus;
+  pickupAddress: AddressSnapshotDto;
+  deliveryAddress: AddressSnapshotDto;
+  readyAt: string | null;
+  pickupRequestedAt: string | null;
+  pickupAssignedAt: string | null;
+  pickedUpAt: string | null;
+  outForDeliveryAt: string | null;
+  deliveredAt: string | null;
+  failedAt: string | null;
+  canceledAt: string | null;
+  failureCode: string | null;
+  failureReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Customer-facing Shipment view — `providerShipmentId`/raw payload are deliberately absent (spec section 31: "never expose raw provider JSON/credentials"). */
+export interface ShipmentDto {
+  id: string;
+  fulfillmentId: string;
+  provider: ShippingProvider;
+  trackingCode: string | null;
+  status: ShipmentStatus;
+  estimatedPickupAt: string | null;
+  estimatedDeliveryAt: string | null;
+  actualPickupAt: string | null;
+  actualDeliveryAt: string | null;
+  lastReconciledAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** One row of the tracking timeline (spec section 32) — `reached: false` milestones are still shown (greyed out in the UI), never hidden, so progress reads as a fixed checklist rather than a live-only feed. */
+export interface ShipmentTrackingEventDto {
+  milestone: FulfillmentStatus | ShipmentStatus;
+  reached: boolean;
+  occurredAt: string | null;
+}
+
+export interface ShipmentTrackingDto {
+  fulfillment: FulfillmentDto | null;
+  shipment: ShipmentDto | null;
+  timeline: ShipmentTrackingEventDto[];
+  lastUpdatedAt: string | null;
 }
