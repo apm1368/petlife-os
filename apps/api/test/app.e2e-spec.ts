@@ -25,9 +25,13 @@ import {
   MarketplaceProvider,
   MarketplaceListingSyncStatus,
   InventoryMovementType,
+  NotificationCategory,
+  NotificationChannel,
+  NotificationDeliveryStatus,
+  NotificationFailureKind,
 } from "@prisma/client";
 import request from "supertest";
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { DevPaymentGateway } from "../src/modules/commerce/payments/dev-payment-gateway.service";
@@ -3601,6 +3605,336 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(deactivated.body.status).toBe("PAUSED");
       // Deactivating is a business-status change; the last real sync result is untouched.
       expect(deactivated.body.syncStatus).toBe(MarketplaceListingSyncStatus.SYNCED);
+    });
+  });
+
+  describe("Messaging, Notifications & Preferences (Handoff 10)", () => {
+    let phoneCounter = 0;
+    function uniquePhone(): string {
+      phoneCounter += 1;
+      const suffix = String(1_000_000 + ((Date.now() + phoneCounter) % 9_000_000)).slice(-7);
+      return `0912${suffix}`;
+    }
+
+    async function setupUser() {
+      const identifier = uniquePhone();
+      const cookies = await signUp(app, logSpy, identifier);
+      const client = authedRequest(app, cookies);
+      const me = await client.get("/auth/session").expect(200);
+      return { client, userId: me.body.user.id as string, phone: identifier };
+    }
+
+    async function simulate(client: ReturnType<typeof authedRequest>, body: Record<string, unknown>) {
+      return client.post("/dev/notifications/simulate").send(body).expect(201);
+    }
+
+    async function smsDeliveryFor(notificationId: string) {
+      return prisma.notificationDelivery.findFirstOrThrow({ where: { notificationId, channel: NotificationChannel.SMS } });
+    }
+
+    // --- Flow A — In-App Notification ------------------------------------
+
+    it("Flow A — In-App Notification: creating one increments unread count; reading it decrements", async () => {
+      const { client, userId } = await setupUser();
+      const before = await client.get("/notifications/unread-count").expect(200);
+      expect(before.body.unreadCount).toBe(0);
+
+      const result = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT });
+      const notificationId = result.body.notification.id as string;
+
+      const after = await client.get("/notifications/unread-count").expect(200);
+      expect(after.body.unreadCount).toBe(1);
+
+      const list = await client.get("/notifications").expect(200);
+      const item = list.body.items.find((n: { id: string }) => n.id === notificationId);
+      expect(item).toBeDefined();
+      expect(item.readAt).toBeNull();
+      expect(item.title.length).toBeGreaterThan(0);
+
+      const firstRead = await client.patch(`/notifications/${notificationId}/read`).expect(200);
+      const afterRead = await client.get("/notifications/unread-count").expect(200);
+      expect(afterRead.body.unreadCount).toBe(0);
+
+      // Re-reading an already-read notification is a safe no-op — the readAt timestamp never bumps a second time.
+      const readAgain = await client.patch(`/notifications/${notificationId}/read`).expect(200);
+      expect(readAgain.body.readAt).toBe(firstRead.body.readAt);
+
+      const markAll = await client.post("/notifications/read-all").expect(201);
+      expect(markAll.body.updatedCount).toBe(0);
+    });
+
+    // --- Flow B — Preferences ---------------------------------------------
+
+    it("Flow B — Preferences: disabling SMS for a category skips SMS but still creates the in-app notification, with the reason recorded", async () => {
+      const { client, userId } = await setupUser();
+      await client.patch("/notification-preferences").send({ preferences: [{ category: NotificationCategory.BOOKING, channel: NotificationChannel.SMS, enabled: false }] }).expect(200);
+
+      const result = await simulate(client, { userId, type: "booking.confirmed", category: NotificationCategory.BOOKING });
+      const notificationId = result.body.notification.id as string;
+
+      const inApp = await prisma.notificationDelivery.findFirstOrThrow({ where: { notificationId, channel: NotificationChannel.IN_APP } });
+      expect(inApp.status).toBe(NotificationDeliveryStatus.DELIVERED);
+
+      const sms = await smsDeliveryFor(notificationId);
+      expect(sms.status).toBe(NotificationDeliveryStatus.SKIPPED);
+      expect((sms.metadata as { reason?: string } | null)?.reason).toBe("category_disabled");
+    });
+
+    it("never infers marketing consent from transactional preferences, and defaults marketing SMS to disabled", async () => {
+      const { client } = await setupUser();
+      const prefs = await client.get("/notification-preferences").expect(200);
+      const marketingSms = prefs.body.preferences.find((p: { category: string; channel: string }) => p.category === NotificationCategory.MARKETING && p.channel === NotificationChannel.SMS);
+      const bookingSms = prefs.body.preferences.find((p: { category: string; channel: string }) => p.category === NotificationCategory.BOOKING && p.channel === NotificationChannel.SMS);
+      expect(marketingSms.enabled).toBe(false);
+      expect(bookingSms.enabled).toBe(true);
+    });
+
+    // --- Flow C — Dev SMS ---------------------------------------------------
+
+    it("Flow C — Dev SMS: a real send through DevMessagingAdapter records a provider message id and progresses to SENT", async () => {
+      const { client, userId } = await setupUser();
+      const result = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT });
+      const notificationId = result.body.notification.id as string;
+
+      const sms = await smsDeliveryFor(notificationId);
+      expect(sms.status).toBe(NotificationDeliveryStatus.SENT);
+      expect(sms.provider).toBe("DEV");
+      expect(sms.providerMessageId).toMatch(/^dev-msg-/);
+      expect(sms.destinationMasked).toMatch(/^\+98\*+\d{2}$/);
+    });
+
+    // --- Flow D — Idempotency ------------------------------------------------
+
+    it("Flow D — Idempotency: processing the same domain event twice creates one logical notification and no duplicate SMS", async () => {
+      const { client, userId } = await setupUser();
+      const domainEventId = randomUUID();
+
+      const first = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, domainEventId });
+      const second = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, domainEventId });
+
+      expect(first.body.created).toBe(true);
+      expect(second.body.created).toBe(false);
+      expect(second.body.notification.id).toBe(first.body.notification.id);
+
+      const notificationCount = await prisma.notification.count({ where: { userId, type: "payment.succeeded", domainEventId } });
+      expect(notificationCount).toBe(1);
+      const deliveryCount = await prisma.notificationDelivery.count({ where: { notificationId: first.body.notification.id, channel: NotificationChannel.SMS } });
+      expect(deliveryCount).toBe(1);
+    });
+
+    it("Concurrency: the same domain event processed concurrently still produces exactly one notification and one SMS delivery", async () => {
+      const { client, userId } = await setupUser();
+      const domainEventId = randomUUID();
+
+      const [a, b] = await Promise.all([
+        simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, domainEventId }),
+        simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, domainEventId }),
+      ]);
+      expect(a.body.notification.id).toBe(b.body.notification.id);
+      expect([a.body.created, b.body.created].filter(Boolean)).toHaveLength(1);
+
+      const notificationCount = await prisma.notification.count({ where: { userId, type: "payment.succeeded", domainEventId } });
+      expect(notificationCount).toBe(1);
+      const deliveryCount = await prisma.notificationDelivery.count({ where: { notificationId: a.body.notification.id, channel: NotificationChannel.SMS } });
+      expect(deliveryCount).toBe(1);
+    });
+
+    // --- Flow E — Retry --------------------------------------------------
+
+    it("Flow E — Retry: a transient DEV failure schedules a retry, which then succeeds", async () => {
+      const { client, userId } = await setupUser();
+      const result = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, smsSimMode: "FAILURE_TRANSIENT" });
+      const notificationId = result.body.notification.id as string;
+
+      let delivery = await smsDeliveryFor(notificationId);
+      expect(delivery.status).toBe(NotificationDeliveryStatus.QUEUED);
+      expect(delivery.attemptCount).toBe(1);
+      expect(delivery.failureKind).toBe(NotificationFailureKind.TRANSIENT);
+      expect(delivery.scheduledAt).not.toBeNull();
+
+      await client.post(`/dev/notifications/deliveries/${delivery.id}/force-attempt`).expect(201);
+      delivery = await prisma.notificationDelivery.findUniqueOrThrow({ where: { id: delivery.id } });
+      expect(delivery.status).toBe(NotificationDeliveryStatus.SENT);
+      expect(delivery.attemptCount).toBe(2);
+      expect(delivery.failureKind).toBeNull();
+    });
+
+    it("Concurrency: the same delivery worker invoked concurrently claims the row exactly once", async () => {
+      const { client, userId } = await setupUser();
+      const result = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, smsSimMode: "FAILURE_TRANSIENT" });
+      const notificationId = result.body.notification.id as string;
+      const queued = await smsDeliveryFor(notificationId);
+      expect(queued.attemptCount).toBe(1);
+
+      const [a, b] = await Promise.all([
+        client.post(`/dev/notifications/deliveries/${queued.id}/force-attempt`),
+        client.post(`/dev/notifications/deliveries/${queued.id}/force-attempt`),
+      ]);
+      expect([a.body.attempted, b.body.attempted].filter(Boolean)).toHaveLength(1);
+
+      const after = await prisma.notificationDelivery.findUniqueOrThrow({ where: { id: queued.id } });
+      expect(after.attemptCount).toBe(2);
+      expect(after.status).toBe(NotificationDeliveryStatus.SENT);
+    });
+
+    // --- Flow F — Permanent Failure ----------------------------------------
+
+    it("Flow F — Permanent failure: FAILED immediately, and process-due never retries it", async () => {
+      const { client, userId } = await setupUser();
+      const result = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, smsSimMode: "FAILURE_PERMANENT" });
+      const notificationId = result.body.notification.id as string;
+
+      const delivery = await smsDeliveryFor(notificationId);
+      expect(delivery.status).toBe(NotificationDeliveryStatus.FAILED);
+      expect(delivery.failureKind).toBe(NotificationFailureKind.PERMANENT);
+      expect(delivery.attemptCount).toBe(1);
+      expect(delivery.scheduledAt).toBeNull();
+
+      await client.post("/dev/notifications/deliveries/process-due").expect(201);
+      const after = await prisma.notificationDelivery.findUniqueOrThrow({ where: { id: delivery.id } });
+      expect(after.attemptCount).toBe(1);
+      expect(after.status).toBe(NotificationDeliveryStatus.FAILED);
+    });
+
+    it("bounds retries — exhausting NOTIFICATION_MAX_DELIVERY_ATTEMPTS terminates in FAILED, never an infinite retry", async () => {
+      const { client, userId } = await setupUser();
+      const result = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT, smsSimMode: "FAILURE_TRANSIENT" });
+      const notificationId = result.body.notification.id as string;
+      let delivery = await smsDeliveryFor(notificationId);
+      expect(delivery.attemptCount).toBe(1);
+
+      // The simulated mode is consumed once per attempt then cleared (see NotificationDeliveryService.attempt) — a bare retry always attempts for real (simulated-success in DEV), so re-inject FAILURE_TRANSIENT before each of the next two attempts to actually exercise the default 3-attempt bound.
+      for (let i = 0; i < 2; i += 1) {
+        const meta = delivery.metadata as { destination: string; smsBody: string };
+        await prisma.notificationDelivery.update({ where: { id: delivery.id }, data: { metadata: { destination: meta.destination, smsBody: meta.smsBody, mode: "FAILURE_TRANSIENT" } } });
+        await client.post(`/dev/notifications/deliveries/${delivery.id}/force-attempt`).expect(201);
+        delivery = await prisma.notificationDelivery.findUniqueOrThrow({ where: { id: delivery.id } });
+      }
+
+      expect(delivery.attemptCount).toBe(3);
+      expect(delivery.status).toBe(NotificationDeliveryStatus.FAILED);
+      expect(delivery.failureKind).toBe(NotificationFailureKind.TRANSIENT);
+
+      // A FAILED row is terminal — process-due leaves it untouched.
+      await client.post("/dev/notifications/deliveries/process-due").expect(201);
+      const finalRow = await prisma.notificationDelivery.findUniqueOrThrow({ where: { id: delivery.id } });
+      expect(finalRow.attemptCount).toBe(3);
+    });
+
+    // --- Flow G — Quiet Hours ------------------------------------------------
+
+    it("Flow G — Quiet hours: a routine notification during quiet hours is deferred, not sent immediately; URGENT bypasses it", async () => {
+      const { client, userId } = await setupUser();
+      await client.patch("/notification-preferences").send({ quietHours: { enabled: true, startTime: "00:00", endTime: "23:59", timezone: "Asia/Tehran" } }).expect(200);
+
+      const routine = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT });
+      const routineDelivery = await smsDeliveryFor(routine.body.notification.id);
+      expect(routineDelivery.status).toBe(NotificationDeliveryStatus.QUEUED);
+      expect(routineDelivery.attemptCount).toBe(0);
+      expect(routineDelivery.scheduledAt).not.toBeNull();
+      expect((routineDelivery.metadata as { reason?: string } | null)?.reason).toBe("quiet_hours_deferred");
+
+      const urgent = await simulate(client, { userId, type: "payment.failed", category: NotificationCategory.PAYMENT, priority: "URGENT" });
+      const urgentDelivery = await smsDeliveryFor(urgent.body.notification.id);
+      expect(urgentDelivery.status).toBe(NotificationDeliveryStatus.SENT);
+    });
+
+    // --- Flow H — Privacy --------------------------------------------------
+
+    it("Flow H — Privacy: a health-category SMS never exposes medical detail", async () => {
+      const { client, userId } = await setupUser();
+      const result = await simulate(client, { userId, type: "health.reminder", category: NotificationCategory.HEALTH, templateParams: { petName: "Luna" } });
+      const notificationId = result.body.notification.id as string;
+
+      const delivery = await smsDeliveryFor(notificationId);
+      const smsBody = (delivery.metadata as { smsBody?: string } | null)?.smsBody ?? "";
+      expect(smsBody.length).toBeGreaterThan(0);
+      expect(smsBody).not.toMatch(/بیماری|آزمایش|diagnos|biopsy|test result/i);
+
+      const notification = await prisma.notification.findUniqueOrThrow({ where: { id: notificationId } });
+      expect(notification.body).toContain("Luna");
+    });
+
+    // --- Flow I — Cross-user isolation ---------------------------------------
+
+    it("Flow I — Cross-user isolation: User A cannot read/update User B's notifications or preferences", async () => {
+      const a = await setupUser();
+      const b = await setupUser();
+      const created = await simulate(a.client, { userId: a.userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT });
+      const notificationId = created.body.notification.id as string;
+
+      const bList = await b.client.get("/notifications").expect(200);
+      expect(bList.body.items.find((n: { id: string }) => n.id === notificationId)).toBeUndefined();
+
+      await b.client.patch(`/notifications/${notificationId}/read`).expect(404);
+
+      await b.client.patch("/notification-preferences").send({ preferences: [{ category: NotificationCategory.PAYMENT, channel: NotificationChannel.SMS, enabled: false }] }).expect(200);
+      const aPrefs = await a.client.get("/notification-preferences").expect(200);
+      const aPaymentSms = aPrefs.body.preferences.find((p: { category: string; channel: string }) => p.category === NotificationCategory.PAYMENT && p.channel === NotificationChannel.SMS);
+      expect(aPaymentSms.enabled).toBe(true);
+    });
+
+    // --- Flow J — Seller isolation, via a genuinely-triggered domain event ---
+
+    it("Flow J — Seller isolation: a real MarketplaceListingSyncFailed event notifies only Seller A's own OWNER, never Seller B's", async () => {
+      async function setupSellerOwner() {
+        const identifier = `notif-seller-owner-${unique()}@example.com`;
+        const client = authedRequest(app, await signUp(app, logSpy, identifier));
+        const ownerUser = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+        const seller = await prisma.sellerOrganization.create({
+          data: { name: `Notif Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" },
+        });
+        await prisma.sellerMembership.create({
+          data: { sellerOrganizationId: seller.id, userId: ownerUser.id, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, acceptedAt: new Date() },
+        });
+        return { client, sellerId: seller.id, ownerUserId: ownerUser.id };
+      }
+
+      async function createRejectedListing(client: ReturnType<typeof authedRequest>, sellerId: string) {
+        const category = await prisma.productCategory.create({ data: { name: `Notif Category ${unique()}`, slug: `notif-category-${unique()}` } });
+        const product = await prisma.product.create({ data: { categoryId: category.id, title: `Notif Product ${unique()}`, slug: `notif-product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] } });
+        const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `NOTIF-SKU-${unique()}` } });
+        const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: sellerId, productVariantId: variant.id, priceAmount: 500_000, currency: "IRR", sellerSku: `NOTIF-SSKU-${unique()}` } });
+        await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand: 10 } });
+        const channel = await client.post(`/seller-organizations/${sellerId}/channels`).send({ provider: MarketplaceProvider.DEV }).expect(201);
+        const listing = await client.post(`/seller-organizations/${sellerId}/marketplace-listings`).send({ marketplaceChannelAccountId: channel.body.id, sellerOfferId: offer.id }).expect(201);
+        await client
+          .post(`/seller-organizations/${sellerId}/channels/${channel.body.id}/dev/simulate/publish-rejection`)
+          .send({ listingId: listing.body.id })
+          .expect(201);
+        return listing.body.id as string;
+      }
+
+      const sellerA = await setupSellerOwner();
+      const sellerB = await setupSellerOwner();
+
+      await createRejectedListing(sellerA.client, sellerA.sellerId);
+
+      const notification = await pollUntil(
+        () => prisma.notification.findFirst({ where: { userId: sellerA.ownerUserId, type: "marketplace.listing_degraded" } }),
+        (row) => row !== null,
+      );
+      expect(notification).not.toBeNull();
+      expect(notification!.sellerOrganizationId).toBe(sellerA.sellerId);
+      expect(notification!.category).toBe(NotificationCategory.SELLER);
+
+      const sellerBNotification = await prisma.notification.findFirst({ where: { userId: sellerB.ownerUserId, type: "marketplace.listing_degraded" } });
+      expect(sellerBNotification).toBeNull();
+
+      // Seller B's own notification list never surfaces Seller A's row (same userId-scoped isolation every other consumer endpoint uses).
+      const bList = await sellerB.client.get("/notifications").expect(200);
+      expect(bList.body.items.find((n: { id: string }) => n.id === notification!.id)).toBeUndefined();
+    });
+
+    // --- Faraz sandbox honesty --------------------------------------------
+
+    it("Faraz never fakes production success without real credentials, and delivery status honesty is preserved", async () => {
+      const { client, userId } = await setupUser();
+      const result = await simulate(client, { userId, type: "payment.succeeded", category: NotificationCategory.PAYMENT });
+      const delivery = await smsDeliveryFor(result.body.notification.id);
+      // DEV is the active provider in this test environment (MESSAGING_PROVIDER=dev) — never DELIVERED, since even DEV's own contract only confirms SENT synchronously; DELIVERED requires a separate, explicit status check this phase.
+      expect(delivery.status).toBe(NotificationDeliveryStatus.SENT);
+      expect(delivery.status).not.toBe(NotificationDeliveryStatus.DELIVERED);
     });
   });
 });

@@ -1955,3 +1955,118 @@ export interface SellerDashboardDto {
   gmvTodayAmount: number;
   recentOrders: SellerOrderSummaryDto[];
 }
+
+// ---------------------------------------------------------------------------
+// Messaging, Notifications & Preferences (Handoff 10)
+// ---------------------------------------------------------------------------
+
+export enum NotificationChannel {
+  IN_APP = "IN_APP",
+  SMS = "SMS",
+  EMAIL = "EMAIL",
+  PUSH = "PUSH",
+}
+
+export enum NotificationCategory {
+  SECURITY = "SECURITY",
+  HEALTH = "HEALTH",
+  BOOKING = "BOOKING",
+  SERVICE = "SERVICE",
+  PAYMENT = "PAYMENT",
+  COMMERCE = "COMMERCE",
+  DELIVERY = "DELIVERY",
+  SELLER = "SELLER",
+  MARKETPLACE = "MARKETPLACE",
+  HOUSEHOLD = "HOUSEHOLD",
+  PET_ACCESS = "PET_ACCESS",
+  SYSTEM = "SYSTEM",
+  MARKETING = "MARKETING",
+}
+
+export enum NotificationPriority {
+  LOW = "LOW",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
+}
+
+export enum NotificationDeliveryStatus {
+  PENDING = "PENDING",
+  QUEUED = "QUEUED",
+  SENDING = "SENDING",
+  SENT = "SENT",
+  DELIVERED = "DELIVERED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+  SKIPPED = "SKIPPED",
+}
+
+export enum NotificationFailureKind {
+  TRANSIENT = "TRANSIENT",
+  PERMANENT = "PERMANENT",
+}
+
+export enum MessagingProvider {
+  DEV = "DEV",
+  FARAZ = "FARAZ",
+}
+
+export interface NotificationDeliveryDto {
+  id: string;
+  channel: NotificationChannel;
+  provider: MessagingProvider | null;
+  status: NotificationDeliveryStatus;
+  destinationMasked: string | null;
+  attemptCount: number;
+  failureKind: NotificationFailureKind | null;
+  failureCode: string | null;
+  failureMessage: string | null;
+  deliveredAt: string | null;
+  failedAt: string | null;
+}
+
+/** A single in-app-visible notification, always addressed to exactly one recipient user (spec: no bare broadcast row — fan-out happens at creation time, one row per recipient). */
+export interface NotificationDto {
+  id: string;
+  type: string;
+  category: NotificationCategory;
+  priority: NotificationPriority;
+  title: string;
+  body: string;
+  locale: Locale;
+  deepLink: string | null;
+  entityType: string | null;
+  entityId: string | null;
+  createdAt: string;
+  readAt: string | null;
+  dismissedAt: string | null;
+  deliveries: NotificationDeliveryDto[];
+}
+
+export interface UnreadCountDto {
+  unreadCount: number;
+}
+
+/** One row of the category x channel opt-out grid — absence of a row for a (category, channel) pair means "enabled", so `enabled` here always reflects the resolved value (default true), never a raw nullable override. */
+export interface NotificationPreferenceDto {
+  category: NotificationCategory;
+  channel: NotificationChannel;
+  enabled: boolean;
+}
+
+export interface NotificationQuietHoursDto {
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+}
+
+export interface NotificationPreferencesDto {
+  preferences: NotificationPreferenceDto[];
+  quietHours: NotificationQuietHoursDto;
+}
+
+export interface UpdateNotificationPreferencesDto {
+  preferences?: Array<{ category: NotificationCategory; channel: NotificationChannel; enabled: boolean }>;
+  quietHours?: { enabled: boolean; startTime: string; endTime: string; timezone: string };
+}

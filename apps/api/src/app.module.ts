@@ -42,6 +42,7 @@ import { ReconciliationModule } from "./modules/commerce/reconciliation/reconcil
 import { OrdersModule } from "./modules/commerce/orders/orders.module";
 import { LogisticsModule } from "./modules/commerce/logistics/logistics.module";
 import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.module";
+import { NotificationsModule } from "./modules/notifications/notifications.module";
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.mo
     OrdersModule,
     LogisticsModule,
     MarketplaceModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

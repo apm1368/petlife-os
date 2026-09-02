@@ -586,3 +586,49 @@ export class MarketplaceWebhookInvalidException extends ApiException {
     super("MARKETPLACE_WEBHOOK_INVALID", "The marketplace webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
   }
 }
+
+/** Handoff 10 — a notification not found, or found but not owned by the caller (never a silent 404 that also leaks existence, but never a different notification's content either). */
+export class NotificationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("NOTIFICATION_NOT_FOUND", "Notification not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class MessagingProviderUnavailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MESSAGING_PROVIDER_UNAVAILABLE", "This messaging provider is not available.", HttpStatus.BAD_GATEWAY, details);
+  }
+}
+
+export class MessagingProviderDisabledException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MESSAGING_PROVIDER_DISABLED", "This messaging provider is disabled.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** Faraz (or any future real SMS provider) rejected the send outright — mirrors PaymentAuthorizationFailedException's own "the attempt itself failed, not a transport error" distinction. */
+export class MessagingSendFailedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MESSAGING_SEND_FAILED", "The message could not be sent.", HttpStatus.BAD_GATEWAY, details);
+  }
+}
+
+/** Thrown by a real (non-DEV) adapter's production-path methods when MESSAGING_SANDBOX_MODE=production is set without real credentials configured — never a silent fallback to simulation. */
+export class MessagingProviderNotConfiguredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MESSAGING_PROVIDER_NOT_CONFIGURED", "This messaging provider is not configured for production use.", HttpStatus.SERVICE_UNAVAILABLE, details);
+  }
+}
+
+export class InvalidPhoneNumberException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_PHONE_NUMBER", "This phone number could not be normalized.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** Mirrors ShippingWebhookInvalidException/MarketplaceWebhookInvalidException — never mutates state on an unverified payload. */
+export class MessagingWebhookInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MESSAGING_WEBHOOK_INVALID", "The messaging webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
+  }
+}

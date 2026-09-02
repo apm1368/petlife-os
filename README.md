@@ -2354,6 +2354,294 @@ MARKETPLACE_ORDER_INGESTION_FAILED   409  order ingestion failed after claiming 
 MARKETPLACE_WEBHOOK_INVALID          400  reserved for a future real webhook signature check — unused while ingestion is dev-simulate-only
 ```
 
+## Messaging, Notifications & Preferences (Handoff 10)
+
+Schema: `prisma/migrations/20260902170000_notifications_messaging_preferences`
+(purely additive; hand-appended `CHECK` constraints Prisma's DSL can't
+express: non-negative `NotificationDelivery.attemptCount`, and a regex
+`CHECK` on `NotificationQuietHours.startTime`/`endTime` enforcing a strict
+24h `HH:mm` string at the database layer). New enums:
+`NotificationChannel` (`IN_APP`/`SMS`/`EMAIL`/`PUSH` — the latter two
+defined-but-unreachable, see below), `NotificationCategory` (13 values
+including the deliberately-separate `MARKETING`), `NotificationPriority`,
+`NotificationDeliveryStatus`, `NotificationFailureKind`,
+`MessagingProvider` (`DEV`/`FARAZ`). New models: `Notification`,
+`NotificationDelivery`, `NotificationPreference`,
+`NotificationQuietHours`. `Notification.locale` reuses the existing
+`Locale` enum rather than a raw string.
+
+### Pipeline: `Domain Event → Notification Orchestrator → Preferences/Quiet Hours → Template → Channel Delivery`
+
+`NotificationOrchestratorService.notify()` is the single write path every
+caller (a domain-event listener, or the dev-simulate controller) goes
+through — no caller ever touches `notification`/`notificationDelivery`
+tables directly. Per call: resolve the recipient's locale, render the
+template (see below), claim the `Notification` row (idempotent — see
+below), create its `IN_APP` delivery as `DELIVERED` immediately (an
+in-app "delivery" has no external transport; the row's existence *is* the
+delivery), then — only if the resolved template has an `smsBody` variant
+for this locale — evaluate SMS eligibility: a missing/invalid phone
+number or a disabled category/channel preference produces a `SKIPPED`
+delivery row with the reason recorded in `metadata.reason`, never a
+silent no-op; quiet hours (see below) either defers it (`QUEUED` +
+`scheduledAt`) or it's attempted immediately via
+`NotificationDeliveryService.attempt()`.
+
+### Idempotency — the same `DomainEvent.id` threading through `EventEmitter2`
+
+`DomainEventsService.publish()` gained one additive, backward-compatible
+change this handoff: `this.emitter.emit(type, payload, event.id)` now
+passes the just-persisted `DomainEvent.id` as a second positional
+argument. Every pre-existing `@OnEvent` listener (e.g.
+`PaymentEventsListener`) declares only one parameter and simply never
+sees it — EventEmitter2 forwards extra `emit()` arguments positionally,
+and JavaScript ignores extra call arguments a function doesn't declare.
+`NotificationEventsListener`'s own handlers are the only ones that
+declare the second `domainEventId` parameter, and pass it straight
+through to `notify()`. `Notification`'s own
+`@@unique([domainEventId, type, userId])` is the actual idempotency
+anchor (spec's suggested "eventId + notificationType + recipient", with
+`channel` scoping living one level down on `NotificationDelivery`'s own
+`@@unique([notificationId, channel])`): the row is claimed via a plain,
+non-transactional `create()` first — the exact two-phase "claim outside
+any transaction, catching P2002 cleanly" pattern
+`MarketplaceOrderIngestionService` established in Handoff 09 — and a
+duplicate claim returns the existing row with `created: false`, skipping
+delivery fan-out entirely (never a second SMS). Postgres treats every
+`NULL` `domainEventId` as distinct, so dev/manually-created notifications
+(no originating event) never collide with each other.
+
+### Templates — code-defined, not the `NotificationTemplate` table
+
+Every other piece of transactional copy in this codebase already lives
+in source (next-intl's `fa.json`/`en.json`), never a database; SMS has no
+frontend to render it, so `notification-templates.ts` is the backend's
+own equivalent — a plain `Record<type, Record<Locale, {title, body,
+smsBody?}>>` with `{{param}}` interpolation. Resolution is explicit
+(spec: "do not silently return broken template content"): exact
+`locale` → `"en"` → throw a real (500-class) error, since a missing
+template is a programmer mistake, not a user-facing 4xx. The
+`NotificationTemplate` Prisma model exists in the schema for a future
+content-managed system — swapping the resolver's lookup order for a
+DB-backed one needs no schema change — but nothing in H10 persists to it.
+**A template with no `smsBody` variant is IN_APP-only by construction**
+— this is the actual privacy mechanism (see Health privacy below), not a
+runtime content filter.
+
+### Preferences — a resolved-default grid, security non-suppressible, marketing opt-in-by-default
+
+`NotificationPreference` is a sparse override table: no row for a given
+(user, category, channel) means "enabled", so a brand-new user needs no
+seed rows for correct default behavior — **except `MARKETING`**, whose
+default comes from `CountryConfig.marketingDefaultEnabled` (`false` for
+Iran) rather than the general default, so marketing consent is never
+silently inferred from the absence of an explicit transactional
+preference row. `SECURITY` is in `NON_SUPPRESSIBLE_CATEGORIES` and never
+even consults this table — `NotificationOrchestratorService` doesn't
+special-case it either; the preference *service* itself
+(`NotificationPreferenceService.resolve()`) returns `true`
+unconditionally for it before ever querying. Quiet hours are
+deliberately their own singleton-per-user table
+(`NotificationQuietHours`), not fields smeared across every
+category/channel preference row — a normalization decision, not a
+literal reading of the spec's flat suggested-fields list.
+
+### Quiet hours — pure clock/timezone semantics, no Persian-calendar coupling
+
+`notification-quiet-hours.util.ts` is built entirely on ICU
+(`Intl.DateTimeFormat`), matching how Jalali/Gregorian dual display is
+done everywhere else in this codebase — no new date library.
+`isWithinQuietHours()` handles the overnight-wrap case (22:00→08:00)
+via local-clock-minutes comparison. `nextQuietHoursEndUtc()` computes the
+next UTC instant at which the local clock reads the configured end time
+by adding the delta between current and target local minutes to the
+current UTC instant — correct as long as no DST transition falls in
+between; Iran has had no DST since 2022, so this is exact for
+`CountryConfig`'s only real entry today, but a future country with an
+active DST rule would need a real timezone-offset lookup here instead
+(documented as a known limitation, not silently assumed to still work).
+`NotificationPriority.URGENT` is the one explicit "bypass quiet hours"
+signal a caller must deliberately choose — never inferred from category.
+
+### `MessagingGateway` — provider-neutral, mirroring `PaymentGateway`/`ShippingGateway`/`MarketplaceChannelAdapter` exactly
+
+One interface (`sendSms`/`getMessageStatus`/`verifyWebhook`, plus
+`readonly provider`/`readonly capabilities`) every provider implements;
+`MESSAGING_PROVIDER_CAPABILITIES` is the one static map consulted
+everywhere instead of branching on provider identity.
+`MessagingProviderRegistry` resolves `MessagingProvider → adapter
+instance` and gates on the matching `*_ENABLED` env flag, exactly like
+every prior provider registry in this codebase. Domain-event listeners
+and the notification services never reference a Faraz-specific concept
+(endpoint shape, auth header, status vocabulary) outside
+`faraz-sms.adapter.ts` itself.
+
+- **`DevMessagingAdapter`** is fully functional — deterministic
+  success/transient-failure/permanent-failure simulation
+  (`messaging-simulation.util.ts`, no randomness in outcome, only opaque
+  ids use `randomUUID()`), a simulated `DELIVERED` follow-up state for
+  test determinism, and a dev-only webhook verifier.
+- **`FarazSmsAdapter`** carries the same "PROVIDER DOCUMENTATION SAFETY"
+  doc-comment discipline as every H07-H09 adapter — no official Faraz SMS
+  merchant/API documentation or credentials were available to this
+  project, so it does not call any real Faraz endpoint, invent a
+  request/response shape, or guess an auth header. `sendSms` delegates to
+  the same simulation engine `DevMessagingAdapter` uses when not
+  production-configured; `isProductionConfigured()` requires both
+  `MESSAGING_SANDBOX_MODE=production` and real `FARAZ_SMS_BASE_URL`/
+  `FARAZ_SMS_API_KEY` — without both, every method returns an explicit
+  `PROVIDER_NOT_IMPLEMENTED` failure rather than silently faking success.
+  `MESSAGING_PROVIDER_CAPABILITIES.FARAZ` marks `supportsDeliveryStatus`
+  and `supportsWebhook` as `false` — not because Faraz definitely lacks
+  them, but because this project could not confirm either, so the honest
+  default is "unconfirmed capability is treated as absent."
+
+### Delivery state machine — `SENT` is never conflated with `DELIVERED`
+
+`PENDING → QUEUED → SENDING → SENT/FAILED/CANCELLED/SKIPPED`, with
+`DELIVERED` reachable only through an explicit, separate
+delivery-confirmation step (never automatically inferred from a
+successful `sendSms` call). `NotificationDeliveryService.attempt()` is
+the one place a non-`IN_APP` delivery is ever attempted — it claims the
+row atomically (`updateMany` on `status IN (PENDING, QUEUED)` before
+calling any provider) exactly like `ShippingOrchestrator.requestCourier`/
+`MarketplaceOrderIngestionService`'s own claim-before-call discipline, so
+two concurrent callers for the same delivery id can never both reach the
+gateway (proven by a dedicated concurrency e2e test — see below). A
+dev/test-only simulated outcome (`smsSimMode`) is consumed exactly once
+per attempt and always cleared from `metadata` afterward regardless of
+outcome, so a bare retry (no test intervention) always attempts for real
+(simulated-success in DEV) — a test wanting a second forced failure must
+explicitly re-set `metadata.mode` before calling `attempt()` again.
+
+### Retry policy — bounded, backoff, transient vs. permanent
+
+A `TRANSIENT` failure is retried with exponential backoff (30s, 60s,
+120s, capped at 15 minutes) up to `NOTIFICATION_MAX_DELIVERY_ATTEMPTS`
+(default 3) total attempts, then terminates in `FAILED` — never an
+infinite retry. A `PERMANENT` failure (invalid destination, provider
+rejection) goes straight to `FAILED` on the very first attempt, no retry
+scheduled at all. `NotificationDeliveryWorkerService` is the smallest
+reliable mechanism compatible with this modular monolith (spec: "do not
+introduce Kafka/RabbitMQ just for H10") — a plain `setInterval` poller,
+not a new dependency (`@nestjs/schedule` isn't installed), picking up due
+`PENDING`/`QUEUED` rows (a quiet-hours-deferred send whose `scheduledAt`
+has arrived, or a transiently-failed send past its backoff window). It
+never runs under `NODE_ENV=test`; tests call `processDueDeliveries()`
+directly for determinism, the same "dev/test drives the real pipeline
+synchronously" convention every DEV adapter's simulate route already
+uses. **Processing guarantee**: at-least-once attempt per due row per
+tick — the atomic claim in `attempt()` is what actually prevents a
+duplicate send, not the poller's own scheduling.
+
+### Privacy — SMS never carries health/medical detail by construction
+
+Every template's `smsBody` is written independently from its `body`
+(the in-app text), and a template with no `smsBody` at all is
+categorically IN_APP-only — there is no runtime content filter deciding
+"is this too sensitive for SMS," the decision is made once, in the
+template registry, at the type level. `health.reminder`'s `smsBody`
+("You have a care reminder for {{petName}}") deliberately never mentions
+a diagnosis, test result, or condition, mirroring the spec's own good/bad
+example pairing exactly. Destinations are masked
+(`+98********12`, via `common/phone/phone-normalizer.ts`'s `maskPhone()`)
+in every persisted `destinationMasked` field — the real E.164 number
+lives only transiently in a delivery's `metadata.destination` for the
+worker to read, never duplicated into a display-safe column, and is
+never returned by any API response.
+
+### Seller notifications — fan-out per recipient, isolation by construction
+
+A `SELLER`/`MARKETPLACE`-category notification (e.g.
+`MarketplaceListingSyncFailed`, `MarketplaceInventoryMismatchDetected`)
+fans out to every `ACTIVE` `OWNER`/`ADMIN` `SellerMembership` of the
+affected organization — one `Notification` row per recipient user, each
+carrying that seller's `sellerOrganizationId` for filtering/correlation.
+There is no separate seller-specific authorization axis for reading
+these: since every `Notification` always belongs to exactly one
+`userId`, the existing `GET /notifications` isolation (always scoped to
+`req.user.id`) already guarantees Seller A's own OWNER never sees Seller
+B's rows — proven end-to-end by triggering a real (not dev-simulated)
+`MarketplaceListingSyncFailed` event via the existing publish-rejection
+route and confirming only the correct seller's OWNER receives it.
+
+### Phone normalization — one reusable path, Iran-first via `CountryConfig`
+
+`common/phone/phone-normalizer.ts`'s `normalizeIranianPhone()` is the one
+place `09.../+98.../0098...` variants are canonicalized to E.164 —
+returns `null` (never a coerced-into-looking-valid number) for anything
+that isn't a genuine Iranian mobile number. `auth/identifier.util.ts` is
+deliberately untouched (it only needs to distinguish email from phone for
+OTP delivery, never a canonical form) — this is a standalone utility for
+messaging's own needs. `common/country/country-config.ts` is the first
+`CountryConfig` in this codebase: a plain lookup keyed by ISO country
+code (`IR` the only real entry today) bundling `smsAvailable`,
+`marketingDefaultEnabled`, `defaultTimezone`, and `normalizePhone` behind
+one interface — a future second country extends the map and the
+dispatch, never the shape callers depend on.
+
+### Local auth remains fully Faraz-independent
+
+`OtpProvider`/`DevOtpProvider` (Handoff 01) are completely untouched —
+`AuthService` never imports anything from the notifications module, and
+`MessagingGateway` was deliberately never wired into the OTP send path
+this phase (the spec permitted but did not require this). Local
+development and every existing auth e2e test work exactly as before,
+with zero dependency on `MESSAGING_PROVIDER`/Faraz.
+
+### Consumer frontend — notification center + preferences, not a dropdown popover
+
+`NotificationBell` (in the shared `AppShell` header, next to the locale/
+theme controls) polls `GET /notifications/unread-count` every 30s (no
+websocket infrastructure exists in this codebase yet) and links to a full
+`/notifications` page rather than a popover panel — deliberately simpler
+for a first pass, avoiding popover-positioning complexity.
+`NotificationCenterView` shows title/body/category/timestamp per row,
+a restrained `HIGH`/`URGENT` treatment (a small accent bar + bold title,
+never a wall of red — only `SECURITY` gets an urgent-toned category
+badge), mark-one/mark-all-read, a "load more" pager, and empty/loading/
+error states. `NotificationPreferencesView` groups the category × channel
+grid into named sections (Essential & Security, Health & Care, Bookings &
+Services, Orders & Delivery, Household & Access, Seller & Marketplace,
+Offers & Marketing); `SECURITY` renders as "Always on" text, never a
+toggle; `EMAIL`/`PUSH` are never rendered as toggles at all, since
+showing a control for an unimplemented channel would misrepresent it as
+working. Both are reachable from the bell → notification center → a
+small settings-gear icon in its own header, since this codebase has no
+dedicated Account/Settings section yet (see Known limitations).
+Deep links are built through one shared `NotificationDeepLinks` helper
+(never a brittle inline URL string per domain) and are locale-free
+relative paths — the frontend prefixes the active `/{locale}` segment
+itself, so a link is correct regardless of which locale the recipient is
+viewing in when they eventually open it.
+
+### API endpoints (Handoff 10 additions)
+
+```
+GET    /notifications                            (paginated; scoped to the caller's own userId — no :userId param exists)
+GET    /notifications/unread-count
+PATCH  /notifications/:id/read                    (idempotent — re-reading an already-read notification is a safe no-op)
+POST   /notifications/read-all
+GET    /notification-preferences
+PATCH  /notification-preferences
+
+POST   /dev/notifications/simulate                          (dev/test-only; hard-disabled outside development/test via NODE_ENV)
+POST   /dev/notifications/deliveries/:deliveryId/force-attempt  (dev/test-only; fast-forwards a QUEUED/PENDING delivery past its backoff/quiet-hours wait)
+POST   /dev/notifications/deliveries/process-due             (dev/test-only; runs one worker tick immediately)
+```
+
+### Error codes (Handoff 10 additions)
+
+```
+NOTIFICATION_NOT_FOUND              404  no such notification, or it belongs to a different user — never a silent leak of another user's content
+MESSAGING_PROVIDER_UNAVAILABLE      502  resolved provider has no registered adapter
+MESSAGING_PROVIDER_DISABLED         400  provider exists but its *_ENABLED flag is off
+MESSAGING_SEND_FAILED               502  the provider rejected the send outright (not a transport-level error)
+MESSAGING_PROVIDER_NOT_CONFIGURED   503  MESSAGING_SANDBOX_MODE=production is set without real credentials — never a silent fallback to simulation
+INVALID_PHONE_NUMBER                400  the phone number could not be normalized to a valid Iranian mobile number
+MESSAGING_WEBHOOK_INVALID           400  reserved for a future real webhook signature check — unused while Faraz has no confirmed webhook scheme
+```
+
 ## API endpoints
 
 ```
@@ -2548,6 +2836,16 @@ POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/o
 POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/cancellation         (dev/test-only)
 POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/mismatch             (dev/test-only)
 POST   /seller-organizations/:sellerId/channels/:channelAccountId/dev/simulate/publish-rejection    (dev/test-only)
+
+GET    /notifications                            (paginated; scoped to the caller's own userId)
+GET    /notifications/unread-count
+PATCH  /notifications/:id/read
+POST   /notifications/read-all
+GET    /notification-preferences
+PATCH  /notification-preferences
+POST   /dev/notifications/simulate                          (dev/test-only; hard-disabled outside development/test via NODE_ENV)
+POST   /dev/notifications/deliveries/:deliveryId/force-attempt  (dev/test-only)
+POST   /dev/notifications/deliveries/process-due             (dev/test-only)
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
@@ -3355,6 +3653,52 @@ was deliberately kept out of this handoff's scope per the spec, reserved
 for a dedicated future financial handoff (see "Next recommended coding
 handoff" below).
 
+Everything in the Handoff 10 acceptance criteria: a coherent `Domain
+Event → Notification Decision → Preferences/Quiet Hours → Template →
+Channel Delivery → History` pipeline that no domain module bypasses
+(every notification, across every category, is created through exactly
+one write path, `NotificationOrchestratorService.notify()`); a real
+idempotency anchor (`Notification.@@unique([domainEventId, type,
+userId])`) fed by a minimal, additive, backward-compatible change to the
+existing outbox (`DomainEventsService.publish()` now forwards
+`DomainEvent.id` as an extra `emit()` argument every pre-existing
+listener simply ignores); a provider-neutral `MessagingGateway`
+(`DEV`/`FARAZ`) mirroring `PaymentGateway`/`ShippingGateway`/
+`MarketplaceChannelAdapter`'s own interface-plus-capability-map-plus-
+registry discipline exactly, with `DevMessagingAdapter` fully functional
+and `FarazSmsAdapter` built as an honestly-documented sandbox boundary
+(no official Faraz SMS docs/credentials exist for this project); an
+explicit delivery state machine that never conflates `SENT` (provider
+accepted) with `DELIVERED` (provider confirmed); bounded exponential-
+backoff retries for transient failures and immediate termination for
+permanent ones, both proven by dedicated e2e tests including two
+concurrency races (the same domain event processed concurrently, and the
+same delivery claimed by two concurrent workers) that use real DB-level
+claiming rather than timing assumptions; quiet-hours deferral built on
+pure ICU clock semantics with an explicit `URGENT`-only bypass; a
+category/channel preference grid where `SECURITY` is structurally
+non-suppressible and `MARKETING` defaults to disabled via a new, minimal
+`CountryConfig` rather than the general "no row means enabled" rule;
+SMS copy that is privacy-safe by construction (a template either has no
+`smsBody` at all, or one deliberately written to omit medical/diagnostic
+detail) with destinations always stored masked; a real notification
+center and preferences UI reachable from a header bell, with restrained
+priority/category presentation and full Persian RTL/English LTR support;
+local dev-OTP authentication left completely untouched and independent
+of Faraz; every Handoff 01-09 backend/frontend test still green (174
+backend e2e scenarios, 120 frontend tests, including one test that
+triggers a real — not dev-simulated — `MarketplaceListingSyncFailed`
+event end to end to prove the domain-event-to-notification wiring itself,
+not just the orchestrator in isolation); and dedicated e2e coverage for
+all ten required flows (A: in-app create/read/unread-count; B: a
+disabled category preference skipping SMS with the reason recorded; C: a
+real DEV SMS send recording a provider message id; D: duplicate-event
+idempotency; E: bounded transient retry-then-success; F: immediate
+permanent failure with no retry; G: quiet-hours deferral plus the
+URGENT bypass; H: health-category SMS privacy; I: cross-user isolation;
+J: cross-seller isolation via a genuinely-triggered domain event) plus
+the two concurrency races described above.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -3736,67 +4080,137 @@ handoff" below).
   their `SellerMembership` directly as `ACTIVE` (auto-accepted); there is
   no email/SMS sent, no `PENDING`-status invitation a person confirms
   themselves, and no way to invite someone who hasn't signed up yet.
+- **No real merchant credentials or official docs for Faraz SMS**
+  (Handoff 10) — `FarazSmsAdapter` is a documented sandbox boundary
+  sharing `DevMessagingAdapter`'s own simulation engine (see the Handoff
+  10 section above for exactly what's marked UNKNOWN); no live send
+  round-trip, delivery-status callback, or real webhook signature scheme
+  exists. There is also no real inbound messaging webhook endpoint —
+  outcome simulation is exercised entirely through the
+  `POST /dev/notifications/simulate`/`force-attempt` routes, which drive
+  the real orchestration/delivery pipeline, never a shortcut around it.
+- **`EMAIL`/`PUSH` are defined in the `NotificationChannel` enum but
+  completely unreachable** — no adapter, template variant, or UI control
+  ever produces or displays them; the vocabulary exists so a future
+  handoff can wire either without a schema change, exactly like
+  `HealthSeverity` beyond `ATTENTION` or `BookingStatus.HOLD` before their
+  own handoffs reached them.
+- **`NotificationTemplate` exists in the schema but nothing persists to
+  it** — H10's own templates are code-defined constants in
+  `notification-templates.ts`, matching how every other transactional
+  copy in this codebase already lives in source rather than a database; a
+  future content-managed system would swap the resolver's lookup order,
+  not the schema.
+- **No real-time delivery to the notification bell** — `NotificationBell`
+  polls `GET /notifications/unread-count` every 30 seconds; there is no
+  websocket/SSE infrastructure in this codebase, so a new notification
+  can take up to that long to show up as an unread badge without a manual
+  refresh of the notification center itself.
+- **No dedicated Account/Settings section** — this codebase has never
+  built one (not in Handoffs 01-09 either); notification preferences live
+  at `/notifications/preferences`, reachable only via a settings-gear icon
+  in the notification center's own header, rather than under a general
+  profile/settings area a future handoff should introduce.
+- **Quiet-hours end-time math assumes no DST transition between "now" and
+  the computed instant** — exact for Iran (no DST since 2022, the only
+  real `CountryConfig` entry today), but a future country with an active
+  DST rule would need a real timezone-offset lookup in
+  `notification-quiet-hours.util.ts`, not the current local-clock-minutes
+  delta approach.
+- **The background delivery worker is a plain `setInterval` poller, not a
+  real job queue** — sufficient for this phase's volume and explicitly
+  the smallest mechanism the spec asked for (no Kafka/RabbitMQ, no new
+  dependency); a future handoff expecting significantly higher notification
+  volume should revisit this before it becomes a bottleneck.
+- **No scheduled reminder types are actually implemented** (appointment/
+  vaccine/service reminders) — the `scheduledAt`-driven deferral mechanism
+  a real reminder would need already exists (it's the same mechanism
+  quiet-hours deferral uses), but no domain event or cron trigger creates
+  one yet; this was explicitly out of scope ("you do NOT need to build
+  every reminder type in H10").
+- **No Home integration** — per the spec's own "Home: what matters now,
+  notification center: what happened / what needs attention" distinction,
+  no notification-derived action surfaces on Home this phase; only the
+  header bell and the dedicated notification center exist as entry points.
+- **Notification preferences have no "seller view" distinction** — a
+  seller's own `SELLER`/`MARKETPLACE` category preferences are the same
+  per-user rows as their consumer notification preferences (there is no
+  separate Seller OS-scoped preferences surface); acceptable since a
+  seller's operational notifications and their consumer notifications
+  already share the same recipient identity (a PET LIFE OS user account).
 
 ## Next recommended coding handoff
 
-**Marketplace + Seller financial settlement** (Handoff 10), the piece
+**Marketplace + Seller financial settlement** (Handoff 11), the piece
 Handoff 09 deliberately left out to avoid entangling Seller OS's launch
-with the ledger: a genuinely complete Seller OS and marketplace-channel
-architecture now exists (real `SellerMembership` authorization,
-inventory with a full audit trail, `MarketplaceChannelAdapter` with a
-working `DevMarketplaceAdapter` and sandbox-honest Torob/Digikala
-boundaries, idempotent order ingestion with real oversell protection),
-but nothing anywhere posts to `SELLER_PAYABLE`/`PLATFORM_REVENUE` for
-either a PET LIFE OS checkout order or a marketplace order — those
-ledger accounts are still Handoff 07 seed-only placeholders. A natural
-next step, reusing the exact double-entry discipline `LedgerService.
-recordBalanced()` already enforces (never a second ledger-write path,
-`sum(debits) === sum(credits)` checked before every write): (1) a first
-real posting crediting `SELLER_PAYABLE` (and debiting
-`CUSTOMER_PAYMENT_CLEARING`) for a PET LIFE OS checkout order once its
-`Fulfillment` reaches `DELIVERED`, finally giving Handoff 06/07's ledger
-foundation a real writer; (2) the marketplace-specific piece this
-handoff exists for — deciding and implementing how a *marketplace*-
-collected payment (Torob/Digikala customers pay the marketplace, not PET
-LIFE OS directly) reconciles against `MarketplaceOrder`/`Order` without
-ever fabricating a `PaymentIntent` PET LIFE OS never actually processed
-(the spec's own "never fabricate PaymentIntent for marketplace-collected
-payments" constraint from Handoff 09 carries forward unchanged); (3) a
-refund-adjusted seller payable — Handoff 07's refund flow already
-reverses a PET LIFE OS-collected payment's ledger entries, but nothing
-yet reduces a seller's payable for either a refunded PET LIFE OS order or
-a marketplace-side refund/return; and (4) genuine settlement/payout
+with the ledger, and now with a notification layer in place to actually
+tell a seller their payable changed: a genuinely complete Seller OS and
+marketplace-channel architecture exists (real `SellerMembership`
+authorization, inventory with a full audit trail,
+`MarketplaceChannelAdapter` with a working `DevMarketplaceAdapter` and
+sandbox-honest Torob/Digikala boundaries, idempotent order ingestion with
+real oversell protection), but nothing anywhere posts to
+`SELLER_PAYABLE`/`PLATFORM_REVENUE` for either a PET LIFE OS checkout
+order or a marketplace order — those ledger accounts are still Handoff
+07 seed-only placeholders. A natural next step, reusing the exact
+double-entry discipline `LedgerService.recordBalanced()` already
+enforces (never a second ledger-write path, `sum(debits) ===
+sum(credits)` checked before every write): (1) a first real posting
+crediting `SELLER_PAYABLE` (and debiting `CUSTOMER_PAYMENT_CLEARING`)
+for a PET LIFE OS checkout order once its `Fulfillment` reaches
+`DELIVERED`, finally giving Handoff 06/07's ledger foundation a real
+writer; (2) the marketplace-specific piece this handoff exists for —
+deciding and implementing how a *marketplace*-collected payment
+(Torob/Digikala customers pay the marketplace, not PET LIFE OS directly)
+reconciles against `MarketplaceOrder`/`Order` without ever fabricating a
+`PaymentIntent` PET LIFE OS never actually processed (the spec's own
+"never fabricate PaymentIntent for marketplace-collected payments"
+constraint from Handoff 09 carries forward unchanged); (3) a
+refund-adjusted seller payable; and (4) genuine settlement/payout
 execution (an actual transfer to the seller, on some cadence), which
-Handoff 09's own "Next recommended coding handoff" note already flagged
-as substantial enough to be its own follow-up rather than bolted onto
-Seller OS's launch. Keep `MarketplaceOrder`'s ingestion shape and
-`InventoryMovementService`'s oversell-protection invariants untouched —
-this handoff is additive ledger-posting logic layered on top of what
-already exists, not a rewrite of either.
+Handoff 09's own note already flagged as substantial enough to be its
+own follow-up. Once a real posting exists, wire a `seller.payable_updated`
+notification through the exact same `NotificationOrchestratorService`
+this handoff built — no new notification infrastructure, just a new
+domain-event listener and a template. Keep `MarketplaceOrder`'s ingestion
+shape and `InventoryMovementService`'s oversell-protection invariants
+untouched — this handoff is additive ledger-posting logic layered on top
+of what already exists, not a rewrite of either.
 
 Alternatively, if the business prioritizes closing the remaining
 external-provider gaps instead of building settlement: once real merchant
 credentials/official docs for SnappPay, DigiPay, a standard payment
-gateway, AloPeyk, SnappBox, Torob, or Digikala become available, swap the
-corresponding adapter's sandbox/simulation bodies for real HTTP calls and
-a real webhook/signature scheme, without touching `PaymentGateway`/
-`FinancingProvider`/`ShippingGateway`/`MarketplaceChannelAdapter`'s shape
-— every adapter already implements the full interface its capability map
-declares, so a real integration is a same-class rewrite, not a new
-architecture. `validatePaymentConfig()`/`validateShippingConfig()`/
-`validateMarketplaceConfig()` already refuse to boot with
-`PAYMENT_SANDBOX_MODE=production`/`SHIPPING_MODE=production`/
-`MARKETPLACE_SANDBOX_MODE=production` unless the enabled provider's
-credential env vars are set, specifically to make this transition safe.
+gateway, AloPeyk, SnappBox, Torob, Digikala, or Faraz SMS become
+available, swap the corresponding adapter's sandbox/simulation bodies for
+real HTTP calls and a real webhook/signature scheme, without touching
+`PaymentGateway`/`FinancingProvider`/`ShippingGateway`/
+`MarketplaceChannelAdapter`/`MessagingGateway`'s shape — every adapter
+already implements the full interface its capability map declares, so a
+real integration is a same-class rewrite, not a new architecture.
+`validatePaymentConfig()`/`validateShippingConfig()`/
+`validateMarketplaceConfig()`/`validateMessagingConfig()` already refuse
+to boot with `PAYMENT_SANDBOX_MODE=production`/`SHIPPING_MODE=production`/
+`MARKETPLACE_SANDBOX_MODE=production`/`MESSAGING_SANDBOX_MODE=production`
+unless the enabled provider's credential env vars are set, specifically
+to make this transition safe. A third option, if the business instead
+wants to build on the notification foundation directly rather than
+close provider gaps: wire the first real scheduled reminder (an
+appointment or vaccination-due reminder) using the `scheduledAt`-driven
+deferral mechanism this handoff already built for quiet hours — the
+`NotificationDeliveryWorkerService` poller and `NotificationOrchestratorService.
+notify()` need no change, only a new cron-like trigger deciding *when* to
+call `notify()` for a given booking/pet.
+
 Whichever is chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly
 separate (never collapse catalog identity, price, and stock back into one
 model), keep "1 Checkout → N Orders" and "1 Order → N Fulfillments → N
 Shipments" (schema-ready, MVP uses N=1) as the non-negotiable invariants,
 keep PET LIFE OS's own inventory as the sole source of truth for stock
-(never a marketplace), keep IRR as the only stored currency unit, and
-keep every financial write going through `LedgerService.
-recordBalanced()`, every Fulfillment status change through
-`FulfillmentTransitionService.transition()`, and every inventory mutation
-through `InventoryReservationService`/`InventoryMovementService` — never
-a second write path for any of them, no matter how small the change
-looks.
+(never a marketplace), keep IRR as the only stored currency unit, keep
+every financial write going through `LedgerService.recordBalanced()`,
+every Fulfillment status change through
+`FulfillmentTransitionService.transition()`, every inventory mutation
+through `InventoryReservationService`/`InventoryMovementService`, and
+every user-visible notification through
+`NotificationOrchestratorService.notify()` — never a second write path
+for any of them, no matter how small the change looks.

@@ -99,6 +99,34 @@ const envSchema = z.object({
   TOROB_API_KEY: z.string().optional(),
   DIGIKALA_BASE_URL: z.string().optional(),
   DIGIKALA_API_KEY: z.string().optional(),
+
+  /// Messaging, Notifications & Preferences (Handoff 10) — same "sandbox is
+  /// always safe, production is validated" rule as PAYMENT_SANDBOX_MODE/
+  /// SHIPPING_MODE/MARKETPLACE_SANDBOX_MODE (see validateMessagingConfig
+  /// below): no official Faraz SMS merchant credentials exist for this
+  /// project (see README "Provider integration status"), so
+  /// MESSAGING_SANDBOX_MODE=production is rejected unless Faraz is enabled
+  /// with real credentials actually configured. MESSAGING_PROVIDER selects
+  /// which gateway NotificationDeliveryService sends SMS through by
+  /// default — "dev" locally/in tests, "faraz" once real credentials exist.
+  MESSAGING_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
+  MESSAGING_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
+  DEV_MESSAGING_ENABLED: z.coerce.boolean().default(true),
+  FARAZ_SMS_ENABLED: z.coerce.boolean().default(true),
+  /// Optional and unused by the sandbox-stub adapter — present only so a
+  /// real integration has a place to read credentials from without a schema
+  /// change, and so startup validation can require them in "production" mode.
+  FARAZ_SMS_BASE_URL: z.string().optional(),
+  FARAZ_SMS_API_KEY: z.string().optional(),
+  FARAZ_SMS_SENDER: z.string().optional(),
+  /// How many times a TRANSIENT delivery failure is retried before the
+  /// delivery is marked FAILED for good (spec: "do not infinitely retry").
+  NOTIFICATION_MAX_DELIVERY_ATTEMPTS: z.coerce.number().int().positive().default(3),
+  /// How often the background delivery worker polls for due (scheduled or
+  /// retry-eligible) NotificationDelivery rows. Irrelevant in test — the
+  /// worker's interval never starts under NODE_ENV=test; tests call its
+  /// processDueDeliveries() directly for determinism.
+  NOTIFICATION_WORKER_INTERVAL_MS: z.coerce.number().int().positive().default(5000),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -146,10 +174,24 @@ function validateMarketplaceConfig(env: AppEnv): void {
   }
 }
 
+/// Handoff 10 (spec: "no fake production success") applies here exactly as
+/// it does to payments/shipping/marketplace: Faraz enabled without its
+/// credentials configured fails startup rather than silently running
+/// DevMessagingAdapter-equivalent simulation against real recipients.
+function validateMessagingConfig(env: AppEnv): void {
+  if (env.MESSAGING_SANDBOX_MODE !== "production") return;
+  const missing: string[] = [];
+  if (env.FARAZ_SMS_ENABLED && !(env.FARAZ_SMS_BASE_URL && env.FARAZ_SMS_API_KEY)) missing.push("FARAZ_SMS_BASE_URL/FARAZ_SMS_API_KEY");
+  if (missing.length > 0) {
+    throw new Error(`MESSAGING_SANDBOX_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   const env = loadEnv(envSchema, source);
   validatePaymentConfig(env);
   validateShippingConfig(env);
   validateMarketplaceConfig(env);
+  validateMessagingConfig(env);
   return env;
 }

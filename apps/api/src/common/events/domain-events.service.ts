@@ -112,6 +112,13 @@ export const DOMAIN_EVENT_TYPES = [
   "MarketplaceOrderReceived",
   "MarketplaceOrderCancelled",
   "MarketplaceInventoryMismatchDetected",
+  // Messaging, Notifications & Preferences (Handoff 10)
+  "NotificationCreated",
+  "NotificationDeliveryAttempted",
+  "NotificationDeliverySucceeded",
+  "NotificationDeliveryFailed",
+  "NotificationDeliverySkipped",
+  "NotificationRead",
 ] as const;
 
 /**
@@ -161,7 +168,16 @@ export class DomainEventsService {
     });
 
     try {
-      this.emitter.emit(type, payload);
+      // The extra `event.id` argument is new in Handoff 10 — EventEmitter2
+      // forwards every value passed to emit() positionally to each
+      // @OnEvent handler, so a pre-existing single-parameter listener
+      // (e.g. PaymentEventsListener) simply ignores it; only a listener
+      // that declares a second parameter (e.g. NotificationEventsListener)
+      // reads it. This is the idempotency anchor notifications dedupe
+      // against — see Notification's `@@unique([domainEventId, type,
+      // userId])` — without it, a listener would have no stable id to key
+      // on other than re-deriving one from the payload's own fields.
+      this.emitter.emit(type, payload, event.id);
       await client.domainEvent.update({
         where: { id: event.id },
         data: { processedAt: new Date() },

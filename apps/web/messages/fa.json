@@ -1343,5 +1343,74 @@
       "save": "ذخیره",
       "saved": "ذخیره شد"
     }
+  },
+  "notifications": {
+    "title": "اعلان‌ها",
+    "loading": "در حال بارگذاری اعلان‌ها…",
+    "retry": "تلاش مجدد",
+    "empty": "اعلان جدیدی ندارید.",
+    "browseHome": "رفتن به خانه",
+    "markAllRead": "علامت‌گذاری همه به‌عنوان خوانده‌شده",
+    "loadMore": "بیشتر",
+    "bellLabel": "اعلان‌ها",
+    "bellLabelUnread": "اعلان‌ها، {count} خوانده‌نشده",
+    "category": {
+      "SECURITY": "امنیت",
+      "HEALTH": "سلامت",
+      "BOOKING": "نوبت",
+      "SERVICE": "خدمات",
+      "PAYMENT": "پرداخت",
+      "COMMERCE": "سفارش",
+      "DELIVERY": "ارسال",
+      "SELLER": "فروشنده",
+      "MARKETPLACE": "بازارگاه",
+      "HOUSEHOLD": "خانواده",
+      "PET_ACCESS": "دسترسی حیوان خانگی",
+      "SYSTEM": "سیستم",
+      "MARKETING": "پیشنهادها"
+    },
+    "preferencesLink": "تنظیمات اعلان‌ها",
+    "preferencesPage": {
+      "title": "تنظیمات اعلان‌ها",
+      "loading": "در حال بارگذاری تنظیمات…",
+      "retry": "تلاش مجدد",
+      "save": "ذخیره",
+      "saved": "ذخیره شد",
+      "alwaysOn": "همیشه فعال",
+      "sections": {
+        "essential": "ضروری و امنیت",
+        "health": "سلامت و مراقبت",
+        "bookings": "نوبت‌ها و خدمات",
+        "orders": "سفارش‌ها و ارسال",
+        "household": "خانواده و دسترسی",
+        "seller": "فروشنده و بازارگاه",
+        "marketing": "پیشنهادها و تبلیغات"
+      },
+      "categories": {
+        "SECURITY": "هشدارهای حساب و امنیت",
+        "SYSTEM": "اعلان‌های سیستمی",
+        "HEALTH": "یادآوری‌های سلامت و مراقبت",
+        "BOOKING": "نوبت‌ها",
+        "SERVICE": "به‌روزرسانی خدمات",
+        "PAYMENT": "پرداخت‌ها",
+        "COMMERCE": "سفارش‌ها",
+        "DELIVERY": "به‌روزرسانی ارسال",
+        "HOUSEHOLD": "خانواده",
+        "PET_ACCESS": "اعطای دسترسی حیوان خانگی",
+        "SELLER": "عملیات فروشنده",
+        "MARKETPLACE": "بازارگاه",
+        "MARKETING": "پیشنهادها و تبلیغات"
+      },
+      "channels": {
+        "IN_APP": "درون‌برنامه‌ای",
+        "SMS": "پیامک"
+      },
+      "quietHours": {
+        "title": "ساعات سکوت",
+        "enable": "فعال‌سازی ساعات سکوت",
+        "start": "از",
+        "end": "تا"
+      }
+    }
   }
 }

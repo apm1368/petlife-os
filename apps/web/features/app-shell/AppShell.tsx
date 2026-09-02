@@ -8,6 +8,7 @@ import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
+import { NotificationBell } from "@/features/notifications/NotificationBell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoading } = useAppBootstrap();
@@ -37,6 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
         <span className="text-section-title text-text-primary">{t("appName")}</span>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <LocaleSwitcher />
           <ThemeToggle />
           {user ? <Avatar name={user.displayName} src={user.avatarUrl} size="sm" /> : null}

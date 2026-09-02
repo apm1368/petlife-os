@@ -1343,5 +1343,74 @@
       "save": "Save",
       "saved": "Saved"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "loading": "Loading notifications…",
+    "retry": "Retry",
+    "empty": "You're all caught up.",
+    "browseHome": "Go to Home",
+    "markAllRead": "Mark all as read",
+    "loadMore": "Load more",
+    "bellLabel": "Notifications",
+    "bellLabelUnread": "Notifications, {count} unread",
+    "category": {
+      "SECURITY": "Security",
+      "HEALTH": "Health",
+      "BOOKING": "Booking",
+      "SERVICE": "Service",
+      "PAYMENT": "Payment",
+      "COMMERCE": "Orders",
+      "DELIVERY": "Delivery",
+      "SELLER": "Seller",
+      "MARKETPLACE": "Marketplace",
+      "HOUSEHOLD": "Household",
+      "PET_ACCESS": "Pet access",
+      "SYSTEM": "System",
+      "MARKETING": "Offers"
+    },
+    "preferencesLink": "Notification preferences",
+    "preferencesPage": {
+      "title": "Notification preferences",
+      "loading": "Loading preferences…",
+      "retry": "Retry",
+      "save": "Save",
+      "saved": "Saved",
+      "alwaysOn": "Always on",
+      "sections": {
+        "essential": "Essential & Security",
+        "health": "Health & Care",
+        "bookings": "Bookings & Services",
+        "orders": "Orders & Delivery",
+        "household": "Household & Access",
+        "seller": "Seller & Marketplace",
+        "marketing": "Offers & Marketing"
+      },
+      "categories": {
+        "SECURITY": "Account & security alerts",
+        "SYSTEM": "System notices",
+        "HEALTH": "Health & care reminders",
+        "BOOKING": "Bookings",
+        "SERVICE": "Service updates",
+        "PAYMENT": "Payments",
+        "COMMERCE": "Orders",
+        "DELIVERY": "Delivery updates",
+        "HOUSEHOLD": "Household",
+        "PET_ACCESS": "Pet access grants",
+        "SELLER": "Seller operations",
+        "MARKETPLACE": "Marketplace",
+        "MARKETING": "Offers & promotions"
+      },
+      "channels": {
+        "IN_APP": "In-app",
+        "SMS": "SMS"
+      },
+      "quietHours": {
+        "title": "Quiet hours",
+        "enable": "Enable quiet hours",
+        "start": "From",
+        "end": "To"
+      }
+    }
   }
 }

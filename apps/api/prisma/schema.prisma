@@ -843,22 +843,25 @@ model User {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  sessions             Session[]
-  householdMemberships HouseholdMember[]
-  petAccessGrants      PetAccessGrant[]
-  activePetPreferences ActivePetPreference[]
-  onboardingProgress   OnboardingProgress[]
-  petInterests         UserPetInterest[]
-  providerProfiles     ProviderUser[]
-  bookings             Booking[]
-  bookingSeries        BookingSeries[]
-  providerContext      ProviderContextPreference?
-  carts                Cart[]
-  checkouts            Checkout[]
-  orders               Order[]
-  sellerMemberships    SellerMembership[]
-  sellerContext        SellerContextPreference?
-  inventoryMovements   InventoryMovement[]
+  sessions                Session[]
+  householdMemberships    HouseholdMember[]
+  petAccessGrants         PetAccessGrant[]
+  activePetPreferences    ActivePetPreference[]
+  onboardingProgress      OnboardingProgress[]
+  petInterests            UserPetInterest[]
+  providerProfiles        ProviderUser[]
+  bookings                Booking[]
+  bookingSeries           BookingSeries[]
+  providerContext         ProviderContextPreference?
+  carts                   Cart[]
+  checkouts               Checkout[]
+  orders                  Order[]
+  sellerMemberships       SellerMembership[]
+  sellerContext           SellerContextPreference?
+  inventoryMovements      InventoryMovement[]
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  notificationQuietHours  NotificationQuietHours?
 
   @@map("users")
 }
@@ -2950,6 +2953,205 @@ model MarketplaceSyncAttempt {
   @@index([marketplaceChannelAccountId, createdAt])
   @@index([marketplaceListingId])
   @@map("marketplace_sync_attempts")
+}
+
+// ---------------------------------------------------------------------------
+// Messaging, Notifications & Preferences (Handoff 10)
+// ---------------------------------------------------------------------------
+
+/// EMAIL/PUSH are defined now (spec: "future channels must be possible
+/// without redesign") but unreachable this phase — no adapter/UI ever
+/// produces them yet. Mirrors HealthSeverity/BookingStatus's own precedent
+/// of defining vocabulary ahead of the feature that reaches it.
+enum NotificationChannel {
+  IN_APP
+  SMS
+  EMAIL
+  PUSH
+}
+
+/// MARKETING is deliberately its own category, never folded into any
+/// transactional one — spec: "Marketing consent must NEVER be inferred from
+/// transactional messaging consent."
+enum NotificationCategory {
+  SECURITY
+  HEALTH
+  BOOKING
+  SERVICE
+  PAYMENT
+  COMMERCE
+  DELIVERY
+  SELLER
+  MARKETPLACE
+  HOUSEHOLD
+  PET_ACCESS
+  SYSTEM
+  MARKETING
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+/// SENT means the provider accepted the message; DELIVERED means the
+/// provider *confirmed* delivery — never conflated (spec: "do not report
+/// DELIVERED just because Faraz accepted the request"). IN_APP has no
+/// external transport, so its own delivery goes straight to DELIVERED at
+/// creation (the row's existence *is* the delivery).
+enum NotificationDeliveryStatus {
+  PENDING
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  CANCELLED
+  SKIPPED
+}
+
+/// Set on a FAILED/QUEUED-for-retry delivery to drive the bounded-retry
+/// policy — TRANSIENT is retried with backoff up to a bounded attempt
+/// count; PERMANENT is never retried.
+enum NotificationFailureKind {
+  TRANSIENT
+  PERMANENT
+}
+
+enum MessagingProvider {
+  DEV
+  FARAZ
+}
+
+/// The addressable, in-app-visible unit — always has exactly one recipient
+/// `userId` (never a bare household/seller broadcast; a notification meant
+/// for every member of a household or every OWNER/ADMIN of a seller
+/// organization is fanned out as one row per recipient, so isolation is
+/// just "WHERE userId = :callerId", never a separate authorization axis).
+/// `sellerOrganizationId` is a plain scalar, not a Prisma relation, purely
+/// for filtering/correlation on SELLER/MARKETPLACE-category rows — kept
+/// deliberately decoupled from SellerOrganization's own schema.
+/// `domainEventId` is a plain scalar correlating to `DomainEvent.id` (also
+/// no Prisma relation, matching how DomainEvent.aggregateId itself already
+/// has no FK) — it is the idempotency anchor: `@@unique([domainEventId,
+/// type, userId])` means the same domain event can never create two
+/// logical notifications for the same recipient (Postgres treats each NULL
+/// domainEventId as distinct, so manually/dev-created notifications with no
+/// originating event never collide with each other).
+model Notification {
+  id                   String  @id @default(uuid()) @db.Uuid
+  userId               String  @db.Uuid
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdId          String? @db.Uuid
+  petId                String? @db.Uuid
+  sellerOrganizationId String? @db.Uuid
+  domainEventId        String? @db.Uuid
+
+  type     String
+  category NotificationCategory
+  priority NotificationPriority @default(NORMAL)
+
+  title  String
+  body   String
+  locale Locale
+
+  deepLink   String?
+  entityType String?
+  entityId   String?
+  actorType  String?
+  actorId    String?
+  metadata   Json?
+
+  createdAt   DateTime  @default(now())
+  readAt      DateTime?
+  dismissedAt DateTime?
+  expiresAt   DateTime?
+
+  deliveries NotificationDelivery[]
+
+  @@unique([domainEventId, type, userId])
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@index([sellerOrganizationId])
+  @@map("notifications")
+}
+
+/// At most one row per (notification, channel) — a retry updates the SAME
+/// row (attemptCount/lastAttemptAt/status), never inserts a new one (spec:
+/// "if NotificationDelivery already captures attempts cleanly, do not
+/// over-normalize"). `destinationMasked` is the only destination form ever
+/// persisted (e.g. "+98********12") — the real phone number is read live
+/// from `User.phone` at send time, never duplicated into this table.
+model NotificationDelivery {
+  id             String              @id @default(uuid()) @db.Uuid
+  notificationId String              @db.Uuid
+  notification   Notification        @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  channel        NotificationChannel
+  provider       MessagingProvider?
+
+  status            NotificationDeliveryStatus @default(PENDING)
+  destinationMasked String?
+  providerMessageId String?
+  attemptCount      Int                        @default(0)
+  scheduledAt       DateTime?
+  lastAttemptAt     DateTime?
+  deliveredAt       DateTime?
+  failedAt          DateTime?
+  failureKind       NotificationFailureKind?
+  failureCode       String?
+  failureMessage    String?
+  metadata          Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([notificationId, channel])
+  @@index([status, scheduledAt])
+  @@index([provider, providerMessageId])
+  @@map("notification_deliveries")
+}
+
+/// Category x channel opt-out grid (spec section "Preferences"). No row for
+/// a given (user, category, channel) means "enabled" (the default) — a row
+/// only ever exists to record an explicit override, so a brand-new user
+/// needs no seed rows to have correct default behavior. Security-critical
+/// sends bypass this table entirely at the orchestrator level (spec:
+/// "security-critical messages may not be fully suppressible") rather than
+/// this table pretending to enforce it.
+model NotificationPreference {
+  id       String               @id @default(uuid()) @db.Uuid
+  userId   String               @db.Uuid
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category NotificationCategory
+  channel  NotificationChannel
+  enabled  Boolean              @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, category, channel])
+  @@map("notification_preferences")
+}
+
+/// Deliberately its own singleton-per-user table rather than smearing
+/// quiet-hours fields across every NotificationPreference row (a user has
+/// one quiet window, not one per category/channel) — a normalization
+/// decision documented here rather than following the spec's flat
+/// suggested-fields list literally. `start`/`end` are "HH:mm" 24h strings
+/// interpreted in `timezone` (IANA, e.g. "Asia/Tehran") — clock/timezone
+/// semantics only, deliberately never Jalali/Gregorian-calendar-coupled.
+model NotificationQuietHours {
+  userId    String   @id @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled   Boolean  @default(false)
+  startTime String   @default("22:00")
+  endTime   String   @default("08:00")
+  timezone  String   @default("Asia/Tehran")
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_quiet_hours")
 }
 
 // ---------------------------------------------------------------------------
