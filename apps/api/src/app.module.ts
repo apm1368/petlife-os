@@ -30,6 +30,7 @@ import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module
 import { ServicesModule } from "./modules/services/services.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
 import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
+import { SellerOsModule } from "./modules/seller-os/seller-os.module";
 import { CatalogModule } from "./modules/commerce/catalog/catalog.module";
 import { CartModule } from "./modules/commerce/cart/cart.module";
 import { CheckoutModule } from "./modules/commerce/checkout/checkout.module";
@@ -74,6 +75,7 @@ import { LogisticsModule } from "./modules/commerce/logistics/logistics.module";
     ServicesModule,
     AddressesModule,
     ProviderOsModule,
+    SellerOsModule,
     CatalogModule,
     CartModule,
     CheckoutModule,

@@ -5,6 +5,14 @@
 export type Locale = "fa" | "en";
 export type ThemePreference = "SYSTEM" | "LIGHT" | "DARK";
 
+/** Simple offset pagination envelope (Handoff 09) used by every Seller OS list endpoint — spec section 69-70: "avoid N+1 queries... never return an entire seller catalog in one unbounded response". */
+export interface PaginatedDto<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export enum PetSpecies {
   DOG = "DOG",
   CAT = "CAT",
