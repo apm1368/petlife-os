@@ -1161,5 +1161,187 @@
       "localStatus": "Local",
       "remoteStatus": "Remote"
     }
+  },
+  "seller": {
+    "shell": {
+      "nav": {
+        "overview": "Overview",
+        "orders": "Orders",
+        "offers": "Offers",
+        "inventory": "Inventory",
+        "channels": "Channels",
+        "team": "Team",
+        "settings": "Settings"
+      },
+      "notASeller": {
+        "title": "No seller access",
+        "body": "Your account isn't part of any seller organization.",
+        "backToApp": "Back to PET LIFE OS"
+      },
+      "chooseOrg": {
+        "title": "Choose a seller",
+        "body": "You belong to more than one seller organization. Choose which one to work in."
+      },
+      "headerRole": "{role}",
+      "role": {
+        "OWNER": "Owner",
+        "ADMIN": "Admin",
+        "OPERATIONS": "Operations",
+        "CATALOG_MANAGER": "Catalog Manager",
+        "ORDER_MANAGER": "Order Manager",
+        "FINANCE": "Finance",
+        "SUPPORT": "Support",
+        "VIEWER": "Viewer"
+      },
+      "switchOrg": "Switch seller",
+      "suspendedBanner": "This seller organization is suspended. New operational actions are blocked."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "loading": "Loading dashboard…",
+      "retry": "Retry",
+      "tiles": {
+        "ordersRequiringAction": "Orders requiring action",
+        "lowStockOffers": "Low-stock offers",
+        "activeOffers": "Active offers",
+        "channelSyncErrors": "Channel sync errors",
+        "fulfillmentExceptions": "Fulfillment exceptions",
+        "ordersToday": "Orders today",
+        "unitsSoldToday": "Units sold today",
+        "gmvToday": "GMV today"
+      },
+      "recentOrders": "Recent orders",
+      "noRecentOrders": "No recent orders yet.",
+      "marketplaceOrderLabel": "{provider} order",
+      "petlifeOrderLabel": "PET LIFE OS order",
+      "itemCount": "{count, plural, one {# item} other {# items}}"
+    },
+    "orders": {
+      "title": "Orders",
+      "loading": "Loading orders…",
+      "retry": "Retry",
+      "empty": "No orders yet.",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "PET LIFE OS",
+      "externalOrderId": "External order: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "Paid via PET LIFE OS",
+        "MARKETPLACE_COLLECTED": "Collected by marketplace",
+        "CASH_ON_DELIVERY": "Cash on delivery",
+        "UNKNOWN": "Payment source unknown"
+      }
+    },
+    "orderDetail": {
+      "title": "Order detail",
+      "loading": "Loading order…",
+      "retry": "Retry",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "PET LIFE OS",
+      "externalOrderId": "External order: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "Paid via PET LIFE OS",
+        "MARKETPLACE_COLLECTED": "Collected by marketplace",
+        "CASH_ON_DELIVERY": "Cash on delivery",
+        "UNKNOWN": "Payment source unknown"
+      },
+      "items": "Items",
+      "quantity": "Qty {count}",
+      "subtotal": "Subtotal",
+      "delivery": "Delivery",
+      "total": "Total"
+    },
+    "offers": {
+      "title": "Offers",
+      "loading": "Loading offers…",
+      "retry": "Retry",
+      "empty": "No offers yet.",
+      "lowStock": "Low stock",
+      "syncErrors": "{count} sync error(s)",
+      "price": "Price (IRR)",
+      "status": "Status",
+      "statusOptions": {
+        "ACTIVE": "Active",
+        "PAUSED": "Paused",
+        "SUSPENDED": "Suspended"
+      },
+      "save": "Save",
+      "available": "{count} available · {currency}"
+    },
+    "inventory": {
+      "title": "Inventory",
+      "loading": "Loading inventory…",
+      "retry": "Retry",
+      "empty": "No inventory yet.",
+      "lowStock": "Low stock",
+      "reserved": "Reserved",
+      "available": "Available",
+      "onHand": "On hand",
+      "save": "Save",
+      "adjustFailed": "This adjustment would make stock negative."
+    },
+    "channels": {
+      "title": "Channels",
+      "loading": "Loading channels…",
+      "retry": "Retry",
+      "connections": "Connections",
+      "lastSync": "Last synced {when}",
+      "neverSynced": "Never synced",
+      "connect": "Connect",
+      "listings": "Listings",
+      "noListings": "No marketplace listings yet",
+      "noListingsBody": "Map an offer to a channel from the Offers page to publish it.",
+      "resync": "Resync",
+      "publish": "Publish",
+      "reconcile": "Reconcile",
+      "inventoryMismatch": "Published stock ({published}) differs from PET LIFE OS stock ({canonical}).",
+      "noDiscrepancy": "No discrepancy found.",
+      "discrepancy": {
+        "INVENTORY_MISMATCH": "Inventory mismatch detected.",
+        "PRICE_MISMATCH": "Price mismatch detected.",
+        "LISTING_STATUS_MISMATCH": "Listing status mismatch detected.",
+        "ORDER_STATUS_MISMATCH": "Order status mismatch detected.",
+        "UNKNOWN_PROVIDER_REFERENCE": "Listing mapping required."
+      }
+    },
+    "team": {
+      "title": "Team",
+      "loading": "Loading team…",
+      "retry": "Retry",
+      "invite": "Invite a team member",
+      "inviteIdentifier": "Email or phone",
+      "inviteHint": "Must already have a PET LIFE OS account.",
+      "role": "Role",
+      "inviteAction": "Invite",
+      "inviteFailed": "Couldn't invite this person.",
+      "statusLabel": {
+        "PENDING": "Pending",
+        "ACTIVE": "Active",
+        "DEACTIVATED": "Deactivated"
+      },
+      "remove": "Remove",
+      "roles": {
+        "OWNER": "Owner",
+        "ADMIN": "Admin",
+        "OPERATIONS": "Operations",
+        "CATALOG_MANAGER": "Catalog Manager",
+        "ORDER_MANAGER": "Order Manager",
+        "FINANCE": "Finance",
+        "SUPPORT": "Support",
+        "VIEWER": "Viewer"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "loading": "Loading settings…",
+      "retry": "Retry",
+      "verificationNote": "Legal and verification details are managed by PET LIFE OS review, not editable here.",
+      "supportEmail": "Support email",
+      "supportPhone": "Support phone",
+      "city": "City",
+      "timezone": "Timezone",
+      "description": "Description",
+      "save": "Save",
+      "saved": "Saved"
+    }
   }
 }

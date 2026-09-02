@@ -1161,5 +1161,187 @@
       "localStatus": "محلی",
       "remoteStatus": "از راه دور"
     }
+  },
+  "seller": {
+    "shell": {
+      "nav": {
+        "overview": "نمای کلی",
+        "orders": "سفارش‌ها",
+        "offers": "پیشنهادها",
+        "inventory": "موجودی",
+        "channels": "کانال‌ها",
+        "team": "تیم",
+        "settings": "تنظیمات"
+      },
+      "notASeller": {
+        "title": "عدم دسترسی فروشنده",
+        "body": "حساب شما عضو هیچ سازمان فروشنده‌ای نیست.",
+        "backToApp": "بازگشت به پت‌لایف"
+      },
+      "chooseOrg": {
+        "title": "انتخاب فروشنده",
+        "body": "شما عضو بیش از یک سازمان فروشنده هستید. یکی را انتخاب کنید."
+      },
+      "headerRole": "{role}",
+      "role": {
+        "OWNER": "مالک",
+        "ADMIN": "مدیر",
+        "OPERATIONS": "عملیات",
+        "CATALOG_MANAGER": "مدیر کاتالوگ",
+        "ORDER_MANAGER": "مدیر سفارشات",
+        "FINANCE": "مالی",
+        "SUPPORT": "پشتیبانی",
+        "VIEWER": "مشاهدهگر"
+      },
+      "switchOrg": "تعویض فروشنده",
+      "suspendedBanner": "این فروشنده معلق شده است. اقدامات عملیاتی جدید مسدود هستند."
+    },
+    "dashboard": {
+      "title": "داشبورد",
+      "loading": "در حال بارگذاری داشبورد…",
+      "retry": "تلاش مجدد",
+      "tiles": {
+        "ordersRequiringAction": "سفارش‌های نیازمند اقدام",
+        "lowStockOffers": "پیشنهادهای کم‌موجود",
+        "activeOffers": "پیشنهادهای فعال",
+        "channelSyncErrors": "خطاهای همگام‌سازی کانال",
+        "fulfillmentExceptions": "استثناهای تکمیل سفارش",
+        "ordersToday": "سفارش‌های امروز",
+        "unitsSoldToday": "تعداد فروش امروز",
+        "gmvToday": "گردش فروش امروز"
+      },
+      "recentOrders": "سفارش‌های اخیر",
+      "noRecentOrders": "هنوز سفارشی ثبت نشده است.",
+      "marketplaceOrderLabel": "سفارش {provider}",
+      "petlifeOrderLabel": "سفارش پت‌لایف",
+      "itemCount": "{count, plural, one {# قلم} other {# قلم}}"
+    },
+    "orders": {
+      "title": "سفارش‌ها",
+      "loading": "در حال بارگذاری سفارش‌ها…",
+      "retry": "تلاش مجدد",
+      "empty": "هنوز سفارشی ثبت نشده است.",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "پت‌لایف",
+      "externalOrderId": "شناسه سفارش خارجی: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "پرداخت از طریق پت‌لایف",
+        "MARKETPLACE_COLLECTED": "دریافت شده توسط بازارگاه",
+        "CASH_ON_DELIVERY": "پرداخت در محل",
+        "UNKNOWN": "منبع پرداخت نامشخص"
+      }
+    },
+    "orderDetail": {
+      "title": "جزئیات سفارش",
+      "loading": "در حال بارگذاری سفارش…",
+      "retry": "تلاش مجدد",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "پت‌لایف",
+      "externalOrderId": "شناسه سفارش خارجی: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "پرداخت از طریق پت‌لایف",
+        "MARKETPLACE_COLLECTED": "دریافت شده توسط بازارگاه",
+        "CASH_ON_DELIVERY": "پرداخت در محل",
+        "UNKNOWN": "منبع پرداخت نامشخص"
+      },
+      "items": "اقلام",
+      "quantity": "تعداد {count}",
+      "subtotal": "جمع جزء",
+      "delivery": "هزینه ارسال",
+      "total": "جمع کل"
+    },
+    "offers": {
+      "title": "پیشنهادها",
+      "loading": "در حال بارگذاری پیشنهادها…",
+      "retry": "تلاش مجدد",
+      "empty": "هنوز پیشنهادی ثبت نشده است.",
+      "lowStock": "موجودی کم",
+      "syncErrors": "{count} خطای همگام‌سازی",
+      "price": "قیمت (ریال)",
+      "status": "وضعیت",
+      "statusOptions": {
+        "ACTIVE": "فعال",
+        "PAUSED": "متوقف",
+        "SUSPENDED": "معلق"
+      },
+      "save": "ذخیره",
+      "available": "{count} موجود · {currency}"
+    },
+    "inventory": {
+      "title": "موجودی",
+      "loading": "در حال بارگذاری موجودی…",
+      "retry": "تلاش مجدد",
+      "empty": "هنوز موجودیثبت نشده است.",
+      "lowStock": "موجودی کم",
+      "reserved": "رزروشده",
+      "available": "موجود",
+      "onHand": "موجودی فعلی",
+      "save": "ذخیره",
+      "adjustFailed": "این تغییر موجودی را منفی می‌کند."
+    },
+    "channels": {
+      "title": "کانال‌ها",
+      "loading": "در حال بارگذاری کانال‌ها…",
+      "retry": "تلاش مجدد",
+      "connections": "اتصالات",
+      "lastSync": "آخرین همگام‌سازی {when}",
+      "neverSynced": "هرگز همگام‌سازی نشده",
+      "connect": "اتصال",
+      "listings": "آگهی‌ها",
+      "noListings": "هنوز آگهی بازار ثبت نشده",
+      "noListingsBody": "برای انتشار، یک پیشنهاد را از صفحه پیشنهادها به یک کانال متصل کنید.",
+      "resync": "همگام‌سازی مجدد",
+      "publish": "انتشار",
+      "reconcile": "تطبیق",
+      "inventoryMismatch": "موجودی منتشرشده ({published}) با موجودی پت‌لایف ({canonical}) تفاوت دارد.",
+      "noDiscrepancy": "مغایرتی یافت نشد.",
+      "discrepancy": {
+        "INVENTORY_MISMATCH": "مغایرت موجودی یافت شد.",
+        "PRICE_MISMATCH": "مغایرت قیمت یافت شد.",
+        "LISTING_STATUS_MISMATCH": "مغایرت وضعیت آگهی یافت شد.",
+        "ORDER_STATUS_MISMATCH": "مغایرت وضعیت سفارش یافت شد.",
+        "UNKNOWN_PROVIDER_REFERENCE": "نیاز به نگاشت آگهی."
+      }
+    },
+    "team": {
+      "title": "تیم",
+      "loading": "در حال بارگذاری تیم…",
+      "retry": "تلاش مجدد",
+      "invite": "دعوت عضو جدید",
+      "inviteIdentifier": "ایمیل یا شماره تماس",
+      "inviteHint": "باید از قبل حساب پت‌لایف داشته باشد.",
+      "role": "نقش",
+      "inviteAction": "دعوت",
+      "inviteFailed": "دعوت این فرد ممکن نشد.",
+      "statusLabel": {
+        "PENDING": "در انتظار",
+        "ACTIVE": "فعال",
+        "DEACTIVATED": "غیرفعال"
+      },
+      "remove": "حذف",
+      "roles": {
+        "OWNER": "مالک",
+        "ADMIN": "مدیر",
+        "OPERATIONS": "عملیات",
+        "CATALOG_MANAGER": "مدیر کاتالوگ",
+        "ORDER_MANAGER": "مدیر سفارشات",
+        "FINANCE": "مالی",
+        "SUPPORT": "پشتیبانی",
+        "VIEWER": "مشاهدهگر"
+      }
+    },
+    "settings": {
+      "title": "تنظیمات",
+      "loading": "در حال بارگذاری تنظیمات…",
+      "retry": "تلاش مجدد",
+      "verificationNote": "جزئیات حقوقی و تأییدیه توسط بازبینی پت‌لایف مدیریت می‌شود و از اینجا قابل ویرایش نیست.",
+      "supportEmail": "ایمیل پشتیبانی",
+      "supportPhone": "تلفن پشتیبانی",
+      "city": "شهر",
+      "timezone": "منطقه زمانی",
+      "description": "توضیحات",
+      "save": "ذخیره",
+      "saved": "ذخیره شد"
+    }
   }
 }

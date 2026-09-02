@@ -942,9 +942,12 @@ export enum SellerVerificationStatus {
 }
 
 export enum SellerStatus {
+  PENDING = "PENDING",
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
   SUSPENDED = "SUSPENDED",
+  RESTRICTED = "RESTRICTED",
+  CLOSED = "CLOSED",
 }
 
 export enum ProductStatus {
