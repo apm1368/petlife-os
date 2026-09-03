@@ -156,6 +156,16 @@ export class SupportCaseService {
     } else if (supportCase.relatedEntityType === "BOOKING" && supportCase.relatedEntityId) {
       const booking = await this.prisma.booking.findUnique({ where: { id: supportCase.relatedEntityId } });
       if (booking) relatedEntity = { type: "BOOKING", id: booking.id, summary: `${booking.category} booking on ${booking.startAt.toISOString()}` };
+    } else if (supportCase.relatedEntityType === "REFUND" && supportCase.relatedEntityId) {
+      const refund = await this.prisma.refund.findUnique({ where: { id: supportCase.relatedEntityId } });
+      if (refund) relatedEntity = { type: "REFUND", id: refund.id, summary: `Refund — ${refund.status} — ${refund.amount.toLocaleString()} ${refund.currency}` };
+    } else if (supportCase.relatedEntityType === "SELLER_SETTLEMENT" && supportCase.relatedEntityId) {
+      // Handoff 14 — a coarse reference only (status/net amount), never bank/payout detail (spec: "without leaking unauthorized data").
+      const settlement = await this.prisma.sellerSettlement.findUnique({ where: { id: supportCase.relatedEntityId } });
+      if (settlement) relatedEntity = { type: "SELLER_SETTLEMENT", id: settlement.id, summary: `Settlement ${settlement.reference} — ${settlement.status} — ${settlement.netIrr.toLocaleString()} ${settlement.currency}` };
+    } else if (supportCase.relatedEntityType === "MARKETPLACE_SETTLEMENT_STATEMENT" && supportCase.relatedEntityId) {
+      const statement = await this.prisma.marketplaceSettlementStatement.findUnique({ where: { id: supportCase.relatedEntityId } });
+      if (statement) relatedEntity = { type: "MARKETPLACE_SETTLEMENT_STATEMENT", id: statement.id, summary: `${statement.provider} statement — ${statement.totalAmount.toLocaleString()} ${statement.currency}` };
     } else if (supportCase.relatedEntityType && supportCase.relatedEntityId) {
       relatedEntity = { type: supportCase.relatedEntityType, id: supportCase.relatedEntityId, summary: supportCase.relatedEntityId };
     }

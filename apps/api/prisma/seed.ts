@@ -2,17 +2,32 @@ import { hashPassword } from "../src/common/password/password-hash.util";
 import {
   AdminMembershipStatus,
   AdminRole,
+  DeliveryResponsibility,
   DietType,
+  FinancialConfidence,
   HealthAreaKnowledgeState,
   HouseholdRole,
   InternalNoteEntityType,
+  LedgerEntryDirection,
   LocationMode,
+  MarketplaceChannelAccountStatus,
+  MarketplaceOrderStatus,
+  MarketplaceProvider,
+  MarketplaceReconciliationStatus,
+  MarketplaceSettlementImportSource,
+  OrderOrigin,
+  OrderStatus,
+  PaymentSourceType,
   PetSpecies,
+  Prisma,
   PrismaClient,
   ProviderServiceType,
   ProviderType,
   ProviderUserRole,
   ProviderVerificationStatus,
+  RefundStatus,
+  SellerLedgerAccountCode,
+  SellerSettlementStatus,
   SellerStatus,
   SellerVerificationStatus,
   ServiceCategory,
@@ -153,6 +168,7 @@ async function seedCommerce() {
   ]);
 
   console.log(`Seeded commerce: sellers=[${petBazaar.id}, ${golestan.id}] products=[${adultDogFood.id}, ${kittenFood.id}, ${trainingTreats.id}, ${groomingWipes.id}, ${travelCarrier.id}]`);
+  return { petBazaar, golestan };
 }
 
 /**
@@ -245,14 +261,19 @@ async function seedServiceProvider(opts: {
  * logs the code) — there is no separate admin credential system.
  */
 async function seedAdmin(requesterUserId: string, requesterDisplayName: string) {
-  const [rootAdminUser, supportAdminUser] = await Promise.all([
+  const [rootAdminUser, supportAdminUser, financeAdminUser] = await Promise.all([
     prisma.user.upsert({ where: { email: "admin@example.com" }, update: {}, create: { email: "admin@example.com", displayName: "Root Admin", locale: "en" } }),
     prisma.user.upsert({ where: { email: "support-admin@example.com" }, update: {}, create: { email: "support-admin@example.com", displayName: "Support Agent", locale: "en" } }),
+    // Handoff 14 — a dedicated FINANCE-role admin so seller settlement seed
+    // data demonstrates real two-person control (initiator != approver)
+    // rather than always using the same SUPER_ADMIN for both roles.
+    prisma.user.upsert({ where: { email: "finance-admin@example.com" }, update: {}, create: { email: "finance-admin@example.com", displayName: "Finance Admin", locale: "en" } }),
   ]);
 
-  const [rootAdmin, supportAdmin] = await Promise.all([
+  const [rootAdmin, supportAdmin, financeAdmin] = await Promise.all([
     prisma.adminUser.upsert({ where: { userId: rootAdminUser.id }, update: {}, create: { userId: rootAdminUser.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } }),
     prisma.adminUser.upsert({ where: { userId: supportAdminUser.id }, update: {}, create: { userId: supportAdminUser.id, role: AdminRole.SUPPORT, status: AdminMembershipStatus.ACTIVE } }),
+    prisma.adminUser.upsert({ where: { userId: financeAdminUser.id }, update: {}, create: { userId: financeAdminUser.id, role: AdminRole.FINANCE, status: AdminMembershipStatus.ACTIVE } }),
   ]);
 
   const existingCase = await prisma.supportCase.findFirst({ where: { requesterUserId, caseNumber: "CASE-000001" } });
@@ -277,8 +298,337 @@ async function seedAdmin(requesterUserId: string, requesterDisplayName: string) 
     });
   }
 
-  console.log(`Seeded admin: root=${rootAdminUser.email} support=${supportAdminUser.email} (both sign in via OTP, same as any consumer account)`);
-  return { rootAdmin, supportAdmin };
+  console.log(`Seeded admin: root=${rootAdminUser.email} support=${supportAdminUser.email} finance=${financeAdminUser.email} (all sign in via OTP, same as any consumer account)`);
+  return { rootAdmin, supportAdmin, financeAdmin };
+}
+
+/** Minimal raw-Prisma mirror of SellerLedgerService.getOrCreateAccount — this script has no NestJS DI container to inject the real service into, so every seed function in this file talks to Prisma directly (see e.g. seedCommerce's own inline `createOffer` helper). */
+async function seedLedgerAccount(sellerOrganizationId: string, code: SellerLedgerAccountCode) {
+  const existing = await prisma.sellerLedgerAccount.findUnique({ where: { sellerOrganizationId_code: { sellerOrganizationId, code } } });
+  if (existing) return existing;
+  return prisma.sellerLedgerAccount.create({ data: { sellerOrganizationId, code } });
+}
+
+/** Mirrors SellerLedgerService.recordBalanced — a balanced two-line posting against already-seeded SellerLedgerAccount rows. */
+async function seedLedgerPosting(
+  sellerOrganizationId: string,
+  description: string,
+  referenceType: string,
+  referenceId: string,
+  debit: { code: SellerLedgerAccountCode; amount: number },
+  credit: { code: SellerLedgerAccountCode; amount: number },
+  sellerSettlementId?: string,
+) {
+  if (debit.amount !== credit.amount) throw new Error(`seedLedgerPosting: unbalanced (${debit.amount} vs ${credit.amount})`);
+  const [debitAccount, creditAccount] = await Promise.all([seedLedgerAccount(sellerOrganizationId, debit.code), seedLedgerAccount(sellerOrganizationId, credit.code)]);
+  const transaction = await prisma.sellerLedgerTransaction.create({
+    data: { sellerOrganizationId, description, referenceType, referenceId, sellerSettlementId: sellerSettlementId ?? null },
+  });
+  await prisma.sellerLedgerEntry.createMany({
+    data: [
+      { sellerLedgerTransactionId: transaction.id, sellerLedgerAccountId: debitAccount.id, direction: LedgerEntryDirection.DEBIT, amount: debit.amount },
+      { sellerLedgerTransactionId: transaction.id, sellerLedgerAccountId: creditAccount.id, direction: LedgerEntryDirection.CREDIT, amount: credit.amount },
+    ],
+  });
+  return transaction;
+}
+
+/**
+ * Marketplace & Seller Financial Settlement fixtures (Handoff 14) — every
+ * dollar amount here is deterministic and hand-computed (never generated
+ * from a live commission calculation), so the numbers a QA session sees in
+ * the Seller/Admin Finance UI are exactly what this comment says they are.
+ * No real bank/payout details anywhere (spec: "no real bank details") —
+ * `payoutReferenceMasked` is a fabricated placeholder string, and payout
+ * method stays MANUAL throughout, same as production until a real provider
+ * exists (see README "External provider status").
+ *
+ * Produces, per the spec's own seed checklist:
+ *  - a SellerFinancialAccount for both commerce sellers (Pet Bazaar Tehran, Golestan Pet Supplies)
+ *  - a direct PET LIFE order's financials (Pet Bazaar) — pending, unswept
+ *  - a DEV marketplace order's financials (Pet Bazaar) — pending, unswept
+ *  - a PAID settlement, above the two-person-control threshold (Golestan) — FINANCE admin initiates, SUPER_ADMIN approves
+ *  - a refund-adjusted order (Golestan) — sale then full refund, nets to zero before ever being settled
+ *  - a reconciliation mismatch example (Golestan, DEV marketplace) — the imported statement disagrees with internal order economics
+ */
+async function seedSellerFinance(input: { petBazaar: { id: string }; golestan: { id: string }; financeAdmin: { id: string }; rootAdmin: { id: string } }) {
+  const { petBazaar, golestan, financeAdmin, rootAdmin } = input;
+
+  const [petBazaarAccount, golestanAccount] = await Promise.all([
+    prisma.sellerFinancialAccount.upsert({
+      where: { sellerOrganizationId: petBazaar.id },
+      update: {},
+      create: { sellerOrganizationId: petBazaar.id, payoutMethodType: "MANUAL", payoutReferenceMasked: "IBAN **** **** 1234" },
+    }),
+    prisma.sellerFinancialAccount.upsert({
+      where: { sellerOrganizationId: golestan.id },
+      update: {},
+      create: { sellerOrganizationId: golestan.id, payoutMethodType: "MANUAL", payoutReferenceMasked: "IBAN **** **** 5678" },
+    }),
+  ]);
+
+  const defaultCommissionRule = await prisma.commissionRule.upsert({
+    where: { id: "00000000-0000-0000-0000-000000000001" },
+    update: {},
+    create: { id: "00000000-0000-0000-0000-000000000001", sellerOrganizationId: null, channel: null, basisPoints: 1_000, createdByAdminId: financeAdmin.id },
+  });
+
+  const now = new Date();
+  const daysAgo = (n: number) => new Date(now.getTime() - n * 24 * 60 * 60 * 1000);
+
+  const baseOrderData = { discountAmount: 0, currency: "IRR", shippingAddressSnapshot: {} as Prisma.InputJsonValue, confirmedAt: now };
+
+  // --- Pet Bazaar: a direct PET LIFE sale, still pending (unswept) ---
+  const petBazaarDirectOrder = await prisma.order.create({
+    data: { ...baseOrderData, sellerOrganizationId: petBazaar.id, status: OrderStatus.CONFIRMED, subtotalAmount: 5_000_000, deliveryAmount: 0, totalAmount: 5_000_000 },
+  });
+  await prisma.orderFinancialBreakdown.create({
+    data: {
+      orderId: petBazaarDirectOrder.id,
+      sellerOrganizationId: petBazaar.id,
+      origin: OrderOrigin.PET_LIFE,
+      grossMerchandiseIrr: 5_000_000,
+      shippingIrr: 0,
+      discountIrr: 0,
+      shippingResponsibility: DeliveryResponsibility.PETLIFE,
+      commissionRuleId: defaultCommissionRule.id,
+      commissionBasisPoints: 1_000,
+      platformCommissionIrr: 500_000,
+      channelFeeIrr: 0,
+      channelFeeConfidence: FinancialConfidence.KNOWN,
+      sellerGrossIrr: 5_000_000,
+      sellerNetIrr: 4_500_000,
+    },
+  });
+  await seedLedgerPosting(petBazaar.id, "Order sale", "ORDER_SALE", petBazaarDirectOrder.id, { code: SellerLedgerAccountCode.RECEIVABLE, amount: 4_500_000 }, { code: SellerLedgerAccountCode.SALES_INCOME, amount: 4_500_000 });
+
+  // --- Pet Bazaar: a DEV marketplace sale, still pending (unswept) — deliberately no PaymentIntent, PET LIFE OS never collected this cash ---
+  const petBazaarMarketplaceOrder = await prisma.order.create({
+    data: { ...baseOrderData, sellerOrganizationId: petBazaar.id, status: OrderStatus.CONFIRMED, subtotalAmount: 3_000_000, deliveryAmount: 0, totalAmount: 3_000_000 },
+  });
+  await prisma.orderFinancialBreakdown.create({
+    data: {
+      orderId: petBazaarMarketplaceOrder.id,
+      sellerOrganizationId: petBazaar.id,
+      origin: OrderOrigin.DEV_MARKETPLACE,
+      grossMerchandiseIrr: 3_000_000,
+      shippingIrr: 0,
+      discountIrr: 0,
+      shippingResponsibility: DeliveryResponsibility.MARKETPLACE,
+      commissionRuleId: defaultCommissionRule.id,
+      commissionBasisPoints: 1_000,
+      platformCommissionIrr: 300_000,
+      channelFeeIrr: 60_000,
+      channelFeeConfidence: FinancialConfidence.ESTIMATED,
+      sellerGrossIrr: 3_000_000,
+      sellerNetIrr: 2_700_000,
+    },
+  });
+  await seedLedgerPosting(
+    petBazaar.id,
+    "Order sale",
+    "ORDER_SALE",
+    petBazaarMarketplaceOrder.id,
+    { code: SellerLedgerAccountCode.RECEIVABLE, amount: 2_700_000 },
+    { code: SellerLedgerAccountCode.SALES_INCOME, amount: 2_700_000 },
+  );
+
+  // --- Golestan: a large direct sale, swept into a PAID settlement requiring two-person control (netIrr >= SETTLEMENT_APPROVAL_THRESHOLD_IRR) ---
+  const golestanSettledOrder = await prisma.order.create({
+    data: { ...baseOrderData, sellerOrganizationId: golestan.id, status: OrderStatus.CONFIRMED, subtotalAmount: 15_000_000, deliveryAmount: 0, totalAmount: 15_000_000 },
+  });
+  await prisma.orderFinancialBreakdown.create({
+    data: {
+      orderId: golestanSettledOrder.id,
+      sellerOrganizationId: golestan.id,
+      origin: OrderOrigin.PET_LIFE,
+      grossMerchandiseIrr: 15_000_000,
+      shippingIrr: 0,
+      discountIrr: 0,
+      shippingResponsibility: DeliveryResponsibility.PETLIFE,
+      commissionRuleId: defaultCommissionRule.id,
+      commissionBasisPoints: 1_000,
+      platformCommissionIrr: 1_500_000,
+      channelFeeIrr: 0,
+      channelFeeConfidence: FinancialConfidence.KNOWN,
+      sellerGrossIrr: 15_000_000,
+      sellerNetIrr: 13_500_000,
+    },
+  });
+  const golestanSaleTxn = await seedLedgerPosting(
+    golestan.id,
+    "Order sale",
+    "ORDER_SALE",
+    golestanSettledOrder.id,
+    { code: SellerLedgerAccountCode.RECEIVABLE, amount: 13_500_000 },
+    { code: SellerLedgerAccountCode.SALES_INCOME, amount: 13_500_000 },
+  );
+
+  const settlementSeqRows = await prisma.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('seller_settlement_reference_seq') AS nextval`;
+  const settlementSeq = settlementSeqRows[0]!.nextval;
+  const golestanSettlement = await prisma.sellerSettlement.create({
+    data: {
+      reference: `STL-${settlementSeq.toString().padStart(6, "0")}`,
+      sellerOrganizationId: golestan.id,
+      periodStart: daysAgo(14),
+      periodEnd: daysAgo(1),
+      status: SellerSettlementStatus.PAID,
+      grossIrr: 15_000_000,
+      commissionIrr: 1_500_000,
+      refundsIrr: 0,
+      adjustmentsIrr: 0,
+      netIrr: 13_500_000,
+      initiatedByAdminId: financeAdmin.id,
+      approvedByAdminId: rootAdmin.id,
+      approvedAt: daysAgo(1),
+      paidAt: now,
+      payoutMethodType: golestanAccount.payoutMethodType,
+    },
+  });
+  await prisma.sellerSettlementItem.create({
+    data: {
+      sellerSettlementId: golestanSettlement.id,
+      sourceType: "ORDER",
+      sourceId: golestanSettledOrder.id,
+      grossAmount: 15_000_000,
+      feeAmount: 1_500_000,
+      netAmount: 13_500_000,
+      description: `Order sale — ${golestanSettledOrder.id}`,
+    },
+  });
+  await prisma.sellerLedgerTransaction.update({ where: { id: golestanSaleTxn.id }, data: { sellerSettlementId: golestanSettlement.id } });
+  await seedLedgerPosting(
+    golestan.id,
+    "Settlement payout",
+    "SETTLEMENT_PAYMENT",
+    golestanSettlement.id,
+    { code: SellerLedgerAccountCode.SETTLEMENT_PAID, amount: 13_500_000 },
+    { code: SellerLedgerAccountCode.RECEIVABLE, amount: 13_500_000 },
+    golestanSettlement.id,
+  );
+
+  // --- Golestan: a refund-adjusted order — sold, then fully refunded before ever being swept into a settlement, netting to zero ---
+  const golestanRefundedOrder = await prisma.order.create({
+    data: { ...baseOrderData, sellerOrganizationId: golestan.id, status: OrderStatus.REFUNDED, subtotalAmount: 2_000_000, deliveryAmount: 0, totalAmount: 2_000_000 },
+  });
+  await prisma.orderFinancialBreakdown.create({
+    data: {
+      orderId: golestanRefundedOrder.id,
+      sellerOrganizationId: golestan.id,
+      origin: OrderOrigin.PET_LIFE,
+      grossMerchandiseIrr: 2_000_000,
+      shippingIrr: 0,
+      discountIrr: 0,
+      shippingResponsibility: DeliveryResponsibility.PETLIFE,
+      commissionRuleId: defaultCommissionRule.id,
+      commissionBasisPoints: 1_000,
+      platformCommissionIrr: 200_000,
+      channelFeeIrr: 0,
+      channelFeeConfidence: FinancialConfidence.KNOWN,
+      sellerGrossIrr: 2_000_000,
+      sellerNetIrr: 1_800_000,
+    },
+  });
+  await seedLedgerPosting(
+    golestan.id,
+    "Order sale",
+    "ORDER_SALE",
+    golestanRefundedOrder.id,
+    { code: SellerLedgerAccountCode.RECEIVABLE, amount: 1_800_000 },
+    { code: SellerLedgerAccountCode.SALES_INCOME, amount: 1_800_000 },
+  );
+  const golestanRefund = await prisma.refund.create({
+    data: { orderId: golestanRefundedOrder.id, amount: 2_000_000, currency: "IRR", status: RefundStatus.SUCCEEDED, reason: "Customer changed their mind", completedAt: now },
+  });
+  await seedLedgerPosting(
+    golestan.id,
+    "Order refund",
+    "ORDER_REFUND",
+    golestanRefund.id,
+    { code: SellerLedgerAccountCode.SALES_INCOME, amount: 1_800_000 },
+    { code: SellerLedgerAccountCode.RECEIVABLE, amount: 1_800_000 },
+  );
+
+  // --- Golestan: a DEV marketplace reconciliation mismatch example ---
+  const golestanChannelAccount = await prisma.marketplaceChannelAccount.create({
+    data: { sellerOrganizationId: golestan.id, provider: MarketplaceProvider.DEV, status: MarketplaceChannelAccountStatus.CONNECTED, displayName: "Golestan DEV Marketplace" },
+  });
+  const golestanMarketplaceInternalOrder = await prisma.order.create({
+    data: { ...baseOrderData, sellerOrganizationId: golestan.id, status: OrderStatus.CONFIRMED, subtotalAmount: 4_000_000, deliveryAmount: 0, totalAmount: 4_000_000 },
+  });
+  const golestanMarketplaceOrder = await prisma.marketplaceOrder.create({
+    data: {
+      provider: MarketplaceProvider.DEV,
+      marketplaceChannelAccountId: golestanChannelAccount.id,
+      sellerOrganizationId: golestan.id,
+      externalOrderId: "DEV-EXT-9001",
+      status: MarketplaceOrderStatus.DELIVERED,
+      currency: "IRR",
+      totalAmount: 4_000_000,
+      deliveryResponsibility: DeliveryResponsibility.MARKETPLACE,
+      paymentSource: PaymentSourceType.MARKETPLACE_COLLECTED,
+      placedAt: daysAgo(10),
+      mappedOrderId: golestanMarketplaceInternalOrder.id,
+    },
+  });
+  await prisma.orderFinancialBreakdown.create({
+    data: {
+      orderId: golestanMarketplaceInternalOrder.id,
+      sellerOrganizationId: golestan.id,
+      origin: OrderOrigin.DEV_MARKETPLACE,
+      grossMerchandiseIrr: 4_000_000,
+      shippingIrr: 0,
+      discountIrr: 0,
+      shippingResponsibility: DeliveryResponsibility.MARKETPLACE,
+      commissionRuleId: defaultCommissionRule.id,
+      commissionBasisPoints: 1_000,
+      platformCommissionIrr: 400_000,
+      channelFeeIrr: 80_000,
+      channelFeeConfidence: FinancialConfidence.ESTIMATED,
+      sellerGrossIrr: 4_000_000,
+      sellerNetIrr: 3_600_000,
+    },
+  });
+  await seedLedgerPosting(
+    golestan.id,
+    "Order sale",
+    "ORDER_SALE",
+    golestanMarketplaceInternalOrder.id,
+    { code: SellerLedgerAccountCode.RECEIVABLE, amount: 3_600_000 },
+    { code: SellerLedgerAccountCode.SALES_INCOME, amount: 3_600_000 },
+  );
+
+  const golestanStatement = await prisma.marketplaceSettlementStatement.create({
+    data: {
+      provider: MarketplaceProvider.DEV,
+      marketplaceChannelAccountId: golestanChannelAccount.id,
+      sellerOrganizationId: golestan.id,
+      source: MarketplaceSettlementImportSource.MANUAL,
+      periodStart: daysAgo(30),
+      periodEnd: now,
+      currency: "IRR",
+      totalAmount: 3_700_000,
+      importedByAdminId: financeAdmin.id,
+    },
+  });
+  const golestanStatementLine = await prisma.marketplaceSettlementStatementLine.create({
+    data: { marketplaceSettlementStatementId: golestanStatement.id, externalOrderId: golestanMarketplaceOrder.externalOrderId, amount: 3_700_000, feeConfidence: FinancialConfidence.UNKNOWN },
+  });
+  await prisma.marketplaceReconciliationResult.create({
+    data: {
+      marketplaceSettlementStatementId: golestanStatement.id,
+      marketplaceSettlementStatementLineId: golestanStatementLine.id,
+      marketplaceOrderId: golestanMarketplaceOrder.id,
+      status: MarketplaceReconciliationStatus.MISMATCH,
+      expectedAmount: 4_000_000,
+      statementAmount: 3_700_000,
+      variance: -300_000,
+    },
+  });
+
+  console.log(
+    `Seeded seller finance: accounts=[${petBazaarAccount.id}, ${golestanAccount.id}] paidSettlement=${golestanSettlement.reference} reconciliationMismatch=DEV-EXT-9001`,
+  );
 }
 
 async function main() {
@@ -615,8 +965,9 @@ async function main() {
 
   console.log(`Seeded: user=${sarah.email} household=${household.id} pets=[Luna:${luna.id}, Milo:${milo.id}]`);
 
-  await seedCommerce();
-  await seedAdmin(sarah.id, sarah.displayName);
+  const { petBazaar, golestan } = await seedCommerce();
+  const { rootAdmin, financeAdmin } = await seedAdmin(sarah.id, sarah.displayName);
+  await seedSellerFinance({ petBazaar, golestan, financeAdmin, rootAdmin });
   await seedDemoAccount();
 }
 
