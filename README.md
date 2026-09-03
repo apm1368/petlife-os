@@ -3300,6 +3300,337 @@ INVALID_SUPPORT_CASE_REOPEN      409  reopen attempted from a status other than 
 SUPPORT_CASE_INVALID_REFERENCE   400  a user-created case's householdId/petId/relatedEntity referenced an entity the caller doesn't own — generic across all three to avoid an enumeration oracle
 ```
 
+## Marketplace & Seller Financial Settlement (Handoff 14)
+
+Schema: `prisma/migrations/20260903063100_seller_financial_settlement`
+(additive: 12 new models/enums — `SellerFinancialAccount`, `CommissionRule`,
+`OrderFinancialBreakdown`, `SellerLedgerAccount`/`SellerLedgerTransaction`/
+`SellerLedgerEntry`, `SellerSettlement`/`SellerSettlementItem`,
+`SellerAdjustment`, `MarketplaceSettlementStatement`/
+`MarketplaceSettlementStatementLine`, `MarketplaceReconciliationResult` —
+plus a hand-appended `seller_settlement_reference_seq` sequence and a
+`seller_settlements_approver_not_initiator` `CHECK` constraint, the exact
+two artifacts Prisma's DSL can't express, mirroring `SupportCase.caseNumber`
+and `AdminRefundApproval`'s own precedents). This is the piece Handoff 09
+deliberately left out ("do not entangle Seller OS's launch with the
+ledger") and Handoff 07's own `SELLER_PAYABLE`/`PLATFORM_REVENUE` ledger
+accounts sat unused waiting for: nothing in this codebase previously posted
+a real seller payable for either a PET LIFE OS checkout order or a
+marketplace order. Handoff 07's platform-wide `LedgerService` is extended,
+never replaced (two new methods, `recordSellerAttribution`/
+`recordMarketplaceCommission`, plus a reversal counterpart), and a brand
+new `SellerLedgerService` gives every seller their own private
+double-entry subledger — a second, seller-scoped mirror of the exact same
+`sum(debits) === sum(credits)`-checked-before-every-write discipline
+`LedgerService.recordBalanced()` already enforced, never a looser or
+differently-checked variant.
+
+### Order financial attribution — direct and marketplace sales, one snapshot shape
+
+`SellerFinanceService.attributeDirectSale()`/`attributeMarketplaceSale()`
+each create exactly one `OrderFinancialBreakdown` row per `Order`
+(`@@unique([orderId])` is the idempotency guard, checked by a find-first
+before insert) — a direct PET LIFE OS checkout order is attributed inside
+`CheckoutService.finalizeSuccessfulPayment()`'s own transaction right
+after its `Fulfillment` rows are created; a marketplace order is attributed
+inside `MarketplaceOrderIngestionService`'s transaction, before the
+`MarketplaceOrderReceived` event publishes, so a seller's finance summary
+and their orders list become consistent in the same instant. Both paths
+resolve a commission rate through `CommissionRuleService` (seller-specific
++ channel-specific rows beat seller-specific-any-channel beat
+channel-specific-any-seller beat the platform default — seeded at 1000
+basis points, 10.00%, in `seed.ts`; category-level commission is a
+documented non-goal this phase), and both compute
+`platformCommissionIrr = order.totalAmount - sellerNetIrr` — a *derived
+balancer*, never an independently-rounded `gross × bps` figure — so the
+two-account ledger posting this produces (`recordSellerAttribution` debits
+`CUSTOMER_PAYMENT_CLEARING`/credits `SELLER_PAYABLE`+`PLATFORM_REVENUE`
+split by that same commission) always balances exactly against what the
+customer actually paid, by construction, never by a rounding coincidence.
+A marketplace order additionally applies `DEV_MARKETPLACE_SIMULATED_CHANNEL_FEE_BPS`
+(a fixed, deterministic 2% simulated channel fee — spec: "DEV marketplace
+may use deterministic simulated fee rules... never fabricate a real
+provider's fee schedule") and never creates a `PaymentIntent` — a
+marketplace customer pays the marketplace, not PET LIFE OS, so
+`recordMarketplaceCommission` posts only the platform's own commission
+share, never a fabricated full-payment entry (the same "never fabricate
+`PaymentIntent` for marketplace-collected payments" invariant Handoff 09
+established, carried forward unchanged). `shippingResponsibility` is read
+once, at attribution time, from the order's own `Fulfillment` (`PETLIFE`
+when none exists — a marketplace order never gets one), so shipping cost
+ownership is never assumed.
+
+### The seller subledger and the sweep pattern
+
+`SellerLedgerAccount` mirrors `LedgerAccount`'s own shape per seller —
+`RECEIVABLE`/`SALES_INCOME`/`SETTLEMENT_PAID`/`ADJUSTMENT`, seeded
+on-demand by `getOrCreateAccount()` — with `RECEIVABLE`'s running balance
+*being* the seller's payable balance (spec: "prefer a derived balance from
+ledger/subledger entries... never a mutable summary column"). Every
+mutation — a sale, a refund, an adjustment, a settlement payment/reversal —
+posts through `SellerLedgerService.recordBalanced()` and creates exactly
+one append-only `SellerLedgerTransaction`. The one field on that row that
+ever changes after creation is `sellerSettlementId`: it starts `NULL` and
+flips exactly once, when `sweepTransactions()` claims it into a real
+settlement — that single flip is the *entire* idempotency and
+double-settlement-protection mechanism. `SellerFinanceReadService
+.getBalance()` derives `pendingIrr`/`availableIrr`/`reservedIrr`/`paidIrr`
+by joining every `RECEIVABLE` entry to its transaction's settlement status
+on every read; there is no stored balance column anywhere to drift out of
+sync with the entries that are supposed to explain it.
+
+### Settlement lifecycle: Calculate → Approve → Payout, with two-person control
+
+`SellerSettlementStatus` (`CALCULATED → APPROVED → PAID`, or `CANCELLED`
+before payout, or `FAILED` after) is deliberately narrower than the
+spec's own suggested superset — no `DRAFT`/`READY`/`PROCESSING`/
+`PARTIALLY_PAID` — because `calculate()` always produces a fully-computed
+settlement in one atomic step (there is no separate "preview" stage; a
+caller wanting a preview reads `SellerLedgerService.getUnsweptTransactions`
+directly without calling `calculate()`) and this phase's payout is
+`MANUAL`-only (no async payout provider ever leaves a settlement
+mid-transfer), so `PROCESSING`/`PARTIALLY_PAID` are genuinely
+unreachable rather than merely unwired. `AdminSellerSettlementService`
+lives inside `AdminModule` (`admin/finance/`), not the seller-finance
+domain module — the exact layering precedent `AdminRefundService`
+established in Handoff 11, since every mutation here needs
+`AdminAuditLogService` and putting it in `SellerFinanceModule` would create
+a circular import. `calculate()` selects every `SellerLedgerTransaction`
+still unswept for the seller up to `periodEnd`, sweeps them in the same
+transaction, and generates a human-readable `reference` ("STL-000123")
+from a dedicated Postgres sequence — the same device
+`SupportCase.caseNumber` already established. Two-person control mirrors
+`AdminRefundApproval` exactly: `initiatedByAdminId`/`approvedByAdminId`
+plus the hand-appended `seller_settlements_approver_not_initiator` `CHECK`
+constraint, an application-layer self-approval guard
+(`SellerSettlementSelfApprovalException`), and a configurable
+`SETTLEMENT_APPROVAL_THRESHOLD_IRR` (default 10,000,000 IRR / 1,000,000
+Toman) above which `payout()` refuses to proceed without a prior
+`APPROVED` transition by a *different* admin
+(`SellerSettlementApprovalRequiredException`). A settlement that nets to
+zero or negative (refunds fully offsetting the period) is still recorded
+`PAID` for bookkeeping continuity, with no `SETTLEMENT_PAYMENT` posting —
+`recordBalanced()` rejects non-positive amounts by design.
+`cancel()`/`markFailed()` are the two reversal paths: cancelling before any
+money moved simply un-sweeps the settlement's transactions (`sellerSettlementId`
+back to `NULL`) so the next calculation picks them up again — no ledger
+entry needs reversing since nothing was ever paid; marking an already-`PAID`
+settlement failed posts a real correcting `SETTLEMENT_PAID`-reversing
+transaction instead, never rewriting the paid settlement's own history.
+
+**Idempotency/concurrency** (spec Flows D, M, N): `calculate()`'s sweep is
+a single `UPDATE ... WHERE sellerSettlementId IS NULL` — Postgres row-locks
+each `SellerLedgerTransaction` during that update, so two concurrent
+`calculate()` calls for the same seller/period both read the same unswept
+set, but only one can actually claim every row it asked for; the loser's
+sweep count comes back short, `calculate()` treats that mismatch as a hard
+failure, and the *entire* transaction — including the settlement and item
+rows it had just created — rolls back, leaving only the winner's settlement
+standing. **This is why the e2e suite logs one expected `ERROR
+[ApiExceptionFilter] PrismaClientUnknownRequestError` line during Flow D**
+(and again for the analogous refund-race Flow M) — it is the losing
+racer's own transaction aborting exactly as designed, not a bug; see Known
+limitations. `approve()`/`payout()`/`cancel()`/`markFailed()` each open
+with `SELECT ... FOR UPDATE` on the settlement row itself (the same
+row-locking discipline `InventoryReservationService` established in
+Handoff 06), and `payout()` additionally short-circuits to a plain re-read
+when the settlement is already `PAID` — a duplicate payout call (retried
+`Idempotency-Key`, or a genuine concurrent double-click) is answered with
+the same result rather than a second `SETTLEMENT_PAID` posting, proven by
+a dedicated Flow N test asserting exactly one payment transaction exists
+afterward.
+
+### Refund and adjustment financial impact
+
+`RefundsService.refundPayment()`/`refundFinancing()` each call
+`SellerFinanceService.applyRefundImpact()` inside the exact same
+transaction as `LedgerService.recordRefundSucceeded()` — a refund posts a
+new, unswept `SellerLedgerTransaction` reversing that seller's share of the
+original sale (debiting `RECEIVABLE`, using the same
+`platformShareIrr = refundAmountIrr - sellerImpactIrr` derived-balancer
+pattern the original attribution used, via
+`LedgerService.recordSellerAttributionReversal()`), never editing the
+original `OrderFinancialBreakdown` snapshot in place. Because the sweep
+flag is the only thing that determines "already settled," a refund's
+timing relative to settlement changes nothing about *how* it posts, only
+*when* it gets swept: refunding before a settlement exists simply reduces
+what the next `calculate()` sweeps (Flow E — the pending receivable shrinks
+back toward zero); refunding an order whose settlement was already `PAID`
+posts a fresh negative transaction that the *next* settlement picks up as
+a negative carry-forward line, never rewriting the already-paid
+settlement's own historical numbers (Flow F). `AdminSellerAdjustmentService
+.create()` is the sole other write path onto a seller's balance — no
+arbitrary balance editing anywhere else in the codebase — requiring
+`amountIrr`/`reason`/a closed `SellerAdjustmentReasonCode`
+(`SHIPPING_COMPENSATION`/`MANUAL_CREDIT`/`MANUAL_DEBIT`/
+`MARKETPLACE_PENALTY`/`CORRECTION`) and posting immediately as its own
+unswept `SellerLedgerTransaction`, picked up by whichever settlement
+calculates next — exactly like a sale or a refund, never a shortcut around
+the same sweep mechanism.
+
+### Marketplace settlement import + reconciliation — honest and non-destructive
+
+No official Torob or Digikala settlement API exists for this project (see
+"External provider status" below) — `AdminMarketplaceSettlementService
+.import()` accepts an already-normalized statement (`source`: `MANUAL` or
+`CSV_IMPORT` this phase; `API` is modeled in the enum for a future real
+integration that would need no schema change) rather than building any
+CSV-parsing-specific machinery, and `@@unique([marketplaceChannelAccountId,
+periodStart, periodEnd])` makes re-importing the same channel/period
+converge on the existing statement (a caught `P2002`, mirroring the exact
+idempotency pattern `MarketplaceOrderIngestionService` already
+established) rather than erroring or duplicating (Flow I). `reconcile()`
+runs inside the same transaction as `import()` so a statement is never
+left without its findings, even momentarily, and produces one
+`MarketplaceReconciliationResult` per statement line — `MATCHED` (exact
+amount match against that order's own `OrderFinancialBreakdown
+.grossMerchandiseIrr`), `MISMATCH` (a real `variance`), `MISSING_INTERNAL`
+(the statement names an external order this codebase never ingested),
+`DUPLICATE` (a re-reported already-`MATCHED` external order), or
+`REVIEW_REQUIRED` (the matching `MarketplaceOrder` exists but its
+`OrderFinancialBreakdown` doesn't yet — ingestion mid-flight) — plus a
+reverse pass producing `MISSING_EXTERNAL` for internal marketplace orders
+in that same seller/channel/period the statement never mentioned at all.
+**Reconciliation never mutates a canonical financial record** (spec:
+"mismatch → flag → admin review → explicit adjustment/correction if
+needed, NEVER auto-correct") — `resolve()` only ever sets `notes`/
+`resolvedByAdminId`/`resolvedAt` on the finding row itself; a genuine
+correction is a separate, fully audited `SellerAdjustment` an admin
+creates deliberately, through the completely separate service above, with
+this service having no code path to the seller ledger at all. A finding
+can only be resolved once (`MarketplaceReconciliationAlreadyResolvedException`)
+— a reopened finding would be a new row, never an edited one, matching the
+ledger's own append-only discipline.
+
+### Admin RBAC — five new `settlement.*`/`sellerFinance.*` permissions, SUPPORT excluded by construction
+
+Five new permissions extend Handoff 11's existing static role-permission
+map in `admin-permissions.ts`: `sellerFinance.view` (read-only, added to
+`READ_ONLY_PERMISSIONS`) and four settlement mutation grants
+(`settlement.calculate`/`settlement.approve`/`settlement.pay`/
+`settlement.adjust`). Per the spec's explicit "do NOT give SUPPORT role
+settlement authority," `AdminRole.SUPPORT` receives none of the five —
+`AdminRole.FINANCE` receives every one including `settlement.pay`
+(payout execution is deliberately FINANCE-only, mirroring how refund
+execution was scoped in Handoff 11), `AdminRole.SUPER_ADMIN` receives
+every one, and `AdminRole.OPERATIONS` receives only `sellerFinance.view`
+(visibility without mutation authority) — proven by a dedicated e2e test
+(Flow K) asserting a SUPPORT-role admin token is rejected with `403` on
+every settlement-mutating route while a FINANCE-role token succeeds.
+Every route in `AdminSellerFinanceController` carries the specific
+permission it performs, never a single coarse "finance" gate.
+
+### Notifications + audit
+
+Three new notification templates (`settlement.ready`/`settlement.paid`/
+`settlement.failed`, fa/en) route through the existing
+`NotificationOrchestratorService.notify()` pipeline unchanged — no new
+notification infrastructure — via a new `SellerFinanceNotificationListener`
+subscribing to `SellerSettlementCalculated`/`SellerSettlementPaid`/
+`SellerSettlementFailed`, each deep-linking to the new
+`sellerSettlementDetail()` route via `notification-deeplink.util.ts`. Eight
+new `AdminAuditAction` values (`seller_settlement.calculated/approved/paid/
+cancelled/failed`, `seller_adjustment.created`,
+`marketplace_settlement.imported`, `marketplace_reconciliation.resolved`)
+extend Handoff 11's existing append-only `AdminAuditLogService` — every
+settlement/adjustment/reconciliation mutation is recorded through the
+exact same `auditLog.record()` call every other admin-mutating service
+already uses, with `reason` required wherever the action is a reversal or
+correction (cancel, mark-failed, resolve). `SupportCaseService.getContext()`
+gained three new `relatedEntity` branches (`REFUND`/`SELLER_SETTLEMENT`/
+`MARKETPLACE_SETTLEMENT_STATEMENT`) resolving to a coarse summary (amount,
+status, reference) for the admin support context panel — never a bank
+detail, never a raw ledger row.
+
+### Seller OS Finance UI + Admin Finance UI
+
+A new "Finance" nav item in `SellerShell.tsx` reaches four read-only
+pages — `/seller/finance` (balance tiles in Toman, next-settlement-eligible
+figure, last settlement), `/seller/finance/transactions` (paginated
+Order/Gross/Commission/Net/Settlement-status history), `/seller/finance/settlements`
+and its `/:id` detail (full gross/commission/refunds/adjustments/net
+breakdown plus every swept line item) — gated by the pre-existing
+`SellerMembershipRole.FINANCE` (`OWNER`/`ADMIN` always pass, per
+`SellerAuthGuard`'s existing precedent), registered inside `SellerOsModule`
+rather than `SellerFinanceModule` to avoid a circular import
+(`SellerAuthGuard` lives in `SellerOsModule`). Two new Admin workspace
+sections — "Seller Finance" (search a seller, inspect balance, drill into
+one seller's settlements/adjustments and calculate a new settlement) and
+"Reconciliation" (every `MarketplaceReconciliationResult` finding, with a
+resolve-with-notes action) — both gated on `sellerFinance.view`, plus a
+settlement detail page exposing Approve/Payout/Cancel/Mark-failed actions
+each gated on their own specific permission and each disabled/enabled per
+the current status (e.g. "Mark payout failed" is only ever reachable from
+`PAID`). Every amount anywhere in both UIs still goes through the one
+existing `formatCurrency()` helper — IRR stays the sole stored,
+authoritative unit; Toman is a display-only ÷10 transform, exactly as
+every prior handoff's UI already established.
+
+### External provider status
+
+```
+Torob      settlement/payout API:  NOT AVAILABLE — no official docs/credentials exist for this project
+Digikala   settlement/payout API:  NOT AVAILABLE — no official docs/credentials exist for this project
+```
+
+Both remain exactly what Handoff 09 already documented them as
+(`DevMarketplaceAdapter`-backed sandbox boundaries for publish/sync/
+order-ingestion) — this handoff adds no new marketplace-adapter surface
+and fabricates no settlement endpoint for either. What this handoff does
+build, honestly, is the *internal* half: expected-settlement computation
+(`OrderFinancialBreakdown.grossMerchandiseIrr` per marketplace order) and
+manual/CSV-shaped statement import + reconciliation against it — the exact
+"if official settlement APIs are unavailable, build the internal
+settlement domain and reconciliation foundation honestly" the spec asked
+for. A future handoff with real Torob/Digikala settlement credentials
+would add an `API`-sourced importer (the enum value already exists) and
+possibly a scheduled pull, without changing `OrderFinancialBreakdown`,
+`SellerLedgerService`, or the reconciliation matching logic at all.
+
+### API endpoints (Handoff 14 additions)
+
+```
+GET    /seller-organizations/:sellerId/finance/summary        (FINANCE role; account + derived balance + last settlement)
+GET    /seller-organizations/:sellerId/finance/transactions   (FINANCE role; paginated Order/Gross/Commission/Net/Settlement-status history)
+GET    /seller-organizations/:sellerId/settlements            (FINANCE role)
+GET    /seller-organizations/:sellerId/settlements/:id        (FINANCE role; full item breakdown)
+
+GET    /admin/seller-finance                                  (sellerFinance.view; search + paginate every seller's balance)
+GET    /admin/seller-finance/:sellerId                        (sellerFinance.view)
+GET    /admin/seller-finance/:sellerId/adjustments             (sellerFinance.view)
+POST   /admin/seller-finance/:sellerId/adjustments             (settlement.adjust; Idempotency-Key supported)
+
+GET    /admin/settlements                                     (sellerFinance.view; optional sellerOrganizationId filter)
+GET    /admin/settlements/:id                                 (sellerFinance.view)
+POST   /admin/settlements/calculate                            (settlement.calculate; Idempotency-Key supported)
+POST   /admin/settlements/:id/approve                          (settlement.approve; rejects self-approval)
+POST   /admin/settlements/:id/payout                           (settlement.pay; Idempotency-Key supported; requires prior APPROVED at/above the configurable threshold)
+POST   /admin/settlements/:id/cancel                           (settlement.adjust; reason required)
+POST   /admin/settlements/:id/mark-failed                      (settlement.adjust; reason required; reverses a PAID settlement)
+POST   /admin/settlements/:id/adjustments                      (settlement.adjust; Idempotency-Key supported — spec's literal route shape, :id only resolves which seller)
+
+POST   /admin/marketplace-settlements/import                   (settlement.calculate; Idempotency-Key supported; re-importing the same channel/period converges, never duplicates)
+GET    /admin/marketplace-settlements                          (sellerFinance.view; optional sellerOrganizationId filter)
+GET    /admin/marketplace-settlements/:id                      (sellerFinance.view)
+GET    /admin/marketplace-reconciliation                       (sellerFinance.view; optional status filter)
+GET    /admin/marketplace-reconciliation/:id                   (sellerFinance.view)
+POST   /admin/marketplace-reconciliation/:id/resolve            (settlement.adjust; notes required; never mutates any financial row)
+```
+
+### Error codes (Handoff 14 additions)
+
+```
+NEGATIVE_PLATFORM_REVENUE                    409  an order's discount exceeds the commission that would normally fund it — not supported this phase
+SELLER_SETTLEMENT_NOT_FOUND                  404
+INVALID_SELLER_SETTLEMENT_TRANSITION         409  a status transition outside CALCULATED→APPROVED→PAID / →CANCELLED / PAID→FAILED
+SELLER_SETTLEMENT_SELF_APPROVAL              409  the admin who calculated a settlement attempted to also approve it
+SELLER_SETTLEMENT_APPROVAL_REQUIRED          409  payout attempted at/above SETTLEMENT_APPROVAL_THRESHOLD_IRR without a prior APPROVED transition by a different admin
+SELLER_ADJUSTMENT_NOT_FOUND                  404
+MARKETPLACE_SETTLEMENT_STATEMENT_NOT_FOUND   404
+MARKETPLACE_RECONCILIATION_RESULT_NOT_FOUND  404
+MARKETPLACE_RECONCILIATION_ALREADY_RESOLVED  409  a finding can only be resolved once — a reopened finding is a new row, never an edited one
+```
+
 ## API endpoints
 
 ```
@@ -4483,6 +4814,67 @@ for order/booking/household; the reopen concurrency race; admin queue
 filters; the admin context panel) plus frontend component tests for the
 four new consumer pages and the two extended admin views.
 
+Everything in the Handoff 14 acceptance criteria: order financial
+attribution for both direct PET LIFE OS checkout sales and external
+marketplace sales, each producing exactly one immutable
+`OrderFinancialBreakdown` snapshot via a configurable, seller/channel-aware
+`CommissionRuleService` (seeded platform default 10.00%), with the
+platform's commission always computed as a derived balancer
+(`order.totalAmount − sellerNetIrr`) so every resulting ledger posting
+balances exactly by construction, never by rounding coincidence; a real
+per-seller double-entry subledger (`SellerLedgerAccount`/
+`SellerLedgerTransaction`/`SellerLedgerEntry`) mirroring Handoff 07's
+platform-wide `LedgerService.recordBalanced()` discipline exactly, with a
+derived (never stored) `pending`/`available`/`reserved`/`paid` balance and
+a single-flip `sellerSettlementId` field as the entire sweep/idempotency
+mechanism; a `Calculate → Approve → Payout` settlement lifecycle with
+genuine two-person control (mirroring `AdminRefundApproval`'s own
+self-approval guard and DB `CHECK` constraint) above a configurable IRR
+threshold, and row-locking concurrency safety proven directly against real
+Postgres races (two concurrent `calculate()` calls for the same period,
+two concurrent `payout()` calls on the same settlement, and a refund
+racing a settlement calculation, all resolving to exactly one correct
+outcome, never a lost or duplicated amount); refund and adjustment
+financial impact posted as fresh unswept ledger transactions rather than
+ever rewriting an already-settled settlement's own history; an honest
+marketplace settlement import + reconciliation foundation (manual/
+CSV-shaped import only, since no official Torob/Digikala settlement API
+exists — see the dedicated section above) that only ever flags findings
+(`MATCHED`/`MISMATCH`/`MISSING_INTERNAL`/`MISSING_EXTERNAL`/`DUPLICATE`/
+`REVIEW_REQUIRED`) and never auto-corrects a canonical financial record; a
+real admin RBAC extension (`sellerFinance.view` plus four
+`settlement.*` mutation permissions) with `SUPPORT` receiving none of
+them and `FINANCE`/`SUPER_ADMIN` receiving every one, proven by a
+dedicated e2e test; notifications routed through Handoff 10's existing
+`NotificationOrchestratorService` unchanged and audit logging routed
+through Handoff 11's existing `AdminAuditLogService` unchanged; a Seller
+OS Finance section (summary/transactions/settlements/settlement detail)
+and an Admin Finance + Reconciliation workspace, both rendering every
+amount through the one existing `formatCurrency()` Toman-display helper;
+deterministic seed data with no real bank details anywhere; and every
+Handoff 01-13 backend/frontend test still green (229 backend e2e
+scenarios — the three pre-existing documented cold-Prisma-connection-pool-
+warmup timeout flakes recur, plus a fourth, previously-undocumented
+instance of the identical symptom on the non-vet provider-services
+discovery path was found and given the same generous explicit timeout
+during this handoff's own final verification pass, see Known limitations —
+and 196 frontend tests, up from 184). Backend e2e coverage for all
+fifteen required flows (A: a direct checkout sale attributes economics and
+grows pending receivable; B: a DEV marketplace sale never fabricates a
+PaymentIntent; C: a large settlement requires approval before payout; D: a
+settlement-calculation concurrency race is provably safe, exactly one
+settlement stands; E: a pre-settlement refund reduces pending receivable;
+F: a post-payout refund creates a negative carry-forward without rewriting
+paid history; G/H: reconciliation MATCHED vs. MISMATCH with correct
+variance; I: duplicate statement import converges, never duplicates; J:
+cross-seller finance isolation; K: SUPPORT excluded from settlement
+authority, FINANCE included; L: settlement self-approval rejected; M: a
+refund-vs-settlement-calculation race is safe; N: a settlement-payout
+concurrency race posts exactly one payment; O: every ledger transaction in
+the whole test file balances) plus dedicated coverage for adjustment
+creation, reconciliation resolve non-mutation, and the support-case
+context-panel financial reference resolution.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -4685,12 +5077,11 @@ four new consumer pages and the two extended admin views.
 - **No seller-facing commerce surface, and no seller settlement** —
   **resolved by Handoff 09** for the commerce surface (a real Seller OS
   dashboard/order view/inventory management/team now exists — see the
-  Handoff 09 section above); seller settlement (a first real posting to
-  `SELLER_PAYABLE`/`PLATFORM_REVENUE`) remains unimplemented — those
-  ledger accounts are still seeded placeholders only, and nothing in
-  Handoff 09 posts to them (deliberately out of scope, per the spec, to
-  avoid entangling this handoff with Ledger/Settlement — see "Next
-  recommended coding handoff" below).
+  Handoff 09 section above) **and resolved by Handoff 14** for seller
+  settlement (a real double-entry seller subledger, a `Calculate → Approve
+  → Payout` settlement lifecycle with two-person control, and real postings
+  to `SELLER_PAYABLE`/`PLATFORM_REVENUE` for both direct and marketplace
+  sales now exist — see the Handoff 14 section above).
 - **No promotion engine** — `Checkout.discountAmount`/`promotionCode` are
   placeholder fields only; nothing ever sets a non-zero discount or
   validates a code this phase.
@@ -4825,13 +5216,16 @@ four new consumer pages and the two extended admin views.
   price is unaffected (it was already locked in), but a *new* quote request
   would reflect the change — consistent with every other commercial
   snapshot in this codebase, just worth calling out explicitly here.
-- **No Torob/Digikala financial settlement** (Handoff 09) — deliberately
-  kept out of scope per the spec, to avoid entangling this handoff with
-  Ledger/Settlement; a marketplace order never posts to
-  `SELLER_PAYABLE`/`PLATFORM_REVENUE`, and there is no concept of a
-  marketplace-collected-vs-PET-LIFE-OS-collected payment split yet. A
-  future dedicated financial handoff should introduce this without
-  touching `MarketplaceOrder`'s ingestion shape.
+- **No Torob/Digikala financial settlement** (Handoff 09) — **resolved by
+  Handoff 14** for the internal half: a marketplace order now posts a real
+  `PLATFORM_REVENUE`-only commission entry (never a fabricated full-payment
+  entry, since the marketplace collects the customer's payment, not PET
+  LIFE OS) and flows through the same seller subledger/settlement engine as
+  a direct sale — see the Handoff 14 section above. The *external* half —
+  a real Torob/Digikala settlement/payout API — remains genuinely
+  unavailable (no official docs or credentials exist for this project);
+  Handoff 14's marketplace statement import/reconciliation is the honest
+  manual/CSV-shaped substitute the spec asked for in that API's absence.
 - **No real merchant credentials or official docs for Torob or Digikala**
   (Handoff 09) — both adapters are documented sandbox boundaries sharing
   `DevMarketplaceAdapter`'s own simulation engine (see the Handoff 09
@@ -5037,64 +5431,114 @@ four new consumer pages and the two extended admin views.
   per-priority SLA targets, no breach alerting; exactly the scope the
   spec asked for ("do NOT build a complex SLA engine yet").
 
+- **A fourth, previously-undocumented instance of the pre-existing
+  cold-Prisma-connection-pool-warmup flake** (see the Handoff 03/04/12
+  bullets above for the same root cause) was found during this handoff's
+  final verification pass — "returns only VERIFIED providers by default
+  when discovering non-vet services" (Handoff 04) occasionally exceeded
+  the default 20s Jest timeout in this sandbox, exactly like its sibling
+  `/providers/vets` test already documented; given the identical explicit
+  60-second timeout rather than fixed by chasing the warm-up cost itself,
+  since the query always eventually succeeds. Unrelated to any Handoff 14
+  change.
+- **Settlement payout is `MANUAL`-only, and genuinely never fakes a bank
+  transfer** — `SellerFinancialAccount.payoutMethodType` is a plain string
+  label (always `"MANUAL"` this phase; `payoutReferenceMasked` is a
+  display-only masked string a future real payout integration would
+  populate), and `AdminSellerSettlementService.payout()` only ever records
+  that a payout *already happened outside this system* (spec: "never fake
+  bank transfer success") — there is no real transfer, no payout provider
+  adapter, and no bank account/credential field anywhere in the schema, by
+  design. `SellerSettlementScheduleType.WEEKLY`/`BIWEEKLY`/`MONTHLY` are
+  defined in the vocabulary (spec: "settlement may run on a cadence") but
+  every seeded account uses `MANUAL`, and nothing schedules a recurring
+  `calculate()` call yet — an admin always triggers one explicitly.
+- **Commission resolution has no category-level matching** —
+  `CommissionRuleService` matches seller-specific and channel-specific
+  rows plus a platform default, but never a product-category-specific
+  rate; a documented non-goal this phase (see the Handoff 14 section
+  above), left for a future handoff if the business needs
+  category-differentiated commission.
+- **`NEGATIVE_PLATFORM_REVENUE` is a hard rejection, not an
+  auto-adjustment** — if an order's discount is large enough that the
+  derived `platformCommissionIrr` balancer would go negative (the
+  commission owed can't cover the discount), attribution is rejected
+  outright rather than the platform silently absorbing a loss or the
+  seller's payout being reduced to compensate; this edge case is
+  documented, not solved, this phase.
+- **Marketplace settlement import has no CSV file upload** — the admin UI
+  accepts one `externalOrderId,amount` pair per line in a plain textarea
+  (`MarketplaceSettlementImportSource.MANUAL`), matching the backend's own
+  "already-normalized lines, not CSV-specific parsing" design; there is no
+  file picker, and `CSV_IMPORT`/`API` exist in the source-type vocabulary
+  for a future handoff to actually wire a file parser or a real
+  provider-fed importer behind, without any schema change.
+- **Reconciliation has no scheduler, like Handoff 07's own payment/
+  financing reconciliation** — `POST /admin/marketplace-settlements/import`
+  is an admin-triggered action only; nothing periodically imports or
+  reconciles a statement automatically.
+- **A settlement-calculation concurrency loss is a full transaction
+  rollback, logged as an `ERROR`** — the documented Flow D/M behavior (see
+  the Handoff 14 section above): the losing racer's entire `calculate()`
+  transaction throws and rolls back rather than partially succeeding, and
+  Nest's global exception filter logs that thrown error at `ERROR` level
+  before returning a `500` to the loser. This is the correct, intended
+  outcome of the row-locking design (proven directly by the concurrency
+  e2e tests, which assert exactly one settlement survives), not a crash to
+  be silenced — a caller that loses this race should simply retry
+  `calculate()`, which will see whatever remains genuinely unswept.
+- **No settlement export/statement PDF** — a settlement's full breakdown
+  is viewable in both the Seller OS and Admin UI, but there is no
+  downloadable PDF/CSV settlement statement a seller could file for their
+  own accounting; out of scope this phase.
+
 ## Next recommended coding handoff
 
-**Marketplace + Seller financial settlement** (Handoff 14), the piece
-Handoff 09 deliberately left out to avoid entangling Seller OS's launch
-with the ledger, and now with a notification layer (Handoff 10), a real
-admin/finance oversight layer (Handoff 11, including
-`AdminRefundService`'s two-person control and read-only order
-financials), and real account creation via Google/phone/password with
-public browsing (Handoff 12) all in place to actually tell a seller their
-payable changed and give finance staff visibility into it: a genuinely
-complete Seller OS and
-marketplace-channel architecture exists (real `SellerMembership`
-authorization, inventory with a full audit trail,
-`MarketplaceChannelAdapter` with a working `DevMarketplaceAdapter` and
-sandbox-honest Torob/Digikala boundaries, idempotent order ingestion with
-real oversell protection), but nothing anywhere posts to
-`SELLER_PAYABLE`/`PLATFORM_REVENUE` for either a PET LIFE OS checkout
-order or a marketplace order — those ledger accounts are still Handoff
-07 seed-only placeholders. A natural next step, reusing the exact
-double-entry discipline `LedgerService.recordBalanced()` already
-enforces (never a second ledger-write path, `sum(debits) ===
-sum(credits)` checked before every write): (1) a first real posting
-crediting `SELLER_PAYABLE` (and debiting `CUSTOMER_PAYMENT_CLEARING`)
-for a PET LIFE OS checkout order once its `Fulfillment` reaches
-`DELIVERED`, finally giving Handoff 06/07's ledger foundation a real
-writer; (2) the marketplace-specific piece this handoff exists for —
-deciding and implementing how a *marketplace*-collected payment
-(Torob/Digikala customers pay the marketplace, not PET LIFE OS directly)
-reconciles against `MarketplaceOrder`/`Order` without ever fabricating a
-`PaymentIntent` PET LIFE OS never actually processed (the spec's own
-"never fabricate PaymentIntent for marketplace-collected payments"
-constraint from Handoff 09 carries forward unchanged); (3) a
-refund-adjusted seller payable; and (4) genuine settlement/payout
-execution (an actual transfer to the seller, on some cadence), which
-Handoff 09's own note already flagged as substantial enough to be its
-own follow-up. Once a real posting exists, wire a `seller.payable_updated`
-notification through the existing `NotificationOrchestratorService`
-(Handoff 10) — no new notification infrastructure, just a new
-domain-event listener and a template — and surface it in
-`AdminFinanceService`'s read-only order-financials view (Handoff 11) so
-finance staff can actually see what a seller is owed without a new admin
-surface. Keep `MarketplaceOrder`'s ingestion shape and
-`InventoryMovementService`'s oversell-protection invariants untouched —
-this handoff is additive ledger-posting logic layered on top of what
-already exists, not a rewrite of either.
+**Real payout execution + scheduled settlement automation**, the piece
+Handoff 14 deliberately left `MANUAL`-only. A genuinely complete financial
+settlement architecture now exists end to end (order attribution, a
+real double-entry seller subledger, a two-person-control
+`Calculate → Approve → Payout` lifecycle, refund/adjustment impact,
+marketplace statement import + reconciliation, RBAC, notifications, and
+audit — see the Handoff 14 section above), but `payout()` only ever
+*records* that a transfer happened outside the system; there is no real
+payout provider, no bank account/credential field, and no cadence that
+triggers `calculate()` automatically (`SellerSettlementScheduleType
+.WEEKLY`/`BIWEEKLY`/`MONTHLY` are modeled but unused — every seeded
+account is `MANUAL`). A natural next step, reusing the exact adapter
+discipline `PaymentGateway`/`ShippingGateway`/`MarketplaceChannelAdapter`/
+`MessagingGateway` already established (an interface, a capability map,
+a registry, a `DEV`-prefixed fully-functional default, and
+sandbox-honest real-provider boundaries only where official docs/
+credentials genuinely exist): (1) a `PayoutProvider` interface with a
+`DevPayoutAdapter` that simulates a bank transfer deterministically,
+mirroring `DevPaymentGateway`'s own precedent, so `payout()` gains a real
+(if simulated) execution step instead of a bare status flip; (2) a
+scheduled trigger (the same `setInterval`-poller class of mechanism
+`NotificationDeliveryWorkerService` already uses, not a new job-queue
+dependency) that calls `calculate()` per seller according to their
+account's own `settlementSchedule`, finally giving that enum a reader;
+and (3) once a real payout event exists, wire a `settlement.paid`
+notification's existing template (already built in Handoff 14) to
+include a real payout confirmation reference rather than the manually
+entered `payoutReference` string. Keep `SellerLedgerService.recordBalanced()`'s
+double-entry discipline, the sweep-flag idempotency mechanism, and the
+two-person-control approval gate completely untouched — this handoff is
+additive execution/scheduling logic layered on top of what Handoff 14
+already built, never a rewrite of the settlement engine itself.
 
-A related, smaller option this handoff also unlocks: a `Dispute`
-resolution that leads to a refund still requires an admin to separately
-open the refund flow today (by design — see the Handoff 11 section
-above on why `Dispute` has no FK to `Refund`); a follow-up could add a
-one-click "resolve and initiate refund" convenience action in the Admin
-frontend that simply calls both existing endpoints in sequence from the
-UI — no schema or service change, since the decoupling itself must stay.
+A related, smaller option this handoff also unlocks: `AdminSellerFinanceDetailView`'s
+adjustment form and `AdminMarketplaceReconciliationView`'s import form are
+both minimal, deliberately manual entry points (see the Handoff 14 section
+above); a follow-up could add a settlement statement export
+(PDF/CSV, per the Handoff 14 Known Limitations note above) a seller could
+file for their own accounting — no schema or service change, purely a new
+read-only rendering of data that already exists.
 
 Alternatively, if the business prioritizes closing the remaining
-external-provider gaps instead of building settlement: once real merchant
-credentials/official docs for SnappPay, DigiPay, a standard payment
-gateway, AloPeyk, SnappBox, Torob, Digikala, or Faraz SMS become
+external-provider gaps instead of building payout execution: once real
+merchant credentials/official docs for SnappPay, DigiPay, a standard
+payment gateway, AloPeyk, SnappBox, Torob, Digikala, or Faraz SMS become
 available, swap the corresponding adapter's sandbox/simulation bodies for
 real HTTP calls and a real webhook/signature scheme, without touching
 `PaymentGateway`/`FinancingProvider`/`ShippingGateway`/
@@ -5106,14 +5550,23 @@ real integration is a same-class rewrite, not a new architecture.
 to boot with `PAYMENT_SANDBOX_MODE=production`/`SHIPPING_MODE=production`/
 `MARKETPLACE_SANDBOX_MODE=production`/`MESSAGING_SANDBOX_MODE=production`
 unless the enabled provider's credential env vars are set, specifically
-to make this transition safe. A third option, if the business instead
-wants to build on the notification foundation directly rather than
-close provider gaps: wire the first real scheduled reminder (an
-appointment or vaccination-due reminder) using the `scheduledAt`-driven
-deferral mechanism this handoff already built for quiet hours — the
+to make this transition safe — real Torob/Digikala credentials
+specifically would also finally let a `MarketplaceSettlementImportSource
+.API` importer replace Handoff 14's manual/CSV-shaped one. A third
+option, if the business instead wants to build on the notification
+foundation directly rather than close provider gaps or automate payout:
+wire the first real scheduled reminder (an appointment or
+vaccination-due reminder) using the `scheduledAt`-driven deferral
+mechanism Handoff 10 already built for quiet hours — the
 `NotificationDeliveryWorkerService` poller and `NotificationOrchestratorService.
 notify()` need no change, only a new cron-like trigger deciding *when* to
-call `notify()` for a given booking/pet.
+call `notify()` for a given booking/pet. A fourth, orthogonal option: this
+codebase has flagged the same missing general Account/Settings section
+since Handoff 10 (notification preferences) and Handoff 12 (password
+change) — a dedicated `/account` area consolidating both, plus a home for
+a future payout-method/bank-reference display once Handoff 14's
+`payoutReferenceMasked` field has a real value to show, would resolve
+three handoffs' worth of the identical documented gap at once.
 
 Whichever is chosen, keep `Product`/`SellerOffer`/`InventoryItem` strictly
 separate (never collapse catalog identity, price, and stock back into one
@@ -5121,10 +5574,13 @@ model), keep "1 Checkout → N Orders" and "1 Order → N Fulfillments → N
 Shipments" (schema-ready, MVP uses N=1) as the non-negotiable invariants,
 keep PET LIFE OS's own inventory as the sole source of truth for stock
 (never a marketplace), keep IRR as the only stored currency unit, keep
-every financial write going through `LedgerService.recordBalanced()`,
-every Fulfillment status change through
+every financial write going through `LedgerService.recordBalanced()` or
+its per-seller mirror `SellerLedgerService.recordBalanced()`, every
+Fulfillment status change through
 `FulfillmentTransitionService.transition()`, every inventory mutation
-through `InventoryReservationService`/`InventoryMovementService`, and
-every user-visible notification through
+through `InventoryReservationService`/`InventoryMovementService`, every
+seller balance mutation through `SellerLedgerService`'s sweep-flag
+mechanism (never a stored, directly-editable balance column), and every
+user-visible notification through
 `NotificationOrchestratorService.notify()` — never a second write path
 for any of them, no matter how small the change looks.
