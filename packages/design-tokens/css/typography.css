@@ -9,20 +9,20 @@
   --font-fa: var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
   --font-en: var(--font-inter, "Inter"), var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
 
-  --text-hero-size: 2.25rem;
+  --text-hero-size: 1.875rem;
   --text-hero-line: 2.75rem;
   --text-hero-weight: 700;
 
-  --text-page-title-size: 1.5rem;
-  --text-page-title-line: 2rem;
-  --text-page-title-weight: 700;
+  --text-page-title-size: 2rem;
+  --text-page-title-line: 3rem;
+  --text-page-title-weight: 600;
 
-  --text-section-title-size: 1.125rem;
-  --text-section-title-line: 1.5rem;
+  --text-section-title-size: 1.25rem;
+  --text-section-title-line: 2rem;
   --text-section-title-weight: 600;
 
   --text-body-size: 1rem;
-  --text-body-line: 1.5rem;
+  --text-body-line: 1.8rem;
   --text-body-weight: 400;
 
   --text-metadata-size: 0.8125rem;

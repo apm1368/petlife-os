@@ -1,9 +1,11 @@
 "use client";
 
+import { consumeLandingIntent } from "@/features/landing/intent";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
-import { Skeleton } from "@petlife/ui";
+import { useLocale, useTranslations } from "next-intl";
+import { ErrorRecovery, Skeleton } from "@petlife/ui";
 import { onboardingService } from "@/services/onboarding.service";
 import { petsService } from "@/services/pets.service";
 import { useOnboardingStore } from "@/stores/onboarding-store";
@@ -40,9 +42,13 @@ type Step = (typeof STEP_ORDER)[number];
 
 export function OnboardingWizard() {
   const [step, setStep] = useState<Step | null>(null);
+  const [error, setError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const update = useOnboardingStore((s) => s.update);
   const router = useRouter();
   const locale = useLocale();
+  const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +58,7 @@ export function OnboardingWizard() {
       if (cancelled) return;
 
       if (progress.status === "COMPLETED" && progress.chapter === "READY") {
-        router.replace(`/${locale}/home`);
+        router.replace(consumeLandingIntent(locale) ?? `/${locale}/home`);
         return;
       }
 
@@ -79,19 +85,35 @@ export function OnboardingWizard() {
       setStep(next);
     }
 
-    void resume();
+    void resume().catch(() => {
+      if (!cancelled) setError(true);
+    });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [retryCount]);
 
   function goTo(next: Step) {
     setStep(next);
   }
 
+  if (error) {
+    return (
+      <ErrorRecovery
+        title={tErrors("generic")}
+        message=""
+        retryLabel={tCommon("retry")}
+        onRetry={() => {
+          setError(false);
+          setRetryCount((count) => count + 1);
+        }}
+      />
+    );
+  }
+
   if (!step) {
-    return <Skeleton className="h-64 w-full" aria-label="Loading onboarding" />;
+    return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
   }
 
   switch (step) {

@@ -12,7 +12,12 @@ export default function ActivePetRedirectPage() {
   const locale = useLocale();
 
   useEffect(() => {
-    if (activePetId) router.replace(`/${locale}/pets/${activePetId}`);
+    if (activePetId) {
+      // Resolve the landing's health destination only after the protected shell
+      // has loaded the real household pet. The demo Cookie ID is never used.
+      const health = new URLSearchParams(window.location.search).get("landingAction") === "health";
+      router.replace(`/${locale}/pets/${activePetId}${health ? "/health" : ""}`);
+    }
   }, [activePetId, locale, router]);
 
   return <Skeleton className="h-40 w-full" aria-label="Loading" />;

@@ -8,6 +8,7 @@ import { Button, PetIdentity } from "@petlife/ui";
 import { PetLifecycleStatus } from "@petlife/types";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { onboardingService } from "@/services/onboarding.service";
+import { consumeLandingIntent } from "@/features/landing/intent";
 
 export function ReadyStep() {
   const t = useTranslations("onboarding.ready");
@@ -30,7 +31,7 @@ export function ReadyStep() {
 
   function goToHome() {
     reset();
-    router.replace(`/${locale}/home`);
+    router.replace(consumeLandingIntent(locale) ?? `/${locale}/home`);
   }
 
   return (

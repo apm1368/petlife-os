@@ -9,6 +9,7 @@ import { authService } from "@/services/auth.service";
 import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
 import { ApiError } from "@/lib/api/client";
+import { consumeLandingIntent } from "@/features/landing/intent";
 
 const RESEND_COOLDOWN_SECONDS = 30;
 
@@ -54,8 +55,13 @@ function AccountFlow() {
       const { user } = await authService.verifyOtp(identifier, code);
       setUser(user);
       const progress = await onboardingService.getProgress();
-      const destination = progress.status === "COMPLETED" && progress.chapter === "READY" ? "home" : "onboarding";
-      router.replace(`/${locale}/${destination}`);
+      const destination =
+        progress.status === "COMPLETED" && progress.chapter === "READY" ? "home" : "onboarding";
+      router.replace(
+        destination === "home"
+          ? (consumeLandingIntent(locale) ?? `/${locale}/home`)
+          : `/${locale}/onboarding`,
+      );
     } catch (err) {
       setError(mapError(err, t));
       setCode(""); // keep the OTP layout in place — clear the digits, not the screen
