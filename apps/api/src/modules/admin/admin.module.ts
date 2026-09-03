@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { RefundsModule } from "../commerce/refunds/refunds.module";
+import { PetAccessModule } from "../pet-access/pet-access.module";
 import { AdminAccessService } from "./auth/admin-access.service";
 import { AdminAuthGuard } from "./auth/admin-auth.guard";
 import { AdminMeController } from "./auth/admin-me.controller";
@@ -41,7 +42,7 @@ import { AdminDashboardController } from "./dashboard/admin-dashboard.controller
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule],
+  imports: [NotificationsModule, RefundsModule, PetAccessModule],
   controllers: [
     AdminMeController,
     AdminNoteController,
@@ -75,6 +76,6 @@ import { AdminDashboardController } from "./dashboard/admin-dashboard.controller
     AdminOrgService,
     AdminDashboardService,
   ],
-  exports: [AdminAccessService, AdminAuthGuard, AdminAuditLogService, InternalNoteService],
+  exports: [AdminAccessService, AdminAuthGuard, AdminAuditLogService, InternalNoteService, SupportCaseService],
 })
 export class AdminModule {}

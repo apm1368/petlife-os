@@ -3479,6 +3479,13 @@ model SupportCase {
   resolvedAt DateTime?
   closedAt   DateTime?
 
+  /// SLA foundation fields — raw timestamps only, no derived-metric engine.
+  /// First-response-time and resolution-time are computed on read from
+  /// these plus createdAt/resolvedAt.
+  firstResponseAt   DateTime?
+  lastUserMessageAt DateTime?
+  lastAdminMessageAt DateTime?
+
   messages SupportMessage[]
   disputes Dispute[]
 

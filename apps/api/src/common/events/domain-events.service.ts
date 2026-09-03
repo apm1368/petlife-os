@@ -134,6 +134,7 @@ export const DOMAIN_EVENT_TYPES = [
   "SupportMessagePosted",
   "SupportCaseResolved",
   "SupportCaseClosed",
+  "SupportCaseReopened",
   "InternalNoteAdded",
   "AdminTaskCreated",
   "AdminTaskCompleted",

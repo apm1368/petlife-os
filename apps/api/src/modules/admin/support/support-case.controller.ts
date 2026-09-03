@@ -20,7 +20,17 @@ export class SupportCaseController {
   @Get()
   @RequireAdminPermission("support.view")
   list(@Query() query: ListSupportCasesQueryDto) {
-    return this.cases.list({ status: query.status, assignedAdminId: query.assignedAdminId }, query);
+    return this.cases.list(
+      {
+        status: query.status,
+        assignedAdminId: query.assignedAdminId,
+        category: query.category,
+        search: query.search,
+        createdFrom: query.createdFrom ? new Date(query.createdFrom) : undefined,
+        createdTo: query.createdTo ? new Date(query.createdTo) : undefined,
+      },
+      query,
+    );
   }
 
   @Post()
@@ -33,6 +43,12 @@ export class SupportCaseController {
   @RequireAdminPermission("support.view")
   get(@Param("id") id: string) {
     return this.cases.get(id);
+  }
+
+  @Get(":id/context")
+  @RequireAdminPermission("support.view")
+  getContext(@Param("id") id: string) {
+    return this.cases.getContext(id);
   }
 
   @Patch(":id/assign")

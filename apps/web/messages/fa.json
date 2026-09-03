@@ -10,7 +10,8 @@
     "loading": "در حال بارگذاری",
     "optional": "اختیاری",
     "selected": "انتخاب‌شده",
-    "logIn": "ورود"
+    "logIn": "ورود",
+    "support": "پشتیبانی"
   },
   "auth": {
     "welcome": {
@@ -437,6 +438,7 @@
     "cancelledReason": "دلیل لغو",
     "completionNote": "یادداشت پایان کار",
     "cancel": "لغو نوبت",
+    "getSupport": "درخواست پشتیبانی",
     "status": {
       "HOLD": "رزرو موقت",
       "PENDING_CONFIRMATION": "در انتظار تأیید",
@@ -1128,7 +1130,8 @@
         "providerReference": "شناسه ارائه‌دهنده",
         "requestedAt": "درخواست‌شده در {when}"
       },
-      "viewPaymentDetails": "مشاهده جزئیات پرداخت و اقساط"
+      "viewPaymentDetails": "مشاهده جزئیات پرداخت و اقساط",
+      "getSupport": "درخواست پشتیبانی"
     },
     "statusLabels": {
       "payment": {
@@ -1449,6 +1452,71 @@
       }
     }
   },
+  "support": {
+    "loading": "در حال بارگذاری…",
+    "retry": "تلاش مجدد",
+    "home": {
+      "title": "پشتیبانی",
+      "subtitle": "برای سفارش، نوبت یا حساب کاربری خود کمک بگیرید.",
+      "createCta": "درخواست پشتیبانی",
+      "recentTitle": "درخواست‌های اخیر",
+      "viewAll": "مشاهده همه",
+      "noRecent": "هنوز درخواست پشتیبانی‌ای ثبت نکرده‌اید."
+    },
+    "tickets": {
+      "title": "درخواست‌های من",
+      "empty": "هنوز درخواست پشتیبانی‌ای ثبت نکرده‌اید."
+    },
+    "create": {
+      "title": "درخواست پشتیبانی جدید",
+      "category": "دسته‌بندی",
+      "subject": "موضوع",
+      "description": "توضیح مشکل",
+      "submit": "ثبت درخواست",
+      "failed": "ثبت درخواست ممکن نشد. لطفاً دوباره تلاش کنید.",
+      "linkedContext": "این درخواست به {type} شما متصل خواهد شد."
+    },
+    "detail": {
+      "caseNumber": "درخواست {number}",
+      "backToList": "بازگشت به درخواست‌های من",
+      "progress": "روند پیگیری",
+      "messages": "گفتگو",
+      "noMessages": "هنوز پیامی ثبت نشده است.",
+      "you": "شما",
+      "support": "پشتیبانی",
+      "composePlaceholder": "پیام خود را بنویسید…",
+      "send": "ارسال",
+      "sendFailed": "ارسال پیام ممکن نشد. لطفاً دوباره تلاش کنید.",
+      "reopen": "بازگشایی درخواست"
+    },
+    "status": {
+      "SUBMITTED": "ثبت‌شده",
+      "UNDER_REVIEW": "در حال بررسی",
+      "WAITING": "منتظر پاسخ شما",
+      "RESOLVED": "حل‌شده",
+      "CLOSED": "بسته‌شده"
+    },
+    "category": {
+      "ACCOUNT": "حساب کاربری",
+      "PET": "حیوان خانگی",
+      "HEALTH": "سلامت",
+      "BOOKING": "نوبت",
+      "SERVICE": "خدمت",
+      "PAYMENT": "پرداخت",
+      "REFUND": "بازپرداخت",
+      "ORDER": "سفارش",
+      "DELIVERY": "ارسال",
+      "SELLER": "فروشنده",
+      "PROVIDER": "ارائه‌دهنده",
+      "MARKETPLACE": "بازارگاه",
+      "TRUST_SAFETY": "اعتماد و ایمنی",
+      "OTHER": "سایر"
+    },
+    "relatedEntityType": {
+      "ORDER": "سفارش",
+      "BOOKING": "نوبت"
+    }
+  },
   "admin": {
     "shell": {
       "title": "مدیریت پت‌لایف",
@@ -1491,7 +1559,8 @@
       "reasonPlaceholder": "الزامی — دلیل را بنویسید",
       "assign": "واگذاری",
       "assigneeLabel": "شناسه مدیر مسئول",
-      "backToList": "بازگشت به فهرست"
+      "backToList": "بازگشت به فهرست",
+      "search": "جستجو"
     },
     "dashboard": {
       "title": "داشبورد",
@@ -1538,7 +1607,11 @@
       "newCase": "درخواست جدید",
       "createTitle": "ایجاد درخواست پشتیبانی",
       "filter": {
-        "allStatuses": "همه وضعیت‌ها"
+        "allStatuses": "همه وضعیت‌ها",
+        "allCategories": "همه دسته‌بندی‌ها",
+        "searchPlaceholder": "جستجوی موضوع یا شماره درخواست…",
+        "createdFrom": "ایجادشده از",
+        "createdTo": "ایجادشده تا"
       },
       "status": {
         "OPEN": "باز",
@@ -1588,7 +1661,18 @@
         "visibilityPublic": "پاسخ عمومی",
         "visibilityInternal": "یادداشت داخلی (هرگز برای مشتری ارسال نمی‌شود)",
         "send": "ارسال",
-        "notes": "یادداشت‌های داخلی"
+        "notes": "یادداشت‌های داخلی",
+        "context": {
+          "title": "اطلاعات زمینه‌ای",
+          "household": "خانواده: {name}",
+          "pet": "حیوان خانگی: {name}",
+          "relatedEntity": "مرتبط با: {summary}",
+          "firstResponseTime": "اولین پاسخ پس از {minutes} دقیقه",
+          "noFirstResponseYet": "هنوز پاسخی ارسال نشده است",
+          "resolutionTime": "حل‌شده پس از {minutes} دقیقه",
+          "previousCases": "درخواست‌های قبلی این مشتری:",
+          "noPreviousCases": "این مشتری درخواست قبلی‌ای ندارد."
+        }
       }
     },
     "disputes": {

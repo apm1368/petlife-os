@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
-import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseDetailDto } from "@petlife/types";
+import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseContextDto, type SupportCaseDetailDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
 
@@ -28,6 +28,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
   const locale = useLocale();
 
   const [data, setData] = useState<SupportCaseDetailDto | null>(null);
+  const [context, setContext] = useState<SupportCaseContextDto | null>(null);
   const [error, setError] = useState(false);
   const [assigneeAdminId, setAssigneeAdminId] = useState("");
   const [messageBody, setMessageBody] = useState("");
@@ -37,7 +38,9 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
   async function load() {
     setError(false);
     try {
-      setData(await adminService.getSupportCase(caseId));
+      const [detail, ctx] = await Promise.all([adminService.getSupportCase(caseId), adminService.getSupportCaseContext(caseId)]);
+      setData(detail);
+      setContext(ctx);
     } catch {
       setError(true);
     }
@@ -90,6 +93,31 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
       <span className="text-body text-text-primary">{data.subject}</span>
       <span className="text-body text-text-secondary">{data.description}</span>
       <span className="text-metadata text-text-secondary">{t("detail.requester", { name: data.requesterDisplayName })}</span>
+
+      {context ? (
+        <ContextSurface className="flex flex-col gap-2">
+          <span className="text-section-title text-text-primary">{t("detail.context.title")}</span>
+          {context.household ? <span className="text-metadata text-text-secondary">{t("detail.context.household", { name: context.household.name })}</span> : null}
+          {context.pet ? <span className="text-metadata text-text-secondary">{t("detail.context.pet", { name: context.pet.name })}</span> : null}
+          {context.relatedEntity ? <span className="text-metadata text-text-secondary">{t("detail.context.relatedEntity", { summary: context.relatedEntity.summary })}</span> : null}
+          <span className="text-metadata text-text-secondary">
+            {context.firstResponseTimeMinutes !== null ? t("detail.context.firstResponseTime", { minutes: context.firstResponseTimeMinutes }) : t("detail.context.noFirstResponseYet")}
+          </span>
+          {context.resolutionTimeMinutes !== null ? <span className="text-metadata text-text-secondary">{t("detail.context.resolutionTime", { minutes: context.resolutionTimeMinutes })}</span> : null}
+          {context.previousCases.length > 0 ? (
+            <div className="flex flex-col gap-1">
+              <span className="text-metadata text-text-secondary">{t("detail.context.previousCases")}</span>
+              {context.previousCases.map((c) => (
+                <button key={c.id} type="button" className="text-start text-metadata text-text-primary underline" onClick={() => router.push(`/${locale}/admin/support/${c.id}`)}>
+                  {c.caseNumber} — {c.subject}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <span className="text-metadata text-text-secondary">{t("detail.context.noPreviousCases")}</span>
+          )}
+        </ContextSurface>
+      ) : null}
 
       <ContextSurface className="flex flex-wrap items-end gap-2">
         <Input label={t("detail.assignTo")} value={assigneeAdminId} onChange={(e) => setAssigneeAdminId(e.target.value)} className="min-w-48 flex-1" />

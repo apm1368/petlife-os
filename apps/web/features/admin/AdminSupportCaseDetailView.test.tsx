@@ -10,6 +10,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/services/admin.service", () => ({
   adminService: {
     getSupportCase: vi.fn(),
+    getSupportCaseContext: vi.fn(),
     assignSupportCase: vi.fn(),
     transitionSupportCase: vi.fn(),
     postSupportMessage: vi.fn(),
@@ -45,6 +46,9 @@ describe("AdminSupportCaseDetailView", () => {
   beforeEach(() => {
     push.mockReset();
     vi.mocked(adminService.getSupportCase).mockReset().mockResolvedValue(CASE);
+    vi.mocked(adminService.getSupportCaseContext)
+      .mockReset()
+      .mockResolvedValue({ household: null, pet: null, relatedEntity: null, previousCases: [], firstResponseAt: null, firstResponseTimeMinutes: null, resolutionTimeMinutes: null });
     vi.mocked(adminService.assignSupportCase).mockReset();
     vi.mocked(adminService.transitionSupportCase).mockReset();
     vi.mocked(adminService.postSupportMessage).mockReset();

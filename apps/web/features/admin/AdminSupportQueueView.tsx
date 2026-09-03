@@ -18,6 +18,10 @@ export function AdminSupportQueueView() {
 
   const [cases, setCases] = useState<SupportCaseSummaryDto[] | null>(null);
   const [status, setStatus] = useState<SupportCaseStatus | "">("");
+  const [categoryFilter, setCategoryFilter] = useState<SupportCaseCategory | "">("");
+  const [search, setSearch] = useState("");
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
   const [error, setError] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
 
@@ -31,7 +35,14 @@ export function AdminSupportQueueView() {
   async function load() {
     setError(false);
     try {
-      const page = await adminService.listSupportCases({ status: status || undefined, pageSize: 50 });
+      const page = await adminService.listSupportCases({
+        status: status || undefined,
+        category: categoryFilter || undefined,
+        search: search || undefined,
+        createdFrom: createdFrom ? new Date(createdFrom).toISOString() : undefined,
+        createdTo: createdTo ? new Date(createdTo).toISOString() : undefined,
+        pageSize: 50,
+      });
       setCases(page.items);
     } catch {
       setError(true);
@@ -41,7 +52,7 @@ export function AdminSupportQueueView() {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
+  }, [status, categoryFilter, createdFrom, createdTo]);
 
   async function createCase() {
     if (!requesterUserId.trim() || !subject.trim() || !description.trim()) return;
@@ -95,13 +106,36 @@ export function AdminSupportQueueView() {
         </ContextSurface>
       ) : null}
 
-      <Select
-        label={t("filter.allStatuses")}
-        value={status}
-        onChange={(e) => setStatus(e.target.value as SupportCaseStatus)}
-        placeholder={t("filter.allStatuses")}
-        options={STATUSES.map((s) => ({ value: s, label: t(`status.${s}`) }))}
-      />
+      <div className="flex flex-wrap items-end gap-2">
+        <Select
+          label={t("filter.allStatuses")}
+          value={status}
+          onChange={(e) => setStatus(e.target.value as SupportCaseStatus)}
+          placeholder={t("filter.allStatuses")}
+          options={STATUSES.map((s) => ({ value: s, label: t(`status.${s}`) }))}
+        />
+        <Select
+          label={t("filter.allCategories")}
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value as SupportCaseCategory)}
+          placeholder={t("filter.allCategories")}
+          options={Object.values(SupportCaseCategory).map((c) => ({ value: c, label: t(`category.${c}`) }))}
+        />
+        <Input
+          label={t("filter.searchPlaceholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") void load();
+          }}
+          className="min-w-56 flex-1"
+        />
+        <Button size="sm" variant="secondary" onClick={() => void load()}>
+          {tCommon("search")}
+        </Button>
+        <Input type="date" label={t("filter.createdFrom")} value={createdFrom} onChange={(e) => setCreatedFrom(e.target.value)} />
+        <Input type="date" label={t("filter.createdTo")} value={createdTo} onChange={(e) => setCreatedTo(e.target.value)} />
+      </div>
 
       {error ? <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} /> : null}
       {!error && !cases ? <Skeleton className="h-40 w-full" aria-label={tCommon("loading")} /> : null}

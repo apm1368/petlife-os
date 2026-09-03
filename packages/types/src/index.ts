@@ -2298,6 +2298,64 @@ export interface SupportCaseDetailDto extends SupportCaseSummaryDto {
   internalNotes: InternalNoteDto[];
 }
 
+/**
+ * Admin-only additions surfaced on the ticket detail context panel — kept
+ * separate from SupportCaseDetailDto so the consumer-facing DTOs below can
+ * never accidentally inherit them.
+ */
+export interface SupportCaseContextDto {
+  household: { id: string; name: string } | null;
+  pet: { id: string; name: string } | null;
+  relatedEntity: { type: string; id: string; summary: string } | null;
+  previousCases: SupportCaseSummaryDto[];
+  firstResponseAt: string | null;
+  firstResponseTimeMinutes: number | null;
+  resolutionTimeMinutes: number | null;
+}
+
+/**
+ * The simplified status a consumer sees — collapses the two internal
+ * "waiting" states and hides WAITING_ON_INTERNAL entirely (spec: "hide
+ * internal complexity"). Never derived on the frontend: the API computes it
+ * from SupportCaseStatus so the mapping only has to be reasoned about once.
+ */
+export enum UserFacingSupportCaseStatus {
+  SUBMITTED = "SUBMITTED",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  WAITING = "WAITING",
+  RESOLVED = "RESOLVED",
+  CLOSED = "CLOSED",
+}
+
+/**
+ * The consumer-facing ticket list/detail shape. Deliberately does NOT
+ * extend SupportCaseSummaryDto/SupportCaseDetailDto: it omits priority and
+ * assignedAdmin (internal operational fields, spec: don't expose "why is my
+ * ticket LOW") and, on the detail variant, has no internalNotes field at
+ * all — not filtered out, structurally absent — satisfying "INTERNAL
+ * messages / notes must NEVER be visible through consumer APIs."
+ */
+export interface SupportCaseUserSummaryDto {
+  id: string;
+  caseNumber: string;
+  subject: string;
+  category: SupportCaseCategory;
+  status: UserFacingSupportCaseStatus;
+  householdId: string | null;
+  petId: string | null;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+  closedAt: string | null;
+}
+
+export interface SupportCaseUserDetailDto extends SupportCaseUserSummaryDto {
+  description: string;
+  messages: SupportMessageDto[];
+}
+
 export interface AdminTaskDto {
   id: string;
   title: string;

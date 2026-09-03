@@ -3103,6 +3103,203 @@ PASSWORD_RESET_TOKEN_INVALID  400  reset token missing/expired/already used — 
 INVALID_RETURN_TO             400  a returnTo value rejected by sanitizeReturnTo — used by non-redirect callers only; a redirect flow degrades to a safe fallback instead
 ```
 
+## User Support Tickets + Admin CRM Enhancements (Handoff 13)
+
+Schema: `prisma/migrations/20260903130000_support_case_sla_timestamps`
+(purely additive: three nullable `DateTime` columns on `SupportCase` —
+`firstResponseAt`, `lastUserMessageAt`, `lastAdminMessageAt` — the SLA
+foundation the spec explicitly asked for without "a complex SLA engine
+yet": raw timestamps only, with first-response-time/resolution-time
+computed on read, never a separately maintained metric row). No new
+models — this handoff builds the consumer-facing half of the Support Case
+system Handoff 11 already modeled, and narrowly extends the admin half.
+
+Note on Handoff 11's own README section above: it was written against an
+earlier draft of the schema and predates this handoff's verification pass
+against the live code — the actual `SupportCaseStatus` values are `OPEN`,
+`IN_PROGRESS`, `WAITING_ON_USER`, `WAITING_ON_INTERNAL`, `RESOLVED`,
+`CLOSED` (no separate `REOPENED` state — see reopen below), and the live
+routes are `/admin/support/*`, not `/admin/support-cases/*`. This section
+and the "API endpoints" reference below reflect the real, current surface.
+
+### One `SupportCaseService`, two controllers — never two ticket systems
+
+The spec's hardest constraint ("do NOT create separate 'user tickets' and
+'admin tickets' systems") is met structurally, not by convention: the new
+consumer-facing `apps/api/src/modules/support/` module has no
+`SupportCase`-related Prisma calls of its own at all. `SupportModule`
+imports `AdminModule` and injects the exact same `SupportCaseService`
+instance `SupportCaseController` (`/admin/support`) already used —
+`AdminModule` now exports it alongside its existing exports — so
+`UserSupportController` (`/support/cases`) and the admin controller are
+two thin HTTP-shaped views over one service, one set of tables, one
+transaction boundary. `SupportCaseService` gained five additive methods
+(`createAsUser`, `listForUser`, `getForUser`, `postMessageAsUser`,
+`reopen`) alongside its existing admin-facing ones; nothing existing was
+renamed or restructured, so all 14 pre-existing Handoff 11 support e2e
+tests still pass unchanged.
+
+### Consumer DTOs are a structurally different shape, not a filtered admin shape
+
+`SupportCaseUserSummaryDto`/`SupportCaseUserDetailDto` (new,
+`@petlife/types`) are built from scratch rather than derived from the
+admin `SupportCaseSummaryDto`/`SupportCaseDetailDto` — they have no
+`priority` field and no `assignedAdmin` field at all (not omitted at
+serialization time; the TypeScript type has no such property), and the
+detail variant has no `internalNotes` field, structurally, satisfying the
+spec's hard requirement that "INTERNAL messages / notes must NEVER be
+visible through consumer APIs." `SupportCaseService.getForUser()` only
+ever queries `SupportMessage` rows `WHERE visibility = PUBLIC` — an
+`INTERNAL` row never enters process memory on the consumer read path, let
+alone the response; proven by an e2e test that posts both an internal note
+and an `INTERNAL`-visibility message, then asserts a user's own
+case-detail read contains neither body. The raw `SupportCaseStatus` is
+translated to a five-value `UserFacingSupportCaseStatus`
+(`SUBMITTED`/`UNDER_REVIEW`/`WAITING`/`RESOLVED`/`CLOSED`) by
+`toUserFacingStatus()` in `support-case.mapper.ts` — `IN_PROGRESS` and
+`WAITING_ON_INTERNAL` both collapse to `UNDER_REVIEW` (a customer has no
+way to act on "we're stuck internally" differently than "we're working on
+it"), and only `WAITING_ON_USER` gets its own `WAITING` label.
+
+### Priority can never be set by a normal user — there is no field to set
+
+The spec's "do not let normal users arbitrarily mark every ticket URGENT"
+is enforced the same way as the internal-notes rule above: the consumer
+create DTO (`CreateMySupportCaseDto`) has no `priority` property, and the
+global `ValidationPipe`'s `forbidNonWhitelisted: true` means a client that
+sends one anyway gets a `400 VALIDATION_ERROR`, not a silently-dropped
+field — `SupportCaseService.createAsUser()` always writes
+`AdminPriority.NORMAL` via the Prisma model default. `requesterUserId` is
+similarly absent from the DTO; the session's own user ID is the only
+possible requester, so there is no impersonation surface to guard against.
+
+### IDOR-safe reference validation for user-created cases
+
+A user can link their own case to a household, a pet, or one of two
+entity kinds (`relatedEntityType`: `ORDER` | `BOOKING`, enforced by
+`@IsIn` at the DTO layer — the only two contextual entry points the spec
+asks for). `SupportCaseService.assertUserOwnsReferences()` validates each
+reference before the case is created: a `HouseholdMember` row must exist
+for `(householdId, userId)`; `petId` ownership reuses
+`PetAccessService.hasActiveAccess()` unchanged; `ORDER`/`BOOKING`
+ownership checks mirror `OrdersService.getById()`/`BookingsService
+.getById()`'s own patterns (`order.userId === userId`, or for a booking,
+`booking.userId === userId || petAccess.hasActiveAccess(booking.petId,
+userId)`) without importing those services directly, avoiding a new
+cross-module dependency for a check that's three lines of Prisma. Every
+failure path throws the same generic `SupportCaseInvalidReferenceException`
+regardless of which reference failed, so a client can't use the error to
+enumerate which IDs exist — proven by an e2e test asserting a case
+referencing another user's order, booking, or household is rejected with
+`400 SUPPORT_CASE_INVALID_REFERENCE`, while a reference to the caller's
+own order succeeds.
+
+### Reopen — a narrower, user-triggered sibling of the admin transition map
+
+`SUPPORT_CASE_TRANSITIONS` (the admin-facing state machine) is untouched;
+widening it to add a user-reachable `RESOLVED/CLOSED → OPEN` edge would
+have blurred which actor can trigger which edge (the admin's own
+`RESOLVED → IN_PROGRESS` "reopen for internal work" already exists there
+with different semantics). Instead, `SupportCaseService.reopen(userId,
+caseId)` is its own method: row-locks the case (`SELECT ... FOR UPDATE`,
+the same `InventoryReservationService`-established pattern Handoff 11
+already used for `transition()`), requires the caller to be the case's own
+requester, requires the current status to be `RESOLVED` or `CLOSED`, and
+sets it to `OPEN`. A dedicated concurrency e2e test fires two simultaneous
+reopen calls against the same resolved case and asserts exactly one
+succeeds (`201`) and the other is rejected (`409
+INVALID_SUPPORT_CASE_REOPEN`) rather than both silently succeeding.
+
+### A user's own reply hands `WAITING_ON_USER` back to the queue automatically
+
+`postMessageAsUser()` is the one deliberate, narrow exception to "no
+arbitrary status PATCH": if the case is currently `WAITING_ON_USER` when
+the user replies, it auto-transitions to `IN_PROGRESS` in the same
+transaction as the message insert — the exact event that status was
+waiting for. Any other status is left untouched. The method also
+maintains `lastUserMessageAt`, and the mirroring admin-side `postMessage()`
+now maintains `lastAdminMessageAt` and (gated on `visibility === PUBLIC`,
+set only once) `firstResponseAt` — the two SLA foundation fields the spec
+asked for, with no derived-metric table alongside them.
+
+### Notifications — one new "more information requested" case, self-notification guarded against
+
+`SupportNotificationListener` gained two new `@OnEvent` handlers
+(`SupportCaseStatusChanged` filtered to `to === WAITING_ON_USER`, mapped
+to a new `support.more_info_requested` template; `SupportCaseClosed`,
+mapped to `support.case_closed`) alongside the pre-existing
+`SupportMessagePosted`/`SupportCaseResolved` handlers — covering every
+"notify user when" case the spec lists (support replies, status
+meaningfully changes, case resolved, more information requested). The
+existing `SupportMessagePosted` handler gained an `authorType` guard: a
+user's own message now publishes `SupportMessagePosted` too (for a future
+admin-side "customer replied" indicator), but the listener skips
+notifying when `authorType === USER` — a user must never be notified
+about their own message. Proven by an e2e test asserting no
+`support.message_posted` notification is created for the message's own
+author.
+
+### Admin context panel + queue filters
+
+`GET /admin/support/:id/context` (new) resolves the pieces Handoff 11's
+detail view never surfaced: the linked household/pet by name (not just
+ID), a human-readable summary of the linked Order/Booking, the requester's
+other support cases, and the two derived SLA durations
+(`firstResponseTimeMinutes`, `resolutionTimeMinutes`, both computed on
+read from the raw timestamps, `null` until the corresponding event has
+happened). `AdminSupportCaseDetailView.tsx` renders it as a new context
+card. `GET /admin/support` gained `category`, `search` (case-insensitive
+substring match against subject or case number, mirroring the existing
+`admin-customer.service.ts`/`admin-org.service.ts` search precedent), and
+`createdFrom`/`createdTo` date-range filters, all optional and additive to
+the existing `status`/`assignedAdminId` filters; `AdminSupportQueueView.tsx`
+exposes them as filter controls. The admin RBAC permission scheme
+(`support.view`/`support.manage`, two permissions) is intentionally left
+as-is rather than split into finer-grained permissions (e.g. separate
+assign/resolve permissions) — the existing two-tier scheme already
+satisfies "UI-hiding-isn't-security" (every route re-checks server-side),
+and splitting it further would touch every existing role grant for a
+capability this handoff's spec didn't explicitly require.
+
+### Consumer frontend — Support Home, My Tickets, Create Ticket, Ticket Detail
+
+Four new pages under the existing `(app)` route group (already
+auth-gated by `AppShell`, so no new gating logic was needed):
+`/support` (Support Home — a create-ticket CTA plus a short recent-tickets
+preview), `/support/tickets` (the full ticket history, open and closed
+alike), `/support/new` (create form, prefillable via `relatedEntityType`/
+`relatedEntityId`/`category` query params), `/support/tickets/:id` (ticket
+detail — a three-step simplified progress tracker collapsing
+`WAITING`/`UNDER_REVIEW` into the same visual step since a case can bounce
+between them without that reading as regression, the conversation, a
+reply box, and a reopen button gated on `RESOLVED`/`CLOSED`). A small
+support icon button in `AppShell`'s header is the global entry point
+(there is no Profile/Account page yet in this codebase for a literal
+"Profile → Support" path — see Known limitations). `OrderDetailView.tsx`
+and `BookingDetailView.tsx` each gained a "Get support" button linking to
+`/support/new` with `relatedEntityType`/`relatedEntityId`/`category`
+pre-filled — the two contextual entry points the spec requires.
+
+### API endpoints (Handoff 13 additions)
+
+```
+GET    /support/cases                   (the caller's own cases only, paginated)
+POST   /support/cases                   (no requesterUserId, no priority — session-scoped, always NORMAL)
+GET    /support/cases/:id               (404 for both "not found" and "not yours" — indistinguishable)
+POST   /support/cases/:id/messages      (always authorType USER, always visibility PUBLIC)
+POST   /support/cases/:id/reopen        (only from RESOLVED/CLOSED, only the case's own requester)
+
+GET    /admin/support/:id/context       (household/pet/related-entity summaries, previous cases, SLA durations)
+GET    /admin/support                   (gained category/search/createdFrom/createdTo filters — additive to status/assignedAdminId)
+```
+
+### Error codes (Handoff 13 additions)
+
+```
+INVALID_SUPPORT_CASE_REOPEN      409  reopen attempted from a status other than RESOLVED/CLOSED, or by a non-requester (surfaced as 404 for the latter — see cross-user isolation)
+SUPPORT_CASE_INVALID_REFERENCE   400  a user-created case's householdId/petId/relatedEntity referenced an entity the caller doesn't own — generic across all three to avoid an enumeration oracle
+```
+
 ## API endpoints
 
 ```
@@ -4244,6 +4441,48 @@ plus dedicated `sanitizeReturnTo`/`resolvePostAuthDestination` unit tests
 on both sides and frontend component tests for `RequireAuth` and the
 welcome/register pages.
 
+Everything in the Handoff 13 acceptance criteria: a consumer-facing User
+Support Center (Support Home, My Tickets, Create Ticket, Ticket Detail)
+reading and writing the exact same `SupportCase`/`SupportMessage` tables
+Handoff 11's admin workspace already used — never a parallel ticket
+system; a simplified five-value user-facing status
+(`SUBMITTED`/`UNDER_REVIEW`/`WAITING`/`RESOLVED`/`CLOSED`) derived from the
+real `SupportCaseStatus` on every read, never stored separately; INTERNAL
+notes/messages structurally absent from every consumer-facing response
+type and query, not merely filtered; priority impossible for a normal
+user to set (no such field on the consumer create DTO, enforced by the
+global `forbidNonWhitelisted` validation pipe); IDOR-safe ownership
+validation before a user-created case can reference a household, pet,
+order, or booking; a user-triggered reopen path (`RESOLVED`/`CLOSED` →
+`OPEN`) kept structurally separate from the admin transition map, with a
+concurrency test proving exactly one of two simultaneous reopen attempts
+succeeds; H10 notification coverage for every "notify user when" case the
+spec lists (support replies, a meaningful status change, resolution, more
+information requested) with a self-notification guard so a user's own
+reply never notifies themself; SLA foundation timestamps
+(`firstResponseAt`/`lastUserMessageAt`/`lastAdminMessageAt`) with derived
+first-response/resolution durations computed on read, deliberately no SLA
+engine; an admin ticket-detail context panel (household/pet/related-entity
+summaries, the requester's previous tickets, the two derived SLA
+durations) and additive `category`/`search`/date-range queue filters;
+"Get support" contextual entry points on Order Detail and Booking Detail
+prefilling the new ticket form; and every Handoff 01-12 backend/frontend
+test still green (212 backend e2e scenarios — the three pre-existing
+documented cold-Prisma-connection-pool-warmup timeout flakes recur,
+unrelated to this handoff's own 11 new scenarios, all of which pass
+cleanly — and 172 frontend tests, up from 159). Backend e2e coverage for
+all required scenarios (a user-created ticket is immediately visible
+through the admin endpoint as the same SupportCase; an admin's PUBLIC
+reply reaches the user and notifies them while an INTERNAL note/message
+never does; a user's own reply is visible to admin and never
+self-notifies; the simplified status collapses admin-only states and
+notifies on "more information requested"; resolution and reopen, correctly
+gated to RESOLVED/CLOSED; cross-user isolation on every consumer-facing
+route; priority cannot be set by a user; IDOR-safe reference validation
+for order/booking/household; the reopen concurrency race; admin queue
+filters; the admin context panel) plus frontend component tests for the
+four new consumer pages and the two extended admin views.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -4774,10 +5013,33 @@ welcome/register pages.
   there is no way to exercise real rate-limiting behavior from this test
   suite; the decorators themselves mirror the exact `{limit, ttl}` shape
   already proven correct for the pre-existing OTP endpoints.
+- **No Profile/Account page for a literal "Profile → Support" entry
+  point** — this codebase has never built a general account/settings
+  section (Handoff 10 and Handoff 12 each flag the same pre-existing gap
+  for notification preferences and password change respectively); the
+  Support Center is instead reachable from a small icon button in
+  `AppShell`'s header, plus the two contextual "Get support" entry points
+  on Order/Booking Detail the spec explicitly asks for.
+- **`relatedEntityType` a user can self-link is limited to `ORDER` and
+  `BOOKING`** — the only two contextual entry points the spec requires;
+  the DTO's `@IsIn` allow-list means adding a third kind later (e.g.
+  linking a case to a `Dispute`) is a one-line addition plus one new
+  ownership-check branch in `assertUserOwnsReferences()`, not a schema or
+  architecture change.
+- **The admin RBAC permission scheme (`support.view`/`support.manage`) is
+  unchanged** — kept as the existing two-tier scheme rather than split
+  into finer-grained permissions (e.g. separate assign/resolve grants);
+  every route still re-checks server-side, so this is a granularity
+  choice, not a security gap, and splitting it is a low-risk follow-up if
+  a future handoff needs it.
+- **First-response-time/resolution-time are simple elapsed-time
+  calculations, not a real SLA engine** — no business-hours calendar, no
+  per-priority SLA targets, no breach alerting; exactly the scope the
+  spec asked for ("do NOT build a complex SLA engine yet").
 
 ## Next recommended coding handoff
 
-**Marketplace + Seller financial settlement** (Handoff 13), the piece
+**Marketplace + Seller financial settlement** (Handoff 14), the piece
 Handoff 09 deliberately left out to avoid entangling Seller OS's launch
 with the ledger, and now with a notification layer (Handoff 10), a real
 admin/finance oversight layer (Handoff 11, including

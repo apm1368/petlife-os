@@ -677,6 +677,20 @@ export class InvalidSupportCaseTransitionException extends ApiException {
   }
 }
 
+/** A user tried to reopen a case that isn't RESOLVED/CLOSED — reopen is a narrower, user-triggered action than the admin transition map allows. */
+export class InvalidSupportCaseReopenException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_SUPPORT_CASE_REOPEN", "This support case cannot be reopened right now.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** A user-created support case referenced a household/pet/order/booking they don't have access to — IDOR guard, deliberately generic rather than per-entity to avoid leaking which kind of reference failed. */
+export class SupportCaseInvalidReferenceException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_CASE_INVALID_REFERENCE", "That item could not be linked to your support case.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
 export class AdminTaskNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("ADMIN_TASK_NOT_FOUND", "Task not found.", HttpStatus.NOT_FOUND, details);

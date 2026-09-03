@@ -25,6 +25,7 @@ import type {
   ProviderVerificationStatus,
   SellerVerificationStatus,
   SupportCaseCategory,
+  SupportCaseContextDto,
   SupportCaseDetailDto,
   SupportCaseStatus,
   SupportCaseSummaryDto,
@@ -73,8 +74,22 @@ export const adminService = {
   addNote: (entityType: InternalNoteDto["entityType"], entityId: string, body: string) => apiFetch<InternalNoteDto>("/admin/notes", { method: "POST", body: { entityType, entityId, body } }),
 
   // Support cases
-  listSupportCases: (input: { status?: SupportCaseStatus; assignedAdminId?: string } & AdminPaginationInput = {}) =>
-    apiFetch<PaginatedDto<SupportCaseSummaryDto>>(`/admin/support${toQueryString({ status: input.status, assignedAdminId: input.assignedAdminId, page: input.page, pageSize: input.pageSize })}`),
+  listSupportCases: (
+    input: { status?: SupportCaseStatus; assignedAdminId?: string; category?: SupportCaseCategory; search?: string; createdFrom?: string; createdTo?: string } & AdminPaginationInput = {},
+  ) =>
+    apiFetch<PaginatedDto<SupportCaseSummaryDto>>(
+      `/admin/support${toQueryString({
+        status: input.status,
+        assignedAdminId: input.assignedAdminId,
+        category: input.category,
+        search: input.search,
+        createdFrom: input.createdFrom,
+        createdTo: input.createdTo,
+        page: input.page,
+        pageSize: input.pageSize,
+      })}`,
+    ),
+  getSupportCaseContext: (caseId: string) => apiFetch<SupportCaseContextDto>(`/admin/support/${caseId}/context`),
   createSupportCase: (input: {
     requesterUserId: string;
     householdId?: string;

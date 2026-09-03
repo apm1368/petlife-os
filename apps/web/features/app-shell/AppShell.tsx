@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { Avatar, Skeleton } from "@petlife/ui";
+import { Avatar, IconButton, Skeleton } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -38,6 +38,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
         <span className="text-section-title text-text-primary">{t("appName")}</span>
         <div className="flex items-center gap-2">
+          <IconButton
+            label={t("support")}
+            onClick={() => router.push(`/${locale}/support`)}
+            icon={
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            }
+          />
           <NotificationBell />
           <LocaleSwitcher />
           <ThemeToggle />

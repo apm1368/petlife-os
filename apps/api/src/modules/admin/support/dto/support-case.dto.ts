@@ -1,4 +1,4 @@
-import { IsEnum, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsDateString, IsEnum, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { AdminPriority, SupportCaseCategory, SupportCaseStatus, SupportMessageVisibility } from "@prisma/client";
 import { PaginationQueryDto } from "../../../../common/pagination/pagination.dto";
 
@@ -10,6 +10,22 @@ export class ListSupportCasesQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsUUID()
   assignedAdminId?: string;
+
+  @IsOptional()
+  @IsEnum(SupportCaseCategory)
+  category?: SupportCaseCategory;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
+  @IsDateString()
+  createdFrom?: string;
+
+  @IsOptional()
+  @IsDateString()
+  createdTo?: string;
 }
 
 export class CreateSupportCaseDto {

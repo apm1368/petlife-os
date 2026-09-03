@@ -85,6 +85,15 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "درخواست پشتیبانی شما حل شد", body: "درخواست پشتیبانی {{caseNumber}} به عنوان حل‌شده علامت‌گذاری شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف حل شد." },
     en: { title: "Your support case was resolved", body: "Support case {{caseNumber}} was marked resolved.", smsBody: "Your PET LIFE OS support case was resolved." },
   },
+  /** Handoff 13 — fires when a case moves to WAITING_ON_USER (the requester's own simplified status label is "Waiting"). */
+  "support.more_info_requested": {
+    fa: { title: "نیاز به اطلاعات بیشتر برای درخواست شما", body: "برای پیگیری درخواست پشتیبانی {{caseNumber}}، به اطلاعات بیشتری از شما نیاز داریم.", smsBody: "برای درخواست پشتیبانی شما در پت‌لایف به اطلاعات بیشتری نیاز است." },
+    en: { title: "We need more information", body: "We need more information from you to continue with support case {{caseNumber}}.", smsBody: "More information is needed on your PET LIFE OS support case." },
+  },
+  "support.case_closed": {
+    fa: { title: "درخواست پشتیبانی شما بسته شد", body: "درخواست پشتیبانی {{caseNumber}} بسته شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف بسته شد." },
+    en: { title: "Your support case was closed", body: "Support case {{caseNumber}} was closed.", smsBody: "Your PET LIFE OS support case was closed." },
+  },
 };
 
 export function hasTemplate(key: string): boolean {

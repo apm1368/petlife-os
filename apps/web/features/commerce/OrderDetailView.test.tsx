@@ -5,6 +5,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { commerceService } from "@/services/commerce.service";
 import { OrderDetailView } from "./OrderDetailView";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/services/commerce.service", () => ({ commerceService: { getOrder: vi.fn(), requestRefund: vi.fn(), getOrderTracking: vi.fn() } }));
 vi.mock("@/stores/pet-store", () => ({
   usePetStore: (selector: (state: { pets: { id: string; name: string }[] }) => unknown) => selector({ pets: [{ id: "pet-1", name: "Luna" }] }),

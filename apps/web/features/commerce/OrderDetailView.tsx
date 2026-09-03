@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { OrderDetailDto, ShipmentTrackingDto } from "@petlife/types";
 import { commerceService } from "@/services/commerce.service";
@@ -22,6 +23,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
   const t = useTranslations("commerce.orderDetail");
   const tStatus = useTranslations("commerce.statusLabels");
   const locale = useLocale() as "fa" | "en";
+  const router = useRouter();
   const pets = usePetStore((s) => s.pets);
 
   const [order, setOrder] = useState<OrderDetailDto | null>(null);
@@ -220,6 +222,10 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
           {t("viewPaymentDetails")}
         </Link>
       ) : null}
+
+      <Button variant="ghost" onClick={() => router.push(`/${locale}/support/new?relatedEntityType=ORDER&relatedEntityId=${orderId}&category=ORDER`)}>
+        {t("getSupport")}
+      </Button>
     </div>
   );
 }

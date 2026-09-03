@@ -147,6 +147,10 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         </Button>
       ) : null}
 
+      <Button variant="ghost" onClick={() => router.push(`/${locale}/support/new?relatedEntityType=BOOKING&relatedEntityId=${bookingId}&category=BOOKING`)}>
+        {t("getSupport")}
+      </Button>
+
       <Dialog open={showCancelDialog} onClose={() => setShowCancelDialog(false)} title={t("cancelDialog.title")}>
         <div className="flex flex-col gap-4">
           <p className="text-body text-text-secondary">{t("cancelDialog.body")}</p>

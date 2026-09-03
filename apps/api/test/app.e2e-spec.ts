@@ -4500,4 +4500,317 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(res.body).toEqual({ google: false, phone: true, password: true });
     });
   });
+
+  describe("User Support Tickets + Admin CRM enhancements (Handoff 13)", () => {
+    async function setupConsumer() {
+      const identifier = `support-user-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const user = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      const household = await client.post("/households").send({}).expect(201);
+      return { client, userId: user.id, householdId: household.body.id as string };
+    }
+
+    async function setupAdmin(role: AdminRole) {
+      const identifier = `support-admin-${role.toLowerCase()}-${unique()}@example.com`;
+      const client = authedRequest(app, await signUp(app, logSpy, identifier));
+      const user = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+      const adminUser = await prisma.adminUser.create({ data: { userId: user.id, role, status: AdminMembershipStatus.ACTIVE } });
+      return { client, userId: user.id, adminUserId: adminUser.id };
+    }
+
+    async function setupPaidOrderFor(consumer: Awaited<ReturnType<typeof setupConsumer>>) {
+      const category = await prisma.productCategory.create({ data: { name: `H13 Category ${unique()}`, slug: `h13-category-${unique()}` } });
+      const product = await prisma.product.create({ data: { categoryId: category.id, title: `H13 Product ${unique()}`, slug: `h13-product-${unique()}`, supportsDog: true, supportsCat: true, allergenTags: [] } });
+      const variant = await prisma.productVariant.create({ data: { productId: product.id, sku: `H13-SKU-${unique()}` } });
+      const seller = await prisma.sellerOrganization.create({ data: { name: `H13 Seller ${unique()}`, verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "US" } });
+      const offer = await prisma.sellerOffer.create({ data: { sellerOrganizationId: seller.id, productVariantId: variant.id, priceAmount: 500_000, currency: "IRR" } });
+      await prisma.inventoryItem.create({ data: { sellerOfferId: offer.id, onHand: 10 } });
+      const addressRes = await consumer.client.post("/addresses").send({ householdId: consumer.householdId, addressLine: "1 H13 St.", city: "Testville", countryCode: "US" }).expect(201);
+      await consumer.client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+      const checkout = await consumer.client.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+      await consumer.client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const paid = await consumer.client.post(`/checkout/${checkout.body.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      return { orderId: paid.body.orderIds[0] as string };
+    }
+
+    /** A minimal but real Booking row, built directly via Prisma rather than the full slot/hold flow — this suite only needs a booking to exist and belong to `consumer`, not to exercise the booking engine itself. */
+    async function createBookingFor(consumer: Awaited<ReturnType<typeof setupConsumer>>) {
+      const pet = await consumer.client.post(`/households/${consumer.householdId}/pets`).send({ name: `Pet${unique()}`, species: "DOG", approximateAgeMonths: 24 }).expect(201);
+      const org = await prisma.providerOrganization.create({ data: { name: `H13 Provider ${unique()}`, type: ProviderType.VET_CLINIC, verificationStatus: ProviderVerificationStatus.VERIFIED } });
+      const location = await prisma.providerLocation.create({ data: { providerOrganizationId: org.id, addressLine: "1 Vet St.", city: "Testville", countryCode: "US", timezone: "UTC" } });
+      const service = await prisma.providerService.create({
+        data: { providerOrganizationId: org.id, locationId: location.id, name: "Checkup", type: ProviderServiceType.CONSULTATION, category: ServiceCategory.VET, durationMinutes: 30 },
+      });
+      const booking = await prisma.booking.create({
+        data: {
+          householdId: consumer.householdId,
+          petId: pet.body.id,
+          userId: consumer.userId,
+          providerOrganizationId: org.id,
+          providerLocationId: location.id,
+          providerServiceId: service.id,
+          category: ServiceCategory.VET,
+          locationMode: LocationMode.AT_PROVIDER,
+          startAt: new Date(),
+          endAt: new Date(Date.now() + 30 * 60 * 1000),
+          timezone: "UTC",
+        },
+      });
+      return { bookingId: booking.id };
+    }
+
+    // --- Flow A: same source of truth ---------------------------------------
+
+    it("Flow A: a user-created ticket is immediately visible through /admin/support as the same SupportCase", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await consumer.client
+        .post("/support/cases")
+        .send({ subject: "My order never arrived", description: "It has been two weeks", category: SupportCaseCategory.ORDER })
+        .expect(201);
+      const caseId = created.body.id as string;
+      expect(created.body.caseNumber).toMatch(/^CASE-\d{6}$/);
+      // The consumer-facing summary must never carry priority/assignedAdmin — structurally absent, not filtered.
+      expect(created.body.priority).toBeUndefined();
+      expect(created.body.assignedAdmin).toBeUndefined();
+      expect(created.body.status).toBe("SUBMITTED");
+
+      const asAdmin = await support.client.get(`/admin/support/${caseId}`).expect(200);
+      expect(asAdmin.body.id).toBe(caseId);
+      expect(asAdmin.body.requesterUserId).toBe(consumer.userId);
+      expect(asAdmin.body.priority).toBe("NORMAL");
+
+      const asUser = await consumer.client.get(`/support/cases/${caseId}`).expect(200);
+      expect(asUser.body.subject).toBe("My order never arrived");
+      expect(asUser.body.internalNotes).toBeUndefined();
+    });
+
+    // --- Flow B: admin reply visible + notified, internal note never leaks --
+
+    it("Flow B: an admin's PUBLIC reply reaches the user and fires a notification; an INTERNAL note/message never does", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await consumer.client.post("/support/cases").send({ subject: "Refund question", description: "d", category: SupportCaseCategory.REFUND }).expect(201);
+      const caseId = created.body.id as string;
+
+      await support.client.post(`/admin/support/${caseId}/notes`).send({ body: "Internal: escalate to finance." }).expect(201);
+      await support.client.post(`/admin/support/${caseId}/messages`).send({ body: "Internal-only detail.", visibility: SupportMessageVisibility.INTERNAL }).expect(201);
+      await support.client.post(`/admin/support/${caseId}/messages`).send({ body: "We're processing your refund.", visibility: SupportMessageVisibility.PUBLIC }).expect(201);
+
+      const asUser = await consumer.client.get(`/support/cases/${caseId}`).expect(200);
+      const bodies = asUser.body.messages.map((m: { body: string }) => m.body);
+      expect(bodies).toContain("We're processing your refund.");
+      expect(bodies).not.toContain("Internal-only detail.");
+      expect(bodies).not.toContain("Internal: escalate to finance.");
+      expect(asUser.body.internalNotes).toBeUndefined();
+
+      const notification = await pollUntil(
+        () => prisma.notification.findFirst({ where: { userId: consumer.userId, type: "support.message_posted" } }),
+        (row) => row !== null,
+      );
+      expect(notification).not.toBeNull();
+    });
+
+    // --- Flow C: user reply visible to admin, never self-notifies -----------
+
+    it("Flow C: a user's own reply is visible to admin and never triggers a notification to the user themself", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await consumer.client.post("/support/cases").send({ subject: "Follow-up", description: "d", category: SupportCaseCategory.OTHER }).expect(201);
+      const caseId = created.body.id as string;
+
+      await consumer.client.post(`/support/cases/${caseId}/messages`).send({ body: "Any update?" }).expect(201);
+
+      const asAdmin = await support.client.get(`/admin/support/${caseId}`).expect(200);
+      const userMessage = asAdmin.body.messages.find((m: { body: string }) => m.body === "Any update?");
+      expect(userMessage).toBeDefined();
+      expect(userMessage.authorType).toBe("USER");
+      expect(userMessage.visibility).toBe("PUBLIC");
+
+      const selfNotification = await prisma.notification.findFirst({ where: { userId: consumer.userId, type: "support.message_posted" } });
+      expect(selfNotification).toBeNull();
+    });
+
+    // --- Flow D: simplified status tracking + "more info requested" --------
+
+    it("Flow D: the user-facing status collapses admin states and notifies when more information is requested", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await consumer.client.post("/support/cases").send({ subject: "Login trouble", description: "d", category: SupportCaseCategory.ACCOUNT }).expect(201);
+      const caseId = created.body.id as string;
+      expect((await consumer.client.get(`/support/cases/${caseId}`).expect(200)).body.status).toBe("SUBMITTED");
+
+      await support.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.IN_PROGRESS }).expect(200);
+      expect((await consumer.client.get(`/support/cases/${caseId}`).expect(200)).body.status).toBe("UNDER_REVIEW");
+
+      await support.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.WAITING_ON_INTERNAL }).expect(200);
+      expect((await consumer.client.get(`/support/cases/${caseId}`).expect(200)).body.status).toBe("UNDER_REVIEW");
+
+      await support.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.IN_PROGRESS }).expect(200);
+      await support.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.WAITING_ON_USER }).expect(200);
+      expect((await consumer.client.get(`/support/cases/${caseId}`).expect(200)).body.status).toBe("WAITING");
+
+      const notification = await pollUntil(
+        () => prisma.notification.findFirst({ where: { userId: consumer.userId, type: "support.more_info_requested" } }),
+        (row) => row !== null,
+      );
+      expect(notification).not.toBeNull();
+
+      // A user reply while WAITING_ON_USER hands the case back to the queue automatically.
+      await consumer.client.post(`/support/cases/${caseId}/messages`).send({ body: "Here is the extra detail." }).expect(201);
+      const afterReply = await support.client.get(`/admin/support/${caseId}`).expect(200);
+      expect(afterReply.body.status).toBe(SupportCaseStatus.IN_PROGRESS);
+    });
+
+    // --- Flow E: resolution + reopen ----------------------------------------
+
+    it("Flow E: resolving a case is visible to the user, and the user can reopen it — but only from RESOLVED/CLOSED", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await consumer.client.post("/support/cases").send({ subject: "Broken feature", description: "d", category: SupportCaseCategory.OTHER }).expect(201);
+      const caseId = created.body.id as string;
+
+      const reopenTooEarly = await consumer.client.post(`/support/cases/${caseId}/reopen`).send({}).expect(409);
+      expect(reopenTooEarly.body.error.code).toBe("INVALID_SUPPORT_CASE_REOPEN");
+
+      await support.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.RESOLVED }).expect(200);
+      expect((await consumer.client.get(`/support/cases/${caseId}`).expect(200)).body.status).toBe("RESOLVED");
+
+      const reopened = await consumer.client.post(`/support/cases/${caseId}/reopen`).send({}).expect(201);
+      expect(reopened.body.status).toBe("SUBMITTED");
+
+      const asAdmin = await support.client.get(`/admin/support/${caseId}`).expect(200);
+      expect(asAdmin.body.status).toBe(SupportCaseStatus.OPEN);
+    });
+
+    // --- Flow F: cross-user isolation on the consumer-facing endpoints ------
+
+    it("Flow F: a user can never read, reply to, or reopen another user's support case", async () => {
+      const owner = await setupConsumer();
+      const stranger = await setupConsumer();
+
+      const created = await owner.client.post("/support/cases").send({ subject: "Private", description: "d", category: SupportCaseCategory.OTHER }).expect(201);
+      const caseId = created.body.id as string;
+
+      await stranger.client.get(`/support/cases/${caseId}`).expect(404);
+      await stranger.client.post(`/support/cases/${caseId}/messages`).send({ body: "hi" }).expect(404);
+      await stranger.client.post(`/support/cases/${caseId}/reopen`).send({}).expect(404);
+
+      const list = await stranger.client.get("/support/cases").expect(200);
+      expect(list.body.items.find((c: { id: string }) => c.id === caseId)).toBeUndefined();
+    });
+
+    // --- Flow G: priority cannot be set by a normal user --------------------
+
+    it("Flow G: a user cannot set priority when creating a case — the field does not exist on the consumer DTO", async () => {
+      const consumer = await setupConsumer();
+      const rejected = await consumer.client
+        .post("/support/cases")
+        .send({ subject: "Urgent!!!", description: "d", category: SupportCaseCategory.OTHER, priority: "URGENT" })
+        .expect(400);
+      expect(rejected.body.error.code).toBe("VALIDATION_ERROR");
+    });
+
+    // --- Flow H: IDOR-safe reference validation -----------------------------
+
+    it("Flow H: a user-created case can only reference their own order/booking/household, never someone else's", async () => {
+      const consumer = await setupConsumer();
+      const stranger = await setupConsumer();
+      const { orderId: strangerOrderId } = await setupPaidOrderFor(stranger);
+      const { orderId: ownOrderId } = await setupPaidOrderFor(consumer);
+      const { bookingId: strangerBookingId } = await createBookingFor(stranger);
+
+      const rejectedOrder = await consumer.client
+        .post("/support/cases")
+        .send({ subject: "x", description: "y", category: SupportCaseCategory.ORDER, relatedEntityType: "ORDER", relatedEntityId: strangerOrderId })
+        .expect(400);
+      expect(rejectedOrder.body.error.code).toBe("SUPPORT_CASE_INVALID_REFERENCE");
+
+      const rejectedBooking = await consumer.client
+        .post("/support/cases")
+        .send({ subject: "x", description: "y", category: SupportCaseCategory.BOOKING, relatedEntityType: "BOOKING", relatedEntityId: strangerBookingId })
+        .expect(400);
+      expect(rejectedBooking.body.error.code).toBe("SUPPORT_CASE_INVALID_REFERENCE");
+
+      const rejectedHousehold = await consumer.client
+        .post("/support/cases")
+        .send({ subject: "x", description: "y", category: SupportCaseCategory.OTHER, householdId: stranger.householdId })
+        .expect(400);
+      expect(rejectedHousehold.body.error.code).toBe("SUPPORT_CASE_INVALID_REFERENCE");
+
+      const accepted = await consumer.client
+        .post("/support/cases")
+        .send({ subject: "x", description: "y", category: SupportCaseCategory.ORDER, relatedEntityType: "ORDER", relatedEntityId: ownOrderId })
+        .expect(201);
+      expect(accepted.body.relatedEntityId).toBe(ownOrderId);
+    });
+
+    // --- Concurrency: two concurrent reopen attempts ------------------------
+
+    it("Concurrency: two concurrent reopen attempts on the same resolved case land on exactly one success", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const created = await consumer.client.post("/support/cases").send({ subject: "Race", description: "d", category: SupportCaseCategory.OTHER }).expect(201);
+      const caseId = created.body.id as string;
+      await support.client.patch(`/admin/support/${caseId}/status`).send({ status: SupportCaseStatus.RESOLVED }).expect(200);
+
+      const [a, b] = await Promise.allSettled([consumer.client.post(`/support/cases/${caseId}/reopen`).send({}), consumer.client.post(`/support/cases/${caseId}/reopen`).send({})]);
+      const statuses = [a, b].map((r) => (r.status === "fulfilled" ? r.value.status : -1));
+      expect(statuses.filter((s) => s === 201)).toHaveLength(1);
+      expect(statuses.filter((s) => s === 409)).toHaveLength(1);
+
+      const final = await prisma.supportCase.findUniqueOrThrow({ where: { id: caseId } });
+      expect(final.status).toBe(SupportCaseStatus.OPEN);
+    });
+
+    // --- Admin queue filters (category/search/date) -------------------------
+
+    it("Admin queue filters: category, search, and date-range filters narrow the support case list", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+
+      const target = await consumer.client.post("/support/cases").send({ subject: "Findable subject", description: "d", category: SupportCaseCategory.PAYMENT }).expect(201);
+      await consumer.client.post("/support/cases").send({ subject: "Unrelated", description: "d", category: SupportCaseCategory.OTHER }).expect(201);
+
+      const byCategory = await support.client.get(`/admin/support?category=${SupportCaseCategory.PAYMENT}`).expect(200);
+      expect(byCategory.body.items.some((c: { id: string }) => c.id === target.body.id)).toBe(true);
+      expect(byCategory.body.items.every((c: { category: string }) => c.category === SupportCaseCategory.PAYMENT)).toBe(true);
+
+      const bySearch = await support.client.get("/admin/support?search=Findable").expect(200);
+      expect(bySearch.body.items.some((c: { id: string }) => c.id === target.body.id)).toBe(true);
+      expect(bySearch.body.items.some((c: { subject: string }) => c.subject === "Unrelated")).toBe(false);
+    });
+
+    // --- Admin context panel -------------------------------------------------
+
+    it("Admin context panel: resolves related household/pet/order and lists the requester's previous tickets", async () => {
+      const consumer = await setupConsumer();
+      const support = await setupAdmin(AdminRole.SUPPORT);
+      const { orderId } = await setupPaidOrderFor(consumer);
+
+      const earlier = await consumer.client.post("/support/cases").send({ subject: "Earlier ticket", description: "d", category: SupportCaseCategory.OTHER }).expect(201);
+      const created = await consumer.client
+        .post("/support/cases")
+        .send({ subject: "Order issue", description: "d", category: SupportCaseCategory.ORDER, householdId: consumer.householdId, relatedEntityType: "ORDER", relatedEntityId: orderId })
+        .expect(201);
+      const caseId = created.body.id as string;
+
+      const context = await support.client.get(`/admin/support/${caseId}/context`).expect(200);
+      expect(context.body.household.id).toBe(consumer.householdId);
+      expect(context.body.relatedEntity.type).toBe("ORDER");
+      expect(context.body.relatedEntity.id).toBe(orderId);
+      expect(context.body.previousCases.map((c: { id: string }) => c.id)).toContain(earlier.body.id);
+      expect(context.body.firstResponseTimeMinutes).toBeNull();
+
+      await support.client.post(`/admin/support/${caseId}/messages`).send({ body: "On it.", visibility: SupportMessageVisibility.PUBLIC }).expect(201);
+      const afterReply = await support.client.get(`/admin/support/${caseId}/context`).expect(200);
+      expect(afterReply.body.firstResponseTimeMinutes).not.toBeNull();
+    });
+  });
 });

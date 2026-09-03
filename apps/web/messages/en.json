@@ -10,7 +10,8 @@
     "loading": "Loading",
     "optional": "Optional",
     "selected": "Selected",
-    "logIn": "Log in"
+    "logIn": "Log in",
+    "support": "Support"
   },
   "auth": {
     "welcome": {
@@ -437,6 +438,7 @@
     "cancelledReason": "Cancellation reason",
     "completionNote": "Completion note",
     "cancel": "Cancel booking",
+    "getSupport": "Get support",
     "status": {
       "HOLD": "Held",
       "PENDING_CONFIRMATION": "Pending confirmation",
@@ -1128,7 +1130,8 @@
         "providerReference": "Provider reference",
         "requestedAt": "Requested {when}"
       },
-      "viewPaymentDetails": "View payment & financing details"
+      "viewPaymentDetails": "View payment & financing details",
+      "getSupport": "Get support"
     },
     "statusLabels": {
       "payment": {
@@ -1449,6 +1452,71 @@
       }
     }
   },
+  "support": {
+    "loading": "Loading…",
+    "retry": "Retry",
+    "home": {
+      "title": "Support",
+      "subtitle": "Get help with an order, booking, or your account.",
+      "createCta": "Get support",
+      "recentTitle": "Recent tickets",
+      "viewAll": "View all",
+      "noRecent": "You have no support tickets yet."
+    },
+    "tickets": {
+      "title": "My Tickets",
+      "empty": "You have no support tickets yet."
+    },
+    "create": {
+      "title": "New support ticket",
+      "category": "Category",
+      "subject": "Subject",
+      "description": "Describe the issue",
+      "submit": "Submit",
+      "failed": "Couldn't submit your ticket. Please try again.",
+      "linkedContext": "This ticket will be linked to your {type}."
+    },
+    "detail": {
+      "caseNumber": "Ticket {number}",
+      "backToList": "Back to My Tickets",
+      "progress": "Progress",
+      "messages": "Conversation",
+      "noMessages": "No messages yet.",
+      "you": "You",
+      "support": "Support",
+      "composePlaceholder": "Write a message…",
+      "send": "Send",
+      "sendFailed": "Couldn't send your message. Please try again.",
+      "reopen": "Reopen ticket"
+    },
+    "status": {
+      "SUBMITTED": "Submitted",
+      "UNDER_REVIEW": "Under review",
+      "WAITING": "Waiting on you",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    },
+    "category": {
+      "ACCOUNT": "Account",
+      "PET": "Pet",
+      "HEALTH": "Health",
+      "BOOKING": "Booking",
+      "SERVICE": "Service",
+      "PAYMENT": "Payment",
+      "REFUND": "Refund",
+      "ORDER": "Order",
+      "DELIVERY": "Delivery",
+      "SELLER": "Seller",
+      "PROVIDER": "Provider",
+      "MARKETPLACE": "Marketplace",
+      "TRUST_SAFETY": "Trust & Safety",
+      "OTHER": "Other"
+    },
+    "relatedEntityType": {
+      "ORDER": "order",
+      "BOOKING": "booking"
+    }
+  },
   "admin": {
     "shell": {
       "title": "PET LIFE OS Admin",
@@ -1491,7 +1559,8 @@
       "reasonPlaceholder": "Required — explain why",
       "assign": "Assign",
       "assigneeLabel": "Assignee admin ID",
-      "backToList": "Back to list"
+      "backToList": "Back to list",
+      "search": "Search"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -1538,7 +1607,11 @@
       "newCase": "New case",
       "createTitle": "Create support case",
       "filter": {
-        "allStatuses": "All statuses"
+        "allStatuses": "All statuses",
+        "allCategories": "All categories",
+        "searchPlaceholder": "Search subject or case number…",
+        "createdFrom": "Created from",
+        "createdTo": "Created to"
       },
       "status": {
         "OPEN": "Open",
@@ -1588,7 +1661,18 @@
         "visibilityPublic": "Public reply",
         "visibilityInternal": "Internal note (never sent to the customer)",
         "send": "Send",
-        "notes": "Internal notes"
+        "notes": "Internal notes",
+        "context": {
+          "title": "Context",
+          "household": "Household: {name}",
+          "pet": "Pet: {name}",
+          "relatedEntity": "Related to: {summary}",
+          "firstResponseTime": "First response after {minutes} min",
+          "noFirstResponseYet": "No response sent yet",
+          "resolutionTime": "Resolved after {minutes} min",
+          "previousCases": "Previous tickets from this customer:",
+          "noPreviousCases": "No previous tickets from this customer."
+        }
       }
     },
     "disputes": {
