@@ -30,7 +30,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-surface-base">
       <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-        <Link href={`/${locale}/home`} className="text-section-title text-text-primary">
+        <Link href={`/${locale}`} className="text-section-title text-text-primary">
           {t("appName")}
         </Link>
         <div className="flex items-center gap-2">
@@ -41,7 +41,15 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
               <Avatar name={user.displayName} src={user.avatarUrl} size="sm" />
             </Link>
           ) : status !== "loading" && status !== "idle" ? (
-            <Button variant="secondary" size="sm" onClick={() => router.push(`/${locale}/welcome?returnTo=${encodeURIComponent(window.location.pathname)}`)}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                router.push(
+                  `/${locale}/welcome?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+                )
+              }
+            >
               {t("logIn")}
             </Button>
           ) : null}
