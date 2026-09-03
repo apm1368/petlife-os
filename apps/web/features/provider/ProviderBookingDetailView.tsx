@@ -132,6 +132,11 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
             <Row label={t("access.expiresAt")} value={access.expiresAt ? formatAppointmentDateTime(access.expiresAt, locale, booking.timezone) : ""} />
           </>
         ) : null}
+        {access.state === "GRANTED" && booking.category === "VET" ? (
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/provider/patients/${pet.id}`)}>
+            {t("access.openClinicalRecord")}
+          </Button>
+        ) : null}
       </ContextSurface>
 
       {careProfile ? (

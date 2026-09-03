@@ -311,7 +311,8 @@
       "vaccination": "Vaccination",
       "activeMedications": "{count} active",
       "noActiveMedications": "None active",
-      "completeSetup": "Complete health setup"
+      "completeSetup": "Complete health setup",
+      "advancedHealth": "Advanced Health"
     },
     "allergies": {
       "title": "Allergies",
@@ -794,7 +795,8 @@
         },
         "scope": "Scope",
         "startsAt": "Starts",
-        "expiresAt": "Expires"
+        "expiresAt": "Expires",
+        "openClinicalRecord": "Open Clinical Record"
       },
       "careProfile": {
         "title": "Care context",
@@ -2282,6 +2284,125 @@
       "retry": "Try again",
       "notFoundTitle": "Article not found",
       "notFoundMessage": "This article doesn't exist or isn't available right now."
+    }
+  },
+  "healthAdvanced": {
+    "nav": {
+      "overview": "Overview",
+      "timeline": "Timeline",
+      "documents": "Documents",
+      "labs": "Labs",
+      "imaging": "Imaging",
+      "referrals": "Referrals",
+      "dental": "Dental",
+      "nutrition": "Nutrition",
+      "rehab": "Rehabilitation",
+      "observations": "Observations"
+    },
+    "overview": {
+      "title": "Advanced Health",
+      "upcomingCare": "Upcoming care",
+      "overdueCare": "Overdue care",
+      "activeMedications": "Active medications",
+      "unresolvedCarePlanItems": "Open care plan items",
+      "recentDocuments": "Recent documents",
+      "recentVisits": "Recent visits",
+      "missingInformation": "Missing information",
+      "noMissingInformation": "No known gaps in this pet's recorded health information."
+    },
+    "timeline": {
+      "title": "Health Timeline",
+      "empty": "No health events recorded yet."
+    },
+    "documents": {
+      "title": "Medical Documents",
+      "empty": "No medical documents uploaded yet.",
+      "upload": "Upload document",
+      "uploading": "Uploading…",
+      "titleLabel": "Title",
+      "documentType": "Document type",
+      "download": "Download",
+      "void": "Remove",
+      "voidReason": "Reason",
+      "provenanceOwner": "Uploaded by household",
+      "provenanceProvider": "Uploaded by provider — verified"
+    },
+    "labs": {
+      "title": "Labs",
+      "empty": "No lab results recorded."
+    },
+    "imaging": {
+      "title": "Imaging",
+      "empty": "No imaging studies recorded."
+    },
+    "referrals": {
+      "title": "Referrals",
+      "empty": "No referrals recorded."
+    },
+    "dental": {
+      "title": "Dental",
+      "empty": "No dental records recorded."
+    },
+    "nutrition": {
+      "title": "Nutrition Plans",
+      "empty": "No clinical nutrition plans recorded."
+    },
+    "rehab": {
+      "title": "Rehabilitation Plans",
+      "empty": "No rehabilitation plans recorded.",
+      "sessionsLogged": "{count} sessions logged"
+    },
+    "observations": {
+      "title": "Observations",
+      "empty": "No observations recorded yet.",
+      "add": "Add observation",
+      "category": "Category",
+      "description": "Description",
+      "observedAt": "Observed at",
+      "disclaimer": "Owner observation — not a diagnosis.",
+      "save": "Save"
+    },
+    "correction": {
+      "add": "Add a correction",
+      "text": "What would you like to correct?",
+      "submit": "Submit correction",
+      "history": "Correction history"
+    }
+  },
+  "clinicalOs": {
+    "patient": {
+      "title": "Patient",
+      "allergies": "Allergies",
+      "medications": "Active medications",
+      "conditions": "Known conditions",
+      "recentVisits": "Recent visits",
+      "recentLabs": "Recent labs",
+      "documents": "Documents",
+      "carePlans": "Care plans",
+      "startVisit": "Start visit"
+    },
+    "visit": {
+      "title": "Clinical Visit",
+      "reasonForVisit": "Reason for visit",
+      "history": "History",
+      "observations": "Observations",
+      "assessment": "Assessment",
+      "plan": "Plan",
+      "save": "Save notes",
+      "complete": "Complete visit",
+      "amend": "Amend visit",
+      "void": "Void visit",
+      "amendReason": "Reason for amendment",
+      "voidReason": "Reason for voiding",
+      "status": {
+        "DRAFT": "Draft",
+        "IN_PROGRESS": "In progress",
+        "COMPLETED": "Completed",
+        "AMENDED": "Amended",
+        "VOIDED": "Voided"
+      },
+      "revisionHistory": "Revision history",
+      "completedNotice": "This visit is completed. Use Amend to make further changes — the prior content is preserved."
     }
   }
 }

@@ -102,10 +102,12 @@ export enum SetupStatus {
   COMPLETE = "COMPLETE",
 }
 
-/** Provenance for every health/care record. OWNER is the only source fully editable in this phase. */
+/** Provenance for every health/care record. OWNER is the only source fully editable in this phase. Handoff 17 adds HOUSEHOLD_MEMBER and CLINIC (additive only). */
 export enum SourceType {
   OWNER = "OWNER",
+  HOUSEHOLD_MEMBER = "HOUSEHOLD_MEMBER",
   PROVIDER = "PROVIDER",
+  CLINIC = "CLINIC",
   IMPORTED_DOCUMENT = "IMPORTED_DOCUMENT",
   SYSTEM = "SYSTEM",
 }
@@ -214,6 +216,8 @@ export interface PetAccessFlags {
   canEditCareProfile: boolean;
   canViewLocation: boolean;
   canManageAccess: boolean;
+  /** Handoff 17: authority to author clinical content (visits, documents, labs, imaging, referrals, care plans) for this pet as a provider. */
+  canRecordClinicalData: boolean;
 }
 
 export interface ApiErrorBody {
@@ -2313,6 +2317,8 @@ export interface SupportCaseContextDto {
   resolutionTimeMinutes: number | null;
   /** Handoff 16 — coarse subscription/billing-state summary for the case's household, null when the case has no household. Never a payment secret (see SupportSubscriptionSummaryDto's own doc comment). */
   subscription: SupportSubscriptionSummaryDto | null;
+  /** Handoff 17 — coarse clinical-record summary for the case's pet, null when the case has no linked pet. Never the full clinical record (see SupportHealthSummaryDto's own doc comment). */
+  health: SupportHealthSummaryDto | null;
 }
 
 /**
@@ -3391,4 +3397,475 @@ export interface SupportSubscriptionSummaryDto {
   planNameEn: string;
   currentPeriodEndAt: string | null;
   recentFailedBillingAttempt: SubscriptionBillingAttemptDto | null;
+}
+
+// ---------------------------------------------------------------------------
+// Advanced Health / Clinical OS (Handoff 17)
+// ---------------------------------------------------------------------------
+
+export enum MedicalDocumentType {
+  LAB_REPORT = "LAB_REPORT",
+  IMAGING_REPORT = "IMAGING_REPORT",
+  PRESCRIPTION = "PRESCRIPTION",
+  VACCINATION_CERTIFICATE = "VACCINATION_CERTIFICATE",
+  REFERRAL = "REFERRAL",
+  DISCHARGE_SUMMARY = "DISCHARGE_SUMMARY",
+  CLINICAL_NOTE = "CLINICAL_NOTE",
+  DENTAL_RECORD = "DENTAL_RECORD",
+  NUTRITION_PLAN = "NUTRITION_PLAN",
+  REHAB_PLAN = "REHAB_PLAN",
+  OTHER = "OTHER",
+}
+
+export enum DocumentVisibility {
+  HOUSEHOLD_ONLY = "HOUSEHOLD_ONLY",
+  PROVIDER_SHARED = "PROVIDER_SHARED",
+}
+
+export enum DocumentVerificationStatus {
+  UNVERIFIED = "UNVERIFIED",
+  PROVIDER_VERIFIED = "PROVIDER_VERIFIED",
+}
+
+export enum CorrectableRecordType {
+  CONDITION = "CONDITION",
+  ALLERGY = "ALLERGY",
+  MEDICATION = "MEDICATION",
+  VACCINATION_SUMMARY = "VACCINATION_SUMMARY",
+  LAB_RESULT = "LAB_RESULT",
+  IMAGING_STUDY = "IMAGING_STUDY",
+  MEDICAL_DOCUMENT = "MEDICAL_DOCUMENT",
+  CLINICAL_VISIT = "CLINICAL_VISIT",
+}
+
+export enum MedicalRecordCorrectionStatus {
+  OPEN = "OPEN",
+  ACKNOWLEDGED_BY_PROVIDER = "ACKNOWLEDGED_BY_PROVIDER",
+  RESOLVED = "RESOLVED",
+}
+
+export enum LabResultStatus {
+  PENDING = "PENDING",
+  FINAL = "FINAL",
+  AMENDED = "AMENDED",
+  CANCELLED = "CANCELLED",
+}
+
+/** Never derived client-side or server-side from value/unit — only ever an explicit provider designation. */
+export enum LabResultFlag {
+  NORMAL = "NORMAL",
+  ABNORMAL = "ABNORMAL",
+}
+
+export enum ImagingStudyType {
+  XRAY = "XRAY",
+  ULTRASOUND = "ULTRASOUND",
+  CT = "CT",
+  MRI = "MRI",
+  OTHER = "OTHER",
+}
+
+export enum ReferralStatus {
+  CREATED = "CREATED",
+  SENT = "SENT",
+  ACCEPTED = "ACCEPTED",
+  SCHEDULED = "SCHEDULED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum DentalRecordType {
+  EXAM = "EXAM",
+  CLEANING = "CLEANING",
+  PROCEDURE = "PROCEDURE",
+  EXTRACTION = "EXTRACTION",
+  FINDING = "FINDING",
+  FOLLOW_UP = "FOLLOW_UP",
+}
+
+export enum RehabPlanStatus {
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+  DISCONTINUED = "DISCONTINUED",
+}
+
+export enum ObservationCategory {
+  SYMPTOM = "SYMPTOM",
+  APPETITE = "APPETITE",
+  BEHAVIOR = "BEHAVIOR",
+  MOBILITY = "MOBILITY",
+  STOOL = "STOOL",
+  VOMITING = "VOMITING",
+  SLEEP = "SLEEP",
+  PAIN = "PAIN",
+  OTHER = "OTHER",
+}
+
+export enum ObservationMediaType {
+  PHOTO = "PHOTO",
+  VIDEO = "VIDEO",
+}
+
+/** Booking = commercial/scheduling state. ClinicalVisit = care-documentation state — deliberately never collapsed together. */
+export enum ClinicalVisitStatus {
+  DRAFT = "DRAFT",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  AMENDED = "AMENDED",
+  VOIDED = "VOIDED",
+}
+
+export enum CarePlanItemType {
+  MEDICATION = "MEDICATION",
+  FOLLOW_UP = "FOLLOW_UP",
+  NUTRITION = "NUTRITION",
+  REHAB = "REHAB",
+  MONITORING = "MONITORING",
+  REFERRAL = "REFERRAL",
+  VACCINATION = "VACCINATION",
+  OTHER = "OTHER",
+}
+
+export enum CarePlanItemStatus {
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum CarePlanStatus {
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+/** A minimal reference to whoever/whatever authored a piece of clinical content — never more than what's needed to show provenance. */
+export interface ClinicalActorRefDto {
+  providerOrganizationId: string | null;
+  providerOrganizationName: string | null;
+  providerUserId: string | null;
+  providerUserDisplayTitle: string | null;
+  userId: string | null;
+}
+
+export interface MedicalDocumentDto {
+  id: string;
+  petId: string;
+  householdId: string;
+  documentType: MedicalDocumentType;
+  title: string;
+  description: string | null;
+  sourceType: SourceType;
+  source: ClinicalActorRefDto;
+  recordedAt: string | null;
+  uploadedAt: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  visibility: DocumentVisibility;
+  verificationStatus: DocumentVerificationStatus;
+  relatedVisitId: string | null;
+  relatedLabResultId: string | null;
+  relatedImagingStudyId: string | null;
+  relatedReferralId: string | null;
+  voidedAt: string | null;
+  voidedReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Minted per-request after authorization — never store or cache this URL. */
+export interface MedicalDocumentDownloadDto {
+  downloadUrl: string;
+  expiresInSeconds: number;
+}
+
+export interface MedicalRecordCorrectionDto {
+  id: string;
+  petId: string;
+  targetType: CorrectableRecordType;
+  targetId: string;
+  correctionText: string;
+  createdByUserId: string;
+  status: MedicalRecordCorrectionStatus;
+  resolvedAt: string | null;
+  resolvedNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LabResultDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  clinicalVisitId: string | null;
+  testName: string;
+  testCode: string | null;
+  sampleDate: string | null;
+  resultDate: string | null;
+  value: string | null;
+  unit: string | null;
+  referenceRangeLow: number | null;
+  referenceRangeHigh: number | null;
+  qualitativeResult: string | null;
+  status: LabResultStatus;
+  flag: LabResultFlag | null;
+  sourceType: SourceType;
+  notes: string | null;
+  supersedesId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ImagingStudyDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  clinicalVisitId: string | null;
+  studyType: ImagingStudyType;
+  bodyRegion: string | null;
+  performedAt: string | null;
+  report: string | null;
+  findings: string | null;
+  recommendation: string | null;
+  sourceType: SourceType;
+  voidedAt: string | null;
+  voidedReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReferralDto {
+  id: string;
+  petId: string;
+  fromProviderOrganizationId: string;
+  fromProviderOrganizationName: string;
+  fromProviderUserId: string | null;
+  toProviderOrganizationId: string | null;
+  toProviderOrganizationName: string | null;
+  externalProviderName: string | null;
+  externalSpecialty: string | null;
+  reason: string;
+  notes: string | null;
+  status: ReferralStatus;
+  clinicalVisitId: string | null;
+  fulfillingBookingId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  cancelledAt: string | null;
+}
+
+export interface DentalRecordDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  clinicalVisitId: string | null;
+  recordType: DentalRecordType;
+  performedAt: string | null;
+  findings: string | null;
+  notes: string | null;
+  followUpRecommended: boolean;
+  followUpNotes: string | null;
+  sourceType: SourceType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClinicalNutritionPlanDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  clinicalVisitId: string | null;
+  goal: string | null;
+  dietType: DietType | null;
+  recommendedFoodText: string | null;
+  dailyAmountText: string | null;
+  frequencyText: string | null;
+  restrictionsText: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  status: CarePlanItemStatus;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RehabSessionDto {
+  id: string;
+  rehabPlanId: string;
+  sessionDate: string;
+  observation: string | null;
+  progressNotes: string | null;
+  createdAt: string;
+}
+
+export interface RehabPlanDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  clinicalVisitId: string | null;
+  goal: string | null;
+  exercisesText: string | null;
+  frequencyText: string | null;
+  durationText: string | null;
+  status: RehabPlanStatus;
+  sessions: RehabSessionDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Owner-recorded, never a diagnosis — the UI must always label this distinctly from clinical content. */
+export interface PetObservationDto {
+  id: string;
+  petId: string;
+  category: ObservationCategory;
+  description: string;
+  observedAt: string;
+  mediaType: ObservationMediaType | null;
+  hasMedia: boolean;
+  sourceType: SourceType;
+  recordedByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClinicalVisitRevisionDto {
+  id: string;
+  revisionNumber: number;
+  snapshotStatus: ClinicalVisitStatus;
+  snapshotReasonForVisit: string | null;
+  snapshotHistoryText: string | null;
+  snapshotObservationsText: string | null;
+  snapshotAssessmentText: string | null;
+  snapshotPlanText: string | null;
+  amendedByProviderUserId: string;
+  reason: string;
+  createdAt: string;
+}
+
+export interface ClinicalVisitDto {
+  id: string;
+  petId: string;
+  householdId: string;
+  bookingId: string | null;
+  providerOrganizationId: string;
+  providerOrganizationName: string;
+  providerUserId: string;
+  providerUserDisplayTitle: string | null;
+  reasonForVisit: string | null;
+  historyText: string | null;
+  observationsText: string | null;
+  assessmentText: string | null;
+  planText: string | null;
+  status: ClinicalVisitStatus;
+  startedAt: string;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClinicalVisitDetailDto extends ClinicalVisitDto {
+  revisions: ClinicalVisitRevisionDto[];
+}
+
+export interface CarePlanItemDto {
+  id: string;
+  carePlanId: string;
+  type: CarePlanItemType;
+  title: string;
+  detail: string | null;
+  status: CarePlanItemStatus;
+  source: SourceType;
+  dueAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CarePlanDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  originatingVisitId: string | null;
+  title: string;
+  status: CarePlanStatus;
+  notes: string | null;
+  items: CarePlanItemDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SeniorCareNoteDto {
+  id: string;
+  petId: string;
+  mobilityNotes: string | null;
+  cognitionNotes: string | null;
+  medicationComplexityNotes: string | null;
+  monitoringFrequencyText: string | null;
+  qualityOfLifeNotes: string | null;
+  sourceType: SourceType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EndOfLifeCarePlanDto {
+  petId: string;
+  palliativeCareNotes: string | null;
+  endOfLifePreferences: string | null;
+  aftercarePreferences: string | null;
+  sourceType: SourceType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Every kind of longitudinal health event, unified for the Health Timeline — read-only and derived (never stored), see HealthTimelineService. */
+export enum HealthTimelineEntryType {
+  VACCINATION = "VACCINATION",
+  MEDICATION_STARTED = "MEDICATION_STARTED",
+  MEDICATION_STOPPED = "MEDICATION_STOPPED",
+  CONDITION_RECORDED = "CONDITION_RECORDED",
+  ALLERGY_RECORDED = "ALLERGY_RECORDED",
+  CLINICAL_VISIT = "CLINICAL_VISIT",
+  LAB_RESULT = "LAB_RESULT",
+  IMAGING_STUDY = "IMAGING_STUDY",
+  REFERRAL = "REFERRAL",
+  DENTAL_RECORD = "DENTAL_RECORD",
+  NUTRITION_PLAN = "NUTRITION_PLAN",
+  REHAB_SESSION = "REHAB_SESSION",
+  OBSERVATION = "OBSERVATION",
+  DOCUMENT_UPLOADED = "DOCUMENT_UPLOADED",
+}
+
+export interface HealthTimelineEntryDto {
+  type: HealthTimelineEntryType;
+  occurredAt: string;
+  sourceType: SourceType;
+  source: ClinicalActorRefDto;
+  summary: string;
+  /** The id of the underlying record, and which endpoint/type it belongs to — lets the UI deep-link into the full record. */
+  recordId: string;
+  recordType: HealthTimelineEntryType;
+}
+
+/** spec: "if a score cannot be responsibly calculated, do not show one" — there is deliberately no numeric health score field anywhere in this DTO. */
+export interface HealthOverviewDto {
+  petId: string;
+  upcomingCare: CareCalendarEventDto[];
+  overdueCare: CareCalendarEventDto[];
+  activeMedicationsCount: number;
+  unresolvedCarePlanItemsCount: number;
+  recentDocuments: MedicalDocumentDto[];
+  recentVisits: ClinicalVisitDto[];
+  missingInformation: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Admin — Advanced Health / Clinical OS oversight (Handoff 17)
+// ---------------------------------------------------------------------------
+
+/** The coarse, permission-gated health summary the H13 support context panel shows — never the full clinical record. */
+export interface SupportHealthSummaryDto {
+  openMedicalDocumentsCount: number;
+  recentClinicalVisit: { id: string; status: ClinicalVisitStatus; providerOrganizationName: string; startedAt: string } | null;
+  openReferralsCount: number;
 }

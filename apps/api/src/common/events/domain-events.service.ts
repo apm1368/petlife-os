@@ -182,6 +182,24 @@ export const DOMAIN_EVENT_TYPES = [
   "SubscriptionUpgraded",
   "SubscriptionDowngradeScheduled",
   "SubscriptionPlanChanged",
+
+  // Handoff 17: Advanced Health / Clinical OS
+  "MedicalDocumentAdded",
+  "MedicalDocumentVoided",
+  "MedicalRecordCorrectionAdded",
+  "ClinicalVisitStarted",
+  "ClinicalVisitCompleted",
+  "ClinicalVisitAmended",
+  "ClinicalVisitVoided",
+  "LabResultAdded",
+  "LabResultAmended",
+  "ImagingStudyAdded",
+  "ReferralCreated",
+  "ReferralStatusChanged",
+  "ReferralCompleted",
+  "CarePlanCreated",
+  "CarePlanUpdated",
+  "PetObservationAdded",
 ] as const;
 
 /**

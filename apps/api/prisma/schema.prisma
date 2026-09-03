@@ -104,9 +104,19 @@ enum SetupStatus {
 /// future-compatible states with no editable integration yet, and SYSTEM is
 /// reserved for derived/setup rows. OWNER-entered data is never marked as
 /// verified provider data.
+///
+/// Handoff 17 adds HOUSEHOLD_MEMBER (an owner-adjacent household member, as
+/// distinct from the primary OWNER) and CLINIC (a provider organization
+/// acting institutionally, e.g. an imported clinic record not attributable
+/// to one specific ProviderUser) — additive values only; IMPORTED_DOCUMENT
+/// and SYSTEM already cover the "system-imported"/"derived" cases, so no
+/// separate SYSTEM_IMPORT value was added (avoids duplicating provenance
+/// vocabulary that already exists).
 enum SourceType {
   OWNER
+  HOUSEHOLD_MEMBER
   PROVIDER
+  CLINIC
   IMPORTED_DOCUMENT
   SYSTEM
 }
@@ -1097,6 +1107,9 @@ model Household {
   subscriptionTrials   SubscriptionTrial[]
   entitlementOverrides SubscriptionEntitlementOverride[]
 
+  medicalDocuments MedicalDocument[]
+  clinicalVisits   ClinicalVisit[]
+
   @@map("households")
 }
 
@@ -1189,6 +1202,20 @@ model Pet {
   orderItems         OrderItem[]
   supportCases       SupportCase[]
 
+  medicalDocuments         MedicalDocument[]
+  medicalRecordCorrections MedicalRecordCorrection[]
+  labResults               LabResult[]
+  imagingStudies           ImagingStudy[]
+  referrals                Referral[]
+  dentalRecords            DentalRecord[]
+  clinicalNutritionPlans   ClinicalNutritionPlan[]
+  rehabPlans               RehabPlan[]
+  observations             PetObservation[]
+  clinicalVisits           ClinicalVisit[]
+  carePlans                CarePlan[]
+  seniorCareNotes          SeniorCareNote[]
+  endOfLifeCarePlan        EndOfLifeCarePlan?
+
   @@index([householdId])
   @@map("pets")
 }
@@ -1214,15 +1241,24 @@ model PetAccessGrant {
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  canViewIdentity    Boolean @default(true)
-  canEditIdentity    Boolean @default(false)
-  canViewHealth      Boolean @default(false)
-  canEditHealth      Boolean @default(false)
-  canBookCare        Boolean @default(false)
-  canViewCareProfile Boolean @default(false)
-  canEditCareProfile Boolean @default(false)
-  canViewLocation    Boolean @default(false)
-  canManageAccess    Boolean @default(false)
+  canViewIdentity       Boolean @default(true)
+  canEditIdentity       Boolean @default(false)
+  canViewHealth         Boolean @default(false)
+  canEditHealth         Boolean @default(false)
+  canBookCare           Boolean @default(false)
+  canViewCareProfile    Boolean @default(false)
+  canEditCareProfile    Boolean @default(false)
+  canViewLocation       Boolean @default(false)
+  canManageAccess       Boolean @default(false)
+  /// Handoff 17: authority to author clinical content (ClinicalVisit,
+  /// MedicalDocument, LabResult, ImagingStudy, Referral, CarePlan, dental/
+  /// nutrition/rehab records) for this pet as a provider. Deliberately
+  /// separate from canEditHealth, which governs an owner/household member's
+  /// own edits to the Handoff 02 health basics — providers never get
+  /// canEditHealth, owners never get canRecordClinicalData. Set true only on
+  /// TEMPORARY grants created for a VET-category booking — see
+  /// BookingPetAccessService.
+  canRecordClinicalData Boolean @default(false)
 
   startsAt  DateTime?
   expiresAt DateTime?
@@ -1429,11 +1465,23 @@ model Medication {
   sourceLabel      String?
   recordedByUserId String?    @db.Uuid
 
+  /// Handoff 17: set when a provider prescribes this medication during a
+  /// Clinical Visit / as part of a Care Plan item — links the executable
+  /// medication record to the clinical context that produced it, without
+  /// creating a second "ClinicalMedicationRecord" model duplicating these
+  /// same fields (spec: "Keep medication record separate from payment/shop
+  /// fulfillment", which this model already satisfies).
+  clinicalVisitId String?        @db.Uuid
+  clinicalVisit   ClinicalVisit? @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+  carePlanItemId  String?        @db.Uuid
+  carePlanItem    CarePlanItem?  @relation(fields: [carePlanItemId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([petId])
   @@index([status])
+  @@index([clinicalVisitId])
   @@map("medications")
 }
 
@@ -1534,6 +1582,19 @@ model ProviderOrganization {
   bookingSeries          BookingSeries[]
   contextPreferences     ProviderContextPreference[]
 
+  medicalDocumentsSourced MedicalDocument[]
+  labResults              LabResult[]
+  imagingStudies          ImagingStudy[]
+  referralsFrom           Referral[]              @relation("ReferralFrom")
+  referralsTo             Referral[]              @relation("ReferralTo")
+  dentalRecords           DentalRecord[]
+  clinicalNutritionPlans  ClinicalNutritionPlan[]
+  rehabPlans              RehabPlan[]
+  clinicalVisits          ClinicalVisit[]
+  carePlans               CarePlan[]
+  seniorCareNotes         SeniorCareNote[]
+  endOfLifeCarePlans      EndOfLifeCarePlan[]
+
   @@index([verificationStatus])
   @@map("provider_organizations")
 }
@@ -1587,6 +1648,16 @@ model ProviderUser {
   availabilityExceptions ProviderAvailabilityException[]
   bookings               Booking[]
   bookingProviderNotes   BookingProviderNote[]
+
+  medicalDocumentsSourced MedicalDocument[]
+  labResultsRecorded      LabResult[]
+  imagingStudiesPerformed ImagingStudy[]
+  referralsFrom           Referral[]
+  dentalRecords           DentalRecord[]
+  clinicalNutritionPlans  ClinicalNutritionPlan[]
+  rehabPlans              RehabPlan[]
+  clinicalVisits          ClinicalVisit[]
+  carePlans               CarePlan[]
 
   @@index([providerOrganizationId])
   @@index([userId])
@@ -1857,6 +1928,9 @@ model Booking {
 
   petAccess     BookingPetAccess?
   providerNotes BookingProviderNote[]
+
+  clinicalVisits     ClinicalVisit[]
+  referralsFulfilled Referral[]
 
   @@index([petId])
   @@index([householdId])
@@ -5101,4 +5175,728 @@ model SubscriptionEntitlementOverride {
 
   @@index([householdId, key])
   @@map("subscription_entitlement_overrides")
+}
+
+// ---------------------------------------------------------------------------
+// Advanced Health / Clinical OS (Handoff 17)
+//
+// Extends the Health & Care foundation (Handoff 02) into a longitudinal
+// clinical system. Every new model here follows the same FK policy as the
+// Handoff 02 block: onDelete: Restrict back to Pet — clinical history must
+// never be silently destroyed by a Pet row disappearing. Provider-authored
+// content uses a real FK to ProviderUser (not a plain audit-only UUID)
+// because, unlike Booking.completedByProviderUserId, the author's identity
+// IS the clinical content ("Dr. X performed this visit") — the same
+// precedent already set by BookingProviderNote.providerUserId.
+//
+// The longitudinal Health Timeline is deliberately NOT a stored table —
+// HealthTimelineService reads and merges the models below (plus the
+// existing H02 models) at query time, the same "derived, never duplicated"
+// approach H16's UsageService uses for metering. This avoids a second copy
+// of data that could drift from the source-of-truth rows.
+//
+// Provider originals are never edited or hard-deleted in place. Three
+// distinct mechanisms enforce this, chosen per record shape:
+//   - MedicalDocument / ImagingStudy: void (voidedAt/voidedReason) + append a new one.
+//   - LabResult: supersede (supersedesId self-relation) — a corrected result
+//     is a new row pointing back at the one it replaces.
+//   - ClinicalVisit: revision history (ClinicalVisitRevision) — a completed
+//     visit's amendment snapshots the prior content before overwriting it.
+// Owner disagreement with any provider-sourced record never edits that
+// record — it creates a MedicalRecordCorrection alongside it instead.
+// ---------------------------------------------------------------------------
+
+enum MedicalDocumentType {
+  LAB_REPORT
+  IMAGING_REPORT
+  PRESCRIPTION
+  VACCINATION_CERTIFICATE
+  REFERRAL
+  DISCHARGE_SUMMARY
+  CLINICAL_NOTE
+  DENTAL_RECORD
+  NUTRITION_PLAN
+  REHAB_PLAN
+  OTHER
+}
+
+/// HOUSEHOLD_ONLY is the safe default (spec: "private medical documents must
+/// never be publicly exposed") — a document is reachable by a provider only
+/// when BOTH this is PROVIDER_SHARED AND that provider currently holds an
+/// active PetAccessGrant with canViewHealth for this pet. Setting this to
+/// PROVIDER_SHARED never bypasses PetAccessGrant on its own.
+enum DocumentVisibility {
+  HOUSEHOLD_ONLY
+  PROVIDER_SHARED
+}
+
+/// PROVIDER-sourced documents are marked PROVIDER_VERIFIED automatically —
+/// the provider organization stands behind its own record. OWNER-uploaded
+/// documents start UNVERIFIED. This is a factual provenance label, never a
+/// judgment about whether the document is genuine.
+enum DocumentVerificationStatus {
+  UNVERIFIED
+  PROVIDER_VERIFIED
+}
+
+/// Which existing record types an owner correction can attach to — mirrors
+/// AdminAuditLog's entityType/entityId polymorphic-reference pattern (plain
+/// string id, no FK, since one table cannot hold a real FK to several
+/// different target tables).
+enum CorrectableRecordType {
+  CONDITION
+  ALLERGY
+  MEDICATION
+  VACCINATION_SUMMARY
+  LAB_RESULT
+  IMAGING_STUDY
+  MEDICAL_DOCUMENT
+  CLINICAL_VISIT
+}
+
+enum MedicalRecordCorrectionStatus {
+  OPEN
+  ACKNOWLEDGED_BY_PROVIDER
+  RESOLVED
+}
+
+/// PENDING = ordered but not yet resulted. FINAL = the result of record.
+/// AMENDED/CANCELLED never overwrite a FINAL row in place — a correction is
+/// always a new row pointing back via supersedesId.
+enum LabResultStatus {
+  PENDING
+  FINAL
+  AMENDED
+  CANCELLED
+}
+
+/// Deliberately nullable and NEVER inferred by comparing value/unit against
+/// referenceRange in application code (spec: "do not invent medical
+/// interpretation") — only ever set by an explicit provider designation.
+enum LabResultFlag {
+  NORMAL
+  ABNORMAL
+}
+
+enum ImagingStudyType {
+  XRAY
+  ULTRASOUND
+  CT
+  MRI
+  OTHER
+}
+
+enum ReferralStatus {
+  CREATED
+  SENT
+  ACCEPTED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum DentalRecordType {
+  EXAM
+  CLEANING
+  PROCEDURE
+  EXTRACTION
+  FINDING
+  FOLLOW_UP
+}
+
+enum RehabPlanStatus {
+  ACTIVE
+  COMPLETED
+  DISCONTINUED
+}
+
+enum ObservationCategory {
+  SYMPTOM
+  APPETITE
+  BEHAVIOR
+  MOBILITY
+  STOOL
+  VOMITING
+  SLEEP
+  PAIN
+  OTHER
+}
+
+enum ObservationMediaType {
+  PHOTO
+  VIDEO
+}
+
+/// Booking = commercial/scheduling state. ClinicalVisit = care-documentation
+/// state — the two are deliberately never collapsed into one model (spec:
+/// "Do not collapse Booking into Clinical Visit"). AMENDED means "was
+/// COMPLETED, then edited" — the prior content is preserved as a
+/// ClinicalVisitRevision row, never overwritten in place without a trace.
+/// VOIDED is terminal.
+enum ClinicalVisitStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  AMENDED
+  VOIDED
+}
+
+enum CarePlanItemType {
+  MEDICATION
+  FOLLOW_UP
+  NUTRITION
+  REHAB
+  MONITORING
+  REFERRAL
+  VACCINATION
+  OTHER
+}
+
+enum CarePlanItemStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum CarePlanStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model MedicalDocument {
+  id          String    @id @default(uuid()) @db.Uuid
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+
+  documentType MedicalDocumentType
+  title        String
+  description  String?
+
+  sourceType                   SourceType
+  /// Plain UUID, no FK — same audit-reference pattern as
+  /// Allergy.recordedByUserId. Set when sourceType is OWNER/HOUSEHOLD_MEMBER.
+  sourceUserId                 String?               @db.Uuid
+  sourceProviderOrganizationId String?               @db.Uuid
+  sourceProviderOrganization   ProviderOrganization? @relation(fields: [sourceProviderOrganizationId], references: [id], onDelete: Restrict)
+  sourceProviderUserId         String?               @db.Uuid
+  sourceProviderUser           ProviderUser?         @relation(fields: [sourceProviderUserId], references: [id], onDelete: Restrict)
+
+  /// The clinically-relevant date (e.g. when a lab sample was taken) — may
+  /// differ from uploadedAt. Nullable: not every document type has one.
+  recordedAt DateTime?
+  uploadedAt DateTime  @default(now())
+
+  /// Private object storage key — never a public URL (spec: "do not store
+  /// public object URLs"). Reads always go through a short-TTL signed
+  /// download URL minted per-request after authorization — see
+  /// HealthStorageService.
+  fileObjectKey String  @unique
+  mimeType      String
+  fileSizeBytes Int
+  checksum      String?
+
+  visibility         DocumentVisibility         @default(HOUSEHOLD_ONLY)
+  verificationStatus DocumentVerificationStatus @default(UNVERIFIED)
+
+  relatedVisitId        String?        @db.Uuid
+  relatedVisit          ClinicalVisit? @relation(fields: [relatedVisitId], references: [id], onDelete: SetNull)
+  relatedLabResultId    String?        @db.Uuid
+  relatedLabResult      LabResult?     @relation(fields: [relatedLabResultId], references: [id], onDelete: SetNull)
+  relatedImagingStudyId String?        @db.Uuid
+  relatedImagingStudy   ImagingStudy?  @relation(fields: [relatedImagingStudyId], references: [id], onDelete: SetNull)
+  relatedReferralId     String?        @db.Uuid
+  relatedReferral       Referral?      @relation(fields: [relatedReferralId], references: [id], onDelete: SetNull)
+
+  /// Provider-sourced documents are never hard-deleted or replaced in place —
+  /// see the locked principle "provider-originated clinical records must not
+  /// be silently overwritten". Voiding is the only way to retract one; the
+  /// replacement is a new MedicalDocument row.
+  voidedAt     DateTime?
+  voidedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@index([householdId])
+  @@index([documentType])
+  @@map("medical_documents")
+}
+
+model MedicalRecordCorrection {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  /// Polymorphic reference to the original record being corrected — plain
+  /// string id, no FK (see the doc comment on CorrectableRecordType). The
+  /// original record is NEVER edited or deleted by a correction — see the
+  /// locked principle "owner corrections must preserve history".
+  targetType CorrectableRecordType
+  targetId   String                @db.Uuid
+
+  correctionText  String
+  createdByUserId String                        @db.Uuid
+  status          MedicalRecordCorrectionStatus @default(OPEN)
+
+  resolvedAt   DateTime?
+  resolvedNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([targetType, targetId])
+  @@index([petId])
+  @@map("medical_record_corrections")
+}
+
+model LabResult {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId   String?               @db.Uuid
+  providerOrganization     ProviderOrganization? @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  recordedByProviderUserId String?               @db.Uuid
+  recordedByProviderUser   ProviderUser?         @relation(fields: [recordedByProviderUserId], references: [id], onDelete: Restrict)
+  clinicalVisitId          String?               @db.Uuid
+  clinicalVisit            ClinicalVisit?        @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  testName String
+  testCode String?
+
+  sampleDate DateTime? @db.Date
+  resultDate DateTime? @db.Date
+
+  value              String?
+  unit               String?
+  referenceRangeLow  Decimal? @db.Decimal(10, 3)
+  referenceRangeHigh Decimal? @db.Decimal(10, 3)
+  qualitativeResult  String?
+
+  status LabResultStatus @default(PENDING)
+  /// Never derived by application code — see the doc comment on LabResultFlag.
+  flag   LabResultFlag?
+
+  sourceType SourceType @default(PROVIDER)
+  notes      String?
+
+  /// Append/supersede semantics for a correction, per the section-level doc
+  /// comment — the superseded row's status is set to AMENDED, never deleted.
+  supersedesId String?    @unique @db.Uuid
+  supersedes   LabResult? @relation("LabResultSupersession", fields: [supersedesId], references: [id], onDelete: SetNull)
+  supersededBy LabResult? @relation("LabResultSupersession")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents MedicalDocument[]
+
+  @@index([petId])
+  @@index([status])
+  @@map("lab_results")
+}
+
+model ImagingStudy {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId    String?               @db.Uuid
+  providerOrganization      ProviderOrganization? @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  performedByProviderUserId String?               @db.Uuid
+  performedByProviderUser   ProviderUser?         @relation(fields: [performedByProviderUserId], references: [id], onDelete: Restrict)
+  clinicalVisitId           String?               @db.Uuid
+  clinicalVisit             ClinicalVisit?        @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  studyType   ImagingStudyType
+  bodyRegion  String?
+  performedAt DateTime?
+
+  /// Free-text provider report — never an automated diagnosis (spec: "do not
+  /// attempt image diagnosis").
+  report         String?
+  findings       String?
+  recommendation String?
+
+  sourceType SourceType @default(PROVIDER)
+
+  voidedAt     DateTime?
+  voidedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents MedicalDocument[]
+
+  @@index([petId])
+  @@map("imaging_studies")
+}
+
+/// Deliberately separate from Booking state (spec: "Keep Referral state
+/// separate from Booking state") — fulfillingBookingId only records which
+/// booking (if any) fulfilled the referral; it never drives `status`.
+model Referral {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  fromProviderOrganizationId String               @db.Uuid
+  fromProviderOrganization   ProviderOrganization @relation("ReferralFrom", fields: [fromProviderOrganizationId], references: [id], onDelete: Restrict)
+  fromProviderUserId         String?              @db.Uuid
+  fromProviderUser           ProviderUser?        @relation(fields: [fromProviderUserId], references: [id], onDelete: Restrict)
+
+  /// Set when the destination exists in PET LIFE OS; otherwise the external
+  /// fields below carry the destination (spec: "if not, support external
+  /// referral metadata").
+  toProviderOrganizationId String?               @db.Uuid
+  toProviderOrganization   ProviderOrganization? @relation("ReferralTo", fields: [toProviderOrganizationId], references: [id], onDelete: Restrict)
+  externalProviderName     String?
+  externalSpecialty        String?
+
+  reason String
+  notes  String?
+  status ReferralStatus @default(CREATED)
+
+  clinicalVisitId     String?        @db.Uuid
+  clinicalVisit       ClinicalVisit? @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+  fulfillingBookingId String?        @db.Uuid
+  fulfillingBooking   Booking?       @relation(fields: [fulfillingBookingId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+  cancelledAt DateTime?
+
+  documents MedicalDocument[]
+
+  @@index([petId])
+  @@index([status])
+  @@map("referrals")
+}
+
+model DentalRecord {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String?               @db.Uuid
+  providerOrganization   ProviderOrganization? @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String?               @db.Uuid
+  providerUser           ProviderUser?         @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+  clinicalVisitId        String?               @db.Uuid
+  clinicalVisit          ClinicalVisit?        @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  recordType          DentalRecordType
+  performedAt         DateTime?
+  findings            String?
+  notes               String?
+  followUpRecommended Boolean          @default(false)
+  followUpNotes       String?
+
+  sourceType SourceType @default(PROVIDER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@map("dental_records")
+}
+
+/// Provider-issued structured plan — distinct from the owner's free-text
+/// NutritionProfile (Handoff 02), which stays untouched. Spec: "do not
+/// silently treat commerce product recommendations as clinical
+/// prescriptions" — recommendedFoodText is free text the provider writes,
+/// never auto-populated from the Shop catalog.
+model ClinicalNutritionPlan {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+  clinicalVisitId        String?              @db.Uuid
+  clinicalVisit          ClinicalVisit?       @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  goal                String?
+  dietType            DietType?
+  recommendedFoodText String?
+  dailyAmountText     String?
+  frequencyText       String?
+  restrictionsText    String?
+
+  startDate DateTime? @db.Date
+  endDate   DateTime? @db.Date
+
+  status CarePlanItemStatus @default(ACTIVE)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@map("clinical_nutrition_plans")
+}
+
+model RehabPlan {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+  clinicalVisitId        String?              @db.Uuid
+  clinicalVisit          ClinicalVisit?       @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  goal          String?
+  exercisesText String?
+  frequencyText String?
+  durationText  String?
+
+  status RehabPlanStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions RehabSession[]
+
+  @@index([petId])
+  @@map("rehab_plans")
+}
+
+model RehabSession {
+  id          String    @id @default(uuid()) @db.Uuid
+  rehabPlanId String    @db.Uuid
+  rehabPlan   RehabPlan @relation(fields: [rehabPlanId], references: [id], onDelete: Restrict)
+
+  sessionDate   DateTime @db.Date
+  observation   String?
+  progressNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([rehabPlanId])
+  @@map("rehab_sessions")
+}
+
+/// Owner-recorded, never a diagnosis (spec: "these are OWNER OBSERVATIONS,
+/// not diagnoses"). `category` is a coarse label the owner chooses, not a
+/// clinical classification. Photo/video reuse the same private storage path
+/// as MedicalDocument (HealthStorageService) — never auto-converted into a
+/// medical finding.
+model PetObservation {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  category    ObservationCategory
+  description String
+  observedAt  DateTime
+
+  mediaType      ObservationMediaType?
+  mediaObjectKey String?
+  mediaMimeType  String?
+
+  sourceType       SourceType @default(OWNER)
+  recordedByUserId String     @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@index([category])
+  @@map("pet_observations")
+}
+
+model ClinicalVisit {
+  id          String    @id @default(uuid()) @db.Uuid
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+
+  bookingId String?  @db.Uuid
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String               @db.Uuid
+  providerUser           ProviderUser         @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+
+  reasonForVisit   String?
+  /// Structured note sections (spec: "preserve structured separation"
+  /// without forcing SOAP naming) — historyText/observationsText/
+  /// assessmentText/planText map to Subjective/Objective/Assessment/Plan.
+  historyText      String?
+  observationsText String?
+  assessmentText   String?
+  planText         String?
+
+  status      ClinicalVisitStatus @default(DRAFT)
+  startedAt   DateTime            @default(now())
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  revisions      ClinicalVisitRevision[]
+  labResults     LabResult[]
+  imagingStudies ImagingStudy[]
+  referrals      Referral[]
+  dentalRecords  DentalRecord[]
+  nutritionPlans ClinicalNutritionPlan[]
+  rehabPlans     RehabPlan[]
+  carePlans      CarePlan[]
+  documents      MedicalDocument[]
+  medications    Medication[]
+
+  @@index([petId])
+  @@index([householdId])
+  @@index([providerOrganizationId])
+  @@index([status])
+  @@map("clinical_visits")
+}
+
+/// Append-only amendment history — a COMPLETED visit is never silently
+/// edited in place. Before applying an amendment, ClinicalVisitService
+/// snapshots the visit's current note fields + status into a new row here,
+/// then updates the live ClinicalVisit row and sets its status to AMENDED.
+model ClinicalVisitRevision {
+  id              String        @id @default(uuid()) @db.Uuid
+  clinicalVisitId String        @db.Uuid
+  clinicalVisit   ClinicalVisit @relation(fields: [clinicalVisitId], references: [id], onDelete: Restrict)
+
+  revisionNumber Int
+
+  /// Snapshot of the visit's note fields + status immediately BEFORE this
+  /// amendment was applied.
+  snapshotStatus           ClinicalVisitStatus
+  snapshotReasonForVisit   String?
+  snapshotHistoryText      String?
+  snapshotObservationsText String?
+  snapshotAssessmentText   String?
+  snapshotPlanText         String?
+
+  /// Plain UUID, no FK — same audit-reference pattern as
+  /// Booking.completedByProviderUserId; deleting a ProviderUser later must
+  /// never alter clinical audit history.
+  amendedByProviderUserId String @db.Uuid
+  reason                  String
+
+  createdAt DateTime @default(now())
+
+  @@unique([clinicalVisitId, revisionNumber])
+  @@map("clinical_visit_revisions")
+}
+
+model CarePlan {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+  originatingVisitId     String?              @db.Uuid
+  originatingVisit       ClinicalVisit?       @relation(fields: [originatingVisitId], references: [id], onDelete: SetNull)
+
+  title  String
+  status CarePlanStatus @default(ACTIVE)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CarePlanItem[]
+
+  @@index([petId])
+  @@map("care_plans")
+}
+
+model CarePlanItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  carePlanId String   @db.Uuid
+  carePlan   CarePlan @relation(fields: [carePlanId], references: [id], onDelete: Restrict)
+
+  type   CarePlanItemType
+  title  String
+  detail String?
+
+  status CarePlanItemStatus @default(PENDING)
+  source SourceType         @default(PROVIDER)
+  dueAt  DateTime?
+
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  medications Medication[]
+
+  @@index([carePlanId])
+  @@index([status])
+  @@map("care_plan_items")
+}
+
+/// Foundation only — no scoring engine (spec: "do not introduce scoring
+/// unless clinically justified"). Free-text, append-only observations,
+/// authorable by either the owner or a provider.
+model SeniorCareNote {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  mobilityNotes             String?
+  cognitionNotes            String?
+  medicationComplexityNotes String?
+  monitoringFrequencyText   String?
+  qualityOfLifeNotes        String?
+
+  sourceType             SourceType            @default(OWNER)
+  recordedByUserId       String?               @db.Uuid
+  providerOrganizationId String?               @db.Uuid
+  providerOrganization   ProviderOrganization? @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@map("senior_care_notes")
+}
+
+/// Careful, non-commercial foundation (spec: "End-of-Life / Aftercare
+/// Foundation"). Creating or updating this record never changes
+/// Pet.lifecycleStatus — pet lifecycle transitions remain an explicit,
+/// separate action (spec: "Do not trigger memorial lifecycle automatically").
+/// One row per pet: successive edits update it in place (these are private
+/// planning notes, not append-only clinical truth), so no revision history
+/// is kept — unlike ClinicalVisit/LabResult/ImagingStudy.
+model EndOfLifeCarePlan {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @unique @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  palliativeCareNotes  String?
+  endOfLifePreferences String?
+  aftercarePreferences String?
+
+  sourceType             SourceType            @default(OWNER)
+  recordedByUserId       String?               @db.Uuid
+  providerOrganizationId String?               @db.Uuid
+  providerOrganization   ProviderOrganization? @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("end_of_life_care_plans")
 }

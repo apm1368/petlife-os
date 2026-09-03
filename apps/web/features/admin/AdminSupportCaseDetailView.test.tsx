@@ -48,7 +48,7 @@ describe("AdminSupportCaseDetailView", () => {
     vi.mocked(adminService.getSupportCase).mockReset().mockResolvedValue(CASE);
     vi.mocked(adminService.getSupportCaseContext)
       .mockReset()
-      .mockResolvedValue({ household: null, pet: null, relatedEntity: null, previousCases: [], firstResponseAt: null, firstResponseTimeMinutes: null, resolutionTimeMinutes: null, subscription: null });
+      .mockResolvedValue({ household: null, pet: null, relatedEntity: null, previousCases: [], firstResponseAt: null, firstResponseTimeMinutes: null, resolutionTimeMinutes: null, subscription: null, health: null });
     vi.mocked(adminService.assignSupportCase).mockReset();
     vi.mocked(adminService.transitionSupportCase).mockReset();
     vi.mocked(adminService.postSupportMessage).mockReset();

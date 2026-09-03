@@ -155,6 +155,31 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "پلن اشتراک شما تغییر کرد", body: "اشتراک خانواده شما اکنون {{planName}} است." },
     en: { title: "Your plan has changed", body: "Your household is now on the {{planName}} plan." },
   },
+  // Advanced Health / Clinical OS (Handoff 17) — spec: "Do not expose
+  // detailed diagnosis in SMS. SMS copy must remain privacy-safe." Every
+  // smsBody below is fully generic (no pet name, no document title, no
+  // finding) by construction — the in-app `body` may name the pet, but
+  // never a diagnosis, test result, or clinical detail either.
+  "health.document_added": {
+    fa: { title: "سند پزشکی جدید", body: "یک سند پزشکی جدید برای {{petName}} اضافه شد.", smsBody: "یک به‌روزرسانی پزشکی برای حیوان خانگی شما در پت‌لایف ثبت شد." },
+    en: { title: "New medical document", body: "A new medical document was added for {{petName}}.", smsBody: "A health update for your pet is available in PET LIFE OS." },
+  },
+  "health.follow_up_due": {
+    fa: { title: "پیگیری درمانی سررسید شد", body: "یک مورد پیگیری درمانی برای {{petName}} سررسید شده است.", smsBody: "یک یادآوری مراقبتی برای حیوان خانگی شما در پت‌لایف دارید." },
+    en: { title: "Follow-up due", body: "A follow-up item for {{petName}} is due.", smsBody: "You have a care follow-up for your pet in PET LIFE OS." },
+  },
+  "health.referral_created": {
+    fa: { title: "ارجاع پزشکی جدید", body: "یک ارجاع پزشکی جدید برای {{petName}} ثبت شد.", smsBody: "یک ارجاع پزشکی جدید برای حیوان خانگی شما ثبت شد." },
+    en: { title: "New referral", body: "A new referral was created for {{petName}}.", smsBody: "A new referral for your pet is available in PET LIFE OS." },
+  },
+  "health.referral_updated": {
+    fa: { title: "وضعیت ارجاع پزشکی به‌روزرسانی شد", body: "وضعیت ارجاع پزشکی {{petName}} تغییر کرد.", smsBody: "وضعیت ارجاع پزشکی حیوان خانگی شما تغییر کرد." },
+    en: { title: "Referral status updated", body: "The referral status for {{petName}} changed.", smsBody: "A referral update for your pet is available in PET LIFE OS." },
+  },
+  "health.care_plan_updated": {
+    fa: { title: "برنامه مراقبتی به‌روزرسانی شد", body: "برنامه مراقبتی {{petName}} توسط ارائه‌دهنده به‌روزرسانی شد.", smsBody: "یک به‌روزرسانی برنامه مراقبتی برای حیوان خانگی شما ثبت شد." },
+    en: { title: "Care plan updated", body: "{{petName}}'s care plan was updated by the provider.", smsBody: "A care plan update for your pet is available in PET LIFE OS." },
+  },
 };
 
 export function hasTemplate(key: string): boolean {

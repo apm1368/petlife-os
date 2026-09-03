@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { AdminMembershipStatus, InternalNoteEntityType, Prisma, SupportCaseCategory, SupportCaseStatus, SupportMessageAuthorType, SupportMessageVisibility } from "@prisma/client";
-import type { PaginatedDto, SupportCaseContextDto, SupportCaseDetailDto, SupportCaseSummaryDto, SupportCaseUserDetailDto, SupportCaseUserSummaryDto, SupportMessageDto } from "@petlife/types";
+import type { PaginatedDto, SupportCaseContextDto, SupportCaseDetailDto, SupportCaseSummaryDto, SupportCaseUserDetailDto, SupportCaseUserSummaryDto, SupportHealthSummaryDto, SupportMessageDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import {
@@ -174,6 +174,7 @@ export class SupportCaseService {
     }
 
     const subscription = household ? await this.getSubscriptionSummary(household.id) : null;
+    const health = pet ? await this.getHealthSummary(pet.id) : null;
 
     return {
       household: household ? { id: household.id, name: household.name ?? "Household" } : null,
@@ -184,6 +185,34 @@ export class SupportCaseService {
       firstResponseTimeMinutes: supportCase.firstResponseAt ? Math.round((supportCase.firstResponseAt.getTime() - supportCase.createdAt.getTime()) / 60000) : null,
       resolutionTimeMinutes: supportCase.resolvedAt ? Math.round((supportCase.resolvedAt.getTime() - supportCase.createdAt.getTime()) / 60000) : null,
       subscription,
+      health,
+    };
+  }
+
+  /**
+   * Handoff 17 spec: "support staff should receive only the minimum health
+   * context required by their permission... do not expose full clinical
+   * record by default." This is a coarse count/status summary only — no
+   * document titles, no clinical note text, no diagnosis. The full record
+   * is reachable only through the regular pet-health authorization path
+   * (PetAccessGuard), never through the support panel.
+   */
+  private async getHealthSummary(petId: string): Promise<SupportHealthSummaryDto> {
+    const [openMedicalDocumentsCount, recentVisit, openReferralsCount] = await Promise.all([
+      this.prisma.medicalDocument.count({ where: { petId, voidedAt: null } }),
+      this.prisma.clinicalVisit.findFirst({
+        where: { petId, status: { in: ["COMPLETED", "AMENDED"] } },
+        include: { providerOrganization: { select: { name: true } } },
+        orderBy: { startedAt: "desc" },
+      }),
+      this.prisma.referral.count({ where: { petId, status: { notIn: ["COMPLETED", "CANCELLED"] } } }),
+    ]);
+    return {
+      openMedicalDocumentsCount,
+      recentClinicalVisit: recentVisit
+        ? { id: recentVisit.id, status: recentVisit.status as never, providerOrganizationName: recentVisit.providerOrganization.name, startedAt: recentVisit.startedAt.toISOString() }
+        : null,
+      openReferralsCount,
     };
   }
 

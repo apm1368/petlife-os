@@ -311,7 +311,8 @@
       "vaccination": "واکسیناسیون",
       "activeMedications": "{count} دارو فعال",
       "noActiveMedications": "بدون داروی فعال",
-      "completeSetup": "تکمیل اطلاعات سلامت"
+      "completeSetup": "تکمیل اطلاعات سلامت",
+      "advancedHealth": "سلامت پیشرفته"
     },
     "allergies": {
       "title": "حساسیت‌ها",
@@ -794,7 +795,8 @@
         },
         "scope": "محدوده",
         "startsAt": "شروع",
-        "expiresAt": "انقضا"
+        "expiresAt": "انقضا",
+        "openClinicalRecord": "باز کردن پرونده بالینی"
       },
       "careProfile": {
         "title": "زمینه مراقبتی",
@@ -2282,6 +2284,125 @@
       "retry": "تلاش دوباره",
       "notFoundTitle": "مقاله یافت نشد",
       "notFoundMessage": "این مقاله وجود ندارد یا در حال حاضر در دسترس نیست."
+    }
+  },
+  "healthAdvanced": {
+    "nav": {
+      "overview": "نمای کلی",
+      "timeline": "جدول زمانی",
+      "documents": "اسناد",
+      "labs": "آزمایش‌ها",
+      "imaging": "تصویربرداری",
+      "referrals": "ارجاع‌ها",
+      "dental": "دندان‌پزشکی",
+      "nutrition": "تغذیه",
+      "rehab": "توان‌بخشی",
+      "observations": "مشاهدات"
+    },
+    "overview": {
+      "title": "سلامت پیشرفته",
+      "upcomingCare": "مراقبت‌های پیش‌رو",
+      "overdueCare": "مراقبت‌های عقب‌افتاده",
+      "activeMedications": "داروهای فعال",
+      "unresolvedCarePlanItems": "موارد باز برنامه مراقبتی",
+      "recentDocuments": "اسناد اخیر",
+      "recentVisits": "ویزیت‌های اخیر",
+      "missingInformation": "اطلاعات ناقص",
+      "noMissingInformation": "هیچ کمبود شناخته‌شده‌ای در اطلاعات سلامت ثبت‌شده این حیوان خانگی وجود ندارد."
+    },
+    "timeline": {
+      "title": "جدول زمانی سلامت",
+      "empty": "هنوز هیچ رویداد سلامتی ثبت نشده است."
+    },
+    "documents": {
+      "title": "اسناد پزشکی",
+      "empty": "هنوز هیچ سند پزشکی بارگذاری نشده است.",
+      "upload": "بارگذاری سند",
+      "uploading": "در حال بارگذاری…",
+      "titleLabel": "عنوان",
+      "documentType": "نوع سند",
+      "download": "دانلود",
+      "void": "حذف",
+      "voidReason": "دلیل",
+      "provenanceOwner": "بارگذاری‌شده توسط خانواده",
+      "provenanceProvider": "بارگذاری‌شده توسط ارائه‌دهنده — تأییدشده"
+    },
+    "labs": {
+      "title": "آزمایش‌ها",
+      "empty": "هیچ نتیجه آزمایشی ثبت نشده است."
+    },
+    "imaging": {
+      "title": "تصویربرداری",
+      "empty": "هیچ مطالعه تصویربرداری ثبت نشده است."
+    },
+    "referrals": {
+      "title": "ارجاع‌ها",
+      "empty": "هیچ ارجاعی ثبت نشده است."
+    },
+    "dental": {
+      "title": "دندان‌پزشکی",
+      "empty": "هیچ رکورد دندان‌پزشکی ثبت نشده است."
+    },
+    "nutrition": {
+      "title": "برنامه‌های تغذیه",
+      "empty": "هیچ برنامه تغذیه بالینی ثبت نشده است."
+    },
+    "rehab": {
+      "title": "برنامه‌های توان‌بخشی",
+      "empty": "هیچ برنامه توان‌بخشی ثبت نشده است.",
+      "sessionsLogged": "{count} جلسه ثبت‌شده"
+    },
+    "observations": {
+      "title": "مشاهدات",
+      "empty": "هنوز هیچ مشاهده‌ای ثبت نشده است.",
+      "add": "افزودن مشاهده",
+      "category": "دسته",
+      "description": "توضیحات",
+      "observedAt": "زمان مشاهده",
+      "disclaimer": "مشاهده مالک — نه یک تشخیص پزشکی.",
+      "save": "ذخیره"
+    },
+    "correction": {
+      "add": "افزودن اصلاحیه",
+      "text": "چه چیزی را می‌خواهید اصلاح کنید؟",
+      "submit": "ثبت اصلاحیه",
+      "history": "تاریخچه اصلاحات"
+    }
+  },
+  "clinicalOs": {
+    "patient": {
+      "title": "بیمار",
+      "allergies": "آلرژی‌ها",
+      "medications": "داروهای فعال",
+      "conditions": "شرایط شناخته‌شده",
+      "recentVisits": "ویزیت‌های اخیر",
+      "recentLabs": "آزمایش‌های اخیر",
+      "documents": "اسناد",
+      "carePlans": "برنامه‌های مراقبتی",
+      "startVisit": "شروع ویزیت"
+    },
+    "visit": {
+      "title": "ویزیت بالینی",
+      "reasonForVisit": "دلیل ویزیت",
+      "history": "سابقه",
+      "observations": "مشاهدات",
+      "assessment": "ارزیابی",
+      "plan": "برنامه",
+      "save": "ذخیره یادداشت‌ها",
+      "complete": "تکمیل ویزیت",
+      "amend": "اصلاح ویزیت",
+      "void": "باطل کردن ویزیت",
+      "amendReason": "دلیل اصلاح",
+      "voidReason": "دلیل ابطال",
+      "status": {
+        "DRAFT": "پیش‌نویس",
+        "IN_PROGRESS": "در حال انجام",
+        "COMPLETED": "تکمیل‌شده",
+        "AMENDED": "اصلاح‌شده",
+        "VOIDED": "باطل‌شده"
+      },
+      "revisionHistory": "تاریخچه اصلاحات",
+      "completedNotice": "این ویزیت تکمیل شده است. برای تغییرات بیشتر از «اصلاح» استفاده کنید — محتوای قبلی حفظ می‌شود."
     }
   }
 }

@@ -128,6 +128,8 @@ async function seedSubscriptions() {
       { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 2 },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
       { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+      { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 10 },
+      { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 20 },
     ],
   });
 
@@ -144,6 +146,8 @@ async function seedSubscriptions() {
       { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 6 },
       { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 50 },
+      { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
     ],
   });
   await ensurePrice(plus.id, SubscriptionBillingInterval.MONTHLY, 990_000);
@@ -162,6 +166,8 @@ async function seedSubscriptions() {
       { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
     ],
   });
   await ensurePrice(premium.id, SubscriptionBillingInterval.MONTHLY, 1_990_000);

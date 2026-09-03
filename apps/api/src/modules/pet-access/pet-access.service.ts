@@ -13,6 +13,7 @@ const OWNER_PRESET: PetAccessFlags = {
   canEditCareProfile: true,
   canViewLocation: true,
   canManageAccess: true,
+  canRecordClinicalData: false,
 };
 
 const FAMILY_PRESET: PetAccessFlags = {
@@ -25,6 +26,7 @@ const FAMILY_PRESET: PetAccessFlags = {
   canEditCareProfile: false,
   canViewLocation: true,
   canManageAccess: false,
+  canRecordClinicalData: false,
 };
 
 const NO_ACCESS_PRESET: PetAccessFlags = {
@@ -37,6 +39,7 @@ const NO_ACCESS_PRESET: PetAccessFlags = {
   canEditCareProfile: false,
   canViewLocation: false,
   canManageAccess: false,
+  canRecordClinicalData: false,
 };
 
 const FLAG_KEYS = Object.keys(NO_ACCESS_PRESET) as (keyof PetAccessFlags)[];

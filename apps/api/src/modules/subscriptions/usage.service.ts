@@ -21,6 +21,16 @@ export class UsageService {
   private static readonly DERIVERS: Record<string, (prisma: PrismaService, householdId: string) => Promise<number>> = {
     "pets.max": (prisma, householdId) => prisma.pet.count({ where: { householdId, deletedAt: null } }),
     "household.members.max": (prisma, householdId) => prisma.householdMember.count({ where: { householdId } }),
+    // Handoff 17: counts every non-voided document regardless of source
+    // (owner-uploaded or provider-uploaded) — the limit itself is only ever
+    // asserted on the OWNER upload path (see MedicalDocumentService.create),
+    // never on a provider's clinical upload, so a household can never be
+    // blocked from receiving new provider-issued records by its own plan.
+    "health.documents.max": (prisma, householdId) => prisma.medicalDocument.count({ where: { householdId, voidedAt: null } }),
+    // Convenience-only (spec: "richer organization, expanded history" —
+    // never safety-critical) — owner-recorded observations are never
+    // required for any clinical workflow.
+    "health.observations.max": (prisma, householdId) => prisma.petObservation.count({ where: { pet: { householdId } } }),
   };
 
   /** Every known LIMIT-type entitlement key this codebase actually meters. */

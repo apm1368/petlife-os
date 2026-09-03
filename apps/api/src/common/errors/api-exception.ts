@@ -1096,3 +1096,94 @@ export class SubscriptionAlreadyCancelledException extends ApiException {
     super("SUBSCRIPTION_ALREADY_CANCELLED", "This subscription cannot be cancelled or resumed in its current state.", HttpStatus.CONFLICT, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Advanced Health / Clinical OS (Handoff 17)
+// ---------------------------------------------------------------------------
+
+export class MedicalDocumentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MEDICAL_DOCUMENT_NOT_FOUND", "Medical document not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class UnsupportedDocumentTypeException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("UNSUPPORTED_DOCUMENT_TYPE", "This file type is not supported for medical documents.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class DocumentTooLargeException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DOCUMENT_TOO_LARGE", "This file exceeds the maximum allowed size for a medical document.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** spec: "provider-originated clinical records must not be silently overwritten by owners" — thrown when an owner attempts to directly edit a PROVIDER-sourced row instead of filing a MedicalRecordCorrection. */
+export class ProviderRecordNotOwnerEditableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PROVIDER_RECORD_NOT_OWNER_EDITABLE", "This record was entered by a provider and cannot be edited directly — add a correction instead.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+export class MedicalRecordCorrectionNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MEDICAL_RECORD_CORRECTION_NOT_FOUND", "Correction not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class ClinicalVisitNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CLINICAL_VISIT_NOT_FOUND", "Clinical visit not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** spec: "Do not allow silent editing after completion." Thrown by any mutation attempted outside the defined ClinicalVisitStatus transition graph. */
+export class InvalidClinicalVisitTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_CLINICAL_VISIT_TRANSITION", "This action is not valid for the visit's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class LabResultNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("LAB_RESULT_NOT_FOUND", "Lab result not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class ImagingStudyNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("IMAGING_STUDY_NOT_FOUND", "Imaging study not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class ReferralNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFERRAL_NOT_FOUND", "Referral not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidReferralTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_REFERRAL_TRANSITION", "This action is not valid for the referral's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class CarePlanNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CARE_PLAN_NOT_FOUND", "Care plan not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class CarePlanItemNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CARE_PLAN_ITEM_NOT_FOUND", "Care plan item not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown when a provider action requires canRecordClinicalData and the caller's PetAccessGrant union does not include it — distinct from PetAccessDeniedException so the client can show provider-specific guidance. */
+export class ClinicalRecordingNotAuthorizedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CLINICAL_RECORDING_NOT_AUTHORIZED", "You are not authorized to record clinical data for this pet.", HttpStatus.FORBIDDEN, details);
+  }
+}

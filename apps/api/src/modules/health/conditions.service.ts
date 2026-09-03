@@ -3,6 +3,7 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { HealthProfileService } from "./health-profile.service";
+import { assertOwnerEditable } from "./provenance.util";
 import type { CreateConditionDto } from "./dto/create-condition.dto";
 import type { UpdateConditionDto } from "./dto/update-condition.dto";
 
@@ -44,6 +45,7 @@ export class ConditionsService {
     return this.prisma.$transaction(async (tx) => {
       const existing = await tx.condition.findUnique({ where: { id } });
       if (!existing || existing.petId !== petId) throw new NotFoundApiException("Condition");
+      assertOwnerEditable(existing.sourceType);
 
       const condition = await tx.condition.update({
         where: { id },

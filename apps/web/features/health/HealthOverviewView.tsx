@@ -100,6 +100,10 @@ export function HealthOverviewView({ petId }: { petId: string }) {
           onClick={() => router.push(`/${locale}/pets/${petId}/health/vaccination`)}
         />
       </ContextSurface>
+
+      <ContextSurface>
+        <Row label={t("overview.advancedHealth")} value={<StatusLabel tone="neutral">{"›"}</StatusLabel>} onClick={() => router.push(`/${locale}/pets/${petId}/health/advanced`)} />
+      </ContextSurface>
     </div>
   );
 }

@@ -4134,6 +4134,169 @@ SUBSCRIPTION_ENTITLEMENT_OVERRIDE_NOT_FOUND      404
 SUBSCRIPTION_ALREADY_CANCELLED                   409  cancel/resume attempted from an invalid state
 ```
 
+## Advanced Health + Medical Documents + Clinical OS (Handoff 17)
+
+### Two connected experiences, one longitudinal record
+
+Health Basics (Handoff 02) stays exactly as it was — allergies, conditions, medications, vaccination summary, diet, care profile. This handoff adds a second layer on top: an Owner Health Experience (Overview, Timeline, Documents, Labs, Imaging, Referrals, Dental, Nutrition, Rehab, Observations, each its own route rather than one giant page) and a Provider Clinical OS (Patient Context → Visit → Clinical Documentation → Orders/Results/Referral → Care Plan → Follow-up). Both read and write against the same sixteen new Prisma models, so "what the owner sees" and "what the provider documented" are always the same underlying rows viewed through two different, permission-scoped DTOs — never two copies of the truth.
+
+### Ten locked principles, enforced in code, not just in the spec prose
+
+1. **Medical records are provenance-oriented** — every new model carries a `sourceType` (`SourceType.OWNER`/`HOUSEHOLD_MEMBER`/`PROVIDER`/`CLINIC`/`IMPORTED_DOCUMENT`/`SYSTEM`, extended additively from Handoff 02's own enum) plus a `ClinicalActorRefDto`-shaped source (provider org/user, or household user) resolved on every read.
+2. **Provider-originated records are not silently overwritten by owners** — `provenance.util.ts`'s `assertOwnerEditable(sourceType)` throws `ProviderRecordNotOwnerEditableException` and is wired into the three pre-existing H02 services that needed it (`AllergiesService.update/remove`, `ConditionsService.update`, `MedicationsService.update`) — a small, targeted change to established code because the principle is central to this handoff, not a rewrite of Health Basics.
+3. **Owner corrections preserve history** — `MedicalRecordCorrection` (`targetType`/`targetId`, a polymorphic pair modeled directly on `AdminAuditLog`'s own `entityType`/`entityId` precedent) is a *new* row alongside the original, never an edit to it; the UI renders both the provider original and the correction, never one replacing the other.
+4. **Unknown ≠ Normal** — a lab result's `flag` (`LabResultFlag.ABNORMAL`/`NORMAL`) is `null` unless a provider explicitly set it; the frontend renders the raw `status` in that case, never a fabricated "Normal".
+5. **Missing ≠ Healthy** — every list view (`HealthRecordListView`, `HealthDocumentsView`, `HealthObservationsView`) renders an explicit `EmptyState` ("No lab results recorded.") rather than defaulting to a reassuring blank page or a green checkmark.
+6. **Medical data retains source** — `source`/`sourceType` are present on every DTO, not just the document model.
+7. **Private medical documents are never publicly exposed** — see storage architecture below.
+8. **Household/PetAccess/provider grant rules remain authoritative** — see authorization below; nothing new bypasses `PetAccessGuard`.
+9. **AI extraction is out of scope** — no OCR, no summarization, no automated diagnosis anywhere in this handoff; `SourceType` has no `AI` value.
+10. **No duplicated Jalali backend values** — every new timestamp column is a plain `TIMESTAMP(3)`; Jalali display continues to be computed client-side with `Intl.DateTimeFormat(..., { calendar: "persian" })`, the exact convention every prior handoff already established.
+
+### Sixteen new models, one authorization boundary
+
+`MedicalDocument`, `MedicalRecordCorrection`, `LabResult`, `ImagingStudy`, `Referral`, `DentalRecord`, `ClinicalNutritionPlan`, `RehabPlan`, `RehabSession`, `PetObservation`, `ClinicalVisit`, `ClinicalVisitRevision`, `CarePlan`, `CarePlanItem`, `SeniorCareNote`, `EndOfLifeCarePlan` — every one of them FKs to `Pet` with `onDelete: Restrict` (matching Health Basics' own FK policy, never `Cascade`), and every consumer-facing endpoint is guarded by `@UseGuards(SessionAuthGuard, PetAccessGuard)` with `@RequirePetAccess({ canViewHealth: true })` (or `canEditHealth`/`canRecordClinicalData` for a mutation), reusing Handoff 03's grant-union `PetAccessGuard` rather than inventing a second authorization path. Provider routes stack a second guard set — `@UseGuards(SessionAuthGuard, ProviderAuthGuard, PetAccessGuard)` — so a provider needs *both* a resolved org membership (`ProviderAuthGuard`, auto-resolved from the caller's single active `ProviderUser`, the same no-`:providerId`-in-the-URL convention `/provider/bookings` already established) *and* an explicit pet-level grant; org membership alone never grants pet access.
+
+### `canRecordClinicalData` — the one new authorization flag, deliberately narrow
+
+A provider can only author clinical content (visits, labs, imaging, referrals, care plans) for a pet if their `PetAccessGrant` has the new boolean `canRecordClinicalData`, which is set `true` in exactly one place: `BookingPetAccessService.grantForBooking()`, and only when `booking.category === ServiceCategory.VET`. Every household/family preset (`OWNER_PRESET`, `FAMILY_PRESET`, `NO_ACCESS_PRESET`) sets it `false` — an owner or household member can view and correct their pet's clinical record but never author one, matching the spec's "AI extraction and clinical authorship both stay out of the owner's hands" boundary. For nested provider mutations that don't carry `:petId` in the URL (a referral status PATCH, a lab amendment, an imaging void), the request DTO carries `petId` directly so `PetAccessGuard`'s existing body-fallback still applies, and the service layer independently re-checks the target row's actual `petId` (`clinical-link.util.ts`'s `assertVisitBelongsToPet`) as defense-in-depth against a spoofed value.
+
+### Private medical documents — a real signed-download capability that didn't exist before
+
+The audit at the start of this handoff found that the existing `StorageService` could mint upload URLs but had **no signed-download capability at all** — every existing file was served through a public object URL. Medical documents cannot use that. `StorageDriver` gained `createDownloadTarget(key)`: `S3StorageDriver` mints a real 5-minute presigned GET, and the local-dev `LocalStorageDriver` mints a one-time-ish Redis-backed download token resolved by a new `DownloadsController` (`GET /downloads/:token`, mirroring `UploadsController`'s exact shape). `StorageService.createHealthDocumentUploadTarget`/`createObservationMediaUploadTarget` validate a MIME allow-list and size cap (20MB for documents, 50MB for observation photo/video) *before* minting anything, generate a `randomUUID()` filename (the client-supplied name is never trusted or stored as a path segment), and write under private key prefixes (`health-documents/{petId}/...`, `pet-observations/{petId}/...`) deliberately distinct from the pre-existing public `pets/{petId}/...` photo scheme. `MedicalDocument.fileObjectKey` is the only thing ever stored — never a public URL — and every download goes through `GET /pets/:petId/health/documents/:id/download`, which re-checks `PetAccessGuard` and mints a fresh signed URL on every call rather than caching or returning one.
+
+### Provider originals — append/supersede/void, never edit-in-place
+
+Nothing a provider authors is ever mutated in place once created; each model uses the append-safe shape that fits it best. `LabResult` self-relates (`supersedesId`/`supersededBy`, a unique FK) — amending marks the old row `AMENDED` and creates a new row pointing back to it. `MedicalDocument` and `ImagingStudy` use `voidedAt`/`voidedReason` — voiding never deletes, it flags, and a replacement is a new row. `ClinicalVisit` uses a dedicated append-only `ClinicalVisitRevision` table, snapshotting the full prior content (`snapshotReasonForVisit`/`snapshotHistoryText`/`snapshotObservationsText`/`snapshotAssessmentText`/`snapshotPlanText`) with an incrementing `revisionNumber`, taken immediately before every amend or void.
+
+### Clinical Visit — separate from Booking, on purpose
+
+`ClinicalVisit` (`visitId`, nullable `bookingId`, `petId`, `providerOrganizationId`, `providerUserId`, `reasonForVisit`/`historyText`/`observationsText`/`assessmentText`/`planText`, `status`, `startedAt`/`completedAt`) is never collapsed into `Booking`: Booking stays the commercial/scheduling state machine from Handoff 03, ClinicalVisit is a wholly separate care-documentation state machine (`DRAFT`/`IN_PROGRESS`/`COMPLETED`/`AMENDED`/`VOIDED`). `start()` creates a visit directly at `IN_PROGRESS` (this phase's one-step "provider starts a visit" action; `DRAFT` stays in the vocabulary for a future multi-step-drafting phase but is unreachable via this API today). Notes are freely editable while `IN_PROGRESS`; once `COMPLETED`, `updateNotes()` is rejected outright and only `amend()` can change the content — and `amend()` always snapshots the prior state into `ClinicalVisitRevision` first, so nothing is ever silently edited after completion.
+
+### A genuine lost-update race was found and fixed during this handoff's own build
+
+The concurrency e2e (Flow P: two simultaneous `POST .../complete` calls on the same visit) initially failed with both requests returning `201` — `ClinicalVisitService.complete()` read the visit's status, validated it *outside* the transaction, then performed an unconditional `update()` inside it, so two racing requests could both pass validation and both "win". Fixed with the same claim-then-check `updateMany({ where: { id, status: { in: [...] } } })` / `count === 0 → throw` pattern this codebase already established in `ShippingOrchestratorService`, `NotificationDeliveryService.attempt()`, and `SellerLedgerService.sweepTransactions()` — one request's `updateMany` now genuinely claims the row, the loser's `count` comes back `0` and it gets a real `409`. `voidVisit()` had the identical class of race (nothing stopped two concurrent voids from both succeeding and both writing a revision) and was hardened the same way as a small, directly-related fix, not a scope expansion.
+
+### Labs, imaging, referrals — structured, never interpreted
+
+`LabResult` carries `value`/`unit`/`referenceRangeLow`/`referenceRangeHigh`/`qualitativeResult`/`status`/`flag` — `flag` is `null` unless a provider explicitly set `ABNORMAL`/`NORMAL`; nothing derives it from the numeric value against the reference range, per the spec's "do not invent medical interpretation" line. `ImagingStudy` carries a free-text `report`/`findings`/`recommendation` from the provider only — there is no image-analysis code path, and the frontend renders the report text as-is, never as a structured "diagnosis." `Referral` has its own state machine (`CREATED`/`SENT`/`ACCEPTED`/`SCHEDULED`/`COMPLETED`/`CANCELLED`) completely independent of `BookingStatus`; a referral to a provider that already exists in PET LIFE OS links via `toProviderOrganizationId`, otherwise `externalProviderName`/`externalSpecialty` carry the metadata.
+
+### Home Observations — owner-recorded, never a diagnosis
+
+`PetObservation` (`category`, `description`, `observedAt`, optional photo/video via the same private-storage pattern as documents) is explicitly owner-only — there is no provider-authored observation, and no observation is ever silently promoted into a `Condition` or any other clinical record. `HealthObservationsView` always renders a disclaimer ("Owner observation — not a diagnosis.") above the entry form, and the list never attaches a diagnosis-shaped field to a recorded entry. `health.observations.max` is entitlement-gated (see below) since this is the one owner-initiated creation path in the whole handoff besides documents.
+
+### Care Plan — provider-issued, Care Calendar reused rather than duplicated
+
+`CarePlan`/`CarePlanItem` (`MEDICATION`/`FOLLOW_UP`/`NUTRITION`/`REHAB`/`MONITORING`/`REFERRAL`/`VACCINATION`/`OTHER`, each with its own `status`/`dueAt`/`source`) is provider-issued only. A `FOLLOW_UP`-type item is deliberately *not* wired into a second reminder system — Handoff 03's Care Calendar already owns "things with a date the owner should see," so a follow-up is represented as a `CarePlanItem` the owner sees in their Health Overview, not a duplicate calendar event; a future handoff could project it into Care Calendar the same way a `Booking` already is, without any schema change here.
+
+### Senior Care + End-of-Life — foundation only, no scoring, no automation
+
+`SeniorCareNote` (mobility/cognition/medication-complexity/quality-of-life free text) and `EndOfLifeCarePlan` (palliative care plan, aftercare preferences) exist as plain structured records with no derived score and no automatic lifecycle trigger — a pet's lifecycle state is never changed as a side effect of creating or reading either model, and the tone of every string in this area (frontend copy, notification templates) is deliberately non-commercial and respectful, per the spec.
+
+### Entitlement gating — asymmetric on purpose, never on safety-critical data
+
+`health.documents.max`/`health.observations.max` were added to `UsageService.DERIVERS` (household-scoped, derived-not-counted counts, the exact "derived, never duplicated" shape `pets.max`/`household.members.max` already established in Handoff 16) and seeded onto all three plans (`seed.ts`: Free 10 documents/20 observations, Plus 50/100, Premium unlimited). `EntitlementService.assertWithinLimit()` is called **only** on the owner-initiated creation paths — `MedicalDocumentService.create()` when the actor is not a provider, and `PetObservationService.create()` always, since observations are owner-only. Every provider-authored creation (labs, imaging, referrals, visits, care plans, dental, nutrition, rehab) is **never** gated — the spec is explicit that safety-critical clinical authorship must never be paywalled, and existing records remain fully readable even past a limit or an expired entitlement; a limit only ever blocks the *next* owner upload, exactly like Handoff 16's own `pets.max` precedent. This was caught by the e2e suite itself: the two new keys were wired into `UsageService` but never actually added to any `SubscriptionPlanEntitlement` row, so the very first document upload in a fresh test household returned `409` — fixed by seeding the keys onto all three plans (see Errors/fixes below).
+
+### Notifications — a stricter SMS bar than the existing precedent
+
+Five new templates (`health.document_added`, `health.follow_up_due` — modeled but not yet wired, since nothing in this handoff proactively schedules follow-up reminders — `health.referral_created`, `health.referral_updated`, `health.care_plan_updated`) go through the existing `NotificationOrchestratorService` only. Every one of their `smsBody` strings is fully generic (no pet name, no document title, no finding, no diagnosis) — deliberately stricter than Handoff 02's own `health.reminder` template, which does interpolate `{{petName}}`, because the spec's "do not expose detailed diagnosis in SMS" line reads as calling for a more conservative bar specifically for clinical content.
+
+### Support integration — a coarse summary, never the clinical record
+
+`SupportCaseService.getHealthSummary(petId)` returns exactly three fields — `openMedicalDocumentsCount`, `recentClinicalVisit` (id/status/org name/start time only, no notes), `openReferralsCount` — wired into `getContext()` as `SupportCaseContextDto.health`. The e2e coverage (Flow M) asserts the JSON-stringified context does not contain a document's title or a lab's test name/value, not just that the shape looks right.
+
+### Frontend — ten consumer routes, two provider views, no giant page
+
+Consumer: `/pets/:id/health/advanced` (Overview) plus one route each for Timeline/Documents/Labs/Imaging/Referrals/Dental/Nutrition/Rehab/Observations — Labs/Imaging/Referrals/Dental/Nutrition/Rehab share one generic `HealthRecordListView<T>` shell (loading/error/empty/list, per-domain only in title/empty-copy/`renderItem`) rather than six near-identical components. `AdvancedHealthOverviewView` deliberately shows no numeric health score anywhere — per the spec, if one can't be responsibly calculated, none is shown — and lists `missingInformation` as explicit strings rather than a reassuring blank state. Provider: `ProviderClinicalPatientView` (Patient Header/Summary — allergies, medications, conditions, recent visits, recent labs, documents, care plans, respecting the same `PetAccessGuard` the API enforces) and `ProviderClinicalVisitView` (notes editable only pre-completion, an Amend/Void pair post-completion, a Revision History list rendered directly from `ClinicalVisitRevision` rows).
+
+### Errors and fixes found during this handoff's own verification
+
+- **A provenance display bug**: `HealthDocumentsView`'s provider-badge logic originally keyed off `verificationStatus === "PROVIDER_VERIFIED"` rather than `sourceType === PROVIDER || CLINIC` — today the two happen to coincide (verification status is set from the same `actor.provider` check at creation time), but they are two different concepts (verification vs. provenance) and would silently diverge the moment a "provider verifies an owner's document" action is ever added. Fixed to read `sourceType` directly, the same field `HealthTimelineView`'s own provenance badge already used correctly.
+- **Missing entitlement seed data**: `health.documents.max`/`health.observations.max` were wired into `UsageService` but never added to any plan's `SubscriptionPlanEntitlement` rows, so `EntitlementService.getLimit()`'s own documented "a key neither plan defines resolves to 0" fallback made the very first owner document/observation upload fail with `409` in any fresh household. Fixed by seeding both keys onto Free/Plus/Premium in `seed.ts`.
+- **A real concurrent-completion lost-update** in `ClinicalVisitService.complete()`/`voidVisit()` — see "A genuine lost-update race" above.
+- Two pre-existing, unrelated migrations in the isolated test database (`petlife_os_test`) were found half-applied (`finished_at IS NULL`) from an earlier, unrelated session in this environment — `20260903063100_seller_financial_settlement` (Handoff 14) and three others through Handoff 16's own migration. Every object each migration creates was verified present in the database before resolving it with `prisma migrate resolve --applied`; this is pre-existing environment bookkeeping, not a Handoff 17 regression, and is called out here only because it blocked this handoff's own e2e run until resolved.
+
+### API endpoints (Handoff 17 additions)
+
+```
+GET    /pets/:petId/health                                          (Health Overview — no numeric score)
+GET    /pets/:petId/health/timeline                                 (derived, cross-domain, provenance-tagged)
+
+GET    /pets/:petId/health/documents
+POST   /pets/:petId/health/documents/upload-url
+POST   /pets/:petId/health/documents
+GET    /pets/:petId/health/documents/:documentId
+GET    /pets/:petId/health/documents/:documentId/download            (fresh signed URL every call)
+POST   /pets/:petId/health/documents/:documentId/void
+
+GET    /pets/:petId/health/corrections
+POST   /pets/:petId/health/corrections                               (never edits the original record)
+
+GET    /pets/:petId/health/labs
+GET    /pets/:petId/health/imaging
+GET    /pets/:petId/health/referrals
+GET    /pets/:petId/health/dental
+GET    /pets/:petId/health/nutrition
+GET    /pets/:petId/health/rehab
+
+GET    /pets/:petId/health/visits
+GET    /pets/:petId/health/visits/:visitId
+GET    /pets/:petId/health/care-plans
+
+GET    /pets/:petId/health/senior-care
+POST   /pets/:petId/health/senior-care
+GET    /pets/:petId/health/end-of-life
+POST   /pets/:petId/health/end-of-life
+
+GET    /pets/:petId/observations
+POST   /pets/:petId/observations/media-upload-url
+POST   /pets/:petId/observations                                     (owner-only; never a diagnosis)
+
+GET    /provider/patients/:petId                                    (provider-scoped clinical DTO — never the consumer DTO)
+GET    /provider/patients/:petId/visits
+GET    /provider/patients/:petId/visits/:visitId
+POST   /provider/visits                                              (canRecordClinicalData required)
+POST   /provider/patients/:petId/visits/:visitId/notes
+POST   /provider/patients/:petId/visits/:visitId/complete
+POST   /provider/patients/:petId/visits/:visitId/amend               (always snapshots first)
+POST   /provider/patients/:petId/visits/:visitId/void
+
+POST   /provider/labs
+POST   /provider/labs/:labResultId/amend                             (append/supersede — never edits the original row)
+POST   /provider/imaging
+POST   /provider/imaging/:imagingStudyId/void
+POST   /provider/referrals
+PATCH  /provider/referrals/:referralId/status
+POST   /provider/dental-records
+POST   /provider/nutrition-plans
+POST   /provider/rehab-plans
+POST   /provider/patients/:petId/rehab-plans/:rehabPlanId/sessions
+POST   /provider/care-plans
+POST   /provider/patients/:petId/care-plans/:carePlanId/items
+PATCH  /provider/patients/:petId/care-plans/:carePlanId/items/:itemId/status
+POST   /provider/patients/:petId/documents/upload-url
+POST   /provider/patients/:petId/documents
+```
+
+### Error codes (Handoff 17 additions)
+
+```
+MEDICAL_DOCUMENT_NOT_FOUND                       404
+UNSUPPORTED_DOCUMENT_TYPE                        400  MIME/type not on the allow-list
+DOCUMENT_TOO_LARGE                               400  over the 20MB document / 50MB media cap
+PROVIDER_RECORD_NOT_OWNER_EDITABLE                409  owner attempted to edit a PROVIDER/CLINIC-sourced record
+MEDICAL_RECORD_CORRECTION_NOT_FOUND              404
+CLINICAL_VISIT_NOT_FOUND                         404
+INVALID_CLINICAL_VISIT_TRANSITION                409  status doesn't allow the requested action, or lost a completion/void race
+LAB_RESULT_NOT_FOUND                             404
+IMAGING_STUDY_NOT_FOUND                          404
+REFERRAL_NOT_FOUND                               404
+INVALID_REFERRAL_TRANSITION                      409
+CARE_PLAN_NOT_FOUND                              404
+CARE_PLAN_ITEM_NOT_FOUND                         404
+CLINICAL_RECORDING_NOT_AUTHORIZED                403  provider grant lacks canRecordClinicalData
+```
+
 ## API endpoints
 
 ```
@@ -5462,6 +5625,53 @@ renewal success/failure through the full `PAST_DUE`/`GRACE_PERIOD`/
 overrides, the full admin surface, and concurrent-purchase/concurrent-
 cancel races — and 243 frontend tests, up from 227).
 
+Everything in the Handoff 17 acceptance criteria: sixteen new provenance-
+tagged Health/Clinical models (`MedicalDocument`, `MedicalRecordCorrection`,
+`LabResult`, `ImagingStudy`, `Referral`, `DentalRecord`,
+`ClinicalNutritionPlan`, `RehabPlan`/`RehabSession`, `PetObservation`,
+`ClinicalVisit`/`ClinicalVisitRevision`, `CarePlan`/`CarePlanItem`,
+`SeniorCareNote`, `EndOfLifeCarePlan`), all ten locked health principles
+enforced in code (provider-original immutability via
+`assertOwnerEditable()`, owner corrections as new rows via
+`MedicalRecordCorrection` that never touch the original, `Unknown ≠ Normal`
+via a `flag` that is `null` unless a provider explicitly set it, `Missing ≠
+Healthy` via explicit `EmptyState` copy everywhere, no AI source anywhere,
+no duplicated Jalali backend values); a real private-document signed-
+download capability added to the storage layer (it did not exist before
+this handoff); a new, deliberately narrow `canRecordClinicalData`
+`PetAccessGrant` flag as the sole mechanism authorizing provider clinical
+authorship, set only by a `VET`-category booking grant; a `ClinicalVisit`
+lifecycle kept wholly separate from `Booking`, with append/supersede/void
+semantics everywhere a provider-authored record needs to change
+(`ClinicalVisitRevision`, `LabResult.supersedesId`,
+`MedicalDocument`/`ImagingStudy` void fields); owner observations that are
+always rendered as observations, never diagnoses; a `Referral` state
+machine independent of `BookingStatus`; asymmetric entitlement gating
+(`health.documents.max`/`health.observations.max` gate only owner-initiated
+creation, never provider-authored clinical content, and never an existing
+record); five new notification templates with a stricter SMS privacy bar
+than the existing precedent; a coarse, three-field
+`SupportCaseContextDto.health` summary that never leaks a document title or
+lab value; ten consumer routes and two provider Clinical OS views; and a
+genuine concurrent-completion lost-update race found and fixed in
+`ClinicalVisitService` during this handoff's own build (see the dedicated
+section above). Every Handoff 01-16 backend/frontend test remains green
+(287 backend e2e scenarios, 15 new for this handoff — covering owner
+document upload/authorization, provider document provenance and
+immutability, owner corrections alongside an unaltered original, `Unknown`
+semantics never rendered as `Normal`, a full clinical visit start →
+document → complete → amend cycle with a preserved revision, labs,
+imaging, independent referral state, provider care plans, owner
+observations, entitlement-limit enforcement with existing data staying
+fully accessible, support-context privacy, cross-household isolation,
+provider-grant isolation, and the concurrent-visit-completion race — and
+267 frontend tests, up from 243, covering the health overview's deliberate
+absence of a numeric score, the timeline's always-present provenance
+indicator, document provenance badges, labs/imaging/referrals rendering
+only explicitly-provided provider data, the owner-observation disclaimer,
+the provider clinical patient view, and completed-visit amendment-only
+immutability).
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -6160,6 +6370,46 @@ cancel races — and 243 frontend tests, up from 227).
   is exactly the class of defect the spec's own concurrency-testing
   requirement exists to catch — see "Concurrency" under Handoff 16 above
   for the fix and its dedicated e2e coverage.
+- **AI extraction/summarization/diagnosis is entirely out of scope**
+  (Handoff 17) — `SourceType` has no `AI` value, `MedicalDocument` has no
+  extracted-fields column, and no code path ever interprets an uploaded
+  file's contents or a lab/imaging value. Explicitly deferred per the
+  spec's own non-goals, not an oversight.
+- **No pharmacy/prescription commerce, no external lab/imaging vendor
+  integration, no wearable integration, no DNA/genetics, no insurance
+  claims** (Handoff 17) — `Referral`/`LabResult`/`ImagingStudy` model the
+  clinical side only; fulfillment/ordering integration with any of these
+  remains a distinct, unbuilt future concern per the spec's explicit
+  non-goals list.
+- **`health.follow_up_due` is a defined notification template with no call
+  site** (Handoff 17) — nothing in this handoff proactively schedules
+  follow-up reminders (mirroring Handoff 16's own
+  `subscription.trial_ending`/`renewal_upcoming` precedent); a
+  `CarePlanItem` of type `FOLLOW_UP` is visible to the owner in their
+  Health Overview today, but firing a reminder ahead of its `dueAt` needs
+  the same kind of proactive-scan poller a future handoff could add
+  without any schema change.
+- **`ClinicalVisitStatus.DRAFT` is modeled but unreachable** (Handoff 17) —
+  `start()` always creates a visit directly at `IN_PROGRESS` (this phase's
+  one-step "provider starts a visit" action); `DRAFT` stays in the
+  vocabulary for a future multi-step-drafting UI.
+- **Care Plan follow-ups are not projected into Care Calendar** (Handoff
+  17) — a `CarePlanItem` of type `FOLLOW_UP` is deliberately kept as its
+  own record rather than also creating a `CareCalendarEvent`, to avoid a
+  second, harder-to-keep-consistent reminder system; a future handoff
+  could add that projection the same way a `Booking` already populates
+  Care Calendar today.
+- **Senior Care / End-of-Life have no scoring and no automated lifecycle
+  trigger** (Handoff 17) — `SeniorCareNote`/`EndOfLifeCarePlan` are plain
+  structured records; creating or reading either never changes a pet's
+  lifecycle state, per the spec's explicit "do not trigger memorial
+  lifecycle automatically" line.
+- **`LocalStorageDriver`'s signed-download token is Redis-backed but
+  single-use-ish, not a true one-time token with atomic claim-and-expire**
+  (Handoff 17) — adequate for local development (the S3 driver's real
+  presigned GET is what production would use), but a determined caller
+  with the token before its TTL expires could reuse it; not a concern in
+  the dev-only code path it guards.
 
 ## Next recommended coding handoff
 
@@ -6308,3 +6558,36 @@ refund event), keep every subscription mutation going through
 subscription revenue/refund posting going through
 `LedgerService.recordSubscriptionRevenue()`/`...Reversal()` — never a
 second write path into `PLATFORM_REVENUE`.
+
+Alternatively, following directly from Handoff 17: **a follow-up reminder
+scan for `CarePlanItem`**, the same "reactive, not proactive" gap this
+codebase now has in two places (Handoff 16's renewal reminders and
+Handoff 17's `health.follow_up_due`) — a single new poller (the same
+`setInterval`-class mechanism `NotificationDeliveryWorkerService`/
+`SubscriptionRenewalWorkerService` already establish, not a new job-queue
+dependency) that scans open `CarePlanItem` rows within N days of `dueAt`
+would close both gaps as one small, reusable piece of infrastructure. A
+related, smaller option: project a `CarePlanItem` of type `FOLLOW_UP` into
+`CareCalendarEvent` the same way a confirmed `Booking` already does, so a
+provider-issued follow-up appears directly on the owner's existing Care
+Calendar rather than only in the Health Overview. A third, independent
+option: a lightweight provider-side "verify this owner-uploaded document"
+action — `MedicalDocument.verificationStatus` already models
+`UNVERIFIED`/`PROVIDER_VERIFIED`, but nothing sets the latter today except
+document creation itself; adding a real verify endpoint would need
+`HealthDocumentsView`'s provenance badge (fixed this handoff to key off
+`sourceType`, not `verificationStatus`) to stay on `sourceType` for
+provenance while a separate, new UI affordance surfaces
+`verificationStatus` for its own distinct meaning — keeping the two
+concepts visually distinct is the one thing to get right before wiring it.
+
+Whichever is chosen, keep `Booking`/`ClinicalVisit` strictly separate
+(commercial/scheduling state vs. care-documentation state, never
+collapsed), keep every provider-authored clinical record append/supersede/
+void rather than edited in place, keep `canRecordClinicalData` as the only
+authorization path for provider clinical authorship (never inferred from
+org membership or booking category alone at the point of use), keep
+`EntitlementService.assertWithinLimit()` off every provider-authored
+creation path (never paywall safety-critical clinical content), and keep
+private medical files behind `StorageService`'s signed-download flow —
+never a stored public URL, no matter how small the change looks.
