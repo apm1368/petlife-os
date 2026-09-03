@@ -9,6 +9,7 @@ import type {
   SubscriptionPlanEntitlementDto,
   SubscriptionPlanPriceDto,
   SubscriptionPlanRefDto,
+  SupportSubscriptionSummaryDto,
 } from "@petlife/types";
 
 export const PLAN_INCLUDE = {
@@ -127,6 +128,22 @@ export const SUBSCRIPTION_INCLUDE = {
 } satisfies Prisma.SubscriptionInclude;
 
 export type SubscriptionWithRelations = Prisma.SubscriptionGetPayload<{ include: typeof SUBSCRIPTION_INCLUDE }>;
+
+/**
+ * Handoff 13's support context panel shape (spec: "support staff should see
+ * a coarse subscription state summary... without exposing payment method
+ * secrets") — plan code/name, status, current period end, and the most
+ * recent FAILED billing attempt (never a succeeded one's payment detail).
+ */
+export function toSupportSubscriptionSummaryDto(row: SubscriptionWithRelations, recentFailedBillingAttempt: Prisma.SubscriptionBillingAttemptGetPayload<Record<string, never>> | null): SupportSubscriptionSummaryDto {
+  return {
+    status: row.status as unknown as SupportSubscriptionSummaryDto["status"],
+    planCode: row.plan.code,
+    planNameEn: row.plan.nameEn,
+    currentPeriodEndAt: row.currentPeriod ? row.currentPeriod.endAt.toISOString() : null,
+    recentFailedBillingAttempt: recentFailedBillingAttempt ? toBillingAttemptDto(recentFailedBillingAttempt) : null,
+  };
+}
 
 export function toSubscriptionDto(row: SubscriptionWithRelations): SubscriptionDto {
   return {

@@ -1,12 +1,14 @@
 import { Module } from "@nestjs/common";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { LedgerModule } from "../commerce/ledger/ledger.module";
+import { NotificationsModule } from "../notifications/notifications.module";
 import { SubscriptionPlanReadService } from "./subscription-plan-read.service";
 import { UsageService } from "./usage.service";
 import { EntitlementService } from "./entitlement.service";
 import { SubscriptionService } from "./subscription.service";
 import { SubscriptionBillingService } from "./subscription-billing.service";
 import { SubscriptionRenewalWorkerService } from "./subscription-renewal-worker.service";
+import { SubscriptionNotificationListener } from "./subscription-notification.listener";
 import { SubscriptionController } from "./subscription.controller";
 
 /**
@@ -17,9 +19,9 @@ import { SubscriptionController } from "./subscription.controller";
  * importing the whole billing surface.
  */
 @Module({
-  imports: [PaymentsModule, LedgerModule],
+  imports: [PaymentsModule, LedgerModule, NotificationsModule],
   controllers: [SubscriptionController],
-  providers: [SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService, SubscriptionRenewalWorkerService],
+  providers: [SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService, SubscriptionRenewalWorkerService, SubscriptionNotificationListener],
   exports: [SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService],
 })
 export class SubscriptionsModule {}

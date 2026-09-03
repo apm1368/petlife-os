@@ -15,6 +15,8 @@ import { PetAccessService } from "../../pet-access/pet-access.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { InternalNoteService } from "../notes/internal-note.service";
+import { SubscriptionService } from "../../subscriptions/subscription.service";
+import { toSupportSubscriptionSummaryDto } from "../../subscriptions/subscription-mapper";
 import { SUPPORT_CASE_TRANSITIONS } from "./support-case-transitions";
 import { toSupportCaseDetailDto, toSupportCaseSummaryDto, toSupportCaseUserDetailDto, toSupportCaseUserSummaryDto, toSupportMessageDto } from "./support-case.mapper";
 import type { CreateSupportCaseDto } from "./dto/support-case.dto";
@@ -64,6 +66,7 @@ export class SupportCaseService {
     private readonly auditLog: AdminAuditLogService,
     private readonly notes: InternalNoteService,
     private readonly petAccess: PetAccessService,
+    private readonly subscriptions: SubscriptionService,
   ) {}
 
   async create(admin: ResolvedAdminContext, dto: CreateSupportCaseDto, requestId?: string): Promise<SupportCaseSummaryDto> {
@@ -170,6 +173,8 @@ export class SupportCaseService {
       relatedEntity = { type: supportCase.relatedEntityType, id: supportCase.relatedEntityId, summary: supportCase.relatedEntityId };
     }
 
+    const subscription = household ? await this.getSubscriptionSummary(household.id) : null;
+
     return {
       household: household ? { id: household.id, name: household.name ?? "Household" } : null,
       pet: pet ? { id: pet.id, name: pet.name } : null,
@@ -178,7 +183,18 @@ export class SupportCaseService {
       firstResponseAt: supportCase.firstResponseAt ? supportCase.firstResponseAt.toISOString() : null,
       firstResponseTimeMinutes: supportCase.firstResponseAt ? Math.round((supportCase.firstResponseAt.getTime() - supportCase.createdAt.getTime()) / 60000) : null,
       resolutionTimeMinutes: supportCase.resolvedAt ? Math.round((supportCase.resolvedAt.getTime() - supportCase.createdAt.getTime()) / 60000) : null,
+      subscription,
     };
+  }
+
+  /** spec (H16): "support staff see a coarse subscription summary... without exposing payment secrets" — plan/status/period end plus the most recent FAILED billing attempt only, never a succeeded attempt's payment detail. */
+  private async getSubscriptionSummary(householdId: string) {
+    const sub = await this.subscriptions.getOrCreateRaw(householdId);
+    const recentFailedBillingAttempt = await this.prisma.subscriptionBillingAttempt.findFirst({
+      where: { subscriptionId: sub.id, status: "FAILED" },
+      orderBy: { createdAt: "desc" },
+    });
+    return toSupportSubscriptionSummaryDto(sub, recentFailedBillingAttempt);
   }
 
   async assign(admin: ResolvedAdminContext, caseId: string, assigneeAdminId: string, requestId?: string): Promise<SupportCaseSummaryDto> {

@@ -2311,6 +2311,8 @@ export interface SupportCaseContextDto {
   firstResponseAt: string | null;
   firstResponseTimeMinutes: number | null;
   resolutionTimeMinutes: number | null;
+  /** Handoff 16 — coarse subscription/billing-state summary for the case's household, null when the case has no household. Never a payment secret (see SupportSubscriptionSummaryDto's own doc comment). */
+  subscription: SupportSubscriptionSummaryDto | null;
 }
 
 /**
