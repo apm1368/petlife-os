@@ -14,3 +14,4 @@ coverage
 apps/api/generated
 apps/api/prisma/generated
 local-storage/
+*.rdb
