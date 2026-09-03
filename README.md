@@ -4007,6 +4007,133 @@ INVALID_RICH_TEXT_CONTENT                400  a block/mark/link outside the clos
 CONTENT_PLACEMENT_NOT_FOUND              404
 ```
 
+## Subscription + Membership + Metering (Handoff 16)
+
+### Three separate states, never conflated
+
+Subscription state (the household's plan/lifecycle), payment state (H07's own `PaymentIntent`/`Transaction`/`Refund`), and entitlement state (what the household can actually do right now) are three different concerns, resolved by three different services (`SubscriptionService`, `SubscriptionBillingService`, `EntitlementService`). A `Subscription` is never modeled as "payment succeeded" — it has its own explicit state machine (`SubscriptionStatus`: `TRIALING`/`ACTIVE`/`PAST_DUE`/`GRACE_PERIOD`/`CANCEL_AT_PERIOD_END`/`CANCELLED`/`EXPIRED`) with an explicit `ALLOWED_TRANSITIONS` table, the same shape Handoff 15's `ArticleLifecycleStatus` already established. `PAST_DUE` and `GRACE_PERIOD` are deliberately two distinct steps (first renewal failure — short retry window, full access — vs. retry window elapsed — final warning window, full access still) rather than one combined "past due" state, so the UI can escalate urgency honestly without ever revoking access early.
+
+### One row per household, evolving over its whole lifecycle
+
+`Subscription.householdId` is `@unique` — a household gets exactly one Subscription row, ever, and it evolves through FREE → trial → paid → cancelled → resubscribed rather than being recreated each time (the same "one row that evolves, history captured separately" shape `SellerLedgerAccount` established in Handoff 14). History lives in `SubscriptionPeriod` (billing periods), `SubscriptionBillingAttempt` (every charge attempt, succeeded or failed, never overwritten), and `SubscriptionChange` (an append-only narrative of trial starts, upgrades, downgrades, cancellations, admin actions — distinct from `AdminAuditLog`, which only covers admin-initiated mutations). Every household gets a real row lazily on first touch, defaulted to a real FREE plan — never an ad hoc "no subscription" fallback.
+
+### The FREE plan is real, and self-healing
+
+Every household resolves entitlements against an actual `SubscriptionPlan` row with `isFree: true`, never special-cased plan-name logic. Because that FREE plan is a hard dependency of the *entire app* (creating a pet, and every other subscription-scoped read, resolves it), `SubscriptionPlanReadService.getFreePlanRaw()` self-heals: if no FREE plan exists yet (a fresh checkout, or the isolated e2e test database, which CI populates via `prisma migrate deploy` only — never `prisma db seed`), it race-safely creates one with conservative defaults, using the same code (`DEFAULT_FREE_PLAN_CODE = "free"`) the deterministic dev seed catalog uses — running the seed afterward upgrades that same row in place rather than creating a duplicate. This was found and fixed mid-handoff: an early version threw a hard 500 on pet creation in any environment without seed data, which would have broken the entire e2e suite for every prior handoff.
+
+### Entitlements — the actual architecture, not a plan-name check
+
+No feature anywhere checks `if plan.code === "premium"`. `EntitlementService` is the one place any code asks "can this household do X" (`has()`, `getLimit()`, `getUsageItem()`, `assertWithinLimit()`), resolving in this order: an active `SubscriptionEntitlementOverride` for the key wins outright; otherwise the household's *effective* plan (its own current plan while `PAID_ACCESS_STATUSES` holds — `TRIALING`/`ACTIVE`/`PAST_DUE`/`GRACE_PERIOD`/`CANCEL_AT_PERIOD_END` — falling back to the FREE plan only once truly `CANCELLED`/`EXPIRED`) supplies it; a key neither defines resolves to the safest default (`false`/`0`), never `undefined` or unlimited-by-omission. `SubscriptionEntitlementType` supports `BOOLEAN` and `LIMIT` only — `QUOTA` was deliberately not added, since nothing in this handoff's real scope needs a reset-on-a-schedule quota.
+
+### Metering is derived, not counted
+
+`UsageService` meters exactly two keys this phase — `pets.max` (counts non-deleted `Pet` rows) and `household.members.max` (counts `HouseholdMember` rows) — both computed live from the source-of-truth tables, never a separately maintained counter. There is deliberately no `SubscriptionUsageCounter`/`SubscriptionUsageEvent` table: every metered resource here is durable and low-volume enough that deriving it can never drift from reality the way a separately incremented counter could. `household.members.max` resolves correctly through the entitlement system but currently has no enforcement call site — this codebase has no invite/add-member endpoint yet (`HouseholdsController` only supports creation), so there is nothing to gate; documented below rather than inventing a member-invite feature out of scope.
+
+### Server-side limit enforcement — over-limit data is never touched
+
+`PetsService.create()` calls `EntitlementService.assertWithinLimit(householdId, "pets.max")` before creating a row, returning a typed `SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED` (409) with `{ key, limit, used }` in `details` — never a generic failure. Frontend gating (disabling a button, showing "N of M used") is UX only; the actual check lives entirely server-side. Critically, a downgrade or grace/expiry fallback never deletes or hides existing data: a household with 5 pets that falls back to a 2-pet FREE limit keeps all 5 pets fully readable — the limit blocks only the *next* creation attempt.
+
+### Reusing the H07 payment stack — a minimal internal shell, not a second payment system
+
+`PaymentIntent.checkoutId` is a required FK to the real commerce `Checkout` model, which itself requires a `Cart` — both physical-goods-shaped and deeply relied on by `CheckoutService`/`OrdersService`/`InventoryReservationService`. Rather than loosening that schema (invasive, risky for existing commerce flows) or building a parallel payment stack (explicitly against spec), `SubscriptionBillingService` creates a minimal internal Checkout/Cart shell purely to satisfy the FK: the shell Cart's `status` is `CONVERTED` from creation (never `ACTIVE`, so `CartService.getCart()`'s own `status: ACTIVE` filter can never mistake it for a real shopping cart), it is never routed through `CheckoutService` at all, and only the synchronous `PaymentsService.charge()` path is used — never `resolvePendingIntent()` — so the existing `PaymentEventsListener` (which only reacts when `viaWebhook: true`) never touches it. `NotificationEventsListener`'s generic "payment succeeded" handler was taught to skip a checkout whose cart has zero line items, so a subscriber never gets a confusing "see My Orders" notification alongside the correct subscription one — a small, deliberate touch to shared H07/H10 code, not new infrastructure. Revenue posts through two new `LedgerService` methods (`recordSubscriptionRevenue`/`...Reversal`) mirroring `recordSellerAttribution`'s own shape — 100% platform revenue, no seller leg.
+
+### Trial, purchase, upgrade — no fake payment success, no proration
+
+A trial (`startTrial`) is a pure entitlement grant — no payment involved at all, gated only by `SubscriptionTrial`'s own `@@unique(householdId, planId)` (the actual anti-abuse enforcement; a friendlier pre-check just gives a nicer error than a raw constraint violation). An initial purchase or upgrade (`SubscriptionBillingService.purchase()`) charges the full price immediately and activates the plan/period at once. **H16's chosen proration policy is none**: an upgrade charges the new plan's full price and starts a brand-new period from now, with no partial credit for the unused portion of the old period — the simpler of the two policies the spec allows, chosen because it needs no floating-point/rounding logic and stays trivially auditable. Idempotency is layered two ways: the existing Redis-backed `IdempotencyInterceptor` at the HTTP layer, and a DB-level unique `SubscriptionBillingAttempt.idempotencyKey` inside the same transaction — a duplicate call (same idempotency key) converges on the exact same attempt row, never a duplicate charge or period.
+
+### Downgrade — scheduled for the boundary, billed at the new price
+
+`scheduleDowngrade()` only sets `Subscription.pendingPlanId`/`pendingPriceId` — it never reduces entitlements mid-period. The pending plan actually takes effect inside `SubscriptionBillingService.attemptRenewal()`, at the real period boundary, and — this needed a correction mid-build — the target plan/price is resolved and applied *before* the renewal charge is made, so the household is billed the new (lower) plan's price starting at the very renewal it takes effect, never the outgoing plan's price. Downgrading to the FREE plan skips charging entirely (`attempt: null` in the outcome) — no billing attempt row is ever created for a charge that was never going to happen.
+
+### Renewal — an honest DEV adapter, not simulated production autopay
+
+There is no real recurring-charge integration available through this project's existing payment providers, and the spec is explicit that simulating one would be dishonest. `SubscriptionRenewalWorkerService` is a plain polling `setInterval` (the exact shape `NotificationDeliveryWorkerService` already established, disabled under `NODE_ENV=test`) that drives `SubscriptionBillingService.attemptRenewal()` using the same `DEV_SIMULATED`/synchronous-charge path every other H16 charge uses — this *is* the honest DEV/manual adapter the spec asks for, not a claim of real autopay. It attempts a renewal once a period's `endAt` has actually passed, not proactively N days ahead — a deliberate simplification given a poller that already runs frequently (see Known limitations). A failed renewal moves `ACTIVE` → `PAST_DUE` (short configurable retry window, `SUBSCRIPTION_PAST_DUE_RETRY_DAYS`) → `GRACE_PERIOD` (final configurable warning window, `SUBSCRIPTION_GRACE_PERIOD_DAYS`) → `EXPIRED` (falls back to FREE entitlements) — full paid access is retained through every step except the last.
+
+### Cancellation — cancel-at-period-end by default, no dark patterns
+
+`cancelAtPeriodEnd()` is the only consumer-facing cancel path: the subscription moves to `CANCEL_AT_PERIOD_END` immediately but keeps full paid access until `cancelEffectiveAt` (snapshotted from the current period's own end, or the trial/grace end if there is no period), with `resumeCancellation()` available any time before that date. There is no immediate-cancel option — H16's scope never asks for one, and offering one would risk exactly the "dark pattern" the spec warns against.
+
+### Refunds — a genuinely separate action from subscription status
+
+`SubscriptionBillingService.refundBillingAttempt()` posts a real `Refund` row (reusing H07's model directly) and reverses the ledger postings, but never mutates `Subscription.status` itself — the spec is explicit that a subscription's lifecycle must never be inferred from an arbitrary refund. If an admin also wants to cancel or downgrade access after a refund, that's a separate, explicit action through `SubscriptionService`.
+
+### Concurrency — lock, then re-read, then decide; found and fixed mid-build
+
+Every subscription-mutating transaction (`purchase`, `startTrial`, `scheduleDowngrade`, `cancelAtPeriodEnd`, `resumeCancellation`, `attemptRenewal`) row-locks the `Subscription` (`SELECT ... FOR UPDATE`) before validating or mutating anything — the same pattern `DisputeService.transition`/`SupportCaseService.transition` already established. This needed a real fix during the build: an earlier version of `purchase()` read the subscription row via `getOrCreateRaw()` *before* acquiring the lock and never re-read it afterward, so a racing transaction's already-committed changes could be invisible even after the lock was held — exactly the class of bug the spec's own "test concurrent subscription creation/renewal/upgrade/cancel" requirement exists to catch. `SubscriptionService.lockAndGetCurrent()` (get-or-create, lock by id, then a fresh re-read) is now the one path every mutation uses. `refundBillingAttempt()` got the same fix for a narrower double-refund race. The dedicated e2e suite (below) includes concurrent-purchase and concurrent-cancel tests that exercise these locks directly.
+
+### Admin surface
+
+`admin/subscriptions/` (parallel to `admin/finance/`) provides plan/price CRUD (`AdminSubscriptionPlanService` — historical subscriptions never break when a plan is later hidden, since `SubscriptionPlanStatus.HIDDEN`/`INACTIVE` only gates *new* subscribability), household subscription search/detail with billing attempts, admin cancel (recorded as `SubscriptionChangeType.ADMIN_CANCELLED`, same cancel-at-period-end semantics as the consumer path — never an immediate-revoke code path this handoff doesn't ask for), and manual entitlement overrides (`SubscriptionEntitlementOverride{household, key, value, reason, createdByAdmin, expiresAt, active}` — granting one first deactivates any existing active override for that key, so resolution never has two active rows to arbitrate between). RBAC reuses H11's Admin RBAC: `subscription.view` (read-only, held by `SUPPORT`/`FINANCE`/`OPERATIONS`), `subscription.manage` and `subscription.plan.manage` (ADMIN and above), and `subscription.entitlement.override` — deliberately **SUPER_ADMIN-only**, not even delegated to `ADMIN`, mirroring `admin.manage`'s own "never delegated" precedent given how high-risk a manual entitlement bypass is.
+
+### Notifications + support integration
+
+`SubscriptionNotificationListener` fans out across all 10 subscription domain events to *every* current `HouseholdMember` (a subscription belongs to the household, not one user) — safe because `Notification`'s own `@@unique([domainEventId, type, userId])` constraint means a retried event still converges to exactly one notification per member. Each member gets the plan name in their own locale rather than one hardcoded language. `subscription.trial_ending`/`subscription.renewal_upcoming` (both named as "potential" in the spec) are deliberately not implemented: the renewal worker only ever acts once a period has already ended, never proactively N days ahead, so there is no point in time to fire either notification without adding new proactive-scheduling infrastructure this handoff's renewal design doesn't have. `SupportCaseContextDto` gained a `subscription: SupportSubscriptionSummaryDto` field (plan/status/period end/most recent *failed* billing attempt only — never a succeeded attempt's payment detail) so H13's support context panel shows subscription state directly.
+
+### Consumer + admin frontend
+
+Consumer: `/subscription` (plan/status/period/trial/cancellation state, entitlements + usage, cancel/resume) and `/subscription/plans` (every ACTIVE plan for the household's country in one comparison list — FREE is never hidden or demoted), reachable from a new Home entry point; every mutation error surfaces the backend's own specific message inline (`ApiError.message`), never a generic "something went wrong". Admin: a new Subscriptions nav item (behind `subscription.view`) leading to Plans/Prices management, a filterable Household Subscriptions list, and a household detail page with billing attempts + refund + entitlement override grant/revoke + cancel — all following this codebase's existing plain-list-and-detail admin UI shape (no new table/pagination component was introduced; every other admin list view already uses a single generously-sized page rather than paged controls, and this handoff matches that).
+
+### Seed data
+
+`seed.ts` gained a `seedSubscriptions()` step (idempotent, upsert-based — unlike most of this file's create-only fixtures) producing three deterministic plans: **Free** (`pets.max: 2`, `household.members.max: 3`), **Plus** (`pets.max: 5`, `household.members.max: 6`, 14-day trial, obviously-fake dev prices ۹۹۰,۰۰۰ / ۹,۹۰۰,۰۰۰ IRR monthly/annual), and **Premium** (unlimited pets/members, 14-day trial, ۱,۹۹۰,۰۰۰ / ۱۹,۹۰۰,۰۰۰ IRR). The Free plan reuses the exact code the runtime self-healing fallback creates, so seeding after that fallback has already run upgrades the same row rather than duplicating it.
+
+### Codex parallel work
+
+Per this handoff's own instructions, local runtime/browser QA, route navigation, and general regression cleanup were left to Codex's parallel work rather than duplicated here. One cross-cutting fix was made because H16 genuinely depended on it: `NotificationEventsListener`'s payment-succeeded/failed handlers (see above) — a pre-existing gap that would have produced confusing notifications for every subscription payment, not something introduced by this handoff.
+
+### API endpoints (Handoff 16 additions)
+
+```
+GET    /households/:householdId/subscription
+GET    /households/:householdId/subscription/plans
+GET    /households/:householdId/subscription/entitlements
+GET    /households/:householdId/subscription/usage
+GET    /households/:householdId/subscription/billing-history
+GET    /households/:householdId/subscription/changes
+POST   /households/:householdId/subscription/trial          (Idempotency-Key)
+POST   /households/:householdId/subscription/subscribe      (Idempotency-Key)
+POST   /households/:householdId/subscription/upgrade        (Idempotency-Key)
+POST   /households/:householdId/subscription/downgrade
+POST   /households/:householdId/subscription/cancel
+POST   /households/:householdId/subscription/resume
+
+GET    /admin/subscriptions/plans
+GET    /admin/subscriptions/plans/:planId
+POST   /admin/subscriptions/plans                                    subscription.plan.manage
+PATCH  /admin/subscriptions/plans/:planId                             subscription.plan.manage
+POST   /admin/subscriptions/plans/:planId/entitlements                subscription.plan.manage
+POST   /admin/subscriptions/plans/:planId/prices                      subscription.plan.manage
+PATCH  /admin/subscriptions/prices/:priceId                           subscription.plan.manage
+
+GET    /admin/subscriptions/households                                subscription.view
+GET    /admin/subscriptions/households/:householdId                   subscription.view
+POST   /admin/subscriptions/households/:householdId/cancel            subscription.manage
+
+GET    /admin/subscriptions/billing-attempts                          subscription.view
+POST   /admin/subscriptions/billing-attempts/:id/refund               subscription.manage
+
+GET    /admin/subscriptions/households/:householdId/entitlement-overrides   subscription.view
+POST   /admin/subscriptions/entitlement-overrides                     subscription.entitlement.override
+DELETE /admin/subscriptions/entitlement-overrides/:id                 subscription.entitlement.override
+```
+
+### Error codes (Handoff 16 additions)
+
+```
+SUBSCRIPTION_NOT_FOUND                          404
+SUBSCRIPTION_PLAN_NOT_FOUND                      404
+SUBSCRIPTION_PLAN_PRICE_NOT_FOUND                404  no ACTIVE price for this plan/country/interval
+DUPLICATE_SUBSCRIPTION_PLAN_CODE                 409
+INVALID_SUBSCRIPTION_STATUS_TRANSITION           409
+SUBSCRIPTION_PLAN_NOT_AVAILABLE                  400  plan not ACTIVE, or not available in this country
+SUBSCRIPTION_TRIAL_NOT_ELIGIBLE                  409  reason: PLAN_HAS_NO_TRIAL | ALREADY_SUBSCRIBED | TRIAL_ALREADY_USED
+SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED          409  details: { key, limit, used }
+SUBSCRIPTION_BILLING_ATTEMPT_NOT_FOUND           404
+SUBSCRIPTION_BILLING_ATTEMPT_NOT_REFUNDABLE      409  not SUCCEEDED, or already refunded
+SUBSCRIPTION_ENTITLEMENT_OVERRIDE_NOT_FOUND      404
+SUBSCRIPTION_ALREADY_CANCELLED                   409  cancel/resume attempted from an invalid state
+```
+
 ## API endpoints
 
 ```
@@ -5295,6 +5422,46 @@ pagination is deterministic; S: media upload/confirm authorization, MIME/
 size validation, and disabled-media selection rules; T: a placement update
 is audited).
 
+Everything in the Handoff 16 acceptance criteria: a genuinely separate
+Subscription/Payment/Entitlement state model, never conflated; an explicit
+`SubscriptionStatus` state machine with a documented `ALLOWED_TRANSITIONS`
+table; a real, self-healing FREE plan every household resolves against
+(never a hardcoded-plan-name fallback); a reusable `EntitlementService`
+(`has`/`getLimit`/`getUsageItem`/`assertWithinLimit`) that is the *only*
+place any feature checks a plan capability — no `if plan === PREMIUM`
+anywhere; derived (not counter-based) metering for `pets.max`/
+`household.members.max`; server-side `pets.max` enforcement wired into
+`PetsService.create()`, returning a typed, specific error, never a generic
+one, with over-limit existing data always left fully accessible; the
+entire H07 payment stack reused through a minimal internal Checkout/Cart
+shell rather than a second payment system or a loosened core commerce
+schema; trial/purchase/upgrade/downgrade/cancel/resume with an explicit,
+documented no-proration policy; an honest DEV/manual renewal adapter
+(never simulated production autopay) driving `PAST_DUE` →
+`GRACE_PERIOD` → `EXPIRED` with full access retained through every step but
+the last; refunds that never auto-infer a subscription-status change;
+row-lock-then-fresh-read concurrency safety on every subscription mutation
+(a genuine stale-read-before-lock race was found and fixed mid-build, see
+that section above); a full admin surface (plan/price CRUD, household
+subscription search/detail, billing-attempt refund, entitlement
+override grant/revoke) behind H11's RBAC with `subscription.entitlement.
+override` kept SUPER_ADMIN-only; household-wide, locale-correct
+subscription notifications through the existing NotificationOrchestrator
+only; a subscription summary added to H13's support context panel; a
+consumer Manage Subscription + Plans UI reachable from Home, and an admin
+Subscriptions section; a deterministic seeded FREE/Plus/Premium catalog;
+and no AI plans, no social/travel/insurance billing, no provider/seller
+SaaS billing, no coupons/promotions/referral/gift/affiliate billing, no
+family plans, and no complex usage-based billing anywhere in this
+handoff, per its explicit scope line. Every Handoff 01-15 backend/frontend
+test remains green (272 backend e2e scenarios, 26 new for this handoff —
+covering free entitlement resolution, limit enforcement, trial
+eligibility, purchase/upgrade/idempotency, downgrade/cancel/resume,
+renewal success/failure through the full `PAST_DUE`/`GRACE_PERIOD`/
+`EXPIRED` chain with FREE fallback and no data loss, entitlement
+overrides, the full admin surface, and concurrent-purchase/concurrent-
+cancel races — and 243 frontend tests, up from 227).
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -5943,6 +6110,56 @@ is audited).
   isolated re-run. This handoff touches no code that test exercises; left
   for Codex per "document, don't silently broaden scope" rather than
   investigated further here.
+- **No proration** (Handoff 16) — an upgrade charges the new plan's full
+  price and starts a brand-new period from now, with no partial credit for
+  the unused portion of the prior period. This is the spec's own sanctioned
+  simpler policy; a future handoff could add deterministic-integer-IRR
+  proration with a full audit trail if the product later needs it.
+- **Renewal is reactive, not proactive** (Handoff 16) —
+  `SubscriptionRenewalWorkerService` only attempts a renewal once a
+  period's `endAt` has actually passed, never N days in advance. This means
+  `subscription.trial_ending`/`subscription.renewal_upcoming` (both listed
+  as "potential" in the spec) are not implemented — there is no point in
+  time to fire either notification without adding new proactive-scheduling
+  infrastructure. A future handoff could add a "renewal due soon" scan.
+- **No real recurring-charge integration** (Handoff 16) — renewals go
+  through the same `DEV_SIMULATED`/synchronous-charge path every other H16
+  charge uses; there is no real payment-provider webhook-driven autopay.
+  This is the spec's own explicit, honest choice ("do not simulate
+  production autopay") rather than an oversight — a future handoff would
+  need a real recurring-charge-capable provider integration to change it.
+- **`household.members.max` resolves but has no enforcement call site**
+  (Handoff 16) — the entitlement is metered and would correctly block a
+  household member invite/add over its limit, but this codebase has no
+  invite/add-member endpoint yet (`HouseholdsController` only supports
+  household creation). Documented rather than inventing a member-invite
+  feature out of this handoff's scope; wiring the check in is a small
+  addition once that feature exists.
+- **`pets.max` enforcement is a soft, non-transactional check** (Handoff
+  16) — `EntitlementService.assertWithinLimit()` is called before
+  `PetsService.create()`'s own transaction begins, so two truly
+  simultaneous pet-creation requests for a household already at its limit
+  could both pass the check and both succeed, exceeding the limit by one.
+  This is a deliberate, documented trade-off (a soft convenience limit, not
+  a financial invariant, unlike the subscription-mutation row locks
+  above) rather than an oversight; a future handoff could close it with a
+  `COUNT(*) ... FOR UPDATE`-style check inside the pet-creation transaction
+  if the product ever needs a hard guarantee here.
+- **Admin plan/household/billing-attempt list pages have no paged
+  controls** (Handoff 16) — each fetches one generously-sized page (up to
+  the backend's own page-size cap) with a status filter, matching every
+  other admin list view in this codebase (`AdminCustomersView`,
+  `AdminAuditView`, `AdminSellerFinanceView`) rather than introducing a new
+  pagination UI component. The backend's own pagination is real and ready
+  to support paged controls later.
+- **A genuine stale-read-before-lock concurrency bug was found and fixed
+  during this handoff's own build**, not left in place: an early version
+  of `SubscriptionBillingService.purchase()` read the Subscription row
+  before acquiring its row lock and never re-read it afterward. Documented
+  here (rather than silently mentioned only in code comments) because it
+  is exactly the class of defect the spec's own concurrency-testing
+  requirement exists to catch — see "Concurrency" under Handoff 16 above
+  for the fix and its dedicated e2e coverage.
 
 ## Next recommended coding handoff
 
@@ -6055,3 +6272,39 @@ mechanism (never a stored, directly-editable balance column), and every
 user-visible notification through
 `NotificationOrchestratorService.notify()` — never a second write path
 for any of them, no matter how small the change looks.
+
+Alternatively, following directly from Handoff 16: **a household member
+invite flow**, the feature this handoff's own `household.members.max`
+entitlement is ready for but has no enforcement call site to attach to
+today (`HouseholdsController` only supports household creation). Adding
+`POST /households/:id/members` (invite/accept, reusing H12's own
+identifier-based auth plumbing rather than inventing a new one) would let
+`EntitlementService.assertWithinLimit(householdId, "household.members.max")`
+gate it exactly the way `PetsService.create()` already gates `pets.max` —
+no schema or entitlement-resolution change needed, the metering already
+resolves correctly, only the missing feature and its one enforcement call
+site. A related, smaller option: a proactive "renewal due soon" /
+"trial ending soon" notification pass — `SubscriptionRenewalWorkerService`
+currently only acts once a period has already ended; a scan that finds
+subscriptions within N days of `currentPeriod.endAt`/`trialEndsAt` and
+fires the two notification templates the spec names but this handoff
+left unimplemented (see Known Limitations) would need no new
+infrastructure beyond a second, similarly-shaped poller job. A third,
+independent option: real proration — if the product later needs partial
+credit on an upgrade mid-period, add it as deterministic integer-IRR
+arithmetic with a full audit trail (a new `SubscriptionChange` note field
+recording the computed credit), never floating point, keeping the
+current no-proration path as the default for a downgrade (which must
+never reduce paid entitlement mid-period regardless of how upgrade
+proration is implemented).
+
+Whichever is chosen, keep the Subscription/Payment/Entitlement separation
+intact (a subscription's status is never inferred from a payment or
+refund event), keep every subscription mutation going through
+`SubscriptionService.lockAndGetCurrent()`'s lock-then-fresh-read pattern
+(never a bare `getOrCreateRaw()` read followed by an unlocked write), keep
+`EntitlementService` as the only place a feature checks a plan capability
+(never a new `if plan.code === ...` check anywhere else), and keep every
+subscription revenue/refund posting going through
+`LedgerService.recordSubscriptionRevenue()`/`...Reversal()` — never a
+second write path into `PLATFORM_REVENUE`.
