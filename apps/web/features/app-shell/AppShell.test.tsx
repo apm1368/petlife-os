@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { authService } from "@/services/auth.service";
 import { householdsService } from "@/services/households.service";
@@ -7,14 +7,39 @@ import { useSessionStore } from "@/stores/session-store";
 import { ApiError } from "@/lib/api/client";
 import { AppShell } from "./AppShell";
 
-const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
+const { replace, push } = vi.hoisted(() => ({ replace: vi.fn(), push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push }) }));
 vi.mock("@/services/auth.service", () => ({ authService: { getSession: vi.fn() } }));
 vi.mock("@/services/households.service", () => ({ householdsService: { listMine: vi.fn() } }));
 vi.mock("@/features/theme/ThemeToggle", () => ({ ThemeToggle: () => null }));
 vi.mock("@/features/locale/LocaleSwitcher", () => ({ LocaleSwitcher: () => null }));
 
+vi.mock("@/features/notifications/NotificationBell", () => ({
+  NotificationBell: () => <button>Notification bell</button>,
+}));
+
 describe("AppShell bootstrap recovery", () => {
+  it("preserves the H13 support entry and H10 bell after integration", async () => {
+    vi.mocked(authService.getSession).mockResolvedValue({
+      user: {
+        id: "u1",
+        email: null,
+        phone: null,
+        displayName: "Demo",
+        avatarUrl: null,
+        locale: "en",
+        themePreference: "SYSTEM",
+        createdAt: "",
+        updatedAt: "",
+      },
+    });
+    vi.mocked(householdsService.listMine).mockResolvedValue([]);
+    renderWithIntl(<AppShell>Product content</AppShell>);
+    await screen.findByText("Product content");
+    expect(screen.getByRole("button", { name: "Notification bell" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Support" }));
+    expect(push).toHaveBeenCalledWith("/en/support");
+  });
   beforeEach(() => {
     vi.resetAllMocks();
     useSessionStore.setState({ user: null, status: "idle" });

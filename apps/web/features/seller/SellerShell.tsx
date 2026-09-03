@@ -57,7 +57,7 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (sessionState === "unauthenticated") router.replace(`/${locale}/welcome`);
+    if (sessionState === "unauthenticated") router.replace(`/${locale}/welcome?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`);
   }, [sessionState, router, locale]);
 
   const [switching, setSwitching] = useState<string | null>(null);
