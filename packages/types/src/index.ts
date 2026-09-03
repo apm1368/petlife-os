@@ -2656,7 +2656,11 @@ export type AdminPermissionName =
   | "content.edit"
   | "content.publish"
   | "content.archive"
-  | "content.media.manage";
+  | "content.media.manage"
+  | "subscription.view"
+  | "subscription.manage"
+  | "subscription.plan.manage"
+  | "subscription.entitlement.override";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -3156,4 +3160,233 @@ export interface AdminContentPlacementDto {
   updatedByAdmin: AdminActorSummaryDto | null;
   updatedAt: string;
   blocks: AdminContentBlockDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Subscription + Membership + Metering (Handoff 16)
+// ---------------------------------------------------------------------------
+
+export enum SubscriptionPlanStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  HIDDEN = "HIDDEN",
+}
+
+export enum SubscriptionPlanPriceStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
+export enum SubscriptionBillingInterval {
+  MONTHLY = "MONTHLY",
+  ANNUAL = "ANNUAL",
+}
+
+export enum SubscriptionEntitlementType {
+  BOOLEAN = "BOOLEAN",
+  LIMIT = "LIMIT",
+}
+
+/** See the matching Prisma enum's own doc comment (schema.prisma) for why PAST_DUE/GRACE_PERIOD are distinct steps. */
+export enum SubscriptionStatus {
+  TRIALING = "TRIALING",
+  ACTIVE = "ACTIVE",
+  PAST_DUE = "PAST_DUE",
+  GRACE_PERIOD = "GRACE_PERIOD",
+  CANCEL_AT_PERIOD_END = "CANCEL_AT_PERIOD_END",
+  CANCELLED = "CANCELLED",
+  EXPIRED = "EXPIRED",
+}
+
+export enum SubscriptionPeriodStatus {
+  ACTIVE = "ACTIVE",
+  ENDED = "ENDED",
+}
+
+export enum SubscriptionChangeType {
+  TRIAL_STARTED = "TRIAL_STARTED",
+  INITIAL_PURCHASE = "INITIAL_PURCHASE",
+  UPGRADE = "UPGRADE",
+  DOWNGRADE_SCHEDULED = "DOWNGRADE_SCHEDULED",
+  DOWNGRADE_APPLIED = "DOWNGRADE_APPLIED",
+  CANCEL_SCHEDULED = "CANCEL_SCHEDULED",
+  CANCEL_REVERSED = "CANCEL_REVERSED",
+  RENEWED = "RENEWED",
+  PAST_DUE = "PAST_DUE",
+  GRACE_STARTED = "GRACE_STARTED",
+  EXPIRED = "EXPIRED",
+  ADMIN_CANCELLED = "ADMIN_CANCELLED",
+  ENTITLEMENT_OVERRIDE_GRANTED = "ENTITLEMENT_OVERRIDE_GRANTED",
+  ENTITLEMENT_OVERRIDE_REVOKED = "ENTITLEMENT_OVERRIDE_REVOKED",
+}
+
+export enum SubscriptionBillingReason {
+  INITIAL = "INITIAL",
+  RENEWAL = "RENEWAL",
+  UPGRADE = "UPGRADE",
+}
+
+export enum SubscriptionBillingAttemptStatus {
+  PENDING = "PENDING",
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+}
+
+export interface SubscriptionPlanEntitlementDto {
+  key: string;
+  type: SubscriptionEntitlementType;
+  boolValue: boolean | null;
+  /** `null` on a LIMIT-type row means unlimited — never confused with "0" or "not configured". */
+  limitValue: number | null;
+}
+
+export interface SubscriptionPlanPriceDto {
+  id: string;
+  countryCode: string;
+  currency: string;
+  billingInterval: SubscriptionBillingInterval;
+  /** Integer IRR — the sole financial source of truth. The UI renders Toman via the existing `formatCurrency()` helper; never store or trust a Toman value from a client. */
+  amount: number;
+  status: SubscriptionPlanPriceStatus;
+  effectiveFrom: string;
+  effectiveTo: string | null;
+}
+
+/** A minimal, embeddable reference — used inside periods/attempts/changes so those payloads don't repeat every price/entitlement row. */
+export interface SubscriptionPlanRefDto {
+  id: string;
+  code: string;
+  nameFa: string;
+  nameEn: string;
+}
+
+export interface SubscriptionPlanDto {
+  id: string;
+  code: string;
+  nameFa: string;
+  nameEn: string;
+  descriptionFa: string | null;
+  descriptionEn: string | null;
+  status: SubscriptionPlanStatus;
+  sortOrder: number;
+  isFree: boolean;
+  trialDays: number | null;
+  countryAvailability: string[];
+  entitlements: SubscriptionPlanEntitlementDto[];
+  prices: SubscriptionPlanPriceDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubscriptionPeriodDto {
+  id: string;
+  status: SubscriptionPeriodStatus;
+  plan: SubscriptionPlanRefDto;
+  startAt: string;
+  endAt: string;
+  isTrial: boolean;
+  amount: number | null;
+  currency: string;
+}
+
+export interface SubscriptionBillingAttemptDto {
+  id: string;
+  reason: SubscriptionBillingReason;
+  attemptNumber: number;
+  status: SubscriptionBillingAttemptStatus;
+  amount: number;
+  currency: string;
+  failureCode: string | null;
+  failureReason: string | null;
+  paymentIntentId: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface SubscriptionChangeDto {
+  id: string;
+  type: SubscriptionChangeType;
+  fromPlan: SubscriptionPlanRefDto | null;
+  toPlan: SubscriptionPlanRefDto | null;
+  effectiveAt: string | null;
+  note: string | null;
+  initiatedByAdmin: AdminActorSummaryDto | null;
+  createdAt: string;
+}
+
+/** The household's own current subscription — GET /subscriptions/current. */
+export interface SubscriptionDto {
+  id: string;
+  status: SubscriptionStatus;
+  plan: SubscriptionPlanRefDto;
+  price: SubscriptionPlanPriceDto | null;
+  pendingPlan: SubscriptionPlanRefDto | null;
+  pendingPrice: SubscriptionPlanPriceDto | null;
+  currentPeriod: SubscriptionPeriodDto | null;
+  trialEndsAt: string | null;
+  gracePeriodEndsAt: string | null;
+  cancelRequestedAt: string | null;
+  cancelEffectiveAt: string | null;
+  expiredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResolvedEntitlementDto {
+  key: string;
+  type: SubscriptionEntitlementType;
+  boolValue: boolean | null;
+  limitValue: number | null;
+  /** True when this value came from an active SubscriptionEntitlementOverride rather than the resolved plan. */
+  overridden: boolean;
+}
+
+export interface SubscriptionUsageItemDto {
+  key: string;
+  limit: number | null;
+  used: number;
+  remaining: number | null;
+}
+
+export interface SubscriptionBillingHistoryDto {
+  periods: SubscriptionPeriodDto[];
+  attempts: SubscriptionBillingAttemptDto[];
+}
+
+export interface AdminSubscriptionSummaryDto {
+  id: string;
+  household: { id: string; name: string | null };
+  status: SubscriptionStatus;
+  plan: SubscriptionPlanRefDto;
+  currentPeriodEndAt: string | null;
+  updatedAt: string;
+}
+
+export interface AdminSubscriptionDetailDto extends SubscriptionDto {
+  household: { id: string; name: string | null };
+  changes: SubscriptionChangeDto[];
+  billingAttempts: SubscriptionBillingAttemptDto[];
+}
+
+export interface SubscriptionEntitlementOverrideDto {
+  id: string;
+  householdId: string;
+  key: string;
+  type: SubscriptionEntitlementType;
+  boolValue: boolean | null;
+  limitValue: number | null;
+  reason: string;
+  createdByAdmin: AdminActorSummaryDto;
+  expiresAt: string | null;
+  active: boolean;
+  createdAt: string;
+}
+
+/** The coarse subscription summary the H13 support context panel shows — never a payment secret. */
+export interface SupportSubscriptionSummaryDto {
+  status: SubscriptionStatus;
+  planCode: string;
+  planNameEn: string;
+  currentPeriodEndAt: string | null;
+  recentFailedBillingAttempt: SubscriptionBillingAttemptDto | null;
 }

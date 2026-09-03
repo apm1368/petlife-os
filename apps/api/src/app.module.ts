@@ -46,6 +46,7 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { AdminModule } from "./modules/admin/admin.module";
 import { SupportModule } from "./modules/support/support.module";
 import { ContentModule } from "./modules/content/content.module";
+import { SubscriptionsModule } from "./modules/subscriptions/subscription.module";
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { ContentModule } from "./modules/content/content.module";
     AdminModule,
     SupportModule,
     ContentModule,
+    SubscriptionsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

@@ -45,6 +45,10 @@ import { AdminMediaService } from "./content/admin-media.service";
 import { AdminContentVersionService } from "./content/admin-content-version.service";
 import { AdminContentPlacementService } from "./content/admin-content-placement.service";
 import { AdminContentController } from "./content/admin-content.controller";
+import { SubscriptionsModule } from "../subscriptions/subscription.module";
+import { AdminSubscriptionPlanService } from "./subscriptions/admin-subscription-plan.service";
+import { AdminSubscriptionService } from "./subscriptions/admin-subscription.service";
+import { AdminSubscriptionController } from "./subscriptions/admin-subscription.controller";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -56,7 +60,7 @@ import { AdminContentController } from "./content/admin-content.controller";
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule],
+  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule],
   controllers: [
     AdminMeController,
     AdminNoteController,
@@ -73,6 +77,7 @@ import { AdminContentController } from "./content/admin-content.controller";
     AdminDashboardController,
     AdminSellerFinanceController,
     AdminContentController,
+    AdminSubscriptionController,
   ],
   providers: [
     AdminAccessService,
@@ -101,6 +106,8 @@ import { AdminContentController } from "./content/admin-content.controller";
     AdminContentAuthorService,
     AdminContentVersionService,
     AdminContentPlacementService,
+    AdminSubscriptionPlanService,
+    AdminSubscriptionService,
   ],
   exports: [
     AdminAccessService,

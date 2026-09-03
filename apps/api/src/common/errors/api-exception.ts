@@ -1017,3 +1017,82 @@ export class ContentPlacementNotFoundException extends ApiException {
     super("CONTENT_PLACEMENT_NOT_FOUND", "Content placement not found.", HttpStatus.NOT_FOUND, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Subscription + Membership + Metering (Handoff 16)
+// ---------------------------------------------------------------------------
+
+export class SubscriptionNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_NOT_FOUND", "Subscription not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SubscriptionPlanNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_PLAN_NOT_FOUND", "Subscription plan not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SubscriptionPlanPriceNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_PLAN_PRICE_NOT_FOUND", "No active price exists for this plan in the requested country/interval.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class DuplicateSubscriptionPlanCodeException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_SUBSCRIPTION_PLAN_CODE", "A plan with this code already exists.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** spec: "use an explicit state machine... define allowed transitions explicitly." */
+export class InvalidSubscriptionStatusTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_SUBSCRIPTION_STATUS_TRANSITION", "This subscription status transition is not allowed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class SubscriptionPlanNotAvailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_PLAN_NOT_AVAILABLE", "This plan is not available for subscription right now.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** spec: "one trial per household per relevant plan family unless configured otherwise... no repeated trial abuse." */
+export class SubscriptionTrialNotEligibleException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_TRIAL_NOT_ELIGIBLE", "This household is not eligible for a trial of this plan.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** spec: "limit checks must happen server-side... API returns typed entitlement/limit error." */
+export class SubscriptionEntitlementLimitExceededException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED", "This action exceeds the current plan's limit.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class SubscriptionBillingAttemptNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_BILLING_ATTEMPT_NOT_FOUND", "Billing attempt not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SubscriptionBillingAttemptNotRefundableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_BILLING_ATTEMPT_NOT_REFUNDABLE", "Only a succeeded billing attempt without an existing refund can be refunded.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class SubscriptionEntitlementOverrideNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_ENTITLEMENT_OVERRIDE_NOT_FOUND", "Entitlement override not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SubscriptionAlreadyCancelledException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_ALREADY_CANCELLED", "This subscription cannot be cancelled or resumed in its current state.", HttpStatus.CONFLICT, details);
+  }
+}

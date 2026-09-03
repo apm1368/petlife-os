@@ -78,8 +78,17 @@ export class NotificationEventsListener {
   @OnEvent("PaymentSucceeded")
   onPaymentSucceeded(payload: { checkoutId: string }, domainEventId: string): Promise<void> {
     return this.safely("PaymentSucceeded", async () => {
-      const checkout = await this.prisma.checkout.findUnique({ where: { id: payload.checkoutId }, select: { userId: true } });
-      if (!checkout) return;
+      const checkout = await this.prisma.checkout.findUnique({ where: { id: payload.checkoutId }, select: { userId: true, cart: { select: { _count: { select: { lines: true } } } } } });
+      // Handoff 16 — a subscription billing attempt's PaymentIntent is
+      // wired to a minimal internal Checkout/Cart shell (never a real cart
+      // with lines) purely to satisfy PaymentIntent.checkoutId's FK; see
+      // SubscriptionBillingService's own doc comment. This generic
+      // "payment.succeeded" → "see My Orders" copy would be actively wrong
+      // for that case (SubscriptionNotificationListener sends the correct
+      // "subscription.started"/"subscription.renewal succeeded" copy
+      // instead), so a checkout whose cart has no line items at all is
+      // never a real commerce purchase and is skipped here.
+      if (!checkout || checkout.cart._count.lines === 0) return;
       await this.orchestrator.notify({
         userId: checkout.userId,
         type: "payment.succeeded",
@@ -95,8 +104,9 @@ export class NotificationEventsListener {
   @OnEvent("PaymentFailed")
   onPaymentFailed(payload: { checkoutId: string }, domainEventId: string): Promise<void> {
     return this.safely("PaymentFailed", async () => {
-      const checkout = await this.prisma.checkout.findUnique({ where: { id: payload.checkoutId }, select: { userId: true } });
-      if (!checkout) return;
+      const checkout = await this.prisma.checkout.findUnique({ where: { id: payload.checkoutId }, select: { userId: true, cart: { select: { _count: { select: { lines: true } } } } } });
+      // See the matching guard in onPaymentSucceeded above.
+      if (!checkout || checkout.cart._count.lines === 0) return;
       await this.orchestrator.notify({
         userId: checkout.userId,
         type: "payment.failed",

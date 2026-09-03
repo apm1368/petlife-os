@@ -1093,6 +1093,9 @@ model Household {
   checkouts            Checkout[]
   orders               Order[]
   supportCases         SupportCase[]
+  subscription         Subscription?
+  subscriptionTrials   SubscriptionTrial[]
+  entitlementOverrides SubscriptionEntitlementOverride[]
 
   @@map("households")
 }
@@ -2488,10 +2491,17 @@ model PaymentIntent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  attempts       PaymentAttempt[]
-  transactions   Transaction[]
-  refunds        Refund[]
-  providerEvents PaymentProviderEvent[]
+  attempts                    PaymentAttempt[]
+  transactions                Transaction[]
+  refunds                     Refund[]
+  providerEvents              PaymentProviderEvent[]
+  /// Handoff 16 — a subscription billing attempt (initial purchase, renewal,
+  /// or upgrade) creates exactly one PaymentIntent through this same table,
+  /// via a minimal internal Checkout/Cart shell never exposed by any
+  /// commerce route (see SubscriptionBillingService's own doc comment) —
+  /// `checkoutId` above stays required and this codebase's real commerce
+  /// checkout flow is completely untouched.
+  subscriptionBillingAttempts SubscriptionBillingAttempt[]
 
   @@index([checkoutId])
   @@map("payment_intents")
@@ -3569,6 +3579,12 @@ enum NotificationCategory {
   /// notifications via H10's NotificationOrchestrator, never call SMS
   /// directly").
   SUPPORT
+  /// Handoff 16 — subscription lifecycle events (trial ending, renewal
+  /// upcoming/failed, grace started, cancelled, expired, upgraded,
+  /// downgrade scheduled). Never PAYMENT — a subscription renewal charge is
+  /// a distinct product event from a one-off commerce payment even though
+  /// both ultimately reuse PaymentIntent underneath.
+  SUBSCRIPTION
 }
 
 enum NotificationPriority {
@@ -3970,6 +3986,8 @@ model AdminUser {
   lastEditedArticleLocales      ArticleLocale[]                   @relation("ArticleLocaleLastEditedBy")
   contentVersions               ContentVersion[]
   updatedContentPlacements      ContentPlacement[]
+  subscriptionChanges           SubscriptionChange[]
+  grantedEntitlementOverrides   SubscriptionEntitlementOverride[]
 
   @@map("admin_users")
 }
@@ -4622,4 +4640,465 @@ model ContentBlockLocale {
 
   @@unique([contentBlockId, locale])
   @@map("content_block_locales")
+}
+
+// ---------------------------------------------------------------------------
+// Subscription + Membership + Metering (Handoff 16)
+// ---------------------------------------------------------------------------
+
+/// spec: "Plans should support ACTIVE/INACTIVE/HIDDEN... historical
+/// subscriptions must not break if a plan is hidden later." A plan is never
+/// deleted — HIDDEN removes it from the comparison page for new subscribers
+/// while every existing Subscription/SubscriptionPeriod FK pointing at it
+/// keeps resolving exactly as before.
+enum SubscriptionPlanStatus {
+  ACTIVE
+  INACTIVE
+  HIDDEN
+}
+
+enum SubscriptionPlanPriceStatus {
+  ACTIVE
+  INACTIVE
+}
+
+/// spec: "Potential billing intervals: MONTHLY, ANNUAL. Do not introduce
+/// arbitrary complex intervals unless required." Exactly the two the spec
+/// names — nothing else.
+enum SubscriptionBillingInterval {
+  MONTHLY
+  ANNUAL
+}
+
+/// spec: "Support at least: BOOLEAN, LIMIT." QUOTA is deliberately not
+/// added — nothing in H16's actual scope (pet count, household member
+/// count, a couple of boolean feature flags) needs a reset-on-a-schedule
+/// quota, and the spec itself warns "do not invent usage limits solely to
+/// make the system look complex."
+enum SubscriptionEntitlementType {
+  BOOLEAN
+  LIMIT
+}
+
+/// The subscription state machine (spec: "use an explicit state machine...
+/// do NOT use payment status names as subscription states"). Every status
+/// here is a genuine access/lifecycle state, never a payment outcome.
+/// Allowed transitions are enforced in code by SubscriptionService (a single
+/// `ALLOWED_TRANSITIONS` table, mirroring ArticleLifecycleStatus's own
+/// precedent from Handoff 15) — see its own doc comment for the exact graph.
+/// PAST_DUE and GRACE_PERIOD are deliberately two distinct steps rather than
+/// one combined state (spec explicitly offers both as an option and names
+/// GRACE_PERIOD as its own header section): PAST_DUE is "first renewal
+/// failure, short retry window, full access"; GRACE_PERIOD is "retry window
+/// elapsed, final configurable warning window, full access still" — both
+/// keep full entitlements (spec: "do not revoke access immediately"), the
+/// distinction exists purely so the UI can escalate urgency honestly.
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  GRACE_PERIOD
+  CANCEL_AT_PERIOD_END
+  CANCELLED
+  EXPIRED
+}
+
+enum SubscriptionPeriodStatus {
+  ACTIVE
+  ENDED
+}
+
+/// Every meaningful thing that can happen to a Subscription, for admin
+/// inspection and the consumer's own billing-history narrative — deliberately
+/// separate from AdminAuditLog (which is "what did an admin do", scoped to
+/// admin-initiated mutations only) since most of these are consumer- or
+/// system-initiated (a household starting a trial, a renewal succeeding, a
+/// grace period expiring) and never touch an admin at all.
+enum SubscriptionChangeType {
+  TRIAL_STARTED
+  INITIAL_PURCHASE
+  UPGRADE
+  DOWNGRADE_SCHEDULED
+  DOWNGRADE_APPLIED
+  CANCEL_SCHEDULED
+  CANCEL_REVERSED
+  RENEWED
+  PAST_DUE
+  GRACE_STARTED
+  EXPIRED
+  ADMIN_CANCELLED
+  ENTITLEMENT_OVERRIDE_GRANTED
+  ENTITLEMENT_OVERRIDE_REVOKED
+}
+
+/// Why a SubscriptionBillingAttempt was made — never inferred from context,
+/// always recorded explicitly (spec: "Track each attempt explicitly").
+enum SubscriptionBillingReason {
+  INITIAL
+  RENEWAL
+  UPGRADE
+}
+
+enum SubscriptionBillingAttemptStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+/// Product packaging (spec: "a plan should represent product packaging...
+/// exact names should be configurable and not hardwired deeply into
+/// business logic" — `code` is a plain string precisely so no enum ties
+/// business logic to "PREMIUM" by name; every entitlement/limit check reads
+/// SubscriptionPlanEntitlement rows, never `plan.code`). Display copy is
+/// plain fa/en sibling columns rather than Handoff 15's CMS-style
+/// `*Locale` child-table pattern — deliberately simpler, since a plan
+/// catalog is a handful of admin-managed rows with no versioning/workflow
+/// need, unlike a growing article library.
+model SubscriptionPlan {
+  id            String                 @id @default(uuid()) @db.Uuid
+  code          String                 @unique
+  nameFa        String
+  nameEn        String
+  descriptionFa String?
+  descriptionEn String?
+  status        SubscriptionPlanStatus @default(ACTIVE)
+  sortOrder     Int                    @default(0)
+  /// Exactly one plan should carry this — the deterministic system default
+  /// every household resolves against before ever subscribing (spec:
+  /// "Prefer a real FREE plan if it simplifies consistent resolution").
+  /// Enforced by SubscriptionPlanService, not a DB constraint (a boolean
+  /// uniqueness constraint needs a partial index Prisma's DSL can't express
+  /// cleanly for a single nullable-marker column; the service layer is the
+  /// simpler, sufficient guard here since plans are admin-managed, not a
+  /// high-write table).
+  isFree        Boolean                @default(false)
+  /// Trial length in days if this plan offers one; null means no trial.
+  trialDays     Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  prices                  SubscriptionPlanPrice[]
+  entitlements            SubscriptionPlanEntitlement[]
+  countryAvailability     SubscriptionPlanCountry[]
+  subscriptions           Subscription[]                @relation("CurrentPlan")
+  pendingForSubscriptions Subscription[]                @relation("PendingPlan")
+  periods                 SubscriptionPeriod[]
+  trials                  SubscriptionTrial[]
+  changesFrom             SubscriptionChange[]          @relation("ChangeFromPlan")
+  changesTo               SubscriptionChange[]          @relation("ChangeToPlan")
+
+  @@map("subscription_plans")
+}
+
+/// Country availability is a simple allow-list per plan (spec: "reuse
+/// CountryConfig... plan availability should support country-specific
+/// behavior... do not fork business logic for Iran directly"). This project
+/// has exactly one real country (IR, see common/country/country-config.ts)
+/// so today every plan is seeded with a single IR row, but resolution never
+/// special-cases "IR" in code — it queries this table.
+model SubscriptionPlanCountry {
+  id          String           @id @default(uuid()) @db.Uuid
+  planId      String           @db.Uuid
+  plan        SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  countryCode String
+
+  createdAt DateTime @default(now())
+
+  @@unique([planId, countryCode])
+  @@map("subscription_plan_countries")
+}
+
+/// Pricing is deliberately separate from plan identity (spec: "pricing must
+/// be separate from plan identity"). `amount` is always integer IRR — the
+/// sole financial source of truth (spec: "For Iran, IRR is source of truth.
+/// UI may render Toman using the existing currency helper. Do not store
+/// Toman as financial truth."); Toman is a ÷10 display transform applied by
+/// the frontend's existing `formatCurrency()` helper, exactly as every
+/// other financial amount in this codebase already does.
+///
+/// Prices are append-only history, never edited in place: changing a
+/// price creates a new ACTIVE row and flips the old one to INACTIVE with
+/// `effectiveTo` set, so a Subscription/SubscriptionPeriod/
+/// SubscriptionBillingAttempt created under the old price keeps resolving
+/// its own real historical amount forever. Prisma's DSL cannot express "at
+/// most one ACTIVE row per (planId, countryCode, billingInterval)" as a
+/// `@@unique` (that needs a partial index with a WHERE clause) — the
+/// migration hand-appends
+/// `CREATE UNIQUE INDEX ... WHERE status = 'ACTIVE'`, the same "documented
+/// exception, raw SQL in the migration only" precedent Handoff 01's
+/// contact-info CHECK and Handoff 14's approver-not-initiator CHECK already
+/// established.
+model SubscriptionPlanPrice {
+  id              String                      @id @default(uuid()) @db.Uuid
+  planId          String                      @db.Uuid
+  plan            SubscriptionPlan            @relation(fields: [planId], references: [id], onDelete: Cascade)
+  countryCode     String
+  currency        String                      @default("IRR")
+  billingInterval SubscriptionBillingInterval
+  amount          Int
+  status          SubscriptionPlanPriceStatus @default(ACTIVE)
+  effectiveFrom   DateTime                    @default(now())
+  effectiveTo     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions           Subscription[]               @relation("CurrentPrice")
+  pendingForSubscriptions Subscription[]               @relation("PendingPrice")
+  periods                 SubscriptionPeriod[]
+  billingAttempts         SubscriptionBillingAttempt[]
+
+  @@index([planId, countryCode, billingInterval, status])
+  @@map("subscription_plan_prices")
+}
+
+/// One row per (plan, entitlement key) — the reusable entitlement
+/// definition every feature checks against (spec: "features should not
+/// check `if plan == PREMIUM`... instead check entitlements... create a
+/// reusable entitlement resolution service"). `key` is a plain string
+/// vocabulary (e.g. "pets.max", "household.members.max", "premium.support",
+/// "premium.badge"), never a Postgres enum — new entitlement keys are a
+/// product/config change, not a schema migration, exactly like
+/// AdminPermission's own "TypeScript union, not a DB enum" precedent for a
+/// vocabulary expected to grow. `limitValue: null` on a LIMIT-type row is a
+/// deliberate, explicit "unlimited" — never confused with "0" or "not
+/// configured" (SubscriptionPlanService rejects a LIMIT row with neither
+/// value set).
+model SubscriptionPlanEntitlement {
+  id         String                      @id @default(uuid()) @db.Uuid
+  planId     String                      @db.Uuid
+  plan       SubscriptionPlan            @relation(fields: [planId], references: [id], onDelete: Cascade)
+  key        String
+  type       SubscriptionEntitlementType
+  boolValue  Boolean?
+  limitValue Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([planId, key])
+  @@map("subscription_plan_entitlements")
+}
+
+/// One row per household, ever (spec: "one active/current subscription per
+/// household" as a DB constraint) — `householdId @unique` makes this
+/// trivially true at the schema level, so a household's subscription
+/// lifecycle (FREE forever, or trial → paid → cancelled → resubscribed) is
+/// one evolving row, never a new row per state change; history lives in
+/// SubscriptionChange/SubscriptionPeriod/SubscriptionBillingAttempt instead
+/// — the same "one row that evolves, history captured separately" shape
+/// `SellerLedgerAccount` (Handoff 14) already established.
+///
+/// Every household gets a real row (spec: "prefer a real FREE plan if it
+/// simplifies consistent resolution") — created lazily, idempotently, by
+/// EntitlementService/SubscriptionService the first time anything asks
+/// about a household's subscription, defaulted to the FREE plan with
+/// `status: ACTIVE` and `priceId: null`. There is deliberately no "no row
+/// exists → improvise fallback entitlements" code path anywhere.
+///
+/// Paid entitlements remain resolvable through PAST_DUE, GRACE_PERIOD, and
+/// CANCEL_AT_PERIOD_END (spec: "do not revoke access immediately") — only
+/// CANCELLED/EXPIRED fall back to the FREE plan's own entitlements
+/// (EntitlementService's own doc comment has the exact rule).
+model Subscription {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @unique @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  planId  String                 @db.Uuid
+  plan    SubscriptionPlan       @relation("CurrentPlan", fields: [planId], references: [id], onDelete: Restrict)
+  /// Null while on the FREE plan (no price exists for it).
+  priceId String?                @db.Uuid
+  price   SubscriptionPlanPrice? @relation("CurrentPrice", fields: [priceId], references: [id], onDelete: Restrict)
+
+  status SubscriptionStatus @default(ACTIVE)
+
+  currentPeriodId String?             @unique @db.Uuid
+  currentPeriod   SubscriptionPeriod? @relation("CurrentPeriod", fields: [currentPeriodId], references: [id], onDelete: SetNull)
+
+  /// A scheduled downgrade's target — set by `scheduleDowngrade()`, applied
+  /// at the next period boundary by the renewal worker, then cleared (spec:
+  /// "downgrade scheduled for next billing period... do not unexpectedly
+  /// reduce paid entitlement mid-period").
+  pendingPlanId  String?                @db.Uuid
+  pendingPlan    SubscriptionPlan?      @relation("PendingPlan", fields: [pendingPlanId], references: [id], onDelete: SetNull)
+  pendingPriceId String?                @db.Uuid
+  pendingPrice   SubscriptionPlanPrice? @relation("PendingPrice", fields: [pendingPriceId], references: [id], onDelete: SetNull)
+
+  trialEndsAt       DateTime?
+  gracePeriodEndsAt DateTime?
+  cancelRequestedAt DateTime?
+  /// Snapshotted at cancel-request time from the current period's own
+  /// `endAt` — stable even though `status: CANCEL_AT_PERIOD_END` means no
+  /// further renewal will ever move the period boundary again.
+  cancelEffectiveAt DateTime?
+  expiredAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  periods         SubscriptionPeriod[]         @relation("SubscriptionPeriods")
+  changes         SubscriptionChange[]
+  billingAttempts SubscriptionBillingAttempt[]
+  trials          SubscriptionTrial[]
+
+  @@map("subscriptions")
+}
+
+/// One billing cycle. `status: ENDED` is set the moment a period is
+/// superseded (a renewal creates the next ACTIVE period and ends this one)
+/// or the subscription reaches CANCELLED/EXPIRED — never deleted, so
+/// billing history always has a complete period ledger to render (spec:
+/// "user should see: plan, period, amount, billing status").
+model SubscriptionPeriod {
+  id             String       @id @default(uuid()) @db.Uuid
+  subscriptionId String       @db.Uuid
+  subscription   Subscription @relation("SubscriptionPeriods", fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  planId  String                 @db.Uuid
+  plan    SubscriptionPlan       @relation(fields: [planId], references: [id], onDelete: Restrict)
+  priceId String?                @db.Uuid
+  price   SubscriptionPlanPrice? @relation(fields: [priceId], references: [id], onDelete: Restrict)
+
+  status  SubscriptionPeriodStatus @default(ACTIVE)
+  startAt DateTime
+  endAt   DateTime
+  isTrial Boolean                  @default(false)
+
+  createdAt DateTime @default(now())
+
+  currentForSubscription Subscription?                @relation("CurrentPeriod")
+  billingAttempts        SubscriptionBillingAttempt[]
+
+  @@index([subscriptionId, status])
+  @@map("subscription_periods")
+}
+
+/// One row per attempted charge — initial purchase, renewal, or upgrade
+/// (spec: "track each attempt explicitly... do not overwrite failed
+/// attempts"). `attemptNumber` is computed the same race-safe way
+/// Handoff 15's `ContentVersion.versionNumber` is: a row-lock on the last
+/// attempt for this subscription inside the same transaction, then
+/// `count + 1` — never a global sequence, since it only needs to order one
+/// subscription's own attempt history. `idempotencyKey` is the caller- or
+/// worker-supplied key that makes a duplicate renewal-worker tick or a
+/// replayed `POST /subscribe` converge on the same attempt row instead of
+/// creating a second PaymentIntent.
+model SubscriptionBillingAttempt {
+  id             String                 @id @default(uuid()) @db.Uuid
+  subscriptionId String                 @db.Uuid
+  subscription   Subscription           @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  /// Null until the attempt succeeds and a period is actually created
+  /// (an initial-purchase attempt has no period yet when the attempt row
+  /// is first created).
+  periodId       String?                @db.Uuid
+  period         SubscriptionPeriod?    @relation(fields: [periodId], references: [id], onDelete: SetNull)
+  priceId        String?                @db.Uuid
+  price          SubscriptionPlanPrice? @relation(fields: [priceId], references: [id], onDelete: SetNull)
+
+  reason        SubscriptionBillingReason
+  attemptNumber Int
+
+  paymentIntentId String?        @db.Uuid
+  paymentIntent   PaymentIntent? @relation(fields: [paymentIntentId], references: [id], onDelete: SetNull)
+
+  idempotencyKey String? @unique
+
+  status        SubscriptionBillingAttemptStatus @default(PENDING)
+  failureCode   String?
+  failureReason String?
+
+  amount   Int
+  currency String @default("IRR")
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([subscriptionId, createdAt])
+  @@map("subscription_billing_attempts")
+}
+
+/// The append-only "what happened to this subscription" narrative — see the
+/// `SubscriptionChangeType` doc comment for why this is distinct from
+/// AdminAuditLog. Exactly one of `initiatedByUserId`/`initiatedByAdminId` is
+/// set for a human-initiated change; both are null for a system-initiated
+/// one (a renewal-worker-driven PAST_DUE/EXPIRED transition).
+model SubscriptionChange {
+  id             String       @id @default(uuid()) @db.Uuid
+  subscriptionId String       @db.Uuid
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  type       SubscriptionChangeType
+  fromPlanId String?                @db.Uuid
+  fromPlan   SubscriptionPlan?      @relation("ChangeFromPlan", fields: [fromPlanId], references: [id], onDelete: SetNull)
+  toPlanId   String?                @db.Uuid
+  toPlan     SubscriptionPlan?      @relation("ChangeToPlan", fields: [toPlanId], references: [id], onDelete: SetNull)
+
+  effectiveAt DateTime?
+  note        String?
+
+  initiatedByUserId  String?    @db.Uuid
+  initiatedByAdminId String?    @db.Uuid
+  initiatedByAdmin   AdminUser? @relation(fields: [initiatedByAdminId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([subscriptionId, createdAt])
+  @@map("subscription_changes")
+}
+
+/// Eligibility + record in one row (spec: "trial start/end... eligibility
+/// checked server-side... one trial per household per relevant plan family
+/// unless configured otherwise... no repeated trial abuse"). `@@unique on
+/// (householdId, planId)` is the actual anti-abuse enforcement — a second
+/// `POST /subscription/trial` for the same household+plan is rejected by
+/// the database itself, not just an application-layer check that a retried
+/// request could race past.
+model SubscriptionTrial {
+  id             String           @id @default(uuid()) @db.Uuid
+  householdId    String           @db.Uuid
+  household      Household        @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  subscriptionId String           @db.Uuid
+  subscription   Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  planId         String           @db.Uuid
+  plan           SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  startAt DateTime @default(now())
+  endAt   DateTime
+
+  createdAt DateTime @default(now())
+
+  @@unique([householdId, planId])
+  @@map("subscription_trials")
+}
+
+/// A support/admin escape hatch, never a silent plan edit (spec: "never
+/// silently modify plan definitions for one customer... require audit and
+/// expiry"). `active` is an explicit admin-revoke flag distinct from
+/// natural `expiresAt` elapsing — both are checked by EntitlementService.
+/// Every grant/revoke is also recorded as a SubscriptionChange and an
+/// AdminAuditLog entry.
+model SubscriptionEntitlementOverride {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  key        String
+  type       SubscriptionEntitlementType
+  boolValue  Boolean?
+  limitValue Int?
+
+  reason           String
+  createdByAdminId String    @db.Uuid
+  createdByAdmin   AdminUser @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([householdId, key])
+  @@map("subscription_entitlement_overrides")
 }

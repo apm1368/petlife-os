@@ -37,7 +37,11 @@ export type AdminPermission =
   | "content.edit"
   | "content.publish"
   | "content.archive"
-  | "content.media.manage";
+  | "content.media.manage"
+  | "subscription.view"
+  | "subscription.manage"
+  | "subscription.plan.manage"
+  | "subscription.entitlement.override";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -67,9 +71,13 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "content.publish",
   "content.archive",
   "content.media.manage",
+  "subscription.view",
+  "subscription.manage",
+  "subscription.plan.manage",
+  "subscription.entitlement.override",
 ];
 
-const READ_ONLY_PERMISSIONS: AdminPermission[] = ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "audit.view", "sellerFinance.view", "content.view"];
+const READ_ONLY_PERMISSIONS: AdminPermission[] = ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "audit.view", "sellerFinance.view", "content.view", "subscription.view"];
 
 /**
  * Least-privilege by construction (spec: "do not make every admin
@@ -77,6 +85,11 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = ["customer.view", "support.view
  * permission SUPER_ADMIN has, and `admin.manage` (granting/suspending other
  * admins) is SUPER_ADMIN-only, never delegated even to ADMIN.
  */
+// spec: "manual entitlement overrides... use only with appropriate
+// permission... be careful with manual overrides." `subscription.entitlement
+// .override` is deliberately SUPER_ADMIN-only — not even ADMIN — since it
+// bypasses the actual paid-plan mechanics for one household; every other
+// subscription.* permission follows the normal ADMIN/SUPER_ADMIN split.
 export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   [AdminRole.SUPER_ADMIN]: ALL_PERMISSIONS,
   [AdminRole.ADMIN]: [
@@ -104,8 +117,15 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "content.publish",
     "content.archive",
     "content.media.manage",
+    "subscription.view",
+    "subscription.manage",
+    "subscription.plan.manage",
   ],
-  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage"],
+  // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
+  // granted by default" — SUPPORT can see a household's subscription state
+  // (needed for the H13 support context panel) but can never cancel, grant
+  // a trial, or override an entitlement.
+  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view"],
   [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage"],
   // Payout execution ("settlement.pay") is FINANCE-only, mirroring
   // finance.refund.execute's own "ADMIN can approve, only FINANCE can move
@@ -123,8 +143,11 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settlement.approve",
     "settlement.pay",
     "settlement.adjust",
+    // spec: "FINANCE: appropriate billing visibility" — read-only; plan/price
+    // management and subscription mutations stay ADMIN/SUPER_ADMIN-only.
+    "subscription.view",
   ],
-  [AdminRole.OPERATIONS]: ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "task.manage", "audit.view", "sellerFinance.view", "content.view"],
+  [AdminRole.OPERATIONS]: ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "task.manage", "audit.view", "sellerFinance.view", "content.view", "subscription.view"],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict
   // CONTENT to only those subject types at the permission-map level (see

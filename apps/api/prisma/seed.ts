@@ -32,13 +32,144 @@ import {
   SellerVerificationStatus,
   ServiceCategory,
   SetupStatus,
+  SubscriptionBillingInterval,
+  SubscriptionEntitlementType,
+  SubscriptionPlanPriceStatus,
   SupportCaseCategory,
   SupportMessageAuthorType,
   SupportMessageVisibility,
   VaccinationStatus,
 } from "@prisma/client";
+import { DEFAULT_FREE_PLAN_CODE } from "../src/modules/subscriptions/subscription-plan-read.service";
 
 const prisma = new PrismaClient();
+
+/**
+ * Deterministic DEV catalog (Handoff 16 spec: "seed deterministic DEV
+ * FREE/PLUS/PREMIUM plans... fa/en display strings... dev/test-obviously-
+ * fake IRR monthly/annual prices"). Written as upserts, unlike most of this
+ * file's create-only fixtures, so re-running `db:seed` never fails on a
+ * unique-code conflict and always converges the same three plans — the
+ * FREE plan specifically reuses `DEFAULT_FREE_PLAN_CODE`, the exact code
+ * `SubscriptionPlanReadService.getFreePlanRaw()`'s own self-healing
+ * fallback creates when no plan is seeded yet, so seeding after that
+ * fallback has already run *upgrades* the same row in place (richer fa/en
+ * copy, the product's real limits) instead of creating a second FREE plan.
+ * Amounts are placeholder IRR figures for local development only — nowhere
+ * close to a real price, and obviously so.
+ */
+async function seedSubscriptions() {
+  const countryCode = "IR";
+
+  async function upsertPlan(input: {
+    code: string;
+    nameFa: string;
+    nameEn: string;
+    descriptionFa?: string;
+    descriptionEn?: string;
+    isFree: boolean;
+    sortOrder: number;
+    trialDays?: number;
+    entitlements: { key: string; type: SubscriptionEntitlementType; boolValue?: boolean; limitValue?: number | null }[];
+  }) {
+    const plan = await prisma.subscriptionPlan.upsert({
+      where: { code: input.code },
+      update: {
+        nameFa: input.nameFa,
+        nameEn: input.nameEn,
+        descriptionFa: input.descriptionFa,
+        descriptionEn: input.descriptionEn,
+        isFree: input.isFree,
+        sortOrder: input.sortOrder,
+        trialDays: input.trialDays,
+      },
+      create: {
+        code: input.code,
+        nameFa: input.nameFa,
+        nameEn: input.nameEn,
+        descriptionFa: input.descriptionFa,
+        descriptionEn: input.descriptionEn,
+        isFree: input.isFree,
+        sortOrder: input.sortOrder,
+        trialDays: input.trialDays,
+      },
+    });
+    await prisma.subscriptionPlanCountry.upsert({
+      where: { planId_countryCode: { planId: plan.id, countryCode } },
+      update: {},
+      create: { planId: plan.id, countryCode },
+    });
+    for (const entitlement of input.entitlements) {
+      await prisma.subscriptionPlanEntitlement.upsert({
+        where: { planId_key: { planId: plan.id, key: entitlement.key } },
+        update: { type: entitlement.type, boolValue: entitlement.boolValue ?? null, limitValue: entitlement.limitValue ?? null },
+        create: { planId: plan.id, key: entitlement.key, type: entitlement.type, boolValue: entitlement.boolValue ?? null, limitValue: entitlement.limitValue ?? null },
+      });
+    }
+    return plan;
+  }
+
+  /** Idempotent: only creates a new ACTIVE price if this exact (plan, country, interval) has none yet — never duplicates one on re-seed. */
+  async function ensurePrice(planId: string, billingInterval: SubscriptionBillingInterval, amount: number) {
+    const existing = await prisma.subscriptionPlanPrice.findFirst({ where: { planId, countryCode, billingInterval, status: SubscriptionPlanPriceStatus.ACTIVE } });
+    if (existing) return existing;
+    return prisma.subscriptionPlanPrice.create({ data: { planId, countryCode, billingInterval, amount } });
+  }
+
+  const free = await upsertPlan({
+    code: DEFAULT_FREE_PLAN_CODE,
+    nameFa: "رایگان",
+    nameEn: "Free",
+    descriptionFa: "شروع رایگان برای هر خانواده — همیشه رایگان.",
+    descriptionEn: "Every household's starting plan — free forever.",
+    isFree: true,
+    sortOrder: 0,
+    entitlements: [
+      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 2 },
+      { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+    ],
+  });
+
+  const plus = await upsertPlan({
+    code: "plus",
+    nameFa: "پلاس",
+    nameEn: "Plus",
+    descriptionFa: "فضای بیشتر برای خانواده‌های چندحیوانی.",
+    descriptionEn: "More room for multi-pet households.",
+    isFree: false,
+    sortOrder: 1,
+    trialDays: 14,
+    entitlements: [
+      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
+      { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 6 },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+    ],
+  });
+  await ensurePrice(plus.id, SubscriptionBillingInterval.MONTHLY, 990_000);
+  await ensurePrice(plus.id, SubscriptionBillingInterval.ANNUAL, 9_900_000);
+
+  const premium = await upsertPlan({
+    code: "premium",
+    nameFa: "پرمیوم",
+    nameEn: "Premium",
+    descriptionFa: "بدون محدودیت تعداد حیوان یا عضو خانواده.",
+    descriptionEn: "No limit on pets or household members.",
+    isFree: false,
+    sortOrder: 2,
+    trialDays: 14,
+    entitlements: [
+      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+    ],
+  });
+  await ensurePrice(premium.id, SubscriptionBillingInterval.MONTHLY, 1_990_000);
+  await ensurePrice(premium.id, SubscriptionBillingInterval.ANNUAL, 19_900_000);
+
+  console.log(`Seeded subscription plans: free=${free.id} plus=${plus.id} premium=${premium.id}`);
+  return { free, plus, premium };
+}
 
 /**
  * Commerce Core fixtures (Handoff 06): two VERIFIED+ACTIVE sellers so every
@@ -632,6 +763,8 @@ async function seedSellerFinance(input: { petBazaar: { id: string }; golestan: {
 }
 
 async function main() {
+  await seedSubscriptions();
+
   const sarah = await prisma.user.upsert({
     where: { email: "sarah@example.com" },
     update: {},

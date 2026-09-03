@@ -56,4 +56,12 @@ export type AdminAuditAction =
   | "content_author.updated"
   | "media_asset.uploaded"
   | "media_asset.disabled"
-  | "content_placement.updated";
+  | "content_placement.updated"
+  | "subscription_plan.created"
+  | "subscription_plan.updated"
+  | "subscription_plan_price.created"
+  | "subscription_plan_price.updated"
+  | "subscription.admin_cancelled"
+  | "subscription.billing_attempt_refunded"
+  | "subscription_entitlement_override.granted"
+  | "subscription_entitlement_override.revoked";
