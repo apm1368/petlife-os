@@ -31,7 +31,13 @@ export type AdminPermission =
   | "settlement.calculate"
   | "settlement.approve"
   | "settlement.pay"
-  | "settlement.adjust";
+  | "settlement.adjust"
+  | "content.view"
+  | "content.create"
+  | "content.edit"
+  | "content.publish"
+  | "content.archive"
+  | "content.media.manage";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -55,9 +61,15 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "settlement.approve",
   "settlement.pay",
   "settlement.adjust",
+  "content.view",
+  "content.create",
+  "content.edit",
+  "content.publish",
+  "content.archive",
+  "content.media.manage",
 ];
 
-const READ_ONLY_PERMISSIONS: AdminPermission[] = ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "audit.view", "sellerFinance.view"];
+const READ_ONLY_PERMISSIONS: AdminPermission[] = ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "audit.view", "sellerFinance.view", "content.view"];
 
 /**
  * Least-privilege by construction (spec: "do not make every admin
@@ -86,6 +98,12 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settlement.calculate",
     "settlement.approve",
     "settlement.adjust",
+    "content.view",
+    "content.create",
+    "content.edit",
+    "content.publish",
+    "content.archive",
+    "content.media.manage",
   ],
   [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage"],
   [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage"],
@@ -106,7 +124,7 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settlement.pay",
     "settlement.adjust",
   ],
-  [AdminRole.OPERATIONS]: ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "task.manage", "audit.view", "sellerFinance.view"],
+  [AdminRole.OPERATIONS]: ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "task.manage", "audit.view", "sellerFinance.view", "content.view"],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict
   // CONTENT to only those subject types at the permission-map level (see
@@ -115,6 +133,15 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   [AdminRole.CONTENT]: ["trust.view", "trust.manage", "task.manage"],
   [AdminRole.VERIFICATION]: ["customer.view", "verification.manage", "task.manage"],
   [AdminRole.READ_ONLY]: READ_ONLY_PERMISSIONS,
+  // The Handoff 15 CMS editorial role — distinct from the pre-existing
+  // AdminRole.CONTENT above (trust-and-safety content moderation, see its
+  // own comment). Deliberately excludes content.publish/content.archive:
+  // an editor can draft, edit, and manage media, but "editing and
+  // publishing should be separate actions" (spec) — only ADMIN/SUPER_ADMIN
+  // can actually make a locale VISIBLE or ARCHIVED, mirroring the exact
+  // "broad drafting, narrower execution" shape finance.refund.request
+  // (broad) vs. finance.refund.execute (FINANCE-only) already established.
+  [AdminRole.EDITOR]: ["content.view", "content.create", "content.edit", "content.media.manage"],
 };
 
 export function roleHasPermission(role: AdminRole, permission: AdminPermission): boolean {

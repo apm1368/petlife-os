@@ -26,6 +26,9 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/transactions", labelKey: "nav.transactions", permission: "finance.view" },
   { href: "/seller-finance", labelKey: "nav.sellerFinance", permission: "sellerFinance.view" },
   { href: "/reconciliation", labelKey: "nav.reconciliation", permission: "sellerFinance.view" },
+  { href: "/content", labelKey: "nav.content", permission: "content.view" },
+  { href: "/content/media", labelKey: "nav.contentMedia", permission: "content.view" },
+  { href: "/content/placements", labelKey: "nav.contentPlacements", permission: "content.view" },
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];

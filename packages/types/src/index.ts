@@ -2650,7 +2650,13 @@ export type AdminPermissionName =
   | "settlement.calculate"
   | "settlement.approve"
   | "settlement.pay"
-  | "settlement.adjust";
+  | "settlement.adjust"
+  | "content.view"
+  | "content.create"
+  | "content.edit"
+  | "content.publish"
+  | "content.archive"
+  | "content.media.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -2892,4 +2898,262 @@ export interface MarketplaceSettlementReconciliationResultDto {
   resolvedByAdmin: AdminActorSummaryDto | null;
   resolvedAt: string | null;
   createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// CMS + Blog + Content Management (Handoff 15)
+// ---------------------------------------------------------------------------
+
+export enum ArticleLifecycleStatus {
+  DRAFT = "DRAFT",
+  VISIBLE = "VISIBLE",
+  HIDDEN = "HIDDEN",
+  ARCHIVED = "ARCHIVED",
+}
+
+export enum ContentPlacementKey {
+  LANDING_HERO = "LANDING_HERO",
+  LANDING_FEATURED_CONTENT = "LANDING_FEATURED_CONTENT",
+  HOME_EDUCATION = "HOME_EDUCATION",
+  HOME_ANNOUNCEMENT = "HOME_ANNOUNCEMENT",
+}
+
+/**
+ * Structured rich text ("portable text"), never raw HTML (spec: "prefer
+ * structured rich text/portable content over storing arbitrary HTML
+ * directly"). A closed block/mark vocabulary makes script injection
+ * structurally impossible — the renderer only ever maps a known `type` to a
+ * real element, never interprets a string as markup. `RichTextInlineLink`'s
+ * `href` is validated server-side (http(s):// or a same-origin relative
+ * path only — see admin content DTOs) before every save.
+ */
+export type RichTextMark = "bold" | "italic" | "code";
+
+export interface RichTextInlineText {
+  text: string;
+  marks?: RichTextMark[];
+}
+
+export interface RichTextInlineLink {
+  type: "link";
+  href: string;
+  text: string;
+}
+
+export type RichTextInline = RichTextInlineText | RichTextInlineLink;
+
+export type RichTextBlock =
+  | { type: "paragraph"; content: RichTextInline[] }
+  | { type: "heading"; level: 2 | 3 | 4; content: RichTextInline[] }
+  | { type: "list"; style: "bulleted" | "numbered"; items: RichTextInline[][] }
+  | { type: "quote"; content: RichTextInline[] }
+  | { type: "callout"; tone: "info" | "warning"; content: RichTextInline[] }
+  /** `url` is never stored or accepted on write — the server resolves it from `mediaAssetId` on every read response so the renderer never has to look anything up itself. */
+  | { type: "image"; mediaAssetId: string; alt: string; caption?: string; url?: string };
+
+export type RichTextDocument = RichTextBlock[];
+
+export interface MediaAssetDto {
+  id: string;
+  url: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  widthPx: number | null;
+  heightPx: number | null;
+  altText: string | null;
+  createdByAdmin: AdminActorSummaryDto;
+  disabledAt: string | null;
+  createdAt: string;
+}
+
+export interface ContentAuthorDto {
+  id: string;
+  name: string;
+  bio: string | null;
+  avatarMediaAsset: MediaAssetDto | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategoryLocaleDto {
+  locale: Locale;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
+export interface CategoryDto {
+  id: string;
+  locales: CategoryLocaleDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** The public-facing, single-locale-resolved shape a blog list/article/placement ever returns — never the full multi-locale admin row. */
+export interface PublicCategoryDto {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
+export interface TagLocaleDto {
+  locale: Locale;
+  name: string;
+  slug: string;
+}
+
+export interface TagDto {
+  id: string;
+  locales: TagLocaleDto[];
+}
+
+export interface PublicTagDto {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+/** One row of the admin article list (spec: "locale availability" as a list filter/column) — never the full body of any locale. */
+export interface AdminArticleLocaleAvailabilityDto {
+  locale: Locale;
+  status: ArticleLifecycleStatus;
+  title: string;
+  slug: string;
+  updatedAt: string;
+}
+
+export interface AdminArticleListItemDto {
+  id: string;
+  author: ContentAuthorDto | null;
+  category: PublicCategoryDto | null;
+  createdByAdmin: AdminActorSummaryDto;
+  createdAt: string;
+  updatedAt: string;
+  locales: AdminArticleLocaleAvailabilityDto[];
+}
+
+/** The article aggregate as the admin editor's shell — author/category/cover/tags are shared across locales; editorial content itself is fetched/edited per locale via AdminArticleLocaleDto below (spec: "manage Persian and English independently"). */
+export interface AdminArticleDto {
+  id: string;
+  author: ContentAuthorDto | null;
+  category: CategoryDto | null;
+  coverMediaAsset: MediaAssetDto | null;
+  tags: TagDto[];
+  createdByAdmin: AdminActorSummaryDto;
+  createdAt: string;
+  updatedAt: string;
+  locales: AdminArticleLocaleAvailabilityDto[];
+}
+
+/** The actual per-locale editorial payload — what the article editor loads/saves for one locale (spec: "independent title, slug, excerpt, body, SEO title, SEO description, locale-specific publication readiness"). */
+export interface AdminArticleLocaleDto {
+  articleId: string;
+  locale: Locale;
+  status: ArticleLifecycleStatus;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  body: RichTextDocument;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  publishedAt: string | null;
+  lastEditedByAdmin: AdminActorSummaryDto | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContentVersionSummaryDto {
+  id: string;
+  articleId: string;
+  locale: Locale;
+  versionNumber: number;
+  editorAdmin: AdminActorSummaryDto;
+  changeNote: string | null;
+  createdAt: string;
+}
+
+export interface ArticleLocaleSnapshot {
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  body: RichTextDocument;
+  seoTitle: string | null;
+  seoDescription: string | null;
+}
+
+export interface ContentVersionDetailDto extends ContentVersionSummaryDto {
+  snapshot: ArticleLocaleSnapshot;
+}
+
+/** The public blog list row — one locale, one already-resolved category/tag/author view. `canonicalPath` is server-computed (spec: "locale-aware canonical URL") so the frontend never has to reconstruct it. */
+export interface PublicArticleSummaryDto {
+  id: string;
+  locale: Locale;
+  slug: string;
+  canonicalPath: string;
+  title: string;
+  excerpt: string | null;
+  coverMediaAsset: MediaAssetDto | null;
+  author: ContentAuthorDto | null;
+  category: PublicCategoryDto | null;
+  tags: PublicTagDto[];
+  publishedAt: string;
+  updatedAt: string;
+}
+
+export interface PublicArticleDetailDto extends PublicArticleSummaryDto {
+  body: RichTextDocument;
+  seoTitle: string | null;
+  seoDescription: string | null;
+}
+
+/** A minimal, non-leaking reference to an article for use inside a placement block — never the full body. */
+export interface PublicArticleReferenceDto {
+  id: string;
+  locale: Locale;
+  slug: string;
+  canonicalPath: string;
+  title: string;
+  excerpt: string | null;
+  coverMediaAsset: MediaAssetDto | null;
+}
+
+export interface PublicContentBlockDto {
+  id: string;
+  sortOrder: number;
+  heading: string | null;
+  body: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  linkedArticle: PublicArticleReferenceDto | null;
+  mediaAsset: MediaAssetDto | null;
+}
+
+export interface PublicContentPlacementDto {
+  key: ContentPlacementKey;
+  blocks: PublicContentBlockDto[];
+}
+
+export interface AdminContentBlockLocaleDto {
+  locale: Locale;
+  heading: string | null;
+  body: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
+}
+
+export interface AdminContentBlockDto {
+  id: string;
+  sortOrder: number;
+  linkedArticleId: string | null;
+  mediaAsset: MediaAssetDto | null;
+  locales: AdminContentBlockLocaleDto[];
+}
+
+export interface AdminContentPlacementDto {
+  key: ContentPlacementKey;
+  updatedByAdmin: AdminActorSummaryDto | null;
+  updatedAt: string;
+  blocks: AdminContentBlockDto[];
 }

@@ -3,6 +3,7 @@ import { NotificationsModule } from "../notifications/notifications.module";
 import { RefundsModule } from "../commerce/refunds/refunds.module";
 import { PetAccessModule } from "../pet-access/pet-access.module";
 import { SellerFinanceModule } from "../seller-finance/seller-finance.module";
+import { StorageModule } from "../storage/storage.module";
 import { AdminAccessService } from "./auth/admin-access.service";
 import { AdminAuthGuard } from "./auth/admin-auth.guard";
 import { AdminMeController } from "./auth/admin-me.controller";
@@ -36,6 +37,14 @@ import { AdminSellerSettlementService } from "./finance/admin-seller-settlement.
 import { AdminSellerAdjustmentService } from "./finance/admin-seller-adjustment.service";
 import { AdminMarketplaceSettlementService } from "./finance/admin-marketplace-settlement.service";
 import { AdminSellerFinanceController } from "./finance/admin-seller-finance.controller";
+import { AdminArticleService } from "./content/admin-article.service";
+import { AdminCategoryService } from "./content/admin-category.service";
+import { AdminTagService } from "./content/admin-tag.service";
+import { AdminContentAuthorService } from "./content/admin-content-author.service";
+import { AdminMediaService } from "./content/admin-media.service";
+import { AdminContentVersionService } from "./content/admin-content-version.service";
+import { AdminContentPlacementService } from "./content/admin-content-placement.service";
+import { AdminContentController } from "./content/admin-content.controller";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -47,7 +56,7 @@ import { AdminSellerFinanceController } from "./finance/admin-seller-finance.con
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule],
+  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule],
   controllers: [
     AdminMeController,
     AdminNoteController,
@@ -63,6 +72,7 @@ import { AdminSellerFinanceController } from "./finance/admin-seller-finance.con
     AdminAuditController,
     AdminDashboardController,
     AdminSellerFinanceController,
+    AdminContentController,
   ],
   providers: [
     AdminAccessService,
@@ -84,6 +94,13 @@ import { AdminSellerFinanceController } from "./finance/admin-seller-finance.con
     AdminSellerSettlementService,
     AdminSellerAdjustmentService,
     AdminMarketplaceSettlementService,
+    AdminMediaService,
+    AdminArticleService,
+    AdminCategoryService,
+    AdminTagService,
+    AdminContentAuthorService,
+    AdminContentVersionService,
+    AdminContentPlacementService,
   ],
   exports: [
     AdminAccessService,

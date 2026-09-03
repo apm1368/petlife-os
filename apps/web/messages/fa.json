@@ -11,7 +11,8 @@
     "optional": "اختیاری",
     "selected": "انتخاب‌شده",
     "logIn": "ورود",
-    "support": "پشتیبانی"
+    "support": "پشتیبانی",
+    "blog": "وبلاگ"
   },
   "auth": {
     "welcome": {
@@ -1627,7 +1628,8 @@
         "OPERATIONS": "عملیات",
         "CONTENT": "محتوا",
         "VERIFICATION": "احراز هویت",
-        "READ_ONLY": "فقط مشاهده"
+        "READ_ONLY": "فقط مشاهده",
+        "EDITOR": "ویراستار"
       },
       "nav": {
         "dashboard": "داشبورد",
@@ -1641,7 +1643,10 @@
         "tasks": "وظایف",
         "audit": "گزارش رویدادها",
         "sellerFinance": "امور مالی فروشندگان",
-        "reconciliation": "تطبیق"
+        "reconciliation": "تطبیق",
+        "content": "محتوا",
+        "contentMedia": "رسانه",
+        "contentPlacements": "بخش‌های محتوایی"
       }
     },
     "common": {
@@ -2023,6 +2028,181 @@
         "invalid": "حساب کانال، هر دو تاریخ و حداقل یک ردیف معتبر را وارد کنید.",
         "failed": "درون‌ریزی انجام نشد."
       }
+    },
+    "content": {
+      "list": {
+        "title": "مقالات",
+        "newArticle": "مقاله جدید",
+        "search": "جستجو",
+        "statusFilter": "وضعیت",
+        "any": "هر مورد",
+        "localeFilter": "زبان",
+        "applyFilters": "اعمال فیلترها",
+        "loading": "در حال بارگذاری مقالات…",
+        "empty": "هنوز مقاله‌ای وجود ندارد.",
+        "untitled": "بدون عنوان",
+        "retry": "تلاش دوباره",
+        "status": {
+          "DRAFT": "پیش‌نویس",
+          "VISIBLE": "قابل مشاهده",
+          "HIDDEN": "پنهان",
+          "ARCHIVED": "بایگانی‌شده"
+        }
+      },
+      "editor": {
+        "title": "مقاله",
+        "editTitle": "ویرایش مقاله",
+        "createTitle": "مقاله جدید",
+        "versionHistory": "تاریخچه نسخه‌ها",
+        "notCreated": "ایجاد نشده",
+        "sharedFieldsTitle": "فیلدهای مشترک",
+        "category": "دسته‌بندی",
+        "author": "نویسنده",
+        "none": "هیچ‌کدام",
+        "saveSharedFields": "ذخیره",
+        "saveFailed": "ذخیره نشد. اسلاگ را بررسی کنید و دوباره تلاش کنید.",
+        "retry": "تلاش دوباره",
+        "loading": "در حال بارگذاری…",
+        "localeSectionTitle": {
+          "fa": "محتوای فارسی",
+          "en": "محتوای انگلیسی"
+        },
+        "titleField": "عنوان",
+        "slug": "اسلاگ",
+        "excerpt": "خلاصه",
+        "seoTitle": "عنوان سئو",
+        "seoDescription": "توضیحات سئو",
+        "body": "متن",
+        "previewBody": "پیش‌نمایش",
+        "editBody": "ویرایش",
+        "changeNote": "یادداشت تغییر (اختیاری)",
+        "save": "ذخیره پیش‌نویس",
+        "publish": "انتشار",
+        "hide": "پنهان کردن",
+        "archive": "بایگانی",
+        "status": {
+          "DRAFT": "پیش‌نویس",
+          "VISIBLE": "قابل مشاهده",
+          "HIDDEN": "پنهان",
+          "ARCHIVED": "بایگانی‌شده"
+        }
+      },
+      "blockEditor": {
+        "blockType": {
+          "paragraph": "پاراگراف",
+          "heading": "تیتر",
+          "list": "فهرست",
+          "quote": "نقل‌قول",
+          "callout": "جعبه توجه",
+          "image": "تصویر"
+        },
+        "moveUp": "انتقال به بالا",
+        "moveDown": "انتقال به پایین",
+        "remove": "حذف",
+        "headingLevel": "سطح تیتر",
+        "listStyle": "نوع فهرست",
+        "bulleted": "نقطه‌ای",
+        "numbered": "شماره‌دار",
+        "calloutTone": "لحن",
+        "info": "اطلاعات",
+        "warning": "هشدار",
+        "mediaAssetId": "شناسه رسانه",
+        "altText": "متن جایگزین",
+        "caption": "زیرنویس",
+        "addBlock": "افزودن {type}"
+      },
+      "versions": {
+        "title": "تاریخچه نسخه‌ها",
+        "retry": "تلاش دوباره",
+        "loading": "در حال بارگذاری نسخه‌ها…",
+        "empty": "هنوز نسخه‌ای وجود ندارد.",
+        "version": "نسخه {number}",
+        "restore": "بازیابی"
+      },
+      "categories": {
+        "title": "دسته‌بندی‌ها",
+        "newCategory": "دسته‌بندی جدید",
+        "faName": "نام فارسی",
+        "faSlug": "اسلاگ فارسی",
+        "enName": "نام انگلیسی",
+        "enSlug": "اسلاگ انگلیسی",
+        "faRequired": "نام و اسلاگ فارسی الزامی است.",
+        "createFailed": "این دسته‌بندی ایجاد نشد — اسلاگ‌ها را بررسی کنید.",
+        "create": "ایجاد",
+        "retry": "تلاش دوباره",
+        "loading": "در حال بارگذاری دسته‌بندی‌ها…",
+        "empty": "هنوز دسته‌بندی‌ای وجود ندارد."
+      },
+      "tags": {
+        "title": "برچسب‌ها",
+        "newTag": "برچسب جدید",
+        "faName": "نام فارسی",
+        "faSlug": "اسلاگ فارسی",
+        "enName": "نام انگلیسی",
+        "enSlug": "اسلاگ انگلیسی",
+        "faRequired": "نام و اسلاگ فارسی الزامی است.",
+        "createFailed": "این برچسب ایجاد نشد — اسلاگ‌ها را بررسی کنید.",
+        "create": "ایجاد",
+        "retry": "تلاش دوباره",
+        "loading": "در حال بارگذاری برچسب‌ها…",
+        "empty": "هنوز برچسبی وجود ندارد."
+      },
+      "media": {
+        "title": "رسانه",
+        "upload": "بارگذاری",
+        "uploading": "در حال بارگذاری…",
+        "uploadFailed": "بارگذاری ناموفق بود.",
+        "altText": "متن جایگزین",
+        "disabled": "غیرفعال",
+        "disable": "غیرفعال کردن",
+        "retry": "تلاش دوباره",
+        "loading": "در حال بارگذاری رسانه…",
+        "empty": "هنوز رسانه‌ای وجود ندارد."
+      },
+      "placements": {
+        "title": "بخش‌های محتوایی",
+        "key": {
+          "LANDING_HERO": "هیرو صفحه فرود",
+          "LANDING_FEATURED_CONTENT": "محتوای ویژه صفحه فرود",
+          "HOME_EDUCATION": "آموزش در خانه",
+          "HOME_ANNOUNCEMENT": "اعلان در خانه"
+        },
+        "block": "بلوک {number}",
+        "remove": "حذف",
+        "linkedArticleId": "شناسه مقاله مرتبط (اختیاری)",
+        "mediaAssetId": "شناسه رسانه (اختیاری)",
+        "heading": "تیتر",
+        "body": "متن",
+        "ctaLabel": "برچسب دکمه",
+        "ctaHref": "لینک دکمه",
+        "addBlock": "افزودن بلوک",
+        "save": "ذخیره",
+        "saveFailed": "این بخش محتوایی ذخیره نشد.",
+        "retry": "تلاش دوباره",
+        "loading": "در حال بارگذاری بخش محتوایی…"
+      }
+    }
+  },
+  "blog": {
+    "index": {
+      "title": "وبلاگ",
+      "allCategories": "همه",
+      "loading": "در حال بارگذاری مقاله‌ها",
+      "empty": "هنوز مقاله‌ای منتشر نشده است. بعداً دوباره سر بزنید.",
+      "loadMore": "نمایش بیشتر",
+      "retry": "تلاش دوباره",
+      "categoryNotFoundTitle": "دسته‌بندی یافت نشد",
+      "categoryNotFoundMessage": "این دسته‌بندی وجود ندارد یا در دسترس نیست.",
+      "tagNotFoundTitle": "برچسب یافت نشد",
+      "tagNotFoundMessage": "این برچسب وجود ندارد یا در دسترس نیست."
+    },
+    "article": {
+      "loading": "در حال بارگذاری مقاله",
+      "published": "انتشار {date}",
+      "updated": "به‌روزرسانی {date}",
+      "retry": "تلاش دوباره",
+      "notFoundTitle": "مقاله یافت نشد",
+      "notFoundMessage": "این مقاله وجود ندارد یا در حال حاضر در دسترس نیست."
     }
   }
 }

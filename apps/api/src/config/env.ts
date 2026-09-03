@@ -179,6 +179,11 @@ const envSchema = z.object({
   /// ADMIN_REFUND_APPROVAL_THRESHOLD_IRR's own precedent exactly. Amount is
   /// in the smallest currency unit (IRR).
   SETTLEMENT_APPROVAL_THRESHOLD_IRR: z.coerce.number().int().positive().default(10_000_000),
+
+  /// CMS media upload limit (spec: "enforce size/type limits") — 5MB is
+  /// generous for a blog cover/body image without a native image-processing
+  /// dependency (see README "Media") to pre-compress on the server.
+  CMS_MEDIA_MAX_SIZE_BYTES: z.coerce.number().int().positive().default(5_242_880),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

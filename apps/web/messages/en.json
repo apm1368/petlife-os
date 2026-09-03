@@ -11,7 +11,8 @@
     "optional": "Optional",
     "selected": "Selected",
     "logIn": "Log in",
-    "support": "Support"
+    "support": "Support",
+    "blog": "Blog"
   },
   "auth": {
     "welcome": {
@@ -1627,7 +1628,8 @@
         "OPERATIONS": "Operations",
         "CONTENT": "Content",
         "VERIFICATION": "Verification",
-        "READ_ONLY": "Read Only"
+        "READ_ONLY": "Read Only",
+        "EDITOR": "Editor"
       },
       "nav": {
         "dashboard": "Dashboard",
@@ -1641,7 +1643,10 @@
         "tasks": "Tasks",
         "audit": "Audit",
         "sellerFinance": "Seller Finance",
-        "reconciliation": "Reconciliation"
+        "reconciliation": "Reconciliation",
+        "content": "Content",
+        "contentMedia": "Media",
+        "contentPlacements": "Placements"
       }
     },
     "common": {
@@ -2023,6 +2028,181 @@
         "invalid": "Fill in the channel account, both dates, and at least one valid line.",
         "failed": "The import could not be completed."
       }
+    },
+    "content": {
+      "list": {
+        "title": "Articles",
+        "newArticle": "New article",
+        "search": "Search",
+        "statusFilter": "Status",
+        "any": "Any",
+        "localeFilter": "Locale",
+        "applyFilters": "Apply filters",
+        "loading": "Loading articles…",
+        "empty": "No articles yet.",
+        "untitled": "Untitled",
+        "retry": "Retry",
+        "status": {
+          "DRAFT": "Draft",
+          "VISIBLE": "Visible",
+          "HIDDEN": "Hidden",
+          "ARCHIVED": "Archived"
+        }
+      },
+      "editor": {
+        "title": "Article",
+        "editTitle": "Edit article",
+        "createTitle": "New article",
+        "versionHistory": "Version history",
+        "notCreated": "not created",
+        "sharedFieldsTitle": "Shared fields",
+        "category": "Category",
+        "author": "Author",
+        "none": "None",
+        "saveSharedFields": "Save",
+        "saveFailed": "Could not save. Check the slug and try again.",
+        "retry": "Retry",
+        "loading": "Loading…",
+        "localeSectionTitle": {
+          "fa": "Persian content",
+          "en": "English content"
+        },
+        "titleField": "Title",
+        "slug": "Slug",
+        "excerpt": "Excerpt",
+        "seoTitle": "SEO title",
+        "seoDescription": "SEO description",
+        "body": "Body",
+        "previewBody": "Preview",
+        "editBody": "Edit",
+        "changeNote": "Change note (optional)",
+        "save": "Save draft",
+        "publish": "Publish",
+        "hide": "Hide",
+        "archive": "Archive",
+        "status": {
+          "DRAFT": "Draft",
+          "VISIBLE": "Visible",
+          "HIDDEN": "Hidden",
+          "ARCHIVED": "Archived"
+        }
+      },
+      "blockEditor": {
+        "blockType": {
+          "paragraph": "Paragraph",
+          "heading": "Heading",
+          "list": "List",
+          "quote": "Quote",
+          "callout": "Callout",
+          "image": "Image"
+        },
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "remove": "Remove",
+        "headingLevel": "Heading level",
+        "listStyle": "List style",
+        "bulleted": "Bulleted",
+        "numbered": "Numbered",
+        "calloutTone": "Tone",
+        "info": "Info",
+        "warning": "Warning",
+        "mediaAssetId": "Media asset ID",
+        "altText": "Alt text",
+        "caption": "Caption",
+        "addBlock": "Add {type}"
+      },
+      "versions": {
+        "title": "Version history",
+        "retry": "Retry",
+        "loading": "Loading versions…",
+        "empty": "No versions yet.",
+        "version": "Version {number}",
+        "restore": "Restore"
+      },
+      "categories": {
+        "title": "Categories",
+        "newCategory": "New category",
+        "faName": "Persian name",
+        "faSlug": "Persian slug",
+        "enName": "English name",
+        "enSlug": "English slug",
+        "faRequired": "Persian name and slug are required.",
+        "createFailed": "Could not create this category — check the slugs.",
+        "create": "Create",
+        "retry": "Retry",
+        "loading": "Loading categories…",
+        "empty": "No categories yet."
+      },
+      "tags": {
+        "title": "Tags",
+        "newTag": "New tag",
+        "faName": "Persian name",
+        "faSlug": "Persian slug",
+        "enName": "English name",
+        "enSlug": "English slug",
+        "faRequired": "Persian name and slug are required.",
+        "createFailed": "Could not create this tag — check the slugs.",
+        "create": "Create",
+        "retry": "Retry",
+        "loading": "Loading tags…",
+        "empty": "No tags yet."
+      },
+      "media": {
+        "title": "Media",
+        "upload": "Upload",
+        "uploading": "Uploading…",
+        "uploadFailed": "Upload failed.",
+        "altText": "Alt text",
+        "disabled": "Disabled",
+        "disable": "Disable",
+        "retry": "Retry",
+        "loading": "Loading media…",
+        "empty": "No media yet."
+      },
+      "placements": {
+        "title": "Placements",
+        "key": {
+          "LANDING_HERO": "Landing hero",
+          "LANDING_FEATURED_CONTENT": "Landing featured content",
+          "HOME_EDUCATION": "Home education",
+          "HOME_ANNOUNCEMENT": "Home announcement"
+        },
+        "block": "Block {number}",
+        "remove": "Remove",
+        "linkedArticleId": "Linked article ID (optional)",
+        "mediaAssetId": "Media asset ID (optional)",
+        "heading": "Heading",
+        "body": "Body",
+        "ctaLabel": "CTA label",
+        "ctaHref": "CTA link",
+        "addBlock": "Add block",
+        "save": "Save",
+        "saveFailed": "Could not save this placement.",
+        "retry": "Retry",
+        "loading": "Loading placement…"
+      }
+    }
+  },
+  "blog": {
+    "index": {
+      "title": "Blog",
+      "allCategories": "All",
+      "loading": "Loading articles",
+      "empty": "No articles yet. Check back soon.",
+      "loadMore": "Load more",
+      "retry": "Try again",
+      "categoryNotFoundTitle": "Category not found",
+      "categoryNotFoundMessage": "This category doesn't exist or isn't available.",
+      "tagNotFoundTitle": "Tag not found",
+      "tagNotFoundMessage": "This tag doesn't exist or isn't available."
+    },
+    "article": {
+      "loading": "Loading article",
+      "published": "Published {date}",
+      "updated": "Updated {date}",
+      "retry": "Try again",
+      "notFoundTitle": "Article not found",
+      "notFoundMessage": "This article doesn't exist or isn't available right now."
     }
   }
 }

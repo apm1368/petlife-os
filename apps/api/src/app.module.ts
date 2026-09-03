@@ -45,6 +45,7 @@ import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.mo
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { SupportModule } from "./modules/support/support.module";
+import { ContentModule } from "./modules/content/content.module";
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { SupportModule } from "./modules/support/support.module";
     NotificationsModule,
     AdminModule,
     SupportModule,
+    ContentModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

@@ -855,6 +855,34 @@ enum MarketplaceReconciliationStatus {
   REVIEW_REQUIRED
 }
 
+/// Per-locale publication state (spec: "do NOT overload one boolean like
+/// published=true... define allowed transitions clearly"). Lives on
+/// ArticleLocale, never on Article itself — Persian and English publish
+/// independently (spec: "do not require both languages before publishing
+/// one language"). CMS_ARTICLE_LOCALE_TRANSITIONS in article.service.ts is
+/// the single source of truth for which of these five transitions are
+/// allowed: DRAFT->VISIBLE, VISIBLE->HIDDEN, HIDDEN->VISIBLE, DRAFT->ARCHIVED,
+/// HIDDEN->ARCHIVED. ARCHIVED is a deliberate terminal state this phase —
+/// spec: "archived content should not silently return to public state
+/// without an explicit action," and no such action is in scope for H15.
+enum ArticleLifecycleStatus {
+  DRAFT
+  VISIBLE
+  HIDDEN
+  ARCHIVED
+}
+
+/// Closed vocabulary of typed content hooks a future Landing/Home surface
+/// may read (spec: "typed placements... avoid arbitrary CSS/layout control
+/// from CMS — CMS controls content, not visual architecture"). Adding a
+/// fifth placement is a one-line enum addition, never a schema redesign.
+enum ContentPlacementKey {
+  LANDING_HERO
+  LANDING_FEATURED_CONTENT
+  HOME_EDUCATION
+  HOME_ANNOUNCEMENT
+}
+
 // ---------------------------------------------------------------------------
 // Delivery & Logistics Core (Handoff 08)
 // ---------------------------------------------------------------------------
@@ -3718,6 +3746,12 @@ model NotificationQuietHours {
 /// PROVIDER_CAPABILITIES/SHIPPING_PROVIDER_CAPABILITIES are static maps
 /// rather than DB-stored rows — no AdminPermission table exists; backend
 /// authorization is the source of truth, never the frontend.
+/// NOTE (Handoff 15): `CONTENT` (below) predates this handoff and means
+/// trust-and-safety *content moderation* (LISTING/REVIEW/COMMUNITY_CONTENT
+/// TrustCase subjects) — it is NOT a CMS editorial role and is deliberately
+/// left untouched. `EDITOR` is the new, distinct CMS role; the naming
+/// collision with "content" is unfortunate but pre-existing, so a new name
+/// was chosen rather than repurposing or renaming the existing role.
 enum AdminRole {
   SUPER_ADMIN
   ADMIN
@@ -3728,6 +3762,7 @@ enum AdminRole {
   CONTENT
   VERIFICATION
   READ_ONLY
+  EDITOR
 }
 
 enum AdminMembershipStatus {
@@ -3930,6 +3965,11 @@ model AdminUser {
   createdSellerAdjustments      SellerAdjustment[]
   importedMarketplaceStatements MarketplaceSettlementStatement[]
   resolvedReconciliations       MarketplaceReconciliationResult[]
+  uploadedMediaAssets           MediaAsset[]
+  createdArticles               Article[]                         @relation("ArticleCreatedBy")
+  lastEditedArticleLocales      ArticleLocale[]                   @relation("ArticleLocaleLastEditedBy")
+  contentVersions               ContentVersion[]
+  updatedContentPlacements      ContentPlacement[]
 
   @@map("admin_users")
 }
@@ -4271,4 +4311,315 @@ model DomainEvent {
   @@index([processedAt])
   @@index([aggregateType, aggregateId])
   @@map("domain_events")
+}
+
+// ---------------------------------------------------------------------------
+// CMS + Blog + Content Management (Handoff 15)
+// ---------------------------------------------------------------------------
+
+/// A public byline (spec: "ContentAuthor") — deliberately its own identity,
+/// never the same row as AdminUser: a byline like "Dr. Sara Ahmadi, DVM" or
+/// "PET LIFE OS Editorial Team" is an editorial persona a reader sees, while
+/// AdminUser is the actual login identity AdminAuditLogService attributes
+/// every mutation to. One admin can write under several authors; one author
+/// byline can be shared by several admins.
+model ContentAuthor {
+  id   String  @id @default(uuid()) @db.Uuid
+  name String
+  bio  String?
+
+  avatarMediaAssetId String?     @db.Uuid
+  avatarMediaAsset   MediaAsset? @relation(fields: [avatarMediaAssetId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  articles Article[]
+
+  @@map("content_authors")
+}
+
+/// Flat taxonomy (spec: "do not over-generalize into a completely arbitrary
+/// no-code page builder" — the same restraint applies to taxonomy: no
+/// parent/child category nesting this phase). The category itself is
+/// locale-neutral; CategoryLocale carries the localized name/slug/description.
+model Category {
+  id String @id @default(uuid()) @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locales  CategoryLocale[]
+  articles Article[]
+
+  @@map("content_categories")
+}
+
+model CategoryLocale {
+  id         String   @id @default(uuid()) @db.Uuid
+  categoryId String   @db.Uuid
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale     Locale
+
+  name        String
+  /// Explicit, never auto-derived from `name` at read time (spec: "slug
+  /// handling must be explicit... avoid collisions per locale") — validated
+  /// and uniqueness-checked by AdminCategoryService before every write.
+  slug        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([categoryId, locale])
+  @@unique([locale, slug])
+  @@map("content_category_locales")
+}
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+
+  locales     TagLocale[]
+  articleTags ArticleTag[]
+
+  @@map("content_tags")
+}
+
+model TagLocale {
+  id     String @id @default(uuid()) @db.Uuid
+  tagId  String @db.Uuid
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  locale Locale
+
+  name String
+  slug String
+
+  createdAt DateTime @default(now())
+
+  @@unique([tagId, locale])
+  @@unique([locale, slug])
+  @@map("content_tag_locales")
+}
+
+/// CMS-owned media only (spec: "strongly separate CMS media authorization
+/// from private pet documents") — a completely separate model and storage
+/// key namespace (`cms/media/...` vs PetsService's own `pets/...`) from any
+/// pet/health document, reusing the same StorageDriver abstraction Handoff
+/// 01 already built. `url` is a plain public delivery URL (identical
+/// "signed PUT to upload, plain public URL to read" semantics
+/// `createPetPhotoUploadTarget` already established) — deliberate, since
+/// article cover/body images are meant to be public. `widthPx`/`heightPx`
+/// are set by a follow-up PATCH once the admin editor's browser has decoded
+/// the image client-side (see README "Media" — no native image-processing
+/// dependency was added for this phase).
+model MediaAsset {
+  id            String  @id @default(uuid()) @db.Uuid
+  key           String  @unique
+  url           String
+  mimeType      String
+  fileSizeBytes Int
+  widthPx       Int?
+  heightPx      Int?
+  altText       String?
+
+  createdByAdminId String    @db.Uuid
+  createdByAdmin   AdminUser @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  /// Soft-disable only (spec: "media deleted/disabled" as an audit action) —
+  /// mirrors Pet.deletedAt's own "never hard-delete, exclude from listings"
+  /// precedent; a disabled asset's existing public URL keeps resolving
+  /// (already-published articles never get a broken image) but it can no
+  /// longer be selected for a new cover/body image.
+  disabledAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  authors          ContentAuthor[]
+  coverForArticles Article[]       @relation("ArticleCoverMedia")
+  contentBlocks    ContentBlock[]
+
+  @@map("content_media_assets")
+}
+
+/// The language-neutral shell (spec: "independent title, slug, excerpt,
+/// body... locale-specific publication readiness" lives one level down, on
+/// ArticleLocale). Author, category, cover image, and tags are shared
+/// across every locale of one article — only the editorial content and its
+/// lifecycle status are per-locale.
+model Article {
+  id String @id @default(uuid()) @db.Uuid
+
+  authorId String?        @db.Uuid
+  author   ContentAuthor? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  categoryId String?   @db.Uuid
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  coverMediaAssetId String?     @db.Uuid
+  coverMediaAsset   MediaAsset? @relation("ArticleCoverMedia", fields: [coverMediaAssetId], references: [id], onDelete: SetNull)
+
+  createdByAdminId String    @db.Uuid
+  createdByAdmin   AdminUser @relation("ArticleCreatedBy", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locales  ArticleLocale[]
+  tags     ArticleTag[]
+  versions ContentVersion[]
+  blocks   ContentBlock[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@map("content_articles")
+}
+
+/// The actual editorial content, one row per (article, locale) — see
+/// ArticleLifecycleStatus's own doc comment for the state machine.
+/// `publishedAt` is set once, the first time `status` reaches VISIBLE, and
+/// is never cleared by a later HIDDEN/ARCHIVED transition — the article
+/// page can therefore always show both "published" and "updated" (spec:
+/// "author, updated/published time").
+model ArticleLocale {
+  id        String                 @id @default(uuid()) @db.Uuid
+  articleId String                 @db.Uuid
+  article   Article                @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  locale    Locale
+  status    ArticleLifecycleStatus @default(DRAFT)
+
+  title          String
+  /// Explicit, admin-supplied — never silently regenerated once set, so a
+  /// published URL never moves out from under a reader/search engine.
+  slug           String
+  excerpt        String?
+  /// Structured rich text (RichTextDocument, @petlife/types) — never raw
+  /// HTML. See README "Editor format" for why: a closed block/mark
+  /// vocabulary makes injection structurally impossible rather than
+  /// something a sanitizer library has to catch after the fact, and the
+  /// same JSON renders through the sanitizing renderer in both the admin
+  /// preview and the public article page.
+  body           Json
+  seoTitle       String?
+  seoDescription String?
+
+  publishedAt DateTime?
+
+  lastEditedByAdminId String?    @db.Uuid
+  lastEditedByAdmin   AdminUser? @relation("ArticleLocaleLastEditedBy", fields: [lastEditedByAdminId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([articleId, locale])
+  @@unique([locale, slug])
+  @@index([locale, status])
+  @@map("content_article_locales")
+}
+
+model ArticleTag {
+  articleId String  @db.Uuid
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tagId     String  @db.Uuid
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([articleId, tagId])
+  @@map("content_article_tags")
+}
+
+/// A recoverable snapshot of one ArticleLocale, scoped per (article, locale)
+/// since Persian and English are edited independently (spec: "manage
+/// Persian and English independently"). `versionNumber` is computed inside
+/// the same transaction as the save it snapshots — safe against concurrent
+/// saves to the *same* article/locale because that write already holds a
+/// row lock on the ArticleLocale being updated; a genuinely global
+/// monotonic counter (the Postgres-sequence device SellerSettlement.reference
+/// uses) is unnecessary here since a version number's only job is ordering
+/// one article's own history, not serving as an external reference.
+/// Restoring a version calls the exact same save path that creates a new
+/// version — history is append-only, never mutated or rewound in place.
+model ContentVersion {
+  id            String  @id @default(uuid()) @db.Uuid
+  articleId     String  @db.Uuid
+  article       Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  locale        Locale
+  versionNumber Int
+
+  editorAdminId String    @db.Uuid
+  editorAdmin   AdminUser @relation(fields: [editorAdminId], references: [id], onDelete: Restrict)
+  changeNote    String?
+
+  /// { title, slug, excerpt, body, seoTitle, seoDescription } — the exact
+  /// ArticleLocale editorial fields at save time; never the lifecycle status,
+  /// which is a separate, deliberate admin action rather than content history.
+  snapshot Json
+
+  createdAt DateTime @default(now())
+
+  @@unique([articleId, locale, versionNumber])
+  @@index([articleId, locale])
+  @@map("content_versions")
+}
+
+/// One typed content hook per placement key (spec: "typed content
+/// placements... CMS controls content, not visual architecture"). Codex's
+/// existing Landing visual implementation is untouched by this table —
+/// nothing here is consumed until a future Landing/Home change deliberately
+/// reads it.
+model ContentPlacement {
+  id  String              @id @default(uuid()) @db.Uuid
+  key ContentPlacementKey @unique
+
+  updatedByAdminId String?    @db.Uuid
+  updatedByAdmin   AdminUser? @relation(fields: [updatedByAdminId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blocks ContentBlock[]
+
+  @@map("content_placements")
+}
+
+/// One content slot within a placement (e.g. one hero, or one card in a
+/// row of featured content) — content-only fields (heading/body/CTA/media/
+/// an optional linked Article), deliberately no layout/style/CSS field of
+/// any kind, so this table structurally cannot become a visual page builder.
+model ContentBlock {
+  id          String           @id @default(uuid()) @db.Uuid
+  placementId String           @db.Uuid
+  placement   ContentPlacement @relation(fields: [placementId], references: [id], onDelete: Cascade)
+  sortOrder   Int
+
+  linkedArticleId String?     @db.Uuid
+  linkedArticle   Article?    @relation(fields: [linkedArticleId], references: [id], onDelete: SetNull)
+  mediaAssetId    String?     @db.Uuid
+  mediaAsset      MediaAsset? @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locales ContentBlockLocale[]
+
+  @@unique([placementId, sortOrder])
+  @@map("content_blocks")
+}
+
+model ContentBlockLocale {
+  id             String       @id @default(uuid()) @db.Uuid
+  contentBlockId String       @db.Uuid
+  contentBlock   ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+  locale         Locale
+
+  heading  String?
+  body     String?
+  /// Validated to be a same-origin relative path or an https:// URL —
+  /// never javascript:/data: — by AdminContentPlacementService before
+  /// every write (spec: "prevent arbitrary script injection").
+  ctaLabel String?
+  ctaHref  String?
+
+  @@unique([contentBlockId, locale])
+  @@map("content_block_locales")
 }

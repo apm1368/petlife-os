@@ -1,0 +1,2 @@
+/** Explicit slug validation (spec: "slug handling must be explicit") — lowercase ASCII letters/digits/hyphens only, no leading/trailing/doubled hyphen. Never auto-derived from a title at read time; an admin supplies it once and it stays until they deliberately change it. Applied via `@Matches(SLUG_PATTERN)` on every admin create/save DTO, so an invalid slug never reaches a service. */
+export const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
