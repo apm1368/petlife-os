@@ -917,3 +917,103 @@ export class MarketplaceReconciliationAlreadyResolvedException extends ApiExcept
     super("MARKETPLACE_RECONCILIATION_ALREADY_RESOLVED", "This reconciliation finding has already been resolved.", HttpStatus.CONFLICT, details);
   }
 }
+
+export class ArticleNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ARTICLE_NOT_FOUND", "Article not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown for both "no ArticleLocale row exists for this locale yet" and (on the public read path) "this locale isn't publicly visible" — the public path never distinguishes the two, so an unpublished draft's existence is never leaked (mirrors SupportCase's own "404 for both not-found and not-yours" precedent). */
+export class ArticleLocaleNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ARTICLE_LOCALE_NOT_FOUND", "This article is not available in the requested locale.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidArticleLifecycleTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_ARTICLE_LIFECYCLE_TRANSITION", "This article status transition is not allowed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** A locale+slug pair must be unique across every article (spec: "duplicate localized slug rejected... avoid collisions per locale") — thrown instead of letting a raw P2002 leak. */
+export class DuplicateArticleSlugException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_ARTICLE_SLUG", "This slug is already used by another article in this locale.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class DuplicateCategorySlugException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_CATEGORY_SLUG", "This slug is already used by another category in this locale.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class DuplicateTagSlugException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_TAG_SLUG", "This slug is already used by another tag in this locale.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class CategoryNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CATEGORY_NOT_FOUND", "Category not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class TagNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TAG_NOT_FOUND", "Tag not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class ContentAuthorNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CONTENT_AUTHOR_NOT_FOUND", "Content author not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class MediaAssetNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MEDIA_ASSET_NOT_FOUND", "Media asset not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** A disabled asset can never be attached to new content (spec: "media deleted/disabled") — its existing, already-published usages keep resolving; only new selection is blocked. */
+export class MediaAssetDisabledException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MEDIA_ASSET_DISABLED", "This media asset has been disabled and cannot be attached to new content.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class UnsupportedMediaTypeException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("UNSUPPORTED_MEDIA_TYPE", "This file type is not supported for CMS media.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class MediaTooLargeException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MEDIA_TOO_LARGE", "This file exceeds the maximum allowed size for CMS media.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class ContentVersionNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CONTENT_VERSION_NOT_FOUND", "Content version not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown when a RichTextDocument fails structural validation (spec: "sanitize rich content"; "prevent arbitrary script injection") — an unrecognized block/mark type or an unsafe link href (not http(s):// or a same-origin relative path) is rejected outright rather than silently stripped, so an editor always knows their save failed rather than silently losing content. */
+export class InvalidRichTextContentException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_RICH_TEXT_CONTENT", "This content contains an unsupported or unsafe structure.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class ContentPlacementNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CONTENT_PLACEMENT_NOT_FOUND", "Content placement not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
