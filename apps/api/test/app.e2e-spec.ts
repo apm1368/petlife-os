@@ -1215,18 +1215,25 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(res.body).toEqual(expect.arrayContaining(["VET", "GROOMING", "TRAINING", "WALKING", "SITTING", "BOARDING", "PET_TAXI"]));
     });
 
-    it("returns only VERIFIED providers by default when discovering non-vet services", async () => {
-      const { client } = await setupOwnerWithPet();
-      const { organization } = await seedServiceProvider(ServiceCategory.GROOMING);
-      const unverified = await prisma.providerOrganization.create({
-        data: { name: `Unverified Groomer ${unique()}`, type: ProviderType.GROOMER, verificationStatus: ProviderVerificationStatus.SUBMITTED },
-      });
+    it(
+      "returns only VERIFIED providers by default when discovering non-vet services",
+      async () => {
+        const { client } = await setupOwnerWithPet();
+        const { organization } = await seedServiceProvider(ServiceCategory.GROOMING);
+        const unverified = await prisma.providerOrganization.create({
+          data: { name: `Unverified Groomer ${unique()}`, type: ProviderType.GROOMER, verificationStatus: ProviderVerificationStatus.SUBMITTED },
+        });
 
-      const results = await client.get("/providers/services?category=GROOMING").expect(200);
-      const ids = results.body.map((r: { provider: { id: string } }) => r.provider.id);
-      expect(ids).toContain(organization.id);
-      expect(ids).not.toContain(unverified.id);
-    });
+        const results = await client.get("/providers/services?category=GROOMING").expect(200);
+        const ids = results.body.map((r: { provider: { id: string } }) => r.provider.id);
+        expect(ids).toContain(organization.id);
+        expect(ids).not.toContain(unverified.id);
+      },
+      // Same cold-Prisma-connection-pool warm-up flake documented on the analogous
+      // "/providers/vets" test above — this is the first test in the suite to hit
+      // the "/providers/services" path, so it gets the same generous timeout.
+      60000,
+    );
 
     it("reports NOT_SUPPORTED compatibility and rejects a hold for a species the service doesn't support", async () => {
       const { client, householdId } = await setupOwnerWithPet();

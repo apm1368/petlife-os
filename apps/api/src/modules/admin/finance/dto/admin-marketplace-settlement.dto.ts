@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { FinancialConfidence, MarketplaceSettlementImportSource } from "@prisma/client";
-import { IsArray, IsDateString, IsEnum, IsInt, IsOptional, IsPositive, IsString, IsUUID, Min, ValidateNested } from "class-validator";
+import { IsArray, IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUUID, Min, ValidateNested } from "class-validator";
 
 export class MarketplaceSettlementStatementLineInputDto {
   @IsString()

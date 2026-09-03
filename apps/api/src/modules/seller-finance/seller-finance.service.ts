@@ -7,8 +7,6 @@ import { LedgerService } from "../commerce/ledger/ledger.service";
 import { CommissionRuleService } from "./commission-rule.service";
 import { SellerLedgerService } from "./seller-ledger.service";
 
-type QueryClient = PrismaService | Prisma.TransactionClient;
-
 /** Fixed, deterministic simulated commission the DEV marketplace channel charges the platform (spec: "DEV marketplace may use deterministic simulated fee rules") — 2%, never varying, never fetched from anywhere real. */
 const DEV_MARKETPLACE_SIMULATED_CHANNEL_FEE_BPS = 200;
 
