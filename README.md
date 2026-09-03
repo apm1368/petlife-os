@@ -3631,6 +3631,382 @@ MARKETPLACE_RECONCILIATION_RESULT_NOT_FOUND  404
 MARKETPLACE_RECONCILIATION_ALREADY_RESOLVED  409  a finding can only be resolved once — a reopened finding is a new row, never an edited one
 ```
 
+## CMS + Blog + Content Management (Handoff 15)
+
+Schema: `prisma/migrations/20260904000000_cms_content_management`
+(additive: 12 new models/enums — `ContentAuthor`, `Category`/`CategoryLocale`,
+`Tag`/`TagLocale`, `MediaAsset`, `Article`/`ArticleLocale`/`ArticleTag`,
+`ContentVersion`, `ContentPlacement`/`ContentBlock`/`ContentBlockLocale` —
+plus `ArticleLifecycleStatus`/`ContentPlacementKey` enums and a new
+`AdminRole.EDITOR` value). This is PET LIFE OS's first internal content
+control plane: admins/editors create, edit, preview, publish, hide, archive,
+localize, version, and restore structured content, with Blog/Guides as the
+first consumer surface and typed hooks Landing/Home can consume later
+without this handoff touching Codex's own Landing visual implementation at
+all. Per the spec's explicit scope line, **no AI content generation/
+editing/SEO/translation and no social publishing exist anywhere in this
+handoff** — every article is human-authored and human-published through the
+admin CMS workspace.
+
+### Domain model — typed content, not a page builder
+
+`Article` is the language-neutral shell (author, category, cover image, tags,
+`createdByAdmin`) with **no status field of its own**; `ArticleLocale` is the
+actual per-locale editorial row (title/slug/excerpt/body/SEO fields) and
+carries its *own* `status: ArticleLifecycleStatus` — the same
+"derive/scope state where it actually varies, never one shared boolean"
+discipline `SellerLedgerAccount` and `OrderFinancialBreakdown` already
+established, here applied to localization: Persian and English are edited,
+reviewed, and published on completely independent timelines, never gated on
+each other. `Category`/`Tag` are flat (no nesting) and locale-neutral
+shells with their own `*Locale` tables carrying the actual name/slug — the
+same author-vs-authorship split as `Article`/`ArticleLocale`. `MediaAsset`
+is CMS-only, in a completely separate storage key namespace
+(`cms/media/...`) from any pet/health document, deliberately never shared
+with `PetsService`'s own upload path. The optional `ContentPlacement`/
+`ContentBlock`/`ContentBlockLocale` trio (see "Landing/Home content hooks"
+below) has **no layout, style, or CSS field of any kind** — content-only
+fields (heading/body/CTA/media/an optional linked article) — so it cannot
+structurally become an arbitrary no-code page builder, per the spec's
+explicit warning against over-generalizing.
+
+### Article lifecycle — four explicit states, five allowed transitions
+
+`ArticleLifecycleStatus` is `DRAFT → VISIBLE → HIDDEN → ARCHIVED`, enforced
+by a single `ALLOWED_TRANSITIONS` table in `AdminArticleService` — exactly
+the five transitions the spec enumerates (`DRAFT→VISIBLE`, `VISIBLE→HIDDEN`,
+`HIDDEN→VISIBLE`, `DRAFT→ARCHIVED`, `HIDDEN→ARCHIVED`) and nothing else;
+`ARCHIVED` is a deliberate terminal state this phase — there is no
+`ARCHIVED→*` transition at all, so archived content can never silently
+reappear publicly without a brand-new locale save. `publishedAt` is set once,
+the first time a locale reaches `VISIBLE`, and is never cleared by a later
+`HIDDEN`/`ARCHIVED` transition, so the public article page can always show
+both "published" and "updated" times honestly. **Editing and publishing are
+always separate actions and separate endpoints** (`PUT .../locales/:locale`
+never changes `status`; `POST .../publish|hide|archive` never touches
+content) — the spec's explicit "be opinionated about reducing accidental
+publication," proven by a dedicated e2e assertion that publishing never
+fires from the same call as a content save.
+
+### Localization — fa-IR first, published independently
+
+Every `ArticleLocale`/`CategoryLocale`/`TagLocale` row carries its own
+title/slug/excerpt/body/SEO fields and its own publication readiness — a
+Persian article can go `VISIBLE` while its English counterpart doesn't exist
+yet at all (Flow E/F in the e2e suite), and adding English later never
+touches the Persian row's own status or history. Slugs are explicit,
+admin-supplied, and validated with a shared `SLUG_PATTERN` regex
+(`@Matches` on the DTO — never silently regenerated from the title at read
+time), unique per `(locale, slug)` so `/fa/blog/x` and `/en/blog/x` can
+never collide with each other's namespace, and a duplicate slug within the
+same locale is rejected with `DUPLICATE_ARTICLE_SLUG`/`DUPLICATE_CATEGORY_SLUG`/
+`DUPLICATE_TAG_SLUG` rather than silently overwriting. The pre-existing
+`Locale` enum (`fa`/`en`) is reused directly for every CMS locale-row FK —
+no new locale representation was invented to express "fa-IR"/"en."
+
+### Editor format — a closed rich-text vocabulary instead of raw HTML
+
+`RichTextDocument` (`@petlife/types`) is a **closed discriminated union** —
+`RichTextBlock` (`paragraph`/`heading`/`list`/`quote`/`callout`/`image`) and
+`RichTextInline` (a plain text run with `bold`/`italic`/`code` marks, or a
+`link`) — stored as Postgres `Json` on `ArticleLocale.body`. Sanitization is
+structural, not library-based: `validateRichTextDocument()`
+(`modules/content/rich-text.util.ts`) walks every block/inline node and
+**rejects** (never silently strips) anything outside the closed vocabulary,
+including an unsafe link `href` (`isSafeHref()` — only a same-origin
+relative path or an `http(s)://` URL; `javascript:`/`data:`/anything else is
+a hard `400 INVALID_RICH_TEXT_CONTENT`, proven by a dedicated e2e test).
+Because there is no `dangerouslySetInnerHTML` anywhere in
+`RichTextRenderer.tsx`, there is no HTML-injection surface for a sanitizer
+library to catch after the fact in the first place. An image block stores
+only a `mediaAssetId` — never a URL — and a read-time-only
+`resolveRichTextMedia()` helper (`content-mapper.ts`) resolves
+`mediaAssetId → url` fresh on every read response, so the stored body never
+denormalizes storage details and a disabled/replaced asset's URL is never
+baked into old content. `RichTextRenderer` is the **one** renderer used
+identically by the admin preview and the public article page — real
+semantic elements throughout (`h2`–`h4`, `ul`/`ol`/`li`, `blockquote`, a
+`role="note"` callout, `figure`/`figcaption` for images), RTL/LTR-safe via
+logical `ps-`/`pe-`/border-`s-` Tailwind utilities rather than
+`left`/`right`, external links carrying `target="_blank" rel="noopener
+noreferrer"` while internal links use Next's own `Link`. `RichTextBlockEditor`
+is a deliberately minimal, dependency-free block editor (per-block type
+selector, plain-textarea single inline run, reorder/add/remove) — no WYSIWYG
+and no inline bold/italic/link authoring UI this phase (see Known
+limitations).
+
+### Versioning + restore — append-only history, restore is a normal save
+
+Every `saveLocale()` call — and the initial `create()` — snapshots
+`{title, slug, excerpt, body, seoTitle, seoDescription}` into a new
+`ContentVersion` row inside the exact same transaction as the write, with
+`versionNumber` computed via a `SELECT ... FOR UPDATE` row-lock on the
+`ArticleLocale` row (when one already exists) plus `count()+1` — race-safe
+against two concurrent saves to the same article/locale without a separate
+global sequence, since a version number only needs to order one article's
+own history. `AdminContentVersionService.restore()` reads a target
+version's own snapshot and calls back into **the exact same
+`AdminArticleService.saveLocale()` write path** every manual edit already
+takes, with a system-supplied change note ("Restored from version N") —
+restore is therefore indistinguishable from a manual edit in the history it
+leaves behind, and always produces a **new**, higher version number; no
+code path ever mutates or rewinds an existing `ContentVersion` row in place
+(proven by Flow L: the restored-from version's own row is read back
+byte-for-byte unchanged after the restore).
+
+### Preview — the existing authenticated admin endpoint, not new infrastructure
+
+"Preview" is literally `GET /admin/content/articles/:id/locales/:locale` —
+the same endpoint an editor already uses to load an article for editing.
+It satisfies every literal spec requirement without a separate
+preview-token subsystem: it works for `DRAFT`/`HIDDEN` content (there is no
+status filter on this route at all), requires `content.view` and a valid
+admin session (`SessionAuthGuard` + `AdminAuthGuard`, `401` anonymously),
+never appears on any public route, is locale-aware, and — because
+`AdminContentArticleEditorView`'s preview toggle renders content through
+the *same* `RichTextRenderer` component the public article page uses —
+"preview shows the actual consumer renderer" is true by construction, not
+by convention or a second renderer that could silently drift from the real
+one.
+
+### Media — a second, separate upload namespace and authorization boundary
+
+`AdminMediaService` mirrors `PetsController`'s existing two-step signed-URL
+pattern exactly (`POST .../media/upload-url` → client `PUT`s bytes directly
+to storage → `POST .../media` confirms with the resulting key/URL plus
+metadata) via `StorageService.createCmsMediaUploadTarget()`, which uses the
+key namespace `cms/media/...` — completely separate from
+`createPetPhotoUploadTarget`'s `pets/...` — per the spec's explicit
+"strongly separate CMS media authorization from private pet documents."
+Only `image/jpeg`/`image/png`/`image/webp` are accepted (`@IsIn` at the DTO
+layer, defense-in-depth-checked again in the service), and a configurable
+`CMS_MEDIA_MAX_SIZE_BYTES` (default 5 MiB) rejects oversized uploads with
+`MEDIA_TOO_LARGE`. `MediaAsset` never hard-deletes — `disable()` is a soft
+flag mirroring `Pet.deletedAt`'s own precedent, so an already-published
+article's cover/body image keeps resolving even after the asset is
+disabled, while `assertSelectable()` (called before attaching media to any
+new article/author/placement) refuses to let a disabled asset be selected
+again (`MEDIA_ASSET_DISABLED`, proven by Flow S). Width/height are supplied
+by the confirming client (already decoded in-browser) rather than a new
+native image-processing dependency — a deliberate, documented simplification
+(see Known limitations).
+
+### SEO — locale-aware, no fabricated defaults
+
+Each `ArticleLocale` carries its own optional `seoTitle`/`seoDescription`;
+when absent, the public API returns `null` rather than fabricating a
+value — a future Blog page template decides its own safe fallback (falling
+back to the article's own `title`/`excerpt`), never something invented by
+this handoff. `PublicContentReadService` computes a stable
+`canonicalPath` (`/${locale}/blog/${slug}`) on every article response so a
+future sitemap/canonical-tag/structured-data layer has one authoritative
+source, and `updatedAt` is always the real, DB-tracked timestamp — nothing
+here stores a formatted date string.
+
+### Public Blog — VISIBLE-only by construction, never leaking a draft
+
+`PublicContentReadService`/`PublicBlogController` (`ContentModule`, no
+`AdminModule` import at all — the two CMS halves share only pure mapper/
+validation utilities, never a service) expose
+`GET /blog/articles`, `GET /blog/articles/:slug`, `GET /blog/categories`,
+`GET /blog/categories/:slug`, `GET /blog/tags`, `GET /blog/tags/:slug` with
+no auth guard at all — a deliberately public, anonymous-readable surface
+like `/shop/products`. Every query filters on `status: VISIBLE` **at the
+database level** — there is no separate "is this safe to show" check
+layered on afterward, so a `DRAFT`/`HIDDEN`/`ARCHIVED` locale can never leak
+through this service by omission (Flows B, I, J, N). A requested article
+that exists but isn't `VISIBLE` in the requested locale throws the exact
+same `ArticleLocaleNotFoundException` (404) as one that never existed at
+all — mirroring `SupportCase`'s own "404 for both not-found and not-yours"
+precedent — so an anonymous caller can never distinguish "never existed"
+from "exists but is a draft." The public frontend
+(`apps/web/app/[locale]/(public)/blog/{page,[slug],category/[slug],tag/[slug]}`)
+renders a paginated index with category navigation and a "Load more" append
+(never a replace, mirroring `SellerTransactionsView`'s own pagination
+pattern), a full article page (title/excerpt/cover/author/published+updated
+time/rendered body/category/tags), and category/tag-filtered variants that
+resolve the category/tag's own localized name for the page header —
+deliberately **no** "related articles"/AI-recommendation section this
+phase, per the spec's explicit scope line.
+
+### Admin CMS — one workspace, publishing kept a deliberate second step
+
+A new "Content" section in the admin shell (Articles/Media/Placements nav
+entries, gated on `content.view`) reaches: an article list (search, status
+filter, locale filter, locale-status badges per row); an article editor
+handling both create and edit (locale tabs loading/saving Persian and
+English independently, shared fields — category/author/tags — edited
+separately from locale content, a Save-draft button and separate Publish/
+Hide/Archive buttons each disabled per the current status's own allowed
+transitions, and a Preview toggle rendering through the real
+`RichTextRenderer`); a version-history page per (article, locale) with a
+Restore action; flat Categories/Tags management screens (both locales
+entered on one screen, since neither ever blocks on the other); a Media
+library (upload, inline alt-text editing, disable); and a Placements editor
+(see below). Persian content renders natively in RTL throughout — no
+mirrored/flipped Latin-first layout bolted on for `fa`.
+
+### Landing/Home content hooks — typed placements, content only, no layout control
+
+Four fixed `ContentPlacementKey` values (`LANDING_HERO`,
+`LANDING_FEATURED_CONTENT`, `HOME_EDUCATION`, `HOME_ANNOUNCEMENT`) each hold
+an ordered list of `ContentBlock`s with per-locale heading/body/CTA text —
+structurally incapable of carrying layout/CSS/style, per the spec's "CMS
+controls content, not visual architecture." `PublicContentPlacementReadService`
+resolves a block's optional `linkedArticleId` through the exact same
+VISIBLE-only public read path everything else in this handoff uses,
+resolving to `null` rather than leaking a draft article's existence if the
+linked article isn't publicly visible in the requested locale. **Nothing in
+Codex's existing Landing visual implementation reads this table yet** — it
+exists purely as a safe, typed content interface a future Landing/Home
+change *could* consume; this handoff does not redesign, wire into, or touch
+Codex's Landing rendering at all (see "Codex parallel work" below).
+
+### RBAC — a new EDITOR role, publishing kept narrower than drafting
+
+Six new permissions (`content.view`/`content.create`/`content.edit`/
+`content.publish`/`content.archive`/`content.media.manage`) extend the
+existing static `admin-permissions.ts` map. **`AdminRole.CONTENT`** already
+existed (Handoff 11) for trust-and-safety content *moderation* — a
+completely different concern from CMS editorial work — so this handoff adds
+a distinct **`AdminRole.EDITOR`** rather than repurposing or renaming that
+role (documented directly in a `schema.prisma` comment above `AdminRole` to
+prevent future confusion). `EDITOR` receives the broad drafting set
+(`content.view`/`content.create`/`content.edit`/`content.media.manage`) but
+**not** `content.publish`/`content.archive` — only `ADMIN`/`SUPER_ADMIN` can
+actually make a locale `VISIBLE` or `ARCHIVED` — the same "broad drafting,
+narrow execution" shape `finance.refund.request` (broad) vs.
+`finance.refund.execute` (`FINANCE`-only) already established in Handoff
+11/14. Per the spec's explicit "do not grant publishing rights to SUPPORT by
+default," `AdminRole.SUPPORT` receives **none** of the six `content.*`
+permissions at all (proven by Flow H/G). Every route in
+`AdminContentController` carries the one specific permission it performs,
+never a single coarse "content" gate.
+
+### Audit
+
+Fifteen new `AdminAuditAction` values (`article.created/updated/published/
+hidden/archived/restored`, `category.created/updated`, `tag.created/updated`,
+`content_author.created/updated`, `media_asset.uploaded/disabled`,
+`content_placement.updated`) extend Handoff 11's existing append-only
+`AdminAuditLogService` — every CMS mutation goes through the exact same
+`auditLog.record()` call every other admin-mutating service already uses
+(proven by Flow T for placements). Per the spec's "do not log full
+sensitive content unnecessarily if snapshots already exist in version
+storage," article audit entries carry only coarse identifying fields
+(locale, slug, title, version number) — the full editorial content already
+has its own recoverable home in `ContentVersion`, so the audit log is never
+asked to duplicate it.
+
+### Security
+
+Every admin CMS write sits behind `SessionAuthGuard` + `AdminAuthGuard` plus
+a specific `content.*` permission; the public Blog surface has no session
+concept at all and is safe to be fully anonymous precisely because every
+query is `VISIBLE`-scoped at the database level (see "Public Blog" above).
+Rich text is sanitized structurally (see "Editor format" above) rather than
+via a runtime HTML sanitizer, closing the injection surface by construction
+rather than by pattern-matching known-bad input. Media upload validates
+MIME type and file size server-side (never trusting a client-supplied
+`Content-Type` alone) and CMS media authorization is a fully separate key
+namespace and service from any pet/health document upload path. No admin
+CMS resource is ever addressed in a way that lets one admin's request leak
+another entity's private state — every article/category/tag/media/version/
+placement lookup is a plain `findUnique` by its own primary key with a
+`404` on a miss, the same IDOR-safe pattern every prior admin domain
+service already established.
+
+### Codex parallel work
+
+Per the spec's explicit instruction, this handoff did **not** touch, fix,
+or expand into any of Codex's concurrently-owned territory: runtime repair,
+Docker, DB availability, dependency installation, auth debugging, branch
+integration, route QA, or visual QA/regression cleanup. No unrelated
+pre-existing runtime issue blocked this handoff's implementation or
+verification — Postgres/Redis needed a routine `sudo service ... start`
+mid-session (the same sandbox-restart upkeep every prior handoff in this
+session has needed), which is not a Codex-owned defect, just local
+dev-environment bookkeeping. **Codex's own Landing visual implementation
+was never modified, redesigned, or wired into** — the `ContentPlacement`
+read API exists as a safe interface Landing/Home *could* adopt in a future,
+separate change; nothing in this handoff makes that adoption happen. The
+one pre-existing issue observed during final verification — a single
+timeout in the large `app.e2e-spec.ts` file's Handoff 03 "returns only
+VERIFIED providers by default" test — reproduced as a flake (it passed
+cleanly on an isolated re-run) and touches code this handoff never modified;
+it is not addressed here per "document, don't silently broaden scope," and
+is called out again in Known limitations below.
+
+### API endpoints (Handoff 15 additions)
+
+```
+GET    /blog/articles                                          (public; locale required; optional categorySlug/tagSlug/search; paginated)
+GET    /blog/articles/:slug                                    (public; locale required; VISIBLE-only, 404 otherwise)
+GET    /blog/categories                                        (public; locale required)
+GET    /blog/categories/:slug                                  (public; locale required)
+GET    /blog/tags                                               (public; locale required)
+GET    /blog/tags/:slug                                         (public; locale required)
+GET    /content/placements/:key                                 (public; locale required; typed Landing/Home content hook)
+
+GET    /admin/content/articles                                  (content.view; search/status/locale/category/author filters, paginated)
+GET    /admin/content/articles/:id                               (content.view)
+POST   /admin/content/articles                                  (content.create; creates the Article shell + first locale + version 1)
+PATCH  /admin/content/articles/:id                               (content.edit; shared fields only — author/category/cover/tags)
+GET    /admin/content/articles/:id/locales/:locale               (content.view — also the preview endpoint)
+PUT    /admin/content/articles/:id/locales/:locale               (content.edit; creates a new ContentVersion; never changes status)
+POST   /admin/content/articles/:id/locales/:locale/publish       (content.publish)
+POST   /admin/content/articles/:id/locales/:locale/hide          (content.publish)
+POST   /admin/content/articles/:id/locales/:locale/archive       (content.archive)
+
+GET    /admin/content/articles/:id/locales/:locale/versions      (content.view)
+GET    /admin/content/content-versions/:versionId                (content.view)
+POST   /admin/content/content-versions/:versionId/restore        (content.edit; creates a NEW version, never mutates history)
+
+GET    /admin/content/categories                                 (content.view)
+POST   /admin/content/categories                                 (content.create)
+PATCH  /admin/content/categories/:id                              (content.edit)
+
+GET    /admin/content/tags                                       (content.view)
+POST   /admin/content/tags                                       (content.create)
+PATCH  /admin/content/tags/:id                                    (content.edit)
+
+GET    /admin/content/authors                                    (content.view)
+POST   /admin/content/authors                                    (content.create)
+PATCH  /admin/content/authors/:id                                 (content.edit)
+
+POST   /admin/content/media/upload-url                           (content.media.manage)
+POST   /admin/content/media                                       (content.media.manage; confirms an upload)
+GET    /admin/content/media                                       (content.view; paginated)
+GET    /admin/content/media/:id                                   (content.view)
+PATCH  /admin/content/media/:id                                   (content.media.manage; alt text/dimensions)
+POST   /admin/content/media/:id/disable                           (content.media.manage; soft-disable only)
+
+GET    /admin/content/placements                                  (content.view; all four placement keys)
+GET    /admin/content/placements/:key                             (content.view)
+PUT    /admin/content/placements/:key                             (content.edit; replaces the block list wholesale)
+```
+
+### Error codes (Handoff 15 additions)
+
+```
+ARTICLE_NOT_FOUND                        404
+ARTICLE_LOCALE_NOT_FOUND                 404  also returned for a locale that exists but isn't VISIBLE, on every public read
+INVALID_ARTICLE_LIFECYCLE_TRANSITION     409  outside the five allowed transitions (DRAFT/VISIBLE/HIDDEN/ARCHIVED)
+DUPLICATE_ARTICLE_SLUG                   409  same (locale, slug) already used by another article
+DUPLICATE_CATEGORY_SLUG                  409
+DUPLICATE_TAG_SLUG                       409
+CATEGORY_NOT_FOUND                       404
+TAG_NOT_FOUND                            404
+CONTENT_AUTHOR_NOT_FOUND                 404
+MEDIA_ASSET_NOT_FOUND                    404
+MEDIA_ASSET_DISABLED                     409  a disabled asset can no longer be selected for new content
+UNSUPPORTED_MEDIA_TYPE                   400  only image/jpeg, image/png, image/webp are accepted
+MEDIA_TOO_LARGE                          400  exceeds CMS_MEDIA_MAX_SIZE_BYTES (default 5 MiB)
+CONTENT_VERSION_NOT_FOUND                404
+INVALID_RICH_TEXT_CONTENT                400  a block/mark/link outside the closed RichTextDocument vocabulary, or an unsafe href
+CONTENT_PLACEMENT_NOT_FOUND              404
+```
+
 ## API endpoints
 
 ```
@@ -4875,6 +5251,50 @@ the whole test file balances) plus dedicated coverage for adjustment
 creation, reconciliation resolve non-mutation, and the support-case
 context-panel financial reference resolution.
 
+Everything in the Handoff 15 acceptance criteria: an Article/ArticleLocale/
+Category/Tag/ContentAuthor/MediaAsset/ContentVersion domain model with no
+arbitrary page-builder generalization; a four-state
+(`DRAFT`/`VISIBLE`/`HIDDEN`/`ARCHIVED`) article lifecycle enforcing exactly
+the five spec-listed transitions, with editing and publishing kept
+permanently separate actions; fa/en localization edited and published fully
+independently, with explicit per-locale slugs and duplicate-slug rejection;
+a closed, structurally-sanitized `RichTextDocument` vocabulary rendered
+identically by the admin preview and the public article page; append-only
+version history with restore always producing a new version, never rewound
+history; preview reusing the existing authenticated admin endpoint rather
+than new infrastructure; a completely separate CMS media upload namespace
+and authorization boundary from any pet/health document; locale-aware SEO
+fields with no fabricated defaults; a fully VISIBLE-scoped-at-the-database
+public Blog (index/article/category/tag pages, "Load more" pagination,
+localized empty states); a full Admin CMS workspace (article list/editor/
+preview/version history, Categories/Tags/Media/Placements); typed,
+layout-free Landing/Home content placement hooks Codex's own Landing
+implementation was never modified to consume; a new `EDITOR` admin role
+kept distinct from the pre-existing trust-and-safety `CONTENT` role, with
+publishing kept `ADMIN`/`SUPER_ADMIN`-only and `SUPPORT` granted no
+`content.*` permission at all; full `AdminAuditLogService` coverage for
+every CMS mutation; and no AI content generation/editing/SEO/translation
+or social publishing anywhere in this handoff, per its explicit scope line.
+Every Handoff 01-14 backend/frontend test remains green (246 backend e2e
+scenarios, 17 new for this handoff's Flows A-T — one pre-existing,
+unrelated Handoff 03 test timeout reproduced as a flake during this
+handoff's own final verification pass and passed cleanly on an isolated
+re-run, see Known limitations — and 227 frontend tests, up from 196).
+Backend e2e coverage for all twenty required flows (A: an editor creates a
+DRAFT; B: a DRAFT is invisible on every public read; C/D: an ADMIN
+publishes and the article becomes publicly visible; E/F: fa publishes
+alone and en is added/published independently without touching fa; G: an
+EDITOR cannot publish; H: SUPPORT has no content.* permission at all; I: a
+HIDDEN locale disappears publicly and can return to VISIBLE; J: an
+ARCHIVED locale is publicly unavailable and can never transition back; K:
+saves build a version history; L: restore creates a new version without
+mutating the old one; M: a duplicate slug is rejected; N: the public list
+excludes DRAFT; O/P: preview works for an authorized editor and is blocked
+anonymously; Q: unsafe/unrecognized rich text is rejected; R: public
+pagination is deterministic; S: media upload/confirm authorization, MIME/
+size validation, and disabled-media selection rules; T: a placement update
+is audited).
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -5491,11 +5911,62 @@ context-panel financial reference resolution.
   is viewable in both the Seller OS and Admin UI, but there is no
   downloadable PDF/CSV settlement statement a seller could file for their
   own accounting; out of scope this phase.
+- **`RichTextBlockEditor` is a minimal, dependency-free block editor** —
+  per-block type selection and a single plain-textarea inline text run;
+  there is no inline formatting UI (bold/italic/code/link buttons within a
+  paragraph) this phase, even though the underlying `RichTextDocument`
+  type and renderer both already fully support marks and links. Adding a
+  richer inline-formatting toolbar is additive — it needs no schema,
+  validation, or renderer change, only a new editor UI writing the same
+  `RichTextInline` shapes `validateRichTextDocument()` already accepts.
+- **`Category`/`Tag` are intentionally flat, no nesting** — a documented,
+  deliberate restraint (spec: "do not over-generalize"), not an oversight;
+  a future handoff could add an optional `parentId` if the catalog of
+  topics genuinely grows to need hierarchy.
+- **No scheduled/future-dated publishing** — `publish()` always takes
+  effect immediately; there is no "publish at this future timestamp"
+  mechanism. `ArticleLocale.publishedAt` is fully ready to support one
+  (it's already the timestamp a scheduler would set), but no trigger exists
+  yet.
+- **Media dimensions are client-supplied, not server-verified** — a
+  confirming admin's browser decodes the image and reports
+  `widthPx`/`heightPx`; the server never opens the uploaded bytes itself
+  (no native image-processing dependency was added this phase). A
+  malformed or mismatched value would only affect display sizing hints,
+  never security, since MIME type and file size are still validated
+  server-side.
+- **Another recurrence of the pre-existing cold-Prisma-connection-pool-
+  warmup flake** (see the Handoff 03/04/12 bullets above for the same root
+  cause) during this handoff's own final verification pass: "returns only
+  VERIFIED providers by default" (Handoff 03) exceeded the default Jest
+  timeout once in the full-suite run and passed cleanly on an immediate
+  isolated re-run. This handoff touches no code that test exercises; left
+  for Codex per "document, don't silently broaden scope" rather than
+  investigated further here.
 
 ## Next recommended coding handoff
 
-**Real payout execution + scheduled settlement automation**, the piece
-Handoff 14 deliberately left `MANUAL`-only. A genuinely complete financial
+**Landing/Home actually consuming the Handoff 15 content placement hooks**,
+the natural next step now that a full, typed content control plane exists.
+`ContentPlacement`/`ContentBlock` (`LANDING_HERO`/`LANDING_FEATURED_CONTENT`/
+`HOME_EDUCATION`/`HOME_ANNOUNCEMENT`) and their public read API
+(`GET /content/placements/:key`) are fully built and independently
+testable, but by explicit design this handoff never wired them into
+Codex's own Landing/Home visual implementation — that wiring is real
+product surface work belonging to whoever owns those pages next (Codex or
+a future handoff), reading the typed DTO this API already returns rather
+than inventing a new shape. A related, smaller Handoff 15 follow-up: give
+`RichTextBlockEditor` an inline formatting toolbar (bold/italic/code/link)
+— the `RichTextDocument` type and `RichTextRenderer` already fully support
+marks and links, so this is purely new editor UI, no schema/validation/
+renderer change. A third, independent option: scheduled/future-dated
+publishing (`ArticleLocale.publishedAt` already exists in the right shape;
+only a scheduler/trigger is missing, the same `NotificationDeliveryWorkerService`-style
+poller class of mechanism Handoff 10 already established, rather than a
+new job-queue dependency).
+
+Alternatively, **real payout execution + scheduled settlement automation**,
+the piece Handoff 14 deliberately left `MANUAL`-only. A genuinely complete financial
 settlement architecture now exists end to end (order attribution, a
 real double-entry seller subledger, a two-person-control
 `Calculate → Approve → Payout` lifecycle, refund/adjustment impact,
