@@ -35,6 +35,7 @@ import { AdminDashboardController } from "./dashboard/admin-dashboard.controller
 import { AdminSellerSettlementService } from "./finance/admin-seller-settlement.service";
 import { AdminSellerAdjustmentService } from "./finance/admin-seller-adjustment.service";
 import { AdminMarketplaceSettlementService } from "./finance/admin-marketplace-settlement.service";
+import { AdminSellerFinanceController } from "./finance/admin-seller-finance.controller";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -61,6 +62,7 @@ import { AdminMarketplaceSettlementService } from "./finance/admin-marketplace-s
     AdminOrgController,
     AdminAuditController,
     AdminDashboardController,
+    AdminSellerFinanceController,
   ],
   providers: [
     AdminAccessService,

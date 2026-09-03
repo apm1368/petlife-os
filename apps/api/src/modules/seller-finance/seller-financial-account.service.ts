@@ -33,6 +33,11 @@ export function toSellerFinancialAccountDto(row: SellerFinancialAccount): Seller
 export class SellerFinancialAccountService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Read-only lookup for list views (spec: admin seller finance browse) — never creates, so browsing a list of sellers never silently provisions accounts for ones with no financial activity yet. */
+  async find(sellerOrganizationId: string, client: QueryClient = this.prisma): Promise<SellerFinancialAccount | null> {
+    return client.sellerFinancialAccount.findUnique({ where: { sellerOrganizationId } });
+  }
+
   async getOrCreate(sellerOrganizationId: string, client: QueryClient = this.prisma): Promise<SellerFinancialAccount> {
     const existing = await client.sellerFinancialAccount.findUnique({ where: { sellerOrganizationId } });
     if (existing) return existing;

@@ -181,7 +181,7 @@ export class AdminSellerSettlementService {
         throw new Error(`AdminSellerSettlementService.calculate: expected to sweep ${eligible.length} transactions but swept ${sweptCount} — concurrent settlement detected, rolled back`);
       }
 
-      await this.events.publish("SellerSettlementCalculated", { settlementId: created.id, sellerOrganizationId, netIrr }, { tx, aggregateType: "SellerSettlement", aggregateId: created.id });
+      await this.events.publish("SellerSettlementCalculated", { settlementId: created.id, sellerOrganizationId, reference, netIrr }, { tx, aggregateType: "SellerSettlement", aggregateId: created.id });
       await this.auditLog.record({
         adminUserId: admin.adminUserId,
         action: "seller_settlement.calculated",
@@ -249,7 +249,7 @@ export class AdminSellerSettlementService {
         data: { status: SellerSettlementStatus.PAID, paidAt: new Date() },
         include: SETTLEMENT_INCLUDE,
       });
-      await this.events.publish("SellerSettlementPaid", { settlementId, netIrr: existing.netIrr, payoutReference: payoutReference ?? null }, { tx, aggregateType: "SellerSettlement", aggregateId: settlementId });
+      await this.events.publish("SellerSettlementPaid", { settlementId, sellerOrganizationId: existing.sellerOrganizationId, reference: existing.reference, netIrr: existing.netIrr, payoutReference: payoutReference ?? null }, { tx, aggregateType: "SellerSettlement", aggregateId: settlementId });
       await this.auditLog.record({
         adminUserId: admin.adminUserId,
         action: "seller_settlement.paid",
@@ -278,7 +278,7 @@ export class AdminSellerSettlementService {
       await tx.sellerLedgerTransaction.updateMany({ where: { sellerSettlementId: settlementId }, data: { sellerSettlementId: null } });
 
       const row = await tx.sellerSettlement.update({ where: { id: settlementId }, data: { status: SellerSettlementStatus.CANCELLED, cancelledAt: new Date() }, include: SETTLEMENT_INCLUDE });
-      await this.events.publish("SellerSettlementFailed", { settlementId, reason: "CANCELLED" }, { tx, aggregateType: "SellerSettlement", aggregateId: settlementId });
+      await this.events.publish("SellerSettlementFailed", { settlementId, sellerOrganizationId: existing.sellerOrganizationId, reference: existing.reference, reason: "CANCELLED" }, { tx, aggregateType: "SellerSettlement", aggregateId: settlementId });
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "seller_settlement.cancelled", entityType: "SELLER_SETTLEMENT", entityId: settlementId, reason, requestId, tx });
       return row;
     });
@@ -301,7 +301,7 @@ export class AdminSellerSettlementService {
       }
 
       const row = await tx.sellerSettlement.update({ where: { id: settlementId }, data: { status: SellerSettlementStatus.FAILED }, include: SETTLEMENT_INCLUDE });
-      await this.events.publish("SellerSettlementFailed", { settlementId, reason }, { tx, aggregateType: "SellerSettlement", aggregateId: settlementId });
+      await this.events.publish("SellerSettlementFailed", { settlementId, sellerOrganizationId: existing.sellerOrganizationId, reference: existing.reference, reason }, { tx, aggregateType: "SellerSettlement", aggregateId: settlementId });
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "seller_settlement.failed", entityType: "SELLER_SETTLEMENT", entityId: settlementId, reason, requestId, tx });
       return row;
     });

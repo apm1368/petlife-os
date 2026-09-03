@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 import { InventoryModule } from "../commerce/inventory/inventory.module";
+import { SellerFinanceModule } from "../seller-finance/seller-finance.module";
+import { SellerFinanceController, SellerSettlementReadController } from "../seller-finance/seller-finance.controller";
 import { SellerAccessService } from "./seller-access.service";
 import { SellerAuthGuard } from "./auth/seller-auth.guard";
 import { SellerContextController, SellerContextPreferenceController } from "./seller-context.controller";
@@ -16,7 +18,7 @@ import { SellerOrderService } from "./seller-order.service";
 import { SellerDashboardService } from "./seller-dashboard.service";
 
 @Module({
-  imports: [InventoryModule],
+  imports: [InventoryModule, SellerFinanceModule],
   controllers: [
     SellerContextController,
     SellerContextPreferenceController,
@@ -26,6 +28,8 @@ import { SellerDashboardService } from "./seller-dashboard.service";
     SellerInventoryController,
     SellerOrderController,
     SellerDashboardController,
+    SellerFinanceController,
+    SellerSettlementReadController,
   ],
   providers: [SellerAccessService, SellerAuthGuard, SellerOrganizationService, SellerTeamService, SellerOfferService, SellerInventoryService, SellerOrderService, SellerDashboardService],
   exports: [SellerAccessService, SellerAuthGuard],

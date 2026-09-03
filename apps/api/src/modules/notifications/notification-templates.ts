@@ -94,6 +94,19 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "درخواست پشتیبانی شما بسته شد", body: "درخواست پشتیبانی {{caseNumber}} بسته شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف بسته شد." },
     en: { title: "Your support case was closed", body: "Support case {{caseNumber}} was closed.", smsBody: "Your PET LIFE OS support case was closed." },
   },
+  /** Handoff 14 — a settlement finished calculation and is awaiting admin review/approval (spec: "Settlement Ready"). Never fires per-ledger-line — exactly one notification per settlement. */
+  "settlement.ready": {
+    fa: { title: "تسویه‌حساب جدید آماده بررسی است", body: "تسویه‌حساب {{reference}} محاسبه شد و آماده بررسی است.", smsBody: "یک تسویه‌حساب جدید در پت‌لایف آماده بررسی است." },
+    en: { title: "A new settlement is ready for review", body: "Settlement {{reference}} has been calculated and is awaiting review.", smsBody: "A new PET LIFE OS settlement is ready for review." },
+  },
+  "settlement.paid": {
+    fa: { title: "تسویه‌حساب شما پرداخت شد", body: "تسویه‌حساب {{reference}} پرداخت شد.", smsBody: "تسویه‌حساب شما در پت‌لایف پرداخت شد." },
+    en: { title: "Your settlement was paid", body: "Settlement {{reference}} has been paid.", smsBody: "Your PET LIFE OS settlement was paid." },
+  },
+  "settlement.failed": {
+    fa: { title: "مشکلی در تسویه‌حساب شما پیش آمد", body: "تسویه‌حساب {{reference}} با مشکل مواجه شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "مشکلی در تسویه‌حساب شما در پت‌لایف پیش آمد." },
+    en: { title: "An issue occurred with your settlement", body: "Settlement {{reference}} could not be completed. See the app for details.", smsBody: "An issue occurred with your PET LIFE OS settlement." },
+  },
 };
 
 export function hasTemplate(key: string): boolean {

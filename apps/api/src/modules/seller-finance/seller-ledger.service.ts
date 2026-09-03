@@ -181,23 +181,49 @@ export class SellerLedgerService {
     );
   }
 
-  /** Derived balance (spec: "do not maintain a mutable balance number") — sum of RECEIVABLE-account entries, split by swept/unswept. */
-  async getBalance(sellerOrganizationId: string, client: QueryClient = this.prisma): Promise<{ pendingIrr: number; paidIrr: number }> {
+  /**
+   * Derived balance (spec: "do not maintain a mutable balance number... prefer
+   * derived balance from ledger/subledger entries"), split into the spec's
+   * four dimensions by joining each RECEIVABLE entry's own transaction to
+   * whatever settlement (if any) it was swept into:
+   *  - pendingIrr: unswept (sellerSettlementId IS NULL) — still accumulating,
+   *    eligible for the next settlement calculation.
+   *  - reservedIrr: swept into a settlement still in CALCULATED (claimed by
+   *    a specific settlement, not yet approved).
+   *  - availableIrr: swept into an APPROVED settlement — ready for payout.
+   *  - paidIrr: cumulative SETTLEMENT_PAID account total. A PAID settlement's
+   *    own RECEIVABLE entries need no separate bucket: `recordSettlementPayment`
+   *    posts an equal-and-opposite RECEIVABLE credit tagged to that same
+   *    settlement, so a paid settlement's net RECEIVABLE contribution is
+   *    always exactly zero and paidIrr alone reflects it correctly.
+   */
+  async getBalance(sellerOrganizationId: string, client: QueryClient = this.prisma): Promise<{ pendingIrr: number; availableIrr: number; reservedIrr: number; paidIrr: number }> {
     const account = await client.sellerLedgerAccount.findUnique({ where: { sellerOrganizationId_code: { sellerOrganizationId, code: SellerLedgerAccountCode.RECEIVABLE } } });
     const paidAccount = await client.sellerLedgerAccount.findUnique({ where: { sellerOrganizationId_code: { sellerOrganizationId, code: SellerLedgerAccountCode.SETTLEMENT_PAID } } });
 
-    const pendingEntries = account
+    const receivableEntries = account
       ? await client.sellerLedgerEntry.findMany({
-          where: { sellerLedgerAccountId: account.id, sellerLedgerTransaction: { sellerSettlementId: null } },
-          select: { direction: true, amount: true },
+          where: { sellerLedgerAccountId: account.id },
+          select: { direction: true, amount: true, sellerLedgerTransaction: { select: { sellerSettlement: { select: { status: true } } } } },
         })
       : [];
-    const pendingIrr = pendingEntries.reduce((sum, e) => sum + (e.direction === LedgerEntryDirection.DEBIT ? e.amount : -e.amount), 0);
+
+    let pendingIrr = 0;
+    let reservedIrr = 0;
+    let availableIrr = 0;
+    for (const entry of receivableEntries) {
+      const signed = entry.direction === LedgerEntryDirection.DEBIT ? entry.amount : -entry.amount;
+      const status = entry.sellerLedgerTransaction.sellerSettlement?.status;
+      if (!status) pendingIrr += signed;
+      else if (status === "CALCULATED") reservedIrr += signed;
+      else if (status === "APPROVED") availableIrr += signed;
+      // PAID/FAILED/CANCELLED/RECONCILIATION_REQUIRED intentionally excluded — see doc comment above.
+    }
 
     const paidEntries = paidAccount ? await client.sellerLedgerEntry.findMany({ where: { sellerLedgerAccountId: paidAccount.id }, select: { direction: true, amount: true } }) : [];
     const paidIrr = paidEntries.reduce((sum, e) => sum + (e.direction === LedgerEntryDirection.DEBIT ? e.amount : -e.amount), 0);
 
-    return { pendingIrr, paidIrr };
+    return { pendingIrr, availableIrr, reservedIrr, paidIrr };
   }
 
   /** Every RECEIVABLE-touching transaction not yet swept into a settlement, oldest first — the exact set a settlement calculation may consider. */

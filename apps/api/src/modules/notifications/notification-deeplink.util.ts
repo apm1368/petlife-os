@@ -16,5 +16,7 @@ export const NotificationDeepLinks = {
   sellerChannels: () => `/seller/channels`,
   sellerInventory: () => `/seller/inventory`,
   sellerOrderDetail: (orderId: string) => `/seller/orders/${orderId}`,
+  sellerFinance: () => `/seller/finance`,
+  sellerSettlementDetail: (settlementId: string) => `/seller/finance/settlements/${settlementId}`,
   notificationCenter: () => `/notifications`,
 };
