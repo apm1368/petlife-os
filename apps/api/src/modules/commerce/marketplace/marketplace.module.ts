@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { InventoryModule } from "../inventory/inventory.module";
 import { SellerOsModule } from "../../seller-os/seller-os.module";
+import { SellerFinanceModule } from "../../seller-finance/seller-finance.module";
 import { DevMarketplaceAdapter } from "./dev-marketplace.adapter";
 import { TorobAdapter } from "./torob.adapter";
 import { DigikalaAdapter } from "./digikala.adapter";
@@ -21,7 +22,7 @@ import { MarketplaceDevController } from "./marketplace-dev.controller";
  * SellerInventoryService's manual adjustments).
  */
 @Module({
-  imports: [InventoryModule, SellerOsModule],
+  imports: [InventoryModule, SellerOsModule, SellerFinanceModule],
   controllers: [MarketplaceChannelController, MarketplaceListingController, MarketplaceDevController],
   providers: [DevMarketplaceAdapter, TorobAdapter, DigikalaAdapter, MarketplaceChannelRegistry, MarketplaceChannelAccountService, MarketplaceListingService, MarketplaceOrderIngestionService],
   exports: [MarketplaceChannelRegistry, MarketplaceOrderIngestionService, MarketplaceChannelAccountService, MarketplaceListingService],

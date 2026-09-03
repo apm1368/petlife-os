@@ -33,4 +33,12 @@ export type AdminAuditAction =
   | "admin_refund_approval.rejected"
   | "admin_refund_approval.executed"
   | "verification.status_changed"
-  | "pii.revealed";
+  | "pii.revealed"
+  | "seller_settlement.calculated"
+  | "seller_settlement.approved"
+  | "seller_settlement.paid"
+  | "seller_settlement.cancelled"
+  | "seller_settlement.failed"
+  | "seller_adjustment.created"
+  | "marketplace_settlement.imported"
+  | "marketplace_reconciliation.resolved";

@@ -7,6 +7,7 @@ import { LedgerModule } from "../ledger/ledger.module";
 import { RefundsModule } from "../refunds/refunds.module";
 import { OrdersModule } from "../orders/orders.module";
 import { LogisticsModule } from "../logistics/logistics.module";
+import { SellerFinanceModule } from "../../seller-finance/seller-finance.module";
 import { CheckoutController } from "./checkout.controller";
 import { CheckoutService } from "./checkout.service";
 import { InventoryReservationService } from "./inventory-reservation.service";
@@ -15,7 +16,7 @@ import { FinancingEventsListener } from "./financing-events.listener";
 import { PaymentWebhooksController } from "./payment-webhooks.controller";
 
 @Module({
-  imports: [HouseholdsModule, CartModule, PaymentsModule, FinancingModule, LedgerModule, RefundsModule, OrdersModule, LogisticsModule],
+  imports: [HouseholdsModule, CartModule, PaymentsModule, FinancingModule, LedgerModule, RefundsModule, OrdersModule, LogisticsModule, SellerFinanceModule],
   controllers: [CheckoutController, PaymentWebhooksController],
   providers: [CheckoutService, InventoryReservationService, PaymentEventsListener, FinancingEventsListener],
   exports: [CheckoutService],

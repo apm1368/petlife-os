@@ -7,6 +7,7 @@ import { OrderNotFoundException, RefundFailedException, RefundNotFoundException,
 import { PaymentGatewayRegistry } from "../payments/payment-gateway-registry.service";
 import { FinancingProviderRegistry } from "../financing/financing-provider-registry.service";
 import { LedgerService } from "../ledger/ledger.service";
+import { SellerFinanceService } from "../../seller-finance/seller-finance.service";
 
 function toDto(refund: Refund): RefundDto {
   return {
@@ -44,6 +45,7 @@ export class RefundsService {
     private readonly gateways: PaymentGatewayRegistry,
     private readonly financingProviders: FinancingProviderRegistry,
     private readonly ledger: LedgerService,
+    private readonly sellerFinance: SellerFinanceService,
   ) {}
 
   async request(userId: string, orderId: string, reason?: string, requestedAmount?: number): Promise<RefundDto> {
@@ -105,6 +107,7 @@ export class RefundsService {
         const row = await tx.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.SUCCEEDED, providerReference: result.providerRefundReference ?? null, completedAt: new Date() } });
         if (orderId) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.REFUNDED } });
         await this.ledger.recordRefundSucceeded(row.id, amount, currency, tx);
+        if (orderId) await this.sellerFinance.applyRefundImpact(tx, orderId, row.id, amount, currency);
         return row;
       });
       await this.events.publish("RefundSucceeded", { refundId: refund.id, orderId, amount }, { aggregateType: "Refund", aggregateId: refund.id });
@@ -140,6 +143,7 @@ export class RefundsService {
         if (orderId) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.REFUNDED } });
         await tx.financingIntent.update({ where: { id: intent.id }, data: { status: FinancingIntentStatus.REFUNDED } });
         await this.ledger.recordRefundSucceeded(row.id, amount, currency, tx);
+        if (orderId) await this.sellerFinance.applyRefundImpact(tx, orderId, row.id, amount, currency);
         return row;
       });
       await this.events.publish("RefundSucceeded", { refundId: refund.id, orderId, amount }, { aggregateType: "Refund", aggregateId: refund.id });

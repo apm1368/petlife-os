@@ -17,6 +17,7 @@ const SEEDED_ACCOUNTS: { code: LedgerAccountCode; name: string }[] = [
   { code: LedgerAccountCode.SELLER_PAYABLE, name: "Seller Payable" },
   { code: LedgerAccountCode.REFUND_PAYABLE, name: "Refund Payable" },
   { code: LedgerAccountCode.PLATFORM_REVENUE, name: "Platform Revenue" },
+  { code: LedgerAccountCode.MARKETPLACE_RECEIVABLE, name: "Marketplace Receivable" },
 ];
 
 /**
@@ -125,5 +126,80 @@ export class LedgerService implements OnModuleInit {
       ],
       client,
     );
+  }
+
+  /**
+   * Closes the financial loop H07 deliberately left open (Handoff 14): the
+   * customer cash already sitting in CUSTOMER_PAYMENT_CLEARING is now
+   * actually distributed between what the seller is owed and what the
+   * platform earned, finally posting to the two accounts H07 only ever
+   * seeded (spec: "Order Financial Attribution -> Platform Fees -> Seller
+   * Receivable"). Only for PET_LIFE-origin orders — PET LIFE OS actually
+   * held this cash, so a debit against CLEARING is honest here in a way it
+   * would not be for a marketplace-collected sale (see
+   * `recordMarketplaceCommission`).
+   */
+  async recordSellerAttribution(orderId: string, sellerNetIrr: number, platformCommissionIrr: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced(
+      "Order economics attributed",
+      "PAYMENT",
+      orderId,
+      currency,
+      [
+        { accountCode: LedgerAccountCode.CUSTOMER_PAYMENT_CLEARING, direction: LedgerEntryDirection.DEBIT, amount: sellerNetIrr + platformCommissionIrr },
+        { accountCode: LedgerAccountCode.SELLER_PAYABLE, direction: LedgerEntryDirection.CREDIT, amount: sellerNetIrr },
+        { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.CREDIT, amount: platformCommissionIrr },
+      ],
+      client,
+    );
+  }
+
+  /**
+   * A marketplace-channel sale's platform-side posting (Handoff 14) — PET
+   * LIFE OS never collected this customer's cash (spec: "do not create a
+   * fake PaymentIntent representing money PET LIFE OS never collected"), so
+   * this never touches CASH_GATEWAY_RECEIVABLE/CUSTOMER_PAYMENT_CLEARING.
+   * MARKETPLACE_RECEIVABLE instead honestly represents "owed to the
+   * platform by/against the channel", a business-to-business claim, not
+   * customer payment collection. The seller's own receivable for this same
+   * order is posted separately, in SellerLedgerService — PET LIFE OS still
+   * owes the seller their net regardless of which channel currently holds
+   * the customer's cash (see README "Marketplace sales").
+   */
+  async recordMarketplaceCommission(orderId: string, platformCommissionIrr: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced(
+      "Marketplace order commission accrued",
+      "PAYMENT",
+      orderId,
+      currency,
+      [
+        { accountCode: LedgerAccountCode.MARKETPLACE_RECEIVABLE, direction: LedgerEntryDirection.DEBIT, amount: platformCommissionIrr },
+        { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.CREDIT, amount: platformCommissionIrr },
+      ],
+      client,
+    );
+  }
+
+  /**
+   * A refund's platform-side reversal of a PET_LIFE-origin order's earlier
+   * `recordSellerAttribution` (Handoff 14) — called *alongside*
+   * `recordRefundSucceeded`, never replacing it: this undoes the
+   * SELLER_PAYABLE/PLATFORM_REVENUE distribution back into
+   * CUSTOMER_PAYMENT_CLEARING, and the existing H07 posting then carries
+   * that same amount the rest of the way out through
+   * CASH_GATEWAY_RECEIVABLE exactly as it always has — H07's own refund
+   * ledger code is never touched. `sellerImpactIrr`/`platformShareIrr` are
+   * expected to sum to the refunded amount (see
+   * SellerFinanceService.applyRefundImpact, which derives them the same
+   * balancer way attribution itself does); either may be legitimately zero
+   * (e.g. a fully-discounted order has no platform share), so only the
+   * non-zero legs are posted.
+   */
+  async recordSellerAttributionReversal(orderId: string, sellerImpactIrr: number, platformShareIrr: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    const total = sellerImpactIrr + platformShareIrr;
+    const entries: LedgerEntryInput[] = [{ accountCode: LedgerAccountCode.CUSTOMER_PAYMENT_CLEARING, direction: LedgerEntryDirection.CREDIT, amount: total }];
+    if (sellerImpactIrr > 0) entries.push({ accountCode: LedgerAccountCode.SELLER_PAYABLE, direction: LedgerEntryDirection.DEBIT, amount: sellerImpactIrr });
+    if (platformShareIrr > 0) entries.push({ accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.DEBIT, amount: platformShareIrr });
+    return this.recordBalanced("Order economics attribution reversed (refund)", "REFUND", orderId, currency, entries, client);
   }
 }

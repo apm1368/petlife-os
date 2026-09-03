@@ -836,3 +836,84 @@ export class InvalidReturnToException extends ApiException {
     super("INVALID_RETURN_TO", "The returnTo destination is not a valid internal path.", HttpStatus.BAD_REQUEST);
   }
 }
+
+/// Marketplace & Seller Financial Settlement (Handoff 14)
+
+export class SellerFinancialAccountNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_FINANCIAL_ACCOUNT_NOT_FOUND", "Seller financial account not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown by CommissionRuleService if no rule at all resolves — should be unreachable once the platform default seed row exists, but never silently defaults to 0%. */
+export class CommissionRuleNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMISSION_RULE_NOT_FOUND", "No effective commission rule could be resolved for this order.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Guards SellerFinanceService.attributeOrderEconomics — an Order can only ever be attributed once (its OrderFinancialBreakdown's own existence is the idempotency check). */
+export class OrderAlreadyAttributedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ORDER_ALREADY_ATTRIBUTED", "This order's financial economics have already been attributed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** A computed platform commission came out negative — an order-level discount exceeded the recoverable commission, a documented unhandled edge case (see README "Commission model") rather than a silently wrong ledger posting. */
+export class NegativePlatformRevenueException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("NEGATIVE_PLATFORM_REVENUE", "This order's discount exceeds the commission that would normally fund it — not supported this phase.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class SellerSettlementNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_SETTLEMENT_NOT_FOUND", "Settlement not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown by the centralized settlement transition validator — no arbitrary status PATCH, mirroring InvalidSupportCaseTransitionException's own precedent. */
+export class InvalidSellerSettlementTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_SELLER_SETTLEMENT_TRANSITION", "This settlement status transition is not allowed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Two-person control (spec: "creator/initiator should not approve their own payout") — mirrors AdminRefundSelfApprovalException exactly. */
+export class SellerSettlementSelfApprovalException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_SETTLEMENT_SELF_APPROVAL", "A settlement must be approved by a different admin than the one who calculated it.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Thrown when payout is attempted on a settlement at/above SETTLEMENT_APPROVAL_THRESHOLD_IRR without a prior APPROVED transition by a different admin — mirrors AdminRefundApprovalRequiredException exactly. */
+export class SellerSettlementApprovalRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_SETTLEMENT_APPROVAL_REQUIRED", "This settlement amount requires a second admin's approval before payout.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class SellerAdjustmentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SELLER_ADJUSTMENT_NOT_FOUND", "Seller adjustment not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class MarketplaceSettlementStatementNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_SETTLEMENT_STATEMENT_NOT_FOUND", "Marketplace settlement statement not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class MarketplaceReconciliationResultNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_RECONCILIATION_RESULT_NOT_FOUND", "Reconciliation result not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** A reconciliation result already marked resolved cannot be resolved again with different data — a reopened finding is a new row, never an edited one (append-only discipline, matching the ledger's own). */
+export class MarketplaceReconciliationAlreadyResolvedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("MARKETPLACE_RECONCILIATION_ALREADY_RESOLVED", "This reconciliation finding has already been resolved.", HttpStatus.CONFLICT, details);
+  }
+}

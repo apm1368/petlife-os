@@ -37,6 +37,7 @@ import { FinancingProviderRegistry } from "../financing/financing-provider-regis
 import { LedgerService } from "../ledger/ledger.service";
 import { RefundsService } from "../refunds/refunds.service";
 import { ShippingOrchestrator } from "../logistics/shipping-orchestrator.service";
+import { SellerFinanceService } from "../../seller-finance/seller-finance.service";
 import { InventoryReservationService, RESERVATION_TTL_MINUTES } from "./inventory-reservation.service";
 import type { CreateCheckoutDto, PayCheckoutDto, UpdateCheckoutDto } from "./dto/checkout.dto";
 
@@ -91,6 +92,7 @@ export class CheckoutService {
     private readonly ledger: LedgerService,
     private readonly refunds: RefundsService,
     private readonly logistics: ShippingOrchestrator,
+    private readonly sellerFinance: SellerFinanceService,
     private readonly events: DomainEventsService,
   ) {}
 
@@ -324,6 +326,12 @@ export class CheckoutService {
         await tx.checkout.update({ where: { id: checkoutId }, data: { status: CheckoutStatus.CONFIRMED } });
         await tx.cart.update({ where: { id: checkout.cartId }, data: { status: CartStatus.CONVERTED } });
         await this.ledger.recordPaymentSucceeded(checkout.id, checkout.totalAmount, checkout.currency, tx);
+        // Handoff 14: attribute each seller's own economics now that payment is confirmed
+        // and their Fulfillment (hence shippingResponsibility) exists — the financial
+        // trigger the spec requires ("use H07 payment confirmation as the financial trigger").
+        for (const createdOrder of createdOrders) {
+          await this.sellerFinance.attributeDirectSale(tx, createdOrder.id);
+        }
         await this.events.publish("CartConverted", { cartId: checkout.cartId, checkoutId }, { tx, aggregateType: "Cart", aggregateId: checkout.cartId });
         return orderIds;
       });

@@ -2645,7 +2645,12 @@ export type AdminPermissionName =
   | "finance.refund.execute"
   | "task.manage"
   | "audit.view"
-  | "admin.manage";
+  | "admin.manage"
+  | "sellerFinance.view"
+  | "settlement.calculate"
+  | "settlement.approve"
+  | "settlement.pay"
+  | "settlement.adjust";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -2654,4 +2659,237 @@ export interface AdminSessionContextDto {
   displayName: string | null;
   role: AdminRole | null;
   permissions: AdminPermissionName[];
+}
+
+// ---------------------------------------------------------------------------
+// Marketplace & Seller Financial Settlement (Handoff 14)
+// ---------------------------------------------------------------------------
+
+export enum OrderOrigin {
+  PET_LIFE = "PET_LIFE",
+  DEV_MARKETPLACE = "DEV_MARKETPLACE",
+  TOROB = "TOROB",
+  DIGIKALA = "DIGIKALA",
+}
+
+export enum FinancialConfidence {
+  KNOWN = "KNOWN",
+  ESTIMATED = "ESTIMATED",
+  UNKNOWN = "UNKNOWN",
+}
+
+export enum SellerFinancialAccountStatus {
+  ACTIVE = "ACTIVE",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum SellerSettlementScheduleType {
+  WEEKLY = "WEEKLY",
+  BIWEEKLY = "BIWEEKLY",
+  MONTHLY = "MONTHLY",
+  MANUAL = "MANUAL",
+}
+
+export enum SellerSettlementStatus {
+  CALCULATED = "CALCULATED",
+  APPROVED = "APPROVED",
+  PAID = "PAID",
+  FAILED = "FAILED",
+  RECONCILIATION_REQUIRED = "RECONCILIATION_REQUIRED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum SellerAdjustmentType {
+  CREDIT = "CREDIT",
+  DEBIT = "DEBIT",
+}
+
+export enum SellerAdjustmentReasonCode {
+  SHIPPING_COMPENSATION = "SHIPPING_COMPENSATION",
+  MANUAL_CREDIT = "MANUAL_CREDIT",
+  MANUAL_DEBIT = "MANUAL_DEBIT",
+  MARKETPLACE_PENALTY = "MARKETPLACE_PENALTY",
+  CORRECTION = "CORRECTION",
+}
+
+export enum MarketplaceSettlementImportSource {
+  MANUAL = "MANUAL",
+  CSV_IMPORT = "CSV_IMPORT",
+  API = "API",
+}
+
+export enum MarketplaceReconciliationStatus {
+  MATCHED = "MATCHED",
+  MISMATCH = "MISMATCH",
+  MISSING_EXTERNAL = "MISSING_EXTERNAL",
+  MISSING_INTERNAL = "MISSING_INTERNAL",
+  DUPLICATE = "DUPLICATE",
+  REVIEW_REQUIRED = "REVIEW_REQUIRED",
+}
+
+export interface SellerFinancialAccountDto {
+  id: string;
+  sellerOrganizationId: string;
+  currency: string;
+  status: SellerFinancialAccountStatus;
+  settlementSchedule: SellerSettlementScheduleType;
+  payoutMethodType: string;
+  payoutReferenceMasked: string | null;
+  minimumPayoutIrr: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** `pendingIrr`/`availableIrr` are the same figure this phase — see README "Seller balance" for why a RESERVED/AVAILABLE split isn't modeled yet (no async payout provider to reserve funds against). Every figure here is derived from ledger entries on request, never a stored mutable number. */
+export interface SellerBalanceSummaryDto {
+  pendingIrr: number;
+  availableIrr: number;
+  reservedIrr: number;
+  paidIrr: number;
+}
+
+export interface SellerFinanceSummaryDto {
+  account: SellerFinancialAccountDto;
+  balance: SellerBalanceSummaryDto;
+  nextSettlementEligibleIrr: number;
+  lastSettlement: SellerSettlementDto | null;
+}
+
+export interface OrderFinancialBreakdownDto {
+  id: string;
+  orderId: string;
+  sellerOrganizationId: string;
+  origin: OrderOrigin;
+  grossMerchandiseIrr: number;
+  shippingIrr: number;
+  discountIrr: number;
+  shippingResponsibility: DeliveryResponsibility;
+  commissionBasisPoints: number;
+  platformCommissionIrr: number;
+  channelFeeIrr: number;
+  channelFeeConfidence: FinancialConfidence;
+  sellerGrossIrr: number;
+  sellerNetIrr: number;
+  createdAt: string;
+}
+
+/** One row of the seller-facing transaction history (spec: "Order, Gross, Commission, Fees, Refund, Net, Settlement status, date, channel"). `breakdown` is present only for `referenceType === "ORDER_SALE"` — a refund/adjustment row carries just its own net amount and description, never a fabricated breakdown. */
+export interface SellerTransactionDto {
+  id: string;
+  referenceType: string;
+  referenceId: string;
+  description: string;
+  breakdown: OrderFinancialBreakdownDto | null;
+  netAmountIrr: number;
+  settlementId: string | null;
+  settlementStatus: SellerSettlementStatus | null;
+  createdAt: string;
+}
+
+export interface CommissionRuleDto {
+  id: string;
+  sellerOrganizationId: string | null;
+  channel: OrderOrigin | null;
+  basisPoints: number;
+  effectiveFrom: string;
+  effectiveTo: string | null;
+  createdAt: string;
+}
+
+export interface SellerSettlementItemDto {
+  id: string;
+  sourceType: string;
+  sourceId: string;
+  grossAmount: number;
+  feeAmount: number;
+  netAmount: number;
+  description: string;
+  createdAt: string;
+}
+
+export interface SellerSettlementDto {
+  id: string;
+  reference: string;
+  sellerOrganizationId: string;
+  periodStart: string;
+  periodEnd: string;
+  currency: string;
+  status: SellerSettlementStatus;
+  grossIrr: number;
+  commissionIrr: number;
+  refundsIrr: number;
+  adjustmentsIrr: number;
+  netIrr: number;
+  initiatedByAdmin: AdminActorSummaryDto;
+  approvedByAdmin: AdminActorSummaryDto | null;
+  payoutMethodType: string | null;
+  createdAt: string;
+  approvedAt: string | null;
+  paidAt: string | null;
+  reconciledAt: string | null;
+  cancelledAt: string | null;
+}
+
+/** List-row shape is SellerSettlementDto itself — `items` only ever comes back on the detail endpoint (mirrors SupportCaseDetailDto's own summary/detail split). */
+export interface SellerSettlementDetailDto extends SellerSettlementDto {
+  items: SellerSettlementItemDto[];
+}
+
+export interface SellerAdjustmentDto {
+  id: string;
+  sellerOrganizationId: string;
+  type: SellerAdjustmentType;
+  reasonCode: SellerAdjustmentReasonCode;
+  amountIrr: number;
+  reason: string;
+  evidenceReference: string | null;
+  createdByAdmin: AdminActorSummaryDto;
+  createdAt: string;
+}
+
+export interface AdminSellerFinanceSummaryDto {
+  sellerOrganization: AdminSellerOrgSummaryDto;
+  account: SellerFinancialAccountDto | null;
+  balance: SellerBalanceSummaryDto;
+}
+
+export interface MarketplaceSettlementStatementLineDto {
+  id: string;
+  externalOrderId: string;
+  amount: number;
+  feeAmount: number | null;
+  feeConfidence: FinancialConfidence;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface MarketplaceSettlementStatementDto {
+  id: string;
+  provider: MarketplaceProvider;
+  marketplaceChannelAccountId: string;
+  sellerOrganizationId: string;
+  source: MarketplaceSettlementImportSource;
+  periodStart: string;
+  periodEnd: string;
+  currency: string;
+  totalAmount: number;
+  importedByAdmin: AdminActorSummaryDto;
+  createdAt: string;
+  lines: MarketplaceSettlementStatementLineDto[];
+}
+
+/** Named distinctly from the pre-existing (Handoff 09) MarketplaceReconciliationResultDto above, which is a different, unrelated concept — that one is an inventory/listing-data discrepancy check, this one is a settlement-statement finding. */
+export interface MarketplaceSettlementReconciliationResultDto {
+  id: string;
+  marketplaceSettlementStatementId: string | null;
+  marketplaceSettlementStatementLineId: string | null;
+  marketplaceOrderId: string | null;
+  status: MarketplaceReconciliationStatus;
+  expectedAmount: number | null;
+  statementAmount: number | null;
+  variance: number | null;
+  notes: string | null;
+  resolvedByAdmin: AdminActorSummaryDto | null;
+  resolvedAt: string | null;
+  createdAt: string;
 }

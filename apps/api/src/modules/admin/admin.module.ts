@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { RefundsModule } from "../commerce/refunds/refunds.module";
 import { PetAccessModule } from "../pet-access/pet-access.module";
+import { SellerFinanceModule } from "../seller-finance/seller-finance.module";
 import { AdminAccessService } from "./auth/admin-access.service";
 import { AdminAuthGuard } from "./auth/admin-auth.guard";
 import { AdminMeController } from "./auth/admin-me.controller";
@@ -31,6 +32,9 @@ import { AdminOrgController } from "./orgs/admin-org.controller";
 import { AdminAuditController } from "./audit/admin-audit.controller";
 import { AdminDashboardService } from "./dashboard/admin-dashboard.service";
 import { AdminDashboardController } from "./dashboard/admin-dashboard.controller";
+import { AdminSellerSettlementService } from "./finance/admin-seller-settlement.service";
+import { AdminSellerAdjustmentService } from "./finance/admin-seller-adjustment.service";
+import { AdminMarketplaceSettlementService } from "./finance/admin-marketplace-settlement.service";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -42,7 +46,7 @@ import { AdminDashboardController } from "./dashboard/admin-dashboard.controller
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PetAccessModule],
+  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule],
   controllers: [
     AdminMeController,
     AdminNoteController,
@@ -75,7 +79,19 @@ import { AdminDashboardController } from "./dashboard/admin-dashboard.controller
     AdminRefundService,
     AdminOrgService,
     AdminDashboardService,
+    AdminSellerSettlementService,
+    AdminSellerAdjustmentService,
+    AdminMarketplaceSettlementService,
   ],
-  exports: [AdminAccessService, AdminAuthGuard, AdminAuditLogService, InternalNoteService, SupportCaseService],
+  exports: [
+    AdminAccessService,
+    AdminAuthGuard,
+    AdminAuditLogService,
+    InternalNoteService,
+    SupportCaseService,
+    AdminSellerSettlementService,
+    AdminSellerAdjustmentService,
+    AdminMarketplaceSettlementService,
+  ],
 })
 export class AdminModule {}

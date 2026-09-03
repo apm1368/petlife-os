@@ -14,6 +14,7 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { MarketplaceOrderIngestionFailedException, MarketplaceOrderNotFoundException, MarketplaceWebhookInvalidException } from "../../../common/errors/api-exception";
 import { InventoryMovementService } from "../inventory/inventory-movement.service";
+import { SellerFinanceService } from "../../seller-finance/seller-finance.service";
 import { normalizeMarketplaceOrderStatus } from "./marketplace-order-status-normalizer";
 import { toMarketplaceOrderDto } from "./marketplace-dto.mapper";
 import type { FetchedMarketplaceOrder, MarketplaceWebhookResult } from "./marketplace-channel-adapter.interface";
@@ -68,6 +69,7 @@ export class MarketplaceOrderIngestionService {
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
     private readonly inventoryMovements: InventoryMovementService,
+    private readonly sellerFinance: SellerFinanceService,
   ) {}
 
   async processWebhookResult(account: MarketplaceChannelAccount, result: MarketplaceWebhookResult): Promise<MarketplaceOrderDto> {
@@ -192,6 +194,12 @@ export class MarketplaceOrderIngestionService {
           },
         });
         await tx.marketplaceOrder.update({ where: { id: marketplaceOrder.id }, data: { mappedOrderId: internalOrder.id } });
+
+        // Handoff 14: PET LIFE OS never collected this cash (spec: "do not create a fake
+        // PaymentIntent") — attribute the seller's own receivable and the platform's
+        // commission claim against the channel now, honestly, without pretending a
+        // payment was captured.
+        await this.sellerFinance.attributeMarketplaceSale(tx, internalOrder.id, account.provider, marketplaceOrder.deliveryResponsibility);
 
         await this.events.publish(
           "MarketplaceOrderReceived",

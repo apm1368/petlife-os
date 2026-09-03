@@ -151,6 +151,17 @@ export const DOMAIN_EVENT_TYPES = [
   "AdminRefundApprovalRejected",
   "AdminRefundApprovalExecuted",
   "AdminVerificationStatusChanged",
+  // Marketplace & Seller Financial Settlement (Handoff 14)
+  "SellerReceivableCreated",
+  "SellerReceivableAdjusted",
+  "SellerSettlementCalculated",
+  "SellerSettlementApproved",
+  "SellerSettlementPaid",
+  "SellerSettlementFailed",
+  "SellerSettlementCancelled",
+  "MarketplaceSettlementImported",
+  "MarketplaceSettlementMismatchDetected",
+  "MarketplaceReconciliationResolved",
 ] as const;
 
 /**

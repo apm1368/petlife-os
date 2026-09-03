@@ -165,6 +165,20 @@ const envSchema = z.object({
   /// value). Amount is in the smallest currency unit, matching every other
   /// amount field in the schema (Order.totalAmount, Refund.amount, ...).
   ADMIN_REFUND_APPROVAL_THRESHOLD_IRR: z.coerce.number().int().positive().default(5_000_000),
+
+  /// Handoff 14 — the platform-default commission rate applied when no
+  /// seller-specific or channel-specific CommissionRule matches (basis
+  /// points: 1000 = 10.00%). CommissionRuleService seeds a matching
+  /// platform-default row on boot from this same value — see that
+  /// service's own doc comment.
+  DEFAULT_PLATFORM_COMMISSION_BPS: z.coerce.number().int().min(0).max(10_000).default(1_000),
+
+  /// Two-person control threshold for settlement payout (spec: "for
+  /// settlement above configurable threshold... initiator should not
+  /// approve their own payout"), mirroring
+  /// ADMIN_REFUND_APPROVAL_THRESHOLD_IRR's own precedent exactly. Amount is
+  /// in the smallest currency unit (IRR).
+  SETTLEMENT_APPROVAL_THRESHOLD_IRR: z.coerce.number().int().positive().default(10_000_000),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

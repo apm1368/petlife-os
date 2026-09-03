@@ -746,11 +746,113 @@ enum LedgerAccountCode {
   SELLER_PAYABLE
   REFUND_PAYABLE
   PLATFORM_REVENUE
+  /// Handoff 14 — "money an external marketplace channel owes us" (the
+  /// mirror-image of CASH_GATEWAY_RECEIVABLE for a sale PET LIFE OS itself
+  /// never collected cash for). Never debited by a real cash receipt this
+  /// phase — no official Torob/Digikala settlement API exists to confirm
+  /// one (see README "External provider status").
+  MARKETPLACE_RECEIVABLE
 }
 
 enum LedgerEntryDirection {
   DEBIT
   CREDIT
+}
+
+// ---------------------------------------------------------------------------
+// Marketplace & Seller Financial Settlement (Handoff 14)
+// ---------------------------------------------------------------------------
+
+/// Which sales channel an Order came through (spec: "financial processing
+/// must distinguish order source"). Deliberately not a stored Order column —
+/// see the Order model's own doc comment on `financialBreakdown` for why
+/// this is safely derived (checkoutId non-null => PET_LIFE; otherwise the
+/// linked MarketplaceOrder.provider) rather than a second, potentially
+/// drifting source of truth. Persisted here only where it is a genuine
+/// first-class dimension: CommissionRule.channel and OrderFinancialBreakdown.origin.
+enum OrderOrigin {
+  PET_LIFE
+  DEV_MARKETPLACE
+  TOROB
+  DIGIKALA
+}
+
+/// Data-confidence tag for a marketplace-reported fee (spec: "never
+/// silently assume zero if unknown"). KNOWN = the provider's own
+/// statement/API told us; ESTIMATED = we computed a best guess from a
+/// published rate card; UNKNOWN = no data at all.
+enum FinancialConfidence {
+  KNOWN
+  ESTIMATED
+  UNKNOWN
+}
+
+enum SellerFinancialAccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum SellerSettlementScheduleType {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  MANUAL
+}
+
+/// Deliberately fewer states than the spec's own suggested superset
+/// (DRAFT/READY/PROCESSING/PARTIALLY_PAID are not modeled) — see README
+/// "Settlement lifecycle" for why: MANUAL-only payout (no async provider)
+/// makes PROCESSING/PARTIALLY_PAID unreachable this phase, and
+/// calculate() always produces a fully-computed settlement in one step, so
+/// DRAFT/READY/CALCULATED would be indistinguishable states.
+enum SellerSettlementStatus {
+  CALCULATED
+  APPROVED
+  PAID
+  FAILED
+  RECONCILIATION_REQUIRED
+  CANCELLED
+}
+
+enum SellerAdjustmentType {
+  CREDIT
+  DEBIT
+}
+
+enum SellerAdjustmentReasonCode {
+  SHIPPING_COMPENSATION
+  MANUAL_CREDIT
+  MANUAL_DEBIT
+  MARKETPLACE_PENALTY
+  CORRECTION
+}
+
+/// A per-seller double-entry chart mirroring LedgerAccountCode's own shape,
+/// scoped to one seller's own view of their balance rather than the
+/// platform-wide accounts (spec: "seller-level accounting subledger...
+/// every monetary mutation must balance"). RECEIVABLE is the account whose
+/// running balance IS the seller's payable balance — see README "Seller
+/// ledger/subledger" for the exact posting rules.
+enum SellerLedgerAccountCode {
+  RECEIVABLE
+  SALES_INCOME
+  SETTLEMENT_PAID
+  ADJUSTMENT
+}
+
+enum MarketplaceSettlementImportSource {
+  MANUAL
+  CSV_IMPORT
+  API
+}
+
+enum MarketplaceReconciliationStatus {
+  MATCHED
+  MISMATCH
+  MISSING_EXTERNAL
+  MISSING_INTERNAL
+  DUPLICATE
+  REVIEW_REQUIRED
 }
 
 // ---------------------------------------------------------------------------
@@ -1871,15 +1973,23 @@ model SellerOrganization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  offers                     SellerOffer[]
-  orders                     Order[]
-  fulfillments               Fulfillment[]
-  shippingQuotes             ShippingQuote[]
-  memberships                SellerMembership[]
-  inventoryMovements         InventoryMovement[]
-  marketplaceChannelAccounts MarketplaceChannelAccount[]
-  marketplaceOrders          MarketplaceOrder[]
-  marketplaceSyncAttempts    MarketplaceSyncAttempt[]
+  offers                          SellerOffer[]
+  orders                          Order[]
+  fulfillments                    Fulfillment[]
+  shippingQuotes                  ShippingQuote[]
+  memberships                     SellerMembership[]
+  inventoryMovements              InventoryMovement[]
+  marketplaceChannelAccounts      MarketplaceChannelAccount[]
+  marketplaceOrders               MarketplaceOrder[]
+  marketplaceSyncAttempts         MarketplaceSyncAttempt[]
+  financialAccount                SellerFinancialAccount?
+  commissionRules                 CommissionRule[]
+  orderFinancialBreakdowns        OrderFinancialBreakdown[]
+  ledgerAccounts                  SellerLedgerAccount[]
+  ledgerTransactions              SellerLedgerTransaction[]
+  settlements                     SellerSettlement[]
+  adjustments                     SellerAdjustment[]
+  marketplaceSettlementStatements MarketplaceSettlementStatement[]
 
   @@index([verificationStatus, status])
   @@map("seller_organizations")
@@ -2283,6 +2393,12 @@ model Order {
   /// (spec section 25) — absent for every ordinary PET LIFE OS checkout Order.
   marketplaceOrder     MarketplaceOrder?
   adminRefundApprovals AdminRefundApproval[]
+  /// Present once SellerFinanceService has attributed this Order's
+  /// economics (spec: "for each qualifying Order, persist... financial
+  /// breakdown") — see OrderFinancialBreakdown's own doc comment for why
+  /// this is a separate table rather than columns on Order itself
+  /// (Handoff 14, additive, keeps this core commerce model untouched).
+  financialBreakdown   OrderFinancialBreakdown?
 
   @@unique([checkoutId, sellerOrganizationId])
   @@index([userId])
@@ -2596,6 +2712,373 @@ model LedgerEntry {
   @@map("ledger_entries")
 }
 
+/// One per seller (spec: "explicit seller financial identity/accounting
+/// relationship"). Deliberately no bank credential fields — `payoutMethodType`
+/// is a plain label ("MANUAL" this phase, see README "Payout behavior") and
+/// `payoutReferenceMasked` is a display-only masked string a future real
+/// payout integration would populate; never a full account number or token.
+model SellerFinancialAccount {
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @unique @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+
+  currency           String                       @default("IRR")
+  status             SellerFinancialAccountStatus @default(ACTIVE)
+  settlementSchedule SellerSettlementScheduleType @default(MANUAL)
+
+  payoutMethodType      String  @default("MANUAL")
+  payoutReferenceMasked String?
+  minimumPayoutIrr      Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("seller_financial_accounts")
+}
+
+/// A configurable commission rate (spec: "commission may vary by seller,
+/// channel, country, effective date"; category-level matching is a
+/// documented non-goal this phase — see README "Commission model").
+/// `sellerOrganizationId` NULL = the platform default; `channel` NULL =
+/// applies to every channel. Resolution always prefers the most specific
+/// currently-effective row — see CommissionRuleService.
+model CommissionRule {
+  id                   String              @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String?             @db.Uuid
+  sellerOrganization   SellerOrganization? @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+  channel              OrderOrigin?
+
+  /// Basis points (1/100 of a percent) — 1000 = 10.00%. Never a float.
+  basisPoints   Int
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
+
+  createdByAdminId String?    @db.Uuid
+  createdByAdmin   AdminUser? @relation(fields: [createdByAdminId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  breakdowns OrderFinancialBreakdown[]
+
+  @@index([sellerOrganizationId, channel])
+  @@map("commission_rules")
+}
+
+/// The immutable, per-Order economics snapshot (spec: "financial values
+/// used for settlement should not depend on mutable current product/offer
+/// prices... snapshot economics at transaction/order time"). Created
+/// exactly once per Order — its own existence (`@@unique([orderId])`) is
+/// the idempotency guard against double-attribution, checked by
+/// SellerFinanceService before every posting. Refund/adjustment impact is
+/// never written back onto this row; it lives in SellerLedgerTransaction
+/// rows instead (see that model's own doc comment), so this snapshot never
+/// mutates after creation.
+model OrderFinancialBreakdown {
+  id                   String             @id @default(uuid()) @db.Uuid
+  orderId              String             @unique @db.Uuid
+  order                Order              @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+
+  origin OrderOrigin
+
+  grossMerchandiseIrr    Int
+  shippingIrr            Int
+  discountIrr            Int
+  /// Who bears `shippingIrr` (spec: "do not assume all shipping belongs to
+  /// seller... use Fulfillment.deliveryResponsibility") — read once, at
+  /// attribution time, from the Order's own Fulfillment; PETLIFE when none
+  /// exists (a marketplace-origin Order never gets one — see README).
+  shippingResponsibility DeliveryResponsibility
+
+  commissionRuleId      String?         @db.Uuid
+  commissionRule        CommissionRule? @relation(fields: [commissionRuleId], references: [id], onDelete: SetNull)
+  /// Snapshotted alongside commissionRuleId so a later edit or deletion of
+  /// the rule itself can never retroactively change this Order's own math
+  /// (spec: "later commission changes must not retroactively alter old
+  /// order economics").
+  commissionBasisPoints Int
+
+  /// The platform's actual distributed share of `totalAmount` — computed as
+  /// `order.totalAmount - sellerNetIrr`, never an independently-rounded
+  /// gross*bps figure, so the two-account platform ledger posting this
+  /// produces always balances exactly against what the customer paid (see
+  /// README "Commission model" for the full worked example, including the
+  /// documented edge case this deliberately leaves unhandled).
+  platformCommissionIrr Int
+  channelFeeIrr         Int                 @default(0)
+  channelFeeConfidence  FinancialConfidence @default(KNOWN)
+
+  sellerGrossIrr Int
+  sellerNetIrr   Int
+
+  createdAt DateTime @default(now())
+
+  @@map("order_financial_breakdowns")
+}
+
+/// A per-seller double-entry chart (spec: "seller-level accounting
+/// subledger... every monetary mutation must balance") — mirrors
+/// LedgerAccount's own shape, scoped to one seller. See
+/// SellerLedgerAccountCode's doc comment for what RECEIVABLE means.
+model SellerLedgerAccount {
+  id                   String                  @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String                  @db.Uuid
+  sellerOrganization   SellerOrganization      @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+  code                 SellerLedgerAccountCode
+  currency             String                  @default("IRR")
+  createdAt            DateTime                @default(now())
+
+  entries SellerLedgerEntry[]
+
+  @@unique([sellerOrganizationId, code])
+  @@map("seller_ledger_accounts")
+}
+
+/// Append-only, exactly like LedgerTransaction (see that model's own doc
+/// comment) — nothing here is ever updated except `sellerSettlementId`,
+/// which flips exactly once from NULL to a real settlement id when this
+/// transaction's RECEIVABLE-account movement is swept into a settlement.
+/// That single flip is the entire idempotency/derivation mechanism for
+/// "which of this seller's transactions are still outstanding" (spec:
+/// "prefer derived balance from ledger/subledger entries") — a settlement
+/// calculation simply selects every row still NULL for that seller.
+model SellerLedgerTransaction {
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+
+  description   String
+  /// "ORDER_SALE" | "ORDER_REFUND" | "ADJUSTMENT" | "SETTLEMENT_PAYMENT" —
+  /// mirrors LedgerTransaction.referenceType's own plain-string precedent.
+  referenceType String
+  referenceId   String @db.Uuid
+  currency      String @default("IRR")
+
+  sellerSettlementId String?           @db.Uuid
+  sellerSettlement   SellerSettlement? @relation(fields: [sellerSettlementId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  entries SellerLedgerEntry[]
+
+  @@index([sellerOrganizationId, sellerSettlementId])
+  @@index([referenceType, referenceId])
+  @@map("seller_ledger_transactions")
+}
+
+model SellerLedgerEntry {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  sellerLedgerTransactionId String                  @db.Uuid
+  sellerLedgerTransaction   SellerLedgerTransaction @relation(fields: [sellerLedgerTransactionId], references: [id], onDelete: Restrict)
+  sellerLedgerAccountId     String                  @db.Uuid
+  sellerLedgerAccount       SellerLedgerAccount     @relation(fields: [sellerLedgerAccountId], references: [id], onDelete: Restrict)
+
+  direction LedgerEntryDirection
+  amount    Int
+
+  createdAt DateTime @default(now())
+
+  @@index([sellerLedgerTransactionId])
+  @@index([sellerLedgerAccountId])
+  @@map("seller_ledger_entries")
+}
+
+/// A batch of a seller's swept receivable movements (spec: "SellerSettlement
+/// ... every settlement should explain exactly what it contains"). `reference`
+/// is human-readable ("STL-000123"), generated once from a dedicated
+/// Postgres sequence, mirroring SupportCase.caseNumber's own precedent.
+/// `initiatedByAdminId`/`approvedByAdminId` plus the hand-appended
+/// `seller_settlements_approver_not_initiator` CHECK constraint are the
+/// two-person-control mechanism, mirroring AdminRefundApproval's own
+/// pattern exactly.
+model SellerSettlement {
+  id                   String             @id @default(uuid()) @db.Uuid
+  reference            String             @unique
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+
+  periodStart DateTime
+  periodEnd   DateTime
+  currency    String   @default("IRR")
+
+  status SellerSettlementStatus @default(CALCULATED)
+
+  grossIrr       Int
+  commissionIrr  Int
+  refundsIrr     Int
+  adjustmentsIrr Int
+  netIrr         Int
+
+  initiatedByAdminId String     @db.Uuid
+  initiatedByAdmin   AdminUser  @relation("InitiatedSettlements", fields: [initiatedByAdminId], references: [id], onDelete: Restrict)
+  approvedByAdminId  String?    @db.Uuid
+  approvedByAdmin    AdminUser? @relation("ApprovedSettlements", fields: [approvedByAdminId], references: [id], onDelete: SetNull)
+
+  /// Snapshotted from SellerFinancialAccount.payoutMethodType at calculate()
+  /// time — never re-read live, so a later account change never rewrites a
+  /// settlement's own history.
+  payoutMethodType String?
+
+  createdAt    DateTime  @default(now())
+  approvedAt   DateTime?
+  paidAt       DateTime?
+  reconciledAt DateTime?
+  cancelledAt  DateTime?
+
+  items        SellerSettlementItem[]
+  transactions SellerLedgerTransaction[]
+
+  @@index([sellerOrganizationId, status])
+  @@map("seller_settlements")
+}
+
+/// One row per swept SellerLedgerTransaction (spec: "no opaque final
+/// number") — `sourceType`/`sourceId` name exactly which Order/Refund/
+/// SellerAdjustment this line came from, without a real FK to any of them
+/// (mirrors LedgerTransaction.referenceId's own plain-Uuid precedent) so
+/// adding this financial layer never requires a back-relation edit on
+/// Order/Refund.
+model SellerSettlementItem {
+  id                 String           @id @default(uuid()) @db.Uuid
+  sellerSettlementId String           @db.Uuid
+  sellerSettlement   SellerSettlement @relation(fields: [sellerSettlementId], references: [id], onDelete: Cascade)
+
+  /// "ORDER" | "REFUND" | "ADJUSTMENT"
+  sourceType String
+  sourceId   String @db.Uuid
+
+  grossAmount Int
+  feeAmount   Int
+  netAmount   Int
+  description String
+
+  createdAt DateTime @default(now())
+
+  @@index([sellerSettlementId])
+  @@map("seller_settlement_items")
+}
+
+/// An explicit, ledger-backed credit/debit to a seller's balance (spec: "no
+/// arbitrary balance editing... every adjustment requires amount, reason,
+/// actor, evidence/reference, audit, ledger posting"). Posts immediately on
+/// creation (never waits for a settlement to exist) and is picked up by the
+/// next settlement calculation exactly like any other unswept
+/// SellerLedgerTransaction.
+model SellerAdjustment {
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+
+  type              SellerAdjustmentType
+  reasonCode        SellerAdjustmentReasonCode
+  amountIrr         Int
+  reason            String
+  evidenceReference String?
+
+  createdByAdminId String    @db.Uuid
+  createdByAdmin   AdminUser @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@map("seller_adjustments")
+}
+
+/// An imported record of what an external marketplace channel reports
+/// having settled (spec: "if official settlement APIs are unavailable,
+/// build import/reconciliation foundation"). `source` is always MANUAL or
+/// CSV_IMPORT this phase — no official Torob/Digikala settlement API
+/// exists to build an API-sourced importer against (see README "External
+/// provider status"); the API value is modeled so a future real
+/// integration is an adapter addition, not a schema change.
+model MarketplaceSettlementStatement {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  provider                    MarketplaceProvider
+  marketplaceChannelAccountId String                    @db.Uuid
+  marketplaceChannelAccount   MarketplaceChannelAccount @relation(fields: [marketplaceChannelAccountId], references: [id], onDelete: Restrict)
+  sellerOrganizationId        String                    @db.Uuid
+  sellerOrganization          SellerOrganization        @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+
+  source      MarketplaceSettlementImportSource
+  periodStart DateTime
+  periodEnd   DateTime
+  currency    String                            @default("IRR")
+  totalAmount Int
+
+  importedByAdminId String    @db.Uuid
+  importedByAdmin   AdminUser @relation(fields: [importedByAdminId], references: [id], onDelete: Restrict)
+
+  /// Small reference metadata only — never a raw payload (mirrors
+  /// MarketplaceOrder.rawPayloadReference's own doc comment).
+  rawReference Json?
+
+  createdAt DateTime @default(now())
+
+  lines                 MarketplaceSettlementStatementLine[]
+  reconciliationResults MarketplaceReconciliationResult[]
+
+  @@unique([marketplaceChannelAccountId, periodStart, periodEnd])
+  @@map("marketplace_settlement_statements")
+}
+
+/// One normalized line per external order the statement covers (spec: "do
+/// not build fragile CSV-specific architecture... normalize imported
+/// lines") — the same shape regardless of whether it arrived via manual
+/// entry or a CSV parse.
+model MarketplaceSettlementStatementLine {
+  id                               String                         @id @default(uuid()) @db.Uuid
+  marketplaceSettlementStatementId String                         @db.Uuid
+  marketplaceSettlementStatement   MarketplaceSettlementStatement @relation(fields: [marketplaceSettlementStatementId], references: [id], onDelete: Cascade)
+
+  externalOrderId String
+  amount          Int
+  feeAmount       Int?
+  feeConfidence   FinancialConfidence @default(UNKNOWN)
+  description     String?
+
+  createdAt DateTime @default(now())
+
+  reconciliationResult MarketplaceReconciliationResult?
+
+  @@unique([marketplaceSettlementStatementId, externalOrderId])
+  @@map("marketplace_settlement_statement_lines")
+}
+
+/// The admin reconciliation queue (spec: "reconciliation must NEVER
+/// overwrite canonical internal financial records automatically... mismatch
+/// -> flag -> admin review -> explicit adjustment/correction if needed").
+/// Every row here is a finding, never a mutation — resolving one only ever
+/// sets `notes`/`resolvedByAdminId`/`resolvedAt` on this row, and if a
+/// correction is warranted, an admin creates a separate SellerAdjustment
+/// (a distinct, audited action) rather than this service touching the
+/// ledger itself.
+model MarketplaceReconciliationResult {
+  id String @id @default(uuid()) @db.Uuid
+
+  marketplaceSettlementStatementId     String?                             @db.Uuid
+  marketplaceSettlementStatement       MarketplaceSettlementStatement?     @relation(fields: [marketplaceSettlementStatementId], references: [id], onDelete: SetNull, map: "reconciliation_result_statement_fkey")
+  marketplaceSettlementStatementLineId String?                             @unique @db.Uuid
+  marketplaceSettlementStatementLine   MarketplaceSettlementStatementLine? @relation(fields: [marketplaceSettlementStatementLineId], references: [id], onDelete: SetNull, map: "reconciliation_result_statement_line_fkey")
+  marketplaceOrderId                   String?                             @db.Uuid
+  marketplaceOrder                     MarketplaceOrder?                   @relation(fields: [marketplaceOrderId], references: [id], onDelete: SetNull)
+
+  status          MarketplaceReconciliationStatus
+  expectedAmount  Int?
+  statementAmount Int?
+  variance        Int?
+
+  notes             String?
+  resolvedByAdminId String?    @db.Uuid
+  resolvedByAdmin   AdminUser? @relation(fields: [resolvedByAdminId], references: [id], onDelete: SetNull)
+  resolvedAt        DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@map("marketplace_reconciliation_results")
+}
+
 /// A persisted shipping-price offer for one seller's share of a Checkout
 /// (spec section 7) — scoped to `checkoutId` + `sellerOrgId` rather than
 /// `orderId` as the spec's own conceptual shape suggests, because Orders
@@ -2859,9 +3342,10 @@ model MarketplaceChannelAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listings     MarketplaceListing[]
-  orders       MarketplaceOrder[]
-  syncAttempts MarketplaceSyncAttempt[]
+  listings             MarketplaceListing[]
+  orders               MarketplaceOrder[]
+  syncAttempts         MarketplaceSyncAttempt[]
+  settlementStatements MarketplaceSettlementStatement[]
 
   @@unique([sellerOrganizationId, provider])
   @@index([provider, status])
@@ -2959,7 +3443,8 @@ model MarketplaceOrder {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  items MarketplaceOrderItem[]
+  items                 MarketplaceOrderItem[]
+  reconciliationResults MarketplaceReconciliationResult[]
 
   @@unique([provider, marketplaceChannelAccountId, externalOrderId])
   @@index([sellerOrganizationId, status])
@@ -3424,21 +3909,27 @@ model AdminUser {
   updatedAt    DateTime  @updatedAt
   lastActiveAt DateTime?
 
-  assignedSupportCases SupportCase[]         @relation("AssignedSupportCases")
-  authoredSupportCases SupportCase[]         @relation("CreatedSupportCases")
-  supportMessages      SupportMessage[]
-  internalNotes        InternalNote[]
-  assignedTasks        AdminTask[]           @relation("AssignedTasks")
-  createdTasks         AdminTask[]           @relation("CreatedTasks")
-  assignedDisputes     Dispute[]             @relation("AssignedDisputes")
-  disputeEvidence      DisputeEvidence[]
-  assignedTrustCases   TrustCase[]           @relation("AssignedTrustCases")
-  openedTrustCases     TrustCase[]           @relation("OpenedTrustCases")
-  trustActions         TrustAction[]
-  reviewedAppeals      Appeal[]
-  auditLogs            AdminAuditLog[]
-  requestedRefunds     AdminRefundApproval[] @relation("RequestedRefunds")
-  approvedRefunds      AdminRefundApproval[] @relation("ApprovedRefunds")
+  assignedSupportCases          SupportCase[]                     @relation("AssignedSupportCases")
+  authoredSupportCases          SupportCase[]                     @relation("CreatedSupportCases")
+  supportMessages               SupportMessage[]
+  internalNotes                 InternalNote[]
+  assignedTasks                 AdminTask[]                       @relation("AssignedTasks")
+  createdTasks                  AdminTask[]                       @relation("CreatedTasks")
+  assignedDisputes              Dispute[]                         @relation("AssignedDisputes")
+  disputeEvidence               DisputeEvidence[]
+  assignedTrustCases            TrustCase[]                       @relation("AssignedTrustCases")
+  openedTrustCases              TrustCase[]                       @relation("OpenedTrustCases")
+  trustActions                  TrustAction[]
+  reviewedAppeals               Appeal[]
+  auditLogs                     AdminAuditLog[]
+  requestedRefunds              AdminRefundApproval[]             @relation("RequestedRefunds")
+  approvedRefunds               AdminRefundApproval[]             @relation("ApprovedRefunds")
+  createdCommissionRules        CommissionRule[]
+  initiatedSettlements          SellerSettlement[]                @relation("InitiatedSettlements")
+  approvedSettlements           SellerSettlement[]                @relation("ApprovedSettlements")
+  createdSellerAdjustments      SellerAdjustment[]
+  importedMarketplaceStatements MarketplaceSettlementStatement[]
+  resolvedReconciliations       MarketplaceReconciliationResult[]
 
   @@map("admin_users")
 }
@@ -3482,8 +3973,8 @@ model SupportCase {
   /// SLA foundation fields — raw timestamps only, no derived-metric engine.
   /// First-response-time and resolution-time are computed on read from
   /// these plus createdAt/resolvedAt.
-  firstResponseAt   DateTime?
-  lastUserMessageAt DateTime?
+  firstResponseAt    DateTime?
+  lastUserMessageAt  DateTime?
   lastAdminMessageAt DateTime?
 
   messages SupportMessage[]
