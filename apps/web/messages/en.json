@@ -1210,7 +1210,8 @@
         "inventory": "Inventory",
         "channels": "Channels",
         "team": "Team",
-        "settings": "Settings"
+        "settings": "Settings",
+        "finance": "Finance"
       },
       "notASeller": {
         "title": "No seller access",
@@ -1381,6 +1382,98 @@
       "description": "Description",
       "save": "Save",
       "saved": "Saved"
+    },
+    "finance": {
+      "title": "Finance",
+      "loading": "Loading finance…",
+      "retry": "Retry",
+      "viewTransactions": "View transactions",
+      "viewAllSettlements": "View all settlements",
+      "balance": {
+        "pending": "Pending",
+        "reserved": "Reserved for settlement",
+        "available": "Available for payout",
+        "paid": "Paid to date"
+      },
+      "nextSettlementEligible": "Next settlement eligible amount",
+      "accountCurrency": "{currency} account · {schedule} settlement schedule",
+      "schedule": {
+        "WEEKLY": "Weekly",
+        "BIWEEKLY": "Biweekly",
+        "MONTHLY": "Monthly",
+        "MANUAL": "Manual"
+      },
+      "lastSettlement": "Last settlement",
+      "noSettlementsYet": "No settlements yet.",
+      "status": {
+        "CALCULATED": "Calculated",
+        "APPROVED": "Approved",
+        "PAID": "Paid",
+        "FAILED": "Failed",
+        "RECONCILIATION_REQUIRED": "Reconciliation required",
+        "CANCELLED": "Cancelled"
+      },
+      "transactions": {
+        "title": "Transactions",
+        "loading": "Loading transactions…",
+        "retry": "Retry",
+        "empty": "No transactions yet.",
+        "loadMore": "Load more",
+        "gross": "Gross: {amount}",
+        "commission": "Commission: {amount}",
+        "settlementStatus": {
+          "CALCULATED": "Calculated",
+          "APPROVED": "Approved",
+          "PAID": "Paid",
+          "FAILED": "Failed",
+          "RECONCILIATION_REQUIRED": "Reconciliation required",
+          "CANCELLED": "Cancelled",
+          "UNSETTLED": "Unsettled"
+        }
+      },
+      "settlements": {
+        "title": "Settlements",
+        "loading": "Loading settlements…",
+        "retry": "Retry",
+        "empty": "No settlements yet.",
+        "status": {
+          "CALCULATED": "Calculated",
+          "APPROVED": "Approved",
+          "PAID": "Paid",
+          "FAILED": "Failed",
+          "RECONCILIATION_REQUIRED": "Reconciliation required",
+          "CANCELLED": "Cancelled"
+        }
+      },
+      "settlementDetail": {
+        "title": "Settlement",
+        "loading": "Loading settlement…",
+        "retry": "Retry",
+        "status": {
+          "CALCULATED": "Calculated",
+          "APPROVED": "Approved",
+          "PAID": "Paid",
+          "FAILED": "Failed",
+          "RECONCILIATION_REQUIRED": "Reconciliation required",
+          "CANCELLED": "Cancelled"
+        },
+        "period": "{start} – {end}",
+        "breakdown": {
+          "gross": "Gross merchandise",
+          "commission": "Platform commission",
+          "refunds": "Refunds",
+          "adjustments": "Adjustments",
+          "net": "Net payout"
+        },
+        "payoutMethod": "Payout method",
+        "paidAt": "Paid on {date}",
+        "items": "{count, plural, one {# line item} other {# line items}}",
+        "sourceType": {
+          "ORDER": "Order",
+          "REFUND": "Refund",
+          "ADJUSTMENT": "Adjustment"
+        }
+      }
     }
   },
   "notifications": {
@@ -1546,7 +1639,9 @@
         "sellers": "Sellers",
         "transactions": "Transactions",
         "tasks": "Tasks",
-        "audit": "Audit"
+        "audit": "Audit",
+        "sellerFinance": "Seller Finance",
+        "reconciliation": "Reconciliation"
       }
     },
     "common": {
@@ -1833,6 +1928,101 @@
       "action": "Action",
       "reason": "Reason",
       "by": "By {name}"
+    },
+    "sellerFinance": {
+      "title": "Seller Finance",
+      "loading": "Loading…",
+      "retry": "Retry",
+      "searchLabel": "Search seller",
+      "search": "Search",
+      "empty": "No sellers found.",
+      "pending": "Pending",
+      "detail": {
+        "title": "Seller finance",
+        "loading": "Loading…",
+        "retry": "Retry",
+        "balance": {
+          "pendingIrr": "Pending",
+          "reservedIrr": "Reserved",
+          "availableIrr": "Available",
+          "paidIrr": "Paid to date"
+        },
+        "calculate": {
+          "title": "Calculate settlement",
+          "periodStart": "Period start",
+          "periodEnd": "Period end",
+          "submit": "Calculate"
+        },
+        "calculateFailed": "Could not calculate a settlement for this period.",
+        "settlementsTitle": "Settlements",
+        "noSettlements": "No settlements yet.",
+        "adjustments": {
+          "title": "Adjustments",
+          "type": "Type",
+          "CREDIT": "Credit",
+          "DEBIT": "Debit",
+          "reasonCode": "Reason",
+          "reasonCodes": {
+            "SHIPPING_COMPENSATION": "Shipping compensation",
+            "MANUAL_CREDIT": "Manual credit",
+            "MANUAL_DEBIT": "Manual debit",
+            "MARKETPLACE_PENALTY": "Marketplace penalty",
+            "CORRECTION": "Correction"
+          },
+          "amount": "Amount (IRR)",
+          "reason": "Reason",
+          "submit": "Add adjustment"
+        }
+      }
+    },
+    "settlementDetail": {
+      "title": "Settlement",
+      "loading": "Loading…",
+      "retry": "Retry",
+      "actionFailed": "That action could not be completed.",
+      "breakdown": {
+        "gross": "Gross merchandise",
+        "commission": "Platform commission",
+        "refunds": "Refunds",
+        "adjustments": "Adjustments",
+        "net": "Net payout"
+      },
+      "initiatedBy": "Initiated by",
+      "approvedBy": "Approved by",
+      "actions": "Actions",
+      "approve": "Approve",
+      "payoutReference": "Payout reference (optional)",
+      "payout": "Record payout",
+      "reason": "Reason",
+      "cancel": "Cancel settlement",
+      "markFailed": "Mark payout failed",
+      "items": "{count, plural, one {# line item} other {# line items}}"
+    },
+    "reconciliation": {
+      "title": "Marketplace Reconciliation",
+      "loading": "Loading…",
+      "retry": "Retry",
+      "empty": "No reconciliation findings yet.",
+      "queueTitle": "Findings",
+      "resolved": "Resolved",
+      "expected": "Expected: {amount}",
+      "statement": "Statement: {amount}",
+      "variance": "Variance: {amount}",
+      "notesLabel": "Resolution notes",
+      "resolve": "Resolve",
+      "submitResolve": "Submit",
+      "import": {
+        "title": "Import marketplace settlement statement",
+        "channelAccountId": "Marketplace channel account ID",
+        "periodStart": "Period start",
+        "periodEnd": "Period end",
+        "currency": "Currency",
+        "linesLabel": "Statement lines (one per line: externalOrderId,amount)",
+        "linesPlaceholder": "EXT-1001,1500000\nEXT-1002,890000",
+        "submit": "Import",
+        "invalid": "Fill in the channel account, both dates, and at least one valid line.",
+        "failed": "The import could not be completed."
+      }
     }
   }
 }

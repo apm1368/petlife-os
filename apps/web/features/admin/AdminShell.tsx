@@ -23,6 +23,8 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/providers", labelKey: "nav.providers", permission: "verification.manage" },
   { href: "/sellers", labelKey: "nav.sellers", permission: "verification.manage" },
   { href: "/transactions", labelKey: "nav.transactions", permission: "finance.view" },
+  { href: "/seller-finance", labelKey: "nav.sellerFinance", permission: "sellerFinance.view" },
+  { href: "/reconciliation", labelKey: "nav.reconciliation", permission: "sellerFinance.view" },
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];

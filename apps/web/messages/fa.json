@@ -1210,7 +1210,8 @@
         "inventory": "موجودی",
         "channels": "کانال‌ها",
         "team": "تیم",
-        "settings": "تنظیمات"
+        "settings": "تنظیمات",
+        "finance": "امور مالی"
       },
       "notASeller": {
         "title": "عدم دسترسی فروشنده",
@@ -1381,6 +1382,98 @@
       "description": "توضیحات",
       "save": "ذخیره",
       "saved": "ذخیره شد"
+    },
+    "finance": {
+      "title": "امور مالی",
+      "loading": "در حال بارگذاری امور مالی…",
+      "retry": "تلاش مجدد",
+      "viewTransactions": "مشاهده تراکنش‌ها",
+      "viewAllSettlements": "مشاهده همه تسویه‌حساب‌ها",
+      "balance": {
+        "pending": "در انتظار",
+        "reserved": "رزرو‌شده برای تسویه",
+        "available": "قابل‌پرداخت",
+        "paid": "پرداخت‌شده تاکنون"
+      },
+      "nextSettlementEligible": "مبلغ واجد شرایط تسویه بعدی",
+      "accountCurrency": "حساب {currency} · دوره تسویه {schedule}",
+      "schedule": {
+        "WEEKLY": "هفتگی",
+        "BIWEEKLY": "دوهفته‌یک‌بار",
+        "MONTHLY": "ماهانه",
+        "MANUAL": "دستی"
+      },
+      "lastSettlement": "آخرین تسویه‌حساب",
+      "noSettlementsYet": "هنوز تسویه‌حسابی ثبت نشده است.",
+      "status": {
+        "CALCULATED": "محاسبه‌شده",
+        "APPROVED": "تأییدشده",
+        "PAID": "پرداخت‌شده",
+        "FAILED": "ناموفق",
+        "RECONCILIATION_REQUIRED": "نیازمند تطبیق",
+        "CANCELLED": "لغوشده"
+      },
+      "transactions": {
+        "title": "تراکنش‌ها",
+        "loading": "در حال بارگذاری تراکنش‌ها…",
+        "retry": "تلاش مجدد",
+        "empty": "هنوز تراکنشی ثبت نشده است.",
+        "loadMore": "بارگذاری بیشتر",
+        "gross": "ناخالص: {amount}",
+        "commission": "کمیسیون: {amount}",
+        "settlementStatus": {
+          "CALCULATED": "محاسبه‌شده",
+          "APPROVED": "تأییدشده",
+          "PAID": "پرداخت‌شده",
+          "FAILED": "ناموفق",
+          "RECONCILIATION_REQUIRED": "نیازمند تطبیق",
+          "CANCELLED": "لغوشده",
+          "UNSETTLED": "تسویه‌نشده"
+        }
+      },
+      "settlements": {
+        "title": "تسویه‌حساب‌ها",
+        "loading": "در حال بارگذاری تسویه‌حساب‌ها…",
+        "retry": "تلاش مجدد",
+        "empty": "هنوز تسویه‌حسابی ثبت نشده است.",
+        "status": {
+          "CALCULATED": "محاسبه‌شده",
+          "APPROVED": "تأییدشده",
+          "PAID": "پرداخت‌شده",
+          "FAILED": "ناموفق",
+          "RECONCILIATION_REQUIRED": "نیازمند تطبیق",
+          "CANCELLED": "لغوشده"
+        }
+      },
+      "settlementDetail": {
+        "title": "تسویه‌حساب",
+        "loading": "در حال بارگذاری تسویه‌حساب…",
+        "retry": "تلاش مجدد",
+        "status": {
+          "CALCULATED": "محاسبه‌شده",
+          "APPROVED": "تأییدشده",
+          "PAID": "پرداخت‌شده",
+          "FAILED": "ناموفق",
+          "RECONCILIATION_REQUIRED": "نیازمند تطبیق",
+          "CANCELLED": "لغوشده"
+        },
+        "period": "{start} تا {end}",
+        "breakdown": {
+          "gross": "ارزش ناخالص کالا",
+          "commission": "کمیسیون پلتفرم",
+          "refunds": "بازگشت‌ وجه‌ها",
+          "adjustments": "تعدیل‌ها",
+          "net": "مبلغ خالص قابل‌پرداخت"
+        },
+        "payoutMethod": "روش پرداخت",
+        "paidAt": "پرداخت‌شده در {date}",
+        "items": "{count, plural, one {# قلم} other {# قلم}}",
+        "sourceType": {
+          "ORDER": "سفارش",
+          "REFUND": "بازگشت وجه",
+          "ADJUSTMENT": "تعدیل"
+        }
+      }
     }
   },
   "notifications": {
@@ -1546,7 +1639,9 @@
         "sellers": "فروشندگان",
         "transactions": "تراکنش‌ها",
         "tasks": "وظایف",
-        "audit": "گزارش رویدادها"
+        "audit": "گزارش رویدادها",
+        "sellerFinance": "امور مالی فروشندگان",
+        "reconciliation": "تطبیق"
       }
     },
     "common": {
@@ -1833,6 +1928,101 @@
       "action": "اقدام",
       "reason": "دلیل",
       "by": "توسط {name}"
+    },
+    "sellerFinance": {
+      "title": "امور مالی فروشندگان",
+      "loading": "در حال بارگذاری…",
+      "retry": "تلاش مجدد",
+      "searchLabel": "جستجوی فروشنده",
+      "search": "جستجو",
+      "empty": "فروشنده‌ای یافت نشد.",
+      "pending": "در انتظار",
+      "detail": {
+        "title": "امور مالی فروشنده",
+        "loading": "در حال بارگذاری…",
+        "retry": "تلاش مجدد",
+        "balance": {
+          "pendingIrr": "در انتظار",
+          "reservedIrr": "رزرو‌شده",
+          "availableIrr": "قابل‌پرداخت",
+          "paidIrr": "پرداخت‌شده تاکنون"
+        },
+        "calculate": {
+          "title": "محاسبه تسویه‌حساب",
+          "periodStart": "شروع دوره",
+          "periodEnd": "پایان دوره",
+          "submit": "محاسبه"
+        },
+        "calculateFailed": "محاسبه تسویه‌حساب برای این دوره ممکن نشد.",
+        "settlementsTitle": "تسویه‌حساب‌ها",
+        "noSettlements": "هنوز تسویه‌حسابی ثبت نشده است.",
+        "adjustments": {
+          "title": "تعدیل‌ها",
+          "type": "نوع",
+          "CREDIT": "بستانکار",
+          "DEBIT": "بدهکار",
+          "reasonCode": "دلیل",
+          "reasonCodes": {
+            "SHIPPING_COMPENSATION": "جبران هزینه ارسال",
+            "MANUAL_CREDIT": "بستانکار دستی",
+            "MANUAL_DEBIT": "بدهکار دستی",
+            "MARKETPLACE_PENALTY": "جریمه بازارگاه",
+            "CORRECTION": "اصلاحیه"
+          },
+          "amount": "مبلغ (ریال)",
+          "reason": "دلیل",
+          "submit": "افزودن تعدیل"
+        }
+      }
+    },
+    "settlementDetail": {
+      "title": "تسویه‌حساب",
+      "loading": "در حال بارگذاری…",
+      "retry": "تلاش مجدد",
+      "actionFailed": "انجام این عملیات ممکن نشد.",
+      "breakdown": {
+        "gross": "ارزش ناخالص کالا",
+        "commission": "کمیسیون پلتفرم",
+        "refunds": "بازگشت‌ وجه‌ها",
+        "adjustments": "تعدیل‌ها",
+        "net": "مبلغ خالص قابل‌پرداخت"
+      },
+      "initiatedBy": "آغازشده توسط",
+      "approvedBy": "تأییدشده توسط",
+      "actions": "عملیات",
+      "approve": "تأیید",
+      "payoutReference": "شماره پیگیری پرداخت (اختیاری)",
+      "payout": "ثبت پرداخت",
+      "reason": "دلیل",
+      "cancel": "لغو تسویه‌حساب",
+      "markFailed": "علامت‌گذاری پرداخت ناموفق",
+      "items": "{count, plural, one {# قلم} other {# قلم}}"
+    },
+    "reconciliation": {
+      "title": "تطبیق بازارگاه",
+      "loading": "در حال بارگذاری…",
+      "retry": "تلاش مجدد",
+      "empty": "هنوز یافته‌ای برای تطبیق ثبت نشده است.",
+      "queueTitle": "یافته‌ها",
+      "resolved": "حل‌شده",
+      "expected": "مورد انتظار: {amount}",
+      "statement": "صورت‌حساب: {amount}",
+      "variance": "اختلاف: {amount}",
+      "notesLabel": "یادداشت حل‌وفصل",
+      "resolve": "حل‌وفصل",
+      "submitResolve": "ثبت",
+      "import": {
+        "title": "درون‌ریزی صورت‌حساب تسویه بازارگاه",
+        "channelAccountId": "شناسه حساب کانال بازارگاه",
+        "periodStart": "شروع دوره",
+        "periodEnd": "پایان دوره",
+        "currency": "واحد پول",
+        "linesLabel": "ردیف‌های صورت‌حساب (هر خط: externalOrderId,amount)",
+        "linesPlaceholder": "EXT-1001,1500000\nEXT-1002,890000",
+        "submit": "درون‌ریزی",
+        "invalid": "حساب کانال، هر دو تاریخ و حداقل یک ردیف معتبر را وارد کنید.",
+        "failed": "درون‌ریزی انجام نشد."
+      }
     }
   }
 }
