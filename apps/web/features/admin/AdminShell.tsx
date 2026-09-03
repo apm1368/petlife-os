@@ -28,6 +28,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/content", labelKey: "nav.content", permission: "content.view" },
   { href: "/content/media", labelKey: "nav.contentMedia", permission: "content.view" },
   { href: "/content/placements", labelKey: "nav.contentPlacements", permission: "content.view" },
+  { href: "/subscriptions", labelKey: "nav.subscriptions", permission: "subscription.view" },
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];

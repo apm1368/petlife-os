@@ -12,7 +12,8 @@
     "selected": "انتخاب‌شده",
     "logIn": "ورود",
     "support": "پشتیبانی",
-    "blog": "وبلاگ"
+    "blog": "وبلاگ",
+    "genericError": "مشکلی پیش آمد. لطفاً دوباره تلاش کنید."
   },
   "auth": {
     "welcome": {
@@ -193,14 +194,62 @@
       "ai": "پرسش از هوش مصنوعی",
       "upcoming": "پیش‌ رو",
       "exploreServices": "کاوش خدمات",
-      "shop": "فروشگاه"
+      "shop": "فروشگاه",
+      "subscription": "اشتراک"
     },
     "aiPlaceholder": "راهنمایی هوش مصنوعی به‌زودی فعال می‌شود.",
     "upcomingPlaceholder": "چیزی برنامه‌ریزی نشده است.",
     "exploreServicesHint": "آرایش، آموزش، پیاده‌روی، نگهداری، اقامت و تاکسی حیوانات.",
     "exploreServicesAction": "کاوش",
     "shopHint": "غذا، تنقلات، لوازم آرایشی و بیشتر.",
-    "shopAction": "مشاهده"
+    "shopAction": "مشاهده",
+    "subscriptionHint": "پلن، میزان استفاده و گزینه‌های ارتقا را ببینید.",
+    "subscriptionAction": "مدیریت"
+  },
+  "subscription": {
+    "title": "اشتراک",
+    "plansTitle": "پلن‌ها",
+    "viewPlans": "مشاهده پلن‌ها",
+    "resume": "ازسرگیری اشتراک",
+    "cancel": "لغو اشتراک",
+    "status": {
+      "TRIALING": "دوره آزمایشی",
+      "ACTIVE": "فعال",
+      "PAST_DUE": "مشکل در پرداخت",
+      "GRACE_PERIOD": "مهلت پرداخت",
+      "CANCEL_AT_PERIOD_END": "در حال لغو",
+      "CANCELLED": "لغو شده",
+      "EXPIRED": "منقضی شده"
+    },
+    "trialEndsAt": "دوره آزمایشی شما در {date} به پایان می‌رسد.",
+    "periodEndsAt": "دوره فعلی در {date} به پایان می‌رسد.",
+    "pastDueWarning": "پرداخت تمدید انجام نشد. لطفاً روش پرداخت خود را بررسی کنید — اشتراک شما همچنان کاملاً فعال است.",
+    "graceWarning": "تمدید همچنان ناموفق است. اشتراک شما فعلاً فعال می‌ماند، اما لطفاً هرچه زودتر پرداخت را انجام دهید تا دسترسی خود را از دست ندهید.",
+    "cancelScheduled": "اشتراک شما تا {date} فعال می‌ماند و سپس لغو خواهد شد.",
+    "downgradeScheduled": "تغییر به {plan} در پایان دوره فعلی.",
+    "entitlements": "امکانات شامل",
+    "entitlement": {
+      "petsMax": "تعداد حیوانات",
+      "membersMax": "اعضای خانواده",
+      "prioritySupport": "پشتیبانی اولویت‌دار"
+    },
+    "included": "شامل می‌شود",
+    "notIncluded": "شامل نمی‌شود",
+    "usageOf": "{used} از {limit}",
+    "unlimited": "نامحدود",
+    "overridden": "سفارشی",
+    "interval": {
+      "monthly": "ماهانه",
+      "annual": "سالانه"
+    },
+    "currentPlanBadge": "پلن فعلی",
+    "free": "رایگان",
+    "notAvailableHere": "در کشور شما در دسترس نیست",
+    "downgradeToFree": "بازگشت به رایگان",
+    "startTrial": "شروع دوره آزمایشی {days} روزه",
+    "subscribe": "اشتراک",
+    "upgradeNow": "ارتقا اکنون",
+    "switchAtRenewal": "تغییر در زمان تمدید"
   },
   "pets": {
     "myPets": "حیوانات خانگی من",
@@ -1646,7 +1695,8 @@
         "reconciliation": "تطبیق",
         "content": "محتوا",
         "contentMedia": "رسانه",
-        "contentPlacements": "بخش‌های محتوایی"
+        "contentPlacements": "بخش‌های محتوایی",
+        "subscriptions": "اشتراک‌ها"
       }
     },
     "common": {
@@ -2180,6 +2230,35 @@
         "saveFailed": "این بخش محتوایی ذخیره نشد.",
         "retry": "تلاش دوباره",
         "loading": "در حال بارگذاری بخش محتوایی…"
+      }
+    },
+    "subscriptions": {
+      "plansTitle": "پلن‌های اشتراک",
+      "householdsTitle": "اشتراک خانواده‌ها",
+      "householdDetailTitle": "اشتراک خانواده",
+      "filterByStatus": "وضعیت",
+      "allStatuses": "همه وضعیت‌ها",
+      "periodEndsAt": "دوره فعلی در {date} به پایان می‌رسد",
+      "cancelSubscription": "لغو اشتراک",
+      "billingAttempts": "تلاش‌های پرداخت",
+      "refund": "بازپرداخت",
+      "entitlementOverrides": "استثناهای امکانات",
+      "revoke": "لغو",
+      "revoked": "لغو شده",
+      "unlimitedShort": "∞",
+      "form": {
+        "code": "کد",
+        "nameFa": "نام (فارسی)",
+        "nameEn": "نام (انگلیسی)",
+        "countries": "کشورها",
+        "trialDays": "روزهای آزمایشی",
+        "createPlan": "ایجاد پلن",
+        "newMonthlyPrice": "قیمت ماهانه جدید (ریال)",
+        "addPrice": "افزودن قیمت",
+        "entitlementKey": "کلید امکان",
+        "entitlementType": "نوع",
+        "limitValue": "مقدار محدودیت",
+        "grantOverride": "اعطای استثنا"
       }
     }
   },

@@ -12,7 +12,8 @@
     "selected": "Selected",
     "logIn": "Log in",
     "support": "Support",
-    "blog": "Blog"
+    "blog": "Blog",
+    "genericError": "Something went wrong. Please try again."
   },
   "auth": {
     "welcome": {
@@ -193,14 +194,62 @@
       "ai": "Ask AI",
       "upcoming": "Upcoming",
       "exploreServices": "Explore Services",
-      "shop": "Shop"
+      "shop": "Shop",
+      "subscription": "Subscription"
     },
     "aiPlaceholder": "AI guidance is coming soon.",
     "upcomingPlaceholder": "Nothing scheduled yet.",
     "exploreServicesHint": "Grooming, training, walking, sitting, boarding, and pet taxi.",
     "exploreServicesAction": "Explore",
     "shopHint": "Food, treats, grooming supplies, and more.",
-    "shopAction": "Browse"
+    "shopAction": "Browse",
+    "subscriptionHint": "See your plan, usage, and upgrade options.",
+    "subscriptionAction": "Manage"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "plansTitle": "Plans",
+    "viewPlans": "View plans",
+    "resume": "Resume subscription",
+    "cancel": "Cancel subscription",
+    "status": {
+      "TRIALING": "Trial",
+      "ACTIVE": "Active",
+      "PAST_DUE": "Payment issue",
+      "GRACE_PERIOD": "Grace period",
+      "CANCEL_AT_PERIOD_END": "Cancelling",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "trialEndsAt": "Your trial ends on {date}.",
+    "periodEndsAt": "Current period ends on {date}.",
+    "pastDueWarning": "We couldn't charge for your renewal. Please check your payment method — your plan is still fully active.",
+    "graceWarning": "Your renewal is still failing. Your plan stays active for now, but please resolve payment soon to avoid losing access.",
+    "cancelScheduled": "Your subscription stays active until {date}, then it will be cancelled.",
+    "downgradeScheduled": "Switching to {plan} at the end of the current period.",
+    "entitlements": "What's included",
+    "entitlement": {
+      "petsMax": "Pets",
+      "membersMax": "Household members",
+      "prioritySupport": "Priority support"
+    },
+    "included": "Included",
+    "notIncluded": "Not included",
+    "usageOf": "{used} of {limit}",
+    "unlimited": "Unlimited",
+    "overridden": "custom",
+    "interval": {
+      "monthly": "Monthly",
+      "annual": "Annual"
+    },
+    "currentPlanBadge": "Current plan",
+    "free": "Free",
+    "notAvailableHere": "Not available in your country",
+    "downgradeToFree": "Downgrade to Free",
+    "startTrial": "Start {days}-day trial",
+    "subscribe": "Subscribe",
+    "upgradeNow": "Upgrade now",
+    "switchAtRenewal": "Switch at renewal"
   },
   "pets": {
     "myPets": "My Pets",
@@ -1646,7 +1695,8 @@
         "reconciliation": "Reconciliation",
         "content": "Content",
         "contentMedia": "Media",
-        "contentPlacements": "Placements"
+        "contentPlacements": "Placements",
+        "subscriptions": "Subscriptions"
       }
     },
     "common": {
@@ -2180,6 +2230,35 @@
         "saveFailed": "Could not save this placement.",
         "retry": "Retry",
         "loading": "Loading placement…"
+      }
+    },
+    "subscriptions": {
+      "plansTitle": "Subscription Plans",
+      "householdsTitle": "Household Subscriptions",
+      "householdDetailTitle": "Household Subscription",
+      "filterByStatus": "Status",
+      "allStatuses": "All statuses",
+      "periodEndsAt": "Current period ends {date}",
+      "cancelSubscription": "Cancel subscription",
+      "billingAttempts": "Billing attempts",
+      "refund": "Refund",
+      "entitlementOverrides": "Entitlement overrides",
+      "revoke": "Revoke",
+      "revoked": "Revoked",
+      "unlimitedShort": "∞",
+      "form": {
+        "code": "Code",
+        "nameFa": "Name (Persian)",
+        "nameEn": "Name (English)",
+        "countries": "Countries",
+        "trialDays": "Trial days",
+        "createPlan": "Create plan",
+        "newMonthlyPrice": "New monthly price (IRR)",
+        "addPrice": "Add price",
+        "entitlementKey": "Entitlement key",
+        "entitlementType": "Type",
+        "limitValue": "Limit value",
+        "grantOverride": "Grant override"
       }
     }
   },
