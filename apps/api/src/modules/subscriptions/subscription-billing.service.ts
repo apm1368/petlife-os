@@ -145,8 +145,7 @@ export class SubscriptionBillingService {
     const price = await this.plans.resolveActivePrice(planId, countryCode, billingInterval);
 
     return this.prisma.$transaction(async (tx) => {
-      const sub = await this.subscriptions.getOrCreateRaw(householdId, tx);
-      await this.lockSubscription(tx, sub.id);
+      const sub = await this.subscriptions.lockAndGetCurrent(householdId, tx);
 
       if (idempotencyKey) {
         const existing = await tx.subscriptionBillingAttempt.findUnique({ where: { idempotencyKey } });
@@ -339,14 +338,16 @@ export class SubscriptionBillingService {
    * `SubscriptionService`.
    */
   async refundBillingAttempt(billingAttemptId: string, reason: string, requestedByAdminUserId: string): Promise<void> {
-    const attempt = await this.prisma.subscriptionBillingAttempt.findUnique({ where: { id: billingAttemptId } });
-    if (!attempt) throw new SubscriptionBillingAttemptNotFoundException({ billingAttemptId });
-    if (attempt.status !== SubscriptionBillingAttemptStatus.SUCCEEDED) throw new SubscriptionBillingAttemptNotRefundableException({ billingAttemptId, status: attempt.status });
-
-    const existingRefund = attempt.paymentIntentId ? await this.prisma.refund.findFirst({ where: { paymentIntentId: attempt.paymentIntentId } }) : null;
-    if (existingRefund) throw new SubscriptionBillingAttemptNotRefundableException({ billingAttemptId, reason: "ALREADY_REFUNDED" });
-
     await this.prisma.$transaction(async (tx) => {
+      // Locked first so two concurrent refund requests for the same attempt can never both pass the "not already refunded" check below.
+      const [locked] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "subscription_billing_attempts" WHERE "id" = ${billingAttemptId}::uuid FOR UPDATE`;
+      if (!locked) throw new SubscriptionBillingAttemptNotFoundException({ billingAttemptId });
+      const attempt = await tx.subscriptionBillingAttempt.findUniqueOrThrow({ where: { id: billingAttemptId } });
+      if (attempt.status !== SubscriptionBillingAttemptStatus.SUCCEEDED) throw new SubscriptionBillingAttemptNotRefundableException({ billingAttemptId, status: attempt.status });
+
+      const existingRefund = attempt.paymentIntentId ? await tx.refund.findFirst({ where: { paymentIntentId: attempt.paymentIntentId } }) : null;
+      if (existingRefund) throw new SubscriptionBillingAttemptNotRefundableException({ billingAttemptId, reason: "ALREADY_REFUNDED" });
+
       await tx.refund.create({
         data: { paymentIntentId: attempt.paymentIntentId, amount: attempt.amount, currency: attempt.currency, status: RefundStatus.SUCCEEDED, reason, requestedByAdminUserId, completedAt: new Date() },
       });

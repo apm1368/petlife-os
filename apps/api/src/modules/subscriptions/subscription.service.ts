@@ -78,6 +78,24 @@ export class SubscriptionService {
     }
   }
 
+  /**
+   * The actual mechanism behind "test concurrent: subscription creation,
+   * renewal, upgrade, cancel" (spec) for every mutation that starts from a
+   * householdId rather than an already-locked subscription row: get-or-
+   * create the row (safe/idempotent on its own), then lock it by id
+   * (`SELECT ... FOR UPDATE`, the same pattern `DisputeService.transition`/
+   * `SupportCaseService.transition` already use), then re-read it fresh —
+   * never validate a status transition or decide "is there a current
+   * period to end" against the pre-lock snapshot, since a concurrent
+   * transaction could have committed changes to this exact row while this
+   * caller was still resolving that snapshot.
+   */
+  async lockAndGetCurrent(householdId: string, tx: Prisma.TransactionClient): Promise<SubscriptionWithRelations> {
+    const sub = await this.getOrCreateRaw(householdId, tx);
+    await tx.$queryRaw`SELECT "id" FROM "subscriptions" WHERE "id" = ${sub.id}::uuid FOR UPDATE`;
+    return tx.subscription.findUniqueOrThrow({ where: { id: sub.id }, include: SUBSCRIPTION_INCLUDE });
+  }
+
   async getCurrent(householdId: string): Promise<SubscriptionDto> {
     return toSubscriptionDto(await this.getOrCreateRaw(householdId));
   }
@@ -112,45 +130,47 @@ export class SubscriptionService {
     const plan = await this.plans.getRawById(planId);
     if (!plan.trialDays || plan.trialDays <= 0) throw new SubscriptionTrialNotEligibleException({ planId, reason: "PLAN_HAS_NO_TRIAL" });
 
-    const sub = await this.getOrCreateRaw(householdId);
-    const trialEligibleStatuses: SubscriptionStatus[] = [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED, SubscriptionStatus.EXPIRED];
-    if (!trialEligibleStatuses.includes(sub.status)) {
-      throw new SubscriptionTrialNotEligibleException({ planId, reason: "ALREADY_SUBSCRIBED" });
-    }
-    this.assertTransition(sub.status, SubscriptionStatus.TRIALING);
-
-    const alreadyTrialed = await this.prisma.subscriptionTrial.findUnique({ where: { householdId_planId: { householdId, planId } } });
-    if (alreadyTrialed) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
-
     const startAt = new Date();
     const endAt = new Date(startAt.getTime() + plan.trialDays * 24 * 60 * 60 * 1000);
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED } });
-        const period = await tx.subscriptionPeriod.create({ data: { subscriptionId: sub.id, planId, priceId: null, startAt, endAt, isTrial: true, status: SubscriptionPeriodStatus.ACTIVE } });
-        const updated = await tx.subscription.update({
-          where: { id: sub.id },
-          data: {
-            planId,
-            priceId: null,
-            status: SubscriptionStatus.TRIALING,
-            currentPeriodId: period.id,
-            trialEndsAt: endAt,
-            gracePeriodEndsAt: null,
-            cancelRequestedAt: null,
-            cancelEffectiveAt: null,
-            pendingPlanId: null,
-            pendingPriceId: null,
-            expiredAt: null,
-          },
-          include: SUBSCRIPTION_INCLUDE,
-        });
-        await tx.subscriptionTrial.create({ data: { householdId, subscriptionId: sub.id, planId, startAt, endAt } });
-        await tx.subscriptionChange.create({ data: { subscriptionId: sub.id, type: SubscriptionChangeType.TRIAL_STARTED, fromPlanId: sub.planId, toPlanId: planId, effectiveAt: startAt, initiatedByUserId: userId } });
-        await this.events.publish("SubscriptionStarted", { subscriptionId: sub.id, householdId, planId, isTrial: true }, { tx, aggregateType: "Subscription", aggregateId: sub.id });
-        return updated;
-      }).then(toSubscriptionDto);
+      return await this.prisma
+        .$transaction(async (tx) => {
+          const sub = await this.lockAndGetCurrent(householdId, tx);
+          const trialEligibleStatuses: SubscriptionStatus[] = [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED, SubscriptionStatus.EXPIRED];
+          if (!trialEligibleStatuses.includes(sub.status)) {
+            throw new SubscriptionTrialNotEligibleException({ planId, reason: "ALREADY_SUBSCRIBED" });
+          }
+          this.assertTransition(sub.status, SubscriptionStatus.TRIALING);
+
+          const alreadyTrialed = await tx.subscriptionTrial.findUnique({ where: { householdId_planId: { householdId, planId } } });
+          if (alreadyTrialed) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
+
+          if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED } });
+          const period = await tx.subscriptionPeriod.create({ data: { subscriptionId: sub.id, planId, priceId: null, startAt, endAt, isTrial: true, status: SubscriptionPeriodStatus.ACTIVE } });
+          const updated = await tx.subscription.update({
+            where: { id: sub.id },
+            data: {
+              planId,
+              priceId: null,
+              status: SubscriptionStatus.TRIALING,
+              currentPeriodId: period.id,
+              trialEndsAt: endAt,
+              gracePeriodEndsAt: null,
+              cancelRequestedAt: null,
+              cancelEffectiveAt: null,
+              pendingPlanId: null,
+              pendingPriceId: null,
+              expiredAt: null,
+            },
+            include: SUBSCRIPTION_INCLUDE,
+          });
+          await tx.subscriptionTrial.create({ data: { householdId, subscriptionId: sub.id, planId, startAt, endAt } });
+          await tx.subscriptionChange.create({ data: { subscriptionId: sub.id, type: SubscriptionChangeType.TRIAL_STARTED, fromPlanId: sub.planId, toPlanId: planId, effectiveAt: startAt, initiatedByUserId: userId } });
+          await this.events.publish("SubscriptionStarted", { subscriptionId: sub.id, householdId, planId, isTrial: true }, { tx, aggregateType: "Subscription", aggregateId: sub.id });
+          return updated;
+        })
+        .then(toSubscriptionDto);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
       throw error;
@@ -167,15 +187,15 @@ export class SubscriptionService {
    * at the very renewal it takes effect.
    */
   async scheduleDowngrade(householdId: string, targetPlanId: string, userId: string): Promise<SubscriptionDto> {
-    const sub = await this.getOrCreateRaw(householdId);
     const countryCode = await resolveHouseholdCountry(this.prisma, householdId);
     const targetPlan = await this.plans.getRawById(targetPlanId);
     if (!targetPlan.isFree) this.plans.assertSubscribable(targetPlan, countryCode);
 
-    const interval = sub.price?.billingInterval;
-    const targetPrice = targetPlan.isFree || !interval ? null : await this.plans.resolveActivePrice(targetPlanId, countryCode, interval);
-
     const updated = await this.prisma.$transaction(async (tx) => {
+      const sub = await this.lockAndGetCurrent(householdId, tx);
+      const interval = sub.price?.billingInterval;
+      const targetPrice = targetPlan.isFree || !interval ? null : await this.plans.resolveActivePrice(targetPlanId, countryCode, interval);
+
       const row = await tx.subscription.update({ where: { id: sub.id }, data: { pendingPlanId: targetPlanId, pendingPriceId: targetPrice?.id ?? null }, include: SUBSCRIPTION_INCLUDE });
       await tx.subscriptionChange.create({
         data: { subscriptionId: sub.id, type: SubscriptionChangeType.DOWNGRADE_SCHEDULED, fromPlanId: sub.planId, toPlanId: targetPlanId, effectiveAt: sub.currentPeriod?.endAt ?? sub.trialEndsAt ?? null, initiatedByUserId: userId },
@@ -188,11 +208,11 @@ export class SubscriptionService {
 
   /** spec: "no dark patterns... clearly state the access end date." */
   async cancelAtPeriodEnd(householdId: string, userId: string): Promise<SubscriptionDto> {
-    const sub = await this.getOrCreateRaw(householdId);
-    this.assertTransition(sub.status, SubscriptionStatus.CANCEL_AT_PERIOD_END);
-    const effectiveAt = sub.currentPeriod?.endAt ?? sub.trialEndsAt ?? sub.gracePeriodEndsAt ?? new Date();
-
     const updated = await this.prisma.$transaction(async (tx) => {
+      const sub = await this.lockAndGetCurrent(householdId, tx);
+      this.assertTransition(sub.status, SubscriptionStatus.CANCEL_AT_PERIOD_END);
+      const effectiveAt = sub.currentPeriod?.endAt ?? sub.trialEndsAt ?? sub.gracePeriodEndsAt ?? new Date();
+
       const row = await tx.subscription.update({ where: { id: sub.id }, data: { status: SubscriptionStatus.CANCEL_AT_PERIOD_END, cancelRequestedAt: new Date(), cancelEffectiveAt: effectiveAt }, include: SUBSCRIPTION_INCLUDE });
       await tx.subscriptionChange.create({ data: { subscriptionId: sub.id, type: SubscriptionChangeType.CANCEL_SCHEDULED, effectiveAt, initiatedByUserId: userId } });
       await this.events.publish("SubscriptionCancelRequested", { subscriptionId: sub.id, householdId, effectiveAt: effectiveAt.toISOString() }, { tx, aggregateType: "Subscription", aggregateId: sub.id });
@@ -202,11 +222,11 @@ export class SubscriptionService {
   }
 
   async resumeCancellation(householdId: string, userId: string): Promise<SubscriptionDto> {
-    const sub = await this.getOrCreateRaw(householdId);
-    if (sub.status !== SubscriptionStatus.CANCEL_AT_PERIOD_END) throw new SubscriptionAlreadyCancelledException({ status: sub.status });
-    this.assertTransition(sub.status, SubscriptionStatus.ACTIVE);
-
     const updated = await this.prisma.$transaction(async (tx) => {
+      const sub = await this.lockAndGetCurrent(householdId, tx);
+      if (sub.status !== SubscriptionStatus.CANCEL_AT_PERIOD_END) throw new SubscriptionAlreadyCancelledException({ status: sub.status });
+      this.assertTransition(sub.status, SubscriptionStatus.ACTIVE);
+
       const row = await tx.subscription.update({ where: { id: sub.id }, data: { status: SubscriptionStatus.ACTIVE, cancelRequestedAt: null, cancelEffectiveAt: null }, include: SUBSCRIPTION_INCLUDE });
       await tx.subscriptionChange.create({ data: { subscriptionId: sub.id, type: SubscriptionChangeType.CANCEL_REVERSED, initiatedByUserId: userId } });
       await this.events.publish("SubscriptionCancelReversed", { subscriptionId: sub.id, householdId }, { tx, aggregateType: "Subscription", aggregateId: sub.id });
