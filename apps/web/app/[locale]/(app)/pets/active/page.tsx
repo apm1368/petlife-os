@@ -12,7 +12,9 @@ export default function ActivePetRedirectPage() {
   const locale = useLocale();
 
   useEffect(() => {
-    if (activePetId) router.replace(`/${locale}/pets/${activePetId}`);
+    const view = new URLSearchParams(window.location.search).get("view");
+    const suffix = view === "health" || view === "care" ? `/${view}` : "";
+    router.replace(activePetId ? `/${locale}/pets/${encodeURIComponent(activePetId)}${suffix}` : `/${locale}/pets`);
   }, [activePetId, locale, router]);
 
   return <Skeleton className="h-40 w-full" aria-label="Loading" />;

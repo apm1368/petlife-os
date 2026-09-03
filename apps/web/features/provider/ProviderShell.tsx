@@ -1,4 +1,5 @@
 "use client";
+import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -29,7 +30,7 @@ const NAV_ITEMS = [
  * (ContextSurface/StatusLabel/theme tokens), completely different identity
  * axis: provider organization context instead of household/pet context.
  */
-export function ProviderShell({ children }: { children: React.ReactNode }) {
+function LiveProviderShell({ children }: { children: React.ReactNode }) {
   const [sessionState, setSessionState] = useState<SessionState>("loading");
   const { isLoading: isProviderLoading } = useProviderBootstrap();
   const context = useProviderStore((s) => s.context);
@@ -166,4 +167,10 @@ export function ProviderShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
     </div>
   );
+}
+
+export function ProviderShell({ children }: { children: React.ReactNode }) {
+  const locale = useLocale();
+  const t = useTranslations("provider.shell");
+  return <LocalPreviewGate title="provider" items={NAV_ITEMS.map(item => ({ href: `/${locale}/provider${item.href}`, label: t(item.labelKey) }))} live={<LiveProviderShell>{children}</LiveProviderShell>}>{children}</LocalPreviewGate>;
 }

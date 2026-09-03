@@ -1,4 +1,6 @@
 "use client";
+import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
+import { SellerPreviewContent } from "@/features/local-preview/SellerPreviewContent";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -33,7 +35,7 @@ const NAV_ITEMS = [
  * pattern (Handoff 05) exactly, since Seller OS's SellerContextDto has the
  * identical active/memberships shape.
  */
-export function SellerShell({ children }: { children: React.ReactNode }) {
+function LiveSellerShell({ children }: { children: React.ReactNode }) {
   const [sessionState, setSessionState] = useState<SessionState>("loading");
   const { isLoading: isSellerLoading } = useSellerBootstrap();
   const context = useSellerStore((s) => s.context);
@@ -156,4 +158,10 @@ export function SellerShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
     </div>
   );
+}
+
+export function SellerShell({ children }: { children: React.ReactNode }) {
+  const locale = useLocale();
+  const t = useTranslations("seller.shell");
+  return <LocalPreviewGate title="seller" items={NAV_ITEMS.map(item => ({ href: `/${locale}/seller${item.href}`, label: t(item.labelKey) }))} live={<LiveSellerShell>{children}</LiveSellerShell>}><SellerPreviewContent>{children}</SellerPreviewContent></LocalPreviewGate>;
 }

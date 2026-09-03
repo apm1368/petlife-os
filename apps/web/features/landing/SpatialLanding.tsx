@@ -8,8 +8,11 @@ import { LandingTheme } from "./LandingTheme";
 import { landingCopy } from "./copy";
 import { cameraAt, cameraStops, clampProgress, nearestStop, wheelProgress } from "./camera";
 import { landingDestination } from "./destination";
+import { publicDestinations } from "@/features/navigation/ProductNavigation";
+import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 
 export function SpatialLanding({ locale }: { locale: AppLocale }) {
+  const preview = useLocalPreview();
   const copy = landingCopy[locale],
     root = useRef<HTMLDivElement>(null),
     camera = useRef<HTMLDivElement>(null),
@@ -280,9 +283,13 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
             <div aria-label={copy.theme}>
               <LandingTheme />
             </div>
-            <Link href={`/${locale}/welcome`}>{copy.signIn}</Link>
+            <Link href={`/${locale}${preview ? "/home" : "/welcome"}`}>{preview ? (locale === "fa" ? "برنامه" : "Open app") : copy.signIn}</Link>
           </div>
         </header>
+        <nav className="spatial-product-nav" aria-label={locale === "fa" ? "بخش‌های محصول" : "Product sections"}>
+          {publicDestinations.map(([path, fa, en]) => <Link key={path} href={`/${locale}${path}`}>{locale === "fa" ? fa : en}</Link>)}
+          <Link href={`/${locale}${preview ? "/pets" : "/register"}`}>{preview ? (locale === "fa" ? "حیوانات من" : "My pets") : (locale === "fa" ? "ساخت حساب" : "Create account")}</Link>
+        </nav>
         <button
           className="cookie-identity"
           onClick={() => focusStop(1)}

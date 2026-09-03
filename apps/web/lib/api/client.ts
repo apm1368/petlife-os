@@ -1,4 +1,5 @@
 import type { ApiErrorBody } from "@petlife/types";
+import { isLocalPreview } from "@/lib/local-preview";
 
 const API_ORIGIN = process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:4000";
 /** Exposed for the one legitimate case a caller needs a full URL rather than a fetch through apiFetch: Google's OAuth login is a real browser navigation, not an XHR. */
@@ -73,6 +74,9 @@ async function send<T>(path: string, options: ApiFetchOptions): Promise<{ respon
  * is treated as a one-time "prime and retry" rather than a hard failure.
  */
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
+  if (isLocalPreview() && options.method && options.method !== "GET") {
+    throw new ApiError({ code: "LOCAL_PREVIEW_READ_ONLY", message: "Local preview is read-only", requestId: "local-preview" }, 403);
+  }
   let { response, payload } = await send<ApiErrorBody | T>(path, options);
 
   if (response.status === 403 && (payload as ApiErrorBody)?.error?.code === "CSRF_TOKEN_INVALID") {

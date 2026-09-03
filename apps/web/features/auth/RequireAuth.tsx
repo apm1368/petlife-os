@@ -7,6 +7,7 @@ import { Skeleton } from "@petlife/ui";
 import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { buildLoginUrl } from "@/lib/auth/return-to";
+import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 
 /**
  * "Auth-on-action": wraps a single gated action (booking creation, etc.)
@@ -17,6 +18,13 @@ import { buildLoginUrl } from "@/lib/auth/return-to";
  * Home.
  */
 export function RequireAuth({ children }: { children: React.ReactNode }) {
+  const preview = useLocalPreview();
+  if (preview === null) return null;
+  if (preview) return <>{children}</>;
+  return <LiveRequireAuth>{children}</LiveRequireAuth>;
+}
+
+function LiveRequireAuth({ children }: { children: React.ReactNode }) {
   useSessionBootstrap();
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
@@ -25,7 +33,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.replace(buildLoginUrl(locale, pathname));
+      router.replace(buildLoginUrl(locale, pathname + window.location.search));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);

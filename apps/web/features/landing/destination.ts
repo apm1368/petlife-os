@@ -12,8 +12,9 @@ export function landingDestination(locale: AppLocale, action: string): string {
     case "taxi":
       return `/${locale}/services`;
     case "cookie":
-    case "health":
       return `/${locale}/pets`;
+    case "health":
+      return `/${locale}/pets/active?view=health`;
     default:
       return `/${locale}/welcome`;
   }

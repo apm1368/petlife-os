@@ -8,6 +8,8 @@ import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
+import { ProductNavigation } from "@/features/navigation/ProductNavigation";
+import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 
 /**
  * The shell for public browsing surfaces (vet/service/shop discovery) —
@@ -26,6 +28,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
+  const preview = useLocalPreview();
 
   return (
     <div className="min-h-screen bg-surface-base">
@@ -36,11 +39,11 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
-          {status === "authenticated" && user ? (
+          {preview ? <Link href={`/${locale}/home`}>{locale === "fa" ? "ورود به برنامه" : "Open app"}</Link> : status === "authenticated" && user ? (
             <Link href={`/${locale}/home`}>
               <Avatar name={user.displayName} src={user.avatarUrl} size="sm" />
             </Link>
-          ) : status !== "loading" && status !== "idle" ? (
+          ) : (
             <Button
               variant="secondary"
               size="sm"
@@ -52,9 +55,10 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             >
               {t("logIn")}
             </Button>
-          ) : null}
+          )}
         </div>
       </header>
+      <ProductNavigation />
       <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
     </div>
   );

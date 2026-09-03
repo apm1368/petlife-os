@@ -1,4 +1,5 @@
 "use client";
+import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -38,7 +39,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
  * `/admin/*` route is independently guarded server-side, so hiding a link
  * here is never itself the security boundary.
  */
-export function AdminShell({ children }: { children: React.ReactNode }) {
+function LiveAdminShell({ children }: { children: React.ReactNode }) {
   const [sessionState, setSessionState] = useState<SessionState>("loading");
   const { isLoading } = useAdminBootstrap();
   const context = useAdminStore((s) => s.context);
@@ -117,4 +118,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto max-w-4xl px-4 py-4">{children}</main>
     </div>
   );
+}
+
+export function AdminShell({ children }: { children: React.ReactNode }) {
+  const locale = useLocale();
+  const t = useTranslations("admin.shell");
+  return <LocalPreviewGate title="admin" items={NAV_ITEMS.map(item => ({ href: `/${locale}/admin${item.href}`, label: t(item.labelKey) }))} live={<LiveAdminShell>{children}</LiveAdminShell>}>{children}</LocalPreviewGate>;
 }

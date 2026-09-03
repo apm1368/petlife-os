@@ -1,6 +1,24 @@
 body:has(.spatial-landing) {
   overflow: hidden;
 }
+.spatial-product-nav {
+  position: absolute;
+  top: 76px;
+  inset-inline-start: 24px;
+  inset-inline-end: 24px;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: auto;
+}
+.spatial-product-nav a {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--surface-base, #faf9f6);
+  border: 1px solid var(--border-subtle, #d9ded7);
+  font-size: 12px;
+}
 .spatial-landing {
   height: 100dvh;
   width: 100%;

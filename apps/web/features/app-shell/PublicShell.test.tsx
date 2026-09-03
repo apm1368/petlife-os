@@ -16,7 +16,7 @@ it("keeps discovery accessible and preserves filters through login", () => {
   window.history.replaceState({}, "", "/en/shop/products?category=food");
   renderWithIntl(<PublicShell>Public products</PublicShell>);
   expect(screen.getByText("Public products")).toBeTruthy();
-  expect(screen.getByRole("link").getAttribute("href")).toBe("/en");
+  expect(screen.getByRole("link", { name: "PET LIFE OS" }).getAttribute("href")).toBe("/en");
   fireEvent.click(screen.getByRole("button"));
   expect(push).toHaveBeenCalledWith("/en/welcome?returnTo=%2Fen%2Fshop%2Fproducts%3Fcategory%3Dfood");
   window.history.replaceState({}, "", "/");

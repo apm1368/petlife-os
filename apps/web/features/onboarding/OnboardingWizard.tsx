@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
-import { Skeleton } from "@petlife/ui";
+import { ErrorRecovery, Skeleton } from "@petlife/ui";
 import { onboardingService } from "@/services/onboarding.service";
 import { petsService } from "@/services/pets.service";
 import { useOnboardingStore } from "@/stores/onboarding-store";
@@ -41,6 +41,7 @@ type Step = (typeof STEP_ORDER)[number];
 
 function OnboardingWizardInner() {
   const [step, setStep] = useState<Step | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const update = useOnboardingStore((s) => s.update);
   const router = useRouter();
   const locale = useLocale();
@@ -82,7 +83,7 @@ function OnboardingWizardInner() {
       setStep(next);
     }
 
-    void resume();
+    void resume().catch(() => { if (!cancelled) setLoadError(true); });
     return () => {
       cancelled = true;
     };
@@ -93,6 +94,7 @@ function OnboardingWizardInner() {
     setStep(next);
   }
 
+  if (loadError) return <ErrorRecovery title={locale === "fa" ? "اتصال به اطلاعات راه‌اندازی برقرار نشد" : "Could not load onboarding"} message="" retryLabel={locale === "fa" ? "تلاش دوباره" : "Retry"} onRetry={() => window.location.reload()} />;
   if (!step) {
     return <Skeleton className="h-64 w-full" aria-label="Loading onboarding" />;
   }

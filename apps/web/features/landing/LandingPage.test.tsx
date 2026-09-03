@@ -73,7 +73,7 @@ describe("Camera and intent boundaries", () => {
       expect(landingDestination(locale, "shop")).toBe(`/${locale}/shop`);
       expect(landingDestination(locale, "vet")).toBe(`/${locale}/vet/find`);
       expect(landingDestination(locale, "care")).toBe(`/${locale}/services`);
-      expect(landingDestination(locale, "health")).toBe(`/${locale}/pets`);
+      expect(landingDestination(locale, "health")).toBe(`/${locale}/pets/active?view=health`);
       expect(landingDestination(locale, "https://evil.example")).toBe(`/${locale}/welcome`);
     }
   });

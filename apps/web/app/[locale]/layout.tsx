@@ -7,6 +7,7 @@ import { locales, localeDirection, isAppLocale } from "@/lib/i18n/config";
 import { themeInitScript } from "@/lib/theme/theme-script";
 import { inter, vazirmatn } from "@/lib/fonts";
 import "../globals.css";
+import { LocalReviewTools } from "@/features/local-preview/LocalReviewTools";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -37,7 +38,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider><LocalReviewTools>{children}</LocalReviewTools></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

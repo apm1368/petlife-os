@@ -1,4 +1,6 @@
 "use client";
+import { ProductNavigation } from "@/features/navigation/ProductNavigation";
+import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -10,7 +12,7 @@ import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+function LiveAppShell({ children }: { children: React.ReactNode }) {
   const { isLoading, error } = useAppBootstrap();
   const user = useSessionStore((s) => s.user);
   const status = useSessionStore((s) => s.status);
@@ -71,7 +73,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {user ? <Avatar name={user.displayName} src={user.avatarUrl} size="sm" /> : null}
         </div>
       </header>
+      <ProductNavigation audience="consumer" />
       <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
     </div>
   );
+}
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  return <LocalPreviewGate title="PET LIFE" live={<LiveAppShell>{children}</LiveAppShell>}>{children}</LocalPreviewGate>;
 }
