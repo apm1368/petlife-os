@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { Avatar, IconButton, Skeleton } from "@petlife/ui";
+import { Avatar, ErrorRecovery, IconButton, Skeleton } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -11,19 +11,35 @@ import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { isLoading } = useAppBootstrap();
+  const { isLoading, error } = useAppBootstrap();
   const user = useSessionStore((s) => s.user);
   const status = useSessionStore((s) => s.status);
   const t = useTranslations("common");
   const router = useRouter();
+  const tErrors = useTranslations("errors");
   const locale = useLocale();
 
   useEffect(() => {
     if (!isLoading && status === "unauthenticated") {
-      router.replace(`/${locale}/welcome`);
+      router.replace(
+        `/${locale}/welcome?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, status]);
+
+  if (error) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-6">
+        <ErrorRecovery
+          title={tErrors("generic")}
+          message=""
+          retryLabel={t("retry")}
+          onRetry={() => window.location.reload()}
+        />
+      </main>
+    );
+  }
 
   if (isLoading || status !== "authenticated") {
     return (
