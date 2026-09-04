@@ -17,3 +17,4 @@ export * from "./PriorityAction";
 export * from "./ErrorRecovery";
 export * from "./OfflineBanner";
 export * from "./EmptyState";
+export { Sun, Moon, Monitor, Menu, X } from "lucide-react";

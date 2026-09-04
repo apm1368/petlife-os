@@ -8,8 +8,9 @@ import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
-import { ProductNavigation } from "@/features/navigation/ProductNavigation";
+import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavigation";
 import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
+import { PublicFooter } from "./PublicFooter";
 
 /**
  * The shell for public browsing surfaces (vet/service/shop discovery) —
@@ -32,11 +33,12 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-surface-base">
-      <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
+      <header className="public-site-header border-b border-border-subtle bg-surface-elevated px-4 py-3">
         <Link href={`/${locale}`} className="text-section-title text-text-primary">
           {t("appName")}
         </Link>
-        <div className="flex items-center gap-2">
+        <PublicPrimaryNavigation />
+        <div className="public-header-actions flex items-center gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
           {preview ? <Link href={`/${locale}/home`}>{locale === "fa" ? "ورود به برنامه" : "Open app"}</Link> : status === "authenticated" && user ? (
@@ -58,8 +60,8 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           )}
         </div>
       </header>
-      <ProductNavigation />
       <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
+      <PublicFooter />
     </div>
   );
 }

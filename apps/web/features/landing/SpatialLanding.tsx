@@ -8,7 +8,7 @@ import { LandingTheme } from "./LandingTheme";
 import { landingCopy } from "./copy";
 import { cameraAt, cameraStops, clampProgress, nearestStop, wheelProgress } from "./camera";
 import { landingDestination } from "./destination";
-import { publicDestinations } from "@/features/navigation/ProductNavigation";
+import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavigation";
 import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 
 export function SpatialLanding({ locale }: { locale: AppLocale }) {
@@ -211,7 +211,7 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
           <div ref={parallax} className="parallax-layer">
             <div className="persistent-world">
               <Image
-                src="/images/landing/cookie-world-day-clean.webp"
+                src="/images/landing/petlife-city-day-v2.png"
                 unoptimized
                 alt=""
                 fill
@@ -221,7 +221,7 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
                 onLoad={() => setReady(true)}
               />
               <Image
-                src="/images/landing/cookie-world-night-clean.webp"
+                src="/images/landing/petlife-city-day-v2.png"
                 unoptimized
                 alt=""
                 fill
@@ -285,10 +285,7 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
             </div>
             <Link href={`/${locale}${preview ? "/home" : "/welcome"}`}>{preview ? (locale === "fa" ? "برنامه" : "Open app") : copy.signIn}</Link>
           </div>
-        <nav className="spatial-product-nav" aria-label={locale === "fa" ? "بخش‌های محصول" : "Product sections"}>
-          {publicDestinations.map(([path, fa, en]) => <Link key={path} href={`/${locale}${path}`}>{locale === "fa" ? fa : en}</Link>)}
-          <Link href={`/${locale}${preview ? "/pets" : "/register"}`}>{preview ? (locale === "fa" ? "حیوانات من" : "My pets") : (locale === "fa" ? "ساخت حساب" : "Create account")}</Link>
-        </nav>
+        <PublicPrimaryNavigation />
         </header>
         <button
           className="cookie-identity"
@@ -297,10 +294,6 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
         >
           <span className="cookie-photo">
             <Image src="/images/landing/cookie-reference.jpg" alt="" width={120} height={120} priority />
-          </span>
-          <span>
-            <strong>{copy.pet}</strong>
-            <bdi>{copy.breed}</bdi>
           </span>
         </button>
         <div className="context-copy" key={cameraStops[active]!.id}>
