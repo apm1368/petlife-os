@@ -285,11 +285,11 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
             </div>
             <Link href={`/${locale}${preview ? "/home" : "/welcome"}`}>{preview ? (locale === "fa" ? "برنامه" : "Open app") : copy.signIn}</Link>
           </div>
-        </header>
         <nav className="spatial-product-nav" aria-label={locale === "fa" ? "بخش‌های محصول" : "Product sections"}>
           {publicDestinations.map(([path, fa, en]) => <Link key={path} href={`/${locale}${path}`}>{locale === "fa" ? fa : en}</Link>)}
           <Link href={`/${locale}${preview ? "/pets" : "/register"}`}>{preview ? (locale === "fa" ? "حیوانات من" : "My pets") : (locale === "fa" ? "ساخت حساب" : "Create account")}</Link>
         </nav>
+        </header>
         <button
           className="cookie-identity"
           onClick={() => focusStop(1)}

@@ -37,9 +37,6 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           {t("appName")}
         </Link>
         <div className="flex items-center gap-2">
-          <Link href={`/${locale}/blog`} className="text-body text-text-secondary">
-            {t("blog")}
-          </Link>
           <LocaleSwitcher />
           <ThemeToggle />
           {preview ? <Link href={`/${locale}/home`}>{locale === "fa" ? "ورود به برنامه" : "Open app"}</Link> : status === "authenticated" && user ? (

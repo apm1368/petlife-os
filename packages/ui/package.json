@@ -12,8 +12,10 @@
     "react-dom": "^18.3.1"
   },
   "dependencies": {
+    "@petlife/types": "workspace:*",
     "clsx": "^2.1.1",
-    "@petlife/types": "workspace:*"
+    "lucide-react": "^1.40.0",
+    "motion": "13.2.0"
   },
   "devDependencies": {
     "@petlife/tsconfig": "workspace:*",

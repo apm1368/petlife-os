@@ -147,7 +147,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
     await loadShared();
   }
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={loadShared} />;
+  if (error && articleId) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={loadShared} />;
   if (articleId && !article) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   const status = localeContent?.status;
@@ -157,6 +157,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
 
   return (
     <div className="flex flex-col gap-5">
+      {error && <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={loadShared} />}
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{articleId ? t("editTitle") : t("createTitle")}</h1>
         {articleId ? (

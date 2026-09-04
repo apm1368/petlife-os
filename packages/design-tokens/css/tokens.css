@@ -8,20 +8,20 @@
   color-scheme: light;
 
   --surface-base: #faf9f6;
-  --surface-subtle: #f1efe9;
+  --surface-subtle: #f0f3ee;
   --surface-elevated: #ffffff;
   --surface-overlay: rgba(31, 28, 23, 0.45);
 
-  --text-primary: #211d17;
-  --text-secondary: #5c564a;
+  --text-primary: #1b2421;
+  --text-secondary: #59635e;
   --text-inverse: #faf9f6;
   --text-disabled: #a39c8d;
 
-  --border-subtle: #e3ded2;
-  --border-strong: #c9c1af;
+  --border-subtle: #e4e8e2;
+  --border-strong: #bbc6bd;
 
-  --brand-natural: #6b7f4f;
-  --brand-natural-strong: #556a3d;
+  --brand-natural: #17633f;
+  --brand-natural-strong: #104e32;
   --brand-mint: #3fae8f;
   --brand-mint-strong: #2f8e73;
 
@@ -38,28 +38,28 @@
 
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-lg: 16px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --surface-base: #211e1a;
-    --surface-subtle: #2a2622;
-    --surface-elevated: #322e28;
+    --surface-base: #131a1b;
+    --surface-subtle: #192224;
+    --surface-elevated: #202a2c;
     --surface-overlay: rgba(0, 0, 0, 0.55);
 
-    --text-primary: #f3f0e8;
-    --text-secondary: #c3bcab;
-    --text-inverse: #211e1a;
+    --text-primary: #f1f5f2;
+    --text-secondary: #bac7c0;
+    --text-inverse: #131a1b;
     --text-disabled: #6f6a5f;
 
-    --border-subtle: #3c372f;
-    --border-strong: #4c4638;
+    --border-subtle: #303d3f;
+    --border-strong: #465556;
 
-    --brand-natural: #8fa571;
-    --brand-natural-strong: #a3ba85;
+    --brand-natural: #83c5a2;
+    --brand-natural-strong: #a0d7b9;
     --brand-mint: #5cc4a5;
     --brand-mint-strong: #79d4b8;
 
@@ -79,21 +79,21 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --surface-base: #211e1a;
-  --surface-subtle: #2a2622;
-  --surface-elevated: #322e28;
+  --surface-base: #131a1b;
+  --surface-subtle: #192224;
+  --surface-elevated: #202a2c;
   --surface-overlay: rgba(0, 0, 0, 0.55);
 
-  --text-primary: #f3f0e8;
-  --text-secondary: #c3bcab;
-  --text-inverse: #211e1a;
+  --text-primary: #f1f5f2;
+  --text-secondary: #bac7c0;
+  --text-inverse: #131a1b;
   --text-disabled: #6f6a5f;
 
-  --border-subtle: #3c372f;
-  --border-strong: #4c4638;
+  --border-subtle: #303d3f;
+  --border-strong: #465556;
 
-  --brand-natural: #8fa571;
-  --brand-natural-strong: #a3ba85;
+  --brand-natural: #83c5a2;
+  --brand-natural-strong: #a0d7b9;
   --brand-mint: #5cc4a5;
   --brand-mint-strong: #79d4b8;
 

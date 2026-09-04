@@ -1645,6 +1645,9 @@
         "sellerFinance": "Seller Finance",
         "reconciliation": "Reconciliation",
         "content": "Content",
+        "contentNew": "New article",
+        "contentCategories": "Categories",
+        "contentTags": "Tags",
         "contentMedia": "Media",
         "contentPlacements": "Placements"
       }

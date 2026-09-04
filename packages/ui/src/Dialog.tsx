@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useId } from "react";
 import type { ReactNode } from "react";
 import { cn } from "./cn";
+import { motion, useReducedMotion } from "motion/react";
 
 export interface DialogProps {
   open: boolean;
@@ -18,6 +19,8 @@ export interface DialogProps {
  */
 export function Dialog({ open, onClose, title, children, className }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
@@ -31,17 +34,19 @@ export function Dialog({ open, onClose, title, children, className }: DialogProp
       ref={ref}
       onClose={onClose}
       onCancel={onClose}
-      aria-labelledby="dialog-title"
+      aria-labelledby={titleId}
       className={cn(
         "rounded-lg border border-border-subtle bg-surface-elevated p-6 text-text-primary shadow-xl backdrop:bg-surface-overlay",
         "w-full max-w-md",
         className,
       )}
     >
-      <h2 id="dialog-title" className="text-section-title text-text-primary">
+      <motion.div initial={false} animate={{ opacity: open ? 1 : 0 }} transition={{ duration: reducedMotion ? 0 : 0.16 }}>
+      <h2 id={titleId} className="text-section-title text-text-primary">
         {title}
       </h2>
       <div className="mt-4">{children}</div>
+      </motion.div>
     </dialog>
   );
 }

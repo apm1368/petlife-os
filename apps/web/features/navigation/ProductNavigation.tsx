@@ -7,6 +7,7 @@ export const publicDestinations = [
   ["/shop", "فروشگاه", "Shop"],
   ["/vet/find", "دامپزشک", "Find a vet"],
   ["/services", "خدمات", "Services"],
+  ["/blog", "وبلاگ و راهنما", "Blog & guides"],
 ] as const;
 
 export const consumerDestinations = [

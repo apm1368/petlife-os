@@ -8,6 +8,7 @@ import { themeInitScript } from "@/lib/theme/theme-script";
 import { inter, vazirmatn } from "@/lib/fonts";
 import "../globals.css";
 import { LocalReviewTools } from "@/features/local-preview/LocalReviewTools";
+import { PageMotion } from "@/features/motion/PageMotion";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -38,7 +39,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ToastProvider><LocalReviewTools>{children}</LocalReviewTools></ToastProvider>
+          <ToastProvider><PageMotion><LocalReviewTools>{children}</LocalReviewTools></PageMotion></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -31,16 +31,18 @@ export function LocalPreviewGate({ children, live, title, items = [] }: {
         <Link href={`/${locale}`} className="text-section-title">PET LIFE OS · {title}</Link>
         <div className="flex items-center gap-2"><LocaleSwitcher /><ThemeToggle /></div>
       </header>
-      <ProductNavigation audience="consumer" />
-      {items.length > 0 && <nav aria-label={title} className="flex flex-wrap gap-2 border-b border-border-subtle px-4 py-2">
-        {items.map(item => <Link key={item.href} href={item.href} className="rounded-full px-3 py-2 text-metadata hover:bg-surface-subtle">{item.label}</Link>)}
+      {items.length === 0 && <ProductNavigation audience="consumer" />}
+      <div className={items.length > 0 ? "lg:grid lg:grid-cols-[240px_minmax(0,1fr)]" : ""}>
+      {items.length > 0 && <nav aria-label={title} className="flex gap-1 overflow-x-auto border-b border-border-subtle bg-surface-elevated p-3 lg:sticky lg:top-0 lg:h-[calc(100dvh-72px)] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-e">
+        {items.map(item => <Link key={item.href} href={item.href} className="shrink-0 rounded-md px-3 py-3 text-metadata text-text-secondary transition-colors hover:bg-surface-subtle hover:text-brand-natural focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]">{item.label}</Link>)}
       </nav>}
-      <main className="mx-auto max-w-4xl px-4 py-6 pb-24">
+      <main className="mx-auto w-full min-w-0 max-w-5xl px-4 py-6 pb-24 lg:px-8">
         <p className="mb-4 rounded-xl border border-border-subtle bg-surface-subtle p-3 text-metadata text-text-secondary" role="status">
           {locale === "fa" ? "پیش‌نمایش محلی بدون ورود. اطلاعات خصوصی به اتصال API و نشست معتبر نیاز دارد؛ عملیات ذخیره و پرداخت در این حالت غیرفعال است." : "Local preview without sign-in. Private data requires a connected API and valid session; saving and payments are disabled in this mode."}
         </p>
         {children}
       </main>
+      </div>
     </div>
   );
 }

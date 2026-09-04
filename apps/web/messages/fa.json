@@ -1645,6 +1645,9 @@
         "sellerFinance": "امور مالی فروشندگان",
         "reconciliation": "تطبیق",
         "content": "محتوا",
+        "contentNew": "مقاله جدید",
+        "contentCategories": "دسته‌بندی‌ها",
+        "contentTags": "برچسب‌ها",
         "contentMedia": "رسانه",
         "contentPlacements": "بخش‌های محتوایی"
       }
