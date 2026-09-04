@@ -1,5 +1,7 @@
 # H17 branch synchronization — 2026-09-04
 
+UPDATE: The runtime blocker below is historical. Local infrastructure became reachable; pending migrations were applied and API restored. See shop-runtime-recovery.md for verified live Shop results. No Docker privilege workaround was used.
+
 1. Branch: integration/local.
 2. Claude commit 5e0a0c1 is confirmed present in HEAD ancestry (merge-base exit 0). Synced via regular merge 139bece. No conflicts, resets, overwritten work, rewritten commits or force push.
 3. Actual route count: 111 (previously 94). docs/qa/routes.md regenerated from page.tsx files.
