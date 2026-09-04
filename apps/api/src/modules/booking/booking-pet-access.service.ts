@@ -31,7 +31,7 @@ import type { AppEnv } from "../../config/env";
  */
 const SCOPE_PRESET_FLAGS: Record<
   PetAccessScopePreset,
-  Omit<PetAccessFlags, "canManageAccess" | "canViewLocation" | "canEditIdentity" | "canBookCare">
+  Omit<PetAccessFlags, "canManageAccess" | "canViewLocation" | "canEditIdentity" | "canBookCare" | "canRecordClinicalData">
 > = {
   [PetAccessScopePreset.MINIMAL_VET_CONTEXT]: {
     canViewIdentity: true,
@@ -155,6 +155,10 @@ export class BookingPetAccessService {
         canEditCareProfile: flags.canEditCareProfile,
         canViewLocation,
         canManageAccess: false,
+        // Handoff 17: only a VET-category visit produces clinical records —
+        // a groomer/trainer/walker/sitter/boarding/taxi booking never grants
+        // authority to author a ClinicalVisit/MedicalDocument/LabResult/etc.
+        canRecordClinicalData: booking.category === ServiceCategory.VET,
         source: PetAccessSource.TEMPORARY,
         reason: `${booking.category}_BOOKING`,
         startsAt: new Date(),

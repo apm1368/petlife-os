@@ -105,6 +105,16 @@ export function HomeView() {
           {t("shopAction")}
         </Button>
       </ContextSurface>
+
+      <ContextSurface className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-section-title text-text-primary">{t("sections.subscription")}</h2>
+          <p className="mt-1 text-body text-text-secondary">{t("subscriptionHint")}</p>
+        </div>
+        <Button variant="secondary" onClick={() => router.push(`/${locale}/subscription`)}>
+          {t("subscriptionAction")}
+        </Button>
+      </ContextSurface>
     </div>
   );
 }

@@ -12,7 +12,8 @@
     "selected": "Selected",
     "logIn": "Log in",
     "support": "Support",
-    "blog": "Blog"
+    "blog": "Blog",
+    "genericError": "Something went wrong. Please try again."
   },
   "auth": {
     "welcome": {
@@ -193,14 +194,62 @@
       "ai": "Ask AI",
       "upcoming": "Upcoming",
       "exploreServices": "Explore Services",
-      "shop": "Shop"
+      "shop": "Shop",
+      "subscription": "Subscription"
     },
     "aiPlaceholder": "AI guidance is coming soon.",
     "upcomingPlaceholder": "Nothing scheduled yet.",
     "exploreServicesHint": "Grooming, training, walking, sitting, boarding, and pet taxi.",
     "exploreServicesAction": "Explore",
     "shopHint": "Food, treats, grooming supplies, and more.",
-    "shopAction": "Browse"
+    "shopAction": "Browse",
+    "subscriptionHint": "See your plan, usage, and upgrade options.",
+    "subscriptionAction": "Manage"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "plansTitle": "Plans",
+    "viewPlans": "View plans",
+    "resume": "Resume subscription",
+    "cancel": "Cancel subscription",
+    "status": {
+      "TRIALING": "Trial",
+      "ACTIVE": "Active",
+      "PAST_DUE": "Payment issue",
+      "GRACE_PERIOD": "Grace period",
+      "CANCEL_AT_PERIOD_END": "Cancelling",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "trialEndsAt": "Your trial ends on {date}.",
+    "periodEndsAt": "Current period ends on {date}.",
+    "pastDueWarning": "We couldn't charge for your renewal. Please check your payment method — your plan is still fully active.",
+    "graceWarning": "Your renewal is still failing. Your plan stays active for now, but please resolve payment soon to avoid losing access.",
+    "cancelScheduled": "Your subscription stays active until {date}, then it will be cancelled.",
+    "downgradeScheduled": "Switching to {plan} at the end of the current period.",
+    "entitlements": "What's included",
+    "entitlement": {
+      "petsMax": "Pets",
+      "membersMax": "Household members",
+      "prioritySupport": "Priority support"
+    },
+    "included": "Included",
+    "notIncluded": "Not included",
+    "usageOf": "{used} of {limit}",
+    "unlimited": "Unlimited",
+    "overridden": "custom",
+    "interval": {
+      "monthly": "Monthly",
+      "annual": "Annual"
+    },
+    "currentPlanBadge": "Current plan",
+    "free": "Free",
+    "notAvailableHere": "Not available in your country",
+    "downgradeToFree": "Downgrade to Free",
+    "startTrial": "Start {days}-day trial",
+    "subscribe": "Subscribe",
+    "upgradeNow": "Upgrade now",
+    "switchAtRenewal": "Switch at renewal"
   },
   "pets": {
     "myPets": "My Pets",
@@ -262,7 +311,8 @@
       "vaccination": "Vaccination",
       "activeMedications": "{count} active",
       "noActiveMedications": "None active",
-      "completeSetup": "Complete health setup"
+      "completeSetup": "Complete health setup",
+      "advancedHealth": "Advanced Health"
     },
     "allergies": {
       "title": "Allergies",
@@ -745,7 +795,8 @@
         },
         "scope": "Scope",
         "startsAt": "Starts",
-        "expiresAt": "Expires"
+        "expiresAt": "Expires",
+        "openClinicalRecord": "Open Clinical Record"
       },
       "careProfile": {
         "title": "Care context",
@@ -1649,7 +1700,8 @@
         "contentCategories": "Categories",
         "contentTags": "Tags",
         "contentMedia": "Media",
-        "contentPlacements": "Placements"
+        "contentPlacements": "Placements",
+        "subscriptions": "Subscriptions"
       }
     },
     "common": {
@@ -2184,6 +2236,35 @@
         "retry": "Retry",
         "loading": "Loading placement…"
       }
+    },
+    "subscriptions": {
+      "plansTitle": "Subscription Plans",
+      "householdsTitle": "Household Subscriptions",
+      "householdDetailTitle": "Household Subscription",
+      "filterByStatus": "Status",
+      "allStatuses": "All statuses",
+      "periodEndsAt": "Current period ends {date}",
+      "cancelSubscription": "Cancel subscription",
+      "billingAttempts": "Billing attempts",
+      "refund": "Refund",
+      "entitlementOverrides": "Entitlement overrides",
+      "revoke": "Revoke",
+      "revoked": "Revoked",
+      "unlimitedShort": "∞",
+      "form": {
+        "code": "Code",
+        "nameFa": "Name (Persian)",
+        "nameEn": "Name (English)",
+        "countries": "Countries",
+        "trialDays": "Trial days",
+        "createPlan": "Create plan",
+        "newMonthlyPrice": "New monthly price (IRR)",
+        "addPrice": "Add price",
+        "entitlementKey": "Entitlement key",
+        "entitlementType": "Type",
+        "limitValue": "Limit value",
+        "grantOverride": "Grant override"
+      }
     }
   },
   "blog": {
@@ -2206,6 +2287,125 @@
       "retry": "Try again",
       "notFoundTitle": "Article not found",
       "notFoundMessage": "This article doesn't exist or isn't available right now."
+    }
+  },
+  "healthAdvanced": {
+    "nav": {
+      "overview": "Overview",
+      "timeline": "Timeline",
+      "documents": "Documents",
+      "labs": "Labs",
+      "imaging": "Imaging",
+      "referrals": "Referrals",
+      "dental": "Dental",
+      "nutrition": "Nutrition",
+      "rehab": "Rehabilitation",
+      "observations": "Observations"
+    },
+    "overview": {
+      "title": "Advanced Health",
+      "upcomingCare": "Upcoming care",
+      "overdueCare": "Overdue care",
+      "activeMedications": "Active medications",
+      "unresolvedCarePlanItems": "Open care plan items",
+      "recentDocuments": "Recent documents",
+      "recentVisits": "Recent visits",
+      "missingInformation": "Missing information",
+      "noMissingInformation": "No known gaps in this pet's recorded health information."
+    },
+    "timeline": {
+      "title": "Health Timeline",
+      "empty": "No health events recorded yet."
+    },
+    "documents": {
+      "title": "Medical Documents",
+      "empty": "No medical documents uploaded yet.",
+      "upload": "Upload document",
+      "uploading": "Uploading…",
+      "titleLabel": "Title",
+      "documentType": "Document type",
+      "download": "Download",
+      "void": "Remove",
+      "voidReason": "Reason",
+      "provenanceOwner": "Uploaded by household",
+      "provenanceProvider": "Uploaded by provider — verified"
+    },
+    "labs": {
+      "title": "Labs",
+      "empty": "No lab results recorded."
+    },
+    "imaging": {
+      "title": "Imaging",
+      "empty": "No imaging studies recorded."
+    },
+    "referrals": {
+      "title": "Referrals",
+      "empty": "No referrals recorded."
+    },
+    "dental": {
+      "title": "Dental",
+      "empty": "No dental records recorded."
+    },
+    "nutrition": {
+      "title": "Nutrition Plans",
+      "empty": "No clinical nutrition plans recorded."
+    },
+    "rehab": {
+      "title": "Rehabilitation Plans",
+      "empty": "No rehabilitation plans recorded.",
+      "sessionsLogged": "{count} sessions logged"
+    },
+    "observations": {
+      "title": "Observations",
+      "empty": "No observations recorded yet.",
+      "add": "Add observation",
+      "category": "Category",
+      "description": "Description",
+      "observedAt": "Observed at",
+      "disclaimer": "Owner observation — not a diagnosis.",
+      "save": "Save"
+    },
+    "correction": {
+      "add": "Add a correction",
+      "text": "What would you like to correct?",
+      "submit": "Submit correction",
+      "history": "Correction history"
+    }
+  },
+  "clinicalOs": {
+    "patient": {
+      "title": "Patient",
+      "allergies": "Allergies",
+      "medications": "Active medications",
+      "conditions": "Known conditions",
+      "recentVisits": "Recent visits",
+      "recentLabs": "Recent labs",
+      "documents": "Documents",
+      "carePlans": "Care plans",
+      "startVisit": "Start visit"
+    },
+    "visit": {
+      "title": "Clinical Visit",
+      "reasonForVisit": "Reason for visit",
+      "history": "History",
+      "observations": "Observations",
+      "assessment": "Assessment",
+      "plan": "Plan",
+      "save": "Save notes",
+      "complete": "Complete visit",
+      "amend": "Amend visit",
+      "void": "Void visit",
+      "amendReason": "Reason for amendment",
+      "voidReason": "Reason for voiding",
+      "status": {
+        "DRAFT": "Draft",
+        "IN_PROGRESS": "In progress",
+        "COMPLETED": "Completed",
+        "AMENDED": "Amended",
+        "VOIDED": "Voided"
+      },
+      "revisionHistory": "Revision history",
+      "completedNotice": "This visit is completed. Use Amend to make further changes — the prior content is preserved."
     }
   }
 }

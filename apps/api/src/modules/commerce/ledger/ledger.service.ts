@@ -202,4 +202,43 @@ export class LedgerService implements OnModuleInit {
     if (platformShareIrr > 0) entries.push({ accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.DEBIT, amount: platformShareIrr });
     return this.recordBalanced("Order economics attribution reversed (refund)", "REFUND", orderId, currency, entries, client);
   }
+
+  /**
+   * A subscription billing attempt's platform-side distribution (Handoff
+   * 16) — mirrors `recordSellerAttribution`'s own two-step shape
+   * (`recordPaymentSucceeded` first moves cash into CUSTOMER_PAYMENT_CLEARING,
+   * then this call distributes it), except subscription revenue has no
+   * seller leg at all: the full amount is 100% platform revenue, so this
+   * posts straight to the existing PLATFORM_REVENUE account with no new
+   * LedgerAccountCode. `referenceId` is the SubscriptionBillingAttempt's own
+   * id — the one row that explains "which charge funded this."
+   */
+  async recordSubscriptionRevenue(billingAttemptId: string, amount: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced(
+      "Subscription revenue recognized",
+      "PAYMENT",
+      billingAttemptId,
+      currency,
+      [
+        { accountCode: LedgerAccountCode.CUSTOMER_PAYMENT_CLEARING, direction: LedgerEntryDirection.DEBIT, amount },
+        { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.CREDIT, amount },
+      ],
+      client,
+    );
+  }
+
+  /** The reversal counterpart to `recordSubscriptionRevenue` — called alongside `recordRefundSucceeded`, never replacing it, exactly like `recordSellerAttributionReversal`. */
+  async recordSubscriptionRevenueReversal(billingAttemptId: string, amount: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced(
+      "Subscription revenue reversed (refund)",
+      "REFUND",
+      billingAttemptId,
+      currency,
+      [
+        { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.DEBIT, amount },
+        { accountCode: LedgerAccountCode.CUSTOMER_PAYMENT_CLEARING, direction: LedgerEntryDirection.CREDIT, amount },
+      ],
+      client,
+    );
+  }
 }

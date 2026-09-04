@@ -46,6 +46,8 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { AdminModule } from "./modules/admin/admin.module";
 import { SupportModule } from "./modules/support/support.module";
 import { ContentModule } from "./modules/content/content.module";
+import { SubscriptionsModule } from "./modules/subscriptions/subscription.module";
+import { ClinicalHealthModule } from "./modules/clinical-health/clinical-health.module";
 
 @Module({
   imports: [
@@ -96,6 +98,8 @@ import { ContentModule } from "./modules/content/content.module";
     AdminModule,
     SupportModule,
     ContentModule,
+    SubscriptionsModule,
+    ClinicalHealthModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

@@ -107,6 +107,79 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "مشکلی در تسویه‌حساب شما پیش آمد", body: "تسویه‌حساب {{reference}} با مشکل مواجه شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "مشکلی در تسویه‌حساب شما در پت‌لایف پیش آمد." },
     en: { title: "An issue occurred with your settlement", body: "Settlement {{reference}} could not be completed. See the app for details.", smsBody: "An issue occurred with your PET LIFE OS settlement." },
   },
+  // Subscription + Membership + Metering (Handoff 16) — no smsBody on any of
+  // these: subscription/billing status is never urgent enough to justify an
+  // SMS the way a failed payment or an OTP is, and every one of these is
+  // already visible in-app the moment the household opens Manage Subscription.
+  "subscription.started": {
+    fa: { title: "اشتراک شما فعال شد", body: "اشتراک {{planName}} برای خانواده شما فعال شد." },
+    en: { title: "Your subscription is active", body: "Your household is now on the {{planName}} plan." },
+  },
+  "subscription.trial_started": {
+    fa: { title: "دوره آزمایشی شما شروع شد", body: "دوره آزمایشی {{planName}} برای خانواده شما فعال شد." },
+    en: { title: "Your trial has started", body: "Your household's {{planName}} trial is now active." },
+  },
+  "subscription.upgraded": {
+    fa: { title: "اشتراک شما ارتقا یافت", body: "اشتراک خانواده شما به {{planName}} ارتقا یافت." },
+    en: { title: "Your subscription was upgraded", body: "Your household is now on the {{planName}} plan." },
+  },
+  "subscription.renewed": {
+    fa: { title: "اشتراک شما تمدید شد", body: "اشتراک {{planName}} برای دوره بعدی تمدید شد." },
+    en: { title: "Your subscription renewed", body: "Your {{planName}} plan renewed for another period." },
+  },
+  "subscription.renewal_failed": {
+    fa: { title: "تمدید اشتراک ناموفق بود", body: "پرداخت تمدید اشتراک {{planName}} انجام نشد. لطفاً روش پرداخت خود را بررسی کنید." },
+    en: { title: "Your subscription renewal failed", body: "We couldn't charge for your {{planName}} plan renewal. Please check your payment method." },
+  },
+  "subscription.grace_started": {
+    fa: { title: "مهلت پرداخت اشتراک شما آغاز شد", body: "اشتراک {{planName}} همچنان فعال است، اما لطفاً هرچه زودتر پرداخت را تکمیل کنید تا از قطع دسترسی جلوگیری شود." },
+    en: { title: "Your subscription is in a grace period", body: "Your {{planName}} plan is still active — please complete payment soon to avoid losing access." },
+  },
+  "subscription.expired": {
+    fa: { title: "اشتراک شما به پایان رسید", body: "اشتراک {{planName}} به پایان رسید و خانواده شما به پلن رایگان بازگشت. اطلاعات و حیوانات شما همچنان در دسترس است." },
+    en: { title: "Your subscription has ended", body: "Your {{planName}} plan has ended and your household moved to the Free plan. Your data and pets remain fully accessible." },
+  },
+  "subscription.cancel_scheduled": {
+    fa: { title: "لغو اشتراک شما ثبت شد", body: "اشتراک شما تا پایان دوره فعلی فعال می‌ماند و سپس لغو خواهد شد." },
+    en: { title: "Your cancellation is scheduled", body: "Your subscription stays active until the end of the current period, then it will be cancelled." },
+  },
+  "subscription.cancel_reversed": {
+    fa: { title: "لغو اشتراک شما لغو شد", body: "درخواست لغو اشتراک شما لغو شد و اشتراک شما به‌طور معمول ادامه می‌یابد." },
+    en: { title: "Your cancellation was reversed", body: "Your subscription cancellation was undone and will continue as normal." },
+  },
+  "subscription.downgrade_scheduled": {
+    fa: { title: "تغییر پلن شما زمان‌بندی شد", body: "اشتراک شما در پایان دوره فعلی به {{planName}} تغییر می‌کند." },
+    en: { title: "Your plan change is scheduled", body: "Your subscription will move to {{planName}} at the end of the current period." },
+  },
+  "subscription.downgrade_applied": {
+    fa: { title: "پلن اشتراک شما تغییر کرد", body: "اشتراک خانواده شما اکنون {{planName}} است." },
+    en: { title: "Your plan has changed", body: "Your household is now on the {{planName}} plan." },
+  },
+  // Advanced Health / Clinical OS (Handoff 17) — spec: "Do not expose
+  // detailed diagnosis in SMS. SMS copy must remain privacy-safe." Every
+  // smsBody below is fully generic (no pet name, no document title, no
+  // finding) by construction — the in-app `body` may name the pet, but
+  // never a diagnosis, test result, or clinical detail either.
+  "health.document_added": {
+    fa: { title: "سند پزشکی جدید", body: "یک سند پزشکی جدید برای {{petName}} اضافه شد.", smsBody: "یک به‌روزرسانی پزشکی برای حیوان خانگی شما در پت‌لایف ثبت شد." },
+    en: { title: "New medical document", body: "A new medical document was added for {{petName}}.", smsBody: "A health update for your pet is available in PET LIFE OS." },
+  },
+  "health.follow_up_due": {
+    fa: { title: "پیگیری درمانی سررسید شد", body: "یک مورد پیگیری درمانی برای {{petName}} سررسید شده است.", smsBody: "یک یادآوری مراقبتی برای حیوان خانگی شما در پت‌لایف دارید." },
+    en: { title: "Follow-up due", body: "A follow-up item for {{petName}} is due.", smsBody: "You have a care follow-up for your pet in PET LIFE OS." },
+  },
+  "health.referral_created": {
+    fa: { title: "ارجاع پزشکی جدید", body: "یک ارجاع پزشکی جدید برای {{petName}} ثبت شد.", smsBody: "یک ارجاع پزشکی جدید برای حیوان خانگی شما ثبت شد." },
+    en: { title: "New referral", body: "A new referral was created for {{petName}}.", smsBody: "A new referral for your pet is available in PET LIFE OS." },
+  },
+  "health.referral_updated": {
+    fa: { title: "وضعیت ارجاع پزشکی به‌روزرسانی شد", body: "وضعیت ارجاع پزشکی {{petName}} تغییر کرد.", smsBody: "وضعیت ارجاع پزشکی حیوان خانگی شما تغییر کرد." },
+    en: { title: "Referral status updated", body: "The referral status for {{petName}} changed.", smsBody: "A referral update for your pet is available in PET LIFE OS." },
+  },
+  "health.care_plan_updated": {
+    fa: { title: "برنامه مراقبتی به‌روزرسانی شد", body: "برنامه مراقبتی {{petName}} توسط ارائه‌دهنده به‌روزرسانی شد.", smsBody: "یک به‌روزرسانی برنامه مراقبتی برای حیوان خانگی شما ثبت شد." },
+    en: { title: "Care plan updated", body: "{{petName}}'s care plan was updated by the provider.", smsBody: "A care plan update for your pet is available in PET LIFE OS." },
+  },
 };
 
 export function hasTemplate(key: string): boolean {

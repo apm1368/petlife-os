@@ -4007,6 +4007,296 @@ INVALID_RICH_TEXT_CONTENT                400  a block/mark/link outside the clos
 CONTENT_PLACEMENT_NOT_FOUND              404
 ```
 
+## Subscription + Membership + Metering (Handoff 16)
+
+### Three separate states, never conflated
+
+Subscription state (the household's plan/lifecycle), payment state (H07's own `PaymentIntent`/`Transaction`/`Refund`), and entitlement state (what the household can actually do right now) are three different concerns, resolved by three different services (`SubscriptionService`, `SubscriptionBillingService`, `EntitlementService`). A `Subscription` is never modeled as "payment succeeded" — it has its own explicit state machine (`SubscriptionStatus`: `TRIALING`/`ACTIVE`/`PAST_DUE`/`GRACE_PERIOD`/`CANCEL_AT_PERIOD_END`/`CANCELLED`/`EXPIRED`) with an explicit `ALLOWED_TRANSITIONS` table, the same shape Handoff 15's `ArticleLifecycleStatus` already established. `PAST_DUE` and `GRACE_PERIOD` are deliberately two distinct steps (first renewal failure — short retry window, full access — vs. retry window elapsed — final warning window, full access still) rather than one combined "past due" state, so the UI can escalate urgency honestly without ever revoking access early.
+
+### One row per household, evolving over its whole lifecycle
+
+`Subscription.householdId` is `@unique` — a household gets exactly one Subscription row, ever, and it evolves through FREE → trial → paid → cancelled → resubscribed rather than being recreated each time (the same "one row that evolves, history captured separately" shape `SellerLedgerAccount` established in Handoff 14). History lives in `SubscriptionPeriod` (billing periods), `SubscriptionBillingAttempt` (every charge attempt, succeeded or failed, never overwritten), and `SubscriptionChange` (an append-only narrative of trial starts, upgrades, downgrades, cancellations, admin actions — distinct from `AdminAuditLog`, which only covers admin-initiated mutations). Every household gets a real row lazily on first touch, defaulted to a real FREE plan — never an ad hoc "no subscription" fallback.
+
+### The FREE plan is real, and self-healing
+
+Every household resolves entitlements against an actual `SubscriptionPlan` row with `isFree: true`, never special-cased plan-name logic. Because that FREE plan is a hard dependency of the *entire app* (creating a pet, and every other subscription-scoped read, resolves it), `SubscriptionPlanReadService.getFreePlanRaw()` self-heals: if no FREE plan exists yet (a fresh checkout, or the isolated e2e test database, which CI populates via `prisma migrate deploy` only — never `prisma db seed`), it race-safely creates one with conservative defaults, using the same code (`DEFAULT_FREE_PLAN_CODE = "free"`) the deterministic dev seed catalog uses — running the seed afterward upgrades that same row in place rather than creating a duplicate. This was found and fixed mid-handoff: an early version threw a hard 500 on pet creation in any environment without seed data, which would have broken the entire e2e suite for every prior handoff.
+
+### Entitlements — the actual architecture, not a plan-name check
+
+No feature anywhere checks `if plan.code === "premium"`. `EntitlementService` is the one place any code asks "can this household do X" (`has()`, `getLimit()`, `getUsageItem()`, `assertWithinLimit()`), resolving in this order: an active `SubscriptionEntitlementOverride` for the key wins outright; otherwise the household's *effective* plan (its own current plan while `PAID_ACCESS_STATUSES` holds — `TRIALING`/`ACTIVE`/`PAST_DUE`/`GRACE_PERIOD`/`CANCEL_AT_PERIOD_END` — falling back to the FREE plan only once truly `CANCELLED`/`EXPIRED`) supplies it; a key neither defines resolves to the safest default (`false`/`0`), never `undefined` or unlimited-by-omission. `SubscriptionEntitlementType` supports `BOOLEAN` and `LIMIT` only — `QUOTA` was deliberately not added, since nothing in this handoff's real scope needs a reset-on-a-schedule quota.
+
+### Metering is derived, not counted
+
+`UsageService` meters exactly two keys this phase — `pets.max` (counts non-deleted `Pet` rows) and `household.members.max` (counts `HouseholdMember` rows) — both computed live from the source-of-truth tables, never a separately maintained counter. There is deliberately no `SubscriptionUsageCounter`/`SubscriptionUsageEvent` table: every metered resource here is durable and low-volume enough that deriving it can never drift from reality the way a separately incremented counter could. `household.members.max` resolves correctly through the entitlement system but currently has no enforcement call site — this codebase has no invite/add-member endpoint yet (`HouseholdsController` only supports creation), so there is nothing to gate; documented below rather than inventing a member-invite feature out of scope.
+
+### Server-side limit enforcement — over-limit data is never touched
+
+`PetsService.create()` calls `EntitlementService.assertWithinLimit(householdId, "pets.max")` before creating a row, returning a typed `SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED` (409) with `{ key, limit, used }` in `details` — never a generic failure. Frontend gating (disabling a button, showing "N of M used") is UX only; the actual check lives entirely server-side. Critically, a downgrade or grace/expiry fallback never deletes or hides existing data: a household with 5 pets that falls back to a 2-pet FREE limit keeps all 5 pets fully readable — the limit blocks only the *next* creation attempt.
+
+### Reusing the H07 payment stack — a minimal internal shell, not a second payment system
+
+`PaymentIntent.checkoutId` is a required FK to the real commerce `Checkout` model, which itself requires a `Cart` — both physical-goods-shaped and deeply relied on by `CheckoutService`/`OrdersService`/`InventoryReservationService`. Rather than loosening that schema (invasive, risky for existing commerce flows) or building a parallel payment stack (explicitly against spec), `SubscriptionBillingService` creates a minimal internal Checkout/Cart shell purely to satisfy the FK: the shell Cart's `status` is `CONVERTED` from creation (never `ACTIVE`, so `CartService.getCart()`'s own `status: ACTIVE` filter can never mistake it for a real shopping cart), it is never routed through `CheckoutService` at all, and only the synchronous `PaymentsService.charge()` path is used — never `resolvePendingIntent()` — so the existing `PaymentEventsListener` (which only reacts when `viaWebhook: true`) never touches it. `NotificationEventsListener`'s generic "payment succeeded" handler was taught to skip a checkout whose cart has zero line items, so a subscriber never gets a confusing "see My Orders" notification alongside the correct subscription one — a small, deliberate touch to shared H07/H10 code, not new infrastructure. Revenue posts through two new `LedgerService` methods (`recordSubscriptionRevenue`/`...Reversal`) mirroring `recordSellerAttribution`'s own shape — 100% platform revenue, no seller leg.
+
+### Trial, purchase, upgrade — no fake payment success, no proration
+
+A trial (`startTrial`) is a pure entitlement grant — no payment involved at all, gated only by `SubscriptionTrial`'s own `@@unique(householdId, planId)` (the actual anti-abuse enforcement; a friendlier pre-check just gives a nicer error than a raw constraint violation). An initial purchase or upgrade (`SubscriptionBillingService.purchase()`) charges the full price immediately and activates the plan/period at once. **H16's chosen proration policy is none**: an upgrade charges the new plan's full price and starts a brand-new period from now, with no partial credit for the unused portion of the old period — the simpler of the two policies the spec allows, chosen because it needs no floating-point/rounding logic and stays trivially auditable. Idempotency is layered two ways: the existing Redis-backed `IdempotencyInterceptor` at the HTTP layer, and a DB-level unique `SubscriptionBillingAttempt.idempotencyKey` inside the same transaction — a duplicate call (same idempotency key) converges on the exact same attempt row, never a duplicate charge or period.
+
+### Downgrade — scheduled for the boundary, billed at the new price
+
+`scheduleDowngrade()` only sets `Subscription.pendingPlanId`/`pendingPriceId` — it never reduces entitlements mid-period. The pending plan actually takes effect inside `SubscriptionBillingService.attemptRenewal()`, at the real period boundary, and — this needed a correction mid-build — the target plan/price is resolved and applied *before* the renewal charge is made, so the household is billed the new (lower) plan's price starting at the very renewal it takes effect, never the outgoing plan's price. Downgrading to the FREE plan skips charging entirely (`attempt: null` in the outcome) — no billing attempt row is ever created for a charge that was never going to happen.
+
+### Renewal — an honest DEV adapter, not simulated production autopay
+
+There is no real recurring-charge integration available through this project's existing payment providers, and the spec is explicit that simulating one would be dishonest. `SubscriptionRenewalWorkerService` is a plain polling `setInterval` (the exact shape `NotificationDeliveryWorkerService` already established, disabled under `NODE_ENV=test`) that drives `SubscriptionBillingService.attemptRenewal()` using the same `DEV_SIMULATED`/synchronous-charge path every other H16 charge uses — this *is* the honest DEV/manual adapter the spec asks for, not a claim of real autopay. It attempts a renewal once a period's `endAt` has actually passed, not proactively N days ahead — a deliberate simplification given a poller that already runs frequently (see Known limitations). A failed renewal moves `ACTIVE` → `PAST_DUE` (short configurable retry window, `SUBSCRIPTION_PAST_DUE_RETRY_DAYS`) → `GRACE_PERIOD` (final configurable warning window, `SUBSCRIPTION_GRACE_PERIOD_DAYS`) → `EXPIRED` (falls back to FREE entitlements) — full paid access is retained through every step except the last.
+
+### Cancellation — cancel-at-period-end by default, no dark patterns
+
+`cancelAtPeriodEnd()` is the only consumer-facing cancel path: the subscription moves to `CANCEL_AT_PERIOD_END` immediately but keeps full paid access until `cancelEffectiveAt` (snapshotted from the current period's own end, or the trial/grace end if there is no period), with `resumeCancellation()` available any time before that date. There is no immediate-cancel option — H16's scope never asks for one, and offering one would risk exactly the "dark pattern" the spec warns against.
+
+### Refunds — a genuinely separate action from subscription status
+
+`SubscriptionBillingService.refundBillingAttempt()` posts a real `Refund` row (reusing H07's model directly) and reverses the ledger postings, but never mutates `Subscription.status` itself — the spec is explicit that a subscription's lifecycle must never be inferred from an arbitrary refund. If an admin also wants to cancel or downgrade access after a refund, that's a separate, explicit action through `SubscriptionService`.
+
+### Concurrency — lock, then re-read, then decide; found and fixed mid-build
+
+Every subscription-mutating transaction (`purchase`, `startTrial`, `scheduleDowngrade`, `cancelAtPeriodEnd`, `resumeCancellation`, `attemptRenewal`) row-locks the `Subscription` (`SELECT ... FOR UPDATE`) before validating or mutating anything — the same pattern `DisputeService.transition`/`SupportCaseService.transition` already established. This needed a real fix during the build: an earlier version of `purchase()` read the subscription row via `getOrCreateRaw()` *before* acquiring the lock and never re-read it afterward, so a racing transaction's already-committed changes could be invisible even after the lock was held — exactly the class of bug the spec's own "test concurrent subscription creation/renewal/upgrade/cancel" requirement exists to catch. `SubscriptionService.lockAndGetCurrent()` (get-or-create, lock by id, then a fresh re-read) is now the one path every mutation uses. `refundBillingAttempt()` got the same fix for a narrower double-refund race. The dedicated e2e suite (below) includes concurrent-purchase and concurrent-cancel tests that exercise these locks directly.
+
+### Admin surface
+
+`admin/subscriptions/` (parallel to `admin/finance/`) provides plan/price CRUD (`AdminSubscriptionPlanService` — historical subscriptions never break when a plan is later hidden, since `SubscriptionPlanStatus.HIDDEN`/`INACTIVE` only gates *new* subscribability), household subscription search/detail with billing attempts, admin cancel (recorded as `SubscriptionChangeType.ADMIN_CANCELLED`, same cancel-at-period-end semantics as the consumer path — never an immediate-revoke code path this handoff doesn't ask for), and manual entitlement overrides (`SubscriptionEntitlementOverride{household, key, value, reason, createdByAdmin, expiresAt, active}` — granting one first deactivates any existing active override for that key, so resolution never has two active rows to arbitrate between). RBAC reuses H11's Admin RBAC: `subscription.view` (read-only, held by `SUPPORT`/`FINANCE`/`OPERATIONS`), `subscription.manage` and `subscription.plan.manage` (ADMIN and above), and `subscription.entitlement.override` — deliberately **SUPER_ADMIN-only**, not even delegated to `ADMIN`, mirroring `admin.manage`'s own "never delegated" precedent given how high-risk a manual entitlement bypass is.
+
+### Notifications + support integration
+
+`SubscriptionNotificationListener` fans out across all 10 subscription domain events to *every* current `HouseholdMember` (a subscription belongs to the household, not one user) — safe because `Notification`'s own `@@unique([domainEventId, type, userId])` constraint means a retried event still converges to exactly one notification per member. Each member gets the plan name in their own locale rather than one hardcoded language. `subscription.trial_ending`/`subscription.renewal_upcoming` (both named as "potential" in the spec) are deliberately not implemented: the renewal worker only ever acts once a period has already ended, never proactively N days ahead, so there is no point in time to fire either notification without adding new proactive-scheduling infrastructure this handoff's renewal design doesn't have. `SupportCaseContextDto` gained a `subscription: SupportSubscriptionSummaryDto` field (plan/status/period end/most recent *failed* billing attempt only — never a succeeded attempt's payment detail) so H13's support context panel shows subscription state directly.
+
+### Consumer + admin frontend
+
+Consumer: `/subscription` (plan/status/period/trial/cancellation state, entitlements + usage, cancel/resume) and `/subscription/plans` (every ACTIVE plan for the household's country in one comparison list — FREE is never hidden or demoted), reachable from a new Home entry point; every mutation error surfaces the backend's own specific message inline (`ApiError.message`), never a generic "something went wrong". Admin: a new Subscriptions nav item (behind `subscription.view`) leading to Plans/Prices management, a filterable Household Subscriptions list, and a household detail page with billing attempts + refund + entitlement override grant/revoke + cancel — all following this codebase's existing plain-list-and-detail admin UI shape (no new table/pagination component was introduced; every other admin list view already uses a single generously-sized page rather than paged controls, and this handoff matches that).
+
+### Seed data
+
+`seed.ts` gained a `seedSubscriptions()` step (idempotent, upsert-based — unlike most of this file's create-only fixtures) producing three deterministic plans: **Free** (`pets.max: 2`, `household.members.max: 3`), **Plus** (`pets.max: 5`, `household.members.max: 6`, 14-day trial, obviously-fake dev prices ۹۹۰,۰۰۰ / ۹,۹۰۰,۰۰۰ IRR monthly/annual), and **Premium** (unlimited pets/members, 14-day trial, ۱,۹۹۰,۰۰۰ / ۱۹,۹۰۰,۰۰۰ IRR). The Free plan reuses the exact code the runtime self-healing fallback creates, so seeding after that fallback has already run upgrades the same row rather than duplicating it.
+
+### Codex parallel work
+
+Per this handoff's own instructions, local runtime/browser QA, route navigation, and general regression cleanup were left to Codex's parallel work rather than duplicated here. One cross-cutting fix was made because H16 genuinely depended on it: `NotificationEventsListener`'s payment-succeeded/failed handlers (see above) — a pre-existing gap that would have produced confusing notifications for every subscription payment, not something introduced by this handoff.
+
+### API endpoints (Handoff 16 additions)
+
+```
+GET    /households/:householdId/subscription
+GET    /households/:householdId/subscription/plans
+GET    /households/:householdId/subscription/entitlements
+GET    /households/:householdId/subscription/usage
+GET    /households/:householdId/subscription/billing-history
+GET    /households/:householdId/subscription/changes
+POST   /households/:householdId/subscription/trial          (Idempotency-Key)
+POST   /households/:householdId/subscription/subscribe      (Idempotency-Key)
+POST   /households/:householdId/subscription/upgrade        (Idempotency-Key)
+POST   /households/:householdId/subscription/downgrade
+POST   /households/:householdId/subscription/cancel
+POST   /households/:householdId/subscription/resume
+
+GET    /admin/subscriptions/plans
+GET    /admin/subscriptions/plans/:planId
+POST   /admin/subscriptions/plans                                    subscription.plan.manage
+PATCH  /admin/subscriptions/plans/:planId                             subscription.plan.manage
+POST   /admin/subscriptions/plans/:planId/entitlements                subscription.plan.manage
+POST   /admin/subscriptions/plans/:planId/prices                      subscription.plan.manage
+PATCH  /admin/subscriptions/prices/:priceId                           subscription.plan.manage
+
+GET    /admin/subscriptions/households                                subscription.view
+GET    /admin/subscriptions/households/:householdId                   subscription.view
+POST   /admin/subscriptions/households/:householdId/cancel            subscription.manage
+
+GET    /admin/subscriptions/billing-attempts                          subscription.view
+POST   /admin/subscriptions/billing-attempts/:id/refund               subscription.manage
+
+GET    /admin/subscriptions/households/:householdId/entitlement-overrides   subscription.view
+POST   /admin/subscriptions/entitlement-overrides                     subscription.entitlement.override
+DELETE /admin/subscriptions/entitlement-overrides/:id                 subscription.entitlement.override
+```
+
+### Error codes (Handoff 16 additions)
+
+```
+SUBSCRIPTION_NOT_FOUND                          404
+SUBSCRIPTION_PLAN_NOT_FOUND                      404
+SUBSCRIPTION_PLAN_PRICE_NOT_FOUND                404  no ACTIVE price for this plan/country/interval
+DUPLICATE_SUBSCRIPTION_PLAN_CODE                 409
+INVALID_SUBSCRIPTION_STATUS_TRANSITION           409
+SUBSCRIPTION_PLAN_NOT_AVAILABLE                  400  plan not ACTIVE, or not available in this country
+SUBSCRIPTION_TRIAL_NOT_ELIGIBLE                  409  reason: PLAN_HAS_NO_TRIAL | ALREADY_SUBSCRIBED | TRIAL_ALREADY_USED
+SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED          409  details: { key, limit, used }
+SUBSCRIPTION_BILLING_ATTEMPT_NOT_FOUND           404
+SUBSCRIPTION_BILLING_ATTEMPT_NOT_REFUNDABLE      409  not SUCCEEDED, or already refunded
+SUBSCRIPTION_ENTITLEMENT_OVERRIDE_NOT_FOUND      404
+SUBSCRIPTION_ALREADY_CANCELLED                   409  cancel/resume attempted from an invalid state
+```
+
+## Advanced Health + Medical Documents + Clinical OS (Handoff 17)
+
+### Two connected experiences, one longitudinal record
+
+Health Basics (Handoff 02) stays exactly as it was — allergies, conditions, medications, vaccination summary, diet, care profile. This handoff adds a second layer on top: an Owner Health Experience (Overview, Timeline, Documents, Labs, Imaging, Referrals, Dental, Nutrition, Rehab, Observations, each its own route rather than one giant page) and a Provider Clinical OS (Patient Context → Visit → Clinical Documentation → Orders/Results/Referral → Care Plan → Follow-up). Both read and write against the same sixteen new Prisma models, so "what the owner sees" and "what the provider documented" are always the same underlying rows viewed through two different, permission-scoped DTOs — never two copies of the truth.
+
+### Ten locked principles, enforced in code, not just in the spec prose
+
+1. **Medical records are provenance-oriented** — every new model carries a `sourceType` (`SourceType.OWNER`/`HOUSEHOLD_MEMBER`/`PROVIDER`/`CLINIC`/`IMPORTED_DOCUMENT`/`SYSTEM`, extended additively from Handoff 02's own enum) plus a `ClinicalActorRefDto`-shaped source (provider org/user, or household user) resolved on every read.
+2. **Provider-originated records are not silently overwritten by owners** — `provenance.util.ts`'s `assertOwnerEditable(sourceType)` throws `ProviderRecordNotOwnerEditableException` and is wired into the three pre-existing H02 services that needed it (`AllergiesService.update/remove`, `ConditionsService.update`, `MedicationsService.update`) — a small, targeted change to established code because the principle is central to this handoff, not a rewrite of Health Basics.
+3. **Owner corrections preserve history** — `MedicalRecordCorrection` (`targetType`/`targetId`, a polymorphic pair modeled directly on `AdminAuditLog`'s own `entityType`/`entityId` precedent) is a *new* row alongside the original, never an edit to it; the UI renders both the provider original and the correction, never one replacing the other.
+4. **Unknown ≠ Normal** — a lab result's `flag` (`LabResultFlag.ABNORMAL`/`NORMAL`) is `null` unless a provider explicitly set it; the frontend renders the raw `status` in that case, never a fabricated "Normal".
+5. **Missing ≠ Healthy** — every list view (`HealthRecordListView`, `HealthDocumentsView`, `HealthObservationsView`) renders an explicit `EmptyState` ("No lab results recorded.") rather than defaulting to a reassuring blank page or a green checkmark.
+6. **Medical data retains source** — `source`/`sourceType` are present on every DTO, not just the document model.
+7. **Private medical documents are never publicly exposed** — see storage architecture below.
+8. **Household/PetAccess/provider grant rules remain authoritative** — see authorization below; nothing new bypasses `PetAccessGuard`.
+9. **AI extraction is out of scope** — no OCR, no summarization, no automated diagnosis anywhere in this handoff; `SourceType` has no `AI` value.
+10. **No duplicated Jalali backend values** — every new timestamp column is a plain `TIMESTAMP(3)`; Jalali display continues to be computed client-side with `Intl.DateTimeFormat(..., { calendar: "persian" })`, the exact convention every prior handoff already established.
+
+### Sixteen new models, one authorization boundary
+
+`MedicalDocument`, `MedicalRecordCorrection`, `LabResult`, `ImagingStudy`, `Referral`, `DentalRecord`, `ClinicalNutritionPlan`, `RehabPlan`, `RehabSession`, `PetObservation`, `ClinicalVisit`, `ClinicalVisitRevision`, `CarePlan`, `CarePlanItem`, `SeniorCareNote`, `EndOfLifeCarePlan` — every one of them FKs to `Pet` with `onDelete: Restrict` (matching Health Basics' own FK policy, never `Cascade`), and every consumer-facing endpoint is guarded by `@UseGuards(SessionAuthGuard, PetAccessGuard)` with `@RequirePetAccess({ canViewHealth: true })` (or `canEditHealth`/`canRecordClinicalData` for a mutation), reusing Handoff 03's grant-union `PetAccessGuard` rather than inventing a second authorization path. Provider routes stack a second guard set — `@UseGuards(SessionAuthGuard, ProviderAuthGuard, PetAccessGuard)` — so a provider needs *both* a resolved org membership (`ProviderAuthGuard`, auto-resolved from the caller's single active `ProviderUser`, the same no-`:providerId`-in-the-URL convention `/provider/bookings` already established) *and* an explicit pet-level grant; org membership alone never grants pet access.
+
+### `canRecordClinicalData` — the one new authorization flag, deliberately narrow
+
+A provider can only author clinical content (visits, labs, imaging, referrals, care plans) for a pet if their `PetAccessGrant` has the new boolean `canRecordClinicalData`, which is set `true` in exactly one place: `BookingPetAccessService.grantForBooking()`, and only when `booking.category === ServiceCategory.VET`. Every household/family preset (`OWNER_PRESET`, `FAMILY_PRESET`, `NO_ACCESS_PRESET`) sets it `false` — an owner or household member can view and correct their pet's clinical record but never author one, matching the spec's "AI extraction and clinical authorship both stay out of the owner's hands" boundary. For nested provider mutations that don't carry `:petId` in the URL (a referral status PATCH, a lab amendment, an imaging void), the request DTO carries `petId` directly so `PetAccessGuard`'s existing body-fallback still applies, and the service layer independently re-checks the target row's actual `petId` (`clinical-link.util.ts`'s `assertVisitBelongsToPet`) as defense-in-depth against a spoofed value.
+
+### Private medical documents — a real signed-download capability that didn't exist before
+
+The audit at the start of this handoff found that the existing `StorageService` could mint upload URLs but had **no signed-download capability at all** — every existing file was served through a public object URL. Medical documents cannot use that. `StorageDriver` gained `createDownloadTarget(key)`: `S3StorageDriver` mints a real 5-minute presigned GET, and the local-dev `LocalStorageDriver` mints a one-time-ish Redis-backed download token resolved by a new `DownloadsController` (`GET /downloads/:token`, mirroring `UploadsController`'s exact shape). `StorageService.createHealthDocumentUploadTarget`/`createObservationMediaUploadTarget` validate a MIME allow-list and size cap (20MB for documents, 50MB for observation photo/video) *before* minting anything, generate a `randomUUID()` filename (the client-supplied name is never trusted or stored as a path segment), and write under private key prefixes (`health-documents/{petId}/...`, `pet-observations/{petId}/...`) deliberately distinct from the pre-existing public `pets/{petId}/...` photo scheme. `MedicalDocument.fileObjectKey` is the only thing ever stored — never a public URL — and every download goes through `GET /pets/:petId/health/documents/:id/download`, which re-checks `PetAccessGuard` and mints a fresh signed URL on every call rather than caching or returning one.
+
+### Provider originals — append/supersede/void, never edit-in-place
+
+Nothing a provider authors is ever mutated in place once created; each model uses the append-safe shape that fits it best. `LabResult` self-relates (`supersedesId`/`supersededBy`, a unique FK) — amending marks the old row `AMENDED` and creates a new row pointing back to it. `MedicalDocument` and `ImagingStudy` use `voidedAt`/`voidedReason` — voiding never deletes, it flags, and a replacement is a new row. `ClinicalVisit` uses a dedicated append-only `ClinicalVisitRevision` table, snapshotting the full prior content (`snapshotReasonForVisit`/`snapshotHistoryText`/`snapshotObservationsText`/`snapshotAssessmentText`/`snapshotPlanText`) with an incrementing `revisionNumber`, taken immediately before every amend or void.
+
+### Clinical Visit — separate from Booking, on purpose
+
+`ClinicalVisit` (`visitId`, nullable `bookingId`, `petId`, `providerOrganizationId`, `providerUserId`, `reasonForVisit`/`historyText`/`observationsText`/`assessmentText`/`planText`, `status`, `startedAt`/`completedAt`) is never collapsed into `Booking`: Booking stays the commercial/scheduling state machine from Handoff 03, ClinicalVisit is a wholly separate care-documentation state machine (`DRAFT`/`IN_PROGRESS`/`COMPLETED`/`AMENDED`/`VOIDED`). `start()` creates a visit directly at `IN_PROGRESS` (this phase's one-step "provider starts a visit" action; `DRAFT` stays in the vocabulary for a future multi-step-drafting phase but is unreachable via this API today). Notes are freely editable while `IN_PROGRESS`; once `COMPLETED`, `updateNotes()` is rejected outright and only `amend()` can change the content — and `amend()` always snapshots the prior state into `ClinicalVisitRevision` first, so nothing is ever silently edited after completion.
+
+### A genuine lost-update race was found and fixed during this handoff's own build
+
+The concurrency e2e (Flow P: two simultaneous `POST .../complete` calls on the same visit) initially failed with both requests returning `201` — `ClinicalVisitService.complete()` read the visit's status, validated it *outside* the transaction, then performed an unconditional `update()` inside it, so two racing requests could both pass validation and both "win". Fixed with the same claim-then-check `updateMany({ where: { id, status: { in: [...] } } })` / `count === 0 → throw` pattern this codebase already established in `ShippingOrchestratorService`, `NotificationDeliveryService.attempt()`, and `SellerLedgerService.sweepTransactions()` — one request's `updateMany` now genuinely claims the row, the loser's `count` comes back `0` and it gets a real `409`. `voidVisit()` had the identical class of race (nothing stopped two concurrent voids from both succeeding and both writing a revision) and was hardened the same way as a small, directly-related fix, not a scope expansion.
+
+### Labs, imaging, referrals — structured, never interpreted
+
+`LabResult` carries `value`/`unit`/`referenceRangeLow`/`referenceRangeHigh`/`qualitativeResult`/`status`/`flag` — `flag` is `null` unless a provider explicitly set `ABNORMAL`/`NORMAL`; nothing derives it from the numeric value against the reference range, per the spec's "do not invent medical interpretation" line. `ImagingStudy` carries a free-text `report`/`findings`/`recommendation` from the provider only — there is no image-analysis code path, and the frontend renders the report text as-is, never as a structured "diagnosis." `Referral` has its own state machine (`CREATED`/`SENT`/`ACCEPTED`/`SCHEDULED`/`COMPLETED`/`CANCELLED`) completely independent of `BookingStatus`; a referral to a provider that already exists in PET LIFE OS links via `toProviderOrganizationId`, otherwise `externalProviderName`/`externalSpecialty` carry the metadata.
+
+### Home Observations — owner-recorded, never a diagnosis
+
+`PetObservation` (`category`, `description`, `observedAt`, optional photo/video via the same private-storage pattern as documents) is explicitly owner-only — there is no provider-authored observation, and no observation is ever silently promoted into a `Condition` or any other clinical record. `HealthObservationsView` always renders a disclaimer ("Owner observation — not a diagnosis.") above the entry form, and the list never attaches a diagnosis-shaped field to a recorded entry. `health.observations.max` is entitlement-gated (see below) since this is the one owner-initiated creation path in the whole handoff besides documents.
+
+### Care Plan — provider-issued, Care Calendar reused rather than duplicated
+
+`CarePlan`/`CarePlanItem` (`MEDICATION`/`FOLLOW_UP`/`NUTRITION`/`REHAB`/`MONITORING`/`REFERRAL`/`VACCINATION`/`OTHER`, each with its own `status`/`dueAt`/`source`) is provider-issued only. A `FOLLOW_UP`-type item is deliberately *not* wired into a second reminder system — Handoff 03's Care Calendar already owns "things with a date the owner should see," so a follow-up is represented as a `CarePlanItem` the owner sees in their Health Overview, not a duplicate calendar event; a future handoff could project it into Care Calendar the same way a `Booking` already is, without any schema change here.
+
+### Senior Care + End-of-Life — foundation only, no scoring, no automation
+
+`SeniorCareNote` (mobility/cognition/medication-complexity/quality-of-life free text) and `EndOfLifeCarePlan` (palliative care plan, aftercare preferences) exist as plain structured records with no derived score and no automatic lifecycle trigger — a pet's lifecycle state is never changed as a side effect of creating or reading either model, and the tone of every string in this area (frontend copy, notification templates) is deliberately non-commercial and respectful, per the spec.
+
+### Entitlement gating — asymmetric on purpose, never on safety-critical data
+
+`health.documents.max`/`health.observations.max` were added to `UsageService.DERIVERS` (household-scoped, derived-not-counted counts, the exact "derived, never duplicated" shape `pets.max`/`household.members.max` already established in Handoff 16) and seeded onto all three plans (`seed.ts`: Free 10 documents/20 observations, Plus 50/100, Premium unlimited). `EntitlementService.assertWithinLimit()` is called **only** on the owner-initiated creation paths — `MedicalDocumentService.create()` when the actor is not a provider, and `PetObservationService.create()` always, since observations are owner-only. Every provider-authored creation (labs, imaging, referrals, visits, care plans, dental, nutrition, rehab) is **never** gated — the spec is explicit that safety-critical clinical authorship must never be paywalled, and existing records remain fully readable even past a limit or an expired entitlement; a limit only ever blocks the *next* owner upload, exactly like Handoff 16's own `pets.max` precedent. This was caught by the e2e suite itself: the two new keys were wired into `UsageService` but never actually added to any `SubscriptionPlanEntitlement` row, so the very first document upload in a fresh test household returned `409` — fixed by seeding the keys onto all three plans (see Errors/fixes below).
+
+### Notifications — a stricter SMS bar than the existing precedent
+
+Five new templates (`health.document_added`, `health.follow_up_due` — modeled but not yet wired, since nothing in this handoff proactively schedules follow-up reminders — `health.referral_created`, `health.referral_updated`, `health.care_plan_updated`) go through the existing `NotificationOrchestratorService` only. Every one of their `smsBody` strings is fully generic (no pet name, no document title, no finding, no diagnosis) — deliberately stricter than Handoff 02's own `health.reminder` template, which does interpolate `{{petName}}`, because the spec's "do not expose detailed diagnosis in SMS" line reads as calling for a more conservative bar specifically for clinical content.
+
+### Support integration — a coarse summary, never the clinical record
+
+`SupportCaseService.getHealthSummary(petId)` returns exactly three fields — `openMedicalDocumentsCount`, `recentClinicalVisit` (id/status/org name/start time only, no notes), `openReferralsCount` — wired into `getContext()` as `SupportCaseContextDto.health`. The e2e coverage (Flow M) asserts the JSON-stringified context does not contain a document's title or a lab's test name/value, not just that the shape looks right.
+
+### Frontend — ten consumer routes, two provider views, no giant page
+
+Consumer: `/pets/:id/health/advanced` (Overview) plus one route each for Timeline/Documents/Labs/Imaging/Referrals/Dental/Nutrition/Rehab/Observations — Labs/Imaging/Referrals/Dental/Nutrition/Rehab share one generic `HealthRecordListView<T>` shell (loading/error/empty/list, per-domain only in title/empty-copy/`renderItem`) rather than six near-identical components. `AdvancedHealthOverviewView` deliberately shows no numeric health score anywhere — per the spec, if one can't be responsibly calculated, none is shown — and lists `missingInformation` as explicit strings rather than a reassuring blank state. Provider: `ProviderClinicalPatientView` (Patient Header/Summary — allergies, medications, conditions, recent visits, recent labs, documents, care plans, respecting the same `PetAccessGuard` the API enforces) and `ProviderClinicalVisitView` (notes editable only pre-completion, an Amend/Void pair post-completion, a Revision History list rendered directly from `ClinicalVisitRevision` rows).
+
+### Errors and fixes found during this handoff's own verification
+
+- **A provenance display bug**: `HealthDocumentsView`'s provider-badge logic originally keyed off `verificationStatus === "PROVIDER_VERIFIED"` rather than `sourceType === PROVIDER || CLINIC` — today the two happen to coincide (verification status is set from the same `actor.provider` check at creation time), but they are two different concepts (verification vs. provenance) and would silently diverge the moment a "provider verifies an owner's document" action is ever added. Fixed to read `sourceType` directly, the same field `HealthTimelineView`'s own provenance badge already used correctly.
+- **Missing entitlement seed data**: `health.documents.max`/`health.observations.max` were wired into `UsageService` but never added to any plan's `SubscriptionPlanEntitlement` rows, so `EntitlementService.getLimit()`'s own documented "a key neither plan defines resolves to 0" fallback made the very first owner document/observation upload fail with `409` in any fresh household. Fixed by seeding both keys onto Free/Plus/Premium in `seed.ts`.
+- **A real concurrent-completion lost-update** in `ClinicalVisitService.complete()`/`voidVisit()` — see "A genuine lost-update race" above.
+- Two pre-existing, unrelated migrations in the isolated test database (`petlife_os_test`) were found half-applied (`finished_at IS NULL`) from an earlier, unrelated session in this environment — `20260903063100_seller_financial_settlement` (Handoff 14) and three others through Handoff 16's own migration. Every object each migration creates was verified present in the database before resolving it with `prisma migrate resolve --applied`; this is pre-existing environment bookkeeping, not a Handoff 17 regression, and is called out here only because it blocked this handoff's own e2e run until resolved.
+
+### API endpoints (Handoff 17 additions)
+
+```
+GET    /pets/:petId/health                                          (Health Overview — no numeric score)
+GET    /pets/:petId/health/timeline                                 (derived, cross-domain, provenance-tagged)
+
+GET    /pets/:petId/health/documents
+POST   /pets/:petId/health/documents/upload-url
+POST   /pets/:petId/health/documents
+GET    /pets/:petId/health/documents/:documentId
+GET    /pets/:petId/health/documents/:documentId/download            (fresh signed URL every call)
+POST   /pets/:petId/health/documents/:documentId/void
+
+GET    /pets/:petId/health/corrections
+POST   /pets/:petId/health/corrections                               (never edits the original record)
+
+GET    /pets/:petId/health/labs
+GET    /pets/:petId/health/imaging
+GET    /pets/:petId/health/referrals
+GET    /pets/:petId/health/dental
+GET    /pets/:petId/health/nutrition
+GET    /pets/:petId/health/rehab
+
+GET    /pets/:petId/health/visits
+GET    /pets/:petId/health/visits/:visitId
+GET    /pets/:petId/health/care-plans
+
+GET    /pets/:petId/health/senior-care
+POST   /pets/:petId/health/senior-care
+GET    /pets/:petId/health/end-of-life
+POST   /pets/:petId/health/end-of-life
+
+GET    /pets/:petId/observations
+POST   /pets/:petId/observations/media-upload-url
+POST   /pets/:petId/observations                                     (owner-only; never a diagnosis)
+
+GET    /provider/patients/:petId                                    (provider-scoped clinical DTO — never the consumer DTO)
+GET    /provider/patients/:petId/visits
+GET    /provider/patients/:petId/visits/:visitId
+POST   /provider/visits                                              (canRecordClinicalData required)
+POST   /provider/patients/:petId/visits/:visitId/notes
+POST   /provider/patients/:petId/visits/:visitId/complete
+POST   /provider/patients/:petId/visits/:visitId/amend               (always snapshots first)
+POST   /provider/patients/:petId/visits/:visitId/void
+
+POST   /provider/labs
+POST   /provider/labs/:labResultId/amend                             (append/supersede — never edits the original row)
+POST   /provider/imaging
+POST   /provider/imaging/:imagingStudyId/void
+POST   /provider/referrals
+PATCH  /provider/referrals/:referralId/status
+POST   /provider/dental-records
+POST   /provider/nutrition-plans
+POST   /provider/rehab-plans
+POST   /provider/patients/:petId/rehab-plans/:rehabPlanId/sessions
+POST   /provider/care-plans
+POST   /provider/patients/:petId/care-plans/:carePlanId/items
+PATCH  /provider/patients/:petId/care-plans/:carePlanId/items/:itemId/status
+POST   /provider/patients/:petId/documents/upload-url
+POST   /provider/patients/:petId/documents
+```
+
+### Error codes (Handoff 17 additions)
+
+```
+MEDICAL_DOCUMENT_NOT_FOUND                       404
+UNSUPPORTED_DOCUMENT_TYPE                        400  MIME/type not on the allow-list
+DOCUMENT_TOO_LARGE                               400  over the 20MB document / 50MB media cap
+PROVIDER_RECORD_NOT_OWNER_EDITABLE                409  owner attempted to edit a PROVIDER/CLINIC-sourced record
+MEDICAL_RECORD_CORRECTION_NOT_FOUND              404
+CLINICAL_VISIT_NOT_FOUND                         404
+INVALID_CLINICAL_VISIT_TRANSITION                409  status doesn't allow the requested action, or lost a completion/void race
+LAB_RESULT_NOT_FOUND                             404
+IMAGING_STUDY_NOT_FOUND                          404
+REFERRAL_NOT_FOUND                               404
+INVALID_REFERRAL_TRANSITION                      409
+CARE_PLAN_NOT_FOUND                              404
+CARE_PLAN_ITEM_NOT_FOUND                         404
+CLINICAL_RECORDING_NOT_AUTHORIZED                403  provider grant lacks canRecordClinicalData
+```
+
 ## API endpoints
 
 ```
@@ -5295,6 +5585,93 @@ pagination is deterministic; S: media upload/confirm authorization, MIME/
 size validation, and disabled-media selection rules; T: a placement update
 is audited).
 
+Everything in the Handoff 16 acceptance criteria: a genuinely separate
+Subscription/Payment/Entitlement state model, never conflated; an explicit
+`SubscriptionStatus` state machine with a documented `ALLOWED_TRANSITIONS`
+table; a real, self-healing FREE plan every household resolves against
+(never a hardcoded-plan-name fallback); a reusable `EntitlementService`
+(`has`/`getLimit`/`getUsageItem`/`assertWithinLimit`) that is the *only*
+place any feature checks a plan capability — no `if plan === PREMIUM`
+anywhere; derived (not counter-based) metering for `pets.max`/
+`household.members.max`; server-side `pets.max` enforcement wired into
+`PetsService.create()`, returning a typed, specific error, never a generic
+one, with over-limit existing data always left fully accessible; the
+entire H07 payment stack reused through a minimal internal Checkout/Cart
+shell rather than a second payment system or a loosened core commerce
+schema; trial/purchase/upgrade/downgrade/cancel/resume with an explicit,
+documented no-proration policy; an honest DEV/manual renewal adapter
+(never simulated production autopay) driving `PAST_DUE` →
+`GRACE_PERIOD` → `EXPIRED` with full access retained through every step but
+the last; refunds that never auto-infer a subscription-status change;
+row-lock-then-fresh-read concurrency safety on every subscription mutation
+(a genuine stale-read-before-lock race was found and fixed mid-build, see
+that section above); a full admin surface (plan/price CRUD, household
+subscription search/detail, billing-attempt refund, entitlement
+override grant/revoke) behind H11's RBAC with `subscription.entitlement.
+override` kept SUPER_ADMIN-only; household-wide, locale-correct
+subscription notifications through the existing NotificationOrchestrator
+only; a subscription summary added to H13's support context panel; a
+consumer Manage Subscription + Plans UI reachable from Home, and an admin
+Subscriptions section; a deterministic seeded FREE/Plus/Premium catalog;
+and no AI plans, no social/travel/insurance billing, no provider/seller
+SaaS billing, no coupons/promotions/referral/gift/affiliate billing, no
+family plans, and no complex usage-based billing anywhere in this
+handoff, per its explicit scope line. Every Handoff 01-15 backend/frontend
+test remains green (272 backend e2e scenarios, 26 new for this handoff —
+covering free entitlement resolution, limit enforcement, trial
+eligibility, purchase/upgrade/idempotency, downgrade/cancel/resume,
+renewal success/failure through the full `PAST_DUE`/`GRACE_PERIOD`/
+`EXPIRED` chain with FREE fallback and no data loss, entitlement
+overrides, the full admin surface, and concurrent-purchase/concurrent-
+cancel races — and 243 frontend tests, up from 227).
+
+Everything in the Handoff 17 acceptance criteria: sixteen new provenance-
+tagged Health/Clinical models (`MedicalDocument`, `MedicalRecordCorrection`,
+`LabResult`, `ImagingStudy`, `Referral`, `DentalRecord`,
+`ClinicalNutritionPlan`, `RehabPlan`/`RehabSession`, `PetObservation`,
+`ClinicalVisit`/`ClinicalVisitRevision`, `CarePlan`/`CarePlanItem`,
+`SeniorCareNote`, `EndOfLifeCarePlan`), all ten locked health principles
+enforced in code (provider-original immutability via
+`assertOwnerEditable()`, owner corrections as new rows via
+`MedicalRecordCorrection` that never touch the original, `Unknown ≠ Normal`
+via a `flag` that is `null` unless a provider explicitly set it, `Missing ≠
+Healthy` via explicit `EmptyState` copy everywhere, no AI source anywhere,
+no duplicated Jalali backend values); a real private-document signed-
+download capability added to the storage layer (it did not exist before
+this handoff); a new, deliberately narrow `canRecordClinicalData`
+`PetAccessGrant` flag as the sole mechanism authorizing provider clinical
+authorship, set only by a `VET`-category booking grant; a `ClinicalVisit`
+lifecycle kept wholly separate from `Booking`, with append/supersede/void
+semantics everywhere a provider-authored record needs to change
+(`ClinicalVisitRevision`, `LabResult.supersedesId`,
+`MedicalDocument`/`ImagingStudy` void fields); owner observations that are
+always rendered as observations, never diagnoses; a `Referral` state
+machine independent of `BookingStatus`; asymmetric entitlement gating
+(`health.documents.max`/`health.observations.max` gate only owner-initiated
+creation, never provider-authored clinical content, and never an existing
+record); five new notification templates with a stricter SMS privacy bar
+than the existing precedent; a coarse, three-field
+`SupportCaseContextDto.health` summary that never leaks a document title or
+lab value; ten consumer routes and two provider Clinical OS views; and a
+genuine concurrent-completion lost-update race found and fixed in
+`ClinicalVisitService` during this handoff's own build (see the dedicated
+section above). Every Handoff 01-16 backend/frontend test remains green
+(287 backend e2e scenarios, 15 new for this handoff — covering owner
+document upload/authorization, provider document provenance and
+immutability, owner corrections alongside an unaltered original, `Unknown`
+semantics never rendered as `Normal`, a full clinical visit start →
+document → complete → amend cycle with a preserved revision, labs,
+imaging, independent referral state, provider care plans, owner
+observations, entitlement-limit enforcement with existing data staying
+fully accessible, support-context privacy, cross-household isolation,
+provider-grant isolation, and the concurrent-visit-completion race — and
+267 frontend tests, up from 243, covering the health overview's deliberate
+absence of a numeric score, the timeline's always-present provenance
+indicator, document provenance badges, labs/imaging/referrals rendering
+only explicitly-provided provider data, the owner-observation disclaimer,
+the provider clinical patient view, and completed-visit amendment-only
+immutability).
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -5943,6 +6320,96 @@ is audited).
   isolated re-run. This handoff touches no code that test exercises; left
   for Codex per "document, don't silently broaden scope" rather than
   investigated further here.
+- **No proration** (Handoff 16) — an upgrade charges the new plan's full
+  price and starts a brand-new period from now, with no partial credit for
+  the unused portion of the prior period. This is the spec's own sanctioned
+  simpler policy; a future handoff could add deterministic-integer-IRR
+  proration with a full audit trail if the product later needs it.
+- **Renewal is reactive, not proactive** (Handoff 16) —
+  `SubscriptionRenewalWorkerService` only attempts a renewal once a
+  period's `endAt` has actually passed, never N days in advance. This means
+  `subscription.trial_ending`/`subscription.renewal_upcoming` (both listed
+  as "potential" in the spec) are not implemented — there is no point in
+  time to fire either notification without adding new proactive-scheduling
+  infrastructure. A future handoff could add a "renewal due soon" scan.
+- **No real recurring-charge integration** (Handoff 16) — renewals go
+  through the same `DEV_SIMULATED`/synchronous-charge path every other H16
+  charge uses; there is no real payment-provider webhook-driven autopay.
+  This is the spec's own explicit, honest choice ("do not simulate
+  production autopay") rather than an oversight — a future handoff would
+  need a real recurring-charge-capable provider integration to change it.
+- **`household.members.max` resolves but has no enforcement call site**
+  (Handoff 16) — the entitlement is metered and would correctly block a
+  household member invite/add over its limit, but this codebase has no
+  invite/add-member endpoint yet (`HouseholdsController` only supports
+  household creation). Documented rather than inventing a member-invite
+  feature out of this handoff's scope; wiring the check in is a small
+  addition once that feature exists.
+- **`pets.max` enforcement is a soft, non-transactional check** (Handoff
+  16) — `EntitlementService.assertWithinLimit()` is called before
+  `PetsService.create()`'s own transaction begins, so two truly
+  simultaneous pet-creation requests for a household already at its limit
+  could both pass the check and both succeed, exceeding the limit by one.
+  This is a deliberate, documented trade-off (a soft convenience limit, not
+  a financial invariant, unlike the subscription-mutation row locks
+  above) rather than an oversight; a future handoff could close it with a
+  `COUNT(*) ... FOR UPDATE`-style check inside the pet-creation transaction
+  if the product ever needs a hard guarantee here.
+- **Admin plan/household/billing-attempt list pages have no paged
+  controls** (Handoff 16) — each fetches one generously-sized page (up to
+  the backend's own page-size cap) with a status filter, matching every
+  other admin list view in this codebase (`AdminCustomersView`,
+  `AdminAuditView`, `AdminSellerFinanceView`) rather than introducing a new
+  pagination UI component. The backend's own pagination is real and ready
+  to support paged controls later.
+- **A genuine stale-read-before-lock concurrency bug was found and fixed
+  during this handoff's own build**, not left in place: an early version
+  of `SubscriptionBillingService.purchase()` read the Subscription row
+  before acquiring its row lock and never re-read it afterward. Documented
+  here (rather than silently mentioned only in code comments) because it
+  is exactly the class of defect the spec's own concurrency-testing
+  requirement exists to catch — see "Concurrency" under Handoff 16 above
+  for the fix and its dedicated e2e coverage.
+- **AI extraction/summarization/diagnosis is entirely out of scope**
+  (Handoff 17) — `SourceType` has no `AI` value, `MedicalDocument` has no
+  extracted-fields column, and no code path ever interprets an uploaded
+  file's contents or a lab/imaging value. Explicitly deferred per the
+  spec's own non-goals, not an oversight.
+- **No pharmacy/prescription commerce, no external lab/imaging vendor
+  integration, no wearable integration, no DNA/genetics, no insurance
+  claims** (Handoff 17) — `Referral`/`LabResult`/`ImagingStudy` model the
+  clinical side only; fulfillment/ordering integration with any of these
+  remains a distinct, unbuilt future concern per the spec's explicit
+  non-goals list.
+- **`health.follow_up_due` is a defined notification template with no call
+  site** (Handoff 17) — nothing in this handoff proactively schedules
+  follow-up reminders (mirroring Handoff 16's own
+  `subscription.trial_ending`/`renewal_upcoming` precedent); a
+  `CarePlanItem` of type `FOLLOW_UP` is visible to the owner in their
+  Health Overview today, but firing a reminder ahead of its `dueAt` needs
+  the same kind of proactive-scan poller a future handoff could add
+  without any schema change.
+- **`ClinicalVisitStatus.DRAFT` is modeled but unreachable** (Handoff 17) —
+  `start()` always creates a visit directly at `IN_PROGRESS` (this phase's
+  one-step "provider starts a visit" action); `DRAFT` stays in the
+  vocabulary for a future multi-step-drafting UI.
+- **Care Plan follow-ups are not projected into Care Calendar** (Handoff
+  17) — a `CarePlanItem` of type `FOLLOW_UP` is deliberately kept as its
+  own record rather than also creating a `CareCalendarEvent`, to avoid a
+  second, harder-to-keep-consistent reminder system; a future handoff
+  could add that projection the same way a `Booking` already populates
+  Care Calendar today.
+- **Senior Care / End-of-Life have no scoring and no automated lifecycle
+  trigger** (Handoff 17) — `SeniorCareNote`/`EndOfLifeCarePlan` are plain
+  structured records; creating or reading either never changes a pet's
+  lifecycle state, per the spec's explicit "do not trigger memorial
+  lifecycle automatically" line.
+- **`LocalStorageDriver`'s signed-download token is Redis-backed but
+  single-use-ish, not a true one-time token with atomic claim-and-expire**
+  (Handoff 17) — adequate for local development (the S3 driver's real
+  presigned GET is what production would use), but a determined caller
+  with the token before its TTL expires could reuse it; not a concern in
+  the dev-only code path it guards.
 
 ## Next recommended coding handoff
 
@@ -6055,3 +6522,72 @@ mechanism (never a stored, directly-editable balance column), and every
 user-visible notification through
 `NotificationOrchestratorService.notify()` — never a second write path
 for any of them, no matter how small the change looks.
+
+Alternatively, following directly from Handoff 16: **a household member
+invite flow**, the feature this handoff's own `household.members.max`
+entitlement is ready for but has no enforcement call site to attach to
+today (`HouseholdsController` only supports household creation). Adding
+`POST /households/:id/members` (invite/accept, reusing H12's own
+identifier-based auth plumbing rather than inventing a new one) would let
+`EntitlementService.assertWithinLimit(householdId, "household.members.max")`
+gate it exactly the way `PetsService.create()` already gates `pets.max` —
+no schema or entitlement-resolution change needed, the metering already
+resolves correctly, only the missing feature and its one enforcement call
+site. A related, smaller option: a proactive "renewal due soon" /
+"trial ending soon" notification pass — `SubscriptionRenewalWorkerService`
+currently only acts once a period has already ended; a scan that finds
+subscriptions within N days of `currentPeriod.endAt`/`trialEndsAt` and
+fires the two notification templates the spec names but this handoff
+left unimplemented (see Known Limitations) would need no new
+infrastructure beyond a second, similarly-shaped poller job. A third,
+independent option: real proration — if the product later needs partial
+credit on an upgrade mid-period, add it as deterministic integer-IRR
+arithmetic with a full audit trail (a new `SubscriptionChange` note field
+recording the computed credit), never floating point, keeping the
+current no-proration path as the default for a downgrade (which must
+never reduce paid entitlement mid-period regardless of how upgrade
+proration is implemented).
+
+Whichever is chosen, keep the Subscription/Payment/Entitlement separation
+intact (a subscription's status is never inferred from a payment or
+refund event), keep every subscription mutation going through
+`SubscriptionService.lockAndGetCurrent()`'s lock-then-fresh-read pattern
+(never a bare `getOrCreateRaw()` read followed by an unlocked write), keep
+`EntitlementService` as the only place a feature checks a plan capability
+(never a new `if plan.code === ...` check anywhere else), and keep every
+subscription revenue/refund posting going through
+`LedgerService.recordSubscriptionRevenue()`/`...Reversal()` — never a
+second write path into `PLATFORM_REVENUE`.
+
+Alternatively, following directly from Handoff 17: **a follow-up reminder
+scan for `CarePlanItem`**, the same "reactive, not proactive" gap this
+codebase now has in two places (Handoff 16's renewal reminders and
+Handoff 17's `health.follow_up_due`) — a single new poller (the same
+`setInterval`-class mechanism `NotificationDeliveryWorkerService`/
+`SubscriptionRenewalWorkerService` already establish, not a new job-queue
+dependency) that scans open `CarePlanItem` rows within N days of `dueAt`
+would close both gaps as one small, reusable piece of infrastructure. A
+related, smaller option: project a `CarePlanItem` of type `FOLLOW_UP` into
+`CareCalendarEvent` the same way a confirmed `Booking` already does, so a
+provider-issued follow-up appears directly on the owner's existing Care
+Calendar rather than only in the Health Overview. A third, independent
+option: a lightweight provider-side "verify this owner-uploaded document"
+action — `MedicalDocument.verificationStatus` already models
+`UNVERIFIED`/`PROVIDER_VERIFIED`, but nothing sets the latter today except
+document creation itself; adding a real verify endpoint would need
+`HealthDocumentsView`'s provenance badge (fixed this handoff to key off
+`sourceType`, not `verificationStatus`) to stay on `sourceType` for
+provenance while a separate, new UI affordance surfaces
+`verificationStatus` for its own distinct meaning — keeping the two
+concepts visually distinct is the one thing to get right before wiring it.
+
+Whichever is chosen, keep `Booking`/`ClinicalVisit` strictly separate
+(commercial/scheduling state vs. care-documentation state, never
+collapsed), keep every provider-authored clinical record append/supersede/
+void rather than edited in place, keep `canRecordClinicalData` as the only
+authorization path for provider clinical authorship (never inferred from
+org membership or booking category alone at the point of use), keep
+`EntitlementService.assertWithinLimit()` off every provider-authored
+creation path (never paywall safety-critical clinical content), and keep
+private medical files behind `StorageService`'s signed-download flow —
+never a stored public URL, no matter how small the change looks.

@@ -184,6 +184,19 @@ const envSchema = z.object({
   /// generous for a blog cover/body image without a native image-processing
   /// dependency (see README "Media") to pre-compress on the server.
   CMS_MEDIA_MAX_SIZE_BYTES: z.coerce.number().int().positive().default(5_242_880),
+
+  /// Subscription + Membership + Metering (Handoff 16) — how often the
+  /// background renewal worker polls for periods whose `endAt` has passed.
+  /// Never starts under NODE_ENV=test, mirroring
+  /// NOTIFICATION_WORKER_INTERVAL_MS's own precedent exactly; tests call
+  /// `processDueRenewals()` directly for determinism.
+  SUBSCRIPTION_RENEWAL_WORKER_INTERVAL_MS: z.coerce.number().int().positive().default(5000),
+  /// First renewal failure: ACTIVE -> PAST_DUE for this many days (a short
+  /// retry window, full access retained) before escalating to GRACE_PERIOD.
+  SUBSCRIPTION_PAST_DUE_RETRY_DAYS: z.coerce.number().int().positive().default(3),
+  /// PAST_DUE -> GRACE_PERIOD for this many further days (a final warning
+  /// window, full access still retained) before EXPIRED.
+  SUBSCRIPTION_GRACE_PERIOD_DAYS: z.coerce.number().int().positive().default(4),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

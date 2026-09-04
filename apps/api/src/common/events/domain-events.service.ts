@@ -162,6 +162,44 @@ export const DOMAIN_EVENT_TYPES = [
   "MarketplaceSettlementImported",
   "MarketplaceSettlementMismatchDetected",
   "MarketplaceReconciliationResolved",
+  // Subscription + Membership + Metering (Handoff 16) — deliberately not one
+  // event per possible mutation (spec: "only publish meaningful domain
+  // events... do not make simple reads asynchronous"). `SubscriptionStarted`
+  // covers both a trial start and an initial paid activation (payload.isTrial
+  // distinguishes) since both mean the same thing to a listener: entitlements
+  // just became active. A scheduled downgrade's actual application at the
+  // period boundary is `SubscriptionPlanChanged` (the exact name the spec's
+  // own "Outbox / Events" section suggests) and deliberately has no
+  // notification listener reaction — the household was already told at
+  // scheduling time (spec: "do not spam").
+  "SubscriptionStarted",
+  "SubscriptionRenewed",
+  "SubscriptionRenewalFailed",
+  "SubscriptionGraceStarted",
+  "SubscriptionExpired",
+  "SubscriptionCancelRequested",
+  "SubscriptionCancelReversed",
+  "SubscriptionUpgraded",
+  "SubscriptionDowngradeScheduled",
+  "SubscriptionPlanChanged",
+
+  // Handoff 17: Advanced Health / Clinical OS
+  "MedicalDocumentAdded",
+  "MedicalDocumentVoided",
+  "MedicalRecordCorrectionAdded",
+  "ClinicalVisitStarted",
+  "ClinicalVisitCompleted",
+  "ClinicalVisitAmended",
+  "ClinicalVisitVoided",
+  "LabResultAdded",
+  "LabResultAmended",
+  "ImagingStudyAdded",
+  "ReferralCreated",
+  "ReferralStatusChanged",
+  "ReferralCompleted",
+  "CarePlanCreated",
+  "CarePlanUpdated",
+  "PetObservationAdded",
 ] as const;
 
 /**

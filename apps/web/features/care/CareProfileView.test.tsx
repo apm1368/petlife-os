@@ -19,6 +19,7 @@ const FULL_ACCESS: PetAccessFlags = {
   canEditCareProfile: true,
   canViewLocation: true,
   canManageAccess: true,
+  canRecordClinicalData: false,
 };
 
 const PROFILE: CareProfileDto = {

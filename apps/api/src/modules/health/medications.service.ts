@@ -3,6 +3,7 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { HealthProfileService } from "./health-profile.service";
+import { assertOwnerEditable } from "./provenance.util";
 import type { CreateMedicationDto } from "./dto/create-medication.dto";
 import type { UpdateMedicationDto } from "./dto/update-medication.dto";
 
@@ -58,6 +59,7 @@ export class MedicationsService {
     return this.prisma.$transaction(async (tx) => {
       const existing = await tx.medication.findUnique({ where: { id } });
       if (!existing || existing.petId !== petId) throw new NotFoundApiException("Medication");
+      assertOwnerEditable(existing.sourceType);
 
       const nextStart = dto.startDate === undefined ? existing.startDate?.toISOString() ?? null : dto.startDate;
       const nextEnd = dto.endDate === undefined ? existing.endDate?.toISOString() ?? null : dto.endDate;

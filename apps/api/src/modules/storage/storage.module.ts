@@ -6,9 +6,10 @@ import { S3StorageDriver } from "./s3-storage.driver";
 import { STORAGE_DRIVER } from "./storage-driver.interface";
 import { StorageService } from "./storage.service";
 import { UploadsController } from "./uploads.controller";
+import { DownloadsController } from "./downloads.controller";
 
 @Module({
-  controllers: [UploadsController],
+  controllers: [UploadsController, DownloadsController],
   providers: [
     LocalStorageDriver,
     S3StorageDriver,
