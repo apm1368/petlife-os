@@ -50,7 +50,13 @@ export class DevOtpProvider implements OtpProvider {
     await this.redis.set(this.codeKey(identifier), JSON.stringify(record), "EX", ttlSeconds);
     await this.redis.set(this.cooldownKey(identifier), "1", "EX", cooldownSeconds);
 
-    // Never log the code in a non-dev environment; this provider must not be used in production.
+    // The code itself must never reach a production log stream — this provider has no real
+    // SMS/email delivery and exists for local/test use only. Gate the actual code behind a
+    // runtime check rather than trusting call sites to never invoke this provider in prod.
+    if (this.config.get("NODE_ENV", { infer: true }) === "production") {
+      this.logger.warn(`[DEV OTP] insecure development OTP provider was invoked in production for identifier=${identifier} — no code was logged, and no code was delivered to the user. Configure a real OtpProvider before accepting production traffic.`);
+      return;
+    }
     this.logger.log(`[DEV OTP] identifier=${identifier} code=${code} (expires in ${ttlSeconds}s)`);
   }
 

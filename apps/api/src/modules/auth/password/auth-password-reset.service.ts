@@ -54,8 +54,14 @@ export class AuthPasswordResetService {
 
     await this.events.publish("PasswordResetRequested", { userId: user.id });
 
-    // Never logged in production — see class doc comment. This is the only
-    // way the raw token is ever observable; the DB only ever stores its hash.
+    // The raw token must never reach a production log stream — the DB only ever
+    // stores its hash, and there is no real mail provider wired in yet (see class
+    // doc comment). Gate the actual token behind a runtime check rather than
+    // trusting call sites to never invoke this path in production.
+    if (this.config.get("NODE_ENV", { infer: true }) === "production") {
+      this.logger.warn(`[DEV PASSWORD RESET] insecure development reset-token delivery was invoked in production for userId=${user.id} — no token was logged, and no email was sent. Configure a real mail provider before accepting production traffic.`);
+      return;
+    }
     this.logger.log(`[DEV PASSWORD RESET] userId=${user.id} token=${rawToken} (expires in ${ttlMinutes}m)`);
   }
 

@@ -20,7 +20,12 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16-alpine
+        # postgis/postgis ships the same postgres:16 base plus the PostGIS
+        # extension (Handoff 19: Pet-Friendly Places geo search) — matches
+        # docker-compose.yml exactly. A plain postgres:16-alpine image here
+        # would fail CI's own "Run database migrations" step below on the
+        # Handoff 19 migration's `CREATE EXTENSION IF NOT EXISTS postgis`.
+        image: postgis/postgis:16-3.4-alpine
         env:
           POSTGRES_USER: petlife
           POSTGRES_PASSWORD: petlife

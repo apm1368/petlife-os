@@ -769,6 +769,15 @@ async function seedSellerFinance(input: { petBazaar: { id: string }; golestan: {
 }
 
 async function main() {
+  // This script seeds a hardcoded demo account (see seedDemoAccount below)
+  // and other obviously-fake data — it must never run against a production
+  // database, whether invoked manually or from a deploy script (Handoff 20
+  // hardening; defense in depth alongside keeping it out of any deploy
+  // pipeline in the first place).
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("prisma/seed.ts must never run with NODE_ENV=production — it seeds demo/dev-only data, including a hardcoded demo account password.");
+  }
+
   await seedSubscriptions();
 
   const sarah = await prisma.user.upsert({

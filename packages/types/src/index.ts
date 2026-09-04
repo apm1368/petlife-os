@@ -89,6 +89,8 @@ export enum HomeActionKind {
   VIEW_BOOKING = "VIEW_BOOKING",
   VIEW_PROFILE = "VIEW_PROFILE",
   ASK_AI = "ASK_AI",
+  /** Handoff 18 memorial mode — the primary Home action for a DECEASED/MEMORIAL pet, replacing every commercial/operational nudge (spec: "no Buy again/Book now CTA on memorial-focused surfaces"). */
+  VIEW_MEMORIES = "VIEW_MEMORIES",
 }
 
 // ---------------------------------------------------------------------------
@@ -2319,6 +2321,8 @@ export interface SupportCaseContextDto {
   subscription: SupportSubscriptionSummaryDto | null;
   /** Handoff 17 — coarse clinical-record summary for the case's pet, null when the case has no linked pet. Never the full clinical record (see SupportHealthSummaryDto's own doc comment). */
   health: SupportHealthSummaryDto | null;
+  /** Handoff 18 — coarse Lost Pet summary for the case's pet, null when the case has no linked pet. Never sighting contact detail or private notes (see SupportLostPetSummaryDto's own doc comment). */
+  lostPet: SupportLostPetSummaryDto | null;
 }
 
 /**
@@ -2668,7 +2672,14 @@ export type AdminPermissionName =
   | "subscription.view"
   | "subscription.manage"
   | "subscription.plan.manage"
-  | "subscription.entitlement.override";
+  | "subscription.entitlement.override"
+  | "animalSupport.view"
+  | "animalSupport.manage"
+  | "animalSupport.payout"
+  | "insurance.view"
+  | "insurance.manage"
+  | "places.view"
+  | "places.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -3414,6 +3425,8 @@ export enum MedicalDocumentType {
   DENTAL_RECORD = "DENTAL_RECORD",
   NUTRITION_PLAN = "NUTRITION_PLAN",
   REHAB_PLAN = "REHAB_PLAN",
+  /** Handoff 19: health certificate, import/export permit, passport, or any other travel-specific document — reuses the existing private MedicalDocument store rather than a parallel one. */
+  TRAVEL_DOCUMENT = "TRAVEL_DOCUMENT",
   OTHER = "OTHER",
 }
 
@@ -3868,4 +3881,690 @@ export interface SupportHealthSummaryDto {
   openMedicalDocumentsCount: number;
   recentClinicalVisit: { id: string; status: ClinicalVisitStatus; providerOrganizationName: string; startedAt: string } | null;
   openReferralsCount: number;
+}
+
+// ===========================================================================
+// Handoff 18 — Lost Pet + Animal Support + Community + Memories
+// ===========================================================================
+
+export enum PetLifecycleTransitionSource {
+  LOST_PET_INCIDENT = "LOST_PET_INCIDENT",
+  MANUAL_MEMORIAL = "MANUAL_MEMORIAL",
+}
+
+export interface PetLifecycleTransitionDto {
+  id: string;
+  petId: string;
+  fromStatus: PetLifecycleStatus;
+  toStatus: PetLifecycleStatus;
+  sourceType: PetLifecycleTransitionSource;
+  sourceId: string | null;
+  reason: string | null;
+  actorUserId: string | null;
+  createdAt: string;
+}
+
+export enum LostPetIncidentStatus {
+  OPEN = "OPEN",
+  SEARCHING = "SEARCHING",
+  SIGHTING_REPORTED = "SIGHTING_REPORTED",
+  FOUND = "FOUND",
+  REUNITED = "REUNITED",
+  CLOSED = "CLOSED",
+}
+
+export enum LostPetContactPreference {
+  IN_APP_MESSAGE = "IN_APP_MESSAGE",
+  MASKED_CONTACT = "MASKED_CONTACT",
+  PUBLIC_CONTACT = "PUBLIC_CONTACT",
+}
+
+export enum LostPetSightingStatus {
+  SUBMITTED = "SUBMITTED",
+  REVIEWED = "REVIEWED",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+}
+
+/** The household/owner view — includes privateNotes and every field. Never returned to an anonymous caller. */
+export interface LostPetIncidentDto {
+  id: string;
+  petId: string;
+  petName: string;
+  petSpecies: PetSpecies;
+  petPhotoUrl: string | null;
+  householdId: string;
+  status: LostPetIncidentStatus;
+  lastKnownLocation: string | null;
+  lastKnownLatitude: number | null;
+  lastKnownLongitude: number | null;
+  lastSeenAt: string | null;
+  description: string;
+  publicNotes: string | null;
+  privateNotes: string | null;
+  primaryPhotoObjectKey: string | null;
+  primaryPhotoUrl: string | null;
+  contactPreference: LostPetContactPreference;
+  publicContactMode: string | null;
+  createdByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+  foundAt: string | null;
+  reunitedAt: string | null;
+  closedAt: string | null;
+  sightingsCount: number;
+}
+
+/**
+ * The anonymous/public view (spec: "Do NOT expose: owner's home address,
+ * full phone number by default, private household information, private
+ * medical history, internal notes"). No householdId, no privateNotes, no
+ * createdByUserId, no raw contact detail — publicContactMode only, and only
+ * when contactPreference is PUBLIC_CONTACT.
+ */
+export interface LostPetIncidentPublicDto {
+  id: string;
+  petName: string;
+  petSpecies: PetSpecies;
+  petBreed: string | null;
+  petColorMarkings: string | null;
+  petApproximateAgeMonths: number | null;
+  primaryPhotoObjectKey: string | null;
+  primaryPhotoUrl: string | null;
+  status: LostPetIncidentStatus;
+  lastKnownLocation: string | null;
+  lastKnownLatitude: number | null;
+  lastKnownLongitude: number | null;
+  lastSeenAt: string | null;
+  publicNotes: string | null;
+  publicContactMode: string | null;
+  createdAt: string;
+}
+
+export interface LostPetSightingDto {
+  id: string;
+  incidentId: string;
+  reporterUserId: string | null;
+  isAnonymous: boolean;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  seenAt: string;
+  description: string | null;
+  photoObjectKey: string | null;
+  photoUrl: string | null;
+  status: LostPetSightingStatus;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Animal Support — organizations, rescue cases, campaigns, donations.
+// ---------------------------------------------------------------------------
+
+export enum AnimalSupportOrgType {
+  NGO = "NGO",
+  SHELTER = "SHELTER",
+  RESCUE_GROUP = "RESCUE_GROUP",
+}
+
+export enum AnimalSupportVerificationStatus {
+  NOT_STARTED = "NOT_STARTED",
+  SUBMITTED = "SUBMITTED",
+  NEEDS_INFORMATION = "NEEDS_INFORMATION",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  VERIFIED = "VERIFIED",
+  REJECTED = "REJECTED",
+}
+
+export interface AnimalSupportOrganizationDto {
+  id: string;
+  type: AnimalSupportOrgType;
+  name: string;
+  description: string | null;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  verificationStatus: AnimalSupportVerificationStatus;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  logoObjectKey: string | null;
+  logoUrl: string | null;
+  imageObjectKeys: string[];
+  imageUrls: string[];
+  isPubliclyListed: boolean;
+  createdAt: string;
+}
+
+export enum RescueCaseStatus {
+  OPEN = "OPEN",
+  IN_TREATMENT = "IN_TREATMENT",
+  FUNDRAISING = "FUNDRAISING",
+  READY_FOR_ADOPTION = "READY_FOR_ADOPTION",
+  RESOLVED = "RESOLVED",
+  CLOSED = "CLOSED",
+}
+
+export interface RescueCaseDto {
+  id: string;
+  organizationId: string;
+  organizationName: string;
+  title: string;
+  description: string;
+  animalType: string | null;
+  status: RescueCaseStatus;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  estimatedNeedIrr: number | null;
+  evidenceObjectKeys: string[];
+  evidenceUrls: string[];
+  createdAt: string;
+  closedAt: string | null;
+}
+
+export enum CampaignFundType {
+  GENERAL = "GENERAL",
+  RESTRICTED = "RESTRICTED",
+}
+
+export enum SupportCampaignStatus {
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  PAUSED = "PAUSED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+/**
+ * raisedAmountIrr is always ledger-derived at read time (spec: "Do not fake
+ * real-time raised amount from cached UI values") — never a stored column,
+ * computed the same way DonationLedgerService.getCampaignRaised() sums
+ * DonationTransaction rows.
+ */
+export interface SupportCampaignDto {
+  id: string;
+  organizationId: string;
+  organizationName: string;
+  rescueCaseId: string | null;
+  title: string;
+  description: string;
+  fundType: CampaignFundType;
+  targetAmountIrr: number | null;
+  raisedAmountIrr: number;
+  status: SupportCampaignStatus;
+  createdAt: string;
+  startsAt: string | null;
+  endsAt: string | null;
+}
+
+export interface SupportCampaignUpdateDto {
+  id: string;
+  campaignId: string;
+  title: string;
+  body: string;
+  evidenceObjectKeys: string[];
+  evidenceUrls: string[];
+  createdAt: string;
+}
+
+export enum DonationStatus {
+  PENDING = "PENDING",
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+  REFUNDED = "REFUNDED",
+}
+
+/** The donor's own donation-history view (spec: "Support clear receipt/history for authenticated donors"). Never shown to anyone but the donor themselves. */
+export interface DonationHistoryItemDto {
+  id: string;
+  campaignId: string;
+  campaignTitle: string;
+  organizationName: string;
+  amountIrr: number;
+  fundType: CampaignFundType;
+  status: DonationStatus;
+  showDonorPublicly: boolean;
+  createdAt: string;
+  succeededAt: string | null;
+  refundedAt: string | null;
+}
+
+/** The public campaign donor list entry — anonymous unless the donor explicitly opted in via showDonorPublicly. */
+export interface PublicDonationEntryDto {
+  displayName: string;
+  amountIrr: number;
+  createdAt: string;
+}
+
+export interface DonationFundBalanceDto {
+  organizationId: string;
+  generalAvailableIrr: number;
+  restrictedAvailableIrr: number;
+}
+
+// ---------------------------------------------------------------------------
+// Community.
+// ---------------------------------------------------------------------------
+
+export enum CommunityPostType {
+  GENERAL = "GENERAL",
+  QUESTION = "QUESTION",
+  LOCAL = "LOCAL",
+  LOST_PET_SHARE = "LOST_PET_SHARE",
+  RESCUE = "RESCUE",
+  ADOPTION = "ADOPTION",
+  MEMORY = "MEMORY",
+}
+
+export enum CommunityContentStatus {
+  PUBLISHED = "PUBLISHED",
+  HIDDEN = "HIDDEN",
+  REMOVED = "REMOVED",
+}
+
+export enum CommunitySourceType {
+  USER = "USER",
+  LOST_PET_INCIDENT = "LOST_PET_INCIDENT",
+  SUPPORT_CAMPAIGN = "SUPPORT_CAMPAIGN",
+}
+
+export enum CommunityReactionType {
+  LIKE = "LIKE",
+  LOVE = "LOVE",
+  HELPFUL = "HELPFUL",
+}
+
+export enum CommunityReportReason {
+  SPAM = "SPAM",
+  ABUSE = "ABUSE",
+  MISINFORMATION = "MISINFORMATION",
+  INAPPROPRIATE = "INAPPROPRIATE",
+  OTHER = "OTHER",
+}
+
+export enum CommunityReportStatus {
+  OPEN = "OPEN",
+  ESCALATED = "ESCALATED",
+  RESOLVED = "RESOLVED",
+  DISMISSED = "DISMISSED",
+}
+
+/** A public-safe pet reference only — never a channel into the pet's private health/household data (spec: "A post referring to a pet should use an explicit public-safe pet representation"). */
+export interface CommunityPostPetRefDto {
+  id: string;
+  name: string;
+  species: PetSpecies;
+  photoUrl: string | null;
+}
+
+export interface CommunityPostDto {
+  id: string;
+  authorUserId: string;
+  authorDisplayName: string;
+  type: CommunityPostType;
+  title: string | null;
+  body: string;
+  locale: Locale | null;
+  countryCode: string | null;
+  pet: CommunityPostPetRefDto | null;
+  mediaObjectKeys: string[];
+  mediaUrls: string[];
+  status: CommunityContentStatus;
+  sourceType: CommunitySourceType;
+  sourceLostPetIncidentId: string | null;
+  sourceSupportCampaignId: string | null;
+  commentCount: number;
+  reactionCount: number;
+  /** Only present when the request is authenticated — the caller's own reaction, if any. */
+  viewerReaction: CommunityReactionType | null;
+  createdAt: string;
+}
+
+export interface CommunityCommentDto {
+  id: string;
+  postId: string;
+  authorUserId: string;
+  authorDisplayName: string;
+  body: string;
+  status: CommunityContentStatus;
+  createdAt: string;
+}
+
+export interface CommunityReportDto {
+  id: string;
+  postId: string | null;
+  commentId: string | null;
+  reason: CommunityReportReason;
+  details: string | null;
+  status: CommunityReportStatus;
+  trustCaseId: string | null;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Memories + Life Timeline.
+// ---------------------------------------------------------------------------
+
+export enum PetMemoryType {
+  PHOTO = "PHOTO",
+  VIDEO = "VIDEO",
+  MILESTONE = "MILESTONE",
+  STORY = "STORY",
+  BIRTHDAY = "BIRTHDAY",
+  FIRST_DAY = "FIRST_DAY",
+  ADOPTION_DAY = "ADOPTION_DAY",
+  TRAVEL = "TRAVEL",
+  ACHIEVEMENT = "ACHIEVEMENT",
+  OTHER = "OTHER",
+}
+
+export enum PetMemoryVisibility {
+  PRIVATE = "PRIVATE",
+  PUBLIC = "PUBLIC",
+}
+
+export interface PetMemoryDto {
+  id: string;
+  petId: string;
+  householdId: string;
+  createdByUserId: string;
+  type: PetMemoryType;
+  title: string;
+  description: string | null;
+  occurredAt: string;
+  mediaObjectKeys: string[];
+  mediaUrls: string[];
+  location: string | null;
+  visibility: PetMemoryVisibility;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** One kind of event the derived Life Timeline can surface — broader than HealthTimelineEntryDto's own health-only scope, per spec: "Life Timeline should be broader than Health Timeline." */
+export enum LifeTimelineEntryType {
+  MEMORY = "MEMORY",
+  HEALTH = "HEALTH",
+  LOST_PET_RESOLVED = "LOST_PET_RESOLVED",
+  ADOPTION = "ADOPTION",
+  LIFECYCLE = "LIFECYCLE",
+}
+
+export interface LifeTimelineEntryDto {
+  type: LifeTimelineEntryType;
+  occurredAt: string;
+  summary: string;
+  /** The id of the underlying record and its own timeline-entry type (for a HEALTH entry, the wrapped HealthTimelineEntryDto's own recordType), so the UI can deep-link into the full record. */
+  recordId: string;
+  recordType: string;
+}
+
+// ---------------------------------------------------------------------------
+// Admin — Lost Pet oversight (Handoff 18)
+// ---------------------------------------------------------------------------
+
+/** The coarse, permission-gated Lost Pet summary the H13 support context panel shows — never the full incident (no privateNotes, no sighting contact detail). */
+export interface SupportLostPetSummaryDto {
+  openIncidentsCount: number;
+  mostRecentIncident: { id: string; status: LostPetIncidentStatus; createdAt: string } | null;
+  sightingsCount: number;
+}
+
+// ---------------------------------------------------------------------------
+// Travel + Insurance + Pet-Friendly Places (Handoff 19).
+// ---------------------------------------------------------------------------
+
+export enum TripStatus {
+  DRAFT = "DRAFT",
+  PLANNING = "PLANNING",
+  READY = "READY",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum TravelMode {
+  AIR = "AIR",
+  ROAD = "ROAD",
+  RAIL = "RAIL",
+  SEA = "SEA",
+  OTHER = "OTHER",
+}
+
+export interface TripDto {
+  id: string;
+  householdId: string;
+  petId: string;
+  petName: string;
+  petPhotoUrl: string | null;
+  createdByUserId: string;
+  originCountry: string;
+  originCity: string | null;
+  destinationCountry: string;
+  destinationCity: string | null;
+  departAt: string;
+  returnAt: string | null;
+  travelMode: TravelMode;
+  status: TripStatus;
+  notes: string | null;
+  requirementsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export enum TravelRequirementType {
+  VACCINATION = "VACCINATION",
+  RABIES = "RABIES",
+  MICROCHIP = "MICROCHIP",
+  HEALTH_CERTIFICATE = "HEALTH_CERTIFICATE",
+  IMPORT_PERMIT = "IMPORT_PERMIT",
+  EXPORT_PERMIT = "EXPORT_PERMIT",
+  CARRIER = "CARRIER",
+  AIRLINE_POLICY = "AIRLINE_POLICY",
+  MEDICATION = "MEDICATION",
+  QUARANTINE = "QUARANTINE",
+  PARASITE_TREATMENT = "PARASITE_TREATMENT",
+  PASSPORT_DOCUMENT = "PASSPORT_DOCUMENT",
+  OTHER = "OTHER",
+}
+
+/** UNKNOWN is a real, distinct, safe-default state — spec's locked rule: "never present uncertain travel/import/legal requirements as guaranteed facts... unknown does not become ready." */
+export enum TravelRequirementStatus {
+  UNKNOWN = "UNKNOWN",
+  REQUIRED = "REQUIRED",
+  NOT_REQUIRED = "NOT_REQUIRED",
+  INCOMPLETE = "INCOMPLETE",
+  READY = "READY",
+}
+
+export interface TravelRequirementDto {
+  id: string;
+  tripId: string;
+  requirementType: TravelRequirementType;
+  status: TravelRequirementStatus;
+  source: string | null;
+  sourceUrl: string | null;
+  jurisdiction: string | null;
+  verifiedAt: string | null;
+  validUntil: string | null;
+  /** Computed server-side against a staleness threshold — spec: "do not hide stale data." True whenever verifiedAt is null or older than the threshold. */
+  isStale: boolean;
+  /** The linked MedicalDocument's id/title only — never a fileObjectKey or URL (medical documents stay private; the frontend re-uses the existing H17 signed-download endpoint to actually view one). */
+  linkedMedicalDocumentId: string | null;
+  linkedMedicalDocumentTitle: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Aggregated, never a stored duplicate of Trip/TravelRequirement rows — the same "derived, never duplicated" convention Life Timeline established in Handoff 18. */
+export interface TripReadinessSummaryDto {
+  tripId: string;
+  status: TripStatus;
+  requirements: TravelRequirementDto[];
+  readyCount: number;
+  totalCount: number;
+  /** True only when every requirement is READY or NOT_REQUIRED — UNKNOWN/REQUIRED/INCOMPLETE always keep this false (locked rule: unknown never becomes ready). */
+  allReady: boolean;
+  hasStaleRequirement: boolean;
+}
+
+/** Not a government passport object — an aggregation of existing pet identity/health data plus travel-specific gaps. Never duplicates H17 health records; every count here is a live read. */
+export interface PetPassportReadinessDto {
+  petId: string;
+  petName: string;
+  petSpecies: PetSpecies;
+  petPhotoUrl: string | null;
+  microchipNumber: string | null;
+  vaccinationStatus: VaccinationStatus;
+  healthDocumentsCount: number;
+  travelDocumentsCount: number;
+  missingItems: string[];
+}
+
+export enum InsuranceVerificationStatus {
+  UNVERIFIED = "UNVERIFIED",
+  VERIFIED = "VERIFIED",
+  SUSPENDED = "SUSPENDED",
+}
+
+export interface InsuranceProviderDto {
+  id: string;
+  name: string;
+  description: string | null;
+  logoObjectKey: string | null;
+  logoUrl: string | null;
+  country: string;
+  status: InsuranceVerificationStatus;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  websiteUrl: string | null;
+  isPubliclyListed: boolean;
+  createdAt: string;
+}
+
+export enum InsuranceCoverageType {
+  ACCIDENT = "ACCIDENT",
+  ILLNESS = "ILLNESS",
+  SURGERY = "SURGERY",
+  DIAGNOSTICS = "DIAGNOSTICS",
+  MEDICATION = "MEDICATION",
+  DENTAL = "DENTAL",
+  PREVENTIVE = "PREVENTIVE",
+  HOSPITALIZATION = "HOSPITALIZATION",
+  EMERGENCY = "EMERGENCY",
+  OTHER = "OTHER",
+}
+
+export interface InsuranceProductDto {
+  id: string;
+  providerId: string;
+  providerName: string;
+  providerLogoUrl: string | null;
+  name: string;
+  country: string;
+  speciesEligibility: PetSpecies[];
+  minAgeMonths: number | null;
+  maxAgeMonths: number | null;
+  coverageTypes: InsuranceCoverageType[];
+  coverageSummary: string;
+  waitingPeriodDays: number | null;
+  deductibleAmountIrr: number | null;
+  annualLimitIrr: number | null;
+  coinsurancePercent: number | null;
+  premiumMinIrr: number | null;
+  premiumMaxIrr: number | null;
+  /** Spec hard UX rule: exclusions must be highly visible, never buried below benefits — always present alongside coverageSummary/coverageTypes in this same DTO. */
+  exclusions: string[];
+  termsSource: string | null;
+  termsUrl: string | null;
+  status: InsuranceVerificationStatus;
+  isPubliclyListed: boolean;
+  createdAt: string;
+}
+
+/** POSSIBLY_ELIGIBLE and UNKNOWN are never treated as guaranteed approval — spec's locked rule: "eligibility does not overclaim... never guarantees insurer approval." */
+export enum InsuranceEligibilityStatus {
+  ELIGIBLE = "ELIGIBLE",
+  POSSIBLY_ELIGIBLE = "POSSIBLY_ELIGIBLE",
+  NOT_ELIGIBLE = "NOT_ELIGIBLE",
+  UNKNOWN = "UNKNOWN",
+}
+
+export interface InsuranceEligibilityResultDto {
+  status: InsuranceEligibilityStatus;
+  reasons: string[];
+}
+
+/** APPROVED/DECLINED exist for a future real insurer integration — no service ever sets either today (spec: "do not simulate underwriting approval"). */
+export enum InsuranceApplicationStatus {
+  DRAFT = "DRAFT",
+  SUBMITTED = "SUBMITTED",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  APPROVED = "APPROVED",
+  DECLINED = "DECLINED",
+  CANCELLED = "CANCELLED",
+}
+
+export interface InsuranceApplicationDto {
+  id: string;
+  productId: string;
+  productName: string;
+  providerName: string;
+  householdId: string;
+  petId: string;
+  petName: string;
+  applicantUserId: string;
+  status: InsuranceApplicationStatus;
+  eligibilityStatus: InsuranceEligibilityStatus;
+  notes: string | null;
+  submittedAt: string | null;
+  decidedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export enum PetFriendlyPlaceCategory {
+  PARK = "PARK",
+  CAFE = "CAFE",
+  RESTAURANT = "RESTAURANT",
+  HOTEL = "HOTEL",
+  STORE = "STORE",
+  BEACH = "BEACH",
+  VENUE = "VENUE",
+  SERVICE = "SERVICE",
+  OTHER = "OTHER",
+}
+
+export enum PetFriendlyPlaceStatus {
+  UNVERIFIED = "UNVERIFIED",
+  VERIFIED = "VERIFIED",
+  SUSPENDED = "SUSPENDED",
+}
+
+export interface PetFriendlyPlaceDto {
+  id: string;
+  name: string;
+  category: PetFriendlyPlaceCategory;
+  description: string | null;
+  country: string;
+  city: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  /** Only present on a nearby-search result — the caller's own straight-line distance to this place, in meters, computed server-side via PostGIS ST_Distance. */
+  distanceMeters: number | null;
+  speciesAllowed: PetSpecies[];
+  sizeRestrictions: string | null;
+  indoorAllowed: boolean;
+  outdoorAllowed: boolean;
+  petPolicy: string | null;
+  imageObjectKeys: string[];
+  imageUrls: string[];
+  verificationSource: string | null;
+  verifiedAt: string | null;
+  status: PetFriendlyPlaceStatus;
+  isPubliclyListed: boolean;
+  isFavorited: boolean;
+  createdAt: string;
 }

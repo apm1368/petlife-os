@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { AdminMembershipStatus, InternalNoteEntityType, Prisma, SupportCaseCategory, SupportCaseStatus, SupportMessageAuthorType, SupportMessageVisibility } from "@prisma/client";
-import type { PaginatedDto, SupportCaseContextDto, SupportCaseDetailDto, SupportCaseSummaryDto, SupportCaseUserDetailDto, SupportCaseUserSummaryDto, SupportHealthSummaryDto, SupportMessageDto } from "@petlife/types";
+import type { PaginatedDto, SupportCaseContextDto, SupportCaseDetailDto, SupportCaseSummaryDto, SupportCaseUserDetailDto, SupportCaseUserSummaryDto, SupportHealthSummaryDto, SupportLostPetSummaryDto, SupportMessageDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import {
@@ -34,7 +34,7 @@ export interface ListSupportCasesFilter {
 }
 
 /** Only entity kinds a consumer can currently link their own case to — the two contextual entry points the spec requires (Order Detail, Booking Detail). */
-export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING"] as const;
+export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING", "LOST_PET_INCIDENT", "TRIP", "INSURANCE_APPLICATION"] as const;
 export type UserLinkableRelatedEntityType = (typeof USER_LINKABLE_RELATED_ENTITY_TYPES)[number];
 
 export interface CreateSupportCaseAsUserInput {
@@ -169,12 +169,31 @@ export class SupportCaseService {
     } else if (supportCase.relatedEntityType === "MARKETPLACE_SETTLEMENT_STATEMENT" && supportCase.relatedEntityId) {
       const statement = await this.prisma.marketplaceSettlementStatement.findUnique({ where: { id: supportCase.relatedEntityId } });
       if (statement) relatedEntity = { type: "MARKETPLACE_SETTLEMENT_STATEMENT", id: statement.id, summary: `${statement.provider} statement — ${statement.totalAmount.toLocaleString()} ${statement.currency}` };
+    } else if (supportCase.relatedEntityType === "LOST_PET_INCIDENT" && supportCase.relatedEntityId) {
+      // Handoff 18 — a coarse reference only (status), never sighting contact detail or private notes.
+      const incident = await this.prisma.lostPetIncident.findUnique({ where: { id: supportCase.relatedEntityId } });
+      if (incident) relatedEntity = { type: "LOST_PET_INCIDENT", id: incident.id, summary: `Lost pet incident — ${incident.status}` };
+    } else if (supportCase.relatedEntityType === "TRIP" && supportCase.relatedEntityId) {
+      // Handoff 19 — destination/status/travel dates only, never the requirements checklist or linked document contents (spec: "must not expose unrelated health details").
+      const trip = await this.prisma.trip.findUnique({ where: { id: supportCase.relatedEntityId } });
+      if (trip) relatedEntity = { type: "TRIP", id: trip.id, summary: `Trip to ${trip.destinationCountry} — ${trip.status} — departs ${trip.departAt.toISOString()}` };
+    } else if (supportCase.relatedEntityType === "INSURANCE_APPLICATION" && supportCase.relatedEntityId) {
+      // Handoff 19 — product/provider/status only, never eligibility reasons or terms detail.
+      const application = await this.prisma.insuranceApplication.findUnique({ where: { id: supportCase.relatedEntityId }, include: { product: { include: { provider: true } } } });
+      if (application) {
+        relatedEntity = {
+          type: "INSURANCE_APPLICATION",
+          id: application.id,
+          summary: `${application.product.provider.name} — ${application.product.name} — ${application.status}`,
+        };
+      }
     } else if (supportCase.relatedEntityType && supportCase.relatedEntityId) {
       relatedEntity = { type: supportCase.relatedEntityType, id: supportCase.relatedEntityId, summary: supportCase.relatedEntityId };
     }
 
     const subscription = household ? await this.getSubscriptionSummary(household.id) : null;
     const health = pet ? await this.getHealthSummary(pet.id) : null;
+    const lostPet = pet ? await this.getLostPetSummary(pet.id) : null;
 
     return {
       household: household ? { id: household.id, name: household.name ?? "Household" } : null,
@@ -186,6 +205,26 @@ export class SupportCaseService {
       resolutionTimeMinutes: supportCase.resolvedAt ? Math.round((supportCase.resolvedAt.getTime() - supportCase.createdAt.getTime()) / 60000) : null,
       subscription,
       health,
+      lostPet,
+    };
+  }
+
+  /**
+   * Handoff 18 spec: "support staff receive only minimum health context
+   * required by permission; do not expose full clinical record by default"
+   * — the same coarse-summary discipline applied to Lost Pet: counts and a
+   * bare status, never sighting contact detail or privateNotes.
+   */
+  private async getLostPetSummary(petId: string): Promise<SupportLostPetSummaryDto> {
+    const [openIncidentsCount, mostRecentIncident, sightingsCount] = await Promise.all([
+      this.prisma.lostPetIncident.count({ where: { petId, status: { notIn: ["REUNITED", "CLOSED"] } } }),
+      this.prisma.lostPetIncident.findFirst({ where: { petId }, orderBy: { createdAt: "desc" } }),
+      this.prisma.lostPetSighting.count({ where: { incident: { petId } } }),
+    ]);
+    return {
+      openIncidentsCount,
+      mostRecentIncident: mostRecentIncident ? { id: mostRecentIncident.id, status: mostRecentIncident.status as never, createdAt: mostRecentIncident.createdAt.toISOString() } : null,
+      sightingsCount,
     };
   }
 
@@ -363,6 +402,21 @@ export class SupportCaseService {
         const booking = await this.prisma.booking.findUnique({ where: { id: input.relatedEntityId } });
         if (!booking) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
         const owns = booking.userId === userId || (await this.petAccess.hasActiveAccess(booking.petId, userId));
+        if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+      } else if (input.relatedEntityType === "LOST_PET_INCIDENT") {
+        const incident = await this.prisma.lostPetIncident.findUnique({ where: { id: input.relatedEntityId } });
+        if (!incident) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+        const owns = incident.createdByUserId === userId || (await this.petAccess.hasActiveAccess(incident.petId, userId));
+        if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+      } else if (input.relatedEntityType === "TRIP") {
+        const trip = await this.prisma.trip.findUnique({ where: { id: input.relatedEntityId } });
+        if (!trip) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+        const owns = trip.createdByUserId === userId || (await this.petAccess.hasActiveAccess(trip.petId, userId));
+        if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+      } else if (input.relatedEntityType === "INSURANCE_APPLICATION") {
+        const application = await this.prisma.insuranceApplication.findUnique({ where: { id: input.relatedEntityId } });
+        if (!application) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+        const owns = application.applicantUserId === userId || (await this.petAccess.hasActiveAccess(application.petId, userId));
         if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
       } else {
         throw new SupportCaseInvalidReferenceException({ field: "relatedEntityType" });

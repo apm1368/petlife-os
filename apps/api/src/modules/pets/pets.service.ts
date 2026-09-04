@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
+import { PetLifecycleStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { EntitlementService } from "../subscriptions/entitlement.service";
+import { PetLifecycleService } from "./pet-lifecycle.service";
 import type { CreatePetDto } from "./dto/create-pet.dto";
 import type { UpdatePetDto } from "./dto/update-pet.dto";
 
@@ -27,6 +29,7 @@ export class PetsService {
     private readonly petAccess: PetAccessService,
     private readonly events: DomainEventsService,
     private readonly entitlements: EntitlementService,
+    private readonly lifecycle: PetLifecycleService,
   ) {}
 
   async create(householdId: string, creatorUserId: string, dto: CreatePetDto) {
@@ -37,9 +40,23 @@ export class PetsService {
     // spec: "limit checks must happen server-side" — checked before creation,
     // never blocking access to pets the household already has (over-limit
     // existing pets stay fully usable; only the NEXT create is refused).
-    await this.entitlements.assertWithinLimit(householdId, "pets.max");
-
+    //
+    // A plain check-then-act here has a real race window: two concurrent
+    // requests for a household already one pet under its limit could both
+    // read "within limit" before either commits, both succeed, and leave the
+    // household over its plan's pets.max (Handoff 20 hardening). A
+    // transaction-scoped Postgres advisory lock keyed by householdId
+    // serializes concurrent creates for the SAME household — the second
+    // transaction blocks until the first commits (or rolls back) and
+    // releases the lock automatically, at which point its own limit check
+    // sees the first pet's now-committed row. This needs no change to
+    // EntitlementService/UsageService (which read via a separate,
+    // non-transactional connection and therefore only ever see committed
+    // state) and does not serialize unrelated households against each other.
     return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${householdId})::bigint)`;
+      await this.entitlements.assertWithinLimit(householdId, "pets.max");
+
       const pet = await tx.pet.create({
         data: {
           householdId,
@@ -109,6 +126,32 @@ export class PetsService {
       });
       await this.events.publish("PetProfileUpdated", { petId: id }, { tx, aggregateType: "Pet", aggregateId: id });
       return pet;
+    });
+  }
+
+  /**
+   * spec: "Memorial transition must be explicit and auditable. Do not
+   * automatically infer death from health data." This is the ONLY place a
+   * household can move a pet to DECEASED — never inferred from any health
+   * record, observation, or clinical visit anywhere else in the codebase.
+   */
+  async markDeceased(petId: string, actorUserId: string, reason?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.lifecycle.transition(tx, petId, PetLifecycleStatus.DECEASED, { sourceType: "MANUAL_MEMORIAL", actorUserId, reason });
+      return tx.pet.findUniqueOrThrow({ where: { id: petId } });
+    });
+  }
+
+  /**
+   * spec: "Deceased vs Memorial: keep distinction explicit. DECEASED = a
+   * lifecycle fact. MEMORIAL = experience mode/retained identity state." A
+   * separate, explicit household action from markDeceased — DECEASED never
+   * auto-advances to MEMORIAL on its own.
+   */
+  async transitionToMemorial(petId: string, actorUserId: string, reason?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.lifecycle.transition(tx, petId, PetLifecycleStatus.MEMORIAL, { sourceType: "MANUAL_MEMORIAL", actorUserId, reason });
+      return tx.pet.findUniqueOrThrow({ where: { id: petId } });
     });
   }
 }

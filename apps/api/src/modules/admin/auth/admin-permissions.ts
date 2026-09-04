@@ -41,7 +41,14 @@ export type AdminPermission =
   | "subscription.view"
   | "subscription.manage"
   | "subscription.plan.manage"
-  | "subscription.entitlement.override";
+  | "subscription.entitlement.override"
+  | "animalSupport.view"
+  | "animalSupport.manage"
+  | "animalSupport.payout"
+  | "insurance.view"
+  | "insurance.manage"
+  | "places.view"
+  | "places.manage";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -75,9 +82,29 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "subscription.manage",
   "subscription.plan.manage",
   "subscription.entitlement.override",
+  "animalSupport.view",
+  "animalSupport.manage",
+  "animalSupport.payout",
+  "insurance.view",
+  "insurance.manage",
+  "places.view",
+  "places.manage",
 ];
 
-const READ_ONLY_PERMISSIONS: AdminPermission[] = ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "audit.view", "sellerFinance.view", "content.view", "subscription.view"];
+const READ_ONLY_PERMISSIONS: AdminPermission[] = [
+  "customer.view",
+  "support.view",
+  "dispute.view",
+  "trust.view",
+  "finance.view",
+  "audit.view",
+  "sellerFinance.view",
+  "content.view",
+  "subscription.view",
+  "animalSupport.view",
+  "insurance.view",
+  "places.view",
+];
 
 /**
  * Least-privilege by construction (spec: "do not make every admin
@@ -120,6 +147,12 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "subscription.view",
     "subscription.manage",
     "subscription.plan.manage",
+    "animalSupport.view",
+    "animalSupport.manage",
+    "insurance.view",
+    "insurance.manage",
+    "places.view",
+    "places.manage",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
@@ -146,8 +179,29 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     // spec: "FINANCE: appropriate billing visibility" — read-only; plan/price
     // management and subscription mutations stay ADMIN/SUPER_ADMIN-only.
     "subscription.view",
+    // Donation payout mirrors settlement.pay's own "only FINANCE moves real
+    // money" precedent exactly — ADMIN can verify/approve, only FINANCE
+    // records an actual fund payout.
+    "animalSupport.view",
+    "animalSupport.payout",
   ],
-  [AdminRole.OPERATIONS]: ["customer.view", "support.view", "dispute.view", "trust.view", "finance.view", "task.manage", "audit.view", "sellerFinance.view", "content.view", "subscription.view"],
+  [AdminRole.OPERATIONS]: [
+    "customer.view",
+    "support.view",
+    "dispute.view",
+    "trust.view",
+    "finance.view",
+    "task.manage",
+    "audit.view",
+    "sellerFinance.view",
+    "content.view",
+    "subscription.view",
+    "animalSupport.view",
+    "insurance.view",
+    "insurance.manage",
+    "places.view",
+    "places.manage",
+  ],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict
   // CONTENT to only those subject types at the permission-map level (see

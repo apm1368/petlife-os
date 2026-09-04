@@ -1,10 +1,18 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
+/// Handoff 19: `extensions = [postgis]` only declares the extension to Prisma's
+/// introspection/migration tooling — it does not itself run `CREATE EXTENSION`.
+/// The Handoff 19 migration does that explicitly (`CREATE EXTENSION IF NOT
+/// EXISTS postgis;`), and docker-compose's postgres image was swapped to
+/// `postgis/postgis` so the extension is actually installable in every
+/// environment that runs this compose file.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
 }
 
 // ---------------------------------------------------------------------------
@@ -762,6 +770,12 @@ enum LedgerAccountCode {
   /// phase — no official Torob/Digikala settlement API exists to confirm
   /// one (see README "External provider status").
   MARKETPLACE_RECEIVABLE
+  /// Handoff 18 — donor cash the platform is holding on behalf of an Animal
+  /// Support organization, pending payout. Deliberately never
+  /// PLATFORM_REVENUE — donation money is a liability to the receiving
+  /// organization, not platform income, even though PET LIFE OS is the one
+  /// that actually collected the cash from the gateway.
+  DONATION_PAYABLE
 }
 
 enum LedgerEntryDirection {
@@ -1110,6 +1124,12 @@ model Household {
   medicalDocuments MedicalDocument[]
   clinicalVisits   ClinicalVisit[]
 
+  lostPetIncidents LostPetIncident[]
+  memories         PetMemory[]
+
+  trips                 Trip[]
+  insuranceApplications InsuranceApplication[]
+
   @@map("households")
 }
 
@@ -1215,6 +1235,14 @@ model Pet {
   carePlans                CarePlan[]
   seniorCareNotes          SeniorCareNote[]
   endOfLifeCarePlan        EndOfLifeCarePlan?
+
+  lifecycleTransitions PetLifecycleTransition[]
+  lostPetIncidents     LostPetIncident[]
+  memories             PetMemory[]
+  communityPosts       CommunityPost[]
+
+  trips                 Trip[]
+  insuranceApplications InsuranceApplication[]
 
   @@index([householdId])
   @@map("pets")
@@ -3659,6 +3687,20 @@ enum NotificationCategory {
   /// a distinct product event from a one-off commerce payment even though
   /// both ultimately reuse PaymentIntent underneath.
   SUBSCRIPTION
+  /// Handoff 18 — a high-severity category, deliberately separate from
+  /// HOUSEHOLD/PET_ACCESS, for lost-pet incident/sighting/reunion events so
+  /// a household can never mute them via a generic preference toggle
+  /// without realizing what they're muting.
+  LOST_PET
+  ANIMAL_SUPPORT
+  COMMUNITY
+  /// Handoff 19 — trip readiness/document notifications. Deliberately not
+  /// spammy: only submission/status-change events, never every requirement
+  /// edit (spec: "do not over-notify").
+  TRAVEL
+  /// Handoff 19 — insurance application status changes only; no comparison
+  /// or eligibility-check spam.
+  INSURANCE
 }
 
 enum NotificationPriority {
@@ -5217,6 +5259,12 @@ enum MedicalDocumentType {
   DENTAL_RECORD
   NUTRITION_PLAN
   REHAB_PLAN
+  /// Handoff 19: health certificate, import/export permit, passport, or any
+  /// other travel-specific document — reuses the existing private
+  /// MedicalDocument store/upload/download flow rather than a parallel one
+  /// (spec: "do not upload the same document into a parallel store").
+  /// TravelRequirement.linkedMedicalDocumentId points at rows of this type.
+  TRAVEL_DOCUMENT
   OTHER
 }
 
@@ -5420,6 +5468,11 @@ model MedicalDocument {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  /// Handoff 19: a travel requirement (e.g. TRAVEL_DOCUMENT-typed health
+  /// certificate/import permit) links back to the existing document row
+  /// rather than a parallel travel-document store.
+  travelRequirements TravelRequirement[]
 
   @@index([petId])
   @@index([householdId])
@@ -5899,4 +5952,1018 @@ model EndOfLifeCarePlan {
   updatedAt DateTime @updatedAt
 
   @@map("end_of_life_care_plans")
+}
+
+// ===========================================================================
+// Handoff 18 — Lost Pet + Animal Support + Community + Memories
+//
+// Pet.lifecycleStatus (ACTIVE/LOST/TEMPORARILY_TRANSFERRED/DECEASED/MEMORIAL)
+// already existed as schema preparation since before Handoff 17 but nothing
+// ever wrote to it — this handoff is the first to actually drive it, always
+// through PetLifecycleService's explicit, auditable transitions (see
+// PetLifecycleTransition below), never a bare `prisma.pet.update()` from an
+// arbitrary controller.
+// ===========================================================================
+
+/// Append-only audit trail for every Pet.lifecycleStatus change this handoff
+/// introduces (LOST on incident open, ACTIVE on reunite; DECEASED/MEMORIAL on
+/// an explicit household action) — mirrors ClinicalVisitRevision's own
+/// "the transition itself must be traceable" precedent from Handoff 17.
+/// Never inferred automatically from health data (spec: "Do not automatically
+/// infer death from health data").
+model PetLifecycleTransition {
+  id          String                       @id @default(uuid()) @db.Uuid
+  petId       String                       @db.Uuid
+  pet         Pet                          @relation(fields: [petId], references: [id], onDelete: Restrict)
+  fromStatus  PetLifecycleStatus
+  toStatus    PetLifecycleStatus
+  /// What triggered this transition — a small closed vocabulary, not a
+  /// typed FK per possible source, mirroring SupportCase.relatedEntityType.
+  sourceType  PetLifecycleTransitionSource
+  sourceId    String?
+  reason      String?
+  /// Always set for a household-initiated transition; null only for a
+  /// system-originated one (none exist yet — every H18 transition is
+  /// explicit and user-triggered).
+  actorUserId String?                      @db.Uuid
+  createdAt   DateTime                     @default(now())
+
+  @@index([petId])
+  @@map("pet_lifecycle_transitions")
+}
+
+enum PetLifecycleTransitionSource {
+  LOST_PET_INCIDENT
+  MANUAL_MEMORIAL
+}
+
+enum LostPetIncidentStatus {
+  OPEN
+  SEARCHING
+  SIGHTING_REPORTED
+  FOUND
+  REUNITED
+  CLOSED
+}
+
+enum LostPetContactPreference {
+  IN_APP_MESSAGE
+  MASKED_CONTACT
+  PUBLIC_CONTACT
+}
+
+enum LostPetSightingStatus {
+  SUBMITTED
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+/// First-class Lost Pet incident (spec: "Do NOT treat it like a normal
+/// community post"). One Pet may have multiple incidents over its lifetime
+/// (lost more than once) but never more than one OPEN/SEARCHING/
+/// SIGHTING_REPORTED/FOUND incident at a time — enforced by
+/// LostPetIncidentService, not a DB constraint, since "at a time" needs a
+/// status-aware check a partial unique index can express but a plain unique
+/// column cannot without excluding CLOSED/REUNITED rows.
+model LostPetIncident {
+  id          String    @id @default(uuid()) @db.Uuid
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+
+  status LostPetIncidentStatus @default(OPEN)
+
+  lastKnownLocation  String?
+  lastKnownLatitude  Float?
+  lastKnownLongitude Float?
+  lastSeenAt         DateTime?
+
+  description  String
+  /// Shown on the public incident page.
+  publicNotes  String?
+  /// Never shown publicly, never returned by the public DTO/service.
+  privateNotes String?
+
+  primaryPhotoObjectKey String?
+
+  contactPreference LostPetContactPreference @default(IN_APP_MESSAGE)
+  /// Only meaningful when contactPreference = PUBLIC_CONTACT — an explicit,
+  /// owner-approved masked value (e.g. a partial phone), never the
+  /// household's real phone/email column.
+  publicContactMode String?
+
+  createdByUserId String   @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  foundAt    DateTime?
+  reunitedAt DateTime?
+  closedAt   DateTime?
+
+  sightings LostPetSighting[]
+
+  @@index([petId])
+  @@index([householdId])
+  @@index([status])
+  @@map("lost_pet_incidents")
+}
+
+/// Anonymous submission is explicitly supported (spec: "Support anonymous
+/// sighting submission safely") — reporterUserId is nullable, and when null,
+/// reporterContactToken carries whatever limited contact the anonymous
+/// reporter chose to leave (never required, never exposed publicly).
+model LostPetSighting {
+  id         String          @id @default(uuid()) @db.Uuid
+  incidentId String          @db.Uuid
+  incident   LostPetIncident @relation(fields: [incidentId], references: [id], onDelete: Restrict)
+
+  reporterUserId       String? @db.Uuid
+  reporterContactToken String?
+
+  location       String?
+  latitude       Float?
+  longitude      Float?
+  seenAt         DateTime
+  description    String?
+  photoObjectKey String?
+
+  status LostPetSightingStatus @default(SUBMITTED)
+
+  createdAt        DateTime  @default(now())
+  reviewedAt       DateTime?
+  reviewedByUserId String?   @db.Uuid
+
+  @@index([incidentId])
+  @@map("lost_pet_sightings")
+}
+
+// ---------------------------------------------------------------------------
+// Animal Support — organizations, rescue cases, campaigns, donations.
+//
+// Donation accounting is deliberately a full, separate double-entry
+// structure — DonationLedgerAccount/Transaction/Entry — structurally
+// cloned from Handoff 14's SellerLedgerAccount/Transaction/Entry (a
+// per-counterparty subledger keyed by organization, never touching
+// LedgerAccountCode.PLATFORM_REVENUE or SellerLedgerAccountCode at all).
+// The platform-level LedgerService gets one new account
+// (LedgerAccountCode.DONATION_PAYABLE, added below) so the platform's own
+// books also never call donor cash "PLATFORM_REVENUE" — it's money held on
+// the organization's behalf pending payout, i.e. a liability, not income.
+// ---------------------------------------------------------------------------
+
+enum AnimalSupportOrgType {
+  NGO
+  SHELTER
+  RESCUE_GROUP
+}
+
+enum AnimalSupportVerificationStatus {
+  NOT_STARTED
+  SUBMITTED
+  NEEDS_INFORMATION
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+model AnimalSupportOrganization {
+  id   String               @id @default(uuid()) @db.Uuid
+  type AnimalSupportOrgType
+
+  name        String
+  description String?
+  location    String?
+  latitude    Float?
+  longitude   Float?
+
+  verificationStatus AnimalSupportVerificationStatus @default(NOT_STARTED)
+  contactEmail       String?
+  contactPhone       String?
+  logoObjectKey      String?
+  imageObjectKeys    String[]                        @default([])
+  /// Whether this organization is listed on the public Animal Support
+  /// directory at all — an org can be VERIFIED but temporarily unlisted
+  /// (e.g. between review cycles) without losing its verification history.
+  isPubliclyListed   Boolean                         @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rescueCases                RescueCase[]
+  campaigns                  SupportCampaign[]
+  donationLedgerAccounts     DonationLedgerAccount[]
+  donationLedgerTransactions DonationLedgerTransaction[]
+  donationTransactions       DonationTransaction[]
+
+  @@map("animal_support_organizations")
+}
+
+enum RescueCaseStatus {
+  OPEN
+  IN_TREATMENT
+  FUNDRAISING
+  READY_FOR_ADOPTION
+  RESOLVED
+  CLOSED
+}
+
+model RescueCase {
+  id             String                    @id @default(uuid()) @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  title       String
+  description String
+  /// Free text, not PetSpecies — a rescue intake routinely covers species
+  /// (birds, rabbits, farm animals) PetSpecies (DOG/CAT only) doesn't model,
+  /// and a rescue case predates any Pet record existing in the product.
+  animalType  String?
+  status      RescueCaseStatus @default(OPEN)
+  location    String?
+  latitude    Float?
+  longitude   Float?
+
+  /// The organization's own stated funding need — informational only.
+  /// The actual amount raised is never stored here; it is always derived
+  /// from DonationLedgerService against this case's campaigns, the same
+  /// "ledger-backed, never a cached UI value" discipline the spec requires
+  /// for campaign totals.
+  estimatedNeedIrr   Int?
+  evidenceObjectKeys String[] @default([])
+
+  createdAt DateTime  @default(now())
+  closedAt  DateTime?
+
+  campaigns SupportCampaign[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("rescue_cases")
+}
+
+enum CampaignFundType {
+  GENERAL
+  RESTRICTED
+}
+
+enum SupportCampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+model SupportCampaign {
+  id             String                    @id @default(uuid()) @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  rescueCaseId   String?                   @db.Uuid
+  rescueCase     RescueCase?               @relation(fields: [rescueCaseId], references: [id], onDelete: SetNull)
+
+  title       String
+  description String
+
+  /// Snapshotted onto every DonationIntent at creation time so a later edit
+  /// to the campaign's own fundType can never retroactively reclassify past
+  /// donations (spec: "restricted donations must remain restricted").
+  fundType        CampaignFundType      @default(GENERAL)
+  targetAmountIrr Int?
+  status          SupportCampaignStatus @default(DRAFT)
+
+  createdAt DateTime  @default(now())
+  startsAt  DateTime?
+  endsAt    DateTime?
+
+  donationIntents      DonationIntent[]
+  donationTransactions DonationTransaction[]
+  updates              SupportCampaignUpdate[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("support_campaigns")
+}
+
+/// Provider-authored (in this phase: admin-curated on the organization's
+/// behalf — H18 does not build a separate organization-staff login/portal,
+/// see README known limitations) progress note, satisfying the spec's
+/// "public campaign should show ... updates ... use-of-funds updates".
+model SupportCampaignUpdate {
+  id         String          @id @default(uuid()) @db.Uuid
+  campaignId String          @db.Uuid
+  campaign   SupportCampaign @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  title              String
+  body               String
+  evidenceObjectKeys String[] @default([])
+
+  postedByAdminId String?  @db.Uuid
+  createdAt       DateTime @default(now())
+
+  @@index([campaignId])
+  @@map("support_campaign_updates")
+}
+
+enum DonationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+/// The donor's expressed intent — one row per attempt, mirroring
+/// PaymentIntent's own role at the checkout layer. Reuses H07's payment
+/// execution (PaymentsService.createIntent/.charge()) behind a minimal
+/// internal shell Checkout/Cart, the exact pattern
+/// SubscriptionBillingService established in Handoff 16 — see
+/// checkoutId below.
+model DonationIntent {
+  id         String          @id @default(uuid()) @db.Uuid
+  campaignId String          @db.Uuid
+  campaign   SupportCampaign @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  /// Nullable — anonymous donation is explicitly supported by the spec.
+  donorUserId String? @db.Uuid
+
+  amountIrr Int
+  /// Snapshotted from the campaign at creation time — see the fundType
+  /// doc-comment on SupportCampaign above.
+  fundType  CampaignFundType
+
+  status            DonationStatus @default(PENDING)
+  /// Donor consented to being shown as themselves rather than "Anonymous"
+  /// on the public campaign page — defaults to false (spec: "Do not expose
+  /// donor identities publicly unless explicit consent exists").
+  showDonorPublicly Boolean        @default(false)
+
+  /// The internal shell Checkout this donation's PaymentIntent hangs off —
+  /// required because PaymentIntent.checkoutId is a non-nullable FK.
+  /// Never routed through CheckoutService; never produces an Order.
+  checkoutId String @unique @db.Uuid
+
+  idempotencyKey String @unique
+
+  createdAt   DateTime  @default(now())
+  succeededAt DateTime?
+  failedAt    DateTime?
+  refundedAt  DateTime?
+
+  transaction DonationTransaction?
+
+  @@index([campaignId])
+  @@map("donation_intents")
+}
+
+/// Created exactly once, when a DonationIntent's payment succeeds — the
+/// confirmed monetary event every ledger entry (both the platform-level
+/// DONATION_PAYABLE posting and the organization's own DonationLedger
+/// posting) references. The 1:1 @unique on donationIntentId plus this
+/// row's own existence check is what makes a duplicate confirmation
+/// (a repeated webhook/callback) a safe no-op rather than a double post.
+model DonationTransaction {
+  id               String         @id @default(uuid()) @db.Uuid
+  donationIntentId String         @unique @db.Uuid
+  donationIntent   DonationIntent @relation(fields: [donationIntentId], references: [id], onDelete: Restrict)
+
+  campaignId     String                    @db.Uuid
+  campaign       SupportCampaign           @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  amountIrr Int
+  fundType  CampaignFundType
+
+  platformLedgerTransactionId String? @db.Uuid
+  donationLedgerTransactionId String? @db.Uuid
+
+  createdAt  DateTime  @default(now())
+  refundedAt DateTime?
+
+  @@map("donation_transactions")
+}
+
+enum DonationLedgerAccountCode {
+  RECEIVABLE
+  DONATION_INCOME_GENERAL
+  DONATION_INCOME_RESTRICTED
+  PAYOUT_PAID
+  ADJUSTMENT
+}
+
+/// Structural clone of SellerLedgerAccount (Handoff 14) — a lazily-created
+/// per-organization chart-of-accounts row.
+model DonationLedgerAccount {
+  id             String                    @id @default(uuid()) @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  code           DonationLedgerAccountCode
+  currency       String                    @default("IRR")
+  createdAt      DateTime                  @default(now())
+
+  entries DonationLedgerEntry[]
+
+  @@unique([organizationId, code])
+  @@map("donation_ledger_accounts")
+}
+
+/// Structural clone of SellerLedgerTransaction. referenceType is a plain
+/// String (not an enum) mirroring SellerLedgerTransaction.referenceType's
+/// own "TEXT, not enum" choice — "DONATION" | "DONATION_REFUND" | "PAYOUT".
+model DonationLedgerTransaction {
+  id             String                    @id @default(uuid()) @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  description    String
+  referenceType  String
+  referenceId    String
+  currency       String                    @default("IRR")
+  createdAt      DateTime                  @default(now())
+
+  entries DonationLedgerEntry[]
+
+  @@index([organizationId])
+  @@map("donation_ledger_transactions")
+}
+
+/// Structural clone of SellerLedgerEntry — append-only, debit always equals
+/// credit within a DonationLedgerTransaction (enforced in
+/// DonationLedgerService.recordBalanced(), never at the DB level, mirroring
+/// LedgerService/SellerLedgerService's own enforcement point).
+model DonationLedgerEntry {
+  id                          String                    @id @default(uuid()) @db.Uuid
+  donationLedgerTransactionId String                    @db.Uuid
+  donationLedgerTransaction   DonationLedgerTransaction @relation(fields: [donationLedgerTransactionId], references: [id], onDelete: Restrict)
+  donationLedgerAccountId     String                    @db.Uuid
+  donationLedgerAccount       DonationLedgerAccount     @relation(fields: [donationLedgerAccountId], references: [id], onDelete: Restrict)
+  direction                   LedgerEntryDirection
+  amount                      Int
+  createdAt                   DateTime                  @default(now())
+
+  @@index([donationLedgerTransactionId])
+  @@index([donationLedgerAccountId])
+  @@map("donation_ledger_entries")
+}
+
+// ---------------------------------------------------------------------------
+// Community — a useful, bounded feed, not generic social media. Moderation
+// deliberately reuses the existing TrustCase/TrustAction/Appeal machinery
+// (TrustSubjectType.COMMUNITY_CONTENT already exists, added in Handoff 11)
+// rather than a second moderation state machine — a CommunityReport that
+// gets escalated opens a TrustCase with subjectType COMMUNITY_CONTENT and
+// subjectId = the post/comment id.
+// ---------------------------------------------------------------------------
+
+enum CommunityPostType {
+  GENERAL
+  QUESTION
+  LOCAL
+  LOST_PET_SHARE
+  RESCUE
+  ADOPTION
+  MEMORY
+}
+
+/// The actual moderation outcome lives here (never a second status
+/// machine) — a TrustAction of type REMOVE_CONTENT sets this to REMOVED.
+enum CommunityContentStatus {
+  PUBLISHED
+  HIDDEN
+  REMOVED
+}
+
+/// Distinguishes user-authored posts from posts generated as a distribution
+/// surface for a LostPetIncident or SupportCampaign (spec: "Campaign/
+/// incident remains source of truth. Post is only presentation/
+/// distribution"). Closing or deleting the post never closes the incident
+/// or campaign — enforced in application code, not by a schema constraint.
+enum CommunitySourceType {
+  USER
+  LOST_PET_INCIDENT
+  SUPPORT_CAMPAIGN
+}
+
+model CommunityPost {
+  id              String                 @id @default(uuid()) @db.Uuid
+  authorUserId    String                 @db.Uuid
+  type            CommunityPostType      @default(GENERAL)
+  title           String?
+  body            String
+  locale          Locale?
+  countryCode     String?
+  /// A public-safe reference only (name/species/photo via the mapper) —
+  /// never a channel back into the pet's private health/household data.
+  petId           String?                @db.Uuid
+  pet             Pet?                   @relation(fields: [petId], references: [id], onDelete: SetNull)
+  mediaObjectKeys String[]               @default([])
+  status          CommunityContentStatus @default(PUBLISHED)
+
+  sourceType              CommunitySourceType @default(USER)
+  sourceLostPetIncidentId String?             @db.Uuid
+  sourceSupportCampaignId String?             @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments  CommunityComment[]
+  reactions CommunityReaction[]
+  reports   CommunityReport[]
+
+  @@index([authorUserId])
+  @@index([status])
+  @@index([type])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id           String                 @id @default(uuid()) @db.Uuid
+  postId       String                 @db.Uuid
+  post         CommunityPost          @relation(fields: [postId], references: [id], onDelete: Restrict)
+  authorUserId String                 @db.Uuid
+  body         String
+  status       CommunityContentStatus @default(PUBLISHED)
+  createdAt    DateTime               @default(now())
+
+  reports CommunityReport[]
+
+  @@index([postId])
+  @@map("community_comments")
+}
+
+enum CommunityReactionType {
+  LIKE
+  LOVE
+  HELPFUL
+}
+
+model CommunityReaction {
+  id        String                @id @default(uuid()) @db.Uuid
+  postId    String                @db.Uuid
+  post      CommunityPost         @relation(fields: [postId], references: [id], onDelete: Restrict)
+  userId    String                @db.Uuid
+  type      CommunityReactionType @default(LIKE)
+  createdAt DateTime              @default(now())
+
+  /// One reaction per user per post — the DB-level backstop against the
+  /// concurrent-duplicate-reaction race the spec's own testing section
+  /// requires covering, mirroring AuthIdentity's own unique-constraint-as-
+  /// concurrency-guard precedent.
+  @@unique([postId, userId])
+  @@map("community_reactions")
+}
+
+enum CommunityReportReason {
+  SPAM
+  ABUSE
+  MISINFORMATION
+  INAPPROPRIATE
+  OTHER
+}
+
+enum CommunityReportStatus {
+  OPEN
+  ESCALATED
+  RESOLVED
+  DISMISSED
+}
+
+model CommunityReport {
+  id             String                @id @default(uuid()) @db.Uuid
+  postId         String?               @db.Uuid
+  post           CommunityPost?        @relation(fields: [postId], references: [id], onDelete: Restrict)
+  commentId      String?               @db.Uuid
+  comment        CommunityComment?     @relation(fields: [commentId], references: [id], onDelete: Restrict)
+  reporterUserId String                @db.Uuid
+  reason         CommunityReportReason
+  details        String?
+  status         CommunityReportStatus @default(OPEN)
+  /// Set once a moderator escalates this report into the existing Trust &
+  /// Safety queue (TrustCase.subjectType = COMMUNITY_CONTENT).
+  trustCaseId    String?               @db.Uuid
+  createdAt      DateTime              @default(now())
+
+  @@index([postId])
+  @@index([commentId])
+  @@map("community_reports")
+}
+
+// ---------------------------------------------------------------------------
+// Memories + Life Timeline. PetMemory is the one genuinely new stored
+// table — Life Timeline itself is a derived aggregation service (the same
+// "derived, never duplicated" convention HealthTimelineService established
+// in Handoff 17), never a second copy of memory/health/incident rows.
+// ---------------------------------------------------------------------------
+
+enum PetMemoryType {
+  PHOTO
+  VIDEO
+  MILESTONE
+  STORY
+  BIRTHDAY
+  FIRST_DAY
+  ADOPTION_DAY
+  TRAVEL
+  ACHIEVEMENT
+  OTHER
+}
+
+/// PRIVATE (default) = household-only, stored under the private media
+/// prefix with signed downloads, matching Handoff 17's private-document
+/// pattern. PUBLIC = the household explicitly chose to make it shareable —
+/// stored under the public media prefix instead (a distinct upload, not a
+/// visibility flip on the same private object), so a public Memory can be
+/// safely referenced from a Community post.
+enum PetMemoryVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+model PetMemory {
+  id              String    @id @default(uuid()) @db.Uuid
+  petId           String    @db.Uuid
+  pet             Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  householdId     String    @db.Uuid
+  household       Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  createdByUserId String    @db.Uuid
+
+  type        PetMemoryType @default(PHOTO)
+  title       String
+  description String?
+  occurredAt  DateTime
+
+  mediaObjectKeys String[]            @default([])
+  location        String?
+  visibility      PetMemoryVisibility @default(PRIVATE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@index([householdId])
+  @@map("pet_memories")
+}
+
+// ---------------------------------------------------------------------------
+// Handoff 19 — Travel + Insurance + Pet-Friendly Places.
+//
+// Travel: Trip is the first-class entity; TravelRequirement is a real,
+// per-trip checklist row (never collapsed into a single "ready" boolean) —
+// spec's locked rule: "never present uncertain travel/import/legal
+// requirements as guaranteed facts... every requirement must retain source,
+// jurisdiction, last verified date, confidence/status." Requirement
+// TEMPLATES (which requirement types typically apply for a destination) are
+// deliberately NOT a database table — they are a small, extensible,
+// backend-code catalog (travel-requirement-catalog.ts), the same
+// code-defined-not-DB-editable convention CountryConfig and
+// NotificationTemplates already established — the spec's "do not hardcode
+// travel rules into frontend components" is satisfied by the frontend never
+// holding this catalog at all, only ever reading real TravelRequirement rows
+// through the API.
+//
+// Insurance: InsuranceProvider/InsuranceProduct are public discovery/
+// comparison data; InsuranceApplication is a lightweight
+// application/lead — no underwriting engine, no real approval logic (spec:
+// "if there is no real insurer integration, do not simulate underwriting
+// approval" — APPROVED/DECLINED exist in the enum for a future real
+// integration to set, but no code path in this handoff ever sets them).
+//
+// Pet-Friendly Places: PostGIS-backed geo search. `location` is an
+// Unsupported geography column Prisma cannot type natively — every write
+// keeps latitude/longitude (plain, queryable via Prisma) as the source of
+// truth and syncs `location` via raw SQL in the same statement; every
+// proximity read goes through raw SQL (ST_DWithin/ST_Distance), never a
+// bounding-box approximation over latitude/longitude alone.
+// ---------------------------------------------------------------------------
+
+enum TripStatus {
+  DRAFT
+  PLANNING
+  READY
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TravelMode {
+  AIR
+  ROAD
+  RAIL
+  SEA
+  OTHER
+}
+
+model Trip {
+  id              String    @id @default(uuid()) @db.Uuid
+  householdId     String    @db.Uuid
+  household       Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId           String    @db.Uuid
+  pet             Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  /// Plain UUID, no FK — same actor-reference convention as
+  /// LostPetIncident.createdByUserId.
+  createdByUserId String    @db.Uuid
+
+  originCountry      String
+  originCity         String?
+  destinationCountry String
+  destinationCity    String?
+
+  departAt DateTime
+  returnAt DateTime?
+
+  travelMode TravelMode @default(OTHER)
+  /// Never inferred from a single field (e.g. "all requirements READY") —
+  /// always an explicit household action via TripService.transition(),
+  /// mirroring PetLifecycleService's own single-writer-gate convention.
+  status     TripStatus @default(DRAFT)
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requirements TravelRequirement[]
+
+  @@index([householdId])
+  @@index([petId])
+  @@map("trips")
+}
+
+enum TravelRequirementType {
+  VACCINATION
+  RABIES
+  MICROCHIP
+  HEALTH_CERTIFICATE
+  IMPORT_PERMIT
+  EXPORT_PERMIT
+  CARRIER
+  AIRLINE_POLICY
+  MEDICATION
+  QUARANTINE
+  PARASITE_TREATMENT
+  PASSPORT_DOCUMENT
+  OTHER
+}
+
+/// UNKNOWN is the safe default and a real, distinct state — never
+/// silently promoted to READY by absence of information (spec's locked
+/// rule). INCOMPLETE means work has started (e.g. a document was linked)
+/// but the requirement isn't satisfied yet.
+enum TravelRequirementStatus {
+  UNKNOWN
+  REQUIRED
+  NOT_REQUIRED
+  INCOMPLETE
+  READY
+}
+
+model TravelRequirement {
+  id     String @id @default(uuid()) @db.Uuid
+  tripId String @db.Uuid
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Restrict)
+
+  requirementType TravelRequirementType
+  status          TravelRequirementStatus @default(UNKNOWN)
+
+  /// Human-readable provenance — e.g. "Destination country embassy website",
+  /// "Airline pet policy page". Spec: "every requirement must retain source."
+  source       String?
+  sourceUrl    String?
+  jurisdiction String?
+
+  /// When this requirement's information was last confirmed correct — never
+  /// updated automatically; a stale verifiedAt (see
+  /// TravelRequirementService's own staleness threshold) is surfaced to the
+  /// UI rather than hidden (spec: "do not hide stale data").
+  verifiedAt DateTime?
+  validUntil DateTime?
+
+  /// Reuses the existing private MedicalDocument store — never a parallel
+  /// upload path (spec: "do not upload the same document into a parallel
+  /// store"). Set only after the document already exists via the existing
+  /// H17 upload/create endpoints.
+  linkedMedicalDocumentId String?          @db.Uuid
+  linkedMedicalDocument   MedicalDocument? @relation(fields: [linkedMedicalDocumentId], references: [id], onDelete: SetNull)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tripId])
+  @@map("travel_requirements")
+}
+
+enum InsuranceVerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  SUSPENDED
+}
+
+model InsuranceProvider {
+  id               String                       @id @default(uuid()) @db.Uuid
+  name             String
+  description      String?
+  logoObjectKey    String?
+  country          String
+  status           InsuranceVerificationStatus  @default(UNVERIFIED)
+  contactEmail     String?
+  contactPhone     String?
+  websiteUrl       String?
+  isPubliclyListed Boolean                      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products InsuranceProduct[]
+
+  @@index([country])
+  @@map("insurance_providers")
+}
+
+enum InsuranceCoverageType {
+  ACCIDENT
+  ILLNESS
+  SURGERY
+  DIAGNOSTICS
+  MEDICATION
+  DENTAL
+  PREVENTIVE
+  HOSPITALIZATION
+  EMERGENCY
+  OTHER
+}
+
+/// Fields here are deliberately not over-normalized (spec: "do not
+/// over-normalize if product terms vary substantially") — coverageTypes/
+/// exclusions are the structured part; coverageSummary/termsSource carry
+/// whatever a product's real terms need in free text.
+model InsuranceProduct {
+  id         String            @id @default(uuid()) @db.Uuid
+  providerId String            @db.Uuid
+  provider   InsuranceProvider @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  name    String
+  country String
+
+  speciesEligibility PetSpecies[]
+  minAgeMonths       Int?
+  maxAgeMonths       Int?
+
+  coverageTypes   InsuranceCoverageType[]
+  coverageSummary String
+
+  waitingPeriodDays   Int?
+  deductibleAmountIrr Int?
+  annualLimitIrr      Int?
+  coinsurancePercent  Int?
+  premiumMinIrr       Int?
+  premiumMaxIrr       Int?
+
+  /// Spec hard UX rule: exclusions must be highly visible, never buried below
+  /// benefits. Kept as a first-class array (not folded into coverageSummary)
+  /// specifically so the frontend cannot render benefits without also having
+  /// this data in hand.
+  exclusions String[] @default([])
+
+  termsSource String?
+  termsUrl    String?
+
+  status           InsuranceVerificationStatus @default(UNVERIFIED)
+  isPubliclyListed Boolean                     @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications InsuranceApplication[]
+
+  @@index([providerId])
+  @@index([country])
+  @@map("insurance_products")
+}
+
+/// POSSIBLY_ELIGIBLE is never treated as guaranteed (spec's locked rule) —
+/// EligibilityService only ever returns ELIGIBLE when every structured
+/// criterion (species/age) is satisfied; anything it cannot fully evaluate
+/// resolves to POSSIBLY_ELIGIBLE or UNKNOWN, never ELIGIBLE.
+enum InsuranceEligibilityStatus {
+  ELIGIBLE
+  POSSIBLY_ELIGIBLE
+  NOT_ELIGIBLE
+  UNKNOWN
+}
+
+/// APPROVED/DECLINED exist for a future real insurer integration to set —
+/// no service in this handoff ever transitions an application into either
+/// state (spec: "do not simulate underwriting approval").
+enum InsuranceApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  DECLINED
+  CANCELLED
+}
+
+model InsuranceApplication {
+  id          String            @id @default(uuid()) @db.Uuid
+  productId   String            @db.Uuid
+  product     InsuranceProduct  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  householdId String            @db.Uuid
+  household   Household         @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId       String            @db.Uuid
+  pet         Pet               @relation(fields: [petId], references: [id], onDelete: Restrict)
+  /// Plain UUID, no FK — same actor-reference convention as Trip.createdByUserId.
+  applicantUserId String        @db.Uuid
+
+  status            InsuranceApplicationStatus @default(DRAFT)
+  /// A snapshot of EligibilityService's own live computation at submission
+  /// time — never silently recomputed later, so a past application's record
+  /// of what it was told stays stable even if product criteria change.
+  eligibilityStatus InsuranceEligibilityStatus @default(UNKNOWN)
+
+  notes       String?
+  submittedAt DateTime?
+  decidedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([householdId])
+  @@index([petId])
+  @@map("insurance_applications")
+}
+
+enum PetFriendlyPlaceCategory {
+  PARK
+  CAFE
+  RESTAURANT
+  HOTEL
+  STORE
+  BEACH
+  VENUE
+  SERVICE
+  OTHER
+}
+
+enum PetFriendlyPlaceStatus {
+  UNVERIFIED
+  VERIFIED
+  SUSPENDED
+}
+
+model PetFriendlyPlace {
+  id          String                   @id @default(uuid()) @db.Uuid
+  name        String
+  category    PetFriendlyPlaceCategory
+  description String?
+
+  country String
+  city    String
+  address String?
+
+  latitude  Float
+  longitude Float
+  /// PostGIS geography point — see the domain-level doc comment above this
+  /// section. Unsupported because Prisma has no native geography type;
+  /// PetFriendlyPlaceService is the only writer, always in the same
+  /// statement as latitude/longitude.
+  location Unsupported("geography(Point, 4326)")?
+
+  speciesAllowed   PetSpecies[]
+  sizeRestrictions String?
+  indoorAllowed    Boolean @default(true)
+  outdoorAllowed   Boolean @default(true)
+  petPolicy        String?
+
+  imageObjectKeys String[] @default([])
+
+  verificationSource String?
+  verifiedAt         DateTime?
+  status             PetFriendlyPlaceStatus @default(UNVERIFIED)
+  isPubliclyListed   Boolean                @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites PetFriendlyPlaceFavorite[]
+
+  @@index([country, city])
+  @@index([category])
+  @@map("pet_friendly_places")
+}
+
+model PetFriendlyPlaceFavorite {
+  id      String           @id @default(uuid()) @db.Uuid
+  placeId String           @db.Uuid
+  place   PetFriendlyPlace @relation(fields: [placeId], references: [id], onDelete: Restrict)
+  /// Plain UUID, no FK — same actor-reference convention as
+  /// CommunityReaction.userId.
+  userId  String           @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  @@unique([placeId, userId])
+  @@index([userId])
+  @@map("pet_friendly_place_favorites")
 }

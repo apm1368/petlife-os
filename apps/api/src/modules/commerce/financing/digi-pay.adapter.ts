@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PaymentProvider } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "node:crypto";
 import type { ProviderCapabilities } from "@petlife/types";
+import type { AppEnv } from "../../../config/env";
 import { PROVIDER_CAPABILITIES } from "../payments/payment-provider-registry";
 import type {
   FinancingAuthorizeInput,
@@ -48,14 +50,27 @@ export class DigiPayAdapter implements FinancingProvider {
 
   private readonly statuses = new Map<string, "APPROVED" | "DECLINED" | "PENDING">();
 
+  constructor(private readonly config: ConfigService<AppEnv, true>) {}
+
+  /** No real DigiPay credentials/API integration exist — see class doc comment. */
+  private isProductionConfigured(): boolean {
+    return this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) === "production";
+  }
+
   async getPlans(input: FinancingPlansInput): Promise<FinancingPlanOption[]> {
     return buildIllustrativePlans(input.amount, input.currency, [4, 8]);
   }
 
   async authorize(input: FinancingAuthorizeInput): Promise<FinancingAuthorizeResult> {
     const providerReference = `digipay_${randomUUID()}`;
-    const mode = input.mode ?? "APPROVE";
 
+    if (this.isProductionConfigured()) {
+      const result: FinancingAuthorizeResult = { status: "DECLINED", providerReference, failureCode: "DIGIPAY_NOT_IMPLEMENTED", failureMessage: "DigiPay has no live merchant integration configured. This installment request was not processed." };
+      this.statuses.set(providerReference, "DECLINED");
+      return result;
+    }
+
+    const mode = input.mode ?? "APPROVE";
     let status: "APPROVED" | "DECLINED" | "PENDING";
     let result: FinancingAuthorizeResult;
     if (mode === "DECLINE") {
@@ -78,10 +93,16 @@ export class DigiPayAdapter implements FinancingProvider {
   }
 
   async refund(_input: FinancingRefundInput): Promise<FinancingRefundResult> {
+    if (this.isProductionConfigured()) {
+      return { status: "FAILED", failureMessage: "DigiPay has no live merchant integration configured." };
+    }
     return { status: "SUCCEEDED", providerRefundReference: `digipay_refund_${randomUUID()}` };
   }
 
   verifyWebhookSignature(_rawBody: unknown, _signatureHeader: string | undefined): boolean {
-    return true;
+    // See class doc: no real signature scheme exists yet. Sandbox always
+    // accepts so local/test flows can self-trigger webhooks; production must
+    // never accept an unverifiable payload.
+    return !this.isProductionConfigured();
   }
 }

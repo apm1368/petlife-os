@@ -18,6 +18,7 @@ const SEEDED_ACCOUNTS: { code: LedgerAccountCode; name: string }[] = [
   { code: LedgerAccountCode.REFUND_PAYABLE, name: "Refund Payable" },
   { code: LedgerAccountCode.PLATFORM_REVENUE, name: "Platform Revenue" },
   { code: LedgerAccountCode.MARKETPLACE_RECEIVABLE, name: "Marketplace Receivable" },
+  { code: LedgerAccountCode.DONATION_PAYABLE, name: "Donation Payable" },
 ];
 
 /**
@@ -236,6 +237,47 @@ export class LedgerService implements OnModuleInit {
       currency,
       [
         { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.DEBIT, amount },
+        { accountCode: LedgerAccountCode.CUSTOMER_PAYMENT_CLEARING, direction: LedgerEntryDirection.CREDIT, amount },
+      ],
+      client,
+    );
+  }
+
+  /**
+   * Handoff 18: a succeeded donation's platform-side distribution — mirrors
+   * `recordSubscriptionRevenue`'s own two-step shape (cash already moved
+   * into `CUSTOMER_PAYMENT_CLEARING` via `recordPaymentSucceeded`), except
+   * donation money is never platform revenue (spec: "Donation money must
+   * remain separate from commercial money... do NOT post donations into
+   * normal commerce revenue logic") — it posts to the dedicated
+   * `DONATION_PAYABLE` liability account instead, honestly representing
+   * "PET LIFE OS is holding this on the organization's behalf." The
+   * organization's own restricted/general income split is tracked
+   * separately by `DonationLedgerService`, never here.
+   */
+  async recordDonationCollected(referenceId: string, amount: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced(
+      "Donation collected",
+      "PAYMENT",
+      referenceId,
+      currency,
+      [
+        { accountCode: LedgerAccountCode.CUSTOMER_PAYMENT_CLEARING, direction: LedgerEntryDirection.DEBIT, amount },
+        { accountCode: LedgerAccountCode.DONATION_PAYABLE, direction: LedgerEntryDirection.CREDIT, amount },
+      ],
+      client,
+    );
+  }
+
+  /** The reversal counterpart to `recordDonationCollected` — called alongside `recordRefundSucceeded`, never replacing it, exactly like `recordSubscriptionRevenueReversal`. */
+  async recordDonationRefunded(referenceId: string, amount: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced(
+      "Donation refunded",
+      "REFUND",
+      referenceId,
+      currency,
+      [
+        { accountCode: LedgerAccountCode.DONATION_PAYABLE, direction: LedgerEntryDirection.DEBIT, amount },
         { accountCode: LedgerAccountCode.CUSTOMER_PAYMENT_CLEARING, direction: LedgerEntryDirection.CREDIT, amount },
       ],
       client,

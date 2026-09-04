@@ -1187,3 +1187,172 @@ export class ClinicalRecordingNotAuthorizedException extends ApiException {
     super("CLINICAL_RECORDING_NOT_AUTHORIZED", "You are not authorized to record clinical data for this pet.", HttpStatus.FORBIDDEN, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Handoff 18: Lost Pet + Animal Support + Community + Memories
+// ---------------------------------------------------------------------------
+
+export class LostPetIncidentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("LOST_PET_INCIDENT_NOT_FOUND", "Lost pet incident not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidLostPetIncidentTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_LOST_PET_INCIDENT_TRANSITION", "This action is not valid for the incident's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** A household already has an OPEN/SEARCHING/SIGHTING_REPORTED/FOUND incident for this pet — mirrors the partial unique index at the DB level with a typed, friendlier error. */
+export class LostPetIncidentAlreadyOpenException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("LOST_PET_INCIDENT_ALREADY_OPEN", "This pet already has an open lost-pet incident.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class LostPetSightingNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("LOST_PET_SIGHTING_NOT_FOUND", "Sighting not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class AnimalSupportOrganizationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ANIMAL_SUPPORT_ORGANIZATION_NOT_FOUND", "Organization not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class RescueCaseNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("RESCUE_CASE_NOT_FOUND", "Rescue case not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SupportCampaignNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_CAMPAIGN_NOT_FOUND", "Campaign not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class SupportCampaignNotAcceptingDonationsException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_CAMPAIGN_NOT_ACCEPTING_DONATIONS", "This campaign is not currently accepting donations.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class DonationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DONATION_NOT_FOUND", "Donation not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class DonationAmountInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DONATION_AMOUNT_INVALID", "Donation amount must be a positive whole amount.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** Thrown by DonationLedgerService.recordPayout when the requested amount exceeds the actual available balance in that specific fund-type account — the enforcement point for "restricted donations must remain restricted" and "no hidden fund movement". */
+export class DonationInsufficientFundBalanceException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DONATION_INSUFFICIENT_FUND_BALANCE", "The requested payout exceeds the available balance for this fund.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class CommunityPostNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_POST_NOT_FOUND", "Post not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class CommunityCommentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_COMMENT_NOT_FOUND", "Comment not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class CommunityContentNotVisibleException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_CONTENT_NOT_VISIBLE", "This content is no longer visible.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class CommunityReportNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_REPORT_NOT_FOUND", "Report not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class PetMemoryNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PET_MEMORY_NOT_FOUND", "Memory not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown by PetLifecycleService when a requested transition isn't a legal move in the explicit state table (e.g. MEMORIAL -> ACTIVE without going through DECEASED first is not modeled). */
+export class InvalidPetLifecycleTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_PET_LIFECYCLE_TRANSITION", "This lifecycle transition is not valid for the pet's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Handoff 19: Travel + Insurance + Pet-Friendly Places
+// ---------------------------------------------------------------------------
+
+export class TripNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRIP_NOT_FOUND", "Trip not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidTripTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_TRIP_TRANSITION", "This action is not valid for the trip's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TravelRequirementNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_REQUIREMENT_NOT_FOUND", "Requirement not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown when a TravelRequirement is linked to a MedicalDocument that does not belong to the same pet as the trip — never trust a client-supplied documentId across pets. */
+export class TravelRequirementDocumentMismatchException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_REQUIREMENT_DOCUMENT_MISMATCH", "This document does not belong to the trip's pet.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class InsuranceProviderNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INSURANCE_PROVIDER_NOT_FOUND", "Insurance provider not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InsuranceProductNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INSURANCE_PRODUCT_NOT_FOUND", "Insurance product not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InsuranceApplicationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INSURANCE_APPLICATION_NOT_FOUND", "Insurance application not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown by InsuranceApplicationService when a requested transition isn't in the explicit state table — never a real underwriting decision (spec: "do not simulate underwriting approval"). */
+export class InvalidInsuranceApplicationTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_INSURANCE_APPLICATION_TRANSITION", "This action is not valid for the application's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class PetFriendlyPlaceNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PET_FRIENDLY_PLACE_NOT_FOUND", "Place not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
