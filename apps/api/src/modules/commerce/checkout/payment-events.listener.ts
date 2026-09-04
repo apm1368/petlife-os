@@ -7,14 +7,16 @@ import { CheckoutService } from "./checkout.service";
  * "future-safe async confirmation" for a PAYMENT_PENDING checkout resolved
  * later by PaymentsService.resolvePendingIntent) — never to one published
  * by the synchronous `pay()` flow, which already calls
- * `finalizeSuccessfulPayment` itself, directly, in the same request.
- * EventEmitter2's `.emit()` does not await async listeners, so if this
+ * `finalizeSuccessfulPayment` itself, directly, in the same request. If this
  * listener also reacted to the synchronous path's event, it would race the
  * request handler's own call to the same (transactional, but not
  * cross-call-serialized) method — two concurrent finalize attempts for the
  * same checkout, both reading "not yet CONFIRMED" before either commits.
  * The `viaWebhook` flag on the event payload is what keeps these two paths
- * from ever overlapping.
+ * from ever overlapping — this holds regardless of whether
+ * DomainEventsService awaits its listeners (it does, via `emitAsync` —
+ * Handoff 20), since the guard is about which code path calls
+ * `finalizeSuccessfulPayment` at all, not about dispatch timing.
  */
 @Injectable()
 export class PaymentEventsListener {

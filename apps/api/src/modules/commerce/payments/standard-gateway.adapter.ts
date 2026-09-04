@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PaymentProvider } from "@prisma/client";
-import { randomUUID, createHmac } from "node:crypto";
+import { ConfigService } from "@nestjs/config";
+import { randomUUID, createHmac, timingSafeEqual } from "node:crypto";
 import type { ProviderCapabilities } from "@petlife/types";
+import type { AppEnv } from "../../../config/env";
 import { PROVIDER_CAPABILITIES } from "./payment-provider-registry";
 import type {
   PaymentChargeInput,
@@ -11,6 +13,8 @@ import type {
   PaymentRefundResult,
   PaymentStatusResult,
 } from "./payment-gateway.interface";
+
+const NOT_IMPLEMENTED_MESSAGE = "The standard payment gateway has no live merchant integration configured. This charge was not processed.";
 
 /**
  * Provider-neutral "real gateway" slot (spec section 7). Required
@@ -35,12 +39,29 @@ export class StandardGatewayAdapter implements PaymentGateway {
   readonly capabilities: ProviderCapabilities = PROVIDER_CAPABILITIES.STANDARD_GATEWAY;
 
   private readonly statuses = new Map<string, PaymentChargeResult["status"]>();
-  private readonly secret = process.env.STANDARD_GATEWAY_API_KEY;
+
+  constructor(private readonly config: ConfigService<AppEnv, true>) {}
+
+  private get secret(): string | undefined {
+    return this.config.get("STANDARD_GATEWAY_API_KEY", { infer: true });
+  }
+
+  /** No merchant credentials exist for a real gateway call — see class doc comment. */
+  private isProductionConfigured(): boolean {
+    return this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) === "production";
+  }
 
   async charge(input: PaymentChargeInput): Promise<PaymentChargeResult> {
     const providerReference = `stdgw_${randomUUID()}`;
-    const mode = input.mode ?? "SUCCESS";
 
+    if (this.isProductionConfigured()) {
+      // Never accept a caller-supplied outcome once running against real
+      // traffic — there is no live gateway behind this adapter yet, so a
+      // charge must fail explicitly rather than silently "succeed."
+      return { status: "FAILED", providerReference, failureCode: "STANDARD_GATEWAY_NOT_IMPLEMENTED", failureMessage: NOT_IMPLEMENTED_MESSAGE };
+    }
+
+    const mode = input.mode ?? "SUCCESS";
     let result: PaymentChargeResult;
     if (mode === "FAILURE") {
       result = { status: "FAILED", providerReference, failureCode: "STANDARD_GATEWAY_DECLINE", failureMessage: "The standard gateway sandbox simulated a declined charge." };
@@ -61,13 +82,25 @@ export class StandardGatewayAdapter implements PaymentGateway {
   }
 
   async refund(_input: PaymentRefundInput): Promise<PaymentRefundResult> {
+    if (this.isProductionConfigured()) {
+      return { status: "FAILED", failureMessage: NOT_IMPLEMENTED_MESSAGE };
+    }
     return { status: "SUCCEEDED", providerRefundReference: `stdgw_refund_${randomUUID()}` };
   }
 
   verifyWebhookSignature(rawBody: unknown, signatureHeader: string | undefined): boolean {
-    if (!this.secret) return true; // sandbox: no secret configured, nothing to verify against
+    if (!this.secret) {
+      // `validatePaymentConfig` (config/env.ts) already refuses to boot with
+      // PAYMENT_SANDBOX_MODE=production and this provider enabled but no
+      // secret configured, so this branch is sandbox-only by construction —
+      // still fail closed here as defense in depth rather than trusting that
+      // invariant alone.
+      return !this.isProductionConfigured();
+    }
     if (!signatureHeader) return false;
     const expected = createHmac("sha256", this.secret).update(JSON.stringify(rawBody)).digest("hex");
-    return expected === signatureHeader;
+    const expectedBuf = Buffer.from(expected, "hex");
+    const actualBuf = Buffer.from(signatureHeader, "hex");
+    return expectedBuf.length === actualBuf.length && timingSafeEqual(expectedBuf, actualBuf);
   }
 }

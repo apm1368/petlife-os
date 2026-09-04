@@ -1,5 +1,7 @@
 import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import type { AppEnv } from "../src/config/env";
 import {
   PetAccessSource,
   HouseholdRole,
@@ -2449,29 +2451,25 @@ describe("PET LIFE OS critical paths (e2e)", () => {
     });
 
     it("rejects an invalid webhook signature once a secret is configured, and accepts a correctly-signed one", async () => {
-      // StandardGatewayAdapter's `secret` field is fixed at construction
-      // from STANDARD_GATEWAY_API_KEY (mirroring how a real provider client
-      // is configured once at boot), so exercising this needs a fresh
-      // instance built with the env var already set — not a second live
-      // NestJS application sharing this test file's Postgres/Redis
-      // connections and event bus for the duration of one assertion. This
-      // still genuinely exercises the real HMAC verification mechanism
-      // (see the adapter's own doc comment), just without the unrelated
-      // cost/risk of standing up a whole second app mid-suite.
-      process.env.STANDARD_GATEWAY_API_KEY = "test-secret";
-      try {
-        const { StandardGatewayAdapter: FreshStandardGatewayAdapter } = await import("../src/modules/commerce/payments/standard-gateway.adapter");
-        const adapter = new FreshStandardGatewayAdapter();
-        const payload = { paymentIntentId: "intent-1", eventId: "evt-1", status: "SUCCEEDED" };
+      // StandardGatewayAdapter reads its secret via ConfigService (Handoff
+      // 20 hardening — no longer a raw process.env field initializer), so
+      // exercising this needs a fresh instance built with its own isolated
+      // ConfigService — not a second live NestJS application sharing this
+      // test file's Postgres/Redis connections and event bus for the
+      // duration of one assertion. This still genuinely exercises the real
+      // HMAC verification mechanism (see the adapter's own doc comment),
+      // just without the unrelated cost/risk of standing up a whole second
+      // app mid-suite.
+      const { StandardGatewayAdapter: FreshStandardGatewayAdapter } = await import("../src/modules/commerce/payments/standard-gateway.adapter");
+      const testConfig = new ConfigService<AppEnv, true>({ STANDARD_GATEWAY_API_KEY: "test-secret", PAYMENT_SANDBOX_MODE: "sandbox" } as unknown as AppEnv);
+      const adapter = new FreshStandardGatewayAdapter(testConfig);
+      const payload = { paymentIntentId: "intent-1", eventId: "evt-1", status: "SUCCEEDED" };
 
-        expect(adapter.verifyWebhookSignature(payload, "not-the-right-signature")).toBe(false);
-        expect(adapter.verifyWebhookSignature(payload, undefined)).toBe(false);
+      expect(adapter.verifyWebhookSignature(payload, "not-the-right-signature")).toBe(false);
+      expect(adapter.verifyWebhookSignature(payload, undefined)).toBe(false);
 
-        const correctSignature = createHmac("sha256", "test-secret").update(JSON.stringify(payload)).digest("hex");
-        expect(adapter.verifyWebhookSignature(payload, correctSignature)).toBe(true);
-      } finally {
-        delete process.env.STANDARD_GATEWAY_API_KEY;
-      }
+      const correctSignature = createHmac("sha256", "test-secret").update(JSON.stringify(payload)).digest("hex");
+      expect(adapter.verifyWebhookSignature(payload, correctSignature)).toBe(true);
     });
 
     it("walks a full BNPL flow to APPROVED, confirming Orders and recording balanced ledger entries", async () => {
@@ -2609,6 +2607,24 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       await client.post(`/orders/${orderId}/refunds`).send({}).expect(201);
       const secondAttempt = await client.post(`/orders/${orderId}/refunds`).send({}).expect(400);
       expect(secondAttempt.body.error.code).toBe("REFUND_NOT_SUPPORTED");
+    });
+
+    it("Concurrency (Handoff 20): two simultaneous refund requests for the same order never both succeed", async () => {
+      const { client, checkout } = await setupCheckoutReady();
+      await client.post(`/checkout/${checkout.id}/payment-intent`).send({}).expect(201);
+      const paid = await client.post(`/checkout/${checkout.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const orderId = paid.body.orderIds[0];
+
+      const [r1, r2] = await Promise.all([client.post(`/orders/${orderId}/refunds`).send({}), client.post(`/orders/${orderId}/refunds`).send({})]);
+
+      const statuses = [r1.status, r2.status].sort();
+      expect(statuses).toEqual([201, 400]); // never [201, 201] — a real double refund
+
+      const refunds = await prisma.refund.findMany({ where: { orderId } });
+      expect(refunds.filter((r) => r.status === "SUCCEEDED")).toHaveLength(1);
+
+      const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+      expect(order.status).toBe(OrderStatus.REFUNDED);
     });
 
     it("reconciliation logs a NONE action and an audit row when local and remote already agree", async () => {

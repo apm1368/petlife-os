@@ -62,4 +62,11 @@ export class MemoryController {
   requestMediaUpload(@Param("petId") petId: string, @Body() dto: RequestPetMemoryMediaUploadDto) {
     return this.memories.requestMediaUpload(petId, dto.contentType, dto.fileSizeBytes, dto.visibility);
   }
+
+  /** The only way to reach a PRIVATE memory's media (see memory-mapper.ts and PetMemoryService.getMediaDownload). */
+  @Get(":memoryId/media/:index/download")
+  @RequirePetAccess("canViewIdentity")
+  getMediaDownload(@Param("petId") petId: string, @Param("memoryId") memoryId: string, @Param("index") index: string) {
+    return this.memories.getMediaDownload(petId, memoryId, Number(index));
+  }
 }

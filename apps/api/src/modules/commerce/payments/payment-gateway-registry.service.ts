@@ -30,7 +30,11 @@ export class PaymentGatewayRegistry {
   }
 
   private isEnabled(provider: PaymentProvider): boolean {
-    if (provider === PaymentProvider.DEV_SIMULATED) return true;
+    // DEV_SIMULATED has no real merchant integration behind it at all — it
+    // must never be reachable once real traffic is expected, regardless of
+    // which provider a caller requests (it is also the DTO's own default).
+    const isProduction = this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) === "production";
+    if (provider === PaymentProvider.DEV_SIMULATED) return !isProduction;
     if (provider === PaymentProvider.STANDARD_GATEWAY) return this.config.get("STANDARD_GATEWAY_ENABLED", { infer: true });
     return false;
   }

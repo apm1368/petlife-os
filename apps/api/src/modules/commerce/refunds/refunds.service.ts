@@ -86,21 +86,49 @@ export class RefundsService {
   }
 
   private async refundPayment(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string): Promise<RefundDto> {
-    const intent = await this.prisma.paymentIntent.findFirst({ where: { checkoutId, status: PaymentIntentStatus.CAPTURED }, orderBy: { createdAt: "desc" } });
-    if (!intent) throw new RefundNotSupportedException({ checkoutId, reason: "No captured payment to refund" });
+    // Handoff 20 hardening: a plain check-then-act here let two concurrent
+    // refund requests for the same checkout both pass "no existing refund
+    // yet" before either committed, both call the provider, and both
+    // succeed — a real double refund. A transaction-scoped Postgres
+    // advisory lock keyed by checkoutId, held only for the short
+    // lock-check-create critical section (never across the external
+    // gateway call below), serializes concurrent requests: the second one
+    // blocks until the first commits its REQUESTED row, then immediately
+    // sees it and is rejected.
+    const { gateway, attempt, refund } = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${checkoutId})::bigint)`;
 
-    const gateway = this.gateways.resolve(intent.provider);
-    if (!gateway.capabilities.supportsRefund) throw new RefundNotSupportedException({ provider: intent.provider });
+      const intent = await tx.paymentIntent.findFirst({ where: { checkoutId, status: PaymentIntentStatus.CAPTURED }, orderBy: { createdAt: "desc" } });
+      if (!intent) throw new RefundNotSupportedException({ checkoutId, reason: "No captured payment to refund" });
 
-    const attempt = await this.prisma.paymentAttempt.findFirst({ where: { paymentIntentId: intent.id, providerReference: { not: null } }, orderBy: { createdAt: "desc" } });
-    if (!attempt?.providerReference) throw new RefundNotSupportedException({ checkoutId, reason: "No provider reference to refund against" });
+      const gateway = this.gateways.resolve(intent.provider);
+      if (!gateway.capabilities.supportsRefund) throw new RefundNotSupportedException({ provider: intent.provider });
 
-    const refund = await this.prisma.refund.create({
-      data: { paymentIntentId: intent.id, orderId, amount, currency, status: RefundStatus.REQUESTED, reason: reason ?? null, requestedByUserId: userId },
+      const attempt = await tx.paymentAttempt.findFirst({ where: { paymentIntentId: intent.id, providerReference: { not: null } }, orderBy: { createdAt: "desc" } });
+      if (!attempt?.providerReference) throw new RefundNotSupportedException({ checkoutId, reason: "No provider reference to refund against" });
+
+      const existingRefund = await tx.refund.findFirst({ where: { paymentIntentId: intent.id, status: { not: RefundStatus.FAILED } } });
+      if (existingRefund) throw new RefundNotSupportedException({ checkoutId, reason: "A refund for this payment is already in progress or completed" });
+
+      const refund = await tx.refund.create({
+        data: { paymentIntentId: intent.id, orderId, amount, currency, status: RefundStatus.REQUESTED, reason: reason ?? null, requestedByUserId: userId },
+      });
+      return { gateway, attempt, refund };
     });
     await this.events.publish("RefundRequested", { refundId: refund.id, orderId, amount }, { aggregateType: "Refund", aggregateId: refund.id });
 
-    const result = await gateway.refund({ providerReference: attempt.providerReference, amount, currency, reason });
+    let result;
+    try {
+      result = await gateway.refund({ providerReference: attempt.providerReference!, amount, currency, reason });
+    } catch (error) {
+      // A provider-call exception must never leave the refund stuck in
+      // REQUESTED forever with no automatic recovery path — treat it the
+      // same as an explicit FAILED result.
+      await this.prisma.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.FAILED } });
+      const message = error instanceof Error ? error.message : String(error);
+      await this.events.publish("RefundFailed", { refundId: refund.id, orderId, reason: message }, { aggregateType: "Refund", aggregateId: refund.id });
+      throw new RefundFailedException({ orderId, providerMessage: message });
+    }
 
     if (result.status === "SUCCEEDED") {
       const updated = await this.prisma.$transaction(async (tx) => {
@@ -120,28 +148,52 @@ export class RefundsService {
   }
 
   private async refundFinancing(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string): Promise<RefundDto> {
-    const intent = await this.prisma.financingIntent.findFirst({ where: { checkoutId, status: FinancingIntentStatus.APPROVED }, orderBy: { createdAt: "desc" } });
-    if (!intent?.providerReference) throw new RefundNotSupportedException({ checkoutId, reason: "No approved financing to refund" });
+    // Same Handoff 20 hardening as refundPayment above: lock + duplicate
+    // check + REQUESTED-row creation all happen inside one short
+    // transaction, keyed by checkoutId, before any external provider call.
+    const { provider, intentId, providerReference, refund } = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${checkoutId})::bigint)`;
 
-    const provider = this.financingProviders.resolve(intent.provider);
-    if (!provider.capabilities.supportsRefund) throw new RefundNotSupportedException({ provider: intent.provider });
+      const intent = await tx.financingIntent.findFirst({ where: { checkoutId, status: FinancingIntentStatus.APPROVED }, orderBy: { createdAt: "desc" } });
+      if (!intent?.providerReference) throw new RefundNotSupportedException({ checkoutId, reason: "No approved financing to refund" });
 
-    const refund = await this.prisma.refund.create({
-      data: { financingIntentId: intent.id, orderId, amount, currency, status: RefundStatus.REQUESTED, reason: reason ?? null, requestedByUserId: userId },
+      const provider = this.financingProviders.resolve(intent.provider);
+      if (!provider.capabilities.supportsRefund) throw new RefundNotSupportedException({ provider: intent.provider });
+
+      const existingRefund = await tx.refund.findFirst({ where: { financingIntentId: intent.id, status: { not: RefundStatus.FAILED } } });
+      if (existingRefund) throw new RefundNotSupportedException({ checkoutId, reason: "A refund for this financing is already in progress or completed" });
+
+      const refund = await tx.refund.create({
+        data: { financingIntentId: intent.id, orderId, amount, currency, status: RefundStatus.REQUESTED, reason: reason ?? null, requestedByUserId: userId },
+      });
+      await tx.financingIntent.update({ where: { id: intent.id }, data: { status: FinancingIntentStatus.REFUND_PENDING } });
+      return { provider, intentId: intent.id, providerReference: intent.providerReference, refund };
     });
-    await this.prisma.financingIntent.update({ where: { id: intent.id }, data: { status: FinancingIntentStatus.REFUND_PENDING } });
     await this.events.publish("RefundRequested", { refundId: refund.id, orderId, amount }, { aggregateType: "Refund", aggregateId: refund.id });
 
     // BNPL refund is never treated identically to a card refund (spec
     // section 25): we store the provider's own reported outcome verbatim
     // and never compute an installment-schedule adjustment ourselves.
-    const result = await provider.refund({ providerReference: intent.providerReference, amount, currency, reason });
+    let result;
+    try {
+      result = await provider.refund({ providerReference, amount, currency, reason });
+    } catch (error) {
+      // A provider-call exception must never leave the refund stuck in
+      // REQUESTED/REFUND_PENDING forever with no automatic recovery path.
+      await this.prisma.$transaction(async (tx) => {
+        await tx.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.FAILED } });
+        await tx.financingIntent.update({ where: { id: intentId }, data: { status: FinancingIntentStatus.APPROVED } });
+      });
+      const message = error instanceof Error ? error.message : String(error);
+      await this.events.publish("RefundFailed", { refundId: refund.id, orderId, reason: message }, { aggregateType: "Refund", aggregateId: refund.id });
+      throw new RefundFailedException({ orderId, providerMessage: message });
+    }
 
     if (result.status === "SUCCEEDED") {
       const updated = await this.prisma.$transaction(async (tx) => {
         const row = await tx.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.SUCCEEDED, providerReference: result.providerRefundReference ?? null, completedAt: new Date() } });
         if (orderId) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.REFUNDED } });
-        await tx.financingIntent.update({ where: { id: intent.id }, data: { status: FinancingIntentStatus.REFUNDED } });
+        await tx.financingIntent.update({ where: { id: intentId }, data: { status: FinancingIntentStatus.REFUNDED } });
         await this.ledger.recordRefundSucceeded(row.id, amount, currency, tx);
         if (orderId) await this.sellerFinance.applyRefundImpact(tx, orderId, row.id, amount, currency);
         return row;
@@ -155,7 +207,7 @@ export class RefundsService {
       // The refund attempt failing doesn't mean the loan itself is
       // invalid — restore APPROVED rather than leaving it stuck in
       // REFUND_PENDING forever.
-      await tx.financingIntent.update({ where: { id: intent.id }, data: { status: FinancingIntentStatus.APPROVED } });
+      await tx.financingIntent.update({ where: { id: intentId }, data: { status: FinancingIntentStatus.APPROVED } });
     });
     await this.events.publish("RefundFailed", { refundId: refund.id, orderId, reason: result.failureMessage }, { aggregateType: "Refund", aggregateId: refund.id });
     throw new RefundFailedException({ orderId, providerMessage: result.failureMessage });

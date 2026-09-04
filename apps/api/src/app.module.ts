@@ -1,9 +1,10 @@
 import { MiddlewareConsumer, Module, type NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
+import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor";
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware";
 import { CsrfMiddleware } from "./common/csrf/csrf.middleware";
 import { CsrfGuard } from "./common/csrf/csrf.guard";
@@ -119,6 +120,7 @@ import { PlacesModule } from "./modules/places/places.module";
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: CsrfGuard },
+    { provide: APP_INTERCEPTOR, useClass: RequestLoggingInterceptor },
   ],
 })
 export class AppModule implements NestModule {

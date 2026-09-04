@@ -40,9 +40,23 @@ export class PetsService {
     // spec: "limit checks must happen server-side" — checked before creation,
     // never blocking access to pets the household already has (over-limit
     // existing pets stay fully usable; only the NEXT create is refused).
-    await this.entitlements.assertWithinLimit(householdId, "pets.max");
-
+    //
+    // A plain check-then-act here has a real race window: two concurrent
+    // requests for a household already one pet under its limit could both
+    // read "within limit" before either commits, both succeed, and leave the
+    // household over its plan's pets.max (Handoff 20 hardening). A
+    // transaction-scoped Postgres advisory lock keyed by householdId
+    // serializes concurrent creates for the SAME household — the second
+    // transaction blocks until the first commits (or rolls back) and
+    // releases the lock automatically, at which point its own limit check
+    // sees the first pet's now-committed row. This needs no change to
+    // EntitlementService/UsageService (which read via a separate,
+    // non-transactional connection and therefore only ever see committed
+    // state) and does not serialize unrelated households against each other.
     return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${householdId})::bigint)`;
+      await this.entitlements.assertWithinLimit(householdId, "pets.max");
+
       const pet = await tx.pet.create({
         data: {
           householdId,

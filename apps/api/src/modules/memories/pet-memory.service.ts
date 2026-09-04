@@ -84,4 +84,20 @@ export class PetMemoryService {
   async requestMediaUpload(petId: string, contentType: string, fileSizeBytes: number, visibility: PetMemoryVisibility) {
     return this.storage.createPetMemoryMediaUploadTarget(petId, contentType, fileSizeBytes, visibility);
   }
+
+  /**
+   * The only way to reach a PRIVATE memory's media — mirrors
+   * PetObservationService.getDownload exactly. `index` is resolved against
+   * this memory's own `mediaObjectKeys` server-side, never a client-supplied
+   * key, so a caller can never mint a download URL for an arbitrary object.
+   * A PUBLIC memory's media is already a plain URL in its own DTO
+   * (see memory-mapper.ts) and does not need this path, but is still served
+   * correctly here for a uniform frontend code path.
+   */
+  async getMediaDownload(petId: string, memoryId: string, index: number) {
+    const row = await this.getRawOrThrow(petId, memoryId);
+    const key = row.mediaObjectKeys[index];
+    if (!key) return null;
+    return this.storage.createPrivateDownloadTarget(key);
+  }
 }

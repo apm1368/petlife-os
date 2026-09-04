@@ -274,6 +274,18 @@ function validateGoogleAuthConfig(env: AppEnv): void {
   }
 }
 
+/// STORAGE_DRIVER defaults to "local" for a frictionless dev checkout, but
+/// the local driver's private downloads are only as safe as the token/TTL
+/// flow in DownloadsController — the static file mount in main.ts must never
+/// serve a private-prefixed key, and that mount only exists when driver is
+/// "local" at all. Rather than rely on every future deploy remembering to
+/// set STORAGE_DRIVER=s3, refuse to boot in production without it.
+function validateStorageConfig(env: AppEnv): void {
+  if (env.NODE_ENV === "production" && env.STORAGE_DRIVER !== "s3") {
+    throw new Error('STORAGE_DRIVER must be "s3" in production — the local driver is dev/test-only.');
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   const env = loadEnv(envSchema, source);
   validatePaymentConfig(env);
@@ -281,5 +293,6 @@ export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   validateMarketplaceConfig(env);
   validateMessagingConfig(env);
   validateGoogleAuthConfig(env);
+  validateStorageConfig(env);
   return env;
 }

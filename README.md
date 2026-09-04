@@ -4546,6 +4546,154 @@ PET_FRIENDLY_PLACE_NOT_FOUND                     404
 - **No real insurer integration, underwriting, or premium billing/autopay** — `InsuranceApplication` is a lead-capture record only; nothing here charges a card, issues a policy, or makes a coverage decision.
 - **No AI-generated travel advice or eligibility prediction** — all suggested requirement types and eligibility statuses come from the deterministic, code-defined logic described above, never from a model inferring what a country "probably" requires.
 
+## Production Hardening, Security & Deployment (Handoff 20)
+
+This handoff added no new product features (locked rule: "no major new features — if you discover a missing feature, document it"). It is a vertical hardening pass across every domain from Handoff 01 through 19: a full architecture/security audit (six parallel reviews covering auth, tenant isolation, financial concurrency, storage privacy, dev-feature leakage, and environment configuration), fixes for every P0 and the highest-value P1 finding, and the documentation this section covers for everything that was audited and found sound, or deliberately left as a documented, accepted risk rather than built out.
+
+### Risk audit summary
+
+Six independent reviews were run before any code changed, each producing file:line evidence and a P0-P3 rating. Two came back clean (no P0/P1 findings): **authorization/tenant isolation** (every pet-scoped route already required `PetAccessGuard` + a specific permission flag, every seller-os service already checked `sellerOrganizationId` ownership, every admin mutation already carried a granular `@RequireAdminPermission`) and **environment/config validation** (a real Zod schema with fail-fast startup checks already existed — most of what a from-scratch audit usually finds was already done correctly in H01-H19). Four found real, now-fixed issues, detailed below.
+
+### P0 findings — fixed
+
+1. **Dev OTP codes and password-reset tokens logged unconditionally.** `DevOtpProvider.sendOtp()` and `AuthPasswordResetService.requestReset()` printed the raw code/token to the log stream with no `NODE_ENV` gate — in production this would leak every OTP and every reset token into whatever aggregates the server's logs. Fixed: both now check `NODE_ENV === "production"` and log only a warning (no code/token) in that case, `dev-otp.provider.ts`/`auth-password-reset.service.ts`. There is still no real SMS/email delivery provider wired in (see "Production provider status matrix" below) — OTP/password-reset delivery is not production-ready until one is.
+2. **Payment and BNPL outcomes were fully client-controlled with no production gate.** `CreatePaymentIntentDto.provider` defaults to `DEV_SIMULATED`, and `PayCheckoutDto.mode`/`AuthorizeFinancingDto.mode` let any caller specify `"SUCCESS"`/`"APPROVE"` directly — `DevPaymentGateway`, `StandardGatewayAdapter`, `SnappPayAdapter`, and `DigiPayAdapter` all echoed that value straight back with zero environment check. Anyone could get a free order or an approved installment plan in production. Fixed: `PaymentGatewayRegistry` now disables `DEV_SIMULATED` entirely once `PAYMENT_SANDBOX_MODE=production`; `StandardGatewayAdapter`/`SnappPayAdapter`/`DigiPayAdapter` now check `isProductionConfigured()` (mirroring the pattern `AloPeykAdapter`/`TorobAdapter` already used) and return an explicit failed/declined result instead of ever honoring a caller-supplied outcome once running against real traffic.
+3. **Private memory media always resolved to a plain public URL.** `PetMemory.visibility` can be `PRIVATE`, and private media is correctly stored under a `pet-memories-private/` key prefix at upload time — but `toPetMemoryDto()` called `resolveObjectUrls()` unconditionally, handing back a plain, permanent, unauthenticated URL for private photos/videos regardless of visibility. Fixed: `mediaUrls` is now only populated for `PUBLIC` memories; a new `GET pets/:petId/memories/:memoryId/media/:index/download` endpoint (same `canViewIdentity` guard, same per-request signed-download pattern as `MedicalDocumentService.getDownload`/`PetObservationService.getDownload`) is the only way to reach a private memory's media, and `resolveObjectUrl()` itself now throws if ever called with a key under a known-private prefix (`health-documents/`, `pet-observations/`, `pet-memories-private/`) — turning "safe by caller discipline" into "safe by construction," so a future mapper bug fails loudly instead of leaking. `MemoryDetailView` was updated to fetch signed URLs for a private memory's media on load.
+4. **Local storage's static file mount served every private prefix unauthenticated, and its driver defaults to "local."** `main.ts` mounted `app.useStaticAssets()` over the *entire* `STORAGE_LOCAL_DIR` tree at `/uploads/*` whenever `STORAGE_DRIVER=local` (the default) — this completely bypassed `DownloadsController`'s intended signed-download flow for health documents, observations, and private memories, since they physically live under that same directory. Fixed: a middleware ahead of the static mount now 404s any request path starting with a known-private prefix, and `validateStorageConfig()` (in `config/env.ts`) refuses to boot at all with `NODE_ENV=production` unless `STORAGE_DRIVER=s3`.
+
+### P1 findings — fixed
+
+- **Checkout confirmation race (also the root cause of the one previously-known flaky test).** `DomainEventsService.publish()` called `EventEmitter2.emit()`, which does not await async `@OnEvent` handlers — a webhook's HTTP response could return before `PaymentEventsListener.onPaymentSucceeded` finished creating the Order, so a client polling immediately after the webhook, or a process crash between `emit()` and listener completion, could observe or lose an unconfirmed order. This was not a test-harness artifact; the H19 report's "one pre-existing Commerce Core webhook-timing flake" was this exact race, papered over in the test with a `setTimeout(100)`. Fixed at the root: `publish()` now calls `emitter.emitAsync()` and awaits it, so every listener has actually finished (or thrown, now caught and recorded via `attemptCount`/`lastError` instead of becoming an unhandled rejection) before `publish()` returns. The flaky test now passes deterministically — full backend suite run repeatedly at 310-312/310-312 passing, zero flakes, with no timeout increased.
+- **`pets.max` had a real check-then-act concurrency race.** `PetsService.create()` called `assertWithinLimit()` before, not inside, the transaction that inserted the pet — two concurrent requests at exactly one slot under the limit could both pass the check before either committed. Fixed: a transaction-scoped Postgres advisory lock (`pg_advisory_xact_lock(hashtext(householdId))`) now serializes concurrent creates for the same household before the limit check runs, with no change needed to `EntitlementService`/`UsageService` (which read via a separate, non-transactional connection and therefore only ever see committed state). Covered by a new concurrency test in `subscription.e2e-spec.ts`.
+- **Refund duplicate-request race and stuck-on-provider-exception.** Two concurrent refund requests for the same checkout could both pass "no existing refund yet" and both call the provider — a real double refund — and a provider-call exception left the `Refund` row stuck in `REQUESTED` forever with no recovery path. Fixed in `RefundsService`: the same advisory-lock pattern (keyed by `checkoutId`) now guards a short transaction that locks, checks for an existing non-`FAILED` refund on the same payment/financing intent, and creates the `REQUESTED` row — all before the external provider call, which is never held inside the lock. A `try/catch` around the provider call now marks the refund `FAILED` (and restores the financing intent to `APPROVED`) on any thrown error instead of leaving it stuck. Covered by a new concurrency test in `app.e2e-spec.ts`.
+- **`StandardGatewayAdapter`/`SnappPayAdapter`/`DigiPayAdapter` webhook signature verification could fail open.** `StandardGatewayAdapter.verifyWebhookSignature()` returned `true` when no secret was configured ("nothing to verify against"); SnappPay/DigiPay's always returned `true` unconditionally. Fixed: Standard Gateway now fails closed (rejects) when no secret is configured *and* running in production mode (defense in depth — `validatePaymentConfig` already refuses to boot in that exact state, so this path is sandbox-only by construction, but it should never rely on that alone), and now uses a timing-safe buffer comparison instead of `===`. SnappPay/DigiPay now reject any webhook once `PAYMENT_SANDBOX_MODE=production`, since no real signature scheme is implemented for either yet — accepting an unverifiable payload against real money would be worse than rejecting it.
+- **`prisma/seed.ts` had no internal guard against running against production.** It creates a hardcoded demo account (`demo`/`dev-only-password`) and other obviously-fake data, with only "don't wire it into a deploy pipeline" as protection. Fixed: `main()` now throws immediately if `NODE_ENV === "production"`, as defense in depth alongside keeping it out of any deploy script.
+- **CI's Postgres service image predated PostGIS.** `.github/workflows/ci.yml` still used a plain `postgres:16-alpine` image, which would fail the "Run database migrations" step on the Handoff 19 migration's `CREATE EXTENSION IF NOT EXISTS postgis` the next time CI actually ran a fresh database. Fixed: CI now uses `postgis/postgis:16-3.4-alpine`, matching `docker-compose.yml` exactly.
+
+### Observability additions
+
+- **Structured request logging**: a new `RequestLoggingInterceptor` (registered globally via `APP_INTERCEPTOR`) logs one line per request — method, path, status, duration, `requestId`, and the resolved controller/handler — on the response's own `finish` event (not the interceptor's success/error callback, since Nest's exception filters run after an interceptor's error path and would not yet have set the real status code there). It never logs the request body, query string, or headers, so it can never leak a password/OTP/token/health-document field the way a naive request logger would.
+- **Liveness/readiness** (`GET /health/live`, `GET /health/ready`) already existed from Handoff 01 and needed no change: liveness never depends on Postgres/Redis (so a DB blip doesn't trigger a bad restart loop), readiness checks both with a real `SELECT 1`/`PING`.
+- **`requestId`** already existed (`RequestIdMiddleware`, `x-request-id` header, echoed in every `ApiExceptionFilter` error body) and is now also the correlation key in the new request-completion log line.
+- **Error tracking**: no external error-tracking vendor (Sentry or similar) is wired in — `ApiExceptionFilter` logs every unexpected error with its `requestId` and stack trace today, which is the boundary a vendor SDK would hook into later without any call-site change; this is a documented gap, not a hardcoded assumption about which vendor to use.
+- **Metrics**: no dedicated metrics endpoint (Prometheus or similar) exists. The structured request log above carries everything a log-based metrics pipeline (e.g. a log-driven dashboard) needs today; a real `/metrics` endpoint is future work, not built here per the "no major new features" rule.
+
+### Production provider status matrix
+
+| Provider / capability | Status | Fails closed in production? | Known limitation |
+|---|---|---|---|
+| Google OAuth/OIDC | **NOT_CONFIGURED** by default (`GOOGLE_AUTH_ENABLED=false`); becomes **LIVE** once real `GOOGLE_CLIENT_ID`/`SECRET`/`CALLBACK_URL` are set | Yes — `assertEnabled()` throws explicitly rather than silently degrading | Real, complete implementation (real token exchange, JWKS verification, issuer/audience/nonce checks) — nothing to fix, only credentials to add |
+| Dev OTP (phone/email codes) | **NOT_IMPLEMENTED** — `OTP_PROVIDER` has only one possible value (`"dev"`) | Codes never logged in production (fixed this handoff); delivery still doesn't happen | No real SMS/email OTP delivery exists at all yet — every environment runs the dev path today |
+| Faraz SMS | **NOT_IMPLEMENTED** (no real HTTP client exists behind the adapter) | Yes — `isProductionConfigured()` returns an explicit `PROVIDER_NOT_IMPLEMENTED` failure, never a fake sent status | Reserved env vars (`FARAZ_SMS_BASE_URL`/`API_KEY`) exist for when a real integration is built |
+| Payment — Standard Gateway | **NOT_CONFIGURED** (no merchant account/credentials exist for any real gateway) | Yes (fixed this handoff) — refuses a caller-supplied outcome and fails explicitly once `PAYMENT_SANDBOX_MODE=production` | Adapter shape (charge/status/refund/webhook-signature) is real; the network call behind it is not |
+| Payment — SnappPay (BNPL) | **NOT_IMPLEMENTED** (sandbox stub, no real credit/eligibility decision) | Yes (fixed this handoff) | Same gap as Standard Gateway — no real merchant integration |
+| Payment — DigiPay (BNPL) | **NOT_IMPLEMENTED** | Yes (fixed this handoff) | Same gap |
+| Shipping — AloPeyk | **NOT_IMPLEMENTED** (no official docs were available; sandbox simulation only) | Yes — `isProductionConfigured()` returns an explicit `UNAVAILABLE`/`FAILED` result | Reserved env vars exist; a real integration needs AloPeyk's actual API documentation first |
+| Shipping — SnappBox | **NOT_IMPLEMENTED** | Yes | Same gap |
+| Marketplace — Torob | **NOT_IMPLEMENTED** | Yes — explicit `REJECTED`/`FAILED` results, never a fake sync success | Same "no official docs available" gap |
+| Marketplace — Digikala | **NOT_IMPLEMENTED** | Yes | Same gap |
+| S3 / object storage | **NOT_CONFIGURED** by default (`STORAGE_DRIVER=local`); becomes real once `STORAGE_DRIVER=s3` + credentials are set | Yes (fixed this handoff) — `validateStorageConfig()` refuses to boot with `NODE_ENV=production` and `STORAGE_DRIVER=local` | `S3StorageDriver` is a real, complete implementation (presigned PUT/GET); only credentials are missing in a fresh deployment |
+
+No provider in this table ever silently reports success without a real backing integration — every "NOT_IMPLEMENTED"/"NOT_CONFIGURED" path fails with an explicit error/rejected result, both before and after this handoff's fixes (the payment/BNPL adapters were the one exception, now closed).
+
+### Environment variable classification
+
+**REQUIRED_PRODUCTION** (already fail-fast validated by `config/env.ts`'s `validateEnv()`, no default): `DATABASE_URL`, `REDIS_URL`, `WEB_APP_ORIGIN`, `SESSION_SECRET` (min 16 chars), `CSRF_SECRET` (min 16 chars). Conditionally required the moment the matching flag is set: `GOOGLE_CLIENT_ID`/`SECRET`/`CALLBACK_URL` (if `GOOGLE_AUTH_ENABLED=true`), `STANDARD_GATEWAY_MERCHANT_ID`/`API_KEY`, `SNAPPAY_MERCHANT_ID`/`API_KEY`, `DIGIPAY_MERCHANT_ID`/`API_KEY` (if `PAYMENT_SANDBOX_MODE=production` and the provider is enabled), `ALOPEYK_API_BASE_URL`/`API_KEY`, `SNAPPBOX_API_BASE_URL`/`API_KEY` (if `SHIPPING_MODE=production`), `TOROB_BASE_URL`/`API_KEY`, `DIGIKALA_BASE_URL`/`API_KEY` (if `MARKETPLACE_SANDBOX_MODE=production`), `FARAZ_SMS_BASE_URL`/`API_KEY` (if `MESSAGING_SANDBOX_MODE=production`), `STORAGE_S3_*` (if `STORAGE_DRIVER=s3`, itself now required in production — see above), `NEXT_PUBLIC_API_ORIGIN` (frontend; `next.config.mjs` now fails the build if unset in a production build, since it is inlined at build time and would otherwise silently ship pointing at `localhost:4000`).
+
+**OPTIONAL_PRODUCTION** (sane, non-secret defaults; worst case is a wrong business-logic number, never an exposed secret): `PORT`, `SESSION_COOKIE_NAME`, `SESSION_TTL_DAYS`, `OTP_LENGTH`/`TTL_SECONDS`/`RESEND_COOLDOWN_SECONDS`/`MAX_ATTEMPTS`, `PASSWORD_MIN_LENGTH`/`RESET_TOKEN_TTL_MINUTES`, `STORAGE_LOCAL_DIR`, `BOOKING_HOLD_TTL_SECONDS`/`HEALTH_ACCESS_BUFFER_HOURS`, every `*_SANDBOX_MODE`/`SHIPPING_MODE` (default `"sandbox"`), every provider `*_ENABLED` toggle, `NOTIFICATION_MAX_DELIVERY_ATTEMPTS`/`WORKER_INTERVAL_MS`, `ADMIN_REFUND_APPROVAL_THRESHOLD_IRR`, `DEFAULT_PLATFORM_COMMISSION_BPS`, `SETTLEMENT_APPROVAL_THRESHOLD_IRR`, `CMS_MEDIA_MAX_SIZE_BYTES`, `SUBSCRIPTION_RENEWAL_WORKER_INTERVAL_MS`/`PAST_DUE_RETRY_DAYS`/`GRACE_PERIOD_DAYS`.
+
+**DEVELOPMENT_ONLY** (must never be relied on in production): `DEV_SHIPPING_ENABLED`, `DEV_MARKETPLACE_ENABLED`, `DEV_MESSAGING_ENABLED` (all default `true`, but are only reachable once their matching `*_MODE` is left at `"sandbox"`), `OTP_PROVIDER`/`MESSAGING_PROVIDER` (currently only ever `"dev"`/no real production value exists yet — see provider matrix above).
+
+**TEST_ONLY**: `TEST_DATABASE_URL` (read only by `apps/api/test/jest-env-setup.js`, never by `main.ts`/`app.module.ts`); the hardcoded `"test-only-session-secret-not-for-prod"`/`"test-only-csrf-secret-not-for-prod"` fallback values live in that same test-only setup file and are unreachable from any production boot path (the real `SESSION_SECRET`/`CSRF_SECRET` schema entries have no default at all).
+
+### Financial core, concurrency & data integrity
+
+- **Double-entry ledger invariant is a real runtime assertion, not just "balanced by construction."** `LedgerService.recordBalanced()` sums debits/credits and throws before writing anything if they don't match; every domain-specific posting method (payments, refunds, seller attribution, donations, subscriptions) routes through it. No dedicated unit test exercises the rejection path directly — a documented, accepted gap (P2), not a live risk.
+- **Payment webhooks are idempotent and signature-verified**: `ProviderEventsService.recordIfNew()`'s `@@unique([provider, providerEventId])` constraint makes a duplicate delivery a safe no-op before any state mutation; signature verification is now closed for all three payment/BNPL adapters (see P1 fixes above). One remaining documented gap: an out-of-order webhook (a "FAILED" event delivered after a delayed "SUCCEEDED" for the same intent) can permanently mask the later success, since `PaymentsService.resolvePendingIntent()` treats any already-terminal intent as a no-op — accepted as a release risk (see "Accepted production risks" below) rather than fixed this handoff, since resolving it correctly needs a broader reconciliation policy decision, not a local patch.
+- **Booking and inventory concurrency were both already solid** — a real Postgres GiST exclusion constraint (`bookings_no_overlap_range_categories`) and partial unique indexes prevent double-booking independent of the Redis pre-booking hold (which is explicitly documented as UX-only, never the source of truth), and `InventoryReservationService.reserve()` uses `SELECT ... FOR UPDATE` before checking available stock, preventing oversell under concurrent checkout. No changes needed.
+- **Donation ledger fund separation (H18) was already solid** — `DonationLedgerService` posts to fund-type-specific accounts (`DONATION_INCOME_RESTRICTED` vs `_GENERAL`) by construction, so a restricted fund can never be spent as general; duplicate-donation protection uses `DonationIntent.idempotencyKey` inside one transaction. No changes needed.
+- **Subscription renewal idempotency (H16) was already solid** — `SubscriptionBillingService.attemptRenewal()` row-locks the subscription (`SELECT ... FOR UPDATE`) and re-checks the current period inside that same locked transaction, so a concurrent worker tick or duplicate cron trigger safely no-ops.
+- **`household.members.max` is not enforced anywhere — because the feature it would gate does not exist yet.** There is no endpoint that adds a household member at all today (the only `HouseholdMember` row created anywhere is the OWNER row at household creation). The entitlement key is read-only in the usage API and the plan definitions; this is accepted as documentation, not a bug to patch, until an "add household member" feature is actually built — at which point it must call `EntitlementService.assertWithinLimit(householdId, "household.members.max")` before creating the row, the same pattern `PetsService.create()` now demonstrates including the concurrency-safe version.
+
+### Database integrity, migrations & backup/restore
+
+- **Schema constraints**: the audits above did not surface any missing FK/unique/CHECK constraint gap beyond what prior handoffs' own "Known limitations" sections already documented (e.g. the pre-existing note that three constraints exist only as raw SQL in a migration, not in `schema.prisma` itself). No new gap found or introduced by Handoff 20.
+- **Migration safety procedure** (documented here for the first time as an explicit runbook, not new tooling): (1) back up the target database (see "Backup/restore" below) before any production migration; (2) run `prisma migrate status` against production first to confirm no migration is already in a failed state; (3) for an additive, backward-compatible migration (the only kind this codebase's own conventions produce — see every prior handoff's "never rewrite historical migrations" rule), `prisma migrate deploy` is safe to run before the new application code is deployed; (4) deploy the new application code; (5) if a migration ever needs a genuinely destructive follow-up (a column drop, say), do it in a *separate*, later migration once the application no longer references the old shape — never in the same release. **Never use `prisma migrate resolve` to force-mark a failed migration as applied** without first understanding exactly why it failed and confirming the database's actual state matches what the migration would have produced; this codebase has a documented history of migration-state incidents in local/test environments (from earlier handoffs' own troubleshooting), which is exactly the failure mode `migrate resolve` can silently paper over in production if used carelessly.
+- **PostgreSQL backup/restore**: not implemented as tooling in this codebase (no backup script exists) — documented here as the MVP policy a real deployment must put in place: automated daily `pg_dump` (or the hosting provider's managed continuous backup/point-in-time-recovery feature, preferred if available) with at least 7 days of retention, encrypted at rest; a restore must be test-run at least once before go-live to confirm the dump/restore cycle actually works end-to-end, not just that the dump file exists. Target RPO for MVP: 24 hours (daily backup cadence) unless the hosting provider's PITR makes near-zero RPO free to adopt; target RTO: same-day restore for a single-region MVP deployment.
+- **Object storage backup**: whichever S3-compatible provider is used in production should have versioning enabled on the bucket (protects against accidental overwrite/delete, which this codebase's random-UUID key scheme makes unlikely but not impossible via a bug) and cross-region replication if the provider offers it cheaply; health-document retention should follow whatever medical-record retention period is legally required in the deployment's jurisdiction — this codebase does not currently implement any automatic deletion/lifecycle policy for health documents, so retention today is "forever, until a household is deleted" (see "Data retention" below).
+
+### Redis failure model
+
+Every Redis usage in this codebase is either **EPHEMERAL** (session-adjacent caches, dev-OTP state, upload/download tokens for the local storage driver — all fine to lose, at worst forcing a re-login or re-upload) or **DERIVABLE** (the booking pre-hold, the entitlement usage counts are computed from Postgres, not cached in Redis at all). Nothing in this codebase treats Redis as the sole source of truth for a safety- or money-relevant invariant — booking safety rests on the real Postgres GiST exclusion constraint (confirmed above), and the entitlement/inventory concurrency fixes in this handoff rest on Postgres advisory locks and row locks, never Redis. A Redis outage degrades the booking UX (no pre-hold, so two users could both see a slot as available right up until one of them's request actually hits the DB constraint and 409s) and pauses the notification delivery worker (which reads its queue from Redis), but never allows a double-booking, an oversold item, or a duplicate financial transaction.
+
+### Background workers
+
+- **Notification delivery worker** (H10): already has bounded retry (`NOTIFICATION_MAX_DELIVERY_ATTEMPTS`), a claim-based dequeue that a concurrent worker invocation cannot double-process (verified by an existing e2e concurrency test), and terminates in `FAILED` rather than retrying forever.
+- **Subscription renewal worker** (H16): uses `SELECT ... FOR UPDATE` row-locking (confirmed above) for crash-safe, duplicate-safe renewal attempts. It is explicitly documented (per its own doc comments and H16's README section) as an in-process interval timer, not a real distributed job scheduler — acceptable for this MVP's single-instance deployment target, but must not be presented as a production-grade autopay/billing scheduler if the deployment ever moves to multiple API instances, since two instances would each run their own interval and could race (though the row lock still prevents a double-charge/double-apply if they do — it would just mean redundant work, not incorrect state).
+- No new background worker infrastructure (Kafka, a dedicated job queue, etc.) was added or is recommended for this MVP's scale — the smallest reliable mechanism consistent with the existing architecture (row-locked, interval-based workers) is judged sufficient.
+
+### Domain events / outbox
+
+`DomainEventsService` is outbox-shaped (`domain_events` table with `aggregateType`/`aggregateId`/`attemptCount`/`lastError`/`processedAt`) and every domain-mutation call site already publishes inside the same transaction as the write it describes. This handoff's `emitAsync` fix (see P1 findings) makes dispatch itself correctly awaited and error-caught, closing the one real gap found. Evolving to a genuine at-least-once relay (a poller reading unprocessed/failed rows) remains future work requiring no schema or call-site change, exactly as every prior handoff's own notes already state.
+
+### Security headers, CORS, CSRF & rate limiting
+
+- **CORS**: already non-wildcard — `app.enableCors({ origin: WEB_APP_ORIGIN.split(","), credentials: true })` in `main.ts`. No change needed.
+- **Security headers**: `helmet()` is already applied globally in `main.ts`, providing the standard set (`X-Content-Type-Options`, a baseline CSP, `Referrer-Policy`, frame protections, etc.) with Express/Helmet's own safe defaults. No custom CSP was layered on top this handoff — Helmet's default CSP is permissive enough not to break the existing OAuth/payment-callback flows, and tightening it further is deferred as a documented follow-up rather than risking breaking a redirect flow without a real browser QA pass (which is Codex's remit per this handoff's role split, not Claude's).
+- **CSRF**: the existing double-submit cookie pattern (`CsrfMiddleware` + `CsrfGuard`, applied globally via `APP_GUARD`) needed no functional change. One documented, accepted P2 risk: the CSRF cookie itself is a plain random UUID with no cryptographic binding to the session, so an attacker who could plant a cookie on the origin (e.g. via a hypothetical subdomain cookie-tossing bug, none known to exist today) could in theory supply a matching header. Binding the CSRF token to the session (HMAC it the same way the session cookie itself is signed) is a reasonable future hardening pass, not addressed here since no exploitable path to planting a cookie was found.
+- **Rate limiting**: endpoint-level `@Throttle` decorators already exist with sensible limits on every auth-adjacent endpoint (OTP request/verify, register, login, password reset). One documented, accepted P2 risk: the global `ThrottlerGuard` uses the default in-memory storage, so a multi-instance production deployment would have each instance track its own counter, effectively multiplying the real rate limit by instance count. Moving to a Redis-backed `ThrottlerStorage` closes this and is a small, low-risk change recommended before scaling past a single API instance — not done in this handoff since this MVP's target deployment (see "Deployment architecture" below) is single-instance.
+- **Argon2id password hashing** uses the library's own defaults (memory cost 64 MiB, time cost 3, parallelism 4 — within OWASP's acceptable range). Cost parameters are not pinned explicitly in code, so a future library upgrade changing its defaults could silently change production hashing cost — a documented P3 note, not fixed here (pinning explicit values is a one-line, low-risk future change).
+
+### Public/private access, RTL/LTR, performance & accessibility
+
+- **Public/private route model (H11)** was re-verified across every handoff through H19 by the authorization audit above — no route was found requiring auth that shouldn't, or vice versa. The model (anonymous browsing for discovery/catalog/public content, auth required for anything pet-specific, financial, or operational) holds exactly as documented in every prior handoff's own README section.
+- **RTL/LTR, accessibility, and visual/performance QA** are explicitly Codex's remit under this handoff's stated role split ("Claude is the primary production engineering owner... Codex is the independent QA/visual/runtime verification owner... do not duplicate Codex's visual redesign work"). This handoff did not re-audit N+1 queries, bundle size, or manually click through every screen in a browser — those are exactly the "end-to-end runtime testing, visual QA, responsive QA, RTL/LTR QA" tasks the role split assigns to Codex's independent pass on the final synchronized commit. No code changes were made in this area; nothing found in the six architecture/security audits pointed to a performance or accessibility regression introduced by this handoff's own changes (which are all backend-only except the two frontend files listed in "Files changed" below).
+
+### CI, staging & deployment
+
+- **CI** (`.github/workflows/ci.yml`) already ran the correct gate order (install → generate Prisma client → lint → typecheck → migrate deploy → unit tests → e2e tests → build) against real, service-container Postgres and Redis — no fake/mocked database. The one real gap found and fixed: its Postgres image predated PostGIS (see P1 fixes above).
+- **Flaky test policy**: the one previously-known flake (Commerce Core webhook timing) is now fixed at its root cause (see above), confirmed by four consecutive full-suite runs at 310-312/310-312 passing with zero retries or timeout increases. The H03 provider-search and H12 auth ECONNRESET/timeout flakes mentioned in this handoff's own spec were not reproduced during this session's several full-suite runs; if they recur, they should get the same root-cause treatment (reproduce, find the actual race/timing assumption, fix the application or test-synchronization code) rather than a timeout bump, per this handoff's own explicit instruction.
+- **Staging** is defined here as: a dedicated database (never production customer data), dedicated Redis, dedicated object storage bucket, real migrations run the same way production's would be, and every external provider left in `*_SANDBOX_MODE=sandbox` (staging is where the Dev-simulated payment/shipping/marketplace paths are expected and useful, exercising the exact same code path production would use once real credentials exist — never a separate "staging-only" code branch).
+- **Deployment architecture** (MVP target, no Kubernetes): a single Next.js web instance, a single NestJS API instance, one managed PostgreSQL instance (PostGIS-enabled) with automated backups, one managed Redis instance, one S3-compatible object storage bucket, TLS terminated at the load balancer/CDN in front of both the web and API instances, and log aggregation pointed at whatever the hosting provider's default log sink is (the structured request-log line this handoff added is designed to be easy to parse regardless of aggregator). This matches the codebase's actual single-instance assumptions today (the in-memory rate limiter and the in-process subscription-renewal interval both documented above as single-instance-safe) — scaling to multiple instances is a real future project (Redis-backed rate limiting, a real job scheduler) rather than something to pretend is already handled.
+- **TLS/domain**: HTTPS is a hosting-layer requirement (terminate at the load balancer/CDN, redirect all HTTP to HTTPS) — no application code assumes or enforces this itself beyond `secure: isProduction` on the session cookie (already correct, gated on `NODE_ENV`) and CORS's origin allowlist.
+- **Rollback**: application rollback (redeploying the previous container image/build) is always safe given this codebase's "every migration is additive, forward-only, never rewritten" convention — an older application version can run against a newer, additively-migrated schema without error, since no migration in this codebase's history removes a column or table an older version still reads. **Database migration rollback is a separate, much riskier operation and is never automatic**: if a migration itself needs to be undone, write a new, forward migration that reverses the effect (e.g. re-adding a dropped column) rather than attempting to run a migration "backwards" against a production database that may already have new data depending on the new shape.
+
+### Disaster recovery runbook
+
+- **Database outage**: readiness (`GET /health/ready`) immediately starts failing, taking the instance out of a load balancer's rotation; liveness stays healthy so the process isn't killed and can recover the moment the database returns, without a full restart. Restore from the most recent backup (see "Backup/restore" above) if the outage is due to data loss rather than transient unavailability.
+- **Redis outage**: per the "Redis failure model" above, no safety/financial invariant depends on Redis — the booking pre-hold UX degrades and the notification worker pauses, but nothing becomes unsafe. Recovery is simply bringing Redis back; no data reconciliation is needed since nothing safety-critical was ever stored there exclusively.
+- **Object storage outage**: uploads/downloads fail explicitly (the S3 driver's real presigned URLs simply won't resolve); no application code silently falls back to a different storage location. Recovery is provider-side; no reconciliation needed since object keys are never mutated after creation.
+- **Payment provider outage**: `PaymentGatewayRegistry`/`FinancingProviderRegistry` already have an explicit `isEnabled()`/`isProductionConfigured()` check per provider — if a provider genuinely cannot be reached, the correct operational response today is to disable it via its `*_ENABLED` env var (a config change, not a code change) so checkout routes customers to a still-working provider rather than one silently failing every request.
+- **Messaging provider outage**: same shape — `MESSAGING_PROVIDER`/`FARAZ_SMS_ENABLED` are config, not code; notifications queue and retry per the existing bounded-retry worker rather than being lost.
+- **Compromised credential**: rotate the specific secret (`SESSION_SECRET`/`CSRF_SECRET`/a provider API key) and redeploy — rotating `SESSION_SECRET` invalidates every existing session cookie's signature, forcing a re-login for all users, which is the correct, safe response to a suspected session-secret compromise.
+- **Broken deployment**: roll back the application container/build (safe per the "Rollback" section above); if the break was caused by a migration, follow the "Migration safety procedure" above rather than attempting to reverse the migration in place.
+
+### Data classification, retention & account deletion
+
+- **Data classification** (documented here for the first time as an explicit map, not new tooling): **HIGHLY_SENSITIVE** — health/medical documents and clinical records (H17), payment/financial secrets (none are stored directly; only provider references), password hashes. **SENSITIVE** — support ticket content, dispute evidence, Lost Pet owner contact details, donation donor identity (when not shown publicly). **INTERNAL** — admin audit logs, seller/provider operational data. **PUBLIC** — catalog/product/provider/place/blog content, a household's own explicitly-PUBLIC memories and community posts.
+- **Retention**: this codebase does not implement automatic data-retention/deletion policies for any category today — sessions expire per `SESSION_TTL_DAYS`, OTP/password-reset tokens expire per their own TTLs (already enforced), but medical records, support tickets, financial records, and community content are retained indefinitely until a household/account is explicitly deleted. This is a documented gap, not a legal assessment — a real production deployment must confirm its jurisdiction's actual legal retention requirements (medical records in particular often have a *minimum* retention period, not just a maximum) before implementing any automatic deletion.
+- **Account deletion**: no account/household deletion endpoint exists in this codebase today. This is a real production/legal gap for markets with a "right to erasure" requirement (e.g. GDPR-adjacent regimes) — documented here rather than built, since a correct implementation needs to reconcile hard deletion against this codebase's existing audit-trail and financial-record immutability conventions (e.g. `LedgerEntry`/`Refund` rows are never deleted or mutated after creation anywhere in this codebase, by design) — likely a soft-delete-plus-anonymization approach rather than a hard `DELETE`, which is a product/legal decision this handoff does not have the authority to make unilaterally.
+
+### Alerting spec (documented, not wired to a vendor)
+
+**P0 — page immediately**: API or database unavailable (readiness failing sustained); a financial invariant violation (the ledger's `recordBalanced()` assertion actually throwing in production — this should never happen, and if it does, it means real money is now unaccounted for); any cross-tenant security anomaly (a household/seller/provider successfully reading or mutating another's data — none were found by this handoff's audits, but this is exactly what would indicate a regression of one of the P0 findings above). **P1 — investigate same-day**: a 5xx error-rate spike; a sustained rise in payment/refund failures; the notification delivery worker's failed-queue depth growing rather than draining; an object-storage upload/download failure spike; sustained shipping/marketplace provider degradation. No vendor integration (PagerDuty, Opsgenie, etc.) is wired in — this is the spec a real integration should alert on, keyed off the structured request log and the existing `AdminAuditLogService`/domain-event `attemptCount` fields, none of which needed new instrumentation to support this spec.
+
+### Release checklist
+
+Before promoting this commit to production: (1) confirm every REQUIRED_PRODUCTION env var above is set with a real value, none matching a known dev/test default; (2) confirm `NODE_ENV=production` and `STORAGE_DRIVER=s3` (the app now refuses to boot otherwise); (3) run `prisma migrate status` against the production database and confirm a clean, un-failed state before `migrate deploy`; (4) confirm the CI pipeline is green on the exact commit being deployed (typecheck, lint, unit tests, e2e tests, build all passing — see "Final validation" below for this commit's own run); (5) confirm the production provider matrix above reflects reality (don't deploy believing a NOT_IMPLEMENTED provider will work); (6) have a tested, working database backup taken within the last 24 hours; (7) after deploy, watch `GET /health/ready` and the structured request log for the first several minutes of real traffic.
+
+### Known production limitations (Handoff 20)
+
+- **No real SMS/email OTP or password-reset delivery provider** — every environment currently uses the dev/log-only path; production traffic would receive no actual code or email until a real provider (Faraz SMS or equivalent) is integrated.
+- **No real payment/BNPL merchant integration** — Standard Gateway/SnappPay/DigiPay are all sandbox stubs with no live credentials or API calls; this handoff's fix ensures they fail explicitly in production rather than fake success, but checkout cannot actually process real money until a real integration exists.
+- **No real shipping or marketplace-sync integration** — AloPeyk/SnappBox/Torob/Digikala are all documented as "no official API documentation was available" stubs; same "fails explicitly, never fakes success" property, same real-integration gap.
+- **No account/data deletion endpoint** — a real production/legal gap for any jurisdiction requiring a right to erasure; not built this handoff (see "Data classification, retention & account deletion" above).
+- **No automatic data-retention/deletion policy** for any data category — everything is retained indefinitely until a household/account is manually deleted (and no deletion endpoint exists yet either).
+- **Out-of-order payment webhooks can mask a later success behind an earlier terminal failure** — a documented, accepted risk (see "Financial core" above) pending a broader reconciliation policy decision.
+- **In-memory rate limiting and an in-process subscription-renewal timer are single-instance-safe only** — both are documented as needing a Redis-backed/real-scheduler upgrade before this deployment scales past one API instance.
+- **No external error-tracking or metrics vendor is wired in** — the boundary (`ApiExceptionFilter`, the new structured request log) is ready for one, but no SDK/vendor call exists yet.
+- **CSRF cookie has no cryptographic binding to the session** and **Argon2id cost parameters aren't pinned explicitly** — both documented P2/P3 hardening items with no known exploitable path today.
+
 ## API endpoints
 
 ```
@@ -6018,6 +6166,35 @@ the Travel hub/trip-detail flows, Insurance's exclusions-always-visible
 list and application status rendering, and Places' public browsing/
 favoriting/sign-in-prompt behavior).
 
+Handoff 20 (Production Hardening, Security & Deployment) added no new
+product surface — per its own locked "no major new features" rule — and
+instead closed a Stage 1 architecture/security audit's findings across the
+whole H01-H19 codebase: dev-only OTP/password-reset codes are no longer
+logged in production; every payment/BNPL adapter that previously had no
+production gate (`StandardGatewayAdapter`, `SnappPayAdapter`,
+`DigiPayAdapter`) now fails closed instead of silently simulating success
+once `PAYMENT_SANDBOX_MODE=production`; a private-visibility Memory's
+media URLs are no longer resolved to public, guessable object-storage
+paths — they now require a per-request, server-issued signed download
+link the same way Handoff 17's health documents already work; the local
+`/uploads` static file server can no longer serve anything under a private
+object-key prefix; two real TOCTOU races (`pets.max` entitlement
+enforcement and duplicate/concurrent refund requests) are now closed with
+transaction-scoped `pg_advisory_xact_lock` calls, each proven closed by a
+new concurrency e2e test; the one previously-known flaky Commerce Core
+webhook test was root-caused (not timeout-widened) to
+`DomainEventsService.publish()` using non-awaited `EventEmitter2.emit()`
+and fixed by switching to `emitAsync()`; `prisma/seed.ts` now refuses to
+run with `NODE_ENV=production`; a global `RequestLoggingInterceptor` now
+logs method/path/status/duration/requestId for every request; and CI's
+Postgres service image was fixed to `postgis/postgis` to match Handoff
+19's migration. See the "Production Hardening, Security & Deployment
+(Handoff 20)" section above for the full risk audit, provider status
+matrix, and release checklist. Every Handoff 01-19 backend/frontend test
+remains green plus 2 new concurrency tests (312 backend e2e scenarios, 307
+frontend tests) — zero product behavior changed, only failure-mode and
+security posture.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -6791,6 +6968,35 @@ favoriting/sign-in-prompt behavior).
 - **No global Travel/Insurance/Places navigation entry** (Handoff 19) —
   consistent with every prior handoff's nav precedent above; both are
   discoverable from Pet Profile teasers and via direct links.
+- **CSRF cookie is not session-bound** (Handoff 20, accepted risk) — the
+  double-submit token is validated against its own cookie value but not
+  tied to the authenticated session, so a token fixation attack across a
+  session change is theoretically possible; the existing `SameSite`
+  cookie policy and short session lifetime mitigate this in practice.
+- **In-memory rate limiter is not multi-instance-safe** (Handoff 20,
+  accepted risk) — auth/OTP rate limiting tracks attempt counts in the
+  API process's own memory, so a multi-instance production deployment
+  without sticky sessions or a shared store (e.g. Redis) would let an
+  attacker's requests spread across instances and evade the limit; the
+  fix is a known, contained one (move the counter to Redis) deferred
+  because this codebase has never been deployed multi-instance.
+- **`STANDARD_GATEWAY`/`SNAPP_PAY`/`DIGI_PAY` have no real production
+  implementation** (Handoff 20) — each now fails closed
+  (`isProductionConfigured()` returns `false` in production) rather than
+  silently simulating a charge, but none has a real HTTP integration
+  against an actual payment processor; enabling any of them in production
+  today would only ever return an explicit `FAILED`/`DECLINED` result,
+  never a working payment.
+- **`LocalStorageDriver` remains dev-only by explicit production gate**
+  (Handoff 20) — `validateStorageConfig()` now throws at boot if
+  `NODE_ENV=production` and `STORAGE_DRIVER` is not `s3`, formalizing what
+  Handoff 17's own Known Limitations note already implied; a production
+  deployment has no working local-disk fallback by design.
+- **No centralized external error-tracking/APM integration** (Handoff 20)
+  — `RequestLoggingInterceptor` and the existing `ApiExceptionFilter` log
+  structured lines to stdout only; there is no Sentry/Datadog/equivalent
+  wiring, so production error visibility today depends entirely on
+  whatever the deployment platform does with stdout/stderr.
 
 ## Next recommended coding handoff
 
@@ -7055,3 +7261,37 @@ keep travel documents flowing through the existing Handoff 17
 verification flowing through the same admin `VERIFIED`/publicly-listed
 gate — never a second, independently-computed "is this trustworthy" flag
 — no matter how small the future change looks.
+
+Alternatively, following directly from Handoff 20's hardening work (a
+"document, don't build" handoff by design, so it deliberately left every
+one of these for a future increment): **Redis-backed, multi-instance-safe
+rate limiting** for auth/OTP endpoints, replacing the current in-memory
+counter the same way `NotificationDeliveryWorkerService` already uses
+Redis for its own state — a contained, well-understood change with no
+schema impact. A related, independent option: **a real SMS/OTP provider
+integration** — `FarazSmsAdapter`'s interface and capability-map boundary
+already exist from Handoff 10; swapping `DevOtpProvider`'s
+console-logging body for a real `FarazSmsAdapter.send()` call (gated the
+same `isProductionConfigured()` way every other adapter now is) would
+close the last "any phone number can sign in with a logged code" gap
+called out above. A third, independent option: **closing the standard
+payment gateway / SnappPay / DigiPay production gap** — Handoff 20 made
+all three fail closed rather than fake-succeed in production, but none
+has a real HTTP integration yet; once real merchant credentials exist,
+each adapter's `charge()`/`authorize()`/`refund()`/
+`verifyWebhookSignature()` bodies are a same-shape rewrite behind an
+interface that already fully supports it, per the Handoff 07 provider
+architecture. A fourth option, purely operational rather than code: wiring
+a real external error-tracking/APM service (Sentry or equivalent) to the
+existing `ApiExceptionFilter` and `RequestLoggingInterceptor` log lines,
+which today only reach stdout.
+
+Whichever is chosen, keep every production-gating adapter's
+`isProductionConfigured()` pattern (check the provider's own
+`*_SANDBOX_MODE`/`SHIPPING_MODE`-style env var plus real credential
+presence, fail closed with an explicit `FAILED`/`DECLINED` result rather
+than ever faking success) as the one mechanism for "is this integration
+really live," never a second, ad hoc readiness check — and keep this
+handoff's `pg_advisory_xact_lock`-based concurrency-safety pattern for any
+new TOCTOU-shaped race a future feature introduces, rather than
+reinventing locking per call site.

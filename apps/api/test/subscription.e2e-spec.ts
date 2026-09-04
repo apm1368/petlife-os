@@ -187,6 +187,29 @@ describe("Subscription + Membership + Metering (Handoff 16)", () => {
       }
     });
 
+    it("Concurrency (Handoff 20): two simultaneous creates at exactly one slot under the limit never both succeed", async () => {
+      const { client, householdId } = await setupHousehold();
+      const freePlan = await getFreePlan();
+      const limit = await prisma.subscriptionPlanEntitlement.findUniqueOrThrow({ where: { planId_key: { planId: freePlan.id, key: "pets.max" } } });
+      const max = limit.limitValue!;
+
+      // Fill every slot but one, leaving room for exactly one more pet.
+      for (let i = 0; i < max - 1; i++) {
+        await client.post(`/households/${householdId}/pets`).send({ name: `Pet${i}`, species: "DOG", approximateAgeMonths: 12 }).expect(201);
+      }
+
+      const [r1, r2] = await Promise.all([
+        client.post(`/households/${householdId}/pets`).send({ name: "RaceA", species: "CAT", approximateAgeMonths: 6 }),
+        client.post(`/households/${householdId}/pets`).send({ name: "RaceB", species: "CAT", approximateAgeMonths: 6 }),
+      ]);
+
+      const statuses = [r1.status, r2.status].sort();
+      expect(statuses).toEqual([201, 409]);
+
+      const pets = await prisma.pet.findMany({ where: { householdId } });
+      expect(pets).toHaveLength(max); // never exceeds the plan's limit, even under a race
+    });
+
     it("Flow E: usage reporting reflects the household's real pet count against its limit", async () => {
       const { client, householdId } = await setupHousehold();
       await client.post(`/households/${householdId}/pets`).send({ name: "Rex", species: "DOG", approximateAgeMonths: 24 }).expect(201);

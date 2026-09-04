@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PaymentProvider } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "node:crypto";
 import type { FinancingEligibilityStatus, ProviderCapabilities } from "@petlife/types";
+import type { AppEnv } from "../../../config/env";
 import { PROVIDER_CAPABILITIES } from "../payments/payment-provider-registry";
 import type {
   FinancingAuthorizeInput,
@@ -53,6 +55,13 @@ export class SnappPayAdapter implements FinancingProvider {
 
   private readonly statuses = new Map<string, "APPROVED" | "DECLINED" | "PENDING">();
 
+  constructor(private readonly config: ConfigService<AppEnv, true>) {}
+
+  /** No real SnappPay credentials/API integration exist — see class doc comment. */
+  private isProductionConfigured(): boolean {
+    return this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) === "production";
+  }
+
   async checkEligibility(input: FinancingEligibilityInput): Promise<FinancingEligibilityResult> {
     // Illustrative-only rule: this sandbox declines eligibility above a
     // conservative ceiling so the "not eligible" UI state is exercisable
@@ -67,8 +76,17 @@ export class SnappPayAdapter implements FinancingProvider {
 
   async authorize(input: FinancingAuthorizeInput): Promise<FinancingAuthorizeResult> {
     const providerReference = `snapppay_${randomUUID()}`;
-    const mode = input.mode ?? "APPROVE";
 
+    if (this.isProductionConfigured()) {
+      // Never accept a caller-supplied outcome once running against real
+      // traffic — there is no real credit/eligibility decision behind this
+      // adapter yet, so authorization must fail explicitly.
+      const result: FinancingAuthorizeResult = { status: "DECLINED", providerReference, failureCode: "SNAPPAY_NOT_IMPLEMENTED", failureMessage: "SnappPay has no live merchant integration configured. This installment request was not processed." };
+      this.statuses.set(providerReference, "DECLINED");
+      return result;
+    }
+
+    const mode = input.mode ?? "APPROVE";
     let status: "APPROVED" | "DECLINED" | "PENDING";
     let result: FinancingAuthorizeResult;
     if (mode === "DECLINE") {
@@ -91,12 +109,18 @@ export class SnappPayAdapter implements FinancingProvider {
   }
 
   async refund(_input: FinancingRefundInput): Promise<FinancingRefundResult> {
+    if (this.isProductionConfigured()) {
+      return { status: "FAILED", failureMessage: "SnappPay has no live merchant integration configured." };
+    }
     return { status: "SUCCEEDED", providerRefundReference: `snapppay_refund_${randomUUID()}` };
   }
 
   verifyWebhookSignature(_rawBody: unknown, _signatureHeader: string | undefined): boolean {
-    // See class doc: real signature scheme is UNKNOWN; sandbox always accepts.
-    return true;
+    // See class doc: real signature scheme is UNKNOWN. Sandbox always
+    // accepts so local/test flows can self-trigger webhooks; production
+    // must never accept an unverifiable payload since there is no real
+    // signature scheme implemented for this provider yet.
+    return !this.isProductionConfigured();
   }
 }
 

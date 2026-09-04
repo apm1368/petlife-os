@@ -14,13 +14,23 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
   const router = useRouter();
 
   const [memory, setMemory] = useState<PetMemoryDto | null>(null);
+  const [privateMediaUrls, setPrivateMediaUrls] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function load() {
     setError(null);
     try {
-      setMemory(await memoriesService.get(petId, memoryId));
+      const loaded = await memoriesService.get(petId, memoryId);
+      setMemory(loaded);
+      // A PRIVATE memory's DTO never carries a plain mediaUrls entry (see
+      // memory-mapper.ts) — each item needs its own signed download.
+      if (loaded.visibility === "PRIVATE" && loaded.mediaObjectKeys.length > 0) {
+        const targets = await Promise.all(loaded.mediaObjectKeys.map((_, index) => memoriesService.getMediaDownload(petId, memoryId, index)));
+        setPrivateMediaUrls(targets.map((target) => target.downloadUrl));
+      } else {
+        setPrivateMediaUrls([]);
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : tCommon("genericError"));
     }
@@ -51,9 +61,9 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
       <h1 className="text-page-title text-text-primary">{memory.title}</h1>
 
       <ContextSurface className="flex flex-col gap-3">
-        {memory.mediaUrls.length > 0 ? (
+        {(memory.visibility === "PRIVATE" ? privateMediaUrls : memory.mediaUrls).length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
-            {memory.mediaUrls.map((url) => (
+            {(memory.visibility === "PRIVATE" ? privateMediaUrls : memory.mediaUrls).map((url) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img key={url} src={url} alt={memory.title} className="h-48 w-full rounded-md object-cover" />
             ))}

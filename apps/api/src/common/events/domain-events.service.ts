@@ -249,10 +249,21 @@ export interface PublishOptions {
 
 /**
  * Outbox-shaped: every event is persisted to `domain_events` before being
- * dispatched in-process via EventEmitter2. Today the dispatch is synchronous
- * and best-effort; evolving to an at-least-once relay only means adding a
+ * dispatched in-process via EventEmitter2. Dispatch is in-process and
+ * best-effort; evolving to an at-least-once relay only means adding a
  * poller that reads unprocessed (or failed/retryable, via attemptCount) rows
  * and marks `processedAt` — no schema or call-site change required.
+ *
+ * `publish()` awaits every `@OnEvent` handler (`emitAsync`, not `emit`) —
+ * Handoff 20 hardening (see PaymentEventsListener's own doc comment for the
+ * production-observable symptom this fixes: a caller reading state
+ * immediately after `publish()` returns, e.g. a webhook responding to its
+ * provider, could previously observe the domain mutation a listener was
+ * still in the middle of applying). This also means a listener's own thrown
+ * error is now caught by the try/catch below and recorded via
+ * `attemptCount`/`lastError` instead of becoming an unhandled rejection.
+ * Listeners still run concurrently with each other, not serially — only the
+ * caller of `publish()` waits for all of them to settle.
  */
 @Injectable()
 export class DomainEventsService {
@@ -277,15 +288,15 @@ export class DomainEventsService {
 
     try {
       // The extra `event.id` argument is new in Handoff 10 — EventEmitter2
-      // forwards every value passed to emit() positionally to each
-      // @OnEvent handler, so a pre-existing single-parameter listener
+      // forwards every value passed to emit()/emitAsync() positionally to
+      // each @OnEvent handler, so a pre-existing single-parameter listener
       // (e.g. PaymentEventsListener) simply ignores it; only a listener
       // that declares a second parameter (e.g. NotificationEventsListener)
       // reads it. This is the idempotency anchor notifications dedupe
       // against — see Notification's `@@unique([domainEventId, type,
       // userId])` — without it, a listener would have no stable id to key
       // on other than re-deriving one from the payload's own fields.
-      this.emitter.emit(type, payload, event.id);
+      await this.emitter.emitAsync(type, payload, event.id);
       await client.domainEvent.update({
         where: { id: event.id },
         data: { processedAt: new Date() },
