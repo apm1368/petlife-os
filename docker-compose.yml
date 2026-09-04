@@ -2,7 +2,11 @@ name: petlife-os
 
 services:
   postgres:
-    image: postgres:16-alpine
+    # postgis/postgis ships the same postgres:16 base plus the PostGIS extension
+    # (Handoff 19: Pet-Friendly Places geo search) — the extension itself is
+    # still only enabled by running `CREATE EXTENSION IF NOT EXISTS postgis;`,
+    # which the Handoff 19 migration does on first apply.
+    image: postgis/postgis:16-3.4-alpine
     environment:
       POSTGRES_USER: petlife
       POSTGRES_PASSWORD: petlife

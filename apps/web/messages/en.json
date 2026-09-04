@@ -282,7 +282,11 @@
       "memoriesTeaserMemorial": "A place to keep the moments you shared",
       "openMemories": "Open memories",
       "lostPetTeaser": "Lost or found?",
-      "openLostPet": "Report lost"
+      "openLostPet": "Report lost",
+      "travelTeaser": "Travel & pet-friendly places",
+      "openTravel": "Plan a trip",
+      "insuranceTeaser": "Pet insurance",
+      "openInsurance": "Browse plans"
     }
   },
   "health": {
@@ -2628,6 +2632,237 @@
     "timeline": {
       "title": "Life timeline",
       "empty": "Nothing to show yet."
+    }
+  },
+  "travel": {
+    "status": {
+      "DRAFT": "Draft",
+      "PLANNING": "Planning",
+      "READY": "Ready",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "transitions": {
+      "DRAFT": "Back to draft",
+      "PLANNING": "Start planning",
+      "READY": "Mark ready",
+      "IN_PROGRESS": "Start trip",
+      "COMPLETED": "Mark completed",
+      "CANCELLED": "Cancel trip"
+    },
+    "travelMode": {
+      "AIR": "Air",
+      "ROAD": "Road",
+      "RAIL": "Rail",
+      "SEA": "Sea",
+      "OTHER": "Other"
+    },
+    "requirementType": {
+      "VACCINATION": "Vaccination",
+      "RABIES": "Rabies vaccination",
+      "MICROCHIP": "Microchip",
+      "HEALTH_CERTIFICATE": "Health certificate",
+      "IMPORT_PERMIT": "Import permit",
+      "EXPORT_PERMIT": "Export permit",
+      "CARRIER": "Carrier",
+      "AIRLINE_POLICY": "Airline policy",
+      "MEDICATION": "Medication",
+      "QUARANTINE": "Quarantine",
+      "PARASITE_TREATMENT": "Parasite treatment",
+      "PASSPORT_DOCUMENT": "Passport document",
+      "OTHER": "Other"
+    },
+    "requirementStatus": {
+      "UNKNOWN": "Unknown",
+      "REQUIRED": "Required",
+      "NOT_REQUIRED": "Not required",
+      "INCOMPLETE": "Incomplete",
+      "READY": "Ready"
+    },
+    "vaccinationStatus": {
+      "UP_TO_DATE": "Up to date",
+      "DUE_SOON": "Due soon",
+      "OVERDUE": "Overdue",
+      "UNKNOWN": "Unknown",
+      "INCOMPLETE": "Incomplete"
+    },
+    "hub": {
+      "title": "Travel",
+      "newTrip": "New trip",
+      "passportReadinessLink": "Pet Passport Readiness",
+      "placesLink": "Find pet-friendly places",
+      "insuranceLink": "Browse pet insurance",
+      "empty": "No trips yet. Start planning your first one.",
+      "requirementsCount": "{count, plural, =0 {No requirements yet} one {# requirement} other {# requirements}}"
+    },
+    "newTrip": {
+      "title": "Plan a new trip",
+      "subtitle": "Start with the basics — you can build out the readiness checklist afterward.",
+      "originCountryLabel": "Origin country (ISO code)",
+      "originCityLabel": "Origin city",
+      "destinationCountryLabel": "Destination country (ISO code)",
+      "destinationCityLabel": "Destination city",
+      "departAtLabel": "Departure date",
+      "returnAtLabel": "Return date",
+      "travelModeLabel": "Travel mode",
+      "notesLabel": "Notes",
+      "submit": "Create trip"
+    },
+    "detail": {
+      "departAt": "Departs {date}",
+      "returnAt": "Returns {date}",
+      "requirementsTitle": "Readiness checklist",
+      "requirementsEmpty": "No requirements added yet.",
+      "addRequirementTitle": "Add a requirement",
+      "requirementTypeLabel": "Requirement type",
+      "addRequirement": "Add",
+      "statusLabel": "Status",
+      "markVerified": "Mark verified",
+      "deleteRequirement": "Remove",
+      "linkDocumentLabel": "Linked document",
+      "linkDocumentNone": "None",
+      "source": "Source: {source}",
+      "jurisdiction": "Jurisdiction: {jurisdiction}",
+      "verifiedAt": "Last verified {date}",
+      "neverVerified": "Never verified",
+      "linkedDocument": "Linked document: {title}"
+    },
+    "readiness": {
+      "summary": "{ready} of {total} requirements ready",
+      "allReady": "Ready to travel",
+      "notReady": "Not ready yet",
+      "stale": "Stale",
+      "staleWarning": "Some requirements haven't been verified recently — double-check before you travel."
+    },
+    "passport": {
+      "title": "{name}'s Passport Readiness",
+      "microchip": "Microchip number",
+      "missing": "Not recorded",
+      "vaccinationStatus": "Vaccination status",
+      "healthDocumentsCount": "Health documents on file",
+      "travelDocumentsCount": "Travel documents on file",
+      "missingItemsTitle": "Still missing",
+      "missingItem": {
+        "MICROCHIP_NUMBER": "Microchip number not recorded",
+        "VACCINATION_STATUS": "Vaccination status not up to date",
+        "HEALTH_DOCUMENTS": "No health documents uploaded",
+        "TRAVEL_DOCUMENTS": "No travel documents uploaded"
+      }
+    }
+  },
+  "insurance": {
+    "verificationStatus": {
+      "UNVERIFIED": "Unverified",
+      "VERIFIED": "Verified",
+      "SUSPENDED": "Suspended"
+    },
+    "coverageType": {
+      "ACCIDENT": "Accident",
+      "ILLNESS": "Illness",
+      "SURGERY": "Surgery",
+      "DIAGNOSTICS": "Diagnostics",
+      "MEDICATION": "Medication",
+      "DENTAL": "Dental",
+      "PREVENTIVE": "Preventive care",
+      "HOSPITALIZATION": "Hospitalization",
+      "EMERGENCY": "Emergency",
+      "OTHER": "Other"
+    },
+    "eligibilityStatus": {
+      "ELIGIBLE": "Eligible",
+      "POSSIBLY_ELIGIBLE": "Possibly eligible",
+      "NOT_ELIGIBLE": "Not eligible",
+      "UNKNOWN": "Unknown"
+    },
+    "applicationStatus": {
+      "DRAFT": "Draft",
+      "SUBMITTED": "Submitted",
+      "UNDER_REVIEW": "Under review",
+      "APPROVED": "Approved",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled"
+    },
+    "list": {
+      "title": "Pet insurance",
+      "subtitle": "Compare providers and coverage — this is a discovery tool, not an insurer.",
+      "empty": "No insurance products found.",
+      "compareSelected": "Compare selected",
+      "viewDetails": "View details"
+    },
+    "detail": {
+      "exclusionsTitle": "Exclusions — read before applying",
+      "exclusionsEmpty": "No exclusions listed for this product.",
+      "coverageTitle": "Coverage",
+      "waitingPeriod": "Waiting period: {days} days",
+      "deductible": "Deductible: {amount} IRR",
+      "annualLimit": "Annual limit: {amount} IRR",
+      "premiumRange": "Premium: {min}–{max} IRR",
+      "termsSource": "Source: {source}",
+      "checkEligibility": "Check eligibility for {petName}",
+      "apply": "Start application"
+    },
+    "compare": {
+      "title": "Compare plans",
+      "exclusions": "Exclusions"
+    },
+    "eligibility": {
+      "title": "Eligibility for {petName}",
+      "sectionTitle": "Eligibility for this pet",
+      "disclaimer": "This is not a guarantee of approval — the insurer makes the final decision.",
+      "reasons": {
+        "SPECIES_NOT_COVERED": "This pet's species is not covered by this product.",
+        "PET_AGE_UNKNOWN": "This pet's age isn't recorded, so age eligibility can't be confirmed.",
+        "PET_BELOW_MINIMUM_AGE": "This pet is younger than the minimum age this product covers.",
+        "PET_ABOVE_MAXIMUM_AGE": "This pet is older than the maximum age this product covers."
+      }
+    },
+    "application": {
+      "title": "Insurance applications for {petName}",
+      "sectionTitle": "Insurance applications",
+      "empty": "No applications yet.",
+      "notesLabel": "Notes for this application",
+      "submit": "Submit application",
+      "cancel": "Cancel application",
+      "disclaimer": "Submitting sends this application to the provider — it does not guarantee coverage."
+    }
+  },
+  "places": {
+    "category": {
+      "PARK": "Park",
+      "CAFE": "Cafe",
+      "RESTAURANT": "Restaurant",
+      "HOTEL": "Hotel",
+      "STORE": "Store",
+      "BEACH": "Beach",
+      "VENUE": "Venue",
+      "SERVICE": "Service",
+      "OTHER": "Other"
+    },
+    "list": {
+      "title": "Pet-friendly places",
+      "subtitle": "Verified places that welcome pets.",
+      "empty": "No places found.",
+      "nearMe": "Search near me",
+      "allCategories": "All categories",
+      "filtersCity": "City",
+      "filtersCategory": "Category"
+    },
+    "detail": {
+      "indoorAllowed": "Indoor access allowed",
+      "outdoorAllowed": "Outdoor access allowed",
+      "sizeRestrictions": "Size restrictions: {restrictions}",
+      "petPolicy": "Pet policy",
+      "verifiedAt": "Verified {date}",
+      "unverified": "Not yet verified — details may be incomplete",
+      "addFavorite": "Save to favorites",
+      "removeFavorite": "Remove from favorites",
+      "distance": "{distance} km away"
+    },
+    "favorites": {
+      "title": "Saved places",
+      "empty": "You haven't saved any places yet.",
+      "signInPrompt": "Sign in to save your favorite places."
     }
   }
 }

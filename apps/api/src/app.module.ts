@@ -52,6 +52,9 @@ import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
 import { CommunityModule } from "./modules/community/community.module";
 import { MemoriesModule } from "./modules/memories/memories.module";
+import { TravelModule } from "./modules/travel/travel.module";
+import { InsuranceModule } from "./modules/insurance/insurance.module";
+import { PlacesModule } from "./modules/places/places.module";
 
 @Module({
   imports: [
@@ -108,6 +111,9 @@ import { MemoriesModule } from "./modules/memories/memories.module";
     AnimalSupportModule,
     CommunityModule,
     MemoriesModule,
+    TravelModule,
+    InsuranceModule,
+    PlacesModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

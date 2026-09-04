@@ -77,4 +77,16 @@ export type AdminAuditAction =
   | "donation.payout_recorded"
   | "donation.refunded"
   | "community_report.escalated"
-  | "community_report.dismissed";
+  | "community_report.dismissed"
+  | "insurance_provider.created"
+  | "insurance_provider.updated"
+  | "insurance_provider.verification_changed"
+  | "insurance_provider.listed_changed"
+  | "insurance_product.created"
+  | "insurance_product.updated"
+  | "insurance_product.verification_changed"
+  | "insurance_product.listed_changed"
+  | "pet_friendly_place.created"
+  | "pet_friendly_place.updated"
+  | "pet_friendly_place.verification_changed"
+  | "pet_friendly_place.listed_changed";

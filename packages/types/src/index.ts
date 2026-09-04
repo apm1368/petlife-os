@@ -2675,7 +2675,11 @@ export type AdminPermissionName =
   | "subscription.entitlement.override"
   | "animalSupport.view"
   | "animalSupport.manage"
-  | "animalSupport.payout";
+  | "animalSupport.payout"
+  | "insurance.view"
+  | "insurance.manage"
+  | "places.view"
+  | "places.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -3421,6 +3425,8 @@ export enum MedicalDocumentType {
   DENTAL_RECORD = "DENTAL_RECORD",
   NUTRITION_PLAN = "NUTRITION_PLAN",
   REHAB_PLAN = "REHAB_PLAN",
+  /** Handoff 19: health certificate, import/export permit, passport, or any other travel-specific document — reuses the existing private MedicalDocument store rather than a parallel one. */
+  TRAVEL_DOCUMENT = "TRAVEL_DOCUMENT",
   OTHER = "OTHER",
 }
 
@@ -4302,4 +4308,263 @@ export interface SupportLostPetSummaryDto {
   openIncidentsCount: number;
   mostRecentIncident: { id: string; status: LostPetIncidentStatus; createdAt: string } | null;
   sightingsCount: number;
+}
+
+// ---------------------------------------------------------------------------
+// Travel + Insurance + Pet-Friendly Places (Handoff 19).
+// ---------------------------------------------------------------------------
+
+export enum TripStatus {
+  DRAFT = "DRAFT",
+  PLANNING = "PLANNING",
+  READY = "READY",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum TravelMode {
+  AIR = "AIR",
+  ROAD = "ROAD",
+  RAIL = "RAIL",
+  SEA = "SEA",
+  OTHER = "OTHER",
+}
+
+export interface TripDto {
+  id: string;
+  householdId: string;
+  petId: string;
+  petName: string;
+  petPhotoUrl: string | null;
+  createdByUserId: string;
+  originCountry: string;
+  originCity: string | null;
+  destinationCountry: string;
+  destinationCity: string | null;
+  departAt: string;
+  returnAt: string | null;
+  travelMode: TravelMode;
+  status: TripStatus;
+  notes: string | null;
+  requirementsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export enum TravelRequirementType {
+  VACCINATION = "VACCINATION",
+  RABIES = "RABIES",
+  MICROCHIP = "MICROCHIP",
+  HEALTH_CERTIFICATE = "HEALTH_CERTIFICATE",
+  IMPORT_PERMIT = "IMPORT_PERMIT",
+  EXPORT_PERMIT = "EXPORT_PERMIT",
+  CARRIER = "CARRIER",
+  AIRLINE_POLICY = "AIRLINE_POLICY",
+  MEDICATION = "MEDICATION",
+  QUARANTINE = "QUARANTINE",
+  PARASITE_TREATMENT = "PARASITE_TREATMENT",
+  PASSPORT_DOCUMENT = "PASSPORT_DOCUMENT",
+  OTHER = "OTHER",
+}
+
+/** UNKNOWN is a real, distinct, safe-default state — spec's locked rule: "never present uncertain travel/import/legal requirements as guaranteed facts... unknown does not become ready." */
+export enum TravelRequirementStatus {
+  UNKNOWN = "UNKNOWN",
+  REQUIRED = "REQUIRED",
+  NOT_REQUIRED = "NOT_REQUIRED",
+  INCOMPLETE = "INCOMPLETE",
+  READY = "READY",
+}
+
+export interface TravelRequirementDto {
+  id: string;
+  tripId: string;
+  requirementType: TravelRequirementType;
+  status: TravelRequirementStatus;
+  source: string | null;
+  sourceUrl: string | null;
+  jurisdiction: string | null;
+  verifiedAt: string | null;
+  validUntil: string | null;
+  /** Computed server-side against a staleness threshold — spec: "do not hide stale data." True whenever verifiedAt is null or older than the threshold. */
+  isStale: boolean;
+  /** The linked MedicalDocument's id/title only — never a fileObjectKey or URL (medical documents stay private; the frontend re-uses the existing H17 signed-download endpoint to actually view one). */
+  linkedMedicalDocumentId: string | null;
+  linkedMedicalDocumentTitle: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Aggregated, never a stored duplicate of Trip/TravelRequirement rows — the same "derived, never duplicated" convention Life Timeline established in Handoff 18. */
+export interface TripReadinessSummaryDto {
+  tripId: string;
+  status: TripStatus;
+  requirements: TravelRequirementDto[];
+  readyCount: number;
+  totalCount: number;
+  /** True only when every requirement is READY or NOT_REQUIRED — UNKNOWN/REQUIRED/INCOMPLETE always keep this false (locked rule: unknown never becomes ready). */
+  allReady: boolean;
+  hasStaleRequirement: boolean;
+}
+
+/** Not a government passport object — an aggregation of existing pet identity/health data plus travel-specific gaps. Never duplicates H17 health records; every count here is a live read. */
+export interface PetPassportReadinessDto {
+  petId: string;
+  petName: string;
+  petSpecies: PetSpecies;
+  petPhotoUrl: string | null;
+  microchipNumber: string | null;
+  vaccinationStatus: VaccinationStatus;
+  healthDocumentsCount: number;
+  travelDocumentsCount: number;
+  missingItems: string[];
+}
+
+export enum InsuranceVerificationStatus {
+  UNVERIFIED = "UNVERIFIED",
+  VERIFIED = "VERIFIED",
+  SUSPENDED = "SUSPENDED",
+}
+
+export interface InsuranceProviderDto {
+  id: string;
+  name: string;
+  description: string | null;
+  logoObjectKey: string | null;
+  logoUrl: string | null;
+  country: string;
+  status: InsuranceVerificationStatus;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  websiteUrl: string | null;
+  isPubliclyListed: boolean;
+  createdAt: string;
+}
+
+export enum InsuranceCoverageType {
+  ACCIDENT = "ACCIDENT",
+  ILLNESS = "ILLNESS",
+  SURGERY = "SURGERY",
+  DIAGNOSTICS = "DIAGNOSTICS",
+  MEDICATION = "MEDICATION",
+  DENTAL = "DENTAL",
+  PREVENTIVE = "PREVENTIVE",
+  HOSPITALIZATION = "HOSPITALIZATION",
+  EMERGENCY = "EMERGENCY",
+  OTHER = "OTHER",
+}
+
+export interface InsuranceProductDto {
+  id: string;
+  providerId: string;
+  providerName: string;
+  providerLogoUrl: string | null;
+  name: string;
+  country: string;
+  speciesEligibility: PetSpecies[];
+  minAgeMonths: number | null;
+  maxAgeMonths: number | null;
+  coverageTypes: InsuranceCoverageType[];
+  coverageSummary: string;
+  waitingPeriodDays: number | null;
+  deductibleAmountIrr: number | null;
+  annualLimitIrr: number | null;
+  coinsurancePercent: number | null;
+  premiumMinIrr: number | null;
+  premiumMaxIrr: number | null;
+  /** Spec hard UX rule: exclusions must be highly visible, never buried below benefits — always present alongside coverageSummary/coverageTypes in this same DTO. */
+  exclusions: string[];
+  termsSource: string | null;
+  termsUrl: string | null;
+  status: InsuranceVerificationStatus;
+  isPubliclyListed: boolean;
+  createdAt: string;
+}
+
+/** POSSIBLY_ELIGIBLE and UNKNOWN are never treated as guaranteed approval — spec's locked rule: "eligibility does not overclaim... never guarantees insurer approval." */
+export enum InsuranceEligibilityStatus {
+  ELIGIBLE = "ELIGIBLE",
+  POSSIBLY_ELIGIBLE = "POSSIBLY_ELIGIBLE",
+  NOT_ELIGIBLE = "NOT_ELIGIBLE",
+  UNKNOWN = "UNKNOWN",
+}
+
+export interface InsuranceEligibilityResultDto {
+  status: InsuranceEligibilityStatus;
+  reasons: string[];
+}
+
+/** APPROVED/DECLINED exist for a future real insurer integration — no service ever sets either today (spec: "do not simulate underwriting approval"). */
+export enum InsuranceApplicationStatus {
+  DRAFT = "DRAFT",
+  SUBMITTED = "SUBMITTED",
+  UNDER_REVIEW = "UNDER_REVIEW",
+  APPROVED = "APPROVED",
+  DECLINED = "DECLINED",
+  CANCELLED = "CANCELLED",
+}
+
+export interface InsuranceApplicationDto {
+  id: string;
+  productId: string;
+  productName: string;
+  providerName: string;
+  householdId: string;
+  petId: string;
+  petName: string;
+  applicantUserId: string;
+  status: InsuranceApplicationStatus;
+  eligibilityStatus: InsuranceEligibilityStatus;
+  notes: string | null;
+  submittedAt: string | null;
+  decidedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export enum PetFriendlyPlaceCategory {
+  PARK = "PARK",
+  CAFE = "CAFE",
+  RESTAURANT = "RESTAURANT",
+  HOTEL = "HOTEL",
+  STORE = "STORE",
+  BEACH = "BEACH",
+  VENUE = "VENUE",
+  SERVICE = "SERVICE",
+  OTHER = "OTHER",
+}
+
+export enum PetFriendlyPlaceStatus {
+  UNVERIFIED = "UNVERIFIED",
+  VERIFIED = "VERIFIED",
+  SUSPENDED = "SUSPENDED",
+}
+
+export interface PetFriendlyPlaceDto {
+  id: string;
+  name: string;
+  category: PetFriendlyPlaceCategory;
+  description: string | null;
+  country: string;
+  city: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  /** Only present on a nearby-search result — the caller's own straight-line distance to this place, in meters, computed server-side via PostGIS ST_Distance. */
+  distanceMeters: number | null;
+  speciesAllowed: PetSpecies[];
+  sizeRestrictions: string | null;
+  indoorAllowed: boolean;
+  outdoorAllowed: boolean;
+  petPolicy: string | null;
+  imageObjectKeys: string[];
+  imageUrls: string[];
+  verificationSource: string | null;
+  verifiedAt: string | null;
+  status: PetFriendlyPlaceStatus;
+  isPubliclyListed: boolean;
+  isFavorited: boolean;
+  createdAt: string;
 }

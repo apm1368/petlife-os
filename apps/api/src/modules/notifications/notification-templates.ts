@@ -201,6 +201,27 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "بازگشت به خانواده", body: "{{petName}} با خانواده دوباره یکی شد!", smsBody: "خبر خوب! {{petName}} با خانواده دوباره یکی شد." },
     en: { title: "Reunited!", body: "{{petName}} has been reunited with the household!", smsBody: "Good news — {{petName}} has been reunited with your household." },
   },
+
+  // Handoff 19: Insurance application status — deliberately just
+  // submission/status-change, never a per-field or per-comparison-view
+  // notification (spec: "do not over-notify"). Never claims an approval or
+  // decline decision, since no service ever sets those statuses.
+  "insurance.application_submitted": {
+    fa: {
+      title: "درخواست بیمه ارسال شد",
+      body: "درخواست بیمه برای {{petName}} نزد {{providerName}} ارسال شد.",
+      smsBody: "درخواست بیمه {{petName}} نزد {{providerName}} در پت‌لایف ارسال شد.",
+    },
+    en: {
+      title: "Insurance application submitted",
+      body: "The insurance application for {{petName}} with {{providerName}} was submitted.",
+      smsBody: "Insurance application for {{petName}} with {{providerName}} submitted in PET LIFE OS.",
+    },
+  },
+  "insurance.application_status_changed": {
+    fa: { title: "به‌روزرسانی وضعیت بیمه", body: "وضعیت درخواست بیمه {{petName}} به {{status}} تغییر کرد.", smsBody: "وضعیت درخواست بیمه {{petName}} در پت‌لایف تغییر کرد." },
+    en: { title: "Insurance application update", body: "The insurance application status for {{petName}} changed to {{status}}.", smsBody: "Insurance application status for {{petName}} changed in PET LIFE OS." },
+  },
 };
 
 export function hasTemplate(key: string): boolean {

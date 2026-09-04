@@ -59,6 +59,11 @@ import { AdminDonationService } from "../animal-support/admin-donation.service";
 import { AdminAnimalSupportController } from "./animal-support/admin-animal-support.controller";
 import { CommunityModerationService } from "./community/community-moderation.service";
 import { AdminCommunityController } from "./community/admin-community.controller";
+import { InsuranceProviderService } from "../insurance/insurance-provider.service";
+import { InsuranceProductService } from "../insurance/insurance-product.service";
+import { AdminInsuranceController } from "./insurance/admin-insurance.controller";
+import { PetFriendlyPlaceService } from "../places/pet-friendly-place.service";
+import { AdminPlacesController } from "./places/admin-places.controller";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -90,6 +95,8 @@ import { AdminCommunityController } from "./community/admin-community.controller
     AdminSubscriptionController,
     AdminAnimalSupportController,
     AdminCommunityController,
+    AdminInsuranceController,
+    AdminPlacesController,
   ],
   providers: [
     AdminAccessService,
@@ -126,6 +133,9 @@ import { AdminCommunityController } from "./community/admin-community.controller
     DonationLedgerService,
     AdminDonationService,
     CommunityModerationService,
+    InsuranceProviderService,
+    InsuranceProductService,
+    PetFriendlyPlaceService,
   ],
   exports: [
     AdminAccessService,

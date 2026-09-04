@@ -48,6 +48,14 @@ const ANIMAL_SUPPORT_MEDIA_MIME_EXTENSIONS: Record<string, string> = {
 };
 const ANIMAL_SUPPORT_MEDIA_MAX_BYTES = 10 * 1024 * 1024; // 10MB
 
+/** Handoff 19: Insurance provider/product logos and Pet-Friendly Place images — public by design, same allow-list as Animal Support media. */
+const TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+const TRAVEL_COMMERCE_MEDIA_MAX_BYTES = 10 * 1024 * 1024; // 10MB
+
 @Injectable()
 export class StorageService {
   constructor(@Inject(STORAGE_DRIVER) private readonly driver: StorageDriver) {}
@@ -168,6 +176,30 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: ANIMAL_SUPPORT_MEDIA_MAX_BYTES });
     }
     const key = `animal-support-orgs/${organizationId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType);
+    return { ...target, key };
+  }
+
+  /** An Insurance provider's logo — public, keyed by providerId. */
+  async createInsuranceProviderLogoUploadTarget(providerId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > TRAVEL_COMMERCE_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
+    }
+    const key = `insurance-providers/${providerId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType);
+    return { ...target, key };
+  }
+
+  /** A Pet-Friendly Place's gallery image — public, keyed by placeId. */
+  async createPetFriendlyPlaceImageUploadTarget(placeId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > TRAVEL_COMMERCE_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
+    }
+    const key = `pet-friendly-places/${placeId}/${randomUUID()}.${extension}`;
     const target = await this.driver.createUploadTarget(key, contentType);
     return { ...target, key };
   }

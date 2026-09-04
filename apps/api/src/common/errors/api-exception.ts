@@ -1296,3 +1296,63 @@ export class InvalidPetLifecycleTransitionException extends ApiException {
     super("INVALID_PET_LIFECYCLE_TRANSITION", "This lifecycle transition is not valid for the pet's current status.", HttpStatus.CONFLICT, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Handoff 19: Travel + Insurance + Pet-Friendly Places
+// ---------------------------------------------------------------------------
+
+export class TripNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRIP_NOT_FOUND", "Trip not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidTripTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_TRIP_TRANSITION", "This action is not valid for the trip's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TravelRequirementNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_REQUIREMENT_NOT_FOUND", "Requirement not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown when a TravelRequirement is linked to a MedicalDocument that does not belong to the same pet as the trip — never trust a client-supplied documentId across pets. */
+export class TravelRequirementDocumentMismatchException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_REQUIREMENT_DOCUMENT_MISMATCH", "This document does not belong to the trip's pet.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class InsuranceProviderNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INSURANCE_PROVIDER_NOT_FOUND", "Insurance provider not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InsuranceProductNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INSURANCE_PRODUCT_NOT_FOUND", "Insurance product not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InsuranceApplicationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INSURANCE_APPLICATION_NOT_FOUND", "Insurance application not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown by InsuranceApplicationService when a requested transition isn't in the explicit state table — never a real underwriting decision (spec: "do not simulate underwriting approval"). */
+export class InvalidInsuranceApplicationTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_INSURANCE_APPLICATION_TRANSITION", "This action is not valid for the application's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class PetFriendlyPlaceNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PET_FRIENDLY_PLACE_NOT_FOUND", "Place not found.", HttpStatus.NOT_FOUND, details);
+  }
+}

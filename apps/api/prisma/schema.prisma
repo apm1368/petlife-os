@@ -1,10 +1,18 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
+/// Handoff 19: `extensions = [postgis]` only declares the extension to Prisma's
+/// introspection/migration tooling — it does not itself run `CREATE EXTENSION`.
+/// The Handoff 19 migration does that explicitly (`CREATE EXTENSION IF NOT
+/// EXISTS postgis;`), and docker-compose's postgres image was swapped to
+/// `postgis/postgis` so the extension is actually installable in every
+/// environment that runs this compose file.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
 }
 
 // ---------------------------------------------------------------------------
@@ -1119,6 +1127,9 @@ model Household {
   lostPetIncidents LostPetIncident[]
   memories         PetMemory[]
 
+  trips                 Trip[]
+  insuranceApplications InsuranceApplication[]
+
   @@map("households")
 }
 
@@ -1229,6 +1240,9 @@ model Pet {
   lostPetIncidents     LostPetIncident[]
   memories             PetMemory[]
   communityPosts       CommunityPost[]
+
+  trips                 Trip[]
+  insuranceApplications InsuranceApplication[]
 
   @@index([householdId])
   @@map("pets")
@@ -3680,6 +3694,13 @@ enum NotificationCategory {
   LOST_PET
   ANIMAL_SUPPORT
   COMMUNITY
+  /// Handoff 19 — trip readiness/document notifications. Deliberately not
+  /// spammy: only submission/status-change events, never every requirement
+  /// edit (spec: "do not over-notify").
+  TRAVEL
+  /// Handoff 19 — insurance application status changes only; no comparison
+  /// or eligibility-check spam.
+  INSURANCE
 }
 
 enum NotificationPriority {
@@ -5238,6 +5259,12 @@ enum MedicalDocumentType {
   DENTAL_RECORD
   NUTRITION_PLAN
   REHAB_PLAN
+  /// Handoff 19: health certificate, import/export permit, passport, or any
+  /// other travel-specific document — reuses the existing private
+  /// MedicalDocument store/upload/download flow rather than a parallel one
+  /// (spec: "do not upload the same document into a parallel store").
+  /// TravelRequirement.linkedMedicalDocumentId points at rows of this type.
+  TRAVEL_DOCUMENT
   OTHER
 }
 
@@ -5441,6 +5468,11 @@ model MedicalDocument {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  /// Handoff 19: a travel requirement (e.g. TRAVEL_DOCUMENT-typed health
+  /// certificate/import permit) links back to the existing document row
+  /// rather than a parallel travel-document store.
+  travelRequirements TravelRequirement[]
 
   @@index([petId])
   @@index([householdId])
@@ -6570,4 +6602,368 @@ model PetMemory {
   @@index([petId])
   @@index([householdId])
   @@map("pet_memories")
+}
+
+// ---------------------------------------------------------------------------
+// Handoff 19 — Travel + Insurance + Pet-Friendly Places.
+//
+// Travel: Trip is the first-class entity; TravelRequirement is a real,
+// per-trip checklist row (never collapsed into a single "ready" boolean) —
+// spec's locked rule: "never present uncertain travel/import/legal
+// requirements as guaranteed facts... every requirement must retain source,
+// jurisdiction, last verified date, confidence/status." Requirement
+// TEMPLATES (which requirement types typically apply for a destination) are
+// deliberately NOT a database table — they are a small, extensible,
+// backend-code catalog (travel-requirement-catalog.ts), the same
+// code-defined-not-DB-editable convention CountryConfig and
+// NotificationTemplates already established — the spec's "do not hardcode
+// travel rules into frontend components" is satisfied by the frontend never
+// holding this catalog at all, only ever reading real TravelRequirement rows
+// through the API.
+//
+// Insurance: InsuranceProvider/InsuranceProduct are public discovery/
+// comparison data; InsuranceApplication is a lightweight
+// application/lead — no underwriting engine, no real approval logic (spec:
+// "if there is no real insurer integration, do not simulate underwriting
+// approval" — APPROVED/DECLINED exist in the enum for a future real
+// integration to set, but no code path in this handoff ever sets them).
+//
+// Pet-Friendly Places: PostGIS-backed geo search. `location` is an
+// Unsupported geography column Prisma cannot type natively — every write
+// keeps latitude/longitude (plain, queryable via Prisma) as the source of
+// truth and syncs `location` via raw SQL in the same statement; every
+// proximity read goes through raw SQL (ST_DWithin/ST_Distance), never a
+// bounding-box approximation over latitude/longitude alone.
+// ---------------------------------------------------------------------------
+
+enum TripStatus {
+  DRAFT
+  PLANNING
+  READY
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TravelMode {
+  AIR
+  ROAD
+  RAIL
+  SEA
+  OTHER
+}
+
+model Trip {
+  id              String    @id @default(uuid()) @db.Uuid
+  householdId     String    @db.Uuid
+  household       Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId           String    @db.Uuid
+  pet             Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  /// Plain UUID, no FK — same actor-reference convention as
+  /// LostPetIncident.createdByUserId.
+  createdByUserId String    @db.Uuid
+
+  originCountry      String
+  originCity         String?
+  destinationCountry String
+  destinationCity    String?
+
+  departAt DateTime
+  returnAt DateTime?
+
+  travelMode TravelMode @default(OTHER)
+  /// Never inferred from a single field (e.g. "all requirements READY") —
+  /// always an explicit household action via TripService.transition(),
+  /// mirroring PetLifecycleService's own single-writer-gate convention.
+  status     TripStatus @default(DRAFT)
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requirements TravelRequirement[]
+
+  @@index([householdId])
+  @@index([petId])
+  @@map("trips")
+}
+
+enum TravelRequirementType {
+  VACCINATION
+  RABIES
+  MICROCHIP
+  HEALTH_CERTIFICATE
+  IMPORT_PERMIT
+  EXPORT_PERMIT
+  CARRIER
+  AIRLINE_POLICY
+  MEDICATION
+  QUARANTINE
+  PARASITE_TREATMENT
+  PASSPORT_DOCUMENT
+  OTHER
+}
+
+/// UNKNOWN is the safe default and a real, distinct state — never
+/// silently promoted to READY by absence of information (spec's locked
+/// rule). INCOMPLETE means work has started (e.g. a document was linked)
+/// but the requirement isn't satisfied yet.
+enum TravelRequirementStatus {
+  UNKNOWN
+  REQUIRED
+  NOT_REQUIRED
+  INCOMPLETE
+  READY
+}
+
+model TravelRequirement {
+  id     String @id @default(uuid()) @db.Uuid
+  tripId String @db.Uuid
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Restrict)
+
+  requirementType TravelRequirementType
+  status          TravelRequirementStatus @default(UNKNOWN)
+
+  /// Human-readable provenance — e.g. "Destination country embassy website",
+  /// "Airline pet policy page". Spec: "every requirement must retain source."
+  source       String?
+  sourceUrl    String?
+  jurisdiction String?
+
+  /// When this requirement's information was last confirmed correct — never
+  /// updated automatically; a stale verifiedAt (see
+  /// TravelRequirementService's own staleness threshold) is surfaced to the
+  /// UI rather than hidden (spec: "do not hide stale data").
+  verifiedAt DateTime?
+  validUntil DateTime?
+
+  /// Reuses the existing private MedicalDocument store — never a parallel
+  /// upload path (spec: "do not upload the same document into a parallel
+  /// store"). Set only after the document already exists via the existing
+  /// H17 upload/create endpoints.
+  linkedMedicalDocumentId String?          @db.Uuid
+  linkedMedicalDocument   MedicalDocument? @relation(fields: [linkedMedicalDocumentId], references: [id], onDelete: SetNull)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tripId])
+  @@map("travel_requirements")
+}
+
+enum InsuranceVerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  SUSPENDED
+}
+
+model InsuranceProvider {
+  id               String                       @id @default(uuid()) @db.Uuid
+  name             String
+  description      String?
+  logoObjectKey    String?
+  country          String
+  status           InsuranceVerificationStatus  @default(UNVERIFIED)
+  contactEmail     String?
+  contactPhone     String?
+  websiteUrl       String?
+  isPubliclyListed Boolean                      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products InsuranceProduct[]
+
+  @@index([country])
+  @@map("insurance_providers")
+}
+
+enum InsuranceCoverageType {
+  ACCIDENT
+  ILLNESS
+  SURGERY
+  DIAGNOSTICS
+  MEDICATION
+  DENTAL
+  PREVENTIVE
+  HOSPITALIZATION
+  EMERGENCY
+  OTHER
+}
+
+/// Fields here are deliberately not over-normalized (spec: "do not
+/// over-normalize if product terms vary substantially") — coverageTypes/
+/// exclusions are the structured part; coverageSummary/termsSource carry
+/// whatever a product's real terms need in free text.
+model InsuranceProduct {
+  id         String            @id @default(uuid()) @db.Uuid
+  providerId String            @db.Uuid
+  provider   InsuranceProvider @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  name    String
+  country String
+
+  speciesEligibility PetSpecies[]
+  minAgeMonths       Int?
+  maxAgeMonths       Int?
+
+  coverageTypes   InsuranceCoverageType[]
+  coverageSummary String
+
+  waitingPeriodDays   Int?
+  deductibleAmountIrr Int?
+  annualLimitIrr      Int?
+  coinsurancePercent  Int?
+  premiumMinIrr       Int?
+  premiumMaxIrr       Int?
+
+  /// Spec hard UX rule: exclusions must be highly visible, never buried below
+  /// benefits. Kept as a first-class array (not folded into coverageSummary)
+  /// specifically so the frontend cannot render benefits without also having
+  /// this data in hand.
+  exclusions String[] @default([])
+
+  termsSource String?
+  termsUrl    String?
+
+  status           InsuranceVerificationStatus @default(UNVERIFIED)
+  isPubliclyListed Boolean                     @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications InsuranceApplication[]
+
+  @@index([providerId])
+  @@index([country])
+  @@map("insurance_products")
+}
+
+/// POSSIBLY_ELIGIBLE is never treated as guaranteed (spec's locked rule) —
+/// EligibilityService only ever returns ELIGIBLE when every structured
+/// criterion (species/age) is satisfied; anything it cannot fully evaluate
+/// resolves to POSSIBLY_ELIGIBLE or UNKNOWN, never ELIGIBLE.
+enum InsuranceEligibilityStatus {
+  ELIGIBLE
+  POSSIBLY_ELIGIBLE
+  NOT_ELIGIBLE
+  UNKNOWN
+}
+
+/// APPROVED/DECLINED exist for a future real insurer integration to set —
+/// no service in this handoff ever transitions an application into either
+/// state (spec: "do not simulate underwriting approval").
+enum InsuranceApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  DECLINED
+  CANCELLED
+}
+
+model InsuranceApplication {
+  id          String            @id @default(uuid()) @db.Uuid
+  productId   String            @db.Uuid
+  product     InsuranceProduct  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  householdId String            @db.Uuid
+  household   Household         @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId       String            @db.Uuid
+  pet         Pet               @relation(fields: [petId], references: [id], onDelete: Restrict)
+  /// Plain UUID, no FK — same actor-reference convention as Trip.createdByUserId.
+  applicantUserId String        @db.Uuid
+
+  status            InsuranceApplicationStatus @default(DRAFT)
+  /// A snapshot of EligibilityService's own live computation at submission
+  /// time — never silently recomputed later, so a past application's record
+  /// of what it was told stays stable even if product criteria change.
+  eligibilityStatus InsuranceEligibilityStatus @default(UNKNOWN)
+
+  notes       String?
+  submittedAt DateTime?
+  decidedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([householdId])
+  @@index([petId])
+  @@map("insurance_applications")
+}
+
+enum PetFriendlyPlaceCategory {
+  PARK
+  CAFE
+  RESTAURANT
+  HOTEL
+  STORE
+  BEACH
+  VENUE
+  SERVICE
+  OTHER
+}
+
+enum PetFriendlyPlaceStatus {
+  UNVERIFIED
+  VERIFIED
+  SUSPENDED
+}
+
+model PetFriendlyPlace {
+  id          String                   @id @default(uuid()) @db.Uuid
+  name        String
+  category    PetFriendlyPlaceCategory
+  description String?
+
+  country String
+  city    String
+  address String?
+
+  latitude  Float
+  longitude Float
+  /// PostGIS geography point — see the domain-level doc comment above this
+  /// section. Unsupported because Prisma has no native geography type;
+  /// PetFriendlyPlaceService is the only writer, always in the same
+  /// statement as latitude/longitude.
+  location Unsupported("geography(Point, 4326)")?
+
+  speciesAllowed   PetSpecies[]
+  sizeRestrictions String?
+  indoorAllowed    Boolean @default(true)
+  outdoorAllowed   Boolean @default(true)
+  petPolicy        String?
+
+  imageObjectKeys String[] @default([])
+
+  verificationSource String?
+  verifiedAt         DateTime?
+  status             PetFriendlyPlaceStatus @default(UNVERIFIED)
+  isPubliclyListed   Boolean                @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites PetFriendlyPlaceFavorite[]
+
+  @@index([country, city])
+  @@index([category])
+  @@map("pet_friendly_places")
+}
+
+model PetFriendlyPlaceFavorite {
+  id      String           @id @default(uuid()) @db.Uuid
+  placeId String           @db.Uuid
+  place   PetFriendlyPlace @relation(fields: [placeId], references: [id], onDelete: Restrict)
+  /// Plain UUID, no FK — same actor-reference convention as
+  /// CommunityReaction.userId.
+  userId  String           @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  @@unique([placeId, userId])
+  @@index([userId])
+  @@map("pet_friendly_place_favorites")
 }

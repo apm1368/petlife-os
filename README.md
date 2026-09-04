@@ -4436,6 +4436,116 @@ INVALID_PET_LIFECYCLE_TRANSITION                 409  e.g. MEMORIAL -> ACTIVE is
 - **Community post creation supports a single optional `petId` link, not a rich pet-tagging UI** — the frontend's create-post form does not yet expose pet selection.
 - **A global animal-support/community/blog navigation entry was not added** — this codebase has never had a persistent nav bar (navigation is driven by Home's ranked actions and direct links, the same pattern Handoff 15's Blog already followed); Lost Pet and Memories are discoverable from Pet Profile, and Animal Support/Community are discoverable the same way Blog already is — via a direct link, not a nav item.
 
+## Travel + Insurance + Pet-Friendly Places (Handoff 19)
+
+Every surface in this handoff shares one governing principle: **never present an uncertain travel/import/legal requirement, insurance eligibility, or verification status as a guaranteed fact.** Every status field that could be wrong (`TravelRequirementStatus`, `InsuranceEligibilityStatus`, `PetFriendlyPlaceStatus.VERIFIED`/`UNVERIFIED`) carries its own source, and the UI renders the actual enum value rather than collapsing it into a friendlier-sounding but overclaiming label.
+
+### Travel
+
+- `Trip` is a first-class entity with an explicit state machine — `DRAFT -> PLANNING -> READY -> IN_PROGRESS -> COMPLETED`, with `CANCELLED` reachable from any non-terminal state — enforced server-side by `TripService.ALLOWED_TRIP_TRANSITIONS`. Readiness is never inferred from a single field (e.g. "has a destination" does not imply `READY`); only an explicit `transition()` call can move a trip to `READY`, and the frontend never auto-advances it either.
+- `TravelRequirement` rows (one per pet per trip, typed by `TravelRequirementType` — vaccination, microchip, health certificate, import permit, quarantine, other) carry `status` (`UNKNOWN | REQUIRED | NOT_REQUIRED | INCOMPLETE | READY`), plus `source`, `jurisdiction`, `verifiedAt`, and `validUntil`. `verifiedAt` can only be set by the server when a caller explicitly marks a requirement verified — it is never defaulted or backfilled.
+- Suggested requirement types come from a code-defined catalog (`travel-requirement-templates.ts`, keyed by destination country, Iran-first with a generic default) — never hardcoded into the frontend. It only *suggests* which requirement types to add; it never asserts a status.
+- Staleness is computed, not stored: `isTravelRequirementStale()` (`travel-staleness.util.ts`) flags a requirement as stale if it has never been verified, was verified more than 180 days ago, or is past its own `validUntil` — surfaced to the user as a visible warning rather than silently treated as still valid.
+- Travel documents reuse the existing Handoff 17 `MedicalDocument` store (a new `TRAVEL_DOCUMENT` medical-document type was added, not a parallel document table) — a requirement links to a document by `medicalDocumentId`, and the link is rejected if the document belongs to a different pet or has been voided.
+- **Pet Passport Readiness** (`PetPassportReadinessService`) is a pure read-side aggregation over existing data (microchip number, latest H16 vaccination summary, H17 health documents, travel documents) — it duplicates none of it, and only computes a `missingItems` list of code tokens for the frontend to localize and render.
+
+### Insurance
+
+- This is **discovery and comparison only** — there is no underwriting engine, no premium billing, and no simulated approve/decline decision. `InsuranceProvider`/`InsuranceProduct` are admin-managed catalog data; only a `VERIFIED` + publicly-listed product is ever visible to the public browse/compare endpoints.
+- Every product's `exclusions: string[]` is a required field and is rendered in its own highlighted block immediately below the product header, before any benefit/coverage details — never buried at the bottom of the page.
+- `EligibilityService.evaluate()` returns `ELIGIBLE | POSSIBLY_ELIGIBLE | NOT_ELIGIBLE | UNKNOWN`, structurally incapable of returning `ELIGIBLE` when a criterion (e.g. the pet's age) is unknown — an unknown age against a product with age bounds always yields `POSSIBLY_ELIGIBLE`, never `ELIGIBLE`. The frontend renders `POSSIBLY_ELIGIBLE` with its own distinct, non-committal label.
+- `InsuranceApplication` is a lightweight lead/interest record with its own small state machine (`DRAFT -> SUBMITTED -> UNDER_REVIEW`, `CANCELLED` reachable from any non-terminal state) — `APPROVED`/`DECLINED` exist in the schema as future-facing states an insurer could set out of band, but nothing in this handoff's code ever transitions an application into them; there is no simulated underwriting decision anywhere in the codebase.
+
+### Pet-Friendly Places
+
+- `PetFriendlyPlace` uses a real PostGIS `geography(Point, 4326)` column (via Prisma's `Unsupported("geography(Point, 4326)")`, written and read through raw SQL) kept in sync with plain queryable `latitude`/`longitude` columns. Nearby search uses `ST_DWithin`/`ST_Distance` against that column, with city/category filters and `distanceMeters` returned per result — not an approximated bounding-box search.
+- Only `VERIFIED` + publicly-listed places appear in public browse/nearby results; an unverified place is never presented as confirmed — both API and frontend surface the raw `status` value with a visible "not yet verified" warning rather than omitting it or softening it.
+- Favoriting a place requires authentication, but browsing, nearby search, and place detail are fully anonymous, per the Handoff 11 public/private split; the public detail endpoint is personalized with `isFavorited` only when a session happens to be present (`OptionalSessionAuthGuard`), the same "no guard by design" pattern `CommunityController` already uses.
+
+### Support + notifications reuse existing mechanisms, never a parallel one
+
+- `SupportCaseService`'s existing generic `relatedEntityType` mechanism was extended with `TRIP` and `INSURANCE_APPLICATION` — ownership is checked against the trip's creator/pet access or the application's pet access before a support case can link to it, and `getContext()` returns a short, non-sensitive summary (destination + status for a trip; provider + product + status for an application) for support-agent context, the same shape every other linkable entity type already returns.
+- Two new `NotificationCategory` values (`TRAVEL`, `INSURANCE`) were added and used sparingly, per the spec's explicit "do not over-notify" instruction: an insurance application only notifies the household on submission and on status change — there is no trip-readiness reminder, no document-expiry reminder, and no periodic nudge of any kind in this handoff.
+
+### Frontend
+
+- New pet-scoped routes: `/pets/[id]/travel` (hub, new trip, trip detail, passport readiness) and `/pets/[id]/insurance` (applications for that pet). New public routes: `/insurance`, `/insurance/[productId]`, `/insurance/compare`, `/places`, `/places/[placeId]`, and the auth-only `/places/favorites`.
+- `PetProfileView` gained a Travel teaser and an Insurance teaser alongside the existing Memories/Lost Pet teasers (both hidden for a memorialized pet, matching the existing gating pattern).
+- No global nav entry was added for Travel/Insurance/Places, consistent with Handoff 18's explicit precedent above — these are discoverable from Pet Profile and via direct links.
+
+### API endpoints (Handoff 19 additions)
+
+```
+POST   /pets/:petId/trips
+GET    /pets/:petId/trips
+GET    /pets/:petId/trips/:tripId
+PATCH  /pets/:petId/trips/:tripId
+POST   /pets/:petId/trips/:tripId/transition
+GET    /pets/:petId/trips/passport-readiness
+GET    /pets/:petId/trips/:tripId/requirement-suggestions
+GET    /pets/:petId/trips/:tripId/readiness
+POST   /pets/:petId/trips/:tripId/requirements
+GET    /pets/:petId/trips/:tripId/requirements
+PATCH  /pets/:petId/trips/:tripId/requirements/:requirementId
+DELETE /pets/:petId/trips/:tripId/requirements/:requirementId
+
+GET    /insurance/providers
+GET    /insurance/providers/:providerId
+GET    /insurance/products
+GET    /insurance/products/compare
+GET    /insurance/products/:productId
+GET    /pets/:petId/insurance-applications
+GET    /pets/:petId/insurance-applications/eligibility/:productId
+POST   /pets/:petId/insurance-applications
+PATCH  /pets/:petId/insurance-applications/:applicationId
+POST   /pets/:petId/insurance-applications/:applicationId/submit
+POST   /pets/:petId/insurance-applications/:applicationId/cancel
+
+GET    /places
+GET    /places/nearby
+GET    /places/:placeId
+GET    /places/favorites
+POST   /places/favorites
+DELETE /places/favorites/:placeId
+
+POST   /admin/insurance/providers
+PATCH  /admin/insurance/providers/:providerId
+POST   /admin/insurance/providers/:providerId/verification
+POST   /admin/insurance/providers/:providerId/listed
+POST   /admin/insurance/products
+PATCH  /admin/insurance/products/:productId
+POST   /admin/insurance/products/:productId/verification
+POST   /admin/insurance/products/:productId/listed
+POST   /admin/places
+PATCH  /admin/places/:placeId
+POST   /admin/places/:placeId/verification
+POST   /admin/places/:placeId/listed
+```
+
+### Error codes (Handoff 19 additions)
+
+```
+TRIP_NOT_FOUND                                   404
+INVALID_TRIP_TRANSITION                          409  e.g. COMPLETED -> PLANNING is not a modeled transition
+TRAVEL_REQUIREMENT_NOT_FOUND                     404
+TRAVEL_REQUIREMENT_DOCUMENT_MISMATCH             409  linked document belongs to a different pet or has been voided
+INSURANCE_PROVIDER_NOT_FOUND                     404
+INSURANCE_PRODUCT_NOT_FOUND                      404
+INSURANCE_APPLICATION_NOT_FOUND                  404
+INVALID_INSURANCE_APPLICATION_TRANSITION         409  e.g. CANCELLED -> SUBMITTED is not a modeled transition
+PET_FRIENDLY_PLACE_NOT_FOUND                     404
+```
+
+### Known limitations / deliberate simplifications (Handoff 19)
+
+- **No trip-readiness or document-expiry notifications** — per the spec's "do not over-notify" instruction, only insurance application submission and status changes notify the household; nothing proactively reminds a user that a trip isn't ready or that a travel document is about to go stale.
+- **No entitlement gating was added** — trips, travel requirements, insurance applications, and place favorites have no metered limit in this handoff, following the same "audit, don't add speculative gating" resolution as Handoff 18.
+- **No CMS integration for travel-requirement content** — the destination-country requirement catalog is a code-defined TypeScript file (`travel-requirement-templates.ts`), not an admin-editable CMS collection.
+- **Relocation is schema-supported but has no dedicated UI** — `TravelRequirementType` and `Trip` do not special-case "one-way relocation" vs. "round-trip travel"; a relocation is simply a trip whose requirements happen to include the relevant import/quarantine types.
+- **No booking, broker, or government-registry integration** — Travel never books flights/hotels, Insurance never talks to a real insurer's API, and no travel document is ever submitted to or verified against an actual customs/import authority. All "verification" in this handoff is a human (pet owner or admin) asserting a status, with a recorded source.
+- **No real insurer integration, underwriting, or premium billing/autopay** — `InsuranceApplication` is a lead-capture record only; nothing here charges a card, issues a policy, or makes a coverage decision.
+- **No AI-generated travel advice or eligibility prediction** — all suggested requirement types and eligibility statuses come from the deterministic, code-defined logic described above, never from a model inferring what a country "probably" requires.
+
 ## API endpoints
 
 ```
@@ -5856,6 +5966,58 @@ donate flow's login-gating and ledger-derived progress display, Community's
 reaction/comment login-gating, and Memorial mode's respectful heading
 switch on `MemoriesListView`).
 
+Everything in the Handoff 19 acceptance criteria: a first-class `Trip`
+state machine (`DRAFT -> PLANNING -> READY -> IN_PROGRESS -> COMPLETED`,
+`CANCELLED` from any non-terminal state) that never infers readiness from
+a single field; `TravelRequirement` rows carrying `status`/`source`/
+`jurisdiction`/`verifiedAt`/`validUntil` with computed (never stored)
+staleness; a code-defined, destination-keyed requirement-suggestion
+catalog; travel documents reusing the existing Handoff 17
+`MedicalDocument` store via a new `TRAVEL_DOCUMENT` type rather than a
+parallel one, rejecting a link to a document that belongs to another pet
+or has been voided; a pure read-side Pet Passport Readiness aggregation
+that duplicates none of the underlying microchip/vaccination/document
+data; an Insurance discovery/comparison surface (never an underwriting
+engine) where every product's `exclusions` render in their own
+highlighted block before any benefit copy, `EligibilityService` that is
+structurally incapable of returning `ELIGIBLE` for an unknown criterion,
+and a lead-only `InsuranceApplication` state machine that never reaches a
+simulated `APPROVED`/`DECLINED` decision; a `PetFriendlyPlace` directory
+backed by a real PostGIS `geography(Point, 4326)` column for `ST_DWithin`/
+`ST_Distance` nearby search, with only `VERIFIED` + publicly-listed
+places ever visible publicly and an unverified one always surfaced with
+its real status rather than hidden or softened; full anonymous browsing
+for travel-requirement info, insurance discovery/comparison, and place
+search per the Handoff 11 public/private split, with saved trips,
+readiness, applications, and favorites gated behind auth; `SupportCaseService`'s
+existing `relatedEntityType` mechanism extended with `TRIP`/
+`INSURANCE_APPLICATION` rather than a parallel linkage model; two new
+`NotificationCategory` values (`TRAVEL`, `INSURANCE`) used sparingly
+(submission/status-change only, no reminders); and a real,
+would-have-shipped-broken gap found and fixed during this handoff's own
+build: `@petlife/types`' `MedicalDocumentType` enum was missing the
+`TRAVEL_DOCUMENT` member the backend Prisma schema already had, which
+would have made every travel-document link a silent frontend type error
+— fixed by adding the member and rebuilding the shared package. A second
+environment-level gap was found and fixed while writing this handoff's
+own e2e tests: the isolated e2e test database's self-healing default FREE
+plan (`SubscriptionPlanReadService.getFreePlanRaw()`) only seeds
+`pets.max`/`household.members.max`, not `health.documents.max` — meaning
+*any* health-document upload (including Handoff 17's own, pre-existing
+tests) would fail with a false `SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED`
+until the full demo catalog (`prisma/seed.ts`) was applied to that
+database; this is an environment/seeding gap, not a product-code bug, and
+needed no application code change. Every Handoff 01-18 backend/frontend
+test remains green (310 backend e2e scenarios — 1 pre-existing, unrelated
+Commerce Core webhook-timing flake confirmed to pass in isolation, 12 new
+for this handoff covering trip transitions/readiness/staleness, H17
+document reuse and cross-pet rejection, insurance visibility/comparison/
+eligibility/application, place nearby search, support linkage, and
+cross-household isolation — and 307 frontend tests, up from 287, covering
+the Travel hub/trip-detail flows, Insurance's exclusions-always-visible
+list and application status rendering, and Places' public browsing/
+favoriting/sign-in-prompt behavior).
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -6611,6 +6773,24 @@ switch on `MemoriesListView`).
 - **No global Animal Support/Community navigation entry** (Handoff 18) —
   this codebase has never had a persistent nav bar; both are discoverable
   via a direct link, the same way Handoff 15's Blog already is.
+- **No trip-readiness or travel-document-expiry notifications** (Handoff
+  19) — per the spec's "do not over-notify" instruction, only insurance
+  application submission and status changes notify the household; a trip
+  stuck in `PLANNING` or a travel document past its `validUntil` never
+  proactively nudges anyone.
+- **No real insurer, booking, broker, or government-registry integration**
+  (Handoff 19) — `InsuranceApplication` is a lead-capture record only (no
+  underwriting, no premium billing/autopay), Travel never books
+  flights/hotels, and no travel document is ever submitted to or verified
+  against a real customs/import authority; every "verification" in this
+  handoff is a human asserting a status with a recorded source.
+- **Destination travel-requirement catalog is code-defined, not
+  CMS-editable** (Handoff 19) — `travel-requirement-templates.ts` is a
+  plain TypeScript map, not wired into the Handoff 15 CMS, so adding a new
+  country's suggested requirements today means a code change.
+- **No global Travel/Insurance/Places navigation entry** (Handoff 19) —
+  consistent with every prior handoff's nav precedent above; both are
+  discoverable from Pet Profile teasers and via direct links.
 
 ## Next recommended coding handoff
 
@@ -6840,3 +7020,38 @@ pet death/memorial transitions an explicit household action through
 `PetLifecycleService.transition()` — never inferred automatically from
 health, booking, or any other data, no matter how small the future change
 looks.
+
+Alternatively, following directly from Handoff 19: **trip-readiness and
+travel-document-expiry notifications**, the natural next increment now
+that `Trip`, `TravelRequirement`, and `PetPassportReadinessService` all
+exist with a well-defined "never guaranteed" status model. A new
+`NotificationOrchestratorService` template (using the `TRAVEL` category
+already added this handoff) could remind a household when a trip is
+still `DRAFT`/`PLANNING` as its `departAt` approaches, or when a
+`TravelRequirement.validUntil` is about to lapse — both are pure reads
+over existing data, no new schema needed, and should stay opt-in/low
+-frequency per the same "do not over-notify" instruction this handoff
+followed. A related, independent option: wiring the destination
+travel-requirement catalog (`travel-requirement-templates.ts`) into the
+Handoff 15 CMS as an admin-editable collection, so adding a new
+destination country's suggested requirements no longer requires a code
+change — `getSuggestedRequirementTypes()`'s call sites would not need to
+change, only its data source. A third, independent option: a real payout
+-free insurer integration boundary (an `InsuranceProviderAdapter`
+interface analogous to Handoff 07's `PaymentGateway`/Handoff 08's
+`ShippingGateway`) so a future handoff could submit an
+`InsuranceApplication` to a real insurer's intake API without touching
+`InsuranceApplicationService`'s state machine — today `submit()`
+deliberately stops at `SUBMITTED`/`UNDER_REVIEW` with no outbound call at
+all.
+
+Whichever is chosen, keep every travel/import requirement's `status`
+rendered as its real enum value rather than a friendlier-sounding
+summary, keep `EligibilityService.evaluate()` returning
+`POSSIBLY_ELIGIBLE` (never `ELIGIBLE`) whenever a criterion is unknown,
+keep travel documents flowing through the existing Handoff 17
+`MedicalDocumentService` (never a second document store), and keep
+`PetFriendlyPlace` verification and Insurance provider/product
+verification flowing through the same admin `VERIFIED`/publicly-listed
+gate — never a second, independently-computed "is this trustworthy" flag
+— no matter how small the future change looks.

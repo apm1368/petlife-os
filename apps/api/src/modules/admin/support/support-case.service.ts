@@ -34,7 +34,7 @@ export interface ListSupportCasesFilter {
 }
 
 /** Only entity kinds a consumer can currently link their own case to — the two contextual entry points the spec requires (Order Detail, Booking Detail). */
-export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING", "LOST_PET_INCIDENT"] as const;
+export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING", "LOST_PET_INCIDENT", "TRIP", "INSURANCE_APPLICATION"] as const;
 export type UserLinkableRelatedEntityType = (typeof USER_LINKABLE_RELATED_ENTITY_TYPES)[number];
 
 export interface CreateSupportCaseAsUserInput {
@@ -173,6 +173,20 @@ export class SupportCaseService {
       // Handoff 18 — a coarse reference only (status), never sighting contact detail or private notes.
       const incident = await this.prisma.lostPetIncident.findUnique({ where: { id: supportCase.relatedEntityId } });
       if (incident) relatedEntity = { type: "LOST_PET_INCIDENT", id: incident.id, summary: `Lost pet incident — ${incident.status}` };
+    } else if (supportCase.relatedEntityType === "TRIP" && supportCase.relatedEntityId) {
+      // Handoff 19 — destination/status/travel dates only, never the requirements checklist or linked document contents (spec: "must not expose unrelated health details").
+      const trip = await this.prisma.trip.findUnique({ where: { id: supportCase.relatedEntityId } });
+      if (trip) relatedEntity = { type: "TRIP", id: trip.id, summary: `Trip to ${trip.destinationCountry} — ${trip.status} — departs ${trip.departAt.toISOString()}` };
+    } else if (supportCase.relatedEntityType === "INSURANCE_APPLICATION" && supportCase.relatedEntityId) {
+      // Handoff 19 — product/provider/status only, never eligibility reasons or terms detail.
+      const application = await this.prisma.insuranceApplication.findUnique({ where: { id: supportCase.relatedEntityId }, include: { product: { include: { provider: true } } } });
+      if (application) {
+        relatedEntity = {
+          type: "INSURANCE_APPLICATION",
+          id: application.id,
+          summary: `${application.product.provider.name} — ${application.product.name} — ${application.status}`,
+        };
+      }
     } else if (supportCase.relatedEntityType && supportCase.relatedEntityId) {
       relatedEntity = { type: supportCase.relatedEntityType, id: supportCase.relatedEntityId, summary: supportCase.relatedEntityId };
     }
@@ -393,6 +407,16 @@ export class SupportCaseService {
         const incident = await this.prisma.lostPetIncident.findUnique({ where: { id: input.relatedEntityId } });
         if (!incident) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
         const owns = incident.createdByUserId === userId || (await this.petAccess.hasActiveAccess(incident.petId, userId));
+        if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+      } else if (input.relatedEntityType === "TRIP") {
+        const trip = await this.prisma.trip.findUnique({ where: { id: input.relatedEntityId } });
+        if (!trip) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+        const owns = trip.createdByUserId === userId || (await this.petAccess.hasActiveAccess(trip.petId, userId));
+        if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+      } else if (input.relatedEntityType === "INSURANCE_APPLICATION") {
+        const application = await this.prisma.insuranceApplication.findUnique({ where: { id: input.relatedEntityId } });
+        if (!application) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+        const owns = application.applicantUserId === userId || (await this.petAccess.hasActiveAccess(application.petId, userId));
         if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
       } else {
         throw new SupportCaseInvalidReferenceException({ field: "relatedEntityType" });

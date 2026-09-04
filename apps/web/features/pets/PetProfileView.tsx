@@ -180,6 +180,24 @@ export function PetProfileView({ petId }: { petId: string }) {
         </ContextSurface>
       ) : null}
 
+      {!isMemorial ? (
+        <ContextSurface className="flex items-center justify-between">
+          <span className="text-body text-text-primary">{t("travelTeaser")}</span>
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/travel`)}>
+            {t("openTravel")}
+          </Button>
+        </ContextSurface>
+      ) : null}
+
+      {!isMemorial ? (
+        <ContextSurface className="flex items-center justify-between">
+          <span className="text-body text-text-primary">{t("insuranceTeaser")}</span>
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/insurance`)}>
+            {t("openInsurance")}
+          </Button>
+        </ContextSurface>
+      ) : null}
+
       {upcomingBooking && !isMemorial ? (
         <ContextSurface className="flex items-center justify-between">
           <div>

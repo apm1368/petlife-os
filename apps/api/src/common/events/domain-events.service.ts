@@ -220,6 +220,13 @@ export const DOMAIN_EVENT_TYPES = [
   "CommunityReportSubmitted",
   "CommunityContentModerated",
   "PetMemoryAdded",
+
+  // Handoff 19: Travel + Insurance + Pet-Friendly Places
+  "TripCreated",
+  "TripStatusChanged",
+  "TravelRequirementUpdated",
+  "InsuranceApplicationSubmitted",
+  "InsuranceApplicationStatusChanged",
 ] as const;
 
 /**

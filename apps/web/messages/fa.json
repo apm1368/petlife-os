@@ -282,7 +282,11 @@
       "memoriesTeaserMemorial": "جایی برای نگه‌داشتن لحظاتی که با هم داشتید",
       "openMemories": "باز کردن خاطرات",
       "lostPetTeaser": "گم شده یا پیدا شده؟",
-      "openLostPet": "گزارش گم‌شدن"
+      "openLostPet": "گزارش گم‌شدن",
+      "travelTeaser": "سفر و مکان‌های دوستدار حیوان خانگی",
+      "openTravel": "برنامه‌ریزی سفر",
+      "insuranceTeaser": "بیمه حیوان خانگی",
+      "openInsurance": "مشاهده طرح‌ها"
     }
   },
   "health": {
@@ -2628,6 +2632,237 @@
     "timeline": {
       "title": "خط زمانی زندگی",
       "empty": "هنوز چیزی برای نمایش وجود ندارد."
+    }
+  },
+  "travel": {
+    "status": {
+      "DRAFT": "پیش‌نویس",
+      "PLANNING": "در حال برنامه‌ریزی",
+      "READY": "آماده",
+      "IN_PROGRESS": "در حال سفر",
+      "COMPLETED": "تکمیل‌شده",
+      "CANCELLED": "لغوشده"
+    },
+    "transitions": {
+      "DRAFT": "بازگشت به پیش‌نویس",
+      "PLANNING": "شروع برنامه‌ریزی",
+      "READY": "علامت‌گذاری به‌عنوان آماده",
+      "IN_PROGRESS": "شروع سفر",
+      "COMPLETED": "علامت‌گذاری به‌عنوان تکمیل‌شده",
+      "CANCELLED": "لغو سفر"
+    },
+    "travelMode": {
+      "AIR": "هوایی",
+      "ROAD": "زمینی",
+      "RAIL": "ریلی",
+      "SEA": "دریایی",
+      "OTHER": "سایر"
+    },
+    "requirementType": {
+      "VACCINATION": "واکسیناسیون",
+      "RABIES": "واکسن هاری",
+      "MICROCHIP": "میکروچیپ",
+      "HEALTH_CERTIFICATE": "گواهی سلامت",
+      "IMPORT_PERMIT": "مجوز ورود",
+      "EXPORT_PERMIT": "مجوز خروج",
+      "CARRIER": "قفس حمل",
+      "AIRLINE_POLICY": "قوانین شرکت هواپیمایی",
+      "MEDICATION": "دارو",
+      "QUARANTINE": "قرنطینه",
+      "PARASITE_TREATMENT": "درمان انگل",
+      "PASSPORT_DOCUMENT": "مدرک پاسپورت",
+      "OTHER": "سایر"
+    },
+    "requirementStatus": {
+      "UNKNOWN": "نامشخص",
+      "REQUIRED": "لازم",
+      "NOT_REQUIRED": "لازم نیست",
+      "INCOMPLETE": "ناقص",
+      "READY": "آماده"
+    },
+    "vaccinationStatus": {
+      "UP_TO_DATE": "به‌روز",
+      "DUE_SOON": "نزدیک به موعد",
+      "OVERDUE": "عقب‌افتاده",
+      "UNKNOWN": "نامشخص",
+      "INCOMPLETE": "ناقص"
+    },
+    "hub": {
+      "title": "سفر",
+      "newTrip": "سفر جدید",
+      "passportReadinessLink": "آمادگی پاسپورت حیوان خانگی",
+      "placesLink": "یافتن مکان‌های دوستدار حیوان خانگی",
+      "insuranceLink": "مشاهده بیمه حیوان خانگی",
+      "empty": "هنوز سفری ثبت نشده. اولین سفر خود را برنامه‌ریزی کنید.",
+      "requirementsCount": "{count, plural, =0 {هنوز الزامی ثبت نشده} other {# الزام}}"
+    },
+    "newTrip": {
+      "title": "برنامه‌ریزی سفر جدید",
+      "subtitle": "با اطلاعات پایه شروع کنید — چک‌لیست آمادگی را بعداً تکمیل کنید.",
+      "originCountryLabel": "کشور مبدأ (کد ISO)",
+      "originCityLabel": "شهر مبدأ",
+      "destinationCountryLabel": "کشور مقصد (کد ISO)",
+      "destinationCityLabel": "شهر مقصد",
+      "departAtLabel": "تاریخ حرکت",
+      "returnAtLabel": "تاریخ بازگشت",
+      "travelModeLabel": "شیوه سفر",
+      "notesLabel": "یادداشت‌ها",
+      "submit": "ایجاد سفر"
+    },
+    "detail": {
+      "departAt": "حرکت در {date}",
+      "returnAt": "بازگشت در {date}",
+      "requirementsTitle": "چک‌لیست آمادگی",
+      "requirementsEmpty": "هنوز الزامی اضافه نشده است.",
+      "addRequirementTitle": "افزودن الزام",
+      "requirementTypeLabel": "نوع الزام",
+      "addRequirement": "افزودن",
+      "statusLabel": "وضعیت",
+      "markVerified": "علامت‌گذاری به‌عنوان تأییدشده",
+      "deleteRequirement": "حذف",
+      "linkDocumentLabel": "مدرک پیوست‌شده",
+      "linkDocumentNone": "هیچ‌کدام",
+      "source": "منبع: {source}",
+      "jurisdiction": "حوزه قضایی: {jurisdiction}",
+      "verifiedAt": "آخرین تأیید {date}",
+      "neverVerified": "هرگز تأیید نشده",
+      "linkedDocument": "مدرک پیوست‌شده: {title}"
+    },
+    "readiness": {
+      "summary": "{ready} از {total} الزام آماده است",
+      "allReady": "آماده سفر",
+      "notReady": "هنوز آماده نیست",
+      "stale": "قدیمی",
+      "staleWarning": "برخی الزامات اخیراً تأیید نشده‌اند — پیش از سفر بررسی کنید."
+    },
+    "passport": {
+      "title": "آمادگی پاسپورت {name}",
+      "microchip": "شماره میکروچیپ",
+      "missing": "ثبت نشده",
+      "vaccinationStatus": "وضعیت واکسیناسیون",
+      "healthDocumentsCount": "مدارک سلامت ثبت‌شده",
+      "travelDocumentsCount": "مدارک سفر ثبت‌شده",
+      "missingItemsTitle": "موارد باقی‌مانده",
+      "missingItem": {
+        "MICROCHIP_NUMBER": "شماره میکروچیپ ثبت نشده است",
+        "VACCINATION_STATUS": "وضعیت واکسیناسیون به‌روز نیست",
+        "HEALTH_DOCUMENTS": "هیچ مدرک سلامتی بارگذاری نشده",
+        "TRAVEL_DOCUMENTS": "هیچ مدرک سفری بارگذاری نشده"
+      }
+    }
+  },
+  "insurance": {
+    "verificationStatus": {
+      "UNVERIFIED": "تأییدنشده",
+      "VERIFIED": "تأییدشده",
+      "SUSPENDED": "معلق"
+    },
+    "coverageType": {
+      "ACCIDENT": "حادثه",
+      "ILLNESS": "بیماری",
+      "SURGERY": "جراحی",
+      "DIAGNOSTICS": "تشخیصی",
+      "MEDICATION": "دارو",
+      "DENTAL": "دندان‌پزشکی",
+      "PREVENTIVE": "پیشگیرانه",
+      "HOSPITALIZATION": "بستری",
+      "EMERGENCY": "اورژانس",
+      "OTHER": "سایر"
+    },
+    "eligibilityStatus": {
+      "ELIGIBLE": "واجد شرایط",
+      "POSSIBLY_ELIGIBLE": "احتمالاً واجد شرایط",
+      "NOT_ELIGIBLE": "فاقد شرایط",
+      "UNKNOWN": "نامشخص"
+    },
+    "applicationStatus": {
+      "DRAFT": "پیش‌نویس",
+      "SUBMITTED": "ارسال‌شده",
+      "UNDER_REVIEW": "در حال بررسی",
+      "APPROVED": "تأییدشده",
+      "DECLINED": "ردشده",
+      "CANCELLED": "لغوشده"
+    },
+    "list": {
+      "title": "بیمه حیوان خانگی",
+      "subtitle": "ارائه‌دهندگان و پوشش‌ها را مقایسه کنید — این ابزار کشف است، نه بیمه‌گر.",
+      "empty": "هیچ محصول بیمه‌ای یافت نشد.",
+      "compareSelected": "مقایسه موارد انتخاب‌شده",
+      "viewDetails": "مشاهده جزئیات"
+    },
+    "detail": {
+      "exclusionsTitle": "استثناها — پیش از درخواست بخوانید",
+      "exclusionsEmpty": "استثنایی برای این محصول ثبت نشده است.",
+      "coverageTitle": "پوشش",
+      "waitingPeriod": "دوره انتظار: {days} روز",
+      "deductible": "فرانشیز: {amount} ریال",
+      "annualLimit": "سقف سالانه: {amount} ریال",
+      "premiumRange": "حق بیمه: {min} تا {max} ریال",
+      "termsSource": "منبع: {source}",
+      "checkEligibility": "بررسی واجد شرایط بودن برای {petName}",
+      "apply": "شروع درخواست"
+    },
+    "compare": {
+      "title": "مقایسه طرح‌ها",
+      "exclusions": "استثناها"
+    },
+    "eligibility": {
+      "title": "واجد شرایط بودن برای {petName}",
+      "sectionTitle": "واجد شرایط بودن برای این حیوان خانگی",
+      "disclaimer": "این تضمین تأیید نیست — تصمیم نهایی با بیمه‌گر است.",
+      "reasons": {
+        "SPECIES_NOT_COVERED": "گونه این حیوان خانگی تحت پوشش این محصول نیست.",
+        "PET_AGE_UNKNOWN": "سن این حیوان خانگی ثبت نشده، بنابراین واجد شرایط بودن سنی قابل تأیید نیست.",
+        "PET_BELOW_MINIMUM_AGE": "سن این حیوان خانگی کمتر از حداقل سن مورد پوشش این محصول است.",
+        "PET_ABOVE_MAXIMUM_AGE": "سن این حیوان خانگی بیشتر از حداکثر سن مورد پوشش این محصول است."
+      }
+    },
+    "application": {
+      "title": "درخواست‌های بیمه برای {petName}",
+      "sectionTitle": "درخواست‌های بیمه",
+      "empty": "هنوز درخواستی ثبت نشده.",
+      "notesLabel": "یادداشت برای این درخواست",
+      "submit": "ارسال درخواست",
+      "cancel": "لغو درخواست",
+      "disclaimer": "ارسال این درخواست را برای بیمه‌گر می‌فرستد — تضمینی برای پوشش نیست."
+    }
+  },
+  "places": {
+    "category": {
+      "PARK": "پارک",
+      "CAFE": "کافه",
+      "RESTAURANT": "رستوران",
+      "HOTEL": "هتل",
+      "STORE": "فروشگاه",
+      "BEACH": "ساحل",
+      "VENUE": "سالن",
+      "SERVICE": "خدمات",
+      "OTHER": "سایر"
+    },
+    "list": {
+      "title": "مکان‌های دوستدار حیوان خانگی",
+      "subtitle": "مکان‌های تأییدشده که از حیوانات خانگی استقبال می‌کنند.",
+      "empty": "هیچ مکانی یافت نشد.",
+      "nearMe": "جستجو نزدیک من",
+      "allCategories": "همه دسته‌بندی‌ها",
+      "filtersCity": "شهر",
+      "filtersCategory": "دسته‌بندی"
+    },
+    "detail": {
+      "indoorAllowed": "ورود به فضای داخلی مجاز است",
+      "outdoorAllowed": "ورود به فضای بیرونی مجاز است",
+      "sizeRestrictions": "محدودیت اندازه: {restrictions}",
+      "petPolicy": "قوانین مربوط به حیوان خانگی",
+      "verifiedAt": "تأییدشده در {date}",
+      "unverified": "هنوز تأیید نشده — جزئیات ممکن است ناقص باشد",
+      "addFavorite": "ذخیره در علاقه‌مندی‌ها",
+      "removeFavorite": "حذف از علاقه‌مندی‌ها",
+      "distance": "{distance} کیلومتر فاصله"
+    },
+    "favorites": {
+      "title": "مکان‌های ذخیره‌شده",
+      "empty": "هنوز هیچ مکانی ذخیره نکرده‌اید.",
+      "signInPrompt": "برای ذخیره مکان‌های موردعلاقه وارد شوید."
     }
   }
 }
