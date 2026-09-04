@@ -1,100 +1,119 @@
-# PET LIFE OS route inventory — H01–H15
+# Route inventory after H17 synchronization
 
-Generated from the actual integrated App Router tree on 2026-09-03. Both fa and en are supported. Local preview is opt-in and loopback-only; it opens UI without granting API permissions. Dynamic IDs/slugs must come from live lists, never fabricated.
+Branch: integration/local. Merge: 139bece. H17 commit 5e0a0c1 is an ancestor of HEAD.
 
-| Route | Audience | Live auth | Entry point | Parent navigation | Verification |
-|---|---|---|---|---|---|
-| /[locale]/admin/audit | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content/[id] | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content/[id]/versions | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content/categories | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content/media | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content/new | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content/placements | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/content/tags | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | Admin CMS navigation | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/customers/[id] | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/customers | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/disputes/[id] | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/disputes | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/providers | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/reconciliation | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/seller-finance/[id] | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/seller-finance | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/sellers | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/settlements/[id] | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/support/[caseId] | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/support | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/tasks | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/transactions | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/trust/[id] | ADMIN | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/admin/trust | ADMIN | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | ADMIN shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/ai | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/bookings/[id] | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/bookings | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/care-calendar | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/cart | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/checkout/[id]/confirmation | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/checkout/[id]/ops | INTERNAL | Callback/session dependent | Parent list/detail; requires real ID or slug | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/checkout | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/home | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/notifications | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/notifications/preferences | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/onboarding | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/orders/[id] | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/orders | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id]/care | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id]/health/allergies | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id]/health/conditions | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id]/health/medications | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id]/health/nutrition | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id]/health | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id]/health/vaccination | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/[id] | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/active | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets/new | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/pets | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/support/new | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/support | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/support/tickets/[id] | CONSUMER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/support/tickets | CONSUMER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | App navigation / parent flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/account/forgot | AUTH | No | Welcome choices; local preview redirects to requested page | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/account | AUTH | No | Welcome choices; local preview redirects to requested page | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/account/reset | AUTH | No | Welcome choices; local preview redirects to requested page | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/auth/complete | INTERNAL | Callback/session dependent | Workflow only; not global navigation | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/register | AUTH | No | Welcome choices; local preview redirects to requested page | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/welcome | AUTH | No | Welcome choices; local preview redirects to requested page | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/provider/availability | PROVIDER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | PROVIDER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/provider/bookings/[id] | PROVIDER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | PROVIDER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/provider/bookings | PROVIDER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | PROVIDER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/provider/calendar | PROVIDER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | PROVIDER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/provider | PROVIDER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | PROVIDER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/provider/services | PROVIDER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | PROVIDER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/provider/team | PROVIDER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | PROVIDER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/blog/[slug] | PUBLIC | No | Parent list/detail; requires real ID or slug | Public navigation / blog index | Source checked; runtime details in h15-local-review.md |
-| /[locale]/blog/category/[slug] | PUBLIC | No | Parent list/detail; requires real ID or slug | Public navigation / blog index | Source checked; runtime details in h15-local-review.md |
-| /[locale]/blog | PUBLIC | No | Local Pages menu; product/portal navigation | Public navigation / blog index | Source checked; runtime details in h15-local-review.md |
-| /[locale]/blog/tag/[slug] | PUBLIC | No | Parent list/detail; requires real ID or slug | Public navigation / blog index | Source checked; runtime details in h15-local-review.md |
-| /[locale]/services/[category]/[serviceId]/book | PUBLIC | Session (auth-on-action) | Parent list/detail; requires real ID or slug | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/services/[category] | PUBLIC | No | Parent list/detail; requires real ID or slug | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/services | PUBLIC | No | Local Pages menu; product/portal navigation | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/shop | PUBLIC | No | Local Pages menu; product/portal navigation | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/shop/products/[id] | PUBLIC | No | Parent list/detail; requires real ID or slug | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/shop/products | PUBLIC | No | Local Pages menu; product/portal navigation | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/vet/[providerId]/book | PUBLIC | Session (auth-on-action) | Parent list/detail; requires real ID or slug | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/vet/[providerId] | PUBLIC | No | Parent list/detail; requires real ID or slug | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/vet/find | PUBLIC | No | Local Pages menu; product/portal navigation | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/channels | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/finance | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/finance/settlements/[id] | SELLER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/finance/settlements | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/finance/transactions | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/inventory | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/offers | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/orders/[id] | SELLER | Session; API enforces role or resource access | Parent list/detail; requires real ID or slug | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/orders | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/settings | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale]/seller/team | SELLER | Session; API enforces role or resource access | Local Pages menu; product/portal navigation | SELLER shell | Source checked; runtime details in h15-local-review.md |
-| /[locale] | PUBLIC | No | Local Pages menu; product/portal navigation | Landing / public header / auth flow | Source checked; runtime details in h15-local-review.md |
+Implemented page routes: 111. Source presence only; live acceptance requires working local services.
+
+| Route | Source |
+|---|---|
+| /[locale] | apps/web/app\[locale]\page.tsx |
+| /[locale]/account | apps/web/app\[locale]\(auth)\account\page.tsx |
+| /[locale]/account/forgot | apps/web/app\[locale]\(auth)\account\forgot\page.tsx |
+| /[locale]/account/reset | apps/web/app\[locale]\(auth)\account\reset\page.tsx |
+| /[locale]/admin | apps/web/app\[locale]\(admin)\admin\page.tsx |
+| /[locale]/admin/audit | apps/web/app\[locale]\(admin)\admin\audit\page.tsx |
+| /[locale]/admin/content | apps/web/app\[locale]\(admin)\admin\content\page.tsx |
+| /[locale]/admin/content/[id] | apps/web/app\[locale]\(admin)\admin\content\[id]\page.tsx |
+| /[locale]/admin/content/[id]/versions | apps/web/app\[locale]\(admin)\admin\content\[id]\versions\page.tsx |
+| /[locale]/admin/content/categories | apps/web/app\[locale]\(admin)\admin\content\categories\page.tsx |
+| /[locale]/admin/content/media | apps/web/app\[locale]\(admin)\admin\content\media\page.tsx |
+| /[locale]/admin/content/new | apps/web/app\[locale]\(admin)\admin\content\new\page.tsx |
+| /[locale]/admin/content/placements | apps/web/app\[locale]\(admin)\admin\content\placements\page.tsx |
+| /[locale]/admin/content/tags | apps/web/app\[locale]\(admin)\admin\content\tags\page.tsx |
+| /[locale]/admin/customers | apps/web/app\[locale]\(admin)\admin\customers\page.tsx |
+| /[locale]/admin/customers/[id] | apps/web/app\[locale]\(admin)\admin\customers\[id]\page.tsx |
+| /[locale]/admin/disputes | apps/web/app\[locale]\(admin)\admin\disputes\page.tsx |
+| /[locale]/admin/disputes/[id] | apps/web/app\[locale]\(admin)\admin\disputes\[id]\page.tsx |
+| /[locale]/admin/providers | apps/web/app\[locale]\(admin)\admin\providers\page.tsx |
+| /[locale]/admin/reconciliation | apps/web/app\[locale]\(admin)\admin\reconciliation\page.tsx |
+| /[locale]/admin/seller-finance | apps/web/app\[locale]\(admin)\admin\seller-finance\page.tsx |
+| /[locale]/admin/seller-finance/[id] | apps/web/app\[locale]\(admin)\admin\seller-finance\[id]\page.tsx |
+| /[locale]/admin/sellers | apps/web/app\[locale]\(admin)\admin\sellers\page.tsx |
+| /[locale]/admin/settlements/[id] | apps/web/app\[locale]\(admin)\admin\settlements\[id]\page.tsx |
+| /[locale]/admin/subscriptions | apps/web/app\[locale]\(admin)\admin\subscriptions\page.tsx |
+| /[locale]/admin/subscriptions/households | apps/web/app\[locale]\(admin)\admin\subscriptions\households\page.tsx |
+| /[locale]/admin/subscriptions/households/[id] | apps/web/app\[locale]\(admin)\admin\subscriptions\households\[id]\page.tsx |
+| /[locale]/admin/support | apps/web/app\[locale]\(admin)\admin\support\page.tsx |
+| /[locale]/admin/support/[caseId] | apps/web/app\[locale]\(admin)\admin\support\[caseId]\page.tsx |
+| /[locale]/admin/tasks | apps/web/app\[locale]\(admin)\admin\tasks\page.tsx |
+| /[locale]/admin/transactions | apps/web/app\[locale]\(admin)\admin\transactions\page.tsx |
+| /[locale]/admin/trust | apps/web/app\[locale]\(admin)\admin\trust\page.tsx |
+| /[locale]/admin/trust/[id] | apps/web/app\[locale]\(admin)\admin\trust\[id]\page.tsx |
+| /[locale]/ai | apps/web/app\[locale]\(app)\ai\page.tsx |
+| /[locale]/auth/complete | apps/web/app\[locale]\(auth)\auth\complete\page.tsx |
+| /[locale]/blog | apps/web/app\[locale]\(public)\blog\page.tsx |
+| /[locale]/blog/[slug] | apps/web/app\[locale]\(public)\blog\[slug]\page.tsx |
+| /[locale]/blog/category/[slug] | apps/web/app\[locale]\(public)\blog\category\[slug]\page.tsx |
+| /[locale]/blog/tag/[slug] | apps/web/app\[locale]\(public)\blog\tag\[slug]\page.tsx |
+| /[locale]/bookings | apps/web/app\[locale]\(app)\bookings\page.tsx |
+| /[locale]/bookings/[id] | apps/web/app\[locale]\(app)\bookings\[id]\page.tsx |
+| /[locale]/care-calendar | apps/web/app\[locale]\(app)\care-calendar\page.tsx |
+| /[locale]/cart | apps/web/app\[locale]\(app)\cart\page.tsx |
+| /[locale]/checkout | apps/web/app\[locale]\(app)\checkout\page.tsx |
+| /[locale]/checkout/[id]/confirmation | apps/web/app\[locale]\(app)\checkout\[id]\confirmation\page.tsx |
+| /[locale]/checkout/[id]/ops | apps/web/app\[locale]\(app)\checkout\[id]\ops\page.tsx |
+| /[locale]/home | apps/web/app\[locale]\(app)\home\page.tsx |
+| /[locale]/notifications | apps/web/app\[locale]\(app)\notifications\page.tsx |
+| /[locale]/notifications/preferences | apps/web/app\[locale]\(app)\notifications\preferences\page.tsx |
+| /[locale]/onboarding | apps/web/app\[locale]\(app)\onboarding\page.tsx |
+| /[locale]/orders | apps/web/app\[locale]\(app)\orders\page.tsx |
+| /[locale]/orders/[id] | apps/web/app\[locale]\(app)\orders\[id]\page.tsx |
+| /[locale]/pets | apps/web/app\[locale]\(app)\pets\page.tsx |
+| /[locale]/pets/[id] | apps/web/app\[locale]\(app)\pets\[id]\page.tsx |
+| /[locale]/pets/[id]/care | apps/web/app\[locale]\(app)\pets\[id]\care\page.tsx |
+| /[locale]/pets/[id]/health | apps/web/app\[locale]\(app)\pets\[id]\health\page.tsx |
+| /[locale]/pets/[id]/health/advanced | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\page.tsx |
+| /[locale]/pets/[id]/health/advanced/dental | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\dental\page.tsx |
+| /[locale]/pets/[id]/health/advanced/documents | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\documents\page.tsx |
+| /[locale]/pets/[id]/health/advanced/imaging | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\imaging\page.tsx |
+| /[locale]/pets/[id]/health/advanced/labs | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\labs\page.tsx |
+| /[locale]/pets/[id]/health/advanced/nutrition | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\nutrition\page.tsx |
+| /[locale]/pets/[id]/health/advanced/observations | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\observations\page.tsx |
+| /[locale]/pets/[id]/health/advanced/referrals | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\referrals\page.tsx |
+| /[locale]/pets/[id]/health/advanced/rehab | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\rehab\page.tsx |
+| /[locale]/pets/[id]/health/advanced/timeline | apps/web/app\[locale]\(app)\pets\[id]\health\advanced\timeline\page.tsx |
+| /[locale]/pets/[id]/health/allergies | apps/web/app\[locale]\(app)\pets\[id]\health\allergies\page.tsx |
+| /[locale]/pets/[id]/health/conditions | apps/web/app\[locale]\(app)\pets\[id]\health\conditions\page.tsx |
+| /[locale]/pets/[id]/health/medications | apps/web/app\[locale]\(app)\pets\[id]\health\medications\page.tsx |
+| /[locale]/pets/[id]/health/nutrition | apps/web/app\[locale]\(app)\pets\[id]\health\nutrition\page.tsx |
+| /[locale]/pets/[id]/health/vaccination | apps/web/app\[locale]\(app)\pets\[id]\health\vaccination\page.tsx |
+| /[locale]/pets/active | apps/web/app\[locale]\(app)\pets\active\page.tsx |
+| /[locale]/pets/new | apps/web/app\[locale]\(app)\pets\new\page.tsx |
+| /[locale]/provider | apps/web/app\[locale]\(provider)\provider\page.tsx |
+| /[locale]/provider/availability | apps/web/app\[locale]\(provider)\provider\availability\page.tsx |
+| /[locale]/provider/bookings | apps/web/app\[locale]\(provider)\provider\bookings\page.tsx |
+| /[locale]/provider/bookings/[id] | apps/web/app\[locale]\(provider)\provider\bookings\[id]\page.tsx |
+| /[locale]/provider/calendar | apps/web/app\[locale]\(provider)\provider\calendar\page.tsx |
+| /[locale]/provider/patients/[petId] | apps/web/app\[locale]\(provider)\provider\patients\[petId]\page.tsx |
+| /[locale]/provider/services | apps/web/app\[locale]\(provider)\provider\services\page.tsx |
+| /[locale]/provider/team | apps/web/app\[locale]\(provider)\provider\team\page.tsx |
+| /[locale]/provider/visits/[id] | apps/web/app\[locale]\(provider)\provider\visits\[id]\page.tsx |
+| /[locale]/register | apps/web/app\[locale]\(auth)\register\page.tsx |
+| /[locale]/seller | apps/web/app\[locale]\(seller)\seller\page.tsx |
+| /[locale]/seller/channels | apps/web/app\[locale]\(seller)\seller\channels\page.tsx |
+| /[locale]/seller/finance | apps/web/app\[locale]\(seller)\seller\finance\page.tsx |
+| /[locale]/seller/finance/settlements | apps/web/app\[locale]\(seller)\seller\finance\settlements\page.tsx |
+| /[locale]/seller/finance/settlements/[id] | apps/web/app\[locale]\(seller)\seller\finance\settlements\[id]\page.tsx |
+| /[locale]/seller/finance/transactions | apps/web/app\[locale]\(seller)\seller\finance\transactions\page.tsx |
+| /[locale]/seller/inventory | apps/web/app\[locale]\(seller)\seller\inventory\page.tsx |
+| /[locale]/seller/offers | apps/web/app\[locale]\(seller)\seller\offers\page.tsx |
+| /[locale]/seller/orders | apps/web/app\[locale]\(seller)\seller\orders\page.tsx |
+| /[locale]/seller/orders/[id] | apps/web/app\[locale]\(seller)\seller\orders\[id]\page.tsx |
+| /[locale]/seller/settings | apps/web/app\[locale]\(seller)\seller\settings\page.tsx |
+| /[locale]/seller/team | apps/web/app\[locale]\(seller)\seller\team\page.tsx |
+| /[locale]/services | apps/web/app\[locale]\(public)\services\page.tsx |
+| /[locale]/services/[category] | apps/web/app\[locale]\(public)\services\[category]\page.tsx |
+| /[locale]/services/[category]/[serviceId]/book | apps/web/app\[locale]\(public)\services\[category]\[serviceId]\book\page.tsx |
+| /[locale]/shop | apps/web/app\[locale]\(public)\shop\page.tsx |
+| /[locale]/shop/products | apps/web/app\[locale]\(public)\shop\products\page.tsx |
+| /[locale]/shop/products/[id] | apps/web/app\[locale]\(public)\shop\products\[id]\page.tsx |
+| /[locale]/subscription | apps/web/app\[locale]\(app)\subscription\page.tsx |
+| /[locale]/subscription/plans | apps/web/app\[locale]\(app)\subscription\plans\page.tsx |
+| /[locale]/support | apps/web/app\[locale]\(app)\support\page.tsx |
+| /[locale]/support/new | apps/web/app\[locale]\(app)\support\new\page.tsx |
+| /[locale]/support/tickets | apps/web/app\[locale]\(app)\support\tickets\page.tsx |
+| /[locale]/support/tickets/[id] | apps/web/app\[locale]\(app)\support\tickets\[id]\page.tsx |
+| /[locale]/vet/[providerId] | apps/web/app\[locale]\(public)\vet\[providerId]\page.tsx |
+| /[locale]/vet/[providerId]/book | apps/web/app\[locale]\(public)\vet\[providerId]\book\page.tsx |
+| /[locale]/vet/find | apps/web/app\[locale]\(public)\vet\find\page.tsx |
+| /[locale]/welcome | apps/web/app\[locale]\(auth)\welcome\page.tsx |

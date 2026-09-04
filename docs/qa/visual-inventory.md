@@ -1,3 +1,5 @@
+# SYNCHRONIZED: H17 present; 111 routes (2026-09-04)
+
 # Visual inventory — before broad edits
 
 Evidence: source review of every route; browser capture of fa/admin/content/new at 1265px. Data-backed views are not certified against populated reference screenshots because the API/DB is unavailable. A = verified match, B = raw, C = mismatch, D = placeholder, E = no exact reference, F = observed broken/unreachable; unavailable API data is a verification limitation, not proof of a broken route, G = absent. No page is certified A yet.
@@ -99,8 +101,26 @@ Evidence: source review of every route; browser capture of fa/admin/content/new 
 | /[locale]/seller/team | seller | C — navigation mismatch; live content blocked | Yes — images 6/20 | Compact sidebar, mobile disclosure, existing routes; restore data separately | P1 |
 | /[locale] | Consumer/public | C — spatial landing has separate approved brief; verify overlays | Partial — supplied boards; source-specific comparison needed | Align tokens, focus/touch states, page motion, spacing; compare in domain batch | P1 |
 
-## G — not implemented (no replacement routes)
-Standalone profile/settings, medical documents/labs/imaging/referrals/observations, subscription plans/usage/billing, lost-pet/community/travel/insurance, organization clinical workspace: no corresponding implemented route in this tree. Keep these with feature owner; do not create backend or fake route shells.
+| /[locale]/admin/subscriptions | H16 subscription | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/admin/subscriptions/households | H16 subscription | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/admin/subscriptions/households/[id] | H16 subscription | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/dental | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/documents | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/imaging | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/labs | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/nutrition | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/observations | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/referrals | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/rehab | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/pets/[id]/health/advanced/timeline | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/provider/patients/[petId] | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/provider/visits/[id] | H17 health/clinical | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/subscription | H16 subscription | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+| /[locale]/subscription/plans | H16 subscription | B — implemented; visual/live review pending | Nearest supplied health/clinical/subscription boards | Verify seeded API data, then compare responsive states | P2 |
+
+## Missing-capability status after H17 sync
+The previous G list is withdrawn. H17 health and provider clinical routes exist; H16 subscription routes also exist. Remaining absence claims require synchronized domain-specific review before marking CLAUDE DEVELOPMENT REQUIRED. No fake shells will be created.
 
 ## Batch order and files
 1. Shared motion + reference palette/primitives + navigation: apps/web/features/motion, features/navigation, local-preview; packages/ui/src; packages/design-tokens/css. 2. Landing/auth. 3. Home/pets/health. 4. Discovery/commerce/support/notifications. 5. Role workspaces/CMS. Data-backed visual fidelity is blocked until real data can load.
