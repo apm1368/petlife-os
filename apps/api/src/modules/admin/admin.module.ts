@@ -49,6 +49,16 @@ import { SubscriptionsModule } from "../subscriptions/subscription.module";
 import { AdminSubscriptionPlanService } from "./subscriptions/admin-subscription-plan.service";
 import { AdminSubscriptionService } from "./subscriptions/admin-subscription.service";
 import { AdminSubscriptionController } from "./subscriptions/admin-subscription.controller";
+import { LedgerModule } from "../commerce/ledger/ledger.module";
+import { CommunityModule } from "../community/community.module";
+import { AnimalSupportOrganizationService } from "../animal-support/animal-support-organization.service";
+import { RescueCaseService } from "../animal-support/rescue-case.service";
+import { SupportCampaignService } from "../animal-support/support-campaign.service";
+import { DonationLedgerService } from "../animal-support/donation-ledger.service";
+import { AdminDonationService } from "../animal-support/admin-donation.service";
+import { AdminAnimalSupportController } from "./animal-support/admin-animal-support.controller";
+import { CommunityModerationService } from "./community/community-moderation.service";
+import { AdminCommunityController } from "./community/admin-community.controller";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -60,7 +70,7 @@ import { AdminSubscriptionController } from "./subscriptions/admin-subscription.
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule],
+  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule],
   controllers: [
     AdminMeController,
     AdminNoteController,
@@ -78,6 +88,8 @@ import { AdminSubscriptionController } from "./subscriptions/admin-subscription.
     AdminSellerFinanceController,
     AdminContentController,
     AdminSubscriptionController,
+    AdminAnimalSupportController,
+    AdminCommunityController,
   ],
   providers: [
     AdminAccessService,
@@ -108,6 +120,12 @@ import { AdminSubscriptionController } from "./subscriptions/admin-subscription.
     AdminContentPlacementService,
     AdminSubscriptionPlanService,
     AdminSubscriptionService,
+    AnimalSupportOrganizationService,
+    RescueCaseService,
+    SupportCampaignService,
+    DonationLedgerService,
+    AdminDonationService,
+    CommunityModerationService,
   ],
   exports: [
     AdminAccessService,

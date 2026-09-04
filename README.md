@@ -4297,6 +4297,145 @@ CARE_PLAN_ITEM_NOT_FOUND                         404
 CLINICAL_RECORDING_NOT_AUTHORIZED                403  provider grant lacks canRecordClinicalData
 ```
 
+## Lost Pet + Animal Support + Community + Memories (Handoff 18)
+
+### Four connected areas, one shared safety principle
+
+This handoff adds four consumer-facing domains — Lost Pet reporting, Animal Support (rescue organizations/rescue cases/donation campaigns), Community (posts/comments/reactions/reports), and Memories/Life Timeline/Memorial mode — plus the admin surfaces each needs (verification, moderation, payout/refund). The one rule that shaped every design decision below: **Lost Pet reporting and existing-memory access are never gated behind entitlements or subscription tier**, and donation accounting is never allowed to touch commerce revenue. Everything else reuses infrastructure this codebase already had (Trust & Safety from Handoff 11, notifications from Handoff 10, the payment/ledger primitives from Handoff 07, entitlements from Handoff 16) rather than building parallel systems.
+
+### Lost Pet — a state machine, a public share page, and a moderated sighting inbox
+
+`LostPetIncident` has an explicit status machine (`OPEN → SEARCHING/SIGHTING_REPORTED → FOUND → REUNITED`, plus `CLOSED` from any state) owned by `LostPetIncidentService`, and every transition is also mirrored into `Pet.lifecycleStatus` through the single existing `PetLifecycleService.transition()` gate (`sourceType: "LOST_PET_INCIDENT"`) — never a second, parallel lifecycle field. `PublicLostPetController` (no guard, mirroring `PublicBlogController`'s own "no guard by design" precedent) serves a redacted `LostPetIncidentPublicDto` — no `householdId`, no `privateNotes`, no `createdByUserId`, and `publicContactMode` only when the owner explicitly chose `PUBLIC_CONTACT` — so a shared link never leaks owner-identifying data. Anyone, including someone with no account, can submit a sighting (`POST /lost-pets/:incidentId/sightings`); the household reviews each one (`ACCEPTED`/`REJECTED`) before it can move the incident forward, so a public share page never lets a stranger silently close out someone else's case.
+
+### Animal Support — a two-tier ledger so a restricted donation can never quietly become general revenue
+
+Donations flow through `DonationService.donate()`, which clones `SubscriptionBillingService`'s own shell-Checkout/Cart pattern (a `Cart` created `CONVERTED` from the start, charged synchronously via the existing `PaymentsService`) rather than inventing a second payment path. Two ledgers record the same transaction for two different purposes and are kept structurally separate:
+
+- **Platform ledger** (`LedgerService.recordDonationCollected/recordDonationRefunded`) posts to a new `DONATION_PAYABLE` liability account — deliberately never `PLATFORM_REVENUE` — so a donation can never be counted as commerce income even by accident.
+- **Per-organization ledger** (`DonationLedgerService`, a structural clone of Handoff 14's `SellerLedgerService`) tracks each organization's own restricted-vs-general split. `recordPayout` debits the *same fund-specific income account* the money was credited to, and `getBalance` reads each fund's own running credit-normal balance as its availability — so a restricted campaign's funds are provably unavailable to a payout against the general fund, not just conventionally kept apart. `AdminDonationService.recordPayout()` calls `getAvailableForFund` before posting and throws `DonationInsufficientFundBalanceException` rather than allowing an overdraft.
+
+`SupportCampaignDto.raisedAmountIrr` is always this ledger's own live read at request time (`DonationLedgerService.getCampaignRaisedIrr`) — never a cached column — matching the spec's "do not fake real-time raised amount from cached UI values."
+
+**A disclosed scope limit, not an oversight**: true anonymous/guest donation was investigated and found to require a schema change to `Cart.userId`/`Checkout.userId` (both hard `NOT NULL` FKs across the entire commerce domain, with no guest-checkout precedent anywhere in the codebase — `SubscriptionBillingService`'s own doc comment already documents avoiding exactly this class of change). `donate()` therefore requires a real authenticated `donorUserId`; "anonymous" on the public side is instead fully satisfied by `showDonorPublicly` defaulting to `false`, so a donor's identity is never shown publicly unless they explicitly opt in.
+
+### Community — reuses Trust & Safety rather than building a second moderation system
+
+`CommunityPost`/`CommunityComment` carry a `status: CommunityContentStatus` (`PUBLISHED`/`HIDDEN`/`REMOVED`) and a report against either opens a `TrustCase` through the existing `TrustCaseService.open()` (`TrustSubjectType.COMMUNITY_CONTENT`, already modeled since Handoff 11 but never wired to anything until now). `TrustActionService` gained `applyCommunityContentEffect()` — a `REMOVE_CONTENT`/`RESTORE` action now actually flips the post/comment's `CommunityContentStatus`, the first time a `TrustAction` has had any operational effect beyond a PROVIDER/SELLER subject. Distribution is one-directional and explicit: a household can share a Lost Pet incident, or an admin a support campaign, into the feed as a `sourceType: LOST_PET_INCIDENT/SUPPORT_CAMPAIGN` post (`CommunityPostService.createSourcedPost`) — the feed never auto-aggregates content on its own, per the spec's "avoid opaque algorithmic recommendation infrastructure, avoid endless card clutter" line, and the frontend feed is a plain paged list with an explicit Load more, never infinite auto-scroll.
+
+### Memories + Life Timeline — derived, never duplicated; Memorial mode suppresses nudges instead of just hiding them
+
+`LifeTimelineService.list()` is a pure read-time aggregation — `PetMemory` rows, wrapped `HealthTimelineEntryDto` entries (via the existing `HealthTimelineService`), `LostPetIncident` rows with `reunitedAt` set, `PetLifecycleTransition` rows, and one synthetic `ADOPTION` entry from `Pet.createdAt` — never a second stored table. Memorial mode is the one place this handoff changes existing Handoff 01/06 behavior, and it's a short-circuit rather than a filter: `HomeRankingService.rank()` returns only a `VIEW_MEMORIES` primary action (plus View Profile) *before* any health/booking/care check runs when `isMemorialModeActive` is true, and `HomeService.getHome()` skips querying health/care/booking entirely rather than fetching and then hiding them — so a memorial household's Home load does strictly less work, not just less rendering. The same suppression was extended to `PetProfileView`'s health/care/upcoming-booking teasers for consistency, and death/memorial transitions are always an explicit household action (`PetsService.markDeceased`/`transitionToMemorial`, both going through `PetLifecycleService`) — pet death is never inferred automatically from health data, per the spec.
+
+### A real gap found and fixed: object keys with no way to become a viewable URL
+
+Every upload flow in this codebase (and every one added in this handoff) stores a raw `objectKey`, not a resolved URL — by design, since `StorageDriver.createUploadTarget()` only hands back a `publicUrl` at the moment of upload. Auditing the frontend build for this handoff surfaced that Lost Pet photos, Animal Support logos/evidence, Community post media, and Memory photos all had no way to be *redisplayed* later — a real, would-have-shipped-broken gap, not a hypothetical one. Fixed with a small, additive `resolveObjectUrl()`/`resolveObjectUrls()` utility (`apps/api/src/modules/storage/object-url.util.ts`) that reconstructs the exact same `${STORAGE_PUBLIC_BASE_URL}/${key}` shape both `LocalStorageDriver` and `S3StorageDriver` already produce at upload time — every affected DTO gained a companion `...Url`/`...Urls` field (`primaryPhotoUrl`, `logoUrl`, `mediaUrls`, etc.) alongside its existing `...ObjectKey` field, so no existing field or e2e assertion changed.
+
+### Frontend — public browsing where the spec calls for it, authenticated everywhere the backend already requires it
+
+Lost Pet, Animal Support, and Community are public-readable (`app/[locale]/(public)/...`) with the create/donate/react/comment/report actions gated by the backend's own `SessionAuthGuard` — the frontend never duplicates that check beyond a courtesy redirect to `/welcome`. Memories/Life Timeline live under the authenticated household routes (`app/[locale]/(app)/pets/[id]/...`) since they were never meant to be public. Donation and campaign progress always render `raisedAmountIrr` exactly as the API returns it — no client-side estimate is ever computed or shown mid-request.
+
+### API endpoints (Handoff 18 additions)
+
+```
+GET    /pets/:petId/lost-incidents
+POST   /pets/:petId/lost-incidents
+GET    /pets/:petId/lost-incidents/:incidentId
+POST   /pets/:petId/lost-incidents/upload-url
+POST   /pets/:petId/lost-incidents/:incidentId/mark-searching
+POST   /pets/:petId/lost-incidents/:incidentId/mark-found
+POST   /pets/:petId/lost-incidents/:incidentId/reunite
+POST   /pets/:petId/lost-incidents/:incidentId/close
+POST   /pets/:petId/lost-incidents/:incidentId/share-to-community
+GET    /pets/:petId/lost-incidents/:incidentId/sightings
+POST   /pets/:petId/lost-incidents/:incidentId/sightings/:sightingId/review
+
+GET    /lost-pets                                                    (public, no guard)
+GET    /lost-pets/:incidentId                                        (public, redacted DTO)
+POST   /lost-pets/:incidentId/sightings/upload-url                   (public)
+POST   /lost-pets/:incidentId/sightings                              (public — anonymous sighting reports)
+
+GET    /animal-support/organizations
+GET    /animal-support/organizations/:organizationId
+GET    /animal-support/rescue-cases
+GET    /animal-support/rescue-cases/:rescueCaseId
+GET    /animal-support/campaigns
+GET    /animal-support/campaigns/:campaignId
+GET    /animal-support/campaigns/:campaignId/updates
+GET    /animal-support/campaigns/:campaignId/donors                  (only showDonorPublicly: true rows)
+POST   /animal-support/campaigns/:campaignId/donate                  (authenticated donor required)
+GET    /me/donations                                                 (the donor's own history only)
+
+POST   /admin/animal-support/organizations
+PATCH  /admin/animal-support/organizations/:id
+POST   /admin/animal-support/organizations/:id/verification
+POST   /admin/animal-support/organizations/:id/listing
+POST   /admin/animal-support/rescue-cases
+PATCH  /admin/animal-support/rescue-cases/:id/status
+POST   /admin/animal-support/campaigns
+PATCH  /admin/animal-support/campaigns/:id/status
+POST   /admin/animal-support/campaigns/:id/updates
+POST   /admin/animal-support/campaigns/:campaignId/share-to-community
+POST   /admin/animal-support/donations/:donationIntentId/refund
+POST   /admin/animal-support/organizations/:id/payout
+GET    /admin/animal-support/organizations/:id/fund-balance
+
+GET    /community/posts
+POST   /community/posts
+GET    /community/posts/:postId
+POST   /community/posts/upload-url
+GET    /community/posts/:postId/comments
+POST   /community/posts/:postId/comments
+PUT    /community/posts/:postId/reactions
+DELETE /community/posts/:postId/reactions
+POST   /community/posts/:postId/report
+POST   /community/comments/:commentId/report
+
+GET    /admin/community/reports
+POST   /admin/community/reports/:id/escalate
+POST   /admin/community/reports/:id/dismiss
+
+GET    /pets/:petId/memories
+POST   /pets/:petId/memories
+GET    /pets/:petId/memories/:memoryId
+PATCH  /pets/:petId/memories/:memoryId
+DELETE /pets/:petId/memories/:memoryId
+POST   /pets/:petId/memories/upload-url
+GET    /pets/:petId/life-timeline                                    (derived — never a stored table)
+
+POST   /pets/:id/mark-deceased                                       (explicit household action, never inferred)
+POST   /pets/:id/transition-to-memorial
+```
+
+### Error codes (Handoff 18 additions)
+
+```
+LOST_PET_INCIDENT_NOT_FOUND                      404
+INVALID_LOST_PET_INCIDENT_TRANSITION             409
+LOST_PET_INCIDENT_ALREADY_OPEN                   409  household already has an open incident for this pet
+LOST_PET_SIGHTING_NOT_FOUND                      404
+ANIMAL_SUPPORT_ORGANIZATION_NOT_FOUND            404
+RESCUE_CASE_NOT_FOUND                            404
+SUPPORT_CAMPAIGN_NOT_FOUND                       404
+SUPPORT_CAMPAIGN_NOT_ACCEPTING_DONATIONS         409
+DONATION_NOT_FOUND                               404
+DONATION_AMOUNT_INVALID                          400
+DONATION_INSUFFICIENT_FUND_BALANCE               409  payout would exceed that fund's actual available balance
+COMMUNITY_POST_NOT_FOUND                         404
+COMMUNITY_COMMENT_NOT_FOUND                      404
+COMMUNITY_CONTENT_NOT_VISIBLE                    404  post/comment was HIDDEN or REMOVED by moderation
+COMMUNITY_REPORT_NOT_FOUND                       404
+PET_MEMORY_NOT_FOUND                             404
+INVALID_PET_LIFECYCLE_TRANSITION                 409  e.g. MEMORIAL -> ACTIVE is not a modeled transition
+```
+
+### Known limitations / deliberate simplifications (Handoff 18)
+
+- **No true anonymous/guest donation** — see "Animal Support" above; `donorUserId` is always required, "anonymous" is satisfied entirely by `showDonorPublicly` defaulting to `false`.
+- **No new entitlement-gated resource was introduced** — `EntitlementService.getLimit()` returns `0` (not unlimited) for any metered key with no seeded `SubscriptionPlanEntitlement` row, so adding one here without seeding it on every plan would have silently blocked that resource for every household. Given the spec's own "if...later" framing and "safety/emotional continuity outranks monetization" mandate, Stage 16 was resolved as an audit confirming Lost Pet/Memories access has no entitlement check anywhere, rather than adding one.
+- **Community has no algorithmic feed ranking** — a plain paged, most-recent-first list with an optional `countryCode` filter is the entire "local feed" story this phase, per the spec's explicit "do not build opaque algorithmic recommendation infrastructure" line.
+- **Community post creation supports a single optional `petId` link, not a rich pet-tagging UI** — the frontend's create-post form does not yet expose pet selection.
+- **A global animal-support/community/blog navigation entry was not added** — this codebase has never had a persistent nav bar (navigation is driven by Home's ranked actions and direct links, the same pattern Handoff 15's Blog already followed); Lost Pet and Memories are discoverable from Pet Profile, and Animal Support/Community are discoverable the same way Blog already is — via a direct link, not a nav item.
+
 ## API endpoints
 
 ```
@@ -5672,6 +5811,51 @@ only explicitly-provided provider data, the owner-observation disclaimer,
 the provider clinical patient view, and completed-visit amendment-only
 immutability).
 
+Everything in the Handoff 18 acceptance criteria: Lost Pet reporting with
+its own state machine mirrored into `Pet.lifecycleStatus` through the
+single existing `PetLifecycleService.transition()` gate, a redacted public
+share page that never leaks owner identity, and an anonymous-eligible
+sighting inbox the household must review before it can move an incident
+forward; Animal Support organizations/rescue cases/donation campaigns with
+a two-tier ledger (a platform-level `DONATION_PAYABLE` account that is
+never `PLATFORM_REVENUE`, plus a per-organization `DonationLedgerService`
+whose `recordPayout`/`getBalance` make a restricted fund provably
+unavailable to a general-fund payout, not just conventionally separate);
+Community posts/comments/reactions/reports fully reusing Handoff 11's
+Trust & Safety (`TrustCaseService`/`TrustActionService`, the latter now
+having its first real operational effect on a non-PROVIDER/SELLER
+subject) rather than a second moderation system, plus one-directional
+Lost-Pet/Support-Campaign distribution into the feed; and
+Memories/Life Timeline/Memorial mode, where the timeline is a pure
+read-time aggregation over existing records (never a duplicated table)
+and Memorial mode short-circuits `HomeRankingService.rank()` and skips
+the underlying health/care/booking queries entirely rather than just
+hiding their results, with death/memorial transitions always an explicit
+household action and never inferred from health data. A real,
+would-have-shipped-broken gap was found and fixed during this handoff's
+own frontend build: every upload flow in this codebase stores a raw
+`objectKey` with no way to reconstruct a viewable URL later, which meant
+Lost Pet photos, Animal Support logos/evidence, Community media, and
+Memory photos would all have rendered as broken images — fixed with an
+additive `resolveObjectUrl()`/`resolveObjectUrls()` utility and a
+companion `...Url`/`...Urls` field on every affected DTO, with no existing
+field removed or renamed. A disclosed, deliberate scope limit: true
+anonymous/guest donation was investigated and found to require a change to
+`Cart.userId`/`Checkout.userId` (hard `NOT NULL` FKs with no guest-checkout
+precedent anywhere in the codebase), so `donate()` requires a real
+authenticated donor and "anonymous" is satisfied entirely by
+`showDonorPublicly` defaulting to `false`. Every Handoff 01-17
+backend/frontend test remains green (298 backend e2e scenarios, 11 new for
+this handoff — covering incident open/transition/reunite/close, anonymous
+sighting submission and review, organization/campaign public browsing,
+the full donate → ledger → refund cycle including restricted-fund
+isolation, community post/comment/reaction/report moderation escalation,
+and memory creation/life-timeline aggregation — and 287 frontend tests, up
+from 267, covering the Lost Pet report/detail/public-share flows, the
+donate flow's login-gating and ledger-derived progress display, Community's
+reaction/comment login-gating, and Memorial mode's respectful heading
+switch on `MemoriesListView`).
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -6410,6 +6594,23 @@ immutability).
   presigned GET is what production would use), but a determined caller
   with the token before its TTL expires could reuse it; not a concern in
   the dev-only code path it guards.
+- **No true anonymous/guest donation** (Handoff 18) — `Cart.userId`/
+  `Checkout.userId` are hard `NOT NULL` FKs across the entire commerce
+  domain with no guest-checkout precedent anywhere in the codebase, so
+  `DonationService.donate()` requires a real authenticated donor;
+  "anonymous" on the public side is satisfied entirely by
+  `showDonorPublicly` defaulting to `false`.
+- **No real payout provider for Animal Support** (Handoff 18) — the same
+  `MANUAL`-only gap Handoff 14 left for seller settlements;
+  `AdminDonationService.recordPayout()` only records that a transfer
+  happened outside the system.
+- **Community has no algorithmic feed ranking** (Handoff 18) — a plain
+  paged, most-recent-first list with an optional `countryCode` filter,
+  per the spec's explicit "do not build opaque algorithmic recommendation
+  infrastructure" line.
+- **No global Animal Support/Community navigation entry** (Handoff 18) —
+  this codebase has never had a persistent nav bar; both are discoverable
+  via a direct link, the same way Handoff 15's Blog already is.
 
 ## Next recommended coding handoff
 
@@ -6591,3 +6792,51 @@ org membership or booking category alone at the point of use), keep
 creation path (never paywall safety-critical clinical content), and keep
 private medical files behind `StorageService`'s signed-download flow —
 never a stored public URL, no matter how small the change looks.
+
+Alternatively, following directly from Handoff 18: **real payout provider
+integration for Animal Support**, the same class of gap Handoff 14 left
+for seller settlements — `AdminDonationService.recordPayout()` only ever
+*records* that an organization was paid outside the system; there is no
+bank account/credential field and no real transfer execution. The exact
+`PayoutProvider`/`DevPayoutAdapter` design already proposed above for
+Handoff 14 would cover both call sites with one adapter, since both are
+"move IRR out of a ledger-tracked balance to an external account" in
+shape. A related, smaller option: a donor-facing receipt (PDF/email) for
+tax or personal record purposes — `DonationHistoryItemDto` already carries
+every field a receipt needs; this is a new rendering, not a new capability.
+A third, independent option: campaign goal-reached notifications — the
+existing `NotificationOrchestratorService` has no template today for "a
+campaign you follow reached its goal" or "a campaign you donated to posted
+an update," both straightforward additions once campaign-follow state (not
+modeled today — currently only a donor sees their own history) is decided
+either as a lightweight new `CampaignFollow` join table or, more simply,
+implicit for anyone who has ever donated to that campaign.
+
+A related, smaller option this handoff also unlocks: **rich pet-tagging on
+Community posts** — `CreateCommunityPostDto.petId` already accepts a single
+optional pet reference and `CommunityPostPetRefDto` already renders it, but
+`CreateCommunityPostView`'s form has no pet picker yet; wiring one is pure
+frontend work reusing the household's existing pet list, no schema or API
+change. A second, independent option: Community reactions/comments/reports
+on **Memories** — `CommunityPostType.MEMORY` already exists in the enum and
+a memory can already be shared the same one-directional way Lost Pet
+incidents and Support Campaigns are today (`CommunityPostService
+.createSourcedPost`), but no "share this memory to Community" action or
+`sourceType: MEMORY`/`sourcePetMemoryId` field exists yet — the natural
+next increment once product wants Memories to be shareable, not just
+private-by-default.
+
+Whichever is chosen, keep Lost Pet reporting and existing-memory access
+completely free of any `EntitlementService.assertWithinLimit()` call (the
+one hard constraint this handoff was built around), keep donation
+accounting posting only through `LedgerService.recordDonationCollected()`/
+`...Refunded()` into `DONATION_PAYABLE` — never `PLATFORM_REVENUE`, no
+matter how the payout side evolves — keep every donation fund-balance read
+going through `DonationLedgerService.getBalance()`/`getAvailableForFund()`
+(never a second, independently-computed running total), keep Community
+moderation flowing through the existing `TrustCaseService`/
+`TrustActionService` (never a second, parallel moderation model), and keep
+pet death/memorial transitions an explicit household action through
+`PetLifecycleService.transition()` — never inferred automatically from
+health, booking, or any other data, no matter how small the future change
+looks.

@@ -188,7 +188,8 @@
         "sitting": "مشاهده نگهداری پیش رو",
         "boarding": "مشاهده اقامت پیش رو",
         "petTaxi": "مشاهده سفر تاکسی حیوانات پیش رو"
-      }
+      },
+      "viewMemories": "مشاهده خاطرات"
     },
     "sections": {
       "ai": "پرسش از هوش مصنوعی",
@@ -276,7 +277,12 @@
         "BOARDING": "اقامت پیش رو",
         "PET_TAXI": "سفر تاکسی حیوانات پیش رو"
       },
-      "viewBooking": "مشاهده نوبت"
+      "viewBooking": "مشاهده نوبت",
+      "memoriesTeaser": "خاطرات",
+      "memoriesTeaserMemorial": "جایی برای نگه‌داشتن لحظاتی که با هم داشتید",
+      "openMemories": "باز کردن خاطرات",
+      "lostPetTeaser": "گم شده یا پیدا شده؟",
+      "openLostPet": "گزارش گم‌شدن"
     }
   },
   "health": {
@@ -2403,6 +2409,225 @@
       },
       "revisionHistory": "تاریخچه اصلاحات",
       "completedNotice": "این ویزیت تکمیل شده است. برای تغییرات بیشتر از «اصلاح» استفاده کنید — محتوای قبلی حفظ می‌شود."
+    }
+  },
+  "lostPet": {
+    "report": {
+      "title": "گزارش حیوان خانگی گم‌شده",
+      "subtitle": "جزئیات را به اشتراک بگذارید تا جامعه بتواند در پیدا کردن او کمک کند.",
+      "descriptionLabel": "توضیحات",
+      "descriptionPlaceholder": "چه چیزی به تن داشت؟ ویژگی‌های خاصی دارد؟",
+      "lastKnownLocationLabel": "آخرین مکان مشاهده‌شده",
+      "lastSeenAtLabel": "آخرین زمان مشاهده",
+      "contactPreferenceLabel": "چگونه می‌توان با شما تماس گرفت؟",
+      "contactPreference": {
+        "inAppMessage": "پیام درون‌برنامه‌ای",
+        "maskedContact": "اشتراک‌گذاری شماره تلفن پوشیده‌شده",
+        "publicContact": "نمایش عمومی اطلاعات تماس"
+      },
+      "photoLabel": "عکس",
+      "submit": "ثبت گزارش گم‌شدن"
+    },
+    "list": {
+      "title": "گزارش‌های حیوانات گم‌شده",
+      "reportButton": "گزارش گم‌شدن",
+      "empty": "هنوز گزارشی ثبت نشده است.",
+      "noLocation": "مکانی ثبت نشده",
+      "sightingsCount": "{count, plural, one {# مشاهده} other {# مشاهده}}"
+    },
+    "status": {
+      "OPEN": "گم‌شده",
+      "SEARCHING": "در حال جستجو",
+      "SIGHTING_REPORTED": "مشاهده گزارش شد",
+      "FOUND": "پیدا شد",
+      "REUNITED": "بازگشت به خانواده",
+      "CLOSED": "بسته شده"
+    },
+    "sightingStatus": {
+      "SUBMITTED": "در انتظار بررسی",
+      "ACCEPTED": "پذیرفته شد",
+      "REJECTED": "رد شد"
+    },
+    "detail": {
+      "title": "{name} گم شده است",
+      "lastKnownLocation": "آخرین مکان مشاهده‌شده: {location}",
+      "privateNotes": "یادداشت خصوصی: {notes}",
+      "actions": {
+        "markSearching": "علامت‌گذاری به‌عنوان در حال جستجو",
+        "markFound": "علامت‌گذاری به‌عنوان پیدا شده",
+        "reunite": "تأیید بازگشت",
+        "share": "اشتراک‌گذاری در انجمن",
+        "close": "بستن گزارش"
+      },
+      "sightingsTitle": "مشاهدات",
+      "sightingsEmpty": "هنوز مشاهده‌ای گزارش نشده است.",
+      "anonymousReporter": "گزارش ناشناس",
+      "knownReporter": "گزارش‌شده توسط کاربر واردشده",
+      "acceptSighting": "پذیرفتن",
+      "rejectSighting": "رد کردن"
+    },
+    "public": {
+      "list": {
+        "title": "حیوانات گم‌شده در اطراف",
+        "subtitle": "گزارش‌های باز حیوانات گم‌شده را مرور کنید. اگر حیوانی را شناختید، گزارش را باز کرده و مشاهده خود را ثبت کنید."
+      },
+      "species": "گونه: {species}",
+      "breed": "نژاد: {breed}",
+      "colorMarkings": "رنگ / نشانه‌ها: {markings}",
+      "contact": "تماس: {contact}",
+      "reportSighting": {
+        "title": "گزارش یک مشاهده",
+        "locationLabel": "کجا او را دیدید؟",
+        "descriptionLabel": "توضیحات",
+        "submit": "ثبت مشاهده",
+        "success": "متشکریم — مشاهده شما برای بررسی ثبت شد."
+      }
+    }
+  },
+  "animalSupport": {
+    "orgList": {
+      "title": "سازمان‌های حمایت از حیوانات",
+      "subtitle": "سازمان‌های نجات تأییدشده‌ای که می‌توانید حمایت کنید را مرور کنید.",
+      "empty": "هنوز سازمانی ثبت نشده است.",
+      "verified": "تأیید شده"
+    },
+    "orgDetail": {
+      "verified": "سازمان تأییدشده",
+      "campaignsTitle": "کمپین‌های فعال",
+      "campaignsEmpty": "در حال حاضر کمپین فعالی وجود ندارد.",
+      "rescueCasesTitle": "موارد نجات",
+      "rescueCasesEmpty": "موردی ثبت نشده است."
+    },
+    "campaignList": {
+      "title": "کمپین‌های حمایتی",
+      "subtitle": "هر کمپین یک مجموع شفاف و برگرفته از دفتر مالی نشان می‌دهد — نه یک تخمین.",
+      "empty": "در حال حاضر کمپینی باز نیست."
+    },
+    "campaignCard": {
+      "raised": "{raised} ریال جمع‌آوری شده",
+      "raisedOfTarget": "{raised} از {target} ریال جمع‌آوری شده"
+    },
+    "fundType": {
+      "GENERAL": "صندوق عمومی",
+      "RESTRICTED": "مخصوص این کمپین"
+    },
+    "campaignDetail": {
+      "fundType": "نوع صندوق: {fundType}",
+      "donateTitle": "کمک مالی",
+      "loginToDonate": "برای کمک مالی وارد شوید.",
+      "amountLabel": "مبلغ (ریال)",
+      "showDonorPublicly": "نام من به‌صورت عمومی همراه این کمک نمایش داده شود",
+      "donateSubmit": "کمک کردن",
+      "donateSuccess": "از کمک شما سپاسگزاریم!",
+      "updatesTitle": "به‌روزرسانی‌ها",
+      "updatesEmpty": "هنوز به‌روزرسانی‌ای ثبت نشده است.",
+      "donorsTitle": "کمک‌کنندگان اخیر",
+      "donorsEmpty": "هنوز کمک‌کننده عمومی‌ای وجود ندارد."
+    },
+    "myDonations": {
+      "title": "کمک‌های من",
+      "empty": "شما هنوز کمکی انجام نداده‌اید."
+    },
+    "donationStatus": {
+      "PENDING": "در انتظار",
+      "SUCCEEDED": "تکمیل شده",
+      "FAILED": "ناموفق",
+      "REFUNDED": "بازگردانده شده"
+    }
+  },
+  "community": {
+    "postType": {
+      "GENERAL": "عمومی",
+      "QUESTION": "سؤال",
+      "LOCAL": "محلی",
+      "LOST_PET_SHARE": "حیوان گم‌شده",
+      "RESCUE": "نجات",
+      "ADOPTION": "فرزندخواندگی",
+      "MEMORY": "خاطره"
+    },
+    "reaction": {
+      "LIKE": "پسندیدن",
+      "LOVE": "دوست داشتن",
+      "HELPFUL": "مفید بود"
+    },
+    "reportReason": {
+      "SPAM": "هرزنامه",
+      "ABUSE": "سوءاستفاده",
+      "MISINFORMATION": "اطلاعات نادرست",
+      "INAPPROPRIATE": "نامناسب",
+      "OTHER": "سایر"
+    },
+    "feed": {
+      "title": "انجمن",
+      "newPost": "پست جدید",
+      "empty": "هنوز پستی وجود ندارد. اولین نفر باشید که چیزی به اشتراک می‌گذارد.",
+      "loadMore": "بیشتر",
+      "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}"
+    },
+    "newPost": {
+      "title": "پست جدید",
+      "typeLabel": "نوع",
+      "titleLabel": "عنوان",
+      "bodyLabel": "چه چیزی در ذهن دارید؟",
+      "mediaLabel": "عکس",
+      "submit": "ارسال"
+    },
+    "post": {
+      "report": "گزارش",
+      "reportReasonLabel": "دلیل",
+      "reportDetailsLabel": "جزئیات",
+      "reportSubmit": "ارسال گزارش",
+      "reportSuccess": "متشکریم — این پست برای بررسی گزارش شد.",
+      "commentsTitle": "نظرات",
+      "commentLabel": "افزودن نظر",
+      "commentSubmit": "ارسال",
+      "commentsEmpty": "هنوز نظری ثبت نشده است."
+    }
+  },
+  "memories": {
+    "memoryType": {
+      "PHOTO": "عکس",
+      "VIDEO": "ویدیو",
+      "MILESTONE": "نقطه عطف",
+      "STORY": "داستان",
+      "BIRTHDAY": "تولد",
+      "FIRST_DAY": "اولین روز در خانه",
+      "ADOPTION_DAY": "روز فرزندخواندگی",
+      "TRAVEL": "سفر",
+      "ACHIEVEMENT": "دستاورد",
+      "OTHER": "سایر"
+    },
+    "timelineEntryType": {
+      "MEMORY": "خاطره",
+      "HEALTH": "سابقه سلامت",
+      "LOST_PET_RESOLVED": "بازگشت به خانواده",
+      "ADOPTION": "فرزندخواندگی",
+      "LIFECYCLE": "رویداد زندگی"
+    },
+    "list": {
+      "title": "خاطرات {name}",
+      "memorialTitle": "به یاد {name}",
+      "memorialSubtitle": "جایی برای نگه‌داشتن لحظاتی که با هم داشتید.",
+      "addMemory": "افزودن خاطره",
+      "empty": "هنوز خاطره‌ای ثبت نشده است. اولین خاطره را اضافه کنید.",
+      "viewLifeTimeline": "مشاهده خط زمانی زندگی"
+    },
+    "newMemory": {
+      "title": "افزودن خاطره",
+      "typeLabel": "نوع",
+      "titleLabel": "عنوان",
+      "descriptionLabel": "توضیحات",
+      "occurredAtLabel": "تاریخ",
+      "locationLabel": "مکان",
+      "mediaLabel": "عکس",
+      "submit": "ذخیره خاطره"
+    },
+    "detail": {
+      "delete": "حذف خاطره"
+    },
+    "timeline": {
+      "title": "خط زمانی زندگی",
+      "empty": "هنوز چیزی برای نمایش وجود ندارد."
     }
   }
 }

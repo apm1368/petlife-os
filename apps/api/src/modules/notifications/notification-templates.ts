@@ -180,6 +180,27 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "برنامه مراقبتی به‌روزرسانی شد", body: "برنامه مراقبتی {{petName}} توسط ارائه‌دهنده به‌روزرسانی شد.", smsBody: "یک به‌روزرسانی برنامه مراقبتی برای حیوان خانگی شما ثبت شد." },
     en: { title: "Care plan updated", body: "{{petName}}'s care plan was updated by the provider.", smsBody: "A care plan update for your pet is available in PET LIFE OS." },
   },
+
+  // Handoff 18: Lost Pet — a high-severity category (spec: "high-severity
+  // product flow"), so every smsBody is deliberately specific enough to be
+  // actionable at a glance (unlike the deliberately generic H17 clinical
+  // smsBody copy) while still never including a raw contact number.
+  "lost_pet.incident_opened": {
+    fa: { title: "گزارش گم‌شدن حیوان خانگی ثبت شد", body: "گزارش گم‌شدن {{petName}} ثبت شد. اعضای خانواده مطلع شدند.", smsBody: "گزارش گم‌شدن {{petName}} در پت‌لایف ثبت شد." },
+    en: { title: "Lost pet report created", body: "A lost pet report for {{petName}} was created. Household members have been notified.", smsBody: "A lost pet report for {{petName}} was created in PET LIFE OS." },
+  },
+  "lost_pet.sighting_submitted": {
+    fa: { title: "گزارش مشاهده جدید", body: "یک گزارش مشاهده جدید برای {{petName}} ثبت شد.", smsBody: "یک گزارش مشاهده جدید برای {{petName}} در پت‌لایف ثبت شد." },
+    en: { title: "New sighting reported", body: "A new sighting was reported for {{petName}}.", smsBody: "A new sighting for {{petName}} was reported in PET LIFE OS." },
+  },
+  "lost_pet.marked_found": {
+    fa: { title: "حیوان خانگی پیدا شد", body: "{{petName}} به عنوان پیداشده علامت‌گذاری شد.", smsBody: "{{petName}} در پت‌لایف پیداشده علامت‌گذاری شد." },
+    en: { title: "Pet marked found", body: "{{petName}} was marked as found.", smsBody: "{{petName}} was marked as found in PET LIFE OS." },
+  },
+  "lost_pet.reunited": {
+    fa: { title: "بازگشت به خانواده", body: "{{petName}} با خانواده دوباره یکی شد!", smsBody: "خبر خوب! {{petName}} با خانواده دوباره یکی شد." },
+    en: { title: "Reunited!", body: "{{petName}} has been reunited with the household!", smsBody: "Good news — {{petName}} has been reunited with your household." },
+  },
 };
 
 export function hasTemplate(key: string): boolean {

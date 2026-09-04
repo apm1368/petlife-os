@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { type Prisma, ProviderVerificationStatus, SellerStatus, SellerVerificationStatus, TrustActionType, TrustCaseStatus, TrustSubjectType } from "@prisma/client";
+import { CommunityContentStatus, type Prisma, ProviderVerificationStatus, SellerStatus, SellerVerificationStatus, TrustActionType, TrustCaseStatus, TrustSubjectType } from "@prisma/client";
 import type { AppealDto, TrustActionDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
@@ -40,6 +40,26 @@ function operationalUpdateFor(subjectType: TrustSubjectType, actionType: TrustAc
   return {};
 }
 
+/**
+ * Handoff 18: COMMUNITY_CONTENT's operational effect (spec: schema doc
+ * comment "a TrustAction of type REMOVE_CONTENT sets this to REMOVED").
+ * `subjectId` is a plain generalized id with no FK (see TrustCase's own
+ * schema doc comment) — it may name either a CommunityPost or a
+ * CommunityComment, so this tries the post table first and falls back to
+ * the comment table only if no post matched, never both.
+ */
+async function applyCommunityContentEffect(tx: Prisma.TransactionClient, subjectId: string, actionType: TrustActionType): Promise<void> {
+  let nextStatus: CommunityContentStatus | undefined;
+  if (actionType === TrustActionType.REMOVE_CONTENT) nextStatus = CommunityContentStatus.REMOVED;
+  else if (actionType === TrustActionType.RESTORE) nextStatus = CommunityContentStatus.PUBLISHED;
+  if (!nextStatus) return;
+
+  const postUpdate = await tx.communityPost.updateMany({ where: { id: subjectId }, data: { status: nextStatus } });
+  if (postUpdate.count === 0) {
+    await tx.communityComment.updateMany({ where: { id: subjectId }, data: { status: nextStatus } });
+  }
+}
+
 @Injectable()
 export class TrustActionService {
   constructor(
@@ -61,6 +81,7 @@ export class TrustActionService {
       const { providerUpdate, sellerUpdate } = operationalUpdateFor(trustCase.subjectType, dto.actionType);
       if (providerUpdate) await tx.providerOrganization.update({ where: { id: trustCase.subjectId }, data: providerUpdate });
       if (sellerUpdate) await tx.sellerOrganization.update({ where: { id: trustCase.subjectId }, data: sellerUpdate });
+      if (trustCase.subjectType === TrustSubjectType.COMMUNITY_CONTENT) await applyCommunityContentEffect(tx, trustCase.subjectId, dto.actionType);
 
       // Taking an action moves the case into review if it was still OPEN —
       // an admin who has already started acting on a case is, by

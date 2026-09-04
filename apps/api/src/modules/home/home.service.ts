@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, PetLifecycleStatus } from "@prisma/client";
 import { SetupStatus, VaccinationStatus, type PetInterest } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
@@ -40,6 +40,7 @@ export class HomeService {
         health: HEALTH_NOT_VISIBLE,
         care: CARE_NOT_VISIBLE,
         booking: NO_UPCOMING_BOOKING,
+        isMemorialModeActive: false,
       });
       return { activePet: null, primaryAction, secondaryActions };
     }
@@ -59,8 +60,26 @@ export class HomeService {
         health: HEALTH_NOT_VISIBLE,
         care: CARE_NOT_VISIBLE,
         booking: NO_UPCOMING_BOOKING,
+        isMemorialModeActive: false,
       });
       return { activePet: null, primaryAction, secondaryActions };
+    }
+
+    // Handoff 18 memorial mode — once DECEASED/MEMORIAL, skip health/care/booking
+    // entirely rather than merely hiding them from ranking: no commercial-nudge
+    // data should even be queried for a pet whose care is no longer active.
+    const isMemorialModeActive = activePet.lifecycleStatus === PetLifecycleStatus.DECEASED || activePet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
+    if (isMemorialModeActive) {
+      const { primaryAction, secondaryActions } = this.ranking.rank({
+        hasActivePet: true,
+        activePetId: activePet.id,
+        interests: [],
+        health: HEALTH_NOT_VISIBLE,
+        care: CARE_NOT_VISIBLE,
+        booking: NO_UPCOMING_BOOKING,
+        isMemorialModeActive: true,
+      });
+      return { activePet, primaryAction, secondaryActions };
     }
 
     const interests = (
@@ -105,6 +124,7 @@ export class HomeService {
       health,
       care,
       booking,
+      isMemorialModeActive: false,
     });
 
     return { activePet, primaryAction, secondaryActions };

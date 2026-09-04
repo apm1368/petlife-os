@@ -26,6 +26,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_HIDDEN,
       care: CARE_HIDDEN,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_PROFILE);
     expect(result.secondaryActions).toHaveLength(0);
@@ -39,6 +40,7 @@ describe("HomeRankingService", () => {
       health: { visible: true, vaccinationStatus: VaccinationStatus.DUE_SOON, profileStatus: SetupStatus.COMPLETE },
       care: CARE_HIDDEN,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_VACCINATION);
     expect(result.primaryAction.href).toBe("/pets/pet-1/health/vaccination");
@@ -52,6 +54,7 @@ describe("HomeRankingService", () => {
       health: { visible: true, vaccinationStatus: VaccinationStatus.UP_TO_DATE, profileStatus: SetupStatus.PARTIAL },
       care: CARE_HIDDEN,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.COMPLETE_HEALTH);
   });
@@ -64,6 +67,7 @@ describe("HomeRankingService", () => {
       health: { visible: false, vaccinationStatus: VaccinationStatus.OVERDUE, profileStatus: SetupStatus.NOT_STARTED },
       care: CARE_HIDDEN,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.FIND_VET);
   });
@@ -76,6 +80,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_COMPLETE,
       care: CARE_HIDDEN,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.FIND_VET);
   });
@@ -88,6 +93,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_COMPLETE,
       care: CARE_HIDDEN,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.ASK_AI);
   });
@@ -100,6 +106,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_COMPLETE,
       care: { visible: true, profileStatus: SetupStatus.PARTIAL },
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.secondaryActions.some((a) => a.kind === HomeActionKind.COMPLETE_CARE_PROFILE)).toBe(true);
   });
@@ -112,6 +119,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_COMPLETE,
       care: CARE_HIDDEN,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.secondaryActions.some((a) => a.kind === HomeActionKind.COMPLETE_CARE_PROFILE)).toBe(false);
   });
@@ -124,6 +132,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_COMPLETE,
       care: CARE_COMPLETE,
       booking: NO_BOOKING,
+      isMemorialModeActive: false,
     });
     expect(result.secondaryActions.some((a) => a.kind === HomeActionKind.COMPLETE_CARE_PROFILE)).toBe(false);
   });
@@ -136,6 +145,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_COMPLETE,
       care: CARE_COMPLETE,
       booking: { hasUpcoming: true, bookingId: "booking-1", category: ServiceCategory.VET },
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_BOOKING);
     expect(result.primaryAction.href).toBe("/bookings/booking-1");
@@ -149,6 +159,7 @@ describe("HomeRankingService", () => {
       health: HEALTH_COMPLETE,
       care: CARE_COMPLETE,
       booking: { hasUpcoming: true, bookingId: "booking-2", category: ServiceCategory.GROOMING },
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_BOOKING);
     expect(result.primaryAction.labelKey).toBe("home.action.viewBooking.grooming");
@@ -162,6 +173,7 @@ describe("HomeRankingService", () => {
       health: { visible: true, vaccinationStatus: VaccinationStatus.DUE_SOON, profileStatus: SetupStatus.COMPLETE },
       care: CARE_HIDDEN,
       booking: { hasUpcoming: true, bookingId: "booking-1", category: ServiceCategory.VET },
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_VACCINATION);
   });
@@ -174,7 +186,23 @@ describe("HomeRankingService", () => {
       health: { visible: true, vaccinationStatus: VaccinationStatus.UP_TO_DATE, profileStatus: SetupStatus.PARTIAL },
       care: CARE_HIDDEN,
       booking: { hasUpcoming: true, bookingId: "booking-1", category: ServiceCategory.VET },
+      isMemorialModeActive: false,
     });
     expect(result.primaryAction.kind).toBe(HomeActionKind.COMPLETE_HEALTH);
+  });
+
+  it("surfaces only View Memories for a memorial-mode pet, never a health/booking/care nudge", () => {
+    const result = ranking.rank({
+      hasActivePet: true,
+      activePetId: "pet-1",
+      interests: [PetInterest.VET, PetInterest.DAILY_CARE],
+      health: { visible: true, vaccinationStatus: VaccinationStatus.OVERDUE, profileStatus: SetupStatus.NOT_STARTED },
+      care: { visible: true, profileStatus: SetupStatus.NOT_STARTED },
+      booking: { hasUpcoming: true, bookingId: "booking-1", category: ServiceCategory.VET },
+      isMemorialModeActive: true,
+    });
+    expect(result.primaryAction.kind).toBe(HomeActionKind.VIEW_MEMORIES);
+    expect(result.primaryAction.href).toBe("/pets/pet-1/memories");
+    expect(result.secondaryActions).toEqual([{ kind: HomeActionKind.VIEW_PROFILE, labelKey: "home.action.viewProfile", href: "/pets/pet-1" }]);
   });
 });

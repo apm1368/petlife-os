@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
+import { PetLifecycleStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { EntitlementService } from "../subscriptions/entitlement.service";
+import { PetLifecycleService } from "./pet-lifecycle.service";
 import type { CreatePetDto } from "./dto/create-pet.dto";
 import type { UpdatePetDto } from "./dto/update-pet.dto";
 
@@ -27,6 +29,7 @@ export class PetsService {
     private readonly petAccess: PetAccessService,
     private readonly events: DomainEventsService,
     private readonly entitlements: EntitlementService,
+    private readonly lifecycle: PetLifecycleService,
   ) {}
 
   async create(householdId: string, creatorUserId: string, dto: CreatePetDto) {
@@ -109,6 +112,32 @@ export class PetsService {
       });
       await this.events.publish("PetProfileUpdated", { petId: id }, { tx, aggregateType: "Pet", aggregateId: id });
       return pet;
+    });
+  }
+
+  /**
+   * spec: "Memorial transition must be explicit and auditable. Do not
+   * automatically infer death from health data." This is the ONLY place a
+   * household can move a pet to DECEASED — never inferred from any health
+   * record, observation, or clinical visit anywhere else in the codebase.
+   */
+  async markDeceased(petId: string, actorUserId: string, reason?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.lifecycle.transition(tx, petId, PetLifecycleStatus.DECEASED, { sourceType: "MANUAL_MEMORIAL", actorUserId, reason });
+      return tx.pet.findUniqueOrThrow({ where: { id: petId } });
+    });
+  }
+
+  /**
+   * spec: "Deceased vs Memorial: keep distinction explicit. DECEASED = a
+   * lifecycle fact. MEMORIAL = experience mode/retained identity state." A
+   * separate, explicit household action from markDeceased — DECEASED never
+   * auto-advances to MEMORIAL on its own.
+   */
+  async transitionToMemorial(petId: string, actorUserId: string, reason?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.lifecycle.transition(tx, petId, PetLifecycleStatus.MEMORIAL, { sourceType: "MANUAL_MEMORIAL", actorUserId, reason });
+      return tx.pet.findUniqueOrThrow({ where: { id: petId } });
     });
   }
 }

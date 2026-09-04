@@ -47,6 +47,8 @@ export interface HomeRankingInput {
   health: HomeRankingHealthInput;
   care: HomeRankingCareInput;
   booking: HomeRankingBookingInput;
+  /** Handoff 18: true iff the active pet's lifecycleStatus is DECEASED or MEMORIAL — see this service's own doc comment on memorial mode. */
+  isMemorialModeActive: boolean;
 }
 
 /**
@@ -82,6 +84,18 @@ export class HomeRankingService {
 
     const petId = input.activePetId;
     const viewProfile: HomeActionDto = { kind: HomeActionKind.VIEW_PROFILE, labelKey: "home.action.viewProfile", href: `/pets/${petId}` };
+
+    // Handoff 18 memorial mode (spec: "stop inappropriate commercial/operational
+    // prompts... no Buy again/Book now CTA on memorial-focused surfaces") — checked
+    // before any vaccination/booking/care/interest signal so a DECEASED/MEMORIAL
+    // pet can never surface a commerce nudge, regardless of what health/booking
+    // data HomeService happened to pass in.
+    if (input.isMemorialModeActive) {
+      return {
+        primaryAction: { kind: HomeActionKind.VIEW_MEMORIES, labelKey: "home.action.viewMemories", href: `/pets/${petId}/memories` },
+        secondaryActions: [viewProfile],
+      };
+    }
 
     if (input.health.visible) {
       if (input.health.vaccinationStatus === VaccinationStatus.DUE_SOON || input.health.vaccinationStatus === VaccinationStatus.OVERDUE) {

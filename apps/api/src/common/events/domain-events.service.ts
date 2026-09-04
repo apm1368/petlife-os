@@ -200,6 +200,26 @@ export const DOMAIN_EVENT_TYPES = [
   "CarePlanCreated",
   "CarePlanUpdated",
   "PetObservationAdded",
+
+  // Handoff 18: Lost Pet + Animal Support + Community + Memories
+  "PetLifecycleTransitioned",
+  "LostPetIncidentOpened",
+  "LostPetSightingSubmitted",
+  "LostPetSightingAccepted",
+  "LostPetMarkedFound",
+  "LostPetReunited",
+  "LostPetIncidentClosed",
+  "AnimalSupportOrganizationVerified",
+  "RescueCaseOpened",
+  "SupportCampaignPublished",
+  "SupportCampaignUpdatePosted",
+  "DonationSucceeded",
+  "DonationRefunded",
+  "CommunityPostCreated",
+  "CommunityCommentAdded",
+  "CommunityReportSubmitted",
+  "CommunityContentModerated",
+  "PetMemoryAdded",
 ] as const;
 
 /**

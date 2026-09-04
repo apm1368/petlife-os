@@ -64,4 +64,17 @@ export type AdminAuditAction =
   | "subscription.admin_cancelled"
   | "subscription.billing_attempt_refunded"
   | "subscription_entitlement_override.granted"
-  | "subscription_entitlement_override.revoked";
+  | "subscription_entitlement_override.revoked"
+  | "animal_support_organization.created"
+  | "animal_support_organization.updated"
+  | "animal_support_organization.verification_changed"
+  | "animal_support_organization.listed_changed"
+  | "rescue_case.created"
+  | "rescue_case.status_changed"
+  | "support_campaign.created"
+  | "support_campaign.status_changed"
+  | "support_campaign.update_posted"
+  | "donation.payout_recorded"
+  | "donation.refunded"
+  | "community_report.escalated"
+  | "community_report.dismissed";

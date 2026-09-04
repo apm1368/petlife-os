@@ -89,6 +89,9 @@ export function PetProfileView({ petId }: { petId: string }) {
   if (error) return <ErrorRecovery title={tCommon("loading")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
   if (!pet) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
+  const isMemorial = pet.lifecycleStatus === PetLifecycleStatus.DECEASED || pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
+  const canReportLost = pet.lifecycleStatus === PetLifecycleStatus.ACTIVE || pet.lifecycleStatus === PetLifecycleStatus.LOST;
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-4">
@@ -133,7 +136,23 @@ export function PetProfileView({ petId }: { petId: string }) {
         )}
       </ContextSurface>
 
-      {healthSummary ? (
+      <ContextSurface className="flex items-center justify-between">
+        <span className="text-body text-text-primary">{isMemorial ? t("memoriesTeaserMemorial") : t("memoriesTeaser")}</span>
+        <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/memories`)}>
+          {t("openMemories")}
+        </Button>
+      </ContextSurface>
+
+      {canReportLost ? (
+        <ContextSurface className="flex items-center justify-between">
+          <span className="text-body text-text-primary">{t("lostPetTeaser")}</span>
+          <Button variant="ghost" onClick={() => router.push(`/${locale}/pets/${petId}/lost`)}>
+            {t("openLostPet")}
+          </Button>
+        </ContextSurface>
+      ) : null}
+
+      {healthSummary && !isMemorial ? (
         <ContextSurface className="flex items-center justify-between">
           <div>
             <p className="text-body text-text-primary">{t("healthTeaser")}</p>
@@ -147,7 +166,7 @@ export function PetProfileView({ petId }: { petId: string }) {
         </ContextSurface>
       ) : null}
 
-      {careProfile ? (
+      {careProfile && !isMemorial ? (
         <ContextSurface className="flex items-center justify-between">
           <div>
             <p className="text-body text-text-primary">{t("careTeaser")}</p>
@@ -161,7 +180,7 @@ export function PetProfileView({ petId }: { petId: string }) {
         </ContextSurface>
       ) : null}
 
-      {upcomingBooking ? (
+      {upcomingBooking && !isMemorial ? (
         <ContextSurface className="flex items-center justify-between">
           <div>
             <p className="text-body text-text-primary">{t(`upcomingServiceTeaser.${upcomingBooking.category}`)}</p>

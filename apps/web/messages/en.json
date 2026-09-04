@@ -188,7 +188,8 @@
         "sitting": "View upcoming sitting",
         "boarding": "View upcoming boarding",
         "petTaxi": "View upcoming pet taxi ride"
-      }
+      },
+      "viewMemories": "View memories"
     },
     "sections": {
       "ai": "Ask AI",
@@ -276,7 +277,12 @@
         "BOARDING": "Upcoming boarding",
         "PET_TAXI": "Upcoming pet taxi ride"
       },
-      "viewBooking": "View booking"
+      "viewBooking": "View booking",
+      "memoriesTeaser": "Memories",
+      "memoriesTeaserMemorial": "A place to keep the moments you shared",
+      "openMemories": "Open memories",
+      "lostPetTeaser": "Lost or found?",
+      "openLostPet": "Report lost"
     }
   },
   "health": {
@@ -2403,6 +2409,225 @@
       },
       "revisionHistory": "Revision history",
       "completedNotice": "This visit is completed. Use Amend to make further changes — the prior content is preserved."
+    }
+  },
+  "lostPet": {
+    "report": {
+      "title": "Report a lost pet",
+      "subtitle": "Share details so your community can help you find them.",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "What were they wearing? Any distinguishing features?",
+      "lastKnownLocationLabel": "Last known location",
+      "lastSeenAtLabel": "Last seen at",
+      "contactPreferenceLabel": "How should people reach you?",
+      "contactPreference": {
+        "inAppMessage": "Message me in the app",
+        "maskedContact": "Share a masked phone number",
+        "publicContact": "Show my contact publicly"
+      },
+      "photoLabel": "Photo",
+      "submit": "Report lost pet"
+    },
+    "list": {
+      "title": "Lost pet reports",
+      "reportButton": "Report lost pet",
+      "empty": "No lost pet reports yet.",
+      "noLocation": "Location not provided",
+      "sightingsCount": "{count, plural, one {# sighting} other {# sightings}}"
+    },
+    "status": {
+      "OPEN": "Missing",
+      "SEARCHING": "Searching",
+      "SIGHTING_REPORTED": "Sighting reported",
+      "FOUND": "Found",
+      "REUNITED": "Reunited",
+      "CLOSED": "Closed"
+    },
+    "sightingStatus": {
+      "SUBMITTED": "Awaiting review",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected"
+    },
+    "detail": {
+      "title": "{name} is missing",
+      "lastKnownLocation": "Last known location: {location}",
+      "privateNotes": "Private notes: {notes}",
+      "actions": {
+        "markSearching": "Mark as searching",
+        "markFound": "Mark as found",
+        "reunite": "Confirm reunited",
+        "share": "Share to community",
+        "close": "Close report"
+      },
+      "sightingsTitle": "Sightings",
+      "sightingsEmpty": "No sightings reported yet.",
+      "anonymousReporter": "Reported anonymously",
+      "knownReporter": "Reported by a signed-in user",
+      "acceptSighting": "Accept",
+      "rejectSighting": "Reject"
+    },
+    "public": {
+      "list": {
+        "title": "Lost pets nearby",
+        "subtitle": "Browse open lost pet reports. If you recognize a pet, open the report to submit a sighting."
+      },
+      "species": "Species: {species}",
+      "breed": "Breed: {breed}",
+      "colorMarkings": "Color / markings: {markings}",
+      "contact": "Contact: {contact}",
+      "reportSighting": {
+        "title": "Report a sighting",
+        "locationLabel": "Where did you see them?",
+        "descriptionLabel": "Description",
+        "submit": "Submit sighting",
+        "success": "Thank you — your sighting has been submitted for review."
+      }
+    }
+  },
+  "animalSupport": {
+    "orgList": {
+      "title": "Animal welfare organizations",
+      "subtitle": "Browse verified rescue organizations you can support.",
+      "empty": "No organizations listed yet.",
+      "verified": "Verified"
+    },
+    "orgDetail": {
+      "verified": "Verified organization",
+      "campaignsTitle": "Active campaigns",
+      "campaignsEmpty": "No active campaigns right now.",
+      "rescueCasesTitle": "Rescue cases",
+      "rescueCasesEmpty": "No rescue cases listed."
+    },
+    "campaignList": {
+      "title": "Support campaigns",
+      "subtitle": "Every campaign shows a transparent, ledger-derived running total — never an estimate.",
+      "empty": "No campaigns are open right now."
+    },
+    "campaignCard": {
+      "raised": "{raised} IRR raised",
+      "raisedOfTarget": "{raised} of {target} IRR raised"
+    },
+    "fundType": {
+      "GENERAL": "General fund",
+      "RESTRICTED": "Restricted to this campaign"
+    },
+    "campaignDetail": {
+      "fundType": "Fund type: {fundType}",
+      "donateTitle": "Donate",
+      "loginToDonate": "Log in to make a donation.",
+      "amountLabel": "Amount (IRR)",
+      "showDonorPublicly": "Show my name publicly with this donation",
+      "donateSubmit": "Donate",
+      "donateSuccess": "Thank you for your donation!",
+      "updatesTitle": "Updates",
+      "updatesEmpty": "No updates posted yet.",
+      "donorsTitle": "Recent donors",
+      "donorsEmpty": "No public donors yet."
+    },
+    "myDonations": {
+      "title": "My donations",
+      "empty": "You haven't made any donations yet."
+    },
+    "donationStatus": {
+      "PENDING": "Pending",
+      "SUCCEEDED": "Completed",
+      "FAILED": "Failed",
+      "REFUNDED": "Refunded"
+    }
+  },
+  "community": {
+    "postType": {
+      "GENERAL": "General",
+      "QUESTION": "Question",
+      "LOCAL": "Local",
+      "LOST_PET_SHARE": "Lost pet",
+      "RESCUE": "Rescue",
+      "ADOPTION": "Adoption",
+      "MEMORY": "Memory"
+    },
+    "reaction": {
+      "LIKE": "Like",
+      "LOVE": "Love",
+      "HELPFUL": "Helpful"
+    },
+    "reportReason": {
+      "SPAM": "Spam",
+      "ABUSE": "Abuse",
+      "MISINFORMATION": "Misinformation",
+      "INAPPROPRIATE": "Inappropriate",
+      "OTHER": "Other"
+    },
+    "feed": {
+      "title": "Community",
+      "newPost": "New post",
+      "empty": "No posts yet. Be the first to share something.",
+      "loadMore": "Load more",
+      "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}"
+    },
+    "newPost": {
+      "title": "New post",
+      "typeLabel": "Type",
+      "titleLabel": "Title",
+      "bodyLabel": "What's on your mind?",
+      "mediaLabel": "Photo",
+      "submit": "Post"
+    },
+    "post": {
+      "report": "Report",
+      "reportReasonLabel": "Reason",
+      "reportDetailsLabel": "Details",
+      "reportSubmit": "Submit report",
+      "reportSuccess": "Thank you — this post has been reported for review.",
+      "commentsTitle": "Comments",
+      "commentLabel": "Add a comment",
+      "commentSubmit": "Post",
+      "commentsEmpty": "No comments yet."
+    }
+  },
+  "memories": {
+    "memoryType": {
+      "PHOTO": "Photo",
+      "VIDEO": "Video",
+      "MILESTONE": "Milestone",
+      "STORY": "Story",
+      "BIRTHDAY": "Birthday",
+      "FIRST_DAY": "First day home",
+      "ADOPTION_DAY": "Adoption day",
+      "TRAVEL": "Travel",
+      "ACHIEVEMENT": "Achievement",
+      "OTHER": "Other"
+    },
+    "timelineEntryType": {
+      "MEMORY": "Memory",
+      "HEALTH": "Health record",
+      "LOST_PET_RESOLVED": "Reunited",
+      "ADOPTION": "Adoption",
+      "LIFECYCLE": "Life event"
+    },
+    "list": {
+      "title": "{name}'s memories",
+      "memorialTitle": "In loving memory of {name}",
+      "memorialSubtitle": "A place to keep the moments you shared together.",
+      "addMemory": "Add a memory",
+      "empty": "No memories yet. Add the first one.",
+      "viewLifeTimeline": "View life timeline"
+    },
+    "newMemory": {
+      "title": "Add a memory",
+      "typeLabel": "Type",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description",
+      "occurredAtLabel": "Date",
+      "locationLabel": "Location",
+      "mediaLabel": "Photo",
+      "submit": "Save memory"
+    },
+    "detail": {
+      "delete": "Delete memory"
+    },
+    "timeline": {
+      "title": "Life timeline",
+      "empty": "Nothing to show yet."
     }
   }
 }
