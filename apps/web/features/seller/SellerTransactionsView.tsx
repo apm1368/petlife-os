@@ -29,7 +29,11 @@ export function SellerTransactionsView() {
     setError(false);
     try {
       const result = await sellerFinanceService.listTransactions(sellerId, { page: nextPage, pageSize: PAGE_SIZE });
-      setItems((prev) => (append && prev ? [...prev, ...result.items] : result.items));
+      setItems((prev) => {
+        if (!append || !prev) return result.items;
+        const known = new Set(prev.map((item) => item.id));
+        return [...prev, ...result.items.filter((item) => !known.has(item.id))];
+      });
       setTotal(result.total);
       setPage(nextPage);
     } catch {

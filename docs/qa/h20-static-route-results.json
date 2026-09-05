@@ -1,0 +1,762 @@
+[
+  {
+    "Locale": "fa",
+    "Path": "/",
+    "Status": 308
+  },
+  {
+    "Locale": "fa",
+    "Path": "/account",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/account/forgot",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/account/reset",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/audit",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/content",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/content/categories",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/content/media",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/content/new",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/content/placements",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/content/tags",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/customers",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/disputes",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/providers",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/reconciliation",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/seller-finance",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/sellers",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/subscriptions",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/subscriptions/households",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/support",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/tasks",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/transactions",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/admin/trust",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/ai",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/animal-support",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/animal-support/campaigns",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/auth/complete",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/blog",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/bookings",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/care-calendar",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/cart",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/checkout",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/community",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/community/new",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/donations",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/home",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/insurance",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/insurance/compare",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/lost-pets",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/notifications",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/notifications/preferences",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/onboarding",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/orders",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/pets",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/pets/active",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/pets/new",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/places",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/places/favorites",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/provider",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/provider/availability",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/provider/bookings",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/provider/calendar",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/provider/services",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/provider/team",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/register",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/channels",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/finance",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/finance/settlements",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/finance/transactions",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/inventory",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/offers",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/orders",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/settings",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/seller/team",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/services",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/shop",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/shop/products",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/subscription",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/subscription/plans",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/support",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/support/new",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/support/tickets",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/vet/find",
+    "Status": 200
+  },
+  {
+    "Locale": "fa",
+    "Path": "/welcome",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/",
+    "Status": 308
+  },
+  {
+    "Locale": "en",
+    "Path": "/account",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/account/forgot",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/account/reset",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/audit",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/content",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/content/categories",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/content/media",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/content/new",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/content/placements",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/content/tags",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/customers",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/disputes",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/providers",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/reconciliation",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/seller-finance",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/sellers",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/subscriptions",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/subscriptions/households",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/support",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/tasks",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/transactions",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/admin/trust",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/ai",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/animal-support",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/animal-support/campaigns",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/auth/complete",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/blog",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/bookings",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/care-calendar",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/cart",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/checkout",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/community",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/community/new",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/donations",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/home",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/insurance",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/insurance/compare",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/lost-pets",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/notifications",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/notifications/preferences",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/onboarding",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/orders",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/pets",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/pets/active",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/pets/new",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/places",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/places/favorites",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/provider",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/provider/availability",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/provider/bookings",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/provider/calendar",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/provider/services",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/provider/team",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/register",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/channels",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/finance",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/finance/settlements",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/finance/transactions",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/inventory",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/offers",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/orders",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/settings",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/seller/team",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/services",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/shop",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/shop/products",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/subscription",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/subscription/plans",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/support",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/support/new",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/support/tickets",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/vet/find",
+    "Status": 200
+  },
+  {
+    "Locale": "en",
+    "Path": "/welcome",
+    "Status": 200
+  }
+]
