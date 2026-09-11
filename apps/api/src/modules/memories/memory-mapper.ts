@@ -22,6 +22,8 @@ export function toPetMemoryDto(row: PetMemory): PetMemoryDto {
     mediaUrls: row.visibility === PetMemoryVisibility.PUBLIC ? resolveObjectUrls(row.mediaObjectKeys) : [],
     location: row.location,
     visibility: row.visibility as unknown as PetMemoryDto["visibility"],
+    tags: row.tags,
+    archivedAt: row.archivedAt ? row.archivedAt.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

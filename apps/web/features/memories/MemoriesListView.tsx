@@ -62,18 +62,21 @@ export function MemoriesListView({ petId }: { petId: string }) {
         <EmptyState title={t("list.empty")} />
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {memories.map((memory) => (
-            <Link key={memory.id} href={`/pets/${petId}/memories/${memory.id}`}>
-              <ContextSurface className="flex flex-col gap-2">
-                {memory.mediaUrls[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={memory.mediaUrls[0]} alt={memory.title} className="h-32 w-full rounded-md object-cover" />
-                ) : null}
-                <span className="text-body text-text-primary">{memory.title}</span>
-                <p className="text-metadata text-text-secondary">{new Date(memory.occurredAt).toLocaleDateString()}</p>
-              </ContextSurface>
-            </Link>
-          ))}
+          {memories.map((memory) => {
+            const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+            return (
+              <Link key={memory.id} href={`/pets/${petId}/memories/${memory.id}`}>
+                <ContextSurface className="flex flex-col gap-2">
+                  {memory.mediaUrls[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={memory.mediaUrls[0]} alt={displayTitle} className="h-32 w-full rounded-md object-cover" />
+                  ) : null}
+                  <span className="text-body text-text-primary">{displayTitle}</span>
+                  <p className="text-metadata text-text-secondary">{new Date(memory.occurredAt).toLocaleDateString()}</p>
+                </ContextSurface>
+              </Link>
+            );
+          })}
         </div>
       )}
 

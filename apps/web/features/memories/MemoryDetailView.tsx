@@ -56,16 +56,18 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
   if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
   if (!memory) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
+  const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-page-title text-text-primary">{memory.title}</h1>
+      <h1 className="text-page-title text-text-primary">{displayTitle}</h1>
 
       <ContextSurface className="flex flex-col gap-3">
         {(memory.visibility === "PRIVATE" ? privateMediaUrls : memory.mediaUrls).length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {(memory.visibility === "PRIVATE" ? privateMediaUrls : memory.mediaUrls).map((url) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img key={url} src={url} alt={memory.title} className="h-48 w-full rounded-md object-cover" />
+              <img key={url} src={url} alt={displayTitle} className="h-48 w-full rounded-md object-cover" />
             ))}
           </div>
         ) : null}

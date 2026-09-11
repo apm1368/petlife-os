@@ -6588,13 +6588,28 @@ model PetMemory {
   createdByUserId String    @db.Uuid
 
   type        PetMemoryType @default(PHOTO)
-  title       String
+  /// Handoff 21 (Memories/Diary): made nullable so the "quick entry" flow
+  /// (spec: "What happened today? textarea + photo + save") never forces a
+  /// title — a null title renders as a date-based fallback in the DTO
+  /// consumer, never a fabricated string persisted to the row itself.
+  title       String?
   description String?
   occurredAt  DateTime
 
   mediaObjectKeys String[]            @default([])
   location        String?
   visibility      PetMemoryVisibility @default(PRIVATE)
+
+  /// Handoff 21 — optional free-form moment tags (birthday, trip, milestone,
+  /// ...); deliberately a plain string array, not a new enum/table, since the
+  /// spec explicitly asks to "keep extensible" rather than hardcode a list.
+  tags String[] @default([])
+
+  /// Handoff 21 — soft-delete/archive per spec: "Memories are personally
+  /// meaningful data. Avoid destructive deletion." A non-null value means the
+  /// household chose to archive the memory; the row is never hard-deleted by
+  /// a normal user action (see PetMemoryService.archive/restore).
+  archivedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

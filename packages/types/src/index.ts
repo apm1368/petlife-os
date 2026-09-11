@@ -4270,13 +4270,17 @@ export interface PetMemoryDto {
   householdId: string;
   createdByUserId: string;
   type: PetMemoryType;
-  title: string;
+  /** Handoff 21: nullable — the "quick entry" flow never forces a title. */
+  title: string | null;
   description: string | null;
   occurredAt: string;
   mediaObjectKeys: string[];
   mediaUrls: string[];
   location: string | null;
   visibility: PetMemoryVisibility;
+  tags: string[];
+  /** Non-null once the household archives (soft-deletes) this memory. */
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

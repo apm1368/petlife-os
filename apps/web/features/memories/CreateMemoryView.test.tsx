@@ -27,10 +27,28 @@ describe("CreateMemoryView", () => {
     expect(push).toHaveBeenCalledWith("/pets/pet-1/memories/memory-9");
   });
 
-  it("disables submit until both title and date are entered", () => {
+  it("allows a quick entry with no title — the date defaults to today so submit is enabled by default", () => {
     renderWithIntl(<CreateMemoryView petId="pet-1" />);
 
     const button = screen.getByText("Save memory").closest("button");
+    expect(button?.disabled).toBe(false);
+  });
+
+  it("disables submit only if the date is cleared", () => {
+    renderWithIntl(<CreateMemoryView petId="pet-1" />);
+
+    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "" } });
+
+    const button = screen.getByText("Save memory").closest("button");
     expect(button?.disabled).toBe(true);
+  });
+
+  it("submits without a title, per the quick-entry spec", async () => {
+    vi.mocked(memoriesService.create).mockResolvedValue({ id: "memory-10" } as never);
+
+    renderWithIntl(<CreateMemoryView petId="pet-1" />);
+    fireEvent.click(screen.getByText("Save memory"));
+
+    await waitFor(() => expect(memoriesService.create).toHaveBeenCalledWith("pet-1", expect.objectContaining({ title: undefined })));
   });
 });

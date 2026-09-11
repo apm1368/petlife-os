@@ -31,6 +31,10 @@ export class UsageService {
     // never safety-critical) — owner-recorded observations are never
     // required for any clinical workflow.
     "health.observations.max": (prisma, householdId) => prisma.petObservation.count({ where: { pet: { householdId } } }),
+    // Handoff 21 (Memories/Diary) — counts only non-archived rows, matching
+    // PetMemoryService.list()'s default view; archiving a memory frees a
+    // slot without ever hard-deleting it (spec: "avoid destructive deletion").
+    "memories.entries.max": (prisma, householdId) => prisma.petMemory.count({ where: { householdId, archivedAt: null } }),
   };
 
   /** Every known LIMIT-type entitlement key this codebase actually meters. */

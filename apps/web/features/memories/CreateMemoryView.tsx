@@ -30,13 +30,14 @@ export function CreateMemoryView({ petId }: { petId: string }) {
   const [type, setType] = useState<PetMemoryType>(PetMemoryType.PHOTO);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [occurredAt, setOccurredAt] = useState("");
+  // spec: "quick entry" defaults to today so the flow is textarea + photo + save.
+  const [occurredAt, setOccurredAt] = useState(() => new Date().toISOString().slice(0, 10));
   const [location, setLocation] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(): Promise<void> {
-    if (!title.trim() || !occurredAt) return;
+    if (!occurredAt) return;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -49,7 +50,7 @@ export function CreateMemoryView({ petId }: { petId: string }) {
       }
       const memory = await memoriesService.create(petId, {
         type,
-        title: title.trim(),
+        title: title.trim() || undefined,
         description: description.trim() || undefined,
         occurredAt,
         location: location.trim() || undefined,
@@ -69,7 +70,7 @@ export function CreateMemoryView({ petId }: { petId: string }) {
 
       <ContextSurface className="flex flex-col gap-4">
         <Select label={t("newMemory.typeLabel")} value={type} onChange={(e) => setType(e.target.value as PetMemoryType)} options={MEMORY_TYPES.map((value) => ({ value, label: t(`memoryType.${value}`) }))} />
-        <Input label={t("newMemory.titleLabel")} value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Input label={t("newMemory.titleLabel")} hint={tCommon("optional")} value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input label={t("newMemory.descriptionLabel")} hint={tCommon("optional")} value={description} onChange={(e) => setDescription(e.target.value)} />
         <Input label={t("newMemory.occurredAtLabel")} type="date" value={occurredAt} onChange={(e) => setOccurredAt(e.target.value)} />
         <Input label={t("newMemory.locationLabel")} hint={tCommon("optional")} value={location} onChange={(e) => setLocation(e.target.value)} />
@@ -78,7 +79,7 @@ export function CreateMemoryView({ petId }: { petId: string }) {
           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
         </div>
         {error ? <p className="text-body text-state-urgent">{error}</p> : null}
-        <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit} disabled={!title.trim() || !occurredAt}>
+        <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit} disabled={!occurredAt}>
           {t("newMemory.submit")}
         </Button>
       </ContextSurface>
