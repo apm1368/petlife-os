@@ -227,6 +227,12 @@ export const DOMAIN_EVENT_TYPES = [
   "TravelRequirementUpdated",
   "InsuranceApplicationSubmitted",
   "InsuranceApplicationStatusChanged",
+  // Handoff 22 — Animal Support classifieds.
+  "SupportNeedListingCreated",
+  "SupportNeedListingStatusChanged",
+  "SupportNeedListingModerated",
+  "SupportNeedHelpOffered",
+  "SupportNeedHelpOfferResolved",
 ] as const;
 
 /**

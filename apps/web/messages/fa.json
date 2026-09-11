@@ -2887,5 +2887,126 @@
       "empty": "هنوز هیچ مکانی ذخیره نکرده‌اید.",
       "signInPrompt": "برای ذخیره مکان‌های موردعلاقه وارد شوید."
     }
+  },
+  "supportNeeds": {
+    "category": {
+      "FOOD": "غذا",
+      "MEDICINE": "دارو",
+      "VETERINARY_CARE": "خدمات دامپزشکی",
+      "TEMPORARY_HOME": "نگهداری موقت",
+      "FOSTER": "سرپرست موقت",
+      "TRANSPORT": "حمل‌ونقل",
+      "VOLUNTEER": "داوطلب",
+      "EQUIPMENT": "تجهیزات",
+      "FINANCIAL": "کمک مالی",
+      "SHELTER_SUPPLIES": "ملزومات پناهگاه",
+      "OTHER": "سایر"
+    },
+    "urgency": {
+      "NORMAL": "عادی",
+      "IMPORTANT": "مهم",
+      "URGENT": "فوری",
+      "CRITICAL": "بحرانی"
+    },
+    "status": {
+      "DRAFT": "پیش‌نویس",
+      "PENDING_REVIEW": "در حال بررسی",
+      "PUBLISHED": "منتشرشده",
+      "FULFILLED": "تأمین‌شده",
+      "CLOSED": "بسته‌شده",
+      "EXPIRED": "منقضی",
+      "REJECTED": "نیازمند اصلاح",
+      "REMOVED": "حذف‌شده"
+    },
+    "offerStatus": {
+      "PENDING": "در انتظار",
+      "ACCEPTED": "پذیرفته‌شده",
+      "DECLINED": "رد شده",
+      "COMPLETED": "انجام‌شده",
+      "CANCELLED": "لغو شده"
+    },
+    "list": {
+      "title": "نیازهای حمایت از حیوانات",
+      "subtitle": "نیازهای واقعی و مشخص که نجات‌دهندگان، پناهگاه‌ها و همسایه‌ها ثبت کرده‌اند.",
+      "publish": "ثبت نیاز",
+      "searchLabel": "جست‌وجوی نیازها",
+      "searchPlaceholder": "بر اساس عنوان یا توضیحات",
+      "categoryLabel": "دسته‌بندی",
+      "allCategories": "همهٔ دسته‌ها",
+      "urgencyLabel": "فوریت",
+      "allUrgencies": "همهٔ سطوح",
+      "cityLabel": "شهر",
+      "allCities": "همهٔ شهرها",
+      "empty": "نیازی با این فیلترها پیدا نشد.",
+      "emptyBrowseByCategory": "بر اساس دسته‌بندی ببینید:",
+      "verifiedOrganization": "سازمان تأییدشده",
+      "progress": "{fulfilled} از {needed} {unit} تأمین شده",
+      "myListings": "نیازهای من"
+    },
+    "detail": {
+      "animalType": "حیوان: {type}",
+      "offerCounts": "{pending} در انتظار · {accepted} پذیرفته‌شده · {completed} انجام‌شده",
+      "offerTitle": "کمک می‌کنم",
+      "contactExplainer": "پیام شما داخل پت‌لایف به ثبت‌کننده می‌رسد. شماره تماس و ایمیل هرگز عمومی نمایش داده نمی‌شود.",
+      "helpTypeLabel": "چه کمکی می‌توانید بکنید؟",
+      "messageLabel": "پیام",
+      "messagePlaceholder": "بنویسید چطور می‌توانید کمک کنید",
+      "quantityLabel": "چه تعداد؟",
+      "offerAction": "ارسال پیشنهاد کمک",
+      "offerSent": "پیشنهاد کمک شما برای ثبت‌کننده ارسال شد.",
+      "signInToHelp": "برای کمک وارد شوید",
+      "donateTitle": "کمک مالی",
+      "donateExplainer": "کمک مالی از طریق کمپین متصل به این نیاز انجام می‌شود تا هر ریال در دفتر کمک‌ها ثبت بماند.",
+      "donateAction": "رفتن به کمپین",
+      "shareTitle": "هم‌رسانی این نیاز",
+      "backToBoard": "بازگشت به همهٔ نیازها"
+    },
+    "create": {
+      "title": "ثبت نیاز",
+      "categoryLabel": "دسته‌بندی",
+      "urgencyLabel": "فوریت",
+      "titleLabel": "عنوان",
+      "titlePlaceholder": "مثلاً: برای هشت سگ نجات‌یافته غذا نیاز داریم",
+      "descriptionLabel": "توضیحات",
+      "descriptionPlaceholder": "دقیقاً بنویسید چه چیزی و چرا نیاز است",
+      "provinceLabel": "استان",
+      "cityLabel": "شهر",
+      "neighborhoodLabel": "محله",
+      "locationPrivacyHint": "اختیاری. کلی بنویسید — هرگز نشانی دقیق منزل را ثبت نکنید.",
+      "quantityLabel": "چه تعداد نیاز است؟",
+      "unitLabel": "واحد (کیسه، دوز، ساعت)",
+      "animalTypeLabel": "نوع حیوان",
+      "photosLabel": "تصاویر",
+      "continue": "پیش‌نمایش",
+      "previewTitle": "پیش‌نمایش نیاز شما",
+      "previewQuantity": "نیاز به {quantity} {unit}",
+      "moderationNotice": "نیاز شما پیش از نمایش عمومی توسط تیم ما بررسی می‌شود.",
+      "publish": "ارسال برای بررسی",
+      "back": "ویرایش",
+      "signInToPublish": "برای ثبت نیاز وارد شوید"
+    },
+    "mine": {
+      "title": "نیازهای ثبت‌شدهٔ من",
+      "tabAll": "همه",
+      "empty": "هنوز نیازی ثبت نکرده‌اید.",
+      "signInPrompt": "برای دیدن نیازهایی که ثبت کرده‌اید وارد شوید.",
+      "reviewNote": "یادداشت بررسی‌کننده: {note}",
+      "viewOffers": "دیدن پیشنهادها",
+      "hideOffers": "بستن پیشنهادها",
+      "noOffers": "هنوز پیشنهادی ثبت نشده.",
+      "markFulfilled": "تأمین شد",
+      "close": "بستن آگهی",
+      "acceptOffer": "پذیرش",
+      "declineOffer": "رد",
+      "completeOffer": "انجام شد"
+    },
+    "share": {
+      "whatsapp": "واتساپ",
+      "telegram": "تلگرام",
+      "bale": "بله",
+      "native": "هم‌رسانی",
+      "copyLink": "کپی لینک",
+      "copied": "لینک کپی شد"
+    }
   }
 }

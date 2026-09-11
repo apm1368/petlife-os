@@ -2887,5 +2887,126 @@
       "empty": "You haven't saved any places yet.",
       "signInPrompt": "Sign in to save your favorite places."
     }
+  },
+  "supportNeeds": {
+    "category": {
+      "FOOD": "Food",
+      "MEDICINE": "Medicine",
+      "VETERINARY_CARE": "Veterinary care",
+      "TEMPORARY_HOME": "Temporary home",
+      "FOSTER": "Foster",
+      "TRANSPORT": "Transport",
+      "VOLUNTEER": "Volunteer",
+      "EQUIPMENT": "Equipment",
+      "FINANCIAL": "Financial help",
+      "SHELTER_SUPPLIES": "Shelter supplies",
+      "OTHER": "Other"
+    },
+    "urgency": {
+      "NORMAL": "Normal",
+      "IMPORTANT": "Important",
+      "URGENT": "Urgent",
+      "CRITICAL": "Critical"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "PENDING_REVIEW": "In review",
+      "PUBLISHED": "Published",
+      "FULFILLED": "Fulfilled",
+      "CLOSED": "Closed",
+      "EXPIRED": "Expired",
+      "REJECTED": "Needs changes",
+      "REMOVED": "Removed"
+    },
+    "offerStatus": {
+      "PENDING": "Pending",
+      "ACCEPTED": "Accepted",
+      "DECLINED": "Declined",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "list": {
+      "title": "Animal support needs",
+      "subtitle": "Real, specific needs posted by rescuers, shelters and neighbours.",
+      "publish": "Post a need",
+      "searchLabel": "Search needs",
+      "searchPlaceholder": "Search by title or description",
+      "categoryLabel": "Category",
+      "allCategories": "All categories",
+      "urgencyLabel": "Urgency",
+      "allUrgencies": "Any urgency",
+      "cityLabel": "City",
+      "allCities": "Everywhere",
+      "empty": "No needs match these filters yet.",
+      "emptyBrowseByCategory": "Browse by category instead:",
+      "verifiedOrganization": "Verified organization",
+      "progress": "{fulfilled} of {needed} {unit} covered",
+      "myListings": "My listings"
+    },
+    "detail": {
+      "animalType": "Animal: {type}",
+      "offerCounts": "{pending} pending · {accepted} accepted · {completed} completed",
+      "offerTitle": "Offer help",
+      "contactExplainer": "Your message goes to the publisher inside PET LIFE. Phone numbers and emails are never shown publicly.",
+      "helpTypeLabel": "What can you offer?",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Tell them how you can help",
+      "quantityLabel": "How many?",
+      "offerAction": "Send offer",
+      "offerSent": "Your offer has been sent to the publisher.",
+      "signInToHelp": "Sign in to offer help",
+      "donateTitle": "Help financially",
+      "donateExplainer": "Donations go through this need's linked campaign, so every rial is tracked in the donation ledger.",
+      "donateAction": "Go to the campaign",
+      "shareTitle": "Share this need",
+      "backToBoard": "Back to all needs"
+    },
+    "create": {
+      "title": "Post a need",
+      "categoryLabel": "Category",
+      "urgencyLabel": "Urgency",
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. Dog food needed for eight rescues",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Explain exactly what is needed and why",
+      "provinceLabel": "Province",
+      "cityLabel": "City",
+      "neighborhoodLabel": "Neighbourhood",
+      "locationPrivacyHint": "Optional. Keep it general — never post your exact home address.",
+      "quantityLabel": "How many needed?",
+      "unitLabel": "Unit (bags, doses, hours)",
+      "animalTypeLabel": "Animal type",
+      "photosLabel": "Photos",
+      "continue": "Preview",
+      "previewTitle": "Preview your need",
+      "previewQuantity": "Needs {quantity} {unit}",
+      "moderationNotice": "Your need is reviewed by our team before it appears on the public board.",
+      "publish": "Submit for review",
+      "back": "Edit",
+      "signInToPublish": "Sign in to post this need"
+    },
+    "mine": {
+      "title": "My support listings",
+      "tabAll": "All",
+      "empty": "You have not posted any needs yet.",
+      "signInPrompt": "Sign in to see the needs you have posted.",
+      "reviewNote": "Moderator note: {note}",
+      "viewOffers": "View offers",
+      "hideOffers": "Hide offers",
+      "noOffers": "No offers yet.",
+      "markFulfilled": "Mark fulfilled",
+      "close": "Close listing",
+      "acceptOffer": "Accept",
+      "declineOffer": "Decline",
+      "completeOffer": "Mark completed"
+    },
+    "share": {
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram",
+      "bale": "Bale",
+      "native": "Share",
+      "copyLink": "Copy link",
+      "copied": "Link copied"
+    }
   }
 }

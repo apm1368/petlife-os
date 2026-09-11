@@ -59,6 +59,8 @@ import { AdminDonationService } from "../animal-support/admin-donation.service";
 import { AdminAnimalSupportController } from "./animal-support/admin-animal-support.controller";
 import { CommunityModerationService } from "./community/community-moderation.service";
 import { AdminCommunityController } from "./community/admin-community.controller";
+import { SupportNeedModerationService } from "./animal-support/support-need-moderation.service";
+import { AdminSupportNeedController } from "./animal-support/admin-support-need.controller";
 import { InsuranceProviderService } from "../insurance/insurance-provider.service";
 import { InsuranceProductService } from "../insurance/insurance-product.service";
 import { AdminInsuranceController } from "./insurance/admin-insurance.controller";
@@ -95,6 +97,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminSubscriptionController,
     AdminAnimalSupportController,
     AdminCommunityController,
+    AdminSupportNeedController,
     AdminInsuranceController,
     AdminPlacesController,
   ],
@@ -133,6 +136,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     DonationLedgerService,
     AdminDonationService,
     CommunityModerationService,
+    SupportNeedModerationService,
     InsuranceProviderService,
     InsuranceProductService,
     PetFriendlyPlaceService,

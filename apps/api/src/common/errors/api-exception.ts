@@ -1290,6 +1290,52 @@ export class PetMemoryNotFoundException extends ApiException {
   }
 }
 
+/** Handoff 22 — Animal Support classifieds. */
+export class SupportNeedListingNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_NEED_LISTING_NOT_FOUND", "Listing not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown when a listing transition isn't legal in SupportNeedService's explicit state table (e.g. publishing an already-CLOSED listing). */
+export class InvalidSupportNeedTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_SUPPORT_NEED_TRANSITION", "That change is not allowed for this listing's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class SupportNeedListingNotEditableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_NEED_LISTING_NOT_EDITABLE", "This listing can no longer be edited.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class HelpOfferNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("HELP_OFFER_NOT_FOUND", "Help offer not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class InvalidHelpOfferTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_HELP_OFFER_TRANSITION", "That change is not allowed for this offer's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** A helper already has an unresolved offer on this listing — they may offer again only once the previous one is resolved. */
+export class DuplicateHelpOfferException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_HELP_OFFER", "You already have an open offer on this listing.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** The caller is authenticated but is not this listing's publisher. */
+export class SupportNeedListingAccessDeniedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_NEED_LISTING_ACCESS_DENIED", "You do not have access to this listing.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
 /** Thrown by PetLifecycleService when a requested transition isn't a legal move in the explicit state table (e.g. MEMORIAL -> ACTIVE without going through DECEASED first is not modeled). */
 export class InvalidPetLifecycleTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {

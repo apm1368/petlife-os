@@ -227,4 +227,21 @@ export class StorageService {
     const target = await this.driver.createUploadTarget(key, contentType);
     return { ...target, key };
   }
+
+  /**
+   * Handoff 22: Animal Support classifieds listing photos — public by
+   * design (a needs board nobody can see helps nobody), same allow-list and
+   * size cap as Community media, keyed by the publishing user. Post-hoc
+   * moderation governs visibility, exactly as it does for Community.
+   */
+  async createSupportNeedImageUploadTarget(userId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = MEMORY_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > MEMORY_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
+    }
+    const key = `support-need-images/${userId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType);
+    return { ...target, key };
+  }
 }

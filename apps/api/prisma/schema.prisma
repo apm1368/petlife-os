@@ -6156,6 +6156,7 @@ model AnimalSupportOrganization {
   donationLedgerAccounts     DonationLedgerAccount[]
   donationLedgerTransactions DonationLedgerTransaction[]
   donationTransactions       DonationTransaction[]
+  supportNeedListings        SupportNeedListing[]
 
   @@map("animal_support_organizations")
 }
@@ -6240,6 +6241,7 @@ model SupportCampaign {
   donationIntents      DonationIntent[]
   donationTransactions DonationTransaction[]
   updates              SupportCampaignUpdate[]
+  supportNeedListings  SupportNeedListing[]
 
   @@index([organizationId])
   @@index([status])
@@ -6264,6 +6266,169 @@ model SupportCampaignUpdate {
 
   @@index([campaignId])
   @@map("support_campaign_updates")
+}
+
+// ---------------------------------------------------------------------------
+// Handoff 22 — Animal Support classifieds ("needs board").
+//
+// A SupportNeedListing is a *need*, not a campaign: anyone (an individual
+// rescuer or a verified organization) posts something concrete they need,
+// and other users respond with a HelpOffer. It deliberately does NOT
+// duplicate SupportCampaign/DonationIntent — a listing that accepts money
+// points at an existing campaign rather than growing its own money column,
+// so every rial still flows through the Handoff 18 donation ledger.
+// ---------------------------------------------------------------------------
+
+enum SupportNeedCategory {
+  FOOD
+  MEDICINE
+  VETERINARY_CARE
+  TEMPORARY_HOME
+  FOSTER
+  TRANSPORT
+  VOLUNTEER
+  EQUIPMENT
+  FINANCIAL
+  SHELTER_SUPPLIES
+  OTHER
+}
+
+enum SupportNeedUrgency {
+  NORMAL
+  IMPORTANT
+  URGENT
+  CRITICAL
+}
+
+enum SupportNeedStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  FULFILLED
+  CLOSED
+  EXPIRED
+  REJECTED
+  REMOVED
+}
+
+/// How a helper may reach the publisher. Deliberately never "publish my
+/// phone number": the spec is explicit that personal contact details must
+/// not be exposed by default, so every mode routes through an in-product
+/// HelpOffer or an existing donation flow.
+enum SupportNeedContactMode {
+  OFFER_HELP
+  DONATE
+  BOTH
+}
+
+model SupportNeedListing {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// Exactly one of these identifies the publisher — an individual rescuer
+  /// (creatorUserId) or a verified organization (organizationId). Both are
+  /// nullable at the column level; SupportNeedService enforces the
+  /// exactly-one rule, matching how DonationIntent keeps donorUserId bare.
+  creatorUserId  String?                    @db.Uuid
+  organizationId String?                    @db.Uuid
+  organization   AnimalSupportOrganization? @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  title       String
+  description String
+  category    SupportNeedCategory
+  urgency     SupportNeedUrgency  @default(NORMAL)
+  status      SupportNeedStatus   @default(DRAFT)
+
+  /// Coarse, publicly-safe location only. The spec forbids exposing an
+  /// exact home address, so there is deliberately no street/line1 column
+  /// and the optional point is documented as approximate.
+  province     String
+  city         String
+  neighborhood String?
+  /// Approximate (neighbourhood-level) coordinates for map discovery —
+  /// never a precise home pin.
+  latitude     Float?
+  longitude    Float?
+
+  imageObjectKeys String[] @default([])
+
+  /// Non-monetary need tracking (e.g. 20 bags of food, 3 volunteers).
+  /// fulfilledQuantity is only ever advanced through
+  /// SupportNeedService.recordFulfillment, never written directly by a client.
+  neededQuantity    Int?
+  fulfilledQuantity Int     @default(0)
+  quantityUnit      String?
+
+  /// A listing that accepts money points at an existing SupportCampaign
+  /// instead of holding its own balance — there is no listing-level money
+  /// column anywhere, so the donation ledger stays the single source of truth.
+  campaignId String?          @db.Uuid
+  campaign   SupportCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  contactMode SupportNeedContactMode @default(OFFER_HELP)
+
+  /// Free text, not PetSpecies — same reasoning as RescueCase.animalType.
+  animalType String?
+
+  reviewedByAdminId String?   @db.Uuid
+  reviewNote        String?
+  publishedAt       DateTime?
+  fulfilledAt       DateTime?
+  closedAt          DateTime?
+  expiresAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  helpOffers HelpOffer[]
+
+  @@index([status, publishedAt])
+  @@index([category])
+  @@index([province, city])
+  @@index([creatorUserId])
+  @@index([organizationId])
+  @@map("support_need_listings")
+}
+
+enum HelpOfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COMPLETED
+  CANCELLED
+}
+
+/// A helper's response to a listing. This is the *only* contact channel the
+/// classifieds surface offers — the publisher's own phone/email is never
+/// returned by any listing endpoint.
+model HelpOffer {
+  id        String             @id @default(uuid()) @db.Uuid
+  listingId String             @db.Uuid
+  listing   SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  helperUserId String @db.Uuid
+
+  message  String
+  /// What the helper is offering, which may legitimately differ from the
+  /// listing's own category (someone answering a FOOD need may offer
+  /// TRANSPORT to deliver it).
+  helpType SupportNeedCategory
+  quantity Int?
+
+  status HelpOfferStatus @default(PENDING)
+
+  /// Set when the publisher marks this offer COMPLETED, recording how much
+  /// of the listing's need it actually satisfied.
+  fulfilledQuantity Int?
+
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  /// One pending/active offer per helper per listing — a helper can offer
+  /// again only after the previous one is resolved.
+  @@index([listingId, status])
+  @@index([helperUserId])
+  @@map("help_offers")
 }
 
 enum DonationStatus {

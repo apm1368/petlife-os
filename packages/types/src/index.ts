@@ -4045,6 +4045,112 @@ export enum RescueCaseStatus {
   CLOSED = "CLOSED",
 }
 
+// --- Handoff 22: Animal Support classifieds (needs board) -------------------
+
+export enum SupportNeedCategory {
+  FOOD = "FOOD",
+  MEDICINE = "MEDICINE",
+  VETERINARY_CARE = "VETERINARY_CARE",
+  TEMPORARY_HOME = "TEMPORARY_HOME",
+  FOSTER = "FOSTER",
+  TRANSPORT = "TRANSPORT",
+  VOLUNTEER = "VOLUNTEER",
+  EQUIPMENT = "EQUIPMENT",
+  FINANCIAL = "FINANCIAL",
+  SHELTER_SUPPLIES = "SHELTER_SUPPLIES",
+  OTHER = "OTHER",
+}
+
+export enum SupportNeedUrgency {
+  NORMAL = "NORMAL",
+  IMPORTANT = "IMPORTANT",
+  URGENT = "URGENT",
+  CRITICAL = "CRITICAL",
+}
+
+export enum SupportNeedStatus {
+  DRAFT = "DRAFT",
+  PENDING_REVIEW = "PENDING_REVIEW",
+  PUBLISHED = "PUBLISHED",
+  FULFILLED = "FULFILLED",
+  CLOSED = "CLOSED",
+  EXPIRED = "EXPIRED",
+  REJECTED = "REJECTED",
+  REMOVED = "REMOVED",
+}
+
+export enum SupportNeedContactMode {
+  OFFER_HELP = "OFFER_HELP",
+  DONATE = "DONATE",
+  BOTH = "BOTH",
+}
+
+export enum HelpOfferStatus {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  DECLINED = "DECLINED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+/**
+ * A published need. Deliberately carries no publisher phone/email: the only
+ * contact channel is an in-product HelpOffer (or a donation against the
+ * linked campaign), per the spec's "do not expose personal contact by
+ * default" rule.
+ */
+export interface SupportNeedListingDto {
+  id: string;
+  /** Present only for an organization-published listing. */
+  organizationId: string | null;
+  organizationName: string | null;
+  /** True when the publishing organization is VERIFIED and publicly listed. */
+  organizationVerified: boolean;
+  /** Present only when the viewer is the publisher (never on public reads). */
+  creatorUserId: string | null;
+  title: string;
+  description: string;
+  category: SupportNeedCategory;
+  urgency: SupportNeedUrgency;
+  status: SupportNeedStatus;
+  province: string;
+  city: string;
+  neighborhood: string | null;
+  /** Approximate (neighbourhood-level) only. */
+  latitude: number | null;
+  longitude: number | null;
+  imageObjectKeys: string[];
+  imageUrls: string[];
+  neededQuantity: number | null;
+  fulfilledQuantity: number;
+  quantityUnit: string | null;
+  /** Money never lives on the listing — it flows through this campaign's ledger. */
+  campaignId: string | null;
+  contactMode: SupportNeedContactMode;
+  animalType: string | null;
+  reviewNote: string | null;
+  publishedAt: string | null;
+  fulfilledAt: string | null;
+  closedAt: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HelpOfferDto {
+  id: string;
+  listingId: string;
+  helperUserId: string;
+  message: string;
+  helpType: SupportNeedCategory;
+  quantity: number | null;
+  status: HelpOfferStatus;
+  fulfilledQuantity: number | null;
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface RescueCaseDto {
   id: string;
   organizationId: string;
