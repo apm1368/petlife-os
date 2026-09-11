@@ -2614,7 +2614,21 @@
       "memorialSubtitle": "جایی برای نگه‌داشتن لحظاتی که با هم داشتید.",
       "addMemory": "افزودن خاطره",
       "empty": "هنوز خاطره‌ای ثبت نشده است. اولین خاطره را اضافه کنید.",
-      "viewLifeTimeline": "مشاهده خط زمانی زندگی"
+      "viewLifeTimeline": "مشاهده خط زمانی زندگی",
+      "searchLabel": "جست‌وجوی خاطره‌ها",
+      "searchPlaceholder": "بر اساس عنوان یا متن خاطره",
+      "tagLabel": "برچسب",
+      "allTags": "همهٔ برچسب‌ها",
+      "yearLabel": "سال",
+      "allYears": "همهٔ سال‌ها",
+      "viewJournal": "دفترچه",
+      "viewGallery": "گالری",
+      "showArchived": "بایگانی",
+      "hideArchived": "بازگشت به دفترچه",
+      "emptyFiltered": "خاطره‌ای با این فیلترها پیدا نشد.",
+      "emptyArchived": "چیزی در بایگانی نیست.",
+      "restore": "بازگردانی",
+      "noPhoto": "بدون عکس"
     },
     "newMemory": {
       "title": "افزودن خاطره",
@@ -2624,14 +2638,23 @@
       "occurredAtLabel": "تاریخ",
       "locationLabel": "مکان",
       "mediaLabel": "عکس",
-      "submit": "ذخیره خاطره"
+      "submit": "ذخیره خاطره",
+      "tagsLabel": "برچسب‌ها",
+      "tagsHint": "با کاما جدا کنید، مثلاً تولد، سفر"
     },
     "detail": {
-      "delete": "حذف خاطره"
+      "edit": "ویرایش",
+      "archive": "بایگانی خاطره",
+      "restore": "بازگردانی خاطره",
+      "archivedNotice": "این خاطره بایگانی شده است. اینجا محفوظ می‌ماند و هر زمان می‌توانید بازگردانید."
     },
     "timeline": {
       "title": "خط زمانی زندگی",
       "empty": "هنوز چیزی برای نمایش وجود ندارد."
+    },
+    "editMemory": {
+      "title": "ویرایش خاطره",
+      "submit": "ذخیرهٔ تغییرات"
     }
   },
   "travel": {

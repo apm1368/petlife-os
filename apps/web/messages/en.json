@@ -2614,7 +2614,21 @@
       "memorialSubtitle": "A place to keep the moments you shared together.",
       "addMemory": "Add a memory",
       "empty": "No memories yet. Add the first one.",
-      "viewLifeTimeline": "View life timeline"
+      "viewLifeTimeline": "View life timeline",
+      "searchLabel": "Search memories",
+      "searchPlaceholder": "Search by title or story",
+      "tagLabel": "Tag",
+      "allTags": "All tags",
+      "yearLabel": "Year",
+      "allYears": "All years",
+      "viewJournal": "Journal",
+      "viewGallery": "Gallery",
+      "showArchived": "Archived",
+      "hideArchived": "Back to diary",
+      "emptyFiltered": "No memories match these filters.",
+      "emptyArchived": "Nothing archived.",
+      "restore": "Restore",
+      "noPhoto": "No photo"
     },
     "newMemory": {
       "title": "Add a memory",
@@ -2624,14 +2638,23 @@
       "occurredAtLabel": "Date",
       "locationLabel": "Location",
       "mediaLabel": "Photo",
-      "submit": "Save memory"
+      "submit": "Save memory",
+      "tagsLabel": "Tags",
+      "tagsHint": "Comma separated, e.g. birthday, trip"
     },
     "detail": {
-      "delete": "Delete memory"
+      "edit": "Edit",
+      "archive": "Archive memory",
+      "restore": "Restore memory",
+      "archivedNotice": "This memory is archived. It stays safe here and can be restored anytime."
     },
     "timeline": {
       "title": "Life timeline",
       "empty": "Nothing to show yet."
+    },
+    "editMemory": {
+      "title": "Edit memory",
+      "submit": "Save changes"
     }
   },
   "travel": {
