@@ -2,7 +2,12 @@ name: Deploy to VPS
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, integration/local ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: true
 
 jobs:
   deploy:
