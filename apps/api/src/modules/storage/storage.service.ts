@@ -244,4 +244,20 @@ export class StorageService {
     const target = await this.driver.createUploadTarget(key, contentType);
     return { ...target, key };
   }
+
+  /**
+   * Handoff 23 — travel listing photos. Public by design (a listing is a
+   * public marketplace page), so the key deliberately stays outside
+   * PRIVATE_OBJECT_KEY_PREFIXES and resolves through resolveObjectUrls().
+   */
+  async createTravelListingImageUploadTarget(organizationId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = MEMORY_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > MEMORY_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
+    }
+    const key = `travel-listing-images/${organizationId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType);
+    return { ...target, key };
+  }
 }

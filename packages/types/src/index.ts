@@ -4678,3 +4678,214 @@ export interface PetFriendlyPlaceDto {
   isFavorited: boolean;
   createdAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Travel booking marketplace (Handoff 23).
+//
+// Every listing, price and availability row here is provider-authored. PET
+// LIFE integrates with no airline, hotel or OTA inventory feed, so a date the
+// board shows as free is free because a real provider said so — never because
+// a placeholder generator invented it.
+// ---------------------------------------------------------------------------
+
+export enum TravelListingType {
+  PET_FRIENDLY_HOTEL = "PET_FRIENDLY_HOTEL",
+  VILLA = "VILLA",
+  APARTMENT = "APARTMENT",
+  RESIDENCE = "RESIDENCE",
+  BOARDING = "BOARDING",
+  PET_TAXI = "PET_TAXI",
+  INTERCITY_TRANSPORT = "INTERCITY_TRANSPORT",
+  AIRPORT_TRANSFER = "AIRPORT_TRANSFER",
+  TRAVEL_SERVICE = "TRAVEL_SERVICE",
+  ATTRACTION = "ATTRACTION",
+  CAFE_RESTAURANT = "CAFE_RESTAURANT",
+  VET_AT_DESTINATION = "VET_AT_DESTINATION",
+}
+
+/** Stay-shaped inventory prices per night; service-shaped inventory prices per trip. */
+export enum TravelPricingMode {
+  PER_NIGHT = "PER_NIGHT",
+  PER_TRIP = "PER_TRIP",
+}
+
+export enum TravelBookingMode {
+  INSTANT_BOOKING = "INSTANT_BOOKING",
+  REQUEST_TO_BOOK = "REQUEST_TO_BOOK",
+}
+
+export enum TravelListingStatus {
+  DRAFT = "DRAFT",
+  PENDING_REVIEW = "PENDING_REVIEW",
+  PUBLISHED = "PUBLISHED",
+  SUSPENDED = "SUSPENDED",
+  ARCHIVED = "ARCHIVED",
+}
+
+/**
+ * Provider-asserted pet rules. A `false` or `null` here means "the provider
+ * did not state this", never "PET LIFE determined it" — the UI must present
+ * every field as the provider's own claim.
+ */
+export interface TravelPetPolicyDto {
+  dogsAllowed: boolean;
+  catsAllowed: boolean;
+  otherAllowed: boolean;
+  maxPets: number | null;
+  maxWeightKg: number | null;
+  minWeightKg: number | null;
+  breedRestrictions: string[];
+  vaccinationRequired: boolean;
+  healthCertificateRequired: boolean;
+  carrierRequired: boolean;
+  leashRequired: boolean;
+  petFeeIrr: number | null;
+  depositIrr: number | null;
+  restrictedAreas: string | null;
+  notes: string | null;
+}
+
+export interface TravelInventoryUnitDto {
+  id: string;
+  listingId: string;
+  name: string;
+  description: string | null;
+  /** Interchangeable stock: 3 identical rooms is one unit with quantity 3. */
+  quantity: number;
+  maxOccupancy: number | null;
+  basePriceIrr: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TravelListingDto {
+  id: string;
+  organizationId: string;
+  organizationName: string;
+  type: TravelListingType;
+  title: string;
+  description: string;
+  country: string;
+  city: string;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  imageObjectKeys: string[];
+  imageUrls: string[];
+  amenities: string[];
+  pricingMode: TravelPricingMode;
+  bookingMode: TravelBookingMode;
+  status: TravelListingStatus;
+  cancellationPolicy: string | null;
+  isVerified: boolean;
+  isPubliclyListed: boolean;
+  petPolicy: TravelPetPolicyDto | null;
+  units: TravelInventoryUnitDto[];
+  /** Cheapest active unit's base price, or null when the listing has no active unit. */
+  fromPriceIrr: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * One night's real bookability for one unit. `isAvailable` is derived from
+ * provider blocks plus live TravelBookedNight holds — it is never an estimate.
+ */
+export interface TravelAvailabilityDayDto {
+  /** Date-only, ISO yyyy-mm-dd. */
+  date: string;
+  isAvailable: boolean;
+  /** Per-date override when the provider set one, else the unit's base price. */
+  priceIrr: number;
+  /** How many of this unit's slots are still free for that night. */
+  remaining: number;
+}
+
+/**
+ * A priced, checked quote for a specific unit and date range. The server
+ * re-derives this at booking time — the client's copy is never trusted as
+ * the price of record.
+ */
+export interface TravelQuoteDto {
+  listingId: string;
+  unitId: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  /** False when any night in the range is blocked or fully held. */
+  isBookable: boolean;
+  /** Present only when isBookable is false — the first date that failed. */
+  unavailableDate: string | null;
+  baseAmountIrr: number;
+  petFeeAmountIrr: number;
+  depositAmountIrr: number;
+  totalAmountIrr: number;
+}
+
+export enum TravelBookingStatus {
+  DRAFT = "DRAFT",
+  AWAITING_PROVIDER = "AWAITING_PROVIDER",
+  AWAITING_PAYMENT = "AWAITING_PAYMENT",
+  CONFIRMED = "CONFIRMED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  REJECTED = "REJECTED",
+  EXPIRED = "EXPIRED",
+  REFUNDED = "REFUNDED",
+}
+
+export interface TravelBookingPetDto {
+  petId: string;
+  petName: string;
+  petSpecies: PetSpecies;
+}
+
+export interface TravelBookingDto {
+  id: string;
+  reference: string;
+  listingId: string;
+  listingTitle: string;
+  listingType: TravelListingType;
+  listingCity: string;
+  unitId: string;
+  unitName: string;
+  householdId: string;
+  bookedByUserId: string;
+  tripId: string | null;
+  status: TravelBookingStatus;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  guests: number;
+  pets: TravelBookingPetDto[];
+  baseAmountIrr: number;
+  petFeeAmountIrr: number;
+  depositAmountIrr: number;
+  totalAmountIrr: number;
+  /** The terms as they read when the booking was made — never re-read from the listing. */
+  cancellationPolicySnapshot: string | null;
+  providerNote: string | null;
+  travelerNote: string | null;
+  requestedAt: string;
+  respondedAt: string | null;
+  confirmedAt: string | null;
+  cancelledAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * The Trip hub's travel section: bookings attached to a trip, read live from
+ * TravelBooking rows. The Trip never stores its own copy (same "derived,
+ * never duplicated" rule as TripReadinessSummaryDto).
+ */
+export interface TripTravelSummaryDto {
+  tripId: string;
+  bookings: TravelBookingDto[];
+  /** Bookings in a live state (AWAITING_*, CONFIRMED, IN_PROGRESS). */
+  activeCount: number;
+  totalCommittedIrr: number;
+}

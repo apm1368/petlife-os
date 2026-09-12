@@ -1129,6 +1129,7 @@ model Household {
 
   trips                 Trip[]
   insuranceApplications InsuranceApplication[]
+  travelBookings        TravelBooking[]
 
   @@map("households")
 }
@@ -1243,6 +1244,7 @@ model Pet {
 
   trips                 Trip[]
   insuranceApplications InsuranceApplication[]
+  travelBookingPets     TravelBookingPet[]
 
   @@index([householdId])
   @@map("pets")
@@ -1622,6 +1624,8 @@ model ProviderOrganization {
   carePlans               CarePlan[]
   seniorCareNotes         SeniorCareNote[]
   endOfLifeCarePlans      EndOfLifeCarePlan[]
+
+  travelListings TravelListing[]
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -6861,7 +6865,8 @@ model Trip {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  requirements TravelRequirement[]
+  requirements   TravelRequirement[]
+  travelBookings TravelBooking[]
 
   @@index([householdId])
   @@index([petId])
@@ -7146,4 +7151,293 @@ model PetFriendlyPlaceFavorite {
   @@unique([placeId, userId])
   @@index([userId])
   @@map("pet_friendly_place_favorites")
+}
+
+// ---------------------------------------------------------------------------
+// Handoff 23 — Travel booking marketplace.
+//
+// Real, PET LIFE-native supply: a TravelListing belongs to an existing
+// ProviderOrganization (Handoff 03/05), so there is no second provider
+// identity and no fabricated external hotel/airline inventory. Availability
+// is date-based and double-booking is prevented by a hard database
+// constraint (see TravelBookedNight), not by application-level optimism.
+// ---------------------------------------------------------------------------
+
+enum TravelListingType {
+  PET_FRIENDLY_HOTEL
+  VILLA
+  APARTMENT
+  RESIDENCE
+  BOARDING
+  PET_TAXI
+  INTERCITY_TRANSPORT
+  AIRPORT_TRANSFER
+  TRAVEL_SERVICE
+  ATTRACTION
+  CAFE_RESTAURANT
+  VET_AT_DESTINATION
+}
+
+/// Stay-shaped inventory prices and books per night; service-shaped
+/// inventory (a taxi ride, an airport transfer) prices and books per trip.
+/// Deliberately NOT forced into identical semantics, per the spec.
+enum TravelPricingMode {
+  PER_NIGHT
+  PER_TRIP
+}
+
+enum TravelBookingMode {
+  INSTANT_BOOKING
+  REQUEST_TO_BOOK
+}
+
+enum TravelListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  SUSPENDED
+  ARCHIVED
+}
+
+model TravelListing {
+  id             String               @id @default(uuid()) @db.Uuid
+  organizationId String               @db.Uuid
+  organization   ProviderOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  type        TravelListingType
+  title       String
+  description String
+
+  country String
+  city    String
+  address String?
+  /// Approximate display coordinates. Places (Handoff 19) keeps the PostGIS
+  /// column for radius search; travel search filters by city/date first, so
+  /// this stays a plain lat/lng rather than a second geography column.
+  latitude  Float?
+  longitude Float?
+
+  imageObjectKeys String[] @default([])
+  amenities       String[] @default([])
+
+  pricingMode TravelPricingMode   @default(PER_NIGHT)
+  bookingMode TravelBookingMode   @default(REQUEST_TO_BOOK)
+  status      TravelListingStatus @default(DRAFT)
+
+  /// Provider-authored cancellation terms, snapshotted onto a booking when
+  /// it is confirmed so later edits never change agreed terms.
+  cancellationPolicy String?
+
+  /// Admin verification, mirroring PetFriendlyPlace's own two-axis model:
+  /// a listing can be verified but temporarily unlisted.
+  isVerified       Boolean @default(false)
+  isPubliclyListed Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  petPolicy TravelPetPolicy?
+  units     TravelInventoryUnit[]
+  bookings  TravelBooking[]
+
+  @@index([status, city])
+  @@index([type])
+  @@index([organizationId])
+  @@map("travel_listings")
+}
+
+/// Provider-supplied pet rules. Every field is the provider's own assertion —
+/// PET LIFE never invents a legal or breed restriction, and a null means
+/// "not stated", never "allowed".
+model TravelPetPolicy {
+  id        String        @id @default(uuid()) @db.Uuid
+  listingId String        @unique @db.Uuid
+  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  dogsAllowed  Boolean @default(false)
+  catsAllowed  Boolean @default(false)
+  otherAllowed Boolean @default(false)
+
+  maxPets      Int?
+  maxWeightKg  Float?
+  minWeightKg  Float?
+  /// Provider-supplied only.
+  breedRestrictions String[] @default([])
+
+  vaccinationRequired      Boolean @default(false)
+  healthCertificateRequired Boolean @default(false)
+  carrierRequired          Boolean @default(false)
+  leashRequired            Boolean @default(false)
+
+  petFeeIrr  Int?
+  depositIrr Int?
+
+  restrictedAreas String?
+  notes           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("travel_pet_policies")
+}
+
+/// One bookable thing: a room, a vehicle, a boarding pen. `quantity` models
+/// interchangeable stock (e.g. 3 identical rooms) without needing a row per
+/// physical unit.
+model TravelInventoryUnit {
+  id        String        @id @default(uuid()) @db.Uuid
+  listingId String        @db.Uuid
+  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  /// How many of this unit can be booked for the same night/trip.
+  quantity    Int    @default(1)
+  maxOccupancy Int?
+
+  /// IRR is the only stored currency across PET LIFE.
+  basePriceIrr Int
+  isActive     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  availability TravelAvailability[]
+  bookings     TravelBooking[]
+  bookedNights TravelBookedNight[]
+
+  @@index([listingId])
+  @@map("travel_inventory_units")
+}
+
+/// A provider's per-date override: a blocked date, or a different price for
+/// that date. Absence of a row means "bookable at the unit's base price" —
+/// so a provider never has to seed a row per day to be bookable.
+model TravelAvailability {
+  id     String              @id @default(uuid()) @db.Uuid
+  unitId String              @db.Uuid
+  unit   TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  /// Date-only semantics; always stored at UTC midnight.
+  date        DateTime
+  isBlocked   Boolean  @default(false)
+  priceIrr    Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([unitId, date])
+  @@index([unitId, date])
+  @@map("travel_availability")
+}
+
+enum TravelBookingStatus {
+  DRAFT
+  AWAITING_PROVIDER
+  AWAITING_PAYMENT
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  REJECTED
+  EXPIRED
+  REFUNDED
+}
+
+model TravelBooking {
+  id        String        @id @default(uuid()) @db.Uuid
+  listingId String        @db.Uuid
+  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  unitId    String        @db.Uuid
+  unit      TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Restrict)
+
+  /// Human-facing reference, shown on the booking and in support threads.
+  reference String @unique
+
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  /// Plain UUID, same actor-reference convention as Trip.createdByUserId.
+  bookedByUserId String @db.Uuid
+
+  /// Optional: a booking may be attached to a Trip, but a Trip never stores
+  /// its own copy of booking data — the Trip hub reads these rows.
+  tripId String? @db.Uuid
+  trip   Trip?   @relation(fields: [tripId], references: [id], onDelete: SetNull)
+
+  status TravelBookingStatus @default(DRAFT)
+
+  /// Date-only, UTC midnight. For PER_TRIP inventory checkOut equals checkIn.
+  checkIn  DateTime
+  checkOut DateTime
+  guests   Int      @default(1)
+
+  /// Price breakdown, all snapshotted at booking time so a later rate change
+  /// never rewrites an agreed price.
+  nights            Int
+  baseAmountIrr     Int
+  petFeeAmountIrr   Int @default(0)
+  depositAmountIrr  Int @default(0)
+  totalAmountIrr    Int
+
+  /// The listing's cancellation terms as they read at confirmation —
+  /// never re-read from the listing afterwards.
+  cancellationPolicySnapshot String?
+
+  providerNote String?
+  travelerNote String?
+
+  requestedAt DateTime  @default(now())
+  respondedAt DateTime?
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pets         TravelBookingPet[]
+  bookedNights TravelBookedNight[]
+
+  @@index([householdId, status])
+  @@index([listingId, status])
+  @@index([tripId])
+  @@map("travel_bookings")
+}
+
+/// Which of the household's pets this reservation is for. The pet policy is
+/// evaluated against these at booking time.
+model TravelBookingPet {
+  id        String        @id @default(uuid()) @db.Uuid
+  bookingId String        @db.Uuid
+  booking   TravelBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  petId     String        @db.Uuid
+  pet       Pet           @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  @@unique([bookingId, petId])
+  @@index([petId])
+  @@map("travel_booking_pets")
+}
+
+/// The double-booking guarantee. One row per (unit, night, slot) that a live
+/// booking holds; `slot` runs 0..quantity-1 so a unit with 3 identical rooms
+/// accepts exactly 3 concurrent bookings for the same night and no more.
+/// The unique constraint makes an oversell impossible at the database level,
+/// not merely unlikely — two racing confirmations cannot both insert the
+/// same (unitId, night, slot).
+model TravelBookedNight {
+  id        String        @id @default(uuid()) @db.Uuid
+  unitId    String        @db.Uuid
+  unit      TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  bookingId String        @db.Uuid
+  booking   TravelBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  /// UTC midnight of the held night. For PER_TRIP inventory this is the single trip date.
+  night DateTime
+  slot  Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([unitId, night, slot])
+  @@index([bookingId])
+  @@map("travel_booked_nights")
 }

@@ -1402,3 +1402,80 @@ export class PetFriendlyPlaceNotFoundException extends ApiException {
     super("PET_FRIENDLY_PLACE_NOT_FOUND", "Place not found.", HttpStatus.NOT_FOUND, details);
   }
 }
+
+// --- Handoff 23: Travel booking marketplace ---------------------------------
+
+export class TravelListingNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_LISTING_NOT_FOUND", "Listing not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Thrown when the acting provider user does not belong to the listing's organization. */
+export class TravelListingAccessDeniedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_LISTING_ACCESS_DENIED", "You do not manage this listing.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+/** Thrown when a listing transition isn't in TravelListingService's explicit state table. */
+export class InvalidTravelListingTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_TRAVEL_LISTING_TRANSITION", "This action is not valid for the listing's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TravelInventoryUnitNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_INVENTORY_UNIT_NOT_FOUND", "Inventory unit not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class TravelBookingNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_BOOKING_NOT_FOUND", "Booking not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class TravelBookingAccessDeniedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_BOOKING_ACCESS_DENIED", "You do not have access to this booking.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+/** Thrown when a booking transition isn't in TravelBookingService's explicit state table. */
+export class InvalidTravelBookingTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_TRAVEL_BOOKING_TRANSITION", "This action is not valid for the booking's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/**
+ * Thrown when a requested date range is blocked or already fully held. This is
+ * the surface of the TravelBookedNight unique constraint: a race that loses
+ * the insert reports unavailability rather than silently overselling.
+ */
+export class TravelDatesUnavailableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_DATES_UNAVAILABLE", "Those dates are no longer available.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** Thrown when checkOut is not after checkIn, or the range exceeds the allowed booking window. */
+export class InvalidTravelDateRangeException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_TRAVEL_DATE_RANGE", "Those dates are not valid.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/**
+ * Thrown when the selected pets violate the listing's provider-stated pet
+ * policy (species not accepted, too many pets, outside the weight range).
+ * The message names the provider as the source — PET LIFE never asserts a
+ * restriction of its own.
+ */
+export class TravelPetPolicyViolationException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRAVEL_PET_POLICY_VIOLATION", "The provider's pet policy does not allow this booking.", HttpStatus.BAD_REQUEST, details);
+  }
+}
