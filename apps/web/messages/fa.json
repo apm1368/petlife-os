@@ -1697,6 +1697,7 @@
       },
       "nav": {
         "dashboard": "داشبورد",
+        "crm": "CRM",
         "customers": "مشتریان",
         "support": "پشتیبانی",
         "disputes": "اختلافات",
