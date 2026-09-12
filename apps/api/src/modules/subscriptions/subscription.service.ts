@@ -59,23 +59,28 @@ export class SubscriptionService {
     if (!ALLOWED_TRANSITIONS[from].includes(to)) throw new InvalidSubscriptionStatusTransitionException({ from, to });
   }
 
-  /** Every household gets a real row (spec: "prefer a real FREE plan"). Race-safe: a P2002 on the concurrent second caller's insert simply re-reads the winner's row. */
+  /**
+   * Every household gets a real row (spec: "prefer a real FREE plan").
+   * Race-safe, and specifically safe when `client` is a transaction client
+   * (AdminSubscriptionService.assignPlan/overrideStatus and
+   * `withLockedSubscription` below all pass `tx`): a plain `create()` that
+   * lost the insert race would raise P2002 and thereby abort the caller's
+   * whole PostgreSQL transaction, making every later statement in it — a
+   * catch-P2002-then-reread recovery included — fail with 25P02
+   * ("current transaction is aborted"). `createMany({ skipDuplicates: true })`
+   * compiles to `INSERT ... ON CONFLICT DO NOTHING`, so the losing caller
+   * simply reads the winner's row and the transaction stays usable.
+   */
   async getOrCreateRaw(householdId: string, client: QueryClient = this.prisma): Promise<SubscriptionWithRelations> {
     const existing = await client.subscription.findUnique({ where: { householdId }, include: SUBSCRIPTION_INCLUDE });
     if (existing) return existing;
 
     const freePlan = await this.plans.getFreePlanRaw();
-    try {
-      return await client.subscription.create({
-        data: { householdId, planId: freePlan.id, status: SubscriptionStatus.ACTIVE },
-        include: SUBSCRIPTION_INCLUDE,
-      });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        return client.subscription.findUniqueOrThrow({ where: { householdId }, include: SUBSCRIPTION_INCLUDE });
-      }
-      throw error;
-    }
+    await client.subscription.createMany({
+      data: [{ householdId, planId: freePlan.id, status: SubscriptionStatus.ACTIVE }],
+      skipDuplicates: true,
+    });
+    return client.subscription.findUniqueOrThrow({ where: { householdId }, include: SUBSCRIPTION_INCLUDE });
   }
 
   /**
