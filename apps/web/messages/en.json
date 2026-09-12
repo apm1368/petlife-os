@@ -13,7 +13,10 @@
     "logIn": "Log in",
     "support": "Support",
     "blog": "Blog",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "navVet": "Vets",
+    "navShop": "Shop",
+    "navLostPets": "Lost pets"
   },
   "auth": {
     "welcome": {
@@ -3007,6 +3010,55 @@
       "native": "Share",
       "copyLink": "Copy link",
       "copied": "Link copied"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Everything your pet needs, in one place",
+      "subtitle": "Find a vet, book an appointment, shop, report a lost pet — without signing up first.",
+      "primaryCta": "Find a vet",
+      "secondaryCta": "Browse the shop"
+    },
+    "explore": {
+      "title": "Where would you like to start?",
+      "vet": {
+        "title": "Vets and clinics",
+        "description": "Search by city and speciality, then book a visit."
+      },
+      "services": {
+        "title": "Pet services",
+        "description": "Grooming, boarding, training and at-home services."
+      },
+      "shop": {
+        "title": "Shop",
+        "description": "Food, medicine and supplies matched to your pet."
+      },
+      "lostPets": {
+        "title": "Lost pets",
+        "description": "Browse lost-pet reports or add a sighting."
+      },
+      "places": {
+        "title": "Pet-friendly places",
+        "description": "Cafes, parks and stays that welcome pets."
+      },
+      "insurance": {
+        "title": "Pet insurance",
+        "description": "Compare cover and see what each policy asks for."
+      },
+      "animalSupport": {
+        "title": "Animal support",
+        "description": "Real needs posted by shelters, and how to help."
+      },
+      "community": {
+        "title": "Community",
+        "description": "Questions, experiences and advice from other owners."
+      }
+    },
+    "account": {
+      "title": "Do you need an account?",
+      "description": "An account is needed to book, order, and keep your pet's health record. Browsing stays open to everyone.",
+      "createAccount": "Create account",
+      "logIn": "Log in"
     }
   }
 }

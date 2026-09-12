@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Avatar, IconButton, Skeleton } from "@petlife/ui";
@@ -17,13 +17,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations("common");
   const router = useRouter();
   const locale = useLocale();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && status === "unauthenticated") {
-      router.replace(`/${locale}/welcome`);
+      // Carry the intended destination through the login flow. Without this a
+      // deep link (a shared booking, a pet profile) silently became "you are
+      // now at Home" after signing in; /welcome already reads and sanitizes
+      // returnTo, it was simply never being told where the visitor was going.
+      router.replace(`/${locale}/welcome?returnTo=${encodeURIComponent(pathname)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, status]);
+  }, [isLoading, status, pathname]);
 
   if (isLoading || status !== "authenticated") {
     return (

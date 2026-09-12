@@ -30,10 +30,19 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-surface-base">
       <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-        <Link href={`/${locale}/home`} className="text-section-title text-text-primary">
+        <Link href={`/${locale}`} className="text-section-title text-text-primary">
           {t("appName")}
         </Link>
         <div className="flex items-center gap-2">
+          <Link href={`/${locale}/vet/find`} className="hidden text-body text-text-secondary sm:inline">
+            {t("navVet")}
+          </Link>
+          <Link href={`/${locale}/shop`} className="hidden text-body text-text-secondary sm:inline">
+            {t("navShop")}
+          </Link>
+          <Link href={`/${locale}/lost-pets`} className="hidden text-body text-text-secondary sm:inline">
+            {t("navLostPets")}
+          </Link>
           <Link href={`/${locale}/blog`} className="text-body text-text-secondary">
             {t("blog")}
           </Link>
