@@ -181,6 +181,32 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     en: { title: "Care plan updated", body: "{{petName}}'s care plan was updated by the provider.", smsBody: "A care plan update for your pet is available in PET LIFE OS." },
   },
 
+  // Veterinary Clinical Panel (Handoff 24). Holds the same privacy bar the
+  // H17 clinical templates set — the smsBody never names the pet, the drug,
+  // the diagnosis, or the amount, because a household member reading an SMS
+  // preview on a lock screen has not authenticated. The in-app body may name
+  // the pet, and nothing more.
+  "clinical.estimate_presented": {
+    fa: { title: "برآورد هزینه درمان آماده است", body: "یک برآورد هزینه درمان برای {{petName}} برای بررسی شما ثبت شد.", smsBody: "یک برآورد هزینه درمان در پت‌لایف منتظر بررسی شماست." },
+    en: { title: "Treatment estimate ready", body: "A treatment estimate for {{petName}} is waiting for your review.", smsBody: "A treatment estimate is waiting for your review in PET LIFE OS." },
+  },
+  "clinical.patient_admitted": {
+    fa: { title: "بستری شدن در کلینیک", body: "{{petName}} در کلینیک بستری شد.", smsBody: "یک به‌روزرسانی درباره بستری حیوان خانگی شما در پت‌لایف ثبت شد." },
+    en: { title: "Admitted to the clinic", body: "{{petName}} has been admitted to the clinic.", smsBody: "An admission update for your pet is available in PET LIFE OS." },
+  },
+  "clinical.patient_discharged": {
+    fa: { title: "ترخیص از کلینیک", body: "{{petName}} از کلینیک ترخیص شد.", smsBody: "یک به‌روزرسانی درباره ترخیص حیوان خانگی شما در پت‌لایف ثبت شد." },
+    en: { title: "Discharged from the clinic", body: "{{petName}} has been discharged from the clinic.", smsBody: "A discharge update for your pet is available in PET LIFE OS." },
+  },
+  "clinical.discharge_summary_issued": {
+    fa: { title: "خلاصه ترخیص صادر شد", body: "خلاصه ترخیص و دستورالعمل مراقبت در منزل برای {{petName}} در دسترس است.", smsBody: "دستورالعمل مراقبت در منزل حیوان خانگی شما در پت‌لایف در دسترس است." },
+    en: { title: "Discharge summary issued", body: "The discharge summary and home care instructions for {{petName}} are available.", smsBody: "Home care instructions for your pet are available in PET LIFE OS." },
+  },
+  "clinical.prescription_issued": {
+    fa: { title: "نسخه جدید", body: "یک نسخه جدید برای {{petName}} ثبت شد.", smsBody: "یک نسخه جدید برای حیوان خانگی شما در پت‌لایف ثبت شد." },
+    en: { title: "New prescription", body: "A new prescription was issued for {{petName}}.", smsBody: "A new prescription for your pet is available in PET LIFE OS." },
+  },
+
   // Handoff 18: Lost Pet — a high-severity category (spec: "high-severity
   // product flow"), so every smsBody is deliberately specific enough to be
   // actionable at a glance (unlike the deliberately generic H17 clinical

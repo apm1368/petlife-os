@@ -49,6 +49,7 @@ import { SupportModule } from "./modules/support/support.module";
 import { ContentModule } from "./modules/content/content.module";
 import { SubscriptionsModule } from "./modules/subscriptions/subscription.module";
 import { ClinicalHealthModule } from "./modules/clinical-health/clinical-health.module";
+import { VetPanelModule } from "./modules/vet-panel/vet-panel.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
 import { CommunityModule } from "./modules/community/community.module";
@@ -108,6 +109,7 @@ import { PlacesModule } from "./modules/places/places.module";
     ContentModule,
     SubscriptionsModule,
     ClinicalHealthModule,
+    VetPanelModule,
     LostPetModule,
     AnimalSupportModule,
     CommunityModule,

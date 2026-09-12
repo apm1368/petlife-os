@@ -16,6 +16,10 @@ type SessionState = "loading" | "authenticated" | "unauthenticated";
 
 const NAV_ITEMS = [
   { href: "", labelKey: "nav.home" },
+  // Handoff 24 — the clinical panel. Placed immediately after Home because a
+  // vet's day starts at the whiteboard, not at the booking list.
+  { href: "/clinical", labelKey: "nav.clinical" },
+  { href: "/patients", labelKey: "nav.patients" },
   { href: "/bookings", labelKey: "nav.bookings" },
   { href: "/calendar", labelKey: "nav.schedule" },
   { href: "/availability", labelKey: "nav.availability" },

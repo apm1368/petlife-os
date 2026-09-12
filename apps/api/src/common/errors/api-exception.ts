@@ -1479,3 +1479,108 @@ export class TravelPetPolicyViolationException extends ApiException {
     super("TRAVEL_PET_POLICY_VIOLATION", "The provider's pet policy does not allow this booking.", HttpStatus.BAD_REQUEST, details);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Handoff 24: Veterinary Clinical Panel (Vet Practice OS)
+// ---------------------------------------------------------------------------
+
+export class VitalsRecordNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("VITALS_RECORD_NOT_FOUND", "Vitals record not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/**
+ * Thrown when a submitted vitals value falls outside the range the field can
+ * physically represent (e.g. a body condition score of 12 on a 1-9 scale).
+ * Deliberately a *representability* check, never a clinical plausibility one —
+ * this codebase does not decide whether a temperature is concerning.
+ */
+export class InvalidVitalsValueException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_VITALS_VALUE", "That measurement is outside the range this field can record.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class ClinicalProblemNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CLINICAL_PROBLEM_NOT_FOUND", "Problem not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class PrescriptionNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PRESCRIPTION_NOT_FOUND", "Prescription not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** A prescription is never deleted or silently rewritten — cancelling a cancelled one, or refilling past the authorised count, lands here. */
+export class InvalidPrescriptionTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_PRESCRIPTION_TRANSITION", "This action is not valid for the prescription's current state.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class HospitalizationNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("HOSPITALIZATION_NOT_FOUND", "Hospitalization not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Also thrown when a second admission is attempted for a pet that is already admitted — one live stay per patient, enforced by a claim-then-check write. */
+export class InvalidHospitalizationTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_HOSPITALIZATION_TRANSITION", "This action is not valid for the hospitalization's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TreatmentTaskNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TREATMENT_TASK_NOT_FOUND", "Treatment task not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** A completed task's outcome is a record of care that already happened — it is never re-stated silently. */
+export class InvalidTreatmentTaskTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_TREATMENT_TASK_TRANSITION", "This action is not valid for the task's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ClinicalEstimateNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CLINICAL_ESTIMATE_NOT_FOUND", "Estimate not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** Covers editing a presented estimate, responding twice, and a provider attempting to approve on the owner's behalf. */
+export class InvalidClinicalEstimateTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_CLINICAL_ESTIMATE_TRANSITION", "This action is not valid for the estimate's current status.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ClinicalNoteTemplateNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CLINICAL_NOTE_TEMPLATE_NOT_FOUND", "Note template not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class DischargeSummaryNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DISCHARGE_SUMMARY_NOT_FOUND", "Discharge summary not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** An ISSUED discharge summary is immutable — the owner has already read it. */
+export class DischargeSummaryAlreadyIssuedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DISCHARGE_SUMMARY_ALREADY_ISSUED", "This discharge summary has already been issued and cannot be changed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ProviderClinicalAlertNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PROVIDER_CLINICAL_ALERT_NOT_FOUND", "Alert not found.", HttpStatus.NOT_FOUND, details);
+  }
+}

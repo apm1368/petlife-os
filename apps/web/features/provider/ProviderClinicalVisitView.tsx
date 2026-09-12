@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
-import type { ClinicalVisitDetailDto } from "@petlife/types";
+import type { ClinicalNoteTemplateDto, ClinicalVisitDetailDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerClinicalService } from "@/services/provider-clinical.service";
+import { VetVisitClinicalTools } from "@/features/vet-panel/VetVisitClinicalTools";
 
 const STATUS_TONE: Record<string, "success" | "attention" | "neutral" | "urgent"> = {
   DRAFT: "neutral",
@@ -113,6 +114,22 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
     }
   }
 
+  /**
+   * Handoff 24 — applying a note template only fills the editable fields in
+   * this form; nothing is written until the vet saves notes they actually
+   * wrote. Existing text is never overwritten: a template fills a blank
+   * section and leaves anything already typed alone.
+   */
+  function handleApplyTemplate(template: ClinicalNoteTemplateDto): void {
+    setNotes((current) => ({
+      reasonForVisit: current.reasonForVisit || (template.reasonForVisitTemplate ?? ""),
+      historyText: current.historyText || (template.historyTemplate ?? ""),
+      observationsText: current.observationsText || (template.observationsTemplate ?? ""),
+      assessmentText: current.assessmentText || (template.assessmentTemplate ?? ""),
+      planText: current.planText || (template.planTemplate ?? ""),
+    }));
+  }
+
   if (error && !visit) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
   if (!visit) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
@@ -187,6 +204,11 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
           ))}
         </ContextSurface>
       ) : null}
+
+      {/* Handoff 24 — the practice layer for this consultation. Separate
+          component because these write to their own records (vitals,
+          prescriptions, the discharge document), not to the visit note. */}
+      <VetVisitClinicalTools petId={petId} visitId={visitId} isVisitEditable={isEditable} onApplyTemplate={handleApplyTemplate} />
     </div>
   );
 }

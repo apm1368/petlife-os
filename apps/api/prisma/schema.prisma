@@ -1131,6 +1131,8 @@ model Household {
   insuranceApplications InsuranceApplication[]
   travelBookings        TravelBooking[]
 
+  clinicalEstimates ClinicalEstimate[]
+
   @@map("households")
 }
 
@@ -1241,6 +1243,14 @@ model Pet {
   lostPetIncidents     LostPetIncident[]
   memories             PetMemory[]
   communityPosts       CommunityPost[]
+
+  vitalsRecords          PatientVitalsRecord[]
+  clinicalProblems       ClinicalProblem[]
+  prescriptions          Prescription[]
+  hospitalizations       Hospitalization[]
+  clinicalEstimates      ClinicalEstimate[]
+  dischargeSummaries     DischargeSummary[]
+  providerClinicalAlerts ProviderClinicalAlert[]
 
   trips                 Trip[]
   insuranceApplications InsuranceApplication[]
@@ -1509,6 +1519,8 @@ model Medication {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  prescription Prescription?
+
   @@index([petId])
   @@index([status])
   @@index([clinicalVisitId])
@@ -1625,6 +1637,15 @@ model ProviderOrganization {
   seniorCareNotes         SeniorCareNote[]
   endOfLifeCarePlans      EndOfLifeCarePlan[]
 
+  vitalsRecords         PatientVitalsRecord[]
+  clinicalProblems      ClinicalProblem[]
+  prescriptions         Prescription[]
+  hospitalizations      Hospitalization[]
+  clinicalEstimates     ClinicalEstimate[]
+  clinicalNoteTemplates ClinicalNoteTemplate[]
+  dischargeSummaries    DischargeSummary[]
+  clinicalAlerts        ProviderClinicalAlert[]
+
   travelListings TravelListing[]
 
   @@index([verificationStatus])
@@ -1690,6 +1711,12 @@ model ProviderUser {
   rehabPlans              RehabPlan[]
   clinicalVisits          ClinicalVisit[]
   carePlans               CarePlan[]
+
+  vitalsRecords             PatientVitalsRecord[]
+  clinicalProblems          ClinicalProblem[]
+  prescriptions             Prescription[]
+  hospitalizationsAttending Hospitalization[]
+  clinicalEstimates         ClinicalEstimate[]
 
   @@index([providerOrganizationId])
   @@index([userId])
@@ -5816,6 +5843,13 @@ model ClinicalVisit {
   documents      MedicalDocument[]
   medications    Medication[]
 
+  vitalsRecords     PatientVitalsRecord[]
+  clinicalProblems  ClinicalProblem[]
+  prescriptions     Prescription[]
+  hospitalizations  Hospitalization[]
+  clinicalEstimates ClinicalEstimate[]
+  dischargeSummary  DischargeSummary?
+
   @@index([petId])
   @@index([householdId])
   @@index([providerOrganizationId])
@@ -6945,16 +6979,16 @@ enum InsuranceVerificationStatus {
 }
 
 model InsuranceProvider {
-  id               String                       @id @default(uuid()) @db.Uuid
+  id               String                      @id @default(uuid()) @db.Uuid
   name             String
   description      String?
   logoObjectKey    String?
   country          String
-  status           InsuranceVerificationStatus  @default(UNVERIFIED)
+  status           InsuranceVerificationStatus @default(UNVERIFIED)
   contactEmail     String?
   contactPhone     String?
   websiteUrl       String?
-  isPubliclyListed Boolean                      @default(false)
+  isPubliclyListed Boolean                     @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -7050,15 +7084,15 @@ enum InsuranceApplicationStatus {
 }
 
 model InsuranceApplication {
-  id          String            @id @default(uuid()) @db.Uuid
-  productId   String            @db.Uuid
-  product     InsuranceProduct  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  householdId String            @db.Uuid
-  household   Household         @relation(fields: [householdId], references: [id], onDelete: Restrict)
-  petId       String            @db.Uuid
-  pet         Pet               @relation(fields: [petId], references: [id], onDelete: Restrict)
+  id              String           @id @default(uuid()) @db.Uuid
+  productId       String           @db.Uuid
+  product         InsuranceProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
+  householdId     String           @db.Uuid
+  household       Household        @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId           String           @db.Uuid
+  pet             Pet              @relation(fields: [petId], references: [id], onDelete: Restrict)
   /// Plain UUID, no FK — same actor-reference convention as Trip.createdByUserId.
-  applicantUserId String        @db.Uuid
+  applicantUserId String           @db.Uuid
 
   status            InsuranceApplicationStatus @default(DRAFT)
   /// A snapshot of EligibilityService's own live computation at submission
@@ -7113,12 +7147,12 @@ model PetFriendlyPlace {
   /// section. Unsupported because Prisma has no native geography type;
   /// PetFriendlyPlaceService is the only writer, always in the same
   /// statement as latitude/longitude.
-  location Unsupported("geography(Point, 4326)")?
+  location  Unsupported("geography(Point, 4326)")?
 
   speciesAllowed   PetSpecies[]
   sizeRestrictions String?
-  indoorAllowed    Boolean @default(true)
-  outdoorAllowed   Boolean @default(true)
+  indoorAllowed    Boolean      @default(true)
+  outdoorAllowed   Boolean      @default(true)
   petPolicy        String?
 
   imageObjectKeys String[] @default([])
@@ -7208,9 +7242,9 @@ model TravelListing {
   title       String
   description String
 
-  country String
-  city    String
-  address String?
+  country   String
+  city      String
+  address   String?
   /// Approximate display coordinates. Places (Handoff 19) keeps the PostGIS
   /// column for radius search; travel search filters by city/date first, so
   /// this stays a plain lat/lng rather than a second geography column.
@@ -7258,16 +7292,16 @@ model TravelPetPolicy {
   catsAllowed  Boolean @default(false)
   otherAllowed Boolean @default(false)
 
-  maxPets      Int?
-  maxWeightKg  Float?
-  minWeightKg  Float?
+  maxPets           Int?
+  maxWeightKg       Float?
+  minWeightKg       Float?
   /// Provider-supplied only.
   breedRestrictions String[] @default([])
 
-  vaccinationRequired      Boolean @default(false)
+  vaccinationRequired       Boolean @default(false)
   healthCertificateRequired Boolean @default(false)
-  carrierRequired          Boolean @default(false)
-  leashRequired            Boolean @default(false)
+  carrierRequired           Boolean @default(false)
+  leashRequired             Boolean @default(false)
 
   petFeeIrr  Int?
   depositIrr Int?
@@ -7289,10 +7323,10 @@ model TravelInventoryUnit {
   listingId String        @db.Uuid
   listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  name        String
-  description String?
+  name         String
+  description  String?
   /// How many of this unit can be booked for the same night/trip.
-  quantity    Int    @default(1)
+  quantity     Int     @default(1)
   maxOccupancy Int?
 
   /// IRR is the only stored currency across PET LIFE.
@@ -7319,9 +7353,9 @@ model TravelAvailability {
   unit   TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   /// Date-only semantics; always stored at UTC midnight.
-  date        DateTime
-  isBlocked   Boolean  @default(false)
-  priceIrr    Int?
+  date      DateTime
+  isBlocked Boolean  @default(false)
+  priceIrr  Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -7345,19 +7379,19 @@ enum TravelBookingStatus {
 }
 
 model TravelBooking {
-  id        String        @id @default(uuid()) @db.Uuid
-  listingId String        @db.Uuid
-  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
-  unitId    String        @db.Uuid
+  id        String              @id @default(uuid()) @db.Uuid
+  listingId String              @db.Uuid
+  listing   TravelListing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  unitId    String              @db.Uuid
   unit      TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Restrict)
 
   /// Human-facing reference, shown on the booking and in support threads.
   reference String @unique
 
-  householdId String    @db.Uuid
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  householdId    String    @db.Uuid
+  household      Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
   /// Plain UUID, same actor-reference convention as Trip.createdByUserId.
-  bookedByUserId String @db.Uuid
+  bookedByUserId String    @db.Uuid
 
   /// Optional: a booking may be attached to a Trip, but a Trip never stores
   /// its own copy of booking data — the Trip hub reads these rows.
@@ -7373,11 +7407,11 @@ model TravelBooking {
 
   /// Price breakdown, all snapshotted at booking time so a later rate change
   /// never rewrites an agreed price.
-  nights            Int
-  baseAmountIrr     Int
-  petFeeAmountIrr   Int @default(0)
-  depositAmountIrr  Int @default(0)
-  totalAmountIrr    Int
+  nights           Int
+  baseAmountIrr    Int
+  petFeeAmountIrr  Int @default(0)
+  depositAmountIrr Int @default(0)
+  totalAmountIrr   Int
 
   /// The listing's cancellation terms as they read at confirmation —
   /// never re-read from the listing afterwards.
@@ -7425,11 +7459,11 @@ model TravelBookingPet {
 /// not merely unlikely — two racing confirmations cannot both insert the
 /// same (unitId, night, slot).
 model TravelBookedNight {
-  id        String        @id @default(uuid()) @db.Uuid
-  unitId    String        @db.Uuid
+  id        String              @id @default(uuid()) @db.Uuid
+  unitId    String              @db.Uuid
   unit      TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  bookingId String        @db.Uuid
-  booking   TravelBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId String              @db.Uuid
+  booking   TravelBooking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   /// UTC midnight of the held night. For PER_TRIP inventory this is the single trip date.
   night DateTime
@@ -7440,4 +7474,559 @@ model TravelBookedNight {
   @@unique([unitId, night, slot])
   @@index([bookingId])
   @@map("travel_booked_nights")
+}
+
+// ===========================================================================
+// Handoff 24 — Veterinary Clinical Panel (Vet Practice OS)
+// ===========================================================================
+//
+// Handoff 17 gave a vet a longitudinal *record* (visits, labs, imaging,
+// referrals, care plans). What it deliberately never built is the day-to-day
+// *practice surface* every serious PIMS is organised around: a patient
+// registry the vet can actually search, a whiteboard of who is in the
+// building right now, an interval treatment sheet for an inpatient, a
+// structured exam/triage record, a master problem list, dispensing-grade
+// prescriptions, a costed estimate the owner approves before work starts,
+// reusable note templates, and a discharge document the owner takes home.
+// These models add exactly that layer — none of them reinterpret, score, or
+// derive clinical meaning from data a provider did not explicitly enter, and
+// every one of them keeps Handoff 17's own boundaries: Booking stays
+// commercial state, ClinicalVisit stays care-documentation state, and
+// `canRecordClinicalData` remains the only authorship gate.
+
+/// Acuity of a patient at the moment it was assessed. Deliberately recorded
+/// by a provider, never derived from vitals — nothing in this codebase turns
+/// a heart rate into an acuity, per Handoff 17's "do not invent medical
+/// interpretation" rule.
+enum TriageLevel {
+  ROUTINE
+  URGENT
+  EMERGENT
+  CRITICAL
+}
+
+/// Mucous-membrane colour as *observed and stated* by the examiner. There is
+/// deliberately no "normal" value: PINK is a described finding, and a field
+/// left NULL means "not assessed", never "unremarkable" (Handoff 17 locked
+/// principle 4, Unknown != Normal).
+enum MucousMembraneColor {
+  PINK
+  PALE
+  WHITE
+  CYANOTIC
+  ICTERIC
+  BRICK_RED
+  MUDDY
+}
+
+enum HydrationStatus {
+  EUHYDRATED
+  MILD_DEHYDRATION
+  MODERATE_DEHYDRATION
+  SEVERE_DEHYDRATION
+}
+
+/// The master problem list's own lifecycle. RULED_OUT is kept distinct from
+/// RESOLVED on purpose: "this was never the problem" and "this problem is
+/// over" are different clinical facts and collapsing them would lose history.
+enum ClinicalProblemStatus {
+  ACTIVE
+  CHRONIC
+  RESOLVED
+  RULED_OUT
+}
+
+enum PrescriptionRoute {
+  ORAL
+  SUBCUTANEOUS
+  INTRAVENOUS
+  INTRAMUSCULAR
+  TOPICAL
+  OTIC
+  OPHTHALMIC
+  INHALED
+  RECTAL
+  INTRANASAL
+  OTHER
+}
+
+/// A prescription is never deleted — it is CANCELLED (with a reason) or runs
+/// to COMPLETED, mirroring the append/supersede discipline every other
+/// provider-authored record in this codebase already follows.
+enum PrescriptionStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum HospitalizationStatus {
+  ADMITTED
+  DISCHARGED
+  CANCELLED
+}
+
+enum TreatmentTaskType {
+  MEDICATION
+  FLUID_THERAPY
+  MONITORING
+  FEEDING
+  WALK
+  PROCEDURE
+  SAMPLE_COLLECTION
+  OTHER
+}
+
+/// SKIPPED (a deliberate clinical decision not to give a treatment) and
+/// MISSED (nobody did it) are separate values on purpose — a treatment sheet
+/// that cannot tell those apart is worthless as a record of care. Neither is
+/// ever set automatically by a timer; a task simply stays SCHEDULED and reads
+/// as overdue until a human states which of the two it was.
+enum TreatmentTaskStatus {
+  SCHEDULED
+  DONE
+  SKIPPED
+  MISSED
+}
+
+enum ClinicalEstimateStatus {
+  DRAFT
+  PRESENTED
+  APPROVED
+  DECLINED
+  EXPIRED
+}
+
+enum DischargeSummaryStatus {
+  DRAFT
+  ISSUED
+}
+
+enum ClinicalAlertType {
+  HANDLING
+  AGGRESSION
+  MEDICAL
+  ANAESTHETIC
+  ALLERGY
+  INFECTIOUS
+  OTHER
+}
+
+enum ClinicalAlertSeverity {
+  INFO
+  CAUTION
+  CRITICAL
+}
+
+/// A single structured exam / triage record: the "O" of a SOAP note in
+/// queryable columns instead of prose, so a weight or a temperature can be
+/// trended across visits. Every field is independently nullable — a vet who
+/// only took a weight records only a weight, and the UI shows the rest as
+/// "not recorded" rather than filling blanks with reassuring defaults. No
+/// column here is computed: body condition score and pain score are the
+/// examiner's own stated values on a named scale, never derived by this
+/// codebase from any other field.
+model PatientVitalsRecord {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  clinicalVisitId String?        @db.Uuid
+  clinicalVisit   ClinicalVisit? @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  hospitalizationId String?          @db.Uuid
+  hospitalization   Hospitalization? @relation(fields: [hospitalizationId], references: [id], onDelete: SetNull)
+
+  recordedAt DateTime @default(now())
+
+  weightValue Decimal?    @db.Decimal(6, 2)
+  weightUnit  WeightUnit?
+
+  temperatureC            Decimal? @db.Decimal(4, 1)
+  heartRateBpm            Int?
+  respiratoryRateBpm      Int?
+  capillaryRefillSeconds  Decimal? @db.Decimal(3, 1)
+  systolicBloodPressure   Int?
+  oxygenSaturationPercent Int?
+  bloodGlucoseMgDl        Int?
+
+  mucousMembraneColor MucousMembraneColor?
+  hydrationStatus     HydrationStatus?
+
+  /// 1-9 Purina-style body condition score. Stored as the examiner entered
+  /// it; `bodyConditionScale` names which scale was used so a 5/9 is never
+  /// silently re-read as a 5/5.
+  bodyConditionScore Int?
+  bodyConditionScale String?
+
+  /// 0-4 pain score. `painScale` names the instrument (e.g. "Glasgow CMPS-SF")
+  /// — a bare number without its scale is not a clinical fact.
+  painScore Int?
+  painScale String?
+
+  triageLevel TriageLevel?
+
+  notes String?
+
+  sourceType             SourceType           @default(PROVIDER)
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String               @db.Uuid
+  providerUser           ProviderUser         @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId, recordedAt])
+  @@index([clinicalVisitId])
+  @@index([hospitalizationId])
+  @@map("patient_vitals_records")
+}
+
+/// The master problem list — the index a clinician reads first. Unlike
+/// `Condition` (Handoff 02, owner-maintained health basics), this is
+/// provider-authored and carries clinical lifecycle: a problem moves between
+/// ACTIVE/CHRONIC/RESOLVED/RULED_OUT and keeps the visit it was first raised
+/// in. The two are deliberately not merged — an owner saying "he has
+/// allergies" and a vet's working problem list are different assertions with
+/// different provenance, and Handoff 17 principle 2 forbids one overwriting
+/// the other.
+model ClinicalProblem {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+
+  originatingVisitId String?        @db.Uuid
+  originatingVisit   ClinicalVisit? @relation(fields: [originatingVisitId], references: [id], onDelete: SetNull)
+
+  name       String
+  bodySystem String?
+
+  status     ClinicalProblemStatus @default(ACTIVE)
+  onsetAt    DateTime?
+  resolvedAt DateTime?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId, status])
+  @@map("clinical_problems")
+}
+
+/// The dispensing-grade prescription record. `Medication` (Handoff 02) stays
+/// the single source of truth for "what this pet is taking" — a Prescription
+/// links to the Medication row it produced (`medicationId`) rather than
+/// duplicating the regimen into a second list the owner's app would then have
+/// to reconcile. What lives here is everything Medication has no column for
+/// and an owner-editable model should never carry: dispensed quantity,
+/// authorised refills, the controlled-substance flag, and the prescriber's
+/// identity.
+model Prescription {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String               @db.Uuid
+  providerUser           ProviderUser         @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+
+  clinicalVisitId String?        @db.Uuid
+  clinicalVisit   ClinicalVisit? @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  /// The executable Medication row this prescription created, so the owner's
+  /// existing medication list stays the one place "what is my pet taking" is
+  /// answered. Nullable because a prescription may be cancelled before the
+  /// medication row is ever created, and SetNull so deleting neither side
+  /// silently rewrites the other's history.
+  medicationId String?     @unique @db.Uuid
+  medication   Medication? @relation(fields: [medicationId], references: [id], onDelete: SetNull)
+
+  drugName String
+  strength String?
+  form     String?
+  route    PrescriptionRoute @default(ORAL)
+
+  /// The dose *as the prescriber wrote it*. This codebase never computes a
+  /// dose: the panel's mg/kg helper is an advisory client-side calculation a
+  /// vet must retype, and only the retyped value is ever stored.
+  doseAmount Decimal? @db.Decimal(10, 3)
+  doseUnit   String?
+
+  frequencyText String?
+  durationDays  Int?
+
+  quantityDispensed Decimal? @db.Decimal(10, 2)
+  quantityUnit      String?
+  refillsAuthorized Int      @default(0)
+  refillsDispensed  Int      @default(0)
+
+  /// Flags a schedule/controlled drug so the panel can surface it distinctly.
+  /// PET LIFE OS asserts no jurisdiction's schedule of its own — this is the
+  /// prescriber's statement about the product they dispensed.
+  isControlledSubstance Boolean @default(false)
+
+  instructionsForOwner String?
+  internalNotes        String?
+
+  status          PrescriptionStatus @default(ACTIVE)
+  prescribedAt    DateTime           @default(now())
+  startAt         DateTime?
+  endAt           DateTime?
+  cancelledAt     DateTime?
+  cancelledReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId, status])
+  @@index([clinicalVisitId])
+  @@map("prescriptions")
+}
+
+/// An inpatient stay. This is what makes a whiteboard possible: "who is in
+/// the building right now" is a real row with an admission and a discharge,
+/// never inferred from a Booking's status or a visit that happens to be open.
+model Hospitalization {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId  String               @db.Uuid
+  providerOrganization    ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  attendingProviderUserId String?              @db.Uuid
+  attendingProviderUser   ProviderUser?        @relation(fields: [attendingProviderUserId], references: [id], onDelete: Restrict)
+
+  clinicalVisitId String?        @db.Uuid
+  clinicalVisit   ClinicalVisit? @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  status HospitalizationStatus @default(ADMITTED)
+
+  reasonForAdmission   String
+  kennelLabel          String?
+  triageLevel          TriageLevel?
+  admittedAt           DateTime     @default(now())
+  estimatedDischargeAt DateTime?
+  dischargedAt         DateTime?
+  dischargeNote        String?
+  cancelledReason      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  treatmentTasks TreatmentTask[]
+  vitalsRecords  PatientVitalsRecord[]
+
+  @@index([providerOrganizationId, status])
+  @@index([petId])
+  @@map("hospitalizations")
+}
+
+/// One scheduled cell of the treatment sheet. The sheet itself is not a
+/// stored document — it is these rows read back in time order, exactly the
+/// way the whiteboard is Hospitalization rows read back by status. A task is
+/// never deleted and never silently rewritten: completing one stamps who did
+/// it and when, and re-stating an outcome is a new status with its own
+/// actor/timestamp, not an erasure of the previous one.
+model TreatmentTask {
+  id                String          @id @default(uuid()) @db.Uuid
+  hospitalizationId String          @db.Uuid
+  hospitalization   Hospitalization @relation(fields: [hospitalizationId], references: [id], onDelete: Restrict)
+
+  type   TreatmentTaskType
+  title  String
+  detail String?
+
+  /// Denormalised from the prescription that generated this task, when one
+  /// did — the task text is a point-in-time instruction and must not change
+  /// under the nurse's hands if the prescription is later amended.
+  prescriptionId String? @db.Uuid
+
+  scheduledAt DateTime
+  status      TreatmentTaskStatus @default(SCHEDULED)
+
+  completedAt               DateTime?
+  completedByProviderUserId String?   @db.Uuid
+  outcomeNote               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([hospitalizationId, scheduledAt])
+  @@index([status, scheduledAt])
+  @@map("treatment_tasks")
+}
+
+/// A costed treatment plan the owner approves before work starts. Money here
+/// obeys every rule Handoff 06/07 established: IRR integers only, never
+/// floating point, and the stored totals are a snapshot computed from the
+/// lines at write time rather than recomputed differently on each read.
+/// A range (low/high) is used rather than a single figure because an honest
+/// veterinary estimate is a range — collapsing it to one number would be the
+/// same class of false precision this codebase refuses elsewhere.
+model ClinicalEstimate {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  householdId String    @db.Uuid
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  providerUserId         String?              @db.Uuid
+  providerUser           ProviderUser?        @relation(fields: [providerUserId], references: [id], onDelete: Restrict)
+
+  clinicalVisitId String?        @db.Uuid
+  clinicalVisit   ClinicalVisit? @relation(fields: [clinicalVisitId], references: [id], onDelete: SetNull)
+
+  title  String
+  status ClinicalEstimateStatus @default(DRAFT)
+  notes  String?
+
+  /// Integer IRR, the only stored currency unit in this codebase (Toman is a
+  /// display-only transform — see Handoff 06).
+  lowTotalIrr  BigInt @default(0)
+  highTotalIrr BigInt @default(0)
+
+  validUntil  DateTime?
+  presentedAt DateTime?
+
+  /// Set only by a real owner/household action through the consumer API —
+  /// a provider can never approve an estimate on the owner's behalf.
+  respondedAt       DateTime?
+  respondedByUserId String?   @db.Uuid
+  declineReason     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lines ClinicalEstimateLine[]
+
+  @@index([petId, status])
+  @@index([providerOrganizationId, status])
+  @@map("clinical_estimates")
+}
+
+model ClinicalEstimateLine {
+  id         String           @id @default(uuid()) @db.Uuid
+  estimateId String           @db.Uuid
+  estimate   ClinicalEstimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+
+  description String
+  quantity    Decimal @default(1) @db.Decimal(10, 2)
+
+  unitLowIrr  BigInt
+  unitHighIrr BigInt
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([estimateId])
+  @@map("clinical_estimate_lines")
+}
+
+/// An organisation's reusable note scaffold for a presenting complaint
+/// ("Vomiting — canine", "Annual wellness — feline"). Applying one only ever
+/// pre-fills the visit's editable note fields client-side; a template never
+/// becomes part of the clinical record on its own, and nothing is written
+/// until the vet saves the notes they actually wrote.
+model ClinicalNoteTemplate {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+
+  name                String
+  presentingComplaint String?
+  /// NULL = applies to every species this organisation sees.
+  species             PetSpecies?
+
+  reasonForVisitTemplate String?
+  historyTemplate        String?
+  observationsTemplate   String?
+  assessmentTemplate     String?
+  planTemplate           String?
+
+  isActive Boolean @default(true)
+
+  createdByProviderUserId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerOrganizationId, isActive])
+  @@map("clinical_note_templates")
+}
+
+/// The document the owner takes home. One row per visit, DRAFT until the vet
+/// issues it; once ISSUED it is immutable — a correction is a new visit
+/// amendment plus a newly issued summary, never a silent rewrite of a
+/// document the owner has already read (Handoff 17's completed-record
+/// immutability rule, applied to the one artefact that leaves the clinic).
+model DischargeSummary {
+  id              String        @id @default(uuid()) @db.Uuid
+  clinicalVisitId String        @unique @db.Uuid
+  clinicalVisit   ClinicalVisit @relation(fields: [clinicalVisitId], references: [id], onDelete: Restrict)
+
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  issuedByProviderUserId String?              @db.Uuid
+
+  status DischargeSummaryStatus @default(DRAFT)
+
+  summaryText          String?
+  homeCareInstructions String?
+  medicationsSummary   String?
+  /// The "call us immediately if you see this" section. Plain provider text —
+  /// PET LIFE OS never generates or augments it.
+  warningSignsText     String?
+  followUpAt           DateTime?
+  followUpInstructions String?
+
+  issuedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId])
+  @@map("discharge_summaries")
+}
+
+/// A safety banner pinned to a patient inside the clinic — "muzzle required",
+/// "prior anaphylaxis to X", "do not sedate". Deliberately provider-only: it
+/// is never returned by any consumer endpoint, because a handling note
+/// written for staff safety is not an owner-facing statement about their pet.
+/// Resolving one keeps the row (resolvedAt), never deletes it.
+model ProviderClinicalAlert {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  providerOrganizationId  String               @db.Uuid
+  providerOrganization    ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  createdByProviderUserId String?              @db.Uuid
+
+  type     ClinicalAlertType
+  severity ClinicalAlertSeverity @default(CAUTION)
+  message  String
+
+  resolvedAt               DateTime?
+  resolvedByProviderUserId String?   @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId, resolvedAt])
+  @@index([providerOrganizationId])
+  @@map("provider_clinical_alerts")
 }

@@ -1,6 +1,6 @@
-import { ProviderClinicalPatientView } from "@/features/provider/ProviderClinicalPatientView";
+import { VetPatientRecordView } from "@/features/vet-panel/VetPatientRecordView";
 
 export default async function ProviderPatientPage({ params }: { params: Promise<{ petId: string }> }) {
   const { petId } = await params;
-  return <ProviderClinicalPatientView petId={petId} />;
+  return <VetPatientRecordView petId={petId} />;
 }

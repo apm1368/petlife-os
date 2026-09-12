@@ -8,7 +8,9 @@ import type { HealthOverviewDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ApiError } from "@/lib/api/client";
 
-const NAV_ITEMS = ["timeline", "documents", "labs", "imaging", "referrals", "dental", "nutrition", "rehab", "observations"] as const;
+// "vitals", "estimates" and "discharge" are the Handoff 24 additions — the
+// owner's read of what the clinic measured, quoted, and sent home with them.
+const NAV_ITEMS = ["timeline", "documents", "vitals", "labs", "imaging", "referrals", "dental", "nutrition", "rehab", "observations", "estimates", "discharge"] as const;
 
 /**
  * Answers "what matters for this pet right now" (spec) — no numeric health
