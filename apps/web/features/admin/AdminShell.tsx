@@ -16,6 +16,7 @@ type SessionState = "loading" | "authenticated" | "unauthenticated";
 
 const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionName }[] = [
   { href: "", labelKey: "nav.dashboard" },
+  { href: "/crm", labelKey: "nav.crm", permission: "customer.view" },
   { href: "/customers", labelKey: "nav.customers", permission: "customer.view" },
   { href: "/support", labelKey: "nav.support", permission: "support.view" },
   { href: "/disputes", labelKey: "nav.disputes", permission: "dispute.view" },
