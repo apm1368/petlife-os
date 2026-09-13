@@ -67,7 +67,18 @@ export function CrmWorkspace() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    // Every string in this workspace is Persian (see the note above
+    // SECTION_LABEL): it is not wired to next-intl yet, so it does not follow
+    // the admin shell's locale. Marking the subtree explicitly keeps it
+    // *rendering* correctly meanwhile — without this, /en/admin/crm inherits
+    // the page's `dir="ltr"` and the bidi algorithm moves sentence-final
+    // punctuation to the wrong end (".متصل نیست"), left-aligns right-aligned
+    // copy, and mis-orders every mixed Persian/Latin run. `lang` matters for
+    // the same reason a screen reader needs it: this is Persian text on a page
+    // that otherwise claims to be English.
+    // This is a stopgap for the rendering, not a substitute for localizing the
+    // workspace — an English-speaking admin still reads Persian here.
+    <div dir="rtl" lang="fa" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-page-title text-text-primary">CRM پت لایف</h1>
