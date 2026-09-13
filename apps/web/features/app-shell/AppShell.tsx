@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { Avatar, IconButton, Skeleton } from "@petlife/ui";
+import { Avatar, Button, IconButton, Skeleton } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -11,7 +11,7 @@ import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { isLoading } = useAppBootstrap();
+  const { isLoading, error, retry } = useAppBootstrap();
   const user = useSessionStore((s) => s.user);
   const status = useSessionStore((s) => s.status);
   const t = useTranslations("common");
@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && status === "unauthenticated") {
+    if (!isLoading && !error && status === "unauthenticated") {
       // Carry the intended destination through the login flow. Without this a
       // deep link (a shared booking, a pet profile) silently became "you are
       // now at Home" after signing in; /welcome already reads and sanitizes
@@ -28,7 +28,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       router.replace(`/${locale}/welcome?returnTo=${encodeURIComponent(pathname)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, status, pathname]);
+  }, [isLoading, error, status, pathname]);
+
+  // A non-401 bootstrap failure (API down, a 500, a fetch that never became an
+  // ApiError) leaves the session status at its initial "idle": the redirect
+  // above never fires because the visitor isn't *known* to be unauthenticated,
+  // and the skeleton below would otherwise render forever with no message and
+  // no way out. Surface it as a recoverable state instead — a reload is not a
+  // fix the visitor should have to discover on their own.
+  if (!isLoading && error) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface-base px-4 text-center">
+        <p className="text-body text-text-secondary">{t("genericError")}</p>
+        <Button variant="secondary" size="sm" onClick={retry}>
+          {t("retry")}
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading || status !== "authenticated") {
     return (

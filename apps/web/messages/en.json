@@ -235,7 +235,10 @@
     "entitlement": {
       "petsMax": "Pets",
       "membersMax": "Household members",
-      "prioritySupport": "Priority support"
+      "prioritySupport": "Priority support",
+      "healthDocumentsMax": "Medical documents",
+      "healthObservationsMax": "Health observations",
+      "memoriesMax": "Memories"
     },
     "included": "Included",
     "notIncluded": "Not included",

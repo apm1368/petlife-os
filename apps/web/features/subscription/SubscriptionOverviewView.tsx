@@ -11,6 +11,7 @@ import { subscriptionService } from "@/services/subscription.service";
 import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { entitlementLabelKey } from "./entitlement-labels";
 
 const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
   [SubscriptionStatus.TRIALING]: "neutral",
@@ -20,12 +21,6 @@ const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
   [SubscriptionStatus.CANCEL_AT_PERIOD_END]: "attention",
   [SubscriptionStatus.CANCELLED]: "neutral",
   [SubscriptionStatus.EXPIRED]: "urgent",
-};
-
-const ENTITLEMENT_LABEL_KEY: Record<string, string> = {
-  "pets.max": "entitlement.petsMax",
-  "household.members.max": "entitlement.membersMax",
-  "premium.support": "entitlement.prioritySupport",
 };
 
 function formatDate(iso: string, locale: string): string {
@@ -147,7 +142,7 @@ export function SubscriptionOverviewView() {
       <ContextSurface className="flex flex-col gap-3">
         <h2 className="text-section-title text-text-primary">{t("entitlements")}</h2>
         {entitlements.map((entitlement) => {
-          const label = ENTITLEMENT_LABEL_KEY[entitlement.key] ? t(ENTITLEMENT_LABEL_KEY[entitlement.key]!) : entitlement.key;
+          const label = entitlementLabelKey(entitlement.key) ? t(entitlementLabelKey(entitlement.key)!) : entitlement.key;
           const usageItem = usageByKey.get(entitlement.key);
           return (
             <div key={entitlement.key} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">

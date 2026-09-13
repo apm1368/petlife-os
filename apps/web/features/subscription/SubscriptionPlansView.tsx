@@ -9,12 +9,7 @@ import { subscriptionService } from "@/services/subscription.service";
 import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
-
-const ENTITLEMENT_LABEL_KEY: Record<string, string> = {
-  "pets.max": "entitlement.petsMax",
-  "household.members.max": "entitlement.membersMax",
-  "premium.support": "entitlement.prioritySupport",
-};
+import { entitlementLabelKey } from "./entitlement-labels";
 
 /**
  * Plan comparison (spec: "must not visually hide Free"). FREE is rendered
@@ -102,7 +97,7 @@ export function SubscriptionPlansView() {
               <ul className="flex flex-col gap-1">
                 {plan.entitlements.map((entitlement) => (
                   <li key={entitlement.key} className="text-metadata text-text-secondary">
-                    {ENTITLEMENT_LABEL_KEY[entitlement.key] ? t(ENTITLEMENT_LABEL_KEY[entitlement.key]!) : entitlement.key}:{" "}
+                    {entitlementLabelKey(entitlement.key) ? t(entitlementLabelKey(entitlement.key)!) : entitlement.key}:{" "}
                     {entitlement.type === "BOOLEAN" ? (entitlement.boolValue ? t("included") : t("notIncluded")) : entitlement.limitValue === null ? t("unlimited") : entitlement.limitValue}
                   </li>
                 ))}
