@@ -16,7 +16,7 @@ import {
   formatIrr,
   formatNumber,
 } from "../crm-sample-data";
-import { Kpi, Panel, PanelTitle, Pipeline, Tag } from "../crm-ui";
+import { Kpi, Panel, PanelTitle, Pipeline, Tag } from "../../console-ui";
 
 /** کارتابل من — the landing view: what is mine, what is due, what is at risk. */
 export function DeskPanel({ meId }: { meId: string }) {

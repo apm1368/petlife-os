@@ -34,7 +34,7 @@ import {
   TextFilter,
   Th,
   type Tone,
-} from "../crm-ui";
+} from "../../console-ui";
 
 const PLAN_TONE: Record<PlanCode, Tone> = { free: "neutral", plus: "brand", premium: "success" };
 

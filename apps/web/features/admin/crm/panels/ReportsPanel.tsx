@@ -13,7 +13,7 @@ import {
   formatNumber,
   type LeadKind,
 } from "../crm-sample-data";
-import { Kpi, Meter, Panel, PanelTitle, TableWrap, Tag, Td, Th } from "../crm-ui";
+import { Kpi, Meter, Panel, PanelTitle, TableWrap, Tag, Td, Th } from "../../console-ui";
 
 type Metric = "revenueIrr" | "newLeads" | "won" | "upgrades";
 

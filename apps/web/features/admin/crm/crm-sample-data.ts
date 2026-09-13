@@ -269,14 +269,14 @@ export function leadName(id: string): string {
   return LEADS.find((l) => l.id === id)?.name ?? "—";
 }
 
+import { formatNumber } from "../console-ui";
+
 /** IRR with Persian digits and thousands separators — the product's only stored currency. */
 export function formatIrr(amount: number): string {
   return new Intl.NumberFormat("fa-IR").format(amount) + " ریال";
 }
 
-export function formatNumber(value: number): string {
-  return new Intl.NumberFormat("fa-IR").format(value);
-}
+export { formatNumber } from "../console-ui";
 
 export function formatDuration(seconds: number): string {
   if (seconds === 0) return "—";

@@ -1,15 +1,21 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { formatNumber } from "./crm-sample-data";
 
 /**
- * Small presentational pieces shared across the CRM panels.
+ * The presentational kit shared by the admin consoles (CRM and Customer
+ * Affairs). One set of tags, panels, tables, filters and drawers rather than
+ * a near-identical copy per console.
  *
  * Everything here draws from the PET LIFE semantic tokens (surface-*, text-*,
- * border-*, brand-*, state-*) rather than raw hex, so the workspace follows
- * the site's light and dark themes without a palette of its own.
+ * border-*, brand-*, state-*) rather than raw hex, so the consoles follow the
+ * site's light and dark themes without a palette of their own.
  */
+
+/** Persian digits with separators — every number the admin consoles print goes through this. */
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat("fa-IR").format(value);
+}
 
 export type Tone = "neutral" | "brand" | "success" | "attention" | "concern" | "urgent";
 

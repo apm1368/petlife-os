@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AGENTS, LEAD_SOURCES, LEAD_STAGE_LABEL, LOST_REASONS, UPGRADE_STAGE_LABEL, type LeadStage, type UpgradeStage, formatNumber } from "../crm-sample-data";
-import { Panel, PanelTitle, Tag } from "../crm-ui";
+import { Panel, PanelTitle, Tag } from "../../console-ui";
 
 type Tab = "pipeline" | "sources" | "team";
 

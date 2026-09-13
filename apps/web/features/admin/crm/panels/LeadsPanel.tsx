@@ -34,7 +34,7 @@ import {
   TextFilter,
   Th,
   type Tone,
-} from "../crm-ui";
+} from "../../console-ui";
 
 const STAGE_TONE: Record<LeadStage, Tone> = {
   new: "neutral",

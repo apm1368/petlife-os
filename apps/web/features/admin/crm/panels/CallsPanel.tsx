@@ -28,7 +28,7 @@ import {
   Td,
   Th,
   type Tone,
-} from "../crm-ui";
+} from "../../console-ui";
 
 const RESULT_TONE: Record<CallResult, Tone> = { answered: "success", no_answer: "attention", callback: "brand", rejected: "urgent" };
 

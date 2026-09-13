@@ -28,7 +28,7 @@ import {
   TextFilter,
   Th,
   type Tone,
-} from "../crm-ui";
+} from "../../console-ui";
 
 const STATUS_TONE: Record<TicketStatus, Tone> = { open: "concern", waiting: "attention", resolved: "success", closed: "neutral" };
 const PRIORITY_TONE: Record<TicketPriority, Tone> = { low: "neutral", normal: "brand", high: "attention", urgent: "urgent" };
