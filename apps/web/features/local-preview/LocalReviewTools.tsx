@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocalPreview } from "./LocalPreviewGate";
@@ -18,9 +18,15 @@ export function LocalReviewTools({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const relative = pathname.slice(locale.length + 1);
   const authPage = authRoutes.includes(relative);
+  const [authPreview, setAuthPreview] = useState(false);
   useEffect(() => {
     if (!preview || !authPage) return;
-    const destination = sanitizeReturnTo(new URLSearchParams(window.location.search).get("returnTo"), `/${locale}/home`);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("authPreview") === "1") {
+      setAuthPreview(true);
+      return;
+    }
+    const destination = sanitizeReturnTo(params.get("returnTo"), `/${locale}/home`);
     const targetPath = destination.split("?")[0] ?? "";
     const isAuthTarget = authRoutes.some(path => targetPath === `/${locale}${path}`);
     router.replace(isAuthTarget ? `/${locale}/home` : destination);
@@ -35,7 +41,7 @@ export function LocalReviewTools({ children }: { children: React.ReactNode }) {
     { label: locale === "fa" ? "ادمین" : "Admin", prefix: "/admin" },
   ];
   return <>
-    {authPage ? <p className="p-6" role="status">{locale === "fa" ? "در حال باز کردن صفحه بدون ورود…" : "Opening page without sign-in…"}</p> : children}
+    {authPage && !authPreview ? <p className="p-6" role="status">{locale === "fa" ? "در حال باز کردن صفحه بدون ورود…" : "Opening page without sign-in…"}</p> : children}
     <details key={pathname} className="fixed bottom-3 end-3 z-[200] max-w-[calc(100vw-1.5rem)] rounded-xl border border-border-subtle bg-surface-base p-3 text-text-primary shadow-lg">
       <summary className="cursor-pointer text-metadata font-medium">{locale === "fa" ? "صفحات · پیش‌نمایش محلی" : "Pages · Local preview"}</summary>
       <nav aria-label={locale === "fa" ? "تمام صفحات محلی" : "All local pages"} className="mt-3 grid max-h-[65dvh] w-[620px] max-w-full grid-cols-1 gap-4 overflow-y-auto overscroll-contain sm:grid-cols-2">

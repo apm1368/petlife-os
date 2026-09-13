@@ -17,4 +17,9 @@ export * from "./PriorityAction";
 export * from "./ErrorRecovery";
 export * from "./OfflineBanner";
 export * from "./EmptyState";
-export { Sun, Moon, Monitor, Menu, X } from "lucide-react";
+export {
+  Sun, Moon, Monitor, Menu, X, Search, SlidersHorizontal, MapPin, CalendarDays,
+  ShieldCheck, Sparkles, Scissors, Stethoscope, Dog, GraduationCap, Footprints,
+  House, CarFront, ShoppingBag, Bone, HeartPulse, BadgeCheck, Clock3, Star,
+  ChevronLeft, ArrowLeft, LockKeyhole, Mail, Phone, UserRound, PackageCheck,
+} from "lucide-react";
