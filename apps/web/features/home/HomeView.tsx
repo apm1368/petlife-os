@@ -66,7 +66,13 @@ export function HomeView() {
 
       <ContextSurface>
         <PriorityAction
-          title={t(home.primaryAction.labelKey.replace("home.", ""))}
+          // `name` is passed for every label, not just the ones that use it:
+          // several action messages interpolate it ("Ask AI about {name}",
+          // "View {name}'s profile") and next-intl renders the raw key path
+          // instead of the message when a required placeholder is missing.
+          // `home.action.askAi` is HomeRankingService's default primary action,
+          // so omitting it showed a raw key on the most common Home state.
+          title={t(home.primaryAction.labelKey.replace("home.", ""), { name: home.activePet.name })}
           primaryLabel={tCommon("continue")}
           onPrimary={() => router.push(`/${locale}${home.primaryAction.href}`)}
           secondaryLabel={home.secondaryActions[0] ? t(home.secondaryActions[0].labelKey.replace("home.", ""), { name: home.activePet.name }) : undefined}

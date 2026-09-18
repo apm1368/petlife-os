@@ -13,7 +13,7 @@ import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 
 function LiveAppShell({ children }: { children: React.ReactNode }) {
-  const { isLoading, error } = useAppBootstrap();
+  const { isLoading, error, retry } = useAppBootstrap();
   const user = useSessionStore((s) => s.user);
   const status = useSessionStore((s) => s.status);
   const t = useTranslations("common");
@@ -23,13 +23,13 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && status === "unauthenticated") {
+    if (!isLoading && !error && status === "unauthenticated") {
       router.replace(
         `/${locale}/welcome?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, status, pathname]);
+  }, [isLoading, error, status, pathname]);
 
   if (error) {
     return (
@@ -38,7 +38,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
           title={tErrors("generic")}
           message=""
           retryLabel={t("retry")}
-          onRetry={() => window.location.reload()}
+          onRetry={retry}
         />
       </main>
     );

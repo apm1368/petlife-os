@@ -42,6 +42,18 @@ export class UsageService {
     return key in UsageService.DERIVERS;
   }
 
+  /**
+   * The metered keys themselves. Exposed so a test can assert that
+   * `DEFAULT_FREE_PLAN_ENTITLEMENTS` — the plan
+   * `SubscriptionPlanReadService.getFreePlanRaw()` self-heals with — defines
+   * a limit for every one of them: an unlisted LIMIT key resolves to `0` in
+   * `EntitlementService.getLimit`, which silently blocks the feature it
+   * meters instead of failing loudly at boot.
+   */
+  static meteredKeys(): string[] {
+    return Object.keys(UsageService.DERIVERS);
+  }
+
   async getUsage(householdId: string, key: string): Promise<number> {
     const derive = UsageService.DERIVERS[key];
     if (!derive) return 0;

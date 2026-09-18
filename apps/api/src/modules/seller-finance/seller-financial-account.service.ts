@@ -38,16 +38,24 @@ export class SellerFinancialAccountService {
     return client.sellerFinancialAccount.findUnique({ where: { sellerOrganizationId } });
   }
 
+  /**
+   * `client` is very often a transaction client (see
+   * AdminSellerSettlementService.calculate / AdminSellerAdjustmentService),
+   * so the lazy create must never be allowed to *fail* here: in PostgreSQL a
+   * statement that raises inside a transaction aborts the whole transaction,
+   * and every later command in it dies with 25P02
+   * ("current transaction is aborted") — including a catch-P2002-then-reread
+   * recovery, which therefore cannot work on `client` at all and would turn
+   * a lost insert race into a 500 for the caller's entire settlement.
+   * `createMany({ skipDuplicates: true })` compiles to
+   * `INSERT ... ON CONFLICT DO NOTHING`, so losing the race is a no-op
+   * rather than an error and the transaction stays usable for the read below
+   * and for everything the caller does afterward.
+   */
   async getOrCreate(sellerOrganizationId: string, client: QueryClient = this.prisma): Promise<SellerFinancialAccount> {
     const existing = await client.sellerFinancialAccount.findUnique({ where: { sellerOrganizationId } });
     if (existing) return existing;
-    try {
-      return await client.sellerFinancialAccount.create({ data: { sellerOrganizationId } });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        return client.sellerFinancialAccount.findUniqueOrThrow({ where: { sellerOrganizationId } });
-      }
-      throw error;
-    }
+    await client.sellerFinancialAccount.createMany({ data: [{ sellerOrganizationId }], skipDuplicates: true });
+    return client.sellerFinancialAccount.findUniqueOrThrow({ where: { sellerOrganizationId } });
   }
 }

@@ -18,6 +18,26 @@ import { PLAN_INCLUDE, toPlanDto, type PlanWithRelations } from "./subscription-
 export const DEFAULT_FREE_PLAN_CODE = "free";
 
 /**
+ * The self-healing default FREE plan's entitlements. Must define a limit for
+ * every key `UsageService.meteredKeys()` meters: an unlisted LIMIT key
+ * resolves to `0` in `EntitlementService.getLimit` ("the most restrictive,
+ * safe default"), so omitting one here does not fall back to "unmetered" —
+ * it silently makes the very first `assertWithinLimit` call for that key
+ * fail with SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED, which is exactly the
+ * "a missing demo-data row blocks a core flow" failure `getFreePlanRaw()`
+ * exists to prevent. `subscription-plan-read.entitlements.spec.ts` asserts
+ * that coverage. Values match `seed.ts`'s own FREE plan, so seeding upgrades
+ * this row in place without changing any household's effective limits.
+ */
+export const DEFAULT_FREE_PLAN_ENTITLEMENTS: { key: string; type: SubscriptionEntitlementType; limitValue: number | null }[] = [
+  { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
+  { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
+  { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 10 },
+  { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 20 },
+  { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
+];
+
+/**
  * Read-only plan/price resolution shared by the consumer plans page, the
  * entitlement resolver, and admin inspection — never mutated here (see
  * `admin/subscriptions/admin-subscription-plan.service.ts` for writes).
@@ -88,13 +108,7 @@ export class SubscriptionPlanReadService {
           status: SubscriptionPlanStatus.ACTIVE,
           sortOrder: 0,
           countryAvailability: { create: { countryCode: DEFAULT_COUNTRY_CODE } },
-          entitlements: {
-            create: [
-              { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
-              { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
-              { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
-            ],
-          },
+          entitlements: { create: DEFAULT_FREE_PLAN_ENTITLEMENTS },
         },
         include: PLAN_INCLUDE,
       });

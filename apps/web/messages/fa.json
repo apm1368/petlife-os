@@ -235,7 +235,10 @@
     "entitlement": {
       "petsMax": "تعداد حیوانات",
       "membersMax": "اعضای خانواده",
-      "prioritySupport": "پشتیبانی اولویت‌دار"
+      "prioritySupport": "پشتیبانی اولویت‌دار",
+      "healthDocumentsMax": "مدارک پزشکی",
+      "healthObservationsMax": "مشاهدات سلامت",
+      "memoriesMax": "خاطرات"
     },
     "included": "شامل می‌شود",
     "notIncluded": "شامل نمی‌شود",
