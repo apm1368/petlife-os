@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
-import { Monitor } from "@petlife/ui";
 
 export function LandingTheme() {
   const [mounted, setMounted] = useState(false);
@@ -13,7 +12,7 @@ export function LandingTheme() {
   // localStorage rather than retaining the server's SYSTEM option.
   return (
     <div className="landing-theme-control">
-      {mounted ? <ThemeToggle /> : <Monitor size={20} aria-hidden="true" />}
+      {mounted ? <ThemeToggle /> : <span aria-hidden="true">◐</span>}
     </div>
   );
 }

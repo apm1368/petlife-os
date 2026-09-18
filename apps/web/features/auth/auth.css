@@ -1,0 +1,14 @@
+.auth-frame{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.18fr) minmax(380px,.82fr);background:#f4f1e9;color:#152d26}
+.auth-brand-panel{position:relative;min-height:100dvh;overflow:hidden;background:#173f33;color:#fff}
+.auth-brand-panel>img{object-fit:cover;object-position:center}
+.auth-brand-panel::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,28,23,.92),rgba(8,28,23,.56) 48%,rgba(8,28,23,.08))}
+[dir="rtl"] .auth-brand-panel::after{background:linear-gradient(270deg,rgba(8,28,23,.92),rgba(8,28,23,.56) 48%,rgba(8,28,23,.08))}
+.auth-brand-copy{position:relative;z-index:1;display:flex;min-height:100%;max-width:590px;flex-direction:column;justify-content:center;padding:clamp(36px,7vw,92px)}
+.auth-brand-panel a{position:absolute;top:38px;color:#f1ca78;text-decoration:none;font-size:1.05rem;font-weight:900;letter-spacing:.08em;white-space:nowrap}
+.auth-brand-panel h1{max-width:12ch;margin:0;font-size:clamp(2.3rem,5vw,4.8rem);line-height:1.12;letter-spacing:-.045em}
+.auth-brand-panel p{max-width:45ch;margin:22px 0 0;color:rgba(255,255,255,.78);font-size:1rem;line-height:1.9}
+.auth-form-panel{--text-primary:#152d26;--text-secondary:#63726d;--surface-base:#fff;--surface-elevated:#fff;--surface-subtle:#eef3ef;align-self:center;width:min(100%,480px);margin-inline:auto;padding:52px;color:#152d26}
+.auth-form-panel>div,.auth-form-panel>form{padding:34px;border:1px solid rgba(26,82,61,.11);border-radius:24px;background:rgba(255,255,255,.82);box-shadow:0 24px 70px rgba(18,55,43,.1);backdrop-filter:blur(18px)}
+.auth-form-panel button{min-height:48px;border-radius:13px}
+.auth-frame a:focus-visible{outline:3px solid var(--focus-ring);outline-offset:5px}
+@media(max-width:820px){.auth-frame{grid-template-columns:1fr}.auth-brand-panel{min-height:310px}.auth-brand-panel>img{object-position:62% center}.auth-brand-copy{min-height:310px;padding:28px}.auth-brand-panel a{top:26px}.auth-brand-panel h1{margin-top:62px;font-size:2.25rem}.auth-brand-panel p{display:none}.auth-form-panel{padding:28px 18px 46px}.auth-form-panel>div,.auth-form-panel>form{padding:25px}}

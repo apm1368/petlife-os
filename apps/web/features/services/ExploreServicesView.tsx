@@ -1,56 +1,34 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
-import { ContextSurface } from "@petlife/ui";
+import { CarFront, Dog, Footprints, GraduationCap, House, Scissors, Search } from "@petlife/ui";
 import { ServiceCategory } from "@petlife/types";
+import { CinematicPageHero } from "@/features/experience/CinematicPageHero";
 import { useActivePet } from "@/hooks/use-active-pet";
 
 const CATEGORIES = [
-  ServiceCategory.GROOMING,
-  ServiceCategory.TRAINING,
-  ServiceCategory.WALKING,
-  ServiceCategory.SITTING,
-  ServiceCategory.BOARDING,
-  ServiceCategory.PET_TAXI,
+  { value: ServiceCategory.GROOMING, fa: "آرایش و شست‌وشو", en: "Grooming", hintFa: "اصلاح، حمام و مراقبت تخصصی", hintEn: "Bath, haircut and specialist care", icon: Scissors },
+  { value: ServiceCategory.TRAINING, fa: "آموزش", en: "Training", hintFa: "مربی خصوصی و کلاس‌های رفتاری", hintEn: "Private trainers and behaviour classes", icon: GraduationCap },
+  { value: ServiceCategory.WALKING, fa: "پیاده‌روی", en: "Walking", hintFa: "پیاده‌روی امن و قابل‌ردیابی", hintEn: "Safe, trackable walks", icon: Footprints },
+  { value: ServiceCategory.SITTING, fa: "نگهداری در منزل", en: "Sitting", hintFa: "همراه مطمئن در خانه شما", hintEn: "Trusted care in your home", icon: Dog },
+  { value: ServiceCategory.BOARDING, fa: "پانسیون", en: "Boarding", hintFa: "اقامت شبانه با گزارش روزانه", hintEn: "Overnight stays with daily updates", icon: House },
+  { value: ServiceCategory.PET_TAXI, fa: "تاکسی حیوانات", en: "Pet Taxi", hintFa: "جابجایی ایمن درون‌شهری", hintEn: "Safe city transportation", icon: CarFront },
 ];
 
-/**
- * Active Pet -> category tiles (spec section 29). No compatibility is
- * computed on this screen itself — the Active Pet's id simply flows through
- * as the `petId` query param on the next (Service Results) screen, so
- * switching the active pet before navigating here always recalculates
- * compatibility from scratch rather than caching a stale result.
- */
 export function ExploreServicesView() {
-  const t = useTranslations("services.explore");
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("services.explore");
   const { activePet } = useActivePet();
-
-  return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-page-title text-text-primary">{t("title")}</h1>
-        {activePet ? <p className="mt-1 text-body text-text-secondary">{t("subtitle", { name: activePet.name })}</p> : null}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {CATEGORIES.map((category) => (
-          <button
-            key={category}
-            type="button"
-            className="text-start"
-            onClick={() => router.push(`/${locale}/services/${category}`)}
-          >
-            <ContextSurface className="flex flex-col gap-1">
-              <p className="text-body font-medium text-text-primary">{t(`category.${category}`)}</p>
-              <p className="text-metadata text-text-secondary">{t(`categoryHint.${category}`)}</p>
-            </ContextSurface>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+  const fa = locale === "fa";
+  return <div className="experience-stack">
+    <CinematicPageHero image="/images/experience/grooming-hero.png" eyebrow={fa ? "متخصص‌های قابل اعتماد، یک‌جا" : "TRUSTED PET PROFESSIONALS"} title={fa ? "مراقبت حرفه‌ای، نزدیک شما" : "Professional care, near you"} description={fa ? "خدمات را بر اساس زمان، محله، نیاز حیوان و تجربه متخصص مقایسه کنید و رزرو را در چند قدم انجام دهید." : "Compare services by time, location, pet needs and professional experience, then book in a few steps."}>
+      <form className="experience-search" onSubmit={(event) => { event.preventDefault(); router.push(`/${locale}/services/${ServiceCategory.GROOMING}`); }} role="search"><label><Search size={20} aria-hidden="true" /><input aria-label={fa ? "جست‌وجوی خدمات" : "Search services"} placeholder={fa ? "چه خدمتی نیاز دارید؟" : "What service do you need?"} /></label><button type="submit">{fa ? "پیدا کن" : "Find care"}</button></form>
+    </CinematicPageHero>
+    {activePet ? <p className="experience-preview-note">{t("subtitle", { name: activePet.name })}</p> : null}
+    <section className="experience-section"><div className="experience-section__head"><div><h2>{fa ? "انتخاب خدمت" : "Choose a service"}</h2><p>{fa ? "هر خدمت با متخصص، زمان‌بندی و استانداردهای خودش" : "Each service with its own professionals, schedule and standards"}</p></div></div><div className="experience-grid">
+      {CATEGORIES.map((item) => { const Icon = item.icon; return <button key={item.value} type="button" className="experience-tile" onClick={() => router.push(`/${locale}/services/${item.value}`)}><span className="experience-tile__icon"><Icon size={23} aria-hidden="true" /></span><div><h3>{fa ? item.fa : item.en}</h3><p>{fa ? item.hintFa : item.hintEn}</p></div></button>; })}
+    </div></section>
+  </div>;
 }

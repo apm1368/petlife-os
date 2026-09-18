@@ -7,12 +7,9 @@ import { useThemeStore } from "@/stores/theme-store";
 import { LandingTheme } from "./LandingTheme";
 import { landingCopy } from "./copy";
 import { cameraAt, cameraStops, clampProgress, nearestStop, wheelProgress } from "./camera";
-import { landingDestination } from "./destination";
-import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavigation";
-import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
+import { rememberLandingIntent } from "./intent";
 
 export function SpatialLanding({ locale }: { locale: AppLocale }) {
-  const preview = useLocalPreview();
   const copy = landingCopy[locale],
     root = useRef<HTMLDivElement>(null),
     camera = useRef<HTMLDivElement>(null),
@@ -149,6 +146,7 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
     overview = active === 0 || active === 11,
     future = active >= 8 && active <= 10;
   const cta = () => {
+    rememberLandingIntent(overview ? "overview" : cameraStops[active]!.id);
     emit("landing_primary_cta_clicked", { state: cameraStops[active]!.id });
   };
   return (
@@ -211,7 +209,7 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
           <div ref={parallax} className="parallax-layer">
             <div className="persistent-world">
               <Image
-                src="/images/landing/petlife-city-day-v2.png"
+                src="/images/landing/cookie-world-day-clean.webp"
                 unoptimized
                 alt=""
                 fill
@@ -221,7 +219,7 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
                 onLoad={() => setReady(true)}
               />
               <Image
-                src="/images/landing/petlife-city-day-v2.png"
+                src="/images/landing/cookie-world-night-clean.webp"
                 unoptimized
                 alt=""
                 fill
@@ -283,9 +281,10 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
             <div aria-label={copy.theme}>
               <LandingTheme />
             </div>
-            <Link href={`/${locale}${preview ? "/home" : "/welcome"}`}>{preview ? (locale === "fa" ? "برنامه" : "Open app") : copy.signIn}</Link>
+            <Link href={`/${locale}/auth`} onClick={() => rememberLandingIntent("overview")}>
+              {copy.signIn}
+            </Link>
           </div>
-        <PublicPrimaryNavigation />
         </header>
         <button
           className="cookie-identity"
@@ -294,6 +293,10 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
         >
           <span className="cookie-photo">
             <Image src="/images/landing/cookie-reference.jpg" alt="" width={120} height={120} priority />
+          </span>
+          <span>
+            <strong>{copy.pet}</strong>
+            <bdi>{copy.breed}</bdi>
           </span>
         </button>
         <div className="context-copy" key={cameraStops[active]!.id}>
@@ -307,11 +310,7 @@ export function SpatialLanding({ locale }: { locale: AppLocale }) {
                 {copy.back}
               </button>
             ) : (
-              <Link
-                className="spatial-primary"
-                href={landingDestination(locale, overview ? "overview" : cameraStops[active]!.id)}
-                onClick={cta}
-              >
+              <Link className="spatial-primary" href={`/${locale}/auth`} onClick={cta}>
                 {context[3]}
               </Link>
             )}

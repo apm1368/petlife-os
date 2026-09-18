@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import RootPage from "@/app/[locale]/page";
-
+import AuthPage from "@/app/[locale]/(auth)/auth/page";
 import { landingCopy } from "./copy";
 import { cameraAt, cameraStops, nearestStop, wheelProgress } from "./camera";
-import { landingDestination } from "./destination";
+import { consumeLandingIntent, rememberLandingIntent } from "./intent";
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -30,7 +30,7 @@ describe("Public spatial landing", () => {
     const copy = landingCopy[locale];
     renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(copy.contexts[0]![1]);
-    expect(screen.getByRole("link", { name: copy.start }).getAttribute("href")).toBe(`/${locale}/welcome`);
+    expect(screen.getByRole("link", { name: copy.start }).getAttribute("href")).toBe(`/${locale}/auth`);
     expect(document.querySelectorAll(".persistent-world")).toHaveLength(1);
     expect(document.querySelectorAll(".context-copy")).toHaveLength(1);
     expect(document.body.textContent).not.toMatch(/Luna|لونا/);
@@ -49,11 +49,19 @@ describe("Public spatial landing", () => {
     const cta = screen.getByRole("link", { name: landingCopy.en.contexts[5]![3] });
     cta.addEventListener("click", (event) => event.preventDefault());
     fireEvent.click(cta);
-    expect(cta.getAttribute("href")).toBe("/en/shop");
+    expect(consumeLandingIntent("en")).toBe("/en/shop?landingPet=cookie&landingAction=shop");
     fireEvent.keyDown(document.querySelector(".spatial-landing")!, { key: "Escape" });
     await waitFor(() =>
       expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("overview"),
     );
+  });
+  it.each(["fa", "en"] as const)("preserves existing %s email/phone auth", (locale) => {
+    renderWithIntl(<AuthPage />, locale);
+    const buttons = screen.getAllByRole("button");
+    fireEvent.click(buttons[0]!);
+    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
+    fireEvent.click(buttons[1]!);
+    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=phone`);
   });
   it("rejects unsupported locales", async () => {
     await expect(RootPage({ params: Promise.resolve({ locale: "xx" }) })).rejects.toThrow("NOT_FOUND");
@@ -68,13 +76,22 @@ describe("Camera and intent boundaries", () => {
     expect(wheelProgress(-99999, 2)).toBeCloseTo(-0.06);
     expect(nearestStop(wheelProgress(100, 0))).toBe(1);
   });
-  it("keeps discovery public and sends private actions to the existing pet gate", () => {
-    for (const locale of ["fa", "en"] as const) {
-      expect(landingDestination(locale, "shop")).toBe(`/${locale}/shop`);
-      expect(landingDestination(locale, "vet")).toBe(`/${locale}/vet/find`);
-      expect(landingDestination(locale, "care")).toBe(`/${locale}/services`);
-      expect(landingDestination(locale, "health")).toBe(`/${locale}/pets/active?view=health`);
-      expect(landingDestination(locale, "https://evil.example")).toBe(`/${locale}/welcome`);
+  it("consumes a local destination once and rejects prototype or external routes", () => {
+    rememberLandingIntent("vet");
+    expect(consumeLandingIntent("fa")).toBe("/fa/vet/find?landingPet=cookie&landingAction=vet");
+    expect(consumeLandingIntent("fa")).toBeNull();
+    for (const action of ["toString", "__proto__", "https://evil.example"]) {
+      rememberLandingIntent(action);
+      expect(consumeLandingIntent("fa")).toBeNull();
     }
+  });
+  it("rejects stale or malformed saved intent", () => {
+    sessionStorage.setItem(
+      "petlife-landing-intent",
+      JSON.stringify({ action: "shop", pet: "cookie", at: Date.now() - 1800001 }),
+    );
+    expect(consumeLandingIntent("en")).toBeNull();
+    sessionStorage.setItem("petlife-landing-intent", "null");
+    expect(consumeLandingIntent("en")).toBeNull();
   });
 });

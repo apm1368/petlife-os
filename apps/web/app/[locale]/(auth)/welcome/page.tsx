@@ -18,7 +18,7 @@ function WelcomeFlow() {
   const [methods, setMethods] = useState<AuthMethodsDto | null>(null);
 
   useEffect(() => {
-    void authService.getMethods().then(setMethods);
+    void authService.getMethods().then(setMethods).catch(() => setMethods({ google: false, phone: true, password: true }));
   }, []);
 
   function accountUrl(method: "email" | "phone" | "password") {

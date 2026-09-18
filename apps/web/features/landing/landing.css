@@ -1,24 +1,6 @@
 body:has(.spatial-landing) {
   overflow: hidden;
 }
-.spatial-product-nav {
-  display: flex;
-  min-width: 0;
-  overflow-x: auto;
-  gap: 4px;
-  grid-column: 2;
-  grid-row: 1;
-  justify-content: center;
-  pointer-events: auto;
-}
-.spatial-product-nav a {
-  padding: 12px 10px;
-  min-height: 44px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  font-size: 12px;
-}
-.spatial-product-nav a:hover { background: var(--surface-subtle); }
 .spatial-landing {
   height: 100dvh;
   width: 100%;
@@ -91,7 +73,6 @@ body:has(.spatial-landing) {
 }
 .world-night {
   display: none;
-  filter: brightness(0.46) saturate(0.76) contrast(1.08) hue-rotate(8deg);
 }
 :root[data-theme="dark"] .world-day {
   display: none;
@@ -197,8 +178,7 @@ body:has(.spatial-landing) {
   position: absolute;
   top: 20px;
   inset-inline: 32px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
@@ -216,9 +196,6 @@ body:has(.spatial-landing) {
   padding: 8px 0;
 }
 .spatial-preferences {
-  grid-column: 3;
-  grid-row: 1;
-  justify-self: end;
   display: flex;
   align-items: center;
   gap: 22px;
@@ -430,7 +407,6 @@ body:has(.spatial-landing) {
   animation-duration: 150ms;
 }
 @media (max-width: 1100px) {
-  .spatial-header { grid-template-columns: auto auto minmax(0,1fr); gap: 8px; }
   .context-copy {
     inset-inline-start: 28px;
     max-width: 33vw;
@@ -450,7 +426,7 @@ body:has(.spatial-landing) {
     padding: 8px 18px;
   }
   .cookie-identity {
-    top: 146px;
+    top: 92px;
   }
   .context-copy {
     top: 48%;
@@ -496,7 +472,7 @@ body:has(.spatial-landing) {
     max-width: 66px;
   }
   .cookie-identity {
-    top: 144px;
+    top: 86px;
     padding: 6px 10px;
   }
   .cookie-identity img {
@@ -511,9 +487,6 @@ body:has(.spatial-landing) {
     width: auto;
     max-width: none;
     padding: 16px 18px;
-    max-height: calc(100dvh - 310px);
-    overflow-y: auto;
-    pointer-events: auto;
   }
   .context-copy h1 {
     font-size: 25px;
@@ -583,7 +556,7 @@ body:has(.spatial-landing) {
 }
 @media (max-height: 650px) and (max-width: 700px) {
   .cookie-identity {
-    top: 140px;
+    top: 78px;
   }
   .context-copy {
     padding: 12px;
@@ -640,17 +613,17 @@ body:has(.spatial-landing) {
   content: "";
   position: absolute;
   inset: -20px;
-  background: url("/images/landing/petlife-city-day-v2.png") center bottom / cover no-repeat;
+  background: url("/images/landing/cookie-world-day-clean.webp") center bottom / cover no-repeat;
   filter: blur(14px);
   opacity: 0.65;
 }
 :root[data-theme="dark"] .ambient-layer::before {
-  background-image: url("/images/landing/petlife-city-day-v2.png");
+  background-image: url("/images/landing/cookie-world-night-clean.webp");
   opacity: 0.4;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .ambient-layer::before {
-    background-image: url("/images/landing/petlife-city-day-v2.png");
+    background-image: url("/images/landing/cookie-world-night-clean.webp");
     opacity: 0.4;
   }
 }
@@ -670,9 +643,6 @@ body:has(.spatial-landing) {
   transform-origin: 80% 38%;
   border-radius: 0;
 }
-.spatial-header > .public-primary-navigation { grid-column:2; grid-row:1; }
-.spatial-header .landing-theme-control { width:40px; }
-.spatial-header .public-primary-navigation nav a { color:var(--text-primary); }
 @media (max-width: 700px) {
   .cookie-identity .cookie-photo,
   .cookie-identity .cookie-photo img {
@@ -825,41 +795,4 @@ body:has(.spatial-landing) {
   left: 82%;
   top: 54%;
   width: 17%;
-}
-
-/* Screenshot-aligned landing palette, scoped to avoid restyling other domains. */
-.spatial-landing {
-  --surface-base: #faf9f6;
-  --surface-subtle: #f5f3ee;
-  --surface-elevated: #ffffff;
-  --text-primary: #18231f;
-  --text-secondary: #59645e;
-  --text-inverse: #faf9f6;
-  --border-subtle: #e6e8e3;
-  --brand-natural: #17633f;
-  --brand-natural-strong: #104e31;
-}
-:root[data-theme="dark"] .spatial-landing {
-  --surface-base: #121416;
-  --surface-subtle: #23272c;
-  --surface-elevated: #1a1d20;
-  --text-primary: #f3f4f6;
-  --text-secondary: #c6cbd2;
-  --text-inverse: #121416;
-  --border-subtle: #2e323a;
-  --brand-natural: #5bac6a;
-  --brand-natural-strong: #83c28c;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .spatial-landing {
-    --surface-base: #121416;
-    --surface-subtle: #23272c;
-    --surface-elevated: #1a1d20;
-    --text-primary: #f3f4f6;
-    --text-secondary: #c6cbd2;
-    --text-inverse: #121416;
-    --border-subtle: #2e323a;
-    --brand-natural: #5bac6a;
-    --brand-natural-strong: #83c28c;
-  }
 }
