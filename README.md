@@ -4782,6 +4782,434 @@ filtering; archive → hidden from list and timeline → still readable →
 restore; entitlement rejection with existing memories still readable and an
 archive freeing a slot), frontend 307 → 309.
 
+## Veterinary Clinical Panel — Vet Practice OS (Handoff 24)
+
+Handoff 17 gave a veterinarian a longitudinal **record** (visits, labs,
+imaging, referrals, care plans, documents). What it deliberately never built
+is the day-to-day **practice surface** every serious veterinary PIMS is
+organised around — and the gap was sharp enough to be disqualifying in
+practice: `GET /provider/patients/:petId` existed, but *nothing told a vet
+which pets those were*. The clinical record was reachable only by already
+knowing a pet's UUID. There was no patient index, no view of who was in the
+building, no interval treatment sheet for an inpatient, no structured exam,
+no problem list, no dispensing record, no costed estimate an owner approves
+before work starts, no reusable note scaffolds, and no discharge document the
+owner takes home.
+
+This handoff builds that layer. It is numbered 24 because the event registry,
+schema, and error codes already use **Handoff 22** for the Animal Support
+classifieds board and **Handoff 23** for the travel booking marketplace (both
+shipped after H21 without their own README sections).
+
+### What "best in class" was measured against
+
+The feature set was derived from what the current generation of veterinary
+practice management systems actually organises a clinic around — ezyVet (and
+its Vet Radar electronic whiteboard), Provet Cloud, Digitail, Shepherd, and
+the treatment-sheet/triage conventions documented by VETgirl and the Merck
+Veterinary Manual. Five capabilities recur across all of them and were the
+explicit target:
+
+1. **A searchable patient registry** — a caseload you can navigate, not a set
+   of UUIDs.
+2. **An electronic whiteboard** — every admitted patient, their due
+   treatments, and their acuity, on one screen that both the PIMS and the
+   board read from the same rows (Vet Radar's core selling point is precisely
+   that it eliminates double entry).
+3. **An interval treatment sheet / flowsheet** — the hospitalised patient's
+   working record: the medication schedule, a time-stamped vitals grid, and
+   who administered what.
+4. **Structured SOAP with reusable templates** — the "O" in queryable
+   columns so a weight or temperature can be trended, plus per-complaint note
+   scaffolds.
+5. **Estimates, dispensing, and discharge instructions** — the three
+   artefacts that cross the counter to the client.
+
+Two capabilities those products advertise prominently were examined and
+deliberately **not** built: **AI-generated SOAP notes / clinical summaries**
+(Digitail's Tails AI, Provet's clinical summaries, Shepherd's dictation) and
+any form of automated interpretation. Handoff 17 locked "AI extraction is out
+of scope" and `SourceType` has no `AI` value; nothing here changes that.
+
+### Ten new models, all provider-authored, all under the existing authorization boundary
+
+`PatientVitalsRecord`, `ClinicalProblem`, `Prescription`, `Hospitalization`,
+`TreatmentTask`, `ClinicalEstimate`, `ClinicalEstimateLine`,
+`ClinicalNoteTemplate`, `DischargeSummary`, `ProviderClinicalAlert` — plus
+thirteen enums. Every pet-scoped model FKs to `Pet` with `onDelete: Restrict`
+(never `Cascade`), matching Health Basics' own FK policy. No new
+authorization path was invented: provider routes stack
+`@UseGuards(SessionAuthGuard, ProviderAuthGuard, PetAccessGuard)` exactly as
+Handoff 17 established, so a provider needs **both** a resolved org
+membership **and** an explicit pet-level grant; authorship routes require
+`canRecordClinicalData`, the flag `BookingPetAccessService.grantForBooking()`
+sets only for a `ServiceCategory.VET` booking. Org membership alone still
+grants nothing.
+
+The migration (`20260912090000_vet_clinical_panel`) is purely additive — ten
+tables, thirteen enums, no `ALTER` or `DROP` against anything pre-existing.
+It was generated with `prisma migrate diff --from-schema-datamodel <previous
+schema> --to-schema-datamodel <this schema> --script` rather than
+`--from-migrations`, specifically so the spurious `DROP INDEX
+"pet_friendly_places_location_gist_idx"` every prior migration had to strip
+by hand (the H19 PostGIS GIST index can't be expressed in `schema.prisma`, so
+the migrations-based differ reads it as drift) is never emitted at all.
+
+### The patient registry — a directory, never an authorization decision
+
+`GET /provider/clinical/patients` defines "this clinic's patients" as every
+pet the organisation has ever **booked or documented**. A clinic's caseload
+does not disappear the moment a visit-scoped grant lapses, so the row stays —
+and carries `accessState: ACTIVE | EXPIRED` plus `accessExpiresAt`, stating
+the truth plainly rather than implying live access. Opening the record still
+goes through `PetAccessGuard`, which refuses an expired grant exactly as
+before; the UI intentionally still lets the vet tap through so the server's
+real error is what they see, rather than a silently disabled row that leaves
+them guessing why their patient vanished.
+
+The active-grant window is computed in the service by mirroring
+`PetAccessService.isGrantActive()`'s predicate over rows fetched with
+`revokedAt: null`, rather than being re-derived as a second SQL expression —
+so the registry's notion of "active" cannot drift from the guard's. The
+registry DTO deliberately carries **no health data at all**: species, age,
+owner display name, weight, visit count, and badge counts only. Search spans
+pet name, raw microchip, normalised microchip (H01's
+`microchipNormalized` column), and owner display name; filters cover species
+and `hospitalizedOnly`; paging reuses H09's `PaginatedDto<T>` envelope.
+
+### Structured exam — `Unknown ≠ Normal`, applied field by field
+
+`PatientVitalsRecord` puts the "O" of a SOAP note into queryable columns:
+weight (+unit), temperature, heart rate, respiratory rate, capillary refill,
+systolic BP, SpO₂, blood glucose, mucous-membrane colour, hydration status,
+body condition score, pain score, and triage level. Every column is
+independently nullable, and **`null` means "not assessed", never
+"unremarkable"** — the frontend renders an em dash and the copy says
+"Leave a field blank if you did not measure it — a blank is recorded as 'not
+measured', never as normal."
+
+Three deliberate constraints:
+
+- **`MucousMembraneColor` has no "normal" value.** `PINK` is a *described
+  finding*, not a verdict.
+- **A score never travels without its scale.** `bodyConditionScale` and
+  `painScale` are stored alongside `bodyConditionScore`/`painScore`, so a 5/9
+  can never be silently re-read as a 5/5. The UI stamps "Purina 1-9" and
+  "Glasgow CMPS-SF 0-4" respectively.
+- **Nothing is derived.** No code turns a heart rate into an acuity, or a
+  value into an `ABNORMAL` flag — the same rule H17 set for `LabResultFlag`.
+  `InvalidVitalsValueException` is a *representability* check only (a BCS of
+  12 on a 1-9 scale), with bounds wide enough that a genuinely alarming but
+  real measurement is always recordable. This codebase never refuses to
+  record what a clinician says they measured.
+
+Vitals are **append-only**: there is no update or delete endpoint at all. A
+measurement is a statement about a moment; correcting one means recording the
+new measurement, and an owner who disputes one uses H17's existing
+`MedicalRecordCorrection` path.
+
+**One deliberate write into pre-existing data:** recording a weight also
+updates `Pet.latestWeightValue`/`latestWeightUnit` in the same transaction.
+That field is the owner-facing "current weight" the rest of the product
+already reads, and leaving it stale after a clinic literally put the animal
+on a scale is the worse failure. It stays a plain last-write-wins field; the
+vitals row, not the `Pet` column, is the historical record. `trends()`
+normalises to kilograms for the *series only* (a mixed kg/lb history would
+otherwise plot as a cliff) and stores whatever unit was recorded.
+
+`VitalsTrendsDto` is a straight re-projection: one point per row that
+actually carries the measurement, chronological, **nothing interpolated,
+averaged, or gap-filled**. `VitalsSparkline` draws a dot per real reading
+with no reference band and no colour-coded "normal" zone, and exposes the
+whole series as its `aria-label` rather than being the only place the numbers
+exist.
+
+### Master problem list — a living index, not a note
+
+`ClinicalProblem` is the index a clinician reads first: name, body system,
+`ACTIVE`/`CHRONIC`/`RESOLVED`/`RULED_OUT`, onset, resolution, and the visit
+it was first raised in. `RULED_OUT` is kept distinct from `RESOLVED` on
+purpose — "this was never the problem" and "this problem is over" are
+different clinical facts.
+
+It is deliberately **not** merged with H02's `Condition`: an owner saying "he
+has allergies" and a vet's working problem list are different assertions with
+different provenance, and H17 principle 2 forbids one overwriting the other.
+Unlike a visit note, status is mutable (a problem legitimately resolves
+months later) — but a problem is never deleted and never **renamed**: only
+`status` and `notes` can change, because renaming a problem other records
+reference by name would rewrite history silently. `resolvedAt` is stamped by
+the service and cleared on reopen, never accepted from the client. Only the
+authoring organisation may change a problem it raised, mirroring
+`ClinicalVisitService.assertOwningOrganization()`; a second clinic adds its
+own rather than editing someone else's clinical judgement.
+
+### Prescriptions — dispensing metadata beside H02's medication list, not a second list
+
+The audit question here was whether `Prescription` duplicates H02's
+`Medication`. It does not, and the split is the point: `Medication` stays the
+**single source of truth for "what this pet is taking"** — the list the
+owner's app already shows — and `Prescription` links to the row it produced
+via a unique `medicationId`, carrying only what `Medication` has no column
+for and an owner-editable model should never hold: dispensed quantity,
+authorised refills, the controlled-substance flag, and the prescriber's
+identity.
+
+`PrescriptionService.create()` writes both rows in one transaction and is the
+**only** provider write path into `Medication`; `MedicationsService` remains
+the owner's path, and H17's `assertOwnerEditable()` already stops an owner
+editing a `PROVIDER`-sourced medication in place. Cancelling sets
+`CANCELLED` + reason **and** moves the linked `Medication` to `HISTORICAL`,
+so the owner's list stops showing a drug they were told to stop — neither row
+is ever deleted. Refills are a counter increment claimed atomically
+(`updateMany({ where: { …, refillsDispensed: <observed> } })`), so two racing
+dispenses cannot both consume the last authorised refill.
+
+**No dose is ever computed server-side.** The panel offers a mg/kg helper
+next to the field — arithmetic, in a dashed box labelled "not part of the
+prescription" — and the vet must type the dose they are prescribing. The
+suggestion is never submitted on their behalf and never stored.
+`Prescription.internalNotes` is omitted **by the mapper's `OWNER` audience**
+rather than nulled after assembly, so a provider's working note cannot leak
+through a consumer route.
+
+### Hospitalization + treatment sheet — the whiteboard, and what it refuses to do
+
+`Hospitalization` makes "who is in the building right now" a **fact with an
+admission and a discharge**, never inferred from a `Booking` that happens to
+be `IN_PROGRESS` — as separate from Booking as `ClinicalVisit` is, and for
+the same reason: an animal can be admitted without a booking (a walk-in
+emergency) and booked without ever being admitted. One live stay per patient
+per organisation, enforced by re-checking inside the transaction (two
+statuses count as "live", which Prisma cannot express as a filtered unique
+index in `schema.prisma`).
+
+The treatment sheet is **not a stored document** — it is `TreatmentTask` rows
+read back in time order, so the sheet can never disagree with the tasks. Four
+locked behaviours:
+
+- **`SKIPPED` and `MISSED` are separate statuses.** A deliberate clinical
+  decision not to give a treatment, and nobody having done it, are different
+  facts; a sheet that cannot tell them apart is worthless as a record of
+  care.
+- **No timer ever writes either one.** An unactioned task stays `SCHEDULED`
+  and reads as overdue (`isOverdue` is computed at read time, never stored)
+  until a human states which it was.
+- **A recorded outcome is never re-stated.** Once a task carries "given at
+  06:10 by Dr X", the action buttons are gone and the server returns `409` —
+  overwriting it would destroy the only record that the first event happened.
+- **Discharge never fabricates an outcome.** Outstanding `SCHEDULED` tasks
+  are left exactly as they are; a task nobody actioned is a real gap in the
+  record, and auto-closing it at discharge would invent a clinical fact. The
+  e2e asserts exactly this (`taskCounts.scheduled` stays 2, `missed` stays 0).
+
+`POST .../task-series` expands "q8h × 3" into **real rows** at write time.
+There is deliberately no stored recurrence rule: once a nurse has actioned
+the 06:00 dose, the sheet must not be able to shift under them because
+someone edited a rule. The sheet UI also shows **no compliance percentage** —
+a figure like that on this screen changes what people write down (asserted by
+a frontend test).
+
+### Estimates — a range, owner-approved, integer IRR only
+
+`ClinicalEstimate` + `ClinicalEstimateLine` is the costed plan an owner
+approves before work starts, and it obeys every money rule H06/H07 locked:
+**integer IRR is the only stored unit**, Toman is a display-only transform,
+and totals are a snapshot computed once at write time from the lines rather
+than recomputed differently on each read. `quantity` is a `Decimal`, so line
+totals are summed with `Prisma.Decimal` arithmetic and rounded to an integer
+IRR **once, at the end** — never through JavaScript floats, never per line.
+
+A **low/high range** is stored rather than a single figure because an honest
+veterinary estimate is a range; collapsing it would be the same false
+precision this codebase refuses in clinical data. The consumer copy says so
+out loud: "A range, not a fixed price — the final cost depends on what
+treatment turns out to be needed."
+
+**Approval belongs to the household, never the clinic.** `respond()` is
+reachable only from the consumer controller (`POST
+/pets/:petId/clinical/estimates/:id/approve|decline`), stamps the responding
+user's id, and requires **`canBookCare`** rather than `canViewHealth` — a
+family member who may read the record is not automatically the person who can
+commit the household to a bill. There is no provider route that can reach it
+at all; the panel renders "Waiting for the owner's decision" instead of a
+button (asserted by both an e2e `403` and a frontend test). A `DRAFT` is a
+working document; `PRESENTED` freezes the numbers, and the response is
+claimed atomically so a double-tap cannot record two different answers.
+
+### Note templates — the organisation's stationery, never clinical content
+
+`ClinicalNoteTemplate` is org-scoped, carries **no pet reference, no
+provenance, and no `PetAccessGuard`**, and lives on the org controller for
+exactly that reason. Applying one only pre-fills the visit's editable note
+fields **client-side**; nothing enters the record until the vet saves notes
+they actually wrote. `handleApplyTemplate` fills a blank section and leaves
+anything already typed alone — it never overwrites the vet's own text.
+Retiring a template sets `isActive: false` rather than deleting it, so a
+visit written from it years ago can still be explained. `seed.ts` ships two
+real ones for the seeded clinic ("Annual wellness", "Vomiting / diarrhoea").
+
+### Discharge summary — the one artefact that leaves the building
+
+`DischargeSummary` (one row per visit) is a draft the vet reworks freely and
+then, once `ISSUED`, **immutable** — because the owner has read it and may be
+acting on it at home. Editing or re-issuing an issued summary returns
+`DISCHARGE_SUMMARY_ALREADY_ISSUED` (`409`); a correction is an explicit
+clinical act (amend the visit, issue a new summary), never a silent rewrite
+of a document already in someone's hands. This is H17's completed-record
+immutability rule applied where it matters most. A `DRAFT` is invisible to
+the owner: `listForPet()` filters to `ISSUED` at the query, and the e2e
+asserts the owner sees zero summaries before issuance and one after. The
+`warningSignsText` section ("Call us immediately if…") is plain provider text
+rendered in the attention colour — PET LIFE OS never generates or augments
+it.
+
+### Staff-safety alerts — provider-only by construction
+
+`ProviderClinicalAlert` ("muzzle required", "prior anaphylaxis to
+cephalosporins", "do not sedate") is scoped to the authoring organisation and
+has **no consumer endpoint at all** — not a filtered one. A handling note
+written so a nurse does not get bitten is an internal operational record, not
+an owner-facing assertion about their animal. The e2e asserts a `404` on the
+guessed consumer path, that a second clinic with its own access to the same
+pet sees zero alerts, and that the authoring clinic's patient record carries
+the banner. Resolving keeps the row (`resolvedAt`); re-resolving is a no-op
+rather than an error, since the outcome the caller wanted is already true.
+
+### The clinical dashboard — operational, never analytical
+
+`GET /provider/clinical/dashboard` is a live read over rows that already
+exist: today's VET bookings, open visits, the whiteboard (admitted patients
+with due/overdue task counts, next task time, last vitals time), overdue
+treatment tasks, estimates awaiting an owner, unresolved alert count, and
+care-plan follow-ups now due. There is no stored board and no cached count,
+so it cannot quietly disagree with the record.
+
+It holds `ProviderOverviewService`'s own "no vanity analytics" bar from H05
+and goes one step further for a clinical surface: **no revenue, no lifetime
+totals, and no per-vet productivity metric** — a clinical board that doubles
+as a performance dashboard changes how people record care. A frontend test
+asserts the rendered board contains no revenue or currency string at all.
+"Today" uses UTC calendar-day boundaries, the same documented simplification
+`ProviderOverviewService` already makes.
+
+### Notifications — five moments, a stricter SMS bar than H17's
+
+Everything this handoff records is notifiable in principle — every vitals
+reading, every treatment task, every problem-list change — and notifying on
+any of them would train owners to ignore the channel while a clinic is
+mid-procedure. `VetPanelNotificationListener` fires only where the household
+has something to **do** or something to **worry about**:
+`clinical.estimate_presented`, `clinical.patient_admitted`,
+`clinical.patient_discharged`, `clinical.discharge_summary_issued`,
+`clinical.prescription_issued`.
+
+Fan-out and idempotency follow `ClinicalHealthNotificationListener` exactly
+(every household member, keyed on the originating `DomainEvent.id`, which
+`Notification.@@unique([domainEventId, type, userId])` makes safe against
+duplicate delivery). Every `smsBody` is fully generic — no pet name, no drug,
+no diagnosis, no amount — because a household member reading an SMS preview
+on a lock screen has not authenticated. The in-app `body` may name the pet,
+and nothing more.
+
+### Frontend — four provider screens, three consumer routes
+
+**Provider** (`apps/web/features/vet-panel/`): `VetClinicalDashboardView`
+(`/provider/clinical` — the whiteboard), `VetPatientRegistryView`
+(`/provider/patients` — search, filter, paging, access badges),
+`VetPatientRecordView` (`/provider/patients/:petId` — tabbed: Summary,
+Problems, Exams, Prescriptions, Visits, Estimates),
+`VetTreatmentSheetView` (`/provider/hospitalizations/:id?petId=` — the
+flowsheet), plus `VetVisitClinicalTools` mounted inside the existing
+`ProviderClinicalVisitView` (templates, exam entry, prescribing, discharge
+summary) and `VitalsSparkline`. `ProviderShell`'s nav gained **Clinical** and
+**Patients**, placed immediately after Home because a vet's day starts at the
+whiteboard, not the booking list.
+
+`VetPatientRecordView` is ordered by **clinical risk rather than data model**:
+staff-safety alerts first (a frontend test asserts they precede the patient
+name in document order), then allergies, then the live problem list, then
+everything else behind tabs. It shows no health score anywhere — H17's
+"if a score cannot be responsibly calculated, do not show one", asserted by
+test.
+
+`ProviderClinicalPatientView` (H17's read-only summary) was **superseded and
+removed** rather than left as dead code behind a route nothing rendered; the
+new record view is a strict superset. Its backend endpoint
+(`GET /provider/patients/:petId`) and `ProviderClinicalPatientService` are
+retained unchanged for API compatibility.
+
+**Consumer** (`apps/web/features/health-advanced/`): `HealthVitalsView`
+(`/pets/:id/health/advanced/vitals`), `HealthEstimatesView`
+(`.../estimates` — the only place approve/decline exists),
+`HealthDischargeSummariesView` (`.../discharge`, reusing the shared
+`HealthRecordListView` shell the six H17 record lists already share). All
+three are wired into `AdvancedHealthOverviewView`'s nav grid. The vitals page
+carries an explicit disclaimer — "These are measurements your clinic
+recorded. PET LIFE OS does not interpret them — ask your vet what a value
+means." — and has no reference range, no normal/high badge, and no trend
+arrow.
+
+Both locale catalogues gained a full `vetPanel` namespace plus the new
+`healthAdvanced` keys; `en.json` and `fa.json` remain key-for-key identical
+(2548 keys each, verified).
+
+### Error codes (Handoff 24 additions)
+
+```
+VITALS_RECORD_NOT_FOUND                          404
+INVALID_VITALS_VALUE                             400  outside what the column/named scale can represent — never a plausibility judgement
+CLINICAL_PROBLEM_NOT_FOUND                       404
+PRESCRIPTION_NOT_FOUND                           404
+INVALID_PRESCRIPTION_TRANSITION                  409  cancelling a cancelled one, or refilling past the authorised count
+HOSPITALIZATION_NOT_FOUND                        404
+INVALID_HOSPITALIZATION_TRANSITION               409  also: a second live admission for an already-admitted patient
+TREATMENT_TASK_NOT_FOUND                         404
+INVALID_TREATMENT_TASK_TRANSITION                409  re-stating a recorded outcome, or writing a non-terminal status
+CLINICAL_ESTIMATE_NOT_FOUND                      404
+INVALID_CLINICAL_ESTIMATE_TRANSITION             409  editing a presented estimate, responding twice, or responding past validUntil
+CLINICAL_NOTE_TEMPLATE_NOT_FOUND                 404
+DISCHARGE_SUMMARY_NOT_FOUND                      404
+DISCHARGE_SUMMARY_ALREADY_ISSUED                 409  the owner has already read it
+PROVIDER_CLINICAL_ALERT_NOT_FOUND                404
+```
+
+Reused unchanged rather than duplicated: `PET_ACCESS_DENIED` (403) for every
+missing pet-level grant including `canRecordClinicalData`/`canBookCare`,
+`PROVIDER_ACCESS_DENIED` (403) for a cross-organisation mutation attempt
+(`NOT_PROBLEM_AUTHOR`/`NOT_PRESCRIBER`/`NOT_ADMITTING_ORGANIZATION`/
+`NOT_ESTIMATE_AUTHOR`/`NOT_VISIT_OWNER`), and `CLINICAL_VISIT_NOT_FOUND`
+(404) when a submitted `clinicalVisitId` belongs to a different pet.
+
+### Verification
+
+- API typecheck, API lint, web typecheck, web lint, full `pnpm build` — all
+  clean.
+- **Backend e2e 344 → 344 passing across 9 suites**, including a new
+  `vet-clinical-panel.e2e-spec.ts` with 14 scenarios across nine flows:
+  registry scoping/search/`EXPIRED`-badge-with-still-refused-record; vitals +
+  `Pet.latestWeight` write-through + trend projection + out-of-scale
+  rejection; problem-list `resolvedAt` stamping/clearing and cross-org edit
+  refusal; prescription → `Medication` creation, refill exhaustion `409`,
+  cancellation retiring the medication, and `internalNotes` absent from the
+  owner payload; admit-once `409`, series expansion, overdue derivation,
+  outcome-recording with actor, re-statement `409`, non-terminal-status
+  `409`, whiteboard appearance/disappearance, and untouched tasks after
+  discharge; estimate integer-IRR totals, presentation freeze, provider
+  approval `403`, owner approval, double-response `409`; discharge-summary
+  draft invisibility, issuance, and post-issuance immutability; alert
+  org-scoping and the absent consumer route; and read-only-grant authorship
+  `403`s.
+- **Frontend 352 passing** (20 new across 5 files), asserting the honesty
+  properties rather than the markup: "no visits recorded" instead of a blank
+  date, `EXPIRED` shown rather than the patient hidden, all three task
+  outcomes offered and action buttons gone once recorded, no `%` compliance
+  figure, no currency on the clinical board, no health score, alerts above
+  the header, and no provider-side approve button.
+- The full stack was verified against a **freshly created database** (drop →
+  `prisma migrate deploy` → `prisma db seed`), so the migration and the new
+  seed data are proven from empty, not just incrementally.
+
 ## API endpoints
 
 ```
@@ -4986,6 +5414,70 @@ PATCH  /notification-preferences
 POST   /dev/notifications/simulate                          (dev/test-only; hard-disabled outside development/test via NODE_ENV)
 POST   /dev/notifications/deliveries/:deliveryId/force-attempt  (dev/test-only)
 POST   /dev/notifications/deliveries/process-due             (dev/test-only)
+
+
+Veterinary Clinical Panel (Handoff 24) — provider surface. Every route below
+stacks SessionAuthGuard + ProviderAuthGuard; the pet-scoped ones additionally
+run PetAccessGuard (canViewHealth to read, canRecordClinicalData to author).
+Routes with no :petId segment carry petId in the body so the guard's existing
+body-fallback applies, and every service re-checks the target row's real petId.
+
+GET    /provider/clinical/patients                          (the patient registry — ?q=/?species=/?accessState=/?hospitalizedOnly=/?page=/?pageSize=; no health data)
+GET    /provider/clinical/dashboard                         (the whiteboard — live read, no stored board, no revenue)
+GET    /provider/clinical/note-templates                    (org-scoped; no pet, no PetAccessGuard)
+POST   /provider/clinical/note-templates
+PATCH  /provider/clinical/note-templates/:templateId        (isActive: false retires, never deletes)
+
+GET    /provider/clinical/patients/:petId                   (the consulting-room read — supersedes H17's provider patient DTO)
+
+GET    /provider/clinical/patients/:petId/vitals
+GET    /provider/clinical/patients/:petId/vitals/trends     (re-projection only — nothing interpolated or gap-filled)
+POST   /provider/clinical/vitals                            (append-only; no update/delete route exists)
+
+GET    /provider/clinical/patients/:petId/problems
+POST   /provider/clinical/problems
+PATCH  /provider/clinical/patients/:petId/problems/:problemId  (status/notes only — never renamed; authoring org only)
+
+GET    /provider/clinical/patients/:petId/prescriptions
+POST   /provider/clinical/prescriptions                     (also creates the owner-facing Medication row)
+POST   /provider/clinical/prescriptions/:prescriptionId/cancel   (retires the Medication; never deletes either row)
+POST   /provider/clinical/prescriptions/:prescriptionId/refill   (atomic counter claim)
+
+GET    /provider/clinical/patients/:petId/hospitalizations
+GET    /provider/clinical/patients/:petId/hospitalizations/:hospitalizationId  (the treatment sheet + stay vitals + counts)
+POST   /provider/clinical/hospitalizations                  (one live stay per patient per org)
+PATCH  /provider/clinical/hospitalizations/:hospitalizationId
+POST   /provider/clinical/hospitalizations/:hospitalizationId/discharge        (leaves outstanding tasks untouched)
+POST   /provider/clinical/hospitalizations/:hospitalizationId/tasks
+POST   /provider/clinical/hospitalizations/:hospitalizationId/task-series      (expands to real rows; no stored recurrence rule)
+POST   /provider/clinical/hospitalizations/:hospitalizationId/tasks/:taskId/action  (DONE/SKIPPED/MISSED only, once)
+
+GET    /provider/clinical/patients/:petId/estimates
+POST   /provider/clinical/estimates                         (integer IRR; totals snapshotted at write)
+PATCH  /provider/clinical/estimates/:estimateId             (DRAFT only)
+POST   /provider/clinical/estimates/:estimateId/present     (freezes the numbers; approval is the owner's alone)
+
+GET    /provider/clinical/patients/:petId/visits/:visitId/discharge-summary
+POST   /provider/clinical/patients/:petId/visits/:visitId/discharge-summary        (draft; rejected once issued)
+POST   /provider/clinical/patients/:petId/visits/:visitId/discharge-summary/issue  (immutable thereafter)
+
+GET    /provider/clinical/patients/:petId/alerts            (provider-only; no consumer counterpart exists)
+POST   /provider/clinical/alerts
+POST   /provider/clinical/patients/:petId/alerts/:alertId/resolve
+
+Veterinary Clinical Panel (Handoff 24) — consumer surface. The same rows, read
+through a permission-scoped DTO. ProviderClinicalAlert has no route here at
+all, Prescription.internalNotes is omitted by the mapper's OWNER audience, and
+a DRAFT discharge summary is filtered out at the query.
+
+GET    /pets/:petId/clinical/vitals
+GET    /pets/:petId/clinical/vitals/trends
+GET    /pets/:petId/clinical/problems
+GET    /pets/:petId/clinical/prescriptions
+GET    /pets/:petId/clinical/estimates
+POST   /pets/:petId/clinical/estimates/:estimateId/approve   (canBookCare — financial consent, not read access)
+POST   /pets/:petId/clinical/estimates/:estimateId/decline   (canBookCare)
+GET    /pets/:petId/clinical/discharge-summaries             (ISSUED only)
 
 PUT    /uploads/:token   (local-dev-only fallback target for photo uploads)
 GET    /health/live
@@ -6301,6 +6793,42 @@ Community, no AI diary writing, no multi-pet `linkedPetIds`, no diary
 reminder notifications, and no admin "browse everyone's diary" surface
 (none existed; none was added). Backend e2e 312 → 316, frontend 307 → 309.
 
+Handoff 24 (Veterinary Clinical Panel — Vet Practice OS) built the practice
+layer Handoff 17's clinical *record* had no surface for, closing a gap sharp
+enough to be disqualifying in real use: a vet could open
+`/provider/patients/:petId` but nothing told them **which** pets those were.
+Ten new models — `PatientVitalsRecord`, `ClinicalProblem`, `Prescription`,
+`Hospitalization`, `TreatmentTask`, `ClinicalEstimate`(+`Line`),
+`ClinicalNoteTemplate`, `DischargeSummary`, `ProviderClinicalAlert` — deliver
+a searchable **patient registry** (a directory that states `ACTIVE`/`EXPIRED`
+access plainly and is never itself an authorization decision), an electronic
+**whiteboard** of who is admitted with their due/overdue treatments, an
+interval **treatment sheet** whose rows *are* the sheet, a structured
+**exam/triage** record with every field independently nullable and every
+score carrying the scale it was read on, a **master problem list** that keeps
+`RULED_OUT` distinct from `RESOLVED`, **dispensing-grade prescriptions** that
+write H02's existing `Medication` row rather than starting a second
+medication list, owner-approved **estimates** in integer IRR as an honest
+low/high range, org-scoped **note templates** that only ever pre-fill the
+editable fields client-side, an immutable-once-issued **discharge summary**,
+and provider-only **staff-safety alerts** with no consumer route at all. The
+feature set was derived from what ezyVet/Vet Radar, Provet Cloud, Digitail
+and Shepherd actually organise a clinic around; the AI-SOAP capability all
+four now advertise was deliberately **not** built, because H17 locked "AI
+extraction is out of scope" and `SourceType` still has no `AI` value.
+Nothing is derived or interpreted anywhere: no code turns a vital into an
+acuity or a flag, `null` means "not assessed" rather than "unremarkable",
+`isOverdue` is computed at read time and never stored, no timer ever writes
+`MISSED` or `SKIPPED` (only a human states which), a recorded treatment
+outcome can never be re-stated, discharge never auto-closes an outstanding
+task, and the clinical board carries no revenue, lifetime total, per-vet
+productivity figure, or compliance percentage. Estimate approval lives only
+on the consumer route and requires `canBookCare`, so the clinic that wrote an
+estimate has no code path to consent on the household's behalf. Backend e2e
+330 → 344 (a new 14-scenario suite across nine flows), frontend 332 → 352
+(20 new tests asserting the honesty properties rather than the markup), and
+the whole stack was re-verified from a freshly created database.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -7120,6 +7648,83 @@ reminder notifications, and no admin "browse everyone's diary" surface
   the spec marks both optional and explicitly warns against spam, so no
   new notification templates or scheduling were added; the `Home` surface
   likewise only ever shows a memory that actually exists.
+- **The patient registry lists a clinic's whole caseload, including pets
+  whose grant has lapsed** (Handoff 24) — a deliberate product choice
+  (a clinic's own patient list should not silently shrink), made honest by
+  the `accessState: EXPIRED` badge and by `PetAccessGuard` still refusing
+  the record itself. The consequence worth naming: the registry row leaks
+  the pet's name, species, breed, weight and owner display name to a clinic
+  whose clinical access has ended. If that is later judged too much, the
+  fix is to narrow the expired row's DTO, not to hide the patient.
+- **No appointment scheduling from inside the clinical panel** (Handoff
+  24) — the panel reads today's VET bookings for its board but books
+  nothing; scheduling stays entirely with Handoff 03/05's booking engine
+  and `ProviderAvailabilityService`, rather than growing a second
+  slot-allocation path.
+- **Estimates are not connected to invoicing or payment** (Handoff 24) —
+  an approved `ClinicalEstimate` records the household's consent and
+  nothing more: it creates no `Order`, posts no `LedgerEntry`, and takes no
+  payment. Wiring it to Handoff 06/07's commerce and ledger stack is a real
+  next increment, and must go through `LedgerService.recordBalanced()` like
+  every other financial write rather than inventing a second path.
+- **No clinical inventory, lot numbers, or expiry tracking** (Handoff 24)
+  — a prescription records what was dispensed but decrements no stock.
+  Handoff 06's `InventoryItem`/`InventoryReservationService` is the retail
+  catalogue's stock, not the clinic's drug cupboard, and conflating the two
+  would have broken "PET LIFE's own inventory is the sole source of truth
+  for stock" in a way that is hard to unwind. A clinic drug inventory is
+  its own model, deliberately deferred.
+- **The controlled-substance flag is a prescriber's statement, not a
+  jurisdiction's schedule** (Handoff 24) — `isControlledSubstance` is set
+  by whoever writes the prescription; PET LIFE OS ships no drug database
+  and asserts no country's controlled-drug schedule of its own. There is
+  also no statutory controlled-drug register report, only the flag plus the
+  `PrescriptionRefillDispensed` domain events.
+- **No drug interaction, allergy cross-check, or dose validation**
+  (Handoff 24) — prescribing against a recorded allergy is not blocked or
+  even warned about, because a warning implies a completeness this codebase
+  cannot honour (it has no drug database, and an allergy list is
+  owner-maintained and often incomplete). The panel instead surfaces
+  allergies at the top of the patient record where the prescriber reads
+  them. A real interaction check needs a licensed drug database, not a
+  heuristic.
+- **The dose helper is arithmetic, not a dose calculator** (Handoff 24) —
+  it multiplies a typed mg/kg by a typed weight, client-side, in a box
+  labelled "not part of the prescription"; it does not read the patient's
+  recorded weight, know any drug's dose range, or ever submit its result.
+  Only the number the prescriber retypes is stored.
+- **No anaesthesia record, dental chart, or per-tooth findings** (Handoff
+  24) — H17's `DentalRecord` remains a free-text record; a real
+  odontogram and an intra-operative anaesthetic monitoring sheet are both
+  their own models and were out of scope here.
+- **Vitals cannot be corrected, only superseded** (Handoff 24) — there is
+  no update or delete route at all. A mistyped temperature stays in the
+  record and is answered by a new reading; an owner's dispute goes through
+  H17's `MedicalRecordCorrection`. Deliberate, but it does mean an obvious
+  typo is permanently visible.
+- **One live hospitalization per patient per organisation is enforced by a
+  transactional re-check, not a database constraint** (Handoff 24) —
+  "live" spans two statuses, which Prisma cannot express as a filtered
+  unique index in `schema.prisma`. Two genuinely simultaneous admissions
+  from the same org therefore rely on the transaction, not on Postgres; a
+  raw-SQL partial unique index (`WHERE status = 'ADMITTED'`) would close
+  that last gap the way the H19 GIST index already does for geo.
+- **Treatment tasks have no reminder or escalation** (Handoff 24) — an
+  overdue dose is visible on the whiteboard and the sheet but notifies
+  nobody. This is the same "reactive, not proactive" gap H16's renewal
+  reminders and H17's `health.follow_up_due` already have, and it wants the
+  same single poller, not three.
+- **"Today" on the clinical board uses UTC calendar-day boundaries**
+  (Handoff 24) — the same simplification `ProviderOverviewService` has
+  made since Handoff 05, rather than the provider location's own timezone.
+- **`ClinicalNoteTemplate` has no admin or CMS management surface**
+  (Handoff 24) — templates are created and retired through the provider
+  API only, and `seed.ts` ships two for the seeded clinic. There is no
+  platform-curated template library.
+- **A discharge summary has no PDF or email delivery** (Handoff 24) —
+  issuing it makes it readable in the app and fires a notification; there
+  is no printable artefact, which is the first thing a real clinic would
+  ask for.
 
 ## Next recommended coding handoff
 
@@ -7439,3 +8044,76 @@ only — never a read, edit, archive, or restore — so no entitlement change
 can ever cost a household access to personal data it already wrote, and
 keep archive/restore (never hard delete) as the only user-facing removal
 verb for Memories, no matter how convenient a real `DELETE` looks.
+
+Alternatively, following directly from Handoff 24: **connect an approved
+`ClinicalEstimate` to invoicing and payment**, the single largest thing the
+vet panel records but cannot act on. Approval today captures the household's
+consent and nothing more — no `Order`, no `LedgerEntry`, no payment — and a
+clinic that quotes, treats, and then has no way to bill from the same record
+will keep a parallel paper trail, which is exactly what a practice management
+system exists to eliminate. The shape is already fully determined by prior
+handoffs: turn an `APPROVED` estimate into a `Checkout`/`Order` through the
+existing commerce path (never a second order-creation path), post revenue
+only through `LedgerService.recordBalanced()`, keep the estimate's stored
+low/high snapshot untouched as the quote-of-record while the invoice carries
+the actual figure, and never let a payment state feed back into the
+estimate's own status — the two are as separate as `Subscription` and
+`PaymentIntent` already are. A related, smaller piece that unlocks the same
+workflow: a **printable/emailable discharge summary** (PDF), which needs no
+schema change at all since `DischargeSummaryDto` already carries every field
+a document needs.
+
+A second, independent option: **one follow-up/reminder poller serving all
+three existing gaps at once**. This codebase has now flagged the identical
+"reactive, not proactive" gap in four places — Handoff 16's
+renewal/trial-ending reminders, Handoff 17's `health.follow_up_due` (a
+template with no firing event), Handoff 19's travel-document expiry, and
+Handoff 24's overdue `TreatmentTask` — and each one wants a scan over rows
+whose due date has passed. Build it once, as the same `setInterval`-class
+poller `NotificationDeliveryWorkerService` and `SubscriptionRenewalWorkerService`
+already establish (never a new job-queue dependency), with a per-domain
+"what is due" query and `NotificationOrchestratorService.notify()` as the only
+outbound path. Treatment tasks are the one case that needs care: an overdue
+dose must notify the **clinic**, not the household, and must never write
+`MISSED` or `SKIPPED` on the task — the whole point of those two statuses is
+that a human states which one it was.
+
+A third option, if the priority is clinical completeness rather than
+workflow: **a clinic drug inventory with lot numbers and expiry**, the piece
+`Prescription` deliberately does not touch. Keep it strictly separate from
+Handoff 06's `InventoryItem` (that is the retail catalogue's stock, and
+collapsing the two would break "PET LIFE's own inventory is the sole source
+of truth for stock" in a way that is hard to unwind), give it its own
+`ClinicDrugStock`/`DrugLot` pair, and have `PrescriptionService.create()`
+optionally decrement a named lot inside its existing transaction so the
+dispensing record and the stock movement can never disagree. That model is
+also the natural home for a statutory controlled-drug register, which today
+exists only as `isControlledSubstance` plus the
+`PrescriptionRefillDispensed` domain events. A fourth, smaller option in the
+same area: an **anaesthesia monitoring sheet** and a real per-tooth
+**odontogram**, both of which are their own models rather than extensions of
+`DentalRecord`'s free text.
+
+Whichever is chosen, keep every Handoff 24 invariant intact, because each one
+exists to stop the panel asserting something a clinician did not:
+`null` on a vitals field means "not assessed" and must never be rendered or
+read as normal; a score is never stored or shown without the scale it was
+read on (`bodyConditionScale`/`painScale`); nothing derives an acuity, a
+flag, or a dose from another field — `TriageLevel` and `LabResultFlag` are
+set by a person or they are `null`, and the mg/kg helper stays advisory,
+client-side, and unstored; `isOverdue` stays computed at read time and never
+becomes a column; **no timer, job, or discharge action ever writes `MISSED`
+or `SKIPPED`** on a `TreatmentTask`, and a task that already carries an
+outcome is never re-stated (append a new fact, never overwrite a recorded act
+of care); an `ISSUED` `DischargeSummary` is immutable, full stop; a
+`ClinicalProblem` changes only `status`/`notes` and is never renamed or
+deleted; `Medication` stays the single source of truth for what a pet is
+taking, with `PrescriptionService` as the only provider write path into it;
+`ProviderClinicalAlert` gets no consumer endpoint and `Prescription.internalNotes`
+stays omitted by the mapper's `OWNER` audience rather than nulled afterwards;
+estimate approval stays consumer-only and `canBookCare`-gated so a clinic can
+never consent on a household's behalf; every estimate amount stays an integer
+IRR summed with `Prisma.Decimal` and rounded once; and the clinical board
+stays free of revenue, lifetime totals, per-vet productivity, and compliance
+percentages — a clinical surface that doubles as a performance dashboard
+changes what people write down.

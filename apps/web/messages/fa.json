@@ -745,7 +745,9 @@
         "schedule": "برنامه",
         "availability": "زمان‌های در دسترس",
         "services": "خدمات",
-        "team": "تیم"
+        "team": "تیم",
+        "clinical": "درمانگاه",
+        "patients": "بیماران"
       },
       "notAProvider": {
         "title": "دسترسی ارائه‌دهنده ندارید",
@@ -2318,7 +2320,10 @@
       "dental": "دندان‌پزشکی",
       "nutrition": "تغذیه",
       "rehab": "توان‌بخشی",
-      "observations": "مشاهدات"
+      "observations": "مشاهدات",
+      "vitals": "معاینه و علائم حیاتی",
+      "estimates": "برآورد هزینه",
+      "discharge": "یادداشت ترخیص"
     },
     "overview": {
       "title": "سلامت پیشرفته",
@@ -2388,6 +2393,49 @@
       "text": "چه چیزی را می‌خواهید اصلاح کنید؟",
       "submit": "ثبت اصلاحیه",
       "history": "تاریخچه اصلاحات"
+    },
+    "vitals": {
+      "title": "معاینه و علائم حیاتی",
+      "disclaimer": "این‌ها اندازه‌گیری‌هایی است که درمانگاه ثبت کرده است. پت‌لایف آن‌ها را تفسیر نمی‌کند — معنای هر مقدار را از دامپزشک خود بپرسید.",
+      "weightTrend": "روند وزن",
+      "trendCaption": "{count} اندازه‌گیری ثبت‌شده. هر نقطه یک اندازه‌گیری واقعی است.",
+      "empty": "اندازه‌گیری‌ای ثبت نشده است.",
+      "emptyDescription": "پس از آنکه درمانگاه معاینه‌ای برای حیوان شما ثبت کند، اندازه‌گیری‌ها اینجا دیده می‌شود.",
+      "noneRecorded": "چیزی ثبت نشده",
+      "weight": "وزن",
+      "temperature": "دما",
+      "heartRate": "ضربان قلب",
+      "respiratoryRate": "تعداد تنفس",
+      "bodyCondition": "وضعیت بدنی"
+    },
+    "estimates": {
+      "title": "برآورد هزینه درمان",
+      "empty": "برآوردی وجود ندارد.",
+      "emptyDescription": "وقتی درمانگاه برآورد هزینه‌ای برای تأیید شما بفرستد، اینجا نمایش داده می‌شود.",
+      "range": "{low} تا {high} ریال",
+      "rangeToman": "{low} تا {high} تومان",
+      "rangeExplainer": "یک بازه است، نه قیمت قطعی — هزینه نهایی به درمانی که لازم می‌شود بستگی دارد.",
+      "lineRange": "{low} تا {high} ریال",
+      "validUntil": "معتبر تا {date}",
+      "declinedBecause": "رد شد: {reason}",
+      "approve": "تأیید",
+      "decline": "رد",
+      "declinePrompt": "دلیل رد کردن چیست؟ (اختیاری، با درمانگاه به اشتراک گذاشته می‌شود)",
+      "status": {
+        "DRAFT": "پیش‌نویس",
+        "PRESENTED": "در انتظار تصمیم شما",
+        "APPROVED": "تأیید‌شده",
+        "DECLINED": "رد‌شده",
+        "EXPIRED": "منقضی‌شده"
+      }
+    },
+    "discharge": {
+      "title": "یادداشت ترخیص",
+      "empty": "یادداشت ترخیصی ثبت نشده است.",
+      "homeCare": "مراقبت در منزل",
+      "medications": "داروهای منزل",
+      "warningSigns": "در این موارد فوراً با درمانگاه تماس بگیرید…",
+      "followUp": "پیگیری"
     }
   },
   "clinicalOs": {
@@ -3067,6 +3115,290 @@
       "description": "برای رزرو نوبت، ثبت سفارش، و نگهداری پرونده سلامت حیوانت به یک حساب نیاز داری. مرور کردن سایت آزاد است.",
       "createAccount": "ساخت حساب",
       "logIn": "ورود"
+    }
+  },
+  "vetPanel": {
+    "dashboard": {
+      "title": "تخته درمانگاه",
+      "todaysAppointments": "{count} نوبت امروز",
+      "openVisits": "{count} ویزیت باز",
+      "overdueTasks": "{count} درمان عقب‌افتاده",
+      "activeAlerts": "{count} هشدار بیمار",
+      "whiteboard": "همین حالا در درمانگاه",
+      "noInpatients": "هیچ بیماری بستری نیست.",
+      "kennel": "قفس {label}",
+      "dueTasks": "{count} درمان سررسیده",
+      "lastVitals": "علائم حیاتی {time}",
+      "noVitalsYet": "هنوز علائم حیاتی ثبت نشده",
+      "overdueTasksHeading": "درمان‌های عقب‌افتاده",
+      "noOverdueTasks": "چیزی عقب‌افتاده نیست.",
+      "overdue": "عقب‌افتاده",
+      "awaitingOwnerDecision": "در انتظار تصمیم صاحب حیوان",
+      "noPendingEstimates": "برآوردی در انتظار پاسخ صاحب حیوان نیست.",
+      "estimateRange": "{low} تا {high} ریال",
+      "openVisitsHeading": "ویزیت‌های باز",
+      "inProgress": "در جریان",
+      "triage": {
+        "ROUTINE": "معمولی",
+        "URGENT": "فوری",
+        "EMERGENT": "اورژانسی",
+        "CRITICAL": "بحرانی"
+      }
+    },
+    "registry": {
+      "title": "بیماران",
+      "searchLabel": "جست‌وجوی بیماران",
+      "searchPlaceholder": "نام، شماره میکروچیپ یا صاحب حیوان",
+      "search": "جست‌وجو",
+      "hospitalizedOnly": "فقط بستری‌ها",
+      "empty": "بیماری یافت نشد.",
+      "emptyDescription": "یک حیوان زمانی اینجا دیده می‌شود که درمانگاه شما برای او نوبتی ثبت یا پرونده‌ای تکمیل کرده باشد.",
+      "accessState": {
+        "ACTIVE": "پرونده باز است",
+        "EXPIRED": "دسترسی منقضی شده"
+      },
+      "ownedBy": "صاحب: {name}",
+      "inpatient": "بستری",
+      "visitOpen": "ویزیت باز",
+      "alerts": "{count} هشدار",
+      "lastVisit": "آخرین ویزیت {date}",
+      "noVisitsYet": "ویزیتی ثبت نشده",
+      "previous": "قبلی",
+      "next": "بعدی",
+      "pageOf": "صفحه {page} از {totalPages}",
+      "species": {
+        "DOG": "سگ",
+        "CAT": "گربه"
+      }
+    },
+    "record": {
+      "startVisit": "شروع ویزیت",
+      "admit": "بستری کردن",
+      "admitPrompt": "دلیل بستری",
+      "openTreatmentSheet": "برگه درمان",
+      "resolveAlert": "رفع شد",
+      "owner": "صاحب: {name} · {phone}",
+      "chip": "میکروچیپ {chip}",
+      "noneRecorded": "چیزی ثبت نشده",
+      "allergies": "حساسیت‌ها",
+      "activeProblems": "مشکلات فعال",
+      "latestVitals": "آخرین معاینه",
+      "noVitalsRecorded": "معاینه‌ای ثبت نشده است.",
+      "careContext": "زمینه مراقبتی",
+      "weight": "وزن",
+      "temperature": "دما",
+      "heartRate": "ضربان قلب",
+      "respiratoryRate": "تعداد تنفس",
+      "bodyCondition": "وضعیت بدنی",
+      "painScore": "امتیاز درد",
+      "weightTrend": "روند وزن",
+      "trendCaption": "{count} اندازه‌گیری ثبت‌شده. هر نقطه یک اندازه‌گیری واقعی است و بین نقطه‌ها هیچ مقداری تخمین زده نشده.",
+      "onset": "شروع {date}",
+      "noProblems": "مشکلی ثبت نشده است.",
+      "noPrescriptions": "نسخه‌ای ثبت نشده است.",
+      "noVisits": "ویزیتی ثبت نشده است.",
+      "noEstimates": "برآوردی ثبت نشده است.",
+      "refills": "تکرار نسخه {used} از {authorized}",
+      "controlledSubstance": "داروی تحت کنترل",
+      "dispenseRefill": "تحویل تکرار نسخه",
+      "cancelPrescription": "لغو",
+      "cancelPrompt": "دلیل لغو این نسخه چیست؟",
+      "presentEstimate": "ارسال به صاحب حیوان",
+      "awaitingOwner": "در انتظار تصمیم صاحب حیوان.",
+      "tab": {
+        "summary": "خلاصه",
+        "problems": "مشکلات",
+        "vitals": "معاینه‌ها",
+        "prescriptions": "نسخه‌ها",
+        "visits": "ویزیت‌ها",
+        "financial": "برآوردها"
+      },
+      "alertType": {
+        "HANDLING": "نحوه نگه‌داشتن",
+        "AGGRESSION": "پرخاشگری",
+        "MEDICAL": "پزشکی",
+        "ANAESTHETIC": "بی‌هوشی",
+        "ALLERGY": "حساسیت",
+        "INFECTIOUS": "عفونی",
+        "OTHER": "هشدار"
+      },
+      "problemStatus": {
+        "ACTIVE": "فعال",
+        "CHRONIC": "مزمن",
+        "RESOLVED": "برطرف شده",
+        "RULED_OUT": "رد شده"
+      },
+      "prescriptionStatus": {
+        "ACTIVE": "فعال",
+        "COMPLETED": "تمام‌شده",
+        "CANCELLED": "لغو‌شده"
+      },
+      "estimateStatus": {
+        "DRAFT": "پیش‌نویس",
+        "PRESENTED": "ارسال‌شده به صاحب حیوان",
+        "APPROVED": "تأیید‌شده",
+        "DECLINED": "رد‌شده",
+        "EXPIRED": "منقضی‌شده"
+      },
+      "estimateRange": "{low} تا {high} ریال",
+      "species": {
+        "DOG": "سگ",
+        "CAT": "گربه"
+      },
+      "sex": {
+        "MALE": "نر",
+        "FEMALE": "ماده",
+        "UNKNOWN": "جنسیت نامشخص"
+      },
+      "route": {
+        "ORAL": "خوراکی",
+        "SUBCUTANEOUS": "زیرجلدی",
+        "INTRAVENOUS": "وریدی",
+        "INTRAMUSCULAR": "عضلانی",
+        "TOPICAL": "موضعی",
+        "OTIC": "گوشی",
+        "OPHTHALMIC": "چشمی",
+        "INHALED": "استنشاقی",
+        "RECTAL": "رکتال",
+        "INTRANASAL": "بینی",
+        "OTHER": "روش دیگر"
+      }
+    },
+    "treatmentSheet": {
+      "title": "برگه درمان",
+      "status": {
+        "ADMITTED": "بستری",
+        "DISCHARGED": "ترخیص‌شده",
+        "CANCELLED": "لغو‌شده"
+      },
+      "kennel": "قفس {label}",
+      "admittedAt": "بستری {time}",
+      "dischargedAt": "ترخیص {time}",
+      "counts": {
+        "scheduled": "{count} زمان‌بندی‌شده",
+        "overdue": "{count} عقب‌افتاده",
+        "done": "{count} انجام‌شده",
+        "skipped": "{count} صرف‌نظر‌شده",
+        "missed": "{count} انجام‌نشده"
+      },
+      "scheduleTreatment": "زمان‌بندی درمان",
+      "discharge": "ترخیص",
+      "dischargePrompt": "یادداشت ترخیص (اختیاری)",
+      "taskTypeLabel": "نوع",
+      "taskTitle": "درمان",
+      "taskDetail": "توضیح",
+      "everyHours": "هر چند ساعت",
+      "occurrences": "چند نوبت",
+      "seriesExplainer": "برای هر نوبت یک ردیف جداگانه از همین حالا ساخته می‌شود. هر ردیف مستقل ثبت می‌شود و دقیقاً در زمان زمان‌بندی‌شده خود می‌ماند.",
+      "addToSheet": "افزودن به برگه",
+      "sheet": "برگه",
+      "noTasks": "چیزی زمان‌بندی نشده.",
+      "noTasksDescription": "برای شروع برگه این بیمار یک درمان زمان‌بندی کنید.",
+      "overdue": "عقب‌افتاده",
+      "actionedAt": "ثبت‌شده {time}",
+      "outcomePrompt": "چه اتفاقی افتاد؟ (در برگه ثبت می‌شود)",
+      "vitalsDuringStay": "علائم حیاتی در این بستری",
+      "noVitals": "در این بستری علائم حیاتی ثبت نشده است.",
+      "noneRecorded": "چیزی ثبت نشده",
+      "pain": "درد",
+      "triage": {
+        "ROUTINE": "معمولی",
+        "URGENT": "فوری",
+        "EMERGENT": "اورژانسی",
+        "CRITICAL": "بحرانی"
+      },
+      "taskType": {
+        "MEDICATION": "دارو",
+        "FLUID_THERAPY": "مایعات",
+        "MONITORING": "پایش",
+        "FEEDING": "تغذیه",
+        "WALK": "پیاده‌روی",
+        "PROCEDURE": "اقدام درمانی",
+        "SAMPLE_COLLECTION": "نمونه‌گیری",
+        "OTHER": "سایر"
+      },
+      "taskStatus": {
+        "SCHEDULED": "زمان‌بندی‌شده",
+        "DONE": "انجام‌شده",
+        "SKIPPED": "صرف‌نظر‌شده",
+        "MISSED": "انجام‌نشده"
+      },
+      "taskAction": {
+        "DONE": "انجام شد",
+        "SKIPPED": "صرف‌نظر شد",
+        "MISSED": "انجام نشد"
+      }
+    },
+    "visitTools": {
+      "templates": "قالب‌های یادداشت",
+      "templatesExplainer": "انتخاب قالب فقط فیلدهای بالا را پر می‌کند. تا زمانی که یادداشت‌ها را ذخیره نکنید چیزی ثبت نمی‌شود.",
+      "exam": "معاینه",
+      "recordExam": "ثبت معاینه",
+      "noExamRecorded": "برای این بیمار معاینه‌ای ثبت نشده است.",
+      "noneRecorded": "چیزی ثبت نشده",
+      "weightKg": "وزن (کیلوگرم)",
+      "temperatureC": "دما (سلسیوس)",
+      "heartRate": "ضربان قلب (در دقیقه)",
+      "respiratoryRate": "تعداد تنفس (در دقیقه)",
+      "bodyConditionScore": "وضعیت بدنی (۱ تا ۹)",
+      "bodyConditionHint": "بر پایه مقیاس ۱ تا ۹ پورینا ثبت می‌شود.",
+      "painScore": "امتیاز درد (۰ تا ۴)",
+      "painScoreHint": "بر پایه مقیاس Glasgow CMPS-SF از ۰ تا ۴ ثبت می‌شود.",
+      "examNotes": "یادداشت معاینه",
+      "blankFieldsExplainer": "فیلدی را که اندازه‌گیری نکرده‌اید خالی بگذارید — خالی بودن به معنای «اندازه‌گیری نشده» ثبت می‌شود، نه «طبیعی».",
+      "saveExam": "ذخیره معاینه",
+      "prescriptions": "نسخه‌ها",
+      "prescribe": "تجویز",
+      "noActivePrescriptions": "نسخه فعالی وجود ندارد.",
+      "controlled": "تحت کنترل",
+      "drugName": "دارو",
+      "strength": "دوز دارو",
+      "routeLabel": "روش مصرف",
+      "doseHelperTitle": "محاسبه‌گر دوز (بخشی از نسخه نیست)",
+      "mgPerKg": "میلی‌گرم بر کیلوگرم",
+      "weightKgHelper": "وزن (کیلوگرم)",
+      "suggestedDose": "پیشنهاد: {value} میلی‌گرم",
+      "doseHelperEmpty": "برای دیدن پیشنهاد، میلی‌گرم بر کیلوگرم و وزن را وارد کنید.",
+      "doseHelperDisclaimer": "این فقط یک محاسبه ساده است. دوزی که تجویز می‌کنید را در فیلد پایین وارد کنید — مقدار پیشنهادی هرگز به‌جای شما ثبت نمی‌شود.",
+      "doseAmount": "دوز",
+      "doseUnit": "واحد دوز",
+      "frequency": "تعداد مصرف",
+      "durationDays": "مدت (روز)",
+      "refillsAuthorized": "تکرار نسخه مجاز",
+      "ownerInstructions": "دستورالعمل برای صاحب حیوان",
+      "prescriptionExplainer": "این دارو به فهرست داروهای صاحب حیوان هم اضافه می‌شود.",
+      "savePrescription": "ذخیره نسخه",
+      "dischargeSummary": "خلاصه ترخیص",
+      "dischargeStatus": {
+        "DRAFT": "پیش‌نویس",
+        "ISSUED": "صادر‌شده"
+      },
+      "issuedNotice": "صادر‌شده در {time}. خلاصه صادرشده قابل تغییر نیست — ویزیت را اصلاح و خلاصه تازه‌ای صادر کنید.",
+      "noDischargeDraft": "هنوز خلاصه ترخیصی نوشته نشده است.",
+      "editDischarge": "ویرایش پیش‌نویس",
+      "writeDischarge": "نوشتن خلاصه ترخیص",
+      "dischargeSummaryText": "خلاصه",
+      "homeCare": "دستورالعمل مراقبت در منزل",
+      "medicationsSummary": "داروهایی که در منزل داده می‌شود",
+      "warningSigns": "در این موارد فوراً تماس بگیرید…",
+      "warningSignsHint": "نشانه‌هایی که باید صاحب حیوان را بی‌درنگ برگرداند.",
+      "followUpInstructions": "پیگیری",
+      "saveDraft": "ذخیره پیش‌نویس",
+      "issueToOwner": "صدور برای صاحب حیوان",
+      "issueExplainer": "با صدور، این خلاصه برای صاحب حیوان ارسال و قطعی می‌شود. تا زمانی که کار تمام نشده آن را پیش‌نویس نگه دارید.",
+      "route": {
+        "ORAL": "خوراکی",
+        "SUBCUTANEOUS": "زیرجلدی",
+        "INTRAVENOUS": "وریدی",
+        "INTRAMUSCULAR": "عضلانی",
+        "TOPICAL": "موضعی",
+        "OTIC": "گوشی",
+        "OPHTHALMIC": "چشمی",
+        "INHALED": "استنشاقی",
+        "RECTAL": "رکتال",
+        "INTRANASAL": "بینی",
+        "OTHER": "سایر"
+      }
     }
   }
 }

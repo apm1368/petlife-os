@@ -745,7 +745,9 @@
         "schedule": "Schedule",
         "availability": "Availability",
         "services": "Services",
-        "team": "Team"
+        "team": "Team",
+        "clinical": "Clinical",
+        "patients": "Patients"
       },
       "notAProvider": {
         "title": "No provider access",
@@ -2318,7 +2320,10 @@
       "dental": "Dental",
       "nutrition": "Nutrition",
       "rehab": "Rehabilitation",
-      "observations": "Observations"
+      "observations": "Observations",
+      "vitals": "Exams & vitals",
+      "estimates": "Estimates",
+      "discharge": "Discharge notes"
     },
     "overview": {
       "title": "Advanced Health",
@@ -2388,6 +2393,49 @@
       "text": "What would you like to correct?",
       "submit": "Submit correction",
       "history": "Correction history"
+    },
+    "vitals": {
+      "title": "Exams & vitals",
+      "disclaimer": "These are measurements your clinic recorded. PET LIFE OS does not interpret them — ask your vet what a value means.",
+      "weightTrend": "Weight over time",
+      "trendCaption": "{count} recorded measurements. Each point is an actual reading.",
+      "empty": "No measurements recorded.",
+      "emptyDescription": "Measurements appear here after a clinic records an exam for your pet.",
+      "noneRecorded": "Nothing recorded",
+      "weight": "Weight",
+      "temperature": "Temperature",
+      "heartRate": "Heart rate",
+      "respiratoryRate": "Respiratory rate",
+      "bodyCondition": "Body condition"
+    },
+    "estimates": {
+      "title": "Treatment estimates",
+      "empty": "No estimates.",
+      "emptyDescription": "A clinic's cost estimate appears here when they send you one to approve.",
+      "range": "{low} – {high} IRR",
+      "rangeToman": "{low} – {high} Toman",
+      "rangeExplainer": "A range, not a fixed price — the final cost depends on what treatment turns out to be needed.",
+      "lineRange": "{low} – {high} IRR",
+      "validUntil": "Valid until {date}",
+      "declinedBecause": "Declined: {reason}",
+      "approve": "Approve",
+      "decline": "Decline",
+      "declinePrompt": "Why are you declining? (optional, shared with the clinic)",
+      "status": {
+        "DRAFT": "Draft",
+        "PRESENTED": "Awaiting your decision",
+        "APPROVED": "Approved",
+        "DECLINED": "Declined",
+        "EXPIRED": "Expired"
+      }
+    },
+    "discharge": {
+      "title": "Discharge notes",
+      "empty": "No discharge notes recorded.",
+      "homeCare": "Home care",
+      "medications": "Medications at home",
+      "warningSigns": "Call the clinic immediately if…",
+      "followUp": "Follow-up"
     }
   },
   "clinicalOs": {
@@ -3067,6 +3115,290 @@
       "description": "An account is needed to book, order, and keep your pet's health record. Browsing stays open to everyone.",
       "createAccount": "Create account",
       "logIn": "Log in"
+    }
+  },
+  "vetPanel": {
+    "dashboard": {
+      "title": "Clinical board",
+      "todaysAppointments": "{count} appointments today",
+      "openVisits": "{count} open visits",
+      "overdueTasks": "{count} overdue treatments",
+      "activeAlerts": "{count} patient alerts",
+      "whiteboard": "In the clinic now",
+      "noInpatients": "No patients are admitted.",
+      "kennel": "Kennel {label}",
+      "dueTasks": "{count} treatments due",
+      "lastVitals": "Vitals {time}",
+      "noVitalsYet": "No vitals recorded yet",
+      "overdueTasksHeading": "Overdue treatments",
+      "noOverdueTasks": "Nothing overdue.",
+      "overdue": "Overdue",
+      "awaitingOwnerDecision": "Awaiting owner decision",
+      "noPendingEstimates": "No estimates are waiting on an owner.",
+      "estimateRange": "{low} – {high} IRR",
+      "openVisitsHeading": "Open visits",
+      "inProgress": "In progress",
+      "triage": {
+        "ROUTINE": "Routine",
+        "URGENT": "Urgent",
+        "EMERGENT": "Emergent",
+        "CRITICAL": "Critical"
+      }
+    },
+    "registry": {
+      "title": "Patients",
+      "searchLabel": "Search patients",
+      "searchPlaceholder": "Name, microchip, or owner",
+      "search": "Search",
+      "hospitalizedOnly": "Admitted only",
+      "empty": "No patients found.",
+      "emptyDescription": "A pet appears here once your clinic has booked or documented a visit for them.",
+      "accessState": {
+        "ACTIVE": "Record open",
+        "EXPIRED": "Access expired"
+      },
+      "ownedBy": "Owner: {name}",
+      "inpatient": "Admitted",
+      "visitOpen": "Visit open",
+      "alerts": "{count} alerts",
+      "lastVisit": "Last visit {date}",
+      "noVisitsYet": "No visits recorded",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {totalPages}",
+      "species": {
+        "DOG": "Dog",
+        "CAT": "Cat"
+      }
+    },
+    "record": {
+      "startVisit": "Start visit",
+      "admit": "Admit",
+      "admitPrompt": "Reason for admission",
+      "openTreatmentSheet": "Treatment sheet",
+      "resolveAlert": "Resolve",
+      "owner": "Owner: {name} · {phone}",
+      "chip": "Chip {chip}",
+      "noneRecorded": "Nothing recorded",
+      "allergies": "Allergies",
+      "activeProblems": "Active problems",
+      "latestVitals": "Latest exam",
+      "noVitalsRecorded": "No exam recorded.",
+      "careContext": "Care context",
+      "weight": "Weight",
+      "temperature": "Temperature",
+      "heartRate": "Heart rate",
+      "respiratoryRate": "Respiratory rate",
+      "bodyCondition": "Body condition",
+      "painScore": "Pain score",
+      "weightTrend": "Weight over time",
+      "trendCaption": "{count} recorded measurements. Points are actual readings — nothing between them is estimated.",
+      "onset": "Onset {date}",
+      "noProblems": "No problems recorded.",
+      "noPrescriptions": "No prescriptions recorded.",
+      "noVisits": "No visits recorded.",
+      "noEstimates": "No estimates recorded.",
+      "refills": "Refills {used}/{authorized}",
+      "controlledSubstance": "Controlled substance",
+      "dispenseRefill": "Dispense refill",
+      "cancelPrescription": "Cancel",
+      "cancelPrompt": "Why is this prescription being cancelled?",
+      "presentEstimate": "Send to owner",
+      "awaitingOwner": "Waiting for the owner's decision.",
+      "tab": {
+        "summary": "Summary",
+        "problems": "Problems",
+        "vitals": "Exams",
+        "prescriptions": "Prescriptions",
+        "visits": "Visits",
+        "financial": "Estimates"
+      },
+      "alertType": {
+        "HANDLING": "Handling",
+        "AGGRESSION": "Aggression",
+        "MEDICAL": "Medical",
+        "ANAESTHETIC": "Anaesthetic",
+        "ALLERGY": "Allergy",
+        "INFECTIOUS": "Infectious",
+        "OTHER": "Alert"
+      },
+      "problemStatus": {
+        "ACTIVE": "Active",
+        "CHRONIC": "Chronic",
+        "RESOLVED": "Resolved",
+        "RULED_OUT": "Ruled out"
+      },
+      "prescriptionStatus": {
+        "ACTIVE": "Active",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "estimateStatus": {
+        "DRAFT": "Draft",
+        "PRESENTED": "Sent to owner",
+        "APPROVED": "Approved",
+        "DECLINED": "Declined",
+        "EXPIRED": "Expired"
+      },
+      "estimateRange": "{low} – {high} IRR",
+      "species": {
+        "DOG": "Dog",
+        "CAT": "Cat"
+      },
+      "sex": {
+        "MALE": "Male",
+        "FEMALE": "Female",
+        "UNKNOWN": "Sex unknown"
+      },
+      "route": {
+        "ORAL": "Oral",
+        "SUBCUTANEOUS": "SC",
+        "INTRAVENOUS": "IV",
+        "INTRAMUSCULAR": "IM",
+        "TOPICAL": "Topical",
+        "OTIC": "Otic",
+        "OPHTHALMIC": "Ophthalmic",
+        "INHALED": "Inhaled",
+        "RECTAL": "Rectal",
+        "INTRANASAL": "Intranasal",
+        "OTHER": "Other route"
+      }
+    },
+    "treatmentSheet": {
+      "title": "Treatment sheet",
+      "status": {
+        "ADMITTED": "Admitted",
+        "DISCHARGED": "Discharged",
+        "CANCELLED": "Cancelled"
+      },
+      "kennel": "Kennel {label}",
+      "admittedAt": "Admitted {time}",
+      "dischargedAt": "Discharged {time}",
+      "counts": {
+        "scheduled": "{count} scheduled",
+        "overdue": "{count} overdue",
+        "done": "{count} done",
+        "skipped": "{count} skipped",
+        "missed": "{count} missed"
+      },
+      "scheduleTreatment": "Schedule treatment",
+      "discharge": "Discharge",
+      "dischargePrompt": "Discharge note (optional)",
+      "taskTypeLabel": "Type",
+      "taskTitle": "Treatment",
+      "taskDetail": "Detail",
+      "everyHours": "Every (hours)",
+      "occurrences": "How many doses",
+      "seriesExplainer": "This creates one entry per dose, starting now. Each entry is actioned on its own and stays exactly as scheduled.",
+      "addToSheet": "Add to sheet",
+      "sheet": "Sheet",
+      "noTasks": "Nothing scheduled.",
+      "noTasksDescription": "Schedule a treatment to start this patient's sheet.",
+      "overdue": "Overdue",
+      "actionedAt": "Recorded {time}",
+      "outcomePrompt": "What happened? (recorded on the sheet)",
+      "vitalsDuringStay": "Vitals during this stay",
+      "noVitals": "No vitals recorded during this stay.",
+      "noneRecorded": "Nothing recorded",
+      "pain": "Pain",
+      "triage": {
+        "ROUTINE": "Routine",
+        "URGENT": "Urgent",
+        "EMERGENT": "Emergent",
+        "CRITICAL": "Critical"
+      },
+      "taskType": {
+        "MEDICATION": "Medication",
+        "FLUID_THERAPY": "Fluids",
+        "MONITORING": "Monitoring",
+        "FEEDING": "Feeding",
+        "WALK": "Walk",
+        "PROCEDURE": "Procedure",
+        "SAMPLE_COLLECTION": "Sample",
+        "OTHER": "Other"
+      },
+      "taskStatus": {
+        "SCHEDULED": "Scheduled",
+        "DONE": "Done",
+        "SKIPPED": "Skipped",
+        "MISSED": "Missed"
+      },
+      "taskAction": {
+        "DONE": "Done",
+        "SKIPPED": "Skipped",
+        "MISSED": "Missed"
+      }
+    },
+    "visitTools": {
+      "templates": "Note templates",
+      "templatesExplainer": "Applying a template only fills the fields above. Nothing is saved until you save your notes.",
+      "exam": "Exam",
+      "recordExam": "Record exam",
+      "noExamRecorded": "No exam recorded for this patient.",
+      "noneRecorded": "Nothing recorded",
+      "weightKg": "Weight (kg)",
+      "temperatureC": "Temperature (°C)",
+      "heartRate": "Heart rate (bpm)",
+      "respiratoryRate": "Respiratory rate (bpm)",
+      "bodyConditionScore": "Body condition (1–9)",
+      "bodyConditionHint": "Recorded on the Purina 1–9 scale.",
+      "painScore": "Pain score (0–4)",
+      "painScoreHint": "Recorded on the Glasgow CMPS-SF 0–4 scale.",
+      "examNotes": "Exam notes",
+      "blankFieldsExplainer": "Leave a field blank if you did not measure it — a blank is recorded as 'not measured', never as normal.",
+      "saveExam": "Save exam",
+      "prescriptions": "Prescriptions",
+      "prescribe": "Prescribe",
+      "noActivePrescriptions": "No active prescriptions.",
+      "controlled": "Controlled",
+      "drugName": "Drug",
+      "strength": "Strength",
+      "routeLabel": "Route",
+      "doseHelperTitle": "Dose helper (not part of the prescription)",
+      "mgPerKg": "mg/kg",
+      "weightKgHelper": "Weight (kg)",
+      "suggestedDose": "Suggested: {value} mg",
+      "doseHelperEmpty": "Enter mg/kg and weight to see a suggestion.",
+      "doseHelperDisclaimer": "This is arithmetic only. Enter the dose you are prescribing in the field below — the suggestion is never saved on your behalf.",
+      "doseAmount": "Dose",
+      "doseUnit": "Dose unit",
+      "frequency": "Frequency",
+      "durationDays": "Duration (days)",
+      "refillsAuthorized": "Refills authorised",
+      "ownerInstructions": "Instructions for the owner",
+      "prescriptionExplainer": "This also adds the medication to the owner's medication list.",
+      "savePrescription": "Save prescription",
+      "dischargeSummary": "Discharge summary",
+      "dischargeStatus": {
+        "DRAFT": "Draft",
+        "ISSUED": "Issued"
+      },
+      "issuedNotice": "Issued {time}. An issued summary cannot be changed — amend the visit and issue a new one instead.",
+      "noDischargeDraft": "No discharge summary written yet.",
+      "editDischarge": "Edit draft",
+      "writeDischarge": "Write discharge summary",
+      "dischargeSummaryText": "Summary",
+      "homeCare": "Home care instructions",
+      "medicationsSummary": "Medications to give at home",
+      "warningSigns": "Call us immediately if…",
+      "warningSignsHint": "The signs that should bring the owner straight back.",
+      "followUpInstructions": "Follow-up",
+      "saveDraft": "Save draft",
+      "issueToOwner": "Issue to owner",
+      "issueExplainer": "Issuing sends this to the owner and locks it. Save as a draft while you are still working on it.",
+      "route": {
+        "ORAL": "Oral",
+        "SUBCUTANEOUS": "Subcutaneous",
+        "INTRAVENOUS": "Intravenous",
+        "INTRAMUSCULAR": "Intramuscular",
+        "TOPICAL": "Topical",
+        "OTIC": "Otic",
+        "OPHTHALMIC": "Ophthalmic",
+        "INHALED": "Inhaled",
+        "RECTAL": "Rectal",
+        "INTRANASAL": "Intranasal",
+        "OTHER": "Other"
+      }
     }
   }
 }

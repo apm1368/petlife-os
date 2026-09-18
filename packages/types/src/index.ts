@@ -4889,3 +4889,426 @@ export interface TripTravelSummaryDto {
   activeCount: number;
   totalCommittedIrr: number;
 }
+
+// ===========================================================================
+// Handoff 24 — Veterinary Clinical Panel (Vet Practice OS)
+// ===========================================================================
+
+export enum TriageLevel {
+  ROUTINE = "ROUTINE",
+  URGENT = "URGENT",
+  EMERGENT = "EMERGENT",
+  CRITICAL = "CRITICAL",
+}
+
+export enum MucousMembraneColor {
+  PINK = "PINK",
+  PALE = "PALE",
+  WHITE = "WHITE",
+  CYANOTIC = "CYANOTIC",
+  ICTERIC = "ICTERIC",
+  BRICK_RED = "BRICK_RED",
+  MUDDY = "MUDDY",
+}
+
+export enum HydrationStatus {
+  EUHYDRATED = "EUHYDRATED",
+  MILD_DEHYDRATION = "MILD_DEHYDRATION",
+  MODERATE_DEHYDRATION = "MODERATE_DEHYDRATION",
+  SEVERE_DEHYDRATION = "SEVERE_DEHYDRATION",
+}
+
+export enum ClinicalProblemStatus {
+  ACTIVE = "ACTIVE",
+  CHRONIC = "CHRONIC",
+  RESOLVED = "RESOLVED",
+  RULED_OUT = "RULED_OUT",
+}
+
+export enum PrescriptionRoute {
+  ORAL = "ORAL",
+  SUBCUTANEOUS = "SUBCUTANEOUS",
+  INTRAVENOUS = "INTRAVENOUS",
+  INTRAMUSCULAR = "INTRAMUSCULAR",
+  TOPICAL = "TOPICAL",
+  OTIC = "OTIC",
+  OPHTHALMIC = "OPHTHALMIC",
+  INHALED = "INHALED",
+  RECTAL = "RECTAL",
+  INTRANASAL = "INTRANASAL",
+  OTHER = "OTHER",
+}
+
+export enum PrescriptionStatus {
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum HospitalizationStatus {
+  ADMITTED = "ADMITTED",
+  DISCHARGED = "DISCHARGED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum TreatmentTaskType {
+  MEDICATION = "MEDICATION",
+  FLUID_THERAPY = "FLUID_THERAPY",
+  MONITORING = "MONITORING",
+  FEEDING = "FEEDING",
+  WALK = "WALK",
+  PROCEDURE = "PROCEDURE",
+  SAMPLE_COLLECTION = "SAMPLE_COLLECTION",
+  OTHER = "OTHER",
+}
+
+export enum TreatmentTaskStatus {
+  SCHEDULED = "SCHEDULED",
+  DONE = "DONE",
+  SKIPPED = "SKIPPED",
+  MISSED = "MISSED",
+}
+
+export enum ClinicalEstimateStatus {
+  DRAFT = "DRAFT",
+  PRESENTED = "PRESENTED",
+  APPROVED = "APPROVED",
+  DECLINED = "DECLINED",
+  EXPIRED = "EXPIRED",
+}
+
+export enum DischargeSummaryStatus {
+  DRAFT = "DRAFT",
+  ISSUED = "ISSUED",
+}
+
+export enum ClinicalAlertType {
+  HANDLING = "HANDLING",
+  AGGRESSION = "AGGRESSION",
+  MEDICAL = "MEDICAL",
+  ANAESTHETIC = "ANAESTHETIC",
+  ALLERGY = "ALLERGY",
+  INFECTIOUS = "INFECTIOUS",
+  OTHER = "OTHER",
+}
+
+export enum ClinicalAlertSeverity {
+  INFO = "INFO",
+  CAUTION = "CAUTION",
+  CRITICAL = "CRITICAL",
+}
+
+/**
+ * A structured exam/triage record. Every measurement is independently
+ * nullable and the UI must render an unset field as "not recorded" — never as
+ * a normal or reassuring value (Handoff 17 locked principle 4).
+ */
+export interface PatientVitalsDto {
+  id: string;
+  petId: string;
+  clinicalVisitId: string | null;
+  hospitalizationId: string | null;
+  recordedAt: string;
+  weightValue: number | null;
+  weightUnit: WeightUnit | null;
+  temperatureC: number | null;
+  heartRateBpm: number | null;
+  respiratoryRateBpm: number | null;
+  capillaryRefillSeconds: number | null;
+  systolicBloodPressure: number | null;
+  oxygenSaturationPercent: number | null;
+  bloodGlucoseMgDl: number | null;
+  mucousMembraneColor: MucousMembraneColor | null;
+  hydrationStatus: HydrationStatus | null;
+  bodyConditionScore: number | null;
+  bodyConditionScale: string | null;
+  painScore: number | null;
+  painScale: string | null;
+  triageLevel: TriageLevel | null;
+  notes: string | null;
+  sourceType: SourceType;
+  source: ClinicalActorRefDto;
+  createdAt: string;
+}
+
+/** One measurement series over time. Purely a re-projection of PatientVitalsDto rows — nothing is smoothed, averaged, or interpolated. */
+export interface VitalsTrendPointDto {
+  recordedAt: string;
+  value: number;
+}
+
+export interface VitalsTrendsDto {
+  petId: string;
+  weightKg: VitalsTrendPointDto[];
+  temperatureC: VitalsTrendPointDto[];
+  heartRateBpm: VitalsTrendPointDto[];
+  respiratoryRateBpm: VitalsTrendPointDto[];
+  bodyConditionScore: VitalsTrendPointDto[];
+  painScore: VitalsTrendPointDto[];
+}
+
+export interface ClinicalProblemDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  originatingVisitId: string | null;
+  name: string;
+  bodySystem: string | null;
+  status: ClinicalProblemStatus;
+  onsetAt: string | null;
+  resolvedAt: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PrescriptionDto {
+  id: string;
+  petId: string;
+  source: ClinicalActorRefDto;
+  clinicalVisitId: string | null;
+  /** The Medication row this prescription produced — the owner's medication list stays the single source of "what is my pet taking". */
+  medicationId: string | null;
+  drugName: string;
+  strength: string | null;
+  form: string | null;
+  route: PrescriptionRoute;
+  doseAmount: number | null;
+  doseUnit: string | null;
+  frequencyText: string | null;
+  durationDays: number | null;
+  quantityDispensed: number | null;
+  quantityUnit: string | null;
+  refillsAuthorized: number;
+  refillsDispensed: number;
+  isControlledSubstance: boolean;
+  instructionsForOwner: string | null;
+  /** Provider-only working notes — never returned by a consumer endpoint. */
+  internalNotes?: string | null;
+  status: PrescriptionStatus;
+  prescribedAt: string;
+  startAt: string | null;
+  endAt: string | null;
+  cancelledAt: string | null;
+  cancelledReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TreatmentTaskDto {
+  id: string;
+  hospitalizationId: string;
+  type: TreatmentTaskType;
+  title: string;
+  detail: string | null;
+  prescriptionId: string | null;
+  scheduledAt: string;
+  status: TreatmentTaskStatus;
+  completedAt: string | null;
+  completedByProviderUserId: string | null;
+  outcomeNote: string | null;
+  /** Derived at read time: SCHEDULED and past due. Never a stored status — a human states MISSED vs SKIPPED. */
+  isOverdue: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HospitalizationDto {
+  id: string;
+  petId: string;
+  petName: string;
+  species: PetSpecies;
+  providerOrganizationId: string;
+  attendingProviderUserId: string | null;
+  attendingProviderDisplayTitle: string | null;
+  clinicalVisitId: string | null;
+  status: HospitalizationStatus;
+  reasonForAdmission: string;
+  kennelLabel: string | null;
+  triageLevel: TriageLevel | null;
+  admittedAt: string;
+  estimatedDischargeAt: string | null;
+  dischargedAt: string | null;
+  dischargeNote: string | null;
+  cancelledReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HospitalizationDetailDto extends HospitalizationDto {
+  tasks: TreatmentTaskDto[];
+  vitals: PatientVitalsDto[];
+  /** Counts the panel's whiteboard needs without a second round trip. */
+  taskCounts: { scheduled: number; overdue: number; done: number; skipped: number; missed: number };
+}
+
+export interface ClinicalEstimateLineDto {
+  id: string;
+  description: string;
+  quantity: number;
+  /** Integer IRR — Toman is a display-only transform, never a stored unit (Handoff 06). */
+  unitLowIrr: number;
+  unitHighIrr: number;
+  sortOrder: number;
+}
+
+export interface ClinicalEstimateDto {
+  id: string;
+  petId: string;
+  householdId: string;
+  source: ClinicalActorRefDto;
+  clinicalVisitId: string | null;
+  title: string;
+  status: ClinicalEstimateStatus;
+  notes: string | null;
+  lowTotalIrr: number;
+  highTotalIrr: number;
+  validUntil: string | null;
+  presentedAt: string | null;
+  respondedAt: string | null;
+  declineReason: string | null;
+  lines: ClinicalEstimateLineDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClinicalNoteTemplateDto {
+  id: string;
+  providerOrganizationId: string;
+  name: string;
+  presentingComplaint: string | null;
+  species: PetSpecies | null;
+  reasonForVisitTemplate: string | null;
+  historyTemplate: string | null;
+  observationsTemplate: string | null;
+  assessmentTemplate: string | null;
+  planTemplate: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DischargeSummaryDto {
+  id: string;
+  clinicalVisitId: string;
+  petId: string;
+  providerOrganizationId: string;
+  providerOrganizationName: string;
+  status: DischargeSummaryStatus;
+  summaryText: string | null;
+  homeCareInstructions: string | null;
+  medicationsSummary: string | null;
+  warningSignsText: string | null;
+  followUpAt: string | null;
+  followUpInstructions: string | null;
+  issuedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Provider-only safety banner. Deliberately absent from every consumer DTO — see the model's doc comment. */
+export interface ProviderClinicalAlertDto {
+  id: string;
+  petId: string;
+  providerOrganizationId: string;
+  type: ClinicalAlertType;
+  severity: ClinicalAlertSeverity;
+  message: string;
+  resolvedAt: string | null;
+  createdAt: string;
+}
+
+/**
+ * Whether this organization can still open the pet's record. A clinic keeps
+ * seeing its historical patients in the registry after a visit-scoped grant
+ * lapses, but the badge says so plainly rather than implying live access —
+ * opening the record still goes through PetAccessGuard, which will refuse.
+ */
+export enum PatientAccessState {
+  ACTIVE = "ACTIVE",
+  EXPIRED = "EXPIRED",
+}
+
+export interface ProviderPatientSummaryDto {
+  petId: string;
+  name: string;
+  species: PetSpecies;
+  breed: string | null;
+  sex: PetSex | null;
+  birthDate: string | null;
+  approximateAgeMonths: number | null;
+  photoUrl: string | null;
+  microchipNumber: string | null;
+  lifecycleStatus: PetLifecycleStatus;
+  latestWeightValue: number | null;
+  latestWeightUnit: WeightUnit | null;
+  ownerDisplayName: string | null;
+  accessState: PatientAccessState;
+  accessExpiresAt: string | null;
+  lastVisitAt: string | null;
+  visitCount: number;
+  openVisitId: string | null;
+  activeHospitalizationId: string | null;
+  activeAlertCount: number;
+  highestActiveAlertSeverity: ClinicalAlertSeverity | null;
+}
+
+/** A row on the whiteboard: one patient currently in the building. */
+export interface WhiteboardPatientDto {
+  hospitalization: HospitalizationDto;
+  dueTaskCount: number;
+  overdueTaskCount: number;
+  nextTaskAt: string | null;
+  latestVitalsAt: string | null;
+}
+
+/**
+ * The clinical panel's "what needs a clinician right now" read. Deliberately
+ * operational, never analytical — no revenue, no lifetime counts (the same
+ * bar ProviderOverviewDto set in Handoff 05).
+ */
+export interface ClinicalDashboardDto {
+  organizationId: string;
+  todaysVetBookingCount: number;
+  openVisits: ClinicalVisitDto[];
+  whiteboard: WhiteboardPatientDto[];
+  overdueTreatmentTasks: TreatmentTaskDto[];
+  pendingEstimates: ClinicalEstimateDto[];
+  unresolvedAlertCount: number;
+  /** Care plan follow-ups this organization issued that are now due. */
+  dueFollowUps: CarePlanItemDto[];
+}
+
+/** The provider's full clinical read of one patient — never the consumer DTO (Handoff 17: "Consumer DTO != Provider clinical DTO"). */
+export interface ProviderPatientRecordDto {
+  pet: {
+    id: string;
+    name: string;
+    species: PetSpecies;
+    breed: string | null;
+    sex: PetSex | null;
+    birthDate: string | null;
+    approximateAgeMonths: number | null;
+    microchipNumber: string | null;
+    lifecycleStatus: PetLifecycleStatus;
+    latestWeightValue: number | null;
+    latestWeightUnit: WeightUnit | null;
+    photoUrl: string | null;
+  };
+  owner: { displayName: string | null; phone: string | null } | null;
+  careProfile: { temperamentText: string | null; handlingSensitivityText: string | null; specialInstructionsText: string | null } | null;
+  alerts: ProviderClinicalAlertDto[];
+  allergies: { id: string; name: string; severity: string | null }[];
+  medications: { id: string; name: string; dosage: number | null; unit: string | null; frequencyText: string | null }[];
+  conditions: { id: string; name: string; notes: string | null }[];
+  problems: ClinicalProblemDto[];
+  prescriptions: PrescriptionDto[];
+  latestVitals: PatientVitalsDto | null;
+  vitalsHistory: PatientVitalsDto[];
+  recentVisits: ClinicalVisitDto[];
+  recentLabs: LabResultDto[];
+  documents: MedicalDocumentDto[];
+  carePlans: CarePlanDto[];
+  estimates: ClinicalEstimateDto[];
+  hospitalizations: HospitalizationDto[];
+}

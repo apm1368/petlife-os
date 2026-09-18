@@ -1,18 +1,5 @@
-import type { CarePlanDto, ClinicalVisitDetailDto, ClinicalVisitDto, LabResultDto, MedicalDocumentDto, PetSpecies, ReferralDto } from "@petlife/types";
+import type { ClinicalVisitDetailDto, ClinicalVisitDto, LabResultDto, ReferralDto } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
-
-/** Shape of ProviderClinicalPatientService.get()'s response — a read-only, provider-specific view assembled ad hoc server-side rather than a shared DTO (spec: "Consumer DTO != Provider clinical DTO"). */
-export interface ProviderClinicalPatientDto {
-  pet: { id: string; name: string; species: PetSpecies; breed: string | null; sex: string | null; birthDate: string | null };
-  careProfile: { temperamentText: string | null; handlingSensitivityText: string | null; specialInstructionsText: string | null } | null;
-  allergies: { id: string; name: string; severity: string | null }[];
-  medications: { id: string; name: string; dosage: number | null; unit: string | null; frequencyText: string | null }[];
-  conditions: { id: string; name: string; notes: string | null }[];
-  recentVisits: ClinicalVisitDto[];
-  recentLabs: LabResultDto[];
-  documents: MedicalDocumentDto[];
-  carePlans: CarePlanDto[];
-}
 
 export interface StartVisitInput {
   petId: string;
@@ -29,7 +16,6 @@ export interface VisitNotesInput {
 }
 
 export const providerClinicalService = {
-  getPatient: (petId: string) => apiFetch<ProviderClinicalPatientDto>(`/provider/patients/${petId}`),
   listVisits: (petId: string) => apiFetch<ClinicalVisitDto[]>(`/provider/patients/${petId}/visits`),
   getVisit: (petId: string, visitId: string) => apiFetch<ClinicalVisitDetailDto>(`/provider/patients/${petId}/visits/${visitId}`),
   startVisit: (input: StartVisitInput) => apiFetch<ClinicalVisitDto>(`/provider/visits`, { method: "POST", body: input }),

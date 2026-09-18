@@ -998,8 +998,42 @@ async function main() {
     })),
   });
 
+  // Handoff 24: two clinical note templates for the seeded clinic, so the
+  // visit workspace's template picker has something real to apply on a fresh
+  // database. Templates are the organisation's own stationery — applying one
+  // only pre-fills the editable note fields, it never writes a record — so
+  // seeding them carries no clinical claim about any pet.
+  const noteTemplates = await Promise.all([
+    prisma.clinicalNoteTemplate.create({
+      data: {
+        providerOrganizationId: clinic.id,
+        createdByProviderUserId: drSara.id,
+        name: "Annual wellness",
+        presentingComplaint: "Routine health check",
+        reasonForVisitTemplate: "Annual wellness examination",
+        historyTemplate: "Diet:\nAppetite / thirst:\nUrination / defecation:\nExercise tolerance:\nParasite prevention:",
+        observationsTemplate: "General demeanour:\nEENT:\nCardiorespiratory (auscultation):\nAbdominal palpation:\nMusculoskeletal:\nSkin and coat:\nLymph nodes:\nOral / dental:",
+        assessmentTemplate: "Findings:\nProblems identified:",
+        planTemplate: "Vaccinations:\nParasite control:\nDiet / weight plan:\nRecheck interval:",
+      },
+    }),
+    prisma.clinicalNoteTemplate.create({
+      data: {
+        providerOrganizationId: clinic.id,
+        createdByProviderUserId: drSara.id,
+        name: "Vomiting / diarrhoea",
+        presentingComplaint: "Acute gastrointestinal signs",
+        reasonForVisitTemplate: "Vomiting and/or diarrhoea",
+        historyTemplate: "Onset and duration:\nFrequency:\nAppearance (blood / bile / mucus):\nAppetite and water intake:\nDietary change or scavenging:\nOther animals affected:\nCurrent medications:",
+        observationsTemplate: "Hydration status:\nMucous membranes / CRT:\nAbdominal palpation:\nRectal findings (if performed):\nTemperature / pulse / respiration:",
+        assessmentTemplate: "Differentials considered:\nDiagnostics performed:",
+        planTemplate: "Treatment given in clinic:\nMedications dispensed:\nFeeding instructions:\nWarning signs given to owner:\nRecheck interval:",
+      },
+    }),
+  ]);
+
   console.log(
-    `Seeded provider: clinic=${clinic.id} location=${clinicLocation.id} vet=${drSara.id} generalVisitService=${generalVisit.id}`,
+    `Seeded provider: clinic=${clinic.id} location=${clinicLocation.id} vet=${drSara.id} generalVisitService=${generalVisit.id} noteTemplates=${noteTemplates.length}`,
   );
 
   // Handoff 05: a second ProviderUser on the same organization — front-desk

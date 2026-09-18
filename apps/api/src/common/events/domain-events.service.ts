@@ -243,6 +243,20 @@ export const DOMAIN_EVENT_TYPES = [
   "TravelBookingCancelled",
   "TravelBookingCompleted",
   "TravelBookingAttachedToTrip",
+
+  // Handoff 24 — Veterinary Clinical Panel (Vet Practice OS).
+  "PatientVitalsRecorded",
+  "ClinicalProblemRecorded",
+  "ClinicalProblemStatusChanged",
+  "PrescriptionIssued",
+  "PrescriptionCancelled",
+  "PrescriptionRefillDispensed",
+  "PatientAdmitted",
+  "PatientDischarged",
+  "TreatmentTaskActioned",
+  "ClinicalEstimatePresented",
+  "ClinicalEstimateResponded",
+  "DischargeSummaryIssued",
 ] as const;
 
 /**

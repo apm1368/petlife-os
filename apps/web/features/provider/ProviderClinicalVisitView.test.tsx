@@ -9,6 +9,25 @@ vi.mock("@/services/provider-clinical.service", () => ({
   providerClinicalService: { getVisit: vi.fn(), updateVisitNotes: vi.fn(), completeVisit: vi.fn(), amendVisit: vi.fn(), voidVisit: vi.fn() },
 }));
 
+/**
+ * Handoff 24 attached VetVisitClinicalTools below the note form. It loads its
+ * own records, so it is stubbed to empty here rather than left to hit the
+ * network — this file's subject is the note/amend/void behaviour, and the
+ * tools have their own tests.
+ */
+vi.mock("@/services/vet-panel.service", () => ({
+  vetPanelService: {
+    listNoteTemplates: vi.fn().mockResolvedValue([]),
+    listVitals: vi.fn().mockResolvedValue([]),
+    listPrescriptions: vi.fn().mockResolvedValue([]),
+    getDischargeSummary: vi.fn().mockResolvedValue(null),
+    recordVitals: vi.fn(),
+    createPrescription: vi.fn(),
+    saveDischargeSummary: vi.fn(),
+    issueDischargeSummary: vi.fn(),
+  },
+}));
+
 function makeVisit(overrides: Partial<ClinicalVisitDetailDto> = {}): ClinicalVisitDetailDto {
   return {
     id: "visit-1",
