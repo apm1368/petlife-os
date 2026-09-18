@@ -92,6 +92,7 @@ export class SubscriptionPlanReadService {
             create: [
               { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
               { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
+              { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
             ],
           },
         },

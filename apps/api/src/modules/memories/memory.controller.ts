@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { PetAccessGuard } from "../../common/auth/pet-access.guard";
 import { RequirePetAccess } from "../../common/auth/require-pet-access.decorator";
@@ -7,7 +7,7 @@ import type { SessionUser } from "../../common/session/session.service";
 import { PetMemoryService } from "./pet-memory.service";
 import { LifeTimelineService } from "./life-timeline.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { CreatePetMemoryDto, RequestPetMemoryMediaUploadDto, UpdatePetMemoryDto } from "./dto/memory.dto";
+import { CreatePetMemoryDto, ListPetMemoriesQueryDto, RequestPetMemoryMediaUploadDto, UpdatePetMemoryDto } from "./dto/memory.dto";
 
 /**
  * spec: "private Life Timeline" (auth-required, household-scoped) —
@@ -35,8 +35,8 @@ export class MemoryController {
 
   @Get()
   @RequirePetAccess("canViewIdentity")
-  list(@Param("petId") petId: string) {
-    return this.memories.list(petId);
+  list(@Param("petId") petId: string, @Query() query: ListPetMemoriesQueryDto) {
+    return this.memories.list(petId, query);
   }
 
   @Get(":memoryId")
@@ -51,10 +51,17 @@ export class MemoryController {
     return this.memories.update(petId, memoryId, dto);
   }
 
+  /** spec: "avoid destructive deletion" — this archives (soft-delete), it never hard-deletes the row or its media. */
   @Delete(":memoryId")
   @RequirePetAccess("canEditIdentity")
   async delete(@Param("petId") petId: string, @Param("memoryId") memoryId: string) {
-    await this.memories.delete(petId, memoryId);
+    await this.memories.archive(petId, memoryId);
+  }
+
+  @Post(":memoryId/restore")
+  @RequirePetAccess("canEditIdentity")
+  restore(@Param("petId") petId: string, @Param("memoryId") memoryId: string) {
+    return this.memories.restore(petId, memoryId);
   }
 
   @Post("upload-url")

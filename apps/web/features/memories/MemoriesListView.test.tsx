@@ -46,6 +46,8 @@ function memory(overrides: Partial<PetMemoryDto> = {}): PetMemoryDto {
     mediaUrls: [],
     location: null,
     visibility: "PRIVATE" as never,
+    tags: [],
+    archivedAt: null,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     ...overrides,

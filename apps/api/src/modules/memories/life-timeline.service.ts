@@ -22,7 +22,8 @@ export class LifeTimelineService {
   async list(petId: string, includeHealth: boolean, limit = 200): Promise<LifeTimelineEntryDto[]> {
     const [pet, memories, reunitedIncidents, lifecycleTransitions, healthEntries] = await Promise.all([
       this.prisma.pet.findUniqueOrThrow({ where: { id: petId }, select: { createdAt: true } }),
-      this.prisma.petMemory.findMany({ where: { petId } }),
+      // Handoff 21: an archived (soft-deleted) memory is excluded, matching PetMemoryService.list()'s default view.
+      this.prisma.petMemory.findMany({ where: { petId, archivedAt: null } }),
       this.prisma.lostPetIncident.findMany({ where: { petId, reunitedAt: { not: null } } }),
       this.prisma.petLifecycleTransition.findMany({ where: { petId } }),
       includeHealth ? this.healthTimeline.list(petId, limit) : Promise.resolve([]),
@@ -33,7 +34,9 @@ export class LifeTimelineService {
     entries.push({ type: LifeTimelineEntryType.ADOPTION, occurredAt: pet.createdAt.toISOString(), summary: "Joined the household", recordId: petId, recordType: "PET_JOINED" });
 
     for (const memory of memories) {
-      entries.push({ type: LifeTimelineEntryType.MEMORY, occurredAt: memory.occurredAt.toISOString(), summary: memory.title, recordId: memory.id, recordType: memory.type });
+      // Handoff 21: title is optional (quick-entry flow) — fall back to a date-based summary rather than an empty timeline row.
+      const summary = memory.title ?? memory.occurredAt.toISOString().slice(0, 10);
+      entries.push({ type: LifeTimelineEntryType.MEMORY, occurredAt: memory.occurredAt.toISOString(), summary, recordId: memory.id, recordType: memory.type });
     }
 
     for (const incident of reunitedIncidents) {

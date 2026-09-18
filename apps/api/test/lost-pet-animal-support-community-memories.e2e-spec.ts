@@ -296,4 +296,126 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const home = await client.get("/home").expect(200);
     expect(home.body.primaryAction.kind).toBe("VIEW_MEMORIES");
   });
+
+  // -- Handoff 21: Memories/Diary enhancement -----------------------------------
+
+  it("H21: a quick entry with no title is accepted and falls back to nothing forced server-side", async () => {
+    const { client, petId } = await setupHousehold();
+
+    const created = await client.post(`/pets/${petId}/memories`).send({ type: "STORY", occurredAt: new Date().toISOString(), description: "Chased a squirrel all afternoon" }).expect(201);
+    expect(created.body.title).toBeNull();
+    expect(created.body.tags).toEqual([]);
+    expect(created.body.archivedAt).toBeNull();
+  });
+
+  it("H21: memories can be filtered by tag, year, and free-text search", async () => {
+    const { client, petId } = await setupHousehold();
+
+    await client.post(`/pets/${petId}/memories`).send({ type: "TRAVEL", title: "Trip to the mountains", occurredAt: "2024-06-01T00:00:00.000Z", tags: ["trip", "milestone"] }).expect(201);
+    await client.post(`/pets/${petId}/memories`).send({ type: "STORY", title: "A quiet Sunday nap", occurredAt: "2025-03-10T00:00:00.000Z", tags: ["funny-moment"] }).expect(201);
+
+    const byTag = await client.get(`/pets/${petId}/memories?tag=trip`).expect(200);
+    expect(byTag.body.map((m: { title: string }) => m.title)).toEqual(["Trip to the mountains"]);
+
+    const byYear = await client.get(`/pets/${petId}/memories?year=2025`).expect(200);
+    expect(byYear.body.map((m: { title: string }) => m.title)).toEqual(["A quiet Sunday nap"]);
+
+    const bySearch = await client.get(`/pets/${petId}/memories?search=quiet`).expect(200);
+    expect(bySearch.body.map((m: { title: string }) => m.title)).toEqual(["A quiet Sunday nap"]);
+
+    const all = await client.get(`/pets/${petId}/memories`).expect(200);
+    expect(all.body).toHaveLength(2);
+  });
+
+  it("H21: archiving a memory is a soft-delete — it disappears from the default list and Life Timeline but is never destroyed, and restore brings it back", async () => {
+    const { client, petId } = await setupHousehold();
+
+    const memory = await client.post(`/pets/${petId}/memories`).send({ type: "MILESTONE", title: "Learned to sit", occurredAt: new Date().toISOString() }).expect(201);
+    const memoryId = memory.body.id as string;
+
+    await client.delete(`/pets/${petId}/memories/${memoryId}`).expect(200);
+
+    const defaultList = await client.get(`/pets/${petId}/memories`).expect(200);
+    expect(defaultList.body.some((m: { id: string }) => m.id === memoryId)).toBe(false);
+
+    const timeline = await client.get(`/pets/${petId}/life-timeline`).expect(200);
+    expect(timeline.body.some((e: { recordId: string }) => e.recordId === memoryId)).toBe(false);
+
+    const includingArchived = await client.get(`/pets/${petId}/memories?includeArchived=true`).expect(200);
+    const archived = includingArchived.body.find((m: { id: string }) => m.id === memoryId);
+    expect(archived.archivedAt).not.toBeNull();
+
+    // Never hard-deleted — the row is still directly readable.
+    const stillReadable = await client.get(`/pets/${petId}/memories/${memoryId}`).expect(200);
+    expect(stillReadable.body.id).toBe(memoryId);
+
+    await client.post(`/pets/${petId}/memories/${memoryId}/restore`).expect(201);
+    const restoredList = await client.get(`/pets/${petId}/memories`).expect(200);
+    expect(restoredList.body.some((m: { id: string }) => m.id === memoryId)).toBe(true);
+  });
+
+  it("H21: a memory can be edited by the household, and an outsider can neither edit nor archive it", async () => {
+    const { client, petId } = await setupHousehold();
+    const { client: otherClient } = await setupHousehold();
+
+    const memory = await client.post(`/pets/${petId}/memories`).send({ type: "STORY", title: "Draft title", occurredAt: "2025-05-05T00:00:00.000Z" }).expect(201);
+    const memoryId = memory.body.id as string;
+
+    const edited = await client.patch(`/pets/${petId}/memories/${memoryId}`).send({ title: "A better title", tags: ["milestone"], description: "Added later" }).expect(200);
+    expect(edited.body.title).toBe("A better title");
+    expect(edited.body.tags).toEqual(["milestone"]);
+    expect(edited.body.description).toBe("Added later");
+
+    await otherClient.patch(`/pets/${petId}/memories/${memoryId}`).send({ title: "Hijacked" }).expect(403);
+    await otherClient.delete(`/pets/${petId}/memories/${memoryId}`).expect(403);
+    await otherClient.post(`/pets/${petId}/memories/${memoryId}/restore`).expect(403);
+
+    // The outsider's attempts changed nothing.
+    const unchanged = await client.get(`/pets/${petId}/memories/${memoryId}`).expect(200);
+    expect(unchanged.body.title).toBe("A better title");
+    expect(unchanged.body.archivedAt).toBeNull();
+  });
+
+  it("H21: a PRIVATE memory's media is reachable only through a per-request signed download, never a public URL", async () => {
+    const { client, petId } = await setupHousehold();
+    const { client: otherClient } = await setupHousehold();
+
+    const upload = await client.post(`/pets/${petId}/memories/upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 2048, visibility: "PRIVATE" }).expect(201);
+    const memory = await client
+      .post(`/pets/${petId}/memories`)
+      .send({ type: "PHOTO", title: "Beach day", occurredAt: new Date().toISOString(), mediaObjectKeys: [upload.body.key] })
+      .expect(201);
+
+    // The DTO never leaks a plain URL for private media (Handoff 20 guarantee).
+    expect(memory.body.visibility).toBe("PRIVATE");
+    expect(memory.body.mediaUrls).toEqual([]);
+
+    const download = await client.get(`/pets/${petId}/memories/${memory.body.id}/media/0/download`).expect(200);
+    expect(download.body.downloadUrl).toBeTruthy();
+
+    // Another household cannot mint a download for it.
+    await otherClient.get(`/pets/${petId}/memories/${memory.body.id}/media/0/download`).expect(403);
+  });
+
+  it("H21: exceeding memories.entries.max is rejected, but every existing memory remains fully readable — a downgrade never holds memories hostage", async () => {
+    const { client, petId, householdId } = await setupHousehold();
+    const adminUserForOverride = await prisma.user.create({ data: { email: `h21-super-${unique()}@example.com`, displayName: "H21 Test Admin" } });
+    const superAdmin = await prisma.adminUser.create({ data: { userId: adminUserForOverride.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } });
+    await prisma.subscriptionEntitlementOverride.create({
+      data: { householdId, key: "memories.entries.max", type: "LIMIT", limitValue: 1, reason: "H21 test — force a low limit", createdByAdminId: superAdmin.id },
+    });
+
+    const first = await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", title: "First one", occurredAt: new Date().toISOString() }).expect(201);
+
+    const rejected = await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", title: "One too many", occurredAt: new Date().toISOString() }).expect(409);
+    expect(rejected.body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
+    expect(rejected.body.error.details.key).toBe("memories.entries.max");
+
+    // Existing memory remains fully accessible — the limit blocks new creation only.
+    await client.get(`/pets/${petId}/memories/${first.body.id}`).expect(200);
+
+    // Archiving the one memory frees a slot without ever hard-deleting it.
+    await client.delete(`/pets/${petId}/memories/${first.body.id}`).expect(200);
+    await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", title: "Now there's room", occurredAt: new Date().toISOString() }).expect(201);
+  });
 });

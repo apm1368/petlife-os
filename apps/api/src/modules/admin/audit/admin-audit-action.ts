@@ -89,4 +89,15 @@ export type AdminAuditAction =
   | "pet_friendly_place.created"
   | "pet_friendly_place.updated"
   | "pet_friendly_place.verification_changed"
-  | "pet_friendly_place.listed_changed";
+  | "pet_friendly_place.listed_changed"
+  // Handoff 22 — Animal Support classifieds moderation outcomes.
+  | "support_need_listing.published"
+  | "support_need_listing.rejected"
+  | "support_need_listing.removed"
+  | "support_need_listing.expired"
+  // Handoff 23 — Travel marketplace listing moderation outcomes.
+  | "travel_listing.published"
+  | "travel_listing.rejected"
+  | "travel_listing.suspended"
+  | "travel_listing.archived"
+  | "travel_listing.verification_changed";

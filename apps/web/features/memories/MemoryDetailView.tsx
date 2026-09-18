@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, ErrorRecovery, Skeleton } from "@petlife/ui";
@@ -41,7 +42,8 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId, memoryId]);
 
-  async function handleDelete(): Promise<void> {
+  /** Archives (soft-deletes) — the memory and its media are preserved and can be restored from the archive view. */
+  async function handleArchive(): Promise<void> {
     setIsDeleting(true);
     setError(null);
     try {
@@ -53,29 +55,55 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
     }
   }
 
+  async function handleRestore(): Promise<void> {
+    setIsDeleting(true);
+    setError(null);
+    try {
+      await memoriesService.restore(petId, memoryId);
+      await load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
   if (!memory) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
+  const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-page-title text-text-primary">{memory.title}</h1>
+      <h1 className="text-page-title text-text-primary">{displayTitle}</h1>
 
       <ContextSurface className="flex flex-col gap-3">
         {(memory.visibility === "PRIVATE" ? privateMediaUrls : memory.mediaUrls).length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {(memory.visibility === "PRIVATE" ? privateMediaUrls : memory.mediaUrls).map((url) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img key={url} src={url} alt={memory.title} className="h-48 w-full rounded-md object-cover" />
+              <img key={url} src={url} alt={displayTitle} className="h-48 w-full rounded-md object-cover" />
             ))}
           </div>
         ) : null}
         <p className="text-metadata text-text-secondary">{new Date(memory.occurredAt).toLocaleDateString()}</p>
         {memory.location ? <p className="text-metadata text-text-secondary">{memory.location}</p> : null}
+        {memory.tags.length > 0 ? <p className="text-metadata text-text-secondary">{memory.tags.join(" · ")}</p> : null}
         {memory.description ? <p className="text-body text-text-primary">{memory.description}</p> : null}
-        <div>
-          <Button variant="ghost" isLoading={isDeleting} onClick={handleDelete}>
-            {t("detail.delete")}
-          </Button>
+        {memory.archivedAt ? <p className="text-metadata text-text-secondary">{t("detail.archivedNotice")}</p> : null}
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/pets/${petId}/memories/${memoryId}/edit`}>
+            <Button variant="secondary">{t("detail.edit")}</Button>
+          </Link>
+          {memory.archivedAt ? (
+            <Button variant="ghost" isLoading={isDeleting} onClick={handleRestore}>
+              {t("detail.restore")}
+            </Button>
+          ) : (
+            <Button variant="ghost" isLoading={isDeleting} onClick={handleArchive}>
+              {t("detail.archive")}
+            </Button>
+          )}
         </div>
       </ContextSurface>
     </div>

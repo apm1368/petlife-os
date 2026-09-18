@@ -4694,6 +4694,94 @@ Before promoting this commit to production: (1) confirm every REQUIRED_PRODUCTIO
 - **No external error-tracking or metrics vendor is wired in** — the boundary (`ApiExceptionFilter`, the new structured request log) is ready for one, but no SDK/vendor call exists yet.
 - **CSRF cookie has no cryptographic binding to the session** and **Argon2id cost parameters aren't pinned explicitly** — both documented P2/P3 hardening items with no known exploitable path today.
 
+## My Pet Diary & Memories (Handoff 21)
+
+Handoff 21 completes Handoff 18's `PetMemory` into a real private pet-owner
+journal. It adds no second Memories system, no public/social publishing
+surface, and no new storage or notification infrastructure — the entire
+handoff is a delta on the model, service, and API H18 already built.
+
+### Audit result before any change
+
+`PetMemory` already carried `petId`/`householdId`/`createdByUserId`,
+`type` (a 10-value `PetMemoryType` including `BIRTHDAY`/`FIRST_DAY`/
+`ADOPTION_DAY`/`TRAVEL`/`MILESTONE`), `title`, `description`,
+`occurredAt`, `mediaObjectKeys`, `location`, and a `PRIVATE`-by-default
+`visibility`; authorization already ran through `PetAccessGuard`'s
+`canViewIdentity`/`canEditIdentity` grants; Life Timeline aggregation and
+Memorial-mode suppression of commercial nudges already worked (verified in
+`MemoriesListView.tsx`, which switches to a memorial heading and carries no
+commerce/booking upsell); and Handoff 20's private-media hardening (signed
+per-request downloads, never a guessable public object URL) was already in
+place. **COMPLETE** for all of those. The genuine gaps were: no tags, a
+mandatory title (blocking the spec's "quick entry" flow), no
+search/filter/archive browsing, no entitlement dimension, and a hard
+`DELETE` that destroyed a personally meaningful record.
+
+### What this handoff added
+
+- **`tags String[]`** — a plain extensible string array, deliberately not a
+  new enum or join table, per the spec's "keep extensible" instruction.
+- **`title` is now nullable** — the spec's quick-entry flow ("What happened
+  today?" → textarea + photo + save) must never force a title. The backend
+  stores `null` rather than fabricating a string; every consumer
+  (`MemoriesListView`, `MemoryDetailView`, `LifeTimelineService`) renders a
+  date-based fallback instead.
+- **`archivedAt DateTime?` + soft-delete semantics** — per the spec's
+  "Memories are personally meaningful data. Avoid destructive deletion."
+  `DELETE /pets/:petId/memories/:memoryId` keeps its REST shape but now
+  *archives*; `POST /pets/:petId/memories/:memoryId/restore` reverses it.
+  An archived memory leaves the default list and the Life Timeline but is
+  never destroyed and stays directly readable by id.
+- **Search/filter browsing** — `GET /pets/:petId/memories` accepts
+  `?search=` (title/description, case-insensitive), `?tag=`, `?year=`, and
+  `?includeArchived=true`, all scoped to the already-authorized pet.
+- **`memories.entries.max` entitlement** — a new derived `UsageService`
+  meter (counting non-archived rows per household) wired into
+  `EntitlementService.assertWithinLimit` at **creation only**. Seeded at
+  100 (Free) / 500 (Plus) / unlimited (Premium), and added to
+  `getFreePlanRaw()`'s self-healing default so no environment can resolve
+  the key to the "safest default" `0` and silently block all journaling.
+
+### Read-after-downgrade guarantee
+
+The spec's "never hold personal memories hostage after downgrade" rule is
+structural here, not a policy note: `assertWithinLimit` is called from
+exactly one place — `PetMemoryService.create` — and never from `list`,
+`get`, `update`, `archive`, or `restore`. A household that drops below its
+current memory count keeps full read *and* edit access to everything it
+already wrote; only new entries are gated. Archiving frees a slot (the
+meter counts non-archived rows) without destroying anything, which is the
+only "make room" path the product offers. An e2e test asserts exactly this
+sequence.
+
+### Deliberately not built
+
+- **No public/social publishing of a Memory**, no auto-posting to
+  Community, no AI diary writing or summaries — all explicit spec
+  non-goals. `PetMemoryVisibility.PUBLIC` remains what H18 defined it as
+  and nothing in this handoff promotes a memory to it.
+- **No `linkedPetIds` multi-pet memory** — deferred. A memory belongs to
+  one primary pet; supporting several cleanly needs a join table and a
+  decision about whose Life Timeline the entry appears on, which is more
+  than the spec's conditional "optionally support... if cleanly compatible"
+  warrants.
+- **No diary reminder / "one year ago today" notification** — the spec
+  marks these optional and low-noise; no new notification infrastructure
+  was added, per its own instruction.
+- **No admin "browse everyone's diary" screen** — verified none exists and
+  none was added; there is no admin-facing Memories controller at all.
+- **Archive/gallery/journal visual modes, warm typography and the Pet
+  Profile Memories surface** are Codex's remit under the standing role
+  split. This handoff only ensured the API contract supports them
+  (date-ordered list, year filter, tags, media) and relaxed the create form
+  so a title is no longer required.
+
+Backend e2e went 312 → 316 (quick entry with no title; tag/year/search
+filtering; archive → hidden from list and timeline → still readable →
+restore; entitlement rejection with existing memories still readable and an
+archive freeing a slot), frontend 307 → 309.
+
 ## API endpoints
 
 ```
@@ -6195,6 +6283,24 @@ remains green plus 2 new concurrency tests (312 backend e2e scenarios, 307
 frontend tests) — zero product behavior changed, only failure-mode and
 security posture.
 
+Handoff 21 (My Pet Diary & Memories) turned Handoff 18's `PetMemory` into a
+real private journal without adding a second Memories system: `tags` as a
+plain extensible string array; a now-nullable `title` so the spec's "quick
+entry" flow (write what happened, attach a photo, save — no title, date
+prefilled to today) works end to end, with every consumer rendering a
+date-based fallback rather than the backend fabricating a string; an
+`archivedAt` soft-delete replacing the old hard `DELETE` (the row and its
+media survive, leave the default list and Life Timeline, stay readable by
+id, and come back via a new `POST .../restore`); `?search=`/`?tag=`/
+`?year=`/`?includeArchived=` filters on the list endpoint; and a new
+`memories.entries.max` entitlement metered from non-archived rows and
+asserted **only** in `create`, so a downgrade never costs a household read
+or edit access to memories it already wrote. Deliberately not built, per
+the spec's own non-goals: no public/social publishing or auto-posting to
+Community, no AI diary writing, no multi-pet `linkedPetIds`, no diary
+reminder notifications, and no admin "browse everyone's diary" surface
+(none existed; none was added). Backend e2e 312 → 316, frontend 307 → 309.
+
 ## Known limitations / deliberate simplifications
 
 - **CSRF** uses the double-submit cookie pattern rather than a signed
@@ -6997,6 +7103,23 @@ security posture.
   structured lines to stdout only; there is no Sentry/Datadog/equivalent
   wiring, so production error visibility today depends entirely on
   whatever the deployment platform does with stdout/stderr.
+- **A memory belongs to exactly one pet** (Handoff 21) — `linkedPetIds`
+  was deliberately not added (the spec only asks for it "if cleanly
+  compatible"); a photo involving three household pets is either one entry
+  on the primary pet or three separate entries, never one shared row, so
+  no decision is needed about whose Life Timeline it belongs to.
+- **Archived memories are never automatically purged** (Handoff 21) —
+  `archivedAt` is a soft-delete marker only; there is no retention job and
+  no endpoint hard-deletes a memory or its media, so the account-deletion
+  flow this codebase still lacks would have to handle purging explicitly.
+- **Memory search is a plain case-insensitive `contains` scan** over title
+  and description (Handoff 21) — no full-text index, no relevance
+  ranking, no tag autocomplete; adequate at per-pet journal scale and
+  deliberately not a search engine.
+- **No diary reminder or "a year ago today" notification** (Handoff 21) —
+  the spec marks both optional and explicitly warns against spam, so no
+  new notification templates or scheduling were added; the `Home` surface
+  likewise only ever shows a memory that actually exists.
 
 ## Next recommended coding handoff
 
@@ -7295,3 +7418,24 @@ really live," never a second, ad hoc readiness check — and keep this
 handoff's `pg_advisory_xact_lock`-based concurrency-safety pattern for any
 new TOCTOU-shaped race a future feature introduces, rather than
 reinventing locking per call site.
+
+Alternatively, following directly from Handoff 21: **the Memories surface
+work the diary spec describes but deliberately left to the visual owner** —
+a photo-grid/journal/timeline view switcher, year → month archive
+browsing, and a warmer journal typography pass, all of which the API now
+fully supports (date-ordered list, `?year=`, `?tag=`, `?search=`, tags on
+every entry) without a single further backend change. A related, smaller
+option: surface tags as a filter chip row and add tag autocomplete from the
+household's own existing tags — again a pure read over data that already
+exists. A third, independent option that *is* backend work: a real
+account-deletion / data-export flow, which this codebase has never had and
+which Handoff 21 makes more pressing — archived memories and their private
+media are now retained indefinitely by design, so the erasure path has to
+decide explicitly what "delete my account" does to a household's journal
+and its object-storage media, rather than leaving it undefined.
+
+Whichever is chosen, keep `assertWithinLimit` confined to creation paths
+only — never a read, edit, archive, or restore — so no entitlement change
+can ever cost a household access to personal data it already wrote, and
+keep archive/restore (never hard delete) as the only user-facing removal
+verb for Memories, no matter how convenient a real `DELETE` looks.
