@@ -2,7 +2,7 @@
 import { ProductNavigation } from "@/features/navigation/ProductNavigation";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Avatar, ErrorRecovery, IconButton, Skeleton } from "@petlife/ui";
@@ -20,6 +20,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const tErrors = useTranslations("errors");
   const locale = useLocale();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && status === "unauthenticated") {
@@ -28,7 +29,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, status]);
+  }, [isLoading, status, pathname]);
 
   if (error) {
     return (
