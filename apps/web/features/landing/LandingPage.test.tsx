@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
-import RootPage from "@/app/[locale]/page";
+import RootPage from "@/app/[locale]/(public)/page";
 import AuthPage from "@/app/[locale]/(auth)/auth/page";
 import { landingCopy } from "./copy";
 import { cameraAt, cameraStops, nearestStop, wheelProgress } from "./camera";
