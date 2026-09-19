@@ -28,5 +28,4 @@ jobs:
             git fetch --prune origin
             git checkout -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
             git reset --hard "${{ github.sha }}"
-            chmod +x /var/www/petlife-os/deploy.sh
             /var/www/petlife-os/deploy.sh
