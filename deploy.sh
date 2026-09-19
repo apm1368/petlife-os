@@ -14,9 +14,9 @@ pnpm build
 pm2 restart petlife-api petlife-web --update-env
 pm2 save
 
-curl --fail --silent --show-error --retry 12 --retry-delay 5 \
+curl --fail --silent --show-error --retry 12 --retry-delay 5 --retry-connrefused --retry-all-errors \
   http://127.0.0.1:4000/health/live >/dev/null
-curl --fail --silent --show-error --retry 12 --retry-delay 5 \
+curl --fail --silent --show-error --retry 12 --retry-delay 5 --retry-connrefused --retry-all-errors \
   http://127.0.0.1:3000/fa >/dev/null
 
 echo "Deploy completed successfully at $(date --iso-8601=seconds)"
