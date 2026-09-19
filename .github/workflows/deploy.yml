@@ -23,8 +23,10 @@ jobs:
           command_timeout: 30m
           script: |
             cd /var/www/petlife-os
+            git remote set-url origin git@github.com:apm1368/petlife-os.git
+            export GIT_SSH_COMMAND="ssh -i /root/.ssh/petlife_github_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
             git fetch --prune origin
-            git checkout --force "${{ github.ref_name }}"
+            git checkout -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
             git reset --hard "${{ github.sha }}"
             chmod +x /var/www/petlife-os/deploy.sh
             /var/www/petlife-os/deploy.sh
