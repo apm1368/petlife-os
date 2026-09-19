@@ -13,7 +13,7 @@ export default function ActivePetRedirectPage() {
 
   useEffect(() => {
     const view = new URLSearchParams(window.location.search).get("view");
-    const suffix = view === "health" || view === "care" ? `/${view}` : "";
+    const suffix = view === "health" || view === "care" || view === "memories" || view === "travel" ? `/${view}` : "";
     router.replace(activePetId ? `/${locale}/pets/${encodeURIComponent(activePetId)}${suffix}` : `/${locale}/pets`);
   }, [activePetId, locale, router]);
 
