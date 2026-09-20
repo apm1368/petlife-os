@@ -68,13 +68,10 @@ export function SubscriptionPlansView() {
     <div className="flex flex-col gap-4">
       <h1 className="text-page-title text-text-primary">{t("plansTitle")}</h1>
 
-      <div className="flex gap-2">
-        <Button size="sm" variant={interval === SubscriptionBillingInterval.MONTHLY ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval.MONTHLY)}>
-          {t("interval.monthly")}
-        </Button>
-        <Button size="sm" variant={interval === SubscriptionBillingInterval.ANNUAL ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval.ANNUAL)}>
-          {t("interval.annual")}
-        </Button>
+      <div className="flex gap-2 overflow-x-auto border-b border-border-subtle pb-2" aria-label={t("durationLabel")}>
+        {(["MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"] as const).map((value) => <Button key={value} size="sm" variant={interval === SubscriptionBillingInterval[value] ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval[value])}>
+          {t(`interval.${value === "MONTHLY" ? "monthly" : value === "QUARTERLY" ? "quarterly" : value === "SEMI_ANNUAL" ? "semiAnnual" : "annual"}`)}
+        </Button>)}
       </div>
 
       {actionError ? <p className="text-body text-state-urgent">{actionError}</p> : null}

@@ -3198,6 +3198,8 @@ export enum SubscriptionPlanPriceStatus {
 
 export enum SubscriptionBillingInterval {
   MONTHLY = "MONTHLY",
+  QUARTERLY = "QUARTERLY",
+  SEMI_ANNUAL = "SEMI_ANNUAL",
   ANNUAL = "ANNUAL",
 }
 

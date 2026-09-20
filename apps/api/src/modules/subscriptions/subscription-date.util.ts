@@ -2,7 +2,7 @@ import { SubscriptionBillingInterval } from "@prisma/client";
 
 /**
  * Deliberately plain `Date` arithmetic — no new date-library dependency for
- * two interval types. Month-end edge case (e.g. Jan 31 + 1 month): native
+ * four interval types. Month-end edge case (e.g. Jan 31 + 1 month): native
  * `Date` rolls forward into the next month (Jan 31 -> Mar 3) rather than
  * clamping to Feb 28/29 — an accepted, documented simplification (see
  * README "Known limitations"); it never produces an earlier date than the
@@ -14,7 +14,8 @@ export function addBillingInterval(start: Date, interval: SubscriptionBillingInt
   if (interval === SubscriptionBillingInterval.ANNUAL) {
     next.setFullYear(next.getFullYear() + 1);
   } else {
-    next.setMonth(next.getMonth() + 1);
+    const months = interval === SubscriptionBillingInterval.QUARTERLY ? 3 : interval === SubscriptionBillingInterval.SEMI_ANNUAL ? 6 : 1;
+    next.setMonth(next.getMonth() + months);
   }
   return next;
 }

@@ -1,0 +1,2 @@
+ALTER TYPE "SubscriptionBillingInterval" ADD VALUE IF NOT EXISTS 'QUARTERLY';
+ALTER TYPE "SubscriptionBillingInterval" ADD VALUE IF NOT EXISTS 'SEMI_ANNUAL';

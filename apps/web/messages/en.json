@@ -245,8 +245,11 @@
     "usageOf": "{used} of {limit}",
     "unlimited": "Unlimited",
     "overridden": "custom",
+    "durationLabel": "Membership duration",
     "interval": {
       "monthly": "Monthly",
+      "quarterly": "3 months",
+      "semiAnnual": "6 months",
       "annual": "Annual"
     },
     "currentPlanBadge": "Current plan",

@@ -245,8 +245,11 @@
     "usageOf": "{used} از {limit}",
     "unlimited": "نامحدود",
     "overridden": "سفارشی",
+    "durationLabel": "مدت عضویت",
     "interval": {
       "monthly": "ماهانه",
+      "quarterly": "۳ ماهه",
+      "semiAnnual": "۶ ماهه",
       "annual": "سالانه"
     },
     "currentPlanBadge": "پلن فعلی",

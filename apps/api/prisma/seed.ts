@@ -142,7 +142,7 @@ async function seedSubscriptions() {
     descriptionEn: "More room for multi-pet households.",
     isFree: false,
     sortOrder: 1,
-    trialDays: 14,
+    trialDays: 7,
     entitlements: [
       { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 6 },
@@ -153,6 +153,8 @@ async function seedSubscriptions() {
     ],
   });
   await ensurePrice(plus.id, SubscriptionBillingInterval.MONTHLY, 990_000);
+  await ensurePrice(plus.id, SubscriptionBillingInterval.QUARTERLY, 2_790_000);
+  await ensurePrice(plus.id, SubscriptionBillingInterval.SEMI_ANNUAL, 5_290_000);
   await ensurePrice(plus.id, SubscriptionBillingInterval.ANNUAL, 9_900_000);
 
   const premium = await upsertPlan({
@@ -163,7 +165,7 @@ async function seedSubscriptions() {
     descriptionEn: "No limit on pets or household members.",
     isFree: false,
     sortOrder: 2,
-    trialDays: 14,
+    trialDays: 7,
     entitlements: [
       { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
@@ -174,6 +176,8 @@ async function seedSubscriptions() {
     ],
   });
   await ensurePrice(premium.id, SubscriptionBillingInterval.MONTHLY, 1_990_000);
+  await ensurePrice(premium.id, SubscriptionBillingInterval.QUARTERLY, 5_590_000);
+  await ensurePrice(premium.id, SubscriptionBillingInterval.SEMI_ANNUAL, 10_690_000);
   await ensurePrice(premium.id, SubscriptionBillingInterval.ANNUAL, 19_900_000);
 
   console.log(`Seeded subscription plans: free=${free.id} plus=${plus.id} premium=${premium.id}`);

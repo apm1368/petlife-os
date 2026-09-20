@@ -4814,6 +4814,8 @@ enum SubscriptionPlanPriceStatus {
 /// names — nothing else.
 enum SubscriptionBillingInterval {
   MONTHLY
+  QUARTERLY
+  SEMI_ANNUAL
   ANNUAL
 }
 
