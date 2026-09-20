@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
-export type NavigationItem = { path: string; fa: string; en: string; match?: (pathname: string, search: URLSearchParams) => boolean };
+export type NavigationItem = { path: string; fa: string; en: string; match?: (pathname: string) => boolean };
 const inPath = (value: string) => (pathname: string) => pathname === value || pathname.startsWith(`${value}/`);
-const petSection = (section: string) => (pathname: string, search: URLSearchParams) => search.get("view") === section || new RegExp(`/pets/[^/]+/${section}(?:/|$)`).test(pathname);
+const petSection = (section: string) => (pathname: string) => new RegExp(`/pets/[^/]+/${section}(?:/|$)`).test(pathname);
 
 export const globalDestinations: NavigationItem[] = [
   { path: "/", fa: "خانه", en: "Home", match: (pathname) => pathname === "/" },
-  { path: "/vet/find", fa: "سلامت", en: "Health", match: (pathname, search) => inPath("/vet")(pathname) || petSection("health")(pathname, search) },
+  { path: "/vet/find", fa: "سلامت", en: "Health", match: (pathname) => inPath("/vet")(pathname) || petSection("health")(pathname) },
   { path: "/services", fa: "خدمات", en: "Services", match: (pathname) => inPath("/services")(pathname) || inPath("/bookings")(pathname) },
   { path: "/shop", fa: "فروشگاه", en: "Shop", match: (pathname) => inPath("/shop")(pathname) || inPath("/cart")(pathname) || inPath("/checkout")(pathname) || inPath("/orders")(pathname) },
   { path: "/pets/active?view=memories", fa: "خاطرات", en: "Memories", match: petSection("memories") },
@@ -35,20 +35,21 @@ const consumerGroups = [
   { fa: "حساب", en: "Account", items: [{ path: "/subscription", fa: "اشتراک", en: "Subscription" }, { path: "/notifications/preferences", fa: "تنظیمات اعلان", en: "Notification preferences" }, { path: "/support", fa: "پشتیبانی", en: "Support" }] },
 ] satisfies { fa: string; en: string; items: NavigationItem[] }[];
 
-function isActive(item: NavigationItem, pathname: string, search: URLSearchParams) {
-  if (item.match) return item.match(pathname, search);
+function isActive(item: NavigationItem, pathname: string) {
+  if (item.match) return item.match(pathname);
   const itemPath = item.path.split("?")[0];
   return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
 }
 
 export function ProductNavigation({ audience = "public" }: { audience?: "public" | "consumer" }) {
-  const locale = useLocale(); const localizedPath = usePathname(); const search = useSearchParams();
+  const locale = useLocale(); const localizedPath = usePathname();
   const pathname = localizedPath.replace(new RegExp(`^/${locale}`), "") || "/";
   const groups = audience === "consumer" ? consumerGroups : [{ fa: "کاوش", en: "Explore", items: exploreDestinations }];
   return <nav aria-label={locale === "fa" ? "ناوبری محصول" : "Product navigation"} className="border-b border-border-subtle bg-surface-elevated">
     <div className="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 py-2 lg:px-8">{groups.map((group) => <section key={group.en} aria-label={locale === "fa" ? group.fa : group.en} className="flex shrink-0 items-center gap-1">
       <span className="me-1 hidden text-[11px] font-semibold uppercase tracking-wide text-text-disabled 2xl:inline">{locale === "fa" ? group.fa : group.en}</span>
-      {group.items.map((item) => { const active = isActive(item, pathname, search); return <Link key={item.path} href={`/${locale}${item.path}`} aria-current={active ? "page" : undefined} className="min-h-11 border-b-2 border-transparent px-2.5 py-3 text-metadata whitespace-nowrap text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary aria-[current=page]:border-brand-natural aria-[current=page]:font-semibold aria-[current=page]:text-brand-natural focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]">{locale === "fa" ? item.fa : item.en}</Link> })}
+      {group.items.map((item) => { const active = isActive(item, pathname); return <Link key={item.path} href={`/${locale}${item.path}`} aria-current={active ? "page" : undefined} className="min-h-11 border-b-2 border-transparent px-2.5 py-3 text-metadata whitespace-nowrap text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary aria-[current=page]:border-brand-natural aria-[current=page]:font-semibold aria-[current=page]:text-brand-natural focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]">{locale === "fa" ? item.fa : item.en}</Link> })}
     </section>)}</div>
   </nav>;
 }
+
