@@ -53,7 +53,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-surface-base">
+    <div className={pathname === `/${locale}/home` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
       <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
         <span className="text-section-title text-text-primary">{t("appName")}</span>
         <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <ProductNavigation audience="consumer" />
-      <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
+      <main className={pathname === `/${locale}/home` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{children}</main>
     </div>
   );
 }

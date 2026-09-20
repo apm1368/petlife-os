@@ -15,18 +15,22 @@ function ForgotPasswordFlow() {
 
   const [identifier, setIdentifier] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [sent, setSent] = useState(false);
 
   const loginUrl = returnTo ? `/${locale}/account?method=password&returnTo=${encodeURIComponent(returnTo)}` : `/${locale}/account?method=password`;
 
   async function submit() {
     setIsSubmitting(true);
+    setFailed(false);
     try {
       // Always resolves the same way regardless of whether identifier matched an account.
       await authService.forgotPassword(identifier);
+      setSent(true);
+    } catch {
+      setFailed(true);
     } finally {
       setIsSubmitting(false);
-      setSent(true);
     }
   }
 
@@ -45,6 +49,7 @@ function ForgotPasswordFlow() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("forgot.title")}</h1>
+      {failed && <p role="alert" className="text-state-urgent">{locale === "fa" ? "ارسال درخواست انجام نشد. دوباره تلاش کنید." : "Could not send your request. Please try again."}</p>}
       <Input label={t("forgot.identifierLabel")} value={identifier} onChange={(e) => setIdentifier(e.target.value)} autoFocus />
       <Button variant="primary" isLoading={isSubmitting} disabled={!identifier} onClick={submit}>
         {t("forgot.submit")}

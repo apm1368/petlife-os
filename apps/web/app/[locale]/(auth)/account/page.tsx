@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Input, OtpInput } from "@petlife/ui";
+import { PasswordInput } from "@/features/auth/PasswordInput";
 import { authService } from "@/services/auth.service";
 import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
@@ -91,7 +92,7 @@ function AccountFlow() {
       <div className="flex flex-col gap-5">
         <h1 className="text-page-title text-text-primary">{t("welcome.title")}</h1>
         <Input label={t("password.usernameLabel")} value={identifier} onChange={(e) => setIdentifier(e.target.value)} errorMessage={error ?? undefined} autoFocus />
-        <Input label={t("password.passwordLabel")} type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <PasswordInput label={t("password.passwordLabel")} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         <Button variant="primary" isLoading={isSubmitting} disabled={!identifier || !password} onClick={loginWithPassword}>
           {t("password.login")}
         </Button>
@@ -131,7 +132,7 @@ function AccountFlow() {
       <Button variant="primary" isLoading={isSubmitting} disabled={code.length !== 6} onClick={verify}>
         {t("otp.verify")}
       </Button>
-      <Button variant="ghost" disabled={cooldown > 0} onClick={sendCode}>
+      <Button variant="ghost" disabled={cooldown > 0 || isSubmitting} onClick={sendCode}>
         {cooldown > 0 ? t("otp.resendIn", { seconds: cooldown }) : t("otp.resend")}
       </Button>
     </div>

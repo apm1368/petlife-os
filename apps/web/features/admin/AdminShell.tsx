@@ -100,7 +100,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   const visibleItems = NAV_ITEMS.filter((item) => !item.permission || permissions.has(item.permission));
 
   return (
-    <div className="min-h-screen bg-surface-base">
+    <div className={pathname === `/${locale}/admin` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
       <header className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-2.5">
         <div className="flex flex-col">
           <span className="text-metadata font-medium text-text-primary">{t("title")}</span>
@@ -124,7 +124,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <main className="mx-auto max-w-4xl px-4 py-4">{children}</main>
+      <main className={pathname === `/${locale}/admin` ? "mx-auto max-w-4xl px-4 py-4" : "workspace-main w-full min-w-0 px-4 py-4"}>{children}</main>
     </div>
   );
 }

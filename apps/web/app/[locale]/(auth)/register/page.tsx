@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@petlife/ui";
+import { PasswordInput } from "@/features/auth/PasswordInput";
 import { authService } from "@/services/auth.service";
 import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
@@ -53,7 +54,7 @@ function RegisterFlow() {
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("register.title")}</h1>
       <Input label={t("register.usernameLabel")} value={username} onChange={(e) => setUsername(e.target.value)} errorMessage={error ?? undefined} autoFocus />
-      <Input label={t("register.passwordLabel")} type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <PasswordInput label={t("register.passwordLabel")} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <Input label={t("register.displayNameLabel")} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
       <Input label={t("register.emailLabel")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <Button variant="primary" isLoading={isSubmitting} disabled={username.length < 3 || password.length < 8} onClick={submit}>

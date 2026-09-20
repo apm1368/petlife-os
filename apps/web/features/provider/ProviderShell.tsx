@@ -123,7 +123,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
   const notVerified = active.verificationStatus !== "VERIFIED";
 
   return (
-    <div className="min-h-screen bg-surface-base">
+    <div className={pathname === `/${locale}/provider` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
       <header className="border-b border-border-subtle px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col">
@@ -157,6 +157,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
             <Link
               key={item.href}
               href={href}
+              aria-current={isActive ? "page" : undefined}
               className={
                 "shrink-0 rounded-full px-3 py-1.5 text-metadata " +
                 (isActive ? "bg-surface-subtle text-text-primary" : "text-text-secondary")
@@ -168,7 +169,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
+      <main className={pathname === `/${locale}/provider` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{children}</main>
     </div>
   );
 }

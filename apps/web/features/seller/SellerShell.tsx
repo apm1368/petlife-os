@@ -119,7 +119,7 @@ function LiveSellerShell({ children }: { children: React.ReactNode }) {
   const suspended = active.sellerStatus === "SUSPENDED" || active.sellerStatus === "RESTRICTED" || active.sellerStatus === "CLOSED";
 
   return (
-    <div className="min-h-screen bg-surface-base">
+    <div className={pathname === `/${locale}/seller` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
       <header className="border-b border-border-subtle px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col">
@@ -155,7 +155,7 @@ function LiveSellerShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
+      <main className={pathname === `/${locale}/seller` ? "mx-auto max-w-3xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{children}</main>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { petsService } from "@/services/pets.service";
 import { OnboardingWizard } from "./OnboardingWizard";
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }), useSearchParams: () => new URLSearchParams() }));
 vi.mock("@/services/onboarding.service", () => ({ onboardingService: { getProgress: vi.fn() } }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn() } }));
 
