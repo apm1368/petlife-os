@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
-import RootPage from "@/app/[locale]/(public)/page";
+import RootPage from "@/app/[locale]/page";
 import AuthPage from "@/app/[locale]/(auth)/auth/page";
 import { landingCopy } from "./copy";
 import { cameraAt, cameraStops, nearestStop, wheelProgress } from "./camera";
@@ -10,6 +10,7 @@ const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
   usePathname: () => "/en",
+  useSearchParams: () => new URLSearchParams(),
   notFound: () => {
     throw new Error("NOT_FOUND");
   },

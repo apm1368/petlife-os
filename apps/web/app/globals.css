@@ -83,3 +83,13 @@ button.experience-tile,button.experience-card { width:100%; text-align:start; cu
     scroll-behavior: auto !important;
   }
 }
+
+.approved-dashboard{position:fixed;inset:0;z-index:60;overflow:hidden;background:#082018;font-family:Vazirmatn,Tahoma,"Segoe UI",sans-serif}
+.approved-dashboard::before{content:"";position:absolute;inset:-24px;background:linear-gradient(#06211866,#06211866),url('/images/dashboard/petlife-dashboard-approved.png') center/cover no-repeat;filter:blur(18px) saturate(.8);transform:scale(1.06)}
+.approved-dashboard>img{z-index:1;object-fit:contain;object-position:center}
+.approved-dashboard a,.approved-dashboard button{position:absolute;z-index:2;border:0;border-radius:12px;background:transparent}
+.approved-dashboard a:focus-visible,.approved-dashboard button:focus-visible{outline:3px solid #f3bf58;outline-offset:2px;box-shadow:0 0 28px #f3bf5880}
+.approved-dashboard__nav{position:absolute;z-index:3;top:0;right:max(0px,calc((100vw - 140.55vh)/2));width:min(12.6vw,17.75vh);height:100%}
+.approved-dashboard__nav a{left:7%;width:86%;height:5.2%}.approved-dashboard__home{top:10.3%}.approved-dashboard__nav a:not(.approved-dashboard__home){top:calc(16.9% + var(--nav-index) * 5.7%)}
+.approved-dashboard__add-pet{top:1.6%;right:max(13.7%,calc((100vw - 140.55vh)/2 + 13.7%));width:13%;height:6%}.approved-dashboard__pet-profile{top:11.4%;right:max(17.2%,calc((100vw - 140.55vh)/2 + 17.2%));width:27%;height:25%}.approved-dashboard__walk{top:50.9%;right:max(15.5%,calc((100vw - 140.55vh)/2 + 15.5%));width:26%;height:5.6%}.approved-dashboard__appointment{top:82.2%;right:max(16%,calc((100vw - 140.55vh)/2 + 16%));width:12.8%;height:4.4%}.approved-dashboard__photo{top:49.2%;left:max(1.8%,calc((100vw - 140.55vh)/2 + 1.8%));width:13.2%;height:5.2%}.approved-dashboard__cinematic{top:49.2%;left:max(15.8%,calc((100vw - 140.55vh)/2 + 15.8%));width:14%;height:5.2%}
+@media(max-width:760px){.approved-dashboard>img{object-fit:cover;object-position:72% center}.approved-dashboard__nav{display:none}.approved-dashboard__add-pet,.approved-dashboard__pet-profile,.approved-dashboard__walk,.approved-dashboard__appointment,.approved-dashboard__photo,.approved-dashboard__cinematic{display:none}}

@@ -24,16 +24,30 @@ export const exploreDestinations: NavigationItem[] = [
   { path: "/blog", fa: "راهنماها", en: "Guides" },
 ];
 
-const consumerGroups = [
-  { fa: "نمای کلی", en: "Overview", items: [{ path: "/home", fa: "خانه", en: "Home" }, { path: "/pets", fa: "حیوانات من", en: "My pets" }, { path: "/care-calendar", fa: "تقویم مراقبت", en: "Care calendar" }] },
-  { fa: "مراقبت حیوان", en: "Pet care", items: [
-    { path: "/pets/active", fa: "پروفایل حیوان", en: "Pet profile" }, { path: "/pets/active?view=health", fa: "سلامت", en: "Health", match: petSection("health") },
-    { path: "/pets/active?view=care", fa: "مراقبت", en: "Care", match: petSection("care") }, { path: "/pets/active?view=memories", fa: "خاطرات", en: "Memories", match: petSection("memories") },
-    { path: "/pets/active?view=travel", fa: "سفر", en: "Travel", match: petSection("travel") },
-  ] },
-  { fa: "فعالیت‌ها", en: "Activity", items: [{ path: "/bookings", fa: "نوبت‌ها", en: "Bookings" }, { path: "/orders", fa: "سفارش‌ها", en: "Orders" }, { path: "/notifications", fa: "اعلان‌ها", en: "Notifications" }] },
-  { fa: "حساب", en: "Account", items: [{ path: "/profile", fa: "پروفایل", en: "Profile" }, { path: "/subscription", fa: "اشتراک", en: "Subscription" }, { path: "/notifications/preferences", fa: "تنظیمات اعلان", en: "Notification preferences" }, { path: "/support", fa: "پشتیبانی", en: "Support" }] },
-] satisfies { fa: string; en: string; items: NavigationItem[] }[];
+export const publicDestinations = [
+  ["/shop", "فروشگاه", "Shop"],
+  ["/vet/find", "دامپزشک", "Find a vet"],
+  ["/services", "خدمات", "Services"],
+  ["/blog", "وبلاگ و راهنما", "Blog & guides"],
+] as const;
+
+export const consumerDestinations = [
+  ["/home", "خانه", "Home"],
+  ["/pets", "حیوانات من", "My pets"],
+  ["/pets/active", "حیوان فعال", "Active pet"],
+  ["/pets/active?view=health", "سلامت", "Health"],
+  ["/pets/active?view=care", "مراقبت", "Care"],
+  ["/care-calendar", "تقویم مراقبت", "Care calendar"],
+  ...publicDestinations,
+  ["/cart", "سبد خرید", "Cart"],
+  ["/checkout", "پرداخت", "Checkout"],
+  ["/orders", "سفارش‌ها", "Orders"],
+  ["/bookings", "نوبت‌ها", "Bookings"],
+  ["/notifications", "اعلان‌ها", "Notifications"],
+  ["/notifications/preferences", "تنظیمات اعلان", "Notification preferences"],
+  ["/support", "پشتیبانی", "Support"],
+] as const;
+
 
 function isActive(item: NavigationItem, pathname: string) {
   if (item.match) return item.match(pathname);
@@ -44,7 +58,8 @@ function isActive(item: NavigationItem, pathname: string) {
 export function ProductNavigation({ audience = "public" }: { audience?: "public" | "consumer" }) {
   const locale = useLocale(); const localizedPath = usePathname() ?? `/${locale}`;
   const pathname = localizedPath.replace(new RegExp(`^/${locale}`), "") || "/";
-  const groups = audience === "consumer" ? consumerGroups : [{ fa: "کاوش", en: "Explore", items: exploreDestinations }];
+  if (audience === "consumer") return <nav aria-label={locale === "fa" ? "بخش‌های محصول" : "Product sections"} className="flex flex-wrap gap-1 border-b border-border-subtle px-4 py-2">{consumerDestinations.map(([path, fa, en]) => <Link key={path} href={`/${locale}${path}`} className="rounded-full px-3 py-2 text-metadata text-text-primary hover:bg-surface-subtle focus-visible:outline focus-visible:outline-2">{locale === "fa" ? fa : en}</Link>)}</nav>;
+  const groups = [{ fa: "کاوش", en: "Explore", items: exploreDestinations }];
   return <nav aria-label={locale === "fa" ? "ناوبری محصول" : "Product navigation"} className="border-b border-border-subtle bg-surface-elevated">
     <div className="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 py-2 lg:px-8">{groups.map((group) => <section key={group.en} aria-label={locale === "fa" ? group.fa : group.en} className="flex shrink-0 items-center gap-1">
       <span className="me-1 hidden text-[11px] font-semibold uppercase tracking-wide text-text-disabled 2xl:inline">{locale === "fa" ? group.fa : group.en}</span>

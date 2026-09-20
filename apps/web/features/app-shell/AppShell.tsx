@@ -75,7 +75,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <ProductNavigation audience="consumer" />
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8">{children}</main>
+      <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
     </div>
   );
 }
