@@ -23,8 +23,10 @@ jobs:
           command_timeout: 30m
           script: |
             cd /var/www/petlife-os
-            git remote set-url origin git@github.com:apm1368/petlife-os.git
-            export GIT_SSH_COMMAND="ssh -i /root/.ssh/petlife_github_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+            # Some VPS networks block outbound SSH on port 22. GitHub's SSH
+            # endpoint on 443 keeps deploy-key authentication deterministic.
+            git remote set-url origin ssh://git@ssh.github.com:443/apm1368/petlife-os.git
+            export GIT_SSH_COMMAND="ssh -p 443 -i /root/.ssh/petlife_github_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
             git fetch --prune origin
             git checkout -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
             git reset --hard "${{ github.sha }}"
