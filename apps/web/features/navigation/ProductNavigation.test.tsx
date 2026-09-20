@@ -6,7 +6,7 @@ import { ProductNavigation } from "./ProductNavigation";
 it("links public discovery directly without an authentication detour", () => {
   renderWithIntl(<ProductNavigation />);
   expect(screen.getByRole("link", { name: "Shop" }).getAttribute("href")).toBe("/en/shop");
-  expect(screen.getByRole("link", { name: "Find a vet" }).getAttribute("href")).toBe("/en/vet/find");
+  expect(screen.getByRole("link", { name: "Health & vet" }).getAttribute("href")).toBe("/en/vet/find");
   expect(screen.getByRole("link", { name: "Services" }).getAttribute("href")).toBe("/en/services");
 });
 it("resolves health through the active pet instead of a invented pet ID", () => {

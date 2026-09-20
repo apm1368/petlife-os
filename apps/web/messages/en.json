@@ -3403,5 +3403,50 @@
         "OTHER": "Other"
       }
     }
+  },
+  "memberProfile": {
+    "title": "Profile",
+    "loadError": "We could not load your profile.",
+    "eyebrow": "Member profile",
+    "contactMissing": "Add a contact method",
+    "settings": "Settings",
+    "household": "Household",
+    "defaultHousehold": "My household",
+    "active": "Active",
+    "petsCount": "Pets",
+    "location": "Location",
+    "notSet": "Not set",
+    "managePets": "Manage pets",
+    "membership": "Membership",
+    "careMembership": "PET LIFE Care",
+    "membershipDescription": "Care tools, health records and member benefits in one place.",
+    "viewMembership": "View membership",
+    "manage": "Manage your account",
+    "destinations": {
+      "pets": {
+        "title": "My pets",
+        "description": "Profiles, care and health records"
+      },
+      "membership": {
+        "title": "Membership",
+        "description": "Plan, trial and benefits"
+      },
+      "bookings": {
+        "title": "Bookings",
+        "description": "Upcoming and past services"
+      },
+      "orders": {
+        "title": "Orders",
+        "description": "Purchases and delivery status"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Channels, categories and quiet hours"
+      },
+      "support": {
+        "title": "Support",
+        "description": "Requests and help"
+      }
+    }
   }
 }

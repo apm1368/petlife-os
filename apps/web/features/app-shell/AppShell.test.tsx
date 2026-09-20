@@ -8,7 +8,7 @@ import { ApiError } from "@/lib/api/client";
 import { AppShell } from "./AppShell";
 
 const { replace, push } = vi.hoisted(() => ({ replace: vi.fn(), push: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push }), usePathname: () => "/en/home" }));
 vi.mock("@/services/auth.service", () => ({ authService: { getSession: vi.fn() } }));
 vi.mock("@/services/households.service", () => ({ householdsService: { listMine: vi.fn() } }));
 vi.mock("@/features/theme/ThemeToggle", () => ({ ThemeToggle: () => null }));

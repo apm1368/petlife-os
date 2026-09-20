@@ -32,7 +32,7 @@ const consumerGroups = [
     { path: "/pets/active?view=travel", fa: "سفر", en: "Travel", match: petSection("travel") },
   ] },
   { fa: "فعالیت‌ها", en: "Activity", items: [{ path: "/bookings", fa: "نوبت‌ها", en: "Bookings" }, { path: "/orders", fa: "سفارش‌ها", en: "Orders" }, { path: "/notifications", fa: "اعلان‌ها", en: "Notifications" }] },
-  { fa: "حساب", en: "Account", items: [{ path: "/subscription", fa: "اشتراک", en: "Subscription" }, { path: "/notifications/preferences", fa: "تنظیمات اعلان", en: "Notification preferences" }, { path: "/support", fa: "پشتیبانی", en: "Support" }] },
+  { fa: "حساب", en: "Account", items: [{ path: "/profile", fa: "پروفایل", en: "Profile" }, { path: "/subscription", fa: "اشتراک", en: "Subscription" }, { path: "/notifications/preferences", fa: "تنظیمات اعلان", en: "Notification preferences" }, { path: "/support", fa: "پشتیبانی", en: "Support" }] },
 ] satisfies { fa: string; en: string; items: NavigationItem[] }[];
 
 function isActive(item: NavigationItem, pathname: string) {
@@ -42,7 +42,7 @@ function isActive(item: NavigationItem, pathname: string) {
 }
 
 export function ProductNavigation({ audience = "public" }: { audience?: "public" | "consumer" }) {
-  const locale = useLocale(); const localizedPath = usePathname();
+  const locale = useLocale(); const localizedPath = usePathname() ?? `/${locale}`;
   const pathname = localizedPath.replace(new RegExp(`^/${locale}`), "") || "/";
   const groups = audience === "consumer" ? consumerGroups : [{ fa: "کاوش", en: "Explore", items: exploreDestinations }];
   return <nav aria-label={locale === "fa" ? "ناوبری محصول" : "Product navigation"} className="border-b border-border-subtle bg-surface-elevated">

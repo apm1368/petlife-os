@@ -3403,5 +3403,50 @@
         "OTHER": "سایر"
       }
     }
+  },
+  "memberProfile": {
+    "title": "پروفایل",
+    "loadError": "پروفایل شما بارگذاری نشد.",
+    "eyebrow": "پروفایل عضو",
+    "contactMissing": "راه ارتباطی را اضافه کنید",
+    "settings": "تنظیمات",
+    "household": "خانواده",
+    "defaultHousehold": "خانواده من",
+    "active": "فعال",
+    "petsCount": "حیوانات",
+    "location": "موقعیت",
+    "notSet": "ثبت نشده",
+    "managePets": "مدیریت حیوانات",
+    "membership": "عضویت",
+    "careMembership": "مراقبت PET LIFE",
+    "membershipDescription": "ابزارهای مراقبت، پرونده سلامت و مزایای عضویت در یک جا.",
+    "viewMembership": "مشاهده عضویت",
+    "manage": "مدیریت حساب",
+    "destinations": {
+      "pets": {
+        "title": "حیوانات من",
+        "description": "پروفایل، مراقبت و پرونده سلامت"
+      },
+      "membership": {
+        "title": "عضویت",
+        "description": "طرح، دوره آزمایشی و مزایا"
+      },
+      "bookings": {
+        "title": "نوبت‌ها",
+        "description": "خدمات آینده و گذشته"
+      },
+      "orders": {
+        "title": "سفارش‌ها",
+        "description": "خریدها و وضعیت ارسال"
+      },
+      "notifications": {
+        "title": "اعلان‌ها",
+        "description": "کانال‌ها، دسته‌ها و ساعات سکوت"
+      },
+      "support": {
+        "title": "پشتیبانی",
+        "description": "درخواست‌ها و راهنمایی"
+      }
+    }
   }
 }
