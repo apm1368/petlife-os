@@ -19,3 +19,6 @@ Web typecheck passed. 12 auth/onboarding/portal return tests and password recove
 
 ## Remaining
 This is not batch-1 acceptance and not full-site completion. Complete reference comparison, responsive checks, auth states, shared components, and all subsequent batches. Do not mark routes accepted from source-only inspection.
+
+## Profile increment
+Profile edit now uses existing PATCH /me and synchronizes shared session identity. Save failure retains input; cancel closes the editor. Removed unconditional household-success badge when no household exists. Profile destinations use compact divided rows. Two regression tests and web typecheck pass. Full visual comparison is outstanding. Auth staging SHA 93c8636 verified via SSH, successful deployment run 35538631334, HTTP 200 and healthy API.

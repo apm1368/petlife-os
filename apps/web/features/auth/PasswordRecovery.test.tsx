@@ -7,7 +7,7 @@ vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams()
 vi.mock("@/services/auth.service", () => ({ authService: { forgotPassword: vi.fn() } }));
 beforeEach(() => vi.resetAllMocks());
 it("keeps recovery retryable after a transport failure", async () => {
- vi.mocked(authService.forgotPassword).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce(undefined);
+ vi.mocked(authService.forgotPassword).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce({ ok: true });
  renderWithIntl(<ForgotPasswordPage />);
  fireEvent.change(screen.getByRole("textbox"), {target:{value:"review@example.com"}});
  fireEvent.click(screen.getByRole("button"));
