@@ -1,4 +1,4 @@
-import type { PetAccessFlags, PetDto } from "@petlife/types";
+import type { PetAccessFlags, PetDto, PetOverviewDto } from "@petlife/types";
 import type { CreatePetInput, UpdatePetInput } from "@petlife/validation";
 import { apiFetch } from "@/lib/api/client";
 
@@ -17,6 +17,7 @@ export interface ManagedPetAccessGrant extends PetAccessFlags {
 
 export const petsService = {
   getById: (id: string) => apiFetch<PetDto>(`/pets/${id}`),
+  getOverview: (id: string) => apiFetch<PetOverviewDto>(`/pets/${id}/overview`),
   getMyAccess: (id: string) => apiFetch<PetAccessFlags>(`/pets/${id}/access`),
   update: (id: string, input: UpdatePetInput) => apiFetch<PetDto>(`/pets/${id}`, { method: "PATCH", body: input }),
   create: (householdId: string, input: CreatePetInput, idempotencyKey: string) =>
