@@ -1,4 +1,5 @@
 "use client";
+import { ConsumerSidebar } from "@/features/navigation/ConsumerSidebar";
 import { ProductNavigation } from "@/features/navigation/ProductNavigation";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
@@ -34,12 +35,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   if (error) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-6">
-        <ErrorRecovery
-          title={tErrors("generic")}
-          message=""
-          retryLabel={t("retry")}
-          onRetry={retry}
-        />
+        <ErrorRecovery title={tErrors("generic")} message="" retryLabel={t("retry")} onRetry={retry} />
       </main>
     );
   }
@@ -53,7 +49,13 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={pathname === `/${locale}/home` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
+    <div
+      className={
+        pathname === `/${locale}/home`
+          ? "min-h-screen bg-surface-base"
+          : "workspace-shell min-h-screen bg-surface-base"
+      }
+    >
       <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
         <span className="text-section-title text-text-primary">{t("appName")}</span>
         <div className="flex items-center gap-2">
@@ -61,7 +63,17 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
             label={t("support")}
             onClick={() => router.push(`/${locale}/support`)}
             icon={
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <circle cx="12" cy="12" r="10" />
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -74,12 +86,24 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
           {user ? <Avatar name={user.displayName} src={user.avatarUrl} size="sm" /> : null}
         </div>
       </header>
-      <ProductNavigation audience="consumer" />
-      <main className={pathname === `/${locale}/home` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{children}</main>
+      {pathname === `/${locale}/home` ? <ProductNavigation audience="consumer" /> : <ConsumerSidebar />}
+      <main
+        className={
+          pathname === `/${locale}/home`
+            ? "mx-auto max-w-2xl px-4 py-6"
+            : "workspace-main w-full min-w-0 px-4 py-6"
+        }
+      >
+        {children}
+      </main>
     </div>
   );
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  return <LocalPreviewGate title="PET LIFE" live={<LiveAppShell>{children}</LiveAppShell>}>{children}</LocalPreviewGate>;
+  return (
+    <LocalPreviewGate title="PET LIFE" live={<LiveAppShell>{children}</LiveAppShell>}>
+      {children}
+    </LocalPreviewGate>
+  );
 }

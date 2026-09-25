@@ -1,0 +1,1796 @@
+{
+  "checkedAt": "2026-09-25T10:59:41.895Z",
+  "base": "http://185.231.112.154",
+  "rows": [
+    {
+      "group": "(admin)",
+      "route": "/admin",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/audit",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/admin/audit",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/audit",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/audit",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/audit",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/content",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/content",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/content",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/content",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content/[id]/versions",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content/categories",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/content/categories",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/content/categories",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/content/categories",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/content/categories",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content/media",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/content/media",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/content/media",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/content/media",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/content/media",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content/new",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/admin/content/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/content/new",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/content/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/content/new",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content/placements",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/content/placements",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/content/placements",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/content/placements",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/content/placements",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/content/tags",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/content/tags",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/content/tags",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/content/tags",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/content/tags",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/crm",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/crm",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/crm",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/crm",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/crm",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/customer-affairs",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/customer-affairs",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/customer-affairs",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/customer-affairs",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/customer-affairs",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/customers",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/customers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/customers",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/customers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/customers",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/customers/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/disputes",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/disputes",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/disputes",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/disputes",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/disputes",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/disputes/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/providers",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/admin/providers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/providers",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/providers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/providers",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/reconciliation",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/reconciliation",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/reconciliation",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/reconciliation",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/reconciliation",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/seller-finance",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/seller-finance",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/seller-finance",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/seller-finance",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/seller-finance",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/seller-finance/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/sellers",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/admin/sellers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/sellers",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/sellers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/sellers",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/settlements/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/subscriptions",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/subscriptions",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/subscriptions",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/subscriptions",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/subscriptions",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/subscriptions/households",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/admin/subscriptions/households",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/subscriptions/households",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/subscriptions/households",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/subscriptions/households",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/subscriptions/households/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/support",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/support",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/support",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/support",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/support",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/support/[caseId]",
+      "dynamic": true
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/tasks",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/tasks",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/tasks",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/tasks",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/tasks",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/transactions",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/transactions",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/transactions",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/transactions",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/transactions",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/trust",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/admin/trust",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/admin/trust",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/admin/trust",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/admin/trust",
+        "appError": false
+      }
+    },
+    {
+      "group": "(admin)",
+      "route": "/admin/trust/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/ai",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/ai",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/ai",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/ai",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/ai",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/bookings",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/bookings",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/bookings",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/bookings",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/bookings",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/bookings/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/care-calendar",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/care-calendar",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/care-calendar",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/care-calendar",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/care-calendar",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/cart",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/cart",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/cart",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/cart",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/cart",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/checkout",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/checkout",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/checkout",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/checkout",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/checkout",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/checkout/[id]/confirmation",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/checkout/[id]/ops",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/donations",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/donations",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/donations",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/donations",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/donations",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/home",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/home",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/home",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/home",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/home",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/notifications",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/notifications",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/notifications",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/notifications",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/notifications",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/notifications/preferences",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/notifications/preferences",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/notifications/preferences",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/notifications/preferences",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/notifications/preferences",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/onboarding",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/onboarding",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/onboarding",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/onboarding",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/onboarding",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/orders",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/orders",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/orders",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/orders",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/orders",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/orders/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/pets",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/pets",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/pets",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/pets",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/care",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/dental",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/discharge",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/documents",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/estimates",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/imaging",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/labs",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/nutrition",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/observations",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/referrals",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/rehab",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/timeline",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/advanced/vitals",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/allergies",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/conditions",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/medications",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/nutrition",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/health/vaccination",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/insurance",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/life-timeline",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/lost",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/lost/[incidentId]",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/lost/report",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/memories",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/memories/[memoryId]",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/memories/[memoryId]/edit",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/memories/new",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/travel",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/travel/[tripId]",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/travel/new",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/[id]/travel/passport",
+      "dynamic": true
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/active",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/pets/active",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/pets/active",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/pets/active",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/pets/active",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/pets/new",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/pets/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/pets/new",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/pets/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/pets/new",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/places/favorites",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/places/favorites",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/places/favorites",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/places/favorites",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/places/favorites",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/profile",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/profile",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/profile",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/profile",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/profile",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/subscription",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/subscription",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/subscription",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/subscription",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/subscription",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/subscription/plans",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/subscription/plans",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/subscription/plans",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/subscription/plans",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/subscription/plans",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/support",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/support",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/support",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/support",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/support",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/support/new",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/support/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/support/new",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/support/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/support/new",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/support/tickets",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/support/tickets",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/support/tickets",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/support/tickets",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/support/tickets",
+        "appError": false
+      }
+    },
+    {
+      "group": "(app)",
+      "route": "/support/tickets/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(auth)",
+      "route": "/account",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/account",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/account",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/account",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/account",
+        "appError": false
+      }
+    },
+    {
+      "group": "(auth)",
+      "route": "/account/forgot",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/account/forgot",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/account/forgot",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/account/forgot",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/account/forgot",
+        "appError": false
+      }
+    },
+    {
+      "group": "(auth)",
+      "route": "/account/reset",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/account/reset",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/account/reset",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/account/reset",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/account/reset",
+        "appError": false
+      }
+    },
+    {
+      "group": "(auth)",
+      "route": "/auth",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/auth",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/auth",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/auth",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/auth",
+        "appError": false
+      }
+    },
+    {
+      "group": "(auth)",
+      "route": "/auth/complete",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/auth/complete",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/auth/complete",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/auth/complete",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/auth/complete",
+        "appError": false
+      }
+    },
+    {
+      "group": "(auth)",
+      "route": "/register",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/register",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/register",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/register",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/register",
+        "appError": false
+      }
+    },
+    {
+      "group": "(auth)",
+      "route": "/welcome",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/welcome",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/welcome",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/welcome",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/welcome",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/provider",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/availability",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider/availability",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider/availability",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/provider/availability",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider/availability",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/bookings",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/provider/bookings",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider/bookings",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider/bookings",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider/bookings",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/bookings/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/calendar",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider/calendar",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider/calendar",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/provider/calendar",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider/calendar",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/clinical",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider/clinical",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider/clinical",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/provider/clinical",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider/clinical",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/hospitalizations/[hospitalizationId]",
+      "dynamic": true
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/patients",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider/patients",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider/patients",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/provider/patients",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider/patients",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/patients/[petId]",
+      "dynamic": true
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/services",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/provider/services",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider/services",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider/services",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider/services",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/team",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/provider/team",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/provider/team",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/provider/team",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/provider/team",
+        "appError": false
+      }
+    },
+    {
+      "group": "(provider)",
+      "route": "/provider/visits/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/animal-support",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/animal-support",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/animal-support",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/animal-support",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support/campaigns",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/animal-support/campaigns",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/animal-support/campaigns",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/animal-support/campaigns",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/animal-support/campaigns",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support/campaigns/[campaignId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support/needs",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/animal-support/needs",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/animal-support/needs",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/animal-support/needs",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/animal-support/needs",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support/needs/[listingId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support/needs/mine",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/animal-support/needs/mine",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/animal-support/needs/mine",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/animal-support/needs/mine",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/animal-support/needs/mine",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support/needs/new",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/animal-support/needs/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/animal-support/needs/new",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/animal-support/needs/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/animal-support/needs/new",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/animal-support/organizations/[organizationId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/blog",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/blog",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/blog",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/blog",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/blog",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/blog/[slug]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/blog/category/[slug]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/blog/tag/[slug]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/community",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/community",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/community",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/community",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/community",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/community/new",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/community/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/community/new",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/community/new",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/community/new",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/community/posts/[postId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/insurance",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/insurance",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/insurance",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/insurance",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/insurance",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/insurance/[productId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/insurance/compare",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/insurance/compare",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/insurance/compare",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/insurance/compare",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/insurance/compare",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/lost-pets",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/lost-pets",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/lost-pets",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/lost-pets",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/lost-pets",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/lost-pets/[incidentId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/places",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/places",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/places",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/places",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/places",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/places/[placeId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/services",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/services",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/services",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/services",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/services",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/services/[category]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/services/[category]/[serviceId]/book",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/shop",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/shop",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/shop",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/shop",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/shop",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/shop/products",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/shop/products",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/shop/products",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/shop/products",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/shop/products",
+        "appError": false
+      }
+    },
+    {
+      "group": "(public)",
+      "route": "/shop/products/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/vet/[providerId]",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/vet/[providerId]/book",
+      "dynamic": true
+    },
+    {
+      "group": "(public)",
+      "route": "/vet/find",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/vet/find",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/vet/find",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/vet/find",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/vet/find",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/seller",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/channels",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/channels",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/channels",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/seller/channels",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/channels",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/finance",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/seller/finance",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/finance",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/finance",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/finance",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/finance/settlements",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/seller/finance/settlements",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/finance/settlements",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/finance/settlements",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/finance/settlements",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/finance/settlements/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/finance/transactions",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/seller/finance/transactions",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/finance/transactions",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/finance/transactions",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/finance/transactions",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/inventory",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/seller/inventory",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/inventory",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/inventory",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/inventory",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/offers",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/seller/offers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/offers",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/offers",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/offers",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/orders",
+      "dynamic": false,
+      "en": {
+        "url": "http://185.231.112.154/en/seller/orders",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/orders",
+        "appError": false
+      },
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/orders",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/orders",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/orders/[id]",
+      "dynamic": true
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/settings",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/settings",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/settings",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/seller/settings",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/settings",
+        "appError": false
+      }
+    },
+    {
+      "group": "(seller)",
+      "route": "/seller/team",
+      "dynamic": false,
+      "fa": {
+        "url": "http://185.231.112.154/fa/seller/team",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/fa/seller/team",
+        "appError": false
+      },
+      "en": {
+        "url": "http://185.231.112.154/en/seller/team",
+        "status": 200,
+        "finalUrl": "http://185.231.112.154/en/seller/team",
+        "appError": false
+      }
+    }
+  ]
+}

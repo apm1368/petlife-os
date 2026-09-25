@@ -1,0 +1,7 @@
+const fs=require('fs'),path=require('path');
+const base='http://185.231.112.154';const root='apps/web/app/[locale]';
+function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):e.name==='page.tsx'?[path.join(dir,e.name)]:[])}
+const rows=walk(root).map(f=>{const parts=path.relative(root,f).replaceAll('\\','/').split('/');const group=parts.find(p=>p.startsWith('('))||'(public)';const route='/'+parts.filter(p=>!p.startsWith('(')&&p!=='page.tsx').join('/');return{group,route,dynamic:route.includes('[')}}).sort((a,b)=>a.group.localeCompare(b.group)||a.route.localeCompare(b.route));
+const todo=rows.filter(r=>!r.dynamic).flatMap(r=>['fa','en'].map(locale=>({r,locale})));
+let index=0;async function worker(){while(index<todo.length){const {r,locale}=todo[index++];const url=base+'/'+locale+(r.route==='/'?'':r.route);try{const res=await fetch(url,{signal:AbortSignal.timeout(25000)});const body=await res.text();r[locale]={url,status:res.status,finalUrl:res.url,appError:body.includes('Application error:')};}catch(e){r[locale]={url,status:'NETWORK',error:e.message}}}};
+(async()=>{await Promise.all(Array.from({length:4},worker));fs.writeFileSync('docs/qa/page-links-audit.json',JSON.stringify({checkedAt:new Date().toISOString(),base,rows},null,2));console.log(JSON.stringify({total:rows.length,static:rows.filter(r=>!r.dynamic).length,dynamic:rows.filter(r=>r.dynamic).length,requests:todo.length,issues:rows.filter(r=>!r.dynamic&&[r.fa,r.en].some(x=>x.status!==200||x.appError))},null,2));})();
