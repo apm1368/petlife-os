@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { Avatar, Button, ContextSurface, Dialog, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { useRouter } from "next/navigation";
+import { Avatar, Button, ContextSurface, Dialog, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { PetAccessFlags, PetDto } from "@petlife/types";
 import { householdsService } from "@/services/households.service";
 import { petsService, type ManagedPetAccessGrant } from "@/services/pets.service";
@@ -15,12 +16,13 @@ const PRESETS={VIEW_ONLY,CARE_HELPER,FULL};
 const FLAGS: Array<[keyof PetAccessFlags,string,string]>=[["canViewIdentity","مشاهده مشخصات","View basic profile"],["canEditIdentity","ویرایش مشخصات","Edit identity"],["canViewHealth","مشاهده سلامت","View health"],["canEditHealth","ویرایش سلامت","Edit health"],["canBookCare","مدیریت رزرو","Manage bookings"],["canViewCareProfile","مشاهده مراقبت","View care"],["canEditCareProfile","ویرایش مراقبت","Edit care"],["canViewLocation","مشاهده موقعیت","View location"],["canManageAccess","مدیریت دسترسی","Manage access"]];
 
 export function PetAccessView({petId}:{petId:string}) {
- const locale=useLocale(); const [pet,setPet]=useState<PetDto|null>(null); const [home,setHome]=useState<HouseholdCollaborationDto|null>(null); const [grants,setGrants]=useState<ManagedPetAccessGrant[]|null>(null); const [open,setOpen]=useState(false); const [userId,setUserId]=useState(""); const [preset,setPreset]=useState<keyof typeof PRESETS>("VIEW_ONLY"); const [expiresAt,setExpiresAt]=useState(""); const [reason,setReason]=useState(""); const [busy,setBusy]=useState(false);
- const load=useCallback(async()=>{const nextPet=await petsService.getById(petId); const [nextHome,nextGrants]=await Promise.all([householdsService.collaboration(nextPet.householdId),petsService.listAccessGrants(petId)]); setPet(nextPet);setHome(nextHome);setGrants(nextGrants);setUserId((v)=>v||nextHome.members.find((m)=>m.role!=="OWNER")?.userId||"");},[petId]);
+ const locale=useLocale(); const router=useRouter(); const [pet,setPet]=useState<PetDto|null>(null); const [home,setHome]=useState<HouseholdCollaborationDto|null>(null); const [grants,setGrants]=useState<ManagedPetAccessGrant[]|null>(null); const [loadError,setLoadError]=useState(false); const [open,setOpen]=useState(false); const [userId,setUserId]=useState(""); const [preset,setPreset]=useState<keyof typeof PRESETS>("VIEW_ONLY"); const [expiresAt,setExpiresAt]=useState(""); const [reason,setReason]=useState(""); const [busy,setBusy]=useState(false);
+ const load=useCallback(async()=>{setLoadError(false);try{const nextPet=await petsService.getById(petId); const [nextHome,nextGrants]=await Promise.all([householdsService.collaboration(nextPet.householdId),petsService.listAccessGrants(petId)]); setPet(nextPet);setHome(nextHome);setGrants(nextGrants);setUserId((v)=>v||nextHome.members.find((m)=>m.role!=="OWNER")?.userId||"");}catch{setLoadError(true)}},[petId]);
  useEffect(()=>{void load()},[load]);
  async function create(){if(!userId)return;setBusy(true);try{await petsService.createAccessGrant(petId,{userId,...PRESETS[preset],...(expiresAt?{expiresAt:new Date(expiresAt).toISOString()}:{}),reason:reason||undefined});setOpen(false);setExpiresAt("");setReason("");await load()}finally{setBusy(false)}}
  async function update(grant:ManagedPetAccessGrant,next:keyof typeof PRESETS){setBusy(true);try{await petsService.updateAccessGrant(petId,grant.id,PRESETS[next]);await load()}finally{setBusy(false)}}
  async function revoke(grantId:string){setBusy(true);try{await petsService.revokeAccessGrant(petId,grantId);await load()}finally{setBusy(false)}}
+ if(loadError)return <div className="account-stack"><AccountPageHeader eyebrow={locale==="fa"?"مجوزهای حیوان":"PET PERMISSIONS"} title={locale==="fa"?"دسترسی ممکن نیست":"Access unavailable"} description={locale==="fa"?"این حساب اجازهٔ مدیریت مجوزهای این حیوان را ندارد.":"This account cannot manage permissions for this pet."}/><EmptyState title={locale==="fa"?"مجوز مدیریت ندارید":"You do not have management access"} description={locale==="fa"?"از مدیر اصلی خانواده بخواهید دسترسی شما را بررسی کند.":"Ask the household organizer to review your access."} actionLabel={locale==="fa"?"بازگشت به خانواده":"Back to household"} onAction={()=>router.push(`/${locale}/profile/household`)}/></div>;
  if(!pet||!home||!grants)return <Skeleton className="h-96 w-full" aria-label="loading"/>;
  const candidates=home.members.filter((m)=>m.role!=="OWNER");
  return <div className="account-stack"><AccountPageHeader eyebrow={locale==="fa"?"مجوزهای حیوان":"PET PERMISSIONS"} title={locale==="fa"?`دسترسی به ${pet.name}`:`Access to ${pet.name}`} description={locale==="fa"?"اطلاعات پزشکی و خصوصی فقط در محدودهٔ مجوزهای روشن و قابل لغو در دسترس است.":"Private and medical data is available only through explicit, revocable permissions."}/>
