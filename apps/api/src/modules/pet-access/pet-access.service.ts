@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { HouseholdRole, PetAccessSource, type Prisma } from "@prisma/client";
+import { HouseholdRole, PetAccessSource, type Pet, type Prisma } from "@prisma/client";
 import type { PetAccessFlags } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
@@ -131,6 +131,20 @@ export class PetAccessService {
 
   async hasActiveAccess(petId: string, userId: string, client: QueryClient = this.prisma): Promise<boolean> {
     return (await this.getEffectivePermissions(petId, userId, client)) !== null;
+  }
+
+  /**
+   * Resolve a pet only after proving that the caller holds an active grant.
+   * Public discovery endpoints use this instead of loading an arbitrary
+   * query-string pet id first. Returning null for anonymous callers,
+   * nonexistent pets, and unrelated users keeps those cases deliberately
+   * indistinguishable and prevents pet-existence/identity disclosure.
+   */
+  async findAccessiblePet(petId: string | undefined, userId: string | undefined, client: QueryClient = this.prisma): Promise<Pet | null> {
+    if (!petId || !userId) return null;
+    const permissions = await this.getEffectivePermissions(petId, userId, client);
+    if (!permissions) return null;
+    return client.pet.findUnique({ where: { id: petId } });
   }
 
   async listForPet(petId: string) {

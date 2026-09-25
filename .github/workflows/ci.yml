@@ -1,8 +1,9 @@
 name: CI
 
 on:
+  workflow_call:
   push:
-    branches: [main]
+    branches: [main, master, integration/local]
   pull_request:
 
 env:
@@ -52,7 +53,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.33.0
 
       - uses: actions/setup-node@v4
         with:

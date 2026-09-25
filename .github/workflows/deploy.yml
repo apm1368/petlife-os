@@ -2,7 +2,7 @@ name: Deploy to VPS
 
 on:
   push:
-    branches: [ main, master, integration/local ]
+    branches: [main, master, integration/local]
   workflow_dispatch:
 
 concurrency:
@@ -10,7 +10,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       - name: Deploy over SSH
@@ -19,4 +23,17 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script: /var/www/petlife-os/deploy.sh
+          script_stop: true
+          script: |
+            cd /var/www/petlife-os
+            git remote set-url origin ssh://git@ssh.github.com:443/apm1368/petlife-os.git
+            export GIT_SSH_COMMAND="ssh -p 443 -i /root/.ssh/petlife_github_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+            git fetch --prune origin
+            git checkout -B '${{ github.ref_name }}' 'origin/${{ github.ref_name }}'
+            git reset --hard '${{ github.sha }}'
+            export BUILD_SHA='${{ github.sha }}'
+            export BUILD_TIME='${{ github.event.head_commit.timestamp }}'
+            export DEPLOYMENT_ENVIRONMENT='staging'
+            export DEPLOYMENT_ID='github-${{ github.run_id }}-${{ github.run_attempt }}'
+            /var/www/petlife-os/deploy.sh
+            bash scripts/smoke-staging.sh

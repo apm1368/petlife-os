@@ -19,8 +19,8 @@ export class ServicesController {
   }
 
   @Get("providers/services")
-  search(@Query() query: SearchServicesDto) {
-    return this.servicesService.search(query);
+  search(@Query() query: SearchServicesDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+    return this.servicesService.search(query, user?.id);
   }
 
   @Get("provider-services/:serviceId")
@@ -29,7 +29,7 @@ export class ServicesController {
   }
 
   @Get("provider-services/:serviceId/availability")
-  getAvailability(@Param("serviceId") serviceId: string, @Query() query: GetServiceAvailabilityDto) {
-    return this.servicesService.getServiceAvailability(serviceId, query);
+  getAvailability(@Param("serviceId") serviceId: string, @Query() query: GetServiceAvailabilityDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+    return this.servicesService.getServiceAvailability(serviceId, query, user?.id);
   }
 }

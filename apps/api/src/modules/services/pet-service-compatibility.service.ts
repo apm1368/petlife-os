@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { SetupStatus, WeightUnit, type Pet, type ProviderService } from "@prisma/client";
 import { PetCompatibilityStatus, type PetCompatibilityDto, type PetCompatibilityReason } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { PetAccessService } from "../pet-access/pet-access.service";
 
 const LB_TO_KG = 0.453592;
 
@@ -30,7 +31,15 @@ function weightInKg(pet: Pet): number | null {
  */
 @Injectable()
 export class PetServiceCompatibilityService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly petAccess: PetAccessService,
+  ) {}
+
+  async evaluateForViewer(petId: string | undefined, service: ProviderService, viewerId: string | undefined): Promise<PetCompatibilityDto | null> {
+    const pet = await this.petAccess.findAccessiblePet(petId, viewerId);
+    return pet ? this.evaluate(pet, service) : null;
+  }
 
   async evaluate(pet: Pet, service: ProviderService): Promise<PetCompatibilityDto> {
     const reasons: PetCompatibilityReason[] = [];

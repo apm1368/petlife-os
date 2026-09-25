@@ -1,3 +1,29 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# pnpm 10 reads install policy from the workspace manifest, not package.json.
+# Keeping this here makes local, headless, and GitHub Actions installs agree.
+onlyBuiltDependencies:
+  - "@nestjs/core"
+  - "@prisma/client"
+  - "@prisma/engines"
+  - "prisma"
+  - "esbuild"
+  - "unrs-resolver"
+  - "sharp"
+  - "argon2"
+
+# CI and agent shells are intentionally non-interactive; a stale virtual
+# store must be repairable without waiting for a TTY confirmation.
+confirmModulesPurge: false
+
+allowBuilds:
+  "@nestjs/core": true
+  "@prisma/client": true
+  "@prisma/engines": true
+  argon2: true
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true

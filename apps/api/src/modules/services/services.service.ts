@@ -42,9 +42,8 @@ export class ServicesService {
     return ALL_CATEGORIES;
   }
 
-  async search(query: SearchServicesDto): Promise<ServiceSearchResultDto[]> {
+  async search(query: SearchServicesDto, viewerId?: string): Promise<ServiceSearchResultDto[]> {
     const verifiedOnly = query.verifiedOnly !== "false";
-    const pet = query.petId ? await this.prisma.pet.findUnique({ where: { id: query.petId } }) : null;
 
     const services = await this.prisma.providerService.findMany({
       where: {
@@ -82,7 +81,7 @@ export class ServicesService {
           },
           service: toProviderServiceDto(service),
           location: service.location ? toProviderLocationDto(service.location) : null,
-          compatibility: pet ? await this.compatibility.evaluate(pet, service) : null,
+          compatibility: await this.compatibility.evaluateForViewer(query.petId, service, viewerId),
           nextAvailableSlotStart,
         };
       }),
@@ -96,8 +95,7 @@ export class ServicesService {
     });
     if (!service) throw new NotFoundApiException("Service");
 
-    const pet = query.petId ? await this.prisma.pet.findUnique({ where: { id: query.petId } }) : null;
-    const compatibility = pet ? await this.compatibility.evaluate(pet, service) : null;
+    const compatibility = await this.compatibility.evaluateForViewer(query.petId, service, viewerId);
 
     if (viewerId) {
       await this.events.publish("ServiceViewed", { serviceId, viewerId }, { aggregateType: "ProviderService", aggregateId: serviceId });
@@ -131,7 +129,7 @@ export class ServicesService {
     };
   }
 
-  async getServiceAvailability(serviceId: string, query: GetServiceAvailabilityDto) {
+  async getServiceAvailability(serviceId: string, query: GetServiceAvailabilityDto, viewerId?: string) {
     const service = await this.prisma.providerService.findUnique({ where: { id: serviceId } });
     if (!service) throw new NotFoundApiException("Service");
 
@@ -139,10 +137,8 @@ export class ServicesService {
     if (!locationId) throw new NotFoundApiException("Location");
 
     let petCompatible = true;
-    if (query.petId) {
-      const pet = await this.prisma.pet.findUnique({ where: { id: query.petId } });
-      if (pet) petCompatible = (await this.compatibility.evaluate(pet, service)).status !== "NOT_SUPPORTED";
-    }
+    const compatibility = await this.compatibility.evaluateForViewer(query.petId, service, viewerId);
+    if (compatibility) petCompatible = compatibility.status !== "NOT_SUPPORTED";
 
     const slots = await this.slotGenerator.generate({
       providerOrganizationId: service.providerOrganizationId,
