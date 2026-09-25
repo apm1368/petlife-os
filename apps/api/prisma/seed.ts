@@ -1,4 +1,5 @@
 import { hashPassword } from "../src/common/password/password-hash.util";
+import { createHash } from "node:crypto";
 import {
   AdminMembershipStatus,
   AdminRole,
@@ -1158,6 +1159,7 @@ async function main() {
   const { rootAdmin, financeAdmin } = await seedAdmin(sarah.id, sarah.displayName);
   await seedSellerFinance({ petBazaar, golestan, financeAdmin, rootAdmin });
   await seedDemoAccount();
+  await seedCanonicalAccountScenarios();
 }
 
 /**
@@ -1253,3 +1255,66 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+async function seedCanonicalAccountScenarios(): Promise<void> {
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  async function user(username: string, displayName: string) {
+    return prisma.user.upsert({
+      where: { normalizedUsername: username },
+      update: { displayName, email: `${username}@example.test` },
+      create: { username, normalizedUsername: username, email: `${username}@example.test`, passwordHash, displayName, locale: "fa" },
+    });
+  }
+  async function household(ownerId: string, name: string) {
+    const existing = await prisma.household.findFirst({ where: { name, members: { some: { userId: ownerId, role: "OWNER" } } } });
+    if (existing) return existing;
+    return prisma.household.create({ data: { name, city: "Tehran", countryCode: "IR", members: { create: { userId: ownerId, role: "OWNER" } } } });
+  }
+  async function pet(householdId: string, name: string, species: "DOG" | "CAT", photoUrl: string) {
+    const existing = await prisma.pet.findFirst({ where: { householdId, name } });
+    if (existing) return existing;
+    return prisma.pet.create({ data: { householdId, name, species, approximateAgeMonths: 30, photoUrl } });
+  }
+  async function grantOwner(petId: string, userId: string) {
+    const existing = await prisma.petAccessGrant.findFirst({ where: { petId, userId, source: "HOUSEHOLD", revokedAt: null } });
+    if (existing) return;
+    await prisma.petAccessGrant.create({ data: { petId, userId, source: "HOUSEHOLD", canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true, canViewCareProfile: true, canEditCareProfile: true, canViewLocation: true, canManageAccess: true } });
+  }
+
+  // Scenario 1: single owner + one pet.
+  const single = await user("qa-single-owner", "QA Single Owner");
+  const singleHome = await household(single.id, "QA Single Pet Home");
+  const cookie = await pet(singleHome.id, "Cookie QA", "DOG", "/images/landing/cookie-reference.jpg");
+  await grantOwner(cookie.id, single.id);
+
+  // Scenario 2: organizer + partner + two pets.
+  const organizer = await user("qa-household-owner", "QA Household Organizer");
+  const partner = await user("qa-household-partner", "QA Care Partner");
+  const guest = await user("qa-pending-guest", "QA Pending Guest");
+  const helper = await user("qa-limited-helper", "QA Limited Helper");
+  const temporary = await user("qa-temporary-helper", "QA Temporary Helper");
+  const sharedHome = await household(organizer.id, "QA Shared Pet Home");
+  for (const member of [partner, helper, temporary]) {
+    await prisma.householdMember.upsert({ where: { householdId_userId: { householdId: sharedHome.id, userId: member.id } }, update: {}, create: { householdId: sharedHome.id, userId: member.id, role: "FAMILY" } });
+  }
+  const milo = await pet(sharedHome.id, "Milo QA", "CAT", "/images/landing/pet-portrait.png");
+  const luna = await pet(sharedHome.id, "Luna QA", "DOG", "/images/landing/cookie-taxi.webp");
+  await grantOwner(milo.id, organizer.id); await grantOwner(luna.id, organizer.id);
+
+  // Scenario 3: pending invitation (token value never stored).
+  const inviteHash = createHash("sha256").update("qa-canonical-pending-invitation").digest("hex");
+  await prisma.householdInvitation.upsert({
+    where: { tokenHash: inviteHash },
+    update: { status: "PENDING", expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    create: { householdId: sharedHome.id, contact: guest.email!, tokenHash: inviteHash, invitedByUserId: organizer.id, initialAccess: [{ petId: milo.id, preset: "VIEW_ONLY" }], expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+  });
+
+  // Scenario 4: member with limited pet access.
+  const limited = await prisma.petAccessGrant.findFirst({ where: { petId: milo.id, userId: helper.id, reason: "QA_LIMITED_ACCESS", revokedAt: null } });
+  if (!limited) await prisma.petAccessGrant.create({ data: { petId: milo.id, userId: helper.id, source: "MANUAL", reason: "QA_LIMITED_ACCESS", grantedByUserId: organizer.id, canViewIdentity: true, canViewCareProfile: true } });
+
+  // Scenario 5: temporary access expiring soon.
+  const expiring = await prisma.petAccessGrant.findFirst({ where: { petId: luna.id, userId: temporary.id, reason: "QA_EXPIRING_SOON", revokedAt: null } });
+  if (!expiring) await prisma.petAccessGrant.create({ data: { petId: luna.id, userId: temporary.id, source: "TEMPORARY", reason: "QA_EXPIRING_SOON", grantedByUserId: organizer.id, canViewIdentity: true, canViewHealth: true, canViewCareProfile: true, expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000) } });
+
+  console.log("Seeded five canonical account/household QA scenarios.");
+}

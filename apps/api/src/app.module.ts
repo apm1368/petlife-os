@@ -15,6 +15,7 @@ import { DomainEventsModule } from "./common/events/domain-events.module";
 import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { AccountModule } from "./modules/account/account.module";
 import { UsersModule } from "./modules/users/users.module";
 import { HouseholdsModule } from "./modules/households/households.module";
 import { PetAccessModule } from "./modules/pet-access/pet-access.module";
@@ -75,6 +76,7 @@ import { PlacesModule } from "./modules/places/places.module";
     DomainEventsModule,
     HealthModule,
     AuthModule,
+    AccountModule,
     UsersModule,
     HouseholdsModule,
     PetAccessModule,
