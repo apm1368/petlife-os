@@ -1,9 +1,9 @@
 -- Canonical Batch 1: account, privacy and household collaboration.
 -- Additive only. Existing users, sessions, households and access grants are preserved.
 
-CREATE TYPE "HouseholdInvitationStatus" AS ENUM (''PENDING'', ''ACCEPTED'', ''DECLINED'', ''EXPIRED'', ''CANCELLED'');
-CREATE TYPE "PrivacyRequestStatus" AS ENUM (''PENDING'', ''PROCESSING'', ''READY'', ''COMPLETED'', ''CANCELLED'', ''FAILED'');
-CREATE TYPE "ConsentKind" AS ENUM (''TERMS'', ''PRIVACY'', ''MARKETING'');
+CREATE TYPE "HouseholdInvitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED', 'EXPIRED', 'CANCELLED');
+CREATE TYPE "PrivacyRequestStatus" AS ENUM ('PENDING', 'PROCESSING', 'READY', 'COMPLETED', 'CANCELLED', 'FAILED');
+CREATE TYPE "ConsentKind" AS ENUM ('TERMS', 'PRIVACY', 'MARKETING');
 
 ALTER TABLE "sessions"
   ADD COLUMN "lastSeenAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14,7 +14,7 @@ CREATE TABLE "household_invitations" (
   "householdId" UUID NOT NULL,
   "contact" TEXT NOT NULL,
   "tokenHash" TEXT NOT NULL,
-  "status" "HouseholdInvitationStatus" NOT NULL DEFAULT ''PENDING'',
+  "status" "HouseholdInvitationStatus" NOT NULL DEFAULT 'PENDING',
   "invitedByUserId" UUID NOT NULL,
   "acceptedByUserId" UUID,
   "initialAccess" JSONB NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE "user_consents" (
 CREATE TABLE "data_export_requests" (
   "id" UUID NOT NULL,
   "userId" UUID NOT NULL,
-  "status" "PrivacyRequestStatus" NOT NULL DEFAULT ''PENDING'',
+  "status" "PrivacyRequestStatus" NOT NULL DEFAULT 'PENDING',
   "scope" JSONB NOT NULL,
   "requestedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "readyAt" TIMESTAMP(3),
@@ -55,7 +55,7 @@ CREATE TABLE "data_export_requests" (
 CREATE TABLE "account_deletion_requests" (
   "id" UUID NOT NULL,
   "userId" UUID NOT NULL,
-  "status" "PrivacyRequestStatus" NOT NULL DEFAULT ''PENDING'',
+  "status" "PrivacyRequestStatus" NOT NULL DEFAULT 'PENDING',
   "reason" TEXT,
   "requestedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "cancelledAt" TIMESTAMP(3),
