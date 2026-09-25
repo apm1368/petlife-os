@@ -56,13 +56,13 @@ describe("Public spatial landing", () => {
       expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("overview"),
     );
   });
-  it.each(["fa", "en"] as const)("preserves existing %s email/phone auth", (locale) => {
+  it.each(["fa", "en"] as const)("keeps phone-first auth and the email fallback for %s", (locale) => {
     renderWithIntl(<AuthPage />, locale);
     const buttons = screen.getAllByRole("button");
     fireEvent.click(buttons[0]!);
-    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
-    fireEvent.click(buttons[1]!);
     expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=phone`);
+    fireEvent.click(buttons[1]!);
+    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
   });
   it("rejects unsupported locales", async () => {
     await expect(RootPage({ params: Promise.resolve({ locale: "xx" }) })).rejects.toThrow("NOT_FOUND");

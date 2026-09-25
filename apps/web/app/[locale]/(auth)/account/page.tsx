@@ -135,6 +135,9 @@ function AccountFlow() {
       <Button variant="ghost" disabled={cooldown > 0 || isSubmitting} onClick={sendCode}>
         {cooldown > 0 ? t("otp.resendIn", { seconds: cooldown }) : t("otp.resend")}
       </Button>
+      <Button variant="ghost" disabled={isSubmitting} onClick={() => { setStage("identifier"); setCode(""); setError(null); }}>
+        {locale === "fa" ? "تغییر ایمیل یا موبایل" : "Change email or phone"}
+      </Button>
     </div>
   );
 }
@@ -147,7 +150,7 @@ function mapError(err: unknown, t: ReturnType<typeof useTranslations<"auth">>): 
       return t("otp.rateLimited", { seconds });
     }
     if (err.code === "INVALID_CREDENTIALS") return t("password.invalidCredentials");
-    return err.message;
+    return t("welcome.googleAuthFailed");
   }
   return "Something went wrong. Please try again.";
 }
