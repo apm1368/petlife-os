@@ -4,6 +4,14 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
 
+  // Immutable release metadata injected by CI/deploy. These values are
+  // public operational identifiers (never secrets) and power /health/version.
+  APP_VERSION: z.string().default("0.1.0"),
+  BUILD_SHA: z.string().default("unknown"),
+  BUILD_TIME: z.string().default("unknown"),
+  DEPLOYMENT_ENVIRONMENT: z.string().default("local"),
+  DEPLOYMENT_ID: z.string().default("unknown"),
+
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1),
 

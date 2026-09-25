@@ -23,7 +23,7 @@ export class ProvidersController {
   }
 
   @Get(":providerId/availability")
-  getAvailability(@Param("providerId") providerId: string, @Query() query: GetAvailabilityDto) {
-    return this.providersService.getAvailability(providerId, query);
+  getAvailability(@Param("providerId") providerId: string, @Query() query: GetAvailabilityDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+    return this.providersService.getAvailability(providerId, query, user?.id);
   }
 }

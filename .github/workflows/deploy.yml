@@ -2,7 +2,7 @@ name: Deploy to VPS
 
 on:
   push:
-    branches: [ main, master, integration/local ]
+    branches: [main, master, integration/local]
   workflow_dispatch:
 
 concurrency:
@@ -10,7 +10,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       - name: Deploy over SSH
@@ -30,4 +34,9 @@ jobs:
             git fetch --prune origin
             git checkout -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
             git reset --hard "${{ github.sha }}"
+            export BUILD_SHA='${{ github.sha }}'
+            export BUILD_TIME='${{ github.event.head_commit.timestamp }}'
+            export DEPLOYMENT_ENVIRONMENT='staging'
+            export DEPLOYMENT_ID='github-${{ github.run_id }}-${{ github.run_attempt }}'
             /var/www/petlife-os/deploy.sh
+            bash scripts/smoke-staging.sh

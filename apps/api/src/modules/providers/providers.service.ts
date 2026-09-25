@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ProviderVerificationStatus as PrismaVerificationStatus, type Prisma, type ProviderLocation, type ProviderOrganization, type ProviderService, type ProviderServiceType as PrismaServiceType } from "@prisma/client";
+import { ProviderType, ProviderVerificationStatus as PrismaVerificationStatus, ServiceCategory, type Prisma, type ProviderLocation, type ProviderOrganization, type ProviderService, type ProviderServiceType as PrismaServiceType } from "@prisma/client";
 import type { AvailabilityResponseDto, ProviderProfileDto, ProviderSummaryDto } from "@petlife/types";
 import { PetSpecies } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -9,8 +9,10 @@ import type { SearchVetsDto } from "./dto/search-vets.dto";
 import type { GetAvailabilityDto } from "./dto/get-availability.dto";
 import { SlotGeneratorService } from "./slot-generator.service";
 import { toProviderLocationDto as toLocationDto, toProviderServiceDto as toServiceDto } from "./provider-dto.mapper";
+import { PetAccessService } from "../pet-access/pet-access.service";
 
 type OrgWithRelations = ProviderOrganization & { locations: ProviderLocation[]; services: ProviderService[] };
+const VET_PROVIDER_TYPES: ProviderType[] = [ProviderType.VET_CLINIC, ProviderType.VET_HOSPITAL, ProviderType.VETERINARIAN];
 
 /**
  * Consumer-facing provider discovery + profile + availability. Deliberately
@@ -23,18 +25,21 @@ export class ProvidersService {
     private readonly prisma: PrismaService,
     private readonly slotGenerator: SlotGeneratorService,
     private readonly events: DomainEventsService,
+    private readonly petAccess: PetAccessService,
   ) {}
 
   async searchVets(query: SearchVetsDto): Promise<ProviderSummaryDto[]> {
     const verifiedOnly = query.verifiedOnly !== "false";
 
     const where: Prisma.ProviderOrganizationWhereInput = {
+      type: { in: VET_PROVIDER_TYPES },
       ...(verifiedOnly ? { verificationStatus: PrismaVerificationStatus.VERIFIED } : {}),
       ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
       ...(query.city ? { locations: { some: { city: { equals: query.city, mode: "insensitive" } } } } : {}),
       services: {
         some: {
           isActive: true,
+          category: ServiceCategory.VET,
           ...(query.serviceType ? { type: query.serviceType as unknown as PrismaServiceType } : {}),
           ...(query.species === PetSpecies.DOG ? { supportsDog: true } : {}),
           ...(query.species === PetSpecies.CAT ? { supportsCat: true } : {}),
@@ -56,7 +61,7 @@ export class ProvidersService {
       where: { id: providerId },
       include: { locations: true, services: true },
     });
-    if (!org) throw new NotFoundApiException("Provider");
+    if (!org || !VET_PROVIDER_TYPES.includes(org.type)) throw new NotFoundApiException("Provider");
 
     if (viewerId) {
       await this.events.publish("ProviderViewed", { providerId, viewerId }, { aggregateType: "ProviderOrganization", aggregateId: providerId });
@@ -73,17 +78,17 @@ export class ProvidersService {
       logoUrl: org.logoUrl,
       websiteUrl: org.websiteUrl,
       locations: org.locations.map(toLocationDto),
-      services: org.services.filter((s) => s.isActive).map(toServiceDto),
+      services: org.services.filter((s) => s.isActive && s.category === ServiceCategory.VET).map(toServiceDto),
     };
   }
 
-  async getAvailability(providerId: string, query: GetAvailabilityDto): Promise<AvailabilityResponseDto> {
+  async getAvailability(providerId: string, query: GetAvailabilityDto, viewerId?: string): Promise<AvailabilityResponseDto> {
     const service = await this.prisma.providerService.findUnique({ where: { id: query.serviceId } });
-    if (!service || service.providerOrganizationId !== providerId) throw new NotFoundApiException("Service");
+    if (!service || service.providerOrganizationId !== providerId || service.category !== ServiceCategory.VET) throw new NotFoundApiException("Service");
 
     let petCompatible = true;
     if (query.petId) {
-      const pet = await this.prisma.pet.findUnique({ where: { id: query.petId } });
+      const pet = await this.petAccess.findAccessiblePet(query.petId, viewerId);
       if (pet) {
         petCompatible = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : true;
       }
@@ -114,7 +119,7 @@ export class ProvidersService {
     const locations = cityFilter
       ? org.locations.filter((l) => l.city.toLowerCase() === cityFilter.toLowerCase())
       : org.locations;
-    const services = org.services.filter((s) => s.isActive);
+    const services = org.services.filter((s) => s.isActive && s.category === ServiceCategory.VET);
 
     const nextAvailableSlotStart = await this.cheapNextAvailableSlot(org.id, locations[0]?.id, services[0]?.id);
 
