@@ -61,6 +61,7 @@ export const healthService = {
     apiFetch<HealthProfileDto>(`/pets/${petId}/health/profile`, { method: "PATCH", body: input }),
 
   listAllergies: (petId: string) => apiFetch<AllergyDto[]>(`/pets/${petId}/health/allergies`),
+  getAllergy: (petId: string, id: string) => apiFetch<AllergyDto>(`/pets/${petId}/health/allergies/${id}`),
   createAllergy: (petId: string, input: CreateAllergyInput) =>
     apiFetch<AllergyDto>(`/pets/${petId}/health/allergies`, { method: "POST", body: input }),
   updateAllergy: (petId: string, id: string, input: Partial<CreateAllergyInput>) =>
@@ -69,12 +70,14 @@ export const healthService = {
     apiFetch<void>(`/pets/${petId}/health/allergies/${id}`, { method: "DELETE" }),
 
   listConditions: (petId: string) => apiFetch<ConditionDto[]>(`/pets/${petId}/health/conditions`),
+  getCondition: (petId: string, id: string) => apiFetch<ConditionDto>(`/pets/${petId}/health/conditions/${id}`),
   createCondition: (petId: string, input: CreateConditionInput) =>
     apiFetch<ConditionDto>(`/pets/${petId}/health/conditions`, { method: "POST", body: input }),
   updateCondition: (petId: string, id: string, input: Partial<CreateConditionInput>) =>
     apiFetch<ConditionDto>(`/pets/${petId}/health/conditions/${id}`, { method: "PATCH", body: input }),
 
   listMedications: (petId: string) => apiFetch<MedicationDto[]>(`/pets/${petId}/health/medications`),
+  getMedication: (petId: string, id: string) => apiFetch<MedicationDto>(`/pets/${petId}/health/medications/${id}`),
   createMedication: (petId: string, input: CreateMedicationInput) =>
     apiFetch<MedicationDto>(`/pets/${petId}/health/medications`, { method: "POST", body: input }),
   updateMedication: (petId: string, id: string, input: Partial<CreateMedicationInput>) =>

@@ -62,6 +62,10 @@ export class ImagingStudyService {
     return row;
   }
 
+  async getDto(petId: string, imagingStudyId: string): Promise<ImagingStudyDto> {
+    return toImagingStudyDto(await this.get(petId, imagingStudyId));
+  }
+
   async voidStudy(petId: string, imagingStudyId: string, reason: string): Promise<ImagingStudyDto> {
     const existing = await this.get(petId, imagingStudyId);
     const row = await this.prisma.imagingStudy.update({

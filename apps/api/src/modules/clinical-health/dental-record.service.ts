@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { SourceType } from "@prisma/client";
 import type { DentalRecordDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { NotFoundApiException } from "../../common/errors/api-exception";
 import { DENTAL_RECORD_INCLUDE, toDentalRecordDto } from "./clinical-health-mapper";
 import { assertVisitBelongsToPet } from "./clinical-link.util";
 import type { CreateDentalRecordDto } from "./dto/dental-record.dto";
@@ -37,5 +38,11 @@ export class DentalRecordService {
   async list(petId: string): Promise<DentalRecordDto[]> {
     const rows = await this.prisma.dentalRecord.findMany({ where: { petId }, include: DENTAL_RECORD_INCLUDE, orderBy: { createdAt: "desc" } });
     return rows.map(toDentalRecordDto);
+  }
+
+  async get(petId: string, recordId: string): Promise<DentalRecordDto> {
+    const row = await this.prisma.dentalRecord.findUnique({ where: { id: recordId }, include: DENTAL_RECORD_INCLUDE });
+    if (!row || row.petId !== petId) throw new NotFoundApiException("Dental record");
+    return toDentalRecordDto(row);
   }
 }

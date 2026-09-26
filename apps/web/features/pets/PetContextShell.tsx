@@ -69,7 +69,7 @@ const sections = [
   { key: "overview", suffix: "" },
   { key: "health", suffix: "/health" },
   { key: "care", suffix: "/care" },
-  { key: "documents", suffix: "/health/advanced/documents" },
+  { key: "documents", suffix: "/health/documents" },
   { key: "memories", suffix: "/memories" },
   { key: "activity", suffix: "/life-timeline" },
   { key: "travel", suffix: "/travel" },
@@ -144,7 +144,7 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
         {visibleSections.map((section) => {
           const href = base + section.suffix;
           const active = section.key === "health"
-            ? (pathname === href || pathname.startsWith(href + "/")) && !pathname.startsWith(base + "/health/advanced/documents")
+            ? (pathname === href || pathname.startsWith(href + "/")) && !pathname.startsWith(base + "/health/documents")
             : section.suffix ? pathname === href || pathname.startsWith(href + "/") : pathname === base;
           return (
             <Link key={section.key} href={href} aria-current={active ? "page" : undefined} className="shrink-0 border-b-2 border-transparent px-3 py-2 text-sm text-text-secondary hover:text-text-primary aria-[current=page]:border-brand-natural aria-[current=page]:font-bold aria-[current=page]:text-brand-natural">
