@@ -750,7 +750,8 @@
         "services": "Services",
         "team": "Team",
         "clinical": "Clinical",
-        "patients": "Patients"
+        "patients": "Patients",
+        "sharedRecords": "Shared records"
       },
       "notAProvider": {
         "title": "No provider access",

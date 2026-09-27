@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ContextSurface, ErrorRecovery, PriorityAction, Skeleton, StatusLabel } from "@petlife/ui";
@@ -22,13 +22,14 @@ export function HealthOverviewView({ petId }: { petId: string }) {
   const base = `/${locale}/pets/${petId}/health`;
   const [data, setData] = useState<{ summary: HealthSummaryDto; overview: HealthOverviewDto } | null>(null);
   const [error, setError] = useState(false);
-  async function load() { setError(false); try { const summary = await healthService.getSummary(petId); const overview = await healthAdvancedService.getOverview(petId).catch(() => ({ petId, upcomingCare: [], overdueCare: [], activeMedicationsCount: summary.activeMedicationCount, unresolvedCarePlanItemsCount: 0, recentDocuments: [], recentVisits: [], missingInformation: [] })); setData({ summary, overview }); } catch { setError(true); } }
-  useEffect(() => { void load(); }, [petId]);
+  const load = useCallback(async () => { setError(false); try { const [summary, overview] = await Promise.all([healthService.getSummary(petId), healthAdvancedService.getOverview(petId)]); setData({ summary, overview }); } catch { setError(true); } }, [petId]);
+  useEffect(() => { void load(); }, [load]);
   if (error) return <ErrorRecovery title={c.title} message="" retryLabel={locale === "fa" ? "تلاش دوباره" : "Try again"} onRetry={load} />;
   if (!data) return <Skeleton className="h-72 w-full" aria-label={c.title} />;
   const { summary, overview } = data;
   const attention = summary.primaryAttention;
   return <div className="flex flex-col gap-7">
+    <Link className="self-end text-sm font-bold text-brand-natural" href={`${base}/share`}>{locale === "fa" ? "اشتراک با دامپزشک" : "Share with vet"}</Link>
     <header><h1 className="text-page-title text-text-primary">{c.title}</h1><p className="mt-2 text-body text-text-secondary">{c.subtitle}</p></header>
     <ContextSurface>{attention ? <PriorityAction title={t(attention.titleKey.replace("health.", ""))} primaryLabel={c.open} onPrimary={() => location.assign(attention.action === "VIEW_VACCINATION" ? `${base}/vaccination` : `${base}/allergies`)} /> : <p className="text-body text-text-primary">{t("setupStatus.COMPLETE")}</p>}</ContextSurface>
     <section><h2 className="mb-3 text-section-title text-text-primary">{c.current}</h2><ContextSurface className="divide-y divide-border-subtle">

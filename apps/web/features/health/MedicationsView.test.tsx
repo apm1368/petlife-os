@@ -39,7 +39,7 @@ describe("MedicationsView RTL mixed content", () => {
     const { container } = renderWithIntl(<MedicationsView petId="pet-1" />, "fa");
 
     const nameLine = await waitFor(() => {
-      const el = container.querySelector('p[dir="auto"]');
+      const el = container.querySelector('a[dir="auto"]');
       if (!el) throw new Error("not rendered yet");
       return el;
     });
@@ -52,7 +52,7 @@ describe("MedicationsView RTL mixed content", () => {
 
     const { container: enContainer, unmount } = renderWithIntl(<MedicationsView petId="pet-1" />, "en");
     const enLine = await waitFor(() => {
-      const el = enContainer.querySelector('p[dir="auto"]');
+      const el = enContainer.querySelector('a[dir="auto"]');
       if (!el) throw new Error("not rendered yet");
       return el;
     });
@@ -61,7 +61,7 @@ describe("MedicationsView RTL mixed content", () => {
 
     const { container: faContainer } = renderWithIntl(<MedicationsView petId="pet-1" />, "fa");
     const faLine = await waitFor(() => {
-      const el = faContainer.querySelector('p[dir="auto"]');
+      const el = faContainer.querySelector('a[dir="auto"]');
       if (!el) throw new Error("not rendered yet");
       return el;
     });

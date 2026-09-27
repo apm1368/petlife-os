@@ -29,6 +29,8 @@ import { CareProfileModule } from "./modules/care-profile/care-profile.module";
 import { ProvidersModule } from "./modules/providers/providers.module";
 import { BookingModule } from "./modules/booking/booking.module";
 import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module";
+import { CareReminderModule } from "./modules/care-reminders/care-reminder.module";
+import { VetShareModule } from "./modules/vet-share/vet-share.module";
 import { ServicesModule } from "./modules/services/services.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
 import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
@@ -90,6 +92,8 @@ import { PlacesModule } from "./modules/places/places.module";
     ProvidersModule,
     BookingModule,
     CareCalendarModule,
+    CareReminderModule,
+    VetShareModule,
     ServicesModule,
     AddressesModule,
     ProviderOsModule,

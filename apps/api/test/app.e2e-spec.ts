@@ -1128,6 +1128,25 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
     });
 
+    it("Batch 2: a VET booking without an explicit owner health choice grants operational recording only, never health reading", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service, vetUser } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      const grant = await prisma.petAccessGrant.findFirstOrThrow({ where: { petId, userId: vetUser.id, source: PetAccessSource.TEMPORARY } });
+      expect(grant).toMatchObject({ canViewHealth: false, canEditHealth: false, canRecordClinicalData: true, reason: "VET_BOOKING" });
+      const vetClient = authedRequest(app, await signUp(app, logSpy, vetUser.email!));
+      await vetClient.get(`/pets/${petId}/health/summary`).expect(403);
+      // Legacy booking rows that carried health flags before consent was recorded are still not honored for reading.
+      await prisma.petAccessGrant.update({ where: { id: grant.id }, data: { canViewHealth: true } });
+      await vetClient.get(`/pets/${petId}/health/summary`).expect(403);
+    });
+
     it("gates the vet's temporary access at canViewHealth/canEditHealth exactly — view works, edit does not", async () => {
       const { client, petId } = await setupOwnerWithPet();
       const { organization, location, service, vetUser } = await seedVerifiedClinic();

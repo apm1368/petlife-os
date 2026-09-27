@@ -750,7 +750,8 @@
         "services": "خدمات",
         "team": "تیم",
         "clinical": "درمانگاه",
-        "patients": "بیماران"
+        "patients": "بیماران",
+        "sharedRecords": "پرونده‌های اشتراکی"
       },
       "notAProvider": {
         "title": "دسترسی ارائه‌دهنده ندارید",

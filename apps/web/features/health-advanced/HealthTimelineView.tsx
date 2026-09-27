@@ -1,16 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { HealthTimelineEntryDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ApiError } from "@/lib/api/client";
 
+/** Canonical detail route per timeline record type; rehab sessions have no standalone detail page. */
+const DETAIL_PATH: Record<string, string> = {
+  VACCINATION: "vaccination",
+  MEDICATION_STARTED: "medications/:id",
+  MEDICATION_STOPPED: "medications/:id",
+  CONDITION_RECORDED: "conditions/:id",
+  ALLERGY_RECORDED: "allergies/:id",
+  CLINICAL_VISIT: "visits/:id",
+  LAB_RESULT: "labs/:id",
+  IMAGING_STUDY: "imaging/:id",
+  REFERRAL: "referrals/:id",
+  DENTAL_RECORD: "dental/:id",
+  NUTRITION_PLAN: "nutrition/clinical/:id",
+  OBSERVATION: "observations/:id",
+  DOCUMENT_UPLOADED: "documents/:id",
+};
+
 /** Every entry always shows its provenance (spec: "provenance indicator") — never just a bare fact with no origin. */
 export function HealthTimelineView({ petId }: { petId: string }) {
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
 
   const [entries, setEntries] = useState<HealthTimelineEntryDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +64,11 @@ export function HealthTimelineView({ petId }: { petId: string }) {
                 <span className="text-metadata text-text-secondary">{new Date(entry.occurredAt).toLocaleDateString()}</span>
                 <StatusLabel tone="neutral">{entry.sourceType}</StatusLabel>
               </div>
-              <p className="text-body text-text-primary">{entry.summary}</p>
+              {DETAIL_PATH[entry.recordType] ? (
+                <Link href={`/${locale}/pets/${petId}/health/${DETAIL_PATH[entry.recordType]!.replace(":id", entry.recordId)}`} className="text-body text-text-primary underline-offset-4 hover:underline">{entry.summary}</Link>
+              ) : (
+                <p className="text-body text-text-primary">{entry.summary}</p>
+              )}
               {entry.source.providerOrganizationName ? <p className="text-metadata text-text-secondary">{entry.source.providerOrganizationName}</p> : null}
             </ContextSurface>
           ))}

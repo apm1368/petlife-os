@@ -1254,6 +1254,7 @@ model AccountDeletionRequest {
 // ---------------------------------------------------------------------------
 
 model Pet {
+  careReminders CareReminder[]
   id          String    @id @default(uuid()) @db.Uuid
   householdId String    @db.Uuid
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
@@ -1374,6 +1375,9 @@ model Pet {
 /// Replaces the old one-row-per-(pet,user) `pet_access` table (schema_hardening
 /// migration); deliberately has NO @@unique([petId, userId]).
 model PetAccessGrant {
+  healthScopes String[] @default([])
+  selectedDocumentIds String[] @default([]) @db.Uuid
+  sharedWithProviderUserId String? @db.Uuid
   id     String @id @default(uuid()) @db.Uuid
   petId  String @db.Uuid
   pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
@@ -4560,6 +4564,35 @@ model AdminAuditLog {
 /// attemptCount, lastError) make this row usable as a real transactional
 /// outbox later — a poller can pick up unprocessed rows, retry with backoff,
 /// and record failures — without any schema change when that poller is built.
+/// Reminder scheduling is separate from clinical source truth and booking state.
+model CareReminder {
+  id String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Restrict)
+  createdByUserId String @db.Uuid
+  title String
+  type String
+  source String @default("USER_CREATED")
+  sourceId String? @db.Uuid
+  originalDueAt DateTime
+  dueAt DateTime
+  snoozedUntil DateTime?
+  state String @default("UPCOMING")
+  recurrence String @default("ONCE")
+  intervalDays Int?
+  completedAt DateTime?
+  cancelledAt DateTime?
+  notifiedAt DateTime?
+  version Int @default(0)
+  parentId String? @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([parentId, originalDueAt])
+  @@index([petId, dueAt])
+  @@index([state, dueAt])
+  @@map("care_reminders")
+}
+
 model DomainEvent {
   id            String    @id @default(uuid()) @db.Uuid
   type          String

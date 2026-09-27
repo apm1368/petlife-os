@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   // vet's day starts at the whiteboard, not at the booking list.
   { href: "/clinical", labelKey: "nav.clinical" },
   { href: "/patients", labelKey: "nav.patients" },
+  { href: "/shared-records", labelKey: "nav.sharedRecords" },
   { href: "/bookings", labelKey: "nav.bookings" },
   { href: "/calendar", labelKey: "nav.schedule" },
   { href: "/availability", labelKey: "nav.availability" },

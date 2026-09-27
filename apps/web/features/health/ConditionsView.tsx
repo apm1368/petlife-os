@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import { SourceType, type ConditionDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
@@ -9,6 +10,7 @@ import { healthService } from "@/services/health.service";
 export function ConditionsView({ petId }: { petId: string }) {
   const t = useTranslations("health.conditions");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [conditions, setConditions] = useState<ConditionDto[] | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState("");
@@ -71,7 +73,7 @@ export function ConditionsView({ petId }: { petId: string }) {
       {conditions.map((condition) => (
         <ContextSurface key={condition.id} className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-body text-text-primary">{condition.name}</p>
+            <Link href={`/${locale}/pets/${petId}/health/conditions/${condition.id}`} className="text-body text-text-primary underline-offset-4 hover:underline">{condition.name}</Link>
             {condition.notes ? <p className="text-metadata text-text-secondary line-clamp-1">{condition.notes}</p> : null}
           </div>
           <StatusLabel tone={condition.status === "ACTIVE" ? "attention" : "neutral"}>

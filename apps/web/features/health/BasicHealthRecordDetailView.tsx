@@ -14,7 +14,8 @@ export function BasicHealthRecordDetailView({ petId, recordId, kind }: { petId: 
   const locale = useLocale() as "fa" | "en"; const fa = locale === "fa";
   const [record, setRecord] = useState<RecordValue | null>(null); const [error, setError] = useState(false);
   async function load() { setError(false); try { if (kind === "condition") setRecord(await healthService.getCondition(petId, recordId)); else if (kind === "allergy") setRecord(await healthService.getAllergy(petId, recordId)); else setRecord(await healthService.getMedication(petId, recordId)); } catch { setError(true); } }
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [petId, recordId, kind]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load is recreated each render; the ids are the real inputs.
+  useEffect(() => { void load(); }, [petId, recordId, kind]);
   if (error) return <ErrorRecovery title={fa ? "رکورد در دسترس نیست." : "The record is unavailable."} message="" retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={load} />;
   if (!record) return <Skeleton className="h-72 w-full" aria-label={fa ? "بارگذاری رکورد" : "Loading record"} />;
   const model = present(kind, record, fa);

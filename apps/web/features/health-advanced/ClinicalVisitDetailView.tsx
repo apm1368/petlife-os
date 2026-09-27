@@ -13,7 +13,8 @@ export function ClinicalVisitDetailView({ petId, visitId }: { petId: string; vis
   const [visit, setVisit] = useState<ClinicalVisitDetailDto | null>(null);
   const [error, setError] = useState(false);
   async function load() { setError(false); try { setVisit(await healthAdvancedService.getVisit(petId, visitId)); } catch { setError(true); } }
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [petId, visitId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load is recreated each render; the ids are the real inputs.
+  useEffect(() => { void load(); }, [petId, visitId]);
   if (error) return <ErrorRecovery title={fa ? "ویزیت در دسترس نیست." : "The visit is unavailable."} message="" retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={load} />;
   if (!visit) return <Skeleton className="h-80 w-full" aria-label={fa ? "بارگذاری ویزیت" : "Loading visit"} />;
   const fields = [{ label: fa ? "سابقه" : "History", value: visit.historyText }, { label: fa ? "یافته‌ها و مشاهدات" : "Findings and observations", value: visit.observationsText }, { label: fa ? "ارزیابی" : "Assessment", value: visit.assessmentText }, { label: fa ? "برنامه" : "Plan", value: visit.planText }].filter((field) => field.value);

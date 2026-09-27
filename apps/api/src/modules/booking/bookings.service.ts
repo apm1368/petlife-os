@@ -261,7 +261,7 @@ export class BookingsService {
           { tx, aggregateType: "Booking", aggregateId: created.id },
         );
 
-        await this.petAccessGrants.grantForBooking(created, hold.providerUserId ?? undefined, scopePreset, tx);
+        await this.petAccessGrants.grantForBooking(created, hold.providerUserId ?? undefined, scopePreset, tx, dto.accessSelection !== undefined);
         await this.careCalendar.upsertForBooking(created, tx);
 
         return created.id;
@@ -365,6 +365,9 @@ export class BookingsService {
     }
 
     const scopePreset = (origin.petAccess?.scopePreset as unknown as PetAccessScopePreset | undefined) ?? DEFAULT_SCOPE_PRESET_BY_CATEGORY[category];
+    // Occurrences inherit the owner's health-consent decision from the origin booking, never widen it.
+    const originGrant = origin.petAccess ? await this.prisma.petAccessGrant.findUnique({ where: { id: origin.petAccess.petAccessGrantId }, select: { reason: true } }) : null;
+    const originConsented = originGrant?.reason?.endsWith("_HEALTH_CONSENT") ?? false;
     const durationMs = origin.endAt.getTime() - origin.startAt.getTime();
 
     const series = await this.prisma.bookingSeries.create({
@@ -428,7 +431,7 @@ export class BookingsService {
             { bookingId: created.id, petId: created.petId, category, bookingSeriesId: series.id },
             { tx, aggregateType: "Booking", aggregateId: created.id },
           );
-          await this.petAccessGrants.grantForBooking(created, origin.providerUserId ?? undefined, scopePreset, tx);
+          await this.petAccessGrants.grantForBooking(created, origin.providerUserId ?? undefined, scopePreset, tx, originConsented);
           await this.careCalendar.upsertForBooking(created, tx);
           return created.id;
         });

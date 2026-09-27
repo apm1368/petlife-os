@@ -11,10 +11,12 @@ import {
 } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { healthService } from "@/services/health.service";
+import { healthAdvancedService } from "@/services/health-advanced.service";
 import { HealthOverviewView } from "./HealthOverviewView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/services/health.service", () => ({ healthService: { getSummary: vi.fn() } }));
+vi.mock("@/services/health-advanced.service", () => ({ healthAdvancedService: { getOverview: vi.fn() } }));
 
 const BASE_SUMMARY: HealthSummaryDto = {
   status: SetupStatus.COMPLETE,
@@ -30,6 +32,7 @@ const BASE_SUMMARY: HealthSummaryDto = {
 describe("HealthOverviewView", () => {
   beforeEach(() => {
     vi.mocked(healthService.getSummary).mockReset();
+    vi.mocked(healthAdvancedService.getOverview).mockResolvedValue({ petId: "pet-1", upcomingCare: [], overdueCare: [], activeMedicationsCount: 0, unresolvedCarePlanItemsCount: 0, recentDocuments: [], recentVisits: [], missingInformation: [] });
   });
 
   it("shows a single primary-attention block, not a grid of equal cards, when something needs attention", async () => {

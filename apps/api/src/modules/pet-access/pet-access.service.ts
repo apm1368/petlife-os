@@ -45,11 +45,17 @@ export class PetAccessService {
 
   async getEffectivePermissions(petId: string, userId: string, client: QueryClient = this.prisma): Promise<PetAccessFlags | null> {
     const grants = await client.petAccessGrant.findMany({ where: { petId, userId } });
-    const active = grants.filter((grant) => isGrantActive(grant, new Date()));
+    // Granular vet shares are usable only through the scope-enforcing read API.
+    const active = grants.filter((grant) => grant.reason !== "EXPLICIT_VET_SHARE" && isGrantActive(grant, new Date()));
     if (!active.length) return null;
     return active.reduce<PetAccessFlags>((union, grant) => {
       const next = { ...union };
-      for (const key of FLAG_KEYS) next[key] = union[key] || grant[key];
+      for (const key of FLAG_KEYS) {
+        // Booking grants without recorded owner consent (including all pre-consent legacy rows) never read or
+        // edit health; clinical recording for the visit window stays operational.
+        const bookingHealth = grant.reason?.endsWith("_BOOKING") && (key === "canViewHealth" || key === "canEditHealth");
+        next[key] = union[key] || (!bookingHealth && grant[key]);
+      }
       return next;
     }, NO_ACCESS_PRESET);
   }

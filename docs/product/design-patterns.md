@@ -120,3 +120,96 @@ Action order follows the locale's reading model while the safer cancel path rema
 
 ### Reuse
 Do not make every confirmation red. Reserve destructive styling for revocation, deletion, and irreversible lifecycle changes.
+
+## PET DETAIL PATTERN — Batch 2
+
+### Layout anatomy
+Persistent pet identity header (photo, name, species, breed, sex, age, recorded weight, microchip), lifecycle strip, permission-aware section navigation, then one focused content area. Overview order: Needs Attention → Upcoming → Recent Health → Recent Activity → Recent Memory → shortcuts. Data comes from the bounded `GET /pets/:id/overview` read model, not ten client fetches.
+
+### Navigation
+Overview, Health, Care, Documents, Memories, Activity, Travel. Clinical and care detail pages keep the pet header and a back link to their list. LOST links into the existing Lost Pet flow; it is never duplicated here.
+
+### Components
+`PetContextShell`, `PetProfileView`, `Avatar`, `StatusLabel`, `ContextSurface`, `EmptyState`, `ErrorRecovery`, `Skeleton`.
+
+### Statuses
+Lifecycle: ACTIVE, LOST (urgent context, no public medical data), TEMPORARILY_TRANSFERRED (current care/access context), DECEASED and MEMORIAL (memories first, no routine care or booking promotion, history stays readable). Attention severity: INFORMATIONAL, ATTENTION, CONCERN, URGENT, EMERGENCY. Data quality is separate: UNKNOWN, INCOMPLETE, KNOWN_NEGATIVE — none of them render as "healthy".
+
+### Empty / loading / error
+Bounded skeleton; forbidden and not-found show recovery, never an endless skeleton; missing age, breed or clinical data use explicit "not recorded" copy.
+
+### Responsive
+The header wraps; section navigation scrolls horizontally on its own; content is single-column below `md`. Nothing is squeezed from desktop at 360/390px.
+
+### RTL (fa)
+Logical properties (`ps`/`pe`, `border-s`) mirror the layout; back chevrons point to the inline start; dates use the Persian calendar; Latin drug and test names are isolated with `dir="auto"`.
+
+### LTR (en)
+Same structure mirrored, Gregorian dates, no text-align-only adaptation.
+
+### Reuse rules
+Use for every pet-owned domain (Memories, Travel, Lost Pet, Insurance, admin pet context), not for account settings. Access flags decide visible navigation, and server guards independently decide access. A scoped veterinarian share never grants this shell.
+
+## HEALTH RECORD PATTERN — Batch 2
+
+### Layout anatomy
+Back to list → record type, title and status → provenance and date metadata → readable clinical sections → linked entities (visit, referral, documents) → correction and revision history where supported. Every type belongs to one Health Home; `/health/advanced` redirects there.
+
+### Navigation
+Canonical `/pets/:id/health/<type>/:recordId`. Lists and the health timeline link each entry to its detail page. Rehab sessions have no standalone page and are reached through their plan. Vaccination is one recorded summary per pet — no invented vaccination event IDs. Clinical nutrition plans stay distinct from owner feeding notes.
+
+### Components
+`HealthRecordDetailView`, `BasicHealthRecordDetailView`, `ClinicalVisitDetailView`, `HealthDocumentDetailView`, `ObservationDetailView`, `HealthTimelineView`, `VetShareView`.
+
+### Statuses and provenance
+Provider Record, Owner Observation, Owner Correction and Provider Revision are four distinct labels and are never flattened. Lab flags appear only when the source recorded them. Unknown, incomplete, recorded, revised and voided are distinct states.
+
+### Empty / loading / error
+"No recorded X" rather than "no X". Failed clinical loads show an error, never fabricated zero counts. Reading history never requires a premium plan.
+
+### Documents
+Metadata loads through authorization; the short-lived signed URL is requested separately and never persisted. Storage object keys never reach UI payloads. Preview supports PDF and allow-listed raster images and falls back to opening the file. Revocation stops new links from being issued; a link already issued stays valid until its storage TTL expires, and the UI does not claim otherwise.
+
+### Share With Vet
+Owner flow: choose a verified veterinarian, scopes (conditions, allergies, current medications, vaccination summary, selected documents, clinical visits) and an expiry of at most 90 days → preview of exactly those records → confirm → issued list showing provider, scope and the from–until window → revoke. Recipient flow: `/provider/shared-records` lists only active shares; the detail page shows only the granted sections and signed downloads for the selected documents. An expired or revoked share shows an explicit "no longer active" state.
+
+### Responsive / RTL / LTR
+Max-width reading column; metadata wraps; bounded preview; bidi-safe titles; logical leading borders; Jalali dates in fa and Gregorian in en.
+
+### Reuse rules
+Reuse in the provider patient view. Reminder completion never writes clinical facts. Scoped shares are read through their scope-enforcing API, never through the broad health permission union.
+
+## CARE / SCHEDULING PATTERN — Batch 2
+
+### Layout anatomy
+Pet context → title with Calendar link and Create action → state filters (Due soon, Overdue, Upcoming, Completed, Snoozed, Cancelled, Custom) → care rows. Each row shows pet, type, due time, source, recurrence, status, original due date when adjusted, notification state (sent time or not yet sent), and a link to the related record. Daily-care instructions are a secondary disclosure.
+
+### Navigation
+`/pets/:id/care` → `/pets/:id/care/:careItemId` (event detail with all actions) and `/pets/:id/care/calendar`. Notifications deep-link to the exact care item.
+
+### Components
+`CareCenterView`, `ReminderForm`, `PetCareCalendarView`, `care-calendar-date`, `CareReminderService`, `CareReminderWorker`, `CareSourceListener`.
+
+### Statuses and actions
+States: UPCOMING, DUE (within 24 hours), OVERDUE, COMPLETED, SNOOZED, CANCELLED. Missed care never auto-completes. Actions: create, edit (user-created only), complete (audited; creates exactly one next occurrence for the chosen recurrence; no clinical record), snooze (later today — up to 3 hours, capped at 22:00 Tehran; tomorrow 09:00 Tehran; or a custom time), reschedule, cancel. Snooze changes only the wake time; `originalDueAt` is always kept. Provider- and record-derived items cannot be edited; rescheduling them never changes the source record.
+
+### Sources
+USER_CREATED (owner), PROVIDER_CREATED (care plan item), MEDICAL_RECORD_DERIVED (recorded vaccination due date), BOOKING_DERIVED, SYSTEM_SCHEDULED. Projection uses only recorded dates. When a source date changes, the open projection is cancelled and replaced; history is kept.
+
+### Notifications
+H10 delivery with stable event IDs: one DUE notification inside the 24-hour window and one OVERDUE notification after the due time. Snoozed, closed or inaccessible items are skipped. SMS respects preferences and quiet hours; no new channels.
+
+### Empty / loading / error
+Explicit no-items copy per filter or date; retryable errors; a failed mutation keeps the form; busy state prevents double submission.
+
+### Responsive
+Desktop has Month and Agenda views. At 360/390px: a day selector plus agenda list — never the squeezed month grid.
+
+### RTL (fa)
+Persian month boundaries and Saturday-first weekdays; times shown in Tehran time; stored in UTC.
+
+### LTR (en)
+Gregorian months, Sunday-first weekdays, same UTC source.
+
+### Reuse rules
+Provider calendar, booking availability and recurring commerce reuse the row, status and agenda grammar, not the care domain model. Never invent clinical schedules. Monthly and yearly recurrence is Gregorian with month-end clamping, and the form says so.
