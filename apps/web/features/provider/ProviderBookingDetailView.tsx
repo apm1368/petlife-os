@@ -8,21 +8,14 @@ import type { ProviderBookingDetailDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
+import { bookingStatusLabel, bookingStatusTone } from "@/features/discovery/labels";
+import type { ProviderFollowUpInput } from "@/services/provider-os.service";
 
 const ACCESS_TONE: Record<string, "success" | "attention" | "neutral"> = {
   GRANTED: "success",
   NO_GRANT: "neutral",
   EXPIRED: "attention",
   REVOKED: "attention",
-};
-
-const STATUS_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
-  CONFIRMED: "success",
-  CHECKED_IN: "attention",
-  IN_PROGRESS: "attention",
-  COMPLETED: "success",
-  CANCELLED_BY_USER: "urgent",
-  CANCELLED_BY_PROVIDER: "urgent",
 };
 
 const ERROR_KEYS = new Set([
@@ -46,7 +39,6 @@ function mapError(err: unknown, t: (key: string) => string): string {
  */
 export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) {
   const t = useTranslations("provider.bookingDetail");
-  const tStatus = useTranslations("bookingDetail.status");
   const tPayment = useTranslations("bookingDetail.paymentStatus");
   const tScopePreset = useTranslations("bookingDetail.careAccess.preset");
   const tKnowledge = useTranslations("health.knowledgeState");
@@ -64,6 +56,9 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
   const [cancelReason, setCancelReason] = useState("");
   const [noteContent, setNoteContent] = useState("");
   const [completionNote, setCompletionNote] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [followUps, setFollowUps] = useState<ProviderFollowUpInput[]>([]);
 
   async function load() {
     setError(null);
@@ -99,14 +94,17 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
   if (!detail) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const { booking, pet, access, careProfile, healthSummary, providerNotes } = detail;
-  const isCancellable = booking.bookingStatus === "CONFIRMED" || booking.bookingStatus === "CHECKED_IN";
+  const isCancellable = ["CONFIRMED", "CHECKED_IN", "AWAITING_PAYMENT"].includes(booking.bookingStatus);
+  const fa = locale === "fa";
+  const started = new Date(booking.startAt).getTime() <= Date.now();
 
   return (
     <div className="flex flex-col gap-5">
       <div>
         <h1 className="text-page-title text-text-primary">{t("title")}</h1>
         <div className="mt-2 flex flex-wrap gap-2">
-          <StatusLabel tone={STATUS_TONE[booking.bookingStatus] ?? "neutral"}>{tStatus(booking.bookingStatus)}</StatusLabel>
+          <StatusLabel tone={bookingStatusTone(booking.bookingStatus)}>{bookingStatusLabel(booking.bookingStatus, fa)}</StatusLabel>
+          {booking.bookingNumber ? <span className="text-sm text-text-secondary" dir="ltr">{booking.bookingNumber}</span> : null}
           <StatusLabel tone="neutral">{tPayment(booking.paymentStatus)}</StatusLabel>
         </div>
       </div>
@@ -114,7 +112,8 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
       <ContextSurface className="flex flex-col gap-3">
         <Row label={t("pet")} value={pet.name} />
         <Row label={t("owner")} value={booking.ownerDisplayName} />
-        <Row label={t("service")} value={booking.serviceName} />
+        <Row label={t("service")} value={booking.variantName ? `${booking.serviceName} — ${booking.variantName}` : booking.serviceName} />
+        {booking.bookingStatus === "REQUESTED" && booking.requestExpiresAt ? <Row label={fa ? "مهلت پاسخ" : "Respond by"} value={formatAppointmentDateTime(booking.requestExpiresAt, locale, booking.timezone)} /> : null}
         <Row label={t("location")} value={booking.locationLabel} />
         <Row label={t("dateTime")} value={formatAppointmentDateTime(booking.startAt, locale, booking.timezone)} />
         {booking.reasonForVisit ? <Row label={t("reason")} value={booking.reasonForVisit} /> : null}
@@ -160,10 +159,22 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
       {actionMessage ? <StatusLabel tone="success">{actionMessage}</StatusLabel> : null}
 
       <div className="flex flex-wrap gap-2">
+        {booking.bookingStatus === "REQUESTED" ? (
+          <>
+            <Button variant="primary" isLoading={isActing} onClick={() => runAction(() => providerOsService.acceptBooking(booking.id))}>{fa ? "پذیرش درخواست" : "Accept request"}</Button>
+            <Button variant="ghost" onClick={() => setShowRejectDialog(true)}>{fa ? "رد درخواست" : "Decline"}</Button>
+          </>
+        ) : null}
         {booking.bookingStatus === "CONFIRMED" ? (
           <Button variant="secondary" isLoading={isActing} onClick={() => runAction(() => providerOsService.confirmBooking(booking.id), "actions.confirmed")}>
             {t("actions.confirm")}
           </Button>
+        ) : null}
+        {booking.bookingStatus === "CONFIRMED" && started ? (
+          <Button variant="ghost" isLoading={isActing} onClick={() => runAction(() => providerOsService.markNoShow(booking.id))}>{fa ? "ثبت عدم حضور" : "Mark no-show"}</Button>
+        ) : null}
+        {booking.category === "VET" && ["CONFIRMED", "CHECKED_IN", "IN_PROGRESS"].includes(booking.bookingStatus) && access.state === "GRANTED" ? (
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/provider/patients/${pet.id}?startVisitForBooking=${booking.id}`)}>{fa ? "شروع ویزیت بالینی" : "Start clinical visit"}</Button>
         ) : null}
         {booking.bookingStatus === "CONFIRMED" ? (
           <Button variant="primary" isLoading={isActing} onClick={() => runAction(() => providerOsService.checkIn(booking.id))}>
@@ -176,7 +187,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
           </Button>
         ) : null}
         {booking.bookingStatus === "IN_PROGRESS" ? (
-          <Button variant="primary" isLoading={isActing} onClick={() => runAction(() => providerOsService.complete(booking.id, completionNote || undefined))}>
+          <Button variant="primary" isLoading={isActing} onClick={() => runAction(() => providerOsService.completeWithFollowUps(booking.id, completionNote || undefined, followUps.filter((f) => f.title.trim() && f.dueAt)))}>
             {t("actions.complete")}
           </Button>
         ) : null}
@@ -195,8 +206,36 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
             onChange={(e) => setCompletionNote(e.target.value)}
             placeholder={t("completionNotePlaceholder")}
           />
+          {booking.category === "VET" ? (
+            <fieldset className="flex flex-col gap-2 border-t border-border-subtle pt-3">
+              <legend className="font-bold">{fa ? "پیگیری‌ها (فقط در صورت نیاز)" : "Follow-ups (only if needed)"}</legend>
+              <p className="text-sm text-text-secondary">{fa ? "هر پیگیری در مرکز مراقبت صاحب حیوان با منبع «ارائه‌دهنده» ثبت می‌شود. چیزی خودکار زمان‌بندی نمی‌شود." : "Each follow-up appears in the owner's Care Center as provider-created. Nothing is scheduled automatically."}</p>
+              {followUps.map((f, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-[10rem_1fr_12rem_auto]">
+                  <select aria-label={fa ? "نوع پیگیری" : "Follow-up type"} className="rounded border border-border-subtle bg-surface-base p-2" value={f.type} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, type: e.target.value as ProviderFollowUpInput["type"] } : x)))}>
+                    <option value="FOLLOW_UP">{fa ? "ویزیت پیگیری" : "Follow-up visit"}</option>
+                    <option value="VACCINATION">{fa ? "واکسن بعدی" : "Next vaccination"}</option>
+                    <option value="MEDICATION">{fa ? "دارو" : "Medication"}</option>
+                    <option value="MONITORING">{fa ? "آزمایش / بررسی" : "Lab / review"}</option>
+                    <option value="OTHER">{fa ? "سایر" : "Other"}</option>
+                  </select>
+                  <input aria-label={fa ? "عنوان" : "Title"} className="rounded border border-border-subtle bg-surface-base p-2" maxLength={200} value={f.title} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
+                  <input aria-label={fa ? "تاریخ" : "Date"} type="date" className="rounded border border-border-subtle bg-surface-base p-2" min={new Date(Date.now() + 86400_000).toISOString().slice(0, 10)} value={f.dueAt.slice(0, 10)} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, dueAt: e.target.value ? new Date(`${e.target.value}T06:30:00Z`).toISOString() : "" } : x)))} />
+                  <Button variant="ghost" size="sm" onClick={() => setFollowUps((prev) => prev.filter((_, j) => j !== i))}>{fa ? "حذف" : "Remove"}</Button>
+                </div>
+              ))}
+              {followUps.length < 10 ? <Button variant="secondary" size="sm" onClick={() => setFollowUps((prev) => [...prev, { type: "FOLLOW_UP", title: "", dueAt: "" }])}>{fa ? "افزودن پیگیری" : "Add follow-up"}</Button> : null}
+            </fieldset>
+          ) : null}
         </ContextSurface>
       ) : null}
+
+      <Dialog open={showRejectDialog} onClose={() => setShowRejectDialog(false)} title={fa ? "رد درخواست نوبت" : "Decline request"}>
+        <div className="flex flex-col gap-3">
+          <Input label={fa ? "علت (برای مشتری نمایش داده می‌شود)" : "Reason (shown to the customer)"} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+          <Button disabled={!rejectReason.trim()} isLoading={isActing} onClick={() => runAction(() => providerOsService.rejectBooking(booking.id, rejectReason.trim())).then(() => setShowRejectDialog(false))}>{fa ? "رد درخواست" : "Decline request"}</Button>
+        </div>
+      </Dialog>
 
       <ContextSurface className="flex flex-col gap-3">
         <h2 className="text-section-title text-text-primary">{t("notes.title")}</h2>

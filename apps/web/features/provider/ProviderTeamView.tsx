@@ -5,8 +5,9 @@ import { useTranslations } from "next-intl";
 import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ProviderTeamMemberDto } from "@petlife/types";
 import { providerOsService } from "@/services/provider-os.service";
+import { ProviderStaffSettingsView } from "./ProviderOperationsViews";
 
-/** Read-only team roster (spec section 26) — no invitation/deactivation flow this phase. */
+/** Team roster plus per-member service qualification, public bio and bookability (Batch 3). Invitations stay out of scope. */
 export function ProviderTeamView() {
   const t = useTranslations("provider.team");
   const [members, setMembers] = useState<ProviderTeamMemberDto[] | null>(null);
@@ -43,6 +44,7 @@ export function ProviderTeamView() {
           </ContextSurface>
         ))}
       </div>
+      <ProviderStaffSettingsView />
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { VetProfileView } from "@/features/vet/VetProfileView";
+import { ProviderProfileView } from "@/features/discovery/ProviderProfileView";
 
 export default async function VetProfilePage({ params }: { params: Promise<{ providerId: string }> }) {
   const { providerId } = await params;
-  return <VetProfileView providerId={providerId} />;
+  return <ProviderProfileView providerId={providerId} />;
 }

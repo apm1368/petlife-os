@@ -519,7 +519,12 @@
       "COMPLETED": "Completed",
       "CANCELLED_BY_USER": "Cancelled by you",
       "CANCELLED_BY_PROVIDER": "Cancelled by provider",
-      "NO_SHOW": "No-show"
+      "NO_SHOW": "No-show",
+      "REQUESTED": "Requested",
+      "AWAITING_PAYMENT": "Awaiting payment",
+      "REJECTED": "Declined",
+      "EXPIRED": "Expired",
+      "RESCHEDULED": "Rescheduled"
     },
     "paymentStatus": {
       "NOT_REQUIRED": "Not required",
@@ -719,7 +724,12 @@
         "COMPLETED": "Completed",
         "CANCELLED_BY_USER": "Cancelled by you",
         "CANCELLED_BY_PROVIDER": "Cancelled by provider",
-        "NO_SHOW": "No-show"
+        "NO_SHOW": "No-show",
+        "REQUESTED": "Requested",
+        "AWAITING_PAYMENT": "Awaiting payment",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "RESCHEDULED": "Rescheduled"
       }
     }
   },
@@ -753,7 +763,10 @@
         "team": "Team",
         "clinical": "Clinical",
         "patients": "Patients",
-        "sharedRecords": "Shared records"
+        "sharedRecords": "Shared records",
+        "waitlist": "Waitlist",
+        "reviews": "Reviews",
+        "analytics": "Performance"
       },
       "notAProvider": {
         "title": "No provider access",
@@ -796,7 +809,8 @@
         "today": "Today",
         "upcoming": "Upcoming",
         "past": "Past",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "requests": "Requests"
       }
     },
     "bookingDetail": {
@@ -1727,7 +1741,8 @@
         "contentTags": "Tags",
         "contentMedia": "Media",
         "contentPlacements": "Placements",
-        "subscriptions": "Subscriptions"
+        "subscriptions": "Subscriptions",
+        "services": "Services & bookings"
       }
     },
     "common": {

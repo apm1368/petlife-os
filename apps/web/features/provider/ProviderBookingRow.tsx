@@ -15,6 +15,11 @@ const STATUS_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"
   NO_SHOW: "urgent",
   HOLD: "neutral",
   PENDING_CONFIRMATION: "neutral",
+  REQUESTED: "attention",
+  AWAITING_PAYMENT: "attention",
+  REJECTED: "neutral",
+  EXPIRED: "neutral",
+  RESCHEDULED: "neutral",
 };
 
 /** Compact booking-queue row (spec section 11) — Pet/Owner/Service/Time/Location/Booking Status/Payment Status, kept separate on purpose. */
@@ -31,7 +36,16 @@ export function ProviderBookingRow({ booking, locale, onClick }: { booking: Prov
           </p>
           <StatusLabel tone={STATUS_TONE[booking.bookingStatus] ?? "neutral"}>{t(booking.bookingStatus)}</StatusLabel>
         </div>
-        <p className="text-metadata text-text-secondary">{booking.serviceName}</p>
+        <p className="text-metadata text-text-secondary">
+          {booking.variantName ? `${booking.serviceName} — ${booking.variantName}` : booking.serviceName}
+          {booking.bookingNumber ? <span dir="ltr"> · {booking.bookingNumber}</span> : null}
+        </p>
+        {booking.bookingStatus === "REQUESTED" && booking.requestExpiresAt ? (
+          <p className="text-metadata text-state-attention">
+            {locale === "fa" ? "پاسخ تا " : "Respond by "}
+            {formatAppointmentDateTime(booking.requestExpiresAt, locale, booking.timezone)}
+          </p>
+        ) : null}
         <p className="text-metadata text-text-secondary">{formatAppointmentDateTime(booking.startAt, locale, booking.timezone)}</p>
         <div className="flex items-center justify-between gap-2">
           <p className="text-metadata text-text-secondary">{booking.locationLabel}</p>

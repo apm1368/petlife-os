@@ -1,18 +1,20 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { BookingDto, PetDto } from "@petlife/types";
 import { PetLifecycleStatus, PetSpecies } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
+import { ApiError } from "@/lib/api/client";
 import { bookingsService } from "@/services/bookings.service";
 import { petsService } from "@/services/pets.service";
 import { BookingDetailView } from "./BookingDetailView";
 
 const searchParamsMock = new URLSearchParams();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useSearchParams: () => searchParamsMock,
 }));
-vi.mock("@/services/bookings.service", () => ({ bookingsService: { getById: vi.fn(), cancel: vi.fn(), recur: vi.fn() } }));
+vi.mock("@/services/bookings.service", () => ({ bookingsService: { getById: vi.fn(), cancel: vi.fn(), recur: vi.fn(), pay: vi.fn(), review: vi.fn(), reschedule: vi.fn(), cancelFollowing: vi.fn() } }));
+vi.mock("@/services/services.service", () => ({ servicesService: { getAvailability: vi.fn() } }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn() } }));
 
 const PET: PetDto = {
@@ -114,71 +116,74 @@ const BASE_BOOKING: BookingDto = {
 };
 
 describe("BookingDetailView", () => {
+  const future = new Date(Date.now() + 5 * 86400_000).toISOString();
+  const futureEnd = new Date(Date.now() + 5 * 86400_000 + 1800_000).toISOString();
+
   beforeEach(() => {
     vi.mocked(bookingsService.getById).mockReset();
+    vi.mocked(bookingsService.cancel).mockReset();
     vi.mocked(petsService.getById).mockResolvedValue(PET);
-    searchParamsMock.delete("confirmed");
+    searchParamsMock.delete("created");
   });
 
-  it("shows the confirmed status and the shared care access scope for a confirmed booking", async () => {
-    vi.mocked(bookingsService.getById).mockResolvedValue(BASE_BOOKING);
-
-    renderWithIntl(<BookingDetailView bookingId="booking-1" />);
-
-    await waitFor(() => expect(screen.getByText("Confirmed")).toBeTruthy());
-    expect(screen.getByText("Health Basics")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Cancel booking" })).toBeTruthy();
-  });
-
-  it("shows the just-confirmed banner with the calendar and care-access copy when navigated to with ?confirmed=1", async () => {
-    searchParamsMock.set("confirmed", "1");
-    vi.mocked(bookingsService.getById).mockResolvedValue(BASE_BOOKING);
-
-    renderWithIntl(<BookingDetailView bookingId="booking-1" />);
-
-    await waitFor(() => expect(screen.getByText("Booking confirmed")).toBeTruthy());
-    expect(screen.getByText("Added to your Care Calendar.")).toBeTruthy();
-  });
-
-  it("never shows a cancel action for an already-cancelled booking", async () => {
+  it("shows number, status, frozen terms, timeline and health share for a confirmed booking", async () => {
     vi.mocked(bookingsService.getById).mockResolvedValue({
       ...BASE_BOOKING,
-      bookingStatus: "CANCELLED_BY_USER" as never,
-      cancelledReason: "Change of plans",
+      startAt: future,
+      endAt: futureEnd,
+      priceAmount: 10_000_000,
+      currency: "IRR",
+      cancellationPolicy: "لغو رایگان تا ۲۴ ساعت قبل",
+      preparation: "۸ ساعت ناشتا",
+      timeline: [{ id: "e1", fromStatus: null, toStatus: "CONFIRMED" as never, actorType: "USER", reason: null, createdAt: "2026-09-01T00:00:00.000Z" }],
     });
-
-    renderWithIntl(<BookingDetailView bookingId="booking-1" />);
-
-    await waitFor(() => expect(screen.getByText("Cancelled by you")).toBeTruthy());
-    expect(screen.getByText("Change of plans")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Cancel booking" })).toBeNull();
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
+    expect((await screen.findAllByText("قطعی")).length).toBeGreaterThan(0);
+    expect(screen.getByText("PL-B-000001")).toBeTruthy();
+    expect(screen.getByText("لغو رایگان تا ۲۴ ساعت قبل")).toBeTruthy();
+    expect(screen.getByText("۸ ساعت ناشتا")).toBeTruthy();
+    expect(screen.getByText(/خلاصه سلامت/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "تغییر زمان" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "لغو نوبت" })).toBeTruthy();
   });
 
-  it("shows a check-in – check-out date range instead of a single time for a multi-day Boarding booking", async () => {
-    vi.mocked(bookingsService.getById).mockResolvedValue({
-      ...BASE_BOOKING,
-      category: "BOARDING" as never,
-      startAt: "2026-09-10T12:00:00.000Z",
-      endAt: "2026-09-13T12:00:00.000Z",
-      petAccess: { scopePreset: "BOARDING_BASIC" as never, expiresAt: "2026-09-14T12:00:00.000Z" },
-    });
-
-    renderWithIntl(<BookingDetailView bookingId="booking-1" />);
-
-    await waitFor(() => expect(screen.getByText("Confirmed")).toBeTruthy());
-    expect(screen.getByText(/–/)).toBeTruthy();
+  it("previews the policy refund before a paid late cancellation and calls the real cancel endpoint", async () => {
+    const soon = new Date(Date.now() + 2 * 3600_000).toISOString();
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, startAt: soon, endAt: soon, paymentMode: "FULL_PREPAYMENT" as never, paymentStatus: "PAID" as never, priceAmount: 1_000_000, freeCancellationHours: 24, lateCancellationRefundPercent: 50 });
+    vi.mocked(bookingsService.cancel).mockResolvedValue(BASE_BOOKING);
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
+    fireEvent.click(await screen.findByRole("button", { name: "لغو نوبت" }));
+    expect(await screen.findByText(/طبق قوانین، ۵۰٪ یعنی/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "بله، لغو شود" }));
+    await waitFor(() => expect(bookingsService.cancel).toHaveBeenCalledWith("booking-1", undefined));
   });
 
-  it("offers to start a weekly series for a recurring-eligible category with no series yet", async () => {
-    vi.mocked(bookingsService.getById).mockResolvedValue({
-      ...BASE_BOOKING,
-      category: "GROOMING" as never,
-      petAccess: { scopePreset: "GROOMING_BASIC" as never, expiresAt: "2026-09-11T06:00:00.000Z" },
-    });
+  it("offers payment only while awaiting payment and never marks it paid itself", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "AWAITING_PAYMENT" as never, paymentStatus: "PENDING" as never, paymentMode: "DEPOSIT" as never, depositAmount: 2_000_000, priceAmount: 10_000_000, requestExpiresAt: future });
+    vi.mocked(bookingsService.pay).mockResolvedValue(BASE_BOOKING);
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
+    fireEvent.click(await screen.findByRole("button", { name: "پرداخت امن" }));
+    await waitFor(() => expect(bookingsService.pay).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole("button", { name: "تغییر زمان" })).toBeNull();
+  });
 
-    renderWithIntl(<BookingDetailView bookingId="booking-1" />);
+  it("explains a declined request and offers rebooking, not cancellation", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "REJECTED" as never, rejectedReason: "تعطیلی کلینیک" });
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
+    expect(await screen.findByText(/تعطیلی کلینیک/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "رزرو دوباره" }).getAttribute("href")).toContain("/providers/provider-1/book?serviceId=svc-1");
+    expect(screen.queryByRole("button", { name: "لغو نوبت" })).toBeNull();
+  });
 
-    await waitFor(() => expect(screen.getByText("Confirmed")).toBeTruthy());
-    expect(screen.getByRole("button", { name: "Repeat weekly" })).toBeTruthy();
+  it("shows a forbidden state instead of an endless skeleton", async () => {
+    vi.mocked(bookingsService.getById).mockRejectedValue(new ApiError({ code: "PET_ACCESS_DENIED", message: "x", requestId: "r" }, 403));
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+    expect(await screen.findByText("You do not have access to this booking")).toBeTruthy();
+  });
+
+  it("lets a completed booking be reviewed once", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "COMPLETED" as never, review: null });
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+    expect(await screen.findByRole("button", { name: "Leave a review" })).toBeTruthy();
   });
 });

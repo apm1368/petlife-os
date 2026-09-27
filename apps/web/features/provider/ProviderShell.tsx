@@ -23,10 +23,13 @@ const NAV_ITEMS = [
   { href: "/patients", labelKey: "nav.patients" },
   { href: "/shared-records", labelKey: "nav.sharedRecords" },
   { href: "/bookings", labelKey: "nav.bookings" },
+  { href: "/waitlist", labelKey: "nav.waitlist" },
   { href: "/calendar", labelKey: "nav.schedule" },
   { href: "/availability", labelKey: "nav.availability" },
   { href: "/services", labelKey: "nav.services" },
   { href: "/team", labelKey: "nav.team" },
+  { href: "/reviews", labelKey: "nav.reviews" },
+  { href: "/analytics", labelKey: "nav.analytics" },
 ] as const;
 
 /**

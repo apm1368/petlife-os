@@ -5,8 +5,11 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { bookingsService } from "@/services/bookings.service";
 import { MyBookingsView } from "./MyBookingsView";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/services/bookings.service", () => ({ bookingsService: { list: vi.fn() } }));
+const params = new URLSearchParams();
+const replace = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace }), usePathname: () => "/fa/bookings", useSearchParams: () => params }));
+vi.mock("@/services/households.service", () => ({ householdsService: { listMine: vi.fn().mockResolvedValue([]), listPets: vi.fn().mockResolvedValue([]) } }));
+vi.mock("@/services/bookings.service", () => ({ bookingsService: { list: vi.fn(), listWaitlist: vi.fn(), cancelWaitlist: vi.fn() } }));
 
 const BOOKING: BookingDto = {
   id: "booking-1",
@@ -46,27 +49,37 @@ const BOOKING: BookingDto = {
 describe("MyBookingsView", () => {
   beforeEach(() => {
     vi.mocked(bookingsService.list).mockReset();
+    params.delete("tab");
+    replace.mockReset();
   });
 
-  it("shows the upcoming tab by default with a booking's service and provider", async () => {
-    vi.mocked(bookingsService.list).mockResolvedValue([BOOKING]);
-
-    renderWithIntl(<MyBookingsView />);
-
-    await waitFor(() => expect(screen.getByText("Full Groom & Bath")).toBeTruthy());
-    expect(screen.getByText("Happy Paws Grooming")).toBeTruthy();
-    expect(bookingsService.list).toHaveBeenCalledWith({ upcoming: true });
+  it("lists upcoming bookings with number, provider and a human status", async () => {
+    vi.mocked(bookingsService.list).mockResolvedValue([{ ...BOOKING, serviceName: "Full Groom & Bath" }]);
+    renderWithIntl(<MyBookingsView />, "en");
+    expect(await screen.findByText("Full Groom & Bath")).toBeTruthy();
+    expect(screen.getByText(/PL-B-000001/)).toBeTruthy();
+    expect(screen.getByText("Confirmed")).toBeTruthy();
+    expect(bookingsService.list).toHaveBeenCalledWith({ upcoming: true, petId: undefined });
   });
 
-  it("switches to the cancelled tab and shows its own empty state", async () => {
+  it("switches tabs through the URL so the view is shareable and restorable", async () => {
     vi.mocked(bookingsService.list).mockResolvedValue([]);
+    renderWithIntl(<MyBookingsView />, "en");
+    fireEvent.click(await screen.findByRole("button", { name: "Requested" }));
+    expect(replace).toHaveBeenCalledWith(expect.stringContaining("tab=requested"), { scroll: false });
+  });
 
-    renderWithIntl(<MyBookingsView />);
-    await waitFor(() => expect(bookingsService.list).toHaveBeenCalledWith({ upcoming: true }));
+  it("shows the waitlist tab with honest copy and no auto-booking promise", async () => {
+    params.set("tab", "waitlist");
+    vi.mocked(bookingsService.listWaitlist).mockResolvedValue([{ id: "w1", petId: "pet-1", petName: "Luna", providerOrganizationId: "provider-1", providerName: "Happy Paws", serviceId: "svc-1", serviceName: "Groom", variantId: null, windowStart: "2026-10-01T00:00:00.000Z", windowEnd: "2026-10-01T23:59:00.000Z", status: "NOTIFIED", notifiedAt: null, createdAt: "2026-09-01T00:00:00.000Z" }]);
+    renderWithIntl(<MyBookingsView />, "en");
+    expect(await screen.findByText(/it is not held for you/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Book" }).getAttribute("href")).toContain("/providers/provider-1/book?serviceId=svc-1");
+  });
 
-    fireEvent.click(screen.getByRole("button", { name: "Cancelled" }));
-
-    await waitFor(() => expect(bookingsService.list).toHaveBeenCalledWith({ cancelled: true }));
-    await waitFor(() => expect(screen.getByText("No cancelled bookings.")).toBeTruthy());
+  it("shows an empty state per tab", async () => {
+    vi.mocked(bookingsService.list).mockResolvedValue([]);
+    renderWithIntl(<MyBookingsView />, "en");
+    await waitFor(() => expect(screen.getByText("No bookings here")).toBeTruthy());
   });
 });

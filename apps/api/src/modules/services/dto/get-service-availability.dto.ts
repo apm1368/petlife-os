@@ -19,4 +19,9 @@ export class GetServiceAvailabilityDto {
   @IsOptional()
   @IsUUID()
   providerUserId?: string;
+
+  /** Service option whose duration drives slot length. */
+  @IsOptional()
+  @IsUUID()
+  variantId?: string;
 }

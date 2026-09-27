@@ -515,4 +515,67 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       await request(server()).delete(`/providers/${c.org.id}/favorite`).set("Cookie", owner.cookie).set("x-csrf-token", owner.csrf).expect(204);
     });
   });
+
+  describe("discovery", () => {
+    it("anonymous search filters by real attributes, sorts deterministically and never lists unverified providers", async () => {
+      const city = `شهر-${randomUUID().slice(0, 6)}`;
+      const mk = async (name: string, opts: { price: number; lat: number; lng: number; homeVisit?: boolean; cat?: boolean; verified?: boolean; rating?: number }) => {
+        const org = await db.providerOrganization.create({ data: { name, type: "VET_CLINIC", verificationStatus: opts.verified === false ? "SUBMITTED" : "VERIFIED", specialties: ["دندانپزشکی"] } });
+        const loc = await db.providerLocation.create({ data: { providerOrganizationId: org.id, addressLine: "x", city, region: "ونک", countryCode: "IR", timezone: "UTC", latitude: opts.lat, longitude: opts.lng } });
+        const staffUser = await actor(`${name}-staff`);
+        const pu = await db.providerUser.create({ data: { userId: staffUser.id, providerOrganizationId: org.id, role: "VET", publicBio: "۱۰ سال تجربه" } });
+        await db.providerUser.create({ data: { userId: (await actor(`${name}-reception`)).id, providerOrganizationId: org.id, role: "STAFF", isBookable: false } });
+        const svc = await db.providerService.create({ data: { providerOrganizationId: org.id, locationId: loc.id, name: "ویزیت", type: opts.homeVisit ? "HOME_VISIT" : "GENERAL_VET_VISIT", category: "VET", locationMode: opts.homeVisit ? "AT_CUSTOMER" : "AT_PROVIDER", durationMinutes: 30, priceAmount: opts.price, currency: "IRR", supportsCat: opts.cat ?? true } });
+        await db.providerAvailabilityRule.createMany({ data: Array.from({ length: 7 }, (_, dayOfWeek) => ({ providerOrganizationId: org.id, locationId: loc.id, providerUserId: pu.id, dayOfWeek, startLocalTime: "00:00", endLocalTime: "23:30", timezone: "UTC" })) });
+        if (opts.rating) {
+          const reviewer = await actor("reviewer");
+          const hh = await household(reviewer);
+          const b = await db.booking.create({ data: { householdId: hh.householdId, petId: hh.pets[0]!.id, userId: reviewer.id, providerOrganizationId: org.id, providerLocationId: loc.id, providerServiceId: svc.id, category: "VET", locationMode: "AT_PROVIDER", startAt: new Date(Date.now() - 7 * 86400_000), endAt: new Date(Date.now() - 7 * 86400_000 + 1800_000), timezone: "UTC", bookingStatus: "COMPLETED" } });
+          await db.providerReview.create({ data: { bookingId: b.id, providerOrganizationId: org.id, userId: reviewer.id, rating: opts.rating } });
+        }
+        return org;
+      };
+      const near = await mk("الف نزدیک", { price: 900_000, lat: 35.757, lng: 51.41, rating: 4 });
+      const cheapHome = await mk("ب ارزان منزل", { price: 500_000, lat: 35.8, lng: 51.5, homeVisit: true, cat: false, rating: 5 });
+      await mk("ج تأییدنشده", { price: 100_000, lat: 35.757, lng: 51.41, verified: false });
+
+      const anon = (qs: string) => request(server()).get(`/discovery/providers?city=${encodeURIComponent(city)}&${qs}`).expect(200);
+      const all = await anon("category=VET");
+      expect(all.body.items.map((p: { name: string }) => p.name).sort()).toEqual(["الف نزدیک", "ب ارزان منزل"]);
+      const first = all.body.items[0];
+      expect(first).toMatchObject({ verified: true, completedBookings: 1 });
+      expect(first.nextAvailableAt).not.toBeNull();
+      expect(first.rating.count).toBe(1);
+
+      expect((await anon("homeVisit=true")).body.items.map((p: { id: string }) => p.id)).toEqual([cheapHome.id]);
+      expect((await anon("species=CAT")).body.items.map((p: { id: string }) => p.id)).toEqual([near.id]);
+      expect((await anon("maxPrice=600000")).body.items.map((p: { id: string }) => p.id)).toEqual([cheapHome.id]);
+      expect((await anon("minRating=4.5")).body.items.map((p: { id: string }) => p.id)).toEqual([cheapHome.id]);
+      expect((await anon("sort=LOWEST_PRICE")).body.items[0].id).toBe(cheapHome.id);
+      expect((await anon("sort=TOP_RATED")).body.items[0].id).toBe(cheapHome.id);
+      const nearest = await anon("sort=NEAREST&lat=35.757&lng=51.41");
+      expect(nearest.body.items[0].id).toBe(near.id);
+      expect(nearest.body.items[0].distanceKm).toBe(0);
+      expect((await anon("lat=35.757&lng=51.41&radiusKm=2")).body.items.map((p: { id: string }) => p.id)).toEqual([near.id]);
+      expect((await anon("neighborhood=ونک")).body.total).toBe(2);
+      const tomorrow = new Date(Date.now() + 86400_000).toISOString().slice(0, 10);
+      expect((await anon(`date=${tomorrow}`)).body.total).toBe(2);
+      expect((await anon("category=GROOMING")).body.total).toBe(0);
+      // Deterministic: the same query returns the same order.
+      expect((await anon("category=VET")).body.items.map((p: { id: string }) => p.id)).toEqual(all.body.items.map((p: { id: string }) => p.id));
+
+      // Legacy public endpoints no longer widen to unverified providers.
+      const legacy = await request(server()).get(`/providers/vets?city=${encodeURIComponent(city)}&verifiedOnly=false`).expect(200);
+      expect(legacy.body.every((p: { verificationStatus: string }) => p.verificationStatus === "VERIFIED")).toBe(true);
+
+      const profile = await request(server()).get(`/discovery/providers/${near.id}`).expect(200);
+      expect(profile.body.team).toHaveLength(1);
+      expect(profile.body.team[0]).toMatchObject({ publicBio: "۱۰ سال تجربه", role: "VET" });
+      expect(JSON.stringify(profile.body.team)).not.toContain("@example.com");
+      expect(profile.body.rating).toEqual({ average: 4, count: 1 });
+      const unverified = await db.providerOrganization.findFirstOrThrow({ where: { name: "ج تأییدنشده" } });
+      await request(server()).get(`/discovery/providers/${unverified.id}`).expect(404);
+      await request(server()).get(`/providers/vets/${unverified.id}`).expect(404);
+    });
+  });
 });

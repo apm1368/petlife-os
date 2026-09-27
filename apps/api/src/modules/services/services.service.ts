@@ -43,7 +43,9 @@ export class ServicesService {
   }
 
   async search(query: SearchServicesDto, viewerId?: string): Promise<ServiceSearchResultDto[]> {
-    const verifiedOnly = query.verifiedOnly !== "false";
+    // Public discovery never advertises an unverified provider (it cannot be booked). The legacy
+    // `verifiedOnly=false` query flag is accepted for compatibility but no longer widens results.
+    const verifiedOnly = true;
 
     const services = await this.prisma.providerService.findMany({
       where: {
@@ -130,8 +132,8 @@ export class ServicesService {
   }
 
   async getServiceAvailability(serviceId: string, query: GetServiceAvailabilityDto, viewerId?: string) {
-    const service = await this.prisma.providerService.findUnique({ where: { id: serviceId } });
-    if (!service) throw new NotFoundApiException("Service");
+    const service = await this.prisma.providerService.findUnique({ where: { id: serviceId }, include: { providerOrganization: { select: { verificationStatus: true } } } });
+    if (!service || !service.isActive || service.providerOrganization.verificationStatus !== "VERIFIED") throw new NotFoundApiException("Service");
 
     const locationId = query.locationId ?? service.locationId;
     if (!locationId) throw new NotFoundApiException("Location");
@@ -145,6 +147,7 @@ export class ServicesService {
       locationId,
       serviceId,
       providerUserId: query.providerUserId,
+      variantId: query.variantId,
       from: new Date(query.from),
       to: new Date(query.to),
     });

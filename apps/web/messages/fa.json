@@ -519,7 +519,12 @@
       "COMPLETED": "انجام‌شده",
       "CANCELLED_BY_USER": "لغوشده توسط شما",
       "CANCELLED_BY_PROVIDER": "لغوشده توسط مرکز",
-      "NO_SHOW": "عدم حضور"
+      "NO_SHOW": "عدم حضور",
+      "REQUESTED": "درخواست ارسال شد",
+      "AWAITING_PAYMENT": "در انتظار پرداخت",
+      "REJECTED": "پذیرفته نشد",
+      "EXPIRED": "منقضی شد",
+      "RESCHEDULED": "منتقل شد"
     },
     "paymentStatus": {
       "NOT_REQUIRED": "نیازی نیست",
@@ -719,7 +724,12 @@
         "COMPLETED": "انجام‌شده",
         "CANCELLED_BY_USER": "لغوشده توسط شما",
         "CANCELLED_BY_PROVIDER": "لغوشده توسط مرکز",
-        "NO_SHOW": "عدم حضور"
+        "NO_SHOW": "عدم حضور",
+        "REQUESTED": "درخواست ارسال شد",
+        "AWAITING_PAYMENT": "در انتظار پرداخت",
+        "REJECTED": "پذیرفته نشد",
+        "EXPIRED": "منقضی شد",
+        "RESCHEDULED": "منتقل شد"
       }
     }
   },
@@ -753,7 +763,10 @@
         "team": "تیم",
         "clinical": "درمانگاه",
         "patients": "بیماران",
-        "sharedRecords": "پرونده‌های اشتراکی"
+        "sharedRecords": "پرونده‌های اشتراکی",
+        "waitlist": "لیست انتظار",
+        "reviews": "نظرات",
+        "analytics": "گزارش عملکرد"
       },
       "notAProvider": {
         "title": "دسترسی ارائه‌دهنده ندارید",
@@ -796,7 +809,8 @@
         "today": "امروز",
         "upcoming": "پیش رو",
         "past": "گذشته",
-        "cancelled": "لغوشده"
+        "cancelled": "لغوشده",
+        "requests": "درخواست‌ها"
       }
     },
     "bookingDetail": {
@@ -1727,7 +1741,8 @@
         "contentTags": "برچسب‌ها",
         "contentMedia": "رسانه",
         "contentPlacements": "بخش‌های محتوایی",
-        "subscriptions": "اشتراک‌ها"
+        "subscriptions": "اشتراک‌ها",
+        "services": "خدمات و نوبت‌ها"
       }
     },
     "common": {

@@ -2,12 +2,14 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { CarFront, Dog, Footprints, GraduationCap, House, Scissors, Search } from "@petlife/ui";
+import { CarFront, Dog, Footprints, GraduationCap, House, Scissors, Search, Stethoscope } from "@petlife/ui";
+import { useState } from "react";
 import { ServiceCategory } from "@petlife/types";
 import { CinematicPageHero } from "@/features/experience/CinematicPageHero";
 import { useActivePet } from "@/hooks/use-active-pet";
 
 const CATEGORIES = [
+  { value: ServiceCategory.VET, fa: "دامپزشکی", en: "Veterinary", hintFa: "کلینیک، ویزیت در منزل و تخصص‌ها", hintEn: "Clinics, home visits and specialties", icon: Stethoscope },
   { value: ServiceCategory.GROOMING, fa: "آرایش و شست‌وشو", en: "Grooming", hintFa: "اصلاح، حمام و مراقبت تخصصی", hintEn: "Bath, haircut and specialist care", icon: Scissors },
   { value: ServiceCategory.TRAINING, fa: "آموزش", en: "Training", hintFa: "مربی خصوصی و کلاس‌های رفتاری", hintEn: "Private trainers and behaviour classes", icon: GraduationCap },
   { value: ServiceCategory.WALKING, fa: "پیاده‌روی", en: "Walking", hintFa: "پیاده‌روی امن و قابل‌ردیابی", hintEn: "Safe, trackable walks", icon: Footprints },
@@ -22,9 +24,10 @@ export function ExploreServicesView() {
   const t = useTranslations("services.explore");
   const { activePet } = useActivePet();
   const fa = locale === "fa";
+  const [text, setText] = useState("");
   return <div className="experience-stack">
     <CinematicPageHero image="/images/experience/grooming-hero.png" eyebrow={fa ? "متخصص‌های قابل اعتماد، یک‌جا" : "TRUSTED PET PROFESSIONALS"} title={fa ? "مراقبت حرفه‌ای، نزدیک شما" : "Professional care, near you"} description={fa ? "خدمات را بر اساس زمان، محله، نیاز حیوان و تجربه متخصص مقایسه کنید و رزرو را در چند قدم انجام دهید." : "Compare services by time, location, pet needs and professional experience, then book in a few steps."}>
-      <form className="experience-search" onSubmit={(event) => { event.preventDefault(); router.push(`/${locale}/services/${ServiceCategory.GROOMING}`); }} role="search"><label><Search size={20} aria-hidden="true" /><input aria-label={fa ? "جست‌وجوی خدمات" : "Search services"} placeholder={fa ? "چه خدمتی نیاز دارید؟" : "What service do you need?"} /></label><button type="submit">{fa ? "پیدا کن" : "Find care"}</button></form>
+      <form className="experience-search" onSubmit={(event) => { event.preventDefault(); router.push(`/${locale}/services/search${text.trim() ? `?q=${encodeURIComponent(text.trim())}` : ""}`); }} role="search"><label><Search size={20} aria-hidden="true" /><input value={text} onChange={(event) => setText(event.target.value)} aria-label={fa ? "جست‌وجوی خدمات" : "Search services"} placeholder={fa ? "چه خدمتی نیاز دارید؟" : "What service do you need?"} /></label><button type="submit">{fa ? "پیدا کن" : "Find care"}</button></form>
     </CinematicPageHero>
     {activePet ? <p className="experience-preview-note">{t("subtitle", { name: activePet.name })}</p> : null}
     <section className="experience-section"><div className="experience-section__head"><div><h2>{fa ? "انتخاب خدمت" : "Choose a service"}</h2><p>{fa ? "هر خدمت با متخصص، زمان‌بندی و استانداردهای خودش" : "Each service with its own professionals, schedule and standards"}</p></div></div><div className="experience-grid">

@@ -33,7 +33,7 @@ function orDash(value: string | number | null | undefined): string {
  * score, no "stable" badge, no interpretation of a vital against a reference
  * range. Where a value was never recorded the page says so with a dash.
  */
-export function VetPatientRecordView({ petId }: { petId: string }) {
+export function VetPatientRecordView({ petId, bookingId }: { petId: string; bookingId?: string }) {
   const t = useTranslations("vetPanel.record");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -73,7 +73,8 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
     setIsBusy(true);
     setError(null);
     try {
-      const visit = await providerClinicalService.startVisit({ petId });
+      // Opened from a booking: the visit links to it; the API verifies it is this clinic's own VET booking.
+      const visit = await providerClinicalService.startVisit({ petId, bookingId });
       router.push(`/${locale}/provider/visits/${visit.id}?petId=${petId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : tCommon("genericError"));

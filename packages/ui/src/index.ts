@@ -22,4 +22,5 @@ export {
   ShieldCheck, Sparkles, Scissors, Stethoscope, Dog, GraduationCap, Footprints,
   House, CarFront, ShoppingBag, Bone, HeartPulse, BadgeCheck, Clock3, Star,
   ChevronLeft, ArrowLeft, LockKeyhole, Mail, Phone, UserRound, PackageCheck,
+  Heart, Users, Info, ChevronRight, LocateFixed, Timer, CircleAlert, RotateCcw, Repeat,
 } from "lucide-react";

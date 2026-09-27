@@ -5,7 +5,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { providerOsService } from "@/services/provider-os.service";
 import { ProviderServicesView } from "./ProviderServicesView";
 
-vi.mock("@/services/provider-os.service", () => ({ providerOsService: { listServices: vi.fn(), updateService: vi.fn() } }));
+vi.mock("@/services/provider-os.service", () => ({ providerOsService: { listServices: vi.fn(), updateService: vi.fn(), getOverview: vi.fn().mockResolvedValue({ location: null }), listResources: vi.fn().mockResolvedValue([]) } }));
 
 const SERVICE: ProviderServiceDto = {
   id: "svc-1",
