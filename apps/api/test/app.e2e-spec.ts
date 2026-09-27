@@ -1832,12 +1832,14 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const staffDenied = await staffProvider.patch(`/provider/services/${org.service.id}`).send({ isActive: false }).expect(403);
       expect(staffDenied.body.error.code).toBe("PROVIDER_ACCESS_DENIED");
 
+      const slot = await firstAvailableServiceSlot(owner, org.service.id);
       await provider.patch(`/provider/services/${org.service.id}`).send({ isActive: false }).expect(200);
 
       const stillThere = await prisma.booking.findUnique({ where: { id: booking.id } });
       expect(stillThere?.bookingStatus).toBe("CONFIRMED");
 
-      const slot = await firstAvailableServiceSlot(owner, org.service.id);
+      // Batch 3: a disabled service no longer advertises availability at all.
+      await owner.get(`/provider-services/${org.service.id}/availability?from=${new Date().toISOString()}&to=${new Date(Date.now() + 86400000).toISOString()}`).expect(404);
       const denied = await owner
         .post("/booking-holds")
         .send({ petId, providerId: org.organization.id, locationId: org.location.id, serviceId: org.service.id, slotStart: slot.startAt })

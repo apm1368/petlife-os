@@ -213,3 +213,84 @@ Gregorian months, Sunday-first weekdays, same UTC source.
 
 ### Reuse rules
 Provider calendar, booking availability and recurring commerce reuse the row, status and agenda grammar, not the care domain model. Never invent clinical schedules. Monthly and yearly recurrence is Gregorian with month-end clamping, and the form says so.
+
+## DISCOVERY PATTERN — Batch 3
+
+### Layout anatomy
+Compact hero with one search field → filter strip (city, sort, date, max price as selects; species, home visit, rating, specialty, near-me as toggle pills) → result count with a one-line ranking explanation → result grid → footnote on unavailable map view.
+
+### Navigation
+`/services` (category tiles + free-text search) → `/services/:category` or `/services/search?q=` or `/vet/find` → `/providers/:id`. Every filter is a URL parameter, so back/forward, sharing and sign-in return keep the exact search.
+
+### Components
+`ProviderDiscoveryView`, result card (cover, verified badge, rating or "no reviews yet", name, type, top services, area + distance, next availability or "no opening in 7 days", pet types, completed count, starting price, save heart).
+
+### Statuses
+Verified only. Rating shown only when reviews exist. Next availability is a real slot or an explicit "none". Price "from" only when a price exists; otherwise "on request".
+
+### Empty / loading / error
+Six-card skeleton; empty state offers "clear filters"; error offers retry. Geolocation denial explains and suggests a city.
+
+### Responsive
+One column → two (md) → three (lg). Filters wrap; pills scroll horizontally on narrow screens.
+
+### RTL / LTR
+Logical properties throughout; the heart sits at the inline end; Persian digits via `toLocaleString`; dates in Jalali (fa) and Gregorian (en).
+
+### Reuse rules
+Reuse for any marketplace list (travel listings, places). Never show a signal the data does not have. Never rank by payment.
+
+## PUBLIC ENTITY DETAIL PATTERN — Batch 3
+
+### Layout anatomy
+Cover (optional) → identity block (logo, type, name, verification sentence, rating sentence, completed count) → section anchors → About/specialties/gallery → Services with options and terms → Team → Location and contact → Reviews (verified-only note) → Policies → FAQ. One primary action, "Book": inline on desktop, sticky bottom bar (safe-area aware) on mobile.
+
+### Components
+`ProviderProfileView`; each service row links straight into the booking flow with the service preselected.
+
+### Statuses
+Unverified or deactivated providers return "not available" (404), never a partial page.
+
+### Empty / loading / error
+Distinct states for loading, not-found and error, each with retry where meaningful; sections without data say so or are omitted (Team, Policies, FAQ).
+
+### Responsive / RTL / LTR
+Single reading column, max-w-5xl; anchors scroll horizontally; the sticky CTA appears below `lg`.
+
+### Reuse rules
+Reuse for sellers, places and insurance providers. Trust copy must describe what was verified, not imply more.
+
+## BOOKING / TRANSACTION PATTERN — Batch 3
+
+### Layout anatomy
+Back to provider → title → numbered step indicator (Service, Pet, Time, Details, Review) → step body → sticky footer with Back and one primary action whose label names the real outcome ("Hold this time", "Send request", "Book and go to payment", "Confirm booking").
+
+### Rules
+- Anonymous visitors browse services and availability. Sign-in is required at the hold, with returnTo keeping service, option and date.
+- The hold is bounded and visible (countdown). On expiry the flow returns to Time with an explanation.
+- The review step lists every frozen term: price × pets, payment mode and deposit, booking mode, cancellation terms, preparation and the shared health scope.
+- The server decides the outcome state; the UI never assumes success.
+- Errors map to human copy per code (slot taken, hold expired, pet not supported, profile incomplete, forbidden, rate-limited).
+
+### Detail page (after booking)
+Status + payment chips + booking number → state banner (requested deadline, pay-by, declined reason, expired, moved) → terms list → shared data → timeline (status, actor, time) → only the actions the state allows. Cancel confirms with the policy refund preview; reschedule keeps the original until the new time is secured.
+
+### Responsive / RTL / LTR
+Single column max-w-3xl. The footer is sticky with a safe-area inset. Times always show in the provider timezone.
+
+### Reuse rules
+Checkout (Batch 4) and travel booking reuse the step indicator, hold countdown, frozen-terms review and outcome-named primary action.
+
+## OPERATIONAL CALENDAR PATTERN — Batch 3
+
+### Layout anatomy
+Title + staff filter + "Block time" → view switch (Day/Week/Month) + period navigation + Today → grid (desktop) or agenda (mobile) → block-time dialog.
+
+### Entries
+Time, pet, service, status label (text, not colour alone) with a status-coloured inline-start border; opens the booking. Blocked periods render as neutral bars with the staff name. The month view shows counts and a "request pending" flag, and a day click opens the Day view.
+
+### Rules
+Weeks start Saturday (fa) or Monday (en). Day keys are computed in the location timezone. Closed bookings are hidden. Blocking time never cancels existing bookings.
+
+### Reuse rules
+Seller fulfilment scheduling and admin operations reuse the grid/agenda split and status grammar, not the booking model.

@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-09-25",
-  "routeCount": 199,
+  "routeCount": 210,
   "rows": [
     {
       "route": "/:locale",
@@ -476,6 +476,101 @@
       "estimatedEffort": "M",
       "blockers": "Route-level design and QA acceptance",
       "sourceFile": "apps/web/app/[locale]/(admin)/admin/sellers/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/services",
+      "pageName": "AdminServiceBookingsView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/services/analytics",
+      "pageName": "AdminServicesAnalyticsView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/analytics/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/services/bookings/:id",
+      "pageName": "AdminServiceBookingDetailView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/bookings/[id]/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/services/catalog",
+      "pageName": "AdminProviderServicesView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/catalog/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/services/reviews",
+      "pageName": "AdminProviderReviewsView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/reviews/page.tsx"
     },
     {
       "route": "/:locale/admin/settlements/:id",
@@ -968,7 +1063,7 @@
       "partnerCounterpart": "Provider bookings exists",
       "priority": "P1",
       "estimatedEffort": "S",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(app)/bookings/page.tsx"
     },
     {
@@ -987,7 +1082,7 @@
       "partnerCounterpart": "Provider bookings exists",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(app)/bookings/[id]/page.tsx"
     },
     {
@@ -2986,6 +3081,25 @@
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/page.tsx"
     },
     {
+      "route": "/:locale/provider/analytics",
+      "pageName": "ProviderAnalyticsView",
+      "actor": "Provider staff",
+      "domain": "Provider OS",
+      "authRequirement": "Provider session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(provider)/provider/analytics/page.tsx"
+    },
+    {
       "route": "/:locale/provider/availability",
       "pageName": "ProviderAvailabilityView",
       "actor": "Provider staff",
@@ -3001,7 +3115,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/availability/page.tsx"
     },
     {
@@ -3020,7 +3134,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/bookings/page.tsx"
     },
     {
@@ -3039,12 +3153,12 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/bookings/[id]/page.tsx"
     },
     {
       "route": "/:locale/provider/calendar",
-      "pageName": "ProviderScheduleView",
+      "pageName": "ProviderCalendarView",
       "actor": "Provider staff",
       "domain": "Provider OS",
       "authRequirement": "Provider session/role; local review is read-only bypass",
@@ -3058,7 +3172,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/calendar/page.tsx"
     },
     {
@@ -3138,6 +3252,25 @@
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/patients/[petId]/page.tsx"
     },
     {
+      "route": "/:locale/provider/reviews",
+      "pageName": "ProviderReviewsView",
+      "actor": "Provider staff",
+      "domain": "Provider OS",
+      "authRequirement": "Provider session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(provider)/provider/reviews/page.tsx"
+    },
+    {
       "route": "/:locale/provider/services",
       "pageName": "ProviderServicesView",
       "actor": "Provider staff",
@@ -3153,7 +3286,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/services/page.tsx"
     },
     {
@@ -3210,7 +3343,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/team/page.tsx"
     },
     {
@@ -3231,6 +3364,63 @@
       "estimatedEffort": "M",
       "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/visits/[id]/page.tsx"
+    },
+    {
+      "route": "/:locale/provider/waitlist",
+      "pageName": "ProviderWaitlistView",
+      "actor": "Provider staff",
+      "domain": "Provider OS",
+      "authRequirement": "Provider session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(provider)/provider/waitlist/page.tsx"
+    },
+    {
+      "route": "/:locale/providers/:providerId",
+      "pageName": "ProviderProfileView",
+      "actor": "Provider staff",
+      "domain": "Provider OS",
+      "authRequirement": "Provider session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
+      "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(public)/providers/[providerId]/page.tsx"
+    },
+    {
+      "route": "/:locale/providers/:providerId/book",
+      "pageName": "BookingFlowView",
+      "actor": "Provider staff",
+      "domain": "Provider OS",
+      "authRequirement": "Provider session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
+      "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(public)/providers/[providerId]/book/page.tsx"
     },
     {
       "route": "/:locale/register",
@@ -3495,12 +3685,12 @@
       "partnerCounterpart": "Provider services exists",
       "priority": "P0",
       "estimatedEffort": "S",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(public)/services/page.tsx"
     },
     {
       "route": "/:locale/services/:category",
-      "pageName": "ServiceResultsView",
+      "pageName": "ProviderDiscoveryView",
       "actor": "Public / member",
       "domain": "Services",
       "authRequirement": "Public browse; session required for protected mutations where applicable",
@@ -3514,12 +3704,12 @@
       "partnerCounterpart": "Provider services exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(public)/services/[category]/page.tsx"
     },
     {
       "route": "/:locale/services/:category/:serviceId/book",
-      "pageName": "ServiceBookingWizard",
+      "pageName": "book",
       "actor": "Public / member",
       "domain": "Services",
       "authRequirement": "Public browse; session required for protected mutations where applicable",
@@ -3533,8 +3723,27 @@
       "partnerCounterpart": "Provider services exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(public)/services/[category]/[serviceId]/book/page.tsx"
+    },
+    {
+      "route": "/:locale/services/search",
+      "pageName": "ProviderDiscoveryView",
+      "actor": "Public / member",
+      "domain": "Services",
+      "authRequirement": "Public browse; session required for protected mutations where applicable",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "C",
+      "backendApiDependency": "Services / Providers / Booking",
+      "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "No admin services catalog page",
+      "partnerCounterpart": "Provider services exists",
+      "priority": "P0",
+      "estimatedEffort": "S",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "sourceFile": "apps/web/app/[locale]/(public)/services/search/page.tsx"
     },
     {
       "route": "/:locale/shop",
@@ -3709,7 +3918,7 @@
     },
     {
       "route": "/:locale/vet/:providerId",
-      "pageName": "VetProfileView",
+      "pageName": "ProviderProfileView",
       "actor": "Public / member",
       "domain": "Vet",
       "authRequirement": "Public browse; session required for protected mutations where applicable",
@@ -3723,12 +3932,12 @@
       "partnerCounterpart": "Provider OS exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(public)/vet/[providerId]/page.tsx"
     },
     {
       "route": "/:locale/vet/:providerId/book",
-      "pageName": "BookingWizard",
+      "pageName": "BookingFlowView",
       "actor": "Public / member",
       "domain": "Vet",
       "authRequirement": "Public browse; session required for protected mutations where applicable",
@@ -3742,12 +3951,12 @@
       "partnerCounterpart": "Provider OS exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(public)/vet/[providerId]/book/page.tsx"
     },
     {
       "route": "/:locale/vet/find",
-      "pageName": "FindVetView",
+      "pageName": "ProviderDiscoveryView",
       "actor": "Public / member",
       "domain": "Vet",
       "authRequirement": "Public browse; session required for protected mutations where applicable",
@@ -3761,7 +3970,7 @@
       "partnerCounterpart": "Provider OS exists",
       "priority": "P0",
       "estimatedEffort": "S",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
       "sourceFile": "apps/web/app/[locale]/(public)/vet/find/page.tsx"
     },
     {
