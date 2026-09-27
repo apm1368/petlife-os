@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { BookingSeriesFrequency as PrismaBookingSeriesFrequency, BookingStatus, LocationMode as PrismaLocationMode, Prisma, SetupStatus } from "@prisma/client";
+import { BookingActorType, BookingMode, BookingPaymentMode, BookingSeriesFrequency as PrismaBookingSeriesFrequency, BookingStatus, CartStatus, CheckoutStatus, LocationMode as PrismaLocationMode, PaymentMethodType, PaymentProvider, PaymentStatus, Prisma, SetupStatus } from "@prisma/client";
 import {
   ServiceCategory,
   type BookingDto,
   type BookingHoldDto,
   type BookingPetAccessSummaryDto,
   type BookingSeriesDto,
+  PetCompatibilityStatus,
   type CustomerAddressDto,
   type PetAccessScopePreset,
   type ProviderSummaryDto,
@@ -16,6 +17,7 @@ import {
   AddressRequiredException,
   BookingConflictException,
   BookingNotCancellableException,
+  InvalidBookingTransitionException,
   NotFoundApiException,
   PetAccessDeniedException,
   PetContextIncompleteException,
@@ -31,12 +33,19 @@ import { toProviderLocationDto, toProviderServiceDto } from "../providers/provid
 import { CareCalendarService } from "../care-calendar/care-calendar.service";
 import { BookingHoldService } from "./booking-hold.service";
 import { BookingPetAccessService, DEFAULT_SCOPE_PRESET_BY_CATEGORY } from "./booking-pet-access.service";
+import { BookingLifecycleService, OCCUPYING_STATUSES, TERMINAL_RELEASE_STATUSES, bookingEventFields } from "./booking-lifecycle.service";
+import { PetServiceCompatibilityService } from "../services/pet-service-compatibility.service";
+import { PaymentsService } from "../commerce/payments/payments.service";
+import type { PaymentChargeMode } from "../commerce/payments/payment-gateway.interface";
+import type { RescheduleBookingDto } from "./dto/reschedule-booking.dto";
+import type { PayBookingDto } from "./dto/pay-booking.dto";
 import type { CreateBookingHoldDto } from "./dto/create-booking-hold.dto";
 import type { CreateBookingDto } from "./dto/create-booking.dto";
 import type { CancelBookingDto } from "./dto/cancel-booking.dto";
 
-const CANCELLABLE_STATUSES: BookingStatus[] = [BookingStatus.HOLD, BookingStatus.PENDING_CONFIRMATION, BookingStatus.CONFIRMED];
-const CANCELLED_STATUSES: BookingStatus[] = [BookingStatus.CANCELLED_BY_USER, BookingStatus.CANCELLED_BY_PROVIDER];
+const CANCELLABLE_STATUSES: BookingStatus[] = [BookingStatus.HOLD, BookingStatus.PENDING_CONFIRMATION, BookingStatus.REQUESTED, BookingStatus.AWAITING_PAYMENT, BookingStatus.CONFIRMED];
+/** Payment window after an instant booking or an accepted request, before the booking expires unpaid. */
+const PAYMENT_WINDOW_MINUTES = 30;
 
 /** SITTING/BOARDING are booked as a check-in/check-out date range rather than a fixed-duration slot picked from availability rules — see README "Multi-day bookings". */
 const DATE_RANGE_CATEGORIES: ServiceCategory[] = [ServiceCategory.SITTING, ServiceCategory.BOARDING];
@@ -51,11 +60,22 @@ const BOOKING_INCLUDE = {
   customerAddress: true,
   dropoffAddress: true,
   petAccess: { include: { petAccessGrant: true } },
+  variant: true,
+  additionalPets: true,
+  statusEvents: { orderBy: { createdAt: "asc" } },
+  review: { select: { id: true, rating: true } },
+  rescheduledTo: { select: { id: true } },
 } satisfies Prisma.BookingInclude;
 
 type BookingWithRelations = Prisma.BookingGetPayload<{ include: typeof BOOKING_INCLUDE }>;
 
 /** P2002 = unique constraint (the exact-startAt partial indexes); P2004 = any other DB constraint failure, which covers the SITTING/BOARDING overlap EXCLUDE constraint. */
+/** Postgres 23P01 (exclusion_violation) from the no-overlap constraints surfaces as an unknown/raw request error. */
+function isExclusionViolation(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+  return message.includes("23P01") || message.includes("exclusion constraint") || message.includes("bookings_no_overlap");
+}
+
 function isUniqueConstraintViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && (error.code === "P2002" || error.code === "P2004");
 }
@@ -102,6 +122,9 @@ export class BookingsService {
     private readonly petAccessGrants: BookingPetAccessService,
     private readonly careCalendar: CareCalendarService,
     private readonly events: DomainEventsService,
+    private readonly lifecycle: BookingLifecycleService,
+    private readonly compatibility: PetServiceCompatibilityService,
+    private readonly payments: PaymentsService,
   ) {}
 
   /**
@@ -122,22 +145,45 @@ export class BookingsService {
       throw new ProviderNotVerifiedException({ providerId: dto.providerId });
     }
 
-    const service = await this.prisma.providerService.findUnique({ where: { id: dto.serviceId } });
+    const service = await this.prisma.providerService.findUnique({ where: { id: dto.serviceId }, include: { variants: true } });
     if (!service || service.providerOrganizationId !== dto.providerId) throw new NotFoundApiException("Service");
     if (!service.isActive) throw new ServiceNotAvailableException({ serviceId: dto.serviceId });
 
-    const speciesSupported = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : true;
-    if (!speciesSupported) throw new PetNotSupportedException({ petId: dto.petId, serviceId: dto.serviceId });
+    const variant = dto.variantId ? service.variants.find((v) => v.id === dto.variantId && v.isActive) : undefined;
+    if (dto.variantId && !variant) throw new NotFoundApiException("Service variant");
+    if (!dto.variantId && service.variants.some((v) => v.isActive)) {
+      throw new ValidationApiException({ field: "variantId", reason: "Choose one of this service's options" });
+    }
+
+    // Multi-pet: every pet must belong to the same household, be bookable by this user and fit the provider's own rules.
+    const additionalPetIds = [...new Set(dto.additionalPetIds ?? [])].filter((id) => id !== pet.id);
+    if (1 + additionalPetIds.length > service.maxPetsPerBooking) {
+      throw new ValidationApiException({ field: "additionalPetIds", reason: `This service accepts at most ${service.maxPetsPerBooking} pet(s) per booking` });
+    }
+    const pets = [pet];
+    for (const extraId of additionalPetIds) {
+      const extra = await this.prisma.pet.findUnique({ where: { id: extraId } });
+      if (!extra || extra.householdId !== pet.householdId) throw new NotFoundApiException("Pet");
+      const access = await this.petAccess.getEffectivePermissions(extraId, userId);
+      if (!access?.canBookCare) throw new PetAccessDeniedException({ petId: extraId });
+      pets.push(extra);
+    }
+    for (const candidate of pets) {
+      const fit = await this.compatibility.evaluate(candidate, service);
+      if (fit.status === PetCompatibilityStatus.NOT_SUPPORTED) throw new PetNotSupportedException({ petId: candidate.id, serviceId: dto.serviceId, reasons: fit.reasons });
+    }
 
     const location = await this.prisma.providerLocation.findUnique({ where: { id: dto.locationId } });
     if (!location || location.providerOrganizationId !== dto.providerId) throw new NotFoundApiException("Location");
 
     const isDateRange = DATE_RANGE_CATEGORIES.includes(service.category as unknown as ServiceCategory);
+    const durationMinutes = variant?.durationMinutes ?? service.durationMinutes;
 
     let rangeStart: Date;
     let rangeEnd: Date;
     let timezone: string;
     let resolvedProviderUserId = dto.providerUserId ?? null;
+    let resourceId: string | null = null;
 
     if (isDateRange) {
       if (!dto.rangeStart || !dto.rangeEnd) {
@@ -151,7 +197,7 @@ export class BookingsService {
       const overlapping = await this.prisma.booking.findFirst({
         where: {
           providerLocationId: dto.locationId,
-          bookingStatus: { notIn: CANCELLED_STATUSES },
+          bookingStatus: { in: OCCUPYING_STATUSES },
           startAt: { lt: rangeEnd },
           endAt: { gt: rangeStart },
         },
@@ -160,20 +206,24 @@ export class BookingsService {
     } else {
       if (!dto.slotStart) throw new ValidationApiException({ field: "slotStart", reason: `${service.category} bookings require a slotStart` });
       rangeStart = new Date(dto.slotStart);
-      rangeEnd = new Date(rangeStart.getTime() + service.durationMinutes * 60_000);
+      rangeEnd = new Date(rangeStart.getTime() + durationMinutes * 60_000);
 
       const slots = await this.slotGenerator.generate({
         providerOrganizationId: dto.providerId,
         locationId: dto.locationId,
         serviceId: dto.serviceId,
         providerUserId: dto.providerUserId,
+        variantId: variant?.id,
         from: new Date(rangeStart.getTime() - 60_000),
         to: new Date(rangeEnd.getTime() + 60_000),
       });
+      // "Any professional": slots are ordered by time then staff id, so the first available qualified
+      // staff member at that time is assigned — deterministic and documented in the booking pattern.
       const match = slots.find((s) => s.startAt.getTime() === rangeStart.getTime() && s.state === "AVAILABLE");
       if (!match) throw new SlotUnavailableException({ slotStart: dto.slotStart });
       timezone = match.timezone;
       resolvedProviderUserId = dto.providerUserId ?? match.providerUserId ?? null;
+      resourceId = match.resourceId ?? null;
     }
 
     const hold = await this.bookingHold.createHold({
@@ -187,6 +237,9 @@ export class BookingsService {
       slotStart: rangeStart.toISOString(),
       slotEnd: rangeEnd.toISOString(),
       timezone,
+      variantId: variant?.id ?? null,
+      additionalPetIds,
+      resourceId,
     });
 
     await this.events.publish("ServiceBookingStarted", { holdId: hold.holdId, petId: pet.id, providerId: dto.providerId, category: service.category });
@@ -202,16 +255,18 @@ export class BookingsService {
       slotStart: hold.slotStart,
       slotEnd: hold.slotEnd,
       timezone: hold.timezone,
+      variantId: hold.variantId,
+      additionalPetIds: hold.additionalPetIds,
     };
   }
 
   /**
-   * Converts a hold into a real Booking row, directly at CONFIRMED (no real
-   * payment-authorization gate exists this phase). The hold is consumed
-   * (deleted) before the DB transaction runs, so a retried confirm on an
-   * already-consumed hold correctly reports HOLD_EXPIRED rather than
-   * silently succeeding twice — the Idempotency-Key on this route (see
-   * BookingsController) is what makes an intentional retry safe.
+   * Converts a hold into a real Booking with frozen price/policy snapshots. The resulting state is
+   * decided by the service's own policy: REQUEST mode → REQUESTED (provider must accept before the
+   * expiry), online prepayment/deposit → AWAITING_PAYMENT, otherwise CONFIRMED. The hold is consumed
+   * before the transaction, so a retried confirm on a consumed hold reports HOLD_EXPIRED; the
+   * Idempotency-Key on this route makes an intentional retry safe. Postgres exclusion constraints
+   * are the last line against double booking.
    */
   async confirm(userId: string, dto: CreateBookingDto): Promise<BookingDto> {
     const hold = await this.bookingHold.consumeHold(dto.holdId);
@@ -219,8 +274,10 @@ export class BookingsService {
       throw new PetAccessDeniedException({ holdId: dto.holdId });
     }
 
-    const service = await this.prisma.providerService.findUnique({ where: { id: hold.providerServiceId } });
+    const service = await this.prisma.providerService.findUnique({ where: { id: hold.providerServiceId }, include: { variants: true } });
     if (!service) throw new NotFoundApiException("Service");
+    const variant = hold.variantId ? service.variants.find((v) => v.id === hold.variantId) ?? null : null;
+    if (hold.variantId && (!variant || !variant.isActive)) throw new ServiceNotAvailableException({ serviceId: service.id, variantId: hold.variantId });
     // service.category/locationMode are already Prisma's own enum types — used as-is for the
     // Booking write below; cast to @petlife/types only for app-logic lookups/comparisons.
     const category = service.category as unknown as ServiceCategory;
@@ -231,6 +288,24 @@ export class BookingsService {
     const { customerAddressId, dropoffAddressId } = await this.resolveAddresses(hold.householdId, locationMode, dto);
 
     await this.assertPetContextComplete(hold.petId, service);
+
+    const unitPrice = variant?.priceAmount ?? service.priceAmount;
+    const petCount = 1 + (hold.additionalPetIds?.length ?? 0);
+    const priceAmount = unitPrice === null ? null : new Prisma.Decimal(unitPrice).mul(petCount);
+    const onlinePayment = service.paymentMode === BookingPaymentMode.FULL_PREPAYMENT || service.paymentMode === BookingPaymentMode.DEPOSIT;
+    if (onlinePayment && (priceAmount === null || (service.paymentMode === BookingPaymentMode.DEPOSIT && !service.depositAmount))) {
+      // A misconfigured paid service must never produce an unpriced "paid" booking.
+      throw new ServiceNotAvailableException({ serviceId: service.id, reason: "PAYMENT_POLICY_INCOMPLETE" });
+    }
+    const now = new Date();
+    const initialStatus =
+      service.bookingMode === BookingMode.REQUEST ? BookingStatus.REQUESTED : onlinePayment ? BookingStatus.AWAITING_PAYMENT : BookingStatus.CONFIRMED;
+    const requestExpiresAt =
+      initialStatus === BookingStatus.REQUESTED
+        ? new Date(Math.min(now.getTime() + service.requestTtlHours * 3600_000, new Date(hold.slotStart).getTime()))
+        : initialStatus === BookingStatus.AWAITING_PAYMENT
+          ? new Date(now.getTime() + PAYMENT_WINDOW_MINUTES * 60_000)
+          : null;
 
     try {
       const bookingId = await this.prisma.$transaction(async (tx) => {
@@ -252,47 +327,77 @@ export class BookingsService {
             timezone: hold.timezone,
             reasonForVisit: dto.reasonForVisit,
             ownerNotes: dto.ownerNotes,
+            bookingStatus: initialStatus,
+            paymentStatus: onlinePayment ? PaymentStatus.PENDING : PaymentStatus.NOT_REQUIRED,
+            bookingNumber: await this.lifecycle.nextBookingNumber(tx),
+            variantId: variant?.id ?? null,
+            resourceId: hold.resourceId ?? null,
+            bookingMode: service.bookingMode,
+            paymentMode: service.paymentMode,
+            priceAmount,
+            discountAmount: 0,
+            depositAmount: service.paymentMode === BookingPaymentMode.DEPOSIT ? service.depositAmount : null,
+            currency: service.currency,
+            durationMinutes: variant?.durationMinutes ?? service.durationMinutes,
+            serviceNameSnapshot: service.name,
+            variantNameSnapshot: variant?.name ?? null,
+            cancellationPolicySnapshot: service.cancellationPolicy,
+            freeCancellationHours: service.freeCancellationHours,
+            lateCancellationRefundPercent: service.lateCancellationRefundPercent,
+            preparationSnapshot: service.preparationNotes,
+            requestExpiresAt,
+            additionalPets: { create: (hold.additionalPetIds ?? []).map((petId) => ({ petId })) },
           },
         });
+        await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
 
-        await this.events.publish(
-          "ServiceBookingConfirmed",
-          { bookingId: created.id, petId: created.petId, category },
-          { tx, aggregateType: "Booking", aggregateId: created.id },
-        );
+        const eventType =
+          initialStatus === BookingStatus.REQUESTED ? "ServiceBookingRequested" : initialStatus === BookingStatus.AWAITING_PAYMENT ? "ServiceBookingAwaitingPayment" : "ServiceBookingConfirmed";
+        await this.events.publish(eventType, bookingEventFields(created), { tx, aggregateType: "Booking", aggregateId: created.id });
 
         await this.petAccessGrants.grantForBooking(created, hold.providerUserId ?? undefined, scopePreset, tx, dto.accessSelection !== undefined);
-        await this.careCalendar.upsertForBooking(created, tx);
+        if (initialStatus !== BookingStatus.REQUESTED) await this.careCalendar.upsertForBooking(created, tx);
 
         return created.id;
       });
 
       return this.toDto(await this.loadWithRelations(bookingId));
     } catch (error) {
-      if (isUniqueConstraintViolation(error)) throw new BookingConflictException({ holdId: dto.holdId });
+      if (isUniqueConstraintViolation(error) || isExclusionViolation(error)) throw new BookingConflictException({ holdId: dto.holdId });
       throw error;
     }
   }
 
-  async list(userId: string, filter: { upcoming?: boolean; past?: boolean; cancelled?: boolean; petId?: string }): Promise<BookingDto[]> {
+  async list(
+    userId: string,
+    filter: { upcoming?: boolean; past?: boolean; cancelled?: boolean; requested?: boolean; petId?: string; serviceId?: string; providerId?: string; from?: string; to?: string },
+  ): Promise<BookingDto[]> {
     const memberships = await this.prisma.householdMember.findMany({ where: { userId } });
     const householdIds = memberships.map((m) => m.householdId);
     const now = new Date();
+    const closed: BookingStatus[] = [...TERMINAL_RELEASE_STATUSES];
+    const pending: BookingStatus[] = [BookingStatus.REQUESTED, BookingStatus.AWAITING_PAYMENT];
 
     const bookings = await this.prisma.booking.findMany({
       where: {
         householdId: { in: householdIds },
-        ...(filter.petId ? { petId: filter.petId } : {}),
+        ...(filter.petId ? { OR: [{ petId: filter.petId }, { additionalPets: { some: { petId: filter.petId } } }] } : {}),
+        ...(filter.serviceId ? { providerServiceId: filter.serviceId } : {}),
+        ...(filter.providerId ? { providerOrganizationId: filter.providerId } : {}),
+        ...(filter.from || filter.to ? { startAt: { ...(filter.from ? { gte: new Date(filter.from) } : {}), ...(filter.to ? { lt: new Date(filter.to) } : {}) } } : {}),
         ...(filter.cancelled
-          ? { bookingStatus: { in: CANCELLED_STATUSES } }
-          : filter.upcoming
-            ? { startAt: { gte: now }, bookingStatus: { notIn: CANCELLED_STATUSES } }
-            : filter.past
-              ? { startAt: { lt: now } }
-              : {}),
+          ? { bookingStatus: { in: closed } }
+          : filter.requested
+            ? { bookingStatus: { in: pending } }
+            : filter.upcoming
+              ? { endAt: { gte: now }, bookingStatus: { notIn: [...closed, ...pending, BookingStatus.COMPLETED, BookingStatus.NO_SHOW] } }
+              : filter.past
+                ? { OR: [{ bookingStatus: { in: [BookingStatus.COMPLETED, BookingStatus.NO_SHOW] } }, { endAt: { lt: now }, bookingStatus: { notIn: closed } }] }
+                : {}),
       },
       include: BOOKING_INCLUDE,
       orderBy: { startAt: filter.past || filter.cancelled ? "desc" : "asc" },
+      take: 200,
     });
 
     return bookings.map((b) => this.toDto(b));
@@ -320,20 +425,159 @@ export class BookingsService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.booking.update({
-        where: { id },
-        data: { bookingStatus: BookingStatus.CANCELLED_BY_USER, cancelledAt: new Date(), cancelledReason: dto.reason },
+      const cancelled = await this.lifecycle.transition(tx, {
+        bookingId: id,
+        to: BookingStatus.CANCELLED_BY_USER,
+        actorType: BookingActorType.USER,
+        actorId: userId,
+        reason: dto.reason ?? null,
+        data: { cancelledAt: new Date(), cancelledReason: dto.reason },
       });
-      await this.petAccessGrants.revokeForBooking(id, userId, tx);
-      await this.careCalendar.markCancelled(id, tx);
+      await this.lifecycle.requestRefund(tx, cancelled, false, userId);
       await this.events.publish(
         "ServiceBookingCancelled",
-        { bookingId: id, reason: dto.reason, category: booking.category },
+        { ...bookingEventFields(cancelled), reason: dto.reason },
         { tx, aggregateType: "Booking", aggregateId: id },
       );
     });
 
     return this.toDto(await this.loadWithRelations(id));
+  }
+
+  /**
+   * Pays an AWAITING_PAYMENT booking (full prepayment or deposit) through the existing H07 stack:
+   * a minimal internal Checkout shell → PaymentIntent → gateway charge. Only a SUCCEEDED charge
+   * confirms the booking; FAILED keeps it awaiting payment (retryable until its window expires),
+   * PENDING leaves it for the provider webhook. The gateway is whatever PAYMENT_SANDBOX_MODE
+   * configures — this code never reports success the gateway did not report.
+   */
+  async pay(userId: string, id: string, dto: PayBookingDto): Promise<BookingDto> {
+    const booking = await this.prisma.booking.findUnique({ where: { id } });
+    if (!booking) throw new NotFoundApiException("Booking");
+    if (booking.userId !== userId) throw new PetAccessDeniedException({ bookingId: id });
+    if (booking.bookingStatus !== BookingStatus.AWAITING_PAYMENT) {
+      throw new InvalidBookingTransitionException({ bookingId: id, from: booking.bookingStatus, to: BookingStatus.CONFIRMED });
+    }
+    if (booking.requestExpiresAt && booking.requestExpiresAt <= new Date()) {
+      throw new InvalidBookingTransitionException({ bookingId: id, reason: "PAYMENT_WINDOW_EXPIRED" });
+    }
+    const amount = Math.round(Number(booking.paymentMode === BookingPaymentMode.DEPOSIT ? booking.depositAmount : booking.priceAmount) - (booking.paymentMode === BookingPaymentMode.DEPOSIT ? 0 : Number(booking.discountAmount)));
+    if (!Number.isFinite(amount) || amount <= 0) throw new ServiceNotAvailableException({ bookingId: id, reason: "PAYMENT_AMOUNT_INVALID" });
+    const currency = booking.currency ?? "IRR";
+
+    const intentId = await this.prisma.$transaction(async (tx) => {
+      if (booking.paymentIntentId) {
+        const existing = await tx.paymentIntent.findUniqueOrThrow({ where: { id: booking.paymentIntentId } });
+        if (existing.status !== "FAILED" && existing.status !== "CANCELLED") return existing.id;
+      }
+      const cart = await tx.cart.create({ data: { userId, status: CartStatus.CONVERTED } });
+      const checkout = await tx.checkout.create({
+        data: { userId, householdId: booking.householdId, cartId: cart.id, paymentMethodType: PaymentMethodType.ONLINE_PAYMENT, status: CheckoutStatus.READY_FOR_PAYMENT, subtotalAmount: amount, totalAmount: amount, currency },
+      });
+      const intent = await this.payments.createIntent(checkout.id, amount, currency, dto.provider ?? PaymentProvider.DEV_SIMULATED, `booking:${id}:${Date.now()}`, tx);
+      await tx.booking.update({ where: { id }, data: { paymentIntentId: intent.id } });
+      return intent.id;
+    });
+
+    const outcome = await this.payments.charge(intentId, dto.mode as PaymentChargeMode | undefined);
+    if (outcome.status === "SUCCEEDED") {
+      await this.prisma.$transaction(async (tx) => {
+        const paid = await this.lifecycle.transition(tx, {
+          bookingId: id,
+          to: BookingStatus.CONFIRMED,
+          from: [BookingStatus.AWAITING_PAYMENT],
+          actorType: BookingActorType.USER,
+          actorId: userId,
+          reason: booking.paymentMode === BookingPaymentMode.DEPOSIT ? "DEPOSIT_PAID" : "PAID",
+          data: { paymentStatus: PaymentStatus.PAID, requestExpiresAt: null },
+        });
+        await this.careCalendar.upsertForBooking(paid, tx);
+        await this.events.publish("ServiceBookingPaid", { ...bookingEventFields(paid), amount, currency }, { tx, aggregateType: "Booking", aggregateId: id });
+        await this.events.publish("ServiceBookingConfirmed", bookingEventFields(paid), { tx, aggregateType: "Booking", aggregateId: id });
+      });
+    } else if (outcome.status === "FAILED") {
+      await this.prisma.booking.update({ where: { id }, data: { paymentStatus: PaymentStatus.FAILED } });
+    }
+    return this.toDto(await this.loadWithRelations(id));
+  }
+
+  /**
+   * Safe reschedule: validates the new slot (ignoring this booking's own time), then in ONE
+   * transaction marks the old booking RESCHEDULED and inserts its successor with the same frozen
+   * price/policy/payment. If the insert loses a race the whole transaction rolls back and the
+   * original booking is untouched — the original slot is never released before the new one is held.
+   * The provider-access grant moves to the successor with the owner's original consent decision.
+   */
+  async reschedule(userId: string, id: string, dto: RescheduleBookingDto): Promise<BookingDto> {
+    const booking = await this.prisma.booking.findUnique({ where: { id }, include: { additionalPets: true, petAccess: { include: { petAccessGrant: true } } } });
+    if (!booking) throw new NotFoundApiException("Booking");
+    const effective = await this.petAccess.getEffectivePermissions(booking.petId, userId);
+    if (booking.userId !== userId && !effective?.canBookCare) throw new PetAccessDeniedException({ bookingId: id });
+    if (booking.bookingStatus !== BookingStatus.CONFIRMED || booking.startAt <= new Date()) {
+      throw new InvalidBookingTransitionException({ bookingId: id, from: booking.bookingStatus, to: BookingStatus.RESCHEDULED });
+    }
+    if (DATE_RANGE_CATEGORIES.includes(booking.category as unknown as ServiceCategory)) {
+      throw new ValidationApiException({ field: "slotStart", reason: "Date-range stays are changed by cancelling and booking again" });
+    }
+    const newStart = new Date(dto.slotStart);
+    const duration = booking.endAt.getTime() - booking.startAt.getTime();
+    const newEnd = new Date(newStart.getTime() + duration);
+    const slots = await this.slotGenerator.generate({
+      providerOrganizationId: booking.providerOrganizationId,
+      locationId: booking.providerLocationId,
+      serviceId: booking.providerServiceId,
+      providerUserId: dto.providerUserId ?? undefined,
+      variantId: booking.variantId ?? undefined,
+      from: new Date(newStart.getTime() - 60_000),
+      to: new Date(newEnd.getTime() + 60_000),
+      ignoreBookingId: id,
+    });
+    const match = slots.find((s) => s.startAt.getTime() === newStart.getTime() && s.state === "AVAILABLE");
+    if (!match) throw new SlotUnavailableException({ slotStart: dto.slotStart });
+
+    try {
+      const successorId = await this.prisma.$transaction(async (tx) => {
+        await this.lifecycle.transition(tx, {
+          bookingId: id,
+          to: BookingStatus.RESCHEDULED,
+          from: [BookingStatus.CONFIRMED],
+          actorType: BookingActorType.USER,
+          actorId: userId,
+          reason: `RESCHEDULED_TO:${newStart.toISOString()}`,
+        });
+        const { id: _oldId, createdAt: _c, updatedAt: _u, bookingNumber: _n, rescheduledFromBookingId: _r, bookingStatus: _s, ...copy } = booking as typeof booking & Record<string, unknown>;
+        delete (copy as Record<string, unknown>).additionalPets;
+        delete (copy as Record<string, unknown>).petAccess;
+        const successor = await tx.booking.create({
+          data: {
+            ...(copy as Prisma.BookingUncheckedCreateInput),
+            startAt: newStart,
+            endAt: newEnd,
+            timezone: match.timezone,
+            providerUserId: dto.providerUserId ?? match.providerUserId ?? booking.providerUserId,
+            resourceId: match.resourceId ?? booking.resourceId,
+            bookingStatus: BookingStatus.CONFIRMED,
+            bookingNumber: await this.lifecycle.nextBookingNumber(tx),
+            rescheduledFromBookingId: id,
+            additionalPets: { create: booking.additionalPets.map((p) => ({ petId: p.petId })) },
+          },
+        });
+        await tx.bookingStatusEvent.create({ data: { bookingId: successor.id, fromStatus: null, toStatus: BookingStatus.CONFIRMED, actorType: BookingActorType.USER, actorId: userId, reason: `RESCHEDULED_FROM:${booking.bookingNumber ?? id}` } });
+        // Access moves with the appointment: end the old grant, issue one for the new window with the same consent.
+        await this.petAccessGrants.revokeForBooking(id, userId, tx);
+        if (booking.petAccess) {
+          const consented = booking.petAccess.petAccessGrant.reason?.endsWith("_HEALTH_CONSENT") ?? false;
+          await this.petAccessGrants.grantForBooking(successor, successor.providerUserId ?? undefined, booking.petAccess.scopePreset as unknown as PetAccessScopePreset, tx, consented);
+        }
+        await this.careCalendar.upsertForBooking(successor, tx);
+        await this.events.publish("ServiceBookingRescheduled", { ...bookingEventFields(successor), fromBookingId: id }, { tx, aggregateType: "Booking", aggregateId: successor.id });
+        return successor.id;
+      });
+      return this.toDto(await this.loadWithRelations(successorId));
+    } catch (error) {
+      if (isUniqueConstraintViolation(error) || isExclusionViolation(error)) throw new BookingConflictException({ slotStart: dto.slotStart });
+      throw error;
+    }
   }
 
   /**
@@ -346,7 +590,7 @@ export class BookingsService {
    * never touches this series row or any sibling occurrence — there is no
    * series-wide cancel endpoint this phase; see README Known limitations.
    */
-  async createWeeklySeries(userId: string, originBookingId: string, occurrences: number): Promise<{ series: BookingSeriesDto; createdBookingIds: string[]; skippedStarts: string[] }> {
+  async createWeeklySeries(userId: string, originBookingId: string, occurrences: number, intervalWeeks = 1): Promise<{ series: BookingSeriesDto; createdBookingIds: string[]; skippedStarts: string[] }> {
     const origin = await this.prisma.booking.findUnique({ where: { id: originBookingId }, include: { petAccess: true } });
     if (!origin) throw new NotFoundApiException("Booking");
 
@@ -354,11 +598,20 @@ export class BookingsService {
     if (!hasAccess) throw new PetAccessDeniedException({ bookingId: originBookingId });
 
     const category = origin.category as unknown as ServiceCategory;
-    if (!RECURRING_CATEGORIES.includes(category)) {
+    const originService = await this.prisma.providerService.findUniqueOrThrow({ where: { id: origin.providerServiceId } });
+    const isRehab = originService.type === "REHAB_SESSION";
+    if (!RECURRING_CATEGORIES.includes(category) && !isRehab) {
       throw new ValidationApiException({ field: "category", reason: `Recurring bookings are only supported for ${RECURRING_CATEGORIES.join(", ")}` });
     }
     if (origin.bookingStatus !== BookingStatus.CONFIRMED) {
       throw new ValidationApiException({ field: "bookingStatus", reason: "Only a confirmed booking can start a series" });
+    }
+    if (origin.paymentMode === BookingPaymentMode.FULL_PREPAYMENT || origin.paymentMode === BookingPaymentMode.DEPOSIT) {
+      // Each prepaid occurrence needs its own payment; a series must never confirm unpaid appointments.
+      throw new ValidationApiException({ field: "paymentMode", reason: "Prepaid services are rebooked one appointment at a time" });
+    }
+    if (intervalWeeks < 1 || intervalWeeks > 4) {
+      throw new ValidationApiException({ field: "intervalWeeks", reason: "intervalWeeks must be between 1 and 4" });
     }
     if (occurrences < 2 || occurrences > 8) {
       throw new ValidationApiException({ field: "occurrences", reason: "occurrences must be between 2 and 8" });
@@ -386,7 +639,7 @@ export class BookingsService {
     const skippedStarts: string[] = [];
 
     for (let i = 1; i < occurrences; i += 1) {
-      const startAt = new Date(origin.startAt.getTime() + i * 7 * 24 * 60 * 60 * 1000);
+      const startAt = new Date(origin.startAt.getTime() + i * intervalWeeks * 7 * 24 * 60 * 60 * 1000);
       const endAt = new Date(startAt.getTime() + durationMs);
 
       const slots = await this.slotGenerator.generate({
@@ -394,11 +647,12 @@ export class BookingsService {
         locationId: origin.providerLocationId,
         serviceId: origin.providerServiceId,
         providerUserId: origin.providerUserId ?? undefined,
+        variantId: origin.variantId ?? undefined,
         from: new Date(startAt.getTime() - 60_000),
         to: new Date(endAt.getTime() + 60_000),
       });
-      const available = slots.some((s) => s.startAt.getTime() === startAt.getTime() && s.state === "AVAILABLE");
-      if (!available) {
+      const slot = slots.find((s) => s.startAt.getTime() === startAt.getTime() && s.state === "AVAILABLE");
+      if (!slot) {
         skippedStarts.push(startAt.toISOString());
         continue;
       }
@@ -424,11 +678,27 @@ export class BookingsService {
               timezone: origin.timezone,
               reasonForVisit: origin.reasonForVisit,
               ownerNotes: origin.ownerNotes,
+              bookingNumber: await this.lifecycle.nextBookingNumber(tx),
+              variantId: origin.variantId,
+              resourceId: slot.resourceId ?? null,
+              bookingMode: origin.bookingMode,
+              paymentMode: origin.paymentMode,
+              priceAmount: origin.priceAmount,
+              discountAmount: origin.discountAmount,
+              currency: origin.currency,
+              durationMinutes: origin.durationMinutes,
+              serviceNameSnapshot: origin.serviceNameSnapshot,
+              variantNameSnapshot: origin.variantNameSnapshot,
+              cancellationPolicySnapshot: origin.cancellationPolicySnapshot,
+              freeCancellationHours: origin.freeCancellationHours,
+              lateCancellationRefundPercent: origin.lateCancellationRefundPercent,
+              preparationSnapshot: origin.preparationSnapshot,
             },
           });
+          await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
           await this.events.publish(
             "ServiceBookingConfirmed",
-            { bookingId: created.id, petId: created.petId, category, bookingSeriesId: series.id },
+            { ...bookingEventFields(created), bookingSeriesId: series.id },
             { tx, aggregateType: "Booking", aggregateId: created.id },
           );
           await this.petAccessGrants.grantForBooking(created, origin.providerUserId ?? undefined, scopePreset, tx, originConsented);
@@ -457,6 +727,30 @@ export class BookingsService {
       createdBookingIds,
       skippedStarts,
     };
+  }
+
+  /**
+   * "Cancel this and all following": cancels every still-cancellable occurrence of the series that
+   * starts at or after the chosen occurrence, each through the same cancel path (policy refund,
+   * capacity release, timeline). Earlier and already-attended occurrences are untouched.
+   */
+  async cancelSeriesFrom(userId: string, bookingId: string, reason?: string): Promise<{ cancelledBookingIds: string[] }> {
+    const anchor = await this.prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!anchor?.bookingSeriesId) throw new NotFoundApiException("Booking series");
+    const effective = await this.petAccess.getEffectivePermissions(anchor.petId, userId);
+    if (anchor.userId !== userId && !effective?.canBookCare) throw new PetAccessDeniedException({ bookingId });
+    const occurrences = await this.prisma.booking.findMany({
+      where: { bookingSeriesId: anchor.bookingSeriesId, startAt: { gte: anchor.startAt }, bookingStatus: { in: CANCELLABLE_STATUSES } },
+      orderBy: { startAt: "asc" },
+    });
+    const cancelledBookingIds: string[] = [];
+    for (const occurrence of occurrences) {
+      await this.cancel(userId, occurrence.id, { reason: reason ?? "SERIES_CANCELLED_FROM_HERE" });
+      cancelledBookingIds.push(occurrence.id);
+    }
+    const remaining = await this.prisma.booking.count({ where: { bookingSeriesId: anchor.bookingSeriesId, bookingStatus: { in: OCCUPYING_STATUSES } } });
+    if (remaining === 0) await this.prisma.bookingSeries.update({ where: { id: anchor.bookingSeriesId }, data: { status: "CANCELLED" } });
+    return { cancelledBookingIds };
   }
 
   private async resolveAddresses(
@@ -537,6 +831,35 @@ export class BookingsService {
       dropoffAddress: toAddressDto(booking.dropoffAddress),
       bookingSeriesId: booking.bookingSeriesId,
       petAccess: booking.petAccess ? this.toPetAccessSummary(booking.petAccess) : null,
+      bookingNumber: booking.bookingNumber,
+      variantId: booking.variantId,
+      variantName: booking.variantNameSnapshot ?? booking.variant?.name ?? null,
+      serviceName: booking.serviceNameSnapshot ?? booking.providerService.name,
+      bookingMode: booking.bookingMode as unknown as BookingDto["bookingMode"],
+      paymentMode: booking.paymentMode as unknown as BookingDto["paymentMode"],
+      priceAmount: booking.priceAmount === null ? null : Number(booking.priceAmount),
+      discountAmount: Number(booking.discountAmount),
+      depositAmount: booking.depositAmount === null ? null : Number(booking.depositAmount),
+      currency: booking.currency,
+      durationMinutes: booking.durationMinutes,
+      cancellationPolicy: booking.cancellationPolicySnapshot,
+      freeCancellationHours: booking.freeCancellationHours,
+      lateCancellationRefundPercent: booking.lateCancellationRefundPercent,
+      preparation: booking.preparationSnapshot,
+      requestExpiresAt: booking.requestExpiresAt?.toISOString() ?? null,
+      rejectedReason: booking.rejectedReason,
+      rescheduledFromBookingId: booking.rescheduledFromBookingId,
+      rescheduledToBookingId: booking.rescheduledTo?.id ?? null,
+      additionalPetIds: booking.additionalPets.map((p) => p.petId),
+      timeline: booking.statusEvents.map((e) => ({
+        id: e.id,
+        fromStatus: e.fromStatus as unknown as BookingDto["bookingStatus"] | null,
+        toStatus: e.toStatus as unknown as BookingDto["bookingStatus"],
+        actorType: e.actorType,
+        reason: e.reason,
+        createdAt: e.createdAt.toISOString(),
+      })),
+      review: booking.review ?? null,
     };
   }
 

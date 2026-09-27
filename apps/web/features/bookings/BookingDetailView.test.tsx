@@ -104,12 +104,13 @@ const BASE_BOOKING: BookingDto = {
     requiresCareProfile: false,
     requiresHealthBasics: false,
     locationMode: "AT_PROVIDER" as never,
-    isActive: true,
+    isActive: true, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, depositAmount: null, cancellationPolicy: null, freeCancellationHours: 24, lateCancellationRefundPercent: 0, preparationNotes: null, maxPetsPerBooking: 1, requiredResourceType: null, variants: [],
   },
   customerAddress: null,
   dropoffAddress: null,
   bookingSeriesId: null,
   petAccess: { scopePreset: "HEALTH_BASICS" as never, expiresAt: "2026-09-11T06:00:00.000Z" },
+  bookingNumber: "PL-B-000001", variantId: null, variantName: null, serviceName: null, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, priceAmount: null, discountAmount: 0, depositAmount: null, currency: null, durationMinutes: null, cancellationPolicy: null, freeCancellationHours: null, lateCancellationRefundPercent: null, preparation: null, requestExpiresAt: null, rejectedReason: null, rescheduledFromBookingId: null, rescheduledToBookingId: null, additionalPetIds: [], timeline: [], review: null,
 };
 
 describe("BookingDetailView", () => {

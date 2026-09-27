@@ -1,5 +1,5 @@
-import type { ProviderLocation, ProviderService } from "@prisma/client";
-import type { ProviderLocationDto, ProviderServiceDto } from "@petlife/types";
+import type { ProviderLocation, ProviderService, ProviderServiceVariant } from "@prisma/client";
+import type { ProviderLocationDto, ProviderServiceDto, ProviderServiceVariantDto } from "@petlife/types";
 
 /**
  * Shared mapping helpers used by ProvidersService, ServicesService, and
@@ -23,7 +23,21 @@ export function toProviderLocationDto(location: ProviderLocation): ProviderLocat
   };
 }
 
-export function toProviderServiceDto(service: ProviderService): ProviderServiceDto {
+export function toProviderServiceVariantDto(variant: ProviderServiceVariant): ProviderServiceVariantDto {
+  return {
+    id: variant.id,
+    serviceId: variant.serviceId,
+    name: variant.name,
+    description: variant.description,
+    priceAmount: variant.priceAmount ? Number(variant.priceAmount) : null,
+    durationMinutes: variant.durationMinutes,
+    sortOrder: variant.sortOrder,
+    isActive: variant.isActive,
+  };
+}
+
+/** Variants are included only when the caller loaded them; public callers pass active variants only. */
+export function toProviderServiceDto(service: ProviderService & { variants?: ProviderServiceVariant[] }, options: { includeInactiveVariants?: boolean } = {}): ProviderServiceDto {
   return {
     id: service.id,
     providerOrganizationId: service.providerOrganizationId,
@@ -45,5 +59,15 @@ export function toProviderServiceDto(service: ProviderService): ProviderServiceD
     requiresHealthBasics: service.requiresHealthBasics,
     locationMode: service.locationMode as unknown as ProviderServiceDto["locationMode"],
     isActive: service.isActive,
+    bookingMode: service.bookingMode as unknown as ProviderServiceDto["bookingMode"],
+    paymentMode: service.paymentMode as unknown as ProviderServiceDto["paymentMode"],
+    depositAmount: service.depositAmount ? Number(service.depositAmount) : null,
+    cancellationPolicy: service.cancellationPolicy,
+    freeCancellationHours: service.freeCancellationHours,
+    lateCancellationRefundPercent: service.lateCancellationRefundPercent,
+    preparationNotes: service.preparationNotes,
+    maxPetsPerBooking: service.maxPetsPerBooking,
+    requiredResourceType: service.requiredResourceType,
+    variants: (service.variants ?? []).filter((v) => options.includeInactiveVariants || v.isActive).sort((a, b) => a.sortOrder - b.sortOrder).map(toProviderServiceVariantDto),
   };
 }

@@ -9,4 +9,5 @@ export const DEFAULT_ACCESS_PRESET_BY_CATEGORY: Record<ServiceCategory, PetAcces
   [ServiceCategory.SITTING]: PetAccessScopePreset.SITTING_BASIC,
   [ServiceCategory.BOARDING]: PetAccessScopePreset.BOARDING_BASIC,
   [ServiceCategory.PET_TAXI]: PetAccessScopePreset.TAXI_BASIC,
+  [ServiceCategory.OTHER]: PetAccessScopePreset.MINIMAL_VET_CONTEXT,
 };

@@ -100,4 +100,8 @@ export type AdminAuditAction =
   | "travel_listing.rejected"
   | "travel_listing.suspended"
   | "travel_listing.archived"
-  | "travel_listing.verification_changed";
+  | "travel_listing.verification_changed"
+  // Batch 3 — services/booking operations.
+  | "provider_review.hidden"
+  | "provider_service.deactivated"
+  | "provider_service.reactivated";

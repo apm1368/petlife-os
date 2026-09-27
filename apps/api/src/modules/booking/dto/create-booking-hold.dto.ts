@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsUUID } from "class-validator";
+import { ArrayMaxSize, IsArray, IsDateString, IsOptional, IsUUID } from "class-validator";
 
 export class CreateBookingHoldDto {
   @IsUUID()
@@ -30,4 +30,15 @@ export class CreateBookingHoldDto {
   @IsOptional()
   @IsUUID()
   providerUserId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  variantId?: string;
+
+  /** Extra pets from the same household for services that accept more than one. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(9)
+  @IsUUID(undefined, { each: true })
+  additionalPetIds?: string[];
 }

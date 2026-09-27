@@ -3,7 +3,7 @@ import { ClinicalVisitStatus } from "@prisma/client";
 import type { ClinicalVisitDetailDto, ClinicalVisitDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { ClinicalVisitNotFoundException, InvalidClinicalVisitTransitionException, ProviderAccessDeniedException } from "../../common/errors/api-exception";
+import { ClinicalVisitNotFoundException, InvalidClinicalVisitTransitionException, ProviderAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { CLINICAL_VISIT_INCLUDE, toClinicalVisitDetailDto, toClinicalVisitDto } from "./clinical-health-mapper";
 import type { AmendClinicalVisitDto, StartClinicalVisitDto, UpdateClinicalVisitNotesDto, VoidClinicalVisitDto } from "./dto/clinical-visit.dto";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
@@ -45,6 +45,17 @@ export class ClinicalVisitService {
 
   async start(ctx: ResolvedProviderContext, dto: StartClinicalVisitDto): Promise<ClinicalVisitDto> {
     const pet = await this.prisma.pet.findUniqueOrThrow({ where: { id: dto.petId } });
+    if (dto.bookingId) {
+      // Booking → visit handoff: the booking must be this organization's own VET booking for this pet,
+      // already confirmed or attended, and not already linked to another visit. Booking != Clinical Visit.
+      const booking = await this.prisma.booking.findUnique({ where: { id: dto.bookingId }, select: { petId: true, providerOrganizationId: true, category: true, bookingStatus: true } });
+      if (!booking || booking.petId !== dto.petId || booking.providerOrganizationId !== ctx.organizationId) throw new ProviderAccessDeniedException({ reason: "BOOKING_NOT_OWNED" });
+      if (booking.category !== "VET" || !["CONFIRMED", "CHECKED_IN", "IN_PROGRESS", "COMPLETED"].includes(booking.bookingStatus)) {
+        throw new ValidationApiException({ field: "bookingId", reason: "Only a confirmed or attended veterinary booking can start a clinical visit" });
+      }
+      const linked = await this.prisma.clinicalVisit.count({ where: { bookingId: dto.bookingId } });
+      if (linked > 0) throw new ValidationApiException({ field: "bookingId", reason: "This booking already has a clinical visit" });
+    }
 
     const row = await this.prisma.$transaction(async (tx) => {
       const created = await tx.clinicalVisit.create({

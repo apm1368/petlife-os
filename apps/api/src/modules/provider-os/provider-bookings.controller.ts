@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { ProviderAuthGuard } from "./auth/provider-auth.guard";
 import { CurrentProviderContext } from "./auth/current-provider-context.decorator";
 import type { ResolvedProviderContext } from "./auth/provider-context.types";
 import { ProviderBookingsService } from "./provider-bookings.service";
 import { ListProviderBookingsDto } from "./dto/list-provider-bookings.dto";
-import { AddBookingProviderNoteDto, CompleteBookingDto, ProviderCancelBookingDto } from "./dto/provider-booking-actions.dto";
+import { AddBookingProviderNoteDto, CompleteBookingDto, ProviderCancelBookingDto, RejectBookingRequestDto } from "./dto/provider-booking-actions.dto";
 
 @Controller("provider/bookings")
 @UseGuards(SessionAuthGuard, ProviderAuthGuard)
@@ -30,6 +30,21 @@ export class ProviderBookingsController {
   @Post(":id/cancel")
   cancel(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id") id: string, @Body() dto: ProviderCancelBookingDto) {
     return this.bookings.cancel(ctx, id, dto);
+  }
+
+  @Post(":id/accept")
+  accept(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string) {
+    return this.bookings.accept(ctx, id);
+  }
+
+  @Post(":id/reject")
+  reject(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: RejectBookingRequestDto) {
+    return this.bookings.reject(ctx, id, dto.reason);
+  }
+
+  @Post(":id/no-show")
+  noShow(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string) {
+    return this.bookings.markNoShow(ctx, id);
   }
 
   @Post(":id/check-in")

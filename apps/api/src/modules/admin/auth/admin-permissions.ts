@@ -48,7 +48,9 @@ export type AdminPermission =
   | "insurance.view"
   | "insurance.manage"
   | "places.view"
-  | "places.manage";
+  | "places.manage"
+  | "services.view"
+  | "services.manage";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -89,6 +91,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "insurance.manage",
   "places.view",
   "places.manage",
+  "services.view",
+  "services.manage",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -104,6 +108,7 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = [
   "animalSupport.view",
   "insurance.view",
   "places.view",
+  "services.view",
 ];
 
 /**
@@ -153,13 +158,16 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "insurance.manage",
     "places.view",
     "places.manage",
+    "services.view",
+    "services.manage",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
   // (needed for the H13 support context panel) but can never cancel, grant
   // a trial, or override an entitlement.
-  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view"],
-  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage"],
+  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view"],
+  // Review moderation is a trust action, so TRUST_SAFETY can hide provider reviews.
+  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage"],
   // Payout execution ("settlement.pay") is FINANCE-only, mirroring
   // finance.refund.execute's own "ADMIN can approve, only FINANCE can move
   // real money" precedent exactly (spec: "do not give SUPPORT role
@@ -201,6 +209,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "insurance.manage",
     "places.view",
     "places.manage",
+    "services.view",
+    "services.manage",
   ],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict

@@ -18,6 +18,9 @@ export interface BookingHoldRecord {
   slotStart: string;
   slotEnd: string;
   timezone: string;
+  variantId: string | null;
+  additionalPetIds: string[];
+  resourceId: string | null;
   createdAt: string;
   expiresAt: string;
 }

@@ -27,7 +27,7 @@ const SERVICE: ProviderServiceDto = {
   requiresCareProfile: false,
   requiresHealthBasics: false,
   locationMode: "AT_PROVIDER" as never,
-  isActive: true,
+  isActive: true, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, depositAmount: null, cancellationPolicy: null, freeCancellationHours: 24, lateCancellationRefundPercent: 0, preparationNotes: null, maxPetsPerBooking: 1, requiredResourceType: null, variants: [],
 };
 
 describe("ProviderServicesView", () => {

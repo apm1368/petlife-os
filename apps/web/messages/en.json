@@ -190,7 +190,8 @@
         "walking": "View upcoming walk",
         "sitting": "View upcoming sitting",
         "boarding": "View upcoming boarding",
-        "petTaxi": "View upcoming pet taxi ride"
+        "petTaxi": "View upcoming pet taxi ride",
+        "other": "View service booking"
       },
       "viewMemories": "View memories"
     },
@@ -732,7 +733,8 @@
       "WALK": "Walk",
       "SITTING": "Sitting",
       "BOARDING": "Boarding",
-      "PET_TAXI": "Pet Taxi ride"
+      "PET_TAXI": "Pet Taxi ride",
+      "otherService": "Service appointment"
     },
     "status": {
       "SCHEDULED": "Scheduled",

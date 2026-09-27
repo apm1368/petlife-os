@@ -78,7 +78,7 @@ export class ProvidersService {
       logoUrl: org.logoUrl,
       websiteUrl: org.websiteUrl,
       locations: org.locations.map(toLocationDto),
-      services: org.services.filter((s) => s.isActive && s.category === ServiceCategory.VET).map(toServiceDto),
+      services: org.services.filter((s) => s.isActive && s.category === ServiceCategory.VET).map((service) => toServiceDto(service)),
     };
   }
 
@@ -131,7 +131,7 @@ export class ProvidersService {
       description: org.description,
       logoUrl: org.logoUrl,
       locations: locations.map(toLocationDto),
-      services: services.map(toServiceDto),
+      services: services.map((service) => toServiceDto(service)),
       nextAvailableSlotStart,
     };
   }

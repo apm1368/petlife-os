@@ -121,7 +121,7 @@ export class ServicesService {
         logoUrl: org.logoUrl,
         websiteUrl: org.websiteUrl,
         locations: org.locations.map(toProviderLocationDto),
-        services: org.services.filter((s) => s.isActive).map(toProviderServiceDto),
+        services: org.services.filter((s) => s.isActive).map((service) => toProviderServiceDto(service)),
       },
       service: toProviderServiceDto(service),
       locationOptions: service.locationId ? org.locations.filter((l) => l.id === service.locationId).map(toProviderLocationDto) : org.locations.map(toProviderLocationDto),

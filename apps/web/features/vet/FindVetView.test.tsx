@@ -52,7 +52,7 @@ const VERIFIED_PROVIDER: ProviderSummaryDto = {
       requiresCareProfile: false,
       requiresHealthBasics: false,
       locationMode: "AT_PROVIDER" as never,
-      isActive: true,
+      isActive: true, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, depositAmount: null, cancellationPolicy: null, freeCancellationHours: 24, lateCancellationRefundPercent: 0, preparationNotes: null, maxPetsPerBooking: 1, requiredResourceType: null, variants: [],
     },
   ],
   nextAvailableSlotStart: "2026-09-10T05:30:00.000Z",

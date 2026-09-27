@@ -273,6 +273,7 @@ enum ServiceCategory {
   SITTING
   BOARDING
   PET_TAXI
+  OTHER
 }
 
 /// Where a booked service actually happens. AT_PROVIDER needs no address
@@ -323,6 +324,14 @@ enum ProviderServiceType {
   PET_SITTING
   BOARDING_STAY
   PET_TAXI_RIDE
+  /// Batch 3 clinical sub-services — still category VET; specialty, not a parallel taxonomy.
+  LAB_TEST
+  IMAGING_STUDY
+  DENTAL_CARE
+  REHAB_SESSION
+  NUTRITION_CONSULT
+  HOME_VISIT
+  OTHER_SERVICE
 }
 
 enum AvailabilityExceptionType {
@@ -341,6 +350,14 @@ enum AvailabilityExceptionType {
 enum BookingStatus {
   HOLD
   PENDING_CONFIRMATION
+  /// Batch 3: request-to-book awaiting provider review; expires at requestExpiresAt.
+  REQUESTED
+  /// Batch 3: accepted/instant booking whose online payment or deposit is not yet paid.
+  AWAITING_PAYMENT
+  REJECTED
+  EXPIRED
+  /// Batch 3: superseded by the booking whose rescheduledFromBookingId points here.
+  RESCHEDULED
   CONFIRMED
   CHECKED_IN
   IN_PROGRESS
@@ -398,6 +415,52 @@ enum CareCalendarEventType {
   SITTING
   BOARDING
   PET_TAXI
+  OTHER_SERVICE
+}
+
+// ---------------------------------------------------------------------------
+// Batch 3 — Services + Booking completion
+// ---------------------------------------------------------------------------
+enum BookingMode {
+  INSTANT
+  REQUEST
+}
+
+/// Only modes the payment stack can honor. PAY_AT_PROVIDER and NONE never create a PaymentIntent.
+enum BookingPaymentMode {
+  NONE
+  PAY_AT_PROVIDER
+  FULL_PREPAYMENT
+  DEPOSIT
+}
+
+enum BookingActorType {
+  USER
+  PROVIDER
+  SYSTEM
+  ADMIN
+}
+
+enum ProviderResourceType {
+  EXAM_ROOM
+  GROOMING_STATION
+  IMAGING_DEVICE
+  VEHICLE
+  TRAINING_ROOM
+  OTHER
+}
+
+enum WaitlistStatus {
+  ACTIVE
+  NOTIFIED
+  BOOKED
+  CANCELLED
+  EXPIRED
+}
+
+enum ProviderReviewStatus {
+  PUBLISHED
+  HIDDEN
 }
 
 enum CareCalendarEventStatus {
@@ -1051,7 +1114,7 @@ model User {
   consents                UserConsent[]
   dataExportRequests      DataExportRequest[]
   accountDeletionRequests AccountDeletionRequest[]
-  acceptedInvitations     HouseholdInvitation[] @relation("AcceptedInvitationUser")
+  acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
 
   adminUser             AdminUser?
   supportCasesRequested SupportCase[]
@@ -1059,6 +1122,9 @@ model User {
   disputesRaised        Dispute[]
   disputeEvidence       DisputeEvidence[]
   appeals               Appeal[]
+  BookingWaitlistEntry  BookingWaitlistEntry[]
+  ProviderReview        ProviderReview[]
+  ProviderFavorite      ProviderFavorite[]
 
   @@map("users")
 }
@@ -1110,16 +1176,16 @@ model PasswordResetToken {
 
 /// Server-side session record backing the HTTP-only session cookie. The cookie carries only the id.
 model Session {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userAgent String?
-  ipAddress String?
-  expiresAt DateTime
-  rotatedAt DateTime @default(now())
-  lastSeenAt DateTime @default(now())
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ipAddress  String?
+  expiresAt  DateTime
+  rotatedAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
   revokedAt  DateTime?
-  createdAt DateTime @default(now())
+  createdAt  DateTime  @default(now())
 
   @@index([userId])
   @@map("sessions")
@@ -1160,8 +1226,9 @@ model Household {
   insuranceApplications InsuranceApplication[]
   travelBookings        TravelBooking[]
 
-  clinicalEstimates ClinicalEstimate[]
-  invitations       HouseholdInvitation[]
+  clinicalEstimates    ClinicalEstimate[]
+  invitations          HouseholdInvitation[]
+  BookingWaitlistEntry BookingWaitlistEntry[]
 
   @@map("households")
 }
@@ -1181,22 +1248,22 @@ model HouseholdMember {
 }
 
 model HouseholdInvitation {
-  id              String                    @id @default(uuid()) @db.Uuid
-  householdId     String                    @db.Uuid
-  household       Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  contact         String
-  tokenHash       String                    @unique
-  status          HouseholdInvitationStatus @default(PENDING)
-  invitedByUserId String                    @db.Uuid
-  acceptedByUserId String?                  @db.Uuid
+  id               String                    @id @default(uuid()) @db.Uuid
+  householdId      String                    @db.Uuid
+  household        Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  contact          String
+  tokenHash        String                    @unique
+  status           HouseholdInvitationStatus @default(PENDING)
+  invitedByUserId  String                    @db.Uuid
+  acceptedByUserId String?                   @db.Uuid
   acceptedBy       User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
   initialAccess    Json
-  expiresAt       DateTime
-  acceptedAt      DateTime?
-  declinedAt      DateTime?
-  cancelledAt     DateTime?
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
+  expiresAt        DateTime
+  acceptedAt       DateTime?
+  declinedAt       DateTime?
+  cancelledAt      DateTime?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
 
   @@index([householdId, status])
   @@index([contact, status])
@@ -1255,9 +1322,9 @@ model AccountDeletionRequest {
 
 model Pet {
   careReminders CareReminder[]
-  id          String    @id @default(uuid()) @db.Uuid
-  householdId String    @db.Uuid
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  id            String         @id @default(uuid()) @db.Uuid
+  householdId   String         @db.Uuid
+  household     Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
   name    String
   species PetSpecies
@@ -1355,6 +1422,8 @@ model Pet {
   trips                 Trip[]
   insuranceApplications InsuranceApplication[]
   travelBookingPets     TravelBookingPet[]
+  BookingPet            BookingPet[]
+  BookingWaitlistEntry  BookingWaitlistEntry[]
 
   @@index([householdId])
   @@map("pets")
@@ -1375,14 +1444,14 @@ model Pet {
 /// Replaces the old one-row-per-(pet,user) `pet_access` table (schema_hardening
 /// migration); deliberately has NO @@unique([petId, userId]).
 model PetAccessGrant {
-  healthScopes String[] @default([])
-  selectedDocumentIds String[] @default([]) @db.Uuid
-  sharedWithProviderUserId String? @db.Uuid
-  id     String @id @default(uuid()) @db.Uuid
-  petId  String @db.Uuid
-  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
-  userId String @db.Uuid
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  healthScopes             String[] @default([])
+  selectedDocumentIds      String[] @default([]) @db.Uuid
+  sharedWithProviderUserId String?  @db.Uuid
+  id                       String   @id @default(uuid()) @db.Uuid
+  petId                    String   @db.Uuid
+  pet                      Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  userId                   String   @db.Uuid
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   canViewIdentity       Boolean @default(true)
   canEditIdentity       Boolean @default(false)
@@ -1715,8 +1784,21 @@ model ProviderOrganization {
   logoUrl     String?
   websiteUrl  String?
 
+  /// Batch 3 public profile. Media are repository/storage-owned paths, never hotlinks.
+  coverImageUrl String?
+  galleryUrls   String[] @default([])
+  specialties   String[] @default([])
+  policiesText  String?
+  /// [{ question, answer }] authored by the provider.
+  faqs          Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  resources ProviderResource[]
+  reviews   ProviderReview[]
+  favorites ProviderFavorite[]
+  waitlist  BookingWaitlistEntry[]
 
   locations              ProviderLocation[]
   providerUsers          ProviderUser[]
@@ -1779,6 +1861,7 @@ model ProviderLocation {
   availabilityRules      ProviderAvailabilityRule[]
   availabilityExceptions ProviderAvailabilityException[]
   bookings               Booking[]
+  resources              ProviderResource[]
 
   @@index([providerOrganizationId])
   @@index([city])
@@ -1794,8 +1877,13 @@ model ProviderUser {
   providerOrganizationId String               @db.Uuid
   providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
 
-  role         ProviderUserRole @default(VET)
-  displayTitle String?
+  role              ProviderUserRole      @default(VET)
+  displayTitle      String?
+  /// Public, provider-authored bio. HR/private staff data never lives on this model.
+  publicBio         String?
+  /// Staff can exist without being bookable (e.g. reception).
+  isBookable        Boolean               @default(true)
+  qualifiedServices ProviderUserService[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1870,9 +1958,24 @@ model ProviderService {
 
   isActive Boolean @default(true)
 
+  /// Batch 3 booking policy — snapshotted onto each booking at confirmation.
+  bookingMode                   BookingMode           @default(INSTANT)
+  paymentMode                   BookingPaymentMode    @default(PAY_AT_PROVIDER)
+  depositAmount                 Decimal?              @db.Decimal(12, 2)
+  cancellationPolicy            String?
+  freeCancellationHours         Int                   @default(24)
+  lateCancellationRefundPercent Int                   @default(0)
+  preparationNotes              String?
+  maxPetsPerBooking             Int                   @default(1)
+  requiredResourceType          ProviderResourceType?
+  requestTtlHours               Int                   @default(24)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  variants          ProviderServiceVariant[]
+  qualifiedStaff    ProviderUserService[]
+  waitlist          BookingWaitlistEntry[]
   availabilityRules ProviderAvailabilityRule[]
   bookings          Booking[]
   bookingSeries     BookingSeries[]
@@ -2067,6 +2170,33 @@ model Booking {
   bookingStatus BookingStatus @default(CONFIRMED)
   paymentStatus PaymentStatus @default(NOT_REQUIRED)
 
+  /// Batch 3 snapshots — later provider edits never rewrite a confirmed booking.
+  bookingNumber                 String?                 @unique
+  variantId                     String?                 @db.Uuid
+  variant                       ProviderServiceVariant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  resourceId                    String?                 @db.Uuid
+  resource                      ProviderResource?       @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  bookingMode                   BookingMode             @default(INSTANT)
+  paymentMode                   BookingPaymentMode      @default(PAY_AT_PROVIDER)
+  priceAmount                   Decimal?                @db.Decimal(12, 2)
+  discountAmount                Decimal                 @default(0) @db.Decimal(12, 2)
+  depositAmount                 Decimal?                @db.Decimal(12, 2)
+  currency                      String?
+  durationMinutes               Int?
+  serviceNameSnapshot           String?
+  variantNameSnapshot           String?
+  cancellationPolicySnapshot    String?
+  freeCancellationHours         Int?
+  lateCancellationRefundPercent Int?
+  preparationSnapshot           String?
+  requestExpiresAt              DateTime?
+  respondedAt                   DateTime?
+  rejectedReason                String?
+  rescheduledFromBookingId      String?                 @unique @db.Uuid
+  rescheduledFrom               Booking?                @relation("BookingReschedule", fields: [rescheduledFromBookingId], references: [id], onDelete: Restrict)
+  rescheduledTo                 Booking?                @relation("BookingReschedule")
+  paymentIntentId               String?                 @db.Uuid
+
   reasonForVisit String?
   ownerNotes     String?
 
@@ -2088,8 +2218,12 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  petAccess     BookingPetAccess?
-  providerNotes BookingProviderNote[]
+  petAccess       BookingPetAccess?
+  providerNotes   BookingProviderNote[]
+  additionalPets  BookingPet[]
+  statusEvents    BookingStatusEvent[]
+  review          ProviderReview?
+  waitlistMatches BookingWaitlistEntry[]
 
   clinicalVisits     ClinicalVisit[]
   referralsFulfilled Referral[]
@@ -4566,27 +4700,28 @@ model AdminAuditLog {
 /// and record failures — without any schema change when that poller is built.
 /// Reminder scheduling is separate from clinical source truth and booking state.
 model CareReminder {
-  id String @id @default(uuid()) @db.Uuid
-  petId String @db.Uuid
-  pet Pet @relation(fields: [petId], references: [id], onDelete: Restrict)
-  createdByUserId String @db.Uuid
-  title String
-  type String
-  source String @default("USER_CREATED")
-  sourceId String? @db.Uuid
-  originalDueAt DateTime
-  dueAt DateTime
-  snoozedUntil DateTime?
-  state String @default("UPCOMING")
-  recurrence String @default("ONCE")
-  intervalDays Int?
-  completedAt DateTime?
-  cancelledAt DateTime?
-  notifiedAt DateTime?
-  version Int @default(0)
-  parentId String? @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(uuid()) @db.Uuid
+  petId           String    @db.Uuid
+  pet             Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  createdByUserId String    @db.Uuid
+  title           String
+  type            String
+  source          String    @default("USER_CREATED")
+  sourceId        String?   @db.Uuid
+  originalDueAt   DateTime
+  dueAt           DateTime
+  snoozedUntil    DateTime?
+  state           String    @default("UPCOMING")
+  recurrence      String    @default("ONCE")
+  intervalDays    Int?
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  notifiedAt      DateTime?
+  version         Int       @default(0)
+  parentId        String?   @db.Uuid
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
   @@unique([parentId, originalDueAt])
   @@index([petId, dueAt])
   @@index([state, dueAt])
@@ -8163,4 +8298,148 @@ model ProviderClinicalAlert {
   @@index([petId, resolvedAt])
   @@index([providerOrganizationId])
   @@map("provider_clinical_alerts")
+}
+
+// ---------------------------------------------------------------------------
+// Batch 3 — Services + Booking completion models
+// ---------------------------------------------------------------------------
+
+/// A priced/timed option of one service (size, duration, visit kind). Variant price/duration override the service's.
+model ProviderServiceVariant {
+  id              String                 @id @default(uuid()) @db.Uuid
+  serviceId       String                 @db.Uuid
+  service         ProviderService        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  priceAmount     Decimal?               @db.Decimal(12, 2)
+  durationMinutes Int
+  sortOrder       Int                    @default(0)
+  isActive        Boolean                @default(true)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  bookings        Booking[]
+  waitlist        BookingWaitlistEntry[]
+
+  @@index([serviceId])
+  @@map("provider_service_variants")
+}
+
+/// Which staff may deliver which service. A service with no rows here accepts any bookable staff (legacy behavior).
+model ProviderUserService {
+  providerUserId String          @db.Uuid
+  providerUser   ProviderUser    @relation(fields: [providerUserId], references: [id], onDelete: Cascade)
+  serviceId      String          @db.Uuid
+  service        ProviderService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  createdAt      DateTime        @default(now())
+
+  @@id([providerUserId, serviceId])
+  @@index([serviceId])
+  @@map("provider_user_services")
+}
+
+model ProviderResource {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  locationId             String               @db.Uuid
+  location               ProviderLocation     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  name                   String
+  type                   ProviderResourceType
+  isActive               Boolean              @default(true)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  bookings               Booking[]
+
+  @@index([providerOrganizationId, locationId, type])
+  @@map("provider_resources")
+}
+
+/// Extra pets on a multi-pet booking; Booking.petId stays the primary pet.
+model BookingPet {
+  bookingId String  @db.Uuid
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  petId     String  @db.Uuid
+  pet       Pet     @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  @@id([bookingId, petId])
+  @@index([petId])
+  @@map("booking_pets")
+}
+
+/// Append-only booking timeline. Every status transition writes exactly one row.
+model BookingStatusEvent {
+  id         String           @id @default(uuid()) @db.Uuid
+  bookingId  String           @db.Uuid
+  booking    Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus BookingStatus?
+  toStatus   BookingStatus
+  actorType  BookingActorType
+  actorId    String?          @db.Uuid
+  reason     String?
+  createdAt  DateTime         @default(now())
+
+  @@index([bookingId, createdAt])
+  @@map("booking_status_events")
+}
+
+/// First-come waitlist. Notified when capacity opens; never auto-booked or auto-charged.
+model BookingWaitlistEntry {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  householdId            String                  @db.Uuid
+  household              Household               @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId                 String                  @db.Uuid
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId                  String                  @db.Uuid
+  pet                    Pet                     @relation(fields: [petId], references: [id], onDelete: Cascade)
+  providerOrganizationId String                  @db.Uuid
+  providerOrganization   ProviderOrganization    @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  serviceId              String                  @db.Uuid
+  service                ProviderService         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  variantId              String?                 @db.Uuid
+  variant                ProviderServiceVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  windowStart            DateTime
+  windowEnd              DateTime
+  status                 WaitlistStatus          @default(ACTIVE)
+  notifiedAt             DateTime?
+  bookedBookingId        String?                 @db.Uuid
+  bookedBooking          Booking?                @relation(fields: [bookedBookingId], references: [id], onDelete: SetNull)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  @@index([providerOrganizationId, serviceId, status, createdAt])
+  @@index([userId, status])
+  @@map("booking_waitlist_entries")
+}
+
+/// One review per completed booking, by the booking's customer only.
+model ProviderReview {
+  id                     String               @id @default(uuid()) @db.Uuid
+  bookingId              String               @unique @db.Uuid
+  booking                Booking              @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  userId                 String               @db.Uuid
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rating                 Int
+  body                   String?
+  status                 ProviderReviewStatus @default(PUBLISHED)
+  hiddenReason           String?
+  providerResponse       String?
+  respondedAt            DateTime?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@index([providerOrganizationId, status, createdAt])
+  @@map("provider_reviews")
+}
+
+model ProviderFavorite {
+  userId                 String               @db.Uuid
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  createdAt              DateTime             @default(now())
+
+  @@id([userId, providerOrganizationId])
+  @@map("provider_favorites")
 }

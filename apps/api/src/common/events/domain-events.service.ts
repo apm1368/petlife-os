@@ -270,6 +270,22 @@ export const DOMAIN_EVENT_TYPES = [
   "ClinicalEstimatePresented",
   "ClinicalEstimateResponded",
   "DischargeSummaryIssued",
+  // Batch 3 — services + booking completion
+  "BookingCapacityReleased",
+  "ServiceBookingRequested",
+  "ServiceBookingAccepted",
+  "ServiceBookingRejected",
+  "ServiceBookingExpired",
+  "ServiceBookingAwaitingPayment",
+  "ServiceBookingPaid",
+  "ServiceBookingRescheduled",
+  "ServiceBookingNoShow",
+  "WaitlistJoined",
+  "WaitlistSlotAvailable",
+  "ProviderReviewCreated",
+  "ProviderReviewResponded",
+  "ProviderReviewHidden",
+  "BookingFollowUpCreated",
 ] as const;
 
 /**

@@ -13,6 +13,7 @@ const CALENDAR_TYPE_BY_CATEGORY: Record<ServiceCategory, CareCalendarEventType> 
   [ServiceCategory.SITTING]: CareCalendarEventType.SITTING,
   [ServiceCategory.BOARDING]: CareCalendarEventType.BOARDING,
   [ServiceCategory.PET_TAXI]: CareCalendarEventType.PET_TAXI,
+  [ServiceCategory.OTHER]: CareCalendarEventType.OTHER_SERVICE,
 };
 
 const TITLE_KEY_BY_CATEGORY: Record<ServiceCategory, string> = {
@@ -23,6 +24,7 @@ const TITLE_KEY_BY_CATEGORY: Record<ServiceCategory, string> = {
   [ServiceCategory.SITTING]: "careCalendar.event.sitting",
   [ServiceCategory.BOARDING]: "careCalendar.event.boarding",
   [ServiceCategory.PET_TAXI]: "careCalendar.event.petTaxi",
+  [ServiceCategory.OTHER]: "careCalendar.event.otherService",
 };
 
 function toDto(event: {

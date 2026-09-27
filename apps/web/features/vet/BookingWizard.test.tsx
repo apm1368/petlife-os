@@ -67,7 +67,7 @@ describe("BookingWizard", () => {
   it("walks Slot Picker -> Review -> Health Sharing, showing the Who/What/Why/Until permission copy", async () => {
     vi.mocked(providersService.getAvailability).mockResolvedValue({ petCompatible: true, slots: [SLOT] });
     vi.mocked(bookingsService.createHold).mockResolvedValue({
-      holdId: "hold-1",
+      holdId: "hold-1", variantId: null, additionalPetIds: [],
       expiresAt: "2026-09-01T00:10:00.000Z",
       petId: "pet-1",
       providerOrganizationId: "provider-1",

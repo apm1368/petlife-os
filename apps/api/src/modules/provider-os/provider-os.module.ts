@@ -17,6 +17,9 @@ import { ProviderServicesService } from "./provider-services.service";
 import { ProviderTeamController } from "./provider-team.controller";
 import { ProviderTeamService } from "./provider-team.service";
 
+import { ProviderCatalogController } from "./provider-catalog.controller";
+import { ProviderCatalogService } from "./provider-catalog.service";
+
 @Module({
   imports: [BookingModule, CareCalendarModule, CareProfileModule, PetHealthModule],
   controllers: [
@@ -26,6 +29,7 @@ import { ProviderTeamService } from "./provider-team.service";
     ProviderBookingsController,
     ProviderServicesController,
     ProviderTeamController,
+    ProviderCatalogController,
   ],
   providers: [
     ProviderContextService,
@@ -35,6 +39,7 @@ import { ProviderTeamService } from "./provider-team.service";
     ProviderBookingsService,
     ProviderServicesService,
     ProviderTeamService,
+    ProviderCatalogService,
   ],
   exports: [ProviderContextService],
 })

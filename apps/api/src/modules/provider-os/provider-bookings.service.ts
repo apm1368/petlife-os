@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BookingStatus, Prisma, type PetAccessGrant } from "@prisma/client";
+import { BookingActorType, BookingPaymentMode, BookingStatus, PaymentStatus, Prisma, SourceType, type PetAccessGrant } from "@prisma/client";
 import { SetupStatus as SharedSetupStatus, type CareProfileDto, type ProviderBookingDetailDto, type ProviderPetAccessContextDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -9,9 +9,11 @@ import {
   InvalidBookingTransitionException,
   ProviderAccessDeniedException,
   ProviderOrgNotVerifiedException,
+  ValidationApiException,
 } from "../../common/errors/api-exception";
 import { isGrantActive } from "../pet-access/pet-access.service";
 import { BookingPetAccessService } from "../booking/booking-pet-access.service";
+import { BookingLifecycleService, bookingEventFields } from "../booking/booking-lifecycle.service";
 import { CareCalendarService } from "../care-calendar/care-calendar.service";
 import { CareProfileService } from "../care-profile/care-profile.service";
 import { HealthSummaryService } from "../health/health-summary.service";
@@ -20,8 +22,8 @@ import { toProviderBookingSummaryDto, type ProviderBookingRow } from "./provider
 import type { ListProviderBookingsDto } from "./dto/list-provider-bookings.dto";
 import type { CompleteBookingDto, ProviderCancelBookingDto, AddBookingProviderNoteDto } from "./dto/provider-booking-actions.dto";
 
-const CANCELLABLE_STATUSES: BookingStatus[] = [BookingStatus.HOLD, BookingStatus.PENDING_CONFIRMATION, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN];
-const CANCELLED_STATUSES: BookingStatus[] = [BookingStatus.CANCELLED_BY_USER, BookingStatus.CANCELLED_BY_PROVIDER];
+const CANCELLABLE_STATUSES: BookingStatus[] = [BookingStatus.PENDING_CONFIRMATION, BookingStatus.AWAITING_PAYMENT, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN];
+const CANCELLED_STATUSES: BookingStatus[] = [BookingStatus.CANCELLED_BY_USER, BookingStatus.CANCELLED_BY_PROVIDER, BookingStatus.REJECTED, BookingStatus.EXPIRED, BookingStatus.RESCHEDULED];
 
 /** Strict single-step forward transitions (spec section 18) — no skipping, category never changes the state machine, only labels. */
 const NEXT_STATUS: Partial<Record<BookingStatus, BookingStatus>> = {
@@ -50,6 +52,7 @@ export class ProviderBookingsService {
     private readonly careCalendar: CareCalendarService,
     private readonly careProfile: CareProfileService,
     private readonly healthSummary: HealthSummaryService,
+    private readonly lifecycle: BookingLifecycleService,
   ) {}
 
   async list(ctx: ResolvedProviderContext, filter: ListProviderBookingsDto) {
@@ -62,7 +65,10 @@ export class ProviderBookingsService {
       ...(filter.category ? { category: filter.category } : {}),
       ...(filter.locationId ? { providerLocationId: filter.locationId } : {}),
       ...(filter.providerUserId ? { providerUserId: filter.providerUserId } : {}),
-      ...(filter.cancelled === "true"
+      ...(filter.from || filter.to ? { startAt: { ...(filter.from ? { gte: new Date(filter.from) } : {}), ...(filter.to ? { lt: new Date(filter.to) } : {}) } } : {}),
+      ...(filter.requests === "true"
+        ? { bookingStatus: BookingStatus.REQUESTED }
+        : filter.cancelled === "true"
         ? { bookingStatus: { in: CANCELLED_STATUSES } }
         : filter.today === "true"
           ? { startAt: { gte: todayStart, lt: todayEnd }, bookingStatus: { notIn: CANCELLED_STATUSES } }
@@ -77,6 +83,7 @@ export class ProviderBookingsService {
       where,
       include: BOOKING_ROW_INCLUDE,
       orderBy: { startAt: filter.past === "true" || filter.cancelled === "true" ? "desc" : "asc" },
+      take: 500,
     });
     return bookings.map((b) => toProviderBookingSummaryDto(b as ProviderBookingRow));
   }
@@ -200,19 +207,89 @@ export class ProviderBookingsService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.booking.update({
-        where: { id },
-        data: { bookingStatus: BookingStatus.CANCELLED_BY_PROVIDER, cancelledAt: new Date(), cancelledReason: dto.reason },
+      const cancelled = await this.lifecycle.transition(tx, {
+        bookingId: id,
+        to: BookingStatus.CANCELLED_BY_PROVIDER,
+        actorType: BookingActorType.PROVIDER,
+        actorId: ctx.userId,
+        reason: dto.reason,
+        data: { cancelledAt: new Date(), cancelledReason: dto.reason },
       });
-      await this.bookingPetAccess.revokeForBooking(id, ctx.userId, tx);
-      await this.careCalendar.markCancelled(id, tx);
+      // A provider-side cancellation always refunds whatever the customer paid.
+      await this.lifecycle.requestRefund(tx, cancelled, true, ctx.userId);
       await this.events.publish(
         "ProviderBookingCancelled",
         { bookingId: id, providerOrganizationId: ctx.organizationId, actorProviderUserId: ctx.providerUserId, reason: dto.reason },
         { tx, aggregateType: "Booking", aggregateId: id },
       );
+      await this.events.publish("ServiceBookingCancelled", { ...bookingEventFields(cancelled), reason: dto.reason, cancelledBy: "PROVIDER" }, { tx, aggregateType: "Booking", aggregateId: id });
     });
 
+    return this.getById(ctx, id);
+  }
+
+  /**
+   * Request-to-book acceptance. A paid service moves to AWAITING_PAYMENT with a fresh payment window;
+   * otherwise it is confirmed immediately. Acceptance can never skip payment.
+   */
+  async accept(ctx: ResolvedProviderContext, id: string): Promise<ProviderBookingDetailDto> {
+    this.assertVerified(ctx);
+    const booking = await this.loadForOrg(ctx, id);
+    if (booking.bookingStatus !== BookingStatus.REQUESTED) {
+      throw new InvalidBookingTransitionException({ from: booking.bookingStatus, to: "ACCEPTED" });
+    }
+    const paid = booking.paymentMode === BookingPaymentMode.FULL_PREPAYMENT || booking.paymentMode === BookingPaymentMode.DEPOSIT;
+    await this.prisma.$transaction(async (tx) => {
+      const next = await this.lifecycle.transition(tx, {
+        bookingId: id,
+        to: paid ? BookingStatus.AWAITING_PAYMENT : BookingStatus.CONFIRMED,
+        from: [BookingStatus.REQUESTED],
+        actorType: BookingActorType.PROVIDER,
+        actorId: ctx.userId,
+        reason: "ACCEPTED",
+        data: { respondedAt: new Date(), requestExpiresAt: paid ? new Date(Date.now() + 24 * 3600_000) : null, paymentStatus: paid ? PaymentStatus.PENDING : booking.paymentStatus },
+      });
+      await this.careCalendar.upsertForBooking(next, tx);
+      await this.events.publish("ServiceBookingAccepted", { ...bookingEventFields(next), awaitingPayment: paid }, { tx, aggregateType: "Booking", aggregateId: id });
+      if (!paid) await this.events.publish("ServiceBookingConfirmed", bookingEventFields(next), { tx, aggregateType: "Booking", aggregateId: id });
+    });
+    return this.getById(ctx, id);
+  }
+
+  async reject(ctx: ResolvedProviderContext, id: string, reason: string): Promise<ProviderBookingDetailDto> {
+    this.assertVerified(ctx);
+    const booking = await this.loadForOrg(ctx, id);
+    if (booking.bookingStatus !== BookingStatus.REQUESTED) {
+      throw new InvalidBookingTransitionException({ from: booking.bookingStatus, to: BookingStatus.REJECTED });
+    }
+    await this.prisma.$transaction(async (tx) => {
+      const rejected = await this.lifecycle.transition(tx, {
+        bookingId: id,
+        to: BookingStatus.REJECTED,
+        from: [BookingStatus.REQUESTED],
+        actorType: BookingActorType.PROVIDER,
+        actorId: ctx.userId,
+        reason,
+        data: { respondedAt: new Date(), rejectedReason: reason, requestExpiresAt: null },
+      });
+      await this.events.publish("ServiceBookingRejected", bookingEventFields(rejected), { tx, aggregateType: "Booking", aggregateId: id });
+    });
+    return this.getById(ctx, id);
+  }
+
+  /** Only after the appointment start; never refunds automatically (policy decides through support/finance). */
+  async markNoShow(ctx: ResolvedProviderContext, id: string): Promise<ProviderBookingDetailDto> {
+    this.assertVerified(ctx);
+    const booking = await this.loadForOrg(ctx, id);
+    if (booking.bookingStatus !== BookingStatus.CONFIRMED || booking.startAt > new Date()) {
+      throw new InvalidBookingTransitionException({ from: booking.bookingStatus, to: BookingStatus.NO_SHOW });
+    }
+    await this.prisma.$transaction(async (tx) => {
+      await this.lifecycle.transition(tx, { bookingId: id, to: BookingStatus.NO_SHOW, from: [BookingStatus.CONFIRMED], actorType: BookingActorType.PROVIDER, actorId: ctx.userId });
+      await this.bookingPetAccess.revokeForBooking(id, ctx.userId, tx);
+      await this.careCalendar.markCancelled(id, tx);
+      await this.events.publish("ServiceBookingNoShow", { bookingId: id, providerOrganizationId: ctx.organizationId }, { tx, aggregateType: "Booking", aggregateId: id });
+    });
     return this.getById(ctx, id);
   }
 
@@ -221,7 +298,7 @@ export class ProviderBookingsService {
     id: string,
     expectedNext: BookingStatus,
     eventType: "BookingCheckedIn" | "BookingStarted" | "BookingCompleted",
-    extraData: Prisma.BookingUpdateInput = {},
+    extraData: Prisma.BookingUncheckedUpdateManyInput = {},
   ): Promise<ProviderBookingDetailDto> {
     this.assertVerified(ctx);
     const booking = await this.loadForOrg(ctx, id);
@@ -230,7 +307,14 @@ export class ProviderBookingsService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.booking.update({ where: { id }, data: { bookingStatus: expectedNext, ...extraData } });
+      await this.lifecycle.transition(tx, {
+        bookingId: id,
+        to: expectedNext,
+        from: [booking.bookingStatus],
+        actorType: BookingActorType.PROVIDER,
+        actorId: ctx.userId,
+        data: extraData,
+      });
       if (expectedNext === BookingStatus.COMPLETED) {
         await this.careCalendar.markCompleted(id, tx);
       }
@@ -252,11 +336,42 @@ export class ProviderBookingsService {
     return this.transition(ctx, id, BookingStatus.IN_PROGRESS, "BookingStarted");
   }
 
-  complete(ctx: ResolvedProviderContext, id: string, dto: CompleteBookingDto) {
-    return this.transition(ctx, id, BookingStatus.COMPLETED, "BookingCompleted", {
+  async complete(ctx: ResolvedProviderContext, id: string, dto: CompleteBookingDto) {
+    if (dto.followUps?.length) {
+      const booking = await this.loadForOrg(ctx, id);
+      if (booking.category !== "VET") throw new ValidationApiException({ field: "followUps", reason: "Clinical follow-ups belong to veterinary bookings only" });
+      const now = Date.now();
+      if (dto.followUps.some((f) => new Date(f.dueAt).getTime() <= now)) throw new ValidationApiException({ field: "followUps.dueAt", reason: "Follow-ups must be in the future" });
+    }
+    const result = await this.transition(ctx, id, BookingStatus.COMPLETED, "BookingCompleted", {
       completedAt: new Date(),
       completedByProviderUserId: ctx.providerUserId,
       completionNote: dto.completionNote ?? null,
+    });
+    if (dto.followUps?.length) await this.createFollowUpPlan(ctx, id, dto);
+    return result;
+  }
+
+  /**
+   * Provider-specified follow-up → CarePlan (linked to the booking's clinical visit when one exists) →
+   * CarePlanCreated → the Care Center projects it as PROVIDER_CREATED. Reuses the Batch 2 contract;
+   * it never writes CareReminder rows directly and never invents a schedule.
+   */
+  private async createFollowUpPlan(ctx: ResolvedProviderContext, bookingId: string, dto: CompleteBookingDto): Promise<void> {
+    const booking = await this.prisma.booking.findUniqueOrThrow({ where: { id: bookingId }, select: { petId: true, serviceNameSnapshot: true, clinicalVisits: { select: { id: true }, take: 1, orderBy: { startedAt: "desc" } } } });
+    await this.prisma.$transaction(async (tx) => {
+      const plan = await tx.carePlan.create({
+        data: {
+          petId: booking.petId,
+          providerOrganizationId: ctx.organizationId,
+          providerUserId: ctx.providerUserId,
+          originatingVisitId: booking.clinicalVisits[0]?.id ?? null,
+          title: booking.serviceNameSnapshot ?? "Follow-up",
+          items: { create: dto.followUps!.map((f) => ({ type: f.type, title: f.title, detail: f.detail, dueAt: new Date(f.dueAt), source: SourceType.PROVIDER })) },
+        },
+      });
+      await this.events.publish("CarePlanCreated", { petId: booking.petId, carePlanId: plan.id }, { tx, aggregateType: "Pet", aggregateId: booking.petId });
+      await this.events.publish("BookingFollowUpCreated", { bookingId, carePlanId: plan.id, count: dto.followUps!.length }, { tx, aggregateType: "Booking", aggregateId: bookingId });
     });
   }
 

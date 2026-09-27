@@ -39,6 +39,38 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "نوبت شما لغو شد", body: "نوبت شما لغو شد.", smsBody: "نوبت شما در پت‌لایف لغو شد." },
     en: { title: "Your booking was cancelled", body: "Your booking was cancelled.", smsBody: "Your PET LIFE OS booking was cancelled." },
   },
+  "booking.requested": {
+    fa: { title: "درخواست نوبت ثبت شد", body: "درخواست شما برای ارائه‌دهنده ارسال شد و تا زمان پاسخ، قطعی نیست.", smsBody: "درخواست نوبت شما در پت‌لایف ثبت شد و منتظر تأیید است." },
+    en: { title: "Booking request sent", body: "Your request was sent to the provider. It is not confirmed until they accept.", smsBody: "Your PET LIFE OS booking request is awaiting the provider." },
+  },
+  "booking.awaitingPayment": {
+    fa: { title: "برای قطعی شدن نوبت، پرداخت را کامل کنید", body: "نوبت شما تا پایان مهلت پرداخت نگه داشته می‌شود.", smsBody: "برای قطعی شدن نوبت پت‌لایف، پرداخت را کامل کنید." },
+    en: { title: "Complete payment to confirm", body: "Your appointment is held until the payment window ends.", smsBody: "Complete payment to confirm your PET LIFE OS booking." },
+  },
+  "booking.rejected": {
+    fa: { title: "درخواست نوبت پذیرفته نشد", body: "ارائه‌دهنده امکان پذیرش این درخواست را نداشت. می‌توانید زمان دیگری انتخاب کنید.", smsBody: "درخواست نوبت شما در پت‌لایف پذیرفته نشد." },
+    en: { title: "Booking request declined", body: "The provider could not accept this request. You can choose another time.", smsBody: "Your PET LIFE OS booking request was declined." },
+  },
+  "booking.expired": {
+    fa: { title: "مهلت نوبت به پایان رسید", body: "این نوبت چون در مهلت تعیین‌شده تأیید یا پرداخت نشد، آزاد شد.", smsBody: "مهلت نوبت شما در پت‌لایف به پایان رسید." },
+    en: { title: "Booking expired", body: "This booking was released because it was not accepted or paid in time.", smsBody: "Your PET LIFE OS booking expired." },
+  },
+  "booking.rescheduled": {
+    fa: { title: "زمان نوبت تغییر کرد", body: "نوبت شما به زمان جدید منتقل شد.", smsBody: "زمان نوبت شما در پت‌لایف تغییر کرد." },
+    en: { title: "Booking rescheduled", body: "Your appointment moved to its new time.", smsBody: "Your PET LIFE OS booking was rescheduled." },
+  },
+  "provider.bookingRequest": {
+    fa: { title: "درخواست نوبت جدید", body: "یک درخواست نوبت جدید منتظر بررسی شماست.", smsBody: "درخواست نوبت جدیدی در پت‌لایف منتظر بررسی است." },
+    en: { title: "New booking request", body: "A new booking request is waiting for your review.", smsBody: "A new PET LIFE OS booking request awaits your review." },
+  },
+  "provider.bookingCancelled": {
+    fa: { title: "نوبت لغو شد", body: "یکی از نوبت‌های شما توسط مشتری لغو شد.", smsBody: "یکی از نوبت‌های شما در پت‌لایف لغو شد." },
+    en: { title: "Booking cancelled", body: "A customer cancelled one of your bookings.", smsBody: "A PET LIFE OS booking was cancelled." },
+  },
+  "waitlist.slotAvailable": {
+    fa: { title: "زمانی در لیست انتظار آزاد شد", body: "زمانی که منتظرش بودید آزاد شد. برای رزرو اقدام کنید؛ این زمان برای شما نگه داشته نشده است.", smsBody: "در لیست انتظار پت‌لایف، زمانی آزاد شد." },
+    en: { title: "A waitlisted time opened", body: "A time you were waiting for opened up. Book it soon — it is not held for you.", smsBody: "A PET LIFE OS waitlisted time opened." },
+  },
   "payment.succeeded": {
     fa: { title: "پرداخت با موفقیت انجام شد", body: "پرداخت شما با موفقیت ثبت شد.", smsBody: "پرداخت شما در پت‌لایف با موفقیت انجام شد." },
     en: { title: "Payment successful", body: "Your payment was completed successfully.", smsBody: "Your PET LIFE OS payment was successful." },

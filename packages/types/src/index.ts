@@ -472,6 +472,7 @@ export enum ServiceCategory {
   SITTING = "SITTING",
   BOARDING = "BOARDING",
   PET_TAXI = "PET_TAXI",
+  OTHER = "OTHER",
 }
 
 /** Where a booked service actually happens — see ProviderServiceDto.locationMode. */
@@ -510,6 +511,13 @@ export enum ProviderServiceType {
   PET_SITTING = "PET_SITTING",
   BOARDING_STAY = "BOARDING_STAY",
   PET_TAXI_RIDE = "PET_TAXI_RIDE",
+  LAB_TEST = "LAB_TEST",
+  IMAGING_STUDY = "IMAGING_STUDY",
+  DENTAL_CARE = "DENTAL_CARE",
+  REHAB_SESSION = "REHAB_SESSION",
+  NUTRITION_CONSULT = "NUTRITION_CONSULT",
+  HOME_VISIT = "HOME_VISIT",
+  OTHER_SERVICE = "OTHER_SERVICE",
 }
 
 /**
@@ -523,6 +531,11 @@ export enum ProviderServiceType {
 export enum BookingStatus {
   HOLD = "HOLD",
   PENDING_CONFIRMATION = "PENDING_CONFIRMATION",
+  REQUESTED = "REQUESTED",
+  AWAITING_PAYMENT = "AWAITING_PAYMENT",
+  REJECTED = "REJECTED",
+  EXPIRED = "EXPIRED",
+  RESCHEDULED = "RESCHEDULED",
   CONFIRMED = "CONFIRMED",
   CHECKED_IN = "CHECKED_IN",
   IN_PROGRESS = "IN_PROGRESS",
@@ -572,6 +585,7 @@ export enum CareCalendarEventType {
   SITTING = "SITTING",
   BOARDING = "BOARDING",
   PET_TAXI = "PET_TAXI",
+  OTHER_SERVICE = "OTHER_SERVICE",
 }
 
 /** BookingSeries recurrence is intentionally minimal — a flat "repeat weekly N times" shape, no custom interval picker. */
@@ -660,6 +674,49 @@ export interface ProviderServiceDto {
   requiresHealthBasics: boolean;
   locationMode: LocationMode;
   isActive: boolean;
+  /** Batch 3 booking policy. */
+  bookingMode: BookingMode;
+  paymentMode: BookingPaymentMode;
+  depositAmount: number | null;
+  cancellationPolicy: string | null;
+  freeCancellationHours: number;
+  lateCancellationRefundPercent: number;
+  preparationNotes: string | null;
+  maxPetsPerBooking: number;
+  requiredResourceType: string | null;
+  variants: ProviderServiceVariantDto[];
+}
+
+export enum BookingMode {
+  INSTANT = "INSTANT",
+  REQUEST = "REQUEST",
+}
+
+export enum BookingPaymentMode {
+  NONE = "NONE",
+  PAY_AT_PROVIDER = "PAY_AT_PROVIDER",
+  FULL_PREPAYMENT = "FULL_PREPAYMENT",
+  DEPOSIT = "DEPOSIT",
+}
+
+export interface ProviderServiceVariantDto {
+  id: string;
+  serviceId: string;
+  name: string;
+  description: string | null;
+  priceAmount: number | null;
+  durationMinutes: number;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface BookingStatusEventDto {
+  id: string;
+  fromStatus: BookingStatus | null;
+  toStatus: BookingStatus;
+  actorType: "USER" | "PROVIDER" | "SYSTEM" | "ADMIN";
+  reason: string | null;
+  createdAt: string;
 }
 
 export interface CustomerAddressDto {
@@ -748,6 +805,8 @@ export interface BookingHoldDto {
   slotStart: string;
   slotEnd: string;
   timezone: string;
+  variantId: string | null;
+  additionalPetIds: string[];
 }
 
 /** Renamed from BookingHealthAccessSummaryDto — see PetAccessScopePreset. */
@@ -801,6 +860,29 @@ export interface BookingDto {
   dropoffAddress: CustomerAddressDto | null;
   bookingSeriesId: string | null;
   petAccess: BookingPetAccessSummaryDto | null;
+  /** Batch 3 snapshots and lifecycle. */
+  bookingNumber: string | null;
+  variantId: string | null;
+  variantName: string | null;
+  serviceName: string | null;
+  bookingMode: BookingMode;
+  paymentMode: BookingPaymentMode;
+  priceAmount: number | null;
+  discountAmount: number;
+  depositAmount: number | null;
+  currency: string | null;
+  durationMinutes: number | null;
+  cancellationPolicy: string | null;
+  freeCancellationHours: number | null;
+  lateCancellationRefundPercent: number | null;
+  preparation: string | null;
+  requestExpiresAt: string | null;
+  rejectedReason: string | null;
+  rescheduledFromBookingId: string | null;
+  rescheduledToBookingId: string | null;
+  additionalPetIds: string[];
+  timeline: BookingStatusEventDto[];
+  review: { id: string; rating: number } | null;
 }
 
 export interface CareCalendarEventDto {
@@ -889,6 +971,12 @@ export interface ProviderBookingSummaryDto {
   bookingStatus: BookingStatus;
   paymentStatus: PaymentStatus;
   providerUserId: string | null;
+  /** Batch 3 */
+  bookingNumber: string | null;
+  variantName: string | null;
+  requestExpiresAt: string | null;
+  resourceId: string | null;
+  paymentMode: BookingPaymentMode;
 }
 
 /**
@@ -2711,7 +2799,9 @@ export type AdminPermissionName =
   | "insurance.view"
   | "insurance.manage"
   | "places.view"
-  | "places.manage";
+  | "places.manage"
+  | "services.view"
+  | "services.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {

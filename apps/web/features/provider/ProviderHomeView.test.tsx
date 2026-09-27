@@ -63,6 +63,7 @@ describe("ProviderHomeView", () => {
       bookingStatus: "CONFIRMED" as never,
       paymentStatus: "NOT_REQUIRED" as never,
       providerUserId: "pu-1",
+      bookingNumber: "PL-B-000001", variantName: null, requestExpiresAt: null, resourceId: null, paymentMode: "PAY_AT_PROVIDER" as never,
     };
     vi.mocked(providerOsService.getOverview).mockResolvedValue({
       ...BASE_OVERVIEW,

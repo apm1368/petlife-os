@@ -8,6 +8,9 @@
  */
 export const NotificationDeepLinks = {
   booking: (bookingId: string) => `/bookings/${bookingId}`,
+  providerBooking: (bookingId: string) => `/provider/bookings/${bookingId}`,
+  provider: (providerId: string) => `/vet/${providerId}`,
+  waitlist: () => `/bookings?tab=waitlist`,
   order: (orderId: string) => `/orders/${orderId}`,
   checkout: (checkoutId: string) => `/checkout/${checkoutId}`,
   myOrders: () => `/orders`,

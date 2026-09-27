@@ -78,7 +78,7 @@ describe("ServiceBookingWizard", () => {
     resetDraft();
     vi.mocked(servicesService.getAvailability).mockResolvedValue({ petCompatible: true, slots: [SLOT] });
     vi.mocked(bookingsService.createHold).mockResolvedValue({
-      holdId: "hold-1",
+      holdId: "hold-1", variantId: null, additionalPetIds: [],
       expiresAt: "2026-09-01T00:10:00.000Z",
       petId: "pet-1",
       providerOrganizationId: "provider-1",
@@ -112,7 +112,7 @@ describe("ServiceBookingWizard", () => {
   it("books a date-range (Boarding) service by check-in/check-out instead of a slot grid", async () => {
     resetDraft({ category: ServiceCategory.BOARDING, serviceName: "Overnight Boarding" });
     vi.mocked(bookingsService.createHold).mockResolvedValue({
-      holdId: "hold-2",
+      holdId: "hold-2", variantId: null, additionalPetIds: [],
       expiresAt: "2026-09-01T00:10:00.000Z",
       petId: "pet-1",
       providerOrganizationId: "provider-1",
@@ -139,7 +139,7 @@ describe("ServiceBookingWizard", () => {
     resetDraft({ category: ServiceCategory.WALKING, locationMode: LocationMode.AT_CUSTOMER, serviceName: "30-Minute Walk" });
     vi.mocked(servicesService.getAvailability).mockResolvedValue({ petCompatible: true, slots: [SLOT] });
     vi.mocked(bookingsService.createHold).mockResolvedValue({
-      holdId: "hold-3",
+      holdId: "hold-3", variantId: null, additionalPetIds: [],
       expiresAt: "2026-09-01T00:10:00.000Z",
       petId: "pet-1",
       providerOrganizationId: "provider-1",

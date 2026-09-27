@@ -35,11 +35,12 @@ const BOOKING: BookingDto = {
   updatedAt: "2026-09-01T00:00:00.000Z",
   provider: { id: "provider-1", name: "Happy Paws Grooming", type: "GROOMER" as never, verificationStatus: "VERIFIED" as never, description: null, logoUrl: null, locations: [], services: [], nextAvailableSlotStart: null },
   location: null,
-  service: { id: "svc-1", providerOrganizationId: "provider-1", locationId: "loc-1", name: "Full Groom & Bath", description: null, type: "GROOMING_SESSION" as never, category: "GROOMING" as never, durationMinutes: 60, priceAmount: null, currency: null, supportsDog: true, supportsCat: true, minAgeMonths: null, maxAgeMonths: null, minWeightKg: null, maxWeightKg: null, requiresCareProfile: false, requiresHealthBasics: false, locationMode: "AT_PROVIDER" as never, isActive: true },
+  service: { id: "svc-1", providerOrganizationId: "provider-1", locationId: "loc-1", name: "Full Groom & Bath", description: null, type: "GROOMING_SESSION" as never, category: "GROOMING" as never, durationMinutes: 60, priceAmount: null, currency: null, supportsDog: true, supportsCat: true, minAgeMonths: null, maxAgeMonths: null, minWeightKg: null, maxWeightKg: null, requiresCareProfile: false, requiresHealthBasics: false, locationMode: "AT_PROVIDER" as never, isActive: true, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, depositAmount: null, cancellationPolicy: null, freeCancellationHours: 24, lateCancellationRefundPercent: 0, preparationNotes: null, maxPetsPerBooking: 1, requiredResourceType: null, variants: [] },
   customerAddress: null,
   dropoffAddress: null,
   bookingSeriesId: null,
   petAccess: null,
+  bookingNumber: "PL-B-000001", variantId: null, variantName: null, serviceName: null, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, priceAmount: null, discountAmount: 0, depositAmount: null, currency: null, durationMinutes: null, cancellationPolicy: null, freeCancellationHours: null, lateCancellationRefundPercent: null, preparation: null, requestExpiresAt: null, rejectedReason: null, rescheduledFromBookingId: null, rescheduledToBookingId: null, additionalPetIds: [], timeline: [], review: null,
 };
 
 describe("MyBookingsView", () => {

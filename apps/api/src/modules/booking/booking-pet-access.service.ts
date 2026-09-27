@@ -107,6 +107,8 @@ export const DEFAULT_SCOPE_PRESET_BY_CATEGORY: Record<ServiceCategory, PetAccess
   [ServiceCategory.SITTING]: PetAccessScopePreset.SITTING_BASIC,
   [ServiceCategory.BOARDING]: PetAccessScopePreset.BOARDING_BASIC,
   [ServiceCategory.PET_TAXI]: PetAccessScopePreset.TAXI_BASIC,
+  // Least privilege for uncategorized services: identity only, no health or care profile.
+  [ServiceCategory.OTHER]: PetAccessScopePreset.MINIMAL_VET_CONTEXT,
 };
 
 /** Renamed from BookingHealthAccessService (Handoff 03) now that booking-time access spans every service category. */

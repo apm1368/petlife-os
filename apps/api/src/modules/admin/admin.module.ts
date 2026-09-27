@@ -1,4 +1,7 @@
 import { Module } from "@nestjs/common";
+import { BookingModule } from "../booking/booking.module";
+import { AdminServicesService } from "./services/admin-services.service";
+import { AdminServicesController } from "./services/admin-services.controller";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { RefundsModule } from "../commerce/refunds/refunds.module";
 import { PetAccessModule } from "../pet-access/pet-access.module";
@@ -77,7 +80,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule],
+  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
   controllers: [
     AdminMeController,
     AdminNoteController,
@@ -100,8 +103,10 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminSupportNeedController,
     AdminInsuranceController,
     AdminPlacesController,
+    AdminServicesController,
   ],
   providers: [
+    AdminServicesService,
     AdminAccessService,
     AdminAuthGuard,
     AdminAuditLogService,
