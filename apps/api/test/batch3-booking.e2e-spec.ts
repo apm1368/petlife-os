@@ -93,6 +93,9 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
 
   beforeAll(async () => {
     app = await createTestApp();
+    // Listen once on an ephemeral port: this suite fires truly concurrent requests, and supertest's
+    // per-request listen() on a non-listening server races and can reset connections (ECONNRESET).
+    await app.listen(0);
     db = app.get(PrismaService);
   });
   afterAll(async () => {
