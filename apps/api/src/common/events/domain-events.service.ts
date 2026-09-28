@@ -286,6 +286,18 @@ export const DOMAIN_EVENT_TYPES = [
   "ProviderReviewResponded",
   "ProviderReviewHidden",
   "BookingFollowUpCreated",
+  // Batch 4 — commerce completion
+  "OrderCancelled",
+  "OrderRefundRequested",
+  "OrderRefundRequestApproved",
+  "OrderRefundRequestRejected",
+  "OrderRefundRequestWithdrawn",
+  "ProductReviewCreated",
+  "ProductReviewHidden",
+  "PromotionChanged",
+  "RepeatDeliveryCreated",
+  "RepeatDeliveryChanged",
+  "RepeatDeliveryDue",
 ] as const;
 
 /**

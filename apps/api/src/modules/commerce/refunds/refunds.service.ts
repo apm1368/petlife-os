@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { FinancingIntentStatus, OrderStatus, PaymentIntentStatus, PaymentMethodType, RefundStatus, type Refund } from "@prisma/client";
+import { FinancingIntentStatus, OrderStatus, PaymentIntentStatus, PaymentMethodType, Prisma, RefundStatus, type Refund } from "@prisma/client";
 import type { RefundDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
@@ -27,6 +27,17 @@ function toDto(refund: Refund): RefundDto {
 }
 
 /**
+ * Extra work committed in the same transaction that marks a refund
+ * SUCCEEDED (Batch 4): the order-lifecycle layer uses it to cancel the
+ * fulfillment and restock, so "refunded" and "cancelled" can never diverge.
+ */
+export interface RefundExecutionOptions {
+  actorType?: "CUSTOMER" | "SELLER" | "ADMIN" | "SYSTEM";
+  actorId?: string | null;
+  onSucceeded?: (tx: Prisma.TransactionClient, refund: Refund) => Promise<void>;
+}
+
+/**
  * Refund basics (spec sections 23-26) — full refund only this phase (spec:
  * "do not claim partial refund support for SnappPay/DigiPay unless official
  * docs confirm it"; DEV_SIMULATED/STANDARD_GATEWAY's own
@@ -48,14 +59,20 @@ export class RefundsService {
     private readonly sellerFinance: SellerFinanceService,
   ) {}
 
-  async request(userId: string, orderId: string, reason?: string, requestedAmount?: number): Promise<RefundDto> {
+  /**
+   * The privileged refund primitive. Batch 4: never exposed to a customer
+   * directly — customers reach it only through OrderLifecycleService
+   * (cancel-before-dispatch) or through an admin-reviewed refund request
+   * (AdminRefundService.execute). The eligibility policy lives there.
+   */
+  async request(userId: string, orderId: string, reason?: string, requestedAmount?: number, options: RefundExecutionOptions = {}): Promise<RefundDto> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order || order.userId !== userId) throw new OrderNotFoundException({ orderId });
     // A marketplace-origin Order (Handoff 09) has no PET LIFE OS checkout/PaymentIntent to refund
     // through this path — it can never reach here anyway since its userId is null and never
     // equals a real caller's userId above, but this keeps checkoutId's non-null narrowing honest.
     if (!order.checkoutId) throw new OrderNotFoundException({ orderId });
-    if (order.status === OrderStatus.REFUNDED) throw new RefundNotSupportedException({ orderId, reason: "Order already refunded" });
+    if (order.status === OrderStatus.REFUNDED || order.status === OrderStatus.CANCELLED) throw new RefundNotSupportedException({ orderId, reason: "Order already refunded or cancelled" });
     if (requestedAmount !== undefined && requestedAmount !== order.totalAmount) {
       throw new RefundNotSupportedException({ orderId, reason: "Only a full refund of the order total is supported this phase" });
     }
@@ -64,9 +81,19 @@ export class RefundsService {
     const amount = order.totalAmount;
 
     if (checkout.paymentMethodType === PaymentMethodType.INSTALLMENTS) {
-      return this.refundFinancing(userId, order.id, checkout.id, amount, order.currency, reason);
+      return this.refundFinancing(userId, order.id, checkout.id, amount, order.currency, reason, options);
     }
-    return this.refundPayment(userId, order.id, checkout.id, amount, order.currency, reason);
+    return this.refundPayment(userId, order.id, checkout.id, amount, order.currency, reason, options);
+  }
+
+  /** Terminal order bookkeeping shared by both refund paths: status, timeline and the caller's hook. */
+  private async markOrderRefunded(tx: Prisma.TransactionClient, orderId: string, refund: Refund, reason: string | undefined, options: RefundExecutionOptions): Promise<void> {
+    const before = await tx.order.findUniqueOrThrow({ where: { id: orderId }, select: { status: true } });
+    await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.REFUNDED } });
+    await tx.orderStatusEvent.create({
+      data: { orderId, fromStatus: before.status, toStatus: OrderStatus.REFUNDED, actorType: options.actorType ?? "SYSTEM", actorId: options.actorId ?? null, reason: reason ?? null },
+    });
+    if (options.onSucceeded) await options.onSucceeded(tx, refund);
   }
 
   /**
@@ -85,7 +112,7 @@ export class RefundsService {
     return this.refundPayment(null, null, checkoutId, amount, currency, reason);
   }
 
-  private async refundPayment(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string): Promise<RefundDto> {
+  private async refundPayment(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string, options: RefundExecutionOptions = {}): Promise<RefundDto> {
     // Handoff 20 hardening: a plain check-then-act here let two concurrent
     // refund requests for the same checkout both pass "no existing refund
     // yet" before either committed, both call the provider, and both
@@ -107,8 +134,15 @@ export class RefundsService {
       const attempt = await tx.paymentAttempt.findFirst({ where: { paymentIntentId: intent.id, providerReference: { not: null } }, orderBy: { createdAt: "desc" } });
       if (!attempt?.providerReference) throw new RefundNotSupportedException({ checkoutId, reason: "No provider reference to refund against" });
 
-      const existingRefund = await tx.refund.findFirst({ where: { paymentIntentId: intent.id, status: { not: RefundStatus.FAILED } } });
-      if (existingRefund) throw new RefundNotSupportedException({ checkoutId, reason: "A refund for this payment is already in progress or completed" });
+      // One checkout pays for N seller orders, so the duplicate guard is per
+      // order (per payment only for the no-order recovery path), and the sum
+      // of live refunds can never exceed what was captured.
+      const liveRefunds = await tx.refund.findMany({ where: { paymentIntentId: intent.id, status: { not: RefundStatus.FAILED } } });
+      if (liveRefunds.some((r) => (orderId ? r.orderId === orderId : true))) {
+        throw new RefundNotSupportedException({ checkoutId, reason: "A refund for this payment is already in progress or completed" });
+      }
+      const alreadyRefunded = liveRefunds.reduce((sum, r) => sum + r.amount, 0);
+      if (alreadyRefunded + amount > intent.amount) throw new RefundNotSupportedException({ checkoutId, reason: "Refund would exceed the captured amount" });
 
       const refund = await tx.refund.create({
         data: { paymentIntentId: intent.id, orderId, amount, currency, status: RefundStatus.REQUESTED, reason: reason ?? null, requestedByUserId: userId },
@@ -133,7 +167,7 @@ export class RefundsService {
     if (result.status === "SUCCEEDED") {
       const updated = await this.prisma.$transaction(async (tx) => {
         const row = await tx.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.SUCCEEDED, providerReference: result.providerRefundReference ?? null, completedAt: new Date() } });
-        if (orderId) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.REFUNDED } });
+        if (orderId) await this.markOrderRefunded(tx, orderId, row, reason, options);
         await this.ledger.recordRefundSucceeded(row.id, amount, currency, tx);
         if (orderId) await this.sellerFinance.applyRefundImpact(tx, orderId, row.id, amount, currency);
         return row;
@@ -147,7 +181,7 @@ export class RefundsService {
     throw new RefundFailedException({ orderId, providerMessage: result.failureMessage });
   }
 
-  private async refundFinancing(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string): Promise<RefundDto> {
+  private async refundFinancing(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string, options: RefundExecutionOptions = {}): Promise<RefundDto> {
     // Same Handoff 20 hardening as refundPayment above: lock + duplicate
     // check + REQUESTED-row creation all happen inside one short
     // transaction, keyed by checkoutId, before any external provider call.
@@ -192,7 +226,7 @@ export class RefundsService {
     if (result.status === "SUCCEEDED") {
       const updated = await this.prisma.$transaction(async (tx) => {
         const row = await tx.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.SUCCEEDED, providerReference: result.providerRefundReference ?? null, completedAt: new Date() } });
-        if (orderId) await tx.order.update({ where: { id: orderId }, data: { status: OrderStatus.REFUNDED } });
+        if (orderId) await this.markOrderRefunded(tx, orderId, row, reason, options);
         await tx.financingIntent.update({ where: { id: intentId }, data: { status: FinancingIntentStatus.REFUNDED } });
         await this.ledger.recordRefundSucceeded(row.id, amount, currency, tx);
         if (orderId) await this.sellerFinance.applyRefundImpact(tx, orderId, row.id, amount, currency);

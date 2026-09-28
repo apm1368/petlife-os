@@ -50,7 +50,11 @@ export type AdminPermission =
   | "places.view"
   | "places.manage"
   | "services.view"
-  | "services.manage";
+  | "services.manage"
+  // Batch 4 — Admin Commerce
+  | "commerce.view"
+  | "commerce.manage"
+  | "promotions.manage";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -93,6 +97,9 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "places.manage",
   "services.view",
   "services.manage",
+  "commerce.view",
+  "commerce.manage",
+  "promotions.manage",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -109,6 +116,7 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = [
   "insurance.view",
   "places.view",
   "services.view",
+  "commerce.view",
 ];
 
 /**
@@ -160,14 +168,17 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "places.manage",
     "services.view",
     "services.manage",
+    "commerce.view",
+    "commerce.manage",
+    "promotions.manage",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
   // (needed for the H13 support context panel) but can never cancel, grant
   // a trial, or override an entitlement.
-  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view"],
+  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view"],
   // Review moderation is a trust action, so TRUST_SAFETY can hide provider reviews.
-  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage"],
+  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage", "commerce.view", "commerce.manage"],
   // Payout execution ("settlement.pay") is FINANCE-only, mirroring
   // finance.refund.execute's own "ADMIN can approve, only FINANCE can move
   // real money" precedent exactly (spec: "do not give SUPPORT role
@@ -192,6 +203,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     // records an actual fund payout.
     "animalSupport.view",
     "animalSupport.payout",
+    // Refund-request review needs the order context.
+    "commerce.view",
   ],
   [AdminRole.OPERATIONS]: [
     "customer.view",
@@ -211,6 +224,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "places.manage",
     "services.view",
     "services.manage",
+    "commerce.view",
+    "commerce.manage",
   ],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict

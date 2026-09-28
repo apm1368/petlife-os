@@ -104,4 +104,13 @@ export type AdminAuditAction =
   // Batch 3 — services/booking operations.
   | "provider_review.hidden"
   | "provider_service.deactivated"
-  | "provider_service.reactivated";
+  | "provider_service.reactivated"
+  // Batch 4 — commerce operations.
+  | "order_refund_request.approved"
+  | "order_refund_request.rejected"
+  | "product.status_changed"
+  | "product_review.hidden"
+  | "product_review.restored"
+  | "promotion.created"
+  | "promotion.updated"
+  | "promotion.status_changed";

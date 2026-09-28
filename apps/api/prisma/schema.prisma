@@ -1116,15 +1116,19 @@ model User {
   accountDeletionRequests AccountDeletionRequest[]
   acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
 
-  adminUser             AdminUser?
-  supportCasesRequested SupportCase[]
-  supportMessages       SupportMessage[]
-  disputesRaised        Dispute[]
-  disputeEvidence       DisputeEvidence[]
-  appeals               Appeal[]
-  BookingWaitlistEntry  BookingWaitlistEntry[]
-  ProviderReview        ProviderReview[]
-  ProviderFavorite      ProviderFavorite[]
+  adminUser              AdminUser?
+  supportCasesRequested  SupportCase[]
+  supportMessages        SupportMessage[]
+  disputesRaised         Dispute[]
+  disputeEvidence        DisputeEvidence[]
+  appeals                Appeal[]
+  BookingWaitlistEntry   BookingWaitlistEntry[]
+  ProviderReview         ProviderReview[]
+  ProviderFavorite       ProviderFavorite[]
+  ProductReview          ProductReview[]
+  ProductFavorite        ProductFavorite[]
+  OrderRefundRequest     OrderRefundRequest[]
+  RepeatDeliverySchedule RepeatDeliverySchedule[]
 
   @@map("users")
 }
@@ -1226,9 +1230,10 @@ model Household {
   insuranceApplications InsuranceApplication[]
   travelBookings        TravelBooking[]
 
-  clinicalEstimates    ClinicalEstimate[]
-  invitations          HouseholdInvitation[]
-  BookingWaitlistEntry BookingWaitlistEntry[]
+  clinicalEstimates      ClinicalEstimate[]
+  invitations            HouseholdInvitation[]
+  BookingWaitlistEntry   BookingWaitlistEntry[]
+  RepeatDeliverySchedule RepeatDeliverySchedule[]
 
   @@map("households")
 }
@@ -2052,9 +2057,13 @@ model ProviderAvailabilityException {
 /// this phase has no delete endpoint for addresses at all (create + list
 /// only — see README Known limitations).
 model CustomerAddress {
-  id          String    @id @default(uuid()) @db.Uuid
-  householdId String    @db.Uuid
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  id               String                   @id @default(uuid()) @db.Uuid
+  /// Batch 4: Iranian 10-digit postal code (couriers require it) and the household default.
+  postalCode       String?
+  isDefault        Boolean                  @default(false)
+  repeatDeliveries RepeatDeliverySchedule[]
+  householdId      String                   @db.Uuid
+  household        Household                @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
   label        String?
   recipient    String?
@@ -2479,11 +2488,16 @@ model ProductCategory {
 /// (e.g. not a speciesCompatibility array) so the two compatibility engines
 /// stay easy to compare and maintain side by side.
 model Product {
-  id         String          @id @default(uuid()) @db.Uuid
-  brandId    String?         @db.Uuid
-  brand      Brand?          @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  categoryId String          @db.Uuid
-  category   ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  id             String            @id @default(uuid()) @db.Uuid
+  /// Batch 4: structured specs [{ label, value }] supplied by manufacturer/seller — never medical claims.
+  specifications Json?
+  media          ProductMedia[]
+  reviews        ProductReview[]
+  favorites      ProductFavorite[]
+  brandId        String?           @db.Uuid
+  brand          Brand?            @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  categoryId     String            @db.Uuid
+  category       ProductCategory   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   title       String
   slug        String  @unique
@@ -2525,9 +2539,12 @@ model Product {
 /// that Json, per the spec's explicit "avoid dumping all variant identity
 /// into free JSON" instruction.
 model ProductVariant {
-  id        String  @id @default(uuid()) @db.Uuid
-  productId String  @db.Uuid
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  id               String                   @id @default(uuid()) @db.Uuid
+  media            ProductMedia[]
+  reviews          ProductReview[]
+  repeatDeliveries RepeatDeliverySchedule[]
+  productId        String                   @db.Uuid
+  product          Product                  @relation(fields: [productId], references: [id], onDelete: Restrict)
 
   sku     String  @unique
   barcode String?
@@ -2553,11 +2570,16 @@ model ProductVariant {
 /// One Variant may have multiple Offers from different sellers (spec
 /// section 8) — price/inventory live here, never on Product/Variant.
 model SellerOffer {
-  id                   String             @id @default(uuid()) @db.Uuid
-  sellerOrganizationId String             @db.Uuid
-  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
-  productVariantId     String             @db.Uuid
-  productVariant       ProductVariant     @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  id                     String                   @id @default(uuid()) @db.Uuid
+  /// Batch 4: seller explicitly opts a consumable offer into Repeat Delivery (never inferred).
+  repeatDeliveryEligible Boolean                  @default(false)
+  /// Intervals in days the customer may choose for this offer (e.g. [14, 28, 42]).
+  repeatIntervalsDays    Int[]                    @default([])
+  repeatDeliveries       RepeatDeliverySchedule[]
+  sellerOrganizationId   String                   @db.Uuid
+  sellerOrganization     SellerOrganization       @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  productVariantId       String                   @db.Uuid
+  productVariant         ProductVariant           @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
 
   /// Integer IRR (Rial), never a fractional/floating amount — see README
   /// "IRR/Toman behavior". The UI divides by 10 to render Toman for display.
@@ -2644,13 +2666,15 @@ model Cart {
 /// offer coexist — CartService.addItem() finds-or-increments explicitly
 /// instead, sidestepping that quirk entirely (see README Known limitations).
 model CartLine {
-  id            String      @id @default(uuid()) @db.Uuid
-  cartId        String      @db.Uuid
-  cart          Cart        @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  sellerOfferId String      @db.Uuid
-  sellerOffer   SellerOffer @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
-  targetPetId   String?     @db.Uuid
-  targetPet     Pet?        @relation(fields: [targetPetId], references: [id], onDelete: SetNull)
+  id                  String      @id @default(uuid()) @db.Uuid
+  /// Batch 4: promotion that produced unitPriceSnapshot, so an ended promotion is reported as such.
+  promotionIdSnapshot String?     @db.Uuid
+  cartId              String      @db.Uuid
+  cart                Cart        @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  sellerOfferId       String      @db.Uuid
+  sellerOffer         SellerOffer @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+  targetPetId         String?     @db.Uuid
+  targetPet           Pet?        @relation(fields: [targetPetId], references: [id], onDelete: SetNull)
 
   quantity Int
 
@@ -2699,6 +2723,8 @@ model Checkout {
   currency       String  @default("IRR")
   /// Placeholder only (spec section 46) — no promotion/campaign engine exists to validate this against.
   promotionCode  String?
+  /// Batch 4: the priced lines (CartLineDto[]) frozen when the checkout was created. Orders are built from this, never from the mutable cart, so the order always equals what was charged.
+  pricedLinesSnapshot Json?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -2753,7 +2779,14 @@ model InventoryReservation {
 /// change (spec section 31's snapshot principle, applied to the address
 /// too).
 model Order {
-  id                   String             @id @default(uuid()) @db.Uuid
+  id                   String                   @id @default(uuid()) @db.Uuid
+  /// Batch 4: cancellation facts and append-only status timeline.
+  cancelledAt          DateTime?
+  cancelReason         String?
+  cancelledBy          String?
+  statusEvents         OrderStatusEvent[]
+  refundRequests       OrderRefundRequest[]
+  repeatDeliveryCycles RepeatDeliverySchedule[] @relation("RepeatDeliveryLastOrder")
   /// Nullable as of Handoff 09 (spec section 25/27) — a marketplace-origin
   /// Order (see the `marketplaceOrder` relation below) never had a PET LIFE
   /// OS Checkout or a registered buyer User; both stay required/non-null for
@@ -2761,14 +2794,14 @@ model Order {
   /// that ever sets them. `@@unique([checkoutId, sellerOrganizationId])`
   /// below still holds: Postgres treats each NULL as distinct, so many
   /// marketplace Orders for the same seller coexist freely under it.
-  checkoutId           String?            @db.Uuid
-  checkout             Checkout?          @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
-  sellerOrganizationId String             @db.Uuid
-  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
-  userId               String?            @db.Uuid
-  user                 User?              @relation(fields: [userId], references: [id], onDelete: Restrict)
-  householdId          String?            @db.Uuid
-  household            Household?         @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  checkoutId           String?                  @db.Uuid
+  checkout             Checkout?                @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  sellerOrganizationId String                   @db.Uuid
+  sellerOrganization   SellerOrganization       @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  userId               String?                  @db.Uuid
+  user                 User?                    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  householdId          String?                  @db.Uuid
+  household            Household?               @relation(fields: [householdId], references: [id], onDelete: SetNull)
 
   status OrderStatus @default(PENDING)
 
@@ -2816,6 +2849,12 @@ model Order {
 /// own compatibility metadata must never rewrite order history.
 model OrderItem {
   id               String         @id @default(uuid()) @db.Uuid
+  /// Batch 4: price facts frozen at commit — list price, applied promotion and per-unit discount.
+  listUnitPrice    Int?
+  unitDiscount     Int            @default(0)
+  promotionId      String?        @db.Uuid
+  promotionName    String?
+  review           ProductReview?
   orderId          String         @db.Uuid
   order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId        String         @db.Uuid
@@ -8442,4 +8481,231 @@ model ProviderFavorite {
 
   @@id([userId, providerOrganizationId])
   @@map("provider_favorites")
+}
+
+// ---------------------------------------------------------------------------
+// Batch 4 — Commerce completion
+// ---------------------------------------------------------------------------
+
+model ProductMedia {
+  id        String          @id @default(uuid()) @db.Uuid
+  productId String          @db.Uuid
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?         @db.Uuid
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  /// Repository-owned or storage-owned path; never a third-party hotlink.
+  url       String
+  alt       String?
+  sortOrder Int             @default(0)
+  createdAt DateTime        @default(now())
+
+  @@index([productId, sortOrder])
+  @@map("product_media")
+}
+
+enum PromotionDiscountType {
+  PERCENT
+  FIXED
+}
+
+enum PromotionScope {
+  ALL
+  CATEGORY
+  PRODUCT
+  SELLER
+  SERVICE
+}
+
+enum PromotionStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum PromotionFundedBy {
+  PLATFORM
+  SELLER
+}
+
+/// The one promotion engine for products (and, later, services). Automatic, non-stacking: the single
+/// best eligible promotion applies per line. No codes, no fake strike-through prices.
+model Promotion {
+  id                        String                @id @default(uuid()) @db.Uuid
+  name                      String
+  description               String?
+  discountType              PromotionDiscountType
+  /// PERCENT: 1..90; FIXED: IRR per unit.
+  value                     Int
+  maxDiscountAmount         Int?
+  scope                     PromotionScope
+  categoryIds               String[]              @default([]) @db.Uuid
+  productIds                String[]              @default([]) @db.Uuid
+  sellerOrganizationIds     String[]              @default([]) @db.Uuid
+  serviceIds                String[]              @default([]) @db.Uuid
+  startsAt                  DateTime
+  endsAt                    DateTime?
+  status                    PromotionStatus       @default(DRAFT)
+  fundedBy                  PromotionFundedBy     @default(PLATFORM)
+  /// Seller-created promotions only ever apply to that seller's own offers.
+  ownerSellerOrganizationId String?               @db.Uuid
+  usageLimit                Int?
+  usageCount                Int                   @default(0)
+  createdByUserId           String                @db.Uuid
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  redemptions               PromotionRedemption[]
+
+  @@index([status, startsAt, endsAt])
+  @@map("promotions")
+}
+
+model PromotionRedemption {
+  id          String    @id @default(uuid()) @db.Uuid
+  promotionId String    @db.Uuid
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Restrict)
+  orderId     String    @db.Uuid
+  orderItemId String    @unique @db.Uuid
+  userId      String?   @db.Uuid
+  amount      Int
+  createdAt   DateTime  @default(now())
+
+  @@index([promotionId])
+  @@map("promotion_redemptions")
+}
+
+enum ProductReviewStatus {
+  PUBLISHED
+  HIDDEN
+}
+
+/// One review per delivered order item, by the order's own customer.
+model ProductReview {
+  id               String              @id @default(uuid()) @db.Uuid
+  orderItemId      String              @unique @db.Uuid
+  orderItem        OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  productId        String              @db.Uuid
+  product          Product             @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productVariantId String              @db.Uuid
+  productVariant   ProductVariant      @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  userId           String              @db.Uuid
+  user             User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rating           Int
+  body             String?
+  status           ProductReviewStatus @default(PUBLISHED)
+  hiddenReason     String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([productId, status, createdAt])
+  @@map("product_reviews")
+}
+
+model ProductFavorite {
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String   @db.Uuid
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId])
+  @@map("product_favorites")
+}
+
+/// Append-only order timeline; one row per real status change.
+model OrderStatusEvent {
+  id         String       @id @default(uuid()) @db.Uuid
+  orderId    String       @db.Uuid
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  actorType  String
+  actorId    String?      @db.Uuid
+  reason     String?
+  createdAt  DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+  @@map("order_status_events")
+}
+
+enum OrderRefundRequestStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+/// Customer refund/return request after dispatch. Never executes money by itself: an admin approval
+/// (AdminRefundApproval) and FINANCE execution move funds through the existing refund pipeline.
+model OrderRefundRequest {
+  id                    String                   @id @default(uuid()) @db.Uuid
+  orderId               String                   @db.Uuid
+  order                 Order                    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  userId                String                   @db.Uuid
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orderItemIds          String[]                 @default([]) @db.Uuid
+  reason                String
+  description           String?
+  requestedAmount       Int
+  status                OrderRefundRequestStatus @default(PENDING_REVIEW)
+  decisionReason        String?
+  decidedByAdminId      String?                  @db.Uuid
+  adminRefundApprovalId String?                  @unique @db.Uuid
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  @@index([status, createdAt])
+  @@index([orderId])
+  @@map("order_refund_requests")
+}
+
+enum RepeatDeliveryStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+/// Repeat Delivery (not PET LIFE Care membership). No stored card, no merchant-initiated charge:
+/// each cycle is revalidated, the customer is reminded and confirms/pays a normal checkout.
+model RepeatDeliverySchedule {
+  id                String                @id @default(uuid()) @db.Uuid
+  userId            String                @db.Uuid
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdId       String                @db.Uuid
+  household         Household             @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  productVariantId  String                @db.Uuid
+  productVariant    ProductVariant        @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  sellerOfferId     String                @db.Uuid
+  sellerOffer       SellerOffer           @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+  quantity          Int
+  intervalDays      Int
+  nextCycleAt       DateTime
+  addressId         String?               @db.Uuid
+  address           CustomerAddress?      @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  status            RepeatDeliveryStatus  @default(ACTIVE)
+  /// Price the customer last accepted; a different current price requires explicit confirmation.
+  acceptedUnitPrice Int
+  reminderSentAt    DateTime?
+  lastOrderId       String?               @db.Uuid
+  lastOrder         Order?                @relation("RepeatDeliveryLastOrder", fields: [lastOrderId], references: [id], onDelete: SetNull)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  events            RepeatDeliveryEvent[]
+
+  @@index([status, nextCycleAt])
+  @@index([userId])
+  @@map("repeat_delivery_schedules")
+}
+
+model RepeatDeliveryEvent {
+  id         String                 @id @default(uuid()) @db.Uuid
+  scheduleId String                 @db.Uuid
+  schedule   RepeatDeliverySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  type       String
+  data       Json?
+  actorId    String?                @db.Uuid
+  createdAt  DateTime               @default(now())
+
+  @@index([scheduleId, createdAt])
+  @@map("repeat_delivery_events")
 }

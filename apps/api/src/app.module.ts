@@ -37,6 +37,8 @@ import { AddressesModule } from "./modules/addresses/addresses.module";
 import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
 import { SellerOsModule } from "./modules/seller-os/seller-os.module";
 import { CatalogModule } from "./modules/commerce/catalog/catalog.module";
+import { ProductEngagementModule } from "./modules/commerce/engagement/product-engagement.module";
+import { RepeatDeliveryModule } from "./modules/commerce/repeat-delivery/repeat-delivery.module";
 import { CartModule } from "./modules/commerce/cart/cart.module";
 import { CheckoutModule } from "./modules/commerce/checkout/checkout.module";
 import { PaymentsModule } from "./modules/commerce/payments/payments.module";
@@ -101,6 +103,8 @@ import { PlacesModule } from "./modules/places/places.module";
     ProviderOsModule,
     SellerOsModule,
     CatalogModule,
+    ProductEngagementModule,
+    RepeatDeliveryModule,
     CartModule,
     CheckoutModule,
     PaymentsModule,

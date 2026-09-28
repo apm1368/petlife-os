@@ -105,12 +105,8 @@ export class OrderLogisticsController {
     return { fulfillment: toFulfillmentDto(updated), shipment: toShipmentDto(shipment) };
   }
 
-  @Post(":orderId/fulfillment/cancel")
-  async cancelFulfillment(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
-    const fulfillment = await this.shipping.getFulfillmentForOrderAsSeller(user.id, orderId);
-    if (!fulfillment) return null;
-    return toFulfillmentDto(await this.shipping.cancelFulfillment(user.id, fulfillment.id));
-  }
+  // Batch 4: seller cancellation moved to POST seller-organizations/:sellerId/orders/:orderId/cancel,
+  // which always refunds the customer. Cancelling only the fulfillment left a paid order undelivered.
 
   @Post(":orderId/shipment/reconcile")
   async reconcileShipment(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {

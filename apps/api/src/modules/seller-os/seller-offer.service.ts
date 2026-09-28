@@ -4,7 +4,7 @@ import type { PaginatedDto, SellerOsOfferDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { toPaginatedDto } from "../../common/pagination/pagination.dto";
-import { OfferNotAvailableException } from "../../common/errors/api-exception";
+import { OfferNotAvailableException, ValidationApiException } from "../../common/errors/api-exception";
 import { SellerAccessService } from "./seller-access.service";
 import type { ResolvedSellerContext } from "./auth/seller-context.types";
 import type { CreateSellerOfferDto, ListSellerOffersQueryDto, UpdateSellerOfferDto } from "./dto/seller-offer.dto";
@@ -19,6 +19,11 @@ type OfferWithRelations = SellerOffer & {
   marketplaceListings: { syncStatus: MarketplaceListingSyncStatus }[];
 };
 
+/** An offer open to repeat delivery must offer at least one interval for the customer to choose. */
+function assertRepeatConfig(eligible: boolean, intervals: number[]): void {
+  if (eligible && intervals.length === 0) throw new ValidationApiException({ field: "repeatIntervalsDays", reason: "REQUIRED_WHEN_REPEAT_ELIGIBLE" });
+}
+
 function toDto(offer: OfferWithRelations): SellerOsOfferDto {
   const onHand = offer.inventoryItem?.onHand ?? 0;
   const reserved = offer.inventoryItem?.reserved ?? 0;
@@ -26,6 +31,7 @@ function toDto(offer: OfferWithRelations): SellerOsOfferDto {
 
   return {
     id: offer.id,
+    productId: offer.productVariant.product.id,
     productVariantId: offer.productVariantId,
     productTitle: offer.productVariant.product.title,
     variantTitle: offer.productVariant.title,
@@ -49,6 +55,8 @@ function toDto(offer: OfferWithRelations): SellerOsOfferDto {
     marketplaceSyncErrorCount: syncErrorCount,
     createdAt: offer.createdAt.toISOString(),
     updatedAt: offer.updatedAt.toISOString(),
+    repeatDeliveryEligible: offer.repeatDeliveryEligible,
+    repeatIntervalsDays: offer.repeatIntervalsDays,
   };
 }
 
@@ -115,6 +123,7 @@ export class SellerOfferService {
 
   async create(ctx: ResolvedSellerContext, dto: CreateSellerOfferDto): Promise<SellerOsOfferDto> {
     this.sellerAccess.assertOperational(ctx.sellerStatus);
+    assertRepeatConfig(dto.repeatDeliveryEligible ?? false, dto.repeatIntervalsDays ?? []);
 
     const created = await this.prisma.$transaction(async (tx) => {
       const offer = await tx.sellerOffer.create({
@@ -125,6 +134,8 @@ export class SellerOfferService {
           compareAtAmount: dto.compareAtAmount,
           sellerSku: dto.sellerSku,
           status: SellerOfferStatus.ACTIVE,
+          repeatDeliveryEligible: dto.repeatDeliveryEligible ?? false,
+          repeatIntervalsDays: [...new Set(dto.repeatIntervalsDays ?? [])].sort((a, b) => a - b),
           inventoryItem: { create: { onHand: dto.initialOnHand ?? 0, reserved: 0 } },
         },
         include: OFFER_INCLUDE,
@@ -139,6 +150,7 @@ export class SellerOfferService {
   async update(ctx: ResolvedSellerContext, offerId: string, dto: UpdateSellerOfferDto): Promise<SellerOsOfferDto> {
     this.sellerAccess.assertOperational(ctx.sellerStatus);
     const existing = await this.loadOwned(ctx, offerId);
+    assertRepeatConfig(dto.repeatDeliveryEligible ?? existing.repeatDeliveryEligible, dto.repeatIntervalsDays ?? existing.repeatIntervalsDays);
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const offer = await tx.sellerOffer.update({
@@ -148,6 +160,8 @@ export class SellerOfferService {
           ...(dto.compareAtAmount !== undefined ? { compareAtAmount: dto.compareAtAmount } : {}),
           ...(dto.sellerSku !== undefined ? { sellerSku: dto.sellerSku } : {}),
           ...(dto.status !== undefined ? { status: dto.status } : {}),
+          ...(dto.repeatDeliveryEligible !== undefined ? { repeatDeliveryEligible: dto.repeatDeliveryEligible } : {}),
+          ...(dto.repeatIntervalsDays !== undefined ? { repeatIntervalsDays: [...new Set(dto.repeatIntervalsDays)].sort((a, b) => a - b) } : {}),
         },
         include: OFFER_INCLUDE,
       });

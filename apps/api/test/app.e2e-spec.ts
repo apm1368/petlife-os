@@ -1982,8 +1982,12 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const offer = await seedOffer(unverifiedSeller.id, variant.id, 100_000, 10);
 
       const results = await client.get(`/shop/products?search=${encodeURIComponent(product.title)}`).expect(200);
-      const found = results.body.find((p: { id: string }) => p.id === product.id);
-      expect(found.bestOffer).toBeNull();
+      // Batch 4: search is paginated ({ items, total, facets }) and lists only products with a buyable offer,
+      // so a product whose only offer is unverified is not surfaced at all; its detail page shows no offer either.
+      const found = results.body.items.find((p: { id: string }) => p.id === product.id);
+      expect(found).toBeUndefined();
+      const detail = await client.get(`/shop/products/${product.id}`).expect(200);
+      expect(detail.body.offers).toHaveLength(0);
 
       const denied = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(400);
       expect(denied.body.error.code).toBe("OFFER_NOT_AVAILABLE");
@@ -2107,7 +2111,13 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const seller = await seedSeller();
       const offer = await seedOffer(seller.id, variant.id, 100_000, 2);
 
-      await client.post("/cart/items").send({ offerId: offer.id, quantity: 5 }).expect(201);
+      // Batch 4: the cart already refuses more than the available stock...
+      const tooMany = await client.post("/cart/items").send({ offerId: offer.id, quantity: 5 }).expect(400);
+      expect(tooMany.body.error.details.reason).toBe("INSUFFICIENT_INVENTORY");
+
+      // ...and checkout still re-validates when stock drops after the item was added.
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 2 }).expect(201);
+      await prisma.inventoryItem.update({ where: { sellerOfferId: offer.id }, data: { onHand: 1 } });
       const denied = await client.post("/checkout").send({}).expect(400);
       expect(denied.body.error.details.reason).toBe("INSUFFICIENT_INVENTORY");
     });

@@ -6,7 +6,7 @@ export class AddCartItemDto {
 
   @IsInt()
   @Min(1)
-  @Max(99)
+  @Max(20)
   quantity!: number;
 
   @IsOptional()
@@ -17,6 +17,6 @@ export class AddCartItemDto {
 export class UpdateCartItemDto {
   @IsInt()
   @Min(1)
-  @Max(99)
+  @Max(20)
   quantity!: number;
 }

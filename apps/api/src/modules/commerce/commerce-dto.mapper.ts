@@ -45,10 +45,28 @@ export function toSellerSummaryDto(seller: SellerOrganization): SellerOrganizati
   };
 }
 
-export function toSellerOfferDto(offer: SellerOffer & { sellerOrganization: SellerOrganization; inventoryItem: InventoryItem | null }): SellerOfferDto {
+/** Stock shown to customers as a state, not a warehouse count; LOW_STOCK at or below this many units. */
+export const LOW_STOCK_THRESHOLD = 5;
+
+export function stockStateOf(available: number): "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK" {
+  return available <= 0 ? "OUT_OF_STOCK" : available <= LOW_STOCK_THRESHOLD ? "LOW_STOCK" : "IN_STOCK";
+}
+
+/** `price` comes from PricingService; without it the offer is shown at its own price with no promotion. */
+export function toSellerOfferDto(
+  offer: SellerOffer & { sellerOrganization: SellerOrganization; inventoryItem: InventoryItem | null },
+  price?: { unitPrice: number; unitDiscount: number; promotion: { id: string; name: string; endsAt: string | null } | null },
+): SellerOfferDto {
   const onHand = offer.inventoryItem?.onHand ?? 0;
   const reserved = offer.inventoryItem?.reserved ?? 0;
+  const available = Math.max(0, onHand - reserved);
   return {
+    effectiveUnitPrice: price?.unitPrice ?? offer.priceAmount,
+    unitDiscount: price?.unitDiscount ?? 0,
+    promotion: price?.promotion ? { id: price.promotion.id, name: price.promotion.name, endsAt: price.promotion.endsAt } : null,
+    stockState: stockStateOf(available),
+    repeatDeliveryEligible: offer.repeatDeliveryEligible,
+    repeatIntervalsDays: offer.repeatIntervalsDays,
     id: offer.id,
     sellerOrganization: toSellerSummaryDto(offer.sellerOrganization),
     productVariantId: offer.productVariantId,

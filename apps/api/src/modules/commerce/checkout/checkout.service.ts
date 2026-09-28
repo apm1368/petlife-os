@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CartStatus, CheckoutStatus, DeliveryMethod, FinancingIntentStatus, PaymentIntentStatus, PaymentMethodType, PaymentProvider, SellerOfferStatus } from "@prisma/client";
+import { CartStatus, CheckoutStatus, DeliveryMethod, FinancingIntentStatus, PaymentIntentStatus, PaymentMethodType, PaymentProvider, Prisma, SellerOfferStatus } from "@prisma/client";
 import type {
   CartDto,
   CartLineDto,
@@ -41,17 +41,56 @@ import { SellerFinanceService } from "../../seller-finance/seller-finance.servic
 import { InventoryReservationService, RESERVATION_TTL_MINUTES } from "./inventory-reservation.service";
 import type { CreateCheckoutDto, PayCheckoutDto, UpdateCheckoutDto } from "./dto/checkout.dto";
 
-/** Dev-calculated placeholder only (spec section 47) — no delivery integration exists this phase. Amounts are integer IRR. */
+/**
+ * Flat fallback only. Batch 4 removed the decorative EXPRESS surcharge: a
+ * faster service is offered solely as a real carrier quote (serviceLevel
+ * EXPRESS in the shipping-quote flow), never as an invented flat price.
+ * Amounts are integer IRR.
+ */
 const DELIVERY_AMOUNT_BY_METHOD: Record<DeliveryMethod, number> = {
   [DeliveryMethod.STANDARD]: 0,
-  [DeliveryMethod.EXPRESS]: 500_000,
+  [DeliveryMethod.EXPRESS]: 0,
 };
 
-function allLines(cart: CartDto): CartLineDto[] {
+function assertDeliveryMethodOffered(method: DeliveryMethod): void {
+  if (method !== DeliveryMethod.STANDARD) {
+    throw new ValidationApiException({ field: "deliveryMethod", reason: "DELIVERY_METHOD_UNAVAILABLE" });
+  }
+}
+
+/** Gross (list) subtotal and promotion discount for a set of priced lines. `lineTotal` is already net of the discount. */
+export function pricedTotals(lines: CartLineDto[]): { subtotalAmount: number; discountAmount: number; netAmount: number } {
+  let subtotalAmount = 0;
+  let discountAmount = 0;
+  let netAmount = 0;
+  for (const line of lines) {
+    const listUnit = line.listUnitPrice ?? line.currentPriceAmount;
+    const unitDiscount = line.unitDiscount ?? 0;
+    subtotalAmount += listUnit * line.quantity;
+    discountAmount += unitDiscount * line.quantity;
+    netAmount += line.lineTotal;
+  }
+  return { subtotalAmount, discountAmount, netAmount };
+}
+
+function allLines(cart: Pick<CartDto, "sellerGroups">): CartLineDto[] {
   return cart.sellerGroups.flatMap((g) => g.lines);
 }
 
-function computeValidationIssues(cart: CartDto): CheckoutValidationIssueDto[] {
+/** Regroups frozen checkout lines by seller for display. */
+function snapshotAsCart(lines: CartLineDto[]): Pick<CartDto, "sellerGroups"> & { sellerGroups: CartDto["sellerGroups"] } {
+  const groups = new Map<string, CartDto["sellerGroups"][number]>();
+  for (const line of lines) {
+    const seller = line.sellerOffer.sellerOrganization;
+    const group = groups.get(seller.id) ?? { sellerOrganization: seller, lines: [], subtotalAmount: 0 };
+    group.lines.push(line);
+    group.subtotalAmount += line.lineTotal;
+    groups.set(seller.id, group);
+  }
+  return { sellerGroups: [...groups.values()] };
+}
+
+function computeValidationIssues(cart: Pick<CartDto, "sellerGroups">): CheckoutValidationIssueDto[] {
   const issues: CheckoutValidationIssueDto[] = [];
   for (const line of allLines(cart)) {
     if (line.priceChanged) {
@@ -109,6 +148,8 @@ export class CheckoutService {
     const cartDto = await this.cart.getCart(userId);
     const lines = allLines(cartDto);
     if (lines.length === 0) throw new CartEmptyException();
+    const deliveryMethod = dto.deliveryMethod ?? DeliveryMethod.STANDARD;
+    assertDeliveryMethodOffered(deliveryMethod);
 
     for (const line of lines) {
       if (line.sellerOffer.status !== SellerOfferStatus.ACTIVE) throw new OfferNotAvailableException({ cartLineId: line.id, offerId: line.sellerOffer.id });
@@ -126,10 +167,11 @@ export class CheckoutService {
     let householdId = cartRow.householdId;
     if (dto.addressId) householdId = await this.assertAddressOwned(userId, dto.addressId);
 
-    const deliveryMethod = dto.deliveryMethod ?? DeliveryMethod.STANDARD;
     const deliveryAmount = DELIVERY_AMOUNT_BY_METHOD[deliveryMethod];
-    const subtotalAmount = cartDto.subtotalAmount;
-    const totalAmount = subtotalAmount + deliveryAmount;
+    // Server-side pricing only: subtotal is the gross list amount, the
+    // promotion discount is shown separately and subtracted once.
+    const { subtotalAmount, discountAmount } = pricedTotals(lines);
+    const totalAmount = subtotalAmount - discountAmount + deliveryAmount;
     const expiresAt = new Date(Date.now() + RESERVATION_TTL_MINUTES * 60_000);
 
     const checkoutId = await this.prisma.$transaction(async (tx) => {
@@ -143,10 +185,11 @@ export class CheckoutService {
           status: dto.addressId ? CheckoutStatus.READY_FOR_PAYMENT : CheckoutStatus.DRAFT,
           subtotalAmount,
           deliveryAmount,
-          discountAmount: 0,
+          discountAmount,
           totalAmount,
           currency: cartDto.currency,
           expiresAt,
+          pricedLinesSnapshot: lines as unknown as Prisma.InputJsonValue,
         },
       });
 
@@ -171,6 +214,7 @@ export class CheckoutService {
     if (dto.addressId) householdId = await this.assertAddressOwned(userId, dto.addressId);
 
     const deliveryMethod = dto.deliveryMethod ?? checkout.deliveryMethod;
+    assertDeliveryMethodOffered(deliveryMethod);
     const deliveryAmount = DELIVERY_AMOUNT_BY_METHOD[deliveryMethod];
     const totalAmount = checkout.subtotalAmount + deliveryAmount - checkout.discountAmount;
     const addressId = dto.addressId ?? checkout.addressId;
@@ -300,14 +344,25 @@ export class CheckoutService {
       return []; // already flagged for recovery — never retried automatically (see README)
     }
 
-    const cartDto = await this.cart.getCart(checkout.userId);
-    const lines = allLines(cartDto);
+    // Orders are built from the lines frozen at checkout creation — the cart
+    // may have changed since (another tab, a price update), and an order must
+    // equal what was charged. Legacy checkouts without a snapshot fall back to
+    // the cart, guarded by the amount check below.
+    const lines = checkout.pricedLinesSnapshot
+      ? (checkout.pricedLinesSnapshot as unknown as CartLineDto[])
+      : allLines(await this.cart.getCart(checkout.userId));
     const address = checkout.addressId ? await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } }) : null;
     const selectedQuotes = await this.prisma.shippingQuote.findMany({ where: { checkoutId, status: "SELECTED" } });
     const deliveryAmountBySeller = selectedQuotes.length > 0 ? new Map(selectedQuotes.map((q) => [q.sellerOrgId, q.priceIrr])) : undefined;
 
     try {
       return await this.prisma.$transaction(async (tx) => {
+        const lineAmount = pricedTotals(lines);
+        const deliveryTotal = deliveryAmountBySeller ? selectedQuotes.reduce((sum, q) => sum + q.priceIrr, 0) : checkout.deliveryAmount;
+        const expectedTotal = lineAmount.netAmount + deliveryTotal;
+        if (lines.length === 0 || expectedTotal !== checkout.totalAmount) {
+          throw new Error(`CHARGED_AMOUNT_MISMATCH: charged ${checkout.totalAmount}, order lines total ${expectedTotal}`);
+        }
         await this.reservations.consumeAllForCheckout(tx, checkoutId);
         const orderIds = await this.orders.createForCheckout(
           tx,
@@ -506,7 +561,8 @@ export class CheckoutService {
 
   private async toDto(userId: string, checkoutId: string): Promise<CheckoutDto> {
     const checkout = await this.prisma.checkout.findUniqueOrThrow({ where: { id: checkoutId } });
-    const cartDto = await this.cart.getCart(userId);
+    // Show exactly what is being charged: the frozen lines, not the live cart.
+    const cartDto = checkout.pricedLinesSnapshot ? snapshotAsCart(checkout.pricedLinesSnapshot as unknown as CartLineDto[]) : await this.cart.getCart(userId);
     return {
       id: checkout.id,
       status: checkout.status as unknown as CheckoutDto["status"],

@@ -83,6 +83,34 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "بازگشت وجه انجام شد", body: "مبلغ سفارش شما بازگردانده شد.", smsBody: "بازگشت وجه سفارش شما در پت‌لایف انجام شد." },
     en: { title: "Refund completed", body: "Your order's amount has been refunded.", smsBody: "Your PET LIFE OS refund was completed." },
   },
+  "order.received": {
+    fa: { title: "سفارش جدید دریافت شد", body: "یک سفارش پرداخت‌شده جدید برای آماده‌سازی دارید.", smsBody: "یک سفارش جدید در پت‌لایف برای شما ثبت شد." },
+    en: { title: "New order received", body: "You have a new paid order to prepare.", smsBody: "You received a new PET LIFE OS order." },
+  },
+  "order.cancelled": {
+    fa: { title: "سفارش لغو شد", body: "سفارش شما لغو شد و مبلغ آن بازگردانده شد.", smsBody: "سفارش شما در پت‌لایف لغو و مبلغ آن بازگردانده شد." },
+    en: { title: "Order cancelled", body: "Your order was cancelled and its amount refunded.", smsBody: "Your PET LIFE OS order was cancelled and refunded." },
+  },
+  "order.cancelled_by_customer": {
+    fa: { title: "مشتری سفارش را لغو کرد", body: "یک سفارش پیش از ارسال توسط مشتری لغو شد. آن را ارسال نکنید.", smsBody: "یک سفارش در پت‌لایف توسط مشتری لغو شد؛ ارسال نکنید." },
+    en: { title: "Customer cancelled an order", body: "An order was cancelled by the customer before dispatch. Do not ship it.", smsBody: "A PET LIFE OS order was cancelled by the customer — do not ship it." },
+  },
+  "refund_request.received": {
+    fa: { title: "درخواست بازگشت وجه ثبت شد", body: "مشتری برای یکی از سفارش‌های شما درخواست بازگشت وجه ثبت کرد. تیم پت‌لایف آن را بررسی می‌کند." },
+    en: { title: "Refund request opened", body: "A customer opened a refund request on one of your orders. PET LIFE will review it." },
+  },
+  "refund_request.approved": {
+    fa: { title: "درخواست بازگشت وجه تأیید شد", body: "درخواست شما تأیید شد و برای پرداخت به واحد مالی ارسال شد.", smsBody: "درخواست بازگشت وجه شما در پت‌لایف تأیید شد." },
+    en: { title: "Refund request approved", body: "Your request was approved and sent to finance for payment.", smsBody: "Your PET LIFE OS refund request was approved." },
+  },
+  "refund_request.rejected": {
+    fa: { title: "درخواست بازگشت وجه رد شد", body: "درخواست بازگشت وجه شما رد شد. دلیل را در جزئیات سفارش ببینید." },
+    en: { title: "Refund request declined", body: "Your refund request was declined. See the order for the reason." },
+  },
+  "repeat_delivery.due": {
+    fa: { title: "زمان ارسال دوره‌ای نزدیک است", body: "سفارش دوره‌ای بعدی شما نزدیک است. قیمت و موجودی را بررسی و سفارش را تأیید کنید.", smsBody: "زمان سفارش دوره‌ای شما در پت‌لایف رسیده است؛ برای تأیید وارد شوید." },
+    en: { title: "Your repeat delivery is due", body: "Your next repeat delivery is coming up. Check the price and stock, then confirm the order.", smsBody: "Your PET LIFE OS repeat delivery is due — open the app to confirm." },
+  },
   "shipment.delivered": {
     fa: { title: "سفارش شما تحویل داده شد", body: "سفارش شما با موفقیت تحویل داده شد.", smsBody: "سفارش شما در پت‌لایف تحویل داده شد." },
     en: { title: "Your order was delivered", body: "Your order was delivered successfully.", smsBody: "Your PET LIFE OS order was delivered." },

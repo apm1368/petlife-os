@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { CartStatus, Prisma, SellerOfferStatus, SellerStatus, SellerVerificationStatus } from "@prisma/client";
-import { ProductCompatibilityStatus, type CartDto, type CartLineDto, type CartSellerGroupDto } from "@petlife/types";
+import { ProductCompatibilityStatus, type CartDto, type CartLineDto, type CartLineIssue, type CartSellerGroupDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { NotFoundApiException, OfferNotAvailableException, PetAccessDeniedException } from "../../../common/errors/api-exception";
+import { NotFoundApiException, OfferNotAvailableException, PetAccessDeniedException, ValidationApiException } from "../../../common/errors/api-exception";
 import { HouseholdsService } from "../../households/households.service";
 import { PetAccessService } from "../../pet-access/pet-access.service";
-import { toSellerOfferDto } from "../commerce-dto.mapper";
+import { LOW_STOCK_THRESHOLD, toSellerOfferDto } from "../commerce-dto.mapper";
+import { PricingService, type EffectivePrice } from "../promotions/pricing.service";
 import { ProductCompatibilityService } from "../catalog/product-compatibility.service";
 import type { AddCartItemDto, UpdateCartItemDto } from "./dto/cart-item.dto";
 
@@ -37,7 +38,23 @@ export class CartService {
     private readonly petAccess: PetAccessService,
     private readonly compatibility: ProductCompatibilityService,
     private readonly events: DomainEventsService,
+    private readonly pricing: PricingService,
   ) {}
+
+  /** Per-line business limit, independent of stock. */
+  static readonly MAX_LINE_QUANTITY = 20;
+
+  private async priceOffer(offer: { id: string; priceAmount: number; sellerOrganizationId: string; productVariant: { product: { id: string; categoryId: string } } }): Promise<EffectivePrice> {
+    const prices = await this.pricing.price([{ offerId: offer.id, priceAmount: offer.priceAmount, sellerOrganizationId: offer.sellerOrganizationId, productId: offer.productVariant.product.id, categoryId: offer.productVariant.product.categoryId }]);
+    return prices.get(offer.id)!;
+  }
+
+  /** Quantity can never exceed what is actually available to sell right now, nor the per-line limit. */
+  private assertQuantity(quantity: number, offer: { inventoryItem: { onHand: number; reserved: number } | null }) {
+    const available = Math.max(0, (offer.inventoryItem?.onHand ?? 0) - (offer.inventoryItem?.reserved ?? 0));
+    if (quantity > CartService.MAX_LINE_QUANTITY) throw new ValidationApiException({ field: "quantity", reason: "LINE_LIMIT", max: CartService.MAX_LINE_QUANTITY });
+    if (quantity > available) throw new ValidationApiException({ field: "quantity", reason: "INSUFFICIENT_INVENTORY", available });
+  }
 
   async getOrCreateActiveCart(userId: string) {
     const existing = await this.prisma.cart.findFirst({ where: { userId, status: CartStatus.ACTIVE } });
@@ -55,7 +72,7 @@ export class CartService {
   }
 
   async addItem(userId: string, dto: AddCartItemDto) {
-    const offer = await this.prisma.sellerOffer.findUnique({ where: { id: dto.offerId }, include: { sellerOrganization: true, productVariant: true } });
+    const offer = await this.prisma.sellerOffer.findUnique({ where: { id: dto.offerId }, include: { sellerOrganization: true, inventoryItem: true, productVariant: { include: { product: true } } } });
     if (!offer) throw new NotFoundApiException("Offer");
     if (
       offer.status !== SellerOfferStatus.ACTIVE ||
@@ -64,6 +81,7 @@ export class CartService {
     ) {
       throw new OfferNotAvailableException({ offerId: dto.offerId });
     }
+    if (offer.productVariant.product.status !== "ACTIVE" || !offer.productVariant.isActive) throw new OfferNotAvailableException({ offerId: dto.offerId });
 
     if (dto.targetPetId) await this.assertPetAccessible(userId, dto.targetPetId);
 
@@ -72,11 +90,13 @@ export class CartService {
     const existingLine = await this.prisma.cartLine.findFirst({
       where: { cartId: cart.id, sellerOfferId: dto.offerId, targetPetId: dto.targetPetId ?? null },
     });
+    this.assertQuantity((existingLine?.quantity ?? 0) + dto.quantity, offer);
+    const price = await this.priceOffer(offer);
 
     if (existingLine) {
       await this.prisma.cartLine.update({
         where: { id: existingLine.id },
-        data: { quantity: existingLine.quantity + dto.quantity, unitPriceSnapshot: offer.priceAmount, currency: offer.currency },
+        data: { quantity: existingLine.quantity + dto.quantity, unitPriceSnapshot: price.unitPrice, promotionIdSnapshot: price.promotion?.id ?? null, currency: offer.currency },
       });
       await this.events.publish("CartItemUpdated", { cartId: cart.id, cartLineId: existingLine.id }, { aggregateType: "Cart", aggregateId: cart.id });
     } else {
@@ -86,7 +106,8 @@ export class CartService {
           sellerOfferId: dto.offerId,
           targetPetId: dto.targetPetId ?? null,
           quantity: dto.quantity,
-          unitPriceSnapshot: offer.priceAmount,
+          unitPriceSnapshot: price.unitPrice,
+          promotionIdSnapshot: price.promotion?.id ?? null,
           currency: offer.currency,
         },
       });
@@ -98,7 +119,11 @@ export class CartService {
 
   async updateItem(userId: string, lineId: string, dto: UpdateCartItemDto) {
     const line = await this.loadOwnedLine(userId, lineId);
-    await this.prisma.cartLine.update({ where: { id: line.id }, data: { quantity: dto.quantity } });
+    const offer = await this.prisma.sellerOffer.findUniqueOrThrow({ where: { id: line.sellerOfferId }, include: { inventoryItem: true, productVariant: { include: { product: true } } } });
+    this.assertQuantity(dto.quantity, offer);
+    // Changing quantity is an explicit customer action: re-accept the current price.
+    const price = await this.priceOffer(offer);
+    await this.prisma.cartLine.update({ where: { id: line.id }, data: { quantity: dto.quantity, unitPriceSnapshot: price.unitPrice, promotionIdSnapshot: price.promotion?.id ?? null } });
     await this.events.publish("CartItemUpdated", { cartId: line.cartId, cartLineId: line.id }, { aggregateType: "Cart", aggregateId: line.cartId });
     return this.getCart(userId);
   }
@@ -116,7 +141,7 @@ export class CartService {
     return this.getCart(userId);
   }
 
-  private async loadOwnedLine(userId: string, lineId: string): Promise<{ id: string; cartId: string }> {
+  private async loadOwnedLine(userId: string, lineId: string): Promise<{ id: string; cartId: string; sellerOfferId: string }> {
     const line = await this.prisma.cartLine.findUnique({ where: { id: lineId }, include: { cart: true } });
     if (!line || line.cart.userId !== userId) throw new NotFoundApiException("Cart item");
     return line;
@@ -129,12 +154,15 @@ export class CartService {
     });
 
     if (!cart) {
-      return { id: "", status: CartStatus.ACTIVE as unknown as CartDto["status"], sellerGroups: [], totalItems: 0, subtotalAmount: 0, currency: "IRR", hasSafetyConflict: false };
+      return { id: "", status: CartStatus.ACTIVE as unknown as CartDto["status"], sellerGroups: [], totalItems: 0, subtotalAmount: 0, currency: "IRR", hasSafetyConflict: false, discountAmount: 0, hasBlockingIssues: false };
     }
 
+    const prices = await this.pricing.price(
+      cart.lines.map((l) => ({ offerId: l.sellerOffer.id, priceAmount: l.sellerOffer.priceAmount, sellerOrganizationId: l.sellerOffer.sellerOrganizationId, productId: l.sellerOffer.productVariant.product.id, categoryId: l.sellerOffer.productVariant.product.categoryId })),
+    );
     const lineDtos: (CartLineDto & { sellerOrgId: string })[] = [];
     for (const line of cart.lines) {
-      lineDtos.push(await this.toLineDto(line, userId));
+      lineDtos.push(await this.toLineDto(line, userId, prices.get(line.sellerOffer.id)!));
     }
 
     const groupsByOrg = new Map<string, CartSellerGroupDto>();
@@ -152,6 +180,9 @@ export class CartService {
     const totalItems = lineDtos.reduce((sum, l) => sum + l.quantity, 0);
     const subtotalAmount = sellerGroups.reduce((sum, g) => sum + g.subtotalAmount, 0);
     const hasSafetyConflict = lineDtos.some((l) => l.compatibility?.status === ProductCompatibilityStatus.POTENTIAL_SAFETY_CONFLICT);
+    const discountAmount = lineDtos.reduce((sum, l) => sum + l.unitDiscount * l.quantity, 0);
+    const blocking: CartLineIssue[] = ["OFFER_UNAVAILABLE", "SELLER_UNAVAILABLE", "OUT_OF_STOCK", "QUANTITY_EXCEEDS_STOCK"];
+    const hasBlockingIssues = lineDtos.some((l) => l.issues.some((i) => blocking.includes(i)));
 
     return {
       id: cart.id,
@@ -161,34 +192,67 @@ export class CartService {
       subtotalAmount,
       currency: lineDtos[0]?.currency ?? "IRR",
       hasSafetyConflict,
+      discountAmount,
+      hasBlockingIssues,
     };
   }
 
-  private async toLineDto(line: CartLineRow, userId: string): Promise<CartLineDto & { sellerOrgId: string }> {
-    const product = line.sellerOffer.productVariant.product;
-    const currentPriceAmount = line.sellerOffer.priceAmount;
+  /**
+   * Every state is explicit and nothing is silently swapped: an unavailable offer or seller stays in
+   * the cart, flagged, until the customer removes it — no automatic substitution of seller or variant.
+   */
+  private async toLineDto(line: CartLineRow, userId: string, price: EffectivePrice): Promise<CartLineDto & { sellerOrgId: string }> {
+    const offer = line.sellerOffer;
+    const product = offer.productVariant.product;
     let compatibility = null;
     if (line.targetPet) {
       compatibility = await this.compatibility.evaluate(line.targetPet, product, userId);
     }
+    const available = Math.max(0, (offer.inventoryItem?.onHand ?? 0) - (offer.inventoryItem?.reserved ?? 0));
+    const issues: CartLineIssue[] = [];
+    if (offer.status !== SellerOfferStatus.ACTIVE || product.status !== "ACTIVE" || !offer.productVariant.isActive) issues.push("OFFER_UNAVAILABLE");
+    if (offer.sellerOrganization.verificationStatus !== SellerVerificationStatus.VERIFIED || offer.sellerOrganization.status !== SellerStatus.ACTIVE) issues.push("SELLER_UNAVAILABLE");
+    if (available === 0) issues.push("OUT_OF_STOCK");
+    else if (line.quantity > available) issues.push("QUANTITY_EXCEEDS_STOCK");
+    else if (available <= LOW_STOCK_THRESHOLD) issues.push("LOW_STOCK");
+    const priceChanged = price.unitPrice !== line.unitPriceSnapshot;
+    if (priceChanged) issues.push(line.promotionIdSnapshot && price.promotion?.id !== line.promotionIdSnapshot && price.unitPrice > line.unitPriceSnapshot ? "PROMOTION_EXPIRED" : "PRICE_CHANGED");
 
     return {
       id: line.id,
-      sellerOffer: toSellerOfferDto(line.sellerOffer),
-      sellerOrgId: line.sellerOffer.sellerOrganizationId,
+      sellerOffer: toSellerOfferDto(offer, price),
+      sellerOrgId: offer.sellerOrganizationId,
       productId: product.id,
       productTitle: product.title,
-      variantTitle: line.sellerOffer.productVariant.title,
-      variantSku: line.sellerOffer.productVariant.sku,
+      variantTitle: offer.productVariant.title,
+      variantSku: offer.productVariant.sku,
       targetPetId: line.targetPetId,
       targetPetName: line.targetPet?.name ?? null,
       quantity: line.quantity,
       unitPriceSnapshot: line.unitPriceSnapshot,
-      currentPriceAmount,
-      priceChanged: currentPriceAmount !== line.unitPriceSnapshot,
+      currentPriceAmount: price.unitPrice,
+      priceChanged,
       currency: line.currency,
-      lineTotal: currentPriceAmount * line.quantity,
+      lineTotal: price.unitPrice * line.quantity,
       compatibility,
+      listUnitPrice: price.listUnitPrice,
+      unitDiscount: price.unitDiscount,
+      promotionName: price.promotion?.name ?? null,
+      promotionId: price.promotion?.id ?? null,
+      issues,
     };
+  }
+
+  /** The customer explicitly accepts current prices after a change (never done silently). */
+  async acceptCurrentPrices(userId: string) {
+    const cart = await this.prisma.cart.findFirst({ where: { userId, status: CartStatus.ACTIVE }, include: { lines: { include: CART_LINE_INCLUDE } } });
+    if (cart) {
+      const prices = await this.pricing.price(cart.lines.map((l) => ({ offerId: l.sellerOffer.id, priceAmount: l.sellerOffer.priceAmount, sellerOrganizationId: l.sellerOffer.sellerOrganizationId, productId: l.sellerOffer.productVariant.product.id, categoryId: l.sellerOffer.productVariant.product.categoryId })));
+      for (const l of cart.lines) {
+        const p = prices.get(l.sellerOffer.id)!;
+        await this.prisma.cartLine.update({ where: { id: l.id }, data: { unitPriceSnapshot: p.unitPrice, promotionIdSnapshot: p.promotion?.id ?? null } });
+      }
+    }
+    return this.getCart(userId);
   }
 }

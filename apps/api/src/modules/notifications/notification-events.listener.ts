@@ -235,8 +235,9 @@ export class NotificationEventsListener {
   @OnEvent("RefundSucceeded")
   onRefundSucceeded(payload: { refundId: string; orderId: string }, domainEventId: string): Promise<void> {
     return this.safely("RefundSucceeded", async () => {
-      const order = await this.prisma.order.findUnique({ where: { id: payload.orderId }, select: { userId: true } });
-      if (!order?.userId) return;
+      const order = await this.prisma.order.findUnique({ where: { id: payload.orderId }, select: { userId: true, cancelledAt: true } });
+      // A cancellation refund is already announced by "order.cancelled".
+      if (!order?.userId || order.cancelledAt) return;
       await this.orchestrator.notify({
         userId: order.userId,
         type: "refund.completed",
@@ -302,6 +303,69 @@ export class NotificationEventsListener {
         domainEventId,
       });
     }
+  }
+
+  // ---- Batch 4: commerce. Payload-only (events publish before commit). ----
+
+  @OnEvent("OrderCreated")
+  onOrderCreated(payload: { orderId: string; sellerOrganizationId: string; userId?: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderCreated", () =>
+      this.notifySellerAdmins(payload.sellerOrganizationId, "order.received", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId),
+    );
+  }
+
+  @OnEvent("OrderCancelled")
+  onOrderCancelled(payload: { orderId: string; userId: string; sellerOrganizationId: string; cancelledBy?: "CUSTOMER" | "SELLER" }, domainEventId: string): Promise<void> {
+    return this.safely("OrderCancelled", async () => {
+      await this.orchestrator.notify({
+        userId: payload.userId,
+        type: "order.cancelled",
+        category: NotificationCategory.COMMERCE,
+        deepLink: NotificationDeepLinks.order(payload.orderId),
+        entityType: "Order",
+        entityId: payload.orderId,
+        domainEventId,
+      });
+      if (payload.cancelledBy !== "SELLER") {
+        await this.notifySellerAdmins(payload.sellerOrganizationId, "order.cancelled_by_customer", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId);
+      }
+    });
+  }
+
+  @OnEvent("OrderRefundRequested")
+  onRefundRequested(payload: { orderId: string; sellerOrganizationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderRefundRequested", () =>
+      this.notifySellerAdmins(payload.sellerOrganizationId, "refund_request.received", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId),
+    );
+  }
+
+  @OnEvent("OrderRefundRequestApproved")
+  onRefundRequestApproved(payload: { orderId: string; userId: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderRefundRequestApproved", () => this.notifyOrderCustomer(payload.userId, payload.orderId, "refund_request.approved", domainEventId));
+  }
+
+  @OnEvent("OrderRefundRequestRejected")
+  onRefundRequestRejected(payload: { orderId: string; userId: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderRefundRequestRejected", () => this.notifyOrderCustomer(payload.userId, payload.orderId, "refund_request.rejected", domainEventId));
+  }
+
+  @OnEvent("RepeatDeliveryDue")
+  onRepeatDeliveryDue(payload: { scheduleId: string; userId: string }, domainEventId: string): Promise<void> {
+    return this.safely("RepeatDeliveryDue", async () => {
+      await this.orchestrator.notify({
+        userId: payload.userId,
+        type: "repeat_delivery.due",
+        category: NotificationCategory.COMMERCE,
+        deepLink: NotificationDeepLinks.repeatDelivery(payload.scheduleId),
+        entityType: "RepeatDeliverySchedule",
+        entityId: payload.scheduleId,
+        domainEventId,
+      });
+    });
+  }
+
+  private async notifyOrderCustomer(userId: string, orderId: string, type: string, domainEventId: string): Promise<void> {
+    await this.orchestrator.notify({ userId, type, category: NotificationCategory.COMMERCE, deepLink: NotificationDeepLinks.order(orderId), entityType: "Order", entityId: orderId, domainEventId });
   }
 
   @OnEvent("MarketplaceListingSyncFailed")

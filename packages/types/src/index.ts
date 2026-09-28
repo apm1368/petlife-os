@@ -732,6 +732,9 @@ export interface CustomerAddressDto {
   latitude: number | null;
   longitude: number | null;
   instructions: string | null;
+  /** Batch 4 — Iranian 10-digit postal code, when known. */
+  postalCode?: string | null;
+  isDefault?: boolean;
 }
 
 /** A single (provider, service) discovery result row — one provider can appear multiple times, once per matching service. */
@@ -1394,6 +1397,56 @@ export interface SellerOfferDto {
   status: SellerOfferStatus;
   /** onHand - reserved, computed server-side, never a stored column. */
   availableQuantity: number;
+  /** Batch 4 — server-computed price after the single best active promotion. */
+  effectiveUnitPrice: number;
+  unitDiscount: number;
+  promotion: AppliedPromotionDto | null;
+  stockState: StockState;
+  repeatDeliveryEligible: boolean;
+  repeatIntervalsDays: number[];
+}
+
+export type StockState = "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
+
+export interface AppliedPromotionDto {
+  id: string;
+  name: string;
+  endsAt: string | null;
+}
+
+export interface RatingSummaryDto {
+  average: number | null;
+  count: number;
+}
+
+export interface ProductMediaDto {
+  id: string;
+  url: string;
+  alt: string | null;
+  variantId: string | null;
+}
+
+export interface ProductReviewDto {
+  id: string;
+  rating: number;
+  body: string | null;
+  authorName: string;
+  variantTitle: string | null;
+  verifiedPurchase: true;
+  createdAt: string;
+}
+
+export interface ProductSearchResultDto {
+  items: ProductSummaryDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  facets: {
+    brands: { id: string; name: string; count: number }[];
+    sellers: { id: string; name: string; count: number }[];
+    attributes: { key: string; values: string[] }[];
+    priceRange: { min: number; max: number } | null;
+  };
 }
 
 /** One (product, variant) discovery/listing row — the cheapest ACTIVE offer is `bestOffer`; every ACTIVE offer is in `offers`. */
@@ -1406,8 +1459,14 @@ export interface ProductSummaryDto {
   variantId: string;
   variantTitle: string | null;
   bestOffer: SellerOfferDto | null;
-  /** Only present when the request carried a petId. */
+  /** Only present when the request carried a petId the caller may see. */
   compatibility: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  imageUrl: string | null;
+  stockState: StockState;
+  rating: RatingSummaryDto;
+  supportsDog: boolean;
+  supportsCat: boolean;
 }
 
 export interface ProductDetailDto {
@@ -1422,6 +1481,21 @@ export interface ProductDetailDto {
   /** All ACTIVE offers across all variants, for the offer-selection step. */
   offers: SellerOfferDto[];
   compatibility: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  media: ProductMediaDto[];
+  specifications: { label: string; value: string }[];
+  /** Deterministic default: available → lowest price the customer pays → offer id. */
+  defaultOfferId: string | null;
+  rating: RatingSummaryDto;
+  reviews: ProductReviewDto[];
+  related: ProductSummaryDto[];
+  favorited: boolean;
+  supportsDog: boolean;
+  supportsCat: boolean;
+  minAgeMonths: number | null;
+  maxAgeMonths: number | null;
+  minWeightKg: number | null;
+  maxWeightKg: number | null;
 }
 
 export interface CartLineDto {
@@ -1440,7 +1514,15 @@ export interface CartLineDto {
   currency: string;
   lineTotal: number;
   compatibility: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  listUnitPrice: number;
+  unitDiscount: number;
+  promotionName: string | null;
+  promotionId: string | null;
+  issues: CartLineIssue[];
 }
+
+export type CartLineIssue = "OFFER_UNAVAILABLE" | "SELLER_UNAVAILABLE" | "OUT_OF_STOCK" | "LOW_STOCK" | "QUANTITY_EXCEEDS_STOCK" | "PRICE_CHANGED" | "PROMOTION_EXPIRED";
 
 export interface CartSellerGroupDto {
   sellerOrganization: SellerOrganizationSummaryDto;
@@ -1456,6 +1538,9 @@ export interface CartDto {
   subtotalAmount: number;
   currency: string;
   hasSafetyConflict: boolean;
+  /** Batch 4: sum of per-line promotion discounts already included in subtotalAmount. */
+  discountAmount: number;
+  hasBlockingIssues: boolean;
 }
 
 export interface CheckoutValidationIssueDto {
@@ -1511,6 +1596,11 @@ export interface OrderItemDto {
   totalPrice: number;
   targetPetId: string | null;
   compatibilitySnapshot: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  listUnitPrice: number | null;
+  unitDiscount: number;
+  promotionName: string | null;
+  reviewId: string | null;
 }
 
 /**
@@ -1536,6 +1626,11 @@ export interface OrderSummaryDto {
   currency: string;
   createdAt: string;
   confirmedAt: string | null;
+  /** Batch 4 */
+  orderNumber: string;
+  cancelledAt: string | null;
+  /** Up to three item titles, for a recognisable list row. */
+  previewTitles: string[];
 }
 
 export interface OrderDetailDto {
@@ -1558,6 +1653,14 @@ export interface OrderDetailDto {
   createdAt: string;
   updatedAt: string;
   confirmedAt: string | null;
+  /** Batch 4 */
+  orderNumber: string;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  timeline: { toStatus: string; fromStatus: string | null; actorType: string; reason: string | null; createdAt: string }[];
+  refundRequests: { id: string; status: string; reason: string; requestedAmount: number; decisionReason: string | null; createdAt: string }[];
+  canCancel: boolean;
+  canRequestRefund: boolean;
 }
 
 /** Minimal internal payment-ops view (spec section 45) — reachable only by the checkout's own owner (no real admin/support role exists yet; see README Known limitations). */
@@ -1938,6 +2041,7 @@ export interface InventoryMovementDto {
 /** Seller-OS view of one SellerOffer — richer than the consumer-facing SellerOfferDto (includes inventory + marketplace sync summary the shopper never needs to see). */
 export interface SellerOsOfferDto {
   id: string;
+  productId: string;
   productVariantId: string;
   productTitle: string;
   variantTitle: string | null;
@@ -1952,6 +2056,9 @@ export interface SellerOsOfferDto {
   marketplaceSyncErrorCount: number;
   createdAt: string;
   updatedAt: string;
+  /** Batch 4 */
+  repeatDeliveryEligible: boolean;
+  repeatIntervalsDays: number[];
 }
 
 export interface MarketplaceProviderCapabilitiesDto {
@@ -2801,7 +2908,10 @@ export type AdminPermissionName =
   | "places.view"
   | "places.manage"
   | "services.view"
-  | "services.manage";
+  | "services.manage"
+  | "commerce.view"
+  | "commerce.manage"
+  | "promotions.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -5435,4 +5545,188 @@ export interface ProviderPatientRecordDto {
   carePlans: CarePlanDto[];
   estimates: ClinicalEstimateDto[];
   hospitalizations: HospitalizationDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Batch 4 — Promotions, Admin Commerce, Repeat Delivery
+// ---------------------------------------------------------------------------
+
+export type PromotionDiscountTypeName = "PERCENT" | "FIXED";
+export type PromotionScopeName = "ALL" | "CATEGORY" | "PRODUCT" | "SELLER" | "SERVICE";
+export type PromotionStatusName = "DRAFT" | "ACTIVE" | "PAUSED" | "ENDED";
+
+export interface PromotionDto {
+  id: string;
+  name: string;
+  description: string | null;
+  discountType: PromotionDiscountTypeName;
+  value: number;
+  maxDiscountAmount: number | null;
+  scope: PromotionScopeName;
+  categoryIds: string[];
+  productIds: string[];
+  sellerOrganizationIds: string[];
+  startsAt: string;
+  endsAt: string | null;
+  status: PromotionStatusName;
+  fundedBy: "PLATFORM" | "SELLER";
+  ownerSellerOrganizationId: string | null;
+  usageLimit: number | null;
+  usageCount: number;
+  /** Derived: ACTIVE and inside its window right now. */
+  isLive: boolean;
+  redemptionCount: number;
+  discountGivenAmount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PromotionInput {
+  name: string;
+  description?: string | null;
+  discountType: PromotionDiscountTypeName;
+  value: number;
+  maxDiscountAmount?: number | null;
+  scope: PromotionScopeName;
+  categoryIds?: string[];
+  productIds?: string[];
+  sellerOrganizationIds?: string[];
+  startsAt: string;
+  endsAt?: string | null;
+  usageLimit?: number | null;
+}
+
+export interface AdminCommerceOrderRowDto {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  fulfillmentStatus: FulfillmentStatus | null;
+  sellerOrganization: { id: string; name: string };
+  customerName: string;
+  itemCount: number;
+  totalAmount: number;
+  discountAmount: number;
+  currency: string;
+  hasOpenRefundRequest: boolean;
+  cancelledAt: string | null;
+  createdAt: string;
+}
+
+export interface AdminCommerceOrderDetailDto extends AdminCommerceOrderRowDto {
+  subtotalAmount: number;
+  deliveryAmount: number;
+  items: OrderItemDto[];
+  timeline: OrderDetailDto["timeline"];
+  refunds: RefundDto[];
+  refundRequests: AdminRefundRequestDto[];
+  fulfillment: FulfillmentDto | null;
+  shippingCity: string | null;
+  cancelReason: string | null;
+  checkoutId: string | null;
+}
+
+export interface AdminRefundRequestDto {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  customerName: string;
+  sellerName: string;
+  status: "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "WITHDRAWN";
+  reason: string;
+  description: string | null;
+  requestedAmount: number;
+  orderItemIds: string[];
+  decisionReason: string | null;
+  adminRefundApprovalId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProductRowDto {
+  id: string;
+  title: string;
+  status: ProductStatus;
+  categoryName: string;
+  brandName: string | null;
+  variantCount: number;
+  activeOfferCount: number;
+  sellerCount: number;
+  rating: RatingSummaryDto;
+  hasMedia: boolean;
+  createdAt: string;
+}
+
+export interface AdminProductReviewRowDto {
+  id: string;
+  productId: string;
+  productTitle: string;
+  rating: number;
+  body: string | null;
+  authorName: string;
+  status: "PUBLISHED" | "HIDDEN";
+  hiddenReason: string | null;
+  createdAt: string;
+}
+
+export interface AdminInventoryRowDto {
+  sellerOfferId: string;
+  productId: string;
+  productTitle: string;
+  variantTitle: string | null;
+  sku: string;
+  sellerOrganization: { id: string; name: string };
+  onHand: number;
+  reserved: number;
+  available: number;
+  offerStatus: string;
+}
+
+export interface AdminSellerRowDto {
+  id: string;
+  name: string;
+  verificationStatus: string;
+  status: string;
+  activeOfferCount: number;
+  orderCount30d: number;
+  grossSales30d: number;
+  openRefundRequests: number;
+}
+
+export interface AdminCommerceAnalyticsDto {
+  days: number;
+  orderCount: number;
+  grossSales: number;
+  discountGiven: number;
+  averageOrderValue: number | null;
+  cancelledCount: number;
+  refundedCount: number;
+  refundRequestCount: number;
+  repeatDeliveryActive: number;
+  byDay: { date: string; orders: number; grossSales: number }[];
+  topProducts: { productId: string; title: string; units: number; grossSales: number }[];
+}
+
+export type RepeatDeliveryStatusName = "ACTIVE" | "PAUSED" | "CANCELLED";
+
+export interface RepeatDeliveryDto {
+  id: string;
+  status: RepeatDeliveryStatusName;
+  product: { id: string; title: string; imageUrl: string | null };
+  variantTitle: string | null;
+  sellerOrganization: SellerOrganizationSummaryDto;
+  sellerOfferId: string;
+  quantity: number;
+  intervalDays: number;
+  allowedIntervalsDays: number[];
+  nextCycleAt: string;
+  addressId: string | null;
+  addressLabel: string | null;
+  acceptedUnitPrice: number;
+  /** Live, server-computed price and availability for the next cycle. */
+  currentUnitPrice: number | null;
+  priceChanged: boolean;
+  available: boolean;
+  lastOrderId: string | null;
+  events: { type: string; note: string | null; createdAt: string }[];
+  createdAt: string;
 }

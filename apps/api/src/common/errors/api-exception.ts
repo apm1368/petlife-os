@@ -291,6 +291,24 @@ export class OrderNotFoundException extends ApiException {
   }
 }
 
+export class OrderNotCancellableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ORDER_NOT_CANCELLABLE", "This order can no longer be cancelled — it has already been handed to the courier.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class RefundRequestNotAllowedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFUND_REQUEST_NOT_ALLOWED", "A refund request is not available for this order right now.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class RefundRequestNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFUND_REQUEST_NOT_FOUND", "Refund request not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
 export class CheckoutNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("CHECKOUT_NOT_FOUND", "Checkout not found.", HttpStatus.NOT_FOUND, details);
