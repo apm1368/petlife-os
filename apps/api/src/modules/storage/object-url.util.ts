@@ -26,6 +26,8 @@ function isPrivateKey(key: string): boolean {
 
 export function resolveObjectUrl(key: string | null): string | null {
   if (!key) return null;
+  // Repository-owned static assets (demo/QA media shipped with the web app) are already public paths.
+  if (key.startsWith("/images/")) return key;
   if (isPrivateKey(key)) {
     throw new Error(`resolveObjectUrl() must never be called with a private object key (got "${key}") — mint a per-request signed download instead.`);
   }

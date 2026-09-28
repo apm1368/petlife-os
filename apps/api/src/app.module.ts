@@ -61,6 +61,7 @@ import { AnimalSupportModule } from "./modules/animal-support/animal-support.mod
 import { CommunityModule } from "./modules/community/community.module";
 import { MemoriesModule } from "./modules/memories/memories.module";
 import { TravelModule } from "./modules/travel/travel.module";
+import { TravelMarketplaceModule } from "./modules/travel-marketplace/travel-marketplace.module";
 import { InsuranceModule } from "./modules/insurance/insurance.module";
 import { PlacesModule } from "./modules/places/places.module";
 
@@ -127,6 +128,7 @@ import { PlacesModule } from "./modules/places/places.module";
     CommunityModule,
     MemoriesModule,
     TravelModule,
+    TravelMarketplaceModule,
     InsuranceModule,
     PlacesModule,
   ],

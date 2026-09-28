@@ -298,6 +298,14 @@ export const DOMAIN_EVENT_TYPES = [
   "RepeatDeliveryCreated",
   "RepeatDeliveryChanged",
   "RepeatDeliveryDue",
+  // Batch 5 — travel marketplace, insurance workflow, places
+  "TravelBookingPaymentRequired",
+  "TravelBookingExpired",
+  "TravelBookingChanged",
+  "TravelBookingNoShow",
+  "TravelReviewCreated",
+  "InsuranceApplicationNeedsInformation",
+  "PlaceReported",
 ] as const;
 
 /**

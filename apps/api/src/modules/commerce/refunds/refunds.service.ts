@@ -112,6 +112,16 @@ export class RefundsService {
     return this.refundPayment(null, null, checkoutId, amount, currency, reason);
   }
 
+  /**
+   * Refund of a standalone online payment that has no commerce Order (a
+   * travel stay paid through an internal Checkout shell). Same gateway path,
+   * advisory lock, duplicate guard and ledger reversal as order refunds; the
+   * caller has already decided the amount from its own snapshotted terms.
+   */
+  async refundStandalonePayment(checkoutId: string, amount: number, currency: string, reason: string, requestedByUserId: string | null): Promise<RefundDto> {
+    return this.refundPayment(requestedByUserId, null, checkoutId, amount, currency, reason);
+  }
+
   private async refundPayment(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string, options: RefundExecutionOptions = {}): Promise<RefundDto> {
     // Handoff 20 hardening: a plain check-then-act here let two concurrent
     // refund requests for the same checkout both pass "no existing refund
