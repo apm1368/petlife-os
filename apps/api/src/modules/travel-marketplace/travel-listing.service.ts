@@ -254,6 +254,9 @@ export class TravelListingService {
     const from = toUtcMidnight(input.fromDate);
     const to = addDays(toUtcMidnight(input.toDate), 1);
     const dates = enumerateNights(from, to);
+    if (dates.length === 0) throw new ValidationApiException({ field: "toDate", reason: "EMPTY_RANGE" });
+    // One bounded write per request: a year at most.
+    if (dates.length > 366) throw new ValidationApiException({ field: "toDate", reason: "RANGE_TOO_LONG", maxDays: 366 });
 
     await this.prisma.$transaction(async (tx) => {
       for (const date of dates) {
