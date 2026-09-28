@@ -286,3 +286,12 @@ export class UpdateInsuranceApplicationDto {
   @Length(0, 2000)
   notes?: string;
 }
+
+// -- Batch 5 ---------------------------------------------------------------
+
+export class SubmitInsuranceApplicationDto {
+  /** Must be true: the applicant agrees to INSURANCE_CONSENT_TEXT. */
+  @IsOptional()
+  @IsBoolean()
+  consent?: boolean;
+}

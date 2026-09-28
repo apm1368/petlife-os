@@ -83,4 +83,13 @@ export class InsuranceNotificationListener {
       await this.notifyHousehold(payload.petId, "insurance.application_status_changed", { petName: pet.name, status: payload.to }, payload.applicationId, domainEventId);
     });
   }
+
+  @OnEvent("InsuranceApplicationNeedsInformation")
+  onNeedsInformation(payload: { petId: string; applicationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("InsuranceApplicationNeedsInformation", async () => {
+      const pet = await this.prisma.pet.findUnique({ where: { id: payload.petId }, select: { name: true } });
+      if (!pet) return;
+      await this.notifyHousehold(payload.petId, "insurance.application_needs_information", { petName: pet.name }, payload.applicationId, domainEventId);
+    });
+  }
 }

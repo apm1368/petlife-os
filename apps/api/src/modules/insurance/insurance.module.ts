@@ -7,6 +7,7 @@ import { InsuranceApplicationService } from "./insurance-application.service";
 import { InsuranceNotificationListener } from "./insurance-notification.listener";
 import { InsuranceController } from "./insurance.controller";
 import { PublicInsuranceController } from "./public-insurance.controller";
+import { InsurerAuthGuard, InsurerPortalController } from "./insurer-portal.controller";
 
 /**
  * The public/consumer half of the Handoff 19 Insurance domain — read-only
@@ -20,8 +21,8 @@ import { PublicInsuranceController } from "./public-insurance.controller";
  */
 @Module({
   imports: [PetAccessModule, NotificationsModule],
-  controllers: [InsuranceController, PublicInsuranceController],
-  providers: [PublicInsuranceReadService, EligibilityService, InsuranceApplicationService, InsuranceNotificationListener],
+  controllers: [InsuranceController, PublicInsuranceController, InsurerPortalController],
+  providers: [PublicInsuranceReadService, EligibilityService, InsuranceApplicationService, InsuranceNotificationListener, InsurerAuthGuard],
   exports: [PublicInsuranceReadService, EligibilityService, InsuranceApplicationService],
 })
 export class InsuranceModule {}
