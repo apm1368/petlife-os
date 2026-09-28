@@ -113,4 +113,18 @@ export type AdminAuditAction =
   | "product_review.restored"
   | "promotion.created"
   | "promotion.updated"
-  | "promotion.status_changed";
+  | "promotion.status_changed"
+  // Batch 5 — travel, insurance applications, places.
+  | "travel_listing.approve"
+  | "travel_listing.request_correction"
+  | "travel_listing.suspend"
+  | "travel_listing.reinstate"
+  | "travel_listing.verification_changed"
+  | "travel_review.hidden"
+  | "travel_review.restored"
+  | "travel_requirement_rule.created"
+  | "travel_requirement_rule.updated"
+  | "insurer_membership.granted"
+  | "insurer_membership.revoked"
+  | "place_report.resolved"
+  | "place_report.dismissed";

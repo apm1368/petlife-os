@@ -1,3 +1,7 @@
+import { AdminInsuranceApplicationsController } from "./insurance/admin-insurance-applications.controller";
+import { AdminTravelController } from "./travel/admin-travel.controller";
+import { AdminTravelService } from "./travel/admin-travel.service";
+import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
 import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
@@ -83,7 +87,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PromotionsModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
+  imports: [NotificationsModule, RefundsModule, PromotionsModule, TravelMarketplaceModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
   controllers: [
     AdminMeController,
     AdminNoteController,
@@ -108,9 +112,12 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminPlacesController,
     AdminServicesController,
     AdminCommerceController,
+    AdminTravelController,
+    AdminInsuranceApplicationsController,
   ],
   providers: [
     AdminServicesService,
+    AdminTravelService,
     AdminCommerceService,
     AdminAccessService,
     AdminAuthGuard,
