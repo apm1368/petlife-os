@@ -1093,7 +1093,7 @@
       "noReviewsYet": "No reviews yet",
       "favorite": "Save to favorites",
       "unfavorite": "Remove from favorites",
-      "offersCount": "{count} sellers",
+      "offersCount": "{count, plural, one {# seller} other {# sellers}}",
       "repeatAvailable": "Repeat delivery available",
       "decrease": "Decrease quantity",
       "increase": "Increase quantity",
@@ -1108,7 +1108,9 @@
         "dog": "Dogs",
         "cat": "Cats",
         "age": "Age {min}–{max} months",
-        "weight": "Weight {min}–{max} kg"
+        "weight": "Weight {min}–{max} kg",
+        "ageFrom": "From {min} months",
+        "weightFrom": "From {min} kg"
       },
       "reviewsTitle": "Reviews",
       "reviewsVerifiedOnly": "Only customers who received the product can review it.",

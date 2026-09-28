@@ -15,6 +15,7 @@ import { servicesService } from "@/services/services.service";
 import { petsService } from "@/services/pets.service";
 import { bookingStatusLabel, bookingStatusTone, paymentModeLabel, TIMELINE_ACTOR } from "@/features/discovery/labels";
 import { errorMessage } from "@/features/booking-flow/BookingFlowView";
+import { DateReading } from "@/lib/date/date-reading";
 
 const CANCELLABLE = new Set(["PENDING_CONFIRMATION", "REQUESTED", "AWAITING_PAYMENT", "CONFIRMED"]);
 const RECURRING_CATEGORIES = new Set(["WALKING", "TRAINING", "GROOMING"]);
@@ -214,6 +215,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         <div className="flex flex-col gap-3">
           <p className="text-sm text-text-secondary">{fa ? "نوبت فعلی تا وقتی زمان جدید قطعی نشده، حفظ می‌شود. مبلغ و قوانین تغییر نمی‌کند." : "Your current booking is kept until the new time is secured. Price and terms stay the same."}</p>
           <input type="date" aria-label={fa ? "روز" : "Day"} className="rounded border border-border-subtle bg-surface-base p-2" min={new Date().toISOString().slice(0, 10)} value={rescheduleDate} onChange={(e) => setRescheduleDate(e.target.value)} />
+          <DateReading value={rescheduleDate} />
           {rescheduleSlots === null ? <Skeleton className="h-16 w-full" /> : rescheduleSlots.length === 0 ? <p className="text-sm">{fa ? "در این روز زمان آزادی نیست." : "No open times on this day."}</p> : (
             <div className="grid grid-cols-3 gap-2">
               {rescheduleSlots.map((slot) => (

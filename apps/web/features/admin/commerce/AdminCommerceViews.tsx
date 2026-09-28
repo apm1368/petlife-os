@@ -192,23 +192,25 @@ export function AdminCommerceOverviewView() {
               <Kpi label={fa ? "ارسال دوره‌ای فعال" : "Active repeat deliveries"} value={num(data.repeatDeliveryActive, lang)} />
             </div>
             <div className="mt-5 grid gap-5 lg:grid-cols-2">
-              <div>
+              <div className="min-w-0">
                 <PanelTitle title={fa ? "فروش روزانه" : "Daily sales"} />
                 {data.byDay.length === 0 ? (
                   <p className="text-metadata text-text-secondary">{fa ? "در این بازه سفارشی ثبت نشده است." : "No orders in this period."}</p>
                 ) : (
                   <ul className="flex flex-col gap-1">
                     {data.byDay.map((d) => (
-                      <li key={d.date} className="grid grid-cols-[88px_1fr_auto] items-center gap-2 text-metadata">
+                      <li key={d.date} className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-2 text-metadata">
                         <span className="text-text-secondary">{new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { month: "short", day: "numeric" }).format(new Date(d.date))}</span>
-                        <span className="h-2 rounded-full bg-brand-natural" style={{ width: `${Math.max(2, (d.grossSales / maxDay) * 100)}%` }} aria-hidden="true" />
-                        <span>{formatCurrency(d.grossSales, lang)}</span>
+                        <span className="block min-w-0" aria-hidden="true">
+                          <span className="block h-2 rounded-full bg-brand-natural" style={{ width: `${Math.max(2, (d.grossSales / maxDay) * 100)}%` }} />
+                        </span>
+                        <span className="whitespace-nowrap">{formatCurrency(d.grossSales, lang)}</span>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
-              <div>
+              <div className="min-w-0">
                 <PanelTitle title={fa ? "پرفروش‌ترین کالاها" : "Top products"} />
                 <TableWrap>
                   <table className="w-full">

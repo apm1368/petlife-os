@@ -7,6 +7,7 @@ import { Button, Dialog, EmptyState, ErrorRecovery, Input, Skeleton } from "@pet
 import type { ProviderAvailabilityExceptionDto, ProviderBookingSummaryDto } from "@petlife/types";
 import { providerOsService, type ProviderStaffMember } from "@/services/provider-os.service";
 import { bookingStatusLabel } from "@/features/discovery/labels";
+import { DateReading } from "@/lib/date/date-reading";
 
 type View = "day" | "week" | "month";
 const DAY_MS = 86400_000;
@@ -208,6 +209,7 @@ export function ProviderCalendarView() {
         <div className="flex flex-col gap-3">
           <p className="text-sm text-text-secondary">{fa ? "در این بازه نوبت جدید قابل رزرو نیست. نوبت‌های قطعی موجود لغو نمی‌شوند." : "No new bookings can be made in this period. Existing confirmed bookings are not cancelled."}</p>
           <Input label={fa ? "روز" : "Day"} type="date" value={block.date} onChange={(e) => setBlock({ ...block, date: e.target.value })} />
+          <DateReading value={block.date} />
           <div className="grid grid-cols-2 gap-2">
             <Input label={fa ? "از" : "From"} type="time" value={block.start} onChange={(e) => setBlock({ ...block, start: e.target.value })} />
             <Input label={fa ? "تا" : "To"} type="time" value={block.end} onChange={(e) => setBlock({ ...block, end: e.target.value })} />

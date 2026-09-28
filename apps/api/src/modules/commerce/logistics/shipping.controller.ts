@@ -41,11 +41,14 @@ function buildTimeline(fulfillment: FulfillmentDto | null, shipment: ShipmentDto
     timeline.push({ milestone: FulfillmentStatus.PICKUP_REQUESTED, reached: !!fulfillment.pickupRequestedAt, occurredAt: fulfillment.pickupRequestedAt });
   }
   timeline.push({ milestone: ShipmentStatus.ASSIGNED, reached: !!shipment && [ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED].includes(shipment.status), occurredAt: null });
-  timeline.push({ milestone: ShipmentStatus.PICKED_UP, reached: !!shipment?.actualPickupAt, occurredAt: shipment?.actualPickupAt ?? null });
+  timeline.push({ milestone: ShipmentStatus.PICKED_UP, reached: !!(shipment?.actualPickupAt ?? fulfillment?.pickedUpAt), occurredAt: shipment?.actualPickupAt ?? fulfillment?.pickedUpAt ?? null });
   timeline.push({ milestone: ShipmentStatus.IN_TRANSIT, reached: !!shipment && [ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED].includes(shipment.status), occurredAt: null });
   timeline.push({ milestone: ShipmentStatus.OUT_FOR_DELIVERY, reached: !!shipment && [ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED].includes(shipment.status), occurredAt: null });
-  timeline.push({ milestone: ShipmentStatus.DELIVERED, reached: !!shipment?.actualDeliveryAt, occurredAt: shipment?.actualDeliveryAt ?? null });
-  return timeline;
+  timeline.push({ milestone: ShipmentStatus.DELIVERED, reached: !!(shipment?.actualDeliveryAt ?? fulfillment?.deliveredAt), occurredAt: shipment?.actualDeliveryAt ?? fulfillment?.deliveredAt ?? null });
+  // Progress is monotonic: once a later milestone is reached, every earlier one was too
+  // (e.g. a seller-delivered order with no courier shipment record).
+  const lastReached = timeline.map((t) => t.reached).lastIndexOf(true);
+  return timeline.map((t, i) => (i <= lastReached ? { ...t, reached: true } : t));
 }
 
 /**

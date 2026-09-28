@@ -329,7 +329,7 @@
       "conditions": "بیماری‌ها",
       "medications": "داروها",
       "vaccination": "واکسیناسیون",
-      "activeMedications": "{count} دارو فعال",
+      "activeMedications": "{count, number} دارو فعال",
       "noActiveMedications": "بدون داروی فعال",
       "completeSetup": "تکمیل اطلاعات سلامت",
       "advancedHealth": "سلامت پیشرفته"
@@ -554,7 +554,7 @@
     "recurring": {
       "prompt": "این نوبت به‌صورت هفتگی رزرو شود؟",
       "action": "تکرار هفتگی",
-      "started": "{count} نوبت هفتگی ایجاد شد."
+      "started": "{count, number} نوبت هفتگی ایجاد شد."
     },
     "cancelDialog": {
       "title": "این نوبت لغو شود؟",
@@ -791,9 +791,9 @@
       "retry": "تلاش دوباره",
       "loading": "در حال بارگذاری",
       "attention": {
-        "pendingConfirmation": "{count} در انتظار تأیید",
-        "cancellations": "{count} لغو اخیر",
-        "availabilityIssues": "{count} تداخل زمان‌بندی",
+        "pendingConfirmation": "{count, number} در انتظار تأیید",
+        "cancellations": "{count, number} لغو اخیر",
+        "availabilityIssues": "{count, number} تداخل زمان‌بندی",
         "allClear": "همه‌چیز مرتب است"
       },
       "nextBooking": "رزرو بعدی",
@@ -933,7 +933,7 @@
         "add": "افزودن",
         "fieldsRequired": "مکان، شروع و پایان الزامی است.",
         "createFailed": "ایجاد استثنا ممکن نشد.",
-        "conflictWarning": "{count} رزرو تأییدشده در این بازه وجود دارد. مسدود کردن آن‌ها را لغو یا جابه‌جا نمی‌کند.",
+        "conflictWarning": "{count, number} رزرو تأییدشده در این بازه وجود دارد. مسدود کردن آن‌ها را لغو یا جابه‌جا نمی‌کند.",
         "conflictCancel": "انصراف",
         "conflictProceed": "با این حال مسدود شود"
       }
@@ -1077,7 +1077,7 @@
       "offer": "فروشنده",
       "noOffers": "در حال حاضر هیچ فروشنده‌ای این نوع را ارائه نمی‌دهد",
       "verified": "تأیید شده",
-      "inStock": "{count} عدد موجود",
+      "inStock": "{count, number} عدد موجود",
       "outOfStock": "ناموجود",
       "deliveryPlaceholder": "جزئیات ارسال به‌زودی",
       "quantity": "تعداد",
@@ -1093,7 +1093,7 @@
       "noReviewsYet": "هنوز نظری ثبت نشده است",
       "favorite": "افزودن به علاقه‌مندی‌ها",
       "unfavorite": "حذف از علاقه‌مندی‌ها",
-      "offersCount": "{count} فروشنده",
+      "offersCount": "{count, plural, other {# فروشنده}}",
       "repeatAvailable": "امکان ارسال دوره‌ای",
       "decrease": "کاهش تعداد",
       "increase": "افزایش تعداد",
@@ -1108,7 +1108,9 @@
         "dog": "سگ",
         "cat": "گربه",
         "age": "سن {min} تا {max} ماه",
-        "weight": "وزن {min} تا {max} کیلوگرم"
+        "weight": "وزن {min} تا {max} کیلوگرم",
+        "ageFrom": "از {min} ماهگی",
+        "weightFrom": "از {min} کیلوگرم"
       },
       "reviewsTitle": "نظرات خریداران",
       "reviewsVerifiedOnly": "فقط خریدارانی که کالا را دریافت کرده‌اند می‌توانند نظر بدهند.",
@@ -1134,7 +1136,7 @@
       "pricesChangedBanner": "قیمت یا تخفیف برخی اقلام پس از افزودن تغییر کرده است. پیش از پرداخت قیمت‌های جدید را بررسی کنید.",
       "acceptPrices": "پذیرش قیمت‌های فعلی",
       "soldBy": "فروشنده: {seller}",
-      "itemsTotal": "جمع کالاها ({count})",
+      "itemsTotal": "جمع کالاها ({count, number})",
       "promotions": "تخفیف",
       "delivery": "هزینه ارسال",
       "deliveryAtCheckout": "در مرحله پرداخت محاسبه می‌شود",
@@ -1309,9 +1311,9 @@
       "soldBy": "فروشنده: {seller}",
       "cancelledRefunded": "لغو و بازپرداخت‌شده",
       "tabs": {
-        "active": "در جریان ({count})",
-        "delivered": "تحویل‌شده ({count})",
-        "closed": "لغو و بازپرداخت ({count})"
+        "active": "در جریان ({count, number})",
+        "delivered": "تحویل‌شده ({count, number})",
+        "closed": "لغو و بازپرداخت ({count, number})"
       },
       "tabEmpty": {
         "active": "سفارش در جریانی ندارید.",
@@ -1422,7 +1424,7 @@
         "write": "ثبت نظر",
         "done": "ممنون — نظر شما ثبت شد.",
         "rating": "امتیاز شما",
-        "stars": "{count} ستاره",
+        "stars": "{count, number} ستاره",
         "body": "نظر شما و حیوان‌تان چه بود؟ (اختیاری)",
         "cancel": "انصراف",
         "submit": "انتشار نظر",
@@ -1507,7 +1509,7 @@
       "out": "ناموجود"
     },
     "rating": {
-      "aria": "امتیاز {average} از ۵ بر اساس {count} نظر خریدار",
+      "aria": "امتیاز {average} از ۵ بر اساس {count, number} نظر خریدار",
       "count": "{count, plural, other {# نظر}}"
     },
     "repeat": {
@@ -1670,7 +1672,7 @@
         "UNKNOWN": "منبع پرداخت نامشخص"
       },
       "items": "اقلام",
-      "quantity": "تعداد {count}",
+      "quantity": "تعداد {count, number}",
       "subtotal": "جمع جزء",
       "delivery": "هزینه ارسال",
       "total": "جمع کل",
@@ -1719,7 +1721,7 @@
       "retry": "تلاش مجدد",
       "empty": "هنوز پیشنهادی ثبت نشده است.",
       "lowStock": "موجودی کم",
-      "syncErrors": "{count} خطای همگام‌سازی",
+      "syncErrors": "{count, number} خطای همگام‌سازی",
       "price": "قیمت (ریال)",
       "status": "وضعیت",
       "statusOptions": {
@@ -1728,7 +1730,7 @@
         "SUSPENDED": "معلق"
       },
       "save": "ذخیره",
-      "available": "{count} موجود · {currency}",
+      "available": "{count, number} موجود · {currency}",
       "saveFailed": "پیشنهاد ذخیره نشد.",
       "repeat": {
         "enable": "ارائه ارسال دوره‌ای",

@@ -150,8 +150,16 @@ export function ProductDetailView({ productId }: { productId: string }) {
   const variant = product.variants.find((v) => v.id === variantId);
   const suitability = [
     product.supportsDog && product.supportsCat ? t("suits.both") : product.supportsDog ? t("suits.dog") : product.supportsCat ? t("suits.cat") : null,
-    product.minAgeMonths !== null || product.maxAgeMonths !== null ? t("suits.age", { min: formatNumber(product.minAgeMonths ?? 0, locale), max: product.maxAgeMonths !== null ? formatNumber(product.maxAgeMonths, locale) : "∞" }) : null,
-    product.minWeightKg !== null || product.maxWeightKg !== null ? t("suits.weight", { min: formatNumber(product.minWeightKg ?? 0, locale), max: product.maxWeightKg !== null ? formatNumber(product.maxWeightKg, locale) : "∞" }) : null,
+    product.maxAgeMonths !== null
+      ? t("suits.age", { min: formatNumber(product.minAgeMonths ?? 0, locale), max: formatNumber(product.maxAgeMonths, locale) })
+      : product.minAgeMonths !== null
+        ? t("suits.ageFrom", { min: formatNumber(product.minAgeMonths, locale) })
+        : null,
+    product.maxWeightKg !== null
+      ? t("suits.weight", { min: formatNumber(product.minWeightKg ?? 0, locale), max: formatNumber(product.maxWeightKg, locale) })
+      : product.minWeightKg !== null
+        ? t("suits.weightFrom", { min: formatNumber(product.minWeightKg, locale) })
+        : null,
   ].filter(Boolean) as string[];
 
   return (

@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-09-25",
-  "routeCount": 210,
+  "routeCount": 224,
   "rows": [
     {
       "route": "/:locale",
@@ -115,6 +115,177 @@
       "estimatedEffort": "S",
       "blockers": "Route-level design and QA acceptance",
       "sourceFile": "apps/web/app/[locale]/(admin)/admin/audit/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce",
+      "pageName": "AdminCommerceOverviewView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/inventory",
+      "pageName": "AdminInventoryView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/inventory/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/orders",
+      "pageName": "AdminCommerceOrdersView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/orders/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/orders/:id",
+      "pageName": "AdminCommerceOrderDetailView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/orders/[id]/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/products",
+      "pageName": "AdminProductsView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/products/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/promotions",
+      "pageName": "AdminPromotionsView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/promotions/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/refund-requests",
+      "pageName": "AdminRefundRequestsView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/refund-requests/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/reviews",
+      "pageName": "AdminProductReviewsView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/reviews/page.tsx"
+    },
+    {
+      "route": "/:locale/admin/commerce/sellers",
+      "pageName": "AdminCommerceSellersView",
+      "actor": "Admin",
+      "domain": "Admin Overview",
+      "authRequirement": "Admin session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Admin aggregate endpoints",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(admin)/admin/commerce/sellers/page.tsx"
     },
     {
       "route": "/:locale/admin/content",
@@ -485,7 +656,7 @@
       "authRequirement": "Admin session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Admin aggregate endpoints",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -493,7 +664,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/page.tsx"
     },
     {
@@ -504,7 +675,7 @@
       "authRequirement": "Admin session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Admin aggregate endpoints",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -512,7 +683,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/analytics/page.tsx"
     },
     {
@@ -523,7 +694,7 @@
       "authRequirement": "Admin session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Admin aggregate endpoints",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -531,7 +702,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/bookings/[id]/page.tsx"
     },
     {
@@ -542,7 +713,7 @@
       "authRequirement": "Admin session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Admin aggregate endpoints",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -550,7 +721,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/catalog/page.tsx"
     },
     {
@@ -561,7 +732,7 @@
       "authRequirement": "Admin session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Admin aggregate endpoints",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -569,7 +740,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(admin)/admin/services/reviews/page.tsx"
     },
     {
@@ -1055,7 +1226,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Bookings / Providers / Services / Notifications",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -1063,7 +1234,7 @@
       "partnerCounterpart": "Provider bookings exists",
       "priority": "P1",
       "estimatedEffort": "S",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(app)/bookings/page.tsx"
     },
     {
@@ -1074,7 +1245,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Bookings / Providers / Services / Notifications",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1082,7 +1253,7 @@
       "partnerCounterpart": "Provider bookings exists",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(app)/bookings/[id]/page.tsx"
     },
     {
@@ -1093,7 +1264,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Care Calendar / Care Profile / Notifications",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -1101,7 +1272,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P2",
       "estimatedEffort": "S",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/care-calendar/page.tsx"
     },
     {
@@ -1112,7 +1283,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Cart / Catalog / Pet Access",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -1120,7 +1291,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P2",
       "estimatedEffort": "S",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(app)/cart/page.tsx"
     },
     {
@@ -1130,8 +1301,8 @@
       "domain": "Checkout",
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
-      "functionStatus": "E",
-      "visualStatus": "C",
+      "functionStatus": "B",
+      "visualStatus": "B",
       "backendApiDependency": "Checkout / Payment / Financing / Logistics / Orders",
       "missingFunctionality": "Live payment/BNPL adapters are not implemented; only simulated flow is proven",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -1139,7 +1310,7 @@
       "partnerCounterpart": "Seller order/finance exists",
       "priority": "P0",
       "estimatedEffort": "L",
-      "blockers": "Merchant, BNPL and shipping production credentials/contracts",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(app)/checkout/page.tsx"
     },
     {
@@ -1149,8 +1320,8 @@
       "domain": "Checkout",
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
-      "functionStatus": "E",
-      "visualStatus": "C",
+      "functionStatus": "B",
+      "visualStatus": "B",
       "backendApiDependency": "Checkout / Payment / Financing / Logistics / Orders",
       "missingFunctionality": "Live payment/BNPL adapters are not implemented; only simulated flow is proven",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1158,7 +1329,7 @@
       "partnerCounterpart": "Seller order/finance exists",
       "priority": "P0",
       "estimatedEffort": "L",
-      "blockers": "Merchant, BNPL and shipping production credentials/contracts",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(app)/checkout/[id]/confirmation/page.tsx"
     },
     {
@@ -1168,8 +1339,8 @@
       "domain": "Checkout",
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
-      "functionStatus": "E",
-      "visualStatus": "C",
+      "functionStatus": "B",
+      "visualStatus": "B",
       "backendApiDependency": "Checkout / Payment / Financing / Logistics / Orders",
       "missingFunctionality": "Live payment/BNPL adapters are not implemented; only simulated flow is proven",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1177,7 +1348,7 @@
       "partnerCounterpart": "Seller order/finance exists",
       "priority": "P0",
       "estimatedEffort": "L",
-      "blockers": "Merchant, BNPL and shipping production credentials/contracts",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(app)/checkout/[id]/ops/page.tsx"
     },
     {
@@ -1255,6 +1426,25 @@
       "estimatedEffort": "S",
       "blockers": "Route-level design and QA acceptance",
       "sourceFile": "apps/web/app/[locale]/(app)/donations/page.tsx"
+    },
+    {
+      "route": "/:locale/favorites",
+      "pageName": "FavoritesView",
+      "actor": "Member",
+      "domain": "Other",
+      "authRequirement": "Member session; local review bypass exists",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Domain API",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P2",
+      "estimatedEffort": "S",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(app)/favorites/page.tsx"
     },
     {
       "route": "/:locale/home",
@@ -1454,7 +1644,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Orders / Fulfillment / Refunds / Logistics",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -1462,7 +1652,7 @@
       "partnerCounterpart": "Seller orders exists",
       "priority": "P1",
       "estimatedEffort": "S",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(app)/orders/page.tsx"
     },
     {
@@ -1473,7 +1663,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Orders / Fulfillment / Refunds / Logistics",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1481,7 +1671,7 @@
       "partnerCounterpart": "Seller orders exists",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(app)/orders/[id]/page.tsx"
     },
     {
@@ -1511,7 +1701,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Pets / Pet Access / Households",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1519,7 +1709,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P2",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/page.tsx"
     },
     {
@@ -1530,7 +1720,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Care Calendar / Care Profile / Notifications",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1538,7 +1728,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P2",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/care/page.tsx"
     },
     {
@@ -1549,7 +1739,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Care Calendar / Care Profile / Notifications",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1557,7 +1747,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P2",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/care/[careItemId]/page.tsx"
     },
     {
@@ -1568,7 +1758,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Care Calendar / Care Profile / Notifications",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1576,7 +1766,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P2",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/care/calendar/page.tsx"
     },
     {
@@ -1587,7 +1777,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1595,7 +1785,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/page.tsx"
     },
     {
@@ -1606,7 +1796,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1614,7 +1804,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/page.tsx"
     },
     {
@@ -1625,7 +1815,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1633,7 +1823,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/dental/page.tsx"
     },
     {
@@ -1644,7 +1834,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1652,7 +1842,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/dental/[recordId]/page.tsx"
     },
     {
@@ -1663,7 +1853,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1671,7 +1861,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/discharge/page.tsx"
     },
     {
@@ -1682,7 +1872,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1690,7 +1880,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/documents/page.tsx"
     },
     {
@@ -1701,7 +1891,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1709,7 +1899,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/documents/[documentId]/page.tsx"
     },
     {
@@ -1720,7 +1910,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1728,7 +1918,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/estimates/page.tsx"
     },
     {
@@ -1739,7 +1929,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1747,7 +1937,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/imaging/page.tsx"
     },
     {
@@ -1758,7 +1948,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1766,7 +1956,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/imaging/[imagingStudyId]/page.tsx"
     },
     {
@@ -1777,7 +1967,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1785,7 +1975,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/labs/page.tsx"
     },
     {
@@ -1796,7 +1986,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1804,7 +1994,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/labs/[labResultId]/page.tsx"
     },
     {
@@ -1815,7 +2005,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1823,7 +2013,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/nutrition/page.tsx"
     },
     {
@@ -1834,7 +2024,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1842,7 +2032,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/nutrition/[planId]/page.tsx"
     },
     {
@@ -1853,7 +2043,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1861,7 +2051,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/observations/page.tsx"
     },
     {
@@ -1872,7 +2062,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1880,7 +2070,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/referrals/page.tsx"
     },
     {
@@ -1891,7 +2081,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1899,7 +2089,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/referrals/[referralId]/page.tsx"
     },
     {
@@ -1910,7 +2100,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1918,7 +2108,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/rehab/page.tsx"
     },
     {
@@ -1929,7 +2119,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1937,7 +2127,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/rehab/[planId]/page.tsx"
     },
     {
@@ -1948,7 +2138,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1956,7 +2146,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/timeline/page.tsx"
     },
     {
@@ -1967,7 +2157,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1975,7 +2165,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/visits/page.tsx"
     },
     {
@@ -1986,7 +2176,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -1994,7 +2184,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/visits/[visitId]/page.tsx"
     },
     {
@@ -2005,7 +2195,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2013,7 +2203,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/advanced/vitals/page.tsx"
     },
     {
@@ -2024,7 +2214,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2032,7 +2222,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/allergies/page.tsx"
     },
     {
@@ -2043,7 +2233,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2051,7 +2241,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/allergies/[allergyId]/page.tsx"
     },
     {
@@ -2062,7 +2252,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2070,7 +2260,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/conditions/page.tsx"
     },
     {
@@ -2081,7 +2271,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2089,7 +2279,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/conditions/[conditionId]/page.tsx"
     },
     {
@@ -2100,7 +2290,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2108,7 +2298,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/dental/page.tsx"
     },
     {
@@ -2119,7 +2309,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2127,7 +2317,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/dental/[recordId]/page.tsx"
     },
     {
@@ -2138,7 +2328,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2146,7 +2336,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/documents/page.tsx"
     },
     {
@@ -2157,7 +2347,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2165,7 +2355,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/documents/[documentId]/page.tsx"
     },
     {
@@ -2176,7 +2366,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2184,7 +2374,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/imaging/page.tsx"
     },
     {
@@ -2195,7 +2385,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2203,7 +2393,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/imaging/[imagingStudyId]/page.tsx"
     },
     {
@@ -2214,7 +2404,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2222,7 +2412,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/labs/page.tsx"
     },
     {
@@ -2233,7 +2423,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2241,7 +2431,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/labs/[labResultId]/page.tsx"
     },
     {
@@ -2252,7 +2442,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2260,7 +2450,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/medications/page.tsx"
     },
     {
@@ -2271,7 +2461,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2279,7 +2469,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/medications/[medicationId]/page.tsx"
     },
     {
@@ -2290,7 +2480,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2298,7 +2488,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/nutrition/page.tsx"
     },
     {
@@ -2309,7 +2499,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2317,7 +2507,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/nutrition/clinical/page.tsx"
     },
     {
@@ -2328,7 +2518,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2336,7 +2526,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/nutrition/clinical/[planId]/page.tsx"
     },
     {
@@ -2347,7 +2537,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2355,7 +2545,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/observations/page.tsx"
     },
     {
@@ -2366,7 +2556,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2374,7 +2564,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/observations/[observationId]/page.tsx"
     },
     {
@@ -2385,7 +2575,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2393,7 +2583,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/referrals/page.tsx"
     },
     {
@@ -2404,7 +2594,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2412,7 +2602,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/referrals/[referralId]/page.tsx"
     },
     {
@@ -2423,7 +2613,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2431,7 +2621,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/rehab/page.tsx"
     },
     {
@@ -2442,7 +2632,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2450,7 +2640,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/rehab/[planId]/page.tsx"
     },
     {
@@ -2461,7 +2651,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2469,7 +2659,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/share/page.tsx"
     },
     {
@@ -2480,7 +2670,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2488,7 +2678,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/timeline/page.tsx"
     },
     {
@@ -2499,7 +2689,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2507,7 +2697,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/vaccination/page.tsx"
     },
     {
@@ -2518,7 +2708,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2526,7 +2716,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/visits/page.tsx"
     },
     {
@@ -2537,7 +2727,7 @@
       "authRequirement": "Member session; local review bypass exists",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Health / Clinical Health / Storage",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -2545,7 +2735,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(app)/pets/[id]/health/visits/[visitId]/page.tsx"
     },
     {
@@ -3088,7 +3278,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3096,7 +3286,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/analytics/page.tsx"
     },
     {
@@ -3107,7 +3297,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3115,7 +3305,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/availability/page.tsx"
     },
     {
@@ -3126,7 +3316,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3134,7 +3324,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/bookings/page.tsx"
     },
     {
@@ -3145,7 +3335,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3153,7 +3343,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/bookings/[id]/page.tsx"
     },
     {
@@ -3164,7 +3354,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3172,7 +3362,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/calendar/page.tsx"
     },
     {
@@ -3259,7 +3449,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3267,7 +3457,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/reviews/page.tsx"
     },
     {
@@ -3278,7 +3468,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3286,7 +3476,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/services/page.tsx"
     },
     {
@@ -3297,7 +3487,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3305,7 +3495,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/shared-records/page.tsx"
     },
     {
@@ -3316,7 +3506,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3324,7 +3514,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+      "blockers": "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/shared-records/[petId]/[shareId]/page.tsx"
     },
     {
@@ -3335,7 +3525,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3343,7 +3533,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/team/page.tsx"
     },
     {
@@ -3373,7 +3563,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3381,7 +3571,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(provider)/provider/waitlist/page.tsx"
     },
     {
@@ -3392,7 +3582,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3400,7 +3590,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/providers/[providerId]/page.tsx"
     },
     {
@@ -3411,7 +3601,7 @@
       "authRequirement": "Provider session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Provider OS / Vet Panel / Booking / Clinical Health",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3419,7 +3609,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/providers/[providerId]/book/page.tsx"
     },
     {
@@ -3440,6 +3630,63 @@
       "estimatedEffort": "S",
       "blockers": "SMS/email/OAuth provider credentials and production callback configuration",
       "sourceFile": "apps/web/app/[locale]/(auth)/register/page.tsx"
+    },
+    {
+      "route": "/:locale/repeat-delivery",
+      "pageName": "RepeatDeliveryListView",
+      "actor": "Member",
+      "domain": "Other",
+      "authRequirement": "Member session; local review bypass exists",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Domain API",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P2",
+      "estimatedEffort": "S",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(app)/repeat-delivery/page.tsx"
+    },
+    {
+      "route": "/:locale/repeat-delivery/:id",
+      "pageName": "RepeatDeliveryDetailView",
+      "actor": "Member",
+      "domain": "Other",
+      "authRequirement": "Member session; local review bypass exists",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Domain API",
+      "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P2",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(app)/repeat-delivery/[id]/page.tsx"
+    },
+    {
+      "route": "/:locale/repeat-delivery/new",
+      "pageName": "RepeatDeliveryCreateView",
+      "actor": "Member",
+      "domain": "Other",
+      "authRequirement": "Member session; local review bypass exists",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Domain API",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P2",
+      "estimatedEffort": "S",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(app)/repeat-delivery/new/page.tsx"
     },
     {
       "route": "/:locale/seller",
@@ -3563,7 +3810,7 @@
       "authRequirement": "Seller session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Seller OS / Orders / Inventory / Finance / Marketplace",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3571,7 +3818,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(seller)/seller/inventory/page.tsx"
     },
     {
@@ -3582,7 +3829,7 @@
       "authRequirement": "Seller session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Seller OS / Orders / Inventory / Finance / Marketplace",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3590,7 +3837,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(seller)/seller/offers/page.tsx"
     },
     {
@@ -3601,7 +3848,7 @@
       "authRequirement": "Seller session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Seller OS / Orders / Inventory / Finance / Marketplace",
       "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3609,7 +3856,7 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(seller)/seller/orders/page.tsx"
     },
     {
@@ -3620,7 +3867,7 @@
       "authRequirement": "Seller session/role; local review is read-only bypass",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Seller OS / Orders / Inventory / Finance / Marketplace",
       "missingFunctionality": "Dynamic ID, not-found, authorization and mutation path need route-level end-to-end acceptance",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3628,8 +3875,27 @@
       "partnerCounterpart": "N/A",
       "priority": "P1",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(seller)/seller/orders/[id]/page.tsx"
+    },
+    {
+      "route": "/:locale/seller/promotions",
+      "pageName": "SellerPromotionsView",
+      "actor": "Seller staff",
+      "domain": "Seller OS",
+      "authRequirement": "Seller session/role; local review is read-only bypass",
+      "designReference": "yes",
+      "functionStatus": "B",
+      "visualStatus": "B",
+      "backendApiDependency": "Seller OS / Orders / Inventory / Finance / Marketplace",
+      "missingFunctionality": "Primary UI exists, but all actions and domain transitions are not accepted end to end",
+      "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
+      "adminCounterpart": "N/A",
+      "partnerCounterpart": "N/A",
+      "priority": "P1",
+      "estimatedEffort": "M",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+      "sourceFile": "apps/web/app/[locale]/(seller)/seller/promotions/page.tsx"
     },
     {
       "route": "/:locale/seller/settings",
@@ -3677,7 +3943,7 @@
       "authRequirement": "Public browse; session required for protected mutations where applicable",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Services / Providers / Booking",
       "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3685,7 +3951,7 @@
       "partnerCounterpart": "Provider services exists",
       "priority": "P0",
       "estimatedEffort": "S",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/services/page.tsx"
     },
     {
@@ -3696,7 +3962,7 @@
       "authRequirement": "Public browse; session required for protected mutations where applicable",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Services / Providers / Booking",
       "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3704,7 +3970,7 @@
       "partnerCounterpart": "Provider services exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/services/[category]/page.tsx"
     },
     {
@@ -3715,7 +3981,7 @@
       "authRequirement": "Public browse; session required for protected mutations where applicable",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Services / Providers / Booking",
       "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3723,7 +3989,7 @@
       "partnerCounterpart": "Provider services exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/services/[category]/[serviceId]/book/page.tsx"
     },
     {
@@ -3734,7 +4000,7 @@
       "authRequirement": "Public browse; session required for protected mutations where applicable",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Services / Providers / Booking",
       "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3742,7 +4008,7 @@
       "partnerCounterpart": "Provider services exists",
       "priority": "P0",
       "estimatedEffort": "S",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/services/search/page.tsx"
     },
     {
@@ -3761,7 +4027,7 @@
       "partnerCounterpart": "Seller OS exists",
       "priority": "P2",
       "estimatedEffort": "S",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(public)/shop/page.tsx"
     },
     {
@@ -3780,7 +4046,7 @@
       "partnerCounterpart": "Seller OS exists",
       "priority": "P2",
       "estimatedEffort": "S",
-      "blockers": "Route-level design and QA acceptance",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(public)/shop/products/page.tsx"
     },
     {
@@ -3799,7 +4065,7 @@
       "partnerCounterpart": "Seller OS exists",
       "priority": "P2",
       "estimatedEffort": "M",
-      "blockers": "Deterministic seeded IDs and role-scoped test fixtures",
+      "blockers": "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
       "sourceFile": "apps/web/app/[locale]/(public)/shop/products/[id]/page.tsx"
     },
     {
@@ -3924,7 +4190,7 @@
       "authRequirement": "Public browse; session required for protected mutations where applicable",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Providers / Services / Booking",
       "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3932,7 +4198,7 @@
       "partnerCounterpart": "Provider OS exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/vet/[providerId]/page.tsx"
     },
     {
@@ -3943,7 +4209,7 @@
       "authRequirement": "Public browse; session required for protected mutations where applicable",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Providers / Services / Booking",
       "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error, not-found and forbidden states not all verified",
@@ -3951,7 +4217,7 @@
       "partnerCounterpart": "Provider OS exists",
       "priority": "P0",
       "estimatedEffort": "M",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/vet/[providerId]/book/page.tsx"
     },
     {
@@ -3962,7 +4228,7 @@
       "authRequirement": "Public browse; session required for protected mutations where applicable",
       "designReference": "yes",
       "functionStatus": "B",
-      "visualStatus": "C",
+      "visualStatus": "B",
       "backendApiDependency": "Providers / Services / Booking",
       "missingFunctionality": "Pet-scoped compatibility authorization must be fixed; vet-only filtering is not enforced in provider search",
       "missingStates": "Desktop/mobile and Persian/English acceptance is incomplete; loading, empty, error and permission states not all verified",
@@ -3970,7 +4236,7 @@
       "partnerCounterpart": "Provider OS exists",
       "priority": "P0",
       "estimatedEffort": "S",
-      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+      "blockers": "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
       "sourceFile": "apps/web/app/[locale]/(public)/vet/find/page.tsx"
     },
     {

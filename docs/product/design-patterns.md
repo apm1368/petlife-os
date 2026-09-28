@@ -294,3 +294,75 @@ Weeks start Saturday (fa) or Monday (en). Day keys are computed in the location 
 
 ### Reuse rules
 Seller fulfilment scheduling and admin operations reuse the grid/agenda split and status grammar, not the booking model.
+
+## COMMERCE DISCOVERY PATTERN — Batch 4
+
+### Layout anatomy
+Shop home: hero with one search field → real top-level categories (+ repeat delivery tile) → current promotions (only when live) → recommended products. Results: title → search → category chips (children of the current category) → sidebar filters (desktop) / filter sheet (mobile) → result count + sort → product grid → pagination.
+
+### Components
+`ProductCard` (image or neutral tile, brand, title, variant, verified rating only when reviews exist, the price the customer pays with a real-promotion strike-through, stock badge, pet compatibility), `ProductResultsView`, `PriceBlock`, `StockBadge`, `RatingInline`.
+
+### Rules
+Every filter lives in the URL. Customers enter Toman; the API filters in IRR. Products without a buyable offer are not listed. No preview/demo products, no invented delivery promises, no "best seller" language without data. Recommended ranking is explainable (see commerce research).
+
+### Empty / loading / error
+Eight-card skeleton; empty state with "clear filters" when filters or a search are active; retry on error.
+
+### Responsive / RTL / LTR
+2 → 3 → 4 columns. Below `lg` the filters open in a bottom sheet with a "show N products" action. Persian digits through ICU `{count, number}` / `toLocaleString`.
+
+### Reuse rules
+Reuse for any catalogue list (places, travel products). Never show a signal the data does not have.
+
+## PRODUCT DETAIL PATTERN — Batch 4
+
+### Layout anatomy
+Breadcrumb → gallery (variant media first) | identity (brand, title, rating link, favorite) → compatibility (always above the CTA) → variant selector → offer list (seller + verification, price block, stock, repeat availability) → quantity (capped by stock and 20) → add to cart (sticky bar on mobile) → repeat-delivery card → about / suitability / specifications → verified reviews (paged) → related products.
+
+### Rules
+The default offer is the server's deterministic choice; the customer can pick any other offer. Out-of-stock variants and offers stay visible but cannot be added. Repeat delivery states plainly that nothing is charged automatically.
+
+### Empty / loading / error
+Not found (removed or inactive) is its own state with a way back to the shop. Missing sections are omitted, never filled with placeholders.
+
+### Reuse rules
+Reuse for any single purchasable entity; keep compatibility above the primary action.
+
+## CART / CHECKOUT PATTERN — Batch 4
+
+### Cart
+Grouped by seller ("Sold by …"). Each line shows the live price, the real discount, and issues as labels: unavailable, seller unavailable, out of stock, only N left, price changed, promotion ended. Changed prices are accepted explicitly ("Accept current prices"). Blocking issues disable checkout with a one-line reason. Summary: items (gross) → promotions → delivery "calculated at checkout" → subtotal.
+
+### Checkout
+Reuses the Booking/Transaction step grammar: address (household address book, default preselected, postal code validated, add-new inline) → review (frozen lines, subtotal, promotions, delivery, total) → per-seller real shipping quotes → payment method → payment/financing → outcome. The amount charged is exactly what the review showed; orders are created from those frozen lines.
+
+### Responsive / RTL / LTR
+Cart summary is a sticky side column on desktop and follows the lines on mobile. Numbers use locale digits.
+
+## ORDER DETAIL PATTERN — Batch 4
+
+### Layout anatomy
+Order number + seller + placed time + status → notice line after an action → available actions card (cancel before dispatch, or refund request after delivery / failed delivery) → items (snapshot title, variant, quantity × unit price, promotion, target pet, review action) → totals (subtotal, promotions, delivery, total) → payment/financing status → fulfillment status + tracking milestones → order history (status events) → refund requests and refunds → shipping address → payment details link → support.
+
+### Rules
+Actions come from server flags (`canCancel`, `canRequestRefund`), never from client guesses. Cancel explains the full refund amount before confirming. A refund request says it will be reviewed; nothing implies an instant refund. One review per delivered item. My Orders groups orders into In progress / Delivered / Cancelled & refunded.
+
+### Reuse rules
+Booking detail and any future transaction detail use the same order: identity → state → allowed actions → terms → history.
+
+## SELLER OPERATIONAL PATTERN — Batch 4
+
+### Rules
+Seller screens show what the seller must do next: the order detail has a "next step" card (mark packed → request courier), and a cancel action that always refunds the customer and returns stock. Cancelled orders carry a "do not ship" banner. Refund requests are visible to the seller but decided by PET LIFE. Offers carry repeat-delivery settings (interval chips; at least one required). Promotions are seller-funded and limited by the API to the seller's own products.
+
+### Reuse rules
+Provider operations follow the same "next step first" layout.
+
+## ADMIN COMMERCE PATTERN — Batch 4
+
+### Layout anatomy
+Section nav (overview, orders, refund requests, products, reviews, inventory, sellers, promotions) → filter bar → table with a horizontal scroller (the page never scrolls sideways) → pager. Mutations open a dialog that asks for a reason where it is audited.
+
+### Rules
+Read access `commerce.view`; moderation `commerce.manage`; promotions `promotions.manage`; refund-request decisions `finance.refund.request`. Approving a refund request only opens the two-person finance approval; money moves at execute. Customer PII is limited to first name and city. Every mutation writes the admin audit log. Analytics exclude cancelled and refunded orders and say so.

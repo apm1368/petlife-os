@@ -208,6 +208,25 @@ describe("Batch 4 — Commerce", () => {
       expect(line.lineTotal).toBe(500_000);
     });
 
+    it("a price change is flagged on the cart line until the customer accepts the new price", async () => {
+      const cu = await customer();
+      const s2 = await seller();
+      const { variant } = await product();
+      const o = await offer(s2.id, variant.id, 400_000, 10);
+      await cu.c.post("/cart/items").send({ offerId: o.id, quantity: 1 }).expect(201);
+      await prisma.sellerOffer.update({ where: { id: o.id }, data: { priceAmount: 450_000 } });
+
+      const changed = await cu.c.get("/cart").expect(200);
+      const line = changed.body.sellerGroups[0].lines[0];
+      expect(line.issues).toContain("PRICE_CHANGED");
+      expect(line.lineTotal).toBe(450_000);
+      expect(changed.body.hasBlockingIssues).toBe(false);
+
+      const accepted = await cu.c.post("/cart/accept-prices").expect(201);
+      expect(accepted.body.sellerGroups[0].lines[0].issues).not.toContain("PRICE_CHANGED");
+      expect(accepted.body.sellerGroups[0].lines[0].unitPriceSnapshot).toBe(450_000);
+    });
+
     it("search is paginated with facets and filters by price and stock", async () => {
       const s = await seller();
       const token = unique();

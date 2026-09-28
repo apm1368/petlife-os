@@ -145,14 +145,28 @@ function isBatch3(route) {
 }
 const BATCH3_GRADE = {
   function: "B",
-  visual: "C",
-  blockers: "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green. LIVE staging fa/en desktop/mobile QA pending; real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured; GitHub deploy key read-only.",
+  visual: "B",
+  blockers: "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
 };
 
 const BATCH2_GRADE = {
   function: "B",
-  visual: "C",
-  blockers: "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+  visual: "B",
+  blockers: "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
+};
+
+/** Batch 4 (Commerce: discovery, PDP, cart, checkout, orders, repeat delivery, seller + admin commerce). */
+function isBatch4(route) {
+  return (
+    /\/:locale\/(shop|cart|checkout|orders|repeat-delivery|favorites)(\/|$)/.test(route) ||
+    /\/seller\/(orders|offers|promotions|inventory)(\/|$)/.test(route) ||
+    route.includes("/admin/commerce")
+  );
+}
+const BATCH4_GRADE = {
+  function: "B",
+  visual: "B",
+  blockers: "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
 };
 
 function status(route, pageDomain, hasTest) {
@@ -287,8 +301,8 @@ const rows = walk(appRoot)
       domain: pageDomain,
       authRequirement: authRequirement(route, routeActor),
       designReference: referenceAvailable(pageDomain),
-      functionStatus: isBatch3(route) ? BATCH3_GRADE.function : isBatch2(route) ? BATCH2_GRADE.function : status(route, pageDomain, hasTest),
-      visualStatus: isBatch3(route) ? BATCH3_GRADE.visual : isBatch2(route) ? BATCH2_GRADE.visual : visualStatus(route, pageDomain),
+      functionStatus: isBatch4(route) ? BATCH4_GRADE.function : isBatch3(route) ? BATCH3_GRADE.function : isBatch2(route) ? BATCH2_GRADE.function : status(route, pageDomain, hasTest),
+      visualStatus: isBatch4(route) ? BATCH4_GRADE.visual : isBatch3(route) ? BATCH3_GRADE.visual : isBatch2(route) ? BATCH2_GRADE.visual : visualStatus(route, pageDomain),
       backendApiDependency: apiDependency(pageDomain),
       missingFunctionality: missingFunctionality(route, pageDomain),
       missingStates: missingStates(route, pageDomain),
@@ -296,7 +310,7 @@ const rows = walk(appRoot)
       partnerCounterpart: counterpart(pageDomain, "partner"),
       priority: priority(route, pageDomain),
       estimatedEffort: effort(route, pageDomain),
-      blockers: isBatch3(route) ? BATCH3_GRADE.blockers : isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
+      blockers: isBatch4(route) ? BATCH4_GRADE.blockers : isBatch3(route) ? BATCH3_GRADE.blockers : isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
       sourceFile: path.relative(root, file).replaceAll(path.sep, "/"),
     };
   })

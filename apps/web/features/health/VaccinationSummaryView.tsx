@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select, Skeleton } from "@petlife/ui";
 import { VaccinationStatus, type VaccinationSummaryDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
+import { DateReading } from "@/lib/date/date-reading";
 
 export function VaccinationSummaryView({ petId }: { petId: string }) {
   const t = useTranslations("health.vaccinationSummary");
@@ -58,7 +59,9 @@ export function VaccinationSummaryView({ petId }: { petId: string }) {
           }))}
         />
         <Input label={t("nextDueDate")} type="date" value={nextDueDate} onChange={(e) => setNextDueDate(e.target.value)} />
+        <DateReading value={nextDueDate} />
         <Input label={t("lastKnownDate")} type="date" value={lastKnownDate} onChange={(e) => setLastKnownDate(e.target.value)} />
+        <DateReading value={lastKnownDate} />
         <Input label={t("notes")} value={notes} onChange={(e) => setNotes(e.target.value)} />
         <Button variant="primary" isLoading={isSaving} onClick={save}>
           {t("save")}

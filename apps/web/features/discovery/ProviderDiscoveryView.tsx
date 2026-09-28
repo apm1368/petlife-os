@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { useSessionStore } from "@/stores/session-store";
 import { CinematicPageHero } from "@/features/experience/CinematicPageHero";
 import { categoryLabel, providerTypeLabel } from "./labels";
+import { DateReading } from "@/lib/date/date-reading";
 
 const SORTS: { value: DiscoverySort; fa: string; en: string }[] = [
   { value: "RECOMMENDED", fa: "پیشنهادی", en: "Recommended" },
@@ -176,6 +177,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-text-secondary">{fa ? "روز مراجعه" : "Date"}</span>
           <input type="date" className="rounded border border-border-subtle bg-surface-base p-2" value={query.date ?? ""} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setParam({ date: e.target.value || undefined })} />
+          <DateReading value={query.date} />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-text-secondary">{fa ? "حداکثر قیمت (تومان)" : "Max price (Toman)"}</span>
