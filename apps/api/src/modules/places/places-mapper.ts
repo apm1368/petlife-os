@@ -26,6 +26,11 @@ export function toPetFriendlyPlaceDto(row: PetFriendlyPlace, options: { distance
     status: row.status as unknown as PetFriendlyPlaceDto["status"],
     isPubliclyListed: row.isPubliclyListed,
     isFavorited: options.isFavorited ?? false,
+    leashRequired: row.leashRequired,
+    waterAvailable: row.waterAvailable,
+    petArea: row.petArea,
+    openingHours: (row.openingHours as unknown as { day: number; open: string; close: string }[] | null) ?? null,
+    province: row.province,
     createdAt: row.createdAt.toISOString(),
   };
 }

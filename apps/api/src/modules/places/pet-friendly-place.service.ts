@@ -70,6 +70,11 @@ export class PetFriendlyPlaceService {
           indoorAllowed: dto.indoorAllowed ?? true,
           outdoorAllowed: dto.outdoorAllowed ?? true,
           petPolicy: dto.petPolicy,
+          leashRequired: dto.leashRequired ?? null,
+          waterAvailable: dto.waterAvailable ?? null,
+          petArea: dto.petArea ?? null,
+          province: dto.province ?? null,
+          openingHours: dto.openingHours ? (dto.openingHours as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
         },
       });
       await this.syncLocation(tx, created.id, dto.latitude, dto.longitude);
@@ -82,7 +87,11 @@ export class PetFriendlyPlaceService {
   async update(admin: ResolvedAdminContext, id: string, dto: UpdatePetFriendlyPlaceDto) {
     const row = await this.prisma.$transaction(async (tx) => {
       const existing = await this.getRawOrThrow(id);
-      const updated = await tx.petFriendlyPlace.update({ where: { id }, data: dto });
+      const { openingHours, ...rest } = dto;
+      const updated = await tx.petFriendlyPlace.update({
+        where: { id },
+        data: { ...rest, ...(openingHours !== undefined ? { openingHours: openingHours ? (openingHours as unknown as Prisma.InputJsonValue) : Prisma.JsonNull } : {}) },
+      });
       if (dto.latitude !== undefined || dto.longitude !== undefined) {
         await this.syncLocation(tx, id, dto.latitude ?? existing.latitude, dto.longitude ?? existing.longitude);
       }

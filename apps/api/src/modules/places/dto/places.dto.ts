@@ -1,7 +1,23 @@
-import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Max, Min } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Matches, Max, Min, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { PetFriendlyPlaceCategory, PetFriendlyPlaceStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+
+export class OpeningHoursDto {
+  @IsInt() @Min(0) @Max(6) day!: number;
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/) open!: string;
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/) close!: string;
+}
+
+export class ReportPlaceDto {
+  @IsIn(["CLOSED_PERMANENTLY", "NOT_PET_FRIENDLY", "WRONG_LOCATION", "WRONG_DETAILS", "OTHER"]) reason!: string;
+  @IsOptional() @IsString() @Length(0, 1000) details?: string;
+}
+
+export class ResolvePlaceReportDto {
+  @IsIn(["RESOLVED", "DISMISSED"]) status!: "RESOLVED" | "DISMISSED";
+  @IsOptional() @IsString() @Length(0, 500) note?: string;
+}
 
 export class CreatePetFriendlyPlaceDto {
   @IsString()
@@ -57,6 +73,13 @@ export class CreatePetFriendlyPlaceDto {
   @IsString()
   @Length(0, 2000)
   petPolicy?: string;
+
+  /** Batch 5 — omit (or null) when the place has not stated it. */
+  @IsOptional() @IsBoolean() leashRequired?: boolean | null;
+  @IsOptional() @IsBoolean() waterAvailable?: boolean | null;
+  @IsOptional() @IsBoolean() petArea?: boolean | null;
+  @IsOptional() @IsString() @Length(0, 120) province?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(14) @ValidateNested({ each: true }) @Type(() => OpeningHoursDto) openingHours?: OpeningHoursDto[] | null;
 }
 
 export class UpdatePetFriendlyPlaceDto {
@@ -125,6 +148,13 @@ export class UpdatePetFriendlyPlaceDto {
   @IsString()
   @Length(0, 300)
   verificationSource?: string;
+
+  /** Batch 5 — omit (or null) when the place has not stated it. */
+  @IsOptional() @IsBoolean() leashRequired?: boolean | null;
+  @IsOptional() @IsBoolean() waterAvailable?: boolean | null;
+  @IsOptional() @IsBoolean() petArea?: boolean | null;
+  @IsOptional() @IsString() @Length(0, 120) province?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(14) @ValidateNested({ each: true }) @Type(() => OpeningHoursDto) openingHours?: OpeningHoursDto[] | null;
 }
 
 export class SetPetFriendlyPlaceVerificationStatusDto {

@@ -111,6 +111,62 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "زمان ارسال دوره‌ای نزدیک است", body: "سفارش دوره‌ای بعدی شما نزدیک است. قیمت و موجودی را بررسی و سفارش را تأیید کنید.", smsBody: "زمان سفارش دوره‌ای شما در پت‌لایف رسیده است؛ برای تأیید وارد شوید." },
     en: { title: "Your repeat delivery is due", body: "Your next repeat delivery is coming up. Check the price and stock, then confirm the order.", smsBody: "Your PET LIFE OS repeat delivery is due — open the app to confirm." },
   },
+  "travel.booking_request_received": {
+    fa: { title: "درخواست رزرو جدید", body: "یک درخواست رزرو اقامت برای بررسی دارید." },
+    en: { title: "New booking request", body: "You have a new stay request to review." },
+  },
+  "travel.booking_requested": {
+    fa: { title: "درخواست رزرو ارسال شد", body: "درخواست شما برای میزبان ارسال شد. پاسخ او را اطلاع می‌دهیم." },
+    en: { title: "Booking request sent", body: "Your request was sent to the host. We'll let you know when they answer." },
+  },
+  "travel.payment_required": {
+    fa: { title: "پرداخت رزرو لازم است", body: "برای قطعی شدن رزرو، پرداخت را در مهلت تعیین‌شده انجام دهید." },
+    en: { title: "Payment needed", body: "Complete the payment within the window to confirm your stay." },
+  },
+  "travel.booking_confirmed": {
+    fa: { title: "رزرو شما قطعی شد", body: "رزرو اقامت شما تأیید شد. جزئیات و آمادگی سفر را ببینید." },
+    en: { title: "Your stay is confirmed", body: "Your stay is confirmed. See the details and trip readiness." },
+  },
+  "travel.booking_confirmed_provider": {
+    fa: { title: "رزرو قطعی شد", body: "یک رزرو اقامت قطعی شد." },
+    en: { title: "Booking confirmed", body: "A stay was confirmed." },
+  },
+  "travel.booking_rejected": {
+    fa: { title: "درخواست رزرو پذیرفته نشد", body: "میزبان نتوانست درخواست شما را بپذیرد. تاریخ‌ها آزاد شد." },
+    en: { title: "Request declined", body: "The host could not accept your request. The dates were released." },
+  },
+  "travel.booking_expired": {
+    fa: { title: "رزرو منقضی شد", body: "مهلت این رزرو به پایان رسید و تاریخ‌ها آزاد شد." },
+    en: { title: "Booking expired", body: "This booking's window ended and the dates were released." },
+  },
+  "travel.booking_cancelled_by_provider": {
+    fa: { title: "میزبان رزرو را لغو کرد", body: "رزرو شما توسط میزبان لغو شد و مبلغ پرداختی کامل بازگردانده می‌شود." },
+    en: { title: "Host cancelled your stay", body: "The host cancelled your stay; anything you paid is refunded in full." },
+  },
+  "travel.booking_cancelled_by_traveler": {
+    fa: { title: "مهمان رزرو را لغو کرد", body: "یک رزرو توسط مهمان لغو شد و تاریخ‌ها آزاد شد." },
+    en: { title: "Guest cancelled", body: "A guest cancelled a stay; the dates were released." },
+  },
+  "travel.booking_changed": {
+    fa: { title: "تاریخ رزرو تغییر کرد", body: "مهمان تاریخ یک رزرو را تغییر داد." },
+    en: { title: "Booking dates changed", body: "A guest changed a booking's dates." },
+  },
+  "travel.listing_published": {
+    fa: { title: "اقامتگاه شما منتشر شد", body: "اقامتگاه شما بررسی و منتشر شد." },
+    en: { title: "Listing published", body: "Your listing was reviewed and published." },
+  },
+  "travel.listing_draft": {
+    fa: { title: "اصلاح اقامتگاه لازم است", body: "تیم پت‌لایف درخواست اصلاح داده است. توضیحات را ببینید." },
+    en: { title: "Changes requested", body: "PET LIFE asked for changes to your listing. See the note." },
+  },
+  "travel.listing_suspended": {
+    fa: { title: "اقامتگاه شما متوقف شد", body: "اقامتگاه شما از نمایش عمومی خارج شد. توضیحات را ببینید." },
+    en: { title: "Listing suspended", body: "Your listing was taken off public view. See the note." },
+  },
+  "insurance.application_needs_information": {
+    fa: { title: "بیمه‌گر اطلاعات بیشتری خواسته است", body: "برای ادامه بررسی درخواست بیمه، اطلاعات خواسته‌شده را تکمیل کنید." },
+    en: { title: "The insurer needs more information", body: "Add the requested information so the insurer can continue reviewing your application." },
+  },
   "shipment.delivered": {
     fa: { title: "سفارش شما تحویل داده شد", body: "سفارش شما با موفقیت تحویل داده شد.", smsBody: "سفارش شما در پت‌لایف تحویل داده شد." },
     en: { title: "Your order was delivered", body: "Your order was delivered successfully.", smsBody: "Your PET LIFE OS order was delivered." },
