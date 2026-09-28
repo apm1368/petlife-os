@@ -45,11 +45,18 @@ export class LedgerService implements OnModuleInit {
   /** Idempotent seed of the small, fixed chart of accounts (spec section 31) — safe to run on every boot. */
   async onModuleInit(): Promise<void> {
     for (const account of SEEDED_ACCOUNTS) {
-      await this.prisma.ledgerAccount.upsert({
-        where: { code: account.code },
-        update: {},
-        create: { code: account.code, name: account.name },
-      });
+      try {
+        await this.prisma.ledgerAccount.upsert({
+          where: { code: account.code },
+          update: {},
+          create: { code: account.code, name: account.name },
+        });
+      } catch (error) {
+        // Prisma's upsert is not atomic: two processes booting at once on a
+        // fresh database can both try the insert. The loser's unique
+        // violation means the account now exists, which is all we need.
+        if (!(error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")) throw error;
+      }
     }
   }
 
