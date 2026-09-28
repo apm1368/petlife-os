@@ -28,6 +28,7 @@ export const insuranceService = {
     apiFetch<InsuranceApplicationDto>(`/pets/${petId}/insurance-applications`, { method: "POST", body: { productId, notes } }),
   updateApplication: (petId: string, applicationId: string, notes: string) =>
     apiFetch<InsuranceApplicationDto>(`/pets/${petId}/insurance-applications/${applicationId}`, { method: "PATCH", body: { notes } }),
-  submitApplication: (petId: string, applicationId: string) => apiFetch<InsuranceApplicationDto>(`/pets/${petId}/insurance-applications/${applicationId}/submit`, { method: "POST" }),
+  submitApplication: (petId: string, applicationId: string, consent: boolean) => apiFetch<InsuranceApplicationDto>(`/pets/${petId}/insurance-applications/${applicationId}/submit`, { method: "POST", body: { consent } }),
+  consentText: () => apiFetch<{ text: string }>("/insurance/consent"),
   cancelApplication: (petId: string, applicationId: string) => apiFetch<InsuranceApplicationDto>(`/pets/${petId}/insurance-applications/${applicationId}/cancel`, { method: "POST" }),
 };

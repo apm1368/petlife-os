@@ -163,7 +163,7 @@ export function policyFacts(p: TravelPetPolicyDto | null, lang: Lang): { label: 
     { label: fa ? "سایر حیوانات" : "Other pets", value: yesNo(p.otherAllowed) },
     { label: fa ? "حداکثر تعداد" : "Maximum pets", value: p.maxPets === null ? NS : localizeDigits(p.maxPets, lang) },
     { label: fa ? "حداکثر وزن" : "Maximum weight", value: kg(p.maxWeightKg) },
-    { label: fa ? "هزینهٔ حیوان (هر شب/اقامت طبق قرارداد)" : "Pet fee", value: p.petFeeIrr === null ? NS : p.petFeeIrr === 0 ? (fa ? "رایگان" : "Free") : formatCurrency(p.petFeeIrr, lang) },
+    { label: fa ? "هزینهٔ حیوان (برای هر حیوان در هر اقامت)" : "Pet fee (per pet, per stay)", value: p.petFeeIrr === null ? NS : p.petFeeIrr === 0 ? (fa ? "رایگان" : "Free") : formatCurrency(p.petFeeIrr, lang) },
     { label: fa ? "ودیعهٔ حیوان" : "Pet deposit", value: p.depositIrr === null ? NS : formatCurrency(p.depositIrr, lang) },
     { label: fa ? "گواهی واکسن" : "Vaccination proof", value: p.vaccinationRequired ? (fa ? "لازم است" : "Required") : fa ? "اعلام نشده" : "Not stated as required" },
     { label: fa ? "گواهی سلامت" : "Health certificate", value: p.healthCertificateRequired ? (fa ? "لازم است" : "Required") : fa ? "اعلام نشده" : "Not stated as required" },

@@ -5,7 +5,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { insuranceService } from "@/services/insurance.service";
 import { PetInsuranceView } from "./PetInsuranceView";
 
-vi.mock("@/services/insurance.service", () => ({ insuranceService: { listApplications: vi.fn(), submitApplication: vi.fn(), cancelApplication: vi.fn() } }));
+vi.mock("@/services/insurance.service", () => ({ insuranceService: { listApplications: vi.fn(), submitApplication: vi.fn(), cancelApplication: vi.fn(), updateApplication: vi.fn(), consentText: vi.fn().mockResolvedValue({ text: "I agree that PET LIFE shares this application with the insurer." }) } }));
 
 function application(overrides: Partial<InsuranceApplicationDto> = {}): InsuranceApplicationDto {
   return {
@@ -45,16 +45,28 @@ describe("PetInsuranceView", () => {
     expect(screen.queryByText("Declined")).toBeNull();
   });
 
-  it("submits a draft application and reloads the list", async () => {
+  it("requires explicit consent before submitting a draft, then reloads the list", async () => {
     vi.mocked(insuranceService.listApplications).mockResolvedValueOnce([application()]).mockResolvedValueOnce([application({ status: "SUBMITTED" as never })]);
     vi.mocked(insuranceService.submitApplication).mockResolvedValue(application({ status: "SUBMITTED" as never }));
 
     renderWithIntl(<PetInsuranceView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.getByText("Submit application")).toBeTruthy());
-    fireEvent.click(screen.getByText("Submit application"));
+    const submit = (await screen.findByRole("button", { name: "Submit application" })) as HTMLButtonElement;
+    expect(submit.disabled).toBe(true);
+    fireEvent.click(await screen.findByRole("checkbox"));
+    fireEvent.click(submit);
 
-    await waitFor(() => expect(insuranceService.submitApplication).toHaveBeenCalledWith("pet-1", "application-1"));
+    await waitFor(() => expect(insuranceService.submitApplication).toHaveBeenCalledWith("pet-1", "application-1", true));
+  });
+
+  it("shows the insurer's request when more information is needed and resubmits with consent", async () => {
+    vi.mocked(insuranceService.listApplications).mockResolvedValue([application({ status: "NEEDS_INFORMATION" as never, insurerMessage: "Please add the latest vet notes." })]);
+    vi.mocked(insuranceService.submitApplication).mockResolvedValue(application({ status: "SUBMITTED" as never }));
+    renderWithIntl(<PetInsuranceView petId="pet-1" />);
+    expect(await screen.findByText("Please add the latest vet notes.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: "Resubmit to the insurer" }));
+    await waitFor(() => expect(insuranceService.submitApplication).toHaveBeenCalledWith("pet-1", "application-1", true));
   });
 
   it("shows a localized empty state when there are no applications", async () => {

@@ -50,7 +50,7 @@ describe("pet policy copy", () => {
     expect(facts).toEqual([{ label: "Pet policy", value: "Not specified" }]);
     const partial = policyFacts({ dogsAllowed: true, catsAllowed: false, otherAllowed: false, maxPets: null, maxWeightKg: null, minWeightKg: null, breedRestrictions: [], vaccinationRequired: false, healthCertificateRequired: false, carrierRequired: false, leashRequired: false, petFeeIrr: null, depositIrr: null, restrictedAreas: null, notes: null }, "en");
     expect(partial.find((f) => f.label === "Maximum weight")!.value).toBe("Not specified");
-    expect(partial.find((f) => f.label === "Pet fee")!.value).toBe("Not specified");
+    expect(partial.find((f) => f.label === "Pet fee (per pet, per stay)")!.value).toBe("Not specified");
   });
 
   it("explains match reasons in plain language", () => {

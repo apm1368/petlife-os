@@ -202,7 +202,7 @@ export const travelProviderService = {
   updateUnit: (id: string, unitId: string, input: UnitInput) => apiFetch<TravelListingDto>(`/provider/travel/listings/${id}/units/${unitId}`, { method: "PATCH", body: input }),
   createRatePlan: (id: string, unitId: string, input: RatePlanInput) => apiFetch<TravelListingDto>(`/provider/travel/listings/${id}/units/${unitId}/rate-plans`, { method: "POST", body: input }),
   updateRatePlan: (id: string, unitId: string, planId: string, input: Partial<RatePlanInput>) => apiFetch<TravelListingDto>(`/provider/travel/listings/${id}/units/${unitId}/rate-plans/${planId}`, { method: "PATCH", body: input }),
-  setAvailability: (id: string, unitId: string, input: { fromDate: string; toDate: string; isBlocked?: boolean; priceOverrideIrr?: number | null }) => apiFetch<{ updatedDays: number }>(`/provider/travel/listings/${id}/units/${unitId}/availability`, { method: "PUT", body: input }),
+  setAvailability: (id: string, unitId: string, input: { fromDate: string; toDate: string; isBlocked?: boolean; priceIrr?: number }) => apiFetch<{ updatedDays: number }>(`/provider/travel/listings/${id}/units/${unitId}/availability`, { method: "PUT", body: input }),
   calendar: (id: string, from: string, to: string) => apiFetch<TravelProviderCalendarDto[]>(`/provider/travel/listings/${id}/calendar${toQuery({ from, to })}`),
   bookings: (p: { status?: string; page?: number } = {}) => apiFetch<PaginatedDto<TravelBookingDto>>(`/provider/travel/bookings${toQuery(p)}`),
   booking: (id: string) => apiFetch<TravelBookingDto>(`/provider/travel/bookings/${id}`),
