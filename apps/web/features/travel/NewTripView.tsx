@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
+import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
+import { addDays, todayIso } from "@/lib/date/jalali";
 import { TravelMode } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
 import { ApiError } from "@/lib/api/client";
@@ -38,8 +40,9 @@ export function NewTripView({ petId }: { petId: string }) {
         originCity: originCity.trim() || undefined,
         destinationCountry: destinationCountry.trim().toUpperCase(),
         destinationCity: destinationCity.trim() || undefined,
-        departAt: new Date(departAt).toISOString(),
-        returnAt: returnAt ? new Date(returnAt).toISOString() : undefined,
+        // Calendar days are Tehran-local; noon avoids the day shifting across time zones.
+        departAt: new Date(`${departAt}T12:00:00+03:30`).toISOString(),
+        returnAt: returnAt ? new Date(`${returnAt}T12:00:00+03:30`).toISOString() : undefined,
         travelMode,
         notes: notes.trim() || undefined,
       });
@@ -61,8 +64,8 @@ export function NewTripView({ petId }: { petId: string }) {
         <Input label={t("newTrip.originCityLabel")} value={originCity} onChange={(e) => setOriginCity(e.target.value)} />
         <Input label={t("newTrip.destinationCountryLabel")} value={destinationCountry} onChange={(e) => setDestinationCountry(e.target.value)} maxLength={2} placeholder="TR" />
         <Input label={t("newTrip.destinationCityLabel")} value={destinationCity} onChange={(e) => setDestinationCity(e.target.value)} />
-        <Input label={t("newTrip.departAtLabel")} type="date" value={departAt} onChange={(e) => setDepartAt(e.target.value)} />
-        <Input label={t("newTrip.returnAtLabel")} type="date" value={returnAt} onChange={(e) => setReturnAt(e.target.value)} />
+        <DateRangeField mode="single" label={t("newTrip.departAtLabel")} value={{ start: departAt || null, end: null }} onChange={(v) => { setDepartAt(v.start ?? ""); if (returnAt && v.start && returnAt < v.start) setReturnAt(""); }} min={todayIso()} max={addDays(todayIso(), 730)} />
+        <DateRangeField mode="single" label={t("newTrip.returnAtLabel")} value={{ start: returnAt || null, end: null }} onChange={(v) => setReturnAt(v.start ?? "")} min={departAt || todayIso()} max={addDays(todayIso(), 730)} />
         <Select
           label={t("newTrip.travelModeLabel")}
           value={travelMode}

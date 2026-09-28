@@ -19,7 +19,7 @@ export const globalDestinations: NavigationItem[] = [
 export const exploreDestinations: NavigationItem[] = [
   { path: "/vet/find", fa: "سلامت و دامپزشکی", en: "Health & vet" }, { path: "/services", fa: "خدمات", en: "Services" },
   { path: "/shop", fa: "فروشگاه", en: "Shop" }, { path: "/places", fa: "مکان‌ها", en: "Places" },
-  { path: "/pets/active?view=travel", fa: "سفر", en: "Travel" }, { path: "/insurance", fa: "بیمه", en: "Insurance" },
+  { path: "/travel", fa: "سفر", en: "Travel" }, { path: "/insurance", fa: "بیمه", en: "Insurance" },
   { path: "/animal-support", fa: "حمایت از حیوانات", en: "Animal support" }, { path: "/community", fa: "جامعه", en: "Community" },
   { path: "/blog", fa: "راهنماها", en: "Guides" },
 ];

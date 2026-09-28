@@ -25,7 +25,7 @@ export const LISTING_INCLUDE = {
 export type ListingWithRelations = Prisma.TravelListingGetPayload<{ include: typeof LISTING_INCLUDE }>;
 
 export const BOOKING_INCLUDE = {
-  listing: { select: { title: true, type: true, city: true, organizationId: true, media: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } } } },
+  listing: { select: { title: true, type: true, city: true, bookingMode: true, organizationId: true, media: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } } } },
   unit: { select: { name: true } },
   pets: { include: { pet: { select: { name: true, species: true } } } },
   statusEvents: { orderBy: { createdAt: "asc" } },
@@ -151,6 +151,7 @@ export function toTravelBookingDto(row: BookingWithRelations, extras: BookingDto
     listingId: row.listingId,
     listingTitle: row.listing.title,
     listingType: row.listing.type as unknown as TravelBookingDto["listingType"],
+    bookingMode: row.listing.bookingMode as unknown as TravelBookingDto["bookingMode"],
     listingCity: row.listing.city,
     unitId: row.unitId,
     unitName: row.unit.name,

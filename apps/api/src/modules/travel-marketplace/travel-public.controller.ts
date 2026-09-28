@@ -7,6 +7,7 @@ import type { SessionUser } from "../../common/session/session.service";
 import { TravelSearchService } from "./travel-search.service";
 import { TravelAvailabilityService, publicQuote } from "./travel-availability.service";
 import { TravelBookingService } from "./travel-booking.service";
+import { TravelInventoryUnitNotFoundException } from "../../common/errors/api-exception";
 import { CalendarQueryDto, TravelCompareQueryDto, TravelQuoteV2QueryDto, TravelSearchQueryDto } from "./dto/travel-marketplace.dto";
 
 class ReviewPageDto {
@@ -54,7 +55,9 @@ export class TravelPublicController {
 
   @Get("listings/:id/units/:unitId/calendar")
   async calendar(@Param("id", ParseUUIDPipe) id: string, @Param("unitId", ParseUUIDPipe) unitId: string, @Query() query: CalendarQueryDto) {
-    await this.search.detail(undefined, id);
+    const listing = await this.search.detail(undefined, id);
+    // Only units of this published listing — never another (unpublished) listing's calendar.
+    if (!listing.units.some((u) => u.id === unitId && u.isActive)) throw new TravelInventoryUnitNotFoundException({ unitId });
     return this.availability.getUnitCalendar(unitId, query.from, query.to);
   }
 

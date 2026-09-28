@@ -42,6 +42,13 @@ export function TravelHubView({ petId }: { petId: string }) {
         </Link>
       </div>
 
+      <Link href="/travel">
+        <ContextSurface className="flex items-center justify-between">
+          <span className="text-body text-text-primary">{t("hub.staysLink")}</span>
+          <span aria-hidden="true">→</span>
+        </ContextSurface>
+      </Link>
+
       <Link href={`/pets/${petId}/travel/passport`}>
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.passportReadinessLink")}</span>

@@ -766,7 +766,8 @@
         "sharedRecords": "پرونده‌های اشتراکی",
         "waitlist": "لیست انتظار",
         "reviews": "نظرات",
-        "analytics": "گزارش عملکرد"
+        "analytics": "گزارش عملکرد",
+        "travel": "سفر و اقامت"
       },
       "notAProvider": {
         "title": "دسترسی ارائه‌دهنده ندارید",
@@ -2039,7 +2040,10 @@
     },
     "relatedEntityType": {
       "ORDER": "سفارش",
-      "BOOKING": "نوبت"
+      "BOOKING": "نوبت",
+      "TRIP": "سفر",
+      "INSURANCE_APPLICATION": "درخواست بیمه",
+      "TRAVEL_BOOKING": "رزرو اقامت"
     }
   },
   "admin": {
@@ -2085,7 +2089,9 @@
         "contentPlacements": "بخش‌های محتوایی",
         "subscriptions": "اشتراک‌ها",
         "services": "خدمات و نوبت‌ها",
-        "commerce": "فروشگاه"
+        "commerce": "فروشگاه",
+        "travel": "سفر و اقامت",
+        "insurance": "بیمه"
       }
     },
     "common": {
@@ -3140,7 +3146,8 @@
       "placesLink": "یافتن مکان‌های دوستدار حیوان خانگی",
       "insuranceLink": "مشاهده بیمه حیوان خانگی",
       "empty": "هنوز سفری ثبت نشده. اولین سفر خود را برنامه‌ریزی کنید.",
-      "requirementsCount": "{count, plural, =0 {هنوز الزامی ثبت نشده} other {# الزام}}"
+      "requirementsCount": "{count, plural, =0 {هنوز الزامی ثبت نشده} other {# الزام}}",
+      "staysLink": "یافتن اقامتگاه دوستدار حیوانات"
     },
     "newTrip": {
       "title": "برنامه‌ریزی سفر جدید",

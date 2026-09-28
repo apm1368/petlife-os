@@ -30,6 +30,7 @@ const NAV_ITEMS = [
   { href: "/team", labelKey: "nav.team" },
   { href: "/reviews", labelKey: "nav.reviews" },
   { href: "/analytics", labelKey: "nav.analytics" },
+  { href: "/travel", labelKey: "nav.travel" },
 ] as const;
 
 /**

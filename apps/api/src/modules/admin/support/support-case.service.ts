@@ -34,7 +34,7 @@ export interface ListSupportCasesFilter {
 }
 
 /** Only entity kinds a consumer can currently link their own case to — the two contextual entry points the spec requires (Order Detail, Booking Detail). */
-export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING", "LOST_PET_INCIDENT", "TRIP", "INSURANCE_APPLICATION"] as const;
+export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING", "LOST_PET_INCIDENT", "TRIP", "INSURANCE_APPLICATION", "TRAVEL_BOOKING"] as const;
 export type UserLinkableRelatedEntityType = (typeof USER_LINKABLE_RELATED_ENTITY_TYPES)[number];
 
 export interface CreateSupportCaseAsUserInput {
@@ -187,6 +187,10 @@ export class SupportCaseService {
           summary: `${application.product.provider.name} — ${application.product.name} — ${application.status}`,
         };
       }
+    } else if (supportCase.relatedEntityType === "TRAVEL_BOOKING" && supportCase.relatedEntityId) {
+      // Batch 5 — reference/status/dates only; never pets' health or shared documents.
+      const stay = await this.prisma.travelBooking.findUnique({ where: { id: supportCase.relatedEntityId }, include: { listing: { select: { title: true } } } });
+      if (stay) relatedEntity = { type: "TRAVEL_BOOKING", id: stay.id, summary: `Stay ${stay.reference} — ${stay.listing.title} — ${stay.status} — ${stay.checkIn.toISOString().slice(0, 10)}` };
     } else if (supportCase.relatedEntityType && supportCase.relatedEntityId) {
       relatedEntity = { type: supportCase.relatedEntityType, id: supportCase.relatedEntityId, summary: supportCase.relatedEntityId };
     }
@@ -417,6 +421,11 @@ export class SupportCaseService {
         const application = await this.prisma.insuranceApplication.findUnique({ where: { id: input.relatedEntityId } });
         if (!application) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
         const owns = application.applicantUserId === userId || (await this.petAccess.hasActiveAccess(application.petId, userId));
+        if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+      } else if (input.relatedEntityType === "TRAVEL_BOOKING") {
+        const stay = await this.prisma.travelBooking.findUnique({ where: { id: input.relatedEntityId }, select: { bookedByUserId: true, householdId: true } });
+        if (!stay) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+        const owns = stay.bookedByUserId === userId || !!(await this.prisma.householdMember.findFirst({ where: { userId, householdId: stay.householdId }, select: { id: true } }));
         if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
       } else {
         throw new SupportCaseInvalidReferenceException({ field: "relatedEntityType" });

@@ -219,6 +219,22 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
       expect((await t.c.get("/travel/favorites").expect(200)).body.map((f: { id: string }) => f.id)).toContain(l.listingId);
       await t.c.delete(`/travel/listings/${l.listingId}/favorite`).expect(200);
     });
+    it("a public unit calendar is only served for units of that published listing; support cases can link only your own stay", async () => {
+      const p = await partner();
+      const pub = await listing(p.orgId);
+      const hidden = await listing(p.orgId);
+      await prisma.travelListing.update({ where: { id: hidden.listingId }, data: { status: "DRAFT", isPubliclyListed: false } });
+      const cal = await request(server).get(`/travel/listings/${pub.listingId}/units/${pub.unitId}/calendar?from=${day(3)}&to=${day(5)}`).expect(200);
+      expect(cal.body).toHaveLength(3);
+      await request(server).get(`/travel/listings/${pub.listingId}/units/${hidden.unitId}/calendar?from=${day(3)}&to=${day(5)}`).expect(404);
+
+      const owner = await traveler();
+      const other = await traveler();
+      const b = await holdAndSubmit(owner.c, pub, owner.petIds);
+      expect(b.bookingMode).toBe("INSTANT_BOOKING");
+      await other.c.post("/support/cases").send({ subject: "Help", description: "Not mine", category: "BOOKING", relatedEntityType: "TRAVEL_BOOKING", relatedEntityId: b.id }).expect(400);
+      await owner.c.post("/support/cases").send({ subject: "Question about my stay", description: "Arrival time", category: "BOOKING", relatedEntityType: "TRAVEL_BOOKING", relatedEntityId: b.id }).expect(201);
+    });
   });
 
   // --------------------------------------------------------------- booking

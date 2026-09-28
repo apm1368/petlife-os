@@ -17,6 +17,8 @@ import { ApiError } from "@/lib/api/client";
  * assertUserOwnsReferences) so a tampered link can't attach someone else's
  * order/booking to this user's case.
  */
+const LINKABLE = ["ORDER", "BOOKING", "TRIP", "INSURANCE_APPLICATION", "TRAVEL_BOOKING"] as const;
+
 export function CreateTicketView() {
   const t = useTranslations("support");
   const router = useRouter();
@@ -44,8 +46,8 @@ export function CreateTicketView() {
         subject,
         description,
         category,
-        relatedEntityType: relatedEntityType === "ORDER" || relatedEntityType === "BOOKING" ? relatedEntityType : undefined,
-        relatedEntityId: relatedEntityId ?? undefined,
+        relatedEntityType: LINKABLE.includes(relatedEntityType as (typeof LINKABLE)[number]) ? (relatedEntityType as (typeof LINKABLE)[number]) : undefined,
+        relatedEntityId: relatedEntityType && LINKABLE.includes(relatedEntityType as (typeof LINKABLE)[number]) ? relatedEntityId ?? undefined : undefined,
       });
       router.push(`/${locale}/support/tickets/${created.id}`);
     } catch (err) {

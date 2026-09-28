@@ -156,6 +156,12 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
           ))}
         </ul>
         {profile.phone ? <p className="inline-flex items-center gap-2"><Phone size={16} aria-hidden="true" /><span dir="ltr">{profile.phone}</span></p> : null}
+        {profile.type === "VET_CLINIC" && profile.locations[0]?.city ? (
+          <p className="text-sm text-text-secondary">
+            {fa ? "در سفر هستید؟ " : "Travelling? "}
+            <Link className="underline" href={`/${locale}/travel/search?city=${encodeURIComponent(profile.locations[0].city)}`}>{fa ? `اقامتگاه‌های دوستدار حیوانات در ${profile.locations[0].city}` : `Pet-friendly stays in ${profile.locations[0].city}`}</Link>
+          </p>
+        ) : null}
       </section>
 
       <section id="reviews" className="flex flex-col gap-3">

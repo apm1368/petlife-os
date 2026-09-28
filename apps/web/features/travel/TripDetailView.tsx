@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { formatDay } from "@/lib/date/jalali";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MedicalDocumentDto, TravelRequirementDto, TripDto, TripReadinessSummaryDto } from "@petlife/types";
 import { MedicalDocumentType, TravelRequirementStatus, TravelRequirementType, TripStatus } from "@petlife/types";
@@ -45,6 +47,7 @@ const REQUIREMENT_STATUSES: TravelRequirementStatus[] = [
 
 export function TripDetailView({ petId, tripId }: { petId: string; tripId: string }) {
   const t = useTranslations("travel");
+  const locale = useLocale() as "fa" | "en";
   const tCommon = useTranslations("common");
 
   const [trip, setTrip] = useState<TripDto | null>(null);
@@ -130,10 +133,11 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
       </div>
 
       <ContextSurface className="flex flex-col gap-2">
-        <p className="text-body text-text-primary">{t("detail.departAt", { date: new Date(trip.departAt).toLocaleDateString() })}</p>
-        {trip.returnAt ? <p className="text-body text-text-primary">{t("detail.returnAt", { date: new Date(trip.returnAt).toLocaleDateString() })}</p> : null}
+        <p className="text-body text-text-primary">{t("detail.departAt", { date: formatDay(trip.departAt.slice(0, 10), locale) })}</p>
+        {trip.returnAt ? <p className="text-body text-text-primary">{t("detail.returnAt", { date: formatDay(trip.returnAt.slice(0, 10), locale) })}</p> : null}
         <p className="text-metadata text-text-secondary">{t(`travelMode.${trip.travelMode}`)}</p>
         {trip.notes ? <p className="text-metadata text-text-secondary">{trip.notes}</p> : null}
+        <Link href={`/${locale}/travel/trips/${trip.id}`} className="w-fit text-sm font-bold text-brand-natural underline">{locale === "fa" ? "مرکز سفر: اقامت‌ها، آمادگی و مکان‌ها" : "Trip hub: stays, readiness and places"}</Link>
       </ContextSurface>
 
       {error ? <p className="text-body text-state-urgent">{error}</p> : null}

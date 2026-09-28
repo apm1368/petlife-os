@@ -766,7 +766,8 @@
         "sharedRecords": "Shared records",
         "waitlist": "Waitlist",
         "reviews": "Reviews",
-        "analytics": "Performance"
+        "analytics": "Performance",
+        "travel": "Travel & stays"
       },
       "notAProvider": {
         "title": "No provider access",
@@ -2039,7 +2040,10 @@
     },
     "relatedEntityType": {
       "ORDER": "order",
-      "BOOKING": "booking"
+      "BOOKING": "booking",
+      "TRIP": "trip",
+      "INSURANCE_APPLICATION": "insurance application",
+      "TRAVEL_BOOKING": "stay booking"
     }
   },
   "admin": {
@@ -2085,7 +2089,9 @@
         "contentPlacements": "Placements",
         "subscriptions": "Subscriptions",
         "services": "Services & bookings",
-        "commerce": "Commerce"
+        "commerce": "Commerce",
+        "travel": "Travel & stays",
+        "insurance": "Insurance"
       }
     },
     "common": {
@@ -3140,7 +3146,8 @@
       "placesLink": "Find pet-friendly places",
       "insuranceLink": "Browse pet insurance",
       "empty": "No trips yet. Start planning your first one.",
-      "requirementsCount": "{count, plural, =0 {No requirements yet} one {# requirement} other {# requirements}}"
+      "requirementsCount": "{count, plural, =0 {No requirements yet} one {# requirement} other {# requirements}}",
+      "staysLink": "Find a pet-friendly stay"
     },
     "newTrip": {
       "title": "Plan a new trip",

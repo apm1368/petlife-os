@@ -5128,6 +5128,8 @@ export interface TravelBookingDto {
   listingId: string;
   listingTitle: string;
   listingType: TravelListingType;
+  /** Batch 5: how the property takes bookings (request vs instant) — for honest copy before submit. */
+  bookingMode: TravelBookingMode;
   listingCity: string;
   unitId: string;
   unitName: string;
