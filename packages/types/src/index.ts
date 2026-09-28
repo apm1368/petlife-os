@@ -2911,7 +2911,11 @@ export type AdminPermissionName =
   | "services.manage"
   | "commerce.view"
   | "commerce.manage"
-  | "promotions.manage";
+  | "promotions.manage"
+  | "travel.view"
+  | "travel.manage"
+  | "travel.requirements.manage"
+  | "insurance.applications.view";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -4842,6 +4846,7 @@ export interface InsuranceEligibilityResultDto {
 
 /** APPROVED/DECLINED exist for a future real insurer integration — no service ever sets either today (spec: "do not simulate underwriting approval"). */
 export enum InsuranceApplicationStatus {
+  NEEDS_INFORMATION = "NEEDS_INFORMATION",
   DRAFT = "DRAFT",
   SUBMITTED = "SUBMITTED",
   UNDER_REVIEW = "UNDER_REVIEW",
@@ -4866,6 +4871,11 @@ export interface InsuranceApplicationDto {
   decidedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  consentAt?: string | null;
+  insurerMessage?: string | null;
+  externalReference?: string | null;
+  timeline?: { toStatus: string; fromStatus: string | null; actorType: string; note: string | null; createdAt: string }[];
 }
 
 export enum PetFriendlyPlaceCategory {
@@ -4911,6 +4921,12 @@ export interface PetFriendlyPlaceDto {
   isPubliclyListed: boolean;
   isFavorited: boolean;
   createdAt: string;
+  /** Batch 5 — null means the place has not stated it. */
+  leashRequired?: boolean | null;
+  waterAvailable?: boolean | null;
+  petArea?: boolean | null;
+  openingHours?: { day: number; open: string; close: string }[] | null;
+  province?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -4923,6 +4939,11 @@ export interface PetFriendlyPlaceDto {
 // ---------------------------------------------------------------------------
 
 export enum TravelListingType {
+  HOTEL = "HOTEL",
+  ECO_LODGE = "ECO_LODGE",
+  GUESTHOUSE = "GUESTHOUSE",
+  RESORT = "RESORT",
+  PET_HOTEL = "PET_HOTEL",
   PET_FRIENDLY_HOTEL = "PET_FRIENDLY_HOTEL",
   VILLA = "VILLA",
   APARTMENT = "APARTMENT",
@@ -4991,6 +5012,13 @@ export interface TravelInventoryUnitDto {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  bedInfo: string | null;
+  sizeSqm: number | null;
+  amenities: string[];
+  maxPets: number | null;
+  petNotes: string | null;
+  ratePlans: TravelRatePlanDto[];
 }
 
 export interface TravelListingDto {
@@ -5020,6 +5048,14 @@ export interface TravelListingDto {
   fromPriceIrr: number | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  province: string | null;
+  checkInFrom: string | null;
+  checkOutUntil: string | null;
+  houseRules: string | null;
+  media: TravelMediaDto[];
+  rating: TravelRatingSummaryDto;
+  moderationNote: string | null;
 }
 
 /**
@@ -5055,9 +5091,19 @@ export interface TravelQuoteDto {
   petFeeAmountIrr: number;
   depositAmountIrr: number;
   totalAmountIrr: number;
+  /** Batch 5 */
+  ratePlanId: string | null;
+  discountAmountIrr: number;
+  payNowAmountIrr: number;
+  payLaterAmountIrr: number;
+  nightly: { date: string; priceIrr: number }[];
+  petPolicyMatch: PetPolicyMatchDto | null;
 }
 
 export enum TravelBookingStatus {
+  HELD = "HELD",
+  NO_SHOW = "NO_SHOW",
+  MODIFIED = "MODIFIED",
   DRAFT = "DRAFT",
   AWAITING_PROVIDER = "AWAITING_PROVIDER",
   AWAITING_PAYMENT = "AWAITING_PAYMENT",
@@ -5109,6 +5155,27 @@ export interface TravelBookingDto {
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  ratePlanId: string | null;
+  ratePlan: TravelRatePlanSnapshotDto | null;
+  petPolicySnapshot: TravelPetPolicyDto | null;
+  priceBreakdown: TravelPriceBreakdownDto | null;
+  discountAmountIrr: number;
+  payNowAmountIrr: number;
+  paymentStatus: TravelPaymentStatus;
+  holdExpiresAt: string | null;
+  requestExpiresAt: string | null;
+  refundAmountIrr: number;
+  cancelReason: string | null;
+  cancelledBy: string | null;
+  listingCoverUrl: string | null;
+  timeline: TravelBookingEventDto[];
+  canCancel: boolean;
+  canModify: boolean;
+  canReview: boolean;
+  reviewId: string | null;
+  refundPreviewIrr: number | null;
+  documentShares: TravelDocumentShareDto[];
 }
 
 /**
@@ -5729,4 +5796,252 @@ export interface RepeatDeliveryDto {
   lastOrderId: string | null;
   events: { type: string; note: string | null; createdAt: string }[];
   createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Batch 5 — Travel marketplace completion
+// ---------------------------------------------------------------------------
+
+export type TravelCancellationTypeName = "FREE_UNTIL" | "PARTIAL" | "NON_REFUNDABLE";
+export type TravelPaymentTimingName = "PAY_NOW" | "DEPOSIT" | "PAY_AT_PROPERTY";
+export type TravelPaymentStatus = "NOT_REQUIRED" | "AWAITING" | "PAID" | "FAILED" | "REFUND_PENDING" | "REFUNDED" | "PARTIALLY_REFUNDED" | "PAY_AT_PROPERTY";
+
+export interface TravelMediaDto {
+  id: string;
+  url: string;
+  alt: string | null;
+  unitId: string | null;
+}
+
+export interface TravelRatingSummaryDto {
+  average: number | null;
+  count: number;
+  petFriendliness: number | null;
+  cleanliness: number | null;
+  location: number | null;
+}
+
+export interface TravelRatePlanDto {
+  id: string;
+  unitId: string;
+  name: string;
+  priceModifierPercent: number;
+  cancellationType: TravelCancellationTypeName;
+  freeCancellationDays: number | null;
+  lateRefundPercent: number | null;
+  paymentTiming: TravelPaymentTimingName;
+  depositPercent: number | null;
+  includesBreakfast: boolean;
+  includedItems: string[];
+  minNights: number | null;
+  activeFrom: string | null;
+  activeUntil: string | null;
+  isActive: boolean;
+}
+
+export type TravelRatePlanSnapshotDto = Omit<TravelRatePlanDto, "isActive" | "activeFrom" | "activeUntil" | "unitId">;
+
+export interface TravelPriceBreakdownDto {
+  nightly: { date: string; priceIrr: number }[];
+  staySubtotalIrr: number;
+  rateAdjustmentIrr: number;
+  petFeeIrr: number;
+  petDepositIrr: number;
+  discountIrr: number;
+  totalIrr: number;
+  payNowIrr: number;
+  payLaterIrr: number;
+}
+
+export type PetPolicyMatchOutcome = "MATCH" | "POTENTIAL_CONFLICT" | "MORE_INFO_NEEDED";
+
+export interface PetPolicyMatchDto {
+  outcome: PetPolicyMatchOutcome;
+  reasons: { petId: string | null; petName: string | null; code: string; detail?: Record<string, unknown> }[];
+}
+
+export interface TravelBookingEventDto {
+  fromStatus: string | null;
+  toStatus: string;
+  actorType: string;
+  reason: string | null;
+  createdAt: string;
+}
+
+export interface TravelDocumentShareDto {
+  id: string;
+  medicalDocumentId: string;
+  title: string;
+  documentType: string;
+  purpose: string;
+  expiresAt: string;
+  revokedAt: string | null;
+  isActive: boolean;
+}
+
+export interface TravelSearchResultItemDto {
+  id: string;
+  title: string;
+  type: TravelListingType;
+  city: string;
+  province: string | null;
+  country: string;
+  coverUrl: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  isVerified: boolean;
+  bookingMode: TravelBookingMode;
+  rating: TravelRatingSummaryDto;
+  petPolicySummary: { dogsAllowed: boolean; catsAllowed: boolean; maxPets: number | null; maxWeightKg: number | null; petFeeIrr: number | null; stated: boolean };
+  /** Present only when dates were given: the cheapest bookable unit + rate for the whole stay. */
+  stay: { unitId: string; ratePlanId: string | null; nights: number; totalIrr: number; petFeeIrr: number; freeCancellation: boolean } | null;
+  fromNightlyIrr: number | null;
+  freeCancellationAvailable: boolean;
+  distanceKm: number | null;
+  petMatch: PetPolicyMatchOutcome | null;
+  amenities: string[];
+  favorited: boolean;
+}
+
+export interface TravelSearchResultDto {
+  items: TravelSearchResultItemDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  facets: { types: { type: TravelListingType; count: number }[]; amenities: { key: string; count: number }[]; priceRange: { min: number; max: number } | null };
+  mapAvailable: boolean;
+}
+
+export interface TravelDestinationDto {
+  country: string;
+  province: string | null;
+  city: string;
+  listingCount: number;
+}
+
+export interface TravelReviewDto {
+  id: string;
+  overall: number;
+  petFriendliness: number | null;
+  cleanliness: number | null;
+  location: number | null;
+  body: string | null;
+  authorName: string;
+  stayMonth: string;
+  providerResponse: string | null;
+  createdAt: string;
+}
+
+export interface TravelListingDetailDto extends TravelListingDto {
+  reviews: TravelReviewDto[];
+  favorited: boolean;
+  nearbyPlaces: { id: string; name: string; category: string; distanceKm: number }[];
+  nearbyVets: { id: string; name: string; city: string; distanceKm: number | null }[];
+  mapAvailable: boolean;
+}
+
+export interface TripHubDto {
+  trip: TripDto;
+  petName: string;
+  petSpecies: string;
+  phase: "PLANNING" | "UPCOMING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  bookings: TravelBookingDto[];
+  readiness: TripReadinessSummaryDto;
+  /** Per requirement: whether evidence is on file. Derived from structured fields only (never document contents). */
+  documentStates: Record<string, "FOUND" | "MISSING" | "EXPIRING" | "EXPIRED" | "UNKNOWN">;
+  documents: { id: string; title: string; documentType: string; linkedRequirementIds: string[] }[];
+  insuranceApplications: { id: string; productName: string; providerName: string; status: InsuranceApplicationStatus; submittedAt: string | null }[];
+  nearbyPlaces: { id: string; name: string; category: string; city: string }[];
+  favoritePlaces: { id: string; name: string; category: string; city: string }[];
+  nearbyVets: { id: string; name: string; city: string }[];
+  activity: { type: string; label: string; at: string; link: string | null }[];
+  suggestions: { requirementRules: TravelRequirementRuleDto[] };
+}
+
+export interface TripListItemDto {
+  id: string;
+  petId: string;
+  petName: string;
+  destinationCity: string | null;
+  destinationCountry: string;
+  departAt: string;
+  returnAt: string | null;
+  status: TripStatus;
+  phase: TripHubDto["phase"];
+  bookingCount: number;
+  readyCount: number;
+  requirementCount: number;
+}
+
+export interface TravelRequirementRuleDto {
+  id: string;
+  country: string;
+  city: string | null;
+  requirementType: TravelRequirementType;
+  title: string;
+  description: string;
+  species: string[];
+  source: string;
+  sourceUrl: string | null;
+  verifiedAt: string;
+  validUntil: string | null;
+  status: "ACTIVE" | "NEEDS_REVIEW" | "RETIRED";
+  isStale: boolean;
+}
+
+export interface TravelProviderFinanceDto {
+  from: string;
+  to: string;
+  bookingCount: number;
+  bookedValueIrr: number;
+  paidOnlineIrr: number;
+  refundedIrr: number;
+  netCollectedIrr: number;
+  payAtPropertyIrr: number;
+  rows: { bookingId: string; reference: string; checkIn: string; status: TravelBookingStatus; totalIrr: number; paidIrr: number; refundedIrr: number }[];
+  settlementNote: string;
+}
+
+export interface TravelProviderCalendarDto {
+  unitId: string;
+  unitName: string;
+  quantity: number;
+  days: { date: string; remaining: number; booked: number; isBlocked: boolean; priceIrr: number; bookings: { id: string; reference: string; status: TravelBookingStatus }[] }[];
+}
+
+export interface AdminTravelAnalyticsDto {
+  days: number;
+  bookingCount: number;
+  confirmedCount: number;
+  cancelledCount: number;
+  bookedValueIrr: number;
+  paidValueIrr: number;
+  refundedIrr: number;
+  cancellationRate: number | null;
+  averageNights: number | null;
+  averageRating: number | null;
+  reviewCount: number;
+  topDestinations: { city: string; bookings: number }[];
+  topProviders: { organizationId: string; name: string; bookings: number; bookedValueIrr: number }[];
+  settlementNote: string;
+}
+
+export interface InsurerApplicationRowDto {
+  id: string;
+  productName: string;
+  status: InsuranceApplicationStatus;
+  eligibilityStatus: InsuranceEligibilityStatus;
+  petSpecies: string;
+  petAgeMonths: number | null;
+  petBreed: string | null;
+  submittedAt: string | null;
+  updatedAt: string;
+}
+
+export interface InsurerApplicationDetailDto extends InsurerApplicationRowDto {
+  notes: string | null;
+  insurerMessage: string | null;
+  externalReference: string | null;
+  consentAt: string | null;
+  timeline: { toStatus: string; fromStatus: string | null; actorType: string; note: string | null; createdAt: string }[];
 }

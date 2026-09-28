@@ -248,6 +248,8 @@ enum HealthSeverity {
 /// categories (e.g. a clinic that also grooms), and each ProviderService
 /// carries its own `category` rather than inferring one from the org's type.
 enum ProviderType {
+  /// Batch 5: accommodation / travel supply partner.
+  TRAVEL_ACCOMMODATION
   VET_CLINIC
   VET_HOSPITAL
   VETERINARIAN
@@ -2716,13 +2718,13 @@ model Checkout {
 
   status CheckoutStatus @default(DRAFT)
 
-  subtotalAmount Int     @default(0)
-  deliveryAmount Int     @default(0)
-  discountAmount Int     @default(0)
-  totalAmount    Int     @default(0)
-  currency       String  @default("IRR")
+  subtotalAmount      Int     @default(0)
+  deliveryAmount      Int     @default(0)
+  discountAmount      Int     @default(0)
+  totalAmount         Int     @default(0)
+  currency            String  @default("IRR")
   /// Placeholder only (spec section 46) — no promotion/campaign engine exists to validate this against.
-  promotionCode  String?
+  promotionCode       String?
   /// Batch 4: the priced lines (CartLineDto[]) frozen when the checkout was created. Orders are built from this, never from the mutable cart, so the order always equals what was charged.
   pricedLinesSnapshot Json?
 
@@ -5753,11 +5755,12 @@ enum CarePlanStatus {
 }
 
 model MedicalDocument {
-  id          String    @id @default(uuid()) @db.Uuid
-  petId       String    @db.Uuid
-  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
-  householdId String    @db.Uuid
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  id           String                       @id @default(uuid()) @db.Uuid
+  travelShares TravelBookingDocumentShare[]
+  petId        String                       @db.Uuid
+  pet          Pet                          @relation(fields: [petId], references: [id], onDelete: Restrict)
+  householdId  String                       @db.Uuid
+  household    Household                    @relation(fields: [householdId], references: [id], onDelete: Restrict)
 
   documentType MedicalDocumentType
   title        String
@@ -7288,6 +7291,7 @@ enum InsuranceVerificationStatus {
 
 model InsuranceProvider {
   id               String                      @id @default(uuid()) @db.Uuid
+  memberships      InsurerMembership[]
   name             String
   description      String?
   logoObjectKey    String?
@@ -7383,6 +7387,8 @@ enum InsuranceEligibilityStatus {
 /// no service in this handoff ever transitions an application into either
 /// state (spec: "do not simulate underwriting approval").
 enum InsuranceApplicationStatus {
+  /// Batch 5: the insurer asked the applicant for more information.
+  NEEDS_INFORMATION
   DRAFT
   SUBMITTED
   UNDER_REVIEW
@@ -7392,15 +7398,21 @@ enum InsuranceApplicationStatus {
 }
 
 model InsuranceApplication {
-  id              String           @id @default(uuid()) @db.Uuid
-  productId       String           @db.Uuid
-  product         InsuranceProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
-  householdId     String           @db.Uuid
-  household       Household        @relation(fields: [householdId], references: [id], onDelete: Restrict)
-  petId           String           @db.Uuid
-  pet             Pet              @relation(fields: [petId], references: [id], onDelete: Restrict)
+  id                String                      @id @default(uuid()) @db.Uuid
+  /// Batch 5
+  consentAt         DateTime?
+  consentText       String?
+  insurerMessage    String?
+  externalReference String?
+  events            InsuranceApplicationEvent[]
+  productId         String                      @db.Uuid
+  product           InsuranceProduct            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  householdId       String                      @db.Uuid
+  household         Household                   @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId             String                      @db.Uuid
+  pet               Pet                         @relation(fields: [petId], references: [id], onDelete: Restrict)
   /// Plain UUID, no FK — same actor-reference convention as Trip.createdByUserId.
-  applicantUserId String           @db.Uuid
+  applicantUserId   String                      @db.Uuid
 
   status            InsuranceApplicationStatus @default(DRAFT)
   /// A snapshot of EligibilityService's own live computation at submission
@@ -7440,10 +7452,17 @@ enum PetFriendlyPlaceStatus {
 }
 
 model PetFriendlyPlace {
-  id          String                   @id @default(uuid()) @db.Uuid
-  name        String
-  category    PetFriendlyPlaceCategory
-  description String?
+  id             String                   @id @default(uuid()) @db.Uuid
+  /// Batch 5 — null means "not stated", never "no".
+  leashRequired  Boolean?
+  waterAvailable Boolean?
+  petArea        Boolean?
+  openingHours   Json?
+  province       String?
+  reports        PlaceReport[]
+  name           String
+  category       PetFriendlyPlaceCategory
+  description    String?
 
   country String
   city    String
@@ -7506,6 +7525,11 @@ model PetFriendlyPlaceFavorite {
 // ---------------------------------------------------------------------------
 
 enum TravelListingType {
+  HOTEL
+  ECO_LODGE
+  GUESTHOUSE
+  RESORT
+  PET_HOTEL
   PET_FRIENDLY_HOTEL
   VILLA
   APARTMENT
@@ -7542,9 +7566,21 @@ enum TravelListingStatus {
 }
 
 model TravelListing {
-  id             String               @id @default(uuid()) @db.Uuid
-  organizationId String               @db.Uuid
-  organization   ProviderOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  id                String                  @id @default(uuid()) @db.Uuid
+  /// Batch 5
+  province          String?
+  checkInFrom       String?
+  checkOutUntil     String?
+  houseRules        String?
+  submittedAt       DateTime?
+  reviewedAt        DateTime?
+  reviewedByAdminId String?                 @db.Uuid
+  moderationNote    String?
+  media             TravelMedia[]
+  reviews           TravelReview[]
+  favorites         TravelListingFavorite[]
+  organizationId    String                  @db.Uuid
+  organization      ProviderOrganization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
 
   type        TravelListingType
   title       String
@@ -7627,9 +7663,17 @@ model TravelPetPolicy {
 /// interchangeable stock (e.g. 3 identical rooms) without needing a row per
 /// physical unit.
 model TravelInventoryUnit {
-  id        String        @id @default(uuid()) @db.Uuid
-  listingId String        @db.Uuid
-  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  id        String           @id @default(uuid()) @db.Uuid
+  /// Batch 5
+  bedInfo   String?
+  sizeSqm   Int?
+  amenities String[]         @default([])
+  maxPets   Int?
+  petNotes  String?
+  ratePlans TravelRatePlan[]
+  media     TravelMedia[]
+  listingId String           @db.Uuid
+  listing   TravelListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   name         String
   description  String?
@@ -7674,6 +7718,11 @@ model TravelAvailability {
 }
 
 enum TravelBookingStatus {
+  /// Batch 5: bounded inventory hold while the traveller completes the booking flow.
+  HELD
+  NO_SHOW
+  /// Batch 5: replaced by a successor booking (date/unit change).
+  MODIFIED
   DRAFT
   AWAITING_PROVIDER
   AWAITING_PAYMENT
@@ -7687,11 +7736,31 @@ enum TravelBookingStatus {
 }
 
 model TravelBooking {
-  id        String              @id @default(uuid()) @db.Uuid
-  listingId String              @db.Uuid
-  listing   TravelListing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
-  unitId    String              @db.Uuid
-  unit      TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  id                     String                       @id @default(uuid()) @db.Uuid
+  /// Batch 5 — rate, snapshots, holds, payment, cancellation, modification.
+  ratePlanId             String?                      @db.Uuid
+  ratePlan               TravelRatePlan?              @relation(fields: [ratePlanId], references: [id], onDelete: SetNull)
+  ratePlanSnapshot       Json?
+  petPolicySnapshot      Json?
+  priceBreakdownSnapshot Json?
+  discountAmountIrr      Int                          @default(0)
+  payNowAmountIrr        Int                          @default(0)
+  holdExpiresAt          DateTime?
+  requestExpiresAt       DateTime?
+  paymentIntentId        String?                      @db.Uuid
+  paymentStatus          String                       @default("NOT_REQUIRED")
+  refundAmountIrr        Int                          @default(0)
+  cancelReason           String?
+  cancelledBy            String?
+  noShowAt               DateTime?
+  modifiedFromBookingId  String?                      @unique @db.Uuid
+  statusEvents           TravelBookingEvent[]
+  review                 TravelReview?
+  documentShares         TravelBookingDocumentShare[]
+  listingId              String                       @db.Uuid
+  listing                TravelListing                @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  unitId                 String                       @db.Uuid
+  unit                   TravelInventoryUnit          @relation(fields: [unitId], references: [id], onDelete: Restrict)
 
   /// Human-facing reference, shown on the booking and in support threads.
   reference String @unique
@@ -8708,4 +8777,223 @@ model RepeatDeliveryEvent {
 
   @@index([scheduleId, createdAt])
   @@map("repeat_delivery_events")
+}
+
+// ===========================================================================
+// Batch 5 — Travel marketplace completion, insurer portal, requirement library
+// ===========================================================================
+
+enum TravelCancellationType {
+  FREE_UNTIL
+  PARTIAL
+  NON_REFUNDABLE
+}
+
+enum TravelPaymentTiming {
+  PAY_NOW
+  DEPOSIT
+  PAY_AT_PROPERTY
+}
+
+/// One way to sell a unit: its own price rule, cancellation terms and payment timing.
+model TravelRatePlan {
+  id     String              @id @default(uuid()) @db.Uuid
+  unitId String              @db.Uuid
+  unit   TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  name                 String
+  /// Applied to the unit's nightly price (base or per-date override); e.g. -10 for non-refundable.
+  priceModifierPercent Int                    @default(0)
+  cancellationType     TravelCancellationType @default(FREE_UNTIL)
+  freeCancellationDays Int?
+  lateRefundPercent    Int?
+  paymentTiming        TravelPaymentTiming    @default(PAY_NOW)
+  depositPercent       Int?
+  includesBreakfast    Boolean                @default(false)
+  includedItems        String[]               @default([])
+  minNights            Int?
+  activeFrom           DateTime?
+  activeUntil          DateTime?
+  isActive             Boolean                @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings TravelBooking[]
+
+  @@index([unitId])
+  @@map("travel_rate_plans")
+}
+
+model TravelMedia {
+  id        String               @id @default(uuid()) @db.Uuid
+  listingId String               @db.Uuid
+  listing   TravelListing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  unitId    String?              @db.Uuid
+  unit      TravelInventoryUnit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  /// Repository-owned path or storage-owned URL; never a third-party hotlink.
+  url       String
+  alt       String?
+  sortOrder Int                  @default(0)
+  createdAt DateTime             @default(now())
+
+  @@index([listingId, sortOrder])
+  @@map("travel_media")
+}
+
+model TravelBookingEvent {
+  id         String               @id @default(uuid()) @db.Uuid
+  bookingId  String               @db.Uuid
+  booking    TravelBooking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus TravelBookingStatus?
+  toStatus   TravelBookingStatus
+  actorType  String
+  actorId    String?              @db.Uuid
+  reason     String?
+  createdAt  DateTime             @default(now())
+
+  @@index([bookingId, createdAt])
+  @@map("travel_booking_events")
+}
+
+enum TravelReviewStatus {
+  PUBLISHED
+  HIDDEN
+}
+
+model TravelReview {
+  id               String             @id @default(uuid()) @db.Uuid
+  bookingId        String             @unique @db.Uuid
+  booking          TravelBooking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  listingId        String             @db.Uuid
+  listing          TravelListing      @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  userId           String             @db.Uuid
+  overall          Int
+  petFriendliness  Int?
+  cleanliness      Int?
+  location         Int?
+  body             String?
+  status           TravelReviewStatus @default(PUBLISHED)
+  hiddenReason     String?
+  providerResponse String?
+  respondedAt      DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([listingId, status, createdAt])
+  @@map("travel_reviews")
+}
+
+model TravelListingFavorite {
+  userId    String        @db.Uuid
+  listingId String        @db.Uuid
+  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@id([userId, listingId])
+  @@map("travel_listing_favorites")
+}
+
+/// The traveller explicitly shares one document with the accommodation for one booking.
+/// The provider reads it only through a short-lived signed URL while this grant is live.
+model TravelBookingDocumentShare {
+  id                String          @id @default(uuid()) @db.Uuid
+  bookingId         String          @db.Uuid
+  booking           TravelBooking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  medicalDocumentId String          @db.Uuid
+  medicalDocument   MedicalDocument @relation(fields: [medicalDocumentId], references: [id], onDelete: Restrict)
+  sharedByUserId    String          @db.Uuid
+  purpose           String
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  createdAt         DateTime        @default(now())
+
+  @@unique([bookingId, medicalDocumentId])
+  @@map("travel_booking_document_shares")
+}
+
+enum TravelRequirementRuleStatus {
+  ACTIVE
+  NEEDS_REVIEW
+  RETIRED
+}
+
+/// Admin-curated requirement library by jurisdiction. A trip suggestion copies the rule's
+/// provenance (source, sourceUrl, verifiedAt, validUntil); stale rules are never presented as current.
+model TravelRequirementRule {
+  id               String                      @id @default(uuid()) @db.Uuid
+  country          String
+  city             String?
+  requirementType  TravelRequirementType
+  title            String
+  description      String
+  species          PetSpecies[]                @default([])
+  source           String
+  sourceUrl        String?
+  verifiedAt       DateTime
+  validUntil       DateTime?
+  status           TravelRequirementRuleStatus @default(ACTIVE)
+  updatedByAdminId String?                     @db.Uuid
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  @@index([country, status])
+  @@map("travel_requirement_rules")
+}
+
+enum InsurerRole {
+  OWNER
+  UNDERWRITING
+  VIEWER
+}
+
+model InsurerMembership {
+  id         String            @id @default(uuid()) @db.Uuid
+  providerId String            @db.Uuid
+  provider   InsuranceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  userId     String            @db.Uuid
+  role       InsurerRole       @default(UNDERWRITING)
+  isActive   Boolean           @default(true)
+  createdAt  DateTime          @default(now())
+
+  @@unique([providerId, userId])
+  @@index([userId])
+  @@map("insurer_memberships")
+}
+
+model InsuranceApplicationEvent {
+  id            String                      @id @default(uuid()) @db.Uuid
+  applicationId String                      @db.Uuid
+  application   InsuranceApplication        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fromStatus    InsuranceApplicationStatus?
+  toStatus      InsuranceApplicationStatus
+  actorType     String
+  actorId       String?                     @db.Uuid
+  note          String?
+  createdAt     DateTime                    @default(now())
+
+  @@index([applicationId, createdAt])
+  @@map("insurance_application_events")
+}
+
+enum PlaceReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model PlaceReport {
+  id                String            @id @default(uuid()) @db.Uuid
+  placeId           String            @db.Uuid
+  place             PetFriendlyPlace  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  userId            String            @db.Uuid
+  reason            String
+  details           String?
+  status            PlaceReportStatus @default(OPEN)
+  resolvedByAdminId String?           @db.Uuid
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([status, createdAt])
+  @@map("place_reports")
 }
