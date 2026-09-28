@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { randomId } from "@/lib/id/random-id";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -72,7 +73,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [waitlisted, setWaitlisted] = useState(false);
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  const [idempotencyKey] = useState(() => randomId());
 
   const load = useCallback(async () => {
     setLoadState("loading");

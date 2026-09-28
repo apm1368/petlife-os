@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { randomId } from "@/lib/id/random-id";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
@@ -64,9 +65,9 @@ export function CheckoutView() {
   const [checkout, setCheckout] = useState<CheckoutDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [failureMessage, setFailureMessage] = useState<string | null>(null);
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
-  const [paymentIntentIdempotencyKey, setPaymentIntentIdempotencyKey] = useState(() => crypto.randomUUID());
-  const [payIdempotencyKey, setPayIdempotencyKey] = useState(() => crypto.randomUUID());
+  const [idempotencyKey] = useState(() => randomId());
+  const [paymentIntentIdempotencyKey, setPaymentIntentIdempotencyKey] = useState(() => randomId());
+  const [payIdempotencyKey, setPayIdempotencyKey] = useState(() => randomId());
   const [newAddress, setNewAddress] = useState({ addressLine: "", city: "", countryCode: "" });
   const [isCreatingAddress, setIsCreatingAddress] = useState(false);
 
@@ -74,8 +75,8 @@ export function CheckoutView() {
   const [shippingQuoteSelectingId, setShippingQuoteSelectingId] = useState<string | null>(null);
   const [paymentOptions, setPaymentOptions] = useState<PaymentMethodOptionDto[] | null>(null);
   const [financingIntent, setFinancingIntent] = useState<FinancingIntentDto | null>(null);
-  const [financingIdempotencyKey, setFinancingIdempotencyKey] = useState(() => crypto.randomUUID());
-  const [authorizeIdempotencyKey, setAuthorizeIdempotencyKey] = useState(() => crypto.randomUUID());
+  const [financingIdempotencyKey, setFinancingIdempotencyKey] = useState(() => randomId());
+  const [authorizeIdempotencyKey, setAuthorizeIdempotencyKey] = useState(() => randomId());
   const [plans, setPlans] = useState<FinancingPlanOptionDto[] | null>(null);
 
   useEffect(() => {
@@ -242,14 +243,14 @@ export function CheckoutView() {
   }
 
   function retryFinancingAuthorization() {
-    setAuthorizeIdempotencyKey(crypto.randomUUID());
+    setAuthorizeIdempotencyKey(randomId());
     setStep("financing-authorize");
   }
 
   function backToMethodChoice() {
     setFinancingIntent(null);
     setPlans(null);
-    setFinancingIdempotencyKey(crypto.randomUUID());
+    setFinancingIdempotencyKey(randomId());
     void enterMethodStep();
   }
 
@@ -284,12 +285,12 @@ export function CheckoutView() {
   }
 
   function retryPayment() {
-    setPayIdempotencyKey(crypto.randomUUID());
+    setPayIdempotencyKey(randomId());
     setStep("payment");
   }
 
   function switchToInstallments() {
-    setPaymentIntentIdempotencyKey(crypto.randomUUID());
+    setPaymentIntentIdempotencyKey(randomId());
     void enterMethodStep();
   }
 

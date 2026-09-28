@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { randomId } from "@/lib/id/random-id";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -52,7 +53,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleSlots, setRescheduleSlots] = useState<AvailabilitySlotDto[] | null>(null);
   const [rescheduleSlot, setRescheduleSlot] = useState<string | null>(null);
-  const [payKey, setPayKey] = useState(() => crypto.randomUUID());
+  const [payKey, setPayKey] = useState(() => randomId());
 
   const load = useCallback(async () => {
     try {
@@ -141,7 +142,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
           <p className="font-bold">{paymentModeLabel(booking.paymentMode, fa)}: {payAmount !== null ? formatCurrency(payAmount, locale) : ""}</p>
           {booking.requestExpiresAt ? <p className="text-sm text-text-secondary">{fa ? `مهلت پرداخت: ${formatAppointmentDateTime(booking.requestExpiresAt, locale, booking.timezone)}` : `Pay by ${formatAppointmentDateTime(booking.requestExpiresAt, locale, booking.timezone)}`}</p> : null}
           {booking.paymentStatus === "FAILED" ? <p role="alert" className="text-state-urgent">{fa ? "پرداخت قبلی ناموفق بود. می‌توانید دوباره تلاش کنید." : "The last payment failed. You can try again."}</p> : null}
-          <Button isLoading={busy} onClick={() => void act(async () => { await bookingsService.pay(booking.id, payKey); setPayKey(crypto.randomUUID()); }, fa ? "نتیجه پرداخت ثبت شد." : "Payment result recorded.")}>{fa ? "پرداخت امن" : "Pay securely"}</Button>
+          <Button isLoading={busy} onClick={() => void act(async () => { await bookingsService.pay(booking.id, payKey); setPayKey(randomId()); }, fa ? "نتیجه پرداخت ثبت شد." : "Payment result recorded.")}>{fa ? "پرداخت امن" : "Pay securely"}</Button>
           <p className="text-xs text-text-secondary">{fa ? "نوبت فقط پس از تأیید درگاه پرداخت قطعی می‌شود." : "The booking is confirmed only after the gateway confirms payment."}</p>
         </ContextSurface>
       ) : null}
@@ -223,7 +224,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
             </div>
           )}
           {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
-          <Button disabled={!rescheduleSlot} isLoading={busy} onClick={() => void act(async () => { const moved = await bookingsService.reschedule(booking.id, rescheduleSlot!, crypto.randomUUID()); window.location.assign(`/${locale}/bookings/${moved.id}`); }, fa ? "زمان نوبت تغییر کرد." : "Booking rescheduled.")}>{fa ? "تأیید زمان جدید" : "Confirm new time"}</Button>
+          <Button disabled={!rescheduleSlot} isLoading={busy} onClick={() => void act(async () => { const moved = await bookingsService.reschedule(booking.id, rescheduleSlot!, randomId()); window.location.assign(`/${locale}/bookings/${moved.id}`); }, fa ? "زمان نوبت تغییر کرد." : "Booking rescheduled.")}>{fa ? "تأیید زمان جدید" : "Confirm new time"}</Button>
         </div>
       </Dialog>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { randomId } from "@/lib/id/random-id";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -32,7 +33,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
   const [refundReason, setRefundReason] = useState("");
   const [isRequestingRefund, setIsRequestingRefund] = useState(false);
   const [refundError, setRefundError] = useState<string | null>(null);
-  const [refundIdempotencyKey, setRefundIdempotencyKey] = useState(() => crypto.randomUUID());
+  const [refundIdempotencyKey, setRefundIdempotencyKey] = useState(() => randomId());
 
   async function load() {
     setError(false);
@@ -63,7 +64,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
     try {
       await commerceService.requestRefund(orderId, refundReason || undefined, undefined, refundIdempotencyKey);
       setRefundReason("");
-      setRefundIdempotencyKey(crypto.randomUUID());
+      setRefundIdempotencyKey(randomId());
       await load();
     } catch (err) {
       setRefundError(err instanceof ApiError ? err.message : t("refunds.requestFailed"));
