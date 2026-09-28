@@ -2091,7 +2091,8 @@
         "services": "خدمات و نوبت‌ها",
         "commerce": "فروشگاه",
         "travel": "سفر و اقامت",
-        "insurance": "بیمه"
+        "insurance": "بیمه",
+        "places": "مکان‌ها"
       }
     },
     "common": {
@@ -3234,7 +3235,8 @@
       "UNDER_REVIEW": "در حال بررسی",
       "APPROVED": "تأییدشده",
       "DECLINED": "ردشده",
-      "CANCELLED": "لغوشده"
+      "CANCELLED": "لغوشده",
+      "NEEDS_INFORMATION": "نیازمند اطلاعات بیشتر"
     },
     "list": {
       "title": "بیمه حیوان خانگی",

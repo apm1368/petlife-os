@@ -28,6 +28,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/commerce", labelKey: "nav.commerce", permission: "commerce.view" },
   { href: "/travel", labelKey: "nav.travel", permission: "travel.view" },
   { href: "/insurance", labelKey: "nav.insurance", permission: "insurance.applications.view" },
+  { href: "/places", labelKey: "nav.places", permission: "places.view" },
   { href: "/sellers", labelKey: "nav.sellers", permission: "verification.manage" },
   { href: "/transactions", labelKey: "nav.transactions", permission: "finance.view" },
   { href: "/seller-finance", labelKey: "nav.sellerFinance", permission: "sellerFinance.view" },

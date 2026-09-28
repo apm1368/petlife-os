@@ -2091,7 +2091,8 @@
         "services": "Services & bookings",
         "commerce": "Commerce",
         "travel": "Travel & stays",
-        "insurance": "Insurance"
+        "insurance": "Insurance",
+        "places": "Places"
       }
     },
     "common": {
@@ -3234,7 +3235,8 @@
       "UNDER_REVIEW": "Under review",
       "APPROVED": "Approved",
       "DECLINED": "Declined",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "NEEDS_INFORMATION": "Needs information"
     },
     "list": {
       "title": "Pet insurance",
