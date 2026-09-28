@@ -37,11 +37,22 @@ function order(id: string, sellerName: string): OrderDetailDto {
         totalPrice: 500_000,
         targetPetId: null,
         compatibilitySnapshot: null,
+        listUnitPrice: null,
+        unitDiscount: 0,
+        promotionName: null,
+        reviewId: null,
       },
     ],
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     confirmedAt: "2026-01-01T00:00:05.000Z",
+    orderNumber: "PL-1A2B3C4D",
+    cancelledAt: null,
+    cancelReason: null,
+    timeline: [],
+    refundRequests: [],
+    canCancel: false,
+    canRequestRefund: false,
   };
 }
 

@@ -23,6 +23,12 @@ function offer(sellerOrganization: typeof SELLER_A, priceAmount: number) {
     currency: "IRR",
     status: "ACTIVE" as never,
     availableQuantity: 10,
+    effectiveUnitPrice: priceAmount,
+    unitDiscount: 0,
+    promotion: null,
+    stockState: "IN_STOCK" as const,
+    repeatDeliveryEligible: false,
+    repeatIntervalsDays: [],
   };
 }
 
@@ -33,6 +39,8 @@ const MULTI_SELLER_CART: CartDto = {
   subtotalAmount: 2_440_000,
   currency: "IRR",
   hasSafetyConflict: false,
+  discountAmount: 0,
+  hasBlockingIssues: false,
   sellerGroups: [
     {
       sellerOrganization: SELLER_A,
@@ -54,6 +62,11 @@ const MULTI_SELLER_CART: CartDto = {
           currency: "IRR",
           lineTotal: 1_250_000,
           compatibility: { status: "COMPATIBLE" as never, reasons: [] },
+          listUnitPrice: 1_250_000,
+          unitDiscount: 0,
+          promotionName: null,
+          promotionId: null,
+          issues: [],
         },
       ],
     },
@@ -77,6 +90,11 @@ const MULTI_SELLER_CART: CartDto = {
           currency: "IRR",
           lineTotal: 1_190_000,
           compatibility: null,
+          listUnitPrice: 1_190_000,
+          unitDiscount: 0,
+          promotionName: null,
+          promotionId: null,
+          issues: ["PRICE_CHANGED"],
         },
       ],
     },
@@ -95,8 +113,8 @@ describe("CartView", () => {
 
     renderWithIntl(<CartView />);
 
-    await waitFor(() => expect(screen.getByText("Pet Bazaar Tehran")).toBeTruthy());
-    expect(screen.getByText("Golestan Pet Supplies")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("Sold by Pet Bazaar Tehran")).toBeTruthy());
+    expect(screen.getByText("Sold by Golestan Pet Supplies")).toBeTruthy();
     expect(screen.getByText("Royal Canin Adult Dog Food")).toBeTruthy();
     expect(screen.getByText("Grain-Free Training Treats")).toBeTruthy();
   });
@@ -106,7 +124,7 @@ describe("CartView", () => {
 
     renderWithIntl(<CartView />);
 
-    await waitFor(() => expect(screen.getByText("Price updated since added")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Price changed")).toBeTruthy());
   });
 
   it("shows the target pet for a line, or a no-pet indicator", async () => {

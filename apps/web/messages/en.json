@@ -975,13 +975,72 @@
       "subtitle": "For {name}",
       "categories": "Categories",
       "browseAll": "Browse all products",
-      "loading": "Loading"
+      "loading": "Loading",
+      "unavailable": "The shop is unavailable right now",
+      "retry": "Retry",
+      "eyebrow": "PET-FIRST SHOPPING",
+      "heroTitle": "Shopping that starts with your pet",
+      "heroDescription": "Compare verified sellers, check fit for your pet, and set up repeat delivery for the things you always need.",
+      "searchLabel": "Search the shop",
+      "searchPlaceholder": "Search food, brand or product…",
+      "searchButton": "Search",
+      "categoriesHint": "Real categories from the catalog",
+      "repeatTitle": "Repeat delivery",
+      "repeatHint": "Reminders and one-tap reorders — never an automatic charge",
+      "dealsTitle": "Current promotions",
+      "dealsHint": "Discounts applied automatically at checkout",
+      "seeAll": "See all",
+      "picksTitle": "Recommended",
+      "picksHint": "Available now, best rated first",
+      "emptyTitle": "The catalog is empty for now",
+      "emptyDescription": "Products appear here as soon as verified sellers list them."
     },
     "results": {
       "title": "Products",
       "loading": "Loading",
       "retry": "Retry",
-      "empty": "No products found."
+      "empty": "No products found.",
+      "searchTitle": "Results for “{query}”",
+      "searchLabel": "Search products",
+      "searchPlaceholder": "Search products or brands",
+      "searchButton": "Search",
+      "categories": "Categories",
+      "allCategories": "All",
+      "resultCount": "{count, plural, =0 {No products} one {# product} other {# products}}",
+      "emptyHint": "Try removing a filter or searching for something broader.",
+      "sort": {
+        "label": "Sort by",
+        "RECOMMENDED": "Recommended",
+        "NEWEST": "Newest",
+        "PRICE_ASC": "Price: low to high",
+        "PRICE_DESC": "Price: high to low",
+        "TOP_RATED": "Top rated"
+      },
+      "pagination": {
+        "label": "Pages",
+        "previous": "Previous",
+        "next": "Next",
+        "status": "Page {page} of {total}"
+      },
+      "filters": {
+        "title": "Filters",
+        "species": "For",
+        "any": "Any",
+        "dog": "Dogs",
+        "cat": "Cats",
+        "brand": "Brand",
+        "seller": "Seller",
+        "price": "Price (Toman)",
+        "minToman": "From",
+        "maxToman": "To",
+        "inStock": "In stock only",
+        "onPromotion": "On promotion",
+        "rating": "Rating",
+        "ratingAtLeast": "{value}★ and up",
+        "clear": "Clear filters",
+        "showResults": "Show {count, plural, one {# product} other {# products}}",
+        "close": "Close"
+      }
     },
     "productCard": {
       "fromPrice": "From {price}",
@@ -1024,7 +1083,38 @@
       "quantity": "Quantity",
       "addToCart": "Add to cart",
       "goToCart": "Go to cart",
-      "addFailed": "Couldn't add this to your cart. Please try again."
+      "addFailed": "Couldn't add this to your cart. Please try again.",
+      "notFound": "This product isn't available",
+      "notFoundHint": "It may have been removed or is no longer sold.",
+      "backToShop": "Back to the shop",
+      "breadcrumb": "Breadcrumb",
+      "shop": "Shop",
+      "gallery": "Product images",
+      "noReviewsYet": "No reviews yet",
+      "favorite": "Save to favorites",
+      "unfavorite": "Remove from favorites",
+      "offersCount": "{count} sellers",
+      "repeatAvailable": "Repeat delivery available",
+      "decrease": "Decrease quantity",
+      "increase": "Increase quantity",
+      "repeatTitle": "Repeat delivery",
+      "repeatExplain": "Choose how often you need it. We remind you before each delivery and you confirm the order at the live price — nothing is charged automatically.",
+      "repeatCta": "Set up repeat delivery",
+      "about": "About this product",
+      "suitability": "Suitable for",
+      "specifications": "Specifications",
+      "suits": {
+        "both": "Dogs and cats",
+        "dog": "Dogs",
+        "cat": "Cats",
+        "age": "Age {min}–{max} months",
+        "weight": "Weight {min}–{max} kg"
+      },
+      "reviewsTitle": "Reviews",
+      "reviewsVerifiedOnly": "Only customers who received the product can review it.",
+      "verifiedPurchase": "Verified purchase",
+      "moreReviews": "Show more reviews",
+      "related": "More from this category"
     },
     "cart": {
       "title": "Cart",
@@ -1039,7 +1129,29 @@
       "priceChanged": "Price updated since added",
       "sellerSubtotal": "Seller subtotal",
       "subtotal": "Subtotal",
-      "proceedToCheckout": "Proceed to checkout"
+      "proceedToCheckout": "Proceed to checkout",
+      "actionFailed": "That change didn't go through. Please try again.",
+      "pricesChangedBanner": "Some prices or promotions changed since you added these items. Check the new prices before checkout.",
+      "acceptPrices": "Accept current prices",
+      "soldBy": "Sold by {seller}",
+      "itemsTotal": "Items ({count})",
+      "promotions": "Promotions",
+      "delivery": "Delivery",
+      "deliveryAtCheckout": "Calculated at checkout",
+      "fixIssuesFirst": "Remove or fix the items marked above to continue.",
+      "continueShopping": "Continue shopping",
+      "decrease": "Decrease quantity",
+      "increase": "Increase quantity",
+      "each": "{price} each",
+      "issue": {
+        "OFFER_UNAVAILABLE": "No longer available",
+        "SELLER_UNAVAILABLE": "Seller unavailable",
+        "OUT_OF_STOCK": "Out of stock",
+        "LOW_STOCK": "Only {count} left",
+        "QUANTITY_EXCEEDS_STOCK": "Only {count} available",
+        "PRICE_CHANGED": "Price changed",
+        "PROMOTION_EXPIRED": "Promotion ended"
+      }
     },
     "checkout": {
       "address": {
@@ -1048,14 +1160,24 @@
         "addressLine": "Address",
         "city": "City",
         "countryCode": "Country code",
-        "save": "Save address"
+        "save": "Save address",
+        "noHousehold": "Create a household first to save a delivery address.",
+        "default": "Default",
+        "postalCodeValue": "Postal code {code}",
+        "recipient": "Recipient name",
+        "phone": "Mobile",
+        "postalCode": "Postal code",
+        "postalCodeHint": "10 digits, optional",
+        "postalCodeInvalid": "Postal code must be 10 digits",
+        "saveFailed": "Couldn't save the address."
       },
       "delivery": {
         "title": "Delivery method",
         "method": {
           "STANDARD": "Standard",
           "EXPRESS": "Express"
-        }
+        },
+        "quotesNext": "You'll choose from real courier options on a later step."
       },
       "safetyAck": {
         "title": "Please confirm before continuing",
@@ -1067,7 +1189,8 @@
         "title": "Review your order",
         "subtotal": "Subtotal",
         "delivery": "Delivery",
-        "total": "Total"
+        "total": "Total",
+        "discount": "Promotions"
       },
       "shipping": {
         "title": "Choose delivery for each seller",
@@ -1181,6 +1304,19 @@
         "CANCELLED": "Cancelled",
         "PARTIALLY_REFUNDED": "Partially refunded",
         "REFUNDED": "Refunded"
+      },
+      "repeatLink": "Repeat deliveries",
+      "soldBy": "Sold by {seller}",
+      "cancelledRefunded": "Cancelled · refunded",
+      "tabs": {
+        "active": "In progress ({count})",
+        "delivered": "Delivered ({count})",
+        "closed": "Cancelled & refunded ({count})"
+      },
+      "tabEmpty": {
+        "active": "Nothing in progress.",
+        "delivered": "No delivered orders yet.",
+        "closed": "No cancelled or refunded orders."
       }
     },
     "orderDetail": {
@@ -1221,7 +1357,77 @@
         "requestedAt": "Requested {when}"
       },
       "viewPaymentDetails": "View payment & financing details",
-      "getSupport": "Get support"
+      "getSupport": "Get support",
+      "notFound": "Order not found",
+      "backToOrders": "Back to my orders",
+      "cancelledRefunded": "Cancelled · refunded",
+      "titleWithSeller": "Order from {seller}",
+      "discount": "Promotions",
+      "actionFailed": "That didn't go through. Please try again.",
+      "itemDiscount": "{name}: {amount} off",
+      "cancel": {
+        "available": "Changed your mind? You can cancel until the seller hands the parcel to the courier.",
+        "button": "Cancel order",
+        "title": "Cancel this order?",
+        "explain": "The full amount ({amount}) goes back to your payment method and the items return to stock.",
+        "reasonOptional": "Reason (optional)",
+        "keep": "Keep order",
+        "confirm": "Cancel and refund",
+        "done": "Order cancelled. Your refund has been issued.",
+        "reasonLabel": "Cancellation reason"
+      },
+      "refundRequest": {
+        "available": "Problem with this order? You can ask for a refund within 7 days of delivery.",
+        "availableFailed": "Delivery failed. You can ask for a refund.",
+        "button": "Request a refund",
+        "title": "Request a refund",
+        "explain": "Our team reviews each request, usually within 2 business days. If approved, the order amount is refunded to your payment method.",
+        "reasonLabel": "What went wrong?",
+        "describe": "Tell us more (optional)",
+        "submit": "Send request",
+        "sent": "Request sent. We'll notify you when it's reviewed.",
+        "sentAt": "Sent {when}",
+        "decision": "Note from our team: {reason}",
+        "approvedNext": "Approved — finance is processing your refund.",
+        "withdraw": "Withdraw request",
+        "withdrawn": "Request withdrawn.",
+        "reason": {
+          "DAMAGED": "Arrived damaged",
+          "WRONG_ITEM": "Wrong item",
+          "NOT_AS_DESCRIBED": "Not as described",
+          "MISSING_ITEMS": "Items missing",
+          "NOT_DELIVERED": "Not delivered",
+          "PET_REACTION": "My pet reacted badly",
+          "OTHER": "Other"
+        },
+        "status": {
+          "PENDING_REVIEW": "Under review",
+          "APPROVED": "Approved",
+          "REJECTED": "Declined",
+          "WITHDRAWN": "Withdrawn"
+        }
+      },
+      "timeline": {
+        "title": "Order history",
+        "PENDING": "Order created",
+        "CONFIRMED": "Payment confirmed — order placed",
+        "PREPARING": "Seller is preparing",
+        "READY_FOR_FULFILLMENT": "Ready to ship",
+        "FULFILLED": "Shipped",
+        "CANCELLED": "Cancelled",
+        "PARTIALLY_REFUNDED": "Partly refunded",
+        "REFUNDED": "Refunded"
+      },
+      "review": {
+        "write": "Write a review",
+        "done": "Thanks — you reviewed this item.",
+        "rating": "Your rating",
+        "stars": "{count, plural, one {# star} other {# stars}}",
+        "body": "What did you and your pet think? (optional)",
+        "cancel": "Cancel",
+        "submit": "Publish review",
+        "failed": "Couldn't publish your review."
+      }
     },
     "statusLabels": {
       "payment": {
@@ -1289,6 +1495,94 @@
       "action": "Action",
       "localStatus": "Local",
       "remoteStatus": "Remote"
+    },
+    "price": {
+      "was": "Was {price}",
+      "promotion": "{name} · {percent}% off"
+    },
+    "stock": {
+      "in": "In stock",
+      "low": "Low stock",
+      "lowCount": "Only {count} left",
+      "out": "Out of stock"
+    },
+    "rating": {
+      "aria": "Rated {average} out of 5 from {count} verified reviews",
+      "count": "{count, plural, one {# review} other {# reviews}}"
+    },
+    "repeat": {
+      "title": "Repeat deliveries",
+      "loading": "Loading",
+      "retry": "Retry",
+      "howItWorks": "We remind you two days before each date. You confirm the order at the live price and pay as usual — PET LIFE never charges you automatically.",
+      "empty": "No repeat deliveries yet",
+      "emptyHint": "Look for “Repeat delivery available” on products you buy regularly.",
+      "browse": "Browse products",
+      "summary": "{quantity} × every {days} days · {seller}",
+      "nextOn": "Next: {date}",
+      "priceChanged": "Price changed",
+      "unavailable": "Currently unavailable",
+      "status": {
+        "ACTIVE": "Active",
+        "PAUSED": "Paused",
+        "CANCELLED": "Cancelled"
+      },
+      "notAvailableTitle": "Repeat delivery isn't available for this item",
+      "notAvailableHint": "The seller may have stopped offering it.",
+      "createTitle": "Set up repeat delivery",
+      "soldBy": "Sold by {seller}",
+      "currentPrice": "Current price: {price} each",
+      "interval": "How often",
+      "everyDays": "Every {days} days",
+      "quantity": "Quantity",
+      "address": "Deliver to",
+      "needAddress": "Add a delivery address at checkout first.",
+      "noAutopayTitle": "No automatic charges",
+      "noAutopay": "You'll get a reminder before each delivery and confirm the order yourself.",
+      "create": "Create repeat delivery",
+      "saveFailed": "Couldn't save. Please try again.",
+      "notFound": "Repeat delivery not found",
+      "backToList": "All repeat deliveries",
+      "priceChangedExplain": "The price changed from {from} to {to}. Accept the new price to keep ordering.",
+      "priceAccepted": "New price accepted.",
+      "acceptPrice": "Accept new price",
+      "unavailableExplain": "This item isn't available from the seller right now.",
+      "dueNow": "Your next delivery is due. Confirm the order to have it sent.",
+      "orderEarly": "Need it sooner? You can order this cycle now.",
+      "orderCycle": "Order this cycle ({price})",
+      "addedToCart": "Added to your cart.",
+      "settings": "Settings",
+      "saved": "Saved.",
+      "skip": "Skip next",
+      "skipped": "Next delivery skipped.",
+      "pause": "Pause",
+      "paused": "Paused.",
+      "resume": "Resume",
+      "resumed": "Resumed.",
+      "cancel": "Cancel repeat delivery",
+      "cancelled": "Repeat delivery cancelled.",
+      "lastOrder": "View last order",
+      "history": "History",
+      "event": {
+        "CREATED": "Created",
+        "UPDATED": "Settings changed",
+        "SKIPPED": "Delivery skipped",
+        "PAUSED": "Paused",
+        "RESUMED": "Resumed",
+        "CANCELLED": "Cancelled",
+        "PRICE_ACCEPTED": "New price accepted",
+        "REMINDER_SENT": "Reminder sent",
+        "CYCLE_PREPARED": "Added to cart",
+        "ORDERED": "Ordered"
+      }
+    },
+    "favorites": {
+      "title": "Favorites",
+      "loading": "Loading",
+      "retry": "Retry",
+      "empty": "No favorites yet",
+      "emptyHint": "Tap the heart on a product to save it here.",
+      "browse": "Browse products"
     }
   },
   "seller": {
@@ -1301,7 +1595,8 @@
         "channels": "Channels",
         "team": "Team",
         "settings": "Settings",
-        "finance": "Finance"
+        "finance": "Finance",
+        "promotions": "Promotions"
       },
       "notASeller": {
         "title": "No seller access",
@@ -1378,7 +1673,45 @@
       "quantity": "Qty {count}",
       "subtotal": "Subtotal",
       "delivery": "Delivery",
-      "total": "Total"
+      "total": "Total",
+      "cancelledDoNotShip": "This order was cancelled and refunded. Do not ship it.",
+      "actionFailed": "That didn't go through. Please try again.",
+      "nextStep": "Next step",
+      "markReady": "Mark packed and ready for pickup",
+      "requestCourier": "Request courier",
+      "cancelOrder": "Can't fulfil — cancel order",
+      "cancelExplain": "The customer gets a full refund ({amount}) immediately and the items return to your stock.",
+      "cancelReason": "Reason (shown to the customer)",
+      "cancelConfirm": "Cancel and refund customer",
+      "orderStatus": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "PREPARING": "Preparing",
+        "READY_FOR_FULFILLMENT": "Ready",
+        "FULFILLED": "Fulfilled",
+        "CANCELLED": "Cancelled",
+        "PARTIALLY_REFUNDED": "Partially refunded",
+        "REFUNDED": "Refunded"
+      },
+      "promotionApplied": "Promotion: {name}",
+      "discount": "Promotions",
+      "refundRequests": "Refund requests",
+      "refundReason": {
+        "DAMAGED": "Arrived damaged",
+        "WRONG_ITEM": "Wrong item",
+        "NOT_AS_DESCRIBED": "Not as described",
+        "MISSING_ITEMS": "Items missing",
+        "NOT_DELIVERED": "Not delivered",
+        "PET_REACTION": "My pet reacted badly",
+        "OTHER": "Other"
+      },
+      "refundStatus": {
+        "PENDING_REVIEW": "Under review",
+        "APPROVED": "Approved",
+        "REJECTED": "Declined",
+        "WITHDRAWN": "Withdrawn"
+      },
+      "refundRequestsNote": "PET LIFE reviews refund requests; approved refunds are deducted from your settlement."
     },
     "offers": {
       "title": "Offers",
@@ -1395,7 +1728,14 @@
         "SUSPENDED": "Suspended"
       },
       "save": "Save",
-      "available": "{count} available · {currency}"
+      "available": "{count} available · {currency}",
+      "saveFailed": "Couldn't save the offer.",
+      "repeat": {
+        "enable": "Offer repeat delivery",
+        "intervals": "Delivery intervals",
+        "everyDays": "Every {days} days",
+        "pickOne": "Choose at least one interval."
+      }
     },
     "inventory": {
       "title": "Inventory",
@@ -1742,7 +2082,8 @@
         "contentMedia": "Media",
         "contentPlacements": "Placements",
         "subscriptions": "Subscriptions",
-        "services": "Services & bookings"
+        "services": "Services & bookings",
+        "commerce": "Commerce"
       }
     },
     "common": {

@@ -1,41 +1,37 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Bone, ErrorRecovery, HeartPulse, PackageCheck, Search, ShoppingBag, Sparkles } from "@petlife/ui";
+import { Bone, EmptyState, ErrorRecovery, HeartPulse, PackageCheck, Repeat, Search, ShoppingBag, Skeleton, Sparkles } from "@petlife/ui";
 import type { ProductCategoryDto, ProductSummaryDto } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
-import { isLocalPreview } from "@/lib/local-preview";
 import { commerceService } from "@/services/commerce.service";
 import { CinematicPageHero } from "@/features/experience/CinematicPageHero";
+import { ProductCard } from "./ProductCard";
 
-const CATEGORY_EXPERIENCE = [
-  { id: "food", fa: "غذا و تشویقی", en: "Food & treats", hintFa: "تغذیه روزانه، رژیمی و درمانی", hintEn: "Everyday, diet and prescription nutrition", icon: Bone },
-  { id: "health", fa: "سلامت و داروخانه", en: "Health & pharmacy", hintFa: "مکمل، بهداشت و نسخه دامپزشک", hintEn: "Supplements, wellness and vet prescriptions", icon: HeartPulse },
-  { id: "care", fa: "مراقبت و زیبایی", en: "Care & grooming", hintFa: "پوست، مو، ناخن و نظافت", hintEn: "Coat, skin, nails and hygiene", icon: Sparkles },
-  { id: "gear", fa: "لوازم و بازی", en: "Gear & play", hintFa: "قلاده، جای خواب و اسباب‌بازی", hintEn: "Walk gear, beds and toys", icon: ShoppingBag },
-  { id: "repeat", fa: "ارسال دوره‌ای", en: "Repeat delivery", hintFa: "سبد تکرارشونده با زمان‌بندی منعطف", hintEn: "Flexible recurring delivery", icon: PackageCheck },
-];
+/** Icons are chosen from the category's own slug, never by list position. */
+function categoryIcon(slug: string) {
+  if (/food|treat|غذا|nutrition/i.test(slug)) return Bone;
+  if (/health|pharm|supplement|vet|سلامت/i.test(slug)) return HeartPulse;
+  if (/groom|care|hygiene|clean|مراقبت/i.test(slug)) return Sparkles;
+  return ShoppingBag;
+}
 
-const PRODUCT_PREVIEW = [
-  { id: "preview-1", titleFa: "غذای خشک سگ بالغ مونژه", titleEn: "Monge adult dog food", brand: "Monge", price: "۳٬۸۹۰٬۰۰۰ تومان", image: "/images/experience/shop-hero.png", position: "70% center" },
-  { id: "preview-2", titleFa: "کنسرو گربه شسیر — مرغ و ژامبون", titleEn: "Schesir cat can — chicken", brand: "Schesir", price: "۲۸۵٬۰۰۰ تومان", image: "/images/landing/pet-portrait.png", position: "72% center" },
-  { id: "preview-3", titleFa: "قلاده ضدکشش با بند ایمنی", titleEn: "Safety no-pull harness", brand: "PetSafe", price: "۱٬۴۵۰٬۰۰۰ تومان", image: "/images/landing/cookie-taxi.png", position: "58% center" },
-  { id: "preview-4", titleFa: "باکس حمل مسافرتی استاندارد", titleEn: "Travel approved carrier", brand: "M-Pets", price: "۲٬۹۸۰٬۰۰۰ تومان", image: "/images/landing/cookie-world-day-clean.png", position: "54% center" },
-  { id: "preview-5", titleFa: "شامپوی پوست حساس حیوانات", titleEn: "Sensitive skin pet shampoo", brand: "Biogance", price: "۷۹۰٬۰۰۰ تومان", image: "/images/experience/grooming-hero.png", position: "70% center" },
-];
-
+/**
+ * Shop home (Commerce Discovery pattern). Everything shown comes from the
+ * catalog API: real categories, real products with server-computed prices
+ * and stock. When the catalog is empty the page says so — no preview
+ * products, no invented prices or delivery promises.
+ */
 export function ShopHomeView() {
   const t = useTranslations("commerce.shopHome");
   const router = useRouter();
   const locale = useLocale();
-  const fa = locale === "fa";
   const { activePet } = useActivePet();
   const [categories, setCategories] = useState<ProductCategoryDto[] | null>(null);
-  const [products, setProducts] = useState<ProductSummaryDto[] | null>(null);
-  const [preview, setPreview] = useState(false);
+  const [picks, setPicks] = useState<ProductSummaryDto[] | null>(null);
+  const [deals, setDeals] = useState<ProductSummaryDto[] | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   const [query, setQuery] = useState("");
@@ -43,31 +39,133 @@ export function ShopHomeView() {
   useEffect(() => {
     let cancelled = false;
     setError(false);
-    void Promise.all([commerceService.listCategories(), commerceService.searchProducts({ petId: activePet?.id })])
-      .then(([nextCategories, nextProducts]) => { if (!cancelled) { setCategories(nextCategories); setProducts(nextProducts); } })
-      .catch(() => { if (!cancelled && isLocalPreview()) { setPreview(true); setCategories([]); setProducts([]); } else if (!cancelled) setError(true); });
-    return () => { cancelled = true; };
-  }, [activePet?.id, retry]);
+    setPicks(null);
+    const species = activePet?.species === "DOG" || activePet?.species === "CAT" ? activePet.species : undefined;
+    void Promise.all([
+      commerceService.listCategories(),
+      commerceService.searchProducts({ petId: activePet?.id, species, sort: "RECOMMENDED", pageSize: 8 }),
+      commerceService.searchProducts({ petId: activePet?.id, species, onPromotion: true, inStock: true, sort: "RECOMMENDED", pageSize: 4 }),
+    ])
+      .then(([nextCategories, recommended, promoted]) => {
+        if (cancelled) return;
+        setCategories(nextCategories);
+        setPicks(recommended.items);
+        setDeals(promoted.items);
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activePet?.id, activePet?.species, retry]);
 
-  const cards = useMemo(() => {
-    const source = products?.length ? products.map((product, index) => ({ id: product.id, titleFa: product.title, titleEn: product.title, brand: product.brand?.name ?? (fa ? "فروشنده تاییدشده" : "Verified seller"), price: product.bestOffer ? `${product.bestOffer.priceAmount.toLocaleString(locale)} ${product.bestOffer.currency}` : (fa ? "ناموجود" : "Unavailable"), image: PRODUCT_PREVIEW[index % PRODUCT_PREVIEW.length]!.image, position: PRODUCT_PREVIEW[index % PRODUCT_PREVIEW.length]!.position })) : PRODUCT_PREVIEW;
-    const normalized = query.trim().toLowerCase();
-    return normalized ? source.filter((item) => `${item.titleFa} ${item.titleEn} ${item.brand}`.toLowerCase().includes(normalized)) : source;
-  }, [fa, locale, products, query]);
+  function submitSearch(event: React.FormEvent) {
+    event.preventDefault();
+    const q = query.trim();
+    router.push(`/${locale}/shop/products${q ? `?search=${encodeURIComponent(q)}` : ""}`);
+  }
 
-  function submitSearch(event: React.FormEvent) { event.preventDefault(); if (query.trim()) router.push(`/${locale}/shop/products?q=${encodeURIComponent(query.trim())}`); }
+  if (error) return <ErrorRecovery title={t("unavailable")} message="" retryLabel={t("retry")} onRetry={() => setRetry((value) => value + 1)} />;
 
-  if (error) return <ErrorRecovery title={fa ? "فروشگاه در دسترس نیست" : "Shop unavailable"} message="" retryLabel={fa ? "تلاش دوباره" : "Retry"} onRetry={() => setRetry((value) => value + 1)} />;
-  return <div className="experience-stack">
-    <CinematicPageHero image="/images/experience/shop-hero.png" eyebrow={fa ? "فروشگاه انتخاب‌شده برای حیوانات" : "PET-FIRST CURATION"} title={fa ? "خریدی که از نیاز حیوان شروع می‌شود" : "Shopping that starts with your pet"} description={fa ? "محصول مناسب را با توجه به سن، جثه و نیازهای مراقبتی پیدا کنید؛ از مقایسه قیمت تا ارسال دوره‌ای." : "Find the right product by age, size and care needs—from price comparison to repeat delivery."}>
-      <form className="experience-search" onSubmit={submitSearch} role="search"><label><Search size={20} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={fa ? "جست‌وجوی غذا، برند یا محصول…" : "Search food, brand or product…"} /></label><button type="submit">{fa ? "جست‌وجو" : "Search"}</button></form>
-    </CinematicPageHero>
-    {preview ? <p className="experience-preview-note">{fa ? "پیش‌نمایش طراحی با ۵ داده واقعی‌نما؛ قیمت، موجودی و سازگاری در نسخه متصل از API خوانده می‌شوند." : "Design preview with five realistic records; price, inventory and compatibility come from the connected API."}</p> : null}
-    <section className="experience-section"><div className="experience-section__head"><div><h2>{t("categories")}</h2><p>{fa ? "مسیر کوتاه‌تر برای رسیدن به انتخاب درست" : "A shorter path to the right choice"}</p></div></div><div className="experience-grid experience-grid--five">
-      {CATEGORY_EXPERIENCE.map((item, index) => { const apiCategory = categories?.[index]; const Icon = item.icon; return <button key={item.id} type="button" className="experience-tile" onClick={() => router.push(`/${locale}/shop/products?category=${apiCategory?.id ?? item.id}`)}><span className="experience-tile__icon"><Icon size={23} aria-hidden="true" /></span><div><h3>{apiCategory?.name ?? (fa ? item.fa : item.en)}</h3><p>{fa ? item.hintFa : item.hintEn}</p></div></button>; })}
-    </div></section>
-    <section className="experience-section"><div className="experience-section__head"><div><h2>{fa ? "پیشنهادهای امروز" : "Today’s picks"}</h2><p>{activePet ? t("subtitle", { name: activePet.name }) : (fa ? "محبوب‌ترین انتخاب‌های فروشگاه" : "Popular store picks")}</p></div></div><div className="experience-grid">
-      {cards.slice(0, 6).map((product) => <button key={product.id} className="experience-card" type="button" onClick={() => router.push(`/${locale}/shop/products/${product.id}`)}><div className="experience-card__media"><Image src={product.image} alt="" fill sizes="(max-width: 600px) 100vw, 33vw" style={{ objectPosition: product.position }} /></div><div className="experience-card__body"><div className="experience-card__row"><span className="experience-badge"><PackageCheck size={14} aria-hidden="true" />{fa ? "موجود" : "In stock"}</span><span className="experience-badge experience-badge--gold">{product.brand}</span></div><h3 className="mt-3">{fa ? product.titleFa : product.titleEn}</h3><p>{fa ? "ارسال سریع · امکان بررسی سازگاری" : "Fast delivery · compatibility check"}</p><div className="experience-price">{product.price}</div></div></button>)}
-    </div></section>
-  </div>;
+  const topCategories = (categories ?? []).filter((c) => !c.parentId);
+  const openProduct = (id: string) => router.push(`/${locale}/shop/products/${id}`);
+
+  return (
+    <div className="experience-stack">
+      <CinematicPageHero image="/images/experience/shop-hero.png" eyebrow={t("eyebrow")} title={t("heroTitle")} description={t("heroDescription")}>
+        <form className="experience-search" onSubmit={submitSearch} role="search">
+          <label>
+            <Search size={20} aria-hidden="true" />
+            <span className="sr-only">{t("searchLabel")}</span>
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} />
+          </label>
+          <button type="submit">{t("searchButton")}</button>
+        </form>
+      </CinematicPageHero>
+
+      <section className="experience-section">
+        <div className="experience-section__head">
+          <div>
+            <h2>{t("categories")}</h2>
+            <p>{t("categoriesHint")}</p>
+          </div>
+        </div>
+        {categories === null ? (
+          <Skeleton className="h-24 w-full" />
+        ) : (
+          <div className="experience-grid experience-grid--five">
+            {topCategories.map((category) => {
+              const Icon = categoryIcon(category.slug);
+              return (
+                <button key={category.id} type="button" className="experience-tile" onClick={() => router.push(`/${locale}/shop/products?category=${category.id}`)}>
+                  <span className="experience-tile__icon">
+                    <Icon size={23} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3>{category.name}</h3>
+                  </div>
+                </button>
+              );
+            })}
+            <button type="button" className="experience-tile" onClick={() => router.push(`/${locale}/repeat-delivery`)}>
+              <span className="experience-tile__icon">
+                <Repeat size={23} aria-hidden="true" />
+              </span>
+              <div>
+                <h3>{t("repeatTitle")}</h3>
+                <p>{t("repeatHint")}</p>
+              </div>
+            </button>
+          </div>
+        )}
+      </section>
+
+      {deals && deals.length ? (
+        <section className="experience-section">
+          <div className="experience-section__head">
+            <div>
+              <h2>{t("dealsTitle")}</h2>
+              <p>{t("dealsHint")}</p>
+            </div>
+            <button type="button" className="text-cta text-brand-natural" onClick={() => router.push(`/${locale}/shop/products?onPromotion=true`)}>
+              {t("seeAll")}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {deals.map((product) => (
+              <ProductCard key={product.id} product={product} onClick={() => openProduct(product.id)} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="experience-section">
+        <div className="experience-section__head">
+          <div>
+            <h2>{t("picksTitle")}</h2>
+            <p>{activePet ? t("subtitle", { name: activePet.name }) : t("picksHint")}</p>
+          </div>
+          <button type="button" className="text-cta text-brand-natural" onClick={() => router.push(`/${locale}/shop/products`)}>
+            {t("seeAll")}
+          </button>
+        </div>
+        {picks === null ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <Skeleton key={i} className="aspect-[3/4] w-full" />
+            ))}
+          </div>
+        ) : picks.length === 0 ? (
+          <EmptyState title={t("emptyTitle")} description={t("emptyDescription")} icon={<PackageCheck size={28} aria-hidden="true" />} />
+        ) : (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {picks.map((product) => (
+              <ProductCard key={product.id} product={product} onClick={() => openProduct(product.id)} />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }

@@ -13,10 +13,17 @@ export interface CreateAddressInput {
   latitude?: number;
   longitude?: number;
   instructions?: string;
+  /** Iranian 10-digit postal code. */
+  postalCode?: string;
+  isDefault?: boolean;
 }
+
+export type UpdateAddressInput = Partial<Omit<CreateAddressInput, "householdId">>;
 
 export const addressesService = {
   create: (input: CreateAddressInput) => apiFetch<CustomerAddressDto>("/addresses", { method: "POST", body: input }),
 
   list: (householdId: string) => apiFetch<CustomerAddressDto[]>(`/addresses?householdId=${householdId}`),
+
+  update: (id: string, input: UpdateAddressInput) => apiFetch<CustomerAddressDto>(`/addresses/${id}`, { method: "PATCH", body: input }),
 };

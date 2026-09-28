@@ -7,6 +7,15 @@ import type { SellerOsOfferDto } from "@petlife/types";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { ApiError } from "@/lib/api/client";
+
+const REPEAT_INTERVALS = [7, 14, 30, 45, 60, 90];
+
+type Draft = { priceAmount: string; status: SellerOsOfferDto["status"]; repeatDeliveryEligible: boolean; repeatIntervalsDays: number[] };
+
+function toDraft(offer: SellerOsOfferDto): Draft {
+  return { priceAmount: String(offer.priceAmount), status: offer.status, repeatDeliveryEligible: offer.repeatDeliveryEligible, repeatIntervalsDays: [...offer.repeatIntervalsDays] };
+}
 
 /** Seller Offers (spec section 42) — price/status edits are explicit save actions, never silent auto-save; marketplace sync health is shown per offer, never hidden. */
 export function SellerOffersView() {
@@ -17,7 +26,8 @@ export function SellerOffersView() {
   const [offers, setOffers] = useState<SellerOsOfferDto[] | null>(null);
   const [error, setError] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [drafts, setDrafts] = useState<Record<string, { priceAmount: string; status: SellerOsOfferDto["status"] }>>({});
+  const [drafts, setDrafts] = useState<Record<string, Draft>>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function load() {
     if (!sellerId) return;
@@ -26,7 +36,7 @@ export function SellerOffersView() {
       const page = await sellerOsService.listOffers(sellerId, { pageSize: 50 });
       setOffers(page.items);
       const nextDrafts: typeof drafts = {};
-      for (const offer of page.items) nextDrafts[offer.id] = { priceAmount: String(offer.priceAmount), status: offer.status };
+      for (const offer of page.items) nextDrafts[offer.id] = toDraft(offer);
       setDrafts(nextDrafts);
     } catch {
       setError(true);
@@ -43,9 +53,18 @@ export function SellerOffersView() {
     const draft = drafts[offerId];
     if (!draft) return;
     setSavingId(offerId);
+    setSaveError(null);
     try {
-      const updated = await sellerOsService.updateOffer(sellerId, offerId, { priceAmount: Number(draft.priceAmount), status: draft.status });
+      const updated = await sellerOsService.updateOffer(sellerId, offerId, {
+        priceAmount: Number(draft.priceAmount),
+        status: draft.status,
+        repeatDeliveryEligible: draft.repeatDeliveryEligible,
+        repeatIntervalsDays: draft.repeatIntervalsDays,
+      });
       setOffers((prev) => prev?.map((o) => (o.id === offerId ? updated : o)) ?? null);
+      setDrafts((prev) => ({ ...prev, [offerId]: toDraft(updated) }));
+    } catch (err) {
+      setSaveError(err instanceof ApiError && err.status < 500 ? err.message : t("saveFailed"));
     } finally {
       setSavingId(null);
     }
@@ -57,13 +76,23 @@ export function SellerOffersView() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
+      {saveError ? (
+        <p role="alert" className="text-metadata text-state-urgent">
+          {saveError}
+        </p>
+      ) : null}
 
       {offers.length === 0 ? (
         <EmptyState title={t("empty")} />
       ) : (
         offers.map((offer) => {
-          const draft = drafts[offer.id] ?? { priceAmount: String(offer.priceAmount), status: offer.status };
-          const dirty = Number(draft.priceAmount) !== offer.priceAmount || draft.status !== offer.status;
+          const draft = drafts[offer.id] ?? toDraft(offer);
+          const dirty =
+            Number(draft.priceAmount) !== offer.priceAmount ||
+            draft.status !== offer.status ||
+            draft.repeatDeliveryEligible !== offer.repeatDeliveryEligible ||
+            draft.repeatIntervalsDays.join(",") !== offer.repeatIntervalsDays.join(",");
+          const repeatInvalid = draft.repeatDeliveryEligible && draft.repeatIntervalsDays.length === 0;
           return (
             <ContextSurface key={offer.id} className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-3">
@@ -96,10 +125,40 @@ export function SellerOffersView() {
                   ]}
                   className="w-40"
                 />
-                <Button size="sm" isLoading={savingId === offer.id} disabled={!dirty} onClick={() => save(offer.id)}>
+                <Button size="sm" isLoading={savingId === offer.id} disabled={!dirty || repeatInvalid} onClick={() => save(offer.id)}>
                   {t("save")}
                 </Button>
               </div>
+
+              <fieldset className="flex flex-col gap-2 rounded-md border border-border-subtle p-3">
+                <label className="flex min-h-9 items-center gap-2 text-body text-text-primary">
+                  <input
+                    type="checkbox"
+                    checked={draft.repeatDeliveryEligible}
+                    onChange={(e) => setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, repeatDeliveryEligible: e.target.checked, repeatIntervalsDays: e.target.checked && draft.repeatIntervalsDays.length === 0 ? [30] : draft.repeatIntervalsDays } }))}
+                  />
+                  {t("repeat.enable")}
+                </label>
+                {draft.repeatDeliveryEligible ? (
+                  <div className="flex flex-wrap gap-2" role="group" aria-label={t("repeat.intervals")}>
+                    {REPEAT_INTERVALS.map((days) => {
+                      const on = draft.repeatIntervalsDays.includes(days);
+                      return (
+                        <button
+                          key={days}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, repeatIntervalsDays: on ? draft.repeatIntervalsDays.filter((d) => d !== days) : [...draft.repeatIntervalsDays, days].sort((a, b) => a - b) } }))}
+                          className={`min-h-9 rounded-full border px-3 text-metadata ${on ? "border-brand-natural bg-brand-natural text-text-inverse" : "border-border-subtle text-text-secondary"}`}
+                        >
+                          {t("repeat.everyDays", { days: days.toLocaleString(locale === "fa" ? "fa-IR" : "en-US") })}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+                {repeatInvalid ? <p className="text-metadata text-state-attention">{t("repeat.pickOne")}</p> : null}
+              </fieldset>
 
               {offer.inventory ? (
                 <p className="text-metadata text-text-secondary">{t("available", { count: offer.inventory.available, currency: formatCurrency(offer.priceAmount, locale) })}</p>

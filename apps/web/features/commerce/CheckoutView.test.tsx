@@ -45,7 +45,7 @@ const ADDRESS: CustomerAddressDto = {
   instructions: null,
 };
 
-const EMPTY_CART: CartDto = { id: "cart-1", status: "ACTIVE" as never, totalItems: 1, subtotalAmount: 100, currency: "IRR", hasSafetyConflict: false, sellerGroups: [] };
+const EMPTY_CART: CartDto = { id: "cart-1", status: "ACTIVE" as never, totalItems: 1, subtotalAmount: 100, currency: "IRR", hasSafetyConflict: false, sellerGroups: [], discountAmount: 0, hasBlockingIssues: false };
 
 const SHIPPING_OPTIONS = [
   {
@@ -88,6 +88,11 @@ const CHECKOUT: CheckoutDto = {
           currency: "IRR",
           lineTotal: 1_250_000,
           compatibility: null,
+          listUnitPrice: 1_250_000,
+          unitDiscount: 0,
+          promotionName: null,
+          promotionId: null,
+          issues: [],
         },
       ],
     },
@@ -121,8 +126,8 @@ async function advanceToPayment() {
 
   renderWithIntl(<CheckoutView />);
 
-  await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-  fireEvent.click(screen.getByText("12 Valiasr St."));
+  await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+  fireEvent.click(screen.getByText(/12 Valiasr St\./));
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -184,8 +189,8 @@ async function advanceToInstallmentPlans() {
 
   renderWithIntl(<CheckoutView />);
 
-  await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-  fireEvent.click(screen.getByText("12 Valiasr St."));
+  await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+  fireEvent.click(screen.getByText(/12 Valiasr St\./));
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -308,8 +313,8 @@ describe("CheckoutView", () => {
     vi.mocked(commerceService.getCheckout).mockResolvedValue({ ...CHECKOUT, deliveryAmount: 350_000, totalAmount: 1_600_000 });
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -330,8 +335,8 @@ describe("CheckoutView", () => {
     vi.mocked(commerceService.refreshShippingOptions).mockResolvedValue(SHIPPING_OPTIONS);
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -350,8 +355,8 @@ describe("CheckoutView", () => {
     vi.mocked(commerceService.getShippingOptions).mockResolvedValue([{ sellerOrganization: SHIPPING_OPTIONS[0]!.sellerOrganization, quotes: [] }]);
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -368,8 +373,8 @@ describe("CheckoutView", () => {
       .mockResolvedValueOnce(CHECKOUT);
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Potential safety conflict")).toBeTruthy());

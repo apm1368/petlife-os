@@ -15,6 +15,8 @@ import type {
   SellerOrderSummaryDto,
   SellerOrganizationDetailDto,
   SellerOsOfferDto,
+  PromotionDto,
+  PromotionInput,
   SellerOfferStatus,
   SellerTeamMemberDto,
 } from "@petlife/types";
@@ -68,6 +70,10 @@ export const sellerOsService = {
 
   listOrders: (sellerId: string, input: ListSellerOrdersInput = {}) =>
     apiFetch<PaginatedDto<SellerOrderSummaryDto>>(`/seller-organizations/${sellerId}/orders${toQueryString({ status: input.status, page: input.page, pageSize: input.pageSize })}`),
+  cancelOrder: (sellerId: string, orderId: string, reason: string, idempotencyKey?: string) =>
+    apiFetch<{ id: string; status: string; amount: number }>(`/seller-organizations/${sellerId}/orders/${orderId}/cancel`, { method: "POST", body: { reason }, idempotencyKey }),
+  markReadyForPickup: (orderId: string) => apiFetch<unknown>(`/orders/${orderId}/fulfillment/ready-for-pickup`, { method: "POST" }),
+  requestCourier: (orderId: string, idempotencyKey?: string) => apiFetch<unknown>(`/orders/${orderId}/fulfillment/request-courier`, { method: "POST", idempotencyKey }),
   getOrder: (sellerId: string, orderId: string) => apiFetch<OrderDetailDto & { source: string | null; externalOrderId: string | null; paymentSource: string }>(`/seller-organizations/${sellerId}/orders/${orderId}`),
 
   listOffers: (sellerId: string, input: ListSellerOffersInput = {}) =>
@@ -75,7 +81,7 @@ export const sellerOsService = {
   getOffer: (sellerId: string, offerId: string) => apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers/${offerId}`),
   createOffer: (sellerId: string, input: { productVariantId: string; priceAmount: number; compareAtAmount?: number; sellerSku?: string; initialOnHand?: number }) =>
     apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers`, { method: "POST", body: input }),
-  updateOffer: (sellerId: string, offerId: string, patch: { priceAmount?: number; compareAtAmount?: number; sellerSku?: string; status?: SellerOfferStatus }) =>
+  updateOffer: (sellerId: string, offerId: string, patch: { priceAmount?: number; compareAtAmount?: number; sellerSku?: string; status?: SellerOfferStatus; repeatDeliveryEligible?: boolean; repeatIntervalsDays?: number[] }) =>
     apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers/${offerId}`, { method: "PATCH", body: patch }),
 
   listInventory: (sellerId: string, input: ListSellerOffersInput = {}) =>
@@ -112,4 +118,10 @@ export const sellerOsService = {
     apiFetch<MarketplaceListingDto>(`/seller-organizations/${sellerId}/marketplace-listings/${listingId}/deactivate`, { method: "POST" }),
   reconcileMarketplaceListing: (sellerId: string, listingId: string) =>
     apiFetch<MarketplaceReconciliationResultDto>(`/seller-organizations/${sellerId}/marketplace-listings/${listingId}/reconcile`, { method: "POST" }),
+
+  listPromotions: (sellerId: string) => apiFetch<PromotionDto[]>(`/seller-organizations/${sellerId}/promotions`),
+  createPromotion: (sellerId: string, input: PromotionInput) => apiFetch<PromotionDto>(`/seller-organizations/${sellerId}/promotions`, { method: "POST", body: input }),
+  updatePromotion: (sellerId: string, id: string, input: Partial<PromotionInput>) => apiFetch<PromotionDto>(`/seller-organizations/${sellerId}/promotions/${id}`, { method: "PATCH", body: input }),
+  transitionPromotion: (sellerId: string, id: string, status: "ACTIVE" | "PAUSED" | "ENDED") =>
+    apiFetch<PromotionDto>(`/seller-organizations/${sellerId}/promotions/${id}/status`, { method: "POST", body: { status } }),
 };

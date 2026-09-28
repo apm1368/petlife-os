@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { randomId } from "@/lib/id/random-id";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import {
   DeliveryMethod,
   type CartDto,
@@ -40,6 +40,10 @@ type Step =
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 
+function toLatinDigits(value: string): string {
+  return value.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/\s/g, "");
+}
+
 /**
  * Checkout (spec sections 56-59, Handoff 07 sections 11-16, 36-43) — one
  * route, internal steps. Address/Delivery -> Review -> Method (Online
@@ -61,14 +65,15 @@ export function CheckoutView() {
   const [cart, setCart] = useState<CartDto | null>(null);
   const [addresses, setAddresses] = useState<CustomerAddressDto[] | null>(null);
   const [addressId, setAddressId] = useState<string | null>(null);
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>(DeliveryMethod.STANDARD);
   const [checkout, setCheckout] = useState<CheckoutDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [failureMessage, setFailureMessage] = useState<string | null>(null);
   const [idempotencyKey] = useState(() => randomId());
   const [paymentIntentIdempotencyKey, setPaymentIntentIdempotencyKey] = useState(() => randomId());
   const [payIdempotencyKey, setPayIdempotencyKey] = useState(() => randomId());
-  const [newAddress, setNewAddress] = useState({ addressLine: "", city: "", countryCode: "" });
+  const [newAddress, setNewAddress] = useState({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
+  const [addressFormOpen, setAddressFormOpen] = useState(false);
+  const [addressError, setAddressError] = useState<string | null>(null);
   const [isCreatingAddress, setIsCreatingAddress] = useState(false);
 
   const [shippingOptions, setShippingOptions] = useState<SellerShippingOptionsDto[] | null>(null);
@@ -81,17 +86,35 @@ export function CheckoutView() {
 
   useEffect(() => {
     void commerceService.getCart().then(setCart);
-    if (householdId) void addressesService.list(householdId).then(setAddresses);
+    if (householdId)
+      void addressesService.list(householdId).then((list) => {
+        setAddresses(list);
+        // The household default is preselected; the customer can still pick another.
+        setAddressId((current) => current ?? list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? null);
+        setAddressFormOpen(list.length === 0);
+      });
   }, [householdId]);
 
   async function createAddress() {
     if (!householdId) return;
     setIsCreatingAddress(true);
+    setAddressError(null);
     try {
-      const address = await addressesService.create({ householdId, ...newAddress });
-      setAddresses((prev) => [address, ...(prev ?? [])]);
+      const address = await addressesService.create({
+        householdId,
+        addressLine: newAddress.addressLine.trim(),
+        city: newAddress.city.trim(),
+        countryCode: newAddress.countryCode,
+        recipient: newAddress.recipient.trim() || undefined,
+        phone: newAddress.phone.trim() || undefined,
+        postalCode: toLatinDigits(newAddress.postalCode) || undefined,
+      });
+      setAddresses((prev) => [address, ...(prev ?? []).map((a) => (address.isDefault ? { ...a, isDefault: false } : a))]);
       setAddressId(address.id);
-      setNewAddress({ addressLine: "", city: "", countryCode: "" });
+      setAddressFormOpen(false);
+      setNewAddress({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
+    } catch (err) {
+      setAddressError(err instanceof ApiError && err.status < 500 ? err.message : t("address.saveFailed"));
     } finally {
       setIsCreatingAddress(false);
     }
@@ -101,7 +124,7 @@ export function CheckoutView() {
     setError(null);
     setStep("submitting");
     try {
-      const result = await commerceService.createCheckout({ addressId: addressId ?? undefined, deliveryMethod, acknowledgeSafetyConflict }, idempotencyKey);
+      const result = await commerceService.createCheckout({ addressId: addressId ?? undefined, deliveryMethod: DeliveryMethod.STANDARD, acknowledgeSafetyConflict }, idempotencyKey);
       setCheckout(result);
       setStep("review");
     } catch (err) {
@@ -306,67 +329,74 @@ export function CheckoutView() {
           </p>
         ) : null}
 
-        <div className="flex flex-col gap-2">
+        {!householdId ? <p className="text-body text-text-secondary">{t("address.noHousehold")}</p> : null}
+
+        <div className="flex flex-col gap-2" role="radiogroup" aria-label={t("address.title")}>
           {(addresses ?? []).map((address) => (
-            <button key={address.id} type="button" className="w-full text-start" onClick={() => setAddressId(address.id)}>
-              <ContextSurface className={addressId === address.id ? "border-brand-mint" : ""}>
-                <p className="text-body text-text-primary">{address.addressLine}</p>
-                <p className="text-metadata text-text-secondary">{address.city}</p>
+            <button key={address.id} type="button" role="radio" aria-checked={addressId === address.id} className="w-full text-start" onClick={() => setAddressId(address.id)}>
+              <ContextSurface className={`flex flex-col gap-0.5 ${addressId === address.id ? "border-brand-natural" : ""}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-body font-medium text-text-primary">{address.label ?? address.recipient ?? address.city}</p>
+                  {address.isDefault ? <StatusLabel tone="neutral">{t("address.default")}</StatusLabel> : null}
+                </div>
+                <p className="text-metadata text-text-secondary">{[address.city, address.addressLine].filter(Boolean).join("، ")}</p>
+                {address.postalCode || address.recipient ? (
+                  <p className="text-metadata text-text-secondary">{[address.recipient, address.postalCode ? t("address.postalCodeValue", { code: address.postalCode }) : null].filter(Boolean).join(" · ")}</p>
+                ) : null}
               </ContextSurface>
             </button>
           ))}
         </div>
 
-        <ContextSurface className="flex flex-col gap-2">
-          <p className="text-metadata text-text-secondary">{t("address.addNew")}</p>
-          <input
-            aria-label={t("address.addressLine")}
-            placeholder={t("address.addressLine")}
-            value={newAddress.addressLine}
-            onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })}
-            className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary"
-          />
-          <input
-            aria-label={t("address.city")}
-            placeholder={t("address.city")}
-            value={newAddress.city}
-            onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-            className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary"
-          />
-          <input
-            aria-label={t("address.countryCode")}
-            placeholder={t("address.countryCode")}
-            value={newAddress.countryCode}
-            onChange={(e) => setNewAddress({ ...newAddress, countryCode: e.target.value })}
-            className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary"
-          />
-          <Button
-            variant="secondary"
-            isLoading={isCreatingAddress}
-            onClick={createAddress}
-            disabled={!newAddress.addressLine || !newAddress.city || !newAddress.countryCode}
-          >
-            {t("address.save")}
+        {householdId && !addressFormOpen ? (
+          <Button variant="ghost" onClick={() => setAddressFormOpen(true)}>
+            {t("address.addNew")}
           </Button>
-        </ContextSurface>
+        ) : null}
 
-        <div>
-          <p className="mb-2 text-section-title text-text-primary">{t("delivery.title")}</p>
-          <div className="flex gap-2">
-            {Object.values(DeliveryMethod).map((method) => (
-              <button
-                key={method}
-                type="button"
-                onClick={() => setDeliveryMethod(method)}
-                className={`rounded-md border px-3 py-2 text-metadata ${
-                  method === deliveryMethod ? "border-brand-mint bg-brand-mint/10 text-text-primary" : "border-border-subtle text-text-secondary"
-                }`}
+        {householdId && addressFormOpen ? (
+          <ContextSurface className="flex flex-col gap-3">
+            <p className="text-section-title text-text-primary">{t("address.addNew")}</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input label={t("address.recipient")} value={newAddress.recipient} autoComplete="name" onChange={(e) => setNewAddress({ ...newAddress, recipient: e.target.value })} />
+              <Input label={t("address.phone")} value={newAddress.phone} inputMode="tel" autoComplete="tel" onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })} />
+              <Input label={t("address.city")} value={newAddress.city} autoComplete="address-level2" onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })} />
+              <Input
+                label={t("address.postalCode")}
+                value={newAddress.postalCode}
+                inputMode="numeric"
+                autoComplete="postal-code"
+                hint={t("address.postalCodeHint")}
+                errorMessage={newAddress.postalCode && !/^\d{10}$/.test(toLatinDigits(newAddress.postalCode)) ? t("address.postalCodeInvalid") : undefined}
+                onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
+              />
+            </div>
+            <Input label={t("address.addressLine")} value={newAddress.addressLine} autoComplete="street-address" onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })} />
+            {addressError ? (
+              <p role="alert" className="text-metadata text-state-urgent">
+                {addressError}
+              </p>
+            ) : null}
+            <div className="flex gap-2">
+              {(addresses ?? []).length ? (
+                <Button variant="ghost" onClick={() => setAddressFormOpen(false)}>
+                  {tCommon("back")}
+                </Button>
+              ) : null}
+              <Button
+                variant="secondary"
+                className="flex-1"
+                isLoading={isCreatingAddress}
+                onClick={createAddress}
+                disabled={!newAddress.addressLine.trim() || !newAddress.city.trim() || (Boolean(newAddress.postalCode) && !/^\d{10}$/.test(toLatinDigits(newAddress.postalCode)))}
               >
-                {t(`delivery.method.${method}`)}
-              </button>
-            ))}
-          </div>
-        </div>
+                {t("address.save")}
+              </Button>
+            </div>
+          </ContextSurface>
+        ) : null}
+
+        <p className="text-metadata text-text-secondary">{t("delivery.quotesNext")}</p>
 
         <Button variant="primary" disabled={!addressId} onClick={() => createCheckout(false)}>
           {tCommon("continue")}
@@ -426,6 +456,7 @@ export function CheckoutView() {
 
         <ContextSurface className="flex flex-col gap-2">
           <Row label={t("review.subtotal")} value={formatCurrency(checkout.subtotalAmount, locale)} />
+          {checkout.discountAmount > 0 ? <Row label={t("review.discount")} value={`− ${formatCurrency(checkout.discountAmount, locale)}`} /> : null}
           <Row label={t("review.delivery")} value={formatCurrency(checkout.deliveryAmount, locale)} />
           <Row label={t("review.total")} value={formatCurrency(checkout.totalAmount, locale)} />
         </ContextSurface>

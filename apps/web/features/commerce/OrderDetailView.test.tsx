@@ -6,7 +6,7 @@ import { commerceService } from "@/services/commerce.service";
 import { OrderDetailView } from "./OrderDetailView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/services/commerce.service", () => ({ commerceService: { getOrder: vi.fn(), requestRefund: vi.fn(), getOrderTracking: vi.fn() } }));
+vi.mock("@/services/commerce.service", () => ({ REFUND_REQUEST_REASONS: ["DAMAGED", "WRONG_ITEM", "OTHER"], commerceService: { getOrder: vi.fn(), cancelOrder: vi.fn(), createRefundRequest: vi.fn(), withdrawRefundRequest: vi.fn(), reviewOrderItem: vi.fn(), getOrderTracking: vi.fn() } }));
 vi.mock("@/stores/pet-store", () => ({
   usePetStore: (selector: (state: { pets: { id: string; name: string }[] }) => unknown) => selector({ pets: [{ id: "pet-1", name: "Luna" }] }),
 }));
@@ -52,17 +52,30 @@ const ORDER: OrderDetailDto = {
       totalPrice: 1_250_000,
       targetPetId: "pet-1",
       compatibilitySnapshot: { status: "COMPATIBLE" as never, reasons: [] },
+      listUnitPrice: null,
+      unitDiscount: 0,
+      promotionName: null,
+      reviewId: null,
     },
   ],
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:05:00.000Z",
   confirmedAt: "2026-01-01T00:05:00.000Z",
+  orderNumber: "PL-1A2B3C4D",
+  cancelledAt: null,
+  cancelReason: null,
+  timeline: [],
+  refundRequests: [],
+  canCancel: false,
+  canRequestRefund: false,
 };
 
 describe("OrderDetailView", () => {
   beforeEach(() => {
     vi.mocked(commerceService.getOrder).mockReset();
-    vi.mocked(commerceService.requestRefund).mockReset();
+    vi.mocked(commerceService.cancelOrder).mockReset();
+    vi.mocked(commerceService.createRefundRequest).mockReset();
+    vi.mocked(commerceService.reviewOrderItem).mockReset();
     vi.mocked(commerceService.getOrderTracking).mockReset();
   });
 
@@ -143,48 +156,50 @@ describe("OrderDetailView", () => {
     expect(screen.getByText("Approved")).toBeTruthy();
   });
 
-  it("lets the owner request a refund on a confirmed order and shows the resulting status", async () => {
-    vi.mocked(commerceService.getOrder).mockResolvedValueOnce(ORDER).mockResolvedValueOnce({
-      ...ORDER,
-      refunds: [
-        {
-          id: "refund-1",
-          paymentIntentId: "intent-1",
-          financingIntentId: null,
-          orderId: "order-1",
-          amount: 1_250_000,
-          currency: "IRR",
-          status: "SUCCEEDED" as never,
-          reason: "Changed my mind",
-          providerReference: "dev_refund_1",
-          createdAt: "2026-01-02T00:00:00.000Z",
-          updatedAt: "2026-01-02T00:00:05.000Z",
-          completedAt: "2026-01-02T00:00:05.000Z",
-        },
-      ],
-    });
-    vi.mocked(commerceService.requestRefund).mockResolvedValue({
-      id: "refund-1",
-      paymentIntentId: "intent-1",
-      financingIntentId: null,
-      orderId: "order-1",
-      amount: 1_250_000,
-      currency: "IRR",
-      status: "SUCCEEDED" as never,
-      reason: "Changed my mind",
-      providerReference: "dev_refund_1",
-      createdAt: "2026-01-02T00:00:00.000Z",
-      updatedAt: "2026-01-02T00:00:05.000Z",
-      completedAt: "2026-01-02T00:00:05.000Z",
-    });
+  it("cancel before dispatch: explains the full refund, then shows the cancelled & refunded state", async () => {
+    vi.mocked(commerceService.getOrder)
+      .mockResolvedValueOnce({ ...ORDER, canCancel: true })
+      .mockResolvedValueOnce({ ...ORDER, status: "REFUNDED" as never, cancelledAt: "2026-01-02T00:00:00.000Z", cancelReason: "Wrong size", canCancel: false });
+    vi.mocked(commerceService.cancelOrder).mockResolvedValue({ id: "refund-1", status: "SUCCEEDED" } as never);
 
     renderWithIntl(<OrderDetailView orderId="order-1" />);
-    await waitFor(() => expect(screen.getByText("Submit request")).toBeTruthy());
+    fireEvent.click(await screen.findByText("Cancel order"));
+    expect(screen.getByText(/The full amount \(125,000 Toman\) goes back/)).toBeTruthy();
+    fireEvent.click(screen.getByText("Cancel and refund"));
 
-    fireEvent.click(screen.getByText("Submit request"));
+    await waitFor(() => expect(commerceService.cancelOrder).toHaveBeenCalledWith("order-1", undefined, expect.any(String)));
+    expect(await screen.findByText("Order cancelled. Your refund has been issued.")).toBeTruthy();
+    expect(screen.getAllByText("Cancelled · refunded").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Cancel order")).toBeNull();
+  });
 
-    await waitFor(() => expect(commerceService.requestRefund).toHaveBeenCalled());
-    await waitFor(() => expect(screen.getByText("Refunded")).toBeTruthy());
-    expect(screen.queryByText("Submit request")).toBeNull();
+  it("after delivery, a refund request goes to review — nothing is refunded instantly", async () => {
+    vi.mocked(commerceService.getOrder)
+      .mockResolvedValueOnce({ ...ORDER, canRequestRefund: true })
+      .mockResolvedValueOnce({ ...ORDER, refundRequests: [{ id: "rr-1", status: "PENDING_REVIEW", reason: "DAMAGED", requestedAmount: 1_250_000, decisionReason: null, createdAt: "2026-01-03T00:00:00.000Z" }] });
+    vi.mocked(commerceService.createRefundRequest).mockResolvedValue({} as never);
+
+    renderWithIntl(<OrderDetailView orderId="order-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Request a refund" }));
+    fireEvent.click(screen.getByText("Send request"));
+    await waitFor(() => expect(commerceService.createRefundRequest).toHaveBeenCalledWith("order-1", { reason: "DAMAGED", description: undefined }, expect.any(String)));
+    expect(await screen.findByText("Under review")).toBeTruthy();
+    expect(screen.getByText("Withdraw request")).toBeTruthy();
+  });
+
+  it("offers one review per delivered item and hides it once reviewed", async () => {
+    const delivered = { ...ORDER, fulfillment: { id: "f-1", orderId: "order-1", sequenceNumber: 1, status: "DELIVERED" } as never };
+    vi.mocked(commerceService.getOrderTracking).mockResolvedValue({ fulfillment: null, shipment: null, timeline: [], lastUpdatedAt: null } as never);
+    vi.mocked(commerceService.getOrder).mockResolvedValueOnce(delivered).mockResolvedValueOnce({ ...delivered, items: [{ ...ORDER.items[0]!, reviewId: "rev-1" }] });
+    vi.mocked(commerceService.reviewOrderItem).mockResolvedValue({} as never);
+
+    renderWithIntl(<OrderDetailView orderId="order-1" />);
+    fireEvent.click(await screen.findByText("Write a review"));
+    const publish = screen.getByText("Publish review").closest("button")!;
+    expect(publish.disabled).toBe(true);
+    fireEvent.click(screen.getByRole("radio", { name: "4 stars" }));
+    fireEvent.click(publish);
+    await waitFor(() => expect(commerceService.reviewOrderItem).toHaveBeenCalledWith("order-1", "item-1", { rating: 4, body: undefined }));
+    expect(await screen.findByText("Thanks — you reviewed this item.")).toBeTruthy();
   });
 });

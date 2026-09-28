@@ -975,13 +975,72 @@
       "subtitle": "برای {name}",
       "categories": "دسته‌بندی‌ها",
       "browseAll": "مشاهده همه محصولات",
-      "loading": "در حال بارگذاری"
+      "loading": "در حال بارگذاری",
+      "unavailable": "فروشگاه در حال حاضر در دسترس نیست",
+      "retry": "تلاش دوباره",
+      "eyebrow": "خرید از نیاز حیوان",
+      "heroTitle": "خریدی که از نیاز حیوان شروع می‌شود",
+      "heroDescription": "فروشندگان تأییدشده را مقایسه کنید، تناسب محصول با حیوان‌تان را ببینید و برای اقلام همیشگی ارسال دوره‌ای بسازید.",
+      "searchLabel": "جست‌وجو در فروشگاه",
+      "searchPlaceholder": "جست‌وجوی غذا، برند یا محصول…",
+      "searchButton": "جست‌وجو",
+      "categoriesHint": "دسته‌بندی‌های واقعی کاتالوگ",
+      "repeatTitle": "ارسال دوره‌ای",
+      "repeatHint": "یادآوری و سفارش با یک لمس — بدون برداشت خودکار",
+      "dealsTitle": "تخفیف‌های جاری",
+      "dealsHint": "تخفیف به‌صورت خودکار در پرداخت اعمال می‌شود",
+      "seeAll": "مشاهده همه",
+      "picksTitle": "پیشنهادها",
+      "picksHint": "موجود، با بهترین امتیاز",
+      "emptyTitle": "فعلاً کالایی در فروشگاه نیست",
+      "emptyDescription": "به‌محض ثبت کالا توسط فروشندگان تأییدشده، اینجا نمایش داده می‌شود."
     },
     "results": {
       "title": "محصولات",
       "loading": "در حال بارگذاری",
       "retry": "تلاش مجدد",
-      "empty": "محصولی پیدا نشد."
+      "empty": "محصولی پیدا نشد.",
+      "searchTitle": "نتایج «{query}»",
+      "searchLabel": "جست‌وجوی کالا",
+      "searchPlaceholder": "جست‌وجوی کالا یا برند",
+      "searchButton": "جست‌وجو",
+      "categories": "دسته‌بندی‌ها",
+      "allCategories": "همه",
+      "resultCount": "{count, plural, =0 {کالایی یافت نشد} other {# کالا}}",
+      "emptyHint": "یکی از فیلترها را بردارید یا عبارت کلی‌تری جست‌وجو کنید.",
+      "sort": {
+        "label": "مرتب‌سازی",
+        "RECOMMENDED": "پیشنهادی",
+        "NEWEST": "جدیدترین",
+        "PRICE_ASC": "ارزان‌ترین",
+        "PRICE_DESC": "گران‌ترین",
+        "TOP_RATED": "بیشترین امتیاز"
+      },
+      "pagination": {
+        "label": "صفحه‌ها",
+        "previous": "قبلی",
+        "next": "بعدی",
+        "status": "صفحه {page} از {total}"
+      },
+      "filters": {
+        "title": "فیلترها",
+        "species": "مناسب برای",
+        "any": "همه",
+        "dog": "سگ",
+        "cat": "گربه",
+        "brand": "برند",
+        "seller": "فروشنده",
+        "price": "قیمت (تومان)",
+        "minToman": "از",
+        "maxToman": "تا",
+        "inStock": "فقط کالاهای موجود",
+        "onPromotion": "دارای تخفیف",
+        "rating": "امتیاز",
+        "ratingAtLeast": "{value}★ و بالاتر",
+        "clear": "حذف فیلترها",
+        "showResults": "نمایش {count, plural, other {# کالا}}",
+        "close": "بستن"
+      }
     },
     "productCard": {
       "fromPrice": "شروع از {price}",
@@ -1024,7 +1083,38 @@
       "quantity": "تعداد",
       "addToCart": "افزودن به سبد خرید",
       "goToCart": "رفتن به سبد خرید",
-      "addFailed": "افزودن به سبد خرید ممکن نشد. لطفاً دوباره تلاش کنید."
+      "addFailed": "افزودن به سبد خرید ممکن نشد. لطفاً دوباره تلاش کنید.",
+      "notFound": "این کالا در دسترس نیست",
+      "notFoundHint": "ممکن است حذف شده باشد یا دیگر فروخته نشود.",
+      "backToShop": "بازگشت به فروشگاه",
+      "breadcrumb": "مسیر صفحه",
+      "shop": "فروشگاه",
+      "gallery": "تصاویر کالا",
+      "noReviewsYet": "هنوز نظری ثبت نشده است",
+      "favorite": "افزودن به علاقه‌مندی‌ها",
+      "unfavorite": "حذف از علاقه‌مندی‌ها",
+      "offersCount": "{count} فروشنده",
+      "repeatAvailable": "امکان ارسال دوره‌ای",
+      "decrease": "کاهش تعداد",
+      "increase": "افزایش تعداد",
+      "repeatTitle": "ارسال دوره‌ای",
+      "repeatExplain": "بازه را انتخاب کنید. پیش از هر ارسال یادآوری می‌کنیم و شما سفارش را با قیمت روز تأیید می‌کنید — هیچ مبلغی خودکار برداشت نمی‌شود.",
+      "repeatCta": "تنظیم ارسال دوره‌ای",
+      "about": "درباره این کالا",
+      "suitability": "مناسب برای",
+      "specifications": "مشخصات",
+      "suits": {
+        "both": "سگ و گربه",
+        "dog": "سگ",
+        "cat": "گربه",
+        "age": "سن {min} تا {max} ماه",
+        "weight": "وزن {min} تا {max} کیلوگرم"
+      },
+      "reviewsTitle": "نظرات خریداران",
+      "reviewsVerifiedOnly": "فقط خریدارانی که کالا را دریافت کرده‌اند می‌توانند نظر بدهند.",
+      "verifiedPurchase": "خریدار تأییدشده",
+      "moreReviews": "نظرات بیشتر",
+      "related": "کالاهای مشابه"
     },
     "cart": {
       "title": "سبد خرید",
@@ -1039,7 +1129,29 @@
       "priceChanged": "قیمت از زمان افزودن تغییر کرده است",
       "sellerSubtotal": "جمع فروشنده",
       "subtotal": "جمع جزء",
-      "proceedToCheckout": "ادامه تا پرداخت"
+      "proceedToCheckout": "ادامه تا پرداخت",
+      "actionFailed": "تغییر انجام نشد. دوباره تلاش کنید.",
+      "pricesChangedBanner": "قیمت یا تخفیف برخی اقلام پس از افزودن تغییر کرده است. پیش از پرداخت قیمت‌های جدید را بررسی کنید.",
+      "acceptPrices": "پذیرش قیمت‌های فعلی",
+      "soldBy": "فروشنده: {seller}",
+      "itemsTotal": "جمع کالاها ({count})",
+      "promotions": "تخفیف",
+      "delivery": "هزینه ارسال",
+      "deliveryAtCheckout": "در مرحله پرداخت محاسبه می‌شود",
+      "fixIssuesFirst": "برای ادامه، اقلام علامت‌خورده را حذف یا اصلاح کنید.",
+      "continueShopping": "ادامه خرید",
+      "decrease": "کاهش تعداد",
+      "increase": "افزایش تعداد",
+      "each": "هر عدد {price}",
+      "issue": {
+        "OFFER_UNAVAILABLE": "دیگر در دسترس نیست",
+        "SELLER_UNAVAILABLE": "فروشنده در دسترس نیست",
+        "OUT_OF_STOCK": "ناموجود",
+        "LOW_STOCK": "فقط {count} عدد باقی مانده",
+        "QUANTITY_EXCEEDS_STOCK": "فقط {count} عدد موجود است",
+        "PRICE_CHANGED": "قیمت تغییر کرده",
+        "PROMOTION_EXPIRED": "تخفیف به پایان رسیده"
+      }
     },
     "checkout": {
       "address": {
@@ -1048,14 +1160,24 @@
         "addressLine": "آدرس",
         "city": "شهر",
         "countryCode": "کد کشور",
-        "save": "ذخیره آدرس"
+        "save": "ذخیره آدرس",
+        "noHousehold": "برای ذخیره نشانی ابتدا یک خانوار بسازید.",
+        "default": "پیش‌فرض",
+        "postalCodeValue": "کد پستی {code}",
+        "recipient": "نام گیرنده",
+        "phone": "تلفن همراه",
+        "postalCode": "کد پستی",
+        "postalCodeHint": "۱۰ رقم، اختیاری",
+        "postalCodeInvalid": "کد پستی باید ۱۰ رقم باشد",
+        "saveFailed": "نشانی ذخیره نشد."
       },
       "delivery": {
         "title": "روش ارسال",
         "method": {
           "STANDARD": "استاندارد",
           "EXPRESS": "فوری"
-        }
+        },
+        "quotesNext": "در مرحله بعد از میان گزینه‌های واقعی ارسال انتخاب می‌کنید."
       },
       "safetyAck": {
         "title": "لطفاً قبل از ادامه تأیید کنید",
@@ -1067,7 +1189,8 @@
         "title": "بررسی سفارش",
         "subtotal": "جمع جزء",
         "delivery": "ارسال",
-        "total": "جمع کل"
+        "total": "جمع کل",
+        "discount": "تخفیف"
       },
       "shipping": {
         "title": "روش ارسال هر فروشنده را انتخاب کنید",
@@ -1181,6 +1304,19 @@
         "CANCELLED": "لغو شده",
         "PARTIALLY_REFUNDED": "بازپرداخت جزئی",
         "REFUNDED": "بازپرداخت شد"
+      },
+      "repeatLink": "ارسال‌های دوره‌ای",
+      "soldBy": "فروشنده: {seller}",
+      "cancelledRefunded": "لغو و بازپرداخت‌شده",
+      "tabs": {
+        "active": "در جریان ({count})",
+        "delivered": "تحویل‌شده ({count})",
+        "closed": "لغو و بازپرداخت ({count})"
+      },
+      "tabEmpty": {
+        "active": "سفارش در جریانی ندارید.",
+        "delivered": "هنوز سفارشی تحویل نشده است.",
+        "closed": "سفارش لغو یا بازپرداخت‌شده‌ای ندارید."
       }
     },
     "orderDetail": {
@@ -1221,7 +1357,77 @@
         "requestedAt": "درخواست‌شده در {when}"
       },
       "viewPaymentDetails": "مشاهده جزئیات پرداخت و اقساط",
-      "getSupport": "درخواست پشتیبانی"
+      "getSupport": "درخواست پشتیبانی",
+      "notFound": "سفارش پیدا نشد",
+      "backToOrders": "بازگشت به سفارش‌ها",
+      "cancelledRefunded": "لغو و بازپرداخت‌شده",
+      "titleWithSeller": "سفارش از {seller}",
+      "discount": "تخفیف",
+      "actionFailed": "انجام نشد. دوباره تلاش کنید.",
+      "itemDiscount": "{name}: {amount} تخفیف",
+      "cancel": {
+        "available": "پشیمان شده‌اید؟ تا پیش از تحویل بسته به پیک می‌توانید سفارش را لغو کنید.",
+        "button": "لغو سفارش",
+        "title": "این سفارش لغو شود؟",
+        "explain": "کل مبلغ ({amount}) به روش پرداخت شما بازمی‌گردد و کالاها به موجودی برمی‌گردند.",
+        "reasonOptional": "دلیل (اختیاری)",
+        "keep": "انصراف",
+        "confirm": "لغو و بازپرداخت",
+        "done": "سفارش لغو شد و بازپرداخت انجام شد.",
+        "reasonLabel": "دلیل لغو"
+      },
+      "refundRequest": {
+        "available": "مشکلی در سفارش هست؟ تا ۷ روز پس از تحویل می‌توانید درخواست بازگشت وجه ثبت کنید.",
+        "availableFailed": "ارسال ناموفق بود. می‌توانید درخواست بازگشت وجه ثبت کنید.",
+        "button": "درخواست بازگشت وجه",
+        "title": "درخواست بازگشت وجه",
+        "explain": "تیم ما هر درخواست را معمولاً ظرف ۲ روز کاری بررسی می‌کند. در صورت تأیید، مبلغ سفارش به روش پرداخت شما بازمی‌گردد.",
+        "reasonLabel": "چه مشکلی پیش آمد؟",
+        "describe": "توضیح بیشتر (اختیاری)",
+        "submit": "ارسال درخواست",
+        "sent": "درخواست ثبت شد. نتیجه بررسی را اطلاع می‌دهیم.",
+        "sentAt": "ثبت {when}",
+        "decision": "توضیح تیم پت‌لایف: {reason}",
+        "approvedNext": "تأیید شد — واحد مالی در حال بازپرداخت است.",
+        "withdraw": "انصراف از درخواست",
+        "withdrawn": "درخواست لغو شد.",
+        "reason": {
+          "DAMAGED": "آسیب‌دیده رسید",
+          "WRONG_ITEM": "کالای اشتباه",
+          "NOT_AS_DESCRIBED": "مغایر با توضیحات",
+          "MISSING_ITEMS": "کسری اقلام",
+          "NOT_DELIVERED": "تحویل نشد",
+          "PET_REACTION": "واکنش نامناسب حیوان",
+          "OTHER": "سایر"
+        },
+        "status": {
+          "PENDING_REVIEW": "در حال بررسی",
+          "APPROVED": "تأیید شد",
+          "REJECTED": "رد شد",
+          "WITHDRAWN": "لغو شد"
+        }
+      },
+      "timeline": {
+        "title": "تاریخچه سفارش",
+        "PENDING": "سفارش ایجاد شد",
+        "CONFIRMED": "پرداخت تأیید و سفارش ثبت شد",
+        "PREPARING": "فروشنده در حال آماده‌سازی است",
+        "READY_FOR_FULFILLMENT": "آماده ارسال",
+        "FULFILLED": "ارسال شد",
+        "CANCELLED": "لغو شد",
+        "PARTIALLY_REFUNDED": "بخشی از مبلغ بازگردانده شد",
+        "REFUNDED": "مبلغ بازگردانده شد"
+      },
+      "review": {
+        "write": "ثبت نظر",
+        "done": "ممنون — نظر شما ثبت شد.",
+        "rating": "امتیاز شما",
+        "stars": "{count} ستاره",
+        "body": "نظر شما و حیوان‌تان چه بود؟ (اختیاری)",
+        "cancel": "انصراف",
+        "submit": "انتشار نظر",
+        "failed": "نظر شما منتشر نشد."
+      }
     },
     "statusLabels": {
       "payment": {
@@ -1289,6 +1495,94 @@
       "action": "اقدام",
       "localStatus": "محلی",
       "remoteStatus": "از راه دور"
+    },
+    "price": {
+      "was": "قیمت قبلی {price}",
+      "promotion": "{name} · {percent}٪ تخفیف"
+    },
+    "stock": {
+      "in": "موجود",
+      "low": "موجودی کم",
+      "lowCount": "فقط {count} عدد باقی مانده",
+      "out": "ناموجود"
+    },
+    "rating": {
+      "aria": "امتیاز {average} از ۵ بر اساس {count} نظر خریدار",
+      "count": "{count, plural, other {# نظر}}"
+    },
+    "repeat": {
+      "title": "ارسال‌های دوره‌ای",
+      "loading": "در حال بارگیری",
+      "retry": "تلاش دوباره",
+      "howItWorks": "دو روز پیش از هر تاریخ یادآوری می‌کنیم. شما سفارش را با قیمت روز تأیید و مثل همیشه پرداخت می‌کنید — پت‌لایف هیچ‌وقت خودکار برداشت نمی‌کند.",
+      "empty": "هنوز ارسال دوره‌ای ندارید",
+      "emptyHint": "روی کالاهایی که مرتب می‌خرید دنبال «امکان ارسال دوره‌ای» بگردید.",
+      "browse": "مشاهده کالاها",
+      "summary": "{quantity} عدد · هر {days} روز · {seller}",
+      "nextOn": "ارسال بعدی: {date}",
+      "priceChanged": "قیمت تغییر کرده",
+      "unavailable": "فعلاً در دسترس نیست",
+      "status": {
+        "ACTIVE": "فعال",
+        "PAUSED": "متوقف",
+        "CANCELLED": "لغوشده"
+      },
+      "notAvailableTitle": "ارسال دوره‌ای برای این کالا در دسترس نیست",
+      "notAvailableHint": "ممکن است فروشنده این امکان را متوقف کرده باشد.",
+      "createTitle": "تنظیم ارسال دوره‌ای",
+      "soldBy": "فروشنده: {seller}",
+      "currentPrice": "قیمت فعلی هر عدد: {price}",
+      "interval": "هر چند وقت",
+      "everyDays": "هر {days} روز",
+      "quantity": "تعداد",
+      "address": "نشانی ارسال",
+      "needAddress": "ابتدا در مرحله پرداخت یک نشانی ثبت کنید.",
+      "noAutopayTitle": "بدون برداشت خودکار",
+      "noAutopay": "پیش از هر ارسال یادآوری دریافت می‌کنید و سفارش را خودتان تأیید می‌کنید.",
+      "create": "ساخت ارسال دوره‌ای",
+      "saveFailed": "ذخیره نشد. دوباره تلاش کنید.",
+      "notFound": "ارسال دوره‌ای پیدا نشد",
+      "backToList": "همه ارسال‌های دوره‌ای",
+      "priceChangedExplain": "قیمت از {from} به {to} تغییر کرده است. برای ادامه، قیمت جدید را بپذیرید.",
+      "priceAccepted": "قیمت جدید پذیرفته شد.",
+      "acceptPrice": "پذیرش قیمت جدید",
+      "unavailableExplain": "این کالا فعلاً از این فروشنده در دسترس نیست.",
+      "dueNow": "زمان ارسال بعدی رسیده است. برای ارسال، سفارش را تأیید کنید.",
+      "orderEarly": "زودتر لازم دارید؟ می‌توانید همین حالا سفارش این دوره را ثبت کنید.",
+      "orderCycle": "سفارش این دوره ({price})",
+      "addedToCart": "به سبد خرید اضافه شد.",
+      "settings": "تنظیمات",
+      "saved": "ذخیره شد.",
+      "skip": "رد کردن ارسال بعدی",
+      "skipped": "ارسال بعدی رد شد.",
+      "pause": "توقف موقت",
+      "paused": "متوقف شد.",
+      "resume": "ادامه",
+      "resumed": "دوباره فعال شد.",
+      "cancel": "لغو ارسال دوره‌ای",
+      "cancelled": "ارسال دوره‌ای لغو شد.",
+      "lastOrder": "مشاهده آخرین سفارش",
+      "history": "تاریخچه",
+      "event": {
+        "CREATED": "ایجاد شد",
+        "UPDATED": "تنظیمات تغییر کرد",
+        "SKIPPED": "یک ارسال رد شد",
+        "PAUSED": "متوقف شد",
+        "RESUMED": "دوباره فعال شد",
+        "CANCELLED": "لغو شد",
+        "PRICE_ACCEPTED": "قیمت جدید پذیرفته شد",
+        "REMINDER_SENT": "یادآوری ارسال شد",
+        "CYCLE_PREPARED": "به سبد اضافه شد",
+        "ORDERED": "سفارش ثبت شد"
+      }
+    },
+    "favorites": {
+      "title": "علاقه‌مندی‌ها",
+      "loading": "در حال بارگیری",
+      "retry": "تلاش دوباره",
+      "empty": "هنوز کالایی ذخیره نکرده‌اید",
+      "emptyHint": "با لمس قلب روی هر کالا، آن را اینجا ذخیره کنید.",
+      "browse": "مشاهده کالاها"
     }
   },
   "seller": {
@@ -1301,7 +1595,8 @@
         "channels": "کانال‌ها",
         "team": "تیم",
         "settings": "تنظیمات",
-        "finance": "امور مالی"
+        "finance": "امور مالی",
+        "promotions": "تخفیف‌ها"
       },
       "notASeller": {
         "title": "عدم دسترسی فروشنده",
@@ -1378,7 +1673,45 @@
       "quantity": "تعداد {count}",
       "subtotal": "جمع جزء",
       "delivery": "هزینه ارسال",
-      "total": "جمع کل"
+      "total": "جمع کل",
+      "cancelledDoNotShip": "این سفارش لغو و مبلغ آن بازگردانده شده است. ارسال نکنید.",
+      "actionFailed": "انجام نشد. دوباره تلاش کنید.",
+      "nextStep": "قدم بعدی",
+      "markReady": "بسته‌بندی شد و آماده تحویل به پیک است",
+      "requestCourier": "درخواست پیک",
+      "cancelOrder": "امکان ارسال نیست — لغو سفارش",
+      "cancelExplain": "کل مبلغ ({amount}) بلافاصله به مشتری بازگردانده می‌شود و کالاها به موجودی شما برمی‌گردند.",
+      "cancelReason": "دلیل (به مشتری نمایش داده می‌شود)",
+      "cancelConfirm": "لغو و بازپرداخت به مشتری",
+      "orderStatus": {
+        "PENDING": "در انتظار",
+        "CONFIRMED": "تأییدشده",
+        "PREPARING": "در حال آماده‌سازی",
+        "READY_FOR_FULFILLMENT": "آماده ارسال",
+        "FULFILLED": "ارسال‌شده",
+        "CANCELLED": "لغوشده",
+        "PARTIALLY_REFUNDED": "بازپرداخت جزئی",
+        "REFUNDED": "بازپرداخت‌شده"
+      },
+      "promotionApplied": "تخفیف: {name}",
+      "discount": "تخفیف",
+      "refundRequests": "درخواست‌های بازگشت وجه",
+      "refundReason": {
+        "DAMAGED": "آسیب‌دیده رسید",
+        "WRONG_ITEM": "کالای اشتباه",
+        "NOT_AS_DESCRIBED": "مغایر با توضیحات",
+        "MISSING_ITEMS": "کسری اقلام",
+        "NOT_DELIVERED": "تحویل نشد",
+        "PET_REACTION": "واکنش نامناسب حیوان",
+        "OTHER": "سایر"
+      },
+      "refundStatus": {
+        "PENDING_REVIEW": "در حال بررسی",
+        "APPROVED": "تأیید شد",
+        "REJECTED": "رد شد",
+        "WITHDRAWN": "لغو شد"
+      },
+      "refundRequestsNote": "درخواست‌ها را پت‌لایف بررسی می‌کند؛ مبلغ بازپرداخت‌های تأییدشده از تسویه شما کسر می‌شود."
     },
     "offers": {
       "title": "پیشنهادها",
@@ -1395,7 +1728,14 @@
         "SUSPENDED": "معلق"
       },
       "save": "ذخیره",
-      "available": "{count} موجود · {currency}"
+      "available": "{count} موجود · {currency}",
+      "saveFailed": "پیشنهاد ذخیره نشد.",
+      "repeat": {
+        "enable": "ارائه ارسال دوره‌ای",
+        "intervals": "بازه‌های ارسال",
+        "everyDays": "هر {days} روز",
+        "pickOne": "دست‌کم یک بازه انتخاب کنید."
+      }
     },
     "inventory": {
       "title": "موجودی",
@@ -1742,7 +2082,8 @@
         "contentMedia": "رسانه",
         "contentPlacements": "بخش‌های محتوایی",
         "subscriptions": "اشتراک‌ها",
-        "services": "خدمات و نوبت‌ها"
+        "services": "خدمات و نوبت‌ها",
+        "commerce": "فروشگاه"
       }
     },
     "common": {

@@ -22,6 +22,9 @@ const ORDER: OrderSummaryDto = {
   currency: "IRR",
   createdAt: "2026-01-01T00:00:00.000Z",
   confirmedAt: "2026-01-01T00:05:00.000Z",
+  orderNumber: "PL-1A2B3C4D",
+  cancelledAt: null,
+  previewTitles: ["Royal Canin Adult Dog Food"],
 };
 
 describe("MyOrdersView", () => {
@@ -34,7 +37,8 @@ describe("MyOrdersView", () => {
 
     renderWithIntl(<MyOrdersView />);
 
-    await waitFor(() => expect(screen.getByText("Pet Bazaar Tehran")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Sold by Pet Bazaar Tehran")).toBeTruthy());
+    expect(screen.getByText("PL-1A2B3C4D")).toBeTruthy();
     expect(screen.getByText("Confirmed")).toBeTruthy();
     expect(screen.getByText("2 items")).toBeTruthy();
     expect(screen.getByText("125,000 Toman")).toBeTruthy();
