@@ -35,5 +35,10 @@ Checks per page: HTTP 200, `dir`/`lang`, no horizontal overflow, no visible skel
 - Admin overview mobile overflow (grid bars).
 - Native date inputs in the Persian UI now show the Jalali reading under the field (discovery, reschedule, provider calendar, vaccination). A full Jalali picker remains open.
 
-## Live
-Recorded after deploy (see the release report).
+## Live (http://185.231.112.154, 2026-09-28)
+- First push `96945a3`: CI run 36382683585 failed (ledger chart-of-accounts boot race between parallel e2e suites on a fresh DB); deploy correctly skipped, live stayed on `72e52ce`.
+- Fix `0d1acb8`: CI run 36383457927 green (build + e2e) → deploy success. Migration `202609280001_commerce_completion` applied.
+- Pre-release backup: `/root/petlife-backups/release-b4-20260928-053638` (+ ROLLBACK.md).
+- API smoke: `/api/health/live` 200, `/api/shop/products` returns the paginated shape, `/robots.txt` 200.
+- Public pages fa/en × desktop/mobile (shop, results, services, vet find): 200, correct dir, no overflow, no skeletons, no console errors. Private pages (cart, orders, repeat delivery) redirect anonymous visitors to sign-in.
+- The live catalogue shows its existing 5 products honestly (no images → neutral tile). No QA/demo data was written to the live database; authenticated flows were verified on the isolated preview with identical code.
