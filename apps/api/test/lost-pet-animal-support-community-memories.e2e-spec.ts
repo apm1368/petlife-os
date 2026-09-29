@@ -220,11 +220,14 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client: publicDonorClient } = await setupHousehold();
 
     await anonDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 100_000 }).expect(201);
-    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true }).expect(201);
+    // Batch 6: showing publicly requires a donor-chosen name (the account name is never shown).
+    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true }).expect(400);
+    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true, publicDisplayName: "Sara" }).expect(201);
 
     const donors = await request(app.getHttpServer()).get(`/animal-support/campaigns/${campaignId}/donors`).expect(200);
     expect(donors.body).toHaveLength(1);
     expect(donors.body[0].amountIrr).toBe(200_000);
+    expect(donors.body[0].displayName).toBe("Sara");
   });
 
   // -- Flow J: Community Post --------------------------------------------------

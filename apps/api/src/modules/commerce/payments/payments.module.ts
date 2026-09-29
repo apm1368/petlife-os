@@ -4,9 +4,11 @@ import { DevPaymentGateway } from "./dev-payment-gateway.service";
 import { StandardGatewayAdapter } from "./standard-gateway.adapter";
 import { PaymentGatewayRegistry } from "./payment-gateway-registry.service";
 import { ProviderEventsService } from "./provider-events.service";
+import { PaymentEnvironmentController } from "./payment-environment.controller";
 
-/** No controller here on purpose — the webhook/callback routes live in CheckoutModule's PaymentWebhooksController, since that's the one place both PaymentsService and FinancingService can be injected together without a module import cycle (see its doc comment). */
+/** Webhook/callback routes live in CheckoutModule's PaymentWebhooksController (both PaymentsService and FinancingService are needed there). The only route here is the read-only payment environment (Batch 6). */
 @Module({
+  controllers: [PaymentEnvironmentController],
   providers: [PaymentsService, DevPaymentGateway, StandardGatewayAdapter, PaymentGatewayRegistry, ProviderEventsService],
   exports: [PaymentsService, PaymentGatewayRegistry, ProviderEventsService],
 })

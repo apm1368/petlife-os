@@ -35,6 +35,8 @@ export interface RefundExecutionOptions {
   actorType?: "CUSTOMER" | "SELLER" | "ADMIN" | "SYSTEM";
   actorId?: string | null;
   onSucceeded?: (tx: Prisma.TransactionClient, refund: Refund) => Promise<void>;
+  /** Batch 6 — recorded on the refund row when an admin (not a customer) requested it. */
+  requestedByAdminUserId?: string | null;
 }
 
 /**
@@ -118,8 +120,13 @@ export class RefundsService {
    * advisory lock, duplicate guard and ledger reversal as order refunds; the
    * caller has already decided the amount from its own snapshotted terms.
    */
-  async refundStandalonePayment(checkoutId: string, amount: number, currency: string, reason: string, requestedByUserId: string | null): Promise<RefundDto> {
-    return this.refundPayment(requestedByUserId, null, checkoutId, amount, currency, reason);
+  /**
+   * A refund for a payment that has no Order (travel bookings, donations). Goes through the real
+   * gateway; `options.onSucceeded` runs inside the same transaction that records the gateway's
+   * success, so domain bookkeeping is atomic with it.
+   */
+  async refundStandalonePayment(checkoutId: string, amount: number, currency: string, reason: string, requestedByUserId: string | null, options: RefundExecutionOptions = {}): Promise<RefundDto> {
+    return this.refundPayment(requestedByUserId, null, checkoutId, amount, currency, reason, options);
   }
 
   private async refundPayment(userId: string | null, orderId: string | null, checkoutId: string, amount: number, currency: string, reason?: string, options: RefundExecutionOptions = {}): Promise<RefundDto> {
@@ -155,7 +162,7 @@ export class RefundsService {
       if (alreadyRefunded + amount > intent.amount) throw new RefundNotSupportedException({ checkoutId, reason: "Refund would exceed the captured amount" });
 
       const refund = await tx.refund.create({
-        data: { paymentIntentId: intent.id, orderId, amount, currency, status: RefundStatus.REQUESTED, reason: reason ?? null, requestedByUserId: userId },
+        data: { paymentIntentId: intent.id, orderId, amount, currency, status: RefundStatus.REQUESTED, reason: reason ?? null, requestedByUserId: userId, requestedByAdminUserId: options.requestedByAdminUserId ?? null },
       });
       return { gateway, attempt, refund };
     });
@@ -178,6 +185,7 @@ export class RefundsService {
       const updated = await this.prisma.$transaction(async (tx) => {
         const row = await tx.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.SUCCEEDED, providerReference: result.providerRefundReference ?? null, completedAt: new Date() } });
         if (orderId) await this.markOrderRefunded(tx, orderId, row, reason, options);
+        else if (options.onSucceeded) await options.onSucceeded(tx, row);
         await this.ledger.recordRefundSucceeded(row.id, amount, currency, tx);
         if (orderId) await this.sellerFinance.applyRefundImpact(tx, orderId, row.id, amount, currency);
         return row;

@@ -35,4 +35,5 @@ export const NotificationDeepLinks = {
   ngoPortal: () => `/ngo`,
   ngoNeed: (listingId: string) => `/ngo/needs/${listingId}`,
   communityPost: (postId: string) => `/community/posts/${postId}`,
+  donationReceipt: (donationIntentId: string) => `/donations/${donationIntentId}`,
 };

@@ -2939,8 +2939,8 @@
       "empty": "No campaigns are open right now."
     },
     "campaignCard": {
-      "raised": "{raised} IRR raised",
-      "raisedOfTarget": "{raised} of {target} IRR raised"
+      "raised": "{raised} raised",
+      "raisedOfTarget": "{raised} of {target} raised"
     },
     "fundType": {
       "GENERAL": "General fund",

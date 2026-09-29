@@ -175,7 +175,7 @@ describe("SupportNeedDetailView", () => {
     renderWithIntl(<SupportNeedDetailView listingId="listing-1" />);
 
     await waitFor(() => expect(screen.getByText("Go to the campaign")).toBeTruthy());
-    expect(screen.getByText("Go to the campaign").closest("a")?.getAttribute("href")).toBe("/animal-support/campaigns/campaign-9");
+    expect(screen.getByText("Go to the campaign").closest("a")?.getAttribute("href")).toBe("/en/animal-support/campaigns/campaign-9?need=listing-1");
     // A donate-only listing shows no help-offer form.
     expect(screen.queryByLabelText("Message")).toBeNull();
   });

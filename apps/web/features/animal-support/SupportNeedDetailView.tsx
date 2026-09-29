@@ -140,7 +140,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
         <ContextSurface className="flex flex-col gap-2">
           <span className="text-body text-text-primary">{t("detail.donateTitle")}</span>
           <p className="text-metadata text-text-secondary">{t("detail.donateExplainer")}</p>
-          <Link href={`/animal-support/campaigns/${listing.campaignId}`}>
+          <Link href={`/${locale}/animal-support/campaigns/${listing.campaignId}?need=${listing.id}`}>
             <Button variant="primary">{t("detail.donateAction")}</Button>
           </Link>
         </ContextSurface>

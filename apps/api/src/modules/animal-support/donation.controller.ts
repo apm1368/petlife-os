@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
@@ -17,8 +17,13 @@ export class DonationController {
   constructor(private readonly donations: DonationService) {}
 
   @Post("animal-support/campaigns/:campaignId/donate")
-  donate(@Param("campaignId") campaignId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateDonationDto) {
+  donate(@Param("campaignId", ParseUUIDPipe) campaignId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateDonationDto) {
     return this.donations.donate(campaignId, user.id, dto);
+  }
+
+  @Get("me/donations/:donationIntentId")
+  receipt(@CurrentUser() user: SessionUser, @Param("donationIntentId", ParseUUIDPipe) donationIntentId: string) {
+    return this.donations.getReceipt(user.id, donationIntentId);
   }
 
   @Get("me/donations")

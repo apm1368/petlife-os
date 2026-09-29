@@ -401,4 +401,117 @@ describe("Batch 6 — Animal support ecosystem", () => {
       await request(server).get(`/animal-support/needs?sort=NEAREST`).expect(400);
     });
   });
+
+  // ------------------------------------------------------------------ 6C donations
+
+  describe("donations", () => {
+    async function orgWithCampaign(fundType: "GENERAL" | "RESTRICTED", targetAmountIrr = 50_000_000) {
+      const ops = await admin(AdminRole.ADMIN);
+      const org = await ops.c.post("/admin/animal-support/organizations").send({ type: "NGO", name: `Rescue ${unique()}` }).expect(201);
+      await ops.c.post(`/admin/animal-support/organizations/${org.body.id}/verification`).send({ verificationStatus: "VERIFIED" }).expect(201);
+      await ops.c.post(`/admin/animal-support/organizations/${org.body.id}/listing`).send({ isPubliclyListed: true }).expect(201);
+      const campaign = await ops.c.post(`/admin/animal-support/organizations/${org.body.id}/campaigns`).send({ title: `Winter food ${unique()}`, description: "Food for the winter", fundType, targetAmountIrr }).expect(201);
+      await ops.c.patch(`/admin/animal-support/campaigns/${campaign.body.id}/status`).send({ status: "ACTIVE" }).expect(200);
+      return { ops, organizationId: org.body.id as string, campaignId: campaign.body.id as string };
+    }
+
+    async function netByAccount(referenceIds: string[]) {
+      const entries = await prisma.ledgerEntry.findMany({ where: { ledgerTransaction: { referenceId: { in: referenceIds } } }, include: { ledgerAccount: true } });
+      const net: Record<string, number> = {};
+      for (const e of entries) net[e.ledgerAccount.code] = (net[e.ledgerAccount.code] ?? 0) + (e.direction === "DEBIT" ? e.amount : -e.amount);
+      return net;
+    }
+
+    it("a sandbox donation records both ledger legs, shows real progress, and gives the donor a private receipt", async () => {
+      const { campaignId, organizationId } = await orgWithCampaign("GENERAL");
+      const donor = await user("b6-donor");
+      const res = await donor.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 2_000_000, idempotencyKey: `k-${unique()}` }).expect(201);
+      expect(res.body.status).toBe("SUCCEEDED");
+      const intent = await prisma.donationIntent.findUniqueOrThrow({ where: { id: res.body.donationIntentId } });
+      const net = await netByAccount([intent.checkoutId, intent.id]);
+      expect(net.CASH_GATEWAY_RECEIVABLE).toBe(2_000_000);
+      expect(net.DONATION_PAYABLE).toBe(-2_000_000);
+      expect(net.CUSTOMER_PAYMENT_CLEARING ?? 0).toBe(0);
+      const campaign = await request(server).get(`/animal-support/campaigns/${campaignId}`).expect(200);
+      expect(campaign.body.raisedAmountIrr).toBe(2_000_000);
+      const receipt = await donor.c.get(`/me/donations/${intent.id}`).expect(200);
+      expect(receipt.body).toMatchObject({ status: "SUCCEEDED", amountIrr: 2_000_000, fundType: "GENERAL", organization: { id: organizationId } });
+      const stranger = await user("b6-stranger");
+      await stranger.c.get(`/me/donations/${intent.id}`).expect(404);
+      const env = await request(server).get("/payments/environment").expect(200);
+      expect(env.body).toEqual({ mode: "sandbox", onlinePaymentAvailable: true });
+    });
+
+    it("public donors show only a name the donor chose, never the account name; anonymous by default", async () => {
+      const { campaignId } = await orgWithCampaign("GENERAL");
+      const named = await user("b6-donor");
+      await prisma.user.update({ where: { id: named.userId }, data: { displayName: "Parisa Amini Legal-Name" } });
+      await named.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 1_000_000, showDonorPublicly: true }).expect(400);
+      await named.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 1_000_000, showDonorPublicly: true, publicDisplayName: "A friend of the shelter" }).expect(201);
+      const anonymous = await user("b6-donor");
+      await anonymous.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 1_500_000 }).expect(201);
+      const donors = await request(server).get(`/animal-support/campaigns/${campaignId}/donors`).expect(200);
+      const json = JSON.stringify(donors.body);
+      expect(json).toContain("A friend of the shelter");
+      expect(json).not.toContain("Legal-Name");
+      expect(json).not.toContain(named.email);
+      expect(json).not.toContain(named.userId);
+      expect(donors.body).toHaveLength(1);
+    });
+
+    it("idempotency: repeats and concurrent retries never charge twice, and a key cannot be reused for another campaign", async () => {
+      const { campaignId } = await orgWithCampaign("GENERAL");
+      const other = await orgWithCampaign("GENERAL");
+      const donor = await user("b6-donor");
+      const key = `idem-${unique()}`;
+      const results = await Promise.all([1, 2, 3].map(() => donor.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 3_000_000, idempotencyKey: key })));
+      expect(results.every((r) => r.status === 201)).toBe(true);
+      expect(new Set(results.map((r) => r.body.donationIntentId)).size).toBe(1);
+      expect(await prisma.donationIntent.count({ where: { idempotencyKey: key } })).toBe(1);
+      expect((await request(server).get(`/animal-support/campaigns/${campaignId}`).expect(200)).body.raisedAmountIrr).toBe(3_000_000);
+      await donor.c.post(`/animal-support/campaigns/${other.campaignId}/donate`).send({ amountIrr: 3_000_000, idempotencyKey: key }).expect(400);
+      await donor.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 500 }).expect(400);
+    });
+
+    it("restricted donations stay linked to the need's own campaign", async () => {
+      const { campaignId, ops } = await orgWithCampaign("RESTRICTED");
+      const unrelated = await orgWithCampaign("RESTRICTED");
+      const publisher = await user("b6-publisher");
+      const needId = await publishedNeed(publisher.c, ops.c, { category: "VETERINARY_CARE", campaignId, contactMode: "BOTH" });
+      const donor = await user("b6-donor");
+      await donor.c.post(`/animal-support/campaigns/${unrelated.campaignId}/donate`).send({ amountIrr: 1_000_000, supportNeedListingId: needId }).expect(400);
+      const ok = await donor.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 1_000_000, supportNeedListingId: needId }).expect(201);
+      const receipt = await donor.c.get(`/me/donations/${ok.body.donationIntentId}`).expect(200);
+      expect(receipt.body.fundType).toBe("RESTRICTED");
+      expect(receipt.body.supportNeed.id).toBe(needId);
+    });
+
+    it("refunds go through the gateway, reverse both legs, can't happen twice, and only finance may do them", async () => {
+      const { campaignId, organizationId } = await orgWithCampaign("GENERAL");
+      const donor = await user("b6-donor");
+      const res = await donor.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 4_000_000 }).expect(201);
+      const id = res.body.donationIntentId as string;
+      const ts = await admin(AdminRole.TRUST_SAFETY);
+      await ts.c.post(`/admin/animal-support/donations/${id}/refund`).send({ reason: "Donor asked" }).expect(403);
+      const finance = await admin(AdminRole.FINANCE);
+      await finance.c.post(`/admin/animal-support/donations/${id}/refund`).send({ reason: "Donor asked within 24h" }).expect(201);
+      const intent = await prisma.donationIntent.findUniqueOrThrow({ where: { id } });
+      expect(intent.status).toBe("REFUNDED");
+      const refund = await prisma.refund.findFirstOrThrow({ where: { paymentIntent: { checkoutId: intent.checkoutId } } });
+      expect(refund.status).toBe("SUCCEEDED");
+      expect(refund.providerReference).toBeTruthy();
+      expect(refund.requestedByAdminUserId).toBeTruthy();
+      const net = await netByAccount([intent.checkoutId, intent.id, refund.id]);
+      expect(net.CASH_GATEWAY_RECEIVABLE ?? 0).toBe(0);
+      expect(net.DONATION_PAYABLE ?? 0).toBe(0);
+      expect(net.CUSTOMER_PAYMENT_CLEARING ?? 0).toBe(0);
+      expect((await request(server).get(`/animal-support/campaigns/${campaignId}`).expect(200)).body.raisedAmountIrr).toBe(0);
+      const second = await finance.c.post(`/admin/animal-support/donations/${id}/refund`).send({ reason: "Again" });
+      expect(second.status).toBeGreaterThanOrEqual(400);
+      expect(await prisma.refund.count({ where: { paymentIntent: { checkoutId: intent.checkoutId }, status: "SUCCEEDED" } })).toBe(1);
+      expect((await donor.c.get(`/me/donations/${id}`).expect(200)).body.status).toBe("REFUNDED");
+      expect(await prisma.adminAuditLog.count({ where: { entityType: "DonationIntent", entityId: id, action: "donation.refunded" } })).toBe(1);
+      void organizationId;
+    });
+  });
 });

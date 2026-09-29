@@ -2939,8 +2939,8 @@
       "empty": "در حال حاضر کمپینی باز نیست."
     },
     "campaignCard": {
-      "raised": "{raised} ریال جمع‌آوری شده",
-      "raisedOfTarget": "{raised} از {target} ریال جمع‌آوری شده"
+      "raised": "{raised} جمع‌آوری شد",
+      "raisedOfTarget": "{raised} از {target} جمع‌آوری شد"
     },
     "fundType": {
       "GENERAL": "صندوق عمومی",

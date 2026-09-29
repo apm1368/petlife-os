@@ -90,6 +90,25 @@ export class SupportNeedNotificationListener {
     });
   }
 
+  /** The donor's confirmation, linking to their private receipt. Organization notifications live with the NGO portal. */
+  @OnEvent("DonationSucceeded")
+  onDonation(p: { donationIntentId: string; campaignId: string }, domainEventId: string) {
+    return this.safely("DonationSucceeded", async () => {
+      const intent = await this.prisma.donationIntent.findUnique({ where: { id: p.donationIntentId }, select: { donorUserId: true, campaign: { select: { title: true } } } });
+      if (!intent?.donorUserId) return;
+      await this.orchestrator.notify({
+        userId: intent.donorUserId,
+        type: "animal_support.donation_received",
+        category: NotificationCategory.ANIMAL_SUPPORT,
+        templateParams: { title: intent.campaign.title },
+        entityType: "DonationIntent",
+        entityId: p.donationIntentId,
+        deepLink: NotificationDeepLinks.donationReceipt(p.donationIntentId),
+        domainEventId,
+      });
+    });
+  }
+
   @OnEvent("SupportNeedListingModerated")
   onModerated(p: { listingId: string; to: string }, domainEventId: string) {
     return this.safely("SupportNeedListingModerated", async () => {
