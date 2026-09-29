@@ -40,6 +40,8 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
   { href: "/travel", labelKey: "", label: { fa: "سفر", en: "Travel" }, permission: "travel.view" },
+  { href: "/insurance", labelKey: "", label: { fa: "بیمه", en: "Insurance" }, permission: "insurance.view" },
+  { href: "/places", labelKey: "", label: { fa: "مکان‌ها", en: "Places" }, permission: "places.view" },
 ];
 
 /**

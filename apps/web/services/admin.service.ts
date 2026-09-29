@@ -39,6 +39,11 @@ import type {
   TrustSubjectType,
   TravelListingDto,
   TravelListingStatus,
+  InsuranceProviderDto,
+  InsuranceProductDto,
+  InsuranceVerificationStatus,
+  PetFriendlyPlaceDto,
+  PetFriendlyPlaceStatus,
 } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
@@ -177,4 +182,15 @@ export const adminService = {
     apiFetch<TravelListingDto>(`/admin/travel/listings/${listingId}/moderate`, { method: "POST", body: { status, reason } }),
   setTravelListingVerification: (listingId: string, isVerified: boolean, reason?: string) =>
     apiFetch<TravelListingDto>(`/admin/travel/listings/${listingId}/verification`, { method: "POST", body: { isVerified, reason } }),
+
+  // Existing insurance and place moderation APIs
+  listInsuranceProviders: (input: AdminPaginationInput = {}) => apiFetch<PaginatedDto<InsuranceProviderDto>>(`/admin/insurance/providers${toQueryString({ page: input.page, pageSize: input.pageSize })}`),
+  listInsuranceProducts: (input: AdminPaginationInput = {}) => apiFetch<PaginatedDto<InsuranceProductDto>>(`/admin/insurance/products${toQueryString({ page: input.page, pageSize: input.pageSize })}`),
+  setInsuranceProviderVerification: (id: string, status: InsuranceVerificationStatus) => apiFetch<InsuranceProviderDto>(`/admin/insurance/providers/${id}/verification`, { method: "POST", body: { status } }),
+  setInsuranceProviderListed: (id: string, isPubliclyListed: boolean) => apiFetch<InsuranceProviderDto>(`/admin/insurance/providers/${id}/listing`, { method: "POST", body: { isPubliclyListed } }),
+  setInsuranceProductVerification: (id: string, status: InsuranceVerificationStatus) => apiFetch<InsuranceProductDto>(`/admin/insurance/products/${id}/verification`, { method: "POST", body: { status } }),
+  setInsuranceProductListed: (id: string, isPubliclyListed: boolean) => apiFetch<InsuranceProductDto>(`/admin/insurance/products/${id}/listing`, { method: "POST", body: { isPubliclyListed } }),
+  listPetFriendlyPlaces: (input: AdminPaginationInput = {}) => apiFetch<PaginatedDto<PetFriendlyPlaceDto>>(`/admin/places${toQueryString({ page: input.page, pageSize: input.pageSize })}`),
+  setPlaceVerification: (id: string, status: PetFriendlyPlaceStatus) => apiFetch<PetFriendlyPlaceDto>(`/admin/places/${id}/verification`, { method: "POST", body: { status } }),
+  setPlaceListed: (id: string, isPubliclyListed: boolean) => apiFetch<PetFriendlyPlaceDto>(`/admin/places/${id}/listing`, { method: "POST", body: { isPubliclyListed } }),
 };
