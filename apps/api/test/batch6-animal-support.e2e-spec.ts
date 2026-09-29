@@ -474,10 +474,11 @@ describe("Batch 6 — Animal support ecosystem", () => {
     });
 
     it("restricted donations stay linked to the need's own campaign", async () => {
-      const { campaignId, ops } = await orgWithCampaign("RESTRICTED");
+      const { campaignId, ops, organizationId } = await orgWithCampaign("RESTRICTED");
       const unrelated = await orgWithCampaign("RESTRICTED");
       const publisher = await user("b6-publisher");
-      const needId = await publishedNeed(publisher.c, ops.c, { category: "VETERINARY_CARE", campaignId, contactMode: "BOTH" });
+      await prisma.animalSupportOrgMembership.create({ data: { organizationId, userId: publisher.userId, role: "COORDINATOR" } });
+      const needId = await publishedNeed(publisher.c, ops.c, { category: "VETERINARY_CARE", campaignId, organizationId, contactMode: "BOTH" });
       const donor = await user("b6-donor");
       await donor.c.post(`/animal-support/campaigns/${unrelated.campaignId}/donate`).send({ amountIrr: 1_000_000, supportNeedListingId: needId }).expect(400);
       const ok = await donor.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 1_000_000, supportNeedListingId: needId }).expect(201);
@@ -512,6 +513,111 @@ describe("Batch 6 — Animal support ecosystem", () => {
       expect((await donor.c.get(`/me/donations/${id}`).expect(200)).body.status).toBe("REFUNDED");
       expect(await prisma.adminAuditLog.count({ where: { entityType: "DonationIntent", entityId: id, action: "donation.refunded" } })).toBe(1);
       void organizationId;
+    });
+  });
+
+  // ------------------------------------------------------------------ 6D NGO operations
+
+  describe("NGO / shelter operations", () => {
+    async function ngo(name = `Shelter ${unique()}`) {
+      const ops = await admin(AdminRole.ADMIN);
+      const org = await ops.c.post("/admin/animal-support/organizations").send({ type: "SHELTER", name }).expect(201);
+      const owner = await user("b6-ngo-owner");
+      await ops.c.post(`/admin/animal-support/organizations/${org.body.id}/members`).send({ email: owner.email, role: "OWNER" }).expect(201);
+      return { ops, owner, organizationId: org.body.id as string };
+    }
+
+    it("nobody can publish in an organization's name, or link its campaign, without being its staff", async () => {
+      const a = await ngo();
+      const stranger = await user("b6-stranger");
+      await stranger.c.post("/animal-support/needs").send({ title: "Fake shelter need", description: "Pretending to be a verified shelter to collect help.", category: "FOOD", province: "تهران", city: "تهران", organizationId: a.organizationId }).expect(403);
+      const campaign = await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/campaigns`).send({ title: "Real campaign", description: "Real", fundType: "GENERAL" }).expect(201);
+      await stranger.c.post("/animal-support/needs").send({ title: "Redirecting donations", description: "Points the donate button at someone else's campaign.", category: "FOOD", province: "تهران", city: "تهران", campaignId: campaign.body.id }).expect(403);
+      const ok = await a.owner.c.post("/animal-support/needs").send({ title: "Blankets for winter", description: "Twenty blankets for the dog shelter this winter.", category: "SHELTER_SUPPLIES", province: "البرز", city: "کرج", organizationId: a.organizationId, campaignId: campaign.body.id, neededQuantity: 20 }).expect(201);
+      expect(ok.body.organizationId).toBe(a.organizationId);
+    });
+
+    it("a coordinator (not the creator) manages the organization's listing and offers; other organizations see nothing", async () => {
+      const a = await ngo();
+      const b = await ngo();
+      const coordinator = await user("b6-coordinator");
+      await a.owner.c.post("/ngo/team").send({ email: coordinator.email, role: "COORDINATOR" }).expect(201);
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const needId = await publishedNeed(a.owner.c, mod.c, { organizationId: a.organizationId });
+      const helper = await user("b6-helper");
+      const offer = await helper.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "Two bags from me", helpType: "FOOD", quantity: 2 }).expect(201);
+      // Staff cannot offer help on their own organization's need.
+      await coordinator.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "Staff offering to self", helpType: "FOOD" }).expect(403);
+      await coordinator.c.patch(`/animal-support/needs/${needId}/offers/${offer.body.id}`).send({ status: "ACCEPTED" }).expect(200);
+      expect((await coordinator.c.get(`/animal-support/needs/${needId}/manage`).expect(200)).body.id).toBe(needId);
+      const offers = await coordinator.c.get("/ngo/offers").expect(200);
+      expect(offers.body.items.map((o: { id: string }) => o.id)).toContain(offer.body.id);
+      expect(JSON.stringify(offers.body)).not.toContain(helper.email);
+
+      // Organization B's owner: no access to A's listing, offers, donations or team — even by selecting A.
+      await b.owner.c.get(`/animal-support/needs/${needId}/manage`).expect(403);
+      await b.owner.c.patch(`/animal-support/needs/${needId}/offers/${offer.body.id}`).send({ status: "DECLINED" }).expect(403);
+      expect((await b.owner.c.get("/ngo/offers").expect(200)).body.items).toHaveLength(0);
+      expect((await b.owner.c.get("/ngo/needs").expect(200)).body.items).toHaveLength(0);
+      await b.owner.c.get(`/ngo/donations?org=${a.organizationId}`).expect(403);
+      await request(server).get("/ngo/team").set("Cookie", "").expect(401);
+      const bTeam = await b.owner.c.get("/ngo/team").expect(200);
+      expect(JSON.stringify(bTeam.body)).not.toContain(coordinator.userId);
+      const notified = await prisma.notification.findFirst({ where: { userId: coordinator.userId, type: "animal_support.offer_received" } });
+      expect(notified?.deepLink).toBe(`/animal-support/needs/${needId}/manage`);
+    });
+
+    it("roles: viewers read only, only owners manage the team, and the last owner cannot be removed", async () => {
+      const a = await ngo();
+      const viewer = await user("b6-viewer");
+      await a.owner.c.post("/ngo/team").send({ email: viewer.email, role: "VIEWER" }).expect(201);
+      expect((await viewer.c.get("/ngo/overview").expect(200)).body.role).toBe("VIEWER");
+      await viewer.c.post("/ngo/team").send({ email: viewer.email, role: "OWNER" }).expect(403);
+      await viewer.c.patch("/ngo/profile").send({ description: "hijack" }).expect(403);
+      await viewer.c.post("/animal-support/needs").send({ title: "Viewer listing", description: "Viewers must not publish for the organization.", category: "FOOD", province: "تهران", city: "تهران", organizationId: a.organizationId }).expect(403);
+      const team = await a.owner.c.get("/ngo/team").expect(200);
+      const ownerRow = team.body.find((m: { role: string }) => m.role === "OWNER");
+      await a.owner.c.patch(`/ngo/team/${ownerRow.id}`).send({ role: "VIEWER" }).expect(400);
+      const nobody = await user("b6-nobody");
+      await nobody.c.get("/ngo/overview").expect(403);
+    });
+
+    it("the portal shows ledger-derived donations without donor identity, and verification is submitted with private documents", async () => {
+      const a = await ngo();
+      const campaign = await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/campaigns`).send({ title: "Surgery fund", description: "For surgeries", fundType: "RESTRICTED" }).expect(201);
+      await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/verification`).send({ verificationStatus: "VERIFIED" }).expect(201);
+      await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/listing`).send({ isPubliclyListed: true }).expect(201);
+      await a.ops.c.patch(`/admin/animal-support/campaigns/${campaign.body.id}/status`).send({ status: "ACTIVE" }).expect(200);
+      const donor = await user("b6-donor");
+      await donor.c.post(`/animal-support/campaigns/${campaign.body.id}/donate`).send({ amountIrr: 7_000_000 }).expect(201);
+      const donations = await a.owner.c.get("/ngo/donations").expect(200);
+      expect(donations.body.balance.restrictedAvailableIrr).toBe(7_000_000);
+      expect(donations.body.items[0]).toMatchObject({ amountIrr: 7_000_000, fundType: "RESTRICTED", donorName: null });
+      expect(JSON.stringify(donations.body)).not.toContain(donor.userId);
+      expect(JSON.stringify(donations.body)).not.toContain(donor.email);
+      const overview = await a.owner.c.get("/ngo/overview").expect(200);
+      expect(overview.body.donations.receivedLast30DaysIrr).toBe(7_000_000);
+      expect(await prisma.notification.count({ where: { userId: a.owner.userId, type: "animal_support.org_donation_received" } })).toBe(1);
+
+      // Verification: a second organization submits documents it uploaded; forged keys are refused.
+      const b = await ngo();
+      await b.owner.c.post("/ngo/verification/submit").send({ documentKeys: [`animal-support-verification/${a.organizationId}/x.pdf`] }).expect(400);
+      const upload = await b.owner.c.post("/ngo/verification/upload-url").send({ contentType: "application/pdf", fileSizeBytes: 20_000 }).expect(201);
+      expect(upload.body.key).toContain(`animal-support-verification/${b.organizationId}/`);
+      const submitted = await b.owner.c.post("/ngo/verification/submit").send({ documentKeys: [upload.body.key] }).expect(201);
+      expect(submitted.body.status).toBe("SUBMITTED");
+      await b.owner.c.post("/ngo/verification/submit").send({ documentKeys: [upload.body.key] }).expect(400);
+      // Documents are never in any public response.
+      expect(JSON.stringify((await request(server).get(`/animal-support/organizations?pageSize=100`)).body)).not.toContain("animal-support-verification");
+      await a.ops.c.post(`/admin/animal-support/organizations/${b.organizationId}/verification`).send({ verificationStatus: "NEEDS_INFORMATION", reason: "Please add the registration certificate." }).expect(201);
+      const status = await b.owner.c.get("/ngo/verification").expect(200);
+      expect(status.body).toMatchObject({ status: "NEEDS_INFORMATION", note: "Please add the registration certificate.", canSubmit: true, documentCount: 1 });
+      expect((await prisma.notification.findFirst({ where: { userId: b.owner.userId, type: "ngo.verification_updated" } }))?.deepLink).toBe("/ngo/verification");
+      const docs = await a.ops.c.post(`/admin/animal-support/organizations/${b.organizationId}/verification-documents`).send({ reason: "Reviewing the submission" }).expect(200);
+      expect(docs.body).toHaveLength(1);
+      expect(await prisma.adminAuditLog.count({ where: { entityId: b.organizationId, action: "animal_support_organization.verification_documents_opened" } })).toBe(1);
+      const content = await admin(AdminRole.CONTENT);
+      await content.c.post(`/admin/animal-support/organizations/${b.organizationId}/verification-documents`).send({ reason: "Curious" }).expect(403);
     });
   });
 });

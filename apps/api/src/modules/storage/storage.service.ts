@@ -216,6 +216,18 @@ export class StorageService {
     return { ...target, key };
   }
 
+  /** Batch 6: an NGO's verification documents — private (same allow-list and limits as medical documents); only admins read them, through signed download targets. */
+  async createOrgVerificationDocumentUploadTarget(organizationId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    }
+    const key = `animal-support-verification/${organizationId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType);
+    return { ...target, key };
+  }
+
   /** Handoff 18: Community post media — public, same allow-list as Memory media, keyed by the posting user's id. Post-hoc moderation (Trust & Safety) governs visibility, not upload-time review. */
   async createCommunityMediaUploadTarget(userId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
     const extension = MEMORY_MEDIA_MIME_EXTENSIONS[contentType];

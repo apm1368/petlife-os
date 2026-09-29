@@ -403,6 +403,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "کمک مالی شما ثبت شد", body: "کمک مالی شما برای «{{title}}» ثبت شد. رسید را ببینید." },
     en: { title: "Your donation was recorded", body: "Your donation to “{{title}}” was recorded. See your receipt." },
   },
+  "animal_support.org_donation_received": {
+    fa: { title: "کمک مالی تازه", body: "یک کمک مالی برای «{{title}}» ثبت شد." },
+    en: { title: "New donation", body: "A donation was recorded for “{{title}}”." },
+  },
+  "ngo.verification_updated": {
+    fa: { title: "وضعیت احراز سازمان", body: "وضعیت احراز «{{title}}» به‌روز شد. جزئیات را ببینید." },
+    en: { title: "Verification update", body: "The verification status of “{{title}}” changed. See the details." },
+  },
   "animal_support.listing_removed": {
     fa: { title: "درخواست حذف شد", body: "«{{title}}» توسط تیم PET LIFE از نمایش عمومی خارج شد." },
     en: { title: "Request removed", body: "“{{title}}” was removed from public view by the PET LIFE team." },

@@ -17,6 +17,7 @@ import {
   SupportNeedListingNotFoundException,
 } from "../../common/errors/api-exception";
 import { toHelpOfferDto, toSupportNeedListingDto } from "./support-need-mapper";
+import { AnimalSupportOrgAccessService } from "./animal-support-org-access.service";
 import type {
   CreateHelpOfferDto,
   CreateSupportNeedListingDto,
@@ -93,6 +94,7 @@ export class SupportNeedService {
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
     private readonly storage: StorageService,
+    private readonly orgAccess: AnimalSupportOrgAccessService,
   ) {}
 
   private async getRawOrThrow(listingId: string) {
@@ -101,9 +103,9 @@ export class SupportNeedService {
     return row;
   }
 
-  /** Publisher identity check: the creating user, or any member acting for the owning organization (organization staff portals do not exist yet — see README). */
-  private assertIsPublisher(row: { creatorUserId: string | null }, userId: string): void {
-    if (row.creatorUserId !== userId) throw new SupportNeedListingAccessDeniedException({ listingId: (row as { id?: string }).id });
+  /** Publisher check (Batch 6): the creating user, or an owner/coordinator of the listing's organization. */
+  private async assertIsPublisher(row: { id?: string; creatorUserId: string | null; organizationId: string | null }, userId: string): Promise<void> {
+    if (!(await this.orgAccess.canManageListing(userId, row))) throw new SupportNeedListingAccessDeniedException({ listingId: row.id });
   }
 
   // -- Publisher: create / edit ------------------------------------------------
@@ -120,10 +122,14 @@ export class SupportNeedService {
     if (dto.organizationId) {
       const org = await this.prisma.animalSupportOrganization.findUnique({ where: { id: dto.organizationId } });
       if (!org) throw new AnimalSupportOrganizationNotFoundException({ organizationId: dto.organizationId });
+      // Batch 6: publishing in an organization's name (and under its verified badge) requires being its owner/coordinator.
+      if (!(await this.orgAccess.canManageOrg(userId, dto.organizationId))) throw new SupportNeedListingAccessDeniedException({ organizationId: dto.organizationId, reason: "NOT_AN_ORGANIZATION_MEMBER" });
     }
     if (dto.campaignId) {
       const campaign = await this.prisma.supportCampaign.findUnique({ where: { id: dto.campaignId } });
       if (!campaign) throw new SupportCampaignNotFoundException({ campaignId: dto.campaignId });
+      // Batch 6: a listing may only point donations at its own organization's campaign.
+      if (campaign.organizationId !== dto.organizationId) throw new SupportNeedListingAccessDeniedException({ campaignId: dto.campaignId, reason: "CAMPAIGN_NOT_OWNED_BY_ORGANIZATION" });
     }
 
     const row = await this.prisma.$transaction(async (tx) => {
@@ -162,7 +168,7 @@ export class SupportNeedService {
 
   async update(listingId: string, userId: string, dto: UpdateSupportNeedListingDto) {
     const existing = await this.getRawOrThrow(listingId);
-    this.assertIsPublisher(existing, userId);
+    await this.assertIsPublisher(existing, userId);
     if (!EDITABLE_STATUSES.includes(existing.status)) throw new SupportNeedListingNotEditableException({ listingId, status: existing.status });
     this.assertDeadline(dto.expiresAt);
 
@@ -214,7 +220,7 @@ export class SupportNeedService {
 
   private async transitionAsPublisher(listingId: string, userId: string, requested: SupportNeedStatus) {
     const existing = await this.getRawOrThrow(listingId);
-    this.assertIsPublisher(existing, userId);
+    await this.assertIsPublisher(existing, userId);
     if (!PUBLISHER_TRANSITIONS[existing.status].includes(requested)) {
       throw new InvalidSupportNeedTransitionException({ listingId, from: existing.status, to: requested });
     }
@@ -321,7 +327,7 @@ export class SupportNeedService {
 
   async getMine(listingId: string, userId: string) {
     const row = await this.getRawOrThrow(listingId);
-    this.assertIsPublisher(row, userId);
+    await this.assertIsPublisher(row, userId);
     return toSupportNeedListingDto(row, true);
   }
 
@@ -340,7 +346,7 @@ export class SupportNeedService {
     const listing = await this.getRawOrThrow(listingId);
     if (!ACCEPTING_OFFERS.includes(listing.status)) throw new InvalidSupportNeedTransitionException({ listingId, status: listing.status, reason: "LISTING_NOT_ACCEPTING_OFFERS" });
     if (listing.expiresAt && listing.expiresAt <= new Date()) throw new InvalidSupportNeedTransitionException({ listingId, status: listing.status, reason: "LISTING_EXPIRED" });
-    if (listing.creatorUserId === helperUserId) throw new SupportNeedListingAccessDeniedException({ listingId, reason: "CANNOT_OFFER_ON_OWN_LISTING" });
+    if (await this.orgAccess.canManageListing(helperUserId, listing)) throw new SupportNeedListingAccessDeniedException({ listingId, reason: "CANNOT_OFFER_ON_OWN_LISTING" });
 
     const open = await this.prisma.helpOffer.findFirst({
       where: { listingId, helperUserId, status: { in: [HelpOfferStatus.PENDING, HelpOfferStatus.ACCEPTED, HelpOfferStatus.IN_PROGRESS] } },
@@ -364,7 +370,7 @@ export class SupportNeedService {
   /** The publisher's inbox for one listing. Returns helper ids only — never a helper's contact details. */
   async listHelpOffers(listingId: string, userId: string) {
     const listing = await this.getRawOrThrow(listingId);
-    this.assertIsPublisher(listing, userId);
+    await this.assertIsPublisher(listing, userId);
     const rows = await this.prisma.helpOffer.findMany({ where: { listingId }, orderBy: { createdAt: "desc" } });
     return rows.map(toHelpOfferDto);
   }
@@ -385,7 +391,7 @@ export class SupportNeedService {
     const offer = await this.prisma.helpOffer.findFirst({ where: { id: offerId, listingId } });
     if (!offer) throw new HelpOfferNotFoundException({ listingId, offerId });
 
-    const isPublisher = listing.creatorUserId === userId;
+    const isPublisher = await this.orgAccess.canManageListing(userId, listing);
     const isHelper = offer.helperUserId === userId;
     // Cancelling is the helper's own right; every other transition is the publisher's.
     const allowed = dto.status === HelpOfferStatus.CANCELLED ? isHelper || isPublisher : isPublisher;

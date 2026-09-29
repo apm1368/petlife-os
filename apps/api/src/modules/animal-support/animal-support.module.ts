@@ -10,6 +10,10 @@ import { DonationController } from "./donation.controller";
 import { SupportNeedService } from "./support-need.service";
 import { SupportNeedController } from "./support-need.controller";
 import { SupportNeedExpiryWorker } from "./support-need-expiry.worker";
+import { AnimalSupportOrgAccessService } from "./animal-support-org-access.service";
+import { NgoPortalService } from "./ngo-portal.service";
+import { NgoPortalController } from "./ngo-portal.controller";
+import { NgoAuthGuard } from "./ngo-auth.guard";
 import { SupportNeedNotificationListener } from "./support-need-notification.listener";
 import { NotificationsModule } from "../notifications/notifications.module";
 
@@ -33,8 +37,8 @@ import { NotificationsModule } from "../notifications/notifications.module";
  */
 @Module({
   imports: [PaymentsModule, LedgerModule, StorageModule, NotificationsModule],
-  controllers: [PublicAnimalSupportController, DonationController, SupportNeedController],
-  providers: [PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService, SupportNeedExpiryWorker, SupportNeedNotificationListener],
-  exports: [DonationLedgerService, SupportNeedService],
+  controllers: [PublicAnimalSupportController, DonationController, SupportNeedController, NgoPortalController],
+  providers: [PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService, SupportNeedExpiryWorker, SupportNeedNotificationListener, AnimalSupportOrgAccessService, NgoPortalService, NgoAuthGuard],
+  exports: [DonationLedgerService, SupportNeedService, AnimalSupportOrgAccessService],
 })
 export class AnimalSupportModule {}

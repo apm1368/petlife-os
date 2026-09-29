@@ -6466,6 +6466,31 @@ model LostPetSighting {
 // the organization's behalf pending payout, i.e. a liability, not income.
 // ---------------------------------------------------------------------------
 
+/// Batch 6 — staff roles inside an NGO / shelter / rescue organization (same membership pattern
+/// as InsurerMembership). OWNER manages team, profile and verification; COORDINATOR runs needs,
+/// offers and volunteers; VIEWER reads.
+enum AnimalSupportOrgRole {
+  OWNER
+  COORDINATOR
+  VIEWER
+}
+
+model AnimalSupportOrgMembership {
+  id             String                    @id @default(uuid()) @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Actor reference (no relation), same convention as InsurerMembership.userId.
+  userId         String                    @db.Uuid
+  role           AnimalSupportOrgRole      @default(COORDINATOR)
+  isActive       Boolean                   @default(true)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("animal_support_org_memberships")
+}
+
 enum AnimalSupportOrgType {
   NGO
   SHELTER
@@ -6510,6 +6535,13 @@ model AnimalSupportOrganization {
   donationLedgerTransactions DonationLedgerTransaction[]
   donationTransactions       DonationTransaction[]
   supportNeedListings        SupportNeedListing[]
+  memberships                AnimalSupportOrgMembership[]
+
+  /// Batch 6 — organization-submitted verification: when submitted, the reviewer's note back to
+  /// the organization, and private document keys (never public; admins read them via signed URLs).
+  verificationSubmittedAt  DateTime?
+  verificationNote         String?
+  verificationDocumentKeys String[]  @default([])
 
   @@map("animal_support_organizations")
 }

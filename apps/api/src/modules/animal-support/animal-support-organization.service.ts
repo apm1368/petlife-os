@@ -107,7 +107,9 @@ export class AnimalSupportOrganizationService {
     const row = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.animalSupportOrganization.findUnique({ where: { id } });
       if (!existing) throw new AnimalSupportOrganizationNotFoundException({ organizationId: id });
-      const updated = await tx.animalSupportOrganization.update({ where: { id }, data: { verificationStatus: dto.verificationStatus } });
+      // Batch 6: the reason doubles as the note the organization sees when more information is needed or it is rejected.
+      const noteForOrg = dto.verificationStatus === AnimalSupportVerificationStatus.NEEDS_INFORMATION || dto.verificationStatus === AnimalSupportVerificationStatus.REJECTED ? (dto.reason ?? null) : null;
+      const updated = await tx.animalSupportOrganization.update({ where: { id }, data: { verificationStatus: dto.verificationStatus, verificationNote: noteForOrg } });
       await this.audit.record({
         adminUserId: admin.adminUserId,
         action: "animal_support_organization.verification_changed",
@@ -118,6 +120,7 @@ export class AnimalSupportOrganizationService {
         afterSummary: { verificationStatus: updated.verificationStatus },
         tx,
       });
+      await this.events.publish("AnimalSupportOrganizationVerificationChanged", { organizationId: id, from: existing.verificationStatus, to: updated.verificationStatus }, { tx, aggregateType: "AnimalSupportOrganization", aggregateId: id });
       if (updated.verificationStatus === AnimalSupportVerificationStatus.VERIFIED) {
         await this.events.publish("AnimalSupportOrganizationVerified", { organizationId: id }, { tx, aggregateType: "AnimalSupportOrganization", aggregateId: id });
       }
@@ -151,3 +154,4 @@ export class AnimalSupportOrganizationService {
     return this.storage.createAnimalSupportOrgMediaUploadTarget(id, contentType, fileSizeBytes);
   }
 }
+

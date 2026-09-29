@@ -77,6 +77,7 @@ import { AdminInsuranceController } from "./insurance/admin-insurance.controller
 import { PetFriendlyPlaceService } from "../places/pet-friendly-place.service";
 import { AdminPlacesController } from "./places/admin-places.controller";
 import { AdminLostPetController } from "./lost-pet/admin-lost-pet.controller";
+import { AdminNgoMembersController } from "./animal-support/admin-ngo-members.controller";
 import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
 
 /**
@@ -117,6 +118,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminTravelController,
     AdminInsuranceApplicationsController,
     AdminLostPetController,
+    AdminNgoMembersController,
   ],
   providers: [
     AdminServicesService,

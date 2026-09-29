@@ -98,6 +98,9 @@ export type AdminAuditAction =
   // Batch 6
   | "lost_pet_incident.location_revealed"
   | "lost_pet_incident.closed_by_moderator"
+  | "animal_support_org_membership.granted"
+  | "animal_support_org_membership.revoked"
+  | "animal_support_organization.verification_documents_opened"
   // Handoff 23 — Travel marketplace listing moderation outcomes.
   | "travel_listing.published"
   | "travel_listing.rejected"

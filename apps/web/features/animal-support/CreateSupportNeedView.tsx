@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -8,6 +8,7 @@ import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedUrgency } from "@petlife/types";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
+import { ngoService } from "@/services/ngo.service";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { addDays, todayIso } from "@/lib/date/jalali";
 
@@ -51,6 +52,12 @@ export function CreateSupportNeedView() {
   const [quantityUnit, setQuantityUnit] = useState("");
   const [animalType, setAnimalType] = useState("");
   const [deadline, setDeadline] = useState<string | null>(null);
+  // Batch 6: staff of an organization may publish in its name (the API re-checks membership).
+  const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
+  const [organizationId, setOrganizationId] = useState("");
+  useEffect(() => {
+    ngoService.me().then((me) => setOrgs(me.memberships.filter((m) => m.role !== "VIEWER").map((m) => ({ id: m.organizationId, name: m.organization.name })))).catch(() => setOrgs([]));
+  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsSignIn, setNeedsSignIn] = useState(false);
@@ -78,6 +85,7 @@ export function CreateSupportNeedView() {
         city: city.trim(),
         neighborhood: neighborhood.trim() || undefined,
         neededQuantity: neededQuantity ? Number(neededQuantity) : undefined,
+        organizationId: organizationId || undefined,
         // End of the chosen Tehran day.
         expiresAt: deadline ? new Date(`${deadline}T23:59:00+03:30`).toISOString() : undefined,
         quantityUnit: quantityUnit.trim() || undefined,
@@ -145,6 +153,15 @@ export function CreateSupportNeedView() {
           <Input label={t("create.unitLabel")} hint={tCommon("optional")} value={quantityUnit} onChange={(e) => setQuantityUnit(e.target.value)} />
         </div>
         <Input label={t("create.animalTypeLabel")} hint={tCommon("optional")} value={animalType} onChange={(e) => setAnimalType(e.target.value)} />
+        {orgs.length ? (
+          <label className="flex flex-col gap-1 text-sm">
+            {locale === "fa" ? "ثبت به نام" : "Publish as"}
+            <select value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} className="min-h-11 rounded-md border border-border-subtle bg-surface-base px-2">
+              <option value="">{locale === "fa" ? "خودم (شخصی)" : "Myself (personal)"}</option>
+              {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+          </label>
+        ) : null}
         <DateRangeField mode="single" label={locale === "fa" ? "مهلت (اختیاری)" : "Deadline (optional)"} placeholder={locale === "fa" ? "بدون مهلت" : "No deadline"} value={{ start: deadline, end: null }} onChange={(v) => setDeadline(v.start)} min={addDays(todayIso(), 1)} max={addDays(todayIso(), 180)} />
         <div className="flex flex-col gap-1.5">
           <span className="text-metadata text-text-secondary">{t("create.photosLabel")}</span>
