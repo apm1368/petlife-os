@@ -36,3 +36,12 @@ Traveller (home, results, detail, compare, favorites, trips, trip hub, booking d
 
 ## Known limits (documented, not faked)
 Payments sandbox only (BLOCKED_EXTERNAL); partner payouts not automated; no map provider (list with distances); no hotel/airline integrations; requirement library ships empty in production; insurance is an application workflow only.
+
+## Live (http://185.231.112.154, 2026-09-29)
+- `0c21a7b`: CI 36571742686 green → deploy 36571743083 success. Migration `202609290001_travel_completion` applied once; `prisma migrate status` up to date.
+- Live QA found one defect: the date field's side sheet (~384px at sm+) rendered two months, so desktop day cells overlapped and clicks were intercepted. Fixed in `b190f68` (sheet always shows one month; cells shrink to their column): CI 36605463579 green → deploy 36605463842 success. Live SHA `b190f68`.
+- Pre-release backup: `/root/petlife-backups/release-b5-20260929-125758` (+ ROLLBACK.md).
+- LIVE READ QA (anonymous): travel home/results/detail/compare, insurance home/compare/product, places home/detail in fa (RTL) and en (LTR) at 1440 and 390 — 200, correct dir, no overflow, no skeletons, no runtime errors (only the expected API 404 for a non-existent id). Production has no travel listings, insurance products, places, requirement rules, trips, travel partners or insurer members, so empty and not-found states are shown honestly; nothing was seeded.
+- Date picker on live: fa shows مهر ۱۴۰۵, Saturday-first, Persian digits; en Gregorian Monday-first; selected range writes ISO dates to the search URL; fa and en at 1440 and 390 without overflow or errors.
+- Security on live: all private travel, provider, insurer and admin API routes return 401 anonymously; an anonymous POST without CSRF returns 403; all private web routes redirect to sign-in with `returnTo`; results and compare pages are `noindex`, unknown stays `noindex, nofollow`, private travel paths are disallowed in robots.txt.
+- Authenticated and mutating flows were not run on live (no QA accounts exist there and no production records were created); they are evidenced by PREVIEW MUTATION QA above and the e2e suite.
