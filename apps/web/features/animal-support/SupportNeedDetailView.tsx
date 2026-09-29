@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedContactMode, SupportNeedUrgency } from "@petlife/types";
 import type { SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService, type SupportNeedOfferSummaryDto } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
+import { formatDay } from "@/lib/date/jalali";
 import { URGENCY_TONE } from "./SupportNeedsListView";
-import { ShareLinkButtons } from "./ShareLinkButtons";
+import { ShareBar } from "@/features/shared/ShareBar";
 
 const HELP_TYPES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -32,6 +33,7 @@ const HELP_TYPES: SupportNeedCategory[] = [
  */
 export function SupportNeedDetailView({ listingId }: { listingId: string }) {
   const t = useTranslations("supportNeeds");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
 
   const [listing, setListing] = useState<SupportNeedListingDto | null>(null);
@@ -41,6 +43,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
   const [message, setMessage] = useState("");
   const [helpType, setHelpType] = useState<SupportNeedCategory>(SupportNeedCategory.FOOD);
   const [quantity, setQuantity] = useState("");
+  const [timing, setTiming] = useState("");
   const [isOffering, setIsOffering] = useState(false);
   const [offerError, setOfferError] = useState<string | null>(null);
   const [offerSent, setOfferSent] = useState(false);
@@ -73,6 +76,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
         message: message.trim(),
         helpType,
         quantity: quantity ? Number(quantity) : undefined,
+        timing: timing.trim() || undefined,
       });
       setOfferSent(true);
       setMessage("");
@@ -103,6 +107,8 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
           {listing.urgency !== SupportNeedUrgency.NORMAL ? <StatusLabel tone={URGENCY_TONE[listing.urgency]}>{t(`urgency.${listing.urgency}`)}</StatusLabel> : null}
           {listing.organizationVerified ? <StatusLabel tone="success">{t("list.verifiedOrganization")}</StatusLabel> : null}
           {listing.status === "FULFILLED" ? <StatusLabel tone="success">{t("status.FULFILLED")}</StatusLabel> : null}
+          {listing.status === "PARTIALLY_FULFILLED" ? <StatusLabel tone="success">{t("status.PARTIALLY_FULFILLED")}</StatusLabel> : null}
+          {listing.status === "PAUSED" ? <StatusLabel tone="neutral">{t("status.PAUSED")}</StatusLabel> : null}
         </div>
         <p className="text-metadata text-text-secondary">
           {[listing.city, listing.province, listing.neighborhood].filter(Boolean).join(" · ")} · {new Date(listing.createdAt).toLocaleDateString()}
@@ -140,7 +146,10 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
         </ContextSurface>
       ) : null}
 
-      {acceptsHelp && listing.status === "PUBLISHED" ? (
+      {listing.status === "PAUSED" ? <p role="status" className="rounded-md bg-surface-subtle p-3 text-sm text-text-secondary">{locale === "fa" ? "منتشرکننده فعلاً پیشنهاد تازه نمی‌پذیرد." : "The publisher is not taking new offers right now."}</p> : null}
+      {listing.status === "FULFILLED" ? <p role="status" className="rounded-md bg-state-success/10 p-3 text-sm text-state-success">{locale === "fa" ? "این نیاز کامل تأمین شده است. از همه کسانی که کمک کردند سپاسگزاریم." : "This need has been fully met. Thank you to everyone who helped."}</p> : null}
+      {listing.expiresAt && (listing.status === "PUBLISHED" || listing.status === "PARTIALLY_FULFILLED") ? <p className="text-metadata text-text-secondary">{locale === "fa" ? "مهلت: " : "Open until: "}{formatDay(listing.expiresAt.slice(0, 10), locale as "fa" | "en")}</p> : null}
+      {acceptsHelp && (listing.status === "PUBLISHED" || listing.status === "PARTIALLY_FULFILLED") ? (
         <ContextSurface className="flex flex-col gap-3">
           <span className="text-body text-text-primary">{t("detail.offerTitle")}</span>
           {offerSent ? (
@@ -156,8 +165,9 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
               />
               <Input label={t("detail.messageLabel")} value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t("detail.messagePlaceholder")} />
               <Input label={t("detail.quantityLabel")} hint={tCommon("optional")} type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+              <Input dir="auto" label={locale === "fa" ? "چه زمانی می‌توانید؟" : "When can you help?"} hint={tCommon("optional")} maxLength={200} value={timing} onChange={(e) => setTiming(e.target.value)} placeholder={locale === "fa" ? "مثلاً عصرهای روز کاری" : "e.g. weekday evenings"} />
               {needsSignIn ? (
-                <Link href={`/login?returnTo=${encodeURIComponent(`/animal-support/needs/${listingId}`)}`} className="text-body text-brand-mint underline">
+                <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/${listingId}`)}`} className="text-body text-brand-mint underline">
                   {t("detail.signInToHelp")}
                 </Link>
               ) : null}
@@ -174,7 +184,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
 
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-body text-text-primary">{t("detail.shareTitle")}</span>
-        <ShareLinkButtons url={shareUrl} title={listing.title} />
+        <ShareBar url={shareUrl} text={listing.title} />
       </ContextSurface>
 
       <Link href="/animal-support/needs" className="text-body text-brand-mint underline">

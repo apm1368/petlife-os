@@ -1328,6 +1328,12 @@ export class SupportNeedListingNotEditableException extends ApiException {
   }
 }
 
+export class SupportNeedDeadlineInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_NEED_DEADLINE_INVALID", "The deadline must be in the future and at most 180 days away.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
 export class HelpOfferNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("HELP_OFFER_NOT_FOUND", "Help offer not found.", HttpStatus.NOT_FOUND, details);

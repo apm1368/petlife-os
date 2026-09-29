@@ -3349,14 +3349,17 @@
       "CLOSED": "Closed",
       "EXPIRED": "Expired",
       "REJECTED": "Needs changes",
-      "REMOVED": "Removed"
+      "REMOVED": "Removed",
+      "PARTIALLY_FULFILLED": "Partly fulfilled",
+      "PAUSED": "Paused"
     },
     "offerStatus": {
       "PENDING": "Pending",
       "ACCEPTED": "Accepted",
       "DECLINED": "Declined",
       "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "IN_PROGRESS": "In progress"
     },
     "list": {
       "title": "Animal support needs",

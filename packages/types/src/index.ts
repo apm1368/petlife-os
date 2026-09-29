@@ -4311,6 +4311,8 @@ export enum SupportNeedStatus {
   DRAFT = "DRAFT",
   PENDING_REVIEW = "PENDING_REVIEW",
   PUBLISHED = "PUBLISHED",
+  PARTIALLY_FULFILLED = "PARTIALLY_FULFILLED",
+  PAUSED = "PAUSED",
   FULFILLED = "FULFILLED",
   CLOSED = "CLOSED",
   EXPIRED = "EXPIRED",
@@ -4327,6 +4329,7 @@ export enum SupportNeedContactMode {
 export enum HelpOfferStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
+  IN_PROGRESS = "IN_PROGRESS",
   DECLINED = "DECLINED",
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
@@ -4383,6 +4386,8 @@ export interface HelpOfferDto {
   message: string;
   helpType: SupportNeedCategory;
   quantity: number | null;
+  /** Batch 6 — when the helper can deliver. */
+  timing: string | null;
   status: HelpOfferStatus;
   fulfilledQuantity: number | null;
   respondedAt: string | null;

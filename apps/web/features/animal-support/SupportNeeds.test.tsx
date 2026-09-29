@@ -7,6 +7,7 @@ import { ApiError } from "@/lib/api/client";
 import { SupportNeedsListView } from "./SupportNeedsListView";
 import { SupportNeedDetailView } from "./SupportNeedDetailView";
 import { MySupportNeedsView } from "./MySupportNeedsView";
+import { ManageSupportNeedView } from "./ManageSupportNeedView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/services/support-needs.service", () => ({
@@ -21,6 +22,11 @@ vi.mock("@/services/support-needs.service", () => ({
     respondToOffer: vi.fn(),
     markFulfilled: vi.fn(),
     close: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    getMine: vi.fn(),
+    listMyOffers: vi.fn(),
+    update: vi.fn(),
   },
 }));
 
@@ -122,6 +128,7 @@ describe("SupportNeedDetailView", () => {
       fulfilledQuantity: 4,
       pendingOffers: 1,
       acceptedOffers: 0,
+      inProgressOffers: 0,
       completedOffers: 2,
     });
   });
@@ -202,7 +209,7 @@ describe("MySupportNeedsView", () => {
   it("loads the offer inbox on demand and accepts an offer", async () => {
     vi.mocked(supportNeedsService.listMine).mockResolvedValue(paginated([listing({ creatorUserId: "user-1" })]));
     vi.mocked(supportNeedsService.listOffers).mockResolvedValue([
-      { id: "offer-1", listingId: "listing-1", helperUserId: "helper-1", message: "I can bring four bags.", helpType: "FOOD" as never, quantity: 4, status: "PENDING" as never, fulfilledQuantity: null, respondedAt: null, createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z" },
+      { id: "offer-1", listingId: "listing-1", helperUserId: "helper-1", message: "I can bring four bags.", helpType: "FOOD" as never, quantity: 4, timing: "Friday", status: "PENDING" as never, fulfilledQuantity: null, respondedAt: null, createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z" },
     ]);
     vi.mocked(supportNeedsService.respondToOffer).mockResolvedValue({ id: "offer-1" } as never);
 
@@ -223,5 +230,32 @@ describe("MySupportNeedsView", () => {
 
     fireEvent.click(screen.getByText("In review"));
     await waitFor(() => expect(supportNeedsService.listMine).toHaveBeenCalledWith(expect.objectContaining({ status: "PENDING_REVIEW" })));
+  });
+});
+
+describe("ManageSupportNeedView", () => {
+  it("shows remaining quantity, lets the publisher pause, and completes an offer with the delivered amount", async () => {
+    vi.mocked(supportNeedsService.getMine).mockResolvedValue(listing({ status: "PARTIALLY_FULFILLED" as never, neededQuantity: 10, fulfilledQuantity: 3, quantityUnit: "bags", creatorUserId: "user-1" }));
+    vi.mocked(supportNeedsService.listOffers).mockResolvedValue([
+      { id: "offer-2", listingId: "listing-1", helperUserId: "helper-2", message: "Seven bags from our shop.", helpType: "FOOD" as never, quantity: 7, timing: "Saturday", status: "IN_PROGRESS" as never, fulfilledQuantity: null, respondedAt: null, createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z" },
+    ]);
+    vi.mocked(supportNeedsService.pause).mockResolvedValue({} as never);
+    vi.mocked(supportNeedsService.respondToOffer).mockResolvedValue({} as never);
+    renderWithIntl(<ManageSupportNeedView listingId="listing-1" />);
+    expect(await screen.findByText(/3 of 10 bags fulfilled; 7 remaining/)).toBeTruthy();
+    expect(screen.getByText("Timing: Saturday")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Pause" }));
+    await waitFor(() => expect(supportNeedsService.pause).toHaveBeenCalledWith("listing-1"));
+    fireEvent.click(screen.getByRole("button", { name: "Mark completed" }));
+    fireEvent.change(screen.getByLabelText("Amount delivered"), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await waitFor(() => expect(supportNeedsService.respondToOffer).toHaveBeenCalledWith("listing-1", "offer-2", { status: "COMPLETED", fulfilledQuantity: 5 }));
+  });
+
+  it("does not reveal another publisher's listing", async () => {
+    const { ApiError } = await import("@/lib/api/client");
+    vi.mocked(supportNeedsService.getMine).mockRejectedValue(new ApiError({ code: "FORBIDDEN", message: "no", requestId: "r" }, 403));
+    renderWithIntl(<ManageSupportNeedView listingId="listing-1" />);
+    expect(await screen.findByText("Request not found")).toBeTruthy();
   });
 });

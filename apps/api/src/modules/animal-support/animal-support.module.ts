@@ -9,6 +9,9 @@ import { PublicAnimalSupportController } from "./public-animal-support.controlle
 import { DonationController } from "./donation.controller";
 import { SupportNeedService } from "./support-need.service";
 import { SupportNeedController } from "./support-need.controller";
+import { SupportNeedExpiryWorker } from "./support-need-expiry.worker";
+import { SupportNeedNotificationListener } from "./support-need-notification.listener";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 /**
  * The public/consumer half of the Handoff 18 Animal Support domain —
@@ -29,9 +32,9 @@ import { SupportNeedController } from "./support-need.controller";
  * reuse SubscriptionsModule already established for H16 billing.
  */
 @Module({
-  imports: [PaymentsModule, LedgerModule, StorageModule],
+  imports: [PaymentsModule, LedgerModule, StorageModule, NotificationsModule],
   controllers: [PublicAnimalSupportController, DonationController, SupportNeedController],
-  providers: [PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService],
-  exports: [DonationLedgerService],
+  providers: [PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService, SupportNeedExpiryWorker, SupportNeedNotificationListener],
+  exports: [DonationLedgerService, SupportNeedService],
 })
 export class AnimalSupportModule {}

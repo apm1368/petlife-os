@@ -347,6 +347,62 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "بازگشت به خانواده", body: "{{petName}} با خانواده دوباره یکی شد!", smsBody: "خبر خوب! {{petName}} با خانواده دوباره یکی شد." },
     en: { title: "Reunited!", body: "{{petName}} has been reunited with the household!", smsBody: "Good news — {{petName}} has been reunited with your household." },
   },
+  "animal_support.offer_received": {
+    fa: { title: "پیشنهاد کمک تازه", body: "برای «{{title}}» یک پیشنهاد کمک رسید. آن را بررسی کنید." },
+    en: { title: "New help offer", body: "Someone offered help for “{{title}}”. Review the offer." },
+  },
+  "animal_support.offer_accepted": {
+    fa: { title: "پیشنهاد شما پذیرفته شد", body: "پیشنهاد کمک شما برای «{{title}}» پذیرفته شد. هماهنگی را ادامه دهید." },
+    en: { title: "Your offer was accepted", body: "Your help offer for “{{title}}” was accepted. Continue coordinating." },
+  },
+  "animal_support.offer_declined": {
+    fa: { title: "پاسخ به پیشنهاد شما", body: "برای «{{title}}» فعلاً از پیشنهاد شما استفاده نمی‌شود. از همراهی‌تان سپاسگزاریم." },
+    en: { title: "Update on your offer", body: "Your offer for “{{title}}” won't be used for now. Thank you for offering." },
+  },
+  "animal_support.offer_in_progress": {
+    fa: { title: "هماهنگی شروع شد", body: "کمک شما برای «{{title}}» در حال انجام است." },
+    en: { title: "Handover in progress", body: "Your help for “{{title}}” is now in progress." },
+  },
+  "animal_support.offer_completed": {
+    fa: { title: "کمک شما ثبت شد", body: "کمک شما برای «{{title}}» انجام‌شده ثبت شد. سپاس!" },
+    en: { title: "Your help was recorded", body: "Your help for “{{title}}” was marked complete. Thank you!" },
+  },
+  "animal_support.offer_cancelled": {
+    fa: { title: "پیشنهاد لغو شد", body: "یک پیشنهاد کمک برای «{{title}}» توسط کمک‌کننده لغو شد." },
+    en: { title: "Offer cancelled", body: "A helper cancelled their offer for “{{title}}”." },
+  },
+  "animal_support.offer_cancelled_by_publisher": {
+    fa: { title: "پیشنهاد لغو شد", body: "هماهنگی کمک شما برای «{{title}}» لغو شد." },
+    en: { title: "Offer cancelled", body: "Coordination of your help for “{{title}}” was cancelled." },
+  },
+  "animal_support.partially_fulfilled": {
+    fa: { title: "بخشی از نیاز تأمین شد", body: "بخشی از «{{title}}» تأمین شد و درخواست همچنان باز است." },
+    en: { title: "Partly fulfilled", body: "Part of “{{title}}” has been fulfilled; the request stays open." },
+  },
+  "animal_support.fulfilled": {
+    fa: { title: "نیاز تأمین شد", body: "«{{title}}» کامل تأمین شد و دیگر پیشنهاد جدید نمی‌پذیرد." },
+    en: { title: "Need fulfilled", body: "“{{title}}” is fully fulfilled and no longer takes new offers." },
+  },
+  "animal_support.expired": {
+    fa: { title: "مهلت درخواست تمام شد", body: "مهلت «{{title}}» تمام شد و دیگر پیشنهاد جدید نمی‌پذیرد." },
+    en: { title: "Request expired", body: "“{{title}}” reached its deadline and no longer takes new offers." },
+  },
+  "animal_support.expiring_soon": {
+    fa: { title: "مهلت نزدیک است", body: "مهلت «{{title}}» تا سه روز دیگر تمام می‌شود. در صورت نیاز آن را تمدید کنید." },
+    en: { title: "Deadline approaching", body: "“{{title}}” ends within three days. Extend it if it's still needed." },
+  },
+  "animal_support.listing_published": {
+    fa: { title: "درخواست منتشر شد", body: "«{{title}}» بررسی و منتشر شد." },
+    en: { title: "Request published", body: "“{{title}}” was reviewed and published." },
+  },
+  "animal_support.listing_rejected": {
+    fa: { title: "درخواست نیاز به اصلاح دارد", body: "«{{title}}» منتشر نشد؛ یادداشت بررسی را ببینید و دوباره ارسال کنید." },
+    en: { title: "Request needs changes", body: "“{{title}}” wasn't published; see the review note and resubmit." },
+  },
+  "animal_support.listing_removed": {
+    fa: { title: "درخواست حذف شد", body: "«{{title}}» توسط تیم PET LIFE از نمایش عمومی خارج شد." },
+    en: { title: "Request removed", body: "“{{title}}” was removed from public view by the PET LIFE team." },
+  },
 
   // Handoff 19: Insurance application status — deliberately just
   // submission/status-change, never a per-field or per-comparison-view

@@ -3,11 +3,13 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedUrgency } from "@petlife/types";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
+import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
+import { addDays, todayIso } from "@/lib/date/jalali";
 
 const CATEGORIES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -32,6 +34,7 @@ const URGENCIES: SupportNeedUrgency[] = [SupportNeedUrgency.NORMAL, SupportNeedU
  */
 export function CreateSupportNeedView() {
   const t = useTranslations("supportNeeds");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +50,7 @@ export function CreateSupportNeedView() {
   const [neededQuantity, setNeededQuantity] = useState("");
   const [quantityUnit, setQuantityUnit] = useState("");
   const [animalType, setAnimalType] = useState("");
+  const [deadline, setDeadline] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsSignIn, setNeedsSignIn] = useState(false);
@@ -74,6 +78,8 @@ export function CreateSupportNeedView() {
         city: city.trim(),
         neighborhood: neighborhood.trim() || undefined,
         neededQuantity: neededQuantity ? Number(neededQuantity) : undefined,
+        // End of the chosen Tehran day.
+        expiresAt: deadline ? new Date(`${deadline}T23:59:00+03:30`).toISOString() : undefined,
         quantityUnit: quantityUnit.trim() || undefined,
         animalType: animalType.trim() || undefined,
         imageObjectKeys: imageObjectKeys.length > 0 ? imageObjectKeys : undefined,
@@ -103,7 +109,7 @@ export function CreateSupportNeedView() {
         </ContextSurface>
         <p className="text-metadata text-text-secondary">{t("create.moderationNotice")}</p>
         {needsSignIn ? (
-          <Link href={`/login?returnTo=${encodeURIComponent("/animal-support/needs/new")}`} className="text-body text-brand-mint underline">
+          <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/new`)}`} className="text-body text-brand-mint underline">
             {t("create.signInToPublish")}
           </Link>
         ) : null}
@@ -139,6 +145,7 @@ export function CreateSupportNeedView() {
           <Input label={t("create.unitLabel")} hint={tCommon("optional")} value={quantityUnit} onChange={(e) => setQuantityUnit(e.target.value)} />
         </div>
         <Input label={t("create.animalTypeLabel")} hint={tCommon("optional")} value={animalType} onChange={(e) => setAnimalType(e.target.value)} />
+        <DateRangeField mode="single" label={locale === "fa" ? "مهلت (اختیاری)" : "Deadline (optional)"} placeholder={locale === "fa" ? "بدون مهلت" : "No deadline"} value={{ start: deadline, end: null }} onChange={(v) => setDeadline(v.start)} min={addDays(todayIso(), 1)} max={addDays(todayIso(), 180)} />
         <div className="flex flex-col gap-1.5">
           <span className="text-metadata text-text-secondary">{t("create.photosLabel")}</span>
           <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />

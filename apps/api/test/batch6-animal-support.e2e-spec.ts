@@ -279,4 +279,126 @@ describe("Batch 6 — Animal support ecosystem", () => {
       expect((await prisma.pet.findUniqueOrThrow({ where: { id: o.petId } })).lifecycleStatus).toBe("LOST");
     });
   });
+
+  // ------------------------------------------------------------------ 6B animal support
+
+  describe("animal support needs and help offers", () => {
+    async function waitForNotification(userId: string, type: string) {
+      const deadline = Date.now() + 5000;
+      while (Date.now() < deadline) {
+        const n = await prisma.notification.findFirst({ where: { userId, type } });
+        if (n) return n;
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      return null;
+    }
+
+    it("offer → accept → in progress → partial completion → pause/resume → full completion, with honest states and notifications", async () => {
+      const publisher = await user("b6-publisher");
+      const helperA = await user("b6-helper");
+      const helperB = await user("b6-helper");
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const needId = await publishedNeed(publisher.c, mod.c);
+      expect((await waitForNotification(publisher.userId, "animal_support.listing_published"))?.deepLink).toBe(`/animal-support/needs/${needId}/manage`);
+
+      await publisher.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "I can bring food myself", helpType: "FOOD", quantity: 2 }).expect(403);
+      const offerA = await helperA.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "I can bring three bags", helpType: "FOOD", quantity: 3, timing: "Friday morning" }).expect(201);
+      expect(offerA.body.timing).toBe("Friday morning");
+      await helperA.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "Another offer from me", helpType: "FOOD", quantity: 1 }).expect(409);
+      expect((await waitForNotification(publisher.userId, "animal_support.offer_received"))?.deepLink).toBe(`/animal-support/needs/${needId}/manage`);
+
+      // Only the publisher can accept; the helper cannot accept their own offer; strangers cannot touch it.
+      await helperA.c.patch(`/animal-support/needs/${needId}/offers/${offerA.body.id}`).send({ status: "ACCEPTED" }).expect(403);
+      await helperB.c.patch(`/animal-support/needs/${needId}/offers/${offerA.body.id}`).send({ status: "CANCELLED" }).expect(403);
+      await publisher.c.patch(`/animal-support/needs/${needId}/offers/${offerA.body.id}`).send({ status: "ACCEPTED" }).expect(200);
+      expect((await waitForNotification(helperA.userId, "animal_support.offer_accepted"))?.deepLink).toBe("/animal-support/my-help");
+      await publisher.c.patch(`/animal-support/needs/${needId}/offers/${offerA.body.id}`).send({ status: "IN_PROGRESS" }).expect(200);
+      await publisher.c.patch(`/animal-support/needs/${needId}/offers/${offerA.body.id}`).send({ status: "COMPLETED", fulfilledQuantity: 3 }).expect(200);
+
+      let listing = await request(server).get(`/animal-support/needs/${needId}`).expect(200);
+      expect(listing.body.status).toBe("PARTIALLY_FULFILLED");
+      expect(listing.body.fulfilledQuantity).toBe(3);
+      const summary = await request(server).get(`/animal-support/needs/${needId}/summary`).expect(200);
+      expect(summary.body).toMatchObject({ neededQuantity: 10, fulfilledQuantity: 3, completedOffers: 1 });
+      expect(JSON.stringify(summary.body)).not.toContain(helperA.userId);
+
+      // Pause: link still works, not listed, no new offers; resume keeps the progress.
+      await publisher.c.post(`/animal-support/needs/${needId}/pause`).expect(201);
+      expect((await request(server).get(`/animal-support/needs/${needId}`).expect(200)).body.status).toBe("PAUSED");
+      expect((await request(server).get("/animal-support/needs?pageSize=100").expect(200)).body.items.some((i: { id: string }) => i.id === needId)).toBe(false);
+      await helperB.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "Seven bags from our store", helpType: "FOOD", quantity: 7 }).expect(409);
+      await publisher.c.post(`/animal-support/needs/${needId}/resume`).expect(201);
+      expect((await request(server).get(`/animal-support/needs/${needId}`).expect(200)).body.status).toBe("PARTIALLY_FULFILLED");
+
+      const offerB = await helperB.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "Seven bags from our store", helpType: "FOOD", quantity: 7 }).expect(201);
+      await publisher.c.patch(`/animal-support/needs/${needId}/offers/${offerB.body.id}`).send({ status: "ACCEPTED" }).expect(200);
+      // Progress is clamped to the need.
+      await publisher.c.patch(`/animal-support/needs/${needId}/offers/${offerB.body.id}`).send({ status: "COMPLETED", fulfilledQuantity: 9 }).expect(200);
+      listing = await request(server).get(`/animal-support/needs/${needId}`).expect(200);
+      expect(listing.body.status).toBe("FULFILLED");
+      expect(listing.body.fulfilledQuantity).toBe(10);
+      expect(listing.body.fulfilledAt).toBeTruthy();
+      const helperC = await user("b6-helper");
+      await helperC.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "Can I still help?", helpType: "FOOD", quantity: 1 }).expect(409);
+      const resolved = await request(server).get("/animal-support/needs?state=RESOLVED&pageSize=100").expect(200);
+      expect(resolved.body.items.some((i: { id: string }) => i.id === needId)).toBe(true);
+      expect((await waitForNotification(publisher.userId, "animal_support.fulfilled"))).toBeTruthy();
+    });
+
+    it("decline and helper cancellation, and a helper sees only their own offers", async () => {
+      const publisher = await user("b6-publisher");
+      const helper = await user("b6-helper");
+      const other = await user("b6-helper");
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const needId = await publishedNeed(publisher.c, mod.c, { category: "TRANSPORT", neededQuantity: null, quantityUnit: null });
+      const a = await helper.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "I can drive to the vet", helpType: "TRANSPORT" }).expect(201);
+      await publisher.c.patch(`/animal-support/needs/${needId}/offers/${a.body.id}`).send({ status: "DECLINED" }).expect(200);
+      expect(await waitForNotification(helper.userId, "animal_support.offer_declined")).toBeTruthy();
+      await publisher.c.patch(`/animal-support/needs/${needId}/offers/${a.body.id}`).send({ status: "ACCEPTED" }).expect(409);
+      const b = await other.c.post(`/animal-support/needs/${needId}/offers`).send({ message: "Weekend driving", helpType: "TRANSPORT" }).expect(201);
+      await other.c.patch(`/animal-support/needs/${needId}/offers/${b.body.id}`).send({ status: "CANCELLED" }).expect(200);
+      expect(await waitForNotification(publisher.userId, "animal_support.offer_cancelled")).toBeTruthy();
+      const mine = await helper.c.get("/animal-support/needs/mine/offers").expect(200);
+      expect(mine.body.map((o: { id: string }) => o.id)).toEqual([a.body.id]);
+      await helper.c.patch(`/animal-support/needs/${needId}/offers/not-a-uuid`).send({ status: "CANCELLED" }).expect(400);
+    });
+
+    it("deadlines: validated, expire the listing (history kept) and remind the publisher once", async () => {
+      const publisher = await user("b6-publisher");
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      await publisher.c.post("/animal-support/needs").send({ title: "Past deadline", description: "Should be refused as the deadline is in the past.", category: "FOOD", province: "تهران", city: "تهران", expiresAt: new Date(Date.now() - 1000).toISOString() }).expect(400);
+      await publisher.c.post("/animal-support/needs").send({ title: "Far deadline", description: "Should be refused as the deadline is too far away.", category: "FOOD", province: "تهران", city: "تهران", expiresAt: new Date(Date.now() + 400 * 86_400_000).toISOString() }).expect(400);
+      const soonId = await publishedNeed(publisher.c, mod.c, { expiresAt: new Date(Date.now() + 2 * 86_400_000).toISOString() });
+      const pastId = await publishedNeed(publisher.c, mod.c, { expiresAt: new Date(Date.now() + 86_400_000).toISOString() });
+      await prisma.supportNeedListing.update({ where: { id: pastId }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      const { SupportNeedService } = await import("../src/modules/animal-support/support-need.service");
+      const svc = app.get(SupportNeedService);
+      const first = await svc.processExpiries();
+      expect(first.expired).toBeGreaterThanOrEqual(1);
+      expect(first.warned).toBeGreaterThanOrEqual(1);
+      await svc.processExpiries();
+      expect(await prisma.notification.count({ where: { userId: publisher.userId, type: "animal_support.expiring_soon", entityId: soonId } })).toBe(1);
+      const expired = await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: pastId } });
+      expect(expired.status).toBe("EXPIRED");
+      await request(server).get(`/animal-support/needs/${pastId}`).expect(404);
+      expect((await publisher.c.get(`/animal-support/needs/${pastId}/manage`).expect(200)).body.status).toBe("EXPIRED");
+    });
+
+    it("discovery sorts only by explicit data and filters by category and city", async () => {
+      const publisher = await user("b6-publisher");
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const city = `Rasht-${unique()}`;
+      const later = await publishedNeed(publisher.c, mod.c, { city, urgency: "NORMAL", expiresAt: new Date(Date.now() + 20 * 86_400_000).toISOString() });
+      const sooner = await publishedNeed(publisher.c, mod.c, { city, urgency: "CRITICAL", category: "VETERINARY_CARE", expiresAt: new Date(Date.now() + 5 * 86_400_000).toISOString() });
+      const byUrgency = await request(server).get(`/animal-support/needs?city=${encodeURIComponent(city)}`).expect(200);
+      expect(byUrgency.body.items.map((i: { id: string }) => i.id)).toEqual([sooner, later]);
+      const closing = await request(server).get(`/animal-support/needs?city=${encodeURIComponent(city)}&sort=CLOSING_SOON`).expect(200);
+      expect(closing.body.items.map((i: { id: string }) => i.id)).toEqual([sooner, later]);
+      const recent = await request(server).get(`/animal-support/needs?city=${encodeURIComponent(city)}&sort=RECENT`).expect(200);
+      expect(recent.body.items.map((i: { id: string }) => i.id)).toEqual([sooner, later]);
+      const vet = await request(server).get(`/animal-support/needs?city=${encodeURIComponent(city)}&category=VETERINARY_CARE`).expect(200);
+      expect(vet.body.items.map((i: { id: string }) => i.id)).toEqual([sooner]);
+      await request(server).get(`/animal-support/needs?sort=NEAREST`).expect(400);
+    });
+  });
 });

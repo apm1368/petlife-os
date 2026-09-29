@@ -6657,6 +6657,10 @@ enum SupportNeedStatus {
   DRAFT
   PENDING_REVIEW
   PUBLISHED
+  /// Batch 6 — publicly visible, still accepting offers, some quantity already fulfilled.
+  PARTIALLY_FULFILLED
+  /// Batch 6 — publisher paused new offers; detail stays reachable, not listed in search.
+  PAUSED
   FULFILLED
   CLOSED
   EXPIRED
@@ -6728,6 +6732,8 @@ model SupportNeedListing {
   fulfilledAt       DateTime?
   closedAt          DateTime?
   expiresAt         DateTime?
+  /// Batch 6 — set once the "expiring soon" reminder was sent to the publisher.
+  expiryWarnedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -6745,6 +6751,8 @@ model SupportNeedListing {
 enum HelpOfferStatus {
   PENDING
   ACCEPTED
+  /// Batch 6 — the helper and publisher are coordinating the handover.
+  IN_PROGRESS
   DECLINED
   COMPLETED
   CANCELLED
@@ -6765,6 +6773,8 @@ model HelpOffer {
   /// listing's own category (someone answering a FOOD need may offer
   /// TRANSPORT to deliver it).
   helpType SupportNeedCategory
+  /// Batch 6 — when the helper can deliver (free text, e.g. "weekday evenings").
+  timing    String?
   quantity Int?
 
   status HelpOfferStatus @default(PENDING)

@@ -61,6 +61,7 @@ export function toHelpOfferDto(row: HelpOffer): HelpOfferDto {
     message: row.message,
     helpType: row.helpType as unknown as HelpOfferDto["helpType"],
     quantity: row.quantity,
+    timing: row.timing,
     status: row.status as unknown as HelpOfferDto["status"],
     fulfilledQuantity: row.fulfilledQuantity,
     respondedAt: row.respondedAt?.toISOString() ?? null,
