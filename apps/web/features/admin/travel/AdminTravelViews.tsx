@@ -169,7 +169,7 @@ export function AdminTravelListingDetailView({ listingId }: { listingId: string 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel>
           <PanelTitle title={fa ? "اقدام بررسی" : "Moderation"} hint={fa ? "همهٔ اقدامات در گزارش رویدادها ثبت می‌شوند." : "Every action is audited."} />
-          <label className="flex flex-col gap-1 text-sm">{fa ? "یادداشت برای شریک (برای درخواست اصلاح/تعلیق الزامی)" : "Note to the partner (required to request correction or suspend)"}<textarea value={note} maxLength={1000} onChange={(e) => setNote(e.target.value)} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+          <label className="flex flex-col gap-1 text-sm">{fa ? "یادداشت برای شریک (برای درخواست اصلاح/تعلیق الزامی)" : "Note to the partner (required to request correction or suspend)"}<textarea dir="auto" value={note} maxLength={1000} onChange={(e) => setNote(e.target.value)} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
           <div className="mt-2 flex flex-wrap gap-2">
             {l.status === "PENDING_REVIEW" ? <><Button size="sm" isLoading={busy} onClick={() => void act(() => adminTravelService.moderate(l.id, "APPROVE", note.trim() || undefined), fa ? "منتشر شد." : "Published.")}>{fa ? "تأیید و انتشار" : "Approve & publish"}</Button><Button size="sm" variant="secondary" disabled={note.trim().length < 3} isLoading={busy} onClick={() => void act(() => adminTravelService.moderate(l.id, "REQUEST_CORRECTION", note.trim()), fa ? "برای اصلاح برگشت." : "Returned for correction.")}>{fa ? "درخواست اصلاح" : "Request correction"}</Button></> : null}
             {l.status === "PUBLISHED" ? <Button size="sm" variant="danger" disabled={note.trim().length < 3} isLoading={busy} onClick={() => void act(() => adminTravelService.moderate(l.id, "SUSPEND", note.trim()), fa ? "معلق شد." : "Suspended.")}>{fa ? "تعلیق" : "Suspend"}</Button> : null}
@@ -432,7 +432,7 @@ export function AdminTravelRequirementsView() {
               <Input label={fa ? "منبع (نهاد رسمی)" : "Source (official body)"} value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} />
               <Input label={fa ? "پیوند منبع (https)" : "Source URL (https)"} dir="ltr" value={form.sourceUrl ?? ""} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} />
               <Input label={fa ? "تاریخ بررسی (میلادی YYYY-MM-DD)" : "Verified on (YYYY-MM-DD)"} dir="ltr" value={form.verifiedAt.slice(0, 10)} onChange={(e) => setForm({ ...form, verifiedAt: e.target.value })} hint={form.verifiedAt.length >= 10 ? formatDay(form.verifiedAt.slice(0, 10), lang) : undefined} />
-              <label className="flex flex-col gap-1 text-sm sm:col-span-2">{fa ? "شرح الزام" : "Description"}<textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+              <label className="flex flex-col gap-1 text-sm sm:col-span-2">{fa ? "شرح الزام" : "Description"}<textarea dir="auto" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
             </div>
             {msg ? <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-state-success" : "text-state-urgent"}`}>{msg.text}</p> : null}
             <div className="mt-3 flex gap-2">

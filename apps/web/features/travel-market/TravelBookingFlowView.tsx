@@ -130,7 +130,7 @@ export function TravelBookingFlowView({ bookingId }: { bookingId: string }) {
           <p className="text-sm text-text-primary">{stayDates(booking, lang)}</p>
         </div>
       </div>
-      <p className="text-metadata text-text-secondary">{fa ? "کد رزرو: " : "Reference: "}<span className="font-mono">{booking.reference}</span></p>
+      <p className="text-metadata text-text-secondary">{fa ? "کد رزرو: " : "Reference: "}<span dir="ltr" className="whitespace-nowrap font-mono">{booking.reference}</span></p>
     </div>
   );
 
@@ -218,7 +218,7 @@ export function TravelBookingFlowView({ bookingId }: { bookingId: string }) {
               </div>
               <label className="flex flex-col gap-1 text-sm">
                 <span className="font-medium">{fa ? "پیام به اقامتگاه (اختیاری)" : "Message to the property (optional)"}</span>
-                <textarea maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} className="min-h-24 rounded-md border border-border-subtle bg-surface-base p-2" placeholder={fa ? "مثلاً ساعت تقریبی رسیدن یا نیاز خاص حیوان" : "e.g. arrival time or a special need of your pet"} />
+                <textarea dir="auto" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} className="min-h-24 rounded-md border border-border-subtle bg-surface-base p-2" placeholder={fa ? "مثلاً ساعت تقریبی رسیدن یا نیاز خاص حیوان" : "e.g. arrival time or a special need of your pet"} />
               </label>
               <p className="text-metadata text-text-secondary">{fa ? "اقامتگاه فقط نام و گونهٔ حیوان و همین پیام را می‌بیند؛ پروندهٔ سلامت به اشتراک گذاشته نمی‌شود مگر خودتان مدرکی را به اشتراک بگذارید." : "The property sees only your pets' names and species and this message; no health record is shared unless you share a document yourself."}</p>
               {booking.bookingMode === "REQUEST_TO_BOOK" ? <p className="rounded-md bg-surface-subtle p-3 text-sm">{fa ? "این اقامتگاه درخواست‌ها را خودش تأیید می‌کند. تا پذیرش درخواست مبلغی دریافت نمی‌شود؛ پس از پذیرش ۲۴ ساعت برای پرداخت فرصت دارید." : "This property approves requests itself. Nothing is charged until it accepts; after acceptance you have 24 hours to pay."}</p> : null}

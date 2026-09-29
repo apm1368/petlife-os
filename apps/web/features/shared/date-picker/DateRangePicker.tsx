@@ -268,7 +268,7 @@ export function formatStayRange(value: DateRangeValue, lang: Lang, system?: Cale
   if (!value.end) return formatDay(value.start, lang, { system });
   const nights = daysBetween(value.start, value.end);
   const n = lang === "fa" ? `${localizeDigits(nights, "fa")} شب` : `${nights} night${nights === 1 ? "" : "s"}`;
-  return `${formatDay(value.start, lang, { system, year: false })} — ${formatDay(value.end, lang, { system })} · ${n}`;
+  return `${formatDay(value.start, lang, { system, year: false })} — ${formatDay(value.end, lang, { system })}${lang === "fa" ? "، " : " · "}${n}`;
 }
 
 export interface DateRangeFieldProps extends Omit<DateRangePickerProps, "className"> {

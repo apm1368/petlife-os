@@ -134,7 +134,7 @@ export function InsurerApplicationView({ applicationId }: { applicationId: strin
       {msg ? <p role={msg.ok ? "status" : "alert"} className={`text-sm ${msg.ok ? "text-state-success" : "text-state-urgent"}`}>{msg.text}</p> : null}
       {can("UNDER_REVIEW") || can("APPROVED") || can("DECLINED") ? (
         <ContextSurface className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1 text-sm">{fa ? "پیام به متقاضی" : "Message to the applicant"}<textarea value={message} maxLength={2000} onChange={(e) => setMessage(e.target.value)} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+          <label className="flex flex-col gap-1 text-sm">{fa ? "پیام به متقاضی" : "Message to the applicant"}<textarea dir="auto" value={message} maxLength={2000} onChange={(e) => setMessage(e.target.value)} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
           <Input label={fa ? "شمارهٔ مرجع/بیمه‌نامه در سیستم شما (اختیاری)" : "Your reference/policy number (optional)"} dir="ltr" value={reference} onChange={(e) => setReference(e.target.value)} />
           <div className="flex flex-wrap gap-2">
             {can("UNDER_REVIEW") ? <Button size="sm" variant="secondary" isLoading={busy} onClick={() => void decide("UNDER_REVIEW" as InsuranceApplicationStatus)}>{fa ? "شروع بررسی" : "Start review"}</Button> : null}

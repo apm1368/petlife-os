@@ -85,7 +85,8 @@ export class TravelSearchService {
           nights: nights.length,
           totalIrr: b.totalIrr,
           petFeeIrr: b.petFeeIrr,
-          freeCancellation: !plan || plan.cancellationType === "FREE_UNTIL",
+          // Only an explicit free-cancellation rate counts; free-text terms are never read as "free".
+          freeCancellation: plan?.cancellationType === "FREE_UNTIL",
         };
         if (!best || option.totalIrr < best.totalIrr || (option.totalIrr === best.totalIrr && option.freeCancellation && !best.freeCancellation)) best = option;
       }
@@ -158,7 +159,7 @@ export class TravelSearchService {
       const stay = checkIn ? this.bestStay(listing, nights, states, guests, pets.length, checkIn) : null;
       if (checkIn && !stay) continue;
       const fromNightlyIrr = this.fromNightly(listing);
-      const freeCancellationAvailable = stay ? stay.freeCancellation : listing.units.some((u) => u.isActive && (u.ratePlans.filter((p) => p.isActive).length === 0 || u.ratePlans.some((p) => p.isActive && p.cancellationType === "FREE_UNTIL")));
+      const freeCancellationAvailable = stay ? stay.freeCancellation : hasFreeCancellationRate(listing);
       if (q.freeCancellation && !freeCancellationAvailable) continue;
       const price = stay ? stay.totalIrr : fromNightlyIrr;
       if (q.minPrice !== undefined && (price === null || price < q.minPrice)) continue;
@@ -172,33 +173,10 @@ export class TravelSearchService {
       const matchScore = petMatch === "MATCH" ? 1 : petMatch === "MORE_INFO_NEEDED" ? 0.3 : 0;
       const proximity = distanceKm === null ? 0 : Math.max(0, 1 - distanceKm / 50);
       items.push({
-        id: listing.id,
-        title: listing.title,
-        type: listing.type as unknown as TravelSearchResultItemDto["type"],
-        city: listing.city,
-        province: listing.province,
-        country: listing.country,
-        coverUrl: listing.media.find((m) => !m.unitId)?.url ?? listing.media[0]?.url ?? null,
-        latitude: listing.latitude,
-        longitude: listing.longitude,
-        isVerified: listing.isVerified,
-        bookingMode: listing.bookingMode as unknown as TravelSearchResultItemDto["bookingMode"],
-        rating,
-        petPolicySummary: {
-          dogsAllowed: listing.petPolicy?.dogsAllowed ?? false,
-          catsAllowed: listing.petPolicy?.catsAllowed ?? false,
-          maxPets: listing.petPolicy?.maxPets ?? null,
-          maxWeightKg: listing.petPolicy?.maxWeightKg ?? null,
-          petFeeIrr: listing.petPolicy?.petFeeIrr ?? null,
-          stated: Boolean(listing.petPolicy),
-        },
-        stay,
-        fromNightlyIrr,
+        ...toSearchItem(listing, rating, stay, fromNightlyIrr, favorites.has(listing.id)),
         freeCancellationAvailable,
         distanceKm,
         petMatch,
-        amenities: listing.amenities,
-        favorited: favorites.has(listing.id),
         _score: 2 * (bayes / 5) + (listing.isVerified ? 0.5 : 0) + matchScore + proximity,
         _price: price,
         _bayes: bayes,
@@ -311,7 +289,8 @@ export class TravelSearchService {
       .slice(0, limit);
   }
 
-  async compare(userId: string | undefined, ids: string[], checkInInput?: string, checkOutInput?: string) {
+  /** Same item shape and facts as search, for 2–3 chosen listings (optionally priced for dates). */
+  async compare(userId: string | undefined, ids: string[], checkInInput?: string, checkOutInput?: string): Promise<TravelSearchResultItemDto[]> {
     const rows = await this.prisma.travelListing.findMany({ where: { id: { in: ids }, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true }, include: LISTING_INCLUDE });
     const ratings = await this.ratings(rows.map((r) => r.id));
     let nights: Date[] = [];
@@ -323,29 +302,47 @@ export class TravelSearchService {
       checkIn = range.checkIn;
       states = await this.availability.getNightStates(rows.flatMap((r) => r.units), nights);
     }
-    void userId;
+    const favorites = userId ? new Set((await this.prisma.travelListingFavorite.findMany({ where: { userId, listingId: { in: rows.map((r) => r.id) } }, select: { listingId: true } })).map((f) => f.listingId)) : new Set<string>();
     return ids
       .map((id) => rows.find((r) => r.id === id))
       .filter((r): r is ListingWithRelations => Boolean(r))
       .map((r) => {
-        const plans = r.units.flatMap((u) => u.ratePlans.filter((p) => p.isActive));
-        return {
-          id: r.id,
-          title: r.title,
-          type: r.type,
-          city: r.city,
-          coverUrl: r.media[0]?.url ?? null,
-          rating: ratings.get(r.id) ?? EMPTY_TRAVEL_RATING,
-          isVerified: r.isVerified,
-          bookingMode: r.bookingMode,
-          fromNightlyIrr: this.fromNightly(r),
-          stay: checkIn ? this.bestStay(r, nights, states, 1, 0, checkIn) : null,
-          petFeeIrr: r.petPolicy?.petFeeIrr ?? null,
-          petDepositIrr: r.petPolicy?.depositIrr ?? null,
-          petPolicy: r.petPolicy ? { dogsAllowed: r.petPolicy.dogsAllowed, catsAllowed: r.petPolicy.catsAllowed, maxPets: r.petPolicy.maxPets, maxWeightKg: r.petPolicy.maxWeightKg, vaccinationRequired: r.petPolicy.vaccinationRequired } : null,
-          cancellation: plans.length ? [...new Set(plans.map((p) => p.cancellationType))] : ["FREE_UNTIL"],
-          amenities: r.amenities,
-        };
+        const stay = checkIn ? this.bestStay(r, nights, states, 1, 0, checkIn) : null;
+        return { ...toSearchItem(r, ratings.get(r.id) ?? EMPTY_TRAVEL_RATING, stay, this.fromNightly(r), favorites.has(r.id)), freeCancellationAvailable: stay ? stay.freeCancellation : hasFreeCancellationRate(r), distanceKm: null, petMatch: null };
       });
   }
+
+}
+
+function hasFreeCancellationRate(listing: ListingWithRelations): boolean {
+  return listing.units.some((u) => u.isActive && u.ratePlans.some((p) => p.isActive && p.cancellationType === "FREE_UNTIL"));
+}
+
+function toSearchItem(listing: ListingWithRelations, rating: TravelRatingSummaryDto, stay: TravelSearchResultItemDto["stay"], fromNightlyIrr: number | null, favorited: boolean): Omit<TravelSearchResultItemDto, "freeCancellationAvailable" | "distanceKm" | "petMatch"> {
+  return {
+    id: listing.id,
+    title: listing.title,
+    type: listing.type as unknown as TravelSearchResultItemDto["type"],
+    city: listing.city,
+    province: listing.province,
+    country: listing.country,
+    coverUrl: listing.media.find((m) => !m.unitId)?.url ?? listing.media[0]?.url ?? null,
+    latitude: listing.latitude,
+    longitude: listing.longitude,
+    isVerified: listing.isVerified,
+    bookingMode: listing.bookingMode as unknown as TravelSearchResultItemDto["bookingMode"],
+    rating,
+    petPolicySummary: {
+      dogsAllowed: listing.petPolicy?.dogsAllowed ?? false,
+      catsAllowed: listing.petPolicy?.catsAllowed ?? false,
+      maxPets: listing.petPolicy?.maxPets ?? null,
+      maxWeightKg: listing.petPolicy?.maxWeightKg ?? null,
+      petFeeIrr: listing.petPolicy?.petFeeIrr ?? null,
+      stated: Boolean(listing.petPolicy),
+    },
+    stay,
+    fromNightlyIrr,
+    amenities: listing.amenities,
+    favorited,
+  };
 }

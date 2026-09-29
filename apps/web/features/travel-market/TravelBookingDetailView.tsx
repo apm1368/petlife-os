@@ -78,7 +78,7 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
         </div>
         <h1 className="text-page-title text-text-primary">{b.listingTitle}</h1>
         <p className="text-body text-text-primary">{stayDates(b, lang)}</p>
-        <p className="text-metadata text-text-secondary">{b.unitName}{b.ratePlan ? ` · ${b.ratePlan.name}` : ""} · {b.listingCity} · {fa ? "کد " : "Ref "}<span className="font-mono">{b.reference}</span></p>
+        <p className="text-metadata text-text-secondary">{b.unitName}{b.ratePlan ? ` · ${b.ratePlan.name}` : ""} · {b.listingCity} · {fa ? "کد " : "Ref "}<span dir="ltr" className="whitespace-nowrap font-mono">{b.reference}</span></p>
       </header>
       {notice ? <p role="status" className="rounded-md bg-state-success/10 p-3 text-sm text-state-success">{notice}</p> : null}
 
@@ -178,7 +178,7 @@ function CancelForm({ booking, busy, error, onSubmit }: { booking: TravelBooking
         <p className="rounded-md bg-surface-subtle p-3">{refund !== null ? (fa ? `طبق شرایط این رزرو، اگر همین حالا لغو کنید ${money(refund, lang)} از ${money(booking.payNowAmountIrr, lang)} پرداختی بازگردانده می‌شود.` : `Under this booking's terms, cancelling now refunds ${money(refund, lang)} of the ${money(booking.payNowAmountIrr, lang)} paid.`) : fa ? "مبلغ بازپرداخت طبق شرایط رزرو محاسبه می‌شود." : "The refund is calculated from the booking's terms."}</p>
       ) : <p className="rounded-md bg-surface-subtle p-3">{fa ? "مبلغی آنلاین پرداخت نشده است؛ لغو هزینه‌ای ندارد." : "Nothing was paid online, so there is nothing to refund."}</p>}
       <p>{booking.ratePlan ? cancellationSummary(booking.ratePlan, lang) : null}</p>
-      <label className="flex flex-col gap-1"><span>{fa ? "علت (اختیاری)" : "Reason (optional)"}</span><textarea maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+      <label className="flex flex-col gap-1"><span>{fa ? "علت (اختیاری)" : "Reason (optional)"}</span><textarea dir="auto" maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
       {error ? <p role="alert" className="text-state-urgent">{error}</p> : null}
       <Button variant="danger" isLoading={busy} onClick={() => onSubmit(reason.trim() || undefined)}>{fa ? "لغو رزرو" : "Cancel booking"}</Button>
     </div>
@@ -231,7 +231,7 @@ function ReviewForm({ busy, error, onSubmit }: { busy: boolean; error: string | 
       <Stars label={fa ? "رفتار با حیوانات" : "Pet friendliness"} value={pet} onChange={setPet} />
       <Stars label={fa ? "تمیزی" : "Cleanliness"} value={clean} onChange={setClean} />
       <Stars label={fa ? "موقعیت" : "Location"} value={loc} onChange={setLoc} />
-      <label className="flex flex-col gap-1"><span>{fa ? "تجربهٔ شما (اختیاری)" : "Your experience (optional)"}</span><textarea maxLength={2000} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-24 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+      <label className="flex flex-col gap-1"><span>{fa ? "تجربهٔ شما (اختیاری)" : "Your experience (optional)"}</span><textarea dir="auto" maxLength={2000} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-24 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
       <p className="text-metadata text-text-secondary">{fa ? "نظر با نام کوچک شما و ماه اقامت منتشر می‌شود." : "Published with your first name and the month of your stay."}</p>
       {error ? <p role="alert" className="text-state-urgent">{error}</p> : null}
       <Button disabled={!overall} isLoading={busy} onClick={() => onSubmit({ overall, petFriendliness: pet || undefined, cleanliness: clean || undefined, location: loc || undefined, body: body.trim() || undefined })}>{fa ? "انتشار نظر" : "Publish review"}</Button>

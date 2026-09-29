@@ -217,7 +217,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
       {images.length ? (
         <div className="grid gap-2 md:grid-cols-4 md:grid-rows-2">
           {images.slice(0, 5).map((img, i) => (
-            <button key={img.url + i} type="button" onClick={() => setLightbox(i)} className={`relative overflow-hidden rounded-md bg-surface-subtle focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${i === 0 ? "aspect-[4/3] md:col-span-2 md:row-span-2 md:aspect-auto" : "hidden aspect-[4/3] md:block"}`} aria-label={fa ? `نمایش تصویر ${localizeDigits(i + 1, "fa")} از ${localizeDigits(images.length, "fa")}` : `Open photo ${i + 1} of ${images.length}`}>
+            <button key={img.url + i} type="button" onClick={() => setLightbox(i)} className={`relative overflow-hidden rounded-md bg-surface-subtle focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${i === 0 ? (images.length === 1 ? "aspect-[4/3] md:col-span-4 md:row-span-2 md:aspect-[21/8]" : "aspect-[4/3] md:col-span-2 md:row-span-2 md:aspect-auto") : "hidden aspect-[4/3] md:block"}`} aria-label={fa ? `نمایش تصویر ${localizeDigits(i + 1, "fa")} از ${localizeDigits(images.length, "fa")}` : `Open photo ${i + 1} of ${images.length}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.url} alt={img.alt} loading={i === 0 ? "eager" : "lazy"} className="h-full w-full object-cover" />
             </button>

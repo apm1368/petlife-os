@@ -13,6 +13,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { amenityLabel, listingTypeLabel, money, STAY_TYPES } from "./labels";
 import { TravelResultCard } from "./TravelResultCard";
 import { searchStateFromParams, TravelSearchForm } from "./TravelSearchForm";
+import { formatStayRange } from "@/features/shared/date-picker/DateRangePicker";
 import { readChosenPetIds, writeChosenPetIds } from "./use-my-pets";
 
 const SORTS: { value: TravelSort; fa: string; en: string }[] = [
@@ -132,7 +133,7 @@ export function TravelResultsView() {
     }
     return `/${lang}/travel/stays/${id}${q.toString() ? `?${q}` : ""}`;
   };
-  const summary = [search.city || (fa ? "همه مقصدها" : "All destinations"), search.checkIn && search.checkOut ? `${localizeDigits(search.checkIn, lang)} → ${localizeDigits(search.checkOut, lang)}` : fa ? "بدون تاریخ" : "Any dates"].join(" · ");
+  const summary = [search.city || (fa ? "همه مقصدها" : "All destinations"), search.checkIn && search.checkOut ? formatStayRange({ start: search.checkIn, end: search.checkOut }, lang) : fa ? "بدون تاریخ" : "Any dates"].join(" · ");
 
   const filters = <TravelFilters params={params} facets={data?.facets ?? null} onApply={(patch) => { setParams(patch); setFiltersOpen(false); }} />;
 

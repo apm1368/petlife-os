@@ -96,11 +96,11 @@ export function ProviderTravelHomeView() {
               {Object.keys(LISTING_TYPE).filter((t) => !["PET_TAXI", "INTERCITY_TRANSPORT"].includes(t)).map((t) => <option key={t} value={t}>{listingTypeLabel(t, lang)}</option>)}
             </select>
           </label>
-          <Input label={fa ? "عنوان" : "Title"} value={form.title} maxLength={160} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <label className="flex flex-col gap-1 text-sm">{fa ? "توضیحات (حداقل ۲۰ حرف)" : "Description (at least 20 characters)"}<textarea value={form.description} maxLength={6000} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-24 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+          <Input dir="auto" label={fa ? "عنوان" : "Title"} value={form.title} maxLength={160} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <label className="flex flex-col gap-1 text-sm">{fa ? "توضیحات (حداقل ۲۰ حرف)" : "Description (at least 20 characters)"}<textarea dir="auto" value={form.description} maxLength={6000} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-24 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Input label={fa ? "شهر" : "City"} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-            <Input label={fa ? "استان" : "Province"} value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} />
+            <Input dir="auto" label={fa ? "شهر" : "City"} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+            <Input dir="auto" label={fa ? "استان" : "Province"} value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} />
           </div>
           {error && error !== "forbidden" && error !== "error" ? <p role="alert" className="text-sm text-state-urgent">{error}</p> : null}
           <Button isLoading={busy} disabled={form.title.trim().length < 3 || form.description.trim().length < 20 || form.city.trim().length < 2} onClick={() => void create()}>{fa ? "ساخت پیش‌نویس" : "Create draft"}</Button>
@@ -206,11 +206,11 @@ function DetailsTab({ listing, busy, onSave }: { listing: TravelListingDto; busy
   const time = /^([01]\d|2[0-3]):[0-5]\d$/;
   return (
     <ContextSurface className="flex flex-col gap-3">
-      <Input label={fa ? "عنوان" : "Title"} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />
-      <label className="flex flex-col gap-1 text-sm">{fa ? "توضیحات" : "Description"}<textarea value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} className="min-h-32 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+      <Input dir="auto" label={fa ? "عنوان" : "Title"} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />
+      <label className="flex flex-col gap-1 text-sm">{fa ? "توضیحات" : "Description"}<textarea dir="auto" value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} className="min-h-32 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Input label={fa ? "استان" : "Province"} value={v.province} onChange={(e) => setV({ ...v, province: e.target.value })} />
-        <Input label={fa ? "نشانی" : "Address"} value={v.address} onChange={(e) => setV({ ...v, address: e.target.value })} />
+        <Input dir="auto" label={fa ? "استان" : "Province"} value={v.province} onChange={(e) => setV({ ...v, province: e.target.value })} />
+        <Input dir="auto" label={fa ? "نشانی" : "Address"} value={v.address} onChange={(e) => setV({ ...v, address: e.target.value })} />
         <Input label={fa ? "عرض جغرافیایی" : "Latitude"} inputMode="decimal" value={v.latitude} onChange={(e) => setV({ ...v, latitude: e.target.value })} hint={fa ? "برای فاصله تا مکان‌ها و دامپزشکان" : "Used for distances to places and vets"} />
         <Input label={fa ? "طول جغرافیایی" : "Longitude"} inputMode="decimal" value={v.longitude} onChange={(e) => setV({ ...v, longitude: e.target.value })} />
         <Input label={fa ? "ساعت ورود از (HH:MM)" : "Check-in from (HH:MM)"} dir="ltr" value={v.checkInFrom} onChange={(e) => setV({ ...v, checkInFrom: e.target.value })} errorMessage={v.checkInFrom && !time.test(v.checkInFrom) ? (fa ? "مثلاً 14:00" : "e.g. 14:00") : undefined} />
@@ -222,8 +222,8 @@ function DetailsTab({ listing, busy, onSave }: { listing: TravelListingDto; busy
           <option value="REQUEST_TO_BOOK">{fa ? "درخواست و تأیید (۲۴ ساعت مهلت پاسخ)" : "Request to book (24h to respond)"}</option>
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-sm">{fa ? "قوانین اقامتگاه" : "House rules"}<textarea value={v.houseRules} maxLength={2000} onChange={(e) => setV({ ...v, houseRules: e.target.value })} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
-      <label className="flex flex-col gap-1 text-sm">{fa ? "شرایط لغو عمومی (برای اتاق‌های بدون نرخ)" : "General cancellation terms (rooms without rate plans)"}<textarea value={v.cancellationPolicy} onChange={(e) => setV({ ...v, cancellationPolicy: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+      <label className="flex flex-col gap-1 text-sm">{fa ? "قوانین اقامتگاه" : "House rules"}<textarea dir="auto" value={v.houseRules} maxLength={2000} onChange={(e) => setV({ ...v, houseRules: e.target.value })} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+      <label className="flex flex-col gap-1 text-sm">{fa ? "شرایط لغو عمومی (برای اتاق‌های بدون نرخ)" : "General cancellation terms (rooms without rate plans)"}<textarea dir="auto" value={v.cancellationPolicy} onChange={(e) => setV({ ...v, cancellationPolicy: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
       <fieldset className="flex flex-wrap gap-2"><legend className="mb-1 text-sm font-medium">{fa ? "امکانات" : "Amenities"}</legend>
         {Object.keys(AMENITY).map((a) => { const on = v.amenities.includes(a); return <button type="button" key={a} aria-pressed={on} onClick={() => setV({ ...v, amenities: on ? v.amenities.filter((x) => x !== a) : [...v.amenities, a] })} className={`min-h-10 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{amenityLabel(a, lang)}</button>; })}
       </fieldset>
@@ -256,9 +256,9 @@ function PolicyTab({ listing, busy, onSave }: { listing: TravelListingDto; busy:
         <Input label={fa ? "هزینهٔ حیوان برای هر حیوان در هر اقامت (تومان) — ۰ یعنی رایگان" : "Pet fee per pet per stay (Toman) — 0 means free"} inputMode="numeric" value={v.petFeeIrr} onChange={(e) => setV({ ...v, petFeeIrr: e.target.value.replace(/\D/g, "") })} />
         <Input label={fa ? "ودیعهٔ حیوان (تومان)" : "Pet deposit (Toman)"} inputMode="numeric" value={v.depositIrr} onChange={(e) => setV({ ...v, depositIrr: e.target.value.replace(/\D/g, "") })} />
       </div>
-      <Input label={fa ? "نژادهای محدود (با ویرگول جدا کنید)" : "Restricted breeds (comma separated)"} value={v.breedRestrictions} onChange={(e) => setV({ ...v, breedRestrictions: e.target.value })} />
-      <Input label={fa ? "فضاهای ممنوع برای حیوان" : "Areas pets may not enter"} value={v.restrictedAreas} onChange={(e) => setV({ ...v, restrictedAreas: e.target.value })} />
-      <label className="flex flex-col gap-1 text-sm">{fa ? "توضیحات" : "Notes"}<textarea value={v.notes} onChange={(e) => setV({ ...v, notes: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+      <Input dir="auto" label={fa ? "نژادهای محدود (با ویرگول جدا کنید)" : "Restricted breeds (comma separated)"} value={v.breedRestrictions} onChange={(e) => setV({ ...v, breedRestrictions: e.target.value })} />
+      <Input dir="auto" label={fa ? "فضاهای ممنوع برای حیوان" : "Areas pets may not enter"} value={v.restrictedAreas} onChange={(e) => setV({ ...v, restrictedAreas: e.target.value })} />
+      <label className="flex flex-col gap-1 text-sm">{fa ? "توضیحات" : "Notes"}<textarea dir="auto" value={v.notes} onChange={(e) => setV({ ...v, notes: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
       <Button isLoading={busy} onClick={() => onSave({
         dogsAllowed: v.dogsAllowed, catsAllowed: v.catsAllowed, otherAllowed: v.otherAllowed, vaccinationRequired: v.vaccinationRequired, healthCertificateRequired: v.healthCertificateRequired, leashRequired: v.leashRequired, carrierRequired: v.carrierRequired,
         maxPets: num(v.maxPets), maxWeightKg: num(v.maxWeightKg), petFeeIrr: v.petFeeIrr === "" ? undefined : Number(v.petFeeIrr) * 10, depositIrr: v.depositIrr === "" ? undefined : Number(v.depositIrr) * 10,
@@ -297,7 +297,7 @@ function RoomsTab({ listing, busy, save }: { listing: TravelListingDto; busy: bo
           ) : <p className="text-metadata text-text-secondary">{fa ? "بدون نرخ؛ قیمت پایه و شرایط لغو عمومی اعمال می‌شود." : "No rate plans; the base price and general cancellation terms apply."}</p>}
           {planFor === u.id ? (
             <div className="grid gap-3 rounded-md border border-border-subtle p-3 sm:grid-cols-2">
-              <Input label={fa ? "نام نرخ" : "Rate name"} value={plan.name} onChange={(e) => setPlan({ ...plan, name: e.target.value })} />
+              <Input dir="auto" label={fa ? "نام نرخ" : "Rate name"} value={plan.name} onChange={(e) => setPlan({ ...plan, name: e.target.value })} />
               <Input label={fa ? "تغییر قیمت نسبت به پایه (٪)" : "Price change vs base (%)"} inputMode="numeric" value={String(plan.priceModifierPercent ?? 0)} onChange={(e) => setPlan({ ...plan, priceModifierPercent: Number(e.target.value.replace(/[^\d-]/g, "")) || 0 })} />
               <label className="flex flex-col gap-1 text-sm">{fa ? "شرایط لغو" : "Cancellation"}
                 <select value={plan.cancellationType} onChange={(e) => setPlan({ ...plan, cancellationType: e.target.value as RatePlanInput["cancellationType"] })} className="min-h-11 rounded-md border border-border-subtle bg-surface-base px-2">
@@ -325,12 +325,12 @@ function RoomsTab({ listing, busy, save }: { listing: TravelListingDto; busy: bo
       ))}
       <ContextSurface className="grid gap-3 sm:grid-cols-2">
         <h3 className="font-bold sm:col-span-2">{fa ? "افزودن نوع اتاق" : "Add a room type"}</h3>
-        <Input label={fa ? "نام" : "Name"} value={room.name} onChange={(e) => setRoom({ ...room, name: e.target.value })} />
+        <Input dir="auto" label={fa ? "نام" : "Name"} value={room.name} onChange={(e) => setRoom({ ...room, name: e.target.value })} />
         <Input label={fa ? "تعداد واحدهای مشابه" : "Identical units"} inputMode="numeric" value={room.quantity} onChange={(e) => setRoom({ ...room, quantity: e.target.value.replace(/\D/g, "") })} />
         <Input label={fa ? "حداکثر نفرات" : "Max guests"} inputMode="numeric" value={room.maxOccupancy} onChange={(e) => setRoom({ ...room, maxOccupancy: e.target.value.replace(/\D/g, "") })} />
         <Input label={fa ? "قیمت پایهٔ هر شب (تومان)" : "Base price per night (Toman)"} inputMode="numeric" value={room.basePrice} onChange={(e) => setRoom({ ...room, basePrice: e.target.value.replace(/\D/g, "") })} />
         <Input label={fa ? "حداکثر حیوان در این اتاق" : "Max pets in this room"} inputMode="numeric" value={room.maxPets} onChange={(e) => setRoom({ ...room, maxPets: e.target.value.replace(/\D/g, "") })} />
-        <Input label={fa ? "تخت‌ها" : "Beds"} value={room.bedInfo} onChange={(e) => setRoom({ ...room, bedInfo: e.target.value })} />
+        <Input dir="auto" label={fa ? "تخت‌ها" : "Beds"} value={room.bedInfo} onChange={(e) => setRoom({ ...room, bedInfo: e.target.value })} />
         <Button className="sm:col-span-2" isLoading={busy} disabled={room.name.trim().length < 2 || !room.basePrice} onClick={() => void save(async () => { const r = await travelProviderService.createUnit(listing.id, { name: room.name.trim(), quantity: Number(room.quantity) || 1, maxOccupancy: Number(room.maxOccupancy) || undefined, basePriceIrr: Number(room.basePrice) * 10, maxPets: room.maxPets ? Number(room.maxPets) : undefined, bedInfo: room.bedInfo.trim() || undefined }); setRoom({ name: "", quantity: "1", maxOccupancy: "2", basePrice: "", maxPets: "", bedInfo: "" }); return r; })}>{fa ? "افزودن اتاق" : "Add room"}</Button>
       </ContextSurface>
     </div>
@@ -358,7 +358,7 @@ function PhotosTab({ listing, busy, save }: { listing: TravelListingDto; busy: b
       <ContextSurface className="flex flex-col gap-3">
         <p className="text-sm text-text-secondary">{fa ? "نشانی تصویری که در فضای ذخیره‌سازی PET LIFE بارگذاری شده است (https://…). تصاویر از منابع ناشناس پذیرفته نمی‌شوند." : "The address of an image uploaded to PET LIFE storage (https://…). Images from arbitrary sources are not accepted."}</p>
         <Input label={fa ? "نشانی تصویر" : "Image URL"} dir="ltr" value={url} onChange={(e) => setUrl(e.target.value.trim())} errorMessage={url && !valid ? (fa ? "نشانی معتبر نیست" : "Not a valid address") : undefined} />
-        <Input label={fa ? "توضیح تصویر (برای دسترس‌پذیری)" : "Alt text (for accessibility)"} value={alt} maxLength={200} onChange={(e) => setAlt(e.target.value)} />
+        <Input dir="auto" label={fa ? "توضیح تصویر (برای دسترس‌پذیری)" : "Alt text (for accessibility)"} value={alt} maxLength={200} onChange={(e) => setAlt(e.target.value)} />
         <Button isLoading={busy} disabled={!valid} onClick={() => void save(async () => { const r = await travelProviderService.addMedia(listing.id, { url, alt: alt.trim() || undefined }); setUrl(""); setAlt(""); return r; })}>{fa ? "افزودن تصویر" : "Add photo"}</Button>
       </ContextSurface>
     </div>
@@ -572,7 +572,7 @@ export function ProviderTravelReviewsView() {
             {r.body ? <p>{r.body}</p> : null}
             {r.providerResponse ? <p className="rounded-md bg-surface-subtle p-2"><span className="font-bold">{fa ? "پاسخ شما: " : "Your response: "}</span>{r.providerResponse}</p> : (
               <div className="flex flex-col gap-2">
-                <textarea aria-label={fa ? "پاسخ" : "Response"} maxLength={1000} value={drafts[r.id] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.id]: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" />
+                <textarea dir="auto" aria-label={fa ? "پاسخ" : "Response"} maxLength={1000} value={drafts[r.id] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.id]: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" />
                 <Button size="sm" className="w-fit" disabled={(drafts[r.id] ?? "").trim().length < 3} onClick={() => void travelProviderService.respond(r.id, drafts[r.id]!.trim()).then(load).catch(() => setMsg(fa ? "پاسخ ثبت نشد." : "Response not saved."))}>{fa ? "انتشار پاسخ" : "Publish response"}</Button>
               </div>
             )}

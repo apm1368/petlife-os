@@ -29,6 +29,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
   const lang = useLocale() as "fa" | "en";
   const fa = lang === "fa";
   const t = useTranslations("travel");
+  const tIns = useTranslations("insurance");
   const [hub, setHub] = useState<TripHubDto | null>(null);
   const [load, setLoad] = useState<"loading" | "ready" | "notFound" | "error">("loading");
   const [selected, setSelected] = useState<string[]>([]);
@@ -103,7 +104,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
                   <li key={r.id} className="flex flex-col gap-1 rounded-md border border-border-subtle p-3 text-sm">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-bold">{t(`requirementType.${r.requirementType}`)}</span>
-                      <span className="flex gap-2"><StatusLabel tone={requirementStatusTone(r.status)}>{t(`requirementStatus.${r.status}`)}</StatusLabel><StatusLabel tone={ds.tone}>{fa ? ds.fa : ds.en}</StatusLabel></span>
+                      <span className="flex gap-2"><StatusLabel tone={requirementStatusTone(r.status)}>{t(`requirementStatus.${r.status}`)}</StatusLabel>{r.status === "UNKNOWN" || r.status === "NOT_REQUIRED" ? null : <StatusLabel tone={ds.tone}>{fa ? ds.fa : ds.en}</StatusLabel>}</span>
                     </div>
                     {r.notes ? <span>{r.notes}</span> : null}
                     <span className="text-metadata text-text-secondary">
@@ -140,7 +141,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
             {hub.activity.length === 0 ? <p className="text-sm text-text-secondary">{fa ? "فعالیتی ثبت نشده است." : "No activity yet."}</p> : (
               <ol className="flex flex-col gap-1.5 border-s border-border-subtle ps-4 text-sm">
                 {hub.activity.map((a, i) => {
-                  const label = a.type === "BOOKING" ? (() => { const [ref, status] = a.label.split(":"); return `${ref} · ${bookingStatusLabel(status ?? "", lang)}`; })() : a.type === "REQUIREMENT" ? (() => { const [type, status] = a.label.split(":"); return `${t(`requirementType.${type}`)} · ${t(`requirementStatus.${status}`)}`; })() : a.label;
+                  const label = a.type === "BOOKING" ? (() => { const [ref, status] = a.label.split(":"); return `${ref} · ${bookingStatusLabel(status ?? "", lang)}`; })() : a.type === "REQUIREMENT" ? (() => { const [type, status] = a.label.split(":"); return `${t(`requirementType.${type}`)} · ${t(`requirementStatus.${status}`)}`; })() : a.type === "INSURANCE" ? `${fa ? "بیمه" : "Insurance"} · ${tIns(`applicationStatus.${a.label}`)}` : a.label;
                   const when = new Intl.DateTimeFormat(fa ? "fa-IR-u-ca-persian" : "en-GB", { dateStyle: "medium", timeZone: "Asia/Tehran" }).format(new Date(a.at));
                   return <li key={i}>{a.link ? <Link className="underline" href={`/${lang}${a.link}`}>{label}</Link> : label} <span className="text-text-secondary">· {when}</span></li>;
                 })}
@@ -152,7 +153,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
         <aside className="flex flex-col gap-4" aria-label={fa ? "همراه سفر" : "Trip companions"}>
           <div className="rounded-md border border-border-subtle p-4">
             <h2 className="mb-2 flex items-center gap-2 font-bold"><ShieldCheck aria-hidden className="h-4 w-4" />{fa ? "بیمه" : "Insurance"}</h2>
-            {hub.insuranceApplications.length ? <ul className="flex flex-col gap-1 text-sm">{hub.insuranceApplications.map((a) => <li key={a.id}>{a.providerName} · {a.productName} <span className="text-text-secondary">· {a.status}</span></li>)}</ul> : <p className="text-sm text-text-secondary">{fa ? "درخواست بیمه‌ای برای این حیوان ندارید." : "No insurance applications for this pet."}</p>}
+            {hub.insuranceApplications.length ? <ul className="flex flex-col gap-1 text-sm">{hub.insuranceApplications.map((a) => <li key={a.id}>{a.providerName} · {a.productName} <span className="text-text-secondary">· {tIns(`applicationStatus.${a.status}`)}</span></li>)}</ul> : <p className="text-sm text-text-secondary">{fa ? "درخواست بیمه‌ای برای این حیوان ندارید." : "No insurance applications for this pet."}</p>}
             <Link className="mt-2 inline-block text-sm underline" href={`/${lang}/insurance`}>{fa ? "مقایسهٔ بیمه‌ها" : "Compare insurance"}</Link>
           </div>
           <div className="rounded-md border border-border-subtle p-4">

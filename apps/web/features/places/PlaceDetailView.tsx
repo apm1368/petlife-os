@@ -145,7 +145,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
                 <option value="OTHER">{fa ? "سایر" : "Other"}</option>
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-sm">{fa ? "توضیح (اختیاری)" : "Details (optional)"}<textarea maxLength={1000} value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
+            <label className="flex flex-col gap-1 text-sm">{fa ? "توضیح (اختیاری)" : "Details (optional)"}<textarea dir="auto" maxLength={1000} value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
             <div className="flex gap-2"><Button size="sm" isLoading={isActing} onClick={() => void sendReport()}>{fa ? "ارسال گزارش" : "Send report"}</Button><Button size="sm" variant="ghost" onClick={() => setReportOpen(false)}>{fa ? "انصراف" : "Cancel"}</Button></div>
           </div>
         ) : null}

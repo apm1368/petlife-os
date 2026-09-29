@@ -29,7 +29,7 @@ export function TravelCompareView() {
     { label: fa ? "نوع" : "Type", value: (i) => listingTypeLabel(i.type, lang) },
     { label: fa ? "شهر" : "City", value: (i) => i.city },
     { label: fa ? "امتیاز" : "Rating", value: (i) => ratingText(i.rating.average, i.rating.count, lang) },
-    { label: fa ? "قیمت کل اقامت" : "Stay total", value: (i) => (i.stay ? money(i.stay.totalIrr, lang) : i.fromNightlyIrr !== null ? (fa ? `از ${money(i.fromNightlyIrr, lang)} / شب` : `from ${money(i.fromNightlyIrr, lang)} / night`) : "—") },
+    { label: checkIn && checkOut ? (fa ? "قیمت کل اقامت" : "Stay total") : fa ? "قیمت" : "Price", value: (i) => (i.stay ? money(i.stay.totalIrr, lang) : i.fromNightlyIrr !== null ? (fa ? `از ${money(i.fromNightlyIrr, lang)} / شب` : `from ${money(i.fromNightlyIrr, lang)} / night`) : "—") },
     { label: fa ? "سگ" : "Dogs", value: (i) => (!i.petPolicySummary.stated ? NS : i.petPolicySummary.dogsAllowed ? "✓" : "✗") },
     { label: fa ? "گربه" : "Cats", value: (i) => (!i.petPolicySummary.stated ? NS : i.petPolicySummary.catsAllowed ? "✓" : "✗") },
     { label: fa ? "حداکثر وزن" : "Max weight", value: (i) => (i.petPolicySummary.maxWeightKg === null ? NS : fa ? `${localizeDigits(i.petPolicySummary.maxWeightKg, "fa")} کیلو` : `${i.petPolicySummary.maxWeightKg} kg`) },

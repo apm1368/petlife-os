@@ -176,7 +176,8 @@ export function policyFacts(p: TravelPetPolicyDto | null, lang: Lang): { label: 
 
 export function stayDates(b: Pick<TravelBookingDto, "checkIn" | "checkOut" | "nights">, lang: Lang): string {
   const n = lang === "fa" ? `${localizeDigits(b.nights, "fa")} شب` : `${b.nights} night${b.nights === 1 ? "" : "s"}`;
-  return `${formatDay(b.checkIn.slice(0, 10), lang, { year: false })} — ${formatDay(b.checkOut.slice(0, 10), lang)} · ${n}`;
+  // "،" (not "·") between the date and the night count keeps Persian digit runs from reordering in RTL.
+  return `${formatDay(b.checkIn.slice(0, 10), lang, { year: false })} — ${formatDay(b.checkOut.slice(0, 10), lang)}${lang === "fa" ? "، " : " · "}${n}`;
 }
 
 export function money(v: number | null | undefined, lang: Lang): string {

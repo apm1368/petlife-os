@@ -68,7 +68,7 @@ describe("DateRangePicker", () => {
   });
 
   it("formats a stay summary with the night count", () => {
-    expect(formatStayRange({ start: "2026-09-28", end: "2026-09-30" }, "fa")).toBe("۶ مهر — ۸ مهر ۱۴۰۵ · ۲ شب");
+    expect(formatStayRange({ start: "2026-09-28", end: "2026-09-30" }, "fa")).toBe("۶ مهر — ۸ مهر ۱۴۰۵، ۲ شب");
     expect(formatStayRange({ start: "2026-09-28", end: "2026-09-29" }, "en")).toBe("28 September — 29 September 2026 · 1 night");
   });
 });

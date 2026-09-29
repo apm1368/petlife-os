@@ -214,9 +214,19 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
       expect(saver.body.payLaterAmountIrr).toBe(850_000);
       await t.c.get(`/travel/listings/${l.listingId}/quote?unitId=${l.unitId}&ratePlanId=${l.plans[1]!.id}&checkIn=${day(5)}&checkOut=${day(6)}`).expect(400);
 
+      // Compare/favorites share the search item shape; free-text terms never count as "free cancellation".
+      const plain = await listing(p.orgId, { city: l.city });
+      const cmp = await request(server).get(`/travel/compare?ids=${l.listingId},${plain.listingId}`).expect(200);
+      expect(cmp.body.map((i: { id: string }) => i.id)).toEqual([l.listingId, plain.listingId]);
+      expect(cmp.body[0].petPolicySummary.stated).toBe(true);
+      expect(cmp.body[0].freeCancellationAvailable).toBe(true);
+      expect(cmp.body[1].freeCancellationAvailable).toBe(false);
+
       await t.c.put(`/travel/listings/${l.listingId}/favorite`).expect(200);
       expect((await t.c.get(`/travel/listings/${l.listingId}`).expect(200)).body.favorited).toBe(true);
-      expect((await t.c.get("/travel/favorites").expect(200)).body.map((f: { id: string }) => f.id)).toContain(l.listingId);
+      const favs = (await t.c.get("/travel/favorites").expect(200)).body;
+      expect(favs.map((f: { id: string }) => f.id)).toContain(l.listingId);
+      expect(favs.find((f: { id: string }) => f.id === l.listingId).favorited).toBe(true);
       await t.c.delete(`/travel/listings/${l.listingId}/favorite`).expect(200);
     });
     it("a public unit calendar is only served for units of that published listing; support cases can link only your own stay", async () => {

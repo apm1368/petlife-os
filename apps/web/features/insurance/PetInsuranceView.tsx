@@ -85,7 +85,7 @@ export function PetInsuranceView({ petId }: { petId: string }) {
                   <p className="font-bold">{fa ? "بیمه‌گر اطلاعات بیشتری خواسته است:" : "The insurer asked for more information:"}</p>
                   <p className="mt-1 whitespace-pre-line">{application.insurerMessage}</p>
                   <label className="mt-2 flex flex-col gap-1">{fa ? "پاسخ یا توضیحات شما" : "Your answer or notes"}
-                    <textarea maxLength={2000} value={notes[application.id] ?? application.notes ?? ""} onChange={(e) => setNotes({ ...notes, [application.id]: e.target.value })} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" />
+                    <textarea dir="auto" maxLength={2000} value={notes[application.id] ?? application.notes ?? ""} onChange={(e) => setNotes({ ...notes, [application.id]: e.target.value })} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" />
                   </label>
                 </div>
               ) : null}
