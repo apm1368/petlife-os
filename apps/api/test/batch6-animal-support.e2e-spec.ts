@@ -620,4 +620,91 @@ describe("Batch 6 — Animal support ecosystem", () => {
       await content.c.post(`/admin/animal-support/organizations/${b.organizationId}/verification-documents`).send({ reason: "Curious" }).expect(403);
     });
   });
+
+  // ------------------------------------------------------------------ 6E community + reports
+
+  describe("community privacy and reports", () => {
+    it("public community content shows only a first name, hides author ids and pet ids, and supports search", async () => {
+      const author = await owner("Pishi");
+      await prisma.user.update({ where: { id: author.userId }, data: { displayName: "Sara Rezaei Full-Name" } });
+      const marker = `glowcollar${unique().replace(/[^a-z0-9]/g, "")}`;
+      const created = await author.c.post("/community/posts").send({ type: "GENERAL", title: `Night walks ${marker}`, body: "Which reflective collar do you use?", petId: author.petId }).expect(201);
+      expect(created.body).toMatchObject({ isMine: true, authorUserId: author.userId, authorDisplayName: "Sara" });
+      await author.c.post(`/community/posts/${created.body.id}/comments`).send({ body: "Following!" }).expect(201);
+
+      const anon = await request(server).get(`/community/posts/${created.body.id}`).expect(200);
+      expect(anon.body).toMatchObject({ isMine: false, authorUserId: null, authorDisplayName: "Sara" });
+      const serialized = JSON.stringify(anon.body);
+      expect(serialized).not.toContain(author.userId);
+      expect(serialized).not.toContain(author.petId);
+      expect(serialized).not.toContain("Rezaei");
+      const comments = await request(server).get(`/community/posts/${created.body.id}/comments`).expect(200);
+      expect(comments.body.items[0]).toMatchObject({ authorUserId: null, isMine: false, authorDisplayName: "Sara" });
+      expect((await author.c.get(`/community/posts/${created.body.id}/comments`).expect(200)).body.items[0].isMine).toBe(true);
+
+      const found = await request(server).get(`/community/posts?q=${marker}`).expect(200);
+      expect(found.body.items.map((i: { id: string }) => i.id)).toEqual([created.body.id]);
+      expect((await request(server).get(`/community/posts?q=${marker}zzz`).expect(200)).body.items).toHaveLength(0);
+    });
+
+    it("a reporter cannot pile up duplicate open reports, and reports on every surface land in the one moderation queue", async () => {
+      const author = await user("b6-author");
+      const reporter = await user("b6-reporter");
+      const post = await author.c.post("/community/posts").send({ type: "GENERAL", body: "Selling puppies, DM me for cheap prices" }).expect(201);
+      const first = await reporter.c.post(`/community/posts/${post.body.id}/report`).send({ reason: "SCAM", details: "Asks for a deposit" }).expect(201);
+      const dup = await reporter.c.post(`/community/posts/${post.body.id}/report`).send({ reason: "SPAM" }).expect(409);
+      expect(dup.body.error.code).toBe("DUPLICATE_REPORT");
+      // Someone else can still report the same post.
+      const second = await (await user("b6-reporter2")).c.post(`/community/posts/${post.body.id}/report`).send({ reason: "ANIMAL_WELFARE" }).expect(201);
+
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const e1 = await mod.c.post(`/admin/community/reports/${first.body.id}/escalate`).send({ reason: "Likely puppy scam" }).expect(201);
+      const e2 = await mod.c.post(`/admin/community/reports/${second.body.id}/escalate`).send({ reason: "Same post" }).expect(201);
+      expect(e2.body.trustCaseId).toBe(e1.body.trustCaseId);
+      await mod.c.post(`/admin/community/reports/${first.body.id}/escalate`).send({ reason: "again" }).expect(409);
+      // While the escalated case is under review the reporter still cannot re-file; after a dismissal they can.
+      await reporter.c.post(`/community/posts/${post.body.id}/report`).send({ reason: "SPAM" }).expect(409);
+      const other = await author.c.post("/community/posts").send({ type: "GENERAL", body: "Harmless post" }).expect(201);
+      const mistaken = await reporter.c.post(`/community/posts/${other.body.id}/report`).send({ reason: "SPAM" }).expect(201);
+      await mod.c.post(`/admin/community/reports/${mistaken.body.id}/dismiss`).send({ reason: "Not spam" }).expect(201);
+      await reporter.c.post(`/community/posts/${other.body.id}/report`).send({ reason: "HARASSMENT" }).expect(201);
+
+      // Support needs, lost-pet incidents and organizations go through POST /reports into the same queue.
+      const needId = await publishedNeed(author.c, mod.c);
+      const needReport = await reporter.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: needId, reason: "SCAM" }).expect(201);
+      expect(needReport.body.supportNeedListingId).toBe(needId);
+      await reporter.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: needId, reason: "SPAM" }).expect(409);
+      const escalatedNeed = await mod.c.post(`/admin/community/reports/${needReport.body.id}/escalate`).send({ reason: "Suspicious fundraising" }).expect(201);
+      expect((await prisma.trustCase.findUniqueOrThrow({ where: { id: escalatedNeed.body.trustCaseId } })).subjectType).toBe("SUPPORT_NEED");
+
+      const o = await owner();
+      const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost near the bazaar", publicArea: "Tajrish", contactPreference: "IN_APP_MESSAGE" }).expect(201);
+      await reporter.c.post("/reports").send({ targetType: "LOST_PET_INCIDENT", targetId: incident.body.id, reason: "MISINFORMATION" }).expect(201);
+
+      const orgRow = await prisma.animalSupportOrganization.create({ data: { type: "SHELTER", name: `Shelter ${unique()}`, isPubliclyListed: true, verificationStatus: "VERIFIED" } });
+      await reporter.c.post("/reports").send({ targetType: "ORGANIZATION", targetId: orgRow.id, reason: "SCAM" }).expect(201);
+
+      const queue = await mod.c.get("/admin/community/reports?targetType=SUPPORT_NEED&pageSize=100").expect(200);
+      expect(queue.body.items.every((r: { supportNeedListingId: string | null }) => r.supportNeedListingId)).toBe(true);
+      expect(queue.body.items.some((r: { id: string }) => r.id === needReport.body.id)).toBe(true);
+
+      // Anonymous users cannot report; unknown or hidden targets look like not-found.
+      await request(server).post("/reports").send({ targetType: "SUPPORT_NEED", targetId: needId, reason: "SCAM" }).expect(403);
+      await reporter.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: "00000000-0000-4000-8000-000000000000", reason: "SCAM" }).expect(404);
+      await reporter.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: needId, reason: "NOT_A_REASON" }).expect(400);
+    });
+
+    it("sightings are private — only the incident's household can report one", async () => {
+      const o = await owner();
+      const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost near the park", publicArea: "Vanak", contactPreference: "IN_APP_MESSAGE" }).expect(201);
+      const primed = await request(server).get("/health/live");
+      const csrf = extractCookie(primed.headers["set-cookie"], "petlife_csrf")!;
+      const sighting = await request(server).post(`/lost-pets/${incident.body.id}/sightings`).set("Cookie", `petlife_csrf=${csrf}`).set("x-csrf-token", csrf).send({ seenAt: new Date().toISOString(), description: "Send me money and I'll return him" }).expect(201);
+      const stranger = await user("b6-stranger");
+      await stranger.c.post("/reports").send({ targetType: "LOST_PET_SIGHTING", targetId: sighting.body.id, reason: "SCAM" }).expect(404);
+      const r = await o.c.post("/reports").send({ targetType: "LOST_PET_SIGHTING", targetId: sighting.body.id, reason: "SCAM" }).expect(201);
+      expect(r.body.lostPetSightingId).toBe(sighting.body.id);
+    });
+  });
+
 });

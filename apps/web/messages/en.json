@@ -2990,14 +2990,24 @@
       "ABUSE": "Abuse",
       "MISINFORMATION": "Misinformation",
       "INAPPROPRIATE": "Inappropriate",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "SCAM": "Scam or fraud",
+      "HARASSMENT": "Harassment",
+      "PERSONAL_INFORMATION": "Shares personal information",
+      "ANIMAL_WELFARE": "Animal welfare concern",
+      "DANGEROUS_CONTENT": "Dangerous content"
     },
     "feed": {
       "title": "Community",
       "newPost": "New post",
       "empty": "No posts yet. Be the first to share something.",
       "loadMore": "Load more",
-      "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}"
+      "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}",
+      "searchLabel": "Search posts",
+      "typeLabel": "Post type",
+      "allTypes": "All types",
+      "search": "Search",
+      "noResults": "No posts match your search."
     },
     "newPost": {
       "title": "New post",
@@ -3822,5 +3832,15 @@
         "description": "Requests and help"
       }
     }
+  },
+  "report": {
+    "action": "Report",
+    "hint": "Reports are private. The team reviews them and the person you report is not told who reported.",
+    "reasonLabel": "What's wrong?",
+    "detailsLabel": "Details",
+    "submit": "Send report",
+    "success": "Thank you — the team will review this.",
+    "duplicate": "You've already reported this. The team is reviewing it.",
+    "limitReached": "You've sent many reports today. Please try again tomorrow."
   }
 }

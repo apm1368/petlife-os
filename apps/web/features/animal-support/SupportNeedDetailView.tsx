@@ -10,6 +10,8 @@ import { supportNeedsService, type SupportNeedOfferSummaryDto } from "@/services
 import { ApiError } from "@/lib/api/client";
 import { formatDay } from "@/lib/date/jalali";
 import { URGENCY_TONE } from "./SupportNeedsListView";
+import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
+import { communityService } from "@/services/community.service";
 import { ShareBar } from "@/features/shared/ShareBar";
 
 const HELP_TYPES: SupportNeedCategory[] = [
@@ -185,6 +187,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-body text-text-primary">{t("detail.shareTitle")}</span>
         <ShareBar url={shareUrl} text={listing.title} />
+        <ReportContentPanel submit={(reason, details) => communityService.reportContent("SUPPORT_NEED", listing.id, reason, details)} />
       </ContextSurface>
 
       <Link href="/animal-support/needs" className="text-body text-brand-mint underline">

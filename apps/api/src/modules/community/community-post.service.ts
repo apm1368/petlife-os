@@ -67,7 +67,7 @@ export class CommunityPostService {
       return created;
     });
     const names = await this.displayNameMap([authorUserId]);
-    return toCommunityPostDto(row, names.get(authorUserId) ?? "", null);
+    return toCommunityPostDto(row, names.get(authorUserId) ?? "", null, authorUserId);
   }
 
   /**
@@ -111,12 +111,18 @@ export class CommunityPostService {
       return created;
     });
     const names = await this.displayNameMap([authorUserId]);
-    return toCommunityPostDto(row, names.get(authorUserId) ?? "", null);
+    return toCommunityPostDto(row, names.get(authorUserId) ?? "", null, authorUserId);
   }
 
   async list(query: ListCommunityPostsQueryDto, viewerUserId?: string) {
     const { page, pageSize, skip, take } = resolvePagination(query);
-    const where: Prisma.CommunityPostWhereInput = { status: CommunityContentStatus.PUBLISHED, type: query.type, countryCode: query.countryCode };
+    const q = query.q?.trim();
+    const where: Prisma.CommunityPostWhereInput = {
+      status: CommunityContentStatus.PUBLISHED,
+      type: query.type,
+      countryCode: query.countryCode,
+      ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { body: { contains: q, mode: "insensitive" } }] } : {}),
+    };
     const [rows, total] = await Promise.all([
       this.prisma.communityPost.findMany({ where, include: POST_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.communityPost.count({ where }),
@@ -132,7 +138,7 @@ export class CommunityPostService {
         )
       : new Map<string, DtoReactionType>();
 
-    const items = rows.map((row) => toCommunityPostDto(row, names.get(row.authorUserId) ?? "", viewerReactions.get(row.id) ?? null));
+    const items = rows.map((row) => toCommunityPostDto(row, names.get(row.authorUserId) ?? "", viewerReactions.get(row.id) ?? null, viewerUserId));
     return toPaginatedDto(items, total, page, pageSize);
   }
 
@@ -140,7 +146,7 @@ export class CommunityPostService {
     const row = await this.getVisiblePostOrThrow(postId);
     const names = await this.displayNameMap([row.authorUserId]);
     const viewerReaction = viewerUserId ? await this.prisma.communityReaction.findUnique({ where: { postId_userId: { postId, userId: viewerUserId } } }) : null;
-    return toCommunityPostDto(row, names.get(row.authorUserId) ?? "", (viewerReaction?.type as unknown as DtoReactionType) ?? null);
+    return toCommunityPostDto(row, names.get(row.authorUserId) ?? "", (viewerReaction?.type as unknown as DtoReactionType) ?? null, viewerUserId);
   }
 
   async addComment(postId: string, authorUserId: string, dto: CreateCommunityCommentDto) {
@@ -151,10 +157,10 @@ export class CommunityPostService {
       return created;
     });
     const names = await this.displayNameMap([authorUserId]);
-    return toCommunityCommentDto(row, names.get(authorUserId) ?? "");
+    return toCommunityCommentDto(row, names.get(authorUserId) ?? "", authorUserId);
   }
 
-  async listComments(postId: string, query: PaginationQueryDto) {
+  async listComments(postId: string, query: PaginationQueryDto, viewerUserId?: string) {
     await this.getVisiblePostOrThrow(postId);
     const { page, pageSize, skip, take } = resolvePagination(query);
     const where: Prisma.CommunityCommentWhereInput = { postId, status: CommunityContentStatus.PUBLISHED };
@@ -164,7 +170,7 @@ export class CommunityPostService {
     ]);
     const names = await this.displayNameMap(rows.map((r) => r.authorUserId));
     return toPaginatedDto(
-      rows.map((row) => toCommunityCommentDto(row, names.get(row.authorUserId) ?? "")),
+      rows.map((row) => toCommunityCommentDto(row, names.get(row.authorUserId) ?? "", viewerUserId)),
       total,
       page,
       pageSize,

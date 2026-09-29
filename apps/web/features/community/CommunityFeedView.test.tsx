@@ -10,7 +10,8 @@ vi.mock("@/services/community.service", () => ({ communityService: { listPosts: 
 function post(overrides: Partial<CommunityPostDto> = {}): CommunityPostDto {
   return {
     id: "post-1",
-    authorUserId: "user-1",
+    authorUserId: null,
+    isMine: false,
     authorDisplayName: "Sara",
     type: "GENERAL" as never,
     title: "A good day at the park",

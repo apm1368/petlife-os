@@ -55,8 +55,9 @@ export class CommunityController {
   }
 
   @Get("posts/:postId/comments")
-  listComments(@Param("postId") postId: string, @Query() query: PaginationQueryDto) {
-    return this.posts.listComments(postId, query);
+  @UseGuards(OptionalSessionAuthGuard)
+  listComments(@Param("postId") postId: string, @Query() query: PaginationQueryDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+    return this.posts.listComments(postId, query, user?.id);
   }
 
   @Post("posts/:postId/comments")

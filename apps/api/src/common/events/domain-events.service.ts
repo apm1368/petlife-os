@@ -249,6 +249,7 @@ export const DOMAIN_EVENT_TYPES = [
   "SupportNeedHelpOffered",
   "SupportNeedHelpOfferResolved",
   "SupportNeedExpiringSoon",
+  "ContentReportSubmitted",
   // Handoff 23 — Travel booking marketplace.
   "TravelListingCreated",
   "TravelListingStatusChanged",

@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsArray, IsEnum, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from "class-validator";
+import { IsArray, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from "class-validator";
 import { CommunityPostType, CommunityReactionType, CommunityReportReason, CommunityReportStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 
@@ -35,6 +35,12 @@ export class ListCommunityPostsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   countryCode?: string;
+
+  /** Batch 6 — plain title/body text search, no ranking infrastructure. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  q?: string;
 }
 
 export class CreateCommunityCommentDto {
@@ -62,6 +68,10 @@ export class ListCommunityReportsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsEnum(CommunityReportStatus)
   status?: CommunityReportStatus;
+
+  @IsOptional()
+  @IsIn(["COMMUNITY", "SUPPORT_NEED", "LOST_PET_INCIDENT", "LOST_PET_SIGHTING", "ORGANIZATION"])
+  targetType?: "COMMUNITY" | "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION";
 }
 
 export class EscalateCommunityReportDto {

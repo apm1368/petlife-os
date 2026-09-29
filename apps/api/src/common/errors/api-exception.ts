@@ -1608,3 +1608,21 @@ export class ProviderClinicalAlertNotFoundException extends ApiException {
     super("PROVIDER_CLINICAL_ALERT_NOT_FOUND", "Alert not found.", HttpStatus.NOT_FOUND, details);
   }
 }
+
+export class DuplicateReportException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_REPORT", "You have already reported this and it is being reviewed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ReportLimitReachedException extends ApiException {
+  constructor() {
+    super("REPORT_LIMIT_REACHED", "You have sent many reports today. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS);
+  }
+}
+
+export class ReportNotOpenException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REPORT_NOT_OPEN", "Only open reports can be escalated or dismissed.", HttpStatus.CONFLICT, details);
+  }
+}

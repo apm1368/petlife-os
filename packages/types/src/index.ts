@@ -2423,6 +2423,9 @@ export enum TrustSubjectType {
   REVIEW = "REVIEW",
   COMMUNITY_CONTENT = "COMMUNITY_CONTENT",
   PET_INCIDENT = "PET_INCIDENT",
+  SUPPORT_NEED = "SUPPORT_NEED",
+  LOST_PET_SIGHTING = "LOST_PET_SIGHTING",
+  ANIMAL_SUPPORT_ORGANIZATION = "ANIMAL_SUPPORT_ORGANIZATION",
 }
 
 export enum TrustCaseSeverity {
@@ -4531,6 +4534,11 @@ export enum CommunityReportReason {
   MISINFORMATION = "MISINFORMATION",
   INAPPROPRIATE = "INAPPROPRIATE",
   OTHER = "OTHER",
+  SCAM = "SCAM",
+  HARASSMENT = "HARASSMENT",
+  PERSONAL_INFORMATION = "PERSONAL_INFORMATION",
+  ANIMAL_WELFARE = "ANIMAL_WELFARE",
+  DANGEROUS_CONTENT = "DANGEROUS_CONTENT",
 }
 
 export enum CommunityReportStatus {
@@ -4542,7 +4550,6 @@ export enum CommunityReportStatus {
 
 /** A public-safe pet reference only — never a channel into the pet's private health/household data (spec: "A post referring to a pet should use an explicit public-safe pet representation"). */
 export interface CommunityPostPetRefDto {
-  id: string;
   name: string;
   species: PetSpecies;
   photoUrl: string | null;
@@ -4550,7 +4557,9 @@ export interface CommunityPostPetRefDto {
 
 export interface CommunityPostDto {
   id: string;
-  authorUserId: string;
+  /** Only set for the viewer's own content (Batch 6 privacy). */
+  authorUserId: string | null;
+  isMine: boolean;
   authorDisplayName: string;
   type: CommunityPostType;
   title: string | null;
@@ -4574,7 +4583,8 @@ export interface CommunityPostDto {
 export interface CommunityCommentDto {
   id: string;
   postId: string;
-  authorUserId: string;
+  authorUserId: string | null;
+  isMine: boolean;
   authorDisplayName: string;
   body: string;
   status: CommunityContentStatus;
@@ -4585,6 +4595,10 @@ export interface CommunityReportDto {
   id: string;
   postId: string | null;
   commentId: string | null;
+  supportNeedListingId: string | null;
+  lostPetIncidentId: string | null;
+  lostPetSightingId: string | null;
+  organizationId: string | null;
   reason: CommunityReportReason;
   details: string | null;
   status: CommunityReportStatus;

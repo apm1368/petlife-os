@@ -9,6 +9,8 @@ import { ApiError } from "@/lib/api/client";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { ShareBar } from "@/features/shared/ShareBar";
 import { addDays, formatDay, localizeDigits, todayIso } from "@/lib/date/jalali";
+import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
+import { communityService } from "@/services/community.service";
 import { lostPetStatusTone } from "./lost-pet-status";
 
 const SPECIES: Record<string, [string, string]> = { DOG: ["سگ", "Dog"], CAT: ["گربه", "Cat"], OTHER: ["سایر", "Other"] };
@@ -114,6 +116,7 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
           {incident.publicNotes ? <p className="text-body text-text-primary">{incident.publicNotes}</p> : null}
           {incident.publicContactMode ? <p className="text-body text-text-primary">{t("public.contact", { contact: incident.publicContactMode })}</p> : null}
           {!reunited ? <ShareBar url={`/${lang}/lost-pets/${incident.id}`} text={shareText} /> : null}
+          <ReportContentPanel submit={(reason, details) => communityService.reportContent("LOST_PET_INCIDENT", incident.id, reason, details)} />
         </ContextSurface>
 
         {!reunited ? (

@@ -2990,14 +2990,24 @@
       "ABUSE": "سوءاستفاده",
       "MISINFORMATION": "اطلاعات نادرست",
       "INAPPROPRIATE": "نامناسب",
-      "OTHER": "سایر"
+      "OTHER": "سایر",
+      "SCAM": "کلاهبرداری",
+      "HARASSMENT": "آزار و مزاحمت",
+      "PERSONAL_INFORMATION": "انتشار اطلاعات شخصی",
+      "ANIMAL_WELFARE": "نگرانی درباره سلامت و رفاه حیوان",
+      "DANGEROUS_CONTENT": "محتوای خطرناک"
     },
     "feed": {
       "title": "انجمن",
       "newPost": "پست جدید",
       "empty": "هنوز پستی وجود ندارد. اولین نفر باشید که چیزی به اشتراک می‌گذارد.",
       "loadMore": "بیشتر",
-      "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}"
+      "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}",
+      "searchLabel": "جستجو در پست‌ها",
+      "typeLabel": "نوع پست",
+      "allTypes": "همه انواع",
+      "search": "جستجو",
+      "noResults": "پستی با این جستجو پیدا نشد."
     },
     "newPost": {
       "title": "پست جدید",
@@ -3822,5 +3832,15 @@
         "description": "درخواست‌ها و راهنمایی"
       }
     }
+  },
+  "report": {
+    "action": "گزارش",
+    "hint": "گزارش‌ها محرمانه‌اند. تیم آن‌ها را بررسی می‌کند و به فرد گزارش‌شده گفته نمی‌شود چه کسی گزارش داده است.",
+    "reasonLabel": "مشکل چیست؟",
+    "detailsLabel": "جزئیات",
+    "submit": "ارسال گزارش",
+    "success": "متشکریم — تیم این مورد را بررسی می‌کند.",
+    "duplicate": "قبلاً این مورد را گزارش داده‌اید. تیم در حال بررسی آن است.",
+    "limitReached": "امروز گزارش‌های زیادی فرستاده‌اید. لطفاً فردا دوباره تلاش کنید."
   }
 }
