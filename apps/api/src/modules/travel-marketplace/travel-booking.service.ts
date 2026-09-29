@@ -243,10 +243,39 @@ export class TravelBookingService {
     return toPaginatedDto(rows.map(toTravelBookingDto), total, page, pageSize);
   }
 
+  /**
+   * Pet-scoped consumer read. A temporary caregiver who can see one pet must
+   * never gain a household-wide travel history just by visiting its travel
+   * page, so the marketplace controller uses this instead of the broader
+   * household listing above.
+   */
+  async listForPet(householdId: string, petId: string, query: { page?: number; pageSize?: number; status?: string }): Promise<PaginatedDto<TravelBookingDto>> {
+    const { page, pageSize, skip, take } = resolvePagination(query);
+    const where: Prisma.TravelBookingWhereInput = {
+      householdId,
+      pets: { some: { petId } },
+      ...(query.status && query.status in TravelBookingStatus ? { status: query.status as TravelBookingStatus } : {}),
+    };
+    const [rows, total] = await Promise.all([
+      this.prisma.travelBooking.findMany({ where, include: BOOKING_INCLUDE, orderBy: { checkIn: "desc" }, skip, take }),
+      this.prisma.travelBooking.count({ where }),
+    ]);
+    return toPaginatedDto(rows.map(toTravelBookingDto), total, page, pageSize);
+  }
+
   async getForHousehold(bookingId: string, householdId: string): Promise<TravelBookingDto> {
     const row = await this.prisma.travelBooking.findUnique({ where: { id: bookingId }, include: BOOKING_INCLUDE });
     if (!row) throw new TravelBookingNotFoundException({ bookingId });
     if (row.householdId !== householdId) throw new TravelBookingAccessDeniedException({ bookingId });
+    return toTravelBookingDto(row);
+  }
+
+  async getForPet(bookingId: string, householdId: string, petId: string): Promise<TravelBookingDto> {
+    const row = await this.prisma.travelBooking.findFirst({
+      where: { id: bookingId, householdId, pets: { some: { petId } } },
+      include: BOOKING_INCLUDE,
+    });
+    if (!row) throw new TravelBookingNotFoundException({ bookingId });
     return toTravelBookingDto(row);
   }
 

@@ -72,6 +72,8 @@ import { InsuranceProductService } from "../insurance/insurance-product.service"
 import { AdminInsuranceController } from "./insurance/admin-insurance.controller";
 import { PetFriendlyPlaceService } from "../places/pet-friendly-place.service";
 import { AdminPlacesController } from "./places/admin-places.controller";
+import { AdminTravelController } from "./travel/admin-travel.controller";
+import { AdminTravelService } from "./travel/admin-travel.service";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -106,6 +108,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminSupportNeedController,
     AdminInsuranceController,
     AdminPlacesController,
+    AdminTravelController,
     AdminServicesController,
     AdminCommerceController,
   ],
@@ -150,6 +153,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     InsuranceProviderService,
     InsuranceProductService,
     PetFriendlyPlaceService,
+    AdminTravelService,
   ],
   exports: [
     AdminAccessService,

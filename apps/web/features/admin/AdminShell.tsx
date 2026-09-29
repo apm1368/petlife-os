@@ -15,7 +15,7 @@ import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 
 type SessionState = "loading" | "authenticated" | "unauthenticated";
 
-const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionName }[] = [
+const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionName; label?: { fa: string; en: string } }[] = [
   { href: "", labelKey: "nav.dashboard" },
   { href: "/crm", labelKey: "nav.crm", permission: "customer.view" },
   { href: "/customer-affairs", labelKey: "nav.customerAffairs", permission: "support.view" },
@@ -39,6 +39,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/subscriptions", labelKey: "nav.subscriptions", permission: "subscription.view" },
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
+  { href: "/travel", labelKey: "", label: { fa: "سفر", en: "Travel" }, permission: "travel.view" },
 ];
 
 /**
@@ -120,7 +121,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
           return (
             <Link key={item.href} href={href} className={"shrink-0 rounded-full px-3 py-1 text-metadata " + (isActive ? "bg-surface-subtle text-text-primary" : "text-text-secondary")}>
-              {t(item.labelKey)}
+              {item.label ? item.label[locale === "fa" ? "fa" : "en"] : t(item.labelKey)}
             </Link>
           );
         })}
@@ -134,5 +135,5 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const t = useTranslations("admin.shell");
-  return <LocalPreviewGate title="admin" items={NAV_ITEMS.map(item => ({ href: `/${locale}/admin${item.href}`, label: t(item.labelKey) }))} live={<LiveAdminShell>{children}</LiveAdminShell>}>{children}</LocalPreviewGate>;
+  return <LocalPreviewGate title="admin" items={NAV_ITEMS.map(item => ({ href: `/${locale}/admin${item.href}`, label: item.label ? item.label[locale === "fa" ? "fa" : "en"] : t(item.labelKey) }))} live={<LiveAdminShell>{children}</LiveAdminShell>}>{children}</LocalPreviewGate>;
 }

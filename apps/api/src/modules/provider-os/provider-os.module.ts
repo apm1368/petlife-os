@@ -41,6 +41,8 @@ import { ProviderCatalogService } from "./provider-catalog.service";
     ProviderTeamService,
     ProviderCatalogService,
   ],
-  exports: [ProviderContextService],
+  // Other bounded domains (for example Travel Marketplace) reuse this guard
+  // instead of re-implementing provider-membership resolution.
+  exports: [ProviderContextService, ProviderAuthGuard],
 })
 export class ProviderOsModule {}

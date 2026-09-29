@@ -339,6 +339,14 @@ export class ModerateTravelListingDto {
   reason?: string;
 }
 
+/** Internal moderation queue filters. Public discovery must never accept a status filter. */
+export class ListAdminTravelListingsQueryDto extends PaginationQueryDto {
+  @IsOptional() @IsEnum(TravelListingStatus) status?: TravelListingStatus;
+  @IsOptional() @IsEnum(TravelListingType) type?: TravelListingType;
+  @IsOptional() @IsString() city?: string;
+  @IsOptional() @IsString() organizationId?: string;
+}
+
 export class SetTravelListingVerificationDto {
   @IsBoolean()
   isVerified!: boolean;

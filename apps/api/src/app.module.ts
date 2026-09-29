@@ -63,6 +63,7 @@ import { MemoriesModule } from "./modules/memories/memories.module";
 import { TravelModule } from "./modules/travel/travel.module";
 import { InsuranceModule } from "./modules/insurance/insurance.module";
 import { PlacesModule } from "./modules/places/places.module";
+import { TravelMarketplaceModule } from "./modules/travel-marketplace/travel-marketplace.module";
 
 @Module({
   imports: [
@@ -127,6 +128,7 @@ import { PlacesModule } from "./modules/places/places.module";
     CommunityModule,
     MemoriesModule,
     TravelModule,
+    TravelMarketplaceModule,
     InsuranceModule,
     PlacesModule,
   ],

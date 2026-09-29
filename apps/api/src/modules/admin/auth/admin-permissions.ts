@@ -49,6 +49,8 @@ export type AdminPermission =
   | "insurance.manage"
   | "places.view"
   | "places.manage"
+  | "travel.view"
+  | "travel.manage"
   | "services.view"
   | "services.manage"
   // Batch 4 — Admin Commerce
@@ -95,6 +97,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "insurance.manage",
   "places.view",
   "places.manage",
+  "travel.view",
+  "travel.manage",
   "services.view",
   "services.manage",
   "commerce.view",
@@ -115,6 +119,7 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = [
   "animalSupport.view",
   "insurance.view",
   "places.view",
+  "travel.view",
   "services.view",
   "commerce.view",
 ];
@@ -166,6 +171,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "insurance.manage",
     "places.view",
     "places.manage",
+    "travel.view",
+    "travel.manage",
     "services.view",
     "services.manage",
     "commerce.view",
@@ -176,7 +183,7 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   // granted by default" — SUPPORT can see a household's subscription state
   // (needed for the H13 support context panel) but can never cancel, grant
   // a trial, or override an entitlement.
-  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view"],
+  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view", "travel.view"],
   // Review moderation is a trust action, so TRUST_SAFETY can hide provider reviews.
   [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage", "commerce.view", "commerce.manage"],
   // Payout execution ("settlement.pay") is FINANCE-only, mirroring
@@ -222,6 +229,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "insurance.manage",
     "places.view",
     "places.manage",
+    "travel.view",
+    "travel.manage",
     "services.view",
     "services.manage",
     "commerce.view",

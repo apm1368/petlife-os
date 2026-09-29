@@ -2907,6 +2907,8 @@ export type AdminPermissionName =
   | "insurance.manage"
   | "places.view"
   | "places.manage"
+  | "travel.view"
+  | "travel.manage"
   | "services.view"
   | "services.manage"
   | "commerce.view"

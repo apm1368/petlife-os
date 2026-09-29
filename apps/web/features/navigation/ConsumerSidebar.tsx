@@ -28,7 +28,7 @@ const items = [
   ["/services", "خدمات", "Services", Scissors],
   ["/vet/find", "دامپزشک", "Vet", Stethoscope],
   ["/shop", "فروشگاه", "Shop", ShoppingBag],
-  ["/pets/active?view=travel", "سفر", "Travel", MapPin],
+  ["/travel", "سفر", "Travel", MapPin],
   ["/places", "مکان‌های دوستدار حیوانات", "Pet-friendly places", MapPin],
   ["/community", "جامعه", "Community", UserRound],
   ["/animal-support", "حمایت حیوانات", "Animal support", HeartPulse],

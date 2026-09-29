@@ -30,6 +30,7 @@ const NAV_ITEMS = [
   { href: "/team", labelKey: "nav.team" },
   { href: "/reviews", labelKey: "nav.reviews" },
   { href: "/analytics", labelKey: "nav.analytics" },
+  { href: "/travel", label: { fa: "سفر", en: "Travel" } },
 ] as const;
 
 /**
@@ -167,7 +168,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
                 (isActive ? "bg-surface-subtle text-text-primary" : "text-text-secondary")
               }
             >
-              {t(item.labelKey)}
+              {"label" in item ? item.label[locale === "fa" ? "fa" : "en"] : t(item.labelKey)}
             </Link>
           );
         })}
@@ -181,5 +182,5 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
 export function ProviderShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const t = useTranslations("provider.shell");
-  return <LocalPreviewGate title="provider" items={NAV_ITEMS.map(item => ({ href: `/${locale}/provider${item.href}`, label: t(item.labelKey) }))} live={<LiveProviderShell>{children}</LiveProviderShell>}>{children}</LocalPreviewGate>;
+  return <LocalPreviewGate title="provider" items={NAV_ITEMS.map(item => ({ href: `/${locale}/provider${item.href}`, label: "label" in item ? item.label[locale === "fa" ? "fa" : "en"] : t(item.labelKey) }))} live={<LiveProviderShell>{children}</LiveProviderShell>}>{children}</LocalPreviewGate>;
 }

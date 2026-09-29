@@ -37,6 +37,8 @@ import type {
   TrustCaseSeverity,
   TrustCaseStatus,
   TrustSubjectType,
+  TravelListingDto,
+  TravelListingStatus,
 } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
@@ -167,4 +169,12 @@ export const adminService = {
     apiFetch<PaginatedDto<AdminAuditLogDto>>(
       `/admin/audit${toQueryString({ entityType: input.entityType, entityId: input.entityId, adminUserId: input.adminUserId, page: input.page, pageSize: input.pageSize })}`,
     ),
+
+  // Travel marketplace moderation
+  listTravelListings: (input: { status?: TravelListingStatus; page?: number; pageSize?: number } = {}) =>
+    apiFetch<PaginatedDto<TravelListingDto>>(`/admin/travel/listings${toQueryString(input)}`),
+  moderateTravelListing: (listingId: string, status: TravelListingStatus, reason?: string) =>
+    apiFetch<TravelListingDto>(`/admin/travel/listings/${listingId}/moderate`, { method: "POST", body: { status, reason } }),
+  setTravelListingVerification: (listingId: string, isVerified: boolean, reason?: string) =>
+    apiFetch<TravelListingDto>(`/admin/travel/listings/${listingId}/verification`, { method: "POST", body: { isVerified, reason } }),
 };
