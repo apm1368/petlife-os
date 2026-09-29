@@ -2878,9 +2878,10 @@
       "CLOSED": "Closed"
     },
     "sightingStatus": {
-      "SUBMITTED": "Awaiting review",
-      "ACCEPTED": "Accepted",
-      "REJECTED": "Rejected"
+      "SUBMITTED": "New",
+      "REVIEWED": "Reviewed",
+      "ACCEPTED": "Likely match",
+      "REJECTED": "Not a match"
     },
     "detail": {
       "title": "{name} is missing",
@@ -2897,8 +2898,8 @@
       "sightingsEmpty": "No sightings reported yet.",
       "anonymousReporter": "Reported anonymously",
       "knownReporter": "Reported by a signed-in user",
-      "acceptSighting": "Accept",
-      "rejectSighting": "Reject"
+      "acceptSighting": "Likely match",
+      "rejectSighting": "Not a match"
     },
     "public": {
       "list": {

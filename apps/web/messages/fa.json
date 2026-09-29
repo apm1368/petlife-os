@@ -2878,9 +2878,10 @@
       "CLOSED": "بسته شده"
     },
     "sightingStatus": {
-      "SUBMITTED": "در انتظار بررسی",
-      "ACCEPTED": "پذیرفته شد",
-      "REJECTED": "رد شد"
+      "SUBMITTED": "تازه",
+      "REVIEWED": "بررسی شد",
+      "ACCEPTED": "احتمالاً خودش است",
+      "REJECTED": "مطابق نیست"
     },
     "detail": {
       "title": "{name} گم شده است",
@@ -2897,8 +2898,8 @@
       "sightingsEmpty": "هنوز مشاهده‌ای گزارش نشده است.",
       "anonymousReporter": "گزارش ناشناس",
       "knownReporter": "گزارش‌شده توسط کاربر واردشده",
-      "acceptSighting": "پذیرفتن",
-      "rejectSighting": "رد کردن"
+      "acceptSighting": "احتمالاً خودش است",
+      "rejectSighting": "مطابق نیست"
     },
     "public": {
       "list": {

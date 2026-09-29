@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CommunityPostType, CommunitySourceType, LostPetIncidentStatus, LostPetSightingStatus, PetLifecycleStatus, Prisma } from "@prisma/client";
+import { CommunityPostType, CommunitySourceType, LostPetIncidentStatus, LostPetSightingStatus, PetLifecycleStatus, PetSpecies, Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { StorageService } from "../storage/storage.service";
@@ -11,6 +11,7 @@ import {
   LostPetIncidentNotFoundException,
   LostPetSightingNotFoundException,
 } from "../../common/errors/api-exception";
+import { resolvePagination, toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { toLostPetIncidentDto, toLostPetIncidentPublicDto, toLostPetSightingDto } from "./lost-pet-mapper";
 import type { CreateLostPetIncidentDto, ReviewLostPetSightingDto, SubmitLostPetSightingDto } from "./dto/lost-pet.dto";
 
@@ -32,9 +33,10 @@ const OPEN_STATUSES: LostPetIncidentStatus[] = [
  * advances the incident past SIGHTING_REPORTED on its own.
  */
 const ALLOWED_TRANSITIONS: Record<LostPetIncidentStatus, LostPetIncidentStatus[]> = {
-  [LostPetIncidentStatus.OPEN]: [LostPetIncidentStatus.SEARCHING, LostPetIncidentStatus.SIGHTING_REPORTED, LostPetIncidentStatus.FOUND, LostPetIncidentStatus.CLOSED],
-  [LostPetIncidentStatus.SEARCHING]: [LostPetIncidentStatus.SIGHTING_REPORTED, LostPetIncidentStatus.FOUND, LostPetIncidentStatus.CLOSED],
-  [LostPetIncidentStatus.SIGHTING_REPORTED]: [LostPetIncidentStatus.SEARCHING, LostPetIncidentStatus.FOUND, LostPetIncidentStatus.CLOSED],
+  // Batch 6: an owner who finds the pet themselves may record the reunion directly.
+  [LostPetIncidentStatus.OPEN]: [LostPetIncidentStatus.SEARCHING, LostPetIncidentStatus.SIGHTING_REPORTED, LostPetIncidentStatus.FOUND, LostPetIncidentStatus.REUNITED, LostPetIncidentStatus.CLOSED],
+  [LostPetIncidentStatus.SEARCHING]: [LostPetIncidentStatus.SIGHTING_REPORTED, LostPetIncidentStatus.FOUND, LostPetIncidentStatus.REUNITED, LostPetIncidentStatus.CLOSED],
+  [LostPetIncidentStatus.SIGHTING_REPORTED]: [LostPetIncidentStatus.SEARCHING, LostPetIncidentStatus.FOUND, LostPetIncidentStatus.REUNITED, LostPetIncidentStatus.CLOSED],
   [LostPetIncidentStatus.FOUND]: [LostPetIncidentStatus.REUNITED, LostPetIncidentStatus.CLOSED],
   [LostPetIncidentStatus.REUNITED]: [LostPetIncidentStatus.CLOSED],
   [LostPetIncidentStatus.CLOSED]: [],
@@ -73,6 +75,7 @@ export class LostPetIncidentService {
           petId,
           householdId: pet.householdId,
           description: dto.description,
+          publicArea: dto.publicArea?.trim() || null,
           lastKnownLocation: dto.lastKnownLocation,
           lastKnownLatitude: dto.lastKnownLatitude,
           lastKnownLongitude: dto.lastKnownLongitude,
@@ -110,7 +113,8 @@ export class LostPetIncidentService {
   async shareToCommunity(petId: string, incidentId: string, actorUserId: string) {
     const incident = await this.getRaw(petId, incidentId);
     const bodyParts = [incident.description];
-    if (incident.lastKnownLocation) bodyParts.push(`Last seen near: ${incident.lastKnownLocation}`);
+    // Only the owner-chosen public area — never the private lastKnownLocation text.
+    if (incident.publicArea) bodyParts.push(`Last seen around: ${incident.publicArea}`);
     if (incident.publicNotes) bodyParts.push(incident.publicNotes);
 
     return this.communityPosts.createSourcedPost(actorUserId, {
@@ -129,23 +133,28 @@ export class LostPetIncidentService {
     return rows.map(toLostPetIncidentDto);
   }
 
+  /**
+   * Open incidents, plus a reunited one so links already shared show the happy
+   * outcome instead of a dead page. Reunited incidents never appear in the
+   * public list and accept no sightings (submitSighting checks OPEN_STATUSES).
+   */
   async getPublic(incidentId: string) {
     const incident = await this.prisma.lostPetIncident.findFirst({
-      where: { id: incidentId, status: { in: OPEN_STATUSES } },
+      where: { id: incidentId, status: { in: [...OPEN_STATUSES, LostPetIncidentStatus.REUNITED] } },
       include: INCIDENT_INCLUDE,
     });
     if (!incident) throw new LostPetIncidentNotFoundException({ incidentId });
     return toLostPetIncidentPublicDto(incident);
   }
 
-  async listPublic() {
-    const rows = await this.prisma.lostPetIncident.findMany({
-      where: { status: { in: OPEN_STATUSES } },
-      include: INCIDENT_INCLUDE,
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    });
-    return rows.map(toLostPetIncidentPublicDto);
+  async listPublic(query: { page?: number; pageSize?: number; species?: "DOG" | "CAT" | "OTHER" } = {}) {
+    const { page, pageSize, skip, take } = resolvePagination(query);
+    const where: Prisma.LostPetIncidentWhereInput = { status: { in: OPEN_STATUSES }, ...(query.species ? { pet: { species: query.species as PetSpecies } } : {}) };
+    const [rows, total] = await Promise.all([
+      this.prisma.lostPetIncident.findMany({ where, include: INCIDENT_INCLUDE, orderBy: [{ createdAt: "desc" }, { id: "asc" }], skip, take }),
+      this.prisma.lostPetIncident.count({ where }),
+    ]);
+    return toPaginatedDto(rows.map(toLostPetIncidentPublicDto), total, page, pageSize);
   }
 
   async requestPhotoUpload(petId: string, contentType: string, fileSizeBytes: number) {
@@ -181,7 +190,9 @@ export class LostPetIncidentService {
       const existing = await tx.lostPetIncident.findFirst({ where: { id: incidentId, petId } });
       if (!existing) throw new LostPetIncidentNotFoundException({ petId, incidentId });
       await this.assertTransition(existing.status, LostPetIncidentStatus.REUNITED, incidentId);
-      const updated = await tx.lostPetIncident.update({ where: { id: incidentId }, data: { status: LostPetIncidentStatus.REUNITED, reunitedAt: new Date() }, include: INCIDENT_INCLUDE });
+// A direct reunion also records when the pet was found (DB invariant: reunited ⇒ foundAt).
+      const now = new Date();
+      const updated = await tx.lostPetIncident.update({ where: { id: incidentId }, data: { status: LostPetIncidentStatus.REUNITED, reunitedAt: now, foundAt: existing.foundAt ?? now }, include: INCIDENT_INCLUDE });
       await this.lifecycle.transition(tx, petId, PetLifecycleStatus.ACTIVE, { sourceType: "LOST_PET_INCIDENT", sourceId: incidentId, actorUserId, reason: "Pet reunited with household" });
       await this.events.publish("LostPetReunited", { petId, incidentId }, { tx, aggregateType: "Pet", aggregateId: petId });
       return updated;
@@ -243,6 +254,9 @@ export class LostPetIncidentService {
   }
 
   async requestSightingPhotoUpload(incidentId: string, contentType: string, fileSizeBytes: number) {
+    // Anonymous upload targets are only issued for an incident that is actually accepting sightings.
+    const open = await this.prisma.lostPetIncident.findFirst({ where: { id: incidentId, status: { in: OPEN_STATUSES } }, select: { id: true } });
+    if (!open) throw new LostPetIncidentNotFoundException({ incidentId });
     return this.storage.createLostPetSightingPhotoUploadTarget(incidentId, contentType, fileSizeBytes);
   }
 

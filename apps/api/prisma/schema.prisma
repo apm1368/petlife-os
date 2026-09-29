@@ -6384,6 +6384,10 @@ model LostPetIncident {
 
   status LostPetIncidentStatus @default(OPEN)
 
+  /// Batch 6 — the ONLY location shown publicly: an owner-chosen approximate
+  /// area (neighbourhood / main street). lastKnownLocation and the
+  /// coordinates below are private to the household and operators.
+  publicArea         String?
   lastKnownLocation  String?
   lastKnownLatitude  Float?
   lastKnownLongitude Float?

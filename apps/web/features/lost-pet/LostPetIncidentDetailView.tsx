@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { ShareBar } from "@/features/shared/ShareBar";
+import { formatDay } from "@/lib/date/jalali";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentDto, LostPetSightingDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
@@ -9,9 +11,10 @@ import { ApiError } from "@/lib/api/client";
 import { lostPetStatusTone } from "./lost-pet-status";
 
 const ACTIONS_BY_STATUS: Record<string, ("markSearching" | "markFound" | "reunite" | "close" | "share")[]> = {
-  OPEN: ["markSearching", "markFound", "share", "close"],
-  SEARCHING: ["markFound", "share", "close"],
-  SIGHTING_REPORTED: ["markSearching", "markFound", "share", "close"],
+  // Batch 6: an owner who finds the pet themselves can record the reunion directly.
+  OPEN: ["markSearching", "markFound", "reunite", "share", "close"],
+  SEARCHING: ["markFound", "reunite", "share", "close"],
+  SIGHTING_REPORTED: ["markSearching", "markFound", "reunite", "share", "close"],
   FOUND: ["reunite", "close"],
   REUNITED: ["close"],
   CLOSED: [],
@@ -25,6 +28,9 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
   const [sightings, setSightings] = useState<LostPetSightingDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isActing, setIsActing] = useState(false);
+  const lang = useLocale() as "fa" | "en";
+  const fa = lang === "fa";
+  const when = (iso: string) => `${formatDay(iso.slice(0, 10), lang, { weekday: true })} ${new Intl.DateTimeFormat(fa ? "fa-IR" : "en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso))}`;
 
   async function load() {
     setError(null);
@@ -73,9 +79,19 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
           <img src={incident.primaryPhotoUrl} alt={incident.petName} className="h-48 w-full rounded-md object-cover" />
         ) : null}
         <p className="text-body text-text-primary">{incident.description}</p>
-        {incident.lastKnownLocation ? <p className="text-metadata text-text-secondary">{t("detail.lastKnownLocation", { location: incident.lastKnownLocation })}</p> : null}
+        <p className="text-metadata text-text-secondary">{fa ? "محدودهٔ عمومی: " : "Public area: "}{incident.publicArea ?? (fa ? "ثبت نشده" : "Not set")}</p>
+        {incident.lastKnownLocation ? <p className="text-metadata text-text-secondary">{fa ? "مکان دقیق (خصوصی): " : "Exact place (private): "}{incident.lastKnownLocation}</p> : null}
+        {incident.lastSeenAt ? <p className="text-metadata text-text-secondary">{fa ? "آخرین مشاهده: " : "Last seen: "}{when(incident.lastSeenAt)}</p> : null}
         {incident.privateNotes ? <p className="text-metadata text-text-secondary">{t("detail.privateNotes", { notes: incident.privateNotes })}</p> : null}
       </ContextSurface>
+
+      {["OPEN", "SEARCHING", "SIGHTING_REPORTED", "FOUND"].includes(incident.status) ? (
+        <ContextSurface className="flex flex-col gap-2">
+          <h2 className="text-section-title">{fa ? "اشتراک صفحهٔ عمومی" : "Share the public page"}</h2>
+          <p className="text-metadata text-text-secondary">{fa ? "صفحهٔ عمومی فقط محدودهٔ تقریبی، عکس و توضیحات عمومی را نشان می‌دهد." : "The public page shows only the approximate area, photo and public description."}</p>
+          <ShareBar url={`/${lang}/lost-pets/${incident.id}`} text={fa ? `${incident.petName} گم شده است. اگر او را دیدید گزارش دهید.` : `${incident.petName} is lost. If you see them, please report it.`} />
+        </ContextSurface>
+      ) : null}
 
       {error ? <p className="text-body text-state-urgent">{error}</p> : null}
 
@@ -115,7 +131,7 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
           {sightings.map((sighting) => (
             <ContextSurface key={sighting.id} className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-body text-text-primary">{new Date(sighting.seenAt).toLocaleString()}</span>
+                <span className="text-body text-text-primary">{when(sighting.seenAt)}</span>
                 <StatusLabel tone={sighting.status === "ACCEPTED" ? "success" : sighting.status === "REJECTED" ? "neutral" : "attention"}>{t(`sightingStatus.${sighting.status}`)}</StatusLabel>
               </div>
               {sighting.photoUrl ? (

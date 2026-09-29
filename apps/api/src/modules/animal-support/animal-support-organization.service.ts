@@ -51,7 +51,7 @@ export class AnimalSupportOrganizationService {
       this.prisma.animalSupportOrganization.findMany({ where, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.animalSupportOrganization.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toAnimalSupportOrganizationDto), total, page, pageSize);
+    return toPaginatedDto(rows.map((r) => toAnimalSupportOrganizationDto(r)), total, page, pageSize);
   }
 
   async adminGet(id: string) {

@@ -28,4 +28,11 @@ export const NotificationDeepLinks = {
   sellerFinance: () => `/seller/finance`,
   sellerSettlementDetail: (settlementId: string) => `/seller/finance/settlements/${settlementId}`,
   notificationCenter: () => `/notifications`,
+  lostIncident: (petId: string, incidentId: string) => `/pets/${petId}/lost/${incidentId}`,
+  supportNeedManage: (listingId: string) => `/animal-support/needs/${listingId}/manage`,
+  supportNeed: (listingId: string) => `/animal-support/needs/${listingId}`,
+  myHelpOffers: () => `/animal-support/my-help`,
+  ngoPortal: () => `/ngo`,
+  ngoNeed: (listingId: string) => `/ngo/needs/${listingId}`,
+  communityPost: (postId: string) => `/community/posts/${postId}`,
 };

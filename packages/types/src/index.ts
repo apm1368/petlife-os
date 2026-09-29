@@ -4173,6 +4173,9 @@ export interface LostPetIncidentDto {
   petPhotoUrl: string | null;
   householdId: string;
   status: LostPetIncidentStatus;
+  /** Batch 6 — the owner-chosen approximate area; the only location shown publicly. */
+  publicArea: string | null;
+  /** Private to the household/operators. */
   lastKnownLocation: string | null;
   lastKnownLatitude: number | null;
   lastKnownLongitude: number | null;
@@ -4207,12 +4210,10 @@ export interface LostPetIncidentPublicDto {
   petBreed: string | null;
   petColorMarkings: string | null;
   petApproximateAgeMonths: number | null;
-  primaryPhotoObjectKey: string | null;
   primaryPhotoUrl: string | null;
   status: LostPetIncidentStatus;
-  lastKnownLocation: string | null;
-  lastKnownLatitude: number | null;
-  lastKnownLongitude: number | null;
+  /** Batch 6 — approximate area only; exact location and coordinates are never public. */
+  approximateArea: string | null;
   lastSeenAt: string | null;
   publicNotes: string | null;
   publicContactMode: string | null;

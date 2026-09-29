@@ -13,6 +13,7 @@ export function toLostPetIncidentDto(row: IncidentWithPet): LostPetIncidentDto {
     petPhotoUrl: row.pet.photoUrl,
     householdId: row.householdId,
     status: row.status as unknown as LostPetIncidentDto["status"],
+    publicArea: row.publicArea,
     lastKnownLocation: row.lastKnownLocation,
     lastKnownLatitude: row.lastKnownLatitude,
     lastKnownLongitude: row.lastKnownLongitude,
@@ -34,7 +35,11 @@ export function toLostPetIncidentDto(row: IncidentWithPet): LostPetIncidentDto {
   };
 }
 
-/** spec: "Do NOT expose: owner's home address, full phone number by default, private household information, private medical history, internal notes." No householdId, no privateNotes, no createdByUserId, no raw contact — publicContactMode only, and only when contactPreference is PUBLIC_CONTACT. */
+/**
+ * spec: "Do NOT expose: owner's home address, full phone number by default, private household information, private medical history, internal notes."
+ * Batch 6: location is the owner-chosen `publicArea` only — never lastKnownLocation text or coordinates (no public map needs them);
+ * no storage object key. No householdId, privateNotes, createdByUserId or raw contact — publicContactMode only when PUBLIC_CONTACT.
+ */
 export function toLostPetIncidentPublicDto(row: IncidentWithPet): LostPetIncidentPublicDto {
   return {
     id: row.id,
@@ -43,12 +48,9 @@ export function toLostPetIncidentPublicDto(row: IncidentWithPet): LostPetInciden
     petBreed: row.pet.breed,
     petColorMarkings: row.pet.colorMarkings,
     petApproximateAgeMonths: row.pet.approximateAgeMonths,
-    primaryPhotoObjectKey: row.primaryPhotoObjectKey,
     primaryPhotoUrl: resolveObjectUrl(row.primaryPhotoObjectKey),
     status: row.status as unknown as LostPetIncidentPublicDto["status"],
-    lastKnownLocation: row.lastKnownLocation,
-    lastKnownLatitude: row.lastKnownLatitude,
-    lastKnownLongitude: row.lastKnownLongitude,
+    approximateArea: row.publicArea,
     lastSeenAt: row.lastSeenAt?.toISOString() ?? null,
     publicNotes: row.publicNotes,
     publicContactMode: row.contactPreference === "PUBLIC_CONTACT" ? row.publicContactMode : null,

@@ -16,6 +16,7 @@ function incident(overrides: Partial<LostPetIncidentDto> = {}): LostPetIncidentD
     petPhotoUrl: null,
     householdId: "household-1",
     status: "OPEN" as never,
+    publicArea: null,
     lastKnownLocation: "Central Park",
     lastKnownLatitude: null,
     lastKnownLongitude: null,
