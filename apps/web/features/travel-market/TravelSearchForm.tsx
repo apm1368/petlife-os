@@ -101,7 +101,7 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
 
   const listId = compact ? "travel-dest-compact" : "travel-dest";
   return (
-    <form onSubmit={submit} className={compact ? "flex flex-col gap-4" : "grid gap-4 rounded-lg border border-border-subtle bg-surface-elevated p-4 md:grid-cols-[1.2fr_1.4fr_1fr_auto] md:items-end md:p-5"} role="search" aria-label={fa ? "جستجوی اقامت" : "Search stays"}>
+    <form onSubmit={submit} className={compact ? "flex flex-col gap-4" : "grid gap-4 rounded-lg border border-border-subtle bg-surface-elevated p-4 md:grid-cols-2 md:p-5 lg:grid-cols-[1.2fr_1.4fr_1fr_auto] lg:items-end [&>*]:min-w-0"} role="search" aria-label={fa ? "جستجوی اقامت" : "Search stays"}>
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium text-text-primary">{fa ? "مقصد" : "Destination"}</span>
         <input

@@ -366,3 +366,156 @@ Section nav (overview, orders, refund requests, products, reviews, inventory, se
 
 ### Rules
 Read access `commerce.view`; moderation `commerce.manage`; promotions `promotions.manage`; refund-request decisions `finance.refund.request`. Approving a refund request only opens the two-person finance approval; money moves at execute. Customer PII is limited to first name and city. Every mutation writes the admin audit log. Analytics exclude cancelled and refunded orders and say so.
+
+## TRAVEL DISCOVERY PATTERN — Batch 5
+
+### Anatomy
+Search form (destination with real destination suggestions, Jalali/Gregorian date range field, pets — own pets when signed in, anonymous species/count/weight otherwise) → results header with the query summary → filters (sidebar ≥ lg, sheet below) → sort (with a sentence explaining “best pet match”) → list/map toggle → result cards (cover, type, city, verified, rating with count, stated pet rules line, match status, whole-stay total or nightly “from”, booking mode, compare checkbox, favorite) → compare tray.
+
+### States
+Loading skeleton cards; no dates (note inviting dates, nightly prices only); empty (explains that full or conflicting stays are hidden, offers clearing filters); error with retry; map selected but unavailable (explicit message, list stays); stale remembered pet (forgotten, anonymous retry).
+
+### Responsive
+Filters move into a bottom sheet under lg; cards stack image-over-text below sm; compare tray is a sticky pill.
+
+### RTL / LTR
+Layout mirrors via logical properties; Persian digits and Jalali month names in fa; prices always in Toman via `formatCurrency`.
+
+### Reuse
+`TravelSearchForm`, `TravelResultCard`, `DateRangeField`; the URL is the state except private pet ids (localStorage).
+
+## TRAVEL LISTING DETAIL PATTERN — Batch 5
+
+### Anatomy
+Breadcrumb → gallery (single image spans full width; lightbox with counter) → title, type, city, verified, rating → pet rules table (“Not specified” for unknowns + disclaimer) → about, check-in/out times, house rules, amenities → rooms with rate plans in plain language → verified reviews with host responses → nearby places and vets → booking panel (dates with real unavailable nights disabled, pets, match with reasons, price breakdown, reserve).
+
+### States
+Not found (unpublished), error, no bookable room, quote error (rate not offered for dates), night unavailable, conflict (reserve disabled), guest (sign in to reserve, returnTo keeps dates/room/rate).
+
+### Responsive
+Booking panel is a sticky aside ≥ lg; below lg it sits after the content with a fixed bottom bar showing the total and a “Reserve” jump.
+
+### RTL / LTR
+Gallery and tables mirror; the price breakdown uses tabular figures.
+
+### Reuse
+`PriceBreakdown`, `policyFacts`, `matchReason`, `cancellationSummary`.
+
+## TRAVEL BOOKING PATTERN — Batch 5
+
+### Anatomy
+Stay summary (cover, listing, room, rate, dates, reference) → hold countdown → steps: pets & rules (acknowledgement when information is missing) → add to trip (optional) → final review (frozen breakdown and terms, message to host, privacy note) → payment (window countdown, gateway note) → result.
+
+### States
+Hold running / under 3 minutes (attention tone) / expired (dates released, back to the stay); request-to-book copy (nothing charged until accepted); payment failed (nothing charged, retry with a new idempotency key); payment pending; window closed; confirmed; request sent.
+
+### Responsive
+Single column; step chips scroll horizontally on phones.
+
+### RTL / LTR
+Countdown digits localised; reference rendered `dir=ltr` and non-breaking.
+
+### Reuse
+`TravelBookingFlowView`; server decides the outcome of every step.
+
+## TRIP HUB PATTERN — Batch 5
+
+### Anatomy
+My Trips (upcoming/past tabs; trips, then stays not in a trip) → Trip Hub: phase, dates, travel mode → stays → readiness → recent activity → aside with insurance, destination places (favorites first), vets, travel documents, support.
+
+### States
+Planning/upcoming/in progress/completed/cancelled phases; no stays; no requirements; loading, not found (other household), error.
+
+### Responsive
+Aside drops below content under lg.
+
+### RTL / LTR
+Activity labels are localised from structured codes (booking status, requirement type/status, insurance status).
+
+### Reuse
+`MyTripsView`, `TripHubView`; the existing pet trip editor remains the place to edit requirements.
+
+## TRAVEL READINESS PATTERN — Batch 5
+
+### Anatomy
+Each requirement shows type, status, evidence state (found/missing/expiring/expired), source, jurisdiction, verification date, official link and linked document; a stale banner when any row needs re-checking; library suggestions with source and date that are added as REQUIRED.
+
+### States
+Unknown rows show a single “Unknown” tag (no duplicated evidence tag); stale rows flagged; nothing ever turns ready automatically.
+
+### Responsive
+Rows stack; tags wrap.
+
+### RTL / LTR
+Dates are Jalali in fa.
+
+### Reuse
+`documentStates` from the hub API; `requirementStatusTone`.
+
+## INSURANCE COMPARISON PATTERN — Batch 5
+
+### Anatomy
+Product and compare pages show coverage, limits, waiting period and exclusions at equal prominence; the pet's applications show status, eligibility, insurer message, reference and history; submission requires ticking a consent that states what is shared and that it is not a policy.
+
+### States
+Draft (consent + submit/cancel), submitted/under review (cancel, disclaimer), needs information (insurer message, notes, resubmit with consent), approved (explained as insurer acceptance), declined (message), cancelled.
+
+### Responsive
+Single column cards.
+
+### RTL / LTR
+The recorded consent text is shown verbatim (LTR) under the Persian translation.
+
+### Reuse
+`PetInsuranceView`, insurer portal `InsurerApplicationView` mirrors the server's insurer transitions.
+
+## MAP / PLACES PATTERN — Batch 5
+
+### Anatomy
+Place detail: category, verification, address, description, indoor/outdoor, pet facts (leash, water, pet area — yes/no/not specified), opening hours or “not specified”, verified date, favorite, link to stays in the same city, report form (reason + details).
+
+### States
+Report sent, already reported, sign-in required, failure; unverified place warning.
+
+### Responsive
+Map views degrade to lists with distances (PostGIS) until a map provider exists.
+
+### RTL / LTR
+Weekday names localised; hours rendered LTR.
+
+### Reuse
+`PlaceDetailView`, admin `AdminPlacesView`.
+
+## TRAVEL PROVIDER OPERATIONAL PATTERN — Batch 5
+
+### Anatomy
+Partner sub-nav (listings, bookings, reviews, finance) → listing editor tabs (details, pet policy, rooms & rates, photos, calendar) with submit/withdraw and the PET LIFE review note → bookings list with status filter → booking detail (pet names and species only, guest message, terms, shared documents via signed links, accept/decline with reason, check-in, no-show, complete, cancel with full refund) → reviews with one response → finance (real figures only, payouts not automated).
+
+### States
+Owner-only actions return a clear message for other roles; submission blocked until a pet policy and an active room exist; calendar shows blocked/full/remaining per night.
+
+### Responsive
+Tabs and filters scroll horizontally on phones; the calendar grid collapses from 7 to 2 columns.
+
+### RTL / LTR
+Free-text inputs use `dir=auto`; money entered in Toman and stored in IRR.
+
+### Reuse
+`ProviderTravelViews`; `DateRangeField` for blackout ranges.
+
+## ADMIN TRAVEL PATTERN — Batch 5
+
+### Anatomy
+Travel sub-nav (listings, bookings, reviews, requirement library, partners, analytics) → moderation queue defaulting to pending review, with completeness hints → listing detail (approve, request correction and suspend need a note; verified badge needs a reason; all audited; history) → read-only booking detail (money, refunds, linked support) → review visibility with audited reason → requirement library editor (source, date, status, staleness) → analytics with real figures → insurance applications (oversight only) → places reports.
+
+### States
+Permission-specific empty states (travel.view, travel.manage, travel.requirements.manage, insurance.applications.view, places.view/manage); moderation errors explain missing pet policy or rooms.
+
+### Responsive
+Tables scroll inside `TableWrap`; panels stack.
+
+### RTL / LTR
+Console kit tokens follow light/dark themes.
+
+### Reuse
+`AdminTravelViews`, `console-ui`.
