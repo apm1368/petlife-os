@@ -16,7 +16,9 @@ export function AdminTravelView() {
   const locale = useLocale() === "fa" ? "fa" : "en"; const copy = COPY[locale];
   const [listings, setListings] = useState<TravelListingDto[] | null>(null); const [error, setError] = useState<string | null>(null); const [acting, setActing] = useState<string | null>(null);
   async function load() { setError(null); try { setListings((await adminService.listTravelListings({ pageSize: 100 })).items); } catch (err) { setError(err instanceof ApiError ? err.message : copy.error); } }
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  // The moderation queue is loaded once for this mounted workspace view.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void load(); }, []);
   async function act(key: string, work: () => Promise<unknown>) { setActing(key); setError(null); try { await work(); await load(); } catch (err) { setError(err instanceof ApiError ? err.message : copy.error); } finally { setActing(null); } }
   if (error && !listings) return <ErrorRecovery title={copy.title} message={error} retryLabel={locale === "fa" ? "تلاش دوباره" : "Try again"} onRetry={load} />;
   if (!listings) return <Skeleton className="h-64 w-full" aria-label={copy.title} />;

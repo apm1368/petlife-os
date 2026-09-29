@@ -13,6 +13,12 @@
 - Provider operations: `/provider/travel/*` using the existing active-provider context and OWNER role for supply mutations.
 - Admin moderation: `/admin/travel/*`, guarded by the new `travel.view` and `travel.manage` permissions. Publish, suspension, archive, and verification changes write an audit row in the same transaction.
 
+## Connected product paths
+
+- A pet's Trip Hub links to the marketplace with the pet identity carried only to the next protected booking route. The public listing still works without a session or selected pet.
+- Booking confirmation rechecks the server quote immediately before it creates the booking. The UI shows only the returned request or confirmation state; it does not imply that a payment was collected.
+- Providers can create a DRAFT listing together with its first inventory unit, then submit it for review. Provider confirmation or rejection can carry the existing optional provider note contract.
+
 ## Security decisions
 
 - Availability and quote endpoints first establish that the requested listing is public and that the unit belongs to it. Guessed unit IDs cannot expose unpublished supply.
@@ -29,4 +35,5 @@
 - `pnpm --filter @petlife/api typecheck` passed.
 - `pnpm --filter @petlife/web typecheck` passed.
 - Targeted API lint passed.
+- `NEXT_PUBLIC_API_ORIGIN=http://localhost:4000 pnpm --filter @petlife/web build` passed, including the consumer, provider, admin, and pet-scoped travel routes.
 - Travel/insurance/places E2E could not start locally because PostgreSQL was unavailable at `localhost:5432`; the failure happened in existing Ledger startup before any test request.

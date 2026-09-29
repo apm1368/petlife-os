@@ -9,6 +9,7 @@ import {
   CreateTravelInventoryUnitDto,
   CreateTravelListingDto,
   ListTravelBookingsQueryDto,
+  RespondToTravelBookingDto,
   SearchTravelListingsQueryDto,
   SetTravelAvailabilityDto,
   UpdateTravelInventoryUnitDto,
@@ -100,14 +101,14 @@ export class ProviderTravelMarketplaceController {
   @Post("bookings/:bookingId/confirm")
   @HttpCode(HttpStatus.OK)
   @RequireProviderRole(ProviderUserRole.OWNER)
-  confirm(@CurrentProviderContext() provider: ResolvedProviderContext, @Param("bookingId") bookingId: string) {
-    return this.bookings.respondAsProvider(bookingId, provider.organizationId, TravelBookingStatus.CONFIRMED);
+  confirm(@CurrentProviderContext() provider: ResolvedProviderContext, @Param("bookingId") bookingId: string, @Body() dto: RespondToTravelBookingDto) {
+    return this.bookings.respondAsProvider(bookingId, provider.organizationId, TravelBookingStatus.CONFIRMED, dto.providerNote);
   }
 
   @Post("bookings/:bookingId/reject")
   @HttpCode(HttpStatus.OK)
   @RequireProviderRole(ProviderUserRole.OWNER)
-  reject(@CurrentProviderContext() provider: ResolvedProviderContext, @Param("bookingId") bookingId: string) {
-    return this.bookings.respondAsProvider(bookingId, provider.organizationId, TravelBookingStatus.REJECTED);
+  reject(@CurrentProviderContext() provider: ResolvedProviderContext, @Param("bookingId") bookingId: string, @Body() dto: RespondToTravelBookingDto) {
+    return this.bookings.respondAsProvider(bookingId, provider.organizationId, TravelBookingStatus.REJECTED, dto.providerNote);
   }
 }

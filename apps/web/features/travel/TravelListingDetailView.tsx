@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { TravelListingDto, TravelQuoteDto } from "@petlife/types";
@@ -15,6 +16,7 @@ const COPY = {
 
 export function TravelListingDetailView({ listingId }: { listingId: string }) {
   const locale = useLocale() === "fa" ? "fa" : "en";
+  const petId = useSearchParams().get("petId");
   const copy = COPY[locale];
   const [listing, setListing] = useState<TravelListingDto | null>(null);
   const [checkIn, setCheckIn] = useState("");
@@ -35,7 +37,9 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
     }
   }
 
-  useEffect(() => { void load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [listingId]);
+  // The fetch is intentionally keyed to the route identity, not the locally recreated callback.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void load(); }, [listingId]);
 
   async function requestQuote(): Promise<void> {
     if (!selectedUnitId || !checkIn || !checkOut) return;
@@ -71,7 +75,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
         {listing.units.map((unit) => <label key={unit.id} className="flex cursor-pointer items-start gap-2 rounded-md border border-border-subtle p-3"><input type="radio" name="unit" checked={selectedUnitId === unit.id} onChange={() => { setSelectedUnitId(unit.id); setQuote(null); }} /><span className="flex-1"><strong className="text-body text-text-primary">{unit.name}</strong><span className="block text-metadata text-text-secondary">{unit.maxOccupancy ? `${unit.maxOccupancy} ${locale === "fa" ? "مهمان" : "guests"}` : ""}</span></span><span className="text-metadata text-text-secondary">{format.format(unit.basePriceIrr)} {copy.currency}</span></label>)}
         <div className="grid grid-cols-2 gap-2"><Input label={copy.checkIn} type="date" value={checkIn} onChange={(event) => setCheckIn(event.target.value)} /><Input label={copy.checkOut} type="date" value={checkOut} onChange={(event) => setCheckOut(event.target.value)} /></div>
         <Button variant="primary" isLoading={isQuoting} disabled={!selectedUnitId || !checkIn || !checkOut} onClick={requestQuote}>{copy.quote}</Button>
-        {quote ? <div className="rounded-md bg-surface-subtle p-3 text-body text-text-primary">{quote.isBookable ? <><p className="text-state-success">{copy.available}</p><p>{copy.total}: {format.format(quote.totalAmountIrr)} {copy.currency}</p><Link href="/pets"><Button className="mt-3" variant="secondary">{copy.choosePet}</Button></Link></> : <p className="text-state-urgent">{copy.unavailable}</p>}</div> : null}
+        {quote ? <div className="rounded-md bg-surface-subtle p-3 text-body text-text-primary">{quote.isBookable ? <><p className="text-state-success">{copy.available}</p><p>{copy.total}: {format.format(quote.totalAmountIrr)} {copy.currency}</p><Link href={petId ? `/pets/${petId}/travel/marketplace/${listingId}?unitId=${selectedUnitId}&checkIn=${checkIn}&checkOut=${checkOut}` : "/pets"}><Button className="mt-3" variant="secondary">{copy.choosePet}</Button></Link></> : <p className="text-state-urgent">{copy.unavailable}</p>}</div> : null}
         {error ? <p className="text-metadata text-state-urgent">{error}</p> : null}
       </ContextSurface>
     </div>

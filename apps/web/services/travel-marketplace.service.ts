@@ -1,6 +1,7 @@
 import type {
   PaginatedDto,
   TravelAvailabilityDayDto,
+  TravelBookingDto,
   TravelListingDto,
   TravelListingType,
   TravelQuoteDto,
@@ -39,4 +40,6 @@ export const travelMarketplaceService = {
     apiFetch<TravelAvailabilityDayDto[]>(`/travel/listings/${listingId}/units/${unitId}/availability${toQueryString({ fromDate, toDate })}`),
   quote: (listingId: string, input: { unitId: string; checkIn: string; checkOut: string; petCount?: number }) =>
     apiFetch<TravelQuoteDto>(`/travel/listings/${listingId}/quote${toQueryString(input)}`),
+  createBooking: (petId: string, listingId: string, input: { unitId: string; checkIn: string; checkOut: string; guests?: number; travelerNote?: string }) =>
+    apiFetch<TravelBookingDto>(`/pets/${petId}/travel-bookings/listings/${listingId}`, { method: "POST", body: { ...input, petIds: [petId] } }),
 };
