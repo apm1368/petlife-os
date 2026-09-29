@@ -55,13 +55,15 @@ describe("DateRangePicker", () => {
     expect(screen.getByRole("heading", { name: "سپتامبر ۲۰۲۶" })).toBeTruthy();
   });
 
-  it("the field commits only on Apply", () => {
+  it("the field shows one month in its narrow sheet and commits only on Apply", () => {
     const onChange = vi.fn();
     renderWithIntl(<DateRangeField label="Dates" min="2026-09-28" months={2} value={{ start: null, end: null }} onChange={onChange} />, "en");
     fireEvent.click(screen.getByRole("button", { name: /Dates/ }));
     fireEvent.click(screen.getByRole("button", { name: /Tuesday, 29 September 2026/ }));
     const apply = screen.getByRole("button", { name: "Apply dates", hidden: true }) as HTMLButtonElement;
     expect(apply.disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Next month" }));
+    expect(screen.queryByRole("heading", { name: "September 2026" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /Thursday, 1 October 2026/ }));
     fireEvent.click(apply);
     expect(onChange).toHaveBeenCalledWith({ start: "2026-09-29", end: "2026-10-01" });

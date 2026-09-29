@@ -239,7 +239,7 @@ export function DateRangePicker({
                             onMouseEnter={() => setHovered(cell.iso)}
                             onFocus={() => setFocused(cell.iso)}
                             className={cn(
-                              "mx-auto flex h-11 w-11 items-center justify-center rounded-full text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
+                              "mx-auto flex h-11 w-full max-w-11 items-center justify-center rounded-full text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
                               reason ? "cursor-not-allowed text-text-disabled line-through decoration-1" : "text-text-primary hover:bg-surface-subtle",
                               (isStart || isEnd) && "bg-brand-natural font-bold text-text-inverse no-underline hover:bg-brand-natural",
                               isToday && !isStart && !isEnd && "ring-1 ring-inset ring-border-strong",
@@ -310,7 +310,8 @@ export function DateRangeField({ label, placeholder, id: idProp, error, classNam
       </button>
       {error ? <span className="text-metadata text-state-urgent" role="alert">{error}</span> : null}
       <Sheet open={open} onClose={() => setOpen(false)} title={label} className="sm:max-w-3xl">
-        <DateRangePicker {...picker} mode={mode} value={draft} onChange={setDraft} />
+        {/* The sheet is at most ~384px wide at every breakpoint, so it always holds one month. */}
+        <DateRangePicker {...picker} months={1} mode={mode} value={draft} onChange={setDraft} />
         <p className="mt-3 text-sm text-text-secondary" aria-live="polite">
           {formatStayRange(draft, lang) ?? (mode === "range" ? (fa ? "روز ورود را انتخاب کنید." : "Choose your check-in day.") : fa ? "روز را انتخاب کنید." : "Choose a day.")}
           {mode === "range" && draft.start && !draft.end ? (fa ? " اکنون روز خروج را انتخاب کنید." : " Now choose check-out.") : ""}
