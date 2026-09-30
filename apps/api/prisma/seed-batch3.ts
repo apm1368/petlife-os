@@ -1,5 +1,6 @@
 import { PrismaClient, type BookingStatus, type LocationMode, type ProviderServiceType, type ProviderType, type ServiceCategory } from "@prisma/client";
 import { createHash } from "node:crypto";
+import { PetAccessService } from "../src/modules/pet-access/pet-access.service";
 
 /**
  * Batch 3 QA scenarios — five realistic Tehran providers with teams, services, options, weekly
@@ -235,6 +236,8 @@ async function main() {
     await db.household.upsert({ where: { id: hh }, create: { id: hh, name: `خانواده نمایشی ${i + 1}`, countryCode: "IR", city: "تهران" }, update: {} });
     await db.householdMember.upsert({ where: { householdId_userId: { householdId: hh, userId: r.id } }, create: { householdId: hh, userId: r.id, role: "OWNER" }, update: {} });
     await db.pet.upsert({ where: { id: id(`reviewer-pet:${i}`) }, create: { id: id(`reviewer-pet:${i}`), householdId: hh, name: i ? "پیشی" : "بونی", species: i ? "CAT" : "DOG", approximateAgeMonths: 24 }, update: {} });
+    // Same household-default grants the product creates with a pet (the owner reaches the pet through a grant, not household membership).
+    await new PetAccessService(db as never).applyHouseholdDefaults(id(`reviewer-pet:${i}`), hh);
   }
 
   let number = 900000;
