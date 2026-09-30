@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { NotificationCategory, NotificationChannel } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
+import { ConsentKind, NotificationCategory, NotificationChannel } from "@prisma/client";
+import type { AppEnv } from "../../config/env";
 import type { NotificationPreferencesDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { getCountryConfig } from "../../common/country/country-config";
@@ -17,27 +19,46 @@ const ALL_CHANNELS: NotificationChannel[] = [NotificationChannel.IN_APP, Notific
 
 @Injectable()
 export class NotificationPreferenceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService<AppEnv, true>,
+  ) {}
+
+  /** Batch 8 — the Privacy Center's marketing consent is the single source of truth for whether any marketing may be sent. */
+  private async marketingConsent(userId: string): Promise<boolean> {
+    const latest = await this.prisma.userConsent.findFirst({ where: { userId, kind: ConsentKind.MARKETING }, orderBy: { updatedAt: "desc" } });
+    return Boolean(latest?.grantedAt && !latest.revokedAt);
+  }
+
+  /** Whether each channel actually reaches people today. SMS goes through the dev simulator unless Faraz is configured, and the Faraz adapter itself is not implemented yet. */
+  private channelDelivery(): NonNullable<NotificationPreferencesDto["channels"]> {
+    const provider = this.config.get("MESSAGING_PROVIDER", { infer: true });
+    return [
+      { channel: NotificationChannel.IN_APP as unknown as NonNullable<NotificationPreferencesDto["channels"]>[number]["channel"], delivery: "LIVE" },
+      { channel: NotificationChannel.SMS as unknown as NonNullable<NotificationPreferencesDto["channels"]>[number]["channel"], delivery: provider === "dev" ? "SANDBOX" : "NOT_CONFIGURED" },
+    ];
+  }
 
   /**
    * Resolves whether (category, channel) is enabled for `userId`. No row
-   * means "enabled" (the default) — EXCEPT MARKETING, whose default comes
-   * from CountryConfig (spec: "marketing consent must never be inferred
-   * from transactional messaging consent" — an explicit opt-in-by-default
-   * of `false` for Iran, never silently `true`).
+   * means "enabled" — except MARKETING, which is never sent without a
+   * granted marketing consent (spec: "marketing consent must never be
+   * inferred from transactional messaging consent"; Batch 8 made the
+   * Privacy Center consent the single source of truth, off by default).
    */
   async resolve(userId: string, category: NotificationCategory, channel: NotificationChannel): Promise<boolean> {
     if (NON_SUPPRESSIBLE_CATEGORIES.has(category)) return true;
+    if (category === NotificationCategory.MARKETING && !(await this.marketingConsent(userId))) return false;
     const row = await this.prisma.notificationPreference.findUnique({ where: { userId_category_channel: { userId, category, channel } } });
     if (row) return row.enabled;
-    if (category === NotificationCategory.MARKETING) return getCountryConfig().marketingDefaultEnabled;
     return true;
   }
 
   async getAll(userId: string): Promise<NotificationPreferencesDto> {
-    const [rows, quietHours] = await Promise.all([
+    const [rows, quietHours, marketingConsent] = await Promise.all([
       this.prisma.notificationPreference.findMany({ where: { userId } }),
       this.prisma.notificationQuietHours.findUnique({ where: { userId } }),
+      this.marketingConsent(userId),
     ]);
     const byKey = new Map(rows.map((r) => [`${r.category}:${r.channel}`, r.enabled]));
 
@@ -45,13 +66,16 @@ export class NotificationPreferenceService {
       ALL_CHANNELS.map((channel) => ({
         category,
         channel,
-        enabled: byKey.get(`${category}:${channel}`) ?? (category === NotificationCategory.MARKETING ? getCountryConfig().marketingDefaultEnabled : true),
+        enabled: NON_SUPPRESSIBLE_CATEGORIES.has(category) ? true : category === NotificationCategory.MARKETING && !marketingConsent ? false : (byKey.get(`${category}:${channel}`) ?? true),
       })),
     );
 
     const country = getCountryConfig();
     return {
       preferences: preferences as unknown as NotificationPreferencesDto["preferences"],
+      requiredCategories: [...NON_SUPPRESSIBLE_CATEGORIES] as unknown as NotificationPreferencesDto["requiredCategories"],
+      marketingConsentGranted: marketingConsent,
+      channels: this.channelDelivery(),
       quietHours: quietHours
         ? { enabled: quietHours.enabled, startTime: quietHours.startTime, endTime: quietHours.endTime, timezone: quietHours.timezone }
         : { enabled: false, startTime: "22:00", endTime: "08:00", timezone: country.defaultTimezone },

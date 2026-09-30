@@ -1,3 +1,5 @@
+import { ConfigService } from "@nestjs/config";
+import type { AppEnv } from "../../config/env";
 import { Injectable } from "@nestjs/common";
 import { Prisma, SubscriptionChangeType, SubscriptionPeriodStatus, SubscriptionStatus } from "@prisma/client";
 import type { SubscriptionBillingHistoryDto, SubscriptionChangeDto, SubscriptionDto } from "@petlife/types";
@@ -53,6 +55,7 @@ export class SubscriptionService {
     private readonly prisma: PrismaService,
     private readonly plans: SubscriptionPlanReadService,
     private readonly events: DomainEventsService,
+    private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
   assertTransition(from: SubscriptionStatus, to: SubscriptionStatus): void {
@@ -102,7 +105,9 @@ export class SubscriptionService {
   }
 
   async getCurrent(householdId: string): Promise<SubscriptionDto> {
-    return toSubscriptionDto(await this.getOrCreateRaw(householdId));
+    // Membership payments go through the simulated charge path unless payments run in production mode.
+    const billingMode = this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) === "production" ? "LIVE" : "SANDBOX";
+    return { ...toSubscriptionDto(await this.getOrCreateRaw(householdId)), billingMode };
   }
 
   async getBillingHistory(householdId: string): Promise<SubscriptionBillingHistoryDto> {
@@ -114,7 +119,8 @@ export class SubscriptionService {
     const priceById = new Map((await this.prisma.subscriptionPlanPrice.findMany({ where: { id: { in: periods.map((p) => p.priceId).filter((id): id is string => Boolean(id)) } } })).map((p) => [p.id, p]));
     return {
       periods: periods.map((p) => toPeriodDto(p, p.priceId ? (priceById.get(p.priceId)?.amount ?? null) : null, p.priceId ? (priceById.get(p.priceId)?.currency ?? "IRR") : "IRR")),
-      attempts: attempts.map(toBillingAttemptDto),
+      // Gateway error text is internal; the member sees the status and a coarse code only.
+      attempts: attempts.map((a) => ({ ...toBillingAttemptDto(a), failureReason: null, paymentIntentId: null })),
     };
   }
 

@@ -64,11 +64,18 @@ export class NotificationOrchestratorService {
     const rendered = renderNotificationTemplate(input.type, user.locale, input.templateParams ?? {});
     const domainEventId = input.domainEventId ?? null;
 
+    // Batch 8 — the in-app preference is honoured: a switched-off category is still recorded (idempotency, audit)
+    // but never lands in the inbox or the unread count. SECURITY is non-suppressible inside resolve().
+    const inAppEnabled = await this.preferences.resolve(input.userId, input.category, NotificationChannel.IN_APP);
+    const suppressedAt = inAppEnabled ? null : new Date();
+
     let notification: Notification;
     let created = true;
     try {
       notification = await this.prisma.notification.create({
         data: {
+          readAt: suppressedAt,
+          dismissedAt: suppressedAt,
           userId: input.userId,
           householdId: input.householdId ?? null,
           petId: input.petId ?? null,
@@ -103,7 +110,9 @@ export class NotificationOrchestratorService {
     if (!created) return { notification, created };
 
     await this.prisma.notificationDelivery.create({
-      data: { notificationId: notification.id, channel: NotificationChannel.IN_APP, status: NotificationDeliveryStatus.DELIVERED, deliveredAt: new Date() },
+      data: inAppEnabled
+        ? { notificationId: notification.id, channel: NotificationChannel.IN_APP, status: NotificationDeliveryStatus.DELIVERED, deliveredAt: new Date() }
+        : { notificationId: notification.id, channel: NotificationChannel.IN_APP, status: NotificationDeliveryStatus.SKIPPED, metadata: { reason: "category_disabled" } },
     });
 
     await this.events.publish("NotificationCreated", { notificationId: notification.id, userId: input.userId, type: input.type, category: input.category });

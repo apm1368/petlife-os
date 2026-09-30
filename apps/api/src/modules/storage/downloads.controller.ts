@@ -37,6 +37,13 @@ export class DownloadsController {
       throw new NotFoundException("File not found");
     }
 
+    const meta = await this.redis.get(`download-meta:${token}`);
+    if (meta) {
+      const { filename, contentType } = JSON.parse(meta) as { filename?: string; contentType?: string };
+      if (contentType) res.setHeader("Content-Type", contentType);
+      if (filename) res.setHeader("Content-Disposition", `attachment; filename="${filename.replace(/[^\w.-]/g, "_")}"`);
+    }
+    res.setHeader("Cache-Control", "no-store");
     createReadStream(source).pipe(res);
   }
 }

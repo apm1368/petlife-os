@@ -9,7 +9,7 @@ import { SubscriptionOverviewView } from "./SubscriptionOverviewView";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/stores/pet-store", () => ({ usePetStore: (selector: (state: { householdId: string }) => unknown) => selector({ householdId: "household-1" }) }));
 vi.mock("@/services/subscription.service", () => ({
-  subscriptionService: { getCurrent: vi.fn(), getEntitlements: vi.fn(), getUsage: vi.fn(), cancel: vi.fn(), resume: vi.fn() },
+  subscriptionService: { getCurrent: vi.fn(), getEntitlements: vi.fn(), getUsage: vi.fn(), getBillingHistory: vi.fn(), cancel: vi.fn(), resume: vi.fn() },
 }));
 
 const FREE_SUB: SubscriptionDto = {
@@ -39,6 +39,7 @@ describe("SubscriptionOverviewView", () => {
     vi.mocked(subscriptionService.getUsage).mockReset().mockResolvedValue(USAGE);
     vi.mocked(subscriptionService.cancel).mockReset();
     vi.mocked(subscriptionService.resume).mockReset();
+    vi.mocked(subscriptionService.getBillingHistory).mockReset().mockResolvedValue({ periods: [], attempts: [] });
   });
 
   it("shows the FREE plan, its status, and usage without ever hiding that it is free", async () => {
@@ -67,6 +68,10 @@ describe("SubscriptionOverviewView", () => {
 
     await waitFor(() => expect(screen.getByText("Plus")).toBeTruthy());
     fireEvent.click(screen.getByText("Cancel subscription"));
+    // Nothing happens until the consequences are confirmed.
+    expect(await screen.findByText(/stays readable and exportable/)).toBeTruthy();
+    expect(subscriptionService.cancel).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel membership" }));
 
     await waitFor(() => expect(subscriptionService.cancel).toHaveBeenCalledWith("household-1"));
     await waitFor(() => expect(screen.getByText("Resume subscription")).toBeTruthy());
@@ -80,7 +85,20 @@ describe("SubscriptionOverviewView", () => {
     renderWithIntl(<SubscriptionOverviewView />);
     await waitFor(() => expect(screen.getByText("Cancel subscription")).toBeTruthy());
     fireEvent.click(screen.getByText("Cancel subscription"));
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel membership" }));
 
     await waitFor(() => expect(screen.getByText("This subscription status transition is not allowed.")).toBeTruthy());
+  });
+
+  it("a household member (not an owner) sees what's included but no billing or membership actions", async () => {
+    const paidSub: SubscriptionDto = { ...FREE_SUB, price: { id: "price-1", countryCode: "IR", currency: "IRR", billingInterval: "MONTHLY" as never, amount: 500_000, status: "ACTIVE" as never, effectiveFrom: "2026-01-01T00:00:00.000Z", effectiveTo: null }, billingMode: "SANDBOX" };
+    vi.mocked(subscriptionService.getCurrent).mockResolvedValue(paidSub);
+    vi.mocked(subscriptionService.getBillingHistory).mockRejectedValue(new ApiError({ code: "HOUSEHOLD_ACCESS_DENIED", message: "no", requestId: "r" }, 403));
+    renderWithIntl(<SubscriptionOverviewView />);
+    await waitFor(() => expect(screen.getByText("Only a household owner can change or cancel the membership.")).toBeTruthy());
+    expect(screen.queryByText("Cancel subscription")).toBeNull();
+    expect(screen.queryByText("Billing history")).toBeNull();
+    expect(screen.getByText(/no real money is charged/)).toBeTruthy();
+    expect(screen.getByText("Your records stay yours")).toBeTruthy();
   });
 });

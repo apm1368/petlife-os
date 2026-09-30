@@ -79,7 +79,9 @@ export class DevOtpProvider implements OtpProvider {
       throw new OtpInvalidException();
     }
 
-    await this.redis.del(this.codeKey(identifier));
+    // Single use even under concurrent submissions of the same correct code: only the request that actually deletes the record wins.
+    const consumed = await this.redis.del(this.codeKey(identifier));
+    if (consumed === 0) throw new OtpInvalidException();
   }
 }
 

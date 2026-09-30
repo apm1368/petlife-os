@@ -306,6 +306,16 @@ export const DOMAIN_EVENT_TYPES = [
   "TravelReviewCreated",
   "InsuranceApplicationNeedsInformation",
   "PlaceReported",
+  "UnverifiedCredentialsCleared",
+  "ContactChanged",
+  "AllSessionsRevoked",
+  "DataExportReady",
+  "DataExportDownloaded",
+  "DataExportFailed",
+  "AccountDeletionCancelled",
+  "HouseholdMemberRemoved",
+  "HouseholdMemberLeft",
+  "HouseholdMemberRoleChanged",
 ] as const;
 
 /**

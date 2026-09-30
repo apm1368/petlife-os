@@ -169,6 +169,35 @@ const BATCH4_GRADE = {
   blockers: "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
 };
 
+/**
+ * Batch 8 (Account, Security, Privacy, Household access, Notifications, Membership, system states).
+ * Per-route grades from recorded evidence (docs/qa/batch-8-account.md): batch8-account e2e (23), web
+ * tests, isolated preview QA fa RTL + en LTR at 1440/1024/768/430/390/360 (no overflow, no stuck
+ * skeleton) and axe WCAG 2.1 A/AA with 0 violations on the eight canonical account pages.
+ */
+const BATCH8_GRADES = {
+  "/:locale/profile": ["A", "A"],
+  "/:locale/profile/personal": ["A", "A"],
+  "/:locale/profile/household": ["A", "A"],
+  "/:locale/profile/membership": ["A", "A"],
+  "/:locale/subscription": ["A", "A"],
+  "/:locale/profile/notifications": ["A", "A"],
+  "/:locale/notifications/preferences": ["A", "A"],
+  "/:locale/profile/security": ["A", "A"],
+  "/:locale/profile/privacy": ["A", "A"],
+  "/:locale/profile/activity": ["A", "A"],
+  "/:locale/invitations/:token": ["A", "B"],
+  "/:locale/profile/household/pets/:petId/access": ["B", "B"],
+  "/:locale/profile/household/pets/:petId/lifecycle": ["B", "C"],
+  "/:locale/subscription/plans": ["B", "B"],
+  "/:locale/:...rest": ["A", "A"],
+};
+const BATCH8_BLOCKERS =
+  "Batch 8: batch8-account e2e (profile/contact verification, pre-takeover guard, OTP single use, household roles/removal/last owner, invitation states, temporary/expired/revoked grants, sessions/revoke-all, security notices, reset-link single use, consents, sharing, export build/download/expiry, deletion re-auth/blockers/cancel, honoured notification prefs, owner-only membership, activity, IDOR/CSRF/returnTo) + web tests green; preview QA fa/en at six widths and axe clean. Live: OTP/SMS/email delivery and payments are sandbox (BLOCKED_EXTERNAL); deletion processing waits for a published retention policy; no pet-transfer flow.";
+function batch8Grade(route) {
+  return BATCH8_GRADES[route];
+}
+
 function status(route, pageDomain, hasTest) {
   if (pageDomain === "AI" || pageDomain === "CRM" || pageDomain === "Customer Affairs") return "C";
   if (pageDomain === "Checkout") return "E";
@@ -301,8 +330,8 @@ const rows = walk(appRoot)
       domain: pageDomain,
       authRequirement: authRequirement(route, routeActor),
       designReference: referenceAvailable(pageDomain),
-      functionStatus: isBatch4(route) ? BATCH4_GRADE.function : isBatch3(route) ? BATCH3_GRADE.function : isBatch2(route) ? BATCH2_GRADE.function : status(route, pageDomain, hasTest),
-      visualStatus: isBatch4(route) ? BATCH4_GRADE.visual : isBatch3(route) ? BATCH3_GRADE.visual : isBatch2(route) ? BATCH2_GRADE.visual : visualStatus(route, pageDomain),
+      functionStatus: batch8Grade(route) ? batch8Grade(route)[0] : isBatch4(route) ? BATCH4_GRADE.function : isBatch3(route) ? BATCH3_GRADE.function : isBatch2(route) ? BATCH2_GRADE.function : status(route, pageDomain, hasTest),
+      visualStatus: batch8Grade(route) ? batch8Grade(route)[1] : isBatch4(route) ? BATCH4_GRADE.visual : isBatch3(route) ? BATCH3_GRADE.visual : isBatch2(route) ? BATCH2_GRADE.visual : visualStatus(route, pageDomain),
       backendApiDependency: apiDependency(pageDomain),
       missingFunctionality: missingFunctionality(route, pageDomain),
       missingStates: missingStates(route, pageDomain),
@@ -310,7 +339,7 @@ const rows = walk(appRoot)
       partnerCounterpart: counterpart(pageDomain, "partner"),
       priority: priority(route, pageDomain),
       estimatedEffort: effort(route, pageDomain),
-      blockers: isBatch4(route) ? BATCH4_GRADE.blockers : isBatch3(route) ? BATCH3_GRADE.blockers : isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
+      blockers: batch8Grade(route) ? BATCH8_BLOCKERS : isBatch4(route) ? BATCH4_GRADE.blockers : isBatch3(route) ? BATCH3_GRADE.blockers : isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
       sourceFile: path.relative(root, file).replaceAll(path.sep, "/"),
     };
   })

@@ -33,5 +33,14 @@ export interface StorageDriver {
    * object space. Distinct from `createUploadTarget`'s `publicUrl` — a
    * private key is never reachable at a stable, permanent URL.
    */
-  createDownloadTarget(key: string): Promise<DownloadTarget>;
+  createDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget>;
+  /** Batch 8 — server-generated private files (account exports). Never exposed as an upload target. */
+  putObject(key: string, body: Buffer, contentType: string): Promise<void>;
+  deleteObject(key: string): Promise<void>;
+}
+
+/** Served as an attachment with this name/type instead of inline. */
+export interface DownloadOptions {
+  filename?: string;
+  contentType?: string;
 }

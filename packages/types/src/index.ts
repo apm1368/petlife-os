@@ -235,6 +235,10 @@ export interface UserDto {
   id: string;
   email: string | null;
   phone: string | null;
+  /** Batch 8 — true only when the contact was proven by an OTP code or a Google-verified email. Present on GET/PATCH /me; the lightweight session payload omits it. */
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  hasPassword?: boolean;
   displayName: string;
   avatarUrl: string | null;
   locale: Locale;
@@ -2298,6 +2302,12 @@ export interface NotificationQuietHoursDto {
 export interface NotificationPreferencesDto {
   preferences: NotificationPreferenceDto[];
   quietHours: NotificationQuietHoursDto;
+  /** Batch 8 — categories that can't be switched off (e.g. security). */
+  requiredCategories?: NotificationCategory[];
+  /** Batch 8 — marketing messages are only sent while marketing consent (Privacy Center) is granted. */
+  marketingConsentGranted?: boolean;
+  /** Batch 8 — honest delivery state per channel: LIVE (really delivered), SANDBOX (simulated, not delivered), NOT_CONFIGURED. */
+  channels?: Array<{ channel: NotificationChannel; delivery: "LIVE" | "SANDBOX" | "NOT_CONFIGURED" }>;
 }
 
 export interface UpdateNotificationPreferencesDto {
@@ -3591,6 +3601,8 @@ export interface SubscriptionDto {
   expiredAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 8 — SANDBOX when membership payments are simulated (no real money moves and nothing renews automatically). Set on the member-facing GET only. */
+  billingMode?: "SANDBOX" | "LIVE";
 }
 
 export interface ResolvedEntitlementDto {

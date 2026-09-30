@@ -50,6 +50,8 @@ enum PrivacyRequestStatus {
   COMPLETED
   CANCELLED
   FAILED
+  /// Batch 8 — an export whose download window closed; its file has been deleted.
+  EXPIRED
 }
 
 enum ConsentKind {
@@ -1085,6 +1087,11 @@ model User {
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
   passwordHash       String?
+  /// Batch 8 — when each contact was proven (OTP code or a Google-verified email). A contact
+  /// set any other way (e.g. typed at password sign-up) stays unverified and is never trusted
+  /// for account linking.
+  emailVerifiedAt    DateTime?
+  phoneVerifiedAt    DateTime?
   displayName        String
   avatarUrl          String?
   locale             Locale          @default(fa)
@@ -1304,8 +1311,14 @@ model DataExportRequest {
   expiresAt   DateTime?
   completedAt DateTime?
   failureCode String?
+  /// Batch 8 — the generated file in the private `account-exports/` space; only ever reached through a short-lived signed download.
+  fileObjectKey    String?
+  fileSizeBytes    Int?
+  downloadCount    Int       @default(0)
+  lastDownloadedAt DateTime?
 
   @@index([userId, requestedAt])
+  @@index([status, expiresAt])
   @@map("data_export_requests")
 }
 
@@ -1318,6 +1331,8 @@ model AccountDeletionRequest {
   requestedAt DateTime             @default(now())
   cancelledAt DateTime?
   completedAt DateTime?
+  /// Batch 8 — the consequence preview (households, pets, open obligations) the person saw and confirmed when requesting.
+  impactSnapshot Json?
 
   @@index([userId, requestedAt])
   @@map("account_deletion_requests")

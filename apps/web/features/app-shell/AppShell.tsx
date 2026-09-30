@@ -6,12 +6,13 @@ import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { Avatar, ErrorRecovery, IconButton, Skeleton } from "@petlife/ui";
+import { ErrorRecovery, IconButton, Skeleton } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
+import { AccountMenu } from "@/features/account/AccountMenu";
 
 function LiveAppShell({ children }: { children: React.ReactNode }) {
   const { isLoading, error, retry } = useAppBootstrap();
@@ -83,7 +84,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
           <NotificationBell />
           <LocaleSwitcher />
           <ThemeToggle />
-          {user ? <Avatar name={user.displayName} src={user.avatarUrl} size="sm" /> : null}
+          {user ? <AccountMenu user={user} /> : null}
         </div>
       </header>
       {pathname === `/${locale}/home` ? <ProductNavigation audience="consumer" /> : <ConsumerSidebar />}

@@ -32,7 +32,7 @@
   --state-higher-concern: #d3651f;
   --state-urgent: #c93b2e;
   --state-emergency: #a3121f;
-  --state-success: #3f8f5f;
+  --state-success: #2e7049; /* Batch 8: 5.4:1 on surface-subtle (was 3.6:1, failed WCAG AA) */
 
   --focus-ring: #43a582;
 
