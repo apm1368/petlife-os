@@ -2865,6 +2865,10 @@ export interface AdminDashboardSummaryDto {
   openTrustCases: number;
   pendingRefundApprovals: number;
   openTasks: number;
+  pendingProviderVerifications: number;
+  contentDrafts: number;
+  needsAttention: Array<{ id: string; count: number; href: string; tone: "urgent" | "warning" | "neutral" }>;
+  recentActivity: Array<Pick<AdminAuditLogDto, "id" | "action" | "entityType" | "entityId" | "createdAt"> & { actorName: string }>;
 }
 
 /** The admin-domain mirror of AdminPermission (apps/api's own admin-permissions.ts) — kept as a plain string union here since the frontend only ever compares/display-filters against it, never re-derives access decisions (the backend is always the source of truth; hiding a nav item is a convenience, never a security boundary). */

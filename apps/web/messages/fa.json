@@ -2115,7 +2115,14 @@
         "openDisputes": "اختلافات باز",
         "openTrustCases": "پرونده‌های اعتماد و امنیت باز",
         "pendingRefundApprovals": "درخواست‌های بازگشت وجه در انتظار تأیید",
-        "openTasks": "وظایف باز"
+        "openTasks": "وظایف باز",
+        "pendingProviderVerifications": "تأیید ارائه‌دهندگان در انتظار بررسی",
+        "contentDrafts": "پیش‌نویس‌های محتوا",
+        "providerVerification": "تأیید ارائه‌دهندگان در انتظار بررسی",
+        "refunds": "درخواست‌های بازگشت وجه در انتظار تأیید",
+        "support": "درخواست‌های پشتیبانی باز",
+        "disputes": "اختلافات باز",
+        "tasks": "وظایف باز"
       }
     },
     "customers": {

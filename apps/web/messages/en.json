@@ -2115,7 +2115,14 @@
         "openDisputes": "Open disputes",
         "openTrustCases": "Open trust cases",
         "pendingRefundApprovals": "Pending refund approvals",
-        "openTasks": "Open tasks"
+        "openTasks": "Open tasks",
+        "pendingProviderVerifications": "Provider verifications awaiting review",
+        "contentDrafts": "Content drafts",
+        "providerVerification": "Provider verifications awaiting review",
+        "refunds": "Pending refund approvals",
+        "support": "Open support cases",
+        "disputes": "Open disputes",
+        "tasks": "Open tasks"
       }
     },
     "customers": {
