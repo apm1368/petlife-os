@@ -52,8 +52,9 @@ export class NotificationsService {
   async list(userId: string, query: PaginationQueryDto): Promise<PaginatedDto<NotificationDto>> {
     const { skip, take, page, pageSize } = resolvePagination(query);
     const [rows, total] = await Promise.all([
-      this.prisma.notification.findMany({ where: { userId }, include: { deliveries: true }, orderBy: { createdAt: "desc" }, skip, take }),
-      this.prisma.notification.count({ where: { userId } }),
+      // Dismissed rows (incl. categories the person switched off in-app) stay recorded but out of the inbox.
+      this.prisma.notification.findMany({ where: { userId, dismissedAt: null }, include: { deliveries: true }, orderBy: { createdAt: "desc" }, skip, take }),
+      this.prisma.notification.count({ where: { userId, dismissedAt: null } }),
     ]);
     return toPaginatedDto(rows.map(toNotificationDto), total, page, pageSize);
   }

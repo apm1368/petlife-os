@@ -6,6 +6,7 @@ import type Redis from "ioredis";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { REDIS_CLIENT } from "../src/common/redis/redis.module";
 import { AccountExportService } from "../src/modules/account/account-export.service";
+import { NotificationOrchestratorService } from "../src/modules/notifications/notification-orchestrator.service";
 
 interface Cookies {
   session?: string;
@@ -485,6 +486,38 @@ describe("Batch 8 — Account & security", () => {
       await o.c.post("/account/privacy/deletion/code").expect(200);
       const refused = await o.c.post("/account/privacy/deletion").send({ confirmation: "DELETE", code: lastOtp(o.email) }).expect(409);
       expect(refused.body.error.code).toBe("DELETION_BLOCKED");
+    });
+  });
+
+
+  // ------------------------------------------------------------------ 8E notification preferences
+
+  describe("notification preferences are really honoured", () => {
+    it("switching a category off in-app keeps it out of the inbox; marketing needs consent; security can't be silenced", async () => {
+      const u = await user("b8-prefs");
+      const orchestrator = app.get(NotificationOrchestratorService);
+      await u.c.patch("/notification-preferences").send({ preferences: [{ category: "HOUSEHOLD", channel: "IN_APP", enabled: false }, { category: "SECURITY", channel: "IN_APP", enabled: false }] }).expect(200);
+
+      await orchestrator.notify({ userId: u.userId, type: "household.invited", category: "HOUSEHOLD", templateParams: { inviterName: "Sara" } });
+      await orchestrator.notify({ userId: u.userId, type: "security.password_changed", category: "SECURITY" });
+      await orchestrator.notify({ userId: u.userId, type: "household.invited", category: "MARKETING", templateParams: { inviterName: "Promo" } });
+
+      const inbox = await u.c.get("/notifications?pageSize=50").expect(200);
+      const types = inbox.body.items.map((n: { category: string }) => n.category);
+      expect(types).toContain("SECURITY");
+      expect(types).not.toContain("HOUSEHOLD");
+      expect(types).not.toContain("MARKETING");
+      const unread = await u.c.get("/notifications/unread-count").expect(200);
+      expect(unread.body.unreadCount).toBe(types.length);
+      // Still recorded, with the reason.
+      const skipped = await prisma.notificationDelivery.findFirstOrThrow({ where: { notification: { userId: u.userId, category: "HOUSEHOLD" }, channel: "IN_APP" } });
+      expect(skipped.status).toBe("SKIPPED");
+
+      // With marketing consent, marketing reaches the inbox.
+      await u.c.patch("/account/privacy/consent").send({ kind: "MARKETING", granted: true }).expect(200);
+      await orchestrator.notify({ userId: u.userId, type: "household.invited", category: "MARKETING", templateParams: { inviterName: "Promo 2" } });
+      const after = await u.c.get("/notifications?pageSize=50").expect(200);
+      expect(after.body.items.some((n: { category: string }) => n.category === "MARKETING")).toBe(true);
     });
   });
 

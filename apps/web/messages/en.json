@@ -1949,7 +1949,10 @@
         "orders": "Orders & Delivery",
         "household": "Household & Access",
         "seller": "Seller & Marketplace",
-        "marketing": "Offers & Marketing"
+        "marketing": "Offers & Marketing",
+        "membership": "Membership & Support",
+        "travel": "Travel & Insurance",
+        "community": "Community & Rescue"
       },
       "categories": {
         "SECURITY": "Account & security alerts",
@@ -1964,7 +1967,14 @@
         "PET_ACCESS": "Pet access grants",
         "SELLER": "Seller operations",
         "MARKETPLACE": "Marketplace",
-        "MARKETING": "Offers & promotions"
+        "MARKETING": "Offers & promotions",
+        "SUPPORT": "Support conversations",
+        "SUBSCRIPTION": "Membership & billing",
+        "LOST_PET": "Lost-pet alerts & sightings",
+        "ANIMAL_SUPPORT": "Animal support offers & donations",
+        "COMMUNITY": "Community replies",
+        "TRAVEL": "Travel bookings & trips",
+        "INSURANCE": "Insurance applications"
       },
       "channels": {
         "IN_APP": "In-app",
@@ -1975,7 +1985,18 @@
         "enable": "Enable quiet hours",
         "start": "From",
         "end": "To"
-      }
+      },
+      "intro": "Choose which updates reach you and how. Everything you keep on appears in your in-app inbox; SMS is an extra channel.",
+      "channelState": {
+        "SANDBOX": "Not delivered yet — SMS is in test mode",
+        "NOT_CONFIGURED": "Not available yet"
+      },
+      "requiredNote": "Security alerts can't be switched off.",
+      "marketingNeedsConsent": "Marketing messages are off until you allow them in the Privacy Center.",
+      "marketingManage": "Manage in Privacy",
+      "quietHoursHint": "During quiet hours, SMS waits until the window ends (urgent alerts still come through). In-app notifications arrive silently in your inbox.",
+      "saveError": "Your preferences weren't saved. Try again.",
+      "unsaved": "You have unsaved changes."
     }
   },
   "support": {
