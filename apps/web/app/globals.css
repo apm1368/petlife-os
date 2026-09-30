@@ -173,3 +173,7 @@ button.experience-tile,button.experience-card { width:100%; text-align:start; cu
 .contact-row__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
 .contact-change{display:flex;flex-direction:column;gap:14px;margin-block-end:16px;max-width:520px}
 @media(max-width:620px){.contact-row .security-row{grid-template-columns:38px minmax(0,1fr)}.contact-row__actions{grid-column:1 / -1;justify-content:flex-start}}
+.member-row--actions{grid-template-columns:42px minmax(0,1fr) auto}
+.member-row__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px}
+.member-leave{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+@media(max-width:620px){.member-row--actions{grid-template-columns:38px minmax(0,1fr)}.member-row--actions .member-row__actions{grid-column:1 / -1;justify-content:flex-start}}

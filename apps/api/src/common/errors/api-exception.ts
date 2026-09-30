@@ -1614,3 +1614,15 @@ export class ContactUnchangedException extends ApiException {
     super("CONTACT_UNCHANGED", "This is already your verified contact.", HttpStatus.BAD_REQUEST);
   }
 }
+
+export class LastHouseholdOwnerException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("LAST_HOUSEHOLD_OWNER", "A household must keep at least one owner. Make another member an owner first.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class AlreadyHouseholdMemberException extends ApiException {
+  constructor() {
+    super("ALREADY_HOUSEHOLD_MEMBER", "This person is already a member of your household.", HttpStatus.CONFLICT);
+  }
+}

@@ -99,7 +99,23 @@ describe("Batch 8 — Account & security", () => {
     return request(server).post("/auth/login/password").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ username, password });
   }
 
-  void ({} as Client);
+  async function owner(petName = "Cookie") {
+    const u = await user("b8-owner");
+    const household = await u.c.post("/households").send({}).expect(201);
+    const pet = await u.c.post(`/households/${household.body.id}/pets`).send({ name: petName, species: "DOG", approximateAgeMonths: 30 }).expect(201);
+    return { ...u, householdId: household.body.id as string, petId: pet.body.id as string };
+  }
+
+  /** Invites `member` with the given preset and returns the raw token from the delivered notification link. */
+  async function invite(o: Awaited<ReturnType<typeof owner>>, member: { c: Client; email: string; userId: string }, preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" = "VIEW_ONLY") {
+    await o.c.post(`/households/${o.householdId}/invitations`).send({ contact: member.email, initialAccess: [{ petId: o.petId, preset }] }).expect(201);
+    const note = await prisma.notification.findFirst({ where: { userId: member.userId, type: "household.invited" }, orderBy: { createdAt: "desc" } });
+    return note!.deepLink!.split("/invitations/")[1]!;
+  }
+
+  async function memberIdOf(householdId: string, userId: string) {
+    return (await prisma.householdMember.findUniqueOrThrow({ where: { householdId_userId: { householdId, userId } } })).id;
+  }
 
   // ------------------------------------------------------------------ 8A account & profile
 
@@ -171,4 +187,92 @@ describe("Batch 8 — Account & security", () => {
       expect(results.filter((r) => r.status === 200)).toHaveLength(1);
     });
   });
+
+  // ------------------------------------------------------------------ 8B household & access
+
+  describe("household membership and pet access", () => {
+    it("invitations are single-use, bound to the invited person, and never duplicate a member or their grants", async () => {
+      const o = await owner();
+      const member = await user("b8-member");
+      const stranger = await user("b8-stranger");
+      const token = await invite(o, member, "VIEW_ONLY");
+      await stranger.c.get(`/household-invitations/${token}`).expect(403);
+      await stranger.c.post(`/household-invitations/${token}/accept`).expect(403);
+      await member.c.post(`/household-invitations/${token}/accept`).expect(201);
+      await member.c.post(`/household-invitations/${token}/accept`).expect(404);
+      expect(await prisma.petAccessGrant.count({ where: { petId: o.petId, userId: member.userId, revokedAt: null } })).toBe(1);
+      const dup = await o.c.post(`/households/${o.householdId}/invitations`).send({ contact: member.email, initialAccess: [] }).expect(409);
+      expect(dup.body.error.code).toBe("ALREADY_HOUSEHOLD_MEMBER");
+
+      // An expired invitation can't be accepted.
+      const late = await user("b8-late");
+      const lateToken = await invite(o, late);
+      await prisma.householdInvitation.updateMany({ where: { householdId: o.householdId, status: "PENDING" }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      await late.c.post(`/household-invitations/${lateToken}/accept`).expect(400);
+      expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: late.userId } })).toBe(0);
+    });
+
+    it("removing a member ends their household-issued access at once and tells them why pages are closed", async () => {
+      const o = await owner();
+      const member = await user("b8-member");
+      await member.c.post(`/household-invitations/${await invite(o, member, "CARE_HELPER")}/accept`).expect(201);
+      await member.c.get(`/pets/${o.petId}`).expect(200);
+      const memberId = await memberIdOf(o.householdId, member.userId);
+
+      // A family member cannot remove anyone; another household's owner can't touch this one.
+      const outsider = await owner("Other");
+      await member.c.delete(`/households/${o.householdId}/members/${await memberIdOf(o.householdId, o.userId)}`).expect(403);
+      await outsider.c.delete(`/households/${o.householdId}/members/${memberId}`).expect(403);
+      await outsider.c.delete(`/households/${outsider.householdId}/members/${memberId}`).expect(404);
+
+      await o.c.delete(`/households/${o.householdId}/members/${memberId}`).expect(200);
+      const denied = await member.c.get(`/pets/${o.petId}`).expect(403);
+      expect(denied.body.error.details.lapse.reason).toBe("REVOKED");
+      expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: member.userId } })).toBe(0);
+      expect(await prisma.notification.count({ where: { userId: member.userId, type: "household.member_removed" } })).toBe(1);
+      expect(await prisma.domainEvent.count({ where: { type: "HouseholdMemberRemoved", aggregateId: o.householdId } })).toBe(1);
+      // A stranger who never had access gets no lapse detail.
+      const never = await user("b8-never");
+      const strangerDenied = await never.c.get(`/pets/${o.petId}`).expect(403);
+      expect(strangerDenied.body.error.details?.lapse).toBeUndefined();
+    });
+
+    it("a household always keeps an owner: the last owner can't leave or be demoted until someone else is promoted", async () => {
+      const o = await owner();
+      const member = await user("b8-member");
+      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      const ownerMemberId = await memberIdOf(o.householdId, o.userId);
+      const memberId = await memberIdOf(o.householdId, member.userId);
+
+      expect((await o.c.post(`/households/${o.householdId}/leave`).expect(409)).body.error.code).toBe("LAST_HOUSEHOLD_OWNER");
+      await o.c.patch(`/households/${o.householdId}/members/${ownerMemberId}`).send({ role: "FAMILY" }).expect(409);
+      await member.c.patch(`/households/${o.householdId}/members/${memberId}`).send({ role: "OWNER" }).expect(403);
+
+      await o.c.patch(`/households/${o.householdId}/members/${memberId}`).send({ role: "OWNER" }).expect(200);
+      // The promoted owner can now manage the pet's access.
+      const grants = await member.c.get(`/pets/${o.petId}/access-grants`).expect(200);
+      expect(Array.isArray(grants.body)).toBe(true);
+      await o.c.post(`/households/${o.householdId}/leave`).expect(201);
+      await o.c.get(`/pets/${o.petId}`).expect(403);
+      await member.c.get(`/pets/${o.petId}`).expect(200);
+    });
+
+    it("temporary access works only inside its window and then reports itself as expired", async () => {
+      const o = await owner();
+      const sitter = await user("b8-sitter");
+      await sitter.c.post(`/household-invitations/${await invite(o, sitter)}/accept`).expect(201);
+      // Remove the standing view grant so only the temporary one applies.
+      await prisma.petAccessGrant.updateMany({ where: { petId: o.petId, userId: sitter.userId }, data: { revokedAt: new Date(Date.now() - 60 * 60 * 1000) } });
+      const flags = { canViewIdentity: true, canEditIdentity: false, canViewHealth: false, canEditHealth: false, canBookCare: false, canViewCareProfile: true, canEditCareProfile: false, canViewLocation: false, canManageAccess: false, canRecordClinicalData: false };
+      const grant = await o.c.post(`/pets/${o.petId}/access-grants`).send({ userId: sitter.userId, ...flags, expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(), reason: "Weekend sitting" }).expect(201);
+      expect(grant.body.source).toBe("TEMPORARY");
+      await sitter.c.get(`/pets/${o.petId}`).expect(200);
+      await prisma.petAccessGrant.update({ where: { id: grant.body.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      const denied = await sitter.c.get(`/pets/${o.petId}`).expect(403);
+      expect(denied.body.error.details.lapse.reason).toBe("EXPIRED");
+      // The sitter can't extend their own access.
+      await sitter.c.patch(`/pets/${o.petId}/access-grants/${grant.body.id}`).send({ expiresAt: new Date(Date.now() + 86_400_000).toISOString() }).expect(403);
+    });
+  });
+
 });

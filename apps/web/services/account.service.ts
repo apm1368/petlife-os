@@ -40,7 +40,7 @@ export interface PrivacyCenterDto {
 
 export interface HouseholdCollaborationDto extends HouseholdDto {
   currentUserRole: "OWNER" | "FAMILY";
-  members: Array<{ id: string; userId: string; role: "OWNER" | "FAMILY"; createdAt: string; user: Pick<UserDto, "id" | "displayName" | "avatarUrl" | "email" | "phone"> }>;
+  members: Array<{ id: string; userId: string; role: "OWNER" | "FAMILY"; createdAt: string; user: Pick<UserDto, "id" | "displayName" | "avatarUrl"> }>;
   pets: Array<{ id: string; name: string; photoUrl: string | null; species: string; lifecycleStatus: string }>;
   invitations: Array<{ id: string; contactMasked: string; status: string; expiresAt: string; createdAt: string; initialAccess: unknown }>;
   grants: Array<PetAccessFlags & { id: string; petId: string; userId: string; source: string; startsAt: string | null; expiresAt: string | null; createdAt: string }>;

@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetAccessSource, type Prisma } from "@prisma/client";
 import type { PetAccessFlags } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { HouseholdAccessDeniedException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
+import { AlreadyHouseholdMemberException, HouseholdAccessDeniedException, LastHouseholdOwnerException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import type { CreateHouseholdDto } from "./dto/create-household.dto";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
@@ -18,7 +18,11 @@ const PRESETS: Record<InitialAccess[number]["preset"], PetAccessFlags> = {
 };
 
 function tokenHash(token: string) { return createHash("sha256").update(token).digest("hex"); }
-function normalizeContact(contact: string) { return contact.trim().toLowerCase().replace(/[\s()-]/g, ""); }
+/** Emails are compared case-insensitively as typed (hyphens are legal in addresses); only phone numbers drop formatting characters. */
+function normalizeContact(contact: string) {
+  const value = contact.trim().toLowerCase();
+  return value.includes("@") ? value : value.replace(/[\s()-]/g, "");
+}
 function maskContact(contact: string) {
   const [name, domain] = contact.split("@");
   if (domain) return `${(name ?? "").slice(0, 2)}***@${domain}`;
@@ -57,7 +61,8 @@ export class HouseholdsService {
     const household = await this.prisma.household.findUnique({
       where: { id: householdId },
       include: {
-        members: { include: { user: { select: { id: true, displayName: true, avatarUrl: true, email: true, phone: true } } }, orderBy: { createdAt: "asc" } },
+        // Members see each other by name only — contact details stay with their owner.
+        members: { include: { user: { select: { id: true, displayName: true, avatarUrl: true } } }, orderBy: { createdAt: "asc" } },
         pets: { where: { deletedAt: null }, select: { id: true, name: true, photoUrl: true, species: true, lifecycleStatus: true } },
         invitations: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" } },
       },
@@ -75,7 +80,7 @@ export class HouseholdsService {
             { aggregateType: "Household", aggregateId: householdId },
             ...(petIds.length ? [{ aggregateType: "Pet", aggregateId: { in: petIds } }] : []),
           ],
-          type: { in: ["HouseholdInvitationCreated", "HouseholdInvitationResent", "HouseholdInvitationCancelled", "HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked"] },
+          type: { in: ["HouseholdInvitationCreated", "HouseholdInvitationResent", "HouseholdInvitationCancelled", "HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked", "HouseholdMemberRemoved", "HouseholdMemberLeft", "HouseholdMemberRoleChanged"] },
         },
         select: { id: true, type: true, occurredAt: true },
         orderBy: { occurredAt: "desc" },
@@ -107,6 +112,8 @@ export class HouseholdsService {
     const pets = await this.prisma.pet.count({ where: { householdId, id: { in: dto.initialAccess.map((item) => item.petId) } } });
     if (pets !== new Set(dto.initialAccess.map((item) => item.petId)).size) throw new HouseholdAccessDeniedException();
     const contact = normalizeContact(dto.contact);
+    const existingMember = await this.prisma.householdMember.findFirst({ where: { householdId, user: contact.includes("@") ? { email: contact } : { phone: contact } }, select: { id: true } });
+    if (existingMember) throw new AlreadyHouseholdMemberException();
     const rawToken = randomBytes(32).toString("base64url");
     const invitation = await this.prisma.householdInvitation.create({
       data: { householdId, contact, tokenHash: tokenHash(rawToken), invitedByUserId: actorUserId, initialAccess: dto.initialAccess as Prisma.InputJsonValue, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
@@ -180,6 +187,11 @@ export class HouseholdsService {
       await tx.householdMember.upsert({ where: { householdId_userId: { householdId: invitation.householdId, userId } }, create: { householdId: invitation.householdId, userId, role: "FAMILY" }, update: {} });
       const access = invitation.initialAccess as unknown as InitialAccess;
       for (const item of access) {
+        // A pet removed from the household since the invite was sent is skipped, and an existing household grant is not duplicated.
+        const pet = await tx.pet.findFirst({ where: { id: item.petId, householdId: invitation.householdId, deletedAt: null }, select: { id: true } });
+        if (!pet) continue;
+        const existing = await tx.petAccessGrant.findFirst({ where: { petId: item.petId, userId, source: PetAccessSource.HOUSEHOLD, revokedAt: null }, select: { id: true } });
+        if (existing) continue;
         await tx.petAccessGrant.create({ data: { petId: item.petId, userId, source: PetAccessSource.HOUSEHOLD, grantedByUserId: invitation.invitedByUserId, ...PRESETS[item.preset] } });
       }
       await this.events.publish("HouseholdInvitationAccepted", { householdId: invitation.householdId, invitationId: invitation.id, userId }, { tx, aggregateType: "Household", aggregateId: invitation.householdId });
@@ -193,6 +205,83 @@ export class HouseholdsService {
     await this.prisma.householdInvitation.update({ where: { id: invitation.id }, data: { status: "DECLINED", declinedAt: new Date() } });
     await this.events.publish("HouseholdInvitationDeclined", { householdId: invitation.householdId, invitationId: invitation.id, userId }, { aggregateType: "Household", aggregateId: invitation.householdId });
     return { ok: true };
+  }
+
+  /**
+   * Batch 8 — membership changes. Household role and pet permissions stay
+   * separate: removing or leaving ends the person's household-issued pet
+   * grants (household, manual and temporary — never a provider's booking or
+   * vet-share grant), while a role change only changes who may manage the
+   * household. A household can never be left without an owner.
+   */
+  async removeMember(householdId: string, memberId: string, actorUserId: string) {
+    await this.requireOwner(householdId, actorUserId);
+    const member = await this.prisma.householdMember.findFirst({ where: { id: memberId, householdId } });
+    if (!member) throw new NotFoundApiException("Member");
+    if (member.userId === actorUserId) throw new ValidationApiException({ field: "memberId", reason: "Use “leave household” to remove yourself." });
+    await this.prisma.$transaction(async (tx) => {
+      if (member.role === HouseholdRole.OWNER) await this.assertAnotherOwner(tx, householdId, member.userId);
+      await tx.householdMember.delete({ where: { id: member.id } });
+      const revoked = await this.revokeHouseholdGrants(tx, householdId, member.userId, actorUserId);
+      await this.events.publish("HouseholdMemberRemoved", { householdId, userId: member.userId, actorUserId, revokedGrants: revoked }, { tx, aggregateType: "Household", aggregateId: householdId });
+    });
+    await this.notifications.notify({ userId: member.userId, type: "household.member_removed", category: "HOUSEHOLD", templateParams: {}, deepLink: "/profile/household", entityType: "Household", entityId: householdId }).catch(() => undefined);
+    return { ok: true };
+  }
+
+  async leave(householdId: string, userId: string) {
+    const member = await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId, userId } } });
+    if (!member) throw new HouseholdAccessDeniedException({ householdId });
+    await this.prisma.$transaction(async (tx) => {
+      if (member.role === HouseholdRole.OWNER) await this.assertAnotherOwner(tx, householdId, userId);
+      await tx.householdMember.delete({ where: { id: member.id } });
+      const revoked = await this.revokeHouseholdGrants(tx, householdId, userId, userId);
+      await this.events.publish("HouseholdMemberLeft", { householdId, userId, revokedGrants: revoked }, { tx, aggregateType: "Household", aggregateId: householdId });
+    });
+    return { ok: true };
+  }
+
+  async changeRole(householdId: string, memberId: string, role: HouseholdRole, actorUserId: string) {
+    await this.requireOwner(householdId, actorUserId);
+    const member = await this.prisma.householdMember.findFirst({ where: { id: memberId, householdId } });
+    if (!member) throw new NotFoundApiException("Member");
+    if (member.role === role) return { ok: true };
+    await this.prisma.$transaction(async (tx) => {
+      if (member.role === HouseholdRole.OWNER) await this.assertAnotherOwner(tx, householdId, member.userId);
+      await tx.householdMember.update({ where: { id: member.id }, data: { role } });
+      // A new owner can manage every pet; existing household grants are upgraded, never silently downgraded on demotion.
+      if (role === HouseholdRole.OWNER) {
+        const pets = await tx.pet.findMany({ where: { householdId, deletedAt: null }, select: { id: true } });
+        for (const pet of pets) {
+          await tx.petAccessGrant.updateMany({ where: { petId: pet.id, userId: member.userId, source: PetAccessSource.HOUSEHOLD, revokedAt: null }, data: { revokedAt: new Date(), revokedByUserId: actorUserId } });
+          await tx.petAccessGrant.create({ data: { petId: pet.id, userId: member.userId, source: PetAccessSource.HOUSEHOLD, grantedByUserId: actorUserId, ...PRESETS.FULL, canManageAccess: true } });
+        }
+      }
+      await this.events.publish("HouseholdMemberRoleChanged", { householdId, userId: member.userId, from: member.role, to: role, actorUserId }, { tx, aggregateType: "Household", aggregateId: householdId });
+    });
+    return { ok: true };
+  }
+
+  private async assertAnotherOwner(tx: Prisma.TransactionClient, householdId: string, excludingUserId: string) {
+    // Lock the household's member rows so two concurrent demotions can't both pass the check.
+    await tx.$queryRaw`SELECT id FROM household_members WHERE "householdId" = ${householdId}::uuid FOR UPDATE`;
+    const owners = await tx.householdMember.count({ where: { householdId, role: HouseholdRole.OWNER, userId: { not: excludingUserId } } });
+    if (owners === 0) throw new LastHouseholdOwnerException({ householdId });
+  }
+
+  private async revokeHouseholdGrants(tx: Prisma.TransactionClient, householdId: string, userId: string, actorUserId: string): Promise<number> {
+    const result = await tx.petAccessGrant.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+        pet: { householdId },
+        source: { in: [PetAccessSource.HOUSEHOLD, PetAccessSource.MANUAL, PetAccessSource.TEMPORARY] },
+        // `reason` is usually null; a bare NOT would drop those rows (SQL NULL), so null is matched explicitly.
+        OR: [{ reason: null }, { AND: [{ NOT: { reason: { endsWith: "_BOOKING" } } }, { NOT: { reason: "EXPLICIT_VET_SHARE" } }] }],
+      },
+      data: { revokedAt: new Date(), revokedByUserId: actorUserId },
+    });
+    return result.count;
   }
 
   private async requireOwner(householdId: string, userId: string) {

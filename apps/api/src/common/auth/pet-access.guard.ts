@@ -39,7 +39,10 @@ export class PetAccessGuard implements CanActivate {
     if (!pet) throw new NotFoundApiException("Pet");
 
     const effective = await this.petAccessService.getEffectivePermissions(petId, user.id);
-    if (!effective) throw new PetAccessDeniedException({ petId });
+    if (!effective) {
+      const lapse = await this.petAccessService.describeLapse(petId, user.id);
+      throw new PetAccessDeniedException(lapse ? { petId, lapse } : { petId });
+    }
 
     const requiredFlag = this.reflector.get<keyof PetAccessFlags | undefined>(PET_ACCESS_KEY, context.getHandler());
     if (requiredFlag && !effective[requiredFlag]) {
