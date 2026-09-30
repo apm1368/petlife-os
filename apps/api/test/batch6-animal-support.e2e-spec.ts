@@ -2,6 +2,11 @@ import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
 import { AdminMembershipStatus, AdminRole } from "@prisma/client";
 import request from "supertest";
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { NotificationDeepLinks } from "../src/modules/notifications/notification-deeplink.util";
+
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { isPrivateUploadPath } from "../src/modules/storage/object-url.util";
@@ -536,6 +541,9 @@ describe("Batch 6 — Animal support ecosystem", () => {
       expect(net.CASH_GATEWAY_RECEIVABLE ?? 0).toBe(0);
       expect(net.DONATION_PAYABLE ?? 0).toBe(0);
       expect(net.CUSTOMER_PAYMENT_CLEARING ?? 0).toBe(0);
+      // The donor is told, with a link to their receipt.
+      const notice = await prisma.notification.findFirstOrThrow({ where: { userId: donor.userId, type: "animal_support.donation_refunded" } });
+      expect(notice.deepLink).toBe(`/donations/${id}`);
       expect((await request(server).get(`/animal-support/campaigns/${campaignId}`).expect(200)).body.raisedAmountIrr).toBe(0);
       const second = await finance.c.post(`/admin/animal-support/donations/${id}/refund`).send({ reason: "Again" });
       expect(second.status).toBeGreaterThanOrEqual(400);
@@ -853,6 +861,194 @@ describe("Batch 6 — Animal support ecosystem", () => {
       await request(server).get(`/community/posts/${post.body.id}`).expect(404);
       await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTORE", reason: "Fine after all" }).expect(201);
       await request(server).get(`/community/posts/${post.body.id}`).expect(200);
+    });
+  });
+
+
+  // ------------------------------------------------------------------ 6H security regression
+
+  describe("6H security regression", () => {
+    async function ngoWithStaff() {
+      const ops = await admin(AdminRole.ADMIN);
+      const org = await ops.c.post("/admin/animal-support/organizations").send({ type: "SHELTER", name: `Org ${unique()}` }).expect(201);
+      const members: Record<string, Awaited<ReturnType<typeof user>>> = {};
+      for (const role of ["OWNER", "COORDINATOR", "VIEWER"] as const) {
+        members[role] = await user(`b6-${role.toLowerCase()}`);
+        await ops.c.post(`/admin/animal-support/organizations/${org.body.id}/members`).send({ email: members[role]!.email, role }).expect(201);
+      }
+      await prisma.animalSupportOrganization.update({ where: { id: org.body.id }, data: { verificationStatus: "VERIFIED", isPubliclyListed: true, contactEmail: `ngo-${unique()}@example.com`, verificationDocumentKeys: [`animal-support-verification/${org.body.id}/doc.pdf`] } });
+      const campaign = await ops.c.post(`/admin/animal-support/organizations/${org.body.id}/campaigns`).send({ title: `Campaign ${unique()}`, description: "QA", fundType: "GENERAL" }).expect(201);
+      await ops.c.patch(`/admin/animal-support/campaigns/${campaign.body.id}/status`).send({ status: "ACTIVE" }).expect(200);
+      return { ops, organizationId: org.body.id as string, campaignId: campaign.body.id as string, owner: members.OWNER!, coordinator: members.COORDINATOR!, viewer: members.VIEWER! };
+    }
+
+    it("forged ids for incidents, sightings, needs, offers, donations, organizations, memberships, reports and cases never reach another party", async () => {
+      const victim = await owner("Victim");
+      const incident = await victim.c.post(`/pets/${victim.petId}/lost-incidents`).send({ description: "Lost near the lake", publicArea: "Chitgar", contactPreference: "IN_APP_MESSAGE" }).expect(201);
+      const primed = await request(server).get("/health/live");
+      const csrf = extractCookie(primed.headers["set-cookie"], "petlife_csrf")!;
+      const sighting = await request(server).post(`/lost-pets/${incident.body.id}/sightings`).set("Cookie", `petlife_csrf=${csrf}`).set("x-csrf-token", csrf).send({ seenAt: new Date().toISOString(), description: "Seen" }).expect(201);
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const victimNeed = await publishedNeed(victim.c, mod.c);
+      const helper = await user("b6-helper");
+      const offer = await helper.c.post(`/animal-support/needs/${victimNeed}/offers`).send({ message: "I can bring food this week", helpType: "FOOD" }).expect(201);
+      const victimOrg = await ngoWithStaff();
+      const donor = await user("b6-donor");
+      const donation = await donor.c.post(`/animal-support/campaigns/${victimOrg.campaignId}/donate`).send({ amountIrr: 2_000_000, idempotencyKey: `k-${unique()}` }).expect(201);
+      const victimMembership = await prisma.animalSupportOrgMembership.findFirstOrThrow({ where: { organizationId: victimOrg.organizationId, role: "VIEWER" } });
+      const report = await helper.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: victimNeed, reason: "SCAM" }).expect(201);
+      const escalated = await mod.c.post(`/admin/community/reports/${report.body.id}/escalate`).send({ reason: "check" }).expect(201);
+
+      const attacker = await owner("Attacker");
+      const attackerOrg = await ngoWithStaff();
+      const attackerNeed = await attacker.c.post("/animal-support/needs").send({ title: "Attacker need title", description: "Attacker's own listing for testing access.", category: "FOOD", province: "تهران", city: "تهران" }).expect(201);
+      const denied = (status: number) => expect([403, 404]).toContain(status);
+
+      // Incident + sighting through the victim's pet path and through the attacker's own pet path.
+      denied((await attacker.c.get(`/pets/${victim.petId}/lost-incidents/${incident.body.id}`)).status);
+      denied((await attacker.c.get(`/pets/${attacker.petId}/lost-incidents/${incident.body.id}`)).status);
+      for (const action of ["mark-found", "reunite", "close", "mark-searching"]) denied((await attacker.c.post(`/pets/${attacker.petId}/lost-incidents/${incident.body.id}/${action}`).send({})).status);
+      denied((await attacker.c.post(`/pets/${victim.petId}/lost-incidents/${incident.body.id}/sightings/${sighting.body.id}/review`).send({ decision: "REJECTED" })).status);
+      denied((await attacker.c.get(`/pets/${victim.petId}/lost-incidents/${incident.body.id}/sightings`)).status);
+      // Needs and offers.
+      denied((await attacker.c.get(`/animal-support/needs/${victimNeed}/manage`)).status);
+      denied((await attacker.c.patch(`/animal-support/needs/${victimNeed}`).send({ title: "Hijacked listing title" })).status);
+      for (const action of ["pause", "resume", "close", "fulfill"]) denied((await attacker.c.post(`/animal-support/needs/${victimNeed}/${action}`).send({})).status);
+      denied((await attacker.c.get(`/animal-support/needs/${victimNeed}/offers`)).status);
+      denied((await attacker.c.patch(`/animal-support/needs/${victimNeed}/offers/${offer.body.id}`).send({ status: "ACCEPTED" })).status);
+      denied((await attacker.c.patch(`/animal-support/needs/${attackerNeed.body.id}/offers/${offer.body.id}`).send({ status: "ACCEPTED" })).status);
+      // Donation receipt.
+      await attacker.c.get(`/me/donations/${donation.body.donationIntentId}`).expect(404);
+      // Organizations: another org's owner can't enter its portal, change its team, or publish as it.
+      denied((await attackerOrg.owner.c.get("/ngo/overview").set("x-ngo-organization", victimOrg.organizationId)).status);
+      denied((await attackerOrg.owner.c.get("/ngo/donations").set("x-ngo-organization", victimOrg.organizationId)).status);
+      denied((await attackerOrg.owner.c.patch(`/ngo/team/${victimMembership.id}`).set("x-ngo-organization", attackerOrg.organizationId).send({ isActive: false })).status);
+      denied((await attackerOrg.owner.c.post("/animal-support/needs").send({ title: "Pretending to be them", description: "Publishing under another organization's name.", category: "FOOD", province: "تهران", city: "تهران", organizationId: victimOrg.organizationId })).status);
+      denied((await attackerOrg.owner.c.post("/ngo/verification/submit").set("x-ngo-organization", attackerOrg.organizationId).send({ documentKeys: [`animal-support-verification/${victimOrg.organizationId}/doc.pdf`] })).status === 400 ? 403 : 200);
+      // Reports and cases are moderator-only.
+      await attacker.c.get("/admin/community/reports").expect(403);
+      await attacker.c.post(`/admin/community/reports/${report.body.id}/dismiss`).send({}).expect(403);
+      await attacker.c.get(`/admin/trust/cases/${escalated.body.trustCaseId}/context`).expect(403);
+      await attacker.c.post(`/admin/trust/cases/${escalated.body.trustCaseId}/actions`).send({ actionType: "REMOVE_CONTENT", reason: "x" }).expect(403);
+
+      // Nothing changed (the sighting itself legitimately moved the incident to SIGHTING_REPORTED).
+      expect((await prisma.lostPetIncident.findUniqueOrThrow({ where: { id: incident.body.id } })).status).toBe("SIGHTING_REPORTED");
+      expect((await prisma.lostPetSighting.findUniqueOrThrow({ where: { id: sighting.body.id } })).status).toBe("SUBMITTED");
+      const needRow = await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: victimNeed } });
+      expect(needRow.status).toBe("PUBLISHED");
+      expect(needRow.title).not.toBe("Hijacked listing title");
+      expect((await prisma.helpOffer.findUniqueOrThrow({ where: { id: offer.body.id } })).status).toBe("PENDING");
+      expect((await prisma.animalSupportOrgMembership.findUniqueOrThrow({ where: { id: victimMembership.id } })).isActive).toBe(true);
+      expect((await prisma.communityReport.findUniqueOrThrow({ where: { id: report.body.id } })).status).toBe("ESCALATED");
+    });
+
+    it("roles inside one organization: owner manages the team, coordinator manages listings, viewer only reads", async () => {
+      const org = await ngoWithStaff();
+      const header = (c: ReturnType<typeof client>) => ({ get: (u: string) => c.get(u).set("x-ngo-organization", org.organizationId), post: (u: string) => c.post(u).set("x-ngo-organization", org.organizationId), patch: (u: string) => c.patch(u).set("x-ngo-organization", org.organizationId) });
+      for (const member of [org.owner, org.coordinator, org.viewer]) await header(member.c).get("/ngo/overview").expect(200);
+      const viewerMembership = await prisma.animalSupportOrgMembership.findFirstOrThrow({ where: { organizationId: org.organizationId, role: "VIEWER" } });
+      denied403(await header(org.coordinator.c).patch(`/ngo/team/${viewerMembership.id}`).send({ role: "COORDINATOR" }));
+      denied403(await header(org.viewer.c).patch(`/ngo/team/${viewerMembership.id}`).send({ role: "OWNER" }));
+      await header(org.owner.c).patch(`/ngo/team/${viewerMembership.id}`).send({ role: "VIEWER" }).expect(200);
+      // Viewer can't publish in the organization's name; coordinator can.
+      denied403(await org.viewer.c.post("/animal-support/needs").send({ title: "Viewer tries to publish", description: "Viewer should not be able to publish for the org.", category: "FOOD", province: "تهران", city: "تهران", organizationId: org.organizationId }));
+      await org.coordinator.c.post("/animal-support/needs").send({ title: "Coordinator publishes", description: "Coordinator can create listings for the org.", category: "FOOD", province: "تهران", city: "تهران", organizationId: org.organizationId }).expect(201);
+      function denied403(res: { status: number }) {
+        expect([403, 404]).toContain(res.status);
+      }
+    });
+
+    it("public payloads never carry donor, reporter, member or author identity, org contacts' internals or document keys", async () => {
+      const org = await ngoWithStaff();
+      const donor = await user("b6-privacy-donor");
+      await prisma.user.update({ where: { id: donor.userId }, data: { phone: `0912${Math.floor(1_000_000 + Math.random() * 8_999_999)}`, displayName: "Private Donor Name" } });
+      const donorRow = await prisma.user.findUniqueOrThrow({ where: { id: donor.userId } });
+      await donor.c.post(`/animal-support/campaigns/${org.campaignId}/donate`).send({ amountIrr: 3_000_000, idempotencyKey: `k-${unique()}` }).expect(201);
+      const o = await owner("Pixel");
+      const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost near the market", publicArea: "Tajrish", lastKnownLocation: "Alley 9 house 3", lastKnownLatitude: EXACT_LAT, lastKnownLongitude: EXACT_LNG, privateNotes: "Chip 982000999", contactPreference: "IN_APP_MESSAGE" }).expect(201);
+      const post = await o.c.post("/community/posts").send({ type: "GENERAL", body: "Thanks everyone for helping" }).expect(201);
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const need = await publishedNeed(org.coordinator.c, mod.c, { organizationId: org.organizationId });
+
+      const publicBodies = [
+        (await request(server).get(`/animal-support/campaigns/${org.campaignId}`).expect(200)).body,
+        (await request(server).get(`/animal-support/campaigns/${org.campaignId}/donors`)).body,
+        (await request(server).get(`/animal-support/organizations/${org.organizationId}`).expect(200)).body,
+        (await request(server).get(`/animal-support/needs/${need}`).expect(200)).body,
+        (await request(server).get(`/lost-pets/${incident.body.id}`).expect(200)).body,
+        (await request(server).get(`/community/posts/${post.body.id}`).expect(200)).body,
+        (await request(server).get("/community/posts?pageSize=50").expect(200)).body,
+      ];
+      const serialized = JSON.stringify(publicBodies);
+      for (const secret of [donor.email, donorRow.phone!, "Private Donor Name", o.email, o.userId, org.owner.email, org.coordinator.email, org.viewer.email, "animal-support-verification", "Alley 9", "982000999"]) {
+        expect(serialized).not.toContain(secret);
+      }
+      expect(leaksExactCoordinates(publicBodies)).toBe(false);
+    });
+
+    it("admin permissions stay separate: a content moderator can't reveal PII, finance can't moderate, verification can't read reports", async () => {
+      const o = await owner();
+      const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost near the park", publicArea: "Vanak", lastKnownLatitude: EXACT_LAT, lastKnownLongitude: EXACT_LNG, contactPreference: "IN_APP_MESSAGE" }).expect(201);
+      // TRUST_SAFETY holds customer.pii.reveal by the existing role design; CONTENT moderates without PII access.
+      const trust = await admin(AdminRole.CONTENT);
+      const finance = await admin(AdminRole.FINANCE);
+      const verification = await admin(AdminRole.VERIFICATION);
+      const reporter = await user("b6-rep");
+      const report = await reporter.c.post("/reports").send({ targetType: "LOST_PET_INCIDENT", targetId: incident.body.id, reason: "MISINFORMATION" }).expect(201);
+      const escalated = await trust.c.post(`/admin/community/reports/${report.body.id}/escalate`).send({ reason: "check it" }).expect(201);
+      await trust.c.post(`/admin/lost-pets/${incident.body.id}/reveal-location`).send({ reason: "Curious about it" }).expect(403);
+      await finance.c.post(`/admin/trust/cases/${escalated.body.trustCaseId}/actions`).send({ actionType: "REMOVE_CONTENT", reason: "no" }).expect(403);
+      await finance.c.post(`/admin/lost-pets/${incident.body.id}/close`).send({ reason: "Not my job at all" }).expect(403);
+      await verification.c.get("/admin/community/reports").expect(403);
+      await verification.c.get(`/admin/trust/cases/${escalated.body.trustCaseId}/context`).expect(403);
+      // The case context shows the subject without reporter identity or exact location.
+      const context = await trust.c.get(`/admin/trust/cases/${escalated.body.trustCaseId}/context`).expect(200);
+      expect(JSON.stringify(context.body)).not.toContain(reporter.userId);
+      expect(JSON.stringify(context.body)).not.toContain(reporter.email);
+      expect(leaksExactCoordinates(context.body)).toBe(false);
+    });
+
+    it("after a moderation decision resolves a report, the same person may report the same item again", async () => {
+      const publisher = await user("b6-pub");
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const need = await publishedNeed(publisher.c, mod.c);
+      const reporter = await user("b6-rep2");
+      const first = await reporter.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: need, reason: "SCAM" }).expect(201);
+      await reporter.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: need, reason: "SPAM" }).expect(409);
+      const escalated = await mod.c.post(`/admin/community/reports/${first.body.id}/escalate`).send({ reason: "check" }).expect(201);
+      await mod.c.post(`/admin/trust/cases/${escalated.body.trustCaseId}/actions`).send({ actionType: "NO_ACTION", reason: "Looks genuine" }).expect(201);
+      expect((await prisma.communityReport.findUniqueOrThrow({ where: { id: first.body.id } })).status).toBe("RESOLVED");
+      await reporter.c.post("/reports").send({ targetType: "SUPPORT_NEED", targetId: need, reason: "SCAM", details: "Still asking for money outside the app" }).expect(201);
+    });
+
+    it("each Batch 6 notification listener is registered exactly once (no duplicate notifications)", async () => {
+      const emitter = app.get(EventEmitter2);
+      for (const event of ["LostPetSightingSubmitted", "SupportNeedHelpOffered", "SupportNeedHelpOfferResolved", "SupportNeedListingModerated", "SupportNeedExpiringSoon", "DonationSucceeded", "DonationRefunded", "AnimalSupportOrganizationVerificationChanged", "AnimalSupportOrganizationModerated", "RefundSucceeded"]) {
+        expect({ event, listeners: emitter.listenerCount(event) }).toEqual({ event, listeners: 1 });
+      }
+    });
+
+    it("every notification deep link resolves to a real web page (no dead routes)", () => {
+      const appDir = join(__dirname, "../../web/app/[locale]");
+      const routes: string[][] = [];
+      const walk = (dir: string, segments: string[]) => {
+        for (const name of readdirSync(dir)) {
+          const full = join(dir, name);
+          if (statSync(full).isDirectory()) walk(full, name.startsWith("(") ? segments : [...segments, name]);
+          else if (name === "page.tsx") routes.push(segments);
+        }
+      };
+      walk(appDir, []);
+      const exists = (path: string) => {
+        const parts = path.split("?")[0]!.split("/").filter(Boolean);
+        // The locale catch-all ([...rest]) is the 404 page and must not count as a match.
+        return routes.some((r) => r.length === parts.length && r.every((seg, i) => (seg.startsWith("[") && !seg.startsWith("[...")) || seg === parts[i]));
+      };
+      const samples = Object.entries(NotificationDeepLinks).map(([name, build]) => [name, (build as (...args: string[]) => string)("00000000-0000-4000-8000-000000000001", "00000000-0000-4000-8000-000000000002")] as const);
+      const dead = samples.filter(([, path]) => !exists(path));
+      expect(dead).toEqual([]);
+      // Links set outside the helper by Batch 6/8 listeners.
+      for (const path of ["/profile/security", "/profile/household"]) expect(exists(path)).toBe(true);
     });
   });
 

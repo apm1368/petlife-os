@@ -99,6 +99,24 @@ export class SupportNeedNotificationListener {
   }
 
   /** The donor's confirmation, linking to their private receipt. Organization notifications live with the NGO portal. */
+  @OnEvent("DonationRefunded")
+  onDonationRefunded(p: { donationIntentId: string }, domainEventId: string) {
+    return this.safely("DonationRefunded", async () => {
+      const intent = await this.prisma.donationIntent.findUnique({ where: { id: p.donationIntentId }, select: { donorUserId: true, campaign: { select: { title: true } } } });
+      if (!intent?.donorUserId) return;
+      await this.orchestrator.notify({
+        userId: intent.donorUserId,
+        type: "animal_support.donation_refunded",
+        category: NotificationCategory.PAYMENT,
+        templateParams: { title: intent.campaign.title },
+        entityType: "DonationIntent",
+        entityId: p.donationIntentId,
+        deepLink: NotificationDeepLinks.donationReceipt(p.donationIntentId),
+        domainEventId,
+      });
+    });
+  }
+
   @OnEvent("DonationSucceeded")
   onDonation(p: { donationIntentId: string; campaignId: string; organizationId?: string }, domainEventId: string) {
     return this.safely("DonationSucceeded", async () => {

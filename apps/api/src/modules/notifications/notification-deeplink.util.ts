@@ -12,7 +12,8 @@ export const NotificationDeepLinks = {
   provider: (providerId: string) => `/vet/${providerId}`,
   waitlist: () => `/bookings?tab=waitlist`,
   order: (orderId: string) => `/orders/${orderId}`,
-  checkout: (checkoutId: string) => `/checkout/${checkoutId}`,
+  /** A failed payment is retried from the cart (there is no page at /checkout/:id). */
+  cart: () => `/cart`,
   myOrders: () => `/orders`,
   travelBooking: (bookingId: string) => `/travel/bookings/${bookingId}`,
   providerTravelBooking: (bookingId: string) => `/provider/travel/bookings/${bookingId}`,

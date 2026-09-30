@@ -424,6 +424,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "درخواست نیاز به اصلاح دارد", body: "«{{title}}» منتشر نشد؛ یادداشت بررسی را ببینید و دوباره ارسال کنید." },
     en: { title: "Request needs changes", body: "“{{title}}” wasn't published; see the review note and resubmit." },
   },
+  "animal_support.donation_refunded": {
+    fa: { title: "کمک مالی شما بازپرداخت شد", body: "کمک مالی شما برای «{{title}}» به شما بازگردانده شد. جزئیات در رسید است." },
+    en: { title: "Your donation was refunded", body: "Your donation to “{{title}}” was refunded to you. Details are on the receipt." },
+  },
   "animal_support.donation_received": {
     fa: { title: "کمک مالی شما ثبت شد", body: "کمک مالی شما برای «{{title}}» ثبت شد. رسید را ببینید." },
     en: { title: "Your donation was recorded", body: "Your donation to “{{title}}” was recorded. See your receipt." },
