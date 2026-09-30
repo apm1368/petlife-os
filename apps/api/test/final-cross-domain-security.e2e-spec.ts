@@ -279,6 +279,29 @@ describe("Final hardening — cross-domain security", () => {
     await call("POST", `/financing/reconcile/${financing.id}`, owner).expect(201);
   });
 
+  it("a client can't point content at a file it didn't upload for that item — private keys, other pets' keys, traversal", async () => {
+    const grant = await db.petAccessGrant.findFirstOrThrow({ where: { canManageAccess: true, revokedAt: null, reason: null } });
+    const other = await db.pet.findFirstOrThrow({ where: { id: { not: grant.petId } } });
+    const owner = await cookieFor(grant.userId);
+    const foreignDoc = `health-documents/${other.id}/${randomUUID()}.pdf`;
+
+    // Public feed: one post referencing a private key used to 500 the feed for everyone.
+    const post = await call("POST", "/community/posts", owner).send({ type: "GENERAL", body: "A walk in the park today", mediaObjectKeys: [foreignDoc] });
+    expect(post.status).toBe(400);
+    await call("POST", "/community/posts", owner).send({ type: "GENERAL", body: "A walk", mediaObjectKeys: [`community-media/../health-documents/${other.id}/${randomUUID()}.pdf`] }).expect(400);
+    await request(server()).get("/community/posts").expect(200);
+
+    // Private files: another pet's key can't be attached to your own pet and then downloaded.
+    const doc = await call("POST", `/pets/${grant.petId}/health/documents`, owner).send({ key: foreignDoc, documentType: "OTHER", title: "x", mimeType: "application/pdf", fileSizeBytes: 12 });
+    expect(doc.status).toBe(400);
+    expect(doc.body.error.code).toBe("INVALID_UPLOAD_KEY");
+    const upload = await call("POST", `/pets/${grant.petId}/health/documents/upload-url`, owner).send({ contentType: "application/pdf", fileSizeBytes: 12 });
+    expect(upload.status).toBe(201);
+    await call("POST", `/pets/${grant.petId}/health/documents`, owner).send({ key: upload.body.key, documentType: "OTHER", title: "Own file", mimeType: "application/pdf", fileSizeBytes: 12 }).expect(201);
+    const memory = await call("POST", `/pets/${grant.petId}/memories`, owner).send({ type: "PHOTO", title: "Beach", occurredAt: new Date().toISOString(), mediaObjectKeys: [`pet-memories-private/${other.id}/${randomUUID()}.jpg`] });
+    expect(memory.status).toBe(400);
+  });
+
   it("no parametrised GET reveals anything private to an anonymous visitor or an unrelated account, and none crashes", async () => {
     const result = await sweep(["GET"]);
     expect(result.serverErrors).toEqual([]);

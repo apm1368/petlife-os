@@ -23,6 +23,7 @@ import {
 } from "class-validator";
 import { PaymentProvider, TravelBookingMode, TravelListingStatus, TravelListingType, TravelPricingMode } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 // --- Provider: listings -----------------------------------------------------
 
@@ -65,6 +66,7 @@ export class CreateTravelListingDto {
   @IsArray()
   @ArrayMaxSize(12)
   @IsString({ each: true })
+  @IsObjectKeyFor(["travel-listing-images"])
   imageObjectKeys?: string[];
 
   @IsOptional()
@@ -123,6 +125,7 @@ export class UpdateTravelListingDto {
   @IsArray()
   @ArrayMaxSize(12)
   @IsString({ each: true })
+  @IsObjectKeyFor(["travel-listing-images"])
   imageObjectKeys?: string[];
 
   @IsOptional()

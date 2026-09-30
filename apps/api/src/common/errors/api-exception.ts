@@ -399,6 +399,12 @@ export class PaymentOrderConfirmationIssueException extends ApiException {
   }
 }
 
+export class ForeignUploadKeyException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_UPLOAD_KEY", "This file wasn't uploaded for this item. Upload it again.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
 export class PaymentIntentNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PAYMENT_INTENT_NOT_FOUND", "Payment not found.", HttpStatus.NOT_FOUND, details);

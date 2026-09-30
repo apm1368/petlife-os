@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsIn, IsISO8601, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, Length, Max, Min } from "class-validator";
 import { LostPetContactPreference } from "@petlife/types";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreateLostPetIncidentDto {
   @IsString()
@@ -43,6 +44,7 @@ export class CreateLostPetIncidentDto {
 
   @IsOptional()
   @IsString()
+  @IsObjectKeyFor(["lost-pet-photos"])
   primaryPhotoObjectKey?: string;
 
   @IsOptional()
@@ -95,6 +97,7 @@ export class SubmitLostPetSightingDto {
 
   @IsOptional()
   @IsString()
+  @IsObjectKeyFor(["lost-pet-sightings"])
   photoObjectKey?: string;
 
   /** Free-form limited contact the reporter chose to leave — never required, never validated as a real phone/email since an anonymous reporter may leave anything (a first name, a Telegram handle). */

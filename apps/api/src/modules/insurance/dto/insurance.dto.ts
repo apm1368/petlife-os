@@ -1,6 +1,7 @@
 import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Length, Max, Min } from "class-validator";
 import { InsuranceCoverageType, InsuranceVerificationStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 // -- Providers -------------------------------------------------------------
 
@@ -32,6 +33,7 @@ export class CreateInsuranceProviderDto {
 
   @IsOptional()
   @IsString()
+  @IsObjectKeyFor(["insurance-providers"])
   logoObjectKey?: string;
 }
 
@@ -60,6 +62,7 @@ export class UpdateInsuranceProviderDto {
 
   @IsOptional()
   @IsString()
+  @IsObjectKeyFor(["insurance-providers"])
   logoObjectKey?: string;
 }
 

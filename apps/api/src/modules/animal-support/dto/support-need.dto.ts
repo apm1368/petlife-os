@@ -1,6 +1,7 @@
 import { IsArray, IsEnum, IsIn, IsInt, IsISO8601, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength, ValidateIf } from "class-validator";
 import { HelpOfferStatus, SupportNeedCategory, SupportNeedContactMode, SupportNeedStatus, SupportNeedUrgency } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreateSupportNeedListingDto {
   /** Batch 6 — deadline after which the listing stops accepting offers (service caps it at 180 days). */
@@ -49,6 +50,7 @@ export class CreateSupportNeedListingDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["support-need-images", "animal-support-orgs"])
   imageObjectKeys?: string[];
 
   @IsOptional()
@@ -123,6 +125,7 @@ export class UpdateSupportNeedListingDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["support-need-images", "animal-support-orgs"])
   imageObjectKeys?: string[];
 
   @IsOptional()

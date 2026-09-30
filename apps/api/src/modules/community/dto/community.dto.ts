@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import { IsArray, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from "class-validator";
 import { CommunityPostType, CommunityReactionType, CommunityReportReason, CommunityReportStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreateCommunityPostDto {
   @IsEnum(CommunityPostType)
@@ -23,6 +24,7 @@ export class CreateCommunityPostDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["community-media"])
   mediaObjectKeys?: string[];
 }
 
