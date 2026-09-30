@@ -1626,3 +1626,15 @@ export class ReportNotOpenException extends ApiException {
     super("REPORT_NOT_OPEN", "Only open reports can be escalated or dismissed.", HttpStatus.CONFLICT, details);
   }
 }
+
+export class TrustActionNotApplicableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_ACTION_NOT_APPLICABLE", "This action can't be applied to the subject in its current state.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TrustSubjectNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_SUBJECT_NOT_FOUND", "The subject of this case no longer exists.", HttpStatus.NOT_FOUND, details);
+  }
+}

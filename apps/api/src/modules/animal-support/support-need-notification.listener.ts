@@ -134,6 +134,26 @@ export class SupportNeedNotificationListener {
     });
   }
 
+  @OnEvent("AnimalSupportOrganizationModerated")
+  onOrgModerated(p: { organizationId: string; suspended: boolean }, domainEventId: string) {
+    return this.safely("AnimalSupportOrganizationModerated", async () => {
+      const org = await this.prisma.animalSupportOrganization.findUnique({ where: { id: p.organizationId }, select: { name: true } });
+      for (const userId of await this.orgAccess.managerUserIds(p.organizationId)) {
+        await this.orchestrator.notify({
+          userId,
+          type: p.suspended ? "ngo.suspended" : "ngo.reinstated",
+          category: NotificationCategory.ANIMAL_SUPPORT,
+          priority: p.suspended ? NotificationPriority.HIGH : NotificationPriority.NORMAL,
+          templateParams: { title: org?.name ?? "" },
+          entityType: "AnimalSupportOrganization",
+          entityId: p.organizationId,
+          deepLink: NotificationDeepLinks.ngoPortal(),
+          domainEventId,
+        });
+      }
+    });
+  }
+
   @OnEvent("SupportNeedListingModerated")
   onModerated(p: { listingId: string; to: string }, domainEventId: string) {
     return this.safely("SupportNeedListingModerated", async () => {

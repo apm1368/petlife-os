@@ -2647,6 +2647,8 @@ export interface TrustActionDto {
   actionType: TrustActionType;
   reason: string;
   performedByAdmin: AdminActorSummaryDto;
+  /** Batch 6 — what the action changed on its subject ({ before, after }), used by RESTORE and shown in the case history. */
+  effectSummary: { before: Record<string, unknown>; after: Record<string, unknown>; restoredByActionId?: string } | null;
   createdAt: string;
   appeal: AppealDto | null;
 }

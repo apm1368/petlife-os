@@ -411,6 +411,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "وضعیت احراز سازمان", body: "وضعیت احراز «{{title}}» به‌روز شد. جزئیات را ببینید." },
     en: { title: "Verification update", body: "The verification status of “{{title}}” changed. See the details." },
   },
+  "ngo.suspended": {
+    fa: { title: "نمایش عمومی سازمان متوقف شد", body: "«{{title}}» پس از بررسی گزارش‌ها موقتاً از نمایش عمومی خارج شد و درخواست‌های فعال آن متوقف شدند." },
+    en: { title: "Organization paused", body: "“{{title}}” was taken out of public view after a report review, and its live requests were paused." },
+  },
+  "ngo.reinstated": {
+    fa: { title: "سازمان دوباره نمایش داده می‌شود", body: "«{{title}}» دوباره به‌صورت عمومی نمایش داده می‌شود." },
+    en: { title: "Organization reinstated", body: "“{{title}}” is publicly listed again." },
+  },
   "animal_support.listing_removed": {
     fa: { title: "درخواست حذف شد", body: "«{{title}}» توسط تیم PET LIFE از نمایش عمومی خارج شد." },
     en: { title: "Request removed", body: "“{{title}}” was removed from public view by the PET LIFE team." },

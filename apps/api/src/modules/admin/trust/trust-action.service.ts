@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { CommunityContentStatus, type Prisma, ProviderVerificationStatus, SellerStatus, SellerVerificationStatus, TrustActionType, TrustCaseStatus, TrustSubjectType } from "@prisma/client";
+import { CommunityReportStatus, type Prisma, ProviderVerificationStatus, SellerStatus, SellerVerificationStatus, TrustActionType, TrustCaseStatus, TrustSubjectType } from "@prisma/client";
 import type { AppealDto, TrustActionDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { AppealAlreadyExistsException, AppealNotFoundException, TrustActionNotFoundException, TrustCaseNotFoundException } from "../../../common/errors/api-exception";
+import { AppealAlreadyExistsException, AppealNotFoundException, TrustActionNotApplicableException, TrustActionNotFoundException, TrustCaseNotFoundException } from "../../../common/errors/api-exception";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { toAppealDto, toTrustActionDto } from "./trust.mapper";
+import { applyTrustEffect, EFFECT_SUBJECTS, restoreTrustEffect, type TrustEffect } from "./trust-subject-effects";
 import type { ResolveAppealDto, SubmitAppealDto, TakeTrustActionDto } from "./dto/trust.dto";
 
 const APPEAL_INCLUDE = { reviewerAdmin: { include: { user: true } } } as const;
@@ -23,7 +24,9 @@ const ACTION_INCLUDE = { performedByAdmin: { include: { user: true } }, appeal: 
  * see README "Known limitations". ProviderOrganization has only
  * `verificationStatus` (no separate operational-status field the way
  * SellerOrganization has both `status` and `verificationStatus`), so a
- * provider SUSPEND/RESTORE necessarily moves that one field.
+ * provider SUSPEND/RESTORE necessarily moves that one field. Batch 6 subjects
+ * (community content, support listings, lost-pet incidents/sightings,
+ * organizations) are handled by trust-subject-effects.ts.
  */
 function operationalUpdateFor(subjectType: TrustSubjectType, actionType: TrustActionType): { providerUpdate?: Prisma.ProviderOrganizationUpdateInput; sellerUpdate?: Prisma.SellerOrganizationUpdateInput } {
   if (subjectType === TrustSubjectType.PROVIDER) {
@@ -40,26 +43,6 @@ function operationalUpdateFor(subjectType: TrustSubjectType, actionType: TrustAc
   return {};
 }
 
-/**
- * Handoff 18: COMMUNITY_CONTENT's operational effect (spec: schema doc
- * comment "a TrustAction of type REMOVE_CONTENT sets this to REMOVED").
- * `subjectId` is a plain generalized id with no FK (see TrustCase's own
- * schema doc comment) — it may name either a CommunityPost or a
- * CommunityComment, so this tries the post table first and falls back to
- * the comment table only if no post matched, never both.
- */
-async function applyCommunityContentEffect(tx: Prisma.TransactionClient, subjectId: string, actionType: TrustActionType): Promise<void> {
-  let nextStatus: CommunityContentStatus | undefined;
-  if (actionType === TrustActionType.REMOVE_CONTENT) nextStatus = CommunityContentStatus.REMOVED;
-  else if (actionType === TrustActionType.RESTORE) nextStatus = CommunityContentStatus.PUBLISHED;
-  if (!nextStatus) return;
-
-  const postUpdate = await tx.communityPost.updateMany({ where: { id: subjectId }, data: { status: nextStatus } });
-  if (postUpdate.count === 0) {
-    await tx.communityComment.updateMany({ where: { id: subjectId }, data: { status: nextStatus } });
-  }
-}
-
 @Injectable()
 export class TrustActionService {
   constructor(
@@ -73,7 +56,7 @@ export class TrustActionService {
       const trustCase = await tx.trustCase.findUnique({ where: { id: trustCaseId } });
       if (!trustCase) throw new TrustCaseNotFoundException({ trustCaseId });
 
-      const created = await tx.trustAction.create({
+      let created = await tx.trustAction.create({
         data: { trustCaseId, actionType: dto.actionType, reason: dto.reason, performedByAdminId: admin.adminUserId },
         include: ACTION_INCLUDE,
       });
@@ -81,7 +64,31 @@ export class TrustActionService {
       const { providerUpdate, sellerUpdate } = operationalUpdateFor(trustCase.subjectType, dto.actionType);
       if (providerUpdate) await tx.providerOrganization.update({ where: { id: trustCase.subjectId }, data: providerUpdate });
       if (sellerUpdate) await tx.sellerOrganization.update({ where: { id: trustCase.subjectId }, data: sellerUpdate });
-      if (trustCase.subjectType === TrustSubjectType.COMMUNITY_CONTENT) await applyCommunityContentEffect(tx, trustCase.subjectId, dto.actionType);
+
+      // Batch 6 — subjects whose effect is recorded so RESTORE can return them to their exact prior state.
+      let effect: TrustEffect | null = null;
+      if (EFFECT_SUBJECTS.includes(trustCase.subjectType)) {
+        if (dto.actionType === TrustActionType.RESTORE) {
+          const history = await tx.trustAction.findMany({
+            where: { id: { not: created.id }, actionType: { not: TrustActionType.RESTORE }, trustCase: { subjectType: trustCase.subjectType, subjectId: trustCase.subjectId } },
+            orderBy: { createdAt: "desc" },
+            take: 50,
+          });
+          const last = history.find((a) => a.effectSummary && !(a.effectSummary as unknown as TrustEffect).restoredByActionId);
+          if (!last) throw new TrustActionNotApplicableException({ subjectType: trustCase.subjectType, reason: "nothing to restore" });
+          effect = await restoreTrustEffect(tx, trustCase.subjectType, trustCase.subjectId, last.effectSummary as unknown as TrustEffect);
+          await tx.trustAction.update({ where: { id: last.id }, data: { effectSummary: { ...(last.effectSummary as object), restoredByActionId: created.id } } });
+        } else {
+          effect = await applyTrustEffect(tx, trustCase.subjectType, trustCase.subjectId, dto.actionType);
+        }
+        if (effect) created = await tx.trustAction.update({ where: { id: created.id }, data: { effectSummary: effect as unknown as Prisma.InputJsonValue }, include: ACTION_INCLUDE });
+        await this.publishSubjectEvents(tx, trustCase.subjectType, trustCase.subjectId, dto.actionType, effect);
+      }
+
+      // A decision on the case answers the reports that were escalated into it.
+      if (dto.actionType !== TrustActionType.RESTORE) {
+        await tx.communityReport.updateMany({ where: { trustCaseId, status: CommunityReportStatus.ESCALATED }, data: { status: CommunityReportStatus.RESOLVED } });
+      }
 
       // Taking an action moves the case into review if it was still OPEN —
       // an admin who has already started acting on a case is, by
@@ -101,7 +108,7 @@ export class TrustActionService {
         entityType: "TRUST_CASE",
         entityId: trustCaseId,
         reason: dto.reason,
-        afterSummary: { actionType: dto.actionType, operationalEffect: providerUpdate ?? sellerUpdate ?? null },
+        afterSummary: { actionType: dto.actionType, subjectType: trustCase.subjectType, operationalEffect: (providerUpdate ?? sellerUpdate ?? (effect as unknown as Record<string, unknown>) ?? null) as never },
         requestId,
         tx,
       });
@@ -109,6 +116,16 @@ export class TrustActionService {
       return created;
     });
     return toTrustActionDto(action);
+  }
+
+  /** Owner-facing consequences of a moderation effect, through the existing notification listeners. */
+  private async publishSubjectEvents(tx: Prisma.TransactionClient, subjectType: TrustSubjectType, subjectId: string, actionType: TrustActionType, effect: TrustEffect | null) {
+    if (!effect) return;
+    if (subjectType === TrustSubjectType.SUPPORT_NEED) {
+      await this.events.publish("SupportNeedListingModerated", { listingId: subjectId, from: effect.before.status, to: effect.after.status, viaTrustAction: actionType }, { tx, aggregateType: "SupportNeedListing", aggregateId: subjectId });
+    } else if (subjectType === TrustSubjectType.ANIMAL_SUPPORT_ORGANIZATION && "isPubliclyListed" in effect.after) {
+      await this.events.publish("AnimalSupportOrganizationModerated", { organizationId: subjectId, suspended: effect.after.isPubliclyListed === false }, { tx, aggregateType: "AnimalSupportOrganization", aggregateId: subjectId });
+    }
   }
 
   async submitAppeal(admin: ResolvedAdminContext, trustActionId: string, dto: SubmitAppealDto, requestId?: string): Promise<AppealDto> {

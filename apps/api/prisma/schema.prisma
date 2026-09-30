@@ -4631,6 +4631,10 @@ model TrustAction {
 
   actionType TrustActionType
   reason     String
+  /// Batch 6 — what the action actually changed on its subject
+  /// ({ before, after, ... }), so RESTORE can put back exactly the prior state
+  /// instead of a guessed default. Null when the action had no operational effect.
+  effectSummary Json?
 
   performedByAdminId String    @db.Uuid
   performedByAdmin   AdminUser @relation(fields: [performedByAdminId], references: [id], onDelete: Restrict)

@@ -53,6 +53,15 @@ describe("Batch 6 — Animal support ecosystem", () => {
 
   afterEach(() => logSpy.mockRestore());
 
+  async function eventually(check: () => Promise<boolean>, timeoutMs = 5000) {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      if (await check()) return;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    throw new Error("Condition not met in time");
+  }
+
   const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   async function signUp(identifier: string): Promise<Cookies> {
@@ -704,6 +713,123 @@ describe("Batch 6 — Animal support ecosystem", () => {
       await stranger.c.post("/reports").send({ targetType: "LOST_PET_SIGHTING", targetId: sighting.body.id, reason: "SCAM" }).expect(404);
       const r = await o.c.post("/reports").send({ targetType: "LOST_PET_SIGHTING", targetId: sighting.body.id, reason: "SCAM" }).expect(201);
       expect(r.body.lostPetSightingId).toBe(sighting.body.id);
+    });
+  });
+
+
+  // ------------------------------------------------------------------ 6F trust & safety
+
+  describe("trust & safety enforcement", () => {
+    async function caseFor(mod: Client, reporter: Client, targetType: string, targetId: string) {
+      const report = await reporter.post("/reports").send({ targetType, targetId, reason: "SCAM", details: "Asked for card-to-card payment" }).expect(201);
+      const escalated = await mod.post(`/admin/community/reports/${report.body.id}/escalate`).send({ reason: "Possible fraud" }).expect(201);
+      return { reportId: report.body.id as string, caseId: escalated.body.trustCaseId as string };
+    }
+
+    it("removing a support listing hides it, resolves the reports, tells the publisher, and RESTORE returns its exact prior state", async () => {
+      const publisher = await user("b6-publisher");
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const reporter = await user("b6-reporter");
+      const needId = await publishedNeed(publisher.c, mod.c);
+      // Some help already arrived, so the listing is PARTIALLY_FULFILLED — restore must bring back exactly that.
+      await prisma.supportNeedListing.update({ where: { id: needId }, data: { status: "PARTIALLY_FULFILLED" } });
+      const { reportId, caseId } = await caseFor(mod.c, reporter.c, "SUPPORT_NEED", needId);
+
+      const context = await mod.c.get(`/admin/trust/cases/${caseId}/context`).expect(200);
+      expect(context.body.subject).toMatchObject({ kind: "SUPPORT_NEED", status: "PARTIALLY_FULFILLED" });
+      expect(context.body.reports).toMatchObject({ total: 1, distinctReporters: 1, byReason: { SCAM: 1 } });
+      expect(context.body.availableActions).toEqual(expect.arrayContaining(["REMOVE_CONTENT", "RESTRICT", "RESTORE"]));
+      expect(JSON.stringify(context.body)).not.toContain(reporter.userId);
+      expect(leaksExactCoordinates(context.body)).toBe(false);
+
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "REMOVE_CONTENT", reason: "Fraudulent fundraising" }).expect(201);
+      expect((await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: needId } })).status).toBe("REMOVED");
+      await request(server).get(`/animal-support/needs/${needId}`).expect(404);
+      expect((await prisma.communityReport.findUniqueOrThrow({ where: { id: reportId } })).status).toBe("RESOLVED");
+      await eventually(async () => (await prisma.notification.count({ where: { userId: publisher.userId, type: "animal_support.listing_removed" } })) === 1);
+
+      // A second removal is refused (nothing to change), restore brings back PARTIALLY_FULFILLED, and a second restore is refused.
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "REMOVE_CONTENT", reason: "again" }).expect(409);
+      const restored = await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTORE", reason: "Publisher proved the need is genuine" }).expect(201);
+      expect(restored.body.effectSummary).toMatchObject({ before: { status: "REMOVED" }, after: { status: "PARTIALLY_FULFILLED" } });
+      expect((await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: needId } })).status).toBe("PARTIALLY_FULFILLED");
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTORE", reason: "twice" }).expect(409);
+
+      // History is preserved: the removal and the restore are both on the case, and both audited.
+      const full = await mod.c.get(`/admin/trust/cases/${caseId}`).expect(200);
+      expect(full.body.actions.map((a: { actionType: string }) => a.actionType).sort()).toEqual(["REMOVE_CONTENT", "RESTORE"]);
+      expect(full.body.actions.find((a: { actionType: string }) => a.actionType === "REMOVE_CONTENT").effectSummary.restoredByActionId).toBe(restored.body.id);
+      expect(await prisma.adminAuditLog.count({ where: { entityId: caseId, action: "trust_action.taken" } })).toBe(2);
+    });
+
+    it("suspending an organization unlists it and pauses its live requests; restore brings back only what it paused", async () => {
+      const ops = await admin(AdminRole.ADMIN);
+      const org = await ops.c.post("/admin/animal-support/organizations").send({ type: "RESCUE_GROUP", name: `Rescue ${unique()}` }).expect(201);
+      const owner = await user("b6-org-owner");
+      await ops.c.post(`/admin/animal-support/organizations/${org.body.id}/members`).send({ email: owner.email, role: "OWNER" }).expect(201);
+      await prisma.animalSupportOrganization.update({ where: { id: org.body.id }, data: { isPubliclyListed: true, verificationStatus: "VERIFIED" } });
+      const live = await publishedNeed(owner.c, ops.c, { organizationId: org.body.id });
+      const draft = await owner.c.post("/animal-support/needs").send({ title: "Kennel repairs later", description: "We will need kennel repairs next month.", category: "SHELTER_SUPPLIES", province: "تهران", city: "تهران", organizationId: org.body.id }).expect(201);
+      const reporter = await user("b6-reporter");
+      const { caseId } = await caseFor(ops.c, reporter.c, "ORGANIZATION", org.body.id);
+
+      await ops.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "SUSPEND", reason: "Multiple scam reports" }).expect(201);
+      expect((await prisma.animalSupportOrganization.findUniqueOrThrow({ where: { id: org.body.id } })).isPubliclyListed).toBe(false);
+      expect((await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: live } })).status).toBe("PAUSED");
+      expect((await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: draft.body.id } })).status).toBe("DRAFT");
+      await request(server).get(`/animal-support/organizations/${org.body.id}`).expect(404);
+      await eventually(async () => (await prisma.notification.count({ where: { userId: owner.userId, type: "ngo.suspended" } })) === 1);
+
+      await ops.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTORE", reason: "Documents verified" }).expect(201);
+      expect((await prisma.animalSupportOrganization.findUniqueOrThrow({ where: { id: org.body.id } })).isPubliclyListed).toBe(true);
+      expect((await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: live } })).status).toBe("PUBLISHED");
+      expect((await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: draft.body.id } })).status).toBe("DRAFT");
+    });
+
+    it("a lost-pet incident can be closed (pet untouched) and restored; a scam sighting is rejected; only trust staff may act", async () => {
+      const o = await owner();
+      const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost near the market", publicArea: "Tajrish", lastKnownLatitude: EXACT_LAT, lastKnownLongitude: EXACT_LNG, contactPreference: "IN_APP_MESSAGE" }).expect(201);
+      const petBefore = await prisma.pet.findUniqueOrThrow({ where: { id: o.petId } });
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const reporter = await user("b6-reporter");
+      const { caseId } = await caseFor(mod.c, reporter.c, "LOST_PET_INCIDENT", incident.body.id);
+      const context = await mod.c.get(`/admin/trust/cases/${caseId}/context`).expect(200);
+      expect(leaksExactCoordinates(context.body)).toBe(false);
+
+      const verifier = await admin(AdminRole.VERIFICATION);
+      await verifier.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "REMOVE_CONTENT", reason: "no" }).expect(403);
+      await verifier.c.get(`/admin/trust/cases/${caseId}/context`).expect(403);
+      await reporter.c.get(`/admin/trust/cases/${caseId}/context`).expect(403);
+
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "REMOVE_CONTENT", reason: "Fake incident used to collect money" }).expect(201);
+      await request(server).get(`/lost-pets/${incident.body.id}`).expect(404);
+      expect((await prisma.pet.findUniqueOrThrow({ where: { id: o.petId } })).lifecycleStatus).toBe(petBefore.lifecycleStatus);
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTORE", reason: "Owner confirmed" }).expect(201);
+      const back = await prisma.lostPetIncident.findUniqueOrThrow({ where: { id: incident.body.id } });
+      expect(back.status).toBe(incident.body.status);
+      expect(back.closedAt).toBeNull();
+
+      // Sighting: reported by the household, escalated, rejected.
+      const primed = await request(server).get("/health/live");
+      const csrf = extractCookie(primed.headers["set-cookie"], "petlife_csrf")!;
+      const sighting = await request(server).post(`/lost-pets/${incident.body.id}/sightings`).set("Cookie", `petlife_csrf=${csrf}`).set("x-csrf-token", csrf).send({ seenAt: new Date().toISOString(), description: "Pay a reward first" }).expect(201);
+      const s = await caseFor(mod.c, o.c, "LOST_PET_SIGHTING", sighting.body.id);
+      await mod.c.post(`/admin/trust/cases/${s.caseId}/actions`).send({ actionType: "REMOVE_CONTENT", reason: "Extortion attempt" }).expect(201);
+      expect((await prisma.lostPetSighting.findUniqueOrThrow({ where: { id: sighting.body.id } })).status).toBe("REJECTED");
+    });
+
+    it("community content: RESTRICT hides, RESTORE brings it back, and restore without a prior effect is refused", async () => {
+      const author = await user("b6-author");
+      const mod = await admin(AdminRole.TRUST_SAFETY);
+      const post = await author.c.post("/community/posts").send({ type: "GENERAL", body: "Borderline post" }).expect(201);
+      const report = await (await user("b6-reporter")).c.post(`/community/posts/${post.body.id}/report`).send({ reason: "HARASSMENT" }).expect(201);
+      const escalated = await mod.c.post(`/admin/community/reports/${report.body.id}/escalate`).send({ reason: "Check tone" }).expect(201);
+      const caseId = escalated.body.trustCaseId as string;
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTORE", reason: "nothing yet" }).expect(409);
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTRICT", reason: "Hide while reviewing" }).expect(201);
+      await request(server).get(`/community/posts/${post.body.id}`).expect(404);
+      await mod.c.post(`/admin/trust/cases/${caseId}/actions`).send({ actionType: "RESTORE", reason: "Fine after all" }).expect(201);
+      await request(server).get(`/community/posts/${post.body.id}`).expect(200);
     });
   });
 

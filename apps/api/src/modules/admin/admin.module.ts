@@ -29,6 +29,7 @@ import { SupportNotificationListener } from "./support/support-notification.list
 import { DisputeService } from "./dispute/dispute.service";
 import { DisputeController } from "./dispute/dispute.controller";
 import { TrustCaseService } from "./trust/trust-case.service";
+import { TrustCaseContextService } from "./trust/trust-case-context.service";
 import { TrustActionService } from "./trust/trust-action.service";
 import { TrustController } from "./trust/trust.controller";
 import { AdminVerificationService } from "./verification/admin-verification.service";
@@ -134,6 +135,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     SupportNotificationListener,
     DisputeService,
     TrustCaseService,
+    TrustCaseContextService,
     TrustActionService,
     AdminVerificationService,
     AdminTaskService,
