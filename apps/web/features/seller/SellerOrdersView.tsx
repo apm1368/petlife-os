@@ -13,6 +13,8 @@ import { fulfillmentTone } from "@/features/commerce/fulfillment-tone";
 /** Seller Orders (spec section 37, 42) — spans PET LIFE OS checkout Orders and marketplace-origin Orders, source always shown explicitly. */
 export function SellerOrdersView() {
   const t = useTranslations("seller.orders");
+  const tOrder = useTranslations("seller.orderDetail");
+  const tStatus = useTranslations("commerce.statusLabels");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
@@ -49,12 +51,12 @@ export function SellerOrdersView() {
           <ContextSurface className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-3">
               <span className="text-body font-medium text-text-primary">{order.source ? t("sourceMarketplace", { provider: order.source }) : t("sourcePetlife")}</span>
-              <StatusLabel tone={order.status === "CANCELLED" ? "urgent" : "neutral"}>{order.status}</StatusLabel>
+              <StatusLabel tone={order.status === "CANCELLED" ? "urgent" : "neutral"}>{tOrder(`orderStatus.${order.status}` as "orderStatus.CONFIRMED")}</StatusLabel>
             </div>
             {order.externalOrderId ? <span className="text-metadata text-text-secondary">{t("externalOrderId", { id: order.externalOrderId })}</span> : null}
             <div className="flex flex-wrap gap-1.5">
               <StatusLabel tone="neutral">{t(`paymentSource.${order.paymentSource}`)}</StatusLabel>
-              {order.fulfillmentStatus ? <StatusLabel tone={fulfillmentTone(order.fulfillmentStatus)}>{order.fulfillmentStatus}</StatusLabel> : null}
+              {order.fulfillmentStatus ? <StatusLabel tone={fulfillmentTone(order.fulfillmentStatus)}>{tStatus(`fulfillment.${order.fulfillmentStatus}` as "fulfillment.PENDING")}</StatusLabel> : null}
             </div>
             <div className="flex items-center justify-between gap-3">
               <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(order.createdAt))}</span>
