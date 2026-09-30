@@ -59,3 +59,20 @@ Pet-access cards overflowed at 1024; status labels wrapped to three lines at 390
 - Terms/Privacy acceptance has never been recorded at sign-up (0 consents live); the Privacy Center lets people accept the current version (owner/legal decision on sign-up flow).
 - No pet-transfer flow exists (only a lifecycle status).
 - Complimentary access exists only as an admin entitlement override (no complimentary subscription status).
+
+## Release and live QA (2026-09-30)
+- Pre-release backup: `/root/petlife-backups/release-b8-20260930-072521/petlife_os.dump` (pg_dump -Fc, 212 tables verified readable) + `ROLLBACK.md`.
+- `integration/local` fast-forwarded `b190f68 → f539f92` (Batch 7 had not landed; nothing to integrate).
+- CI run `36683616945`: success (lint, typecheck, migrations, unit, API e2e, build). Deploy run `36683617344`: gate job success, "Deploy over SSH" success (completed 07:35:33Z).
+- Live checkout `/var/www/petlife-os` at `f539f92`; `GET /api/health/live` → 200 `{"status":"ok"}`; `prisma migrate status` → 40 migrations, up to date; `202610010001_batch8_contact_verification` and `202610010002_batch8_privacy_requests` finished, not rolled back. Backfill: 14 users, 12 with e-mail, 12 e-mail verified (all OTP sign-ups, no passwords), 0 phones.
+- pm2 after deploy: petlife-api online 147 MB, petlife-web online 88 MB; host memory 1.97 GB free / 2.63 GB available, swap 409 MB used of 2 GB. (A background CI watcher was reaped for low memory during the on-host build; the release itself was unaffected.)
+
+### Read-only live checks (no sign-in, no production account touched)
+| Check | fa 1440 | fa 390 | en 1440 | en 390 |
+|---|---|---|---|---|
+| `/welcome` sign-in entry | 200, rtl, no overflow | 200, rtl | 200, ltr | 200, ltr |
+| `/account/forgot` recovery entry | 200, rtl | 200, rtl | 200, ltr | 200, ltr |
+| `/profile/security` signed out → `/welcome?returnTo=%2F…%2Fprofile%2Fsecurity` | ok | ok | ok | ok |
+| `/no-such-page-b8` localized 404 (`noindex`) | 404 "این صفحه پیدا نشد" | 404 | 404 "We couldn't find that page" | 404 |
+
+API (unauthenticated): `/me`, `/account/security`, `/account/activity`, `/account/privacy`, `/pets/:id`, `/household-invitations/:token` → 401 `UNAUTHENTICATED`; `POST /account/security/sessions/revoke-all` without CSRF token → 403; `/auth/google?returnTo=https://evil.example` → 503 (disabled), no redirect. No page errors in the browser runs.
