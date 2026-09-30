@@ -48,7 +48,7 @@ function isActive(grant: { startsAt: string | null; expiresAt: string | null }, 
  * pet's grants say what they can see and do.
  */
 export function HouseholdCenterView() {
-  const { t, locale } = useAccountCopy();
+  const { t, locale, num } = useAccountCopy();
   const router = useRouter();
   const currentUserId = useSessionStore((s) => s.user?.id);
   const [households, setHouseholds] = useState<HouseholdDto[] | null>(null);
@@ -164,7 +164,7 @@ export function HouseholdCenterView() {
                   </b>
                   <p>
                     {access?.pets.length ? t(`دسترسی به ${access.pets.join("، ")}`, `Access to ${access.pets.join(", ")}`) : t("بدون دسترسی فعال به حیوان", "No active pet access")}
-                    {access?.temporary ? ` · ${t(`${access.temporary} دسترسی موقت`, `${access.temporary} temporary`)}` : ""}
+                    {access?.temporary ? ` · ${t(`${num(access.temporary)} دسترسی موقت`, `${num(access.temporary)} temporary`)}` : ""}
                   </p>
                   <p className="text-metadata text-text-secondary">{t("عضو از", "Joined")} {formatAccountDate(member.createdAt, locale)}</p>
                 </div>
@@ -231,7 +231,7 @@ export function HouseholdCenterView() {
                 </div>
                 <div>
                   <b>{pet.name}</b>
-                  <p>{t(`${data.grants.filter((g) => g.petId === pet.id && isActive(g, Date.now())).length} دسترسی فعال`, `${data.grants.filter((g) => g.petId === pet.id && isActive(g, Date.now())).length} active grants`)}</p>
+                  <p>{t(`${num(data.grants.filter((g) => g.petId === pet.id && isActive(g, Date.now())).length)} دسترسی فعال`, `${num(data.grants.filter((g) => g.petId === pet.id && isActive(g, Date.now())).length)} active grants`)}</p>
                 </div>
                 {isOwner ? <Button variant="secondary" size="sm" onClick={() => router.push(`/${locale}/profile/household/pets/${pet.id}/access`)}>{t("مدیریت دسترسی", "Manage access")}</Button> : <span />}
                 <Button variant="ghost" size="sm" onClick={() => router.push(`/${locale}/profile/household/pets/${pet.id}/lifecycle`)}>{t("وضعیت زندگی", "Lifecycle")}</Button>

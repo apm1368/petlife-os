@@ -54,7 +54,7 @@ const CONSENT: Record<string, [string, string]> = { TERMS: ["شرایط استف
  * whitelisted detail the API returns; dates follow the locale's calendar.
  */
 export function AccountActivityView() {
-  const { t, fa, locale } = useAccountCopy();
+  const { t, fa, locale, num } = useAccountCopy();
   const [filter, setFilter] = useState<ActivityGroupValue | "ALL">("ALL");
   const [items, setItems] = useState<AccountActivityItemDto[] | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -96,7 +96,7 @@ export function AccountActivityView() {
     if (item.type === "UserAuthenticated") return [d.method && METHOD[d.method] ? t(METHOD[d.method]![0], METHOD[d.method]![1]) : null, d.device].filter(Boolean).join(" · ") || null;
     if (item.type === "ConsentChanged" && d.kind) return `${CONSENT[d.kind] ? t(CONSENT[d.kind]![0], CONSENT[d.kind]![1]) : d.kind}: ${d.granted ? t("پذیرفته شد", "given") : t("پس گرفته شد", "withdrawn")}`;
     if (item.type === "ContactChanged" && d.kind) return d.kind === "email" ? t("ایمیل", "Email") : t("موبایل", "Mobile");
-    if ((item.type === "OtherSessionsRevoked" || item.type === "AllSessionsRevoked") && typeof d.count === "number") return t(`${d.count} دستگاه`, `${d.count} device(s)`);
+    if ((item.type === "OtherSessionsRevoked" || item.type === "AllSessionsRevoked") && typeof d.count === "number") return t(`${num(d.count)} دستگاه`, `${num(d.count)} device(s)`);
     if (item.type === "SubscriptionStarted" && d.isTrial) return t("دورهٔ آزمایشی", "Trial");
     if (item.type === "SubscriptionCancelRequested" && d.effectiveAt) return t(`پایان در ${formatAccountDate(d.effectiveAt, locale)}`, `Ends ${formatAccountDate(d.effectiveAt, locale)}`);
     if (item.type === "SubscriptionRenewed" && d.recovered) return t("پس از تأخیر در پرداخت", "After a late payment");

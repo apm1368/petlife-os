@@ -164,7 +164,7 @@ export function SubscriptionOverviewView() {
                     ? t("included")
                     : t("notIncluded")
                   : usageItem
-                    ? t("usageOf", { used: usageItem.used, limit: usageItem.limit ?? "∞" })
+                    ? t("usageOf", { used: new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(usageItem.used), limit: usageItem.limit === null ? "∞" : new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(usageItem.limit) })
                     : entitlement.limitValue === null
                       ? t("unlimited")
                       : entitlement.limitValue}
@@ -193,7 +193,9 @@ export function SubscriptionOverviewView() {
                 </span>
                 <span className="flex items-center gap-2">
                   <span className="text-metadata text-text-secondary">{formatCurrency(attempt.amount, locale === "fa" ? "fa" : "en")}</span>
-                  <StatusLabel tone={attempt.status === "SUCCEEDED" ? "success" : attempt.status === "FAILED" ? "urgent" : "neutral"}>{t(`attemptStatus.${attempt.status}`)}</StatusLabel>
+                  <StatusLabel tone={attempt.status === "SUCCEEDED" ? "success" : attempt.status === "FAILED" ? "urgent" : "neutral"}>
+                    {attempt.status === "SUCCEEDED" && sub.billingMode === "SANDBOX" ? t("attemptStatus.SIMULATED") : t(`attemptStatus.${attempt.status}`)}
+                  </StatusLabel>
                 </span>
               </div>
             ))

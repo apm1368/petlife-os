@@ -30,7 +30,7 @@ type Confirm = { kind: "session"; session: AccountSessionDto } | { kind: "others
  * and nothing (location, IP) is invented or shown beyond that.
  */
 export function SecurityCenterView() {
-  const { t, locale } = useAccountCopy();
+  const { t, locale, num } = useAccountCopy();
   const signOut = useSignOut();
   const [data, setData] = useState<SecurityCenterDto | null>(null);
   const [methods, setMethods] = useState<AuthMethodsDto | null>(null);
@@ -98,7 +98,7 @@ export function SecurityCenterView() {
       </section>
 
       <PasswordForm hasPassword={data.methods.password.connected} onDone={async (count) => {
-        setNotice(count > 0 ? t(`رمز ذخیره شد و ${count} دستگاه دیگر خارج شد. این دستگاه همچنان وارد است.`, `Password saved and ${count} other device(s) were signed out. You're still signed in here.`) : t("رمز ذخیره شد. این دستگاه همچنان وارد است.", "Password saved. You're still signed in here."));
+        setNotice(count > 0 ? t(`رمز ذخیره شد و ${num(count)} دستگاه دیگر خارج شد. این دستگاه همچنان وارد است.`, `Password saved and ${num(count)} other device(s) were signed out. You're still signed in here.`) : t("رمز ذخیره شد. این دستگاه همچنان وارد است.", "Password saved. You're still signed in here."));
         await load();
       }} />
 
@@ -184,12 +184,12 @@ export function SecurityCenterView() {
           open
           onClose={() => setConfirm(null)}
           title={t("خروج از سایر دستگاه‌ها", "Sign out other devices")}
-          consequences={[t(`${others.length} دستگاه دیگر فوراً خارج می‌شوند.`, `${others.length} other device(s) are signed out immediately.`)]}
+          consequences={[t(`${num(others.length)} دستگاه دیگر فوراً خارج می‌شوند.`, `${num(others.length)} other device(s) are signed out immediately.`)]}
           keeps={[t("همین دستگاه وارد می‌ماند.", "You stay signed in on this device.")]}
           confirmLabel={t("خروج دستگاه‌ها", "Sign them out")}
           onConfirm={async () => {
             const result = await accountService.revokeOtherSessions();
-            setNotice(t(`${result.count} دستگاه خارج شد.`, `${result.count} device(s) signed out.`));
+            setNotice(t(`${num(result.count)} دستگاه خارج شد.`, `${num(result.count)} device(s) signed out.`));
             await load();
           }}
         />

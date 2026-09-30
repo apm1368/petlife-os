@@ -216,3 +216,7 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 .activity-list>li>span{position:relative;width:8px;height:8px;margin-top:7px;border-radius:50%;background:var(--brand-natural)}
 .activity-list>li>p{display:flex;flex-direction:column;gap:2px;margin:0}
 .activity-list .activity-detail{color:var(--text-primary)}
+/* Batch 8: two-column pet access cards only when both action buttons fit. */
+@media(max-width:1200px){.pet-access-cards{grid-template-columns:1fr}}
+@media(max-width:480px){.pet-access-card{grid-template-columns:44px minmax(0,1fr)}.pet-access-card>button,.pet-access-card>span{grid-column:1 / -1;justify-self:start}}
+.security-row .text-status,.member-row .text-status,.contact-row .text-status{white-space:nowrap}

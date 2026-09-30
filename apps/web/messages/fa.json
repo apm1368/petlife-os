@@ -273,7 +273,8 @@
       "PENDING": "در انتظار",
       "SUCCEEDED": "پرداخت شد",
       "FAILED": "ناموفق",
-      "REFUNDED": "بازپرداخت شد"
+      "REFUNDED": "بازپرداخت شد",
+      "SIMULATED": "پرداخت آزمایشی (کسر نشد)"
     },
     "attemptReason": {
       "INITIAL": "پرداخت اول",

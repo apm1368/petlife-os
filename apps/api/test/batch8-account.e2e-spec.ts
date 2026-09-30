@@ -7,6 +7,7 @@ import { PrismaService } from "../src/common/prisma/prisma.service";
 import { REDIS_CLIENT } from "../src/common/redis/redis.module";
 import { AccountExportService } from "../src/modules/account/account-export.service";
 import { NotificationOrchestratorService } from "../src/modules/notifications/notification-orchestrator.service";
+import { sanitizeReturnTo } from "../src/common/return-to/return-to.util";
 
 interface Cookies {
   session?: string;
@@ -595,6 +596,85 @@ describe("Batch 8 — Account & security", () => {
       expect(memberView.body.items).toHaveLength(0);
       expect(ownerView.body.items[0]).toMatchObject({ type: "SubscriptionStarted", group: "MEMBERSHIP", detail: { isTrial: true } });
       expect(JSON.stringify(ownerView.body)).not.toContain(plan.id);
+    });
+  });
+
+
+  // ------------------------------------------------------------------ 8H security regression
+
+  describe("security regression", () => {
+    it("forged ids never reach another person's household, member, invitation, grant, session, subscription, export or deletion request", async () => {
+      const victim = await owner("VictimPet");
+      const victimMember = await user("b8-vmember");
+      await victimMember.c.post(`/household-invitations/${await invite(victim, victimMember)}/accept`).expect(201);
+      await victim.c.post(`/households/${victim.householdId}/invitations`).send({ contact: `pending-${unique()}@example.com`, initialAccess: [] }).expect(201);
+      const inviteRow = await prisma.householdInvitation.findFirstOrThrow({ where: { householdId: victim.householdId, status: "PENDING" } });
+      const grant = await prisma.petAccessGrant.findFirstOrThrow({ where: { petId: victim.petId, userId: victimMember.userId, revokedAt: null } });
+      const memberId = await memberIdOf(victim.householdId, victimMember.userId);
+      const victimSession = (await victim.c.get("/account/security").expect(200)).body.sessions[0].id as string;
+      const exportReq = await victim.c.post("/account/privacy/exports").expect(201);
+
+      const attacker = await owner("AttackerPet");
+      const hh = victim.householdId;
+      // Household-scoped routes with the victim's household id.
+      for (const [method, path, body] of [
+        ["get", `/households/${hh}`, undefined],
+        ["get", `/households/${hh}/collaboration`, undefined],
+        ["patch", `/households/${hh}`, { name: "pwned" }],
+        ["delete", `/households/${hh}/members/${memberId}`, undefined],
+        ["patch", `/households/${hh}/members/${memberId}`, { role: "OWNER" }],
+        ["post", `/households/${hh}/leave`, {}],
+        ["post", `/households/${hh}/invitations/${inviteRow.id}/resend`, {}],
+        ["delete", `/households/${hh}/invitations/${inviteRow.id}`, undefined],
+        ["get", `/households/${hh}/subscription`, undefined],
+        ["get", `/households/${hh}/subscription/billing-history`, undefined],
+        ["post", `/households/${hh}/subscription/cancel`, {}],
+      ] as const) {
+        const res = await (body === undefined ? attacker.c[method](path) : attacker.c[method](path).send(body));
+        expect([403, 404]).toContain(res.status);
+      }
+      // The attacker's own household id with the victim's member / invitation ids.
+      await attacker.c.delete(`/households/${attacker.householdId}/members/${memberId}`).expect(404);
+      await attacker.c.delete(`/households/${attacker.householdId}/invitations/${inviteRow.id}`).expect(404);
+      // Pet grants: the victim's grant through the victim's pet, and through the attacker's own pet.
+      expect([403, 404]).toContain((await attacker.c.delete(`/pets/${victim.petId}/access-grants/${grant.id}`)).status);
+      expect([403, 404]).toContain((await attacker.c.delete(`/pets/${attacker.petId}/access-grants/${grant.id}`)).status);
+      // Sessions, exports, deletion requests.
+      await attacker.c.delete(`/account/security/sessions/${victimSession}`).expect(400);
+      await attacker.c.post(`/account/privacy/exports/${exportReq.body.id}/download`).expect(404);
+      await attacker.c.post(`/account/privacy/deletion/${exportReq.body.id}/cancel`).expect(404);
+
+      // Nothing about the victim changed.
+      expect((await prisma.household.findUniqueOrThrow({ where: { id: hh } })).name).not.toBe("pwned");
+      expect(await prisma.householdMember.count({ where: { householdId: hh } })).toBe(2);
+      expect((await prisma.petAccessGrant.findUniqueOrThrow({ where: { id: grant.id } })).revokedAt).toBeNull();
+      expect((await prisma.householdInvitation.findUniqueOrThrow({ where: { id: inviteRow.id } })).status).toBe("PENDING");
+      await victim.c.get("/me").expect(200);
+    });
+
+    it("account mutations require the CSRF token; a missing or mismatched token is refused", async () => {
+      const u = await user("b8-csrf");
+      const cookie = `petlife_session=${u.c.cookies.session}; petlife_csrf=${u.c.cookies.csrf}`;
+      const attempts = [
+        request(server).patch("/me").set("Cookie", cookie).send({ displayName: "x" }),
+        request(server).post("/account/security/sessions/revoke-all").set("Cookie", cookie),
+        request(server).patch("/account/privacy/consent").set("Cookie", cookie).set("x-csrf-token", "forged").send({ kind: "MARKETING", granted: true }),
+        request(server).post("/account/privacy/exports").set("Cookie", cookie),
+        request(server).post("/me/contact/request").set("Cookie", cookie).send({ kind: "phone", value: uniquePhone() }),
+      ];
+      for (const res of await Promise.all(attempts)) expect(res.status).toBe(403);
+      await u.c.get("/me").expect(200);
+      expect(await prisma.userConsent.count({ where: { userId: u.userId } })).toBe(0);
+    });
+
+    it("returnTo never leaves the site (the sanitizer every redirect goes through)", async () => {
+      for (const evil of ["https://evil.example", "//evil.example", "/\\evil.example", "javascript:alert(1)", "%2F%2Fevil.example", "/\tevil"]) {
+        expect(sanitizeReturnTo(evil, "/welcome")).toBe("/welcome");
+      }
+      expect(sanitizeReturnTo("/fa/profile/security", "/welcome")).toBe("/fa/profile/security");
+      // The Google entry point is disabled in this environment and must not redirect anywhere at all.
+      const res = await request(server).get(`/auth/google?returnTo=${encodeURIComponent("https://evil.example")}`);
+      expect(res.headers.location ?? "").not.toContain("evil.example");
     });
   });
 

@@ -273,7 +273,8 @@
       "PENDING": "Pending",
       "SUCCEEDED": "Paid",
       "FAILED": "Failed",
-      "REFUNDED": "Refunded"
+      "REFUNDED": "Refunded",
+      "SIMULATED": "Test payment (not charged)"
     },
     "attemptReason": {
       "INITIAL": "First payment",

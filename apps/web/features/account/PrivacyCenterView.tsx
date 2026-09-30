@@ -34,6 +34,16 @@ const SCOPE_LABELS: Record<string, [string, string]> = {
   ACTIVITY: ["فعالیت حساب", "Account activity"],
 };
 
+const MEMBERSHIP_STATUS: Record<string, [string, string]> = {
+  TRIALING: ["آزمایشی", "trial"],
+  ACTIVE: ["فعال", "active"],
+  PAST_DUE: ["پرداخت معوق", "payment overdue"],
+  GRACE_PERIOD: ["مهلت پرداخت", "grace period"],
+  CANCEL_AT_PERIOD_END: ["لغو در پایان دوره", "ending at period end"],
+  CANCELLED: ["لغوشده", "cancelled"],
+  EXPIRED: ["پایان‌یافته", "ended"],
+};
+
 const SHARE_KIND: Record<string, [string, string]> = {
   HOUSEHOLD: ["عضو خانواده", "Household member"],
   TEMPORARY: ["دسترسی موقت", "Temporary access"],
@@ -54,7 +64,8 @@ const BLOCKER_COPY: Record<string, { fa: string; en: string; href?: string }> = 
 function formatSize(bytes: number | null, fa: boolean): string {
   if (!bytes) return "";
   const kb = bytes / 1024;
-  return kb < 1024 ? `${Math.max(1, Math.round(kb))} ${fa ? "کیلوبایت" : "KB"}` : `${(kb / 1024).toFixed(1)} ${fa ? "مگابایت" : "MB"}`;
+  const n = new Intl.NumberFormat(fa ? "fa-IR" : "en-US", { maximumFractionDigits: 1 });
+  return kb < 1024 ? `${n.format(Math.max(1, Math.round(kb)))} ${fa ? "کیلوبایت" : "KB"}` : `${n.format(kb / 1024)} ${fa ? "مگابایت" : "MB"}`;
 }
 
 /**
@@ -63,7 +74,7 @@ function formatSize(bytes: number | null, fa: boolean): string {
  * facts, not legal promises — the legal text itself lives in the CMS.
  */
 export function PrivacyCenterView() {
-  const { t, fa, locale } = useAccountCopy();
+  const { t, fa, locale, num } = useAccountCopy();
   const [data, setData] = useState<PrivacyCenterDto | null>(null);
   const [sharing, setSharing] = useState<SharingSummaryDto | null>(null);
   const [failed, setFailed] = useState(false);
@@ -227,7 +238,7 @@ export function PrivacyCenterView() {
       <ContextSurface className="privacy-export">
         <div>
           <h2>{t("دریافت یک نسخه از داده‌ها", "Get a copy of your data")}</h2>
-          <p>{t(`یک فایل JSON آماده می‌شود و ${data.exportAvailableDays} روز برای دریافت در دسترس است. پیوند دریافت فقط چند دقیقه اعتبار دارد و هر دریافت ثبت می‌شود.`, `We prepare a JSON file that stays available for ${data.exportAvailableDays} days. Each download link works for a few minutes and every download is recorded.`)}</p>
+          <p>{t(`یک فایل JSON آماده می‌شود و ${num(data.exportAvailableDays)} روز برای دریافت در دسترس است. پیوند دریافت فقط چند دقیقه اعتبار دارد و هر دریافت ثبت می‌شود.`, `We prepare a JSON file that stays available for ${num(data.exportAvailableDays)} days. Each download link works for a few minutes and every download is recorded.`)}</p>
           <div className="experience-pills">
             {data.exportIncludes.map((item) => (
               <span className="experience-pill" key={item}>{SCOPE_LABELS[item] ? t(SCOPE_LABELS[item]![0], SCOPE_LABELS[item]![1]) : item}</span>
@@ -250,7 +261,7 @@ export function PrivacyCenterView() {
                   <p>
                     {request.status === "READY" && request.expiresAt ? t(`تا ${formatAccountDate(request.expiresAt, locale)} قابل دریافت`, `Available until ${formatAccountDate(request.expiresAt, locale)}`) : request.status === "FAILED" ? t("آماده‌سازی ناموفق بود؛ دوباره درخواست دهید.", "Preparing failed; please request again.") : ""}
                     {request.fileSizeBytes ? ` · ${formatSize(request.fileSizeBytes, fa)}` : ""}
-                    {request.downloadCount ? ` · ${t(`${request.downloadCount} بار دریافت شده`, `downloaded ${request.downloadCount}×`)}` : ""}
+                    {request.downloadCount ? ` · ${t(`${num(request.downloadCount)} بار دریافت شده`, `downloaded ${num(request.downloadCount)}×`)}` : ""}
                   </p>
                 </div>
                 <div className="member-row__actions">
@@ -309,7 +320,7 @@ export function PrivacyCenterView() {
 }
 
 function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone: () => Promise<void> }) {
-  const { t, fa, locale } = useAccountCopy();
+  const { t, fa, locale, num } = useAccountCopy();
   const [preview, setPreview] = useState<DeletionPreviewDto | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [step, setStep] = useState<"impact" | "confirm">("impact");
@@ -364,9 +375,9 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
               <ul>
                 {preview.households.map((h) => (
                   <li key={h.id}>
-                    {h.name || t("خانهٔ بدون نام", "Unnamed household")}: {h.role === "OWNER" ? t("مدیر", "owner") : t("عضو", "member")}, {t(`${h.pets} حیوان`, `${h.pets} pet(s)`)}
-                    {h.otherMembers ? t(`، ${h.otherMembers} عضو دیگر دسترسی خود را حفظ می‌کنند`, `; ${h.otherMembers} other member(s) keep their access`) : ""}
-                    {h.membershipStatus ? t(`، عضویت: ${h.membershipStatus}`, `; membership: ${h.membershipStatus}`) : ""}
+                    {h.name || t("خانهٔ بدون نام", "Unnamed household")}: {h.role === "OWNER" ? t("مدیر", "owner") : t("عضو", "member")}, {t(`${num(h.pets)} حیوان`, `${num(h.pets)} pet(s)`)}
+                    {h.otherMembers ? t(`، ${num(h.otherMembers)} عضو دیگر دسترسی خود را حفظ می‌کنند`, `; ${num(h.otherMembers)} other member(s) keep their access`) : ""}
+                    {h.membershipStatus && MEMBERSHIP_STATUS[h.membershipStatus] ? t(`، عضویت: ${MEMBERSHIP_STATUS[h.membershipStatus]![0]}`, `; membership: ${MEMBERSHIP_STATUS[h.membershipStatus]![1]}`) : ""}
                   </li>
                 ))}
                 <li>{t("پس از پردازش، ورود به این حساب ممکن نخواهد بود.", "After processing, you won't be able to sign in to this account.")}</li>
@@ -381,7 +392,7 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
                     const copy = BLOCKER_COPY[b.code];
                     return (
                       <li key={b.code}>
-                        {copy ? (fa ? copy.fa : copy.en) : b.code} {b.count > 1 ? `(${b.count})` : ""}
+                        {copy ? (fa ? copy.fa : copy.en) : t("مورد باز دیگری وجود دارد.", "Something else is still open.")} {b.count > 1 ? `(${num(b.count)})` : ""}
                         {copy?.href ? <> · <Link href={`/${locale}${copy.href}`} className="text-brand-natural">{t("مشاهده", "View")}</Link></> : null}
                       </li>
                     );
