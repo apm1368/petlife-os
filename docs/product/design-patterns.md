@@ -609,3 +609,111 @@ AUTH_REQUIRED, FORBIDDEN, NOT_FOUND, ACCESS_EXPIRED, ACCESS_REVOKED, ACCESS_NOT_
 
 ### Rules
 Fixed product copy — backend messages are never shown; unauthorized states reveal nothing about the protected object. Private routes are noindex via their layout; the localized 404 (`[locale]/not-found`, catch-all under a locale) is noindex too.
+
+## LOST INCIDENT PATTERN — Batch 6
+
+### Anatomy
+Owner side (`/pets/:id/lost/report`): stepped report — pet and last-seen time (Jalali picker) → **public area** (what strangers see, e.g. "near Vanak square") separated from the **private** exact place, coordinates and notes → photo → contact preference → review. Incident detail for the household: status, sightings inbox (likely match / not a match), share bar, "found" and direct "reunited". Public side (`/lost-pets`, `/lost-pets/:id`): paginated list with species filter; detail with species, age, public area, last-seen time, share bar (Web Share, copy, WhatsApp, Telegram, Bale), report panel, and an anonymous-friendly sighting form (date, time, place text, description, photo).
+
+### States
+Searching / sighting reported / found / reunited (happy outcome, sighting form removed) / closed (404 publicly). Sighting uploads are only issued for incidents still accepting sightings.
+
+### Privacy
+Public payloads carry the public area only — never coordinates, the private address, private notes, household, creator or storage keys; sharing to the community copies the public area. Sightings are private to the household; the reporter's identity is never shown to the owner. Exact location is available to the household, and to admins only through an audited PII reveal.
+
+### Responsive / RTL
+Detail is two columns from `md` (grid children `min-w-0`), single column below; free text `dir=auto`; Jalali dates with Persian digits in fa.
+
+### Reuse
+`ReportLostPetView`, `PublicLostPetListView`, `PublicLostPetView`, `LostPetIncidentDetailView`, `ShareBar`, `DateRangeField`, `ReportContentPanel`.
+
+## SUPPORT DISCOVERY PATTERN — Batch 6
+
+### Anatomy
+`/animal-support/needs`: filters (category, city), state (open / resolved / all), explicit sort (recent, most urgent, closing soon — no distance, no opaque ranking), paginated cards with urgency, category, city, organization name with a verified mark, progress when a quantity is set; links to "my requests" and "my help".
+
+### States
+Only published, partially fulfilled and (in "resolved") fulfilled listings appear; paused listings are reachable by link but not listed. Empty and filtered-empty states are separate.
+
+### Privacy
+Cards and detail show province/city/neighbourhood only; coordinates are returned to the publisher alone.
+
+### Reuse
+`SupportNeedsListView`, `supportNeedsService`.
+
+## SUPPORT LISTING DETAIL PATTERN — Batch 6
+
+### Anatomy
+Title, urgency, category, publisher (person or organization, verified mark), area, description, needed/fulfilled quantity with a named progress bar, deadline, "offer help" form (help type, timing, quantity, message) or "donate" to the linked campaign (`?need=`), share bar, report panel, back to board.
+
+### States
+Paused ("not accepting offers right now"), fulfilled, expired, removed (404). Signed-out visitors get a sign-in link that returns to the listing.
+
+### Reuse
+`SupportNeedDetailView`, `DonationPanel`, `ShareBar`, `ReportContentPanel`.
+
+## HELP / FULFILLMENT PATTERN — Batch 6
+
+### Anatomy
+Publisher: `/animal-support/needs/:id/manage` — offer inbox (pending / accepted / in progress / done), accept or decline, mark in progress, mark completed with a delivered quantity (partial completion moves the listing to *partially fulfilled*, the last one to *fulfilled*), pause/resume, deadline. Helper: `/animal-support/my-help` — own offers only, with the publisher's answer.
+
+### Rules
+Staff of the publishing organization act on its listings; staff can't offer on their own organization's listing; a deadline must be in the future and ≤180 days; the expiry worker warns the publisher once and then expires the listing (history kept). Each step notifies the other party with an exact deep link.
+
+### Reuse
+`ManageSupportNeedView`, `SupportOfferInbox`, `MyHelpOffersView`.
+
+## DONATION PATTERN — Batch 6
+
+### Anatomy
+`DonationPanel` on a campaign (optionally for one need): Toman presets + custom amount, fund-type explanation (general vs restricted to one purpose), public display (anonymous by default, or a name the donor types — never the account name), review (amount, recipient, type, shown as, sandbox note, not-a-purchase note) → pay → private receipt (`/donations/:id`). Campaign page: progress, updates, recent public donors (display name + Toman).
+
+### Rules
+IRR is stored, Toman shown via `formatCurrency` in locale digits. Idempotency key per attempt, bound to donor and campaign. A payment records both ledgers (cash/clearing and donation payable); a refund goes through the gateway and reverses both only when the gateway confirms; the donor is notified. Restricted donations must match the need's own campaign.
+
+### Reuse
+`DonationPanel`, `DonationReceiptView`, `CampaignProgressBar`.
+
+## NGO OPERATIONAL PATTERN — Batch 6
+
+### Anatomy
+`/ngo` portal with an organization selector (multi-org staff) and tabs: overview (live needs, offers waiting, donations in 30 days, team size — each a link; ledger-derived balances general / restricted / paid out, not editable), needs, offers & volunteers, donations (no donor identity), team (owner-only role changes), verification (private document upload → submit → status and PET LIFE's note), profile.
+
+### Roles
+OWNER manages team and verification; COORDINATOR manages listings and offers; VIEWER reads. Another organization's staff get nothing (403/404). Publishing "as" an organization requires membership; a campaign must belong to the listing's organization.
+
+### Reuse
+`NgoPortalViews`, `ngoService`, `x-ngo-organization` selector.
+
+## COMMUNITY CONTENT PATTERN — Batch 6
+
+### Anatomy
+Feed with text search (title/body) and type filter, "load more"; post detail with body, media, reactions, comments; create post with optional photo; lost-pet and campaign shares arrive as posts. Report panel on posts and comments.
+
+### Privacy
+Authors appear by first name only; account ids are returned only to the author (`isMine`); pet references carry no pet id.
+
+### Reuse
+`CommunityFeedView`, `CommunityPostDetailView`, `CreateCommunityPostView`, `ReportContentPanel`.
+
+## MODERATION CASE PATTERN — Batch 6
+
+### Anatomy
+Report (`ReportContentPanel` or `POST /reports`): reason list incl. scam, harassment, personal information, animal welfare, dangerous content; one open report per person per item; daily cap; "already reported" shown as a state. Escalation opens a trust & safety case or joins the open case for the same item. Case detail: subject panel (kind, status, title/text, owner/organization, public link — no contact details or exact location), reports summary (count, distinct reporters, by reason — never who), actions limited to those with a real effect for that subject, history with each effect's before → after and a "restored" marker, and action errors shown in place.
+
+### Effects
+Support need remove/restrict, lost-pet incident close (pet lifecycle untouched), sighting reject, organization suspend (unlisted, live requests paused) / require re-verification, community hide/remove; RESTORE returns the exact prior state once. Decisions resolve the reports escalated into the case.
+
+### Reuse
+`ReportContentPanel`, `AdminTrustCaseDetailView`, `TrustActionService` + `trust-subject-effects`.
+
+## ADMIN T&S PATTERN — Batch 6
+
+### Anatomy
+Animal-support console sub-nav: overview (needs attention first — requests awaiting review, organizations awaiting verification, open reports, open cases; then live counts and 30-day donations; every number a live count), support-request queue and detail (publish / request changes / remove), organizations (create, verification status + note, audited opening of private documents via short-lived links, public-list toggle, staff grant/revoke), donations (donor by name only; full refund, finance only), lost pets (masked location, audited PII reveal, moderator close), user reports (status + item-type filters, escalate / dismiss), trust cases.
+
+### Rules
+Every consequential action asks for a reason that is written to the audit log. Permissions stay separate: trust.view/manage for moderation, customer.pii.reveal for exact locations, animalSupport.view/manage for organizations, animalSupport.payout for refunds; a missing permission shows a clear state, not a crash.
+
+### Reuse
+`AdminAnimalSupportViews`, `console-ui` (Panel, Kpi, TableWrap, FilterBar, Tag), `adminAnimalSupportService`.

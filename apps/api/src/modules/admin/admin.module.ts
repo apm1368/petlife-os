@@ -29,6 +29,7 @@ import { SupportNotificationListener } from "./support/support-notification.list
 import { DisputeService } from "./dispute/dispute.service";
 import { DisputeController } from "./dispute/dispute.controller";
 import { TrustCaseService } from "./trust/trust-case.service";
+import { TrustCaseContextService } from "./trust/trust-case-context.service";
 import { TrustActionService } from "./trust/trust-action.service";
 import { TrustController } from "./trust/trust.controller";
 import { AdminVerificationService } from "./verification/admin-verification.service";
@@ -70,12 +71,16 @@ import { AdminAnimalSupportController } from "./animal-support/admin-animal-supp
 import { CommunityModerationService } from "./community/community-moderation.service";
 import { AdminCommunityController } from "./community/admin-community.controller";
 import { SupportNeedModerationService } from "./animal-support/support-need-moderation.service";
+import { AdminAnimalSupportOpsService } from "./animal-support/admin-animal-support-ops.service";
 import { AdminSupportNeedController } from "./animal-support/admin-support-need.controller";
 import { InsuranceProviderService } from "../insurance/insurance-provider.service";
 import { InsuranceProductService } from "../insurance/insurance-product.service";
 import { AdminInsuranceController } from "./insurance/admin-insurance.controller";
 import { PetFriendlyPlaceService } from "../places/pet-friendly-place.service";
 import { AdminPlacesController } from "./places/admin-places.controller";
+import { AdminLostPetController } from "./lost-pet/admin-lost-pet.controller";
+import { AdminNgoMembersController } from "./animal-support/admin-ngo-members.controller";
+import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -114,9 +119,12 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminCommerceController,
     AdminTravelController,
     AdminInsuranceApplicationsController,
+    AdminLostPetController,
+    AdminNgoMembersController,
   ],
   providers: [
     AdminServicesService,
+    AdminLostPetService,
     AdminTravelService,
     AdminCommerceService,
     AdminAccessService,
@@ -128,6 +136,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     SupportNotificationListener,
     DisputeService,
     TrustCaseService,
+    TrustCaseContextService,
     TrustActionService,
     AdminVerificationService,
     AdminTaskService,
@@ -154,6 +163,7 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminDonationService,
     CommunityModerationService,
     SupportNeedModerationService,
+    AdminAnimalSupportOpsService,
     InsuranceProviderService,
     InsuranceProductService,
     PetFriendlyPlaceService,

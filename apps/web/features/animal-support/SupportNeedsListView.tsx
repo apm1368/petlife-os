@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedUrgency } from "@petlife/types";
 import type { SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService, type SupportNeedLocationDto } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
+import { formatDay, localizeDigits } from "@/lib/date/jalali";
 
 const CATEGORIES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -50,6 +51,12 @@ export function SupportNeedsListView() {
   const [category, setCategory] = useState<SupportNeedCategory | "">("");
   const [urgency, setUrgency] = useState<SupportNeedUrgency | "">("");
   const [city, setCity] = useState("");
+  const [sort, setSort] = useState<"URGENT" | "RECENT" | "CLOSING_SOON">("URGENT");
+  const [needState, setNeedState] = useState<"OPEN" | "RESOLVED">("OPEN");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const locale = useLocale() as "fa" | "en";
+  const fa = locale === "fa";
   const [listings, setListings] = useState<SupportNeedListingDto[] | null>(null);
   const [locations, setLocations] = useState<SupportNeedLocationDto[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -64,14 +71,18 @@ export function SupportNeedsListView() {
         category: category || undefined,
         urgency: urgency || undefined,
         city: city || undefined,
-        pageSize: 50,
+        sort,
+        state: needState,
+        page,
+        pageSize: 20,
       });
       setListings(result.items);
+      setTotal(result.total);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : tCommon("genericError"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, urgency, city]);
+  }, [search, category, urgency, city, sort, needState, page]);
 
   useEffect(() => {
     void load();
@@ -101,6 +112,12 @@ export function SupportNeedsListView() {
         </Link>
       </div>
 
+      <div role="tablist" aria-label={fa ? "وضعیت" : "State"} className="flex gap-2">
+        {([["OPEN", fa ? "نیازهای باز" : "Open needs"], ["RESOLVED", fa ? "تأمین‌شده" : "Fulfilled"]] as const).map(([value, label]) => (
+          <button key={value} role="tab" aria-selected={needState === value} onClick={() => { setNeedState(value); setPage(1); }} className={`min-h-11 rounded-full px-4 text-sm ${needState === value ? "bg-surface-subtle font-bold text-text-primary" : "text-text-secondary"}`}>{label}</button>
+        ))}
+      </div>
+
       <ContextSurface className="flex flex-col gap-3">
         <Input label={t("list.searchLabel")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("list.searchPlaceholder")} />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -123,6 +140,16 @@ export function SupportNeedsListView() {
             options={[{ value: "", label: t("list.allCities") }, ...cities.map((value) => ({ value, label: value }))]}
           />
         </div>
+        <Select
+          label={fa ? "مرتب‌سازی" : "Sort"}
+          value={sort}
+          onChange={(e) => { setSort(e.target.value as typeof sort); setPage(1); }}
+          options={[
+            { value: "URGENT", label: fa ? "فوری‌ترین" : "Most urgent" },
+            { value: "RECENT", label: fa ? "تازه‌ترین" : "Most recent" },
+            { value: "CLOSING_SOON", label: fa ? "نزدیک‌ترین مهلت" : "Closing soon" },
+          ]}
+        />
       </ContextSurface>
 
       {!listings ? (
@@ -140,7 +167,7 @@ export function SupportNeedsListView() {
                 </Button>
               ))}
             </div>
-            <Link href="/animal-support/needs/new" className="text-body text-brand-mint underline">
+            <Link href="/animal-support/needs/new" className="text-body text-brand-mint-strong underline">
               {t("list.publish")}
             </Link>
           </ContextSurface>
@@ -154,7 +181,7 @@ export function SupportNeedsListView() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={listing.imageUrls[0]} alt={listing.title} className="h-20 w-20 shrink-0 rounded-md object-cover" />
                 ) : (
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-md bg-surface-muted">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-md bg-surface-subtle">
                     <span className="text-metadata text-text-secondary">{t(`category.${listing.category}`)}</span>
                   </div>
                 )}
@@ -167,11 +194,11 @@ export function SupportNeedsListView() {
                     {listing.organizationVerified ? <StatusLabel tone="success">{t("list.verifiedOrganization")}</StatusLabel> : null}
                   </div>
                   <p className="text-metadata text-text-secondary">
-                    {t(`category.${listing.category}`)} · {listing.city} · {new Date(listing.createdAt).toLocaleDateString()}
+                    {t(`category.${listing.category}`)} · {listing.city}{listing.neighborhood ? `، ${listing.neighborhood}` : ""} · {formatDay((listing.publishedAt ?? listing.createdAt).slice(0, 10), locale)}{listing.expiresAt ? ` · ${fa ? "مهلت" : "until"} ${formatDay(listing.expiresAt.slice(0, 10), locale, { year: false })}` : ""}
                   </p>
                   {listing.neededQuantity !== null ? (
                     <p className="text-metadata text-text-secondary">
-                      {t("list.progress", { fulfilled: listing.fulfilledQuantity, needed: listing.neededQuantity, unit: listing.quantityUnit ?? "" })}
+                      {t("list.progress", { fulfilled: localizeDigits(listing.fulfilledQuantity, locale), needed: localizeDigits(listing.neededQuantity, locale), unit: listing.quantityUnit ?? "" })}
                     </p>
                   ) : null}
                 </div>
@@ -181,9 +208,22 @@ export function SupportNeedsListView() {
         </div>
       )}
 
-      <Link href="/animal-support/needs/mine" className="text-body text-brand-mint underline">
-        {t("list.myListings")}
-      </Link>
+      {total > 20 ? (
+        <nav aria-label={fa ? "صفحه‌ها" : "Pages"} className="flex items-center justify-center gap-3">
+          <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>{fa ? "قبلی" : "Previous"}</Button>
+          <span className="text-sm text-text-secondary">{localizeDigits(page, locale)} / {localizeDigits(Math.ceil(total / 20), locale)}</span>
+          <Button variant="secondary" size="sm" disabled={page * 20 >= total} onClick={() => setPage(page + 1)}>{fa ? "بعدی" : "Next"}</Button>
+        </nav>
+      ) : null}
+
+      <div className="flex flex-wrap gap-4">
+        <Link href="/animal-support/needs/mine" className="text-body text-brand-mint-strong underline">
+          {t("list.myListings")}
+        </Link>
+        <Link href={`/${locale}/animal-support/my-help`} className="text-body text-brand-mint-strong underline">
+          {fa ? "کمک‌های من" : "My help"}
+        </Link>
+      </div>
     </div>
   );
 }

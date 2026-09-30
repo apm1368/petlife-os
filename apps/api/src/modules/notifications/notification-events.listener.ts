@@ -224,7 +224,7 @@ export class NotificationEventsListener {
         type: "payment.failed",
         category: NotificationCategory.PAYMENT,
         priority: NotificationPriority.HIGH,
-        deepLink: NotificationDeepLinks.checkout(payload.checkoutId),
+        deepLink: NotificationDeepLinks.cart(),
         entityType: "Checkout",
         entityId: payload.checkoutId,
         domainEventId,
@@ -233,8 +233,10 @@ export class NotificationEventsListener {
   }
 
   @OnEvent("RefundSucceeded")
-  onRefundSucceeded(payload: { refundId: string; orderId: string }, domainEventId: string): Promise<void> {
+  onRefundSucceeded(payload: { refundId: string; orderId: string | null }, domainEventId: string): Promise<void> {
     return this.safely("RefundSucceeded", async () => {
+      // Refunds without an order (donations, subscriptions) are announced by their own domain listener.
+      if (!payload.orderId) return;
       const order = await this.prisma.order.findUnique({ where: { id: payload.orderId }, select: { userId: true, cancelledAt: true } });
       // A cancellation refund is already announced by "order.cancelled".
       if (!order?.userId || order.cancelledAt) return;

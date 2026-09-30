@@ -36,6 +36,9 @@ const NAV_GROUPS: NavGroup[] = [
     { href: "/travel", labelKey: "nav.travel", permission: "travel.view" },
     { href: "/subscriptions", labelKey: "nav.subscriptions", permission: "subscription.view" },
   ] },
+  { id: "animal-support", label: { en: "Animal support", fa: "حمایت از حیوانات" }, items: [
+    { href: "/animal-support", labelKey: "nav.animalSupport", permission: "animalSupport.view" },
+  ] },
   { id: "finance", label: { en: "Finance", fa: "مالی" }, items: [
     { href: "/transactions", labelKey: "nav.transactions", permission: "finance.view" },
     { href: "/seller-finance", labelKey: "nav.sellerFinance", permission: "sellerFinance.view" },
@@ -45,6 +48,8 @@ const NAV_GROUPS: NavGroup[] = [
     { href: "/support", labelKey: "nav.support", permission: "support.view" },
     { href: "/disputes", labelKey: "nav.disputes", permission: "dispute.view" },
     { href: "/trust", labelKey: "nav.trust", permission: "trust.view" },
+    { href: "/community", labelKey: "nav.communityReports", permission: "trust.view" },
+    { href: "/lost-pets", labelKey: "nav.lostPets", permission: "trust.view" },
     { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
   ] },
   { id: "content", label: { en: "Content", fa: "محتوا" }, items: [

@@ -45,7 +45,7 @@ export function MemoryMediaThumb({ petId, memory, className }: { petId: string; 
 
   if (!url) {
     return (
-      <div className={`flex items-center justify-center bg-surface-muted ${className ?? ""}`} aria-label={t("list.noPhoto")}>
+      <div className={`flex items-center justify-center bg-surface-subtle ${className ?? ""}`} aria-label={t("list.noPhoto")}>
         <span className="text-metadata text-text-secondary">{t("list.noPhoto")}</span>
       </div>
     );

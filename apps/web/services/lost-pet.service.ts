@@ -1,4 +1,4 @@
-import type { LostPetIncidentDto, LostPetIncidentPublicDto, LostPetSightingDto } from "@petlife/types";
+import type { LostPetIncidentDto, LostPetIncidentPublicDto, LostPetSightingDto, PaginatedDto } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
 export interface UploadTargetDto {
@@ -12,6 +12,9 @@ export interface UploadTargetDto {
 
 export interface CreateLostPetIncidentInput {
   description: string;
+  /** Public: approximate area only. */
+  publicArea?: string;
+  /** Private to the household. */
   lastKnownLocation?: string;
   lastKnownLatitude?: number;
   lastKnownLongitude?: number;
@@ -50,7 +53,7 @@ export const lostPetService = {
     apiFetch<LostPetSightingDto>(`/pets/${petId}/lost-incidents/${incidentId}/sightings/${sightingId}/review`, { method: "POST", body: { decision } }),
 
   // -- Public (no auth) -------------------------------------------------------
-  listPublic: () => apiFetch<LostPetIncidentPublicDto[]>(`/lost-pets`),
+  listPublic: (p: { page?: number; species?: string } = {}) => apiFetch<PaginatedDto<LostPetIncidentPublicDto>>(`/lost-pets?pageSize=24${p.page ? `&page=${p.page}` : ""}${p.species ? `&species=${p.species}` : ""}`),
   getPublic: (incidentId: string) => apiFetch<LostPetIncidentPublicDto>(`/lost-pets/${incidentId}`),
   requestSightingPhotoUpload: (incidentId: string, contentType: string, fileSizeBytes: number) =>
     apiFetch<UploadTargetDto>(`/lost-pets/${incidentId}/sightings/upload-url`, { method: "POST", body: { contentType, fileSizeBytes } }),

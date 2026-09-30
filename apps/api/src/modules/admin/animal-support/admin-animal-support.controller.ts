@@ -8,6 +8,16 @@ import { AnimalSupportOrganizationService } from "../../animal-support/animal-su
 import { RescueCaseService } from "../../animal-support/rescue-case.service";
 import { SupportCampaignService } from "../../animal-support/support-campaign.service";
 import { AdminDonationService } from "../../animal-support/admin-donation.service";
+import { AdminAnimalSupportOpsService } from "./admin-animal-support-ops.service";
+import { DonationStatus } from "@prisma/client";
+import { IsEnum, IsOptional, IsUUID } from "class-validator";
+import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+
+class ListAdminDonationsQueryDto extends PaginationQueryDto {
+  @IsOptional() @IsEnum(DonationStatus) status?: DonationStatus;
+  @IsOptional() @IsUUID() organizationId?: string;
+  @IsOptional() @IsUUID() campaignId?: string;
+}
 import {
   CreateAnimalSupportOrganizationDto,
   CreateRescueCaseDto,
@@ -34,7 +44,22 @@ export class AdminAnimalSupportController {
     private readonly rescueCases: RescueCaseService,
     private readonly campaigns: SupportCampaignService,
     private readonly donations: AdminDonationService,
+    private readonly ops: AdminAnimalSupportOpsService,
   ) {}
+
+  // -- Overview and donations (Batch 6) -------------------------------------
+
+  @Get("overview")
+  @RequireAdminPermission("animalSupport.view")
+  overview() {
+    return this.ops.overview();
+  }
+
+  @Get("donations")
+  @RequireAdminPermission("animalSupport.view")
+  listDonations(@Query() query: ListAdminDonationsQueryDto) {
+    return this.ops.listDonations(query);
+  }
 
   // -- Organizations -------------------------------------------------------
 

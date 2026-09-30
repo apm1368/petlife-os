@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
 import { RequireAdminPermission } from "../auth/require-admin-permission.decorator";
@@ -6,6 +6,7 @@ import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-context.types";
 import { TrustCaseService } from "./trust-case.service";
 import { TrustActionService } from "./trust-action.service";
+import { TrustCaseContextService } from "./trust-case-context.service";
 import { AssignTrustCaseDto, ListTrustCasesQueryDto, OpenTrustCaseDto, ResolveAppealDto, SubmitAppealDto, TakeTrustActionDto, TransitionTrustCaseDto } from "./dto/trust.dto";
 
 @Controller("admin/trust")
@@ -14,6 +15,7 @@ export class TrustController {
   constructor(
     private readonly cases: TrustCaseService,
     private readonly actions: TrustActionService,
+    private readonly context: TrustCaseContextService,
   ) {}
 
   @Get("cases")
@@ -32,6 +34,13 @@ export class TrustController {
   @RequireAdminPermission("trust.view")
   get(@Param("id") id: string) {
     return this.cases.get(id);
+  }
+
+  /** Batch 6 — the moderation case view: subject, owner, reports and the actions that actually do something. */
+  @Get("cases/:id/context")
+  @RequireAdminPermission("trust.view")
+  getContext(@Param("id", ParseUUIDPipe) id: string) {
+    return this.context.get(id);
   }
 
   @Patch("cases/:id/assign")

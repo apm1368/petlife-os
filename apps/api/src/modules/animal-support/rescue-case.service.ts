@@ -40,7 +40,7 @@ export class RescueCaseService {
       this.prisma.rescueCase.findMany({ where, include: CASE_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.rescueCase.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toRescueCaseDto), total, page, pageSize);
+    return toPaginatedDto(rows.map((r) => toRescueCaseDto(r)), total, page, pageSize);
   }
 
   async adminGet(id: string) {

@@ -1,13 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedUrgency } from "@petlife/types";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
+import { ngoService } from "@/services/ngo.service";
+import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
+import { addDays, todayIso } from "@/lib/date/jalali";
 
 const CATEGORIES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -32,6 +35,7 @@ const URGENCIES: SupportNeedUrgency[] = [SupportNeedUrgency.NORMAL, SupportNeedU
  */
 export function CreateSupportNeedView() {
   const t = useTranslations("supportNeeds");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +51,13 @@ export function CreateSupportNeedView() {
   const [neededQuantity, setNeededQuantity] = useState("");
   const [quantityUnit, setQuantityUnit] = useState("");
   const [animalType, setAnimalType] = useState("");
+  const [deadline, setDeadline] = useState<string | null>(null);
+  // Batch 6: staff of an organization may publish in its name (the API re-checks membership).
+  const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
+  const [organizationId, setOrganizationId] = useState("");
+  useEffect(() => {
+    ngoService.me().then((me) => setOrgs(me.memberships.filter((m) => m.role !== "VIEWER").map((m) => ({ id: m.organizationId, name: m.organization.name })))).catch(() => setOrgs([]));
+  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsSignIn, setNeedsSignIn] = useState(false);
@@ -74,6 +85,9 @@ export function CreateSupportNeedView() {
         city: city.trim(),
         neighborhood: neighborhood.trim() || undefined,
         neededQuantity: neededQuantity ? Number(neededQuantity) : undefined,
+        organizationId: organizationId || undefined,
+        // End of the chosen Tehran day.
+        expiresAt: deadline ? new Date(`${deadline}T23:59:00+03:30`).toISOString() : undefined,
         quantityUnit: quantityUnit.trim() || undefined,
         animalType: animalType.trim() || undefined,
         imageObjectKeys: imageObjectKeys.length > 0 ? imageObjectKeys : undefined,
@@ -103,7 +117,7 @@ export function CreateSupportNeedView() {
         </ContextSurface>
         <p className="text-metadata text-text-secondary">{t("create.moderationNotice")}</p>
         {needsSignIn ? (
-          <Link href={`/login?returnTo=${encodeURIComponent("/animal-support/needs/new")}`} className="text-body text-brand-mint underline">
+          <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/new`)}`} className="text-body text-brand-mint-strong underline">
             {t("create.signInToPublish")}
           </Link>
         ) : null}
@@ -139,10 +153,20 @@ export function CreateSupportNeedView() {
           <Input label={t("create.unitLabel")} hint={tCommon("optional")} value={quantityUnit} onChange={(e) => setQuantityUnit(e.target.value)} />
         </div>
         <Input label={t("create.animalTypeLabel")} hint={tCommon("optional")} value={animalType} onChange={(e) => setAnimalType(e.target.value)} />
-        <div className="flex flex-col gap-1.5">
+        {orgs.length ? (
+          <label className="flex flex-col gap-1 text-sm">
+            {locale === "fa" ? "ثبت به نام" : "Publish as"}
+            <select value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} className="min-h-11 rounded-md border border-border-subtle bg-surface-base px-2">
+              <option value="">{locale === "fa" ? "خودم (شخصی)" : "Myself (personal)"}</option>
+              {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+            </select>
+          </label>
+        ) : null}
+        <DateRangeField mode="single" label={locale === "fa" ? "مهلت (اختیاری)" : "Deadline (optional)"} placeholder={locale === "fa" ? "بدون مهلت" : "No deadline"} value={{ start: deadline, end: null }} onChange={(v) => setDeadline(v.start)} min={addDays(todayIso(), 1)} max={addDays(todayIso(), 180)} />
+        <label className="flex flex-col gap-1.5">
           <span className="text-metadata text-text-secondary">{t("create.photosLabel")}</span>
           <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </div>
+        </label>
         <div>
           <Button variant="primary" onClick={() => setStep("PREVIEW")} disabled={!canContinue}>
             {t("create.continue")}

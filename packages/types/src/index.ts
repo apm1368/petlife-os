@@ -2433,6 +2433,9 @@ export enum TrustSubjectType {
   REVIEW = "REVIEW",
   COMMUNITY_CONTENT = "COMMUNITY_CONTENT",
   PET_INCIDENT = "PET_INCIDENT",
+  SUPPORT_NEED = "SUPPORT_NEED",
+  LOST_PET_SIGHTING = "LOST_PET_SIGHTING",
+  ANIMAL_SUPPORT_ORGANIZATION = "ANIMAL_SUPPORT_ORGANIZATION",
 }
 
 export enum TrustCaseSeverity {
@@ -2654,6 +2657,8 @@ export interface TrustActionDto {
   actionType: TrustActionType;
   reason: string;
   performedByAdmin: AdminActorSummaryDto;
+  /** Batch 6 — what the action changed on its subject ({ before, after }), used by RESTORE and shown in the case history. */
+  effectSummary: { before: Record<string, unknown>; after: Record<string, unknown>; restoredByActionId?: string } | null;
   createdAt: string;
   appeal: AppealDto | null;
 }
@@ -4189,6 +4194,9 @@ export interface LostPetIncidentDto {
   petPhotoUrl: string | null;
   householdId: string;
   status: LostPetIncidentStatus;
+  /** Batch 6 — the owner-chosen approximate area; the only location shown publicly. */
+  publicArea: string | null;
+  /** Private to the household/operators. */
   lastKnownLocation: string | null;
   lastKnownLatitude: number | null;
   lastKnownLongitude: number | null;
@@ -4223,12 +4231,10 @@ export interface LostPetIncidentPublicDto {
   petBreed: string | null;
   petColorMarkings: string | null;
   petApproximateAgeMonths: number | null;
-  primaryPhotoObjectKey: string | null;
   primaryPhotoUrl: string | null;
   status: LostPetIncidentStatus;
-  lastKnownLocation: string | null;
-  lastKnownLatitude: number | null;
-  lastKnownLongitude: number | null;
+  /** Batch 6 — approximate area only; exact location and coordinates are never public. */
+  approximateArea: string | null;
   lastSeenAt: string | null;
   publicNotes: string | null;
   publicContactMode: string | null;
@@ -4326,6 +4332,8 @@ export enum SupportNeedStatus {
   DRAFT = "DRAFT",
   PENDING_REVIEW = "PENDING_REVIEW",
   PUBLISHED = "PUBLISHED",
+  PARTIALLY_FULFILLED = "PARTIALLY_FULFILLED",
+  PAUSED = "PAUSED",
   FULFILLED = "FULFILLED",
   CLOSED = "CLOSED",
   EXPIRED = "EXPIRED",
@@ -4342,6 +4350,7 @@ export enum SupportNeedContactMode {
 export enum HelpOfferStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
+  IN_PROGRESS = "IN_PROGRESS",
   DECLINED = "DECLINED",
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
@@ -4398,6 +4407,8 @@ export interface HelpOfferDto {
   message: string;
   helpType: SupportNeedCategory;
   quantity: number | null;
+  /** Batch 6 — when the helper can deliver. */
+  timing: string | null;
   status: HelpOfferStatus;
   fulfilledQuantity: number | null;
   respondedAt: string | null;
@@ -4541,6 +4552,11 @@ export enum CommunityReportReason {
   MISINFORMATION = "MISINFORMATION",
   INAPPROPRIATE = "INAPPROPRIATE",
   OTHER = "OTHER",
+  SCAM = "SCAM",
+  HARASSMENT = "HARASSMENT",
+  PERSONAL_INFORMATION = "PERSONAL_INFORMATION",
+  ANIMAL_WELFARE = "ANIMAL_WELFARE",
+  DANGEROUS_CONTENT = "DANGEROUS_CONTENT",
 }
 
 export enum CommunityReportStatus {
@@ -4552,7 +4568,6 @@ export enum CommunityReportStatus {
 
 /** A public-safe pet reference only — never a channel into the pet's private health/household data (spec: "A post referring to a pet should use an explicit public-safe pet representation"). */
 export interface CommunityPostPetRefDto {
-  id: string;
   name: string;
   species: PetSpecies;
   photoUrl: string | null;
@@ -4560,7 +4575,9 @@ export interface CommunityPostPetRefDto {
 
 export interface CommunityPostDto {
   id: string;
-  authorUserId: string;
+  /** Only set for the viewer's own content (Batch 6 privacy). */
+  authorUserId: string | null;
+  isMine: boolean;
   authorDisplayName: string;
   type: CommunityPostType;
   title: string | null;
@@ -4584,7 +4601,8 @@ export interface CommunityPostDto {
 export interface CommunityCommentDto {
   id: string;
   postId: string;
-  authorUserId: string;
+  authorUserId: string | null;
+  isMine: boolean;
   authorDisplayName: string;
   body: string;
   status: CommunityContentStatus;
@@ -4595,6 +4613,10 @@ export interface CommunityReportDto {
   id: string;
   postId: string | null;
   commentId: string | null;
+  supportNeedListingId: string | null;
+  lostPetIncidentId: string | null;
+  lostPetSightingId: string | null;
+  organizationId: string | null;
   reason: CommunityReportReason;
   details: string | null;
   status: CommunityReportStatus;

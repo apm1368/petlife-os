@@ -4336,6 +4336,10 @@ enum TrustSubjectType {
   REVIEW
   COMMUNITY_CONTENT
   PET_INCIDENT
+  /// Batch 6
+  SUPPORT_NEED
+  LOST_PET_SIGHTING
+  ANIMAL_SUPPORT_ORGANIZATION
 }
 
 enum TrustCaseSeverity {
@@ -4642,6 +4646,10 @@ model TrustAction {
 
   actionType TrustActionType
   reason     String
+  /// Batch 6 — what the action actually changed on its subject
+  /// ({ before, after, ... }), so RESTORE can put back exactly the prior state
+  /// instead of a guessed default. Null when the action had no operational effect.
+  effectSummary Json?
 
   performedByAdminId String    @db.Uuid
   performedByAdmin   AdminUser @relation(fields: [performedByAdminId], references: [id], onDelete: Restrict)
@@ -6399,6 +6407,10 @@ model LostPetIncident {
 
   status LostPetIncidentStatus @default(OPEN)
 
+  /// Batch 6 — the ONLY location shown publicly: an owner-chosen approximate
+  /// area (neighbourhood / main street). lastKnownLocation and the
+  /// coordinates below are private to the household and operators.
+  publicArea         String?
   lastKnownLocation  String?
   lastKnownLatitude  Float?
   lastKnownLongitude Float?
@@ -6477,6 +6489,31 @@ model LostPetSighting {
 // the organization's behalf pending payout, i.e. a liability, not income.
 // ---------------------------------------------------------------------------
 
+/// Batch 6 — staff roles inside an NGO / shelter / rescue organization (same membership pattern
+/// as InsurerMembership). OWNER manages team, profile and verification; COORDINATOR runs needs,
+/// offers and volunteers; VIEWER reads.
+enum AnimalSupportOrgRole {
+  OWNER
+  COORDINATOR
+  VIEWER
+}
+
+model AnimalSupportOrgMembership {
+  id             String                    @id @default(uuid()) @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Actor reference (no relation), same convention as InsurerMembership.userId.
+  userId         String                    @db.Uuid
+  role           AnimalSupportOrgRole      @default(COORDINATOR)
+  isActive       Boolean                   @default(true)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("animal_support_org_memberships")
+}
+
 enum AnimalSupportOrgType {
   NGO
   SHELTER
@@ -6521,6 +6558,13 @@ model AnimalSupportOrganization {
   donationLedgerTransactions DonationLedgerTransaction[]
   donationTransactions       DonationTransaction[]
   supportNeedListings        SupportNeedListing[]
+  memberships                AnimalSupportOrgMembership[]
+
+  /// Batch 6 — organization-submitted verification: when submitted, the reviewer's note back to
+  /// the organization, and private document keys (never public; admins read them via signed URLs).
+  verificationSubmittedAt  DateTime?
+  verificationNote         String?
+  verificationDocumentKeys String[]  @default([])
 
   @@map("animal_support_organizations")
 }
@@ -6668,6 +6712,10 @@ enum SupportNeedStatus {
   DRAFT
   PENDING_REVIEW
   PUBLISHED
+  /// Batch 6 — publicly visible, still accepting offers, some quantity already fulfilled.
+  PARTIALLY_FULFILLED
+  /// Batch 6 — publisher paused new offers; detail stays reachable, not listed in search.
+  PAUSED
   FULFILLED
   CLOSED
   EXPIRED
@@ -6739,6 +6787,8 @@ model SupportNeedListing {
   fulfilledAt       DateTime?
   closedAt          DateTime?
   expiresAt         DateTime?
+  /// Batch 6 — set once the "expiring soon" reminder was sent to the publisher.
+  expiryWarnedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -6756,6 +6806,8 @@ model SupportNeedListing {
 enum HelpOfferStatus {
   PENDING
   ACCEPTED
+  /// Batch 6 — the helper and publisher are coordinating the handover.
+  IN_PROGRESS
   DECLINED
   COMPLETED
   CANCELLED
@@ -6776,6 +6828,8 @@ model HelpOffer {
   /// listing's own category (someone answering a FOOD need may offer
   /// TRANSPORT to deliver it).
   helpType SupportNeedCategory
+  /// Batch 6 — when the helper can deliver (free text, e.g. "weekday evenings").
+  timing    String?
   quantity Int?
 
   status HelpOfferStatus @default(PENDING)
@@ -6826,6 +6880,12 @@ model DonationIntent {
   /// on the public campaign page — defaults to false (spec: "Do not expose
   /// donor identities publicly unless explicit consent exists").
   showDonorPublicly Boolean        @default(false)
+  /// Batch 6 — the name the donor chose to be shown as (only when showDonorPublicly).
+  /// The account's own display name is never used publicly.
+  publicDisplayName String?
+  /// Batch 6 — optional support need this (restricted) donation is for; validated
+  /// against the need's linked campaign at donation time.
+  supportNeedListingId String? @db.Uuid
 
   /// The internal shell Checkout this donation's PaymentIntent hangs off —
   /// required because PaymentIntent.checkoutId is a non-nullable FK.
@@ -6842,6 +6902,7 @@ model DonationIntent {
   transaction DonationTransaction?
 
   @@index([campaignId])
+  @@index([supportNeedListingId])
   @@map("donation_intents")
 }
 
@@ -7048,6 +7109,12 @@ enum CommunityReportReason {
   MISINFORMATION
   INAPPROPRIATE
   OTHER
+  /// Batch 6
+  SCAM
+  HARASSMENT
+  PERSONAL_INFORMATION
+  ANIMAL_WELFARE
+  DANGEROUS_CONTENT
 }
 
 enum CommunityReportStatus {
@@ -7063,6 +7130,12 @@ model CommunityReport {
   post           CommunityPost?        @relation(fields: [postId], references: [id], onDelete: Restrict)
   commentId      String?               @db.Uuid
   comment        CommunityComment?     @relation(fields: [commentId], references: [id], onDelete: Restrict)
+  /// Batch 6 — the same user report queue also covers animal-support needs, lost-pet incidents,
+  /// sightings and organizations (plain ids, TrustCase-style); exactly one target is set.
+  supportNeedListingId String? @db.Uuid
+  lostPetIncidentId    String? @db.Uuid
+  lostPetSightingId    String? @db.Uuid
+  organizationId       String? @db.Uuid
   reporterUserId String                @db.Uuid
   reason         CommunityReportReason
   details        String?
@@ -7074,6 +7147,11 @@ model CommunityReport {
 
   @@index([postId])
   @@index([commentId])
+  @@index([supportNeedListingId])
+  @@index([lostPetIncidentId])
+  @@index([lostPetSightingId])
+  @@index([organizationId])
+  @@index([reporterUserId])
   @@map("community_reports")
 }
 

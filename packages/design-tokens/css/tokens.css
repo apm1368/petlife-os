@@ -28,8 +28,8 @@
   --ai-primary: #8065d7;
   --ai-primary-strong: #6353c2;
 
-  --state-attention: #c98a1a;
-  --state-higher-concern: #d3651f;
+  --state-attention: #8f5c0c; /* Batch 6: 5.1:1 on surface-subtle (was 2.7:1, failed WCAG AA as text) */
+  --state-higher-concern: #a64b15; /* Batch 6: 5.2:1 on surface-subtle (was 3.4:1) */
   --state-urgent: #c93b2e;
   --state-emergency: #a3121f;
   --state-success: #2e7049; /* Batch 8: 5.4:1 on surface-subtle (was 3.6:1, failed WCAG AA) */

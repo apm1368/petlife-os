@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton } from "@petlife/ui";
+import { CommunityPostType } from "@petlife/types";
 import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { ApiError } from "@/lib/api/client";
@@ -16,11 +17,14 @@ export function CommunityFeedView() {
   const [page, setPage] = useState<PaginatedDto<CommunityPostDto> | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [appliedQuery, setAppliedQuery] = useState("");
+  const [type, setType] = useState<CommunityPostType | "">("");
 
-  async function load(nextPage: number, append = false) {
+  async function load(nextPage: number, append = false, filters: { q: string; type: CommunityPostType | "" } = { q: appliedQuery, type }) {
     setError(null);
     try {
-      const data = await communityService.listPosts({ page: nextPage, pageSize: 20 });
+      const data = await communityService.listPosts({ page: nextPage, pageSize: 20, q: filters.q || undefined, type: filters.type || undefined });
       setPage((prev) => (append && prev ? { ...data, items: [...prev.items, ...data.items] } : data));
       setPageNumber(nextPage);
     } catch (err) {
@@ -45,8 +49,34 @@ export function CommunityFeedView() {
         </Link>
       </div>
 
+      <form
+        role="search"
+        className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const q = query.trim();
+          setAppliedQuery(q);
+          void load(1, false, { q, type });
+        }}
+      >
+        <Input dir="auto" label={t("feed.searchLabel")} value={query} maxLength={80} onChange={(e) => setQuery(e.target.value)} />
+        <Select
+          label={t("feed.typeLabel")}
+          value={type}
+          onChange={(e) => {
+            const next = e.target.value as CommunityPostType | "";
+            setType(next);
+            void load(1, false, { q: appliedQuery, type: next });
+          }}
+          options={[{ value: "", label: t("feed.allTypes") }, ...Object.values(CommunityPostType).map((value) => ({ value, label: t(`postType.${value}`) }))]}
+        />
+        <Button type="submit" variant="secondary">
+          {t("feed.search")}
+        </Button>
+      </form>
+
       {page.items.length === 0 ? (
-        <EmptyState title={t("feed.empty")} />
+        <EmptyState title={appliedQuery || type ? t("feed.noResults") : t("feed.empty")} />
       ) : (
         <div className="flex flex-col gap-3">
           {page.items.map((post) => (

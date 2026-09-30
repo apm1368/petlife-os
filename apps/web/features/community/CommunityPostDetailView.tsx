@@ -3,21 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton } from "@petlife/ui";
-import { CommunityReactionType, CommunityReportReason } from "@petlife/types";
+import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
+import { CommunityReactionType } from "@petlife/types";
 import type { CommunityCommentDto, CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { ApiError } from "@/lib/api/client";
 import { useSessionStore } from "@/stores/session-store";
+import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 
 const REACTIONS: CommunityReactionType[] = [CommunityReactionType.LIKE, CommunityReactionType.LOVE, CommunityReactionType.HELPFUL];
-const REPORT_REASONS: CommunityReportReason[] = [
-  CommunityReportReason.SPAM,
-  CommunityReportReason.ABUSE,
-  CommunityReportReason.MISINFORMATION,
-  CommunityReportReason.INAPPROPRIATE,
-  CommunityReportReason.OTHER,
-];
 
 export function CommunityPostDetailView({ postId }: { postId: string }) {
   const t = useTranslations("community");
@@ -33,10 +27,6 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
   const [commentBody, setCommentBody] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
-  const [isReportOpen, setIsReportOpen] = useState(false);
-  const [reportReason, setReportReason] = useState<CommunityReportReason>(CommunityReportReason.SPAM);
-  const [reportDetails, setReportDetails] = useState("");
-  const [reportSubmitted, setReportSubmitted] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   async function load() {
@@ -96,17 +86,6 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
     }
   }
 
-  async function handleReport(): Promise<void> {
-    if (!requireLogin()) return;
-    setActionError(null);
-    try {
-      await communityService.reportPost(postId, reportReason, reportDetails.trim() || undefined);
-      setReportSubmitted(true);
-    } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
-    }
-  }
-
   if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
   if (!post || !comments) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
@@ -134,31 +113,9 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
               {t(`reaction.${type}`)} {post.reactionCount > 0 ? `(${post.reactionCount})` : ""}
             </Button>
           ))}
-          <Button variant="ghost" size="sm" onClick={() => setIsReportOpen((v) => !v)}>
-            {t("post.report")}
-          </Button>
         </div>
 
-        {isReportOpen ? (
-          <div className="flex flex-col gap-3 border-t border-border-subtle pt-3">
-            {reportSubmitted ? (
-              <p className="text-body text-state-success">{t("post.reportSuccess")}</p>
-            ) : (
-              <>
-                <Select
-                  label={t("post.reportReasonLabel")}
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value as CommunityReportReason)}
-                  options={REPORT_REASONS.map((value) => ({ value, label: t(`reportReason.${value}`) }))}
-                />
-                <Input label={t("post.reportDetailsLabel")} hint={tCommon("optional")} value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} />
-                <Button variant="secondary" onClick={handleReport}>
-                  {t("post.reportSubmit")}
-                </Button>
-              </>
-            )}
-          </div>
-        ) : null}
+        <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportPost(postId, reason, details)} />
 
         {actionError ? <p className="text-body text-state-urgent">{actionError}</p> : null}
       </ContextSurface>

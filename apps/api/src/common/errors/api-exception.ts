@@ -1328,6 +1328,12 @@ export class SupportNeedListingNotEditableException extends ApiException {
   }
 }
 
+export class SupportNeedDeadlineInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_NEED_DEADLINE_INVALID", "The deadline must be in the future and at most 180 days away.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
 export class HelpOfferNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("HELP_OFFER_NOT_FOUND", "Help offer not found.", HttpStatus.NOT_FOUND, details);
@@ -1600,6 +1606,36 @@ export class DischargeSummaryAlreadyIssuedException extends ApiException {
 export class ProviderClinicalAlertNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PROVIDER_CLINICAL_ALERT_NOT_FOUND", "Alert not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class DuplicateReportException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_REPORT", "You have already reported this and it is being reviewed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ReportLimitReachedException extends ApiException {
+  constructor() {
+    super("REPORT_LIMIT_REACHED", "You have sent many reports today. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS);
+  }
+}
+
+export class ReportNotOpenException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REPORT_NOT_OPEN", "Only open reports can be escalated or dismissed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TrustActionNotApplicableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_ACTION_NOT_APPLICABLE", "This action can't be applied to the subject in its current state.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TrustSubjectNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_SUBJECT_NOT_FOUND", "The subject of this case no longer exists.", HttpStatus.NOT_FOUND, details);
   }
 }
 

@@ -9,7 +9,7 @@ import helmet from "helmet";
 import type { NextFunction, Request, Response } from "express";
 import { AppModule } from "./app.module";
 import type { AppEnv } from "./config/env";
-import { PRIVATE_OBJECT_KEY_PREFIXES } from "./modules/storage/object-url.util";
+import { isPrivateUploadPath } from "./modules/storage/object-url.util";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -41,8 +41,7 @@ async function bootstrap() {
     // static middleware ever runs (validateStorageConfig in config/env.ts
     // additionally refuses to boot with this driver in production at all).
     app.use("/uploads", (req: Request, res: Response, next: NextFunction) => {
-      const key = decodeURIComponent(req.path.replace(/^\/+/, ""));
-      if (PRIVATE_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+      if (isPrivateUploadPath(req.path)) {
         res.status(404).end();
         return;
       }

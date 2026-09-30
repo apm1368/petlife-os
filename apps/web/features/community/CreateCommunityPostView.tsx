@@ -56,10 +56,10 @@ export function CreateCommunityPostView() {
         />
         <Input label={t("newPost.titleLabel")} hint={tCommon("optional")} value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input label={t("newPost.bodyLabel")} value={body} onChange={(e) => setBody(e.target.value)} />
-        <div className="flex flex-col gap-1.5">
+        <label className="flex flex-col gap-1.5">
           <span className="text-metadata text-text-secondary">{t("newPost.mediaLabel")}</span>
           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </div>
+        </label>
         {error ? <p className="text-body text-state-urgent">{error}</p> : null}
         <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit} disabled={!body.trim()}>
           {t("newPost.submit")}

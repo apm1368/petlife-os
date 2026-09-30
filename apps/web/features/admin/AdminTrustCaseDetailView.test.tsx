@@ -43,6 +43,7 @@ describe("AdminTrustCaseDetailView", () => {
       reason: "Pattern of non-fulfillment",
       performedByAdmin: { id: "a1", displayName: "Admin", role: "TRUST_SAFETY" as never },
       createdAt: "2026-01-01T00:00:00.000Z",
+      effectSummary: null,
       appeal: null,
     });
 
@@ -66,7 +67,8 @@ describe("AdminTrustCaseDetailView", () => {
           reason: "Pattern of non-fulfillment",
           performedByAdmin: { id: "a1", displayName: "Admin", role: "TRUST_SAFETY" as never },
           createdAt: "2026-01-01T00:00:00.000Z",
-          appeal: null,
+          effectSummary: null,
+      appeal: null,
         },
       ],
     });

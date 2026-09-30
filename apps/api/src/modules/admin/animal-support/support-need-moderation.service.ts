@@ -39,6 +39,8 @@ const REVIEWABLE_FROM: Record<SupportNeedStatus, SupportNeedStatus[]> = {
   [SupportNeedStatus.DRAFT]: [SupportNeedStatus.REMOVED],
   [SupportNeedStatus.PENDING_REVIEW]: [SupportNeedStatus.PUBLISHED, SupportNeedStatus.REJECTED, SupportNeedStatus.REMOVED],
   [SupportNeedStatus.PUBLISHED]: [SupportNeedStatus.REMOVED, SupportNeedStatus.EXPIRED],
+  [SupportNeedStatus.PARTIALLY_FULFILLED]: [SupportNeedStatus.REMOVED, SupportNeedStatus.EXPIRED],
+  [SupportNeedStatus.PAUSED]: [SupportNeedStatus.REMOVED, SupportNeedStatus.EXPIRED],
   [SupportNeedStatus.FULFILLED]: [SupportNeedStatus.REMOVED],
   [SupportNeedStatus.REJECTED]: [SupportNeedStatus.PUBLISHED, SupportNeedStatus.REMOVED],
   [SupportNeedStatus.EXPIRED]: [SupportNeedStatus.PUBLISHED, SupportNeedStatus.REMOVED],

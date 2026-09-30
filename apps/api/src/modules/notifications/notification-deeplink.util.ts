@@ -12,7 +12,8 @@ export const NotificationDeepLinks = {
   provider: (providerId: string) => `/vet/${providerId}`,
   waitlist: () => `/bookings?tab=waitlist`,
   order: (orderId: string) => `/orders/${orderId}`,
-  checkout: (checkoutId: string) => `/checkout/${checkoutId}`,
+  /** A failed payment is retried from the cart (there is no page at /checkout/:id). */
+  cart: () => `/cart`,
   myOrders: () => `/orders`,
   travelBooking: (bookingId: string) => `/travel/bookings/${bookingId}`,
   providerTravelBooking: (bookingId: string) => `/provider/travel/bookings/${bookingId}`,
@@ -28,4 +29,13 @@ export const NotificationDeepLinks = {
   sellerFinance: () => `/seller/finance`,
   sellerSettlementDetail: (settlementId: string) => `/seller/finance/settlements/${settlementId}`,
   notificationCenter: () => `/notifications`,
+  lostIncident: (petId: string, incidentId: string) => `/pets/${petId}/lost/${incidentId}`,
+  supportNeedManage: (listingId: string) => `/animal-support/needs/${listingId}/manage`,
+  supportNeed: (listingId: string) => `/animal-support/needs/${listingId}`,
+  myHelpOffers: () => `/animal-support/my-help`,
+  ngoPortal: () => `/ngo`,
+  ngoDonations: () => `/ngo/donations`,
+  ngoVerification: () => `/ngo/verification`,
+  communityPost: (postId: string) => `/community/posts/${postId}`,
+  donationReceipt: (donationIntentId: string) => `/donations/${donationIntentId}`,
 };

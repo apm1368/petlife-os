@@ -4,6 +4,7 @@ import { StorageModule } from "../storage/storage.module";
 import { CommunityPostService } from "./community-post.service";
 import { CommunityReportService } from "./community-report.service";
 import { CommunityController } from "./community.controller";
+import { ContentReportController } from "./content-report.controller";
 
 /**
  * The consumer-facing half of the Handoff 18 Community domain — browsing,
@@ -16,7 +17,7 @@ import { CommunityController } from "./community.controller";
  */
 @Module({
   imports: [PetAccessModule, StorageModule],
-  controllers: [CommunityController],
+  controllers: [CommunityController, ContentReportController],
   providers: [CommunityPostService, CommunityReportService],
   exports: [CommunityPostService],
 })

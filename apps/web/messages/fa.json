@@ -2141,7 +2141,10 @@
         "commerce": "فروشگاه",
         "travel": "سفر و اقامت",
         "insurance": "بیمه",
-        "places": "مکان‌ها"
+        "places": "مکان‌ها",
+        "communityReports": "گزارش‌های کاربران",
+        "animalSupport": "حمایت از حیوانات",
+        "lostPets": "حیوانات گم‌شده"
       }
     },
     "common": {
@@ -2342,7 +2345,10 @@
         "LISTING": "آگهی",
         "REVIEW": "نظر",
         "COMMUNITY_CONTENT": "محتوای انجمن",
-        "PET_INCIDENT": "حادثه مربوط به حیوان خانگی"
+        "PET_INCIDENT": "حادثه مربوط به حیوان خانگی",
+        "SUPPORT_NEED": "درخواست کمک",
+        "LOST_PET_SIGHTING": "گزارش مشاهدهٔ حیوان گم‌شده",
+        "ANIMAL_SUPPORT_ORGANIZATION": "سازمان حمایت از حیوانات"
       },
       "actionType": {
         "WARNING": "اخطار",
@@ -2934,9 +2940,10 @@
       "CLOSED": "بسته شده"
     },
     "sightingStatus": {
-      "SUBMITTED": "در انتظار بررسی",
-      "ACCEPTED": "پذیرفته شد",
-      "REJECTED": "رد شد"
+      "SUBMITTED": "تازه",
+      "REVIEWED": "بررسی شد",
+      "ACCEPTED": "احتمالاً خودش است",
+      "REJECTED": "مطابق نیست"
     },
     "detail": {
       "title": "{name} گم شده است",
@@ -2953,8 +2960,8 @@
       "sightingsEmpty": "هنوز مشاهده‌ای گزارش نشده است.",
       "anonymousReporter": "گزارش ناشناس",
       "knownReporter": "گزارش‌شده توسط کاربر واردشده",
-      "acceptSighting": "پذیرفتن",
-      "rejectSighting": "رد کردن"
+      "acceptSighting": "احتمالاً خودش است",
+      "rejectSighting": "مطابق نیست"
     },
     "public": {
       "list": {
@@ -2994,8 +3001,8 @@
       "empty": "در حال حاضر کمپینی باز نیست."
     },
     "campaignCard": {
-      "raised": "{raised} ریال جمع‌آوری شده",
-      "raisedOfTarget": "{raised} از {target} ریال جمع‌آوری شده"
+      "raised": "{raised} جمع‌آوری شد",
+      "raisedOfTarget": "{raised} از {target} جمع‌آوری شد"
     },
     "fundType": {
       "GENERAL": "صندوق عمومی",
@@ -3045,14 +3052,24 @@
       "ABUSE": "سوءاستفاده",
       "MISINFORMATION": "اطلاعات نادرست",
       "INAPPROPRIATE": "نامناسب",
-      "OTHER": "سایر"
+      "OTHER": "سایر",
+      "SCAM": "کلاهبرداری",
+      "HARASSMENT": "آزار و مزاحمت",
+      "PERSONAL_INFORMATION": "انتشار اطلاعات شخصی",
+      "ANIMAL_WELFARE": "نگرانی درباره سلامت و رفاه حیوان",
+      "DANGEROUS_CONTENT": "محتوای خطرناک"
     },
     "feed": {
       "title": "انجمن",
       "newPost": "پست جدید",
       "empty": "هنوز پستی وجود ندارد. اولین نفر باشید که چیزی به اشتراک می‌گذارد.",
       "loadMore": "بیشتر",
-      "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}"
+      "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}",
+      "searchLabel": "جستجو در پست‌ها",
+      "typeLabel": "نوع پست",
+      "allTypes": "همه انواع",
+      "search": "جستجو",
+      "noResults": "پستی با این جستجو پیدا نشد."
     },
     "newPost": {
       "title": "پست جدید",
@@ -3404,14 +3421,17 @@
       "CLOSED": "بسته‌شده",
       "EXPIRED": "منقضی",
       "REJECTED": "نیازمند اصلاح",
-      "REMOVED": "حذف‌شده"
+      "REMOVED": "حذف‌شده",
+      "PARTIALLY_FULFILLED": "بخشی تأمین شده",
+      "PAUSED": "متوقف موقت"
     },
     "offerStatus": {
       "PENDING": "در انتظار",
       "ACCEPTED": "پذیرفته‌شده",
       "DECLINED": "رد شده",
       "COMPLETED": "انجام‌شده",
-      "CANCELLED": "لغو شده"
+      "CANCELLED": "لغو شده",
+      "IN_PROGRESS": "در حال انجام"
     },
     "list": {
       "title": "نیازهای حمایت از حیوانات",
@@ -3874,5 +3894,15 @@
         "description": "درخواست‌ها و راهنمایی"
       }
     }
+  },
+  "report": {
+    "action": "گزارش",
+    "hint": "گزارش‌ها محرمانه‌اند. تیم آن‌ها را بررسی می‌کند و به فرد گزارش‌شده گفته نمی‌شود چه کسی گزارش داده است.",
+    "reasonLabel": "مشکل چیست؟",
+    "detailsLabel": "جزئیات",
+    "submit": "ارسال گزارش",
+    "success": "متشکریم — تیم این مورد را بررسی می‌کند.",
+    "duplicate": "قبلاً این مورد را گزارش داده‌اید. تیم در حال بررسی آن است.",
+    "limitReached": "امروز گزارش‌های زیادی فرستاده‌اید. لطفاً فردا دوباره تلاش کنید."
   }
 }

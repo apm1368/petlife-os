@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from "class-validator";
+import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
 import { AnimalSupportOrgType, AnimalSupportVerificationStatus, CampaignFundType, RescueCaseStatus, SupportCampaignStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 
@@ -231,6 +231,17 @@ export class CreateDonationDto {
   @IsOptional()
   @IsBoolean()
   showDonorPublicly?: boolean;
+
+  /** Batch 6 — required when showDonorPublicly; e.g. a first name or "A friend of the shelter". */
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  publicDisplayName?: string;
+
+  /** Batch 6 — the support need this donation is for (must be linked to this campaign). */
+  @IsOptional()
+  @IsUUID()
+  supportNeedListingId?: string;
 
   @IsOptional()
   @IsString()

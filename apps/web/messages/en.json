@@ -2141,7 +2141,10 @@
         "commerce": "Commerce",
         "travel": "Travel & stays",
         "insurance": "Insurance",
-        "places": "Places"
+        "places": "Places",
+        "communityReports": "User reports",
+        "animalSupport": "Animal support",
+        "lostPets": "Lost pets"
       }
     },
     "common": {
@@ -2342,7 +2345,10 @@
         "LISTING": "Listing",
         "REVIEW": "Review",
         "COMMUNITY_CONTENT": "Community content",
-        "PET_INCIDENT": "Pet incident"
+        "PET_INCIDENT": "Pet incident",
+        "SUPPORT_NEED": "Support request",
+        "LOST_PET_SIGHTING": "Lost-pet sighting",
+        "ANIMAL_SUPPORT_ORGANIZATION": "Animal support organization"
       },
       "actionType": {
         "WARNING": "Warning",
@@ -2934,9 +2940,10 @@
       "CLOSED": "Closed"
     },
     "sightingStatus": {
-      "SUBMITTED": "Awaiting review",
-      "ACCEPTED": "Accepted",
-      "REJECTED": "Rejected"
+      "SUBMITTED": "New",
+      "REVIEWED": "Reviewed",
+      "ACCEPTED": "Likely match",
+      "REJECTED": "Not a match"
     },
     "detail": {
       "title": "{name} is missing",
@@ -2953,8 +2960,8 @@
       "sightingsEmpty": "No sightings reported yet.",
       "anonymousReporter": "Reported anonymously",
       "knownReporter": "Reported by a signed-in user",
-      "acceptSighting": "Accept",
-      "rejectSighting": "Reject"
+      "acceptSighting": "Likely match",
+      "rejectSighting": "Not a match"
     },
     "public": {
       "list": {
@@ -2994,8 +3001,8 @@
       "empty": "No campaigns are open right now."
     },
     "campaignCard": {
-      "raised": "{raised} IRR raised",
-      "raisedOfTarget": "{raised} of {target} IRR raised"
+      "raised": "{raised} raised",
+      "raisedOfTarget": "{raised} of {target} raised"
     },
     "fundType": {
       "GENERAL": "General fund",
@@ -3045,14 +3052,24 @@
       "ABUSE": "Abuse",
       "MISINFORMATION": "Misinformation",
       "INAPPROPRIATE": "Inappropriate",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "SCAM": "Scam or fraud",
+      "HARASSMENT": "Harassment",
+      "PERSONAL_INFORMATION": "Shares personal information",
+      "ANIMAL_WELFARE": "Animal welfare concern",
+      "DANGEROUS_CONTENT": "Dangerous content"
     },
     "feed": {
       "title": "Community",
       "newPost": "New post",
       "empty": "No posts yet. Be the first to share something.",
       "loadMore": "Load more",
-      "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}"
+      "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}",
+      "searchLabel": "Search posts",
+      "typeLabel": "Post type",
+      "allTypes": "All types",
+      "search": "Search",
+      "noResults": "No posts match your search."
     },
     "newPost": {
       "title": "New post",
@@ -3404,14 +3421,17 @@
       "CLOSED": "Closed",
       "EXPIRED": "Expired",
       "REJECTED": "Needs changes",
-      "REMOVED": "Removed"
+      "REMOVED": "Removed",
+      "PARTIALLY_FULFILLED": "Partly fulfilled",
+      "PAUSED": "Paused"
     },
     "offerStatus": {
       "PENDING": "Pending",
       "ACCEPTED": "Accepted",
       "DECLINED": "Declined",
       "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "IN_PROGRESS": "In progress"
     },
     "list": {
       "title": "Animal support needs",
@@ -3874,5 +3894,15 @@
         "description": "Requests and help"
       }
     }
+  },
+  "report": {
+    "action": "Report",
+    "hint": "Reports are private. The team reviews them and the person you report is not told who reported.",
+    "reasonLabel": "What's wrong?",
+    "detailsLabel": "Details",
+    "submit": "Send report",
+    "success": "Thank you — the team will review this.",
+    "duplicate": "You've already reported this. The team is reviewing it.",
+    "limitReached": "You've sent many reports today. Please try again tomorrow."
   }
 }

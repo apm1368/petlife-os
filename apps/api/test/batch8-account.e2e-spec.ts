@@ -8,6 +8,7 @@ import { REDIS_CLIENT } from "../src/common/redis/redis.module";
 import { AccountExportService } from "../src/modules/account/account-export.service";
 import { NotificationOrchestratorService } from "../src/modules/notifications/notification-orchestrator.service";
 import { sanitizeReturnTo } from "../src/common/return-to/return-to.util";
+import { isPrivateUploadPath } from "../src/modules/storage/object-url.util";
 
 interface Cookies {
   session?: string;
@@ -436,9 +437,11 @@ describe("Batch 8 — Account & security", () => {
       expect(exported.pets[0].health.allergies.items[0]).toMatchObject({ name: "Chicken" });
       expect(file.text).not.toContain("passwordHash");
       expect(file.text).not.toContain("tokenHash");
-      // The private file is never reachable through the public static route.
+      // The private file is never reachable through the public static route (main.ts mounts it only
+      // outside tests, behind this exact guard — asserted directly rather than against an unmounted route).
       const key = (await prisma.dataExportRequest.findUniqueOrThrow({ where: { id: requested.body.id } })).fileObjectKey!;
-      await request(server).get(`/uploads/${key}`).expect(404);
+      expect(key.startsWith("account-exports/")).toBe(true);
+      expect(isPrivateUploadPath(`/${key}`)).toBe(true);
       expect(await prisma.domainEvent.count({ where: { type: "DataExportDownloaded", aggregateId: o.userId } })).toBe(1);
 
       // After the window closes the file is removed and the link can't be minted.

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { AppealStatus, TrustActionType, TrustCaseStatus, type TrustActionDto, type TrustCaseDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
+import { adminAnimalSupportService, type TrustCaseContext } from "@/services/admin-animal-support.service";
+import { ApiError } from "@/lib/api/client";
 import { adminStatusTone } from "./status-tone";
 
 const STATUSES = Object.values(TrustCaseStatus);
@@ -82,11 +84,16 @@ export function AdminTrustCaseDetailView({ trustCaseId }: { trustCaseId: string 
   const [assigneeAdminId, setAssigneeAdminId] = useState("");
   const [actionType, setActionType] = useState<TrustActionType>(TrustActionType.WARNING);
   const [actionReason, setActionReason] = useState("");
+  const [context, setContext] = useState<TrustCaseContext | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   async function load() {
     setError(false);
     try {
-      setData(await adminService.getTrustCase(trustCaseId));
+      const [caseData, ctx] = await Promise.all([adminService.getTrustCase(trustCaseId), adminAnimalSupportService.trustCaseContext(trustCaseId).catch(() => null)]);
+      setData(caseData);
+      setContext(ctx);
+      if (ctx && !ctx.availableActions.includes(actionType)) setActionType(ctx.availableActions[0] as TrustActionType);
     } catch {
       setError(true);
     }
@@ -111,9 +118,22 @@ export function AdminTrustCaseDetailView({ trustCaseId }: { trustCaseId: string 
 
   async function takeAction() {
     if (!actionReason.trim()) return;
-    await adminService.takeTrustAction(trustCaseId, { actionType, reason: actionReason });
-    setActionReason("");
-    await load();
+    setActionError(null);
+    try {
+      await adminService.takeTrustAction(trustCaseId, { actionType, reason: actionReason });
+      setActionReason("");
+      await load();
+    } catch (err) {
+      setActionError(
+        err instanceof ApiError && err.code === "TRUST_ACTION_NOT_APPLICABLE"
+          ? locale === "fa"
+            ? "این اقدام در وضعیت فعلی مورد قابل اجرا نیست (مثلاً قبلاً انجام شده یا چیزی برای بازگرداندن نیست)."
+            : "This action can't be applied in the item's current state (already done, or nothing to restore)."
+          : err instanceof ApiError && err.status === 403
+            ? locale === "fa" ? "نقش شما اجازهٔ این اقدام را ندارد." : "Your role can't take this action."
+            : locale === "fa" ? "اقدام ثبت نشد." : "The action wasn't recorded.",
+      );
+    }
   }
 
   if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
@@ -130,6 +150,8 @@ export function AdminTrustCaseDetailView({ trustCaseId }: { trustCaseId: string 
         <StatusLabel tone={adminStatusTone(data.status)}>{t(`status.${data.status}`)}</StatusLabel>
       </div>
       <span className="text-body text-text-primary">{data.reason}</span>
+
+      {context ? <CaseContextPanel context={context} locale={locale} /> : null}
 
       <ContextSurface className="flex flex-wrap items-end gap-2">
         <Input label={tCommon("assigneeLabel")} value={assigneeAdminId} onChange={(e) => setAssigneeAdminId(e.target.value)} className="min-w-48 flex-1" />
@@ -153,13 +175,65 @@ export function AdminTrustCaseDetailView({ trustCaseId }: { trustCaseId: string 
               <span className="text-metadata text-text-secondary">{a.performedByAdmin.displayName} · {formatDate(a.createdAt, locale)}</span>
             </div>
             <span className="text-body text-text-primary">{a.reason}</span>
+            {a.effectSummary ? (
+              <span className="text-metadata text-text-secondary" dir="ltr">
+                {JSON.stringify(a.effectSummary.before)} → {JSON.stringify(a.effectSummary.after)}
+                {a.effectSummary.restoredByActionId ? (locale === "fa" ? " · بازگردانده شد" : " · restored") : ""}
+              </span>
+            ) : null}
             <ActionAppeal action={a} onChanged={load} />
           </div>
         ))}
-        <Select label={t("detail.takeAction")} value={actionType} onChange={(e) => setActionType(e.target.value as TrustActionType)} options={Object.values(TrustActionType).map((v) => ({ value: v, label: t(`actionType.${v}`) }))} />
+        <Select label={t("detail.takeAction")} value={actionType} onChange={(e) => setActionType(e.target.value as TrustActionType)} options={(context ? (context.availableActions as TrustActionType[]) : Object.values(TrustActionType)).map((v) => ({ value: v, label: t(`actionType.${v}`) }))} />
         <Input label={t("detail.actionReason")} value={actionReason} onChange={(e) => setActionReason(e.target.value)} />
+        {actionError ? <p role="alert" className="text-body text-state-urgent">{actionError}</p> : null}
         <Button onClick={takeAction}>{t("detail.takeAction")}</Button>
       </ContextSurface>
     </div>
+  );
+}
+
+const SUBJECT_KIND: Record<string, [string, string]> = {
+  POST: ["پست انجمن", "Community post"],
+  COMMENT: ["نظر انجمن", "Community comment"],
+  SUPPORT_NEED: ["درخواست کمک", "Support request"],
+  LOST_PET_INCIDENT: ["گزارش گم‌شدن", "Lost-pet report"],
+  LOST_PET_SIGHTING: ["گزارش مشاهده", "Sighting"],
+  ORGANIZATION: ["سازمان", "Organization"],
+};
+
+/** Batch 6 — what the case is about: the subject (no contact details or exact location), every report on it, without reporter identity. */
+function CaseContextPanel({ context, locale }: { context: TrustCaseContext; locale: string }) {
+  const fa = locale === "fa";
+  const subject = context.subject as { kind?: string; title?: string | null; text?: string | null; status?: string; owner?: string | null; link?: string; organization?: { name?: string } | null } | null;
+  return (
+    <ContextSurface className="flex flex-col gap-3">
+      <span className="text-section-title text-text-primary">{fa ? "موضوع پرونده" : "Case subject"}</span>
+      {subject ? (
+        <div className="flex flex-col gap-1">
+          <span className="text-metadata text-text-secondary">{subject.kind && SUBJECT_KIND[subject.kind] ? (fa ? SUBJECT_KIND[subject.kind]![0] : SUBJECT_KIND[subject.kind]![1]) : subject.kind} · {subject.status}</span>
+          {subject.title ? <b className="text-body text-text-primary" dir="auto">{subject.title}</b> : null}
+          {subject.text ? <p className="text-body text-text-primary" dir="auto">{subject.text}</p> : null}
+          <span className="text-metadata text-text-secondary">
+            {subject.owner ? `${fa ? "ثبت‌کننده" : "By"}: ${subject.owner}` : ""}
+            {subject.organization?.name ? ` · ${subject.organization.name}` : ""}
+          </span>
+          {subject.link ? <a className="text-metadata text-brand-natural underline" href={`/${locale}${subject.link}`} target="_blank" rel="noreferrer">{fa ? "مشاهدهٔ صفحهٔ عمومی" : "Open public page"}</a> : null}
+        </div>
+      ) : (
+        <span className="text-metadata text-text-secondary">{fa ? "موضوع دیگر وجود ندارد یا خلاصه‌ای برایش تعریف نشده است." : "The subject no longer exists, or has no summary."}</span>
+      )}
+      <div className="flex flex-col gap-1 border-t border-border-subtle pt-2">
+        <span className="text-body font-medium text-text-primary">
+          {fa ? `${context.reports.total} گزارش از ${context.reports.distinctReporters} نفر` : `${context.reports.total} report(s) from ${context.reports.distinctReporters} person(s)`}
+        </span>
+        <span className="text-metadata text-text-secondary">{Object.entries(context.reports.byReason).map(([reason, count]) => `${reason} ×${count}`).join(" · ")}</span>
+        {context.reports.items.slice(0, 10).map((r) => (
+          <span key={r.id} className="text-metadata text-text-secondary" dir="auto">
+            {r.reason} · {r.status}{r.details ? ` — ${r.details}` : ""}
+          </span>
+        ))}
+      </div>
+    </ContextSurface>
   );
 }

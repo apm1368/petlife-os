@@ -1,32 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
+import { ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { PublicDonationEntryDto, SupportCampaignDto, SupportCampaignUpdateDto } from "@petlife/types";
 import { animalSupportService } from "@/services/animal-support.service";
 import { ApiError } from "@/lib/api/client";
-import { useSessionStore } from "@/stores/session-store";
+import { supportNeedsService } from "@/services/support-needs.service";
 import { CampaignProgressBar } from "./CampaignProgressBar";
+import { DonationPanel } from "./DonationPanel";
+import { formatCurrency } from "@/lib/currency/format-currency";
 
 export function SupportCampaignDetailView({ campaignId }: { campaignId: string }) {
   const t = useTranslations("animalSupport");
   const tCommon = useTranslations("common");
-  const status = useSessionStore((s) => s.status);
-  const router = useRouter();
-  const locale = useLocale();
+  const lang = useLocale() === "fa" ? "fa" : "en";
+  const params = useSearchParams();
+  const needId = params.get("need");
+  const [need, setNeed] = useState<{ id: string; title: string } | null>(null);
 
   const [campaign, setCampaign] = useState<SupportCampaignDto | null>(null);
   const [updates, setUpdates] = useState<SupportCampaignUpdateDto[] | null>(null);
   const [donors, setDonors] = useState<PublicDonationEntryDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [amountIrr, setAmountIrr] = useState("");
-  const [showDonorPublicly, setShowDonorPublicly] = useState(false);
-  const [isDonating, setIsDonating] = useState(false);
-  const [donateError, setDonateError] = useState<string | null>(null);
-  const [donateSuccess, setDonateSuccess] = useState(false);
 
   async function load() {
     setError(null);
@@ -49,22 +47,11 @@ export function SupportCampaignDetailView({ campaignId }: { campaignId: string }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId]);
 
-  async function handleDonate(): Promise<void> {
-    const amount = Number(amountIrr);
-    if (!amount || amount < 1000) return;
-    setIsDonating(true);
-    setDonateError(null);
-    try {
-      await animalSupportService.donate(campaignId, { amountIrr: amount, showDonorPublicly });
-      setDonateSuccess(true);
-      setAmountIrr("");
-      await load();
-    } catch (err) {
-      setDonateError(err instanceof ApiError ? err.message : tCommon("genericError"));
-    } finally {
-      setIsDonating(false);
-    }
-  }
+  useEffect(() => {
+    if (!needId) return;
+    // Only a live need linked to this campaign can be named as the purpose (the API re-checks).
+    supportNeedsService.get(needId).then((n) => setNeed(n.campaignId === campaignId ? { id: n.id, title: n.title } : null)).catch(() => setNeed(null));
+  }, [needId, campaignId]);
 
   if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
   if (!campaign || !updates || !donors) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
@@ -84,28 +71,7 @@ export function SupportCampaignDetailView({ campaignId }: { campaignId: string }
 
       <ContextSurface className="flex flex-col gap-4">
         <h2 className="text-section-title text-text-primary">{t("campaignDetail.donateTitle")}</h2>
-        {status !== "authenticated" ? (
-          <div className="flex flex-col gap-2">
-            <p className="text-body text-text-secondary">{t("campaignDetail.loginToDonate")}</p>
-            <Button variant="secondary" onClick={() => router.push(`/${locale}/welcome?returnTo=${encodeURIComponent(window.location.pathname)}`)}>
-              {tCommon("logIn")}
-            </Button>
-          </div>
-        ) : donateSuccess ? (
-          <p className="text-body text-state-success">{t("campaignDetail.donateSuccess")}</p>
-        ) : (
-          <>
-            <Input label={t("campaignDetail.amountLabel")} type="number" min={1000} value={amountIrr} onChange={(e) => setAmountIrr(e.target.value)} />
-            <label className="flex items-center gap-2 text-body text-text-primary">
-              <input type="checkbox" checked={showDonorPublicly} onChange={(e) => setShowDonorPublicly(e.target.checked)} />
-              {t("campaignDetail.showDonorPublicly")}
-            </label>
-            {donateError ? <p className="text-body text-state-urgent">{donateError}</p> : null}
-            <Button variant="primary" isLoading={isDonating} onClick={handleDonate} disabled={!amountIrr || Number(amountIrr) < 1000}>
-              {t("campaignDetail.donateSubmit")}
-            </Button>
-          </>
-        )}
+        <DonationPanel campaign={campaign} need={need} onDonated={() => void load()} />
       </ContextSurface>
 
       <div>
@@ -133,7 +99,8 @@ export function SupportCampaignDetailView({ campaignId }: { campaignId: string }
             {donors.map((donor, index) => (
               <div key={index} className="flex items-center justify-between text-body text-text-primary">
                 <span>{donor.displayName}</span>
-                <span className="text-text-secondary">{donor.amountIrr.toLocaleString()}</span>
+                {/* IRR is the stored truth; people read Toman in the locale digits (was raw rial, 10× the Toman figure). */}
+                <span className="text-text-secondary">{formatCurrency(donor.amountIrr, lang)}</span>
               </div>
             ))}
           </div>

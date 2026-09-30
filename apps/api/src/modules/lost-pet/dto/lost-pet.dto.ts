@@ -1,4 +1,5 @@
-import { IsEnum, IsISO8601, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, Length, Min } from "class-validator";
+import { Type } from "class-transformer";
+import { IsEnum, IsIn, IsISO8601, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, Length, Max, Min } from "class-validator";
 import { LostPetContactPreference } from "@petlife/types";
 
 export class CreateLostPetIncidentDto {
@@ -6,6 +7,13 @@ export class CreateLostPetIncidentDto {
   @Length(1, 2000)
   description!: string;
 
+  /** Public: approximate area only (neighbourhood / main street) — never a home address. */
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  publicArea?: string;
+
+  /** Private to the household and operators. */
   @IsOptional()
   @IsString()
   @Length(0, 300)
@@ -108,4 +116,10 @@ export class RequestLostPetSightingPhotoUploadDto {
 export class ReviewLostPetSightingDto {
   @IsEnum(["ACCEPTED", "REJECTED"])
   decision!: "ACCEPTED" | "REJECTED";
+}
+
+export class ListPublicLostPetsQueryDto {
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(48) pageSize?: number;
+  @IsOptional() @IsIn(["DOG", "CAT", "OTHER"]) species?: "DOG" | "CAT" | "OTHER";
 }

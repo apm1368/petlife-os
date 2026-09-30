@@ -30,8 +30,10 @@ export function toSupportNeedListingDto(row: SupportNeedListingWithOrg, includeP
     province: row.province,
     city: row.city,
     neighborhood: row.neighborhood,
-    latitude: row.latitude,
-    longitude: row.longitude,
+    // Batch 6: exact coordinates stay with the publisher and operators; public reads
+    // carry province/city/neighbourhood only.
+    latitude: includePublisher ? row.latitude : null,
+    longitude: includePublisher ? row.longitude : null,
     imageObjectKeys: row.imageObjectKeys,
     imageUrls: resolveObjectUrls(row.imageObjectKeys),
     neededQuantity: row.neededQuantity,
@@ -59,6 +61,7 @@ export function toHelpOfferDto(row: HelpOffer): HelpOfferDto {
     message: row.message,
     helpType: row.helpType as unknown as HelpOfferDto["helpType"],
     quantity: row.quantity,
+    timing: row.timing,
     status: row.status as unknown as HelpOfferDto["status"],
     fulfilledQuantity: row.fulfilledQuantity,
     respondedAt: row.respondedAt?.toISOString() ?? null,
