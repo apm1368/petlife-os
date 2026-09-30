@@ -275,4 +275,89 @@ describe("Batch 8 — Account & security", () => {
     });
   });
 
+
+  // ------------------------------------------------------------------ 8C security center
+
+  describe("sessions and security notices", () => {
+    it("a user sees and ends only their own sessions; other devices stop working at once", async () => {
+      const u = await user("b8-sessions");
+      const phone = client(await signIn(u.email));
+      const tablet = client(await signIn(u.email));
+      const list = await u.c.get("/account/security").expect(200);
+      expect(list.body.sessions).toHaveLength(3);
+      expect(list.body.sessions.filter((x: { current: boolean }) => x.current)).toHaveLength(1);
+      expect(JSON.stringify(list.body.sessions)).not.toContain("ipAddress");
+
+      // Someone else's session id is indistinguishable from an inactive one, and stays alive.
+      const other = await user("b8-other");
+      const otherSession = (await other.c.get("/account/security").expect(200)).body.sessions[0].id as string;
+      await u.c.delete(`/account/security/sessions/${otherSession}`).expect(400);
+      await other.c.get("/me").expect(200);
+      await u.c.delete("/account/security/sessions/not-a-uuid").expect(400);
+
+      // The current session can't be ended from the list (that's "sign out").
+      const currentId = list.body.sessions.find((x: { current: boolean }) => x.current).id as string;
+      await u.c.delete(`/account/security/sessions/${currentId}`).expect(400);
+
+      const tabletId = (await tablet.get("/account/security").expect(200)).body.sessions.find((x: { current: boolean }) => x.current).id as string;
+      await u.c.delete(`/account/security/sessions/${tabletId}`).expect(200);
+      await tablet.get("/me").expect(401);
+      await phone.get("/me").expect(200);
+
+      const others = await u.c.post("/account/security/sessions/revoke-others").expect(201);
+      expect(others.body.count).toBe(1);
+      await phone.get("/me").expect(401);
+      await u.c.get("/me").expect(200);
+      expect(await prisma.notification.count({ where: { userId: u.userId, type: "security.sessions_revoked" } })).toBe(1);
+    });
+
+    it("sign out everywhere ends this session too, and a revoked session can't race past revocation", async () => {
+      const u = await user("b8-everywhere");
+      const second = client(await signIn(u.email));
+      // Requests in flight with the soon-revoked session either finish before or fail after — never succeed afterwards.
+      const inflight = Promise.all(Array.from({ length: 5 }, () => second.get("/me")));
+      const res = await u.c.post("/account/security/sessions/revoke-all").expect(200);
+      expect(res.body.count).toBe(2);
+      await inflight;
+      await u.c.get("/me").expect(401);
+      await second.get("/me").expect(401);
+      expect(await prisma.session.count({ where: { userId: u.userId, revokedAt: null } })).toBe(0);
+    });
+
+    it("security notices: a later sign-in and a password change notify; the very first sign-in does not", async () => {
+      const u = await user("b8-notices");
+      expect(await prisma.notification.count({ where: { userId: u.userId, type: "security.new_sign_in" } })).toBe(0);
+      await signIn(u.email);
+      const note = await prisma.notification.findFirstOrThrow({ where: { userId: u.userId, type: "security.new_sign_in" } });
+      expect(note.category).toBe("SECURITY");
+      expect(note.deepLink).toBe("/profile/security");
+      const changed = await u.c.put("/auth/password").send({ newPassword: "a brand new password" }).expect(200);
+      expect(await prisma.notification.count({ where: { userId: u.userId, type: "security.password_changed" } })).toBe(1);
+      const rotated = client({ session: extractCookie(changed.headers["set-cookie"], "petlife_session"), csrf: u.c.cookies.csrf });
+      // Security notices can't be switched off.
+      await rotated.patch("/notification-preferences").send({ preferences: [{ category: "SECURITY", channel: "IN_APP", enabled: false }] }).expect(200);
+      const prefs = await rotated.get("/notification-preferences").expect(200);
+      expect(prefs.body.preferences.find((p: { category: string; channel: string }) => p.category === "SECURITY" && p.channel === "IN_APP").enabled).toBe(true);
+    });
+
+    it("password reset links are single-use, die when another is used, and don't reveal whether an account exists", async () => {
+      const username = `b8reset_${Date.now()}`;
+      const email = `b8-reset-${unique()}@example.com`;
+      await register(username, "first-password-1", email);
+      const token = await csrf();
+      const forgot = (identifier: string) => request(server).post("/auth/password/forgot").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ identifier });
+      const known = await forgot(email).expect(200);
+      const unknown = await forgot(`nobody-${unique()}@example.com`).expect(200);
+      expect(known.body).toEqual(unknown.body);
+      await forgot(username).expect(200);
+      const tokens = logSpy.mock.calls.map((c) => String(c[0])).filter((line) => line.includes("[DEV PASSWORD RESET]")).map((line) => /token=(\S+)/.exec(line)![1]!);
+      expect(tokens.length).toBeGreaterThanOrEqual(2);
+      const [first, second] = tokens.slice(-2);
+      const reset = (t: string, pw: string) => request(server).post("/auth/password/reset").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ token: t, newPassword: pw });
+      const race = await Promise.all([reset(second!, "second-password-2"), reset(second!, "second-password-3")]);
+      expect(race.filter((r) => r.status === 200)).toHaveLength(1);
+      await reset(first!, "first-link-reused").expect(400);
+    });
+  });
+
 });

@@ -7,6 +7,7 @@ import { DomainEventsService } from "../../../common/events/domain-events.servic
 import { GoogleAuthFailedException } from "../../../common/errors/api-exception";
 import type { GoogleProfile } from "./google-profile.types";
 import { markContactVerified } from "../contact-verification.util";
+import { deviceLabel } from "../../../common/session/device-label.util";
 
 function isUniqueConstraintViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
@@ -46,9 +47,9 @@ export class AuthGoogleService {
   ): Promise<SessionUser> {
     const { user, isNewUser } = await this.resolveUser(profile);
 
-    await this.sessions.issueSession(user.id, res, meta);
+    const sessionId = await this.sessions.issueSession(user.id, res, meta);
     if (isNewUser) await this.events.publish("UserRegistered", { userId: user.id, method: "GOOGLE" });
-    await this.events.publish("UserAuthenticated", { userId: user.id });
+    await this.events.publish("UserAuthenticated", { userId: user.id, method: "GOOGLE", sessionId, device: deviceLabel(meta.userAgent), firstSignIn: isNewUser }, { aggregateType: "User", aggregateId: user.id });
 
     return toSessionUser(user);
   }

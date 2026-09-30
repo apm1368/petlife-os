@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { Response } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { deviceLabel } from "../../common/session/device-label.util";
 import { SessionService, type SessionUser } from "../../common/session/session.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { classifyIdentifier } from "./identifier.util";
@@ -46,8 +47,8 @@ export class AuthService {
 
     // Session rotation: always issue a fresh session row on successful auth
     // rather than reusing any pre-existing one.
-    await this.sessions.issueSession(user.id, res, meta);
-    await this.events.publish("UserAuthenticated", { userId: user.id, method: "OTP" }, { aggregateType: "User", aggregateId: user.id });
+    const sessionId = await this.sessions.issueSession(user.id, res, meta);
+    await this.events.publish("UserAuthenticated", { userId: user.id, method: "OTP", sessionId, device: deviceLabel(meta.userAgent) }, { aggregateType: "User", aggregateId: user.id });
 
     return {
       id: user.id,

@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { IsBoolean, IsIn, IsOptional, IsString, Length } from "class-validator";
-import type { Request } from "express";
+import type { Request, Response } from "express";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { SessionService, type SessionUser } from "../../common/session/session.service";
@@ -39,7 +39,7 @@ export class AccountController {
   }
 
   @Delete("security/sessions/:sessionId")
-  async revokeSession(@CurrentUser() user: SessionUser, @Req() req: Request, @Param("sessionId") sessionId: string) {
+  async revokeSession(@CurrentUser() user: SessionUser, @Req() req: Request, @Param("sessionId", ParseUUIDPipe) sessionId: string) {
     await this.sessions.revokeForUser(user.id, sessionId, this.sessions.getSessionId(this.sessions.readCookie(req)));
     await this.account.recordSessionRevoked(user.id, sessionId);
     return { ok: true };
@@ -49,6 +49,15 @@ export class AccountController {
   async revokeOtherSessions(@CurrentUser() user: SessionUser, @Req() req: Request) {
     const count = await this.sessions.revokeOthers(user.id, this.sessions.getSessionId(this.sessions.readCookie(req)));
     await this.account.recordOtherSessionsRevoked(user.id, count);
+    return { ok: true, count };
+  }
+
+  /** Signs out every device, this one included. */
+  @Post("security/sessions/revoke-all")
+  @HttpCode(HttpStatus.OK)
+  async revokeAllSessions(@CurrentUser() user: SessionUser, @Res({ passthrough: true }) res: Response) {
+    const count = await this.sessions.revokeAllAndClear(user.id, res);
+    await this.account.recordAllSessionsRevoked(user.id, count);
     return { ok: true, count };
   }
 

@@ -9,7 +9,7 @@ const CONSENT_VERSION = "2026-09-25";
 const EXPORT_SCOPE = ["ACCOUNT", "HOUSEHOLD", "PET_IDENTITY", "HEALTH", "MEMORIES", "ACTIVITY"] as const;
 const ACTIVITY_TYPES = [
   "UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked",
-  "OtherSessionsRevoked", "ConsentChanged", "DataExportRequested", "AccountDeletionRequested",
+  "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared", "ConsentChanged", "DataExportRequested", "AccountDeletionRequested",
   "HouseholdInvitationAccepted", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked",
 ];
 
@@ -44,7 +44,7 @@ export class AccountService {
         providers,
       },
       sessions,
-      activity: await this.activity(userId, ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked"]),
+      activity: await this.activity(userId, ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"]),
     };
   }
 
@@ -96,6 +96,10 @@ export class AccountService {
 
   async recordSessionRevoked(userId: string, sessionId: string) {
     await this.events.publish("SessionRevoked", { userId, sessionId }, { aggregateType: "User", aggregateId: userId });
+  }
+
+  async recordAllSessionsRevoked(userId: string, count: number) {
+    await this.events.publish("AllSessionsRevoked", { userId, count }, { aggregateType: "User", aggregateId: userId });
   }
 
   async recordOtherSessionsRevoked(userId: string, count: number) {

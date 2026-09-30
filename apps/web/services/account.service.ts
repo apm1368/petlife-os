@@ -11,6 +11,8 @@ export interface AccountOverviewDto {
 export interface AccountSessionDto {
   id: string;
   userAgent: string | null;
+  /** Coarse "Browser · OS" label derived from the user-agent, or null when it can't be read. */
+  device: string | null;
   createdAt: string;
   lastSeenAt: string;
   expiresAt: string;
@@ -52,6 +54,7 @@ export const accountService = {
   security: () => apiFetch<SecurityCenterDto>("/account/security"),
   revokeSession: (sessionId: string) => apiFetch<{ ok: true }>(`/account/security/sessions/${sessionId}`, { method: "DELETE" }),
   revokeOtherSessions: () => apiFetch<{ ok: true; count: number }>("/account/security/sessions/revoke-others", { method: "POST" }),
+  revokeAllSessions: () => apiFetch<{ ok: true; count: number }>("/account/security/sessions/revoke-all", { method: "POST" }),
   privacy: () => apiFetch<PrivacyCenterDto>("/account/privacy"),
   setConsent: (kind: "TERMS" | "PRIVACY" | "MARKETING", granted: boolean) => apiFetch("/account/privacy/consent", { method: "PATCH", body: { kind, granted } }),
   requestExport: () => apiFetch("/account/privacy/exports", { method: "POST" }),

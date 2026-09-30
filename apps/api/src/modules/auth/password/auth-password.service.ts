@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import type { Response } from "express";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { deviceLabel } from "../../../common/session/device-label.util";
 import { SessionService, type SessionUser } from "../../../common/session/session.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { CurrentPasswordIncorrectException, InvalidCredentialsException, UsernameTakenException } from "../../../common/errors/api-exception";
@@ -62,9 +63,9 @@ export class AuthPasswordService {
       throw error;
     }
 
-    await this.sessions.issueSession(user.id, res, meta);
+    const sessionId = await this.sessions.issueSession(user.id, res, meta);
     await this.events.publish("UserRegistered", { userId: user.id, method: "PASSWORD" });
-    await this.events.publish("UserAuthenticated", { userId: user.id });
+    await this.events.publish("UserAuthenticated", { userId: user.id, method: "PASSWORD", sessionId, device: deviceLabel(meta.userAgent), firstSignIn: true }, { aggregateType: "User", aggregateId: user.id });
 
     return toSessionUser(user);
   }
@@ -78,8 +79,8 @@ export class AuthPasswordService {
       throw new InvalidCredentialsException();
     }
 
-    await this.sessions.issueSession(user.id, res, meta);
-    await this.events.publish("UserAuthenticated", { userId: user.id, method: "PASSWORD" }, { aggregateType: "User", aggregateId: user.id });
+    const sessionId = await this.sessions.issueSession(user.id, res, meta);
+    await this.events.publish("UserAuthenticated", { userId: user.id, method: "PASSWORD", sessionId, device: deviceLabel(meta.userAgent) }, { aggregateType: "User", aggregateId: user.id });
 
     return toSessionUser(user);
   }
