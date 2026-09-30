@@ -36,6 +36,7 @@ import { BookingPetAccessService, DEFAULT_SCOPE_PRESET_BY_CATEGORY } from "./boo
 import { BookingLifecycleService, OCCUPYING_STATUSES, TERMINAL_RELEASE_STATUSES, bookingEventFields } from "./booking-lifecycle.service";
 import { PetServiceCompatibilityService } from "../services/pet-service-compatibility.service";
 import { PaymentsService } from "../commerce/payments/payments.service";
+import { LedgerService } from "../commerce/ledger/ledger.service";
 import type { PaymentChargeMode } from "../commerce/payments/payment-gateway.interface";
 import type { RescheduleBookingDto } from "./dto/reschedule-booking.dto";
 import type { PayBookingDto } from "./dto/pay-booking.dto";
@@ -125,6 +126,7 @@ export class BookingsService {
     private readonly lifecycle: BookingLifecycleService,
     private readonly compatibility: PetServiceCompatibilityService,
     private readonly payments: PaymentsService,
+    private readonly ledger: LedgerService,
   ) {}
 
   /**
@@ -466,8 +468,14 @@ export class BookingsService {
     const currency = booking.currency ?? "IRR";
 
     const intentId = await this.prisma.$transaction(async (tx) => {
-      if (booking.paymentIntentId) {
-        const existing = await tx.paymentIntent.findUniqueOrThrow({ where: { id: booking.paymentIntentId } });
+      // One intent per booking even when pay is tapped twice: the row lock serialises this block and the
+      // intent id is re-read inside it, so the second request reuses the first one's intent (and then
+      // loses the claim in PaymentsService.charge) instead of creating and charging its own.
+      await tx.$queryRaw`SELECT id FROM "bookings" WHERE id = ${id}::uuid FOR UPDATE`;
+      const current = await tx.booking.findUniqueOrThrow({ where: { id }, select: { paymentIntentId: true, bookingStatus: true } });
+      if (current.bookingStatus !== BookingStatus.AWAITING_PAYMENT) throw new InvalidBookingTransitionException({ bookingId: id, from: current.bookingStatus, to: BookingStatus.CONFIRMED });
+      if (current.paymentIntentId) {
+        const existing = await tx.paymentIntent.findUniqueOrThrow({ where: { id: current.paymentIntentId } });
         if (existing.status !== "FAILED" && existing.status !== "CANCELLED") return existing.id;
       }
       const cart = await tx.cart.create({ data: { userId, status: CartStatus.CONVERTED } });
@@ -482,6 +490,17 @@ export class BookingsService {
     const outcome = await this.payments.charge(intentId, dto.mode as PaymentChargeMode | undefined);
     if (outcome.status === "SUCCEEDED") {
       await this.prisma.$transaction(async (tx) => {
+        // The money is in: it goes in the ledger whatever happens to the booking next.
+        const intent = await tx.paymentIntent.findUniqueOrThrow({ where: { id: intentId } });
+        await this.ledger.recordPaymentSucceeded(intent.checkoutId, intent.amount, intent.currency, tx);
+        const current = await tx.booking.findUniqueOrThrow({ where: { id } });
+        if (current.bookingStatus !== BookingStatus.AWAITING_PAYMENT) {
+          // Paid after the booking expired or was cancelled in between: never confirm silently —
+          // record the payment and hand a full refund to the finance workflow.
+          const late = await tx.booking.update({ where: { id }, data: { paymentStatus: PaymentStatus.PAID, paymentIntentId: intentId } });
+          await this.lifecycle.requestRefund(tx, late, true, userId);
+          return;
+        }
         const paid = await this.lifecycle.transition(tx, {
           bookingId: id,
           to: BookingStatus.CONFIRMED,

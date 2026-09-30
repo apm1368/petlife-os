@@ -279,6 +279,12 @@ export class PaymentPendingException extends ApiException {
   }
 }
 
+export class PaymentInProgressException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_IN_PROGRESS", "This payment is already being processed.", HttpStatus.CONFLICT, details);
+  }
+}
+
 export class PaymentAlreadyCompletedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PAYMENT_ALREADY_COMPLETED", "This checkout has already been paid.", HttpStatus.CONFLICT, details);

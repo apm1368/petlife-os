@@ -290,6 +290,24 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       await post(owner, `/bookings/${booking.id}/pay`).set("Idempotency-Key", randomUUID()).send({ mode: "SUCCESS" }).expect(400);
     });
 
+    it("two pay requests at once (a double tap, different keys) charge once, and the payment is in the ledger", async () => {
+      const c = await clinic({ service: { paymentMode: "FULL_PREPAYMENT" } });
+      const owner = await actor("owner");
+      const { pets } = await household(owner);
+      const booking = await book(owner, pets[0]!.id, c);
+      const results = await Promise.all([1, 2, 3].map(() => post(owner, `/bookings/${booking.id}/pay`).set("Idempotency-Key", randomUUID()).send({ mode: "SUCCESS" })));
+      expect(results.filter((r) => r.status === 201 && r.body.bookingStatus === "CONFIRMED").length).toBeGreaterThanOrEqual(1);
+      expect(results.every((r) => r.status < 500)).toBe(true);
+      const captured = await db.paymentIntent.findMany({ where: { checkout: { userId: owner.id }, status: "CAPTURED" } });
+      expect(captured).toHaveLength(1);
+      const legs = await db.ledgerEntry.findMany({ where: { ledgerTransaction: { referenceType: "PAYMENT", referenceId: captured[0]!.checkoutId } } });
+      expect(legs.length).toBeGreaterThanOrEqual(2);
+      const debit = legs.filter((l) => l.direction === "DEBIT").reduce((a, l) => a + l.amount, 0);
+      const credit = legs.filter((l) => l.direction === "CREDIT").reduce((a, l) => a + l.amount, 0);
+      expect(debit).toBe(credit);
+      expect(debit).toBe(captured[0]!.amount);
+    });
+
     it("unpaid bookings expire after the payment window", async () => {
       const c = await clinic({ service: { paymentMode: "DEPOSIT", depositAmount: 200_000 as never } });
       const owner = await actor("owner");
