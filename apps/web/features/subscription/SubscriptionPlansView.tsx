@@ -95,7 +95,7 @@ export function SubscriptionPlansView() {
                 {plan.entitlements.map((entitlement) => (
                   <li key={entitlement.key} className="text-metadata text-text-secondary">
                     {entitlementLabelKey(entitlement.key) ? t(entitlementLabelKey(entitlement.key)!) : entitlement.key}:{" "}
-                    {entitlement.type === "BOOLEAN" ? (entitlement.boolValue ? t("included") : t("notIncluded")) : entitlement.limitValue === null ? t("unlimited") : entitlement.limitValue}
+                    {entitlement.type === "BOOLEAN" ? (entitlement.boolValue ? t("included") : t("notIncluded")) : entitlement.limitValue === null ? t("unlimited") : entitlement.limitValue.toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}
                   </li>
                 ))}
               </ul>

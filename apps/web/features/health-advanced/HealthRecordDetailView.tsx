@@ -13,6 +13,7 @@ import type {
   RehabPlanDto,
 } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
+import { recordStatusLabel } from "@/features/health/record-status-labels";
 
 type RecordKind = "lab" | "imaging" | "referral" | "dental" | "nutrition" | "rehab";
 type RecordValue = LabResultDto | ImagingStudyDto | ReferralDto | DentalRecordDto | ClinicalNutritionPlanDto | RehabPlanDto;
@@ -87,7 +88,7 @@ function presentRecord(kind: RecordKind, record: RecordValue, locale: "fa" | "en
   if (kind === "lab") {
     const item = record as LabResultDto;
     const range = item.referenceRangeLow !== null || item.referenceRangeHigh !== null ? String(item.referenceRangeLow ?? "—") + " – " + String(item.referenceRangeHigh ?? "—") : unknown;
-    return { eyebrow: fa ? "نتیجه آزمایش" : "Lab result", title: item.testName, subtitle: item.testCode, date: item.resultDate ?? item.sampleDate ?? item.createdAt, sourceLabel: source(item.sourceType, fa), provider: item.source.providerOrganizationName, status: item.flag ?? item.status, statusTone: item.flag === "ABNORMAL" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "نتیجه" : "Result", value: item.value ? item.value + (item.unit ? " " + item.unit : "") : item.qualitativeResult }, { label: fa ? "بازه مرجع ثبت‌شده" : "Recorded reference range", value: range }, { label: fa ? "یادداشت منبع" : "Source notes", value: item.notes }]) };
+    return { eyebrow: fa ? "نتیجه آزمایش" : "Lab result", title: item.testName, subtitle: item.testCode, date: item.resultDate ?? item.sampleDate ?? item.createdAt, sourceLabel: source(item.sourceType, fa), provider: item.source.providerOrganizationName, status: recordStatusLabel(item.flag ?? item.status, fa), statusTone: item.flag === "ABNORMAL" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "نتیجه" : "Result", value: item.value ? item.value + (item.unit ? " " + item.unit : "") : item.qualitativeResult }, { label: fa ? "بازه مرجع ثبت‌شده" : "Recorded reference range", value: range }, { label: fa ? "یادداشت منبع" : "Source notes", value: item.notes }]) };
   }
   if (kind === "imaging") {
     const item = record as ImagingStudyDto;
@@ -95,7 +96,7 @@ function presentRecord(kind: RecordKind, record: RecordValue, locale: "fa" | "en
   }
   if (kind === "referral") {
     const item = record as ReferralDto;
-    return { eyebrow: fa ? "ارجاع پزشکی" : "Clinical referral", title: item.reason, subtitle: item.toProviderOrganizationName ?? item.externalProviderName, date: item.createdAt, sourceLabel: fa ? "ارائه‌دهنده" : "Provider", provider: item.fromProviderOrganizationName, status: item.status, statusTone: item.status === "COMPLETED" ? "success" as const : "attention" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "تخصص مقصد" : "Destination specialty", value: item.externalSpecialty }, { label: fa ? "یادداشت" : "Notes", value: item.notes }]) };
+    return { eyebrow: fa ? "ارجاع پزشکی" : "Clinical referral", title: item.reason, subtitle: item.toProviderOrganizationName ?? item.externalProviderName, date: item.createdAt, sourceLabel: fa ? "ارائه‌دهنده" : "Provider", provider: item.fromProviderOrganizationName, status: recordStatusLabel(item.status, fa), statusTone: item.status === "COMPLETED" ? "success" as const : "attention" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "تخصص مقصد" : "Destination specialty", value: item.externalSpecialty }, { label: fa ? "یادداشت" : "Notes", value: item.notes }]) };
   }
   if (kind === "dental") {
     const item = record as DentalRecordDto;
@@ -103,10 +104,10 @@ function presentRecord(kind: RecordKind, record: RecordValue, locale: "fa" | "en
   }
   if (kind === "nutrition") {
     const item = record as ClinicalNutritionPlanDto;
-    return { eyebrow: fa ? "برنامه تغذیه بالینی" : "Clinical nutrition plan", title: item.goal ?? (fa ? "برنامه تغذیه" : "Nutrition plan"), subtitle: item.dietType, date: item.startDate ?? item.createdAt, sourceLabel: fa ? "ارائه‌دهنده" : "Provider", provider: item.source.providerOrganizationName, status: item.status, statusTone: item.status === "ACTIVE" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "غذای توصیه‌شده" : "Recommended food", value: item.recommendedFoodText }, { label: fa ? "مقدار روزانه" : "Daily amount", value: item.dailyAmountText }, { label: fa ? "دفعات" : "Frequency", value: item.frequencyText }, { label: fa ? "محدودیت‌ها" : "Restrictions", value: item.restrictionsText }, { label: fa ? "یادداشت" : "Notes", value: item.notes }]) };
+    return { eyebrow: fa ? "برنامه تغذیه بالینی" : "Clinical nutrition plan", title: item.goal ?? (fa ? "برنامه تغذیه" : "Nutrition plan"), subtitle: item.dietType, date: item.startDate ?? item.createdAt, sourceLabel: fa ? "ارائه‌دهنده" : "Provider", provider: item.source.providerOrganizationName, status: recordStatusLabel(item.status, fa), statusTone: item.status === "ACTIVE" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "غذای توصیه‌شده" : "Recommended food", value: item.recommendedFoodText }, { label: fa ? "مقدار روزانه" : "Daily amount", value: item.dailyAmountText }, { label: fa ? "دفعات" : "Frequency", value: item.frequencyText }, { label: fa ? "محدودیت‌ها" : "Restrictions", value: item.restrictionsText }, { label: fa ? "یادداشت" : "Notes", value: item.notes }]) };
   }
   const item = record as RehabPlanDto;
-  return { eyebrow: fa ? "برنامه توان‌بخشی" : "Rehabilitation plan", title: item.goal ?? (fa ? "توان‌بخشی" : "Rehabilitation"), subtitle: null, date: item.createdAt, sourceLabel: fa ? "ارائه‌دهنده" : "Provider", provider: item.source.providerOrganizationName, status: item.status, statusTone: item.status === "ACTIVE" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "تمرین‌ها" : "Exercises", value: item.exercisesText }, { label: fa ? "دفعات" : "Frequency", value: item.frequencyText }, { label: fa ? "مدت" : "Duration", value: item.durationText }, { label: fa ? "جلسات ثبت‌شده" : "Recorded sessions", value: item.sessions.map((session) => formatDate(session.sessionDate, locale) + (session.progressNotes ? " — " + session.progressNotes : "")).join("\n") }]) };
+  return { eyebrow: fa ? "برنامه توان‌بخشی" : "Rehabilitation plan", title: item.goal ?? (fa ? "توان‌بخشی" : "Rehabilitation"), subtitle: null, date: item.createdAt, sourceLabel: fa ? "ارائه‌دهنده" : "Provider", provider: item.source.providerOrganizationName, status: recordStatusLabel(item.status, fa), statusTone: item.status === "ACTIVE" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "تمرین‌ها" : "Exercises", value: item.exercisesText }, { label: fa ? "دفعات" : "Frequency", value: item.frequencyText }, { label: fa ? "مدت" : "Duration", value: item.durationText }, { label: fa ? "جلسات ثبت‌شده" : "Recorded sessions", value: item.sessions.map((session) => formatDate(session.sessionDate, locale) + (session.progressNotes ? " — " + session.progressNotes : "")).join("\n") }]) };
 }
 
 function compact(fields: { label: string; value: string | null | undefined }[]) {

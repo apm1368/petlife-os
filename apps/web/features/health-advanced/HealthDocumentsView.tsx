@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { MedicalDocumentType, SourceType, type MedicalDocumentDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { documentTypeLabel } from "./document-labels";
 
 /** spec: "private medical documents must never be publicly exposed" — download always goes through a freshly-minted signed URL, never a stored/cached link. */
 export function HealthDocumentsView({ petId }: { petId: string }) {
+  const lang = useLocale() === "en" ? "en" : "fa";
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
 
@@ -77,7 +79,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
           label={t("documents.documentType")}
           value={documentType}
           onChange={(e) => setDocumentType(e.target.value as MedicalDocumentType)}
-          options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: type }))}
+          options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: documentTypeLabel(type, lang) }))}
         />
         <input ref={fileInputRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
@@ -98,7 +100,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
                   {doc.sourceType === SourceType.PROVIDER || doc.sourceType === SourceType.CLINIC ? t("documents.provenanceProvider") : t("documents.provenanceOwner")}
                 </StatusLabel>
               </div>
-              <span className="text-metadata text-text-secondary">{doc.documentType}</span>
+              <span className="text-metadata text-text-secondary">{documentTypeLabel(doc.documentType, lang)}</span>
               <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id)}>
                 {t("documents.download")}
               </Button>
