@@ -34,6 +34,11 @@ function clean<T extends Record<string, unknown>>(row: T): Record<string, unknow
  * members by name only. Every list is bounded (ROW_LIMIT) — the file states
  * when a section was truncated rather than silently dropping rows.
  */
+/** A PROCESSING row older than 15 minutes was abandoned (e.g. a restart) and may be retried. */
+function claimable() {
+  return { OR: [{ status: PrivacyRequestStatus.PENDING }, { status: PrivacyRequestStatus.PROCESSING, requestedAt: { lt: new Date(Date.now() - 15 * 60_000) } }] };
+}
+
 @Injectable()
 export class AccountExportService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AccountExportService.name);
@@ -45,6 +50,8 @@ export class AccountExportService implements OnModuleInit, OnModuleDestroy {
     private readonly storage: StorageService,
     private readonly petAccess: PetAccessService,
   ) {}
+
+  private running = false;
 
   onModuleInit(): void {
     if (process.env.NODE_ENV === "test") return;
@@ -59,23 +66,23 @@ export class AccountExportService implements OnModuleInit, OnModuleDestroy {
 
   /** Builds pending exports and expires old ones. Returns how many exports were built. Tests call this directly. */
   async processQueue(limit = 5): Promise<number> {
-    await this.expireOld();
-    // A PROCESSING row older than 15 minutes was abandoned (e.g. a restart) and is retried.
-    const stale = new Date(Date.now() - 15 * 60_000);
-    const due = await this.prisma.dataExportRequest.findMany({
-      where: { OR: [{ status: PrivacyRequestStatus.PENDING }, { status: PrivacyRequestStatus.PROCESSING, requestedAt: { lt: stale } }] },
-      orderBy: { requestedAt: "asc" },
-      take: limit,
-      select: { id: true },
-    });
-    let built = 0;
-    for (const row of due) if (await this.build(row.id)) built += 1;
-    return built;
+    // A slow build must not overlap the next tick (the other workers have the same guard).
+    if (this.running) return 0;
+    this.running = true;
+    try {
+      await this.expireOld();
+      const due = await this.prisma.dataExportRequest.findMany({ where: claimable(), orderBy: { requestedAt: "asc" }, take: limit, select: { id: true } });
+      let built = 0;
+      for (const row of due) if (await this.build(row.id)) built += 1;
+      return built;
+    } finally {
+      this.running = false;
+    }
   }
 
   async build(requestId: string): Promise<boolean> {
-    // Claim the row so two workers never build the same export.
-    const claimed = await this.prisma.dataExportRequest.updateMany({ where: { id: requestId, status: { in: [PrivacyRequestStatus.PENDING, PrivacyRequestStatus.PROCESSING] } }, data: { status: PrivacyRequestStatus.PROCESSING } });
+    // Claim the row so two workers never build the same export: PENDING, or a PROCESSING row abandoned long enough ago.
+    const claimed = await this.prisma.dataExportRequest.updateMany({ where: { id: requestId, ...claimable() }, data: { status: PrivacyRequestStatus.PROCESSING } });
     if (!claimed.count) return false;
     const request = await this.prisma.dataExportRequest.findUniqueOrThrow({ where: { id: requestId } });
     try {
