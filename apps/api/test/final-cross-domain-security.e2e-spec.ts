@@ -302,6 +302,20 @@ describe("Final hardening — cross-domain security", () => {
     expect(memory.status).toBe(400);
   });
 
+  it("an upload can't be larger than the size declared for it, and a bad body is a 4xx, not a 500", async () => {
+    const user = await cookieFor((await db.petAccessGrant.findFirstOrThrow({ where: { canManageAccess: true, revokedAt: null } })).userId);
+    const target = await call("POST", "/community/posts/upload-url", user).send({ contentType: "image/jpeg", fileSizeBytes: 1000 }).expect(201);
+    const token = String(target.body.uploadUrl).split("/uploads/")[1]!;
+    const put = (bytes: number) => request(server()).put(`/uploads/${token}`).set("Cookie", user).set("x-csrf-token", csrf).set("Content-Type", "image/jpeg").send(Buffer.alloc(bytes));
+    const tooBig = await put(64 * 1024);
+    expect(tooBig.status).toBe(413);
+    expect(tooBig.body.error.code).toBe("PAYLOAD_TOO_LARGE");
+    await put(1000).expect(200);
+
+    const malformed = await request(server()).post("/community/posts").set("Cookie", user).set("x-csrf-token", csrf).set("Content-Type", "application/json").send("{not json");
+    expect(malformed.status).toBe(400);
+  });
+
   it("no parametrised GET reveals anything private to an anonymous visitor or an unrelated account, and none crashes", async () => {
     const result = await sweep(["GET"]);
     expect(result.serverErrors).toEqual([]);
