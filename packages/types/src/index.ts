@@ -2302,6 +2302,12 @@ export interface NotificationQuietHoursDto {
 export interface NotificationPreferencesDto {
   preferences: NotificationPreferenceDto[];
   quietHours: NotificationQuietHoursDto;
+  /** Batch 8 — categories that can't be switched off (e.g. security). */
+  requiredCategories?: NotificationCategory[];
+  /** Batch 8 — marketing messages are only sent while marketing consent (Privacy Center) is granted. */
+  marketingConsentGranted?: boolean;
+  /** Batch 8 — honest delivery state per channel: LIVE (really delivered), SANDBOX (simulated, not delivered), NOT_CONFIGURED. */
+  channels?: Array<{ channel: NotificationChannel; delivery: "LIVE" | "SANDBOX" | "NOT_CONFIGURED" }>;
 }
 
 export interface UpdateNotificationPreferencesDto {

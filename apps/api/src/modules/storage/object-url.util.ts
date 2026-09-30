@@ -18,7 +18,7 @@ const DEFAULT_STORAGE_PUBLIC_BASE_URL = "http://localhost:4000/uploads";
  * leaking. Also used by main.ts to keep the local-dev static file mount from
  * ever serving one of these prefixes.
  */
-export const PRIVATE_OBJECT_KEY_PREFIXES = ["health-documents/", "pet-observations/", "pet-memories-private/"] as const;
+export const PRIVATE_OBJECT_KEY_PREFIXES = ["health-documents/", "pet-observations/", "pet-memories-private/", "account-exports/"] as const;
 
 function isPrivateKey(key: string): boolean {
   return PRIVATE_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));

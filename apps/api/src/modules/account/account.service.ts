@@ -1,15 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { ConsentKind, PrivacyRequestStatus } from "@prisma/client";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { ValidationApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { SessionService } from "../../common/session/session.service";
 
-const CONSENT_VERSION = "2026-09-25";
-const EXPORT_SCOPE = ["ACCOUNT", "HOUSEHOLD", "PET_IDENTITY", "HEALTH", "MEMORIES", "ACTIVITY"] as const;
 const ACTIVITY_TYPES = [
   "UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked",
-  "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared", "ConsentChanged", "DataExportRequested", "AccountDeletionRequested",
+  "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared", "ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled",
   "HouseholdInvitationAccepted", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked",
 ];
 
@@ -48,42 +44,9 @@ export class AccountService {
     };
   }
 
-  async privacy(userId: string) {
-    const [consents, exports, deletionRequests] = await Promise.all([
-      this.prisma.userConsent.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } }),
-      this.prisma.dataExportRequest.findMany({ where: { userId }, orderBy: { requestedAt: "desc" }, take: 5 }),
-      this.prisma.accountDeletionRequest.findMany({ where: { userId }, orderBy: { requestedAt: "desc" }, take: 3 }),
-    ]);
-    return { consentVersion: CONSENT_VERSION, consents, exports, deletionRequests, exportIncludes: EXPORT_SCOPE };
-  }
 
-  async setConsent(userId: string, kind: "TERMS" | "PRIVACY" | "MARKETING", granted: boolean) {
-    const now = new Date();
-    const consent = await this.prisma.userConsent.upsert({
-      where: { userId_kind_version: { userId, kind: ConsentKind[kind], version: CONSENT_VERSION } },
-      create: { userId, kind: ConsentKind[kind], version: CONSENT_VERSION, grantedAt: granted ? now : null, revokedAt: granted ? null : now },
-      update: { grantedAt: granted ? now : null, revokedAt: granted ? null : now },
-    });
-    await this.events.publish("ConsentChanged", { userId, kind, granted }, { aggregateType: "User", aggregateId: userId });
-    return consent;
-  }
 
-  async requestExport(userId: string) {
-    const existing = await this.prisma.dataExportRequest.findFirst({ where: { userId, status: { in: [PrivacyRequestStatus.PENDING, PrivacyRequestStatus.PROCESSING] } } });
-    if (existing) return existing;
-    const request = await this.prisma.dataExportRequest.create({ data: { userId, scope: [...EXPORT_SCOPE] } });
-    await this.events.publish("DataExportRequested", { userId, requestId: request.id }, { aggregateType: "User", aggregateId: userId });
-    return request;
-  }
 
-  async requestDeletion(userId: string, confirmation: string, reason?: string) {
-    if (confirmation !== "DELETE") throw new ValidationApiException({ field: "confirmation", reason: "Type DELETE to confirm." });
-    const existing = await this.prisma.accountDeletionRequest.findFirst({ where: { userId, status: { in: [PrivacyRequestStatus.PENDING, PrivacyRequestStatus.PROCESSING] } } });
-    if (existing) return existing;
-    const request = await this.prisma.accountDeletionRequest.create({ data: { userId, reason } });
-    await this.events.publish("AccountDeletionRequested", { userId, requestId: request.id }, { aggregateType: "User", aggregateId: userId });
-    return request;
-  }
 
   async activity(userId: string, types: string[] = ACTIVITY_TYPES) {
     return this.prisma.domainEvent.findMany({

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import { DocumentTooLargeException, UnsupportedDocumentTypeException } from "../../common/errors/api-exception";
-import { DownloadTarget, STORAGE_DRIVER, type StorageDriver, type UploadTarget } from "./storage-driver.interface";
+import { type DownloadOptions, DownloadTarget, STORAGE_DRIVER, type StorageDriver, type UploadTarget } from "./storage-driver.interface";
 
 /** Handoff 17: allow-listed MIME types for a medical document — a narrow, explicit set, never "anything the client sends". */
 const HEALTH_DOCUMENT_MIME_EXTENSIONS: Record<string, string> = {
@@ -106,8 +106,19 @@ export class StorageService {
    * underlying record before calling this — this method performs no
    * authorization of its own, it only knows how to sign a URL.
    */
-  async createPrivateDownloadTarget(key: string): Promise<DownloadTarget> {
-    return this.driver.createDownloadTarget(key);
+  async createPrivateDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget> {
+    return this.driver.createDownloadTarget(key, options);
+  }
+
+  /** Batch 8 — writes a server-generated account export into the private `account-exports/` space. */
+  async putAccountExport(userId: string, requestId: string, body: Buffer): Promise<string> {
+    const key = `account-exports/${userId}/${requestId}-${randomUUID()}.json`;
+    await this.driver.putObject(key, body, "application/json");
+    return key;
+  }
+
+  async deletePrivateObject(key: string): Promise<void> {
+    await this.driver.deleteObject(key);
   }
 
   /** A completely separate key namespace (`cms/media/...`) from `pets/...` — spec: "strongly separate CMS media authorization from private pet documents." CMS media is meant to be public (blog images), so this uses the same plain-public-URL delivery `createPetPhotoUploadTarget` already established, never a signed-read scheme this codebase has no other precedent for. Returns `key` alongside the target (unlike the pet-photo variant) since the CMS confirm step needs it verbatim, not reconstructed from the URL. */

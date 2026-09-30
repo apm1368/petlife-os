@@ -32,12 +32,30 @@ export interface SecurityCenterDto {
 
 export interface ActivityEventDto { id: string; type: string; occurredAt: string }
 
+export type ConsentKindValue = "TERMS" | "PRIVACY" | "MARKETING";
+export type PrivacyRequestStatusValue = "PENDING" | "PROCESSING" | "READY" | "COMPLETED" | "CANCELLED" | "FAILED" | "EXPIRED";
+
 export interface PrivacyCenterDto {
   consentVersion: string;
-  consents: Array<{ id: string; kind: "TERMS" | "PRIVACY" | "MARKETING"; version: string; grantedAt: string | null; revokedAt: string | null; updatedAt: string }>;
-  exports: Array<{ id: string; status: string; requestedAt: string; readyAt: string | null }>;
-  deletionRequests: Array<{ id: string; status: string; requestedAt: string }>;
+  consents: Array<{ kind: ConsentKindValue; required: boolean; currentVersion: string; granted: boolean; grantedAt: string | null; revokedAt: string | null; lastRecordedVersion: string | null }>;
+  exports: Array<{ id: string; status: PrivacyRequestStatusValue; requestedAt: string; readyAt: string | null; expiresAt: string | null; fileSizeBytes: number | null; downloadCount: number; failureCode: string | null }>;
+  exportAvailableDays: number;
   exportIncludes: string[];
+  deletionRequests: Array<{ id: string; status: PrivacyRequestStatusValue; requestedAt: string; cancelledAt: string | null; completedAt: string | null }>;
+  retention: { policyPublished: boolean };
+}
+
+export interface SharingSummaryDto {
+  sharedByYou: Array<{ grantId: string; pet: { id: string; name: string }; person: string; kind: "HOUSEHOLD" | "TEMPORARY" | "PROVIDER_BOOKING" | "VET_SHARE"; canViewHealth: boolean; startsAt: string | null; expiresAt: string | null }>;
+  sharedWithYou: Array<{ pet: { id: string; name: string }; kind: "HOUSEHOLD" | "TEMPORARY" | "PROVIDER_BOOKING" | "VET_SHARE"; expiresAt: string | null }>;
+}
+
+export interface DeletionPreviewDto {
+  households: Array<{ id: string; name: string | null; role: "OWNER" | "FAMILY"; otherMembers: number; pets: number; membershipStatus: string | null; onlyOwnerWithOthers: boolean }>;
+  blockers: Array<{ code: string; count: number }>;
+  canRequest: boolean;
+  reauth: { password: boolean; code: string | null };
+  retention: { policyPublished: boolean };
 }
 
 export interface HouseholdCollaborationDto extends HouseholdDto {
@@ -56,8 +74,13 @@ export const accountService = {
   revokeOtherSessions: () => apiFetch<{ ok: true; count: number }>("/account/security/sessions/revoke-others", { method: "POST" }),
   revokeAllSessions: () => apiFetch<{ ok: true; count: number }>("/account/security/sessions/revoke-all", { method: "POST" }),
   privacy: () => apiFetch<PrivacyCenterDto>("/account/privacy"),
-  setConsent: (kind: "TERMS" | "PRIVACY" | "MARKETING", granted: boolean) => apiFetch("/account/privacy/consent", { method: "PATCH", body: { kind, granted } }),
-  requestExport: () => apiFetch("/account/privacy/exports", { method: "POST" }),
-  requestDeletion: (confirmation: string, reason?: string) => apiFetch("/account/privacy/deletion", { method: "POST", body: { confirmation, reason } }),
+  setConsent: (kind: ConsentKindValue, granted: boolean) => apiFetch("/account/privacy/consent", { method: "PATCH", body: { kind, granted } }),
+  sharing: () => apiFetch<SharingSummaryDto>("/account/privacy/sharing"),
+  requestExport: () => apiFetch<{ id: string; status: PrivacyRequestStatusValue }>("/account/privacy/exports", { method: "POST" }),
+  downloadExport: (id: string) => apiFetch<{ downloadUrl: string; expiresInSeconds: number }>(`/account/privacy/exports/${id}/download`, { method: "POST" }),
+  deletionPreview: () => apiFetch<DeletionPreviewDto>("/account/privacy/deletion/preview"),
+  sendDeletionCode: () => apiFetch<{ sentTo: string }>("/account/privacy/deletion/code", { method: "POST" }),
+  requestDeletion: (input: { confirmation: string; password?: string; code?: string; reason?: string }) => apiFetch<{ id: string; status: PrivacyRequestStatusValue }>("/account/privacy/deletion", { method: "POST", body: input }),
+  cancelDeletion: (id: string) => apiFetch<{ ok: true }>(`/account/privacy/deletion/${id}/cancel`, { method: "POST" }),
   activity: () => apiFetch<ActivityEventDto[]>("/account/activity"),
 };

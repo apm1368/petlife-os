@@ -5,6 +5,7 @@ import { createTestApp, extractCookie } from "./test-app";
 import type Redis from "ioredis";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { REDIS_CLIENT } from "../src/common/redis/redis.module";
+import { AccountExportService } from "../src/modules/account/account-export.service";
 
 interface Cookies {
   session?: string;
@@ -357,6 +358,133 @@ describe("Batch 8 — Account & security", () => {
       const race = await Promise.all([reset(second!, "second-password-2"), reset(second!, "second-password-3")]);
       expect(race.filter((r) => r.status === 200)).toHaveLength(1);
       await reset(first!, "first-link-reused").expect(400);
+    });
+  });
+
+
+  // ------------------------------------------------------------------ 8D privacy, export and deletion
+
+  describe("privacy center", () => {
+    it("required agreements can be accepted but not withdrawn; marketing is a real opt-in that gates marketing messages", async () => {
+      const u = await user("b8-privacy");
+      const before = await u.c.get("/account/privacy").expect(200);
+      expect(before.body.consents.find((c: { kind: string }) => c.kind === "TERMS")).toMatchObject({ required: true, granted: false });
+      await u.c.patch("/account/privacy/consent").send({ kind: "TERMS", granted: true }).expect(200);
+      expect((await u.c.patch("/account/privacy/consent").send({ kind: "PRIVACY", granted: false }).expect(400)).body.error.code).toBe("CONSENT_REQUIRED");
+
+      let prefs = await u.c.get("/notification-preferences").expect(200);
+      expect(prefs.body.marketingConsentGranted).toBe(false);
+      expect(prefs.body.preferences.filter((p: { category: string }) => p.category === "MARKETING").every((p: { enabled: boolean }) => !p.enabled)).toBe(true);
+      expect(prefs.body.requiredCategories).toContain("SECURITY");
+      expect(prefs.body.channels).toEqual(expect.arrayContaining([{ channel: "IN_APP", delivery: "LIVE" }, { channel: "SMS", delivery: "SANDBOX" }]));
+
+      await u.c.patch("/account/privacy/consent").send({ kind: "MARKETING", granted: true }).expect(200);
+      prefs = await u.c.get("/notification-preferences").expect(200);
+      expect(prefs.body.preferences.find((p: { category: string; channel: string }) => p.category === "MARKETING" && p.channel === "IN_APP").enabled).toBe(true);
+      await u.c.patch("/account/privacy/consent").send({ kind: "MARKETING", granted: false }).expect(200);
+      prefs = await u.c.get("/notification-preferences").expect(200);
+      expect(prefs.body.marketingConsentGranted).toBe(false);
+    });
+
+    it("sharing summary lists who can see your pets and what you can see of others'", async () => {
+      const o = await owner();
+      const member = await user("b8-member");
+      await member.c.post(`/household-invitations/${await invite(o, member, "CARE_HELPER")}/accept`).expect(201);
+      const sharing = await o.c.get("/account/privacy/sharing").expect(200);
+      expect(sharing.body.sharedByYou).toEqual([expect.objectContaining({ person: expect.any(String), kind: "HOUSEHOLD", canViewHealth: true, pet: { id: o.petId, name: "Cookie" } })]);
+      const theirs = await member.c.get("/account/privacy/sharing").expect(200);
+      expect(theirs.body.sharedByYou).toHaveLength(0);
+    });
+
+    it("an export is built in the background into a private file, downloaded only by its owner through a short-lived link, and expires", async () => {
+      const o = await owner("Biscuit");
+      await prisma.allergy.create({ data: { petId: o.petId, name: "Chicken", knowledgeState: "KNOWN", status: "ACTIVE", sourceType: "OWNER" } });
+      const requested = await o.c.post("/account/privacy/exports").expect(201);
+      expect(requested.body.status).toBe("PENDING");
+      // A second request while one is pending returns the same one.
+      expect((await o.c.post("/account/privacy/exports").expect(201)).body.id).toBe(requested.body.id);
+
+      const worker = app.get(AccountExportService);
+      expect(await worker.processQueue()).toBeGreaterThanOrEqual(1);
+      const privacy = await o.c.get("/account/privacy").expect(200);
+      const ready = privacy.body.exports.find((e: { id: string }) => e.id === requested.body.id);
+      expect(ready).toMatchObject({ status: "READY", downloadCount: 0 });
+      expect(ready).not.toHaveProperty("fileObjectKey");
+
+      // Someone else can't mint a download for it.
+      const stranger = await user("b8-stranger");
+      await stranger.c.post(`/account/privacy/exports/${requested.body.id}/download`).expect(404);
+      const link = await o.c.post(`/account/privacy/exports/${requested.body.id}/download`).expect(200);
+      expect(link.body.expiresInSeconds).toBeLessThanOrEqual(300);
+      const file = await request(server).get(new URL(link.body.downloadUrl).pathname).expect(200);
+      expect(file.headers["content-disposition"]).toContain("attachment");
+      const exported = JSON.parse(file.text);
+      expect(exported.account).toMatchObject({ id: o.userId, email: o.email });
+      expect(exported.pets[0]).toMatchObject({ name: "Biscuit" });
+      expect(exported.pets[0].health.allergies.items[0]).toMatchObject({ name: "Chicken" });
+      expect(file.text).not.toContain("passwordHash");
+      expect(file.text).not.toContain("tokenHash");
+      // The private file is never reachable through the public static route.
+      const key = (await prisma.dataExportRequest.findUniqueOrThrow({ where: { id: requested.body.id } })).fileObjectKey!;
+      await request(server).get(`/uploads/${key}`).expect(404);
+      expect(await prisma.domainEvent.count({ where: { type: "DataExportDownloaded", aggregateId: o.userId } })).toBe(1);
+
+      // After the window closes the file is removed and the link can't be minted.
+      await prisma.dataExportRequest.update({ where: { id: requested.body.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      await worker.processQueue();
+      expect((await prisma.dataExportRequest.findUniqueOrThrow({ where: { id: requested.body.id } })).status).toBe("EXPIRED");
+      await o.c.post(`/account/privacy/exports/${requested.body.id}/download`).expect(404);
+    });
+
+    it("a member's export includes health only for pets they may view health for, and never another member's memories", async () => {
+      const o = await owner("Pixel");
+      await prisma.petMemory.create({ data: { petId: o.petId, householdId: o.householdId, createdByUserId: o.userId, type: "STORY", title: "Owner-only memory", occurredAt: new Date(), visibility: "PRIVATE" } });
+      await prisma.allergy.create({ data: { petId: o.petId, name: "Beef", knowledgeState: "KNOWN", status: "ACTIVE", sourceType: "OWNER" } });
+      const viewer = await user("b8-viewer");
+      await viewer.c.post(`/household-invitations/${await invite(o, viewer, "VIEW_ONLY")}/accept`).expect(201);
+      const req = await viewer.c.post("/account/privacy/exports").expect(201);
+      await app.get(AccountExportService).processQueue();
+      const link = await viewer.c.post(`/account/privacy/exports/${req.body.id}/download`).expect(200);
+      const text = (await request(server).get(new URL(link.body.downloadUrl).pathname).expect(200)).text;
+      const exported = JSON.parse(text);
+      expect(exported.pets[0].name).toBe("Pixel");
+      expect(exported.pets[0]).not.toHaveProperty("health");
+      expect(text).not.toContain("Owner-only memory");
+      expect(text).not.toContain("Beef");
+      expect(exported.households[0].subscription?.periods).toBeUndefined();
+    });
+
+    it("deletion is a confirmed, re-authenticated request that open obligations block, and it can be cancelled", async () => {
+      const o = await owner();
+      const preview = await o.c.get("/account/privacy/deletion/preview").expect(200);
+      expect(preview.body).toMatchObject({ canRequest: true, blockers: [], retention: { policyPublished: false } });
+      expect(preview.body.reauth.code).toContain("***");
+
+      await o.c.post("/account/privacy/deletion").send({ confirmation: "DELETE" }).expect(401);
+      await o.c.post("/account/privacy/deletion").send({ confirmation: "DELETE", code: "000000" }).expect(401);
+      await clearOtpCooldown(o.email);
+      await o.c.post("/account/privacy/deletion/code").expect(200);
+      await o.c.post("/account/privacy/deletion").send({ confirmation: "delete", code: lastOtp(o.email) }).expect(400);
+      await clearOtpCooldown(o.email);
+      await o.c.post("/account/privacy/deletion/code").expect(200);
+      const created = await o.c.post("/account/privacy/deletion").send({ confirmation: "DELETE", code: lastOtp(o.email), reason: "Moving away" }).expect(201);
+      expect(created.body.status).toBe("PENDING");
+      // The account still works while the request waits; nothing was erased.
+      await o.c.get(`/pets/${o.petId}`).expect(200);
+      const stranger = await user("b8-stranger");
+      await stranger.c.post(`/account/privacy/deletion/${created.body.id}/cancel`).expect(404);
+      await o.c.post(`/account/privacy/deletion/${created.body.id}/cancel`).expect(200);
+      await o.c.post(`/account/privacy/deletion/${created.body.id}/cancel`).expect(404);
+
+      // The only owner of a shared household is blocked until someone else can run it.
+      const member = await user("b8-member");
+      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      const blocked = await o.c.get("/account/privacy/deletion/preview").expect(200);
+      expect(blocked.body.blockers).toEqual([{ code: "ONLY_OWNER_OF_SHARED_HOUSEHOLD", count: 1 }]);
+      await clearOtpCooldown(o.email);
+      await o.c.post("/account/privacy/deletion/code").expect(200);
+      const refused = await o.c.post("/account/privacy/deletion").send({ confirmation: "DELETE", code: lastOtp(o.email) }).expect(409);
+      expect(refused.body.error.code).toBe("DELETION_BLOCKED");
     });
   });
 

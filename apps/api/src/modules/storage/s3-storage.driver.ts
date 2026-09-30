@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { AppEnv } from "../../config/env";
-import type { DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
+import type { DownloadOptions, DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
 
 const UPLOAD_URL_TTL_SECONDS = 15 * 60;
 /** Short-lived on purpose (spec: "signed download/view URLs... expiry") — a medical document's link must not remain valid indefinitely. */
@@ -40,9 +40,22 @@ export class S3StorageDriver implements StorageDriver {
     };
   }
 
-  async createDownloadTarget(key: string): Promise<DownloadTarget> {
-    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+  async createDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      ...(options?.filename ? { ResponseContentDisposition: `attachment; filename="${options.filename}"` } : {}),
+      ...(options?.contentType ? { ResponseContentType: options.contentType } : {}),
+    });
     const downloadUrl = await getSignedUrl(this.client, command, { expiresIn: DOWNLOAD_URL_TTL_SECONDS });
     return { downloadUrl, expiresInSeconds: DOWNLOAD_URL_TTL_SECONDS };
+  }
+
+  async putObject(key: string, body: Buffer, contentType: string): Promise<void> {
+    await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: body, ContentType: contentType }));
+  }
+
+  async deleteObject(key: string): Promise<void> {
+    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }
 }

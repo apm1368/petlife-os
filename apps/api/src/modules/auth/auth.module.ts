@@ -23,6 +23,6 @@ import { ContactChangeService } from "./contact-change.service";
     AuthGoogleService,
     ContactChangeService,
   ],
-  exports: [AuthService],
+  exports: [AuthService, OTP_PROVIDER],
 })
 export class AuthModule {}

@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res, UseGuards } from "@nestjs/common";
-import { IsBoolean, IsIn, IsOptional, IsString, Length } from "class-validator";
+import { IsBoolean, IsIn, IsOptional, IsString, Length, Matches } from "class-validator";
+import { Throttle } from "@nestjs/throttler";
+import { AccountPrivacyService } from "./account-privacy.service";
 import type { Request, Response } from "express";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -16,8 +18,18 @@ class ConsentDto {
 
 class DeleteAccountDto {
   @IsString()
-  @Length(6, 6)
+  @Length(1, 20)
   confirmation!: string;
+
+  /** Re-authentication: the account password, or the code sent by POST privacy/deletion/code. */
+  @IsOptional()
+  @IsString()
+  @Length(1, 200)
+  password?: string;
+
+  @IsOptional()
+  @Matches(/^\d{4,8}$/)
+  code?: string;
 
   @IsOptional()
   @IsString()
@@ -28,7 +40,11 @@ class DeleteAccountDto {
 @Controller("account")
 @UseGuards(SessionAuthGuard)
 export class AccountController {
-  constructor(private readonly account: AccountService, private readonly sessions: SessionService) {}
+  constructor(
+    private readonly account: AccountService,
+    private readonly privacyCenter: AccountPrivacyService,
+    private readonly sessions: SessionService,
+  ) {}
 
   @Get("overview")
   overview(@CurrentUser() user: SessionUser) { return this.account.overview(user.id); }
@@ -62,19 +78,46 @@ export class AccountController {
   }
 
   @Get("privacy")
-  privacy(@CurrentUser() user: SessionUser) { return this.account.privacy(user.id); }
+  privacy(@CurrentUser() user: SessionUser) { return this.privacyCenter.overview(user.id); }
 
   @Patch("privacy/consent")
   consent(@CurrentUser() user: SessionUser, @Body() dto: ConsentDto) {
-    return this.account.setConsent(user.id, dto.kind, dto.granted);
+    return this.privacyCenter.setConsent(user.id, dto.kind, dto.granted);
   }
 
+  @Get("privacy/sharing")
+  sharing(@CurrentUser() user: SessionUser) { return this.privacyCenter.sharing(user.id); }
+
   @Post("privacy/exports")
-  requestExport(@CurrentUser() user: SessionUser) { return this.account.requestExport(user.id); }
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  requestExport(@CurrentUser() user: SessionUser) { return this.privacyCenter.requestExport(user.id); }
+
+  /** Mints a short-lived signed download for the caller's own ready export. */
+  @Post("privacy/exports/:id/download")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  downloadExport(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.privacyCenter.downloadExport(user.id, id);
+  }
+
+  @Get("privacy/deletion/preview")
+  deletionPreview(@CurrentUser() user: SessionUser) { return this.privacyCenter.deletionPreview(user.id); }
+
+  @Post("privacy/deletion/code")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  sendDeletionCode(@CurrentUser() user: SessionUser) { return this.privacyCenter.sendDeletionCode(user.id); }
 
   @Post("privacy/deletion")
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   requestDeletion(@CurrentUser() user: SessionUser, @Body() dto: DeleteAccountDto) {
-    return this.account.requestDeletion(user.id, dto.confirmation, dto.reason);
+    return this.privacyCenter.requestDeletion(user.id, dto);
+  }
+
+  @Post("privacy/deletion/:id/cancel")
+  @HttpCode(HttpStatus.OK)
+  cancelDeletion(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.privacyCenter.cancelDeletion(user.id, id);
   }
 
   @Get("activity")
