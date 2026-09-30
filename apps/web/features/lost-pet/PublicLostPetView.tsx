@@ -102,7 +102,7 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
         <p role="status" className="rounded-md bg-state-success/10 p-4 text-body text-state-success">{fa ? `${incident.petName} به خانه برگشت. از همهٔ کسانی که کمک کردند سپاسگزاریم.` : `${incident.petName} is back home. Thank you to everyone who helped.`}</p>
       ) : null}
 
-      <div className="grid gap-5 md:grid-cols-[1fr_1fr]">
+      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] [&>*]:min-w-0">
         <ContextSurface className="flex flex-col gap-3">
           {incident.primaryPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element

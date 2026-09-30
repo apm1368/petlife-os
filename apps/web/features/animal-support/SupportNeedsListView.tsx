@@ -167,7 +167,7 @@ export function SupportNeedsListView() {
                 </Button>
               ))}
             </div>
-            <Link href="/animal-support/needs/new" className="text-body text-brand-mint underline">
+            <Link href="/animal-support/needs/new" className="text-body text-brand-mint-strong underline">
               {t("list.publish")}
             </Link>
           </ContextSurface>
@@ -217,10 +217,10 @@ export function SupportNeedsListView() {
       ) : null}
 
       <div className="flex flex-wrap gap-4">
-        <Link href="/animal-support/needs/mine" className="text-body text-brand-mint underline">
+        <Link href="/animal-support/needs/mine" className="text-body text-brand-mint-strong underline">
           {t("list.myListings")}
         </Link>
-        <Link href={`/${locale}/animal-support/my-help`} className="text-body text-brand-mint underline">
+        <Link href={`/${locale}/animal-support/my-help`} className="text-body text-brand-mint-strong underline">
           {fa ? "کمک‌های من" : "My help"}
         </Link>
       </div>

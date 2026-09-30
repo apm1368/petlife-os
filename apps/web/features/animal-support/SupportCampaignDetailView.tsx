@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { PublicDonationEntryDto, SupportCampaignDto, SupportCampaignUpdateDto } from "@petlife/types";
 import { animalSupportService } from "@/services/animal-support.service";
@@ -10,10 +10,12 @@ import { ApiError } from "@/lib/api/client";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { CampaignProgressBar } from "./CampaignProgressBar";
 import { DonationPanel } from "./DonationPanel";
+import { formatCurrency } from "@/lib/currency/format-currency";
 
 export function SupportCampaignDetailView({ campaignId }: { campaignId: string }) {
   const t = useTranslations("animalSupport");
   const tCommon = useTranslations("common");
+  const lang = useLocale() === "fa" ? "fa" : "en";
   const params = useSearchParams();
   const needId = params.get("need");
   const [need, setNeed] = useState<{ id: string; title: string } | null>(null);
@@ -97,7 +99,8 @@ export function SupportCampaignDetailView({ campaignId }: { campaignId: string }
             {donors.map((donor, index) => (
               <div key={index} className="flex items-center justify-between text-body text-text-primary">
                 <span>{donor.displayName}</span>
-                <span className="text-text-secondary">{donor.amountIrr.toLocaleString()}</span>
+                {/* IRR is the stored truth; people read Toman in the locale digits (was raw rial, 10× the Toman figure). */}
+                <span className="text-text-secondary">{formatCurrency(donor.amountIrr, lang)}</span>
               </div>
             ))}
           </div>

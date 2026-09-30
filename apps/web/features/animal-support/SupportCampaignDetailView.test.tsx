@@ -81,4 +81,11 @@ describe("SupportCampaignDetailView", () => {
     fireEvent.change(screen.getByLabelText("Display name"), { target: { value: "Sara" } });
     expect((screen.getByRole("button", { name: "Continue" }) as HTMLButtonElement).disabled).toBe(false);
   });
+
+  it("shows public donor amounts in Toman with locale digits, never raw rial", async () => {
+    vi.mocked(animalSupportService.listCampaignDonors).mockResolvedValue([{ id: "d1", displayName: "Samira", amountIrr: 35_000_000, createdAt: "2026-09-29T00:00:00.000Z" } as never]);
+    renderWithIntl(<SupportCampaignDetailView campaignId="campaign-1" />, "en");
+    expect(await screen.findByText("3,500,000 Toman")).toBeTruthy();
+    expect(screen.queryByText("35,000,000")).toBeNull();
+  });
 });

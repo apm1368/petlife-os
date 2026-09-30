@@ -10,7 +10,7 @@ export function CampaignProgressBar({ raisedAmountIrr, targetAmountIrr }: { rais
   return (
     <div className="flex flex-col gap-1">
       {pct !== null ? (
-        <div className="h-2 w-full rounded-full bg-border-subtle" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+        <div className="h-2 w-full rounded-full bg-border-subtle" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={lang === "fa" ? "پیشرفت جمع‌آوری کمک" : "Fundraising progress"}>
           <div className="h-2 rounded-full bg-brand-mint" style={{ width: `${pct}%` }} />
         </div>
       ) : null}

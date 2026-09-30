@@ -118,7 +118,7 @@ export function MySupportNeedsView() {
       <div className="flex flex-col gap-3">
         <h1 className="text-page-title text-text-primary">{t("mine.title")}</h1>
         <p className="text-body text-text-secondary">{t("mine.signInPrompt")}</p>
-        <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/mine`)}`} className="text-body text-brand-mint underline">
+        <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/mine`)}`} className="text-body text-brand-mint-strong underline">
           {tCommon("logIn")}
         </Link>
       </div>
@@ -195,7 +195,7 @@ export function MySupportNeedsView() {
         </div>
       )}
 
-      <Link href="/animal-support/needs" className="text-body text-brand-mint underline">
+      <Link href="/animal-support/needs" className="text-body text-brand-mint-strong underline">
         {t("detail.backToBoard")}
       </Link>
     </div>

@@ -117,7 +117,7 @@ export function CreateSupportNeedView() {
         </ContextSurface>
         <p className="text-metadata text-text-secondary">{t("create.moderationNotice")}</p>
         {needsSignIn ? (
-          <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/new`)}`} className="text-body text-brand-mint underline">
+          <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/new`)}`} className="text-body text-brand-mint-strong underline">
             {t("create.signInToPublish")}
           </Link>
         ) : null}
@@ -163,10 +163,10 @@ export function CreateSupportNeedView() {
           </label>
         ) : null}
         <DateRangeField mode="single" label={locale === "fa" ? "مهلت (اختیاری)" : "Deadline (optional)"} placeholder={locale === "fa" ? "بدون مهلت" : "No deadline"} value={{ start: deadline, end: null }} onChange={(v) => setDeadline(v.start)} min={addDays(todayIso(), 1)} max={addDays(todayIso(), 180)} />
-        <div className="flex flex-col gap-1.5">
+        <label className="flex flex-col gap-1.5">
           <span className="text-metadata text-text-secondary">{t("create.photosLabel")}</span>
           <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </div>
+        </label>
         <div>
           <Button variant="primary" onClick={() => setStep("PREVIEW")} disabled={!canContinue}>
             {t("create.continue")}

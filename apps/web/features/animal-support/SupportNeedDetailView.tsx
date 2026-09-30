@@ -169,7 +169,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
               <Input label={t("detail.quantityLabel")} hint={tCommon("optional")} type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
               <Input dir="auto" label={locale === "fa" ? "چه زمانی می‌توانید؟" : "When can you help?"} hint={tCommon("optional")} maxLength={200} value={timing} onChange={(e) => setTiming(e.target.value)} placeholder={locale === "fa" ? "مثلاً عصرهای روز کاری" : "e.g. weekday evenings"} />
               {needsSignIn ? (
-                <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/${listingId}`)}`} className="text-body text-brand-mint underline">
+                <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/${listingId}`)}`} className="text-body text-brand-mint-strong underline">
                   {t("detail.signInToHelp")}
                 </Link>
               ) : null}
@@ -190,7 +190,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
         <ReportContentPanel submit={(reason, details) => communityService.reportContent("SUPPORT_NEED", listing.id, reason, details)} />
       </ContextSurface>
 
-      <Link href="/animal-support/needs" className="text-body text-brand-mint underline">
+      <Link href="/animal-support/needs" className="text-body text-brand-mint-strong underline">
         {t("detail.backToBoard")}
       </Link>
     </div>

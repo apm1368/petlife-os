@@ -97,16 +97,16 @@ export function NgoOverviewView() {
               <StatusLabel tone={VERIFY[data.organization.verificationStatus]?.[2] ?? "neutral"}>{VERIFY[data.organization.verificationStatus]?.[fa ? 0 : 1] ?? data.organization.verificationStatus}</StatusLabel>
               <span className="text-metadata text-text-secondary">{ROLE[data.role][fa ? 0 : 1]}</span>
             </header>
-            <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {([
                 [fa ? "نیازهای فعال" : "Live needs", localizeDigits(data.needs.live, lang), `/${lang}/ngo/needs`],
                 [fa ? "پیشنهادهای در انتظار" : "Offers waiting", localizeDigits(data.offers.pending, lang), `/${lang}/ngo/offers?status=PENDING`],
                 [fa ? "کمک مالی ۳۰ روز اخیر" : "Donations, last 30 days", formatCurrency(data.donations.receivedLast30DaysIrr, lang), `/${lang}/ngo/donations`],
                 [fa ? "اعضای تیم" : "Team members", localizeDigits(data.teamSize, lang), `/${lang}/ngo/team`],
               ] as const).map(([label, value, href]) => (
-                <Link key={label} href={href} className="rounded-md border border-border-subtle bg-surface-elevated p-3 hover:border-border-strong"><dt className="text-metadata text-text-secondary">{label}</dt><dd className="mt-1 text-section-title tabular-nums">{value}</dd></Link>
+                <li key={label}><Link href={href} className="block rounded-md border border-border-subtle bg-surface-elevated p-3 hover:border-border-strong"><span className="block text-metadata text-text-secondary">{label}</span><span className="mt-1 block text-section-title tabular-nums">{value}</span></Link></li>
               ))}
-            </dl>
+            </ul>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-md border border-border-subtle p-3 text-sm">
                 <p className="font-bold">{fa ? "موجودی کمک‌های مالی (از دفتر کل)" : "Donation balance (from the ledger)"}</p>
