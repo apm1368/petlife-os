@@ -54,3 +54,11 @@ had not landed on `integration/local` during this pass; no Batch 7 area was chan
 | Migration from zero | 46 migrations applied; schema diff only the known PostGIS index |
 | Upgrade | copy of live restored to a `*_test` DB: already at 46, nothing pending — this release has no schema change |
 | Browser smoke / crawl / axe | see Method above (preview, `petlife_final_qa_test`) |
+
+## Release 1 and live read-only QA (2026-09-30)
+- Backup before release: `/root/petlife-backups/release-final-20260930-223023` (pg_dump -Fc, 213 table-data entries readable; nginx site file; ROLLBACK.md). No schema change in this release.
+- `integration/local` fast-forwarded `b9906e7 → 8e5a467` (Batch 7 had not landed). CI `36785976955` success; deploy `36785977264` (ci/build + deploy) success.
+- Live `/var/www/petlife-os` at `8e5a467`; `/api/health/live` 200; 46 migrations, up to date; pm2 api + web online.
+- nginx: `/api/uploads/` raised to 50 MB (`nginx -t` ok, reloaded). A 2 MB upload now reaches the API (was 413 at nginx); 60 MB still 413; other API paths keep 1 MB.
+- LIVE READ-ONLY QA (anonymous, GET only, nothing created): 25 pages × fa/en × 1440/390 = 100 loads — all 200, 0 page errors, 0 overflow, 0 stuck skeletons, correct `dir`. Unknown support listing / campaign / post / insurance product / place → canonical "not found", no Retry, no raw API text (the defect that opened this pass). `/pets`, `/orders`, `/profile`, `/provider`, `/seller`, `/ngo`, `/admin` → sign-in.
+- Found in live QA and fixed in the follow-up release: the places filter button read "Retry" (now "Search").

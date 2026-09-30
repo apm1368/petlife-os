@@ -88,7 +88,7 @@ export function PlacesListView() {
           options={[{ value: "", label: t("list.allCategories") }, ...CATEGORIES.map((c) => ({ value: c, label: t(`category.${c}`) }))]}
         />
         <Button variant="secondary" onClick={load}>
-          {tCommon("retry")}
+          {t("list.search")}
         </Button>
         <Button variant="primary" isLoading={isSearchingNearby} onClick={searchNearMe}>
           {t("list.nearMe")}

@@ -3362,6 +3362,7 @@
       "OTHER": "Other"
     },
     "list": {
+      "search": "Search",
       "title": "Pet-friendly places",
       "subtitle": "Verified places that welcome pets.",
       "empty": "No places found.",
