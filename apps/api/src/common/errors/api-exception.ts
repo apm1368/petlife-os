@@ -399,6 +399,12 @@ export class PaymentOrderConfirmationIssueException extends ApiException {
   }
 }
 
+export class PaymentIntentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_INTENT_NOT_FOUND", "Payment not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
 export class FinancingIntentNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("FINANCING_INTENT_NOT_FOUND", "Financing intent not found.", HttpStatus.NOT_FOUND, details);
