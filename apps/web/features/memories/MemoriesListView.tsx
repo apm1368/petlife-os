@@ -11,6 +11,7 @@ import { petsService } from "@/services/pets.service";
 import { ApiError } from "@/lib/api/client";
 import { MemoryMediaThumb } from "./MemoryMediaThumb";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 type ViewMode = "JOURNAL" | "GALLERY";
 
@@ -27,6 +28,7 @@ type ViewMode = "JOURNAL" | "GALLERY";
  * endpoint rather than fetching everything and filtering client-side.
  */
 export function MemoriesListView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("memories");
   const tCommon = useTranslations("common");
 
@@ -157,13 +159,13 @@ export function MemoriesListView({ petId }: { petId: string }) {
               <h2 className="text-section-title text-text-secondary">{groupYear}</h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {entries.map((memory) => {
-                  const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+                  const displayTitle = memory.title ?? fmt.date(memory.occurredAt);
                   return (
                     <ContextSurface key={memory.id} className="flex flex-col gap-2">
                       <Link href={`/pets/${petId}/memories/${memory.id}`} className="flex flex-col gap-2">
                         <MemoryMediaThumb petId={petId} memory={memory} className="h-32 w-full rounded-md object-cover" />
                         <span className="text-body text-text-primary">{displayTitle}</span>
-                        <p className="text-metadata text-text-secondary">{new Date(memory.occurredAt).toLocaleDateString()}</p>
+                        <p className="text-metadata text-text-secondary">{fmt.date(memory.occurredAt)}</p>
                         {memory.tags.length > 0 ? <p className="text-metadata text-text-secondary">{memory.tags.join(" · ")}</p> : null}
                       </Link>
                       {memory.archivedAt ? (

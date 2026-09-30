@@ -7,6 +7,7 @@ import { ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { HealthTimelineEntryDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /** Canonical detail route per timeline record type; rehab sessions have no standalone detail page. */
 const DETAIL_PATH: Record<string, string> = {
@@ -27,6 +28,7 @@ const DETAIL_PATH: Record<string, string> = {
 
 /** Every entry always shows its provenance (spec: "provenance indicator") — never just a bare fact with no origin. */
 export function HealthTimelineView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
   const locale = useLocale();
@@ -61,7 +63,7 @@ export function HealthTimelineView({ petId }: { petId: string }) {
           {entries.map((entry, index) => (
             <ContextSurface key={`${entry.recordType}-${entry.recordId}-${index}`} className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <span className="text-metadata text-text-secondary">{new Date(entry.occurredAt).toLocaleDateString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.date(entry.occurredAt)}</span>
                 <StatusLabel tone="neutral">{entry.sourceType}</StatusLabel>
               </div>
               {DETAIL_PATH[entry.recordType] ? (

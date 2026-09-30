@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VetVisitClinicalTools } from "@/features/vet-panel/VetVisitClinicalTools";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const STATUS_TONE: Record<string, "success" | "attention" | "neutral" | "urgent"> = {
   DRAFT: "neutral",
@@ -24,6 +25,7 @@ const STATUS_TONE: Record<string, "success" | "attention" | "neutral" | "urgent"
  * snapshots the prior content first (see ClinicalVisitService.amend).
  */
 export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; visitId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("clinicalOs.visit");
   const tCommon = useTranslations("common");
 
@@ -201,7 +203,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
           <h2 className="text-section-title text-text-primary">{t("revisionHistory")}</h2>
           {visit.revisions.map((rev) => (
             <div key={rev.id} className="flex flex-col gap-1 border-b border-border-subtle pb-2 last:border-0">
-              <span className="text-metadata text-text-secondary">{new Date(rev.createdAt).toLocaleString()}</span>
+              <span className="text-metadata text-text-secondary">{fmt.dateTime(rev.createdAt)}</span>
               <span className="text-body text-text-primary">{rev.reason}</span>
             </div>
           ))}

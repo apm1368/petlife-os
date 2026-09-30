@@ -6,6 +6,7 @@ import { Button, Input } from "@petlife/ui";
 import type { ProviderServiceDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerOsService, type ProviderResource } from "@/services/provider-os.service";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const RESOURCE_TYPES: Record<string, [string, string]> = {
   EXAM_ROOM: ["اتاق معاینه", "Exam room"],
@@ -21,6 +22,7 @@ const RESOURCE_TYPES: Record<string, [string, string]> = {
  * future bookings only — confirmed bookings keep the terms they were booked under.
  */
 export function ProviderServiceSettings({ service, onSaved }: { service: ProviderServiceDto; onSaved: (s: ProviderServiceDto) => void }) {
+  const fmt = useInstantFormat();
   const fa = useLocale() === "fa";
   const [policy, setPolicy] = useState({
     bookingMode: service.bookingMode as string,
@@ -130,7 +132,7 @@ export function ProviderServiceSettings({ service, onSaved }: { service: Provide
           <ul className="divide-y divide-border-subtle text-sm">
             {service.variants.map((v) => (
               <li key={v.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                <span className={v.isActive ? "" : "text-text-secondary line-through"}>{v.name} · {v.durationMinutes} {fa ? "دقیقه" : "min"}{v.priceAmount !== null ? ` · ${v.priceAmount.toLocaleString()}` : ""}</span>
+                <span className={v.isActive ? "" : "text-text-secondary line-through"}>{v.name} · {v.durationMinutes} {fa ? "دقیقه" : "min"}{v.priceAmount !== null ? ` · ${fmt.number(v.priceAmount)}` : ""}</span>
                 <Button variant="ghost" size="sm" onClick={() => void toggleVariant(v.id, !v.isActive)}>{v.isActive ? (fa ? "غیرفعال" : "Disable") : fa ? "فعال" : "Enable"}</Button>
               </li>
             ))}

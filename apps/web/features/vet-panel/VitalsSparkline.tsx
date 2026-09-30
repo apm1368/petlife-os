@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import type { VitalsTrendPointDto } from "@petlife/types";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /**
  * A deliberately minimal trend line: one dot per *actual* measurement, joined
@@ -16,6 +17,7 @@ import type { VitalsTrendPointDto } from "@petlife/types";
  * the only place the numbers exist.
  */
 export function VitalsSparkline({ points, ariaLabel }: { points: VitalsTrendPointDto[]; ariaLabel: string }) {
+  const fmt = useInstantFormat();
   const gradientId = useId();
   if (points.length < 2) return null;
 
@@ -42,7 +44,7 @@ export function VitalsSparkline({ points, ariaLabel }: { points: VitalsTrendPoin
       viewBox={`0 0 ${width} ${height}`}
       className="h-16 w-full"
       role="img"
-      aria-label={`${ariaLabel}: ${points.map((p) => `${new Date(p.recordedAt).toLocaleDateString()} ${p.value.toFixed(1)}`).join(", ")}`}
+      aria-label={`${ariaLabel}: ${points.map((p) => `${fmt.date(p.recordedAt)} ${p.value.toFixed(1)}`).join(", ")}`}
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">

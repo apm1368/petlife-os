@@ -10,6 +10,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VitalsSparkline } from "./VitalsSparkline";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 type Tab = "summary" | "problems" | "vitals" | "prescriptions" | "visits" | "financial";
 
@@ -35,6 +36,7 @@ function orDash(value: string | number | null | undefined): string {
  * range. Where a value was never recorded the page says so with a dash.
  */
 export function VetPatientRecordView({ petId, bookingId }: { petId: string; bookingId?: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.record");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -205,7 +207,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
             <h2 className="text-section-title text-text-primary">{t("latestVitals")}</h2>
             {record.latestVitals ? (
               <>
-                <p className="text-metadata text-text-secondary">{new Date(record.latestVitals.recordedAt).toLocaleString()}</p>
+                <p className="text-metadata text-text-secondary">{fmt.dateTime(record.latestVitals.recordedAt)}</p>
                 <dl className="grid grid-cols-2 gap-2">
                   <Measure label={t("weight")} value={record.latestVitals.weightValue !== null ? `${record.latestVitals.weightValue} ${record.latestVitals.weightUnit ?? ""}` : null} />
                   <Measure label={t("temperature")} value={record.latestVitals.temperatureC !== null ? `${record.latestVitals.temperatureC} °C` : null} />
@@ -245,7 +247,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                   <StatusLabel tone={p.status === "RESOLVED" ? "success" : p.status === "RULED_OUT" ? "neutral" : "attention"}>{t(`problemStatus.${p.status}`)}</StatusLabel>
                 </div>
                 <span className="text-metadata text-text-secondary">
-                  {[p.bodySystem, p.onsetAt ? t("onset", { date: new Date(p.onsetAt).toLocaleDateString() }) : null, p.source.providerOrganizationName].filter(Boolean).join(" · ")}
+                  {[p.bodySystem, p.onsetAt ? t("onset", { date: fmt.date(p.onsetAt) }) : null, p.source.providerOrganizationName].filter(Boolean).join(" · ")}
                 </span>
                 {p.notes ? <p className="text-body text-text-secondary">{p.notes}</p> : null}
               </ContextSurface>
@@ -268,7 +270,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
           ) : (
             record.vitalsHistory.map((v) => (
               <ContextSurface key={v.id} className="flex flex-col gap-1">
-                <span className="text-metadata text-text-secondary">{new Date(v.recordedAt).toLocaleString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.dateTime(v.recordedAt)}</span>
                 <span className="text-body text-text-primary">
                   {[
                     v.weightValue !== null ? `${t("weight")}: ${v.weightValue} ${v.weightUnit ?? ""}` : null,
@@ -351,7 +353,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                 className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface-elevated p-3 text-start hover:bg-surface-subtle"
               >
                 <div className="flex flex-col">
-                  <span className="text-body text-text-primary">{v.reasonForVisit ?? new Date(v.startedAt).toLocaleDateString()}</span>
+                  <span className="text-body text-text-primary">{v.reasonForVisit ?? fmt.date(v.startedAt)}</span>
                   <span className="text-metadata text-text-secondary">{v.providerOrganizationName}</span>
                 </div>
                 <StatusLabel tone="neutral">{v.status}</StatusLabel>
@@ -372,7 +374,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                   <span className="text-body text-text-primary">{estimate.title}</span>
                   <StatusLabel tone={estimate.status === "APPROVED" ? "success" : estimate.status === "DECLINED" ? "urgent" : "attention"}>{t(`estimateStatus.${estimate.status}`)}</StatusLabel>
                 </div>
-                <span className="text-metadata text-text-secondary">{t("estimateRange", { low: estimate.lowTotalIrr.toLocaleString(), high: estimate.highTotalIrr.toLocaleString() })}</span>
+                <span className="text-metadata text-text-secondary">{t("estimateRange", { low: fmt.number(estimate.lowTotalIrr), high: fmt.number(estimate.highTotalIrr) })}</span>
                 {estimate.status === "DRAFT" ? (
                   <Button
                     className="mt-1 self-start"

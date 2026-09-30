@@ -8,6 +8,7 @@ import type { HospitalizationDetailDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { TRIAGE_TONE } from "./VetClinicalDashboardView";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const TASK_TYPES: TreatmentTaskType[] = [
   TreatmentTaskType.MEDICATION,
@@ -39,6 +40,7 @@ const TASK_OUTCOMES: TreatmentTaskStatus[] = [TreatmentTaskStatus.DONE, Treatmen
  *     would change what people write down.
  */
 export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitalizationId: string; petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.treatmentSheet");
   const tCommon = useTranslations("common");
 
@@ -116,8 +118,8 @@ export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitaliz
         <div className="flex flex-wrap gap-2">
           {detail.kennelLabel ? <StatusLabel tone="neutral">{t("kennel", { label: detail.kennelLabel })}</StatusLabel> : null}
           {detail.triageLevel ? <StatusLabel tone={TRIAGE_TONE[detail.triageLevel]}>{t(`triage.${detail.triageLevel}`)}</StatusLabel> : null}
-          <StatusLabel tone="neutral">{t("admittedAt", { time: new Date(detail.admittedAt).toLocaleString() })}</StatusLabel>
-          {detail.dischargedAt ? <StatusLabel tone="success">{t("dischargedAt", { time: new Date(detail.dischargedAt).toLocaleString() })}</StatusLabel> : null}
+          <StatusLabel tone="neutral">{t("admittedAt", { time: fmt.dateTime(detail.admittedAt) })}</StatusLabel>
+          {detail.dischargedAt ? <StatusLabel tone="success">{t("dischargedAt", { time: fmt.dateTime(detail.dischargedAt) })}</StatusLabel> : null}
         </div>
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
       </header>
@@ -182,7 +184,7 @@ export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitaliz
                 <div className="flex flex-col">
                   <span className="text-body text-text-primary">{task.title}</span>
                   <span className="text-metadata text-text-secondary">
-                    {t(`taskType.${task.type}`)} · {new Date(task.scheduledAt).toLocaleString()}
+                    {t(`taskType.${task.type}`)} · {fmt.dateTime(task.scheduledAt)}
                   </span>
                 </div>
                 <StatusLabel tone={task.status === "DONE" ? "success" : task.status === "MISSED" ? "urgent" : task.status === "SKIPPED" ? "attention" : task.isOverdue ? "urgent" : "neutral"}>
@@ -192,7 +194,7 @@ export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitaliz
               {task.detail ? <p className="text-metadata text-text-secondary">{task.detail}</p> : null}
               {task.outcomeNote ? <p className="text-body text-text-secondary">{task.outcomeNote}</p> : null}
               {task.completedAt ? (
-                <p className="text-metadata text-text-secondary">{t("actionedAt", { time: new Date(task.completedAt).toLocaleString() })}</p>
+                <p className="text-metadata text-text-secondary">{t("actionedAt", { time: fmt.dateTime(task.completedAt) })}</p>
               ) : null}
 
               {/* Action buttons exist only while the task has no recorded outcome. */}
@@ -225,7 +227,7 @@ export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitaliz
         ) : (
           detail.vitals.map((v) => (
             <ContextSurface key={v.id} className="flex flex-col gap-1">
-              <span className="text-metadata text-text-secondary">{new Date(v.recordedAt).toLocaleString()}</span>
+              <span className="text-metadata text-text-secondary">{fmt.dateTime(v.recordedAt)}</span>
               <span className="text-body text-text-primary">
                 {[
                   v.temperatureC !== null ? `T ${v.temperatureC} °C` : null,

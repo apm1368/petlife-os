@@ -12,6 +12,7 @@ import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { requirementStatusTone, tripStatusTone } from "./travel-status";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const ALLOWED_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
   [TripStatus.DRAFT]: [TripStatus.PLANNING, TripStatus.CANCELLED],
@@ -235,6 +236,7 @@ function RequirementCard({
   documents: MedicalDocumentDto[];
   fileInputRef: (el: HTMLInputElement | null) => void;
 }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("travel");
 
   return (
@@ -250,7 +252,7 @@ function RequirementCard({
       {requirement.source ? <p className="text-metadata text-text-secondary">{t("detail.source", { source: requirement.source })}</p> : null}
       {requirement.jurisdiction ? <p className="text-metadata text-text-secondary">{t("detail.jurisdiction", { jurisdiction: requirement.jurisdiction })}</p> : null}
       <p className="text-metadata text-text-secondary">
-        {requirement.verifiedAt ? t("detail.verifiedAt", { date: new Date(requirement.verifiedAt).toLocaleDateString() }) : t("detail.neverVerified")}
+        {requirement.verifiedAt ? t("detail.verifiedAt", { date: fmt.date(requirement.verifiedAt) }) : t("detail.neverVerified")}
       </p>
       {requirement.linkedMedicalDocumentTitle ? <p className="text-metadata text-text-secondary">{t("detail.linkedDocument", { title: requirement.linkedMedicalDocumentTitle })}</p> : null}
 

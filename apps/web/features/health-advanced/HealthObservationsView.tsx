@@ -7,9 +7,11 @@ import { ObservationCategory, type PetObservationDto } from "@petlife/types";
 import { petObservationService } from "@/services/pet-observation.service";
 import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /** spec: "these are OWNER OBSERVATIONS, not diagnoses" — the UI labels every entry as such and never offers a "diagnosis" field. */
 export function HealthObservationsView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
 
@@ -103,7 +105,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
             <ContextSurface key={obs.id} className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <StatusLabel tone="neutral">{obs.category}</StatusLabel>
-                <span className="text-metadata text-text-secondary">{new Date(obs.observedAt).toLocaleDateString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.date(obs.observedAt)}</span>
               </div>
               <p className="text-body text-text-primary">{obs.description}</p>
             </ContextSurface>

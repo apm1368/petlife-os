@@ -7,9 +7,11 @@ import type { InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
 import { verificationStatusTone } from "./insurance-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /** Side-by-side comparison — never a ranked "best plan" recommendation, and exclusions are shown for every product at the same level as coverage/premium (spec hard UX rule). */
 export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("insurance");
   const tCommon = useTranslations("common");
 
@@ -48,11 +50,11 @@ export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
             <p className="text-metadata text-text-secondary">{product.coverageSummary}</p>
             {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: product.waitingPeriodDays })}</p> : null}
             {product.deductibleAmountIrr !== null ? (
-              <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: product.deductibleAmountIrr.toLocaleString() })}</p>
+              <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: fmt.number(product.deductibleAmountIrr) })}</p>
             ) : null}
-            {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: product.annualLimitIrr.toLocaleString() })}</p> : null}
+            {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: fmt.number(product.annualLimitIrr) })}</p> : null}
             {product.premiumMinIrr !== null && product.premiumMaxIrr !== null ? (
-              <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: product.premiumMinIrr.toLocaleString(), max: product.premiumMaxIrr.toLocaleString() })}</p>
+              <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: fmt.number(product.premiumMinIrr), max: fmt.number(product.premiumMaxIrr) })}</p>
             ) : null}
             <div className="rounded-md border border-state-urgent p-2">
               <h2 className="text-metadata font-semibold text-state-urgent">{t("compare.exclusions")}</h2>

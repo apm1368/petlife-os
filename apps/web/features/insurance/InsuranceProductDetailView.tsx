@@ -9,6 +9,7 @@ import { insuranceService } from "@/services/insurance.service";
 import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { eligibilityStatusTone, verificationStatusTone } from "./insurance-status";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /**
  * Spec hard UX rule: exclusions must be highly visible — this renders them
@@ -16,6 +17,7 @@ import { eligibilityStatusTone, verificationStatusTone } from "./insurance-statu
  * benefits, never folded below or scrolled past.
  */
 export function InsuranceProductDetailView({ productId }: { productId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("insurance");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -97,11 +99,11 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
         </div>
         {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: product.waitingPeriodDays })}</p> : null}
         {product.deductibleAmountIrr !== null ? (
-          <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: product.deductibleAmountIrr.toLocaleString() })}</p>
+          <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: fmt.number(product.deductibleAmountIrr) })}</p>
         ) : null}
-        {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: product.annualLimitIrr.toLocaleString() })}</p> : null}
+        {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: fmt.number(product.annualLimitIrr) })}</p> : null}
         {product.premiumMinIrr !== null && product.premiumMaxIrr !== null ? (
-          <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: product.premiumMinIrr.toLocaleString(), max: product.premiumMaxIrr.toLocaleString() })}</p>
+          <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: fmt.number(product.premiumMinIrr), max: fmt.number(product.premiumMaxIrr) })}</p>
         ) : null}
         {product.termsSource ? <p className="text-metadata text-text-secondary">{t("detail.termsSource", { source: product.termsSource })}</p> : null}
       </ContextSurface>

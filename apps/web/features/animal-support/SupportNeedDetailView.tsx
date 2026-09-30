@@ -14,6 +14,7 @@ import { URGENCY_TONE } from "./SupportNeedsListView";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
 import { ShareBar } from "@/features/shared/ShareBar";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const HELP_TYPES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -35,6 +36,7 @@ const HELP_TYPES: SupportNeedCategory[] = [
  * through the linked campaign's existing donation flow.
  */
 export function SupportNeedDetailView({ listingId }: { listingId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("supportNeeds");
   const locale = useLocale();
   const tCommon = useTranslations("common");
@@ -114,7 +116,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
           {listing.status === "PAUSED" ? <StatusLabel tone="neutral">{t("status.PAUSED")}</StatusLabel> : null}
         </div>
         <p className="text-metadata text-text-secondary">
-          {[listing.city, listing.province, listing.neighborhood].filter(Boolean).join(" · ")} · {new Date(listing.createdAt).toLocaleDateString()}
+          {[listing.city, listing.province, listing.neighborhood].filter(Boolean).join(" · ")} · {fmt.date(listing.createdAt)}
         </p>
         {listing.organizationName ? <p className="text-metadata text-text-secondary">{listing.organizationName}</p> : null}
       </div>

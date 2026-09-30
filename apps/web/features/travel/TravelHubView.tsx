@@ -8,8 +8,10 @@ import type { TripDto } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
 import { tripStatusTone } from "./travel-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 export function TravelHubView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("travel");
   const tCommon = useTranslations("common");
 
@@ -83,7 +85,7 @@ export function TravelHubView({ petId }: { petId: string }) {
                   </span>
                   <StatusLabel tone={tripStatusTone(trip.status)}>{t(`status.${trip.status}`)}</StatusLabel>
                 </div>
-                <p className="text-metadata text-text-secondary">{new Date(trip.departAt).toLocaleDateString()}</p>
+                <p className="text-metadata text-text-secondary">{fmt.date(trip.departAt)}</p>
                 <p className="text-metadata text-text-secondary">{t("hub.requirementsCount", { count: trip.requirementsCount })}</p>
               </ContextSurface>
             </Link>

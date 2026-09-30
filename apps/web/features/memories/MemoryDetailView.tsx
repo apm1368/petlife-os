@@ -9,8 +9,10 @@ import type { PetMemoryDto } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
 import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("memories");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -74,7 +76,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
   if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!memory) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
-  const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+  const displayTitle = memory.title ?? fmt.date(memory.occurredAt);
 
   return (
     <div className="flex flex-col gap-5">
@@ -89,7 +91,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
             ))}
           </div>
         ) : null}
-        <p className="text-metadata text-text-secondary">{new Date(memory.occurredAt).toLocaleDateString()}</p>
+        <p className="text-metadata text-text-secondary">{fmt.date(memory.occurredAt)}</p>
         {memory.location ? <p className="text-metadata text-text-secondary">{memory.location}</p> : null}
         {memory.tags.length > 0 ? <p className="text-metadata text-text-secondary">{memory.tags.join(" · ")}</p> : null}
         {memory.description ? <p className="text-body text-text-primary">{memory.description}</p> : null}

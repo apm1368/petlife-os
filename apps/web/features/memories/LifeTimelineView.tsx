@@ -6,9 +6,11 @@ import { ContextSurface, EmptyState, Skeleton } from "@petlife/ui";
 import type { LifeTimelineEntryDto } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /** spec: "derived, never duplicated" — every row here is computed server-side from Memories/Health/lost-pet/lifecycle records, never a separately stored table. */
 export function LifeTimelineView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("memories");
   const tCommon = useTranslations("common");
 
@@ -44,7 +46,7 @@ export function LifeTimelineView({ petId }: { petId: string }) {
             <ContextSurface key={`${entry.recordType}-${entry.recordId}-${index}`} className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span className="text-metadata text-text-secondary">{t(`timelineEntryType.${entry.type}`)}</span>
-                <span className="text-metadata text-text-secondary">{new Date(entry.occurredAt).toLocaleDateString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.date(entry.occurredAt)}</span>
               </div>
               <p className="text-body text-text-primary">{entry.summary}</p>
             </ContextSurface>

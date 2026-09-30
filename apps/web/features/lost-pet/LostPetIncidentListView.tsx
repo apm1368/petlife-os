@@ -8,8 +8,10 @@ import type { LostPetIncidentDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
 import { lostPetStatusTone } from "./lost-pet-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 export function LostPetIncidentListView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("lostPet");
   const tCommon = useTranslations("common");
 
@@ -50,7 +52,7 @@ export function LostPetIncidentListView({ petId }: { petId: string }) {
             <Link key={incident.id} href={`/pets/${petId}/lost/${incident.id}`}>
               <ContextSurface className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-text-primary">{new Date(incident.createdAt).toLocaleDateString()}</span>
+                  <span className="text-body text-text-primary">{fmt.date(incident.createdAt)}</span>
                   <StatusLabel tone={lostPetStatusTone(incident.status)}>{t(`status.${incident.status}`)}</StatusLabel>
                 </div>
                 <p className="text-metadata text-text-secondary">{incident.lastKnownLocation ?? t("list.noLocation")}</p>
