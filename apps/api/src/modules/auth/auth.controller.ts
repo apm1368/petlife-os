@@ -71,9 +71,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(SessionAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  async setOrChangePassword(@CurrentUser() user: SessionUser, @Body() dto: ChangePasswordDto): Promise<{ ok: true }> {
-    await this.passwordAuth.setOrChangePassword(user.id, dto);
-    return { ok: true };
+  async setOrChangePassword(@CurrentUser() user: SessionUser, @Body() dto: ChangePasswordDto, @Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<{ ok: true; otherSessionsSignedOut: number }> {
+    const otherSessionsSignedOut = await this.passwordAuth.setOrChangePassword(user.id, dto);
+    // Every session (including this one) was just revoked; this device continues on a fresh session id rather than being signed out.
+    await this.sessions.issueSession(user.id, res, { userAgent: req.headers["user-agent"], ipAddress: req.ip });
+    return { ok: true, otherSessionsSignedOut };
   }
 
   @Post("password/forgot")

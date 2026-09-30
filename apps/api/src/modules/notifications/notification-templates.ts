@@ -205,6 +205,31 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "دعوت به خانواده PET LIFE", body: "{{inviterName}} شما را برای همکاری در مراقبت از حیوان‌ها دعوت کرده است.", smsBody: "یک دعوت خانوادگی جدید در PET LIFE دارید." },
     en: { title: "PET LIFE household invitation", body: "{{inviterName}} invited you to collaborate on pet care.", smsBody: "You have a new PET LIFE household invitation." },
   },
+  "household.member_removed": {
+    fa: { title: "دسترسی خانوادگی شما پایان یافت", body: "مدیر خانواده شما را از خانواده حذف کرد؛ دسترسی شما به حیوان‌های آن خانواده قطع شد." },
+    en: { title: "Your household access ended", body: "A household owner removed you; your access to that household's pets has ended." },
+  },
+  // Batch 8 — security messages (SECURITY category is never suppressible).
+  "security.new_sign_in": {
+    fa: { title: "ورود تازه به حساب شما", body: "یک ورود تازه با {{device}} ثبت شد. اگر شما نبودید، از بخش امنیت نشست را قطع و رمز را تغییر دهید." },
+    en: { title: "New sign-in to your account", body: "A new sign-in from {{device}} was recorded. If it wasn't you, end that session in Security and change your password." },
+  },
+  "security.password_changed": {
+    fa: { title: "رمز عبور شما تغییر کرد", body: "رمز عبور حساب شما تغییر کرد و سایر دستگاه‌ها خارج شدند. اگر شما نبودید، فوراً رمز را بازیابی کنید." },
+    en: { title: "Your password was changed", body: "Your account password changed and other devices were signed out. If this wasn't you, reset your password now." },
+  },
+  "security.contact_changed": {
+    fa: { title: "راه تماس حساب تغییر کرد", body: "{{contactKind}} حساب شما تغییر کرد. اگر شما نبودید، با پشتیبانی تماس بگیرید." },
+    en: { title: "Account contact changed", body: "The {{contactKind}} on your account changed. If this wasn't you, contact support." },
+  },
+  "security.sessions_revoked": {
+    fa: { title: "از سایر دستگاه‌ها خارج شدید", body: "{{count}} نشست فعال دیگر به درخواست شما پایان یافت." },
+    en: { title: "Signed out of other devices", body: "{{count}} other active session(s) were ended at your request." },
+  },
+  "security.unverified_credentials_cleared": {
+    fa: { title: "حساب شما ایمن شد", body: "ایمیل شما تأیید شد و رمز عبوری که قبلاً بدون تأیید این ایمیل ثبت شده بود حذف شد. در صورت نیاز رمز تازه بسازید." },
+    en: { title: "Your account was secured", body: "Your email is now verified, and a password that had been set without proving this email was removed. Set a new one if you need it." },
+  },
   /** Handoff 13 — fires when a case moves to WAITING_ON_USER (the requester's own simplified status label is "Waiting"). */
   "support.more_info_requested": {
     fa: { title: "نیاز به اطلاعات بیشتر برای درخواست شما", body: "برای پیگیری درخواست پشتیبانی {{caseNumber}}، به اطلاعات بیشتری از شما نیاز داریم.", smsBody: "برای درخواست پشتیبانی شما در پت‌لایف به اطلاعات بیشتری نیاز است." },

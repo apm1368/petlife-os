@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { IsArray, IsIn, IsString, IsUUID, Length, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -15,6 +15,11 @@ class InitialPetAccessDto {
 
   @IsIn(["VIEW_ONLY", "CARE_HELPER", "FULL"])
   preset!: "VIEW_ONLY" | "CARE_HELPER" | "FULL";
+}
+
+class ChangeMemberRoleDto {
+  @IsIn(["OWNER", "FAMILY"])
+  role!: "OWNER" | "FAMILY";
 }
 
 class InviteMemberDto {
@@ -59,6 +64,24 @@ export class HouseholdsController {
   @UseGuards(HouseholdMemberGuard)
   invite(@Param("id") id: string, @CurrentUser() user: SessionUser, @Body() dto: InviteMemberDto) {
     return this.householdsService.invite(id, user.id, dto);
+  }
+
+  @Delete(":id/members/:memberId")
+  @UseGuards(HouseholdMemberGuard)
+  removeMember(@Param("id") id: string, @Param("memberId", ParseUUIDPipe) memberId: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.removeMember(id, memberId, user.id);
+  }
+
+  @Patch(":id/members/:memberId")
+  @UseGuards(HouseholdMemberGuard)
+  changeRole(@Param("id") id: string, @Param("memberId", ParseUUIDPipe) memberId: string, @Body() dto: ChangeMemberRoleDto, @CurrentUser() user: SessionUser) {
+    return this.householdsService.changeRole(id, memberId, dto.role, user.id);
+  }
+
+  @Post(":id/leave")
+  @UseGuards(HouseholdMemberGuard)
+  leave(@Param("id") id: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.leave(id, user.id);
   }
 
   @Post(":id/invitations/:invitationId/resend")

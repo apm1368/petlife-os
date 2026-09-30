@@ -519,3 +519,93 @@ Console kit tokens follow light/dark themes.
 
 ### Reuse
 `AdminTravelViews`, `console-ui`.
+
+## ACCOUNT SETTINGS PATTERN — Batch 8
+
+### Anatomy
+Account shell (`/profile/*`): section sidebar (Overview, Profile & preferences, Household & access, Membership, Notifications, Security, Privacy, Activity) → page header (eyebrow, title, one-sentence purpose) → sections separated by rules, not nested cards. Profile edits save explicitly (dirty-aware button, "Saved" status); contacts are rows with a verification badge and an inline change flow (new value → code → confirm).
+
+### States
+Loading skeleton only until the first response; retryable error with product copy; no fake "verified" — a contact is verified only when proven (OTP or Google-verified email).
+
+### Responsive
+≥900px: sticky sidebar at inline-start. <900px: the overview is the settings index (full-width section list with hints) and every section page shows a "← Account" back link instead of a squeezed tab strip.
+
+### RTL / LTR
+Sidebar and back arrow mirror by `dir`; emails/phones render `dir=ltr`; dates via `formatAccountDate` (Solar Hijri + Persian digits in fa, Gregorian in en); counts via `num()`.
+
+### Reuse
+`AccountNav`, `AccountPageHeader`, `useAccountCopy` (`t`, `num`), `formatAccountDate`.
+
+## SECURITY CENTER PATTERN — Batch 8
+
+### Anatomy
+Recovery warning (only when no verified contact) → sign-in methods (code to mobile, code to email, password, Google) each with an honest state (On / Not verified / Off / Unavailable) → password form stating its session consequence → signed-in devices → recovery explanation → recent security activity linking to Activity.
+
+### States
+Google shows "unavailable" when not configured; a password change keeps this device signed in (rotated session) and says how many others were signed out.
+
+### Responsive / RTL
+Rows collapse to icon + text with actions wrapping below at ≤620px; status labels never wrap.
+
+### Reuse
+`SecurityCenterView`, `ConfirmActionDialog`, `useSignOut`, `AccountMenu`.
+
+## SESSION MANAGEMENT PATTERN — Batch 8
+
+### Anatomy
+One row per active session: coarse device label from the browser's own user-agent ("Chrome · Android", or "Unknown device"), signed-in date, last active, "This device" badge or a Sign out action. Page-level actions: "Sign out other devices" and "Sign out everywhere".
+
+### Rules
+Never invent location or IP data. The current session can't be ended from the list (that is "Sign out"). "Sign out everywhere" ends this session too and leaves with a full navigation. Revocation is server-side and immediate; ids are validated and ownership-scoped.
+
+## PRIVACY CENTER PATTERN — Batch 8
+
+### Anatomy
+Consents (required Terms/Privacy: accept current version, never withdraw here; optional Marketing: a real `role=switch`) → Sharing (who can reach your pets: person, pet, kind, health yes/no, expiry; your access to others' pets) → Data copy (request → preparing → ready for N days → expired; download mints a 5-minute link) → Delete (danger zone).
+
+### Rules
+Product facts, not legal promises — legal text lives in the CMS. Marketing consent is the single switch for marketing messages across all channels.
+
+## ACCESS / PERMISSION PATTERN — Batch 8
+
+### Anatomy
+Household page: members (name, role, joined, pets they can reach, temporary count) with owner actions (make owner/member, remove) and "Leave this household"; pending invitations (masked contact, expiry, resend/cancel); pet access cards → per-pet access page (grants, presets that map exactly to flags, temporary expiry, confirmed revoke); access history with human labels.
+
+### Rules
+Household role ≠ pet permission. A household always keeps an owner. Presets are explained by the exact permissions they grant. Expired / revoked / not-yet-started access is enforced server-side and explained to the person (see System Failure State).
+
+## MEMBERSHIP PATTERN — Batch 8
+
+### Anatomy
+Plan + status + price → state explanation (trial, past due, grace with end date, cancel scheduled, expired, cancelled) → sandbox note when payments are simulated → actions (owners only) → what's included with usage → "Your records stay yours" guarantee → billing history (owners only; status + amount, never gateway text).
+
+### Rules
+Only household owners buy, change or cancel; members see what they get and why they can't act. Simulated payments are labelled "test payment (not charged)". Cancelling states what stops, what stays and the resume window.
+
+## ACCOUNT ACTIVITY PATTERN — Batch 8
+
+### Anatomy
+Filter chips (All, Security, Privacy, Household, Membership; `aria-pressed`) → ordered list of events: human title, a one-line summary built only from whitelisted detail (method, device, consent kind, counts, trial, end date), `<time>` in the locale calendar → "Show older" (cursor pagination).
+
+### Rules
+A bounded reference view over the person's own events — never another member's activity, never ids; unknown event types show a neutral "Account event".
+
+## DESTRUCTIVE ACTION PATTERN — Batch 8
+
+### Anatomy
+`ConfirmActionDialog` (native `<dialog>`: focus trap, Esc): title → "What happens" list → optional "What stays" list → optional typed phrase for irreversible requests → Cancel / confirm (danger variant) → errors stay inside the dialog.
+
+### Used for
+Remove member, change role, leave household, revoke pet access, sign out one/other/all devices, cancel membership, cancel a deletion request. Account deletion adds a consequence preview with blockers, re-authentication (password or code to the verified contact) and typed DELETE.
+
+## SYSTEM FAILURE STATE PATTERN — Batch 8
+
+### Anatomy
+`SystemState`: icon (severity: info / attention / blocked) → plain title → one explanatory sentence → primary action (sign in with safe returnTo, retry, or a context action) → secondary action (home or account).
+
+### Kinds
+AUTH_REQUIRED, FORBIDDEN, NOT_FOUND, ACCESS_EXPIRED, ACCESS_REVOKED, ACCESS_NOT_STARTED, LINK_EXPIRED, EXTERNAL_UNAVAILABLE, GENERIC_RETRYABLE_ERROR. `systemStateFor(error)` maps API errors (incl. the PET_ACCESS_DENIED `lapse`).
+
+### Rules
+Fixed product copy — backend messages are never shown; unauthorized states reveal nothing about the protected object. Private routes are noindex via their layout; the localized 404 (`[locale]/not-found`, catch-all under a locale) is noindex too.

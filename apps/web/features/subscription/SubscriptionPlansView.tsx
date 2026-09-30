@@ -53,7 +53,7 @@ export function SubscriptionPlansView() {
       await action();
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(err instanceof ApiError && err.status === 403 ? t("ownerOnly") : err instanceof ApiError ? err.message : tCommon("genericError"));
     } finally {
       setBusyPlanId(null);
     }

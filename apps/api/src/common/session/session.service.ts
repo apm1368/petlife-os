@@ -5,6 +5,7 @@ import type { AppEnv } from "../../config/env";
 import { ValidationApiException } from "../errors/api-exception";
 import { PrismaService } from "../prisma/prisma.service";
 import { signSessionCookie, verifySessionCookie } from "./session-cookie.util";
+import { deviceLabel } from "./device-label.util";
 
 export interface SessionUser {
   id: string;
@@ -56,8 +57,9 @@ export class SessionService {
   }
 
   async listForUser(userId: string, currentSessionId: string | null) {
-    const sessions = await this.prisma.session.findMany({ where: { userId, revokedAt: null, expiresAt: { gt: new Date() } }, orderBy: { lastSeenAt: "desc" } });
-    return sessions.map((session) => ({ id: session.id, userAgent: session.userAgent, createdAt: session.createdAt, lastSeenAt: session.lastSeenAt, expiresAt: session.expiresAt, current: session.id === currentSessionId }));
+    // Bounded: an account with a runaway number of sessions still renders; "sign out other devices" clears them all.
+    const sessions = await this.prisma.session.findMany({ where: { userId, revokedAt: null, expiresAt: { gt: new Date() } }, orderBy: { lastSeenAt: "desc" }, take: 50 });
+    return sessions.map((session) => ({ id: session.id, userAgent: session.userAgent, device: deviceLabel(session.userAgent), createdAt: session.createdAt, lastSeenAt: session.lastSeenAt, expiresAt: session.expiresAt, current: session.id === currentSessionId }));
   }
 
   async revokeForUser(userId: string, sessionId: string, currentSessionId: string | null): Promise<void> {
@@ -68,6 +70,13 @@ export class SessionService {
 
   async revokeOthers(userId: string, currentSessionId: string | null): Promise<number> {
     const result = await this.prisma.session.updateMany({ where: { userId, revokedAt: null, ...(currentSessionId ? { id: { not: currentSessionId } } : {}) }, data: { revokedAt: new Date() } });
+    return result.count;
+  }
+
+  /** Ends every session of the user, this one included, and clears the cookie on this response. */
+  async revokeAllAndClear(userId: string, res: Response): Promise<number> {
+    const result = await this.prisma.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
+    res.clearCookie(this.cookieName, { path: "/" });
     return result.count;
   }
 

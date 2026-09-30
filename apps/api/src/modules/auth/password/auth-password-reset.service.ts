@@ -74,14 +74,18 @@ export class AuthPasswordResetService {
     }
 
     const newHash = await hashPassword(newPassword);
-    await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: record.userId }, data: { passwordHash: newHash } }),
-      this.prisma.passwordResetToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
-    ]);
+    await this.prisma.$transaction(async (tx) => {
+      // Claim the token atomically so two concurrent submissions can't both reset the password.
+      const claimed = await tx.passwordResetToken.updateMany({ where: { id: record.id, usedAt: null }, data: { usedAt: new Date() } });
+      if (claimed.count === 0) throw new PasswordResetTokenInvalidException();
+      await tx.user.update({ where: { id: record.userId }, data: { passwordHash: newHash } });
+      // Any other outstanding reset link for this account dies with this one.
+      await tx.passwordResetToken.updateMany({ where: { userId: record.userId, usedAt: null }, data: { usedAt: new Date() } });
+    });
 
     // A reset must invalidate every existing session, including one an
     // attacker who compromised the credential may currently hold.
     await this.sessions.revokeAllForUser(record.userId);
-    await this.events.publish("PasswordResetCompleted", { userId: record.userId });
+    await this.events.publish("PasswordResetCompleted", { userId: record.userId }, { aggregateType: "User", aggregateId: record.userId });
   }
 }

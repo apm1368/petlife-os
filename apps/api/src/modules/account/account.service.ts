@@ -1,17 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import { ConsentKind, PrivacyRequestStatus } from "@prisma/client";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { ValidationApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { SessionService } from "../../common/session/session.service";
 
-const CONSENT_VERSION = "2026-09-25";
-const EXPORT_SCOPE = ["ACCOUNT", "HOUSEHOLD", "PET_IDENTITY", "HEALTH", "MEMORIES", "ACTIVITY"] as const;
-const ACTIVITY_TYPES = [
-  "UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked",
-  "OtherSessionsRevoked", "ConsentChanged", "DataExportRequested", "AccountDeletionRequested",
-  "HouseholdInvitationAccepted", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked",
-];
+/** Batch 8 — account activity groups. Only events about this person (their own User aggregate, or naming them as the actor); never another member's household activity. */
+export const ACTIVITY_GROUPS = {
+  SECURITY: ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"],
+  PRIVACY: ["ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled"],
+  HOUSEHOLD: ["HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "HouseholdMemberLeft"],
+  /** Household membership events — shown only to that household's owners, who hold its billing. */
+  MEMBERSHIP: ["SubscriptionStarted", "SubscriptionRenewed", "SubscriptionRenewalFailed", "SubscriptionGraceStarted", "SubscriptionExpired", "SubscriptionPlanChanged", "SubscriptionDowngradeScheduled", "SubscriptionCancelRequested", "SubscriptionCancelReversed"],
+} as const;
+export type ActivityGroup = keyof typeof ACTIVITY_GROUPS;
+const ACTIVITY_TYPES: string[] = Object.values(ACTIVITY_GROUPS).flat();
+const GROUP_OF = new Map<string, ActivityGroup>(Object.entries(ACTIVITY_GROUPS).flatMap(([group, types]) => types.map((type) => [type, group as ActivityGroup])));
+/** Payload fields that are safe and useful to show back to the person. */
+const SAFE_DETAIL_KEYS = ["method", "device", "kind", "granted", "count", "version", "isTrial", "stage", "recovered", "effectiveAt"] as const;
 
 @Injectable()
 export class AccountService {
@@ -32,58 +36,25 @@ export class AccountService {
 
   async security(userId: string, currentSessionId: string | null) {
     const [user, providers, sessions] = await Promise.all([
-      this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, passwordHash: true } }),
+      this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, passwordHash: true, emailVerifiedAt: true, phoneVerifiedAt: true } }),
       this.prisma.authIdentity.findMany({ where: { userId }, select: { provider: true, email: true, createdAt: true } }),
       this.sessions.listForUser(userId, currentSessionId),
     ]);
     return {
       methods: {
-        phone: { verified: Boolean(user.phone), value: user.phone },
-        email: { verified: Boolean(user.email), value: user.email },
+        phone: { verified: Boolean(user.phone && user.phoneVerifiedAt), value: user.phone },
+        email: { verified: Boolean(user.email && user.emailVerifiedAt), value: user.email },
         password: { connected: Boolean(user.passwordHash) },
         providers,
       },
       sessions,
-      activity: await this.activity(userId, ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked"]),
+      activity: await this.activity(userId, ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"]),
     };
   }
 
-  async privacy(userId: string) {
-    const [consents, exports, deletionRequests] = await Promise.all([
-      this.prisma.userConsent.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } }),
-      this.prisma.dataExportRequest.findMany({ where: { userId }, orderBy: { requestedAt: "desc" }, take: 5 }),
-      this.prisma.accountDeletionRequest.findMany({ where: { userId }, orderBy: { requestedAt: "desc" }, take: 3 }),
-    ]);
-    return { consentVersion: CONSENT_VERSION, consents, exports, deletionRequests, exportIncludes: EXPORT_SCOPE };
-  }
 
-  async setConsent(userId: string, kind: "TERMS" | "PRIVACY" | "MARKETING", granted: boolean) {
-    const now = new Date();
-    const consent = await this.prisma.userConsent.upsert({
-      where: { userId_kind_version: { userId, kind: ConsentKind[kind], version: CONSENT_VERSION } },
-      create: { userId, kind: ConsentKind[kind], version: CONSENT_VERSION, grantedAt: granted ? now : null, revokedAt: granted ? null : now },
-      update: { grantedAt: granted ? now : null, revokedAt: granted ? null : now },
-    });
-    await this.events.publish("ConsentChanged", { userId, kind, granted }, { aggregateType: "User", aggregateId: userId });
-    return consent;
-  }
 
-  async requestExport(userId: string) {
-    const existing = await this.prisma.dataExportRequest.findFirst({ where: { userId, status: { in: [PrivacyRequestStatus.PENDING, PrivacyRequestStatus.PROCESSING] } } });
-    if (existing) return existing;
-    const request = await this.prisma.dataExportRequest.create({ data: { userId, scope: [...EXPORT_SCOPE] } });
-    await this.events.publish("DataExportRequested", { userId, requestId: request.id }, { aggregateType: "User", aggregateId: userId });
-    return request;
-  }
 
-  async requestDeletion(userId: string, confirmation: string, reason?: string) {
-    if (confirmation !== "DELETE") throw new ValidationApiException({ field: "confirmation", reason: "Type DELETE to confirm." });
-    const existing = await this.prisma.accountDeletionRequest.findFirst({ where: { userId, status: { in: [PrivacyRequestStatus.PENDING, PrivacyRequestStatus.PROCESSING] } } });
-    if (existing) return existing;
-    const request = await this.prisma.accountDeletionRequest.create({ data: { userId, reason } });
-    await this.events.publish("AccountDeletionRequested", { userId, requestId: request.id }, { aggregateType: "User", aggregateId: userId });
-    return request;
-  }
 
   async activity(userId: string, types: string[] = ACTIVITY_TYPES) {
     return this.prisma.domainEvent.findMany({
@@ -94,8 +65,45 @@ export class AccountService {
     });
   }
 
+  /** Paginated (cursor = occurredAt of the last item), filterable account activity with a safe detail subset. */
+  async activityPage(userId: string, options: { group?: ActivityGroup; before?: string; limit?: number }) {
+    const limit = Math.min(Math.max(options.limit ?? 30, 1), 100);
+    const types = options.group ? [...ACTIVITY_GROUPS[options.group]] : ACTIVITY_TYPES;
+    const ownedSubscriptions = !options.group || options.group === "MEMBERSHIP"
+      ? (await this.prisma.subscription.findMany({ where: { household: { members: { some: { userId, role: "OWNER" } } } }, select: { id: true } })).map((s) => s.id)
+      : [];
+    const rows = await this.prisma.domainEvent.findMany({
+      where: {
+        type: { in: types },
+        OR: [
+          { aggregateType: "User", aggregateId: userId },
+          { payload: { path: ["userId"], equals: userId } },
+          ...(ownedSubscriptions.length ? [{ aggregateType: "Subscription", aggregateId: { in: ownedSubscriptions } }] : []),
+        ],
+        ...(options.before ? { occurredAt: { lt: new Date(options.before) } } : {}),
+      },
+      orderBy: { occurredAt: "desc" },
+      take: limit + 1,
+      select: { id: true, type: true, occurredAt: true, payload: true },
+    });
+    const page = rows.slice(0, limit);
+    return {
+      items: page.map((row) => {
+        const payload = (row.payload ?? {}) as Record<string, unknown>;
+        const detail = Object.fromEntries(SAFE_DETAIL_KEYS.filter((key) => payload[key] !== undefined && payload[key] !== null).map((key) => [key, payload[key]]));
+        return { id: row.id, type: row.type, group: GROUP_OF.get(row.type) ?? "SECURITY", occurredAt: row.occurredAt, detail };
+      }),
+      nextCursor: rows.length > limit ? page[page.length - 1]!.occurredAt.toISOString() : null,
+    };
+  }
+
+
   async recordSessionRevoked(userId: string, sessionId: string) {
     await this.events.publish("SessionRevoked", { userId, sessionId }, { aggregateType: "User", aggregateId: userId });
+  }
+
+  async recordAllSessionsRevoked(userId: string, count: number) {
+    await this.events.publish("AllSessionsRevoked", { userId, count }, { aggregateType: "User", aggregateId: userId });
   }
 
   async recordOtherSessionsRevoked(userId: string, count: number) {

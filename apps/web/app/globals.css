@@ -144,3 +144,79 @@ button.experience-tile,button.experience-card { width:100%; text-align:start; cu
   font-size: .9rem;
   line-height: 1.7;
 }
+
+/* Batch 8 — account shell: sidebar on desktop, settings index + back link on mobile; confirmations; contact rows. */
+.account-rail{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;gap:12px}
+.account-rail .account-nav{position:static}
+.account-nav a{display:flex;flex-direction:column;gap:2px}
+.account-nav a small{display:none;color:var(--text-secondary);font-size:.74rem;font-weight:400}
+.account-back{display:none;align-items:center;gap:6px;color:var(--brand-natural);font-size:.86rem;font-weight:700}
+@media(max-width:900px){
+  .account-rail{position:static}
+  .account-rail .account-nav{display:none}
+  .account-rail--index{order:2}
+  .account-rail--index .account-nav{display:flex;flex-direction:column;gap:0;overflow:visible;border-top:1px solid var(--border-subtle);border-bottom:0;padding:0}
+  .account-rail--index .account-nav>p{display:block;margin:18px 0 8px}
+  .account-rail--index .account-nav a{flex:auto;white-space:normal;min-height:64px;justify-content:center;border-radius:0;border-bottom:1px solid var(--border-subtle);padding:12px 4px}
+  .account-rail--index .account-nav a small{display:block}
+  .account-rail--index .account-nav__overview{display:none!important}
+  .account-back{display:inline-flex;min-height:44px}
+}
+.confirm-action{display:flex;flex-direction:column;gap:16px}
+.confirm-action__label{margin:0 0 6px;color:var(--text-secondary);font-size:.74rem;font-weight:800;letter-spacing:.04em}
+.confirm-action ul{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:4px;font-size:.88rem;line-height:1.7}
+.confirm-action__buttons{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.contact-row{display:flex;flex-direction:column;border-bottom:1px solid var(--border-subtle)}
+.contact-row>.security-row{border-bottom:0}
+.contact-row__value{overflow-wrap:anywhere}
+[dir=rtl] .contact-row__value{text-align:right}
+.contact-row__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+.contact-change{display:flex;flex-direction:column;gap:14px;margin-block-end:16px;max-width:520px}
+@media(max-width:620px){.contact-row .security-row{grid-template-columns:38px minmax(0,1fr)}.contact-row__actions{grid-column:1 / -1;justify-content:flex-start}}
+.member-row--actions{grid-template-columns:42px minmax(0,1fr) auto}
+.member-row__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px}
+.member-leave{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+@media(max-width:620px){.member-row--actions{grid-template-columns:38px minmax(0,1fr)}.member-row--actions .member-row__actions{grid-column:1 / -1;justify-content:flex-start}}
+.account-menu{position:relative}
+.account-menu__trigger{display:grid;place-items:center;min-width:44px;min-height:44px;border:0;border-radius:999px;background:transparent;cursor:pointer}
+.account-menu__trigger:focus-visible{outline:2px solid var(--brand-natural);outline-offset:2px}
+.account-menu__panel{position:absolute;inset-inline-end:0;top:calc(100% + 6px);z-index:50;display:flex;flex-direction:column;min-width:220px;max-width:calc(100vw - 32px);padding:6px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--surface-elevated);box-shadow:0 12px 32px rgb(0 0 0 / .12)}
+.account-menu__who{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-bottom:1px solid var(--border-subtle);margin-bottom:4px}
+.account-menu__who small{color:var(--text-secondary);font-size:.76rem;overflow-wrap:anywhere}
+.account-menu__panel a,.account-menu__panel button{display:flex;align-items:center;min-height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--text-primary);font-size:.88rem;text-align:start;cursor:pointer}
+.account-menu__panel a:hover,.account-menu__panel button:hover,.account-menu__panel a:focus-visible,.account-menu__panel button:focus-visible{background:var(--surface-subtle);outline:none}
+.account-menu__panel button{color:var(--state-urgent,#b3261e)}
+.account-link-button{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:10px;background:var(--brand-natural);color:var(--text-inverse,#fff);font-size:.84rem;font-weight:700;white-space:nowrap}
+.account-switch{position:relative;flex:none;width:48px;height:28px;border:0;border-radius:999px;background:var(--border-strong,#b9b9b9);cursor:pointer;transition:background .15s}
+.account-switch span{position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .25);transition:inset-inline-start .15s}
+.account-switch[aria-checked=true]{background:var(--brand-natural)}
+.account-switch[aria-checked=true] span{inset-inline-start:23px}
+.account-switch:focus-visible{outline:2px solid var(--brand-natural);outline-offset:2px}
+.account-switch:disabled{opacity:.6;cursor:progress}
+.notification-pref-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;min-height:44px;margin:0;padding:0;border:0}
+.notification-pref-row legend{float:inline-start;padding:0}
+.notification-pref-row__channels{display:flex;align-items:center;gap:16px;margin-inline-start:auto}
+.notification-pref-row__channels input{width:18px;height:18px}
+.notification-pref-save{position:sticky;bottom:0;display:flex;flex-direction:column;gap:8px;padding-block:12px;background:var(--surface-base)}
+/* Batch 8 — shared system states and the account activity list. */
+.system-state{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:520px;margin:48px auto;padding:0 16px;text-align:center}
+.system-state__icon{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--surface-subtle);color:var(--brand-natural);font-size:1.4rem;font-weight:700}
+.system-state--attention .system-state__icon{color:#9b6b16}
+.system-state--blocked .system-state__icon{color:var(--state-urgent,#b3261e)}
+.system-state h1{margin:0;font-size:1.35rem;line-height:1.5}
+.system-state p{margin:0;color:var(--text-secondary);font-size:.92rem;line-height:1.8}
+.system-state__actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;margin-top:8px}
+.system-state__link{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:var(--brand-natural);font-weight:700;font-size:.88rem}
+.activity-filters{display:flex;flex-wrap:wrap;gap:8px}
+.activity-filter{min-height:40px;padding:0 14px;border:1px solid var(--border-subtle);border-radius:999px;background:transparent;color:var(--text-secondary);font-size:.84rem;cursor:pointer}
+.activity-filter[aria-pressed=true]{border-color:var(--brand-natural);background:color-mix(in srgb,var(--brand-natural) 10%,transparent);color:var(--brand-natural);font-weight:700}
+.activity-filter:focus-visible{outline:2px solid var(--brand-natural);outline-offset:2px}
+ol.activity-list{margin:0;padding:0;list-style:none}
+.activity-list>li{display:grid;grid-template-columns:12px 1fr;gap:16px;min-height:72px}
+.activity-list>li>span{position:relative;width:8px;height:8px;margin-top:7px;border-radius:50%;background:var(--brand-natural)}
+.activity-list>li>p{display:flex;flex-direction:column;gap:2px;margin:0}
+.activity-list .activity-detail{color:var(--text-primary)}
+/* Batch 8: two-column pet access cards only when both action buttons fit. */
+@media(max-width:1200px){.pet-access-cards{grid-template-columns:1fr}}
+@media(max-width:480px){.pet-access-card{grid-template-columns:44px minmax(0,1fr)}.pet-access-card>button,.pet-access-card>span{grid-column:1 / -1;justify-self:start}}
+.security-row .text-status,.member-row .text-status,.contact-row .text-status{white-space:nowrap}

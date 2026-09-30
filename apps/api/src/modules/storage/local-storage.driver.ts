@@ -4,7 +4,9 @@ import { randomUUID } from "node:crypto";
 import type Redis from "ioredis";
 import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { AppEnv } from "../../config/env";
-import type { DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { dirname, join, normalize } from "node:path";
+import type { DownloadOptions, DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
 
 const UPLOAD_TOKEN_TTL_SECONDS = 15 * 60;
 /** Same short-TTL rationale as S3StorageDriver's presigned GET — see its doc comment. */
@@ -37,11 +39,29 @@ export class LocalStorageDriver implements StorageDriver {
   }
 
   /** Dev fallback for private downloads — a token mapped to a key, resolved by DownloadsController, never a stable public path. */
-  async createDownloadTarget(key: string): Promise<DownloadTarget> {
+  async createDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget> {
     const token = randomUUID();
     await this.redis.set(`download-token:${token}`, key, "EX", DOWNLOAD_TOKEN_TTL_SECONDS);
+    if (options?.filename || options?.contentType) await this.redis.set(`download-meta:${token}`, JSON.stringify(options), "EX", DOWNLOAD_TOKEN_TTL_SECONDS);
 
     const apiOrigin = this.config.get("STORAGE_PUBLIC_BASE_URL", { infer: true }).replace(/\/uploads$/, "");
     return { downloadUrl: `${apiOrigin}/downloads/${token}`, expiresInSeconds: DOWNLOAD_TOKEN_TTL_SECONDS };
+  }
+
+  private resolve(key: string): string {
+    const baseDir = normalize(this.config.get("STORAGE_LOCAL_DIR", { infer: true }));
+    const target = normalize(join(baseDir, key));
+    if (!target.startsWith(baseDir)) throw new Error("Invalid storage key");
+    return target;
+  }
+
+  async putObject(key: string, body: Buffer): Promise<void> {
+    const target = this.resolve(key);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, body, { mode: 0o600 });
+  }
+
+  async deleteObject(key: string): Promise<void> {
+    await rm(this.resolve(key), { force: true });
   }
 }

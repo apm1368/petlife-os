@@ -64,6 +64,23 @@ export class PetAccessService {
     return (await this.getEffectivePermissions(petId, userId, client)) !== null;
   }
 
+  /**
+   * Batch 8 — why someone who once had access no longer does, so the product
+   * can say "your access expired" / "was revoked" instead of a generic error.
+   * Only ever describes the caller's own grants; a stranger gets null.
+   */
+  async describeLapse(petId: string, userId: string): Promise<{ reason: "EXPIRED" | "REVOKED" | "NOT_STARTED"; at: string } | null> {
+    const grants = await this.prisma.petAccessGrant.findMany({ where: { petId, userId }, orderBy: { updatedAt: "desc" }, take: 20 });
+    const now = new Date();
+    const upcoming = grants.find((g) => !g.revokedAt && g.startsAt && g.startsAt > now);
+    if (upcoming) return { reason: "NOT_STARTED", at: upcoming.startsAt!.toISOString() };
+    const ended = grants
+      .map((g) => (g.revokedAt ? { reason: "REVOKED" as const, at: g.revokedAt } : g.expiresAt && g.expiresAt <= now ? { reason: "EXPIRED" as const, at: g.expiresAt } : null))
+      .filter((x): x is { reason: "EXPIRED" | "REVOKED"; at: Date } => x !== null)
+      .sort((a, b) => b.at.getTime() - a.at.getTime())[0];
+    return ended ? { reason: ended.reason, at: ended.at.toISOString() } : null;
+  }
+
   async findAccessiblePet(petId: string | undefined, userId: string | undefined, client: QueryClient = this.prisma): Promise<Pet | null> {
     if (!petId || !userId || !(await this.getEffectivePermissions(petId, userId, client))) return null;
     return client.pet.findUnique({ where: { id: petId } });

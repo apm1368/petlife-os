@@ -1638,3 +1638,76 @@ export class TrustSubjectNotFoundException extends ApiException {
     super("TRUST_SUBJECT_NOT_FOUND", "The subject of this case no longer exists.", HttpStatus.NOT_FOUND, details);
   }
 }
+
+export class ContactUnavailableException extends ApiException {
+  constructor() {
+    super("CONTACT_UNAVAILABLE", "This email or phone number can't be used for your account.", HttpStatus.CONFLICT);
+  }
+}
+
+export class ContactUnchangedException extends ApiException {
+  constructor() {
+    super("CONTACT_UNCHANGED", "This is already your verified contact.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class LastHouseholdOwnerException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("LAST_HOUSEHOLD_OWNER", "A household must keep at least one owner. Make another member an owner first.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class AlreadyHouseholdMemberException extends ApiException {
+  constructor() {
+    super("ALREADY_HOUSEHOLD_MEMBER", "This person is already a member of your household.", HttpStatus.CONFLICT);
+  }
+}
+
+export class ConsentRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CONSENT_REQUIRED", "This agreement is required to use PET LIFE. To stop, request account deletion instead.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class ExportLimitReachedException extends ApiException {
+  constructor() {
+    super("EXPORT_LIMIT_REACHED", "You've requested several exports today. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS);
+  }
+}
+
+export class DeletionBlockedException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("DELETION_BLOCKED", "Some things need to be resolved before your account can be deleted.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ReauthenticationRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REAUTHENTICATION_REQUIRED", "Confirm it's you with your password or the code we sent.", HttpStatus.UNAUTHORIZED, details);
+  }
+}
+
+/** Batch 8 — invitation token states, told to whoever holds the (secret) token; household details stay behind the invitee check. */
+export class InvitationExpiredException extends ApiException {
+  constructor() {
+    super("INVITATION_EXPIRED", "This invitation has expired. Ask for a new one.", HttpStatus.GONE);
+  }
+}
+
+export class InvitationAlreadyUsedException extends ApiException {
+  constructor() {
+    super("INVITATION_ALREADY_USED", "This invitation has already been answered.", HttpStatus.CONFLICT);
+  }
+}
+
+export class InvitationRevokedException extends ApiException {
+  constructor() {
+    super("INVITATION_REVOKED", "This invitation was cancelled by the household.", HttpStatus.GONE);
+  }
+}
+
+export class InvitationNotForYouException extends ApiException {
+  constructor() {
+    super("INVITATION_NOT_FOR_YOU", "This invitation was sent to a different email or phone number.", HttpStatus.FORBIDDEN);
+  }
+}
