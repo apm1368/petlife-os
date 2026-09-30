@@ -1,12 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Req, Res, UseGuards } from "@nestjs/common";
-import { IsBoolean, IsIn, IsOptional, IsString, Length, Matches } from "class-validator";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { IsBoolean, IsIn, IsInt, IsISO8601, IsOptional, IsString, Length, Matches, Max, Min } from "class-validator";
+import { Type } from "class-transformer";
 import { Throttle } from "@nestjs/throttler";
 import { AccountPrivacyService } from "./account-privacy.service";
 import type { Request, Response } from "express";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { SessionService, type SessionUser } from "../../common/session/session.service";
-import { AccountService } from "./account.service";
+import { AccountService, type ActivityGroup } from "./account.service";
 
 class ConsentDto {
   @IsIn(["TERMS", "PRIVACY", "MARKETING"])
@@ -35,6 +36,23 @@ class DeleteAccountDto {
   @IsString()
   @Length(0, 500)
   reason?: string;
+}
+
+class ActivityQueryDto {
+  @IsOptional()
+  @IsIn(["SECURITY", "PRIVACY", "HOUSEHOLD", "MEMBERSHIP"])
+  group?: ActivityGroup;
+
+  @IsOptional()
+  @IsISO8601()
+  before?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
 }
 
 @Controller("account")
@@ -121,5 +139,7 @@ export class AccountController {
   }
 
   @Get("activity")
-  activity(@CurrentUser() user: SessionUser) { return this.account.activity(user.id); }
+  activity(@CurrentUser() user: SessionUser, @Query() query: ActivityQueryDto) {
+    return this.account.activityPage(user.id, { group: query.group, before: query.before, limit: query.limit });
+  }
 }

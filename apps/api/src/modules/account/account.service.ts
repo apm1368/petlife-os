@@ -3,11 +3,19 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { SessionService } from "../../common/session/session.service";
 
-const ACTIVITY_TYPES = [
-  "UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked",
-  "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared", "ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled",
-  "HouseholdInvitationAccepted", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked",
-];
+/** Batch 8 — account activity groups. Only events about this person (their own User aggregate, or naming them as the actor); never another member's household activity. */
+export const ACTIVITY_GROUPS = {
+  SECURITY: ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"],
+  PRIVACY: ["ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled"],
+  HOUSEHOLD: ["HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "HouseholdMemberLeft"],
+  /** Household membership events — shown only to that household's owners, who hold its billing. */
+  MEMBERSHIP: ["SubscriptionStarted", "SubscriptionRenewed", "SubscriptionRenewalFailed", "SubscriptionGraceStarted", "SubscriptionExpired", "SubscriptionPlanChanged", "SubscriptionDowngradeScheduled", "SubscriptionCancelRequested", "SubscriptionCancelReversed"],
+} as const;
+export type ActivityGroup = keyof typeof ACTIVITY_GROUPS;
+const ACTIVITY_TYPES: string[] = Object.values(ACTIVITY_GROUPS).flat();
+const GROUP_OF = new Map<string, ActivityGroup>(Object.entries(ACTIVITY_GROUPS).flatMap(([group, types]) => types.map((type) => [type, group as ActivityGroup])));
+/** Payload fields that are safe and useful to show back to the person. */
+const SAFE_DETAIL_KEYS = ["method", "device", "kind", "granted", "count", "version", "isTrial", "stage", "recovered", "effectiveAt"] as const;
 
 @Injectable()
 export class AccountService {
@@ -56,6 +64,39 @@ export class AccountService {
       select: { id: true, type: true, occurredAt: true },
     });
   }
+
+  /** Paginated (cursor = occurredAt of the last item), filterable account activity with a safe detail subset. */
+  async activityPage(userId: string, options: { group?: ActivityGroup; before?: string; limit?: number }) {
+    const limit = Math.min(Math.max(options.limit ?? 30, 1), 100);
+    const types = options.group ? [...ACTIVITY_GROUPS[options.group]] : ACTIVITY_TYPES;
+    const ownedSubscriptions = !options.group || options.group === "MEMBERSHIP"
+      ? (await this.prisma.subscription.findMany({ where: { household: { members: { some: { userId, role: "OWNER" } } } }, select: { id: true } })).map((s) => s.id)
+      : [];
+    const rows = await this.prisma.domainEvent.findMany({
+      where: {
+        type: { in: types },
+        OR: [
+          { aggregateType: "User", aggregateId: userId },
+          { payload: { path: ["userId"], equals: userId } },
+          ...(ownedSubscriptions.length ? [{ aggregateType: "Subscription", aggregateId: { in: ownedSubscriptions } }] : []),
+        ],
+        ...(options.before ? { occurredAt: { lt: new Date(options.before) } } : {}),
+      },
+      orderBy: { occurredAt: "desc" },
+      take: limit + 1,
+      select: { id: true, type: true, occurredAt: true, payload: true },
+    });
+    const page = rows.slice(0, limit);
+    return {
+      items: page.map((row) => {
+        const payload = (row.payload ?? {}) as Record<string, unknown>;
+        const detail = Object.fromEntries(SAFE_DETAIL_KEYS.filter((key) => payload[key] !== undefined && payload[key] !== null).map((key) => [key, payload[key]]));
+        return { id: row.id, type: row.type, group: GROUP_OF.get(row.type) ?? "SECURITY", occurredAt: row.occurredAt, detail };
+      }),
+      nextCursor: rows.length > limit ? page[page.length - 1]!.occurredAt.toISOString() : null,
+    };
+  }
+
 
   async recordSessionRevoked(userId: string, sessionId: string) {
     await this.events.publish("SessionRevoked", { userId, sessionId }, { aggregateType: "User", aggregateId: userId });

@@ -544,4 +544,48 @@ describe("Batch 8 — Account & security", () => {
     });
   });
 
+
+  // ------------------------------------------------------------------ 8G activity
+
+  describe("account activity", () => {
+    it("is the person's own, filterable, paginated, and shows only safe detail", async () => {
+      const u = await user("b8-activity");
+      await signIn(u.email);
+      await u.c.patch("/account/privacy/consent").send({ kind: "MARKETING", granted: true }).expect(200);
+      const other = await user("b8-other");
+      await other.c.patch("/account/privacy/consent").send({ kind: "MARKETING", granted: true }).expect(200);
+
+      const all = await u.c.get("/account/activity").expect(200);
+      expect(all.body.items.length).toBeGreaterThanOrEqual(3);
+      expect(all.body.items.filter((i: { type: string }) => i.type === "ConsentChanged")).toHaveLength(1);
+      const serialized = JSON.stringify(all.body);
+      expect(serialized).not.toContain(other.userId);
+      expect(serialized).not.toContain("sessionId");
+      expect(all.body.items.find((i: { type: string }) => i.type === "ConsentChanged").detail).toMatchObject({ kind: "MARKETING", granted: true });
+
+      const security = await u.c.get("/account/activity?group=SECURITY").expect(200);
+      expect(security.body.items.every((i: { group: string }) => i.group === "SECURITY")).toBe(true);
+
+      const first = await u.c.get("/account/activity?limit=1").expect(200);
+      expect(first.body.items).toHaveLength(1);
+      expect(first.body.nextCursor).toBeTruthy();
+      const second = await u.c.get(`/account/activity?limit=1&before=${encodeURIComponent(first.body.nextCursor)}`).expect(200);
+      expect(second.body.items[0].id).not.toBe(first.body.items[0].id);
+      await u.c.get("/account/activity?group=EVERYTHING").expect(400);
+
+      // Membership events belong to the household's owners only.
+      const o = await owner();
+      const member = await user("b8-member");
+      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      const plan = await prisma.subscriptionPlan.create({ data: { code: `b8-${unique()}`, nameFa: "آزمایشی", nameEn: "Trial plan", isFree: false, sortOrder: 90, trialDays: 7, countryAvailability: { create: { countryCode: "IR" } } } });
+      await prisma.household.update({ where: { id: o.householdId }, data: { countryCode: "IR" } });
+      await o.c.post(`/households/${o.householdId}/subscription/trial`).send({ planId: plan.id }).expect(201);
+      const ownerView = await o.c.get("/account/activity?group=MEMBERSHIP").expect(200);
+      const memberView = await member.c.get("/account/activity?group=MEMBERSHIP").expect(200);
+      expect(memberView.body.items).toHaveLength(0);
+      expect(ownerView.body.items[0]).toMatchObject({ type: "SubscriptionStarted", group: "MEMBERSHIP", detail: { isTrial: true } });
+      expect(JSON.stringify(ownerView.body)).not.toContain(plan.id);
+    });
+  });
+
 });
