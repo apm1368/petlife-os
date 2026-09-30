@@ -1,3 +1,4 @@
+import { posix } from "node:path";
 /**
  * Reconstructs the same publicUrl shape StorageDriver.createUploadTarget()
  * hands back at upload time (`${STORAGE_PUBLIC_BASE_URL}/${key}`), so a
@@ -18,10 +19,27 @@ const DEFAULT_STORAGE_PUBLIC_BASE_URL = "http://localhost:4000/uploads";
  * leaking. Also used by main.ts to keep the local-dev static file mount from
  * ever serving one of these prefixes.
  */
-export const PRIVATE_OBJECT_KEY_PREFIXES = ["health-documents/", "pet-observations/", "pet-memories-private/", "account-exports/"] as const;
+export const PRIVATE_OBJECT_KEY_PREFIXES = ["health-documents/", "pet-observations/", "pet-memories-private/", "account-exports/", "animal-support-verification/"] as const;
 
 function isPrivateKey(key: string): boolean {
   return PRIVATE_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
+/**
+ * Whether a request path under the local static `/uploads` mount would reach a private key.
+ * The path is decoded and normalised first (dot segments, repeated slashes) so `./health-documents/…`
+ * or `%2e/…` can't slip past the prefix check while the static server still resolves them.
+ * Undecodable paths are treated as private (refused).
+ */
+export function isPrivateUploadPath(rawPath: string): boolean {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(rawPath);
+  } catch {
+    return true;
+  }
+  const normalized = posix.normalize(`/${decoded.replace(/\\/g, "/")}`).replace(/^\/+/, "");
+  return isPrivateKey(normalized);
 }
 
 export function resolveObjectUrl(key: string | null): string | null {

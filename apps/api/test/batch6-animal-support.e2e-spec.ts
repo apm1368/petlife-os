@@ -4,6 +4,7 @@ import { AdminMembershipStatus, AdminRole } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { isPrivateUploadPath } from "../src/modules/storage/object-url.util";
 
 interface Cookies {
   session?: string;
@@ -613,6 +614,8 @@ describe("Batch 6 — Animal support ecosystem", () => {
       await b.owner.c.post("/ngo/verification/submit").send({ documentKeys: [`animal-support-verification/${a.organizationId}/x.pdf`] }).expect(400);
       const upload = await b.owner.c.post("/ngo/verification/upload-url").send({ contentType: "application/pdf", fileSizeBytes: 20_000 }).expect(201);
       expect(upload.body.key).toContain(`animal-support-verification/${b.organizationId}/`);
+      // Verification documents are private: the local static mount refuses the prefix.
+      expect(isPrivateUploadPath(`/${upload.body.key}`)).toBe(true);
       const submitted = await b.owner.c.post("/ngo/verification/submit").send({ documentKeys: [upload.body.key] }).expect(201);
       expect(submitted.body.status).toBe("SUBMITTED");
       await b.owner.c.post("/ngo/verification/submit").send({ documentKeys: [upload.body.key] }).expect(400);
