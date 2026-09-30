@@ -3597,6 +3597,8 @@ export interface SubscriptionDto {
   expiredAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 8 — SANDBOX when membership payments are simulated (no real money moves and nothing renews automatically). Set on the member-facing GET only. */
+  billingMode?: "SANDBOX" | "LIVE";
 }
 
 export interface ResolvedEntitlementDto {

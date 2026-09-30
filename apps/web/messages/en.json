@@ -228,8 +228,8 @@
     },
     "trialEndsAt": "Your trial ends on {date}.",
     "periodEndsAt": "Current period ends on {date}.",
-    "pastDueWarning": "We couldn't charge for your renewal. Please check your payment method — your plan is still fully active.",
-    "graceWarning": "Your renewal is still failing. Your plan stays active for now, but please resolve payment soon to avoid losing access.",
+    "pastDueWarning": "We couldn't take the renewal payment. Your plan stays fully active for now — renew from Plans to keep it.",
+    "graceWarning": "The renewal payment is still outstanding. Your plan stays active until {date}; renew from Plans before then to keep your benefits.",
     "cancelScheduled": "Your subscription stays active until {date}, then it will be cancelled.",
     "downgradeScheduled": "Switching to {plan} at the end of the current period.",
     "entitlements": "What's included",
@@ -260,7 +260,34 @@
     "startTrial": "Start {days}-day trial",
     "subscribe": "Subscribe",
     "upgradeNow": "Upgrade now",
-    "switchAtRenewal": "Switch at renewal"
+    "switchAtRenewal": "Switch at renewal",
+    "expiredExplain": "Your paid membership has ended. Paid features and higher limits stopped; everything you already recorded stays yours to read.",
+    "cancelledExplain": "This membership was cancelled. Paid features and higher limits stopped; everything you already recorded stays yours to read.",
+    "sandboxNote": "Membership payments are in test mode right now: no real money is charged and nothing renews automatically.",
+    "ownerOnly": "Only a household owner can change or cancel the membership.",
+    "historyTitle": "Your records stay yours",
+    "historyBody": "Whatever your plan, you can always read your pets' profiles, health history, memories, orders and receipts, support conversations, and export your data. Limits only apply to adding new items.",
+    "billingTitle": "Billing history",
+    "billingEmpty": "No payments yet.",
+    "attemptStatus": {
+      "PENDING": "Pending",
+      "SUCCEEDED": "Paid",
+      "FAILED": "Failed",
+      "REFUNDED": "Refunded"
+    },
+    "attemptReason": {
+      "INITIAL": "First payment",
+      "RENEWAL": "Renewal",
+      "UPGRADE": "Upgrade",
+      "RETRY": "Retry"
+    },
+    "cancelDialogTitle": "Cancel the membership",
+    "cancelConsequence1": "Nothing more is charged. The membership stays active until {date}, then ends.",
+    "cancelConsequence2": "After that, paid features and higher limits stop — for example adding more pets or members than the free plan allows.",
+    "cancelKeeps": "Everything already recorded (pets, health history, memories, orders, receipts) stays readable and exportable.",
+    "cancelKeeps2": "You can resume before {date} and nothing changes.",
+    "cancelConfirm": "Cancel membership",
+    "trialNote": "No payment is taken during the trial."
   },
   "pets": {
     "myPets": "My Pets",

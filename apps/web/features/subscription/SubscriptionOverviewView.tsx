@@ -5,13 +5,14 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { StatusTone } from "@petlife/ui";
-import type { ResolvedEntitlementDto, SubscriptionDto, SubscriptionUsageItemDto } from "@petlife/types";
+import type { ResolvedEntitlementDto, SubscriptionBillingHistoryDto, SubscriptionDto, SubscriptionUsageItemDto } from "@petlife/types";
 import { SubscriptionStatus } from "@petlife/types";
 import { subscriptionService } from "@/services/subscription.service";
 import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { entitlementLabelKey } from "./entitlement-labels";
+import { ConfirmActionDialog } from "@/features/account/ConfirmActionDialog";
 
 const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
   [SubscriptionStatus.TRIALING]: "neutral",
@@ -46,6 +47,9 @@ export function SubscriptionOverviewView() {
   const [error, setError] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
+  const [history, setHistory] = useState<SubscriptionBillingHistoryDto | null>(null);
+  const [isOwner, setIsOwner] = useState(true);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const load = useCallback(async () => {
     if (!householdId) return;
@@ -59,6 +63,14 @@ export function SubscriptionOverviewView() {
       setSub(subResult);
       setEntitlements(entitlementsResult);
       setUsage(usageResult);
+      // Billing belongs to household owners; a member simply doesn't see it (and the actions) — the API enforces the same.
+      try {
+        setHistory(await subscriptionService.getBillingHistory(householdId));
+        setIsOwner(true);
+      } catch (err) {
+        setHistory(null);
+        setIsOwner(!(err instanceof ApiError && err.status === 403));
+      }
     } catch {
       setError(true);
     }
@@ -71,15 +83,9 @@ export function SubscriptionOverviewView() {
   async function cancel() {
     if (!householdId) return;
     setActionError(null);
-    setActionBusy(true);
-    try {
-      const updated = await subscriptionService.cancel(householdId);
-      setSub(updated);
-    } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
-    } finally {
-      setActionBusy(false);
-    }
+    // Errors surface inside the confirmation dialog.
+    const updated = await subscriptionService.cancel(householdId);
+    setSub(updated);
   }
 
   async function resume() {
@@ -117,7 +123,12 @@ export function SubscriptionOverviewView() {
         {sub.status === SubscriptionStatus.TRIALING && sub.trialEndsAt ? <p className="text-body text-text-secondary">{t("trialEndsAt", { date: formatDate(sub.trialEndsAt, locale) })}</p> : null}
         {sub.currentPeriod ? <p className="text-body text-text-secondary">{t("periodEndsAt", { date: formatDate(sub.currentPeriod.endAt, locale) })}</p> : null}
         {sub.status === SubscriptionStatus.PAST_DUE ? <p className="text-body text-state-attention">{t("pastDueWarning")}</p> : null}
-        {sub.status === SubscriptionStatus.GRACE_PERIOD ? <p className="text-body text-state-higher-concern">{t("graceWarning")}</p> : null}
+        {sub.status === SubscriptionStatus.GRACE_PERIOD ? <p className="text-body text-state-higher-concern">{t("graceWarning", { date: sub.gracePeriodEndsAt ? formatDate(sub.gracePeriodEndsAt, locale) : "—" })}</p> : null}
+        {sub.status === SubscriptionStatus.EXPIRED ? <p className="text-body text-text-secondary">{t("expiredExplain")}</p> : null}
+        {sub.status === SubscriptionStatus.CANCELLED ? <p className="text-body text-text-secondary">{t("cancelledExplain")}</p> : null}
+        {sub.status === SubscriptionStatus.TRIALING ? <p className="text-metadata text-text-secondary">{t("trialNote")}</p> : null}
+        {sub.billingMode === "SANDBOX" && sub.price ? <p className="text-metadata text-text-secondary" role="note">{t("sandboxNote")}</p> : null}
+        {!isOwner ? <p className="text-metadata text-text-secondary">{t("ownerOnly")}</p> : null}
         {sub.status === SubscriptionStatus.CANCEL_AT_PERIOD_END && sub.cancelEffectiveAt ? <p className="text-body text-text-secondary">{t("cancelScheduled", { date: formatDate(sub.cancelEffectiveAt, locale) })}</p> : null}
         {sub.pendingPlan ? <p className="text-body text-text-secondary">{t("downgradeScheduled", { plan: locale === "fa" ? sub.pendingPlan.nameFa : sub.pendingPlan.nameEn })}</p> : null}
 
@@ -127,12 +138,12 @@ export function SubscriptionOverviewView() {
           <Button variant="secondary" onClick={() => router.push(`/${locale}/subscription/plans`)}>
             {t("viewPlans")}
           </Button>
-          {sub.status === SubscriptionStatus.CANCEL_AT_PERIOD_END ? (
+          {!isOwner ? null : sub.status === SubscriptionStatus.CANCEL_AT_PERIOD_END ? (
             <Button variant="secondary" isLoading={actionBusy} onClick={resume}>
               {t("resume")}
             </Button>
-          ) : sub.price ? (
-            <Button variant="danger" isLoading={actionBusy} onClick={cancel}>
+          ) : sub.price && sub.status !== SubscriptionStatus.CANCELLED && sub.status !== SubscriptionStatus.EXPIRED ? (
+            <Button variant="danger" onClick={() => setConfirmCancel(true)}>
               {t("cancel")}
             </Button>
           ) : null}
@@ -163,6 +174,44 @@ export function SubscriptionOverviewView() {
           );
         })}
       </ContextSurface>
+
+      <ContextSurface className="flex flex-col gap-2">
+        <h2 className="text-section-title text-text-primary">{t("historyTitle")}</h2>
+        <p className="text-body text-text-secondary">{t("historyBody")}</p>
+      </ContextSurface>
+
+      {isOwner && history ? (
+        <ContextSurface className="flex flex-col gap-3">
+          <h2 className="text-section-title text-text-primary">{t("billingTitle")}</h2>
+          {history.attempts.length === 0 ? (
+            <p className="text-body text-text-secondary">{t("billingEmpty")}</p>
+          ) : (
+            history.attempts.map((attempt) => (
+              <div key={attempt.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">
+                <span className="text-body text-text-primary">
+                  {t(`attemptReason.${attempt.reason}`)} · {formatDate(attempt.createdAt, locale)}
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="text-metadata text-text-secondary">{formatCurrency(attempt.amount, locale === "fa" ? "fa" : "en")}</span>
+                  <StatusLabel tone={attempt.status === "SUCCEEDED" ? "success" : attempt.status === "FAILED" ? "urgent" : "neutral"}>{t(`attemptStatus.${attempt.status}`)}</StatusLabel>
+                </span>
+              </div>
+            ))
+          )}
+        </ContextSurface>
+      ) : null}
+
+      {confirmCancel ? (
+        <ConfirmActionDialog
+          open
+          onClose={() => setConfirmCancel(false)}
+          title={t("cancelDialogTitle")}
+          consequences={[t("cancelConsequence1", { date: sub.currentPeriod ? formatDate(sub.currentPeriod.endAt, locale) : "—" }), t("cancelConsequence2")]}
+          keeps={[t("cancelKeeps"), t("cancelKeeps2", { date: sub.currentPeriod ? formatDate(sub.currentPeriod.endAt, locale) : "—" })]}
+          confirmLabel={t("cancelConfirm")}
+          onConfirm={cancel}
+        />
+      ) : null}
     </div>
   );
 }

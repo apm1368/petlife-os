@@ -521,4 +521,27 @@ describe("Batch 8 — Account & security", () => {
     });
   });
 
+
+  // ------------------------------------------------------------------ 8F membership
+
+  describe("membership", () => {
+    it("only household owners can buy, change or cancel the membership or read its billing; members can still see what they get", async () => {
+      const o = await owner();
+      const member = await user("b8-member");
+      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      const base = `/households/${o.householdId}/subscription`;
+
+      const current = await member.c.get(base).expect(200);
+      expect(current.body.billingMode).toBe("SANDBOX");
+      await member.c.get(`${base}/entitlements`).expect(200);
+      await member.c.get(`${base}/usage`).expect(200);
+      for (const [method, path] of [["get", "billing-history"], ["post", "cancel"], ["post", "resume"], ["post", "trial"], ["post", "subscribe"], ["post", "upgrade"], ["post", "downgrade"]] as const) {
+        const res = await member.c[method](`${base}/${path}`).send({});
+        expect([403]).toContain(res.status);
+      }
+      const history = await o.c.get(`${base}/billing-history`).expect(200);
+      for (const attempt of history.body.attempts) expect(attempt.failureReason).toBeNull();
+    });
+  });
+
 });
