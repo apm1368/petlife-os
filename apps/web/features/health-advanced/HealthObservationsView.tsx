@@ -90,7 +90,10 @@ export function HealthObservationsView({ petId }: { petId: string }) {
           rows={3}
           className="rounded-md border border-border-strong bg-surface-elevated p-3 text-body text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
         />
-        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" className="text-body text-text-primary" />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" className="text-body text-text-primary" />
+        </label>
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
         <Button variant="primary" isLoading={isSaving} onClick={handleSave} disabled={!description.trim()}>
           {t("observations.save")}

@@ -81,7 +81,10 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
           onChange={(e) => setDocumentType(e.target.value as MedicalDocumentType)}
           options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: documentTypeLabel(type, lang) }))}
         />
-        <input ref={fileInputRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
+          <input ref={fileInputRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
+        </label>
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
         <Button variant="primary" isLoading={isUploading} onClick={handleUpload} disabled={!title.trim()}>
           {isUploading ? t("documents.uploading") : t("documents.upload")}

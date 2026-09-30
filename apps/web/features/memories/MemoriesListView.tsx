@@ -182,7 +182,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
         </div>
       )}
 
-      <Link href={`/pets/${petId}/life-timeline`} className="text-body text-brand-mint underline">
+      <Link href={`/pets/${petId}/life-timeline`} className="text-body text-brand-mint-strong underline">
         {t("list.viewLifeTimeline")}
       </Link>
     </div>

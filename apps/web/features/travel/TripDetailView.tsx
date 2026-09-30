@@ -238,6 +238,7 @@ function RequirementCard({
 }) {
   const fmt = useInstantFormat();
   const t = useTranslations("travel");
+  const tCommon = useTranslations("common");
 
   return (
     <ContextSurface className="flex flex-col gap-2">
@@ -280,16 +281,19 @@ function RequirementCard({
             options={[{ value: "", label: t("detail.linkDocumentNone") }, ...documents.map((doc) => ({ value: doc.id, label: doc.title }))]}
           />
         ) : null}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/pdf,image/jpeg,image/png,image/webp"
-          className="text-metadata text-text-primary"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) onUploadFile(file);
-          }}
-        />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf,image/jpeg,image/png,image/webp"
+            className="text-metadata text-text-primary"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onUploadFile(file);
+            }}
+          />
+        </label>
       </div>
     </ContextSurface>
   );
