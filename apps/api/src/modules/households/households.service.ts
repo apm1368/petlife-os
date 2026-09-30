@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetAccessSource, type Prisma } from "@prisma/client";
 import type { PetAccessFlags } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { AlreadyHouseholdMemberException, HouseholdAccessDeniedException, LastHouseholdOwnerException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
+import { AlreadyHouseholdMemberException, InvitationAlreadyUsedException, InvitationExpiredException, InvitationNotForYouException, InvitationRevokedException, HouseholdAccessDeniedException, LastHouseholdOwnerException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import type { CreateHouseholdDto } from "./dto/create-household.dto";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
@@ -183,7 +183,7 @@ export class HouseholdsService {
     await this.requireInvitee(invitation.contact, userId);
     return this.prisma.$transaction(async (tx) => {
       const claimed = await tx.householdInvitation.updateMany({ where: { id: invitation.id, status: "PENDING" }, data: { status: "ACCEPTED", acceptedByUserId: userId, acceptedAt: new Date() } });
-      if (!claimed.count) throw new ValidationApiException({ field: "token", reason: "Invitation is no longer available." });
+      if (!claimed.count) throw new InvitationAlreadyUsedException();
       await tx.householdMember.upsert({ where: { householdId_userId: { householdId: invitation.householdId, userId } }, create: { householdId: invitation.householdId, userId, role: "FAMILY" }, update: {} });
       const access = invitation.initialAccess as unknown as InitialAccess;
       for (const item of access) {
@@ -292,18 +292,23 @@ export class HouseholdsService {
   private async requireInvitee(contact: string, userId: string) {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true } });
     const contacts = [user.email, user.phone].filter(Boolean).map((value) => normalizeContact(value!));
-    if (!contacts.includes(contact)) throw new HouseholdAccessDeniedException();
+    if (!contacts.includes(contact)) throw new InvitationNotForYouException();
   }
+
 
   private async findActiveInvitation(token: string) {
     const invitation = await this.prisma.householdInvitation.findUnique({ where: { tokenHash: tokenHash(token) } });
-    if (!invitation || invitation.status !== "PENDING") throw new NotFoundApiException("Invitation");
+    if (!invitation) throw new NotFoundApiException("Invitation");
+    if (invitation.status === "ACCEPTED" || invitation.status === "DECLINED") throw new InvitationAlreadyUsedException();
+    if (invitation.status === "CANCELLED") throw new InvitationRevokedException();
+    if (invitation.status === "EXPIRED") throw new InvitationExpiredException();
     if (invitation.expiresAt <= new Date()) {
       await this.prisma.householdInvitation.update({ where: { id: invitation.id }, data: { status: "EXPIRED" } });
-      throw new ValidationApiException({ field: "token", reason: "Invitation has expired." });
+      throw new InvitationExpiredException();
     }
     return invitation;
   }
+
 
   private async expireInvitations(householdId: string) {
     await this.prisma.householdInvitation.updateMany({ where: { householdId, status: "PENDING", expiresAt: { lte: new Date() } }, data: { status: "EXPIRED" } });

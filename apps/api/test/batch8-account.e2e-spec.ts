@@ -198,10 +198,14 @@ describe("Batch 8 — Account & security", () => {
       const member = await user("b8-member");
       const stranger = await user("b8-stranger");
       const token = await invite(o, member, "VIEW_ONLY");
-      await stranger.c.get(`/household-invitations/${token}`).expect(403);
+      // Someone else holding the link learns only that it isn't theirs — never the household or inviter.
+      const notMine = await stranger.c.get(`/household-invitations/${token}`).expect(403);
+      expect(notMine.body.error.code).toBe("INVITATION_NOT_FOR_YOU");
+      expect(JSON.stringify(notMine.body)).not.toContain(o.householdId);
       await stranger.c.post(`/household-invitations/${token}/accept`).expect(403);
       await member.c.post(`/household-invitations/${token}/accept`).expect(201);
-      await member.c.post(`/household-invitations/${token}/accept`).expect(404);
+      expect((await member.c.post(`/household-invitations/${token}/accept`).expect(409)).body.error.code).toBe("INVITATION_ALREADY_USED");
+      expect((await member.c.get("/household-invitations/not-a-real-token").expect(404)).body.error.code).toBe("NOT_FOUND");
       expect(await prisma.petAccessGrant.count({ where: { petId: o.petId, userId: member.userId, revokedAt: null } })).toBe(1);
       const dup = await o.c.post(`/households/${o.householdId}/invitations`).send({ contact: member.email, initialAccess: [] }).expect(409);
       expect(dup.body.error.code).toBe("ALREADY_HOUSEHOLD_MEMBER");
@@ -210,7 +214,13 @@ describe("Batch 8 — Account & security", () => {
       const late = await user("b8-late");
       const lateToken = await invite(o, late);
       await prisma.householdInvitation.updateMany({ where: { householdId: o.householdId, status: "PENDING" }, data: { expiresAt: new Date(Date.now() - 1000) } });
-      await late.c.post(`/household-invitations/${lateToken}/accept`).expect(400);
+      expect((await late.c.post(`/household-invitations/${lateToken}/accept`).expect(410)).body.error.code).toBe("INVITATION_EXPIRED");
+      // A cancelled invitation says so.
+      const revokedUser = await user("b8-revoked");
+      const revokedToken = await invite(o, revokedUser);
+      const pending = await prisma.householdInvitation.findFirstOrThrow({ where: { householdId: o.householdId, status: "PENDING", contact: revokedUser.email } });
+      await o.c.delete(`/households/${o.householdId}/invitations/${pending.id}`).expect(200);
+      expect((await revokedUser.c.get(`/household-invitations/${revokedToken}`).expect(410)).body.error.code).toBe("INVITATION_REVOKED");
       expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: late.userId } })).toBe(0);
     });
 

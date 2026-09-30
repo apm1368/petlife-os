@@ -198,3 +198,21 @@ button.experience-tile,button.experience-card { width:100%; text-align:start; cu
 .notification-pref-row__channels{display:flex;align-items:center;gap:16px;margin-inline-start:auto}
 .notification-pref-row__channels input{width:18px;height:18px}
 .notification-pref-save{position:sticky;bottom:0;display:flex;flex-direction:column;gap:8px;padding-block:12px;background:var(--surface-base)}
+/* Batch 8 — shared system states and the account activity list. */
+.system-state{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:520px;margin:48px auto;padding:0 16px;text-align:center}
+.system-state__icon{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--surface-subtle);color:var(--brand-natural);font-size:1.4rem;font-weight:700}
+.system-state--attention .system-state__icon{color:#9b6b16}
+.system-state--blocked .system-state__icon{color:var(--state-urgent,#b3261e)}
+.system-state h1{margin:0;font-size:1.35rem;line-height:1.5}
+.system-state p{margin:0;color:var(--text-secondary);font-size:.92rem;line-height:1.8}
+.system-state__actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;margin-top:8px}
+.system-state__link{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:var(--brand-natural);font-weight:700;font-size:.88rem}
+.activity-filters{display:flex;flex-wrap:wrap;gap:8px}
+.activity-filter{min-height:40px;padding:0 14px;border:1px solid var(--border-subtle);border-radius:999px;background:transparent;color:var(--text-secondary);font-size:.84rem;cursor:pointer}
+.activity-filter[aria-pressed=true]{border-color:var(--brand-natural);background:color-mix(in srgb,var(--brand-natural) 10%,transparent);color:var(--brand-natural);font-weight:700}
+.activity-filter:focus-visible{outline:2px solid var(--brand-natural);outline-offset:2px}
+ol.activity-list{margin:0;padding:0;list-style:none}
+.activity-list>li{display:grid;grid-template-columns:12px 1fr;gap:16px;min-height:72px}
+.activity-list>li>span{position:relative;width:8px;height:8px;margin-top:7px;border-radius:50%;background:var(--brand-natural)}
+.activity-list>li>p{display:flex;flex-direction:column;gap:2px;margin:0}
+.activity-list .activity-detail{color:var(--text-primary)}

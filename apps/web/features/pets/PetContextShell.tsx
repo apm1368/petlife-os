@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Avatar, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import { PetLifecycleStatus, type PetAccessFlags, type PetDto } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
+import { SystemState, systemStateFor, type SystemStateKind } from "@/features/system/SystemState";
 
 const copy = {
   fa: {
@@ -81,16 +82,16 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
   const c = copy[locale];
   const [pet, setPet] = useState<PetDto | null>(null);
   const [access, setAccess] = useState<PetAccessFlags | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<SystemStateKind | null>(null);
 
   async function load() {
-    setError(false);
+    setError(null);
     try {
       const [petData, accessData] = await Promise.all([petsService.getById(petId), petsService.getMyAccess(petId)]);
       setPet(petData);
       setAccess(accessData);
-    } catch {
-      setError(true);
+    } catch (err) {
+      setError(systemStateFor(err));
     }
   }
 
@@ -99,7 +100,9 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={load} />;
+  if (error === "GENERIC_RETRYABLE_ERROR") return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={load} />;
+  // Access that ended, was removed or never existed explains itself — and says nothing about the pet.
+  if (error) return <SystemState kind={error} returnTo={pathname} />;
   if (!pet || !access) return <Skeleton className="h-72 w-full" aria-label={c.loading} />;
 
   const isMemorial = pet.lifecycleStatus === PetLifecycleStatus.DECEASED || pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;

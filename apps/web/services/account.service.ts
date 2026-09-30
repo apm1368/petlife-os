@@ -32,6 +32,14 @@ export interface SecurityCenterDto {
 
 export interface ActivityEventDto { id: string; type: string; occurredAt: string }
 
+export type ActivityGroupValue = "SECURITY" | "PRIVACY" | "HOUSEHOLD" | "MEMBERSHIP";
+
+export interface AccountActivityItemDto extends ActivityEventDto {
+  group: ActivityGroupValue;
+  /** Whitelisted, human-meaningful facts only (never ids). */
+  detail: { method?: string; device?: string; kind?: string; granted?: boolean; count?: number; version?: string; isTrial?: boolean; stage?: string; recovered?: boolean; effectiveAt?: string };
+}
+
 export type ConsentKindValue = "TERMS" | "PRIVACY" | "MARKETING";
 export type PrivacyRequestStatusValue = "PENDING" | "PROCESSING" | "READY" | "COMPLETED" | "CANCELLED" | "FAILED" | "EXPIRED";
 
@@ -82,5 +90,12 @@ export const accountService = {
   sendDeletionCode: () => apiFetch<{ sentTo: string }>("/account/privacy/deletion/code", { method: "POST" }),
   requestDeletion: (input: { confirmation: string; password?: string; code?: string; reason?: string }) => apiFetch<{ id: string; status: PrivacyRequestStatusValue }>("/account/privacy/deletion", { method: "POST", body: input }),
   cancelDeletion: (id: string) => apiFetch<{ ok: true }>(`/account/privacy/deletion/${id}/cancel`, { method: "POST" }),
-  activity: () => apiFetch<ActivityEventDto[]>("/account/activity"),
+  activity: (params: { group?: ActivityGroupValue; before?: string; limit?: number } = {}) => {
+    const query = new URLSearchParams();
+    if (params.group) query.set("group", params.group);
+    if (params.before) query.set("before", params.before);
+    if (params.limit) query.set("limit", String(params.limit));
+    const suffix = query.toString();
+    return apiFetch<{ items: AccountActivityItemDto[]; nextCursor: string | null }>(`/account/activity${suffix ? `?${suffix}` : ""}`);
+  },
 };

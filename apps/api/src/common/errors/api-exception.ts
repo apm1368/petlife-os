@@ -1650,3 +1650,28 @@ export class ReauthenticationRequiredException extends ApiException {
     super("REAUTHENTICATION_REQUIRED", "Confirm it's you with your password or the code we sent.", HttpStatus.UNAUTHORIZED, details);
   }
 }
+
+/** Batch 8 — invitation token states, told to whoever holds the (secret) token; household details stay behind the invitee check. */
+export class InvitationExpiredException extends ApiException {
+  constructor() {
+    super("INVITATION_EXPIRED", "This invitation has expired. Ask for a new one.", HttpStatus.GONE);
+  }
+}
+
+export class InvitationAlreadyUsedException extends ApiException {
+  constructor() {
+    super("INVITATION_ALREADY_USED", "This invitation has already been answered.", HttpStatus.CONFLICT);
+  }
+}
+
+export class InvitationRevokedException extends ApiException {
+  constructor() {
+    super("INVITATION_REVOKED", "This invitation was cancelled by the household.", HttpStatus.GONE);
+  }
+}
+
+export class InvitationNotForYouException extends ApiException {
+  constructor() {
+    super("INVITATION_NOT_FOR_YOU", "This invitation was sent to a different email or phone number.", HttpStatus.FORBIDDEN);
+  }
+}
