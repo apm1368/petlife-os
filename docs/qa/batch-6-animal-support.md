@@ -77,3 +77,26 @@ WCAG contrast of the light-theme attention (2.7:1 → 5.1:1) and higher-concern 
 - No map provider: public locations are an approximate area text, never a pin.
 - Rescue-case evidence and campaign updates exist in the API; their public presentation is minimal.
 - Trust case detail shows raw status/reason codes and a before → after JSON line (operator view, Visual B).
+
+## Release and live QA (2026-09-30)
+- Pre-release backup: `/root/petlife-backups/release-b6-20260930-191404/petlife_os.dump` (pg_dump -Fc, 212 tables verified readable) + `ROLLBACK.md`.
+- `integration/local` fast-forwarded `f539f92 → b9906e7` (Batch 7 had not landed; Batch 8 was already merged into this branch).
+- CI run `36764257079`: success. Deploy run `36764257491`: gate job success, deploy success (19:24:43Z).
+- Live `/var/www/petlife-os` at `b9906e7`; `GET /api/health/live` → 200; `prisma migrate status` → 46 migrations, up to date; the six `20260930000*_batch6_*` migrations finished. pm2: petlife-api 147 MB, petlife-web 87 MB online. (The background CI poller was reaped for low memory during the on-host build; the release was unaffected.)
+
+### LIVE READ-ONLY QA (no sign-in, nothing created)
+| Surface | fa 1440 | fa 390 | en 1440 | en 390 |
+|---|---|---|---|---|
+| Lost pets list — honest empty state | ok | ok | ok | ok |
+| Unknown lost pet — "this report isn't available" | ok | ok | ok | ok |
+| Organizations, needs, campaigns — empty states | ok | ok | ok | ok |
+| Community — empty state | ok | ok | ok | ok |
+| `/ngo`, `/admin/animal-support` signed out → `/welcome?returnTo=…` | ok | ok | ok | ok |
+| My listings signed out → sign-in prompt | ok | ok | ok | ok |
+
+All 200, correct `dir`, 0 overflow, 0 stuck skeletons, no page errors. API: public lists (lost pets, needs, organizations, posts) return no coordinates; `/ngo/overview`, `/animal-support/needs/mine`, `/me/donations`, admin overview and report queue → 401; `/uploads/animal-support-verification/…` incl. `./`, `../`, `%2e` and `/api/uploads/…` variants → 404.
+
+### Found in live QA (carried into the final hardening task)
+- An unknown support-listing id shows an error box titled "Loading" with the raw message "Listing not found." and a Retry button, instead of a not-found state (the lost-pet page handles this correctly). P1/P2 error-state defect; no data or security impact.
+
+ISOLATED PREVIEW MUTATION QA is recorded above (seed-batch6 on `petlife_b6_qa_test`); nothing was created on production.
