@@ -71,6 +71,7 @@ import { AdminAnimalSupportController } from "./animal-support/admin-animal-supp
 import { CommunityModerationService } from "./community/community-moderation.service";
 import { AdminCommunityController } from "./community/admin-community.controller";
 import { SupportNeedModerationService } from "./animal-support/support-need-moderation.service";
+import { AdminAnimalSupportOpsService } from "./animal-support/admin-animal-support-ops.service";
 import { AdminSupportNeedController } from "./animal-support/admin-support-need.controller";
 import { InsuranceProviderService } from "../insurance/insurance-provider.service";
 import { InsuranceProductService } from "../insurance/insurance-product.service";
@@ -162,6 +163,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminDonationService,
     CommunityModerationService,
     SupportNeedModerationService,
+    AdminAnimalSupportOpsService,
     InsuranceProviderService,
     InsuranceProductService,
     PetFriendlyPlaceService,

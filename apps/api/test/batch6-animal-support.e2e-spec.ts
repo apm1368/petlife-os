@@ -432,6 +432,26 @@ describe("Batch 6 — Animal support ecosystem", () => {
       return net;
     }
 
+    it("admin console: donations list shows donors by name only, the overview counts are live, and both are permission-gated", async () => {
+      const { ops, campaignId, organizationId } = await orgWithCampaign("GENERAL");
+      const donor = await user("b6-console-donor");
+      await prisma.user.update({ where: { id: donor.userId }, data: { displayName: "Donor Console" } });
+      const before = await ops.c.get("/admin/animal-support/overview").expect(200);
+      await donor.c.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 3_000_000, idempotencyKey: `k-${unique()}` }).expect(201);
+      const after = await ops.c.get("/admin/animal-support/overview").expect(200);
+      expect(after.body.donationsLast30Days.amountIrr - before.body.donationsLast30Days.amountIrr).toBe(3_000_000);
+      expect(after.body.donationsLast30Days.count - before.body.donationsLast30Days.count).toBe(1);
+      const list = await ops.c.get(`/admin/animal-support/donations?organizationId=${organizationId}&status=SUCCEEDED`).expect(200);
+      expect(list.body.items).toHaveLength(1);
+      expect(list.body.items[0]).toMatchObject({ amountIrr: 3_000_000, donorName: "Donor Console", organization: { id: organizationId } });
+      expect(JSON.stringify(list.body)).not.toContain(donor.email);
+      // Not an admin, or an admin role without animal-support permissions.
+      await donor.c.get("/admin/animal-support/overview").expect(403);
+      await donor.c.get("/admin/animal-support/donations").expect(403);
+      const verifier = await admin(AdminRole.VERIFICATION);
+      await verifier.c.get("/admin/animal-support/donations").expect(403);
+    });
+
     it("a sandbox donation records both ledger legs, shows real progress, and gives the donor a private receipt", async () => {
       const { campaignId, organizationId } = await orgWithCampaign("GENERAL");
       const donor = await user("b6-donor");

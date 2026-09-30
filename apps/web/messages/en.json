@@ -2141,7 +2141,10 @@
         "commerce": "Commerce",
         "travel": "Travel & stays",
         "insurance": "Insurance",
-        "places": "Places"
+        "places": "Places",
+        "communityReports": "User reports",
+        "animalSupport": "Animal support",
+        "lostPets": "Lost pets"
       }
     },
     "common": {
@@ -2335,7 +2338,10 @@
         "LISTING": "Listing",
         "REVIEW": "Review",
         "COMMUNITY_CONTENT": "Community content",
-        "PET_INCIDENT": "Pet incident"
+        "PET_INCIDENT": "Pet incident",
+        "SUPPORT_NEED": "Support request",
+        "LOST_PET_SIGHTING": "Lost-pet sighting",
+        "ANIMAL_SUPPORT_ORGANIZATION": "Animal support organization"
       },
       "actionType": {
         "WARNING": "Warning",

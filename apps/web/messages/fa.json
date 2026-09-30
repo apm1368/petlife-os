@@ -2141,7 +2141,10 @@
         "commerce": "فروشگاه",
         "travel": "سفر و اقامت",
         "insurance": "بیمه",
-        "places": "مکان‌ها"
+        "places": "مکان‌ها",
+        "communityReports": "گزارش‌های کاربران",
+        "animalSupport": "حمایت از حیوانات",
+        "lostPets": "حیوانات گم‌شده"
       }
     },
     "common": {
@@ -2335,7 +2338,10 @@
         "LISTING": "آگهی",
         "REVIEW": "نظر",
         "COMMUNITY_CONTENT": "محتوای انجمن",
-        "PET_INCIDENT": "حادثه مربوط به حیوان خانگی"
+        "PET_INCIDENT": "حادثه مربوط به حیوان خانگی",
+        "SUPPORT_NEED": "درخواست کمک",
+        "LOST_PET_SIGHTING": "گزارش مشاهدهٔ حیوان گم‌شده",
+        "ANIMAL_SUPPORT_ORGANIZATION": "سازمان حمایت از حیوانات"
       },
       "actionType": {
         "WARNING": "اخطار",
