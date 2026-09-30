@@ -32,14 +32,14 @@ export class AccountService {
 
   async security(userId: string, currentSessionId: string | null) {
     const [user, providers, sessions] = await Promise.all([
-      this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, passwordHash: true } }),
+      this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, passwordHash: true, emailVerifiedAt: true, phoneVerifiedAt: true } }),
       this.prisma.authIdentity.findMany({ where: { userId }, select: { provider: true, email: true, createdAt: true } }),
       this.sessions.listForUser(userId, currentSessionId),
     ]);
     return {
       methods: {
-        phone: { verified: Boolean(user.phone), value: user.phone },
-        email: { verified: Boolean(user.email), value: user.email },
+        phone: { verified: Boolean(user.phone && user.phoneVerifiedAt), value: user.phone },
+        email: { verified: Boolean(user.email && user.emailVerifiedAt), value: user.email },
         password: { connected: Boolean(user.passwordHash) },
         providers,
       },

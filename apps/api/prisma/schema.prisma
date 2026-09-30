@@ -1085,6 +1085,11 @@ model User {
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
   passwordHash       String?
+  /// Batch 8 — when each contact was proven (OTP code or a Google-verified email). A contact
+  /// set any other way (e.g. typed at password sign-up) stays unverified and is never trusted
+  /// for account linking.
+  emailVerifiedAt    DateTime?
+  phoneVerifiedAt    DateTime?
   displayName        String
   avatarUrl          String?
   locale             Locale          @default(fa)

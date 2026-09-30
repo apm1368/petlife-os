@@ -235,6 +235,10 @@ export interface UserDto {
   id: string;
   email: string | null;
   phone: string | null;
+  /** Batch 8 — true only when the contact was proven by an OTP code or a Google-verified email. Present on GET/PATCH /me; the lightweight session payload omits it. */
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  hasPassword?: boolean;
   displayName: string;
   avatarUrl: string | null;
   locale: Locale;

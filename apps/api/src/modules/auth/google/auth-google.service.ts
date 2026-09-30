@@ -6,6 +6,7 @@ import { SessionService, type SessionUser } from "../../../common/session/sessio
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { GoogleAuthFailedException } from "../../../common/errors/api-exception";
 import type { GoogleProfile } from "./google-profile.types";
+import { markContactVerified } from "../contact-verification.util";
 
 function isUniqueConstraintViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
@@ -73,6 +74,8 @@ export class AuthGoogleService {
 
     const existingUserByEmail = await this.prisma.user.findUnique({ where: { email: profile.email } });
     if (existingUserByEmail) {
+      // Google proved this address; an account that never proved it must not stay reachable by whoever typed it in.
+      await markContactVerified(this.prisma, existingUserByEmail, "email");
       const linked = await this.linkIdentity(existingUserByEmail.id, profile);
       return { user: linked, isNewUser: false };
     }
@@ -107,6 +110,7 @@ export class AuthGoogleService {
             displayName: profile.name ?? profile.email!.split("@")[0]!,
             avatarUrl: profile.picture,
             locale: "en",
+            emailVerifiedAt: new Date(),
           },
         });
         await tx.authIdentity.create({

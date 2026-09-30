@@ -144,3 +144,32 @@ button.experience-tile,button.experience-card { width:100%; text-align:start; cu
   font-size: .9rem;
   line-height: 1.7;
 }
+
+/* Batch 8 — account shell: sidebar on desktop, settings index + back link on mobile; confirmations; contact rows. */
+.account-rail{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;gap:12px}
+.account-rail .account-nav{position:static}
+.account-nav a{display:flex;flex-direction:column;gap:2px}
+.account-nav a small{display:none;color:var(--text-secondary);font-size:.74rem;font-weight:400}
+.account-back{display:none;align-items:center;gap:6px;color:var(--brand-natural);font-size:.86rem;font-weight:700}
+@media(max-width:900px){
+  .account-rail{position:static}
+  .account-rail .account-nav{display:none}
+  .account-rail--index{order:2}
+  .account-rail--index .account-nav{display:flex;flex-direction:column;gap:0;overflow:visible;border-top:1px solid var(--border-subtle);border-bottom:0;padding:0}
+  .account-rail--index .account-nav>p{display:block;margin:18px 0 8px}
+  .account-rail--index .account-nav a{flex:auto;white-space:normal;min-height:64px;justify-content:center;border-radius:0;border-bottom:1px solid var(--border-subtle);padding:12px 4px}
+  .account-rail--index .account-nav a small{display:block}
+  .account-rail--index .account-nav__overview{display:none!important}
+  .account-back{display:inline-flex;min-height:44px}
+}
+.confirm-action{display:flex;flex-direction:column;gap:16px}
+.confirm-action__label{margin:0 0 6px;color:var(--text-secondary);font-size:.74rem;font-weight:800;letter-spacing:.04em}
+.confirm-action ul{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:4px;font-size:.88rem;line-height:1.7}
+.confirm-action__buttons{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.contact-row{display:flex;flex-direction:column;border-bottom:1px solid var(--border-subtle)}
+.contact-row>.security-row{border-bottom:0}
+.contact-row__value{overflow-wrap:anywhere}
+[dir=rtl] .contact-row__value{text-align:right}
+.contact-row__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+.contact-change{display:flex;flex-direction:column;gap:14px;margin-block-end:16px;max-width:520px}
+@media(max-width:620px){.contact-row .security-row{grid-template-columns:38px minmax(0,1fr)}.contact-row__actions{grid-column:1 / -1;justify-content:flex-start}}

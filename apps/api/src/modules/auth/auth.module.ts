@@ -9,9 +9,11 @@ import { GoogleOAuthClient } from "./google/google-oauth.client";
 import { AuthGoogleService } from "./google/auth-google.service";
 import { AuthGoogleController } from "./google/auth-google.controller";
 import { AuthGoogleDevController } from "./google/auth-google-dev.controller";
+import { ContactChangeController } from "./contact-change.controller";
+import { ContactChangeService } from "./contact-change.service";
 
 @Module({
-  controllers: [AuthController, AuthGoogleController, AuthGoogleDevController],
+  controllers: [AuthController, AuthGoogleController, AuthGoogleDevController, ContactChangeController],
   providers: [
     AuthService,
     { provide: OTP_PROVIDER, useClass: DevOtpProvider },
@@ -19,6 +21,7 @@ import { AuthGoogleDevController } from "./google/auth-google-dev.controller";
     AuthPasswordResetService,
     GoogleOAuthClient,
     AuthGoogleService,
+    ContactChangeService,
   ],
   exports: [AuthService],
 })

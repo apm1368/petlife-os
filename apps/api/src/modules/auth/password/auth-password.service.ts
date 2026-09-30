@@ -79,13 +79,14 @@ export class AuthPasswordService {
     }
 
     await this.sessions.issueSession(user.id, res, meta);
-    await this.events.publish("UserAuthenticated", { userId: user.id });
+    await this.events.publish("UserAuthenticated", { userId: user.id, method: "PASSWORD" }, { aggregateType: "User", aggregateId: user.id });
 
     return toSessionUser(user);
   }
 
   /** Handles both "set a password for the first time" (OTP-only/Google-only account, currentPassword omitted) and "change an existing password" (currentPassword required and verified). */
-  async setOrChangePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+  /** Returns how many sessions other than the caller's were ended; the controller re-issues the caller's session so a password change never signs this device out (session id rotates). */
+  async setOrChangePassword(userId: string, dto: ChangePasswordDto): Promise<number> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
 
     if (user.passwordHash) {
@@ -95,8 +96,13 @@ export class AuthPasswordService {
     }
 
     const newHash = await hashPassword(dto.newPassword);
+    const hadPassword = Boolean(user.passwordHash);
     await this.prisma.user.update({ where: { id: userId }, data: { passwordHash: newHash } });
+    const active = await this.prisma.session.count({ where: { userId, revokedAt: null, expiresAt: { gt: new Date() } } });
     await this.sessions.revokeAllForUser(userId);
-    await this.events.publish("PasswordChanged", { userId });
+    // Outstanding reset links were issued for the old credential.
+    await this.prisma.passwordResetToken.updateMany({ where: { userId, usedAt: null }, data: { usedAt: new Date() } });
+    await this.events.publish("PasswordChanged", { userId, firstPassword: !hadPassword }, { aggregateType: "User", aggregateId: userId });
+    return Math.max(active - 1, 0);
   }
 }

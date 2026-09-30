@@ -1602,3 +1602,15 @@ export class ProviderClinicalAlertNotFoundException extends ApiException {
     super("PROVIDER_CLINICAL_ALERT_NOT_FOUND", "Alert not found.", HttpStatus.NOT_FOUND, details);
   }
 }
+
+export class ContactUnavailableException extends ApiException {
+  constructor() {
+    super("CONTACT_UNAVAILABLE", "This email or phone number can't be used for your account.", HttpStatus.CONFLICT);
+  }
+}
+
+export class ContactUnchangedException extends ApiException {
+  constructor() {
+    super("CONTACT_UNCHANGED", "This is already your verified contact.", HttpStatus.BAD_REQUEST);
+  }
+}

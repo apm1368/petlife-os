@@ -6,6 +6,8 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { classifyIdentifier } from "./identifier.util";
 import { OTP_PROVIDER, type OtpProvider } from "./otp/otp-provider.interface";
 
+import { markContactVerified } from "./contact-verification.util";
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -39,10 +41,13 @@ export class AuthService {
       },
     });
 
+    const { clearedUnverifiedCredentials } = await markContactVerified(this.prisma, user, kind === "email" ? "email" : "phone");
+    if (clearedUnverifiedCredentials) await this.events.publish("UnverifiedCredentialsCleared", { userId: user.id, via: "OTP" }, { aggregateType: "User", aggregateId: user.id });
+
     // Session rotation: always issue a fresh session row on successful auth
     // rather than reusing any pre-existing one.
     await this.sessions.issueSession(user.id, res, meta);
-    await this.events.publish("UserAuthenticated", { userId: user.id });
+    await this.events.publish("UserAuthenticated", { userId: user.id, method: "OTP" }, { aggregateType: "User", aggregateId: user.id });
 
     return {
       id: user.id,
