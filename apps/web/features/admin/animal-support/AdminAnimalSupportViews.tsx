@@ -306,7 +306,7 @@ export function AdminSupportNeedDetailView({ needId }: { needId: string }) {
         <h1 className="text-page-title text-text-primary">{need.title}</h1>
         <StatusTag map={NEED_STATUS} value={need.status} />
       </div>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] [&>*]:min-w-0">
         <Panel>
           <PanelTitle title={t("جزئیات", "Details")} />
           <p className="mb-3 whitespace-pre-line text-body text-text-primary" dir="auto">{need.description}</p>
@@ -460,7 +460,7 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
         <Tag tone={org.isPubliclyListed ? "success" : "neutral"}>{org.isPubliclyListed ? t("در فهرست عمومی", "Publicly listed") : t("خارج از فهرست", "Not listed")}</Tag>
       </div>
       {notice ? <p role="status" className="mb-3 text-metadata text-text-secondary">{notice}</p> : null}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">
         <Panel>
           <PanelTitle title={t("احراز هویت", "Verification")} hint={t("یادداشت برای سازمان ارسال می‌شود.", "The note is sent to the organization.")} />
           <FilterField label={t("وضعیت جدید", "New status")}>
@@ -487,8 +487,8 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
         <Panel>
           <PanelTitle title={t("اعضای سازمان", "Organization staff")} />
           {members.length === 0 ? <p className="text-metadata text-text-secondary">{t("هنوز عضوی ندارد.", "No staff yet.")}</p> : members.map((m) => (
-            <div key={m.id} className="flex items-center justify-between gap-2 border-b border-border-subtle py-2 last:border-b-0">
-              <span className="text-metadata text-text-primary">{m.displayName ?? "—"} <span className="text-text-secondary" dir="ltr">{m.email}</span></span>
+            <div key={m.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border-subtle py-2 last:border-b-0">
+              <span className="min-w-0 text-metadata text-text-primary">{m.displayName ?? "—"} <span className="break-all text-text-secondary" dir="ltr">{m.email}</span></span>
               <span className="flex items-center gap-2">
                 <Tag tone={m.isActive ? "brand" : "neutral"}>{ROLE[m.role] ? t(ROLE[m.role]![0], ROLE[m.role]![1]) : m.role}{m.isActive ? "" : ` · ${t("غیرفعال", "inactive")}`}</Tag>
                 {m.isActive ? <Button size="sm" variant="ghost" onClick={() => run(() => adminAnimalSupportService.revokeMember(org.id, m.id), t("دسترسی عضو لغو شد.", "Staff access revoked."))}>{t("لغو", "Revoke")}</Button> : null}
@@ -643,7 +643,7 @@ export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
         <h1 className="text-page-title text-text-primary">{row.pet.name}</h1>
         <StatusTag map={INCIDENT_STATUS} value={row.status} />
       </div>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] [&>*]:min-w-0">
         <Panel>
           <PanelTitle title={t("گزارش", "Report")} />
           {row.description ? <p className="mb-3 whitespace-pre-line text-body text-text-primary" dir="auto">{row.description}</p> : null}

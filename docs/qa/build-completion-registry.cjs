@@ -194,7 +194,53 @@ const BATCH8_GRADES = {
 };
 const BATCH8_BLOCKERS =
   "Batch 8: batch8-account e2e (profile/contact verification, pre-takeover guard, OTP single use, household roles/removal/last owner, invitation states, temporary/expired/revoked grants, sessions/revoke-all, security notices, reset-link single use, consents, sharing, export build/download/expiry, deletion re-auth/blockers/cancel, honoured notification prefs, owner-only membership, activity, IDOR/CSRF/returnTo) + web tests green; preview QA fa/en at six widths and axe clean. Live: OTP/SMS/email delivery and payments are sandbox (BLOCKED_EXTERNAL); deletion processing waits for a published retention policy; no pet-transfer flow.";
+/**
+ * Batch 6 (Lost Pet, Animal Support, Donations, NGO/Shelter, Community, Trust & Safety, admin console).
+ * Evidence (docs/qa/batch-6-animal-support.md): batch6-animal-support e2e (35) + web tests; isolated preview
+ * with seed-batch6. Visual A = fa at 1440/1024/768/430/390/360 AND en checked (no overflow, no stuck
+ * skeleton, axe WCAG 2.1 A/AA clean at 1440/390). Visual B = fa+en at 1440/390 only, or fa only.
+ * Routes with no browser evidence this batch keep B/C.
+ */
+const BATCH6_GRADES = {
+  "/:locale/lost-pets/:incidentId": ["A", "A"],
+  "/:locale/animal-support/needs": ["A", "A"],
+  "/:locale/animal-support/needs/:listingId": ["A", "A"],
+  "/:locale/animal-support/organizations/:organizationId": ["A", "A"],
+  "/:locale/community": ["A", "A"],
+  "/:locale/admin/community": ["A", "A"],
+  "/:locale/lost-pets": ["A", "B"],
+  "/:locale/pets/:id/lost/report": ["A", "B"],
+  "/:locale/pets/:id/lost/:incidentId": ["A", "B"],
+  "/:locale/animal-support/needs/new": ["A", "B"],
+  "/:locale/animal-support/needs/:listingId/manage": ["A", "B"],
+  "/:locale/animal-support/needs/mine": ["A", "B"],
+  "/:locale/animal-support/my-help": ["A", "B"],
+  "/:locale/animal-support/campaigns": ["B", "B"],
+  "/:locale/animal-support/campaigns/:campaignId": ["A", "B"],
+  "/:locale/donations/:id": ["A", "B"],
+  "/:locale/community/posts/:postId": ["A", "B"],
+  "/:locale/community/new": ["A", "B"],
+  "/:locale/ngo": ["A", "B"],
+  "/:locale/ngo/needs": ["A", "B"],
+  "/:locale/ngo/offers": ["A", "B"],
+  "/:locale/ngo/donations": ["A", "B"],
+  "/:locale/ngo/team": ["A", "B"],
+  "/:locale/ngo/verification": ["A", "B"],
+  "/:locale/admin/animal-support": ["A", "B"],
+  "/:locale/admin/animal-support/needs": ["A", "B"],
+  "/:locale/admin/animal-support/needs/:id": ["A", "B"],
+  "/:locale/admin/animal-support/organizations": ["A", "B"],
+  "/:locale/admin/animal-support/organizations/:id": ["A", "B"],
+  "/:locale/admin/animal-support/donations": ["A", "B"],
+  "/:locale/admin/lost-pets": ["A", "B"],
+  "/:locale/admin/lost-pets/:id": ["A", "B"],
+  "/:locale/admin/trust/:id": ["A", "B"],
+};
+const BATCH6_BLOCKERS =
+  "Batch 6: batch6-animal-support e2e (location/contact privacy, lost-pet lifecycle, offers and fulfilment, expiry, donations incl. ledger/idempotency/refund, NGO roles and isolation, community privacy and reports, trust & safety effects and restore, admin console, forged-id sweep, deep links) + web tests; isolated preview QA with seed-batch6 (fa/en, axe clean). Live: payments sandbox only (BLOCKED_EXTERNAL); SMS delivery not configured; no map provider (approximate area text).";
+
 function batch8Grade(route) {
+  if (BATCH6_GRADES[route]) return BATCH6_GRADES[route];
   return BATCH8_GRADES[route];
 }
 
@@ -339,7 +385,7 @@ const rows = walk(appRoot)
       partnerCounterpart: counterpart(pageDomain, "partner"),
       priority: priority(route, pageDomain),
       estimatedEffort: effort(route, pageDomain),
-      blockers: batch8Grade(route) ? BATCH8_BLOCKERS : isBatch4(route) ? BATCH4_GRADE.blockers : isBatch3(route) ? BATCH3_GRADE.blockers : isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
+      blockers: BATCH6_GRADES[route] ? BATCH6_BLOCKERS : batch8Grade(route) ? BATCH8_BLOCKERS : isBatch4(route) ? BATCH4_GRADE.blockers : isBatch3(route) ? BATCH3_GRADE.blockers : isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
       sourceFile: path.relative(root, file).replaceAll(path.sep, "/"),
     };
   })

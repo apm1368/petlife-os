@@ -224,7 +224,7 @@ export function NgoDonationsView() {
               </dl>
               <p className="text-metadata text-text-secondary">{fa ? "ارقام از دفتر کل کمک‌های مالی خوانده می‌شوند و قابل ویرایش نیستند. هویت اهداکننده فقط اگر خودش نامی برای نمایش انتخاب کرده باشد نشان داده می‌شود." : "Figures come from the donation ledger and cannot be edited. A donor is only named if they chose a public name."}</p>
               {data.items.length === 0 ? <EmptyState title={fa ? "هنوز کمک مالی ثبت نشده" : "No donations yet"} /> : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={fa ? "فهرست کمک‌های مالی" : "Donations list"}>
                   <table className="w-full min-w-[520px] text-sm">
                     <thead><tr className="text-text-secondary"><th className="p-2 text-start">{fa ? "تاریخ" : "Date"}</th><th className="p-2 text-start">{fa ? "کارزار" : "Campaign"}</th><th className="p-2 text-start">{fa ? "نوع" : "Type"}</th><th className="p-2 text-start">{fa ? "اهداکننده" : "Donor"}</th><th className="p-2 text-end">{fa ? "مبلغ" : "Amount"}</th></tr></thead>
                     <tbody>{data.items.map((d) => <tr key={d.id} className="border-t border-border-subtle"><td className="p-2">{formatDay(d.createdAt.slice(0, 10), lang)}</td><td className="p-2">{d.campaign.title}</td><td className="p-2">{d.fundType === "RESTRICTED" ? (fa ? "محدود" : "Restricted") : fa ? "عمومی" : "General"}</td><td className="p-2">{d.donorName ?? (fa ? "ناشناس" : "Anonymous")}</td><td className="p-2 text-end tabular-nums">{formatCurrency(d.amountIrr, lang)}{d.refundedAt ? <span className="block text-metadata text-text-secondary">{fa ? "بازپرداخت شد" : "refunded"}</span> : null}</td></tr>)}</tbody>
