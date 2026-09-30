@@ -29,6 +29,8 @@ const ALL_CATEGORIES: ServiceCategory[] = [
  * different services from the same provider can have different pet
  * compatibility. No ranking complexity, same as ProvidersService.
  */
+const SERVICE_SEARCH_LIMIT = 100;
+
 @Injectable()
 export class ServicesService {
   constructor(
@@ -61,6 +63,9 @@ export class ServicesService {
       },
       include: { providerOrganization: true, location: true },
       orderBy: { name: "asc" },
+      // Each result computes its next free slot; an unbounded public search would do that for the
+      // whole catalogue on every request. Filters (category, city, species, name) narrow further.
+      take: SERVICE_SEARCH_LIMIT,
     });
 
     return Promise.all(
