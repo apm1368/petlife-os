@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
+import { ContextSurface, EmptyState, Skeleton } from "@petlife/ui";
 import type { LifeTimelineEntryDto } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** spec: "derived, never duplicated" — every row here is computed server-side from Memories/Health/lost-pet/lifecycle records, never a separately stored table. */
 export function LifeTimelineView({ petId }: { petId: string }) {
@@ -13,14 +13,14 @@ export function LifeTimelineView({ petId }: { petId: string }) {
   const tCommon = useTranslations("common");
 
   const [entries, setEntries] = useState<LifeTimelineEntryDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setEntries(await memoriesService.getLifeTimeline(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -29,7 +29,7 @@ export function LifeTimelineView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!entries) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

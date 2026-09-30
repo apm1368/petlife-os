@@ -3,25 +3,25 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
-import { ApiError } from "@/lib/api/client";
 import { lostPetStatusTone } from "./lost-pet-status";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 export function LostPetIncidentListView({ petId }: { petId: string }) {
   const t = useTranslations("lostPet");
   const tCommon = useTranslations("common");
 
   const [incidents, setIncidents] = useState<LostPetIncidentDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setIncidents(await lostPetService.list(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -30,7 +30,7 @@ export function LostPetIncidentListView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!incidents) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

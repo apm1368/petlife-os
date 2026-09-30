@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalAlertSeverity, ProviderPatientRecordDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VitalsSparkline } from "./VitalsSparkline";
@@ -41,15 +42,17 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
 
   const [record, setRecord] = useState<ProviderPatientRecordDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [tab, setTab] = useState<Tab>("summary");
   const [isBusy, setIsBusy] = useState(false);
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setRecord(await vetPanelService.getPatientRecord(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -96,7 +99,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
     }
   }
 
-  if (error && !record) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !record) return <LoadFailure error={loadError} onRetry={load} />;
   if (!record) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const openHospitalization = record.hospitalizations.find((h) => h.status === "ADMITTED");

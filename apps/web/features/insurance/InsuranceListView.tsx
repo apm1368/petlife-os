@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
-import { ApiError } from "@/lib/api/client";
 import { verificationStatusTone } from "./insurance-status";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** Public discovery — no guard, works for anonymous visitors (spec: "public browsing" for insurance discovery must work without auth). `petId` in the query string is passed through to product detail so a household browsing for a specific pet can check eligibility there. */
 export function InsuranceListView() {
@@ -19,7 +19,7 @@ export function InsuranceListView() {
   const petId = searchParams.get("petId") ?? undefined;
 
   const [products, setProducts] = useState<InsuranceProductDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [selected, setSelected] = useState<string[]>([]);
 
   async function load() {
@@ -28,13 +28,13 @@ export function InsuranceListView() {
       const result = await insuranceService.listProducts({ pageSize: 50 });
       setProducts(result.items);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
   useEffect(() => {
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   function toggleSelected(productId: string): void {
@@ -45,7 +45,7 @@ export function InsuranceListView() {
     return petId ? `/insurance/${productId}?petId=${petId}` : `/insurance/${productId}`;
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!products) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

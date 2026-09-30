@@ -3,25 +3,25 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { TripDto } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
-import { ApiError } from "@/lib/api/client";
 import { tripStatusTone } from "./travel-status";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 export function TravelHubView({ petId }: { petId: string }) {
   const t = useTranslations("travel");
   const tCommon = useTranslations("common");
 
   const [trips, setTrips] = useState<TripDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setTrips(await travelService.list(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -30,7 +30,7 @@ export function TravelHubView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!trips) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

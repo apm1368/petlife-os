@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** Authenticated — favorites require auth (spec: "favorites-saved places" needs auth). */
 export function PlacesFavoritesView() {
@@ -14,23 +14,23 @@ export function PlacesFavoritesView() {
   const tCommon = useTranslations("common");
 
   const [favorites, setFavorites] = useState<PetFriendlyPlaceDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setFavorites(await placesService.listFavorites());
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
   useEffect(() => {
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!favorites) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

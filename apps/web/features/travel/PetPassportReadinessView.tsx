@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { PetPassportReadinessDto } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** Not a government passport object — an aggregation of existing pet identity/health data plus travel-specific gaps (spec). Never duplicates H17 health records; every field here is a live read. */
 export function PetPassportReadinessView({ petId }: { petId: string }) {
@@ -13,14 +13,14 @@ export function PetPassportReadinessView({ petId }: { petId: string }) {
   const tCommon = useTranslations("common");
 
   const [readiness, setReadiness] = useState<PetPassportReadinessDto | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setReadiness(await travelService.getPassportReadiness(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -29,7 +29,7 @@ export function PetPassportReadinessView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!readiness) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

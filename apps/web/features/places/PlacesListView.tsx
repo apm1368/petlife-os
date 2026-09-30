@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { PetFriendlyPlaceCategory } from "@petlife/types";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.PARK,
@@ -30,15 +31,17 @@ export function PlacesListView() {
   const [category, setCategory] = useState<PetFriendlyPlaceCategory | "">("");
   const [places, setPlaces] = useState<PetFriendlyPlaceDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isSearchingNearby, setIsSearchingNearby] = useState(false);
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const result = await placesService.list({ city: city.trim() || undefined, category: category || undefined, pageSize: 50 });
       setPlaces(result.items);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -66,10 +69,11 @@ export function PlacesListView() {
     );
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
 
   return (
     <div className="flex flex-col gap-5">
+      {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
       <div>
         <h1 className="text-page-title text-text-primary">{t("list.title")}</h1>
         <p className="text-body text-text-secondary">{t("list.subtitle")}</p>

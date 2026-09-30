@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalNoteTemplateDto, ClinicalVisitDetailDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VetVisitClinicalTools } from "@/features/vet-panel/VetVisitClinicalTools";
 
@@ -28,6 +29,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
 
   const [visit, setVisit] = useState<ClinicalVisitDetailDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [notes, setNotes] = useState({ reasonForVisit: "", historyText: "", observationsText: "", assessmentText: "", planText: "" });
   const [amendReason, setAmendReason] = useState("");
@@ -37,6 +39,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const detail = await providerClinicalService.getVisit(petId, visitId);
       setVisit(detail);
@@ -48,7 +51,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
         planText: detail.planText ?? "",
       });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -130,7 +133,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
     }));
   }
 
-  if (error && !visit) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !visit) return <LoadFailure error={loadError} onRetry={load} />;
   if (!visit) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const isEditable = visit.status === "DRAFT" || visit.status === "IN_PROGRESS";

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
+import { ContextSurface, EmptyState, Skeleton } from "@petlife/ui";
 import type { PublicDonationEntryDto, SupportCampaignDto, SupportCampaignUpdateDto } from "@petlife/types";
 import { animalSupportService } from "@/services/animal-support.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { CampaignProgressBar } from "./CampaignProgressBar";
 import { DonationPanel } from "./DonationPanel";
@@ -23,11 +23,11 @@ export function SupportCampaignDetailView({ campaignId }: { campaignId: string }
   const [campaign, setCampaign] = useState<SupportCampaignDto | null>(null);
   const [updates, setUpdates] = useState<SupportCampaignUpdateDto[] | null>(null);
   const [donors, setDonors] = useState<PublicDonationEntryDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
 
 
   async function load() {
-    setError(null);
+    setLoadError(null);
     try {
       const [campaignData, updatesData, donorsData] = await Promise.all([
         animalSupportService.getCampaign(campaignId),
@@ -38,7 +38,7 @@ export function SupportCampaignDetailView({ campaignId }: { campaignId: string }
       setUpdates(updatesData);
       setDonors(donorsData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -53,7 +53,7 @@ export function SupportCampaignDetailView({ campaignId }: { campaignId: string }
     supportNeedsService.get(needId).then((n) => setNeed(n.campaignId === campaignId ? { id: n.id, title: n.title } : null)).catch(() => setNeed(null));
   }, [needId, campaignId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!campaign || !updates || !donors) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

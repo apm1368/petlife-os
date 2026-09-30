@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Input, Select, Skeleton } from "@petlife/ui";
 import type { PetDto, PetMemoryDto } from "@petlife/types";
 import { PetLifecycleStatus } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
 import { petsService } from "@/services/pets.service";
 import { ApiError } from "@/lib/api/client";
 import { MemoryMediaThumb } from "./MemoryMediaThumb";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 type ViewMode = "JOURNAL" | "GALLERY";
 
@@ -32,6 +33,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
   const [pet, setPet] = useState<PetDto | null>(null);
   const [memories, setMemories] = useState<PetMemoryDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   const [search, setSearch] = useState("");
   const [tag, setTag] = useState("");
@@ -45,6 +47,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
   // each render and make the effect below refetch forever.
   const load = useCallback(async () => {
     setError(null);
+    setLoadError(null);
     try {
       const [petData, memoriesData] = await Promise.all([
         petsService.getById(petId),
@@ -59,9 +62,9 @@ export function MemoriesListView({ petId }: { petId: string }) {
       // The archive view shows only archived entries; the default view already excludes them server-side.
       setMemories(showArchived ? memoriesData.filter((m) => m.archivedAt !== null) : memoriesData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [petId, search, tag, year, showArchived]);
 
   useEffect(() => {
@@ -89,7 +92,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
     return Array.from(years).sort((a, b) => b - a);
   }, [memories, year]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!pet || !memories) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const isMemorial = pet.lifecycleStatus === PetLifecycleStatus.DECEASED || pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
@@ -97,6 +100,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
 
   return (
     <div className="flex flex-col gap-5">
+      {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-page-title text-text-primary">{isMemorial ? t("list.memorialTitle", { name: pet.name }) : t("list.title", { name: pet.name })}</h1>

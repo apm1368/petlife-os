@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import { HelpOfferStatus, SupportNeedStatus } from "@petlife/types";
 import type { HelpOfferDto, SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { SupportOfferInbox } from "./SupportOfferInbox";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 const TABS: (SupportNeedStatus | "ALL")[] = [
   "ALL",
@@ -45,6 +46,7 @@ export function MySupportNeedsView() {
   const [listings, setListings] = useState<SupportNeedListingDto[] | null>(null);
   const [offersByListing, setOffersByListing] = useState<Record<string, HelpOfferDto[]>>({});
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [needsSignIn, setNeedsSignIn] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -52,15 +54,16 @@ export function MySupportNeedsView() {
   // translator identity each render, which would refetch in a loop.
   const load = useCallback(async () => {
     setError(null);
+    setLoadError(null);
     setNeedsSignIn(false);
     try {
       const result = await supportNeedsService.listMine({ status: tab === "ALL" ? undefined : tab, pageSize: 50 });
       setListings(result.items);
     } catch (err) {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) setNeedsSignIn(true);
-      else setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      else setLoadError(err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [tab]);
 
   useEffect(() => {
@@ -125,10 +128,11 @@ export function MySupportNeedsView() {
     );
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
 
   return (
     <div className="flex flex-col gap-5">
+      {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{t("mine.title")}</h1>
         <Link href="/animal-support/needs/new">

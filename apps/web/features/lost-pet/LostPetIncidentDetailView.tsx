@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ShareBar } from "@/features/shared/ShareBar";
 import { formatDay } from "@/lib/date/jalali";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentDto, LostPetSightingDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { lostPetStatusTone } from "./lost-pet-status";
 
 const ACTIONS_BY_STATUS: Record<string, ("markSearching" | "markFound" | "reunite" | "close" | "share")[]> = {
@@ -27,6 +28,7 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
   const [incident, setIncident] = useState<LostPetIncidentDto | null>(null);
   const [sightings, setSightings] = useState<LostPetSightingDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
   const lang = useLocale() as "fa" | "en";
   const fa = lang === "fa";
@@ -34,12 +36,13 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const [incidentData, sightingsData] = await Promise.all([lostPetService.get(petId, incidentId), lostPetService.listSightings(petId, incidentId)]);
       setIncident(incidentData);
       setSightings(sightingsData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -61,7 +64,7 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
     }
   }
 
-  if (error && !incident) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !incident) return <LoadFailure error={loadError} onRetry={load} />;
   if (!incident || !sightings) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const availableActions = ACTIONS_BY_STATUS[incident.status] ?? [];

@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, ErrorRecovery, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, Skeleton } from "@petlife/ui";
 import type { PetMemoryDto } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId: string }) {
   const t = useTranslations("memories");
@@ -17,10 +18,12 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
   const [memory, setMemory] = useState<PetMemoryDto | null>(null);
   const [privateMediaUrls, setPrivateMediaUrls] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const loaded = await memoriesService.get(petId, memoryId);
       setMemory(loaded);
@@ -33,7 +36,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
         setPrivateMediaUrls([]);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -68,7 +71,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
     }
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!memory) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
@@ -105,6 +108,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
             </Button>
           )}
         </div>
+        {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
       </ContextSurface>
     </div>
   );

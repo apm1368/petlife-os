@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Input, Select, Skeleton } from "@petlife/ui";
 import { CommunityPostType } from "@petlife/types";
 import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** spec: "avoid endless card clutter" — a plain paged feed with an explicit Load more, never infinite auto-scroll. */
 export function CommunityFeedView() {
@@ -16,7 +16,7 @@ export function CommunityFeedView() {
 
   const [page, setPage] = useState<PaginatedDto<CommunityPostDto> | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [query, setQuery] = useState("");
   const [appliedQuery, setAppliedQuery] = useState("");
   const [type, setType] = useState<CommunityPostType | "">("");
@@ -28,7 +28,7 @@ export function CommunityFeedView() {
       setPage((prev) => (append && prev ? { ...data, items: [...prev.items, ...data.items] } : data));
       setPageNumber(nextPage);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -37,7 +37,7 @@ export function CommunityFeedView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={() => load(1)} />;
+  if (error) return <LoadFailure error={error} onRetry={() => load(1)} />;
   if (!page) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
-import { ApiError } from "@/lib/api/client";
 import { verificationStatusTone } from "./insurance-status";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** Side-by-side comparison — never a ranked "best plan" recommendation, and exclusions are shown for every product at the same level as coverage/premium (spec hard UX rule). */
 export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
@@ -14,14 +14,14 @@ export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
   const tCommon = useTranslations("common");
 
   const [products, setProducts] = useState<InsuranceProductDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setProducts(await insuranceService.compareProducts(productIds));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -30,7 +30,7 @@ export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productIds.join(",")]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!products) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

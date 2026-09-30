@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDay } from "@/lib/date/jalali";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MedicalDocumentDto, TravelRequirementDto, TripDto, TripReadinessSummaryDto } from "@petlife/types";
 import { MedicalDocumentType, TravelRequirementStatus, TravelRequirementType, TripStatus } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { requirementStatusTone, tripStatusTone } from "./travel-status";
 
 const ALLOWED_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
@@ -55,12 +56,14 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
   const [suggestions, setSuggestions] = useState<TravelRequirementType[]>([]);
   const [documents, setDocuments] = useState<MedicalDocumentDto[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
   const [newRequirementType, setNewRequirementType] = useState<TravelRequirementType>(TravelRequirementType.VACCINATION);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const [tripData, readinessData, suggestionsData, documentsData] = await Promise.all([
         travelService.get(petId, tripId),
@@ -73,7 +76,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
       setSuggestions(suggestionsData);
       setDocuments(documentsData.filter((doc) => doc.documentType === MedicalDocumentType.TRAVEL_DOCUMENT));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -117,7 +120,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
     }
   }
 
-  if (error && !trip) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !trip) return <LoadFailure error={loadError} onRetry={load} />;
   if (!trip || !readiness) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const availableTransitions = ALLOWED_TRANSITIONS[trip.status] ?? [];

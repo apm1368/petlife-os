@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceApplicationDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
 import { ApiError } from "@/lib/api/client";
 import { applicationStatusTone } from "./insurance-status";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 export function PetInsuranceView({ petId }: { petId: string }) {
   const t = useTranslations("insurance");
@@ -15,6 +16,7 @@ export function PetInsuranceView({ petId }: { petId: string }) {
 
   const [applications, setApplications] = useState<InsuranceApplicationDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
   const fa = useLocale() === "fa";
   const [consentText, setConsentText] = useState<string | null>(null);
@@ -27,10 +29,11 @@ export function PetInsuranceView({ petId }: { petId: string }) {
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setApplications(await insuranceService.listApplications(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -52,7 +55,7 @@ export function PetInsuranceView({ petId }: { petId: string }) {
     }
   }
 
-  if (error && !applications) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !applications) return <LoadFailure error={loadError} onRetry={load} />;
   if (!applications) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { ObservationCategory, type PetObservationDto } from "@petlife/types";
 import { petObservationService } from "@/services/pet-observation.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** spec: "these are OWNER OBSERVATIONS, not diagnoses" — the UI labels every entry as such and never offers a "diagnosis" field. */
 export function HealthObservationsView({ petId }: { petId: string }) {
@@ -14,6 +15,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
 
   const [observations, setObservations] = useState<PetObservationDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [category, setCategory] = useState<ObservationCategory>(ObservationCategory.OTHER);
   const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -21,10 +23,11 @@ export function HealthObservationsView({ petId }: { petId: string }) {
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setObservations(await petObservationService.list(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -60,7 +63,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
     }
   }
 
-  if (error && !observations) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !observations) return <LoadFailure error={loadError} onRetry={load} />;
   if (!observations) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

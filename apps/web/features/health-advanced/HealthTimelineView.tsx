@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { HealthTimelineEntryDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** Canonical detail route per timeline record type; rehab sessions have no standalone detail page. */
 const DETAIL_PATH: Record<string, string> = {
@@ -32,14 +32,14 @@ export function HealthTimelineView({ petId }: { petId: string }) {
   const locale = useLocale();
 
   const [entries, setEntries] = useState<HealthTimelineEntryDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setEntries(await healthAdvancedService.getTimeline(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -48,7 +48,7 @@ export function HealthTimelineView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!entries) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

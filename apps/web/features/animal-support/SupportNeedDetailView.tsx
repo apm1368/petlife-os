@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedContactMode, SupportNeedUrgency } from "@petlife/types";
 import type { SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService, type SupportNeedOfferSummaryDto } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatDay } from "@/lib/date/jalali";
 import { URGENCY_TONE } from "./SupportNeedsListView";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
@@ -40,7 +41,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
 
   const [listing, setListing] = useState<SupportNeedListingDto | null>(null);
   const [summary, setSummary] = useState<SupportNeedOfferSummaryDto | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   const [message, setMessage] = useState("");
   const [helpType, setHelpType] = useState<SupportNeedCategory>(SupportNeedCategory.FOOD);
@@ -52,14 +53,14 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
   const [needsSignIn, setNeedsSignIn] = useState(false);
 
   async function load() {
-    setError(null);
+    setLoadError(null);
     try {
       const [loaded, loadedSummary] = await Promise.all([supportNeedsService.get(listingId), supportNeedsService.getSummary(listingId)]);
       setListing(loaded);
       setSummary(loadedSummary);
       setHelpType(loaded.category);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -93,7 +94,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
     }
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!listing) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const acceptsHelp = listing.contactMode !== SupportNeedContactMode.DONATE;

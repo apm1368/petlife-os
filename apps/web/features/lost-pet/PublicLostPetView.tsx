@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentPublicDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
 import { ApiError } from "@/lib/api/client";
@@ -12,6 +12,7 @@ import { addDays, formatDay, localizeDigits, todayIso } from "@/lib/date/jalali"
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
 import { lostPetStatusTone } from "./lost-pet-status";
+import { SystemState } from "@/features/system/SystemState";
 
 const SPECIES: Record<string, [string, string]> = { DOG: ["سگ", "Dog"], CAT: ["گربه", "Cat"], OTHER: ["سایر", "Other"] };
 
@@ -77,7 +78,7 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
   }
 
   if (error === "notFound") return <EmptyState title={fa ? "این گزارش در دسترس نیست" : "This report is not available"} description={fa ? "ممکن است پرونده بسته شده باشد." : "The report may have been closed."} />;
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={tCommon("genericError")} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <SystemState kind="GENERIC_RETRYABLE_ERROR" onRetry={load} />;
   if (!incident) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const reunited = incident.status === "REUNITED";
