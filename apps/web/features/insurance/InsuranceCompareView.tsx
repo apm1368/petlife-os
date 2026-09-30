@@ -48,7 +48,7 @@ export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
               <StatusLabel tone={verificationStatusTone(product.status)}>{t(`verificationStatus.${product.status}`)}</StatusLabel>
             </div>
             <p className="text-metadata text-text-secondary">{product.coverageSummary}</p>
-            {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: product.waitingPeriodDays })}</p> : null}
+            {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: fmt.number(product.waitingPeriodDays) })}</p> : null}
             {product.deductibleAmountIrr !== null ? (
               <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: fmt.number(product.deductibleAmountIrr) })}</p>
             ) : null}

@@ -97,7 +97,7 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
             </StatusLabel>
           ))}
         </div>
-        {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: product.waitingPeriodDays })}</p> : null}
+        {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: fmt.number(product.waitingPeriodDays) })}</p> : null}
         {product.deductibleAmountIrr !== null ? (
           <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: fmt.number(product.deductibleAmountIrr) })}</p>
         ) : null}
