@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { PackageCheck, Star, StatusLabel } from "@petlife/ui";
 import type { RatingSummaryDto, StockState } from "@petlife/types";
+import { isolate } from "@/lib/text/bidi";
 import { formatCurrency } from "@/lib/currency/format-currency";
 
 type Locale = "fa" | "en";
@@ -29,7 +30,7 @@ export function PriceBlock({ unitPrice, listUnitPrice, promotionName, size = "md
       </div>
       {discounted && promotionName ? (
         <span className="text-metadata text-state-success">
-          {t("promotion", { name: promotionName, percent: Math.round(((listUnitPrice! - unitPrice) / listUnitPrice!) * 100).toLocaleString(locale === "fa" ? "fa-IR" : "en-US") })}
+          {t("promotion", { name: isolate(promotionName), percent: Math.round(((listUnitPrice! - unitPrice) / listUnitPrice!) * 100).toLocaleString(locale === "fa" ? "fa-IR" : "en-US") })}
         </span>
       ) : null}
     </div>

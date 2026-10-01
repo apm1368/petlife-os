@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useStickyTop } from "@/features/shared/use-sticky-top";
 import { BadgeCheck, Button, ContextSurface, ErrorRecovery, Heart, Repeat, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ProductDetailDto, ProductReviewDto, SellerOfferDto } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
@@ -42,6 +43,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
   const [variantId, setVariantId] = useState<string | null>(null);
   const [offerId, setOfferId] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
+  const buyPanelRef = useStickyTop();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -163,7 +165,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
   ].filter(Boolean) as string[];
 
   return (
-    <div className="flex flex-col gap-8 pb-24 lg:pb-0">
+    <div className="flex flex-col gap-10 pb-24 lg:pb-0">
       <nav aria-label={t("breadcrumb")} className="flex flex-wrap items-center gap-1 text-metadata text-text-secondary">
         <button type="button" className="hover:text-text-primary" onClick={() => router.push(`/${locale}/shop`)}>
           {t("shop")}
@@ -174,8 +176,8 @@ export function ProductDetailView({ productId }: { productId: string }) {
         </button>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="flex flex-col gap-3">
+      <div className="product-layout">
+        <div className="product-layout__gallery flex flex-col gap-3">
           <ProductImage src={images[imageIndex]?.url ?? null} alt={images[imageIndex]?.alt ?? product.title} className="aspect-square w-full rounded-lg border border-border-subtle" />
           {images.length > 1 ? (
             <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label={t("gallery")}>
@@ -188,7 +190,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div ref={buyPanelRef} className="product-layout__buy flex flex-col gap-5">
           {activePet ? <p className="text-metadata text-text-secondary">{t("shoppingFor", { name: activePet.name })}</p> : null}
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -210,14 +212,14 @@ export function ProductDetailView({ productId }: { productId: string }) {
           </div>
 
           {product.compatibility ? (
-            <ContextSurface className="flex flex-col gap-2">
+            <div className="calm-note flex flex-col gap-2">
               <StatusLabel tone={COMPATIBILITY_TONE[product.compatibility.status] ?? "neutral"}>{tCompat(`status.${product.compatibility.status}`)}</StatusLabel>
               {product.compatibility.reasons.map((reason) => (
                 <p key={reason} className="text-metadata text-text-secondary">
                   {tCompat(`reason.${reason}`)}
                 </p>
               ))}
-            </ContextSurface>
+            </div>
           ) : null}
 
           {product.variants.length > 1 || variant?.title ? (
@@ -294,7 +296,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
             </p>
           ) : null}
 
-          <div className="fixed inset-x-0 bottom-0 z-20 flex gap-3 border-t border-border-subtle bg-surface-elevated p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:static lg:border-0 lg:bg-transparent lg:p-0">
+          <div className="product-buy-bar flex gap-3">
             <Button variant="primary" className="flex-1" isLoading={isAdding} disabled={!selectedOffer || maxQuantity === 0} onClick={addToCart}>
               {selectedOffer && maxQuantity === 0 ? t("outOfStock") : t("addToCart")}
             </Button>
@@ -306,7 +308,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
           </div>
 
           {selectedOffer?.repeatDeliveryEligible && maxQuantity > 0 ? (
-            <ContextSurface className="flex flex-col gap-2">
+            <div className="split-panel flex flex-col gap-2">
               <p className="inline-flex items-center gap-2 text-body font-medium text-text-primary">
                 <Repeat size={18} aria-hidden="true" />
                 {t("repeatTitle")}
@@ -315,13 +317,13 @@ export function ProductDetailView({ productId }: { productId: string }) {
               <Button variant="secondary" onClick={() => router.push(`/${locale}/repeat-delivery/new?productId=${product.id}&offerId=${selectedOffer.id}&quantity=${quantity}`)}>
                 {t("repeatCta")}
               </Button>
-            </ContextSurface>
+            </div>
           ) : null}
         </div>
-      </div>
 
+        <div className="product-layout__details flex flex-col gap-10">
       {product.description || suitability.length || product.specifications.length ? (
-        <section className="grid gap-6 lg:grid-cols-2">
+        <section className="grid gap-6 xl:grid-cols-2">
           {product.description ? (
             <div>
               <h2 className="mb-2 text-section-title text-text-primary">{t("about")}</h2>
@@ -366,10 +368,10 @@ export function ProductDetailView({ productId }: { productId: string }) {
         {reviews.length === 0 ? (
           <p className="text-body text-text-secondary">{t("noReviewsYet")}</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col divide-y divide-border-subtle border-y border-border-subtle">
             {reviews.map((review) => (
               <li key={review.id}>
-                <ContextSurface className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 py-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-2">
                       <StarRow value={review.rating} />
@@ -380,7 +382,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
                   {review.variantTitle ? <p className="text-metadata text-text-secondary">{review.variantTitle}</p> : null}
                   {review.body ? <p className="text-body text-text-primary">{review.body}</p> : null}
                   <p className="text-metadata text-state-success">{t("verifiedPurchase")}</p>
-                </ContextSurface>
+                </div>
               </li>
             ))}
           </ul>
@@ -391,11 +393,13 @@ export function ProductDetailView({ productId }: { productId: string }) {
           </Button>
         ) : null}
       </section>
+        </div>
+      </div>
 
       {product.related.length ? (
         <section className="flex flex-col gap-3">
           <h2 className="text-section-title text-text-primary">{t("related")}</h2>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <div className="product-grid">
             {product.related.map((p) => (
               <ProductCard key={p.id} product={p} onClick={() => router.push(`/${locale}/shop/products/${p.id}`)} />
             ))}

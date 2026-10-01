@@ -139,7 +139,7 @@ async function advanceToPayment() {
   await waitFor(() => expect(screen.getByText("How would you like to pay?")).toBeTruthy());
   fireEvent.click(screen.getByText("Pay online"));
 
-  await waitFor(() => expect(screen.getByText("Payment")).toBeTruthy());
+  await waitFor(() => expect(screen.getByRole("heading", { name: "Payment" })).toBeTruthy());
 }
 
 async function advanceToInstallmentPlans() {
@@ -271,7 +271,7 @@ describe("CheckoutView", () => {
 
     fireEvent.click(screen.getByText("Try again"));
 
-    await waitFor(() => expect(screen.getByText("Payment")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Payment" })).toBeTruthy());
   });
 
   it("walks the BNPL flow to APPROVED and routes to the confirmation page", async () => {

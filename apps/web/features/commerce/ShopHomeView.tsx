@@ -94,7 +94,7 @@ export function ShopHomeView() {
         {categories === null ? (
           <Skeleton className="h-24 w-full" />
         ) : (
-          <div className="experience-grid experience-grid--five">
+          <div className="experience-grid experience-grid--compact">
             {topCategories.map((category) => {
               const Icon = categoryIcon(category.slug);
               return (
@@ -132,7 +132,7 @@ export function ShopHomeView() {
               {t("seeAll")}
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="product-grid">
             {deals.map((product) => (
               <ProductCard key={product.id} product={product} onClick={() => openProduct(product.id)} />
             ))}
@@ -151,7 +151,7 @@ export function ShopHomeView() {
           </button>
         </div>
         {picks === null ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="product-grid">
             {Array.from({ length: 4 }, (_, i) => (
               <Skeleton key={i} className="aspect-[3/4] w-full" />
             ))}
@@ -159,7 +159,7 @@ export function ShopHomeView() {
         ) : picks.length === 0 ? (
           <EmptyState title={t("emptyTitle")} description={t("emptyDescription")} icon={<PackageCheck size={28} aria-hidden="true" />} />
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="product-grid">
             {picks.map((product) => (
               <ProductCard key={product.id} product={product} onClick={() => openProduct(product.id)} />
             ))}

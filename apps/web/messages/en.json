@@ -1153,6 +1153,7 @@
       "loading": "Loading",
       "retry": "Retry",
       "empty": "Your cart is empty.",
+      "emptyHint": "Items you pick for your pet gather here; each seller’s price and stock are checked again before you pay.",
       "browseShop": "Browse the shop",
       "safetyConflictBanner": "One or more items may conflict with a pet's known allergy. You'll be asked to confirm at checkout.",
       "forPet": "For {name}",
@@ -1186,6 +1187,7 @@
       }
     },
     "checkout": {
+      "summary": { "title": "Order summary", "deliveryNext": "Chosen in the delivery step" },
       "address": {
         "title": "Delivery address",
         "addNew": "Add a new address",

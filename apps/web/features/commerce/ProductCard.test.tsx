@@ -19,7 +19,7 @@ describe("ProductCard", () => {
     renderWithIntl(<ProductCard product={productSummary({ bestOffer: promoted })} onClick={vi.fn()} />);
     expect(screen.getByText("100,000 Toman")).toBeTruthy();
     expect(screen.getByText("125,000 Toman")).toBeTruthy();
-    expect(screen.getByText("Autumn · 20% off")).toBeTruthy();
+    expect(screen.getByText("\u2068Autumn\u2069 · 20% off")).toBeTruthy();
   });
 
   it("never renders placeholder stars when there are no reviews", () => {

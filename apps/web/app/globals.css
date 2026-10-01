@@ -272,7 +272,9 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 @keyframes pl-rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes pl-drop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @keyframes pl-fade{from{opacity:0}to{opacity:1}}
-.motion-page>*{animation:pl-rise var(--dur-3) var(--ease-out) both}
+/* backwards, not both: a forward-filled transform keeps the element a containing block, which would
+   pin position:fixed bars (sticky CTAs) to the page instead of the viewport. */
+.motion-page>*{animation:pl-rise var(--dur-3) var(--ease-out) backwards}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;scroll-behavior:auto!important}}
 
 .workspace-shell{display:flex;flex-direction:column;min-height:100dvh;background:var(--surface-base)}
@@ -522,7 +524,7 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 .stepper__step--current .stepper__label{color:var(--text-primary);font-weight:800}
 .flow-layout{display:grid;grid-template-columns:1fr;gap:28px;max-width:1240px;margin-inline:auto}
 .flow-main{display:flex;flex-direction:column;gap:24px;min-width:0}
-.flow-main>.flow-step{animation:pl-rise var(--dur-3) var(--ease-out) both}
+.flow-main>.flow-step{animation:pl-rise var(--dur-3) var(--ease-out) backwards}
 .flow-summary{display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--border-subtle);border-radius:16px;background:var(--surface-elevated)}
 .flow-summary h2{margin:0;color:var(--text-primary);font-size:1rem;font-weight:800}
 .flow-summary dl{display:flex;flex-direction:column;margin:0}
@@ -535,3 +537,49 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 .flow-summary__note{margin:0;color:var(--text-secondary);font-size:.78rem;line-height:1.7}
 @media(min-width:1100px){.flow-layout{grid-template-columns:minmax(0,1fr) 360px;column-gap:48px}.flow-summary{position:sticky;top:88px;align-self:start}}
 @media(max-width:520px){.stepper__step{min-width:0}.stepper__label{font-size:.7rem}.stepper__mark{width:28px;height:28px;font-size:.78rem}.stepper__step::before{top:13px}}
+
+/* Split layout: the record in the main column, its money/actions/address beside it (order, booking, trip…). */
+.split-layout{display:grid;grid-template-columns:1fr;gap:28px}
+.split-main,.split-aside{display:flex;flex-direction:column;gap:24px;min-width:0}
+.split-section{padding-top:18px;border-top:1px solid var(--border-subtle)}
+.split-main>.split-section:first-child{border-top:0;padding-top:0}
+@media(min-width:1100px){.split-layout{grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr);gap:48px}.split-aside{position:sticky;top:88px;align-self:start;gap:16px}}
+.split-panel{padding:18px 20px;border-radius:var(--radius-lg);background:var(--surface-subtle)}
+.split-aside>.split-section:first-child{border-top:0;padding-top:0}
+
+/* Product page: gallery + details flow on the start side, the buy panel stays in reach on the end side. */
+.product-layout{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"gallery" "buy" "details";gap:28px}
+.product-layout__gallery{grid-area:gallery;min-width:0}
+.product-layout__buy{grid-area:buy;min-width:0}
+.product-layout__details{grid-area:details;min-width:0}
+.product-buy-bar{position:fixed;inset-inline:0;bottom:0;z-index:30;padding:12px 16px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--border-subtle);background:var(--surface-elevated)}
+.workspace-shell .product-buy-bar{bottom:calc(66px + env(safe-area-inset-bottom));padding-bottom:12px}
+@media(min-width:1024px){
+ .product-layout{grid-template-columns:minmax(0,1.3fr) minmax(340px,1fr);grid-template-areas:"gallery buy" "details buy";gap:40px 56px;align-items:start}
+ .product-layout__buy{position:sticky;top:var(--sticky-top,88px)}
+ .product-buy-bar,.workspace-shell .product-buy-bar{position:static;padding:0;border:0;background:transparent}
+}
+
+/* Order rows: one line per order, the money states as quiet text, only order + delivery as pills. */
+.order-row{display:flex;width:100%;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px 4px;text-align:start;transition:background-color var(--dur-1)}
+.order-row:hover{background:color-mix(in srgb,var(--surface-subtle) 70%,transparent)}
+.order-row:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.order-row__main{display:flex;min-width:0;flex-direction:column;gap:2px}
+.order-row__side{display:flex;flex-shrink:0;flex-direction:column;align-items:flex-end;gap:6px;text-align:end}
+@media(max-width:520px){.order-row{flex-direction:column;gap:10px}.order-row__side{width:100%;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between}}
+
+/* Product grids: card width stays product-sized (≈210–260px) at every viewport instead of
+   stretching to four giant columns; two-up on phones. */
+.product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:768px){.product-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}}
+.experience-grid--compact{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+@media(max-width:600px){.experience-grid--compact{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Checkout summary: the lines being bought, then the money, in the flow-summary aside. */
+.checkout-summary__lines{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.checkout-summary__lines li{display:flex;justify-content:space-between;gap:12px;color:var(--text-primary);font-size:.88rem;line-height:1.7}
+.checkout-summary__lines li>span:last-child{flex-shrink:0;white-space:nowrap;color:var(--text-secondary)}
+.flow-summary dl>div.flow-summary__total{border-top-color:var(--border-strong);font-size:1rem}
+.flow-summary__total dt{color:var(--text-primary);font-weight:700}
+.flow-summary__total dd{font-weight:800}
+.flow-summary dd.is-note{color:var(--text-secondary);font-weight:500}

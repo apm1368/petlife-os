@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { OrderSummaryDto } from "@petlife/types";
 import { commerceService } from "@/services/commerce.service";
+import { isolate } from "@/lib/text/bidi";
 import { formatCurrency } from "@/lib/currency/format-currency";
 
 type Tab = "active" | "delivered" | "closed";
@@ -80,39 +81,45 @@ export function MyOrdersView() {
 
       {counts[tab] === 0 ? <p className="text-body text-text-secondary">{t(`tabEmpty.${tab}`)}</p> : null}
 
-      {orders.filter((o) => orderTab(o) === tab).map((order) => (
-        <button key={order.id} type="button" className="w-full text-start" onClick={() => router.push(`/${locale}/orders/${order.id}`)}>
-          <ContextSurface className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-metadata text-text-secondary" dir="ltr">{order.orderNumber}</p>
-                <p className="truncate text-body font-medium text-text-primary">{order.previewTitles.join("، ") || order.sellerOrganization.name}</p>
-                <p className="text-metadata text-text-secondary">{t("soldBy", { seller: order.sellerOrganization.name })}</p>
-              </div>
-              <StatusLabel tone={order.cancelledAt ? "neutral" : order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : "neutral"}>
-                {order.cancelledAt ? t("cancelledRefunded") : t(`status.${order.status}`)}
-              </StatusLabel>
-            </div>
-            <p className="text-metadata text-text-secondary">{t("itemCount", { count: order.itemCount })}</p>
-            {order.paymentStatus || order.financingStatus || order.refundStatus || order.fulfillmentStatus ? (
-              <div className="flex flex-wrap gap-1.5">
-                {order.paymentStatus ? <StatusLabel tone="neutral">{tStatus(`payment.${order.paymentStatus}`)}</StatusLabel> : null}
-                {order.financingStatus ? <StatusLabel tone="neutral">{tStatus(`financing.${order.financingStatus}`)}</StatusLabel> : null}
-                {order.refundStatus ? <StatusLabel tone="neutral">{tStatus(`refund.${order.refundStatus}`)}</StatusLabel> : null}
-                {order.fulfillmentStatus ? (
-                  <StatusLabel tone={order.fulfillmentStatus === "DELIVERED" ? "success" : order.fulfillmentStatus === "FAILED" || order.fulfillmentStatus === "CANCELED" ? "urgent" : "neutral"}>
-                    {tStatus(`fulfillment.${order.fulfillmentStatus}`)}
-                  </StatusLabel>
-                ) : null}
-              </div>
-            ) : null}
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(order.createdAt))}</span>
-              <span className="text-body text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
-            </div>
-          </ContextSurface>
-        </button>
-      ))}
+      <ul className="flex flex-col divide-y divide-border-subtle border-y border-border-subtle">
+        {orders.filter((o) => orderTab(o) === tab).map((order) => {
+          const money = [
+            order.paymentStatus ? tStatus(`payment.${order.paymentStatus}`) : null,
+            order.financingStatus ? tStatus(`financing.${order.financingStatus}`) : null,
+            order.refundStatus ? tStatus(`refund.${order.refundStatus}`) : null,
+          ].filter(Boolean);
+          return (
+            <li key={order.id}>
+              <button type="button" className="order-row" onClick={() => router.push(`/${locale}/orders/${order.id}`)}>
+                <span className="order-row__main">
+                  <span className="text-metadata text-text-secondary" dir="ltr">{order.orderNumber}</span>
+                  <span className="truncate text-body font-semibold text-text-primary">{order.previewTitles.join(locale === "fa" ? "، " : ", ") || order.sellerOrganization.name}</span>
+                  <span className="text-metadata text-text-secondary">
+                    <span className="[unicode-bidi:isolate]">{t("soldBy", { seller: isolate(order.sellerOrganization.name) })}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span className="[unicode-bidi:isolate]">{t("itemCount", { count: order.itemCount })}</span>
+                  </span>
+                  {money.length ? <span className="text-metadata text-text-secondary">{money.join(" · ")}</span> : null}
+                </span>
+                <span className="order-row__side">
+                  <span className="flex flex-wrap justify-end gap-1.5">
+                    <StatusLabel tone={order.cancelledAt ? "neutral" : order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : "neutral"}>
+                      {order.cancelledAt ? t("cancelledRefunded") : t(`status.${order.status}`)}
+                    </StatusLabel>
+                    {order.fulfillmentStatus ? (
+                      <StatusLabel tone={order.fulfillmentStatus === "DELIVERED" ? "success" : order.fulfillmentStatus === "FAILED" || order.fulfillmentStatus === "CANCELED" ? "urgent" : "neutral"}>
+                        {tStatus(`fulfillment.${order.fulfillmentStatus}`)}
+                      </StatusLabel>
+                    ) : null}
+                  </span>
+                  <span className="text-body font-semibold text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
+                  <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(order.createdAt))}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

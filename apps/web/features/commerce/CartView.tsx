@@ -77,7 +77,7 @@ export function CartView() {
   if (!cart) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   if (cart.sellerGroups.length === 0) {
-    return <EmptyState title={t("empty")} icon={<ShoppingBag size={28} />} actionLabel={t("browseShop")} onAction={() => router.push(`/${locale}/shop`)} />;
+    return <EmptyState title={t("empty")} description={t("emptyHint")} icon={<ShoppingBag size={28} />} actionLabel={t("browseShop")} onAction={() => router.push(`/${locale}/shop`)} />;
   }
 
   const lines = cart.sellerGroups.flatMap((g) => g.lines);

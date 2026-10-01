@@ -37,7 +37,7 @@ describe("MyOrdersView", () => {
 
     renderWithIntl(<MyOrdersView />);
 
-    await waitFor(() => expect(screen.getByText("Sold by Pet Bazaar Tehran")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Sold by \u2068Pet Bazaar Tehran\u2069")).toBeTruthy());
     expect(screen.getByText("PL-1A2B3C4D")).toBeTruthy();
     expect(screen.getByText("Confirmed")).toBeTruthy();
     expect(screen.getByText("2 items")).toBeTruthy();

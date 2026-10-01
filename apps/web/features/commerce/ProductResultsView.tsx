@@ -236,7 +236,7 @@ export function ProductResultsView() {
 
           {error ? <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={() => setRetry((n) => n + 1)} /> : null}
           {!error && !data ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4" aria-label={t("loading")}>
+            <div className="product-grid" aria-label={t("loading")}>
               {Array.from({ length: 8 }, (_, i) => (
                 <Skeleton key={i} className="aspect-[3/4] w-full" />
               ))}
@@ -251,7 +251,7 @@ export function ProductResultsView() {
             />
           ) : null}
           {data && data.items.length ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+            <div className="product-grid">
               {data.items.map((product) => (
                 <ProductCard key={product.id} product={product} onClick={() => router.push(`/${locale}/shop/products/${product.id}`)} />
               ))}

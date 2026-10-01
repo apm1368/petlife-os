@@ -38,7 +38,7 @@ export function FavoritesView() {
       {items.length === 0 ? (
         <EmptyState title={t("empty")} description={t("emptyHint")} icon={<Heart size={28} />} actionLabel={t("browse")} onAction={() => router.push(`/${locale}/shop/products`)} />
       ) : (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+        <div className="product-grid">
           {items.map((product) => (
             <ProductCard key={product.id} product={product} onClick={() => router.push(`/${locale}/shop/products/${product.id}`)} />
           ))}

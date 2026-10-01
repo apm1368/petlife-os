@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { randomId } from "@/lib/id/random-id";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -23,6 +23,10 @@ import { addressesService } from "@/services/addresses.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { Stepper } from "@/features/shared/Stepper";
+import { formatCount } from "@/lib/number/format-number";
+import { localizeDigits } from "@/lib/date/jalali";
+import { isolate } from "@/lib/text/bidi";
 
 type Step =
   | "address"
@@ -60,6 +64,9 @@ export function CheckoutView() {
   const tCommon = useTranslations("common");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
+  const progress = (current: number) => (
+    <Stepper steps={locale === "fa" ? ["نشانی", "بازبینی", "ارسال", "پرداخت"] : ["Address", "Review", "Delivery", "Payment"]} current={current} label={locale === "fa" ? "مراحل تسویه" : "Checkout steps"} />
+  );
   const { householdId } = useActivePet();
 
   const [step, setStep] = useState<Step>("address");
@@ -320,9 +327,19 @@ export function CheckoutView() {
 
   if (!cart || (householdId && !addresses)) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
+  // Once delivery is chosen the checkout carries the real totals; before that the cart is the summary.
+  const priced = checkout && (step === "method" || step === "payment" || step.startsWith("financing-"));
+  const frame = (body: ReactNode) => (
+    <div className="flow-layout">
+      <div className="flow-main">{body}</div>
+      <CheckoutSummary cart={cart} checkout={priced ? checkout : null} />
+    </div>
+  );
+
   if (step === "address") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(0)}
         <h1 className="text-page-title text-text-primary">{t("address.title")}</h1>
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
@@ -340,9 +357,9 @@ export function CheckoutView() {
                   <p className="text-body font-medium text-text-primary">{address.label ?? address.recipient ?? address.city}</p>
                   {address.isDefault ? <StatusLabel tone="neutral">{t("address.default")}</StatusLabel> : null}
                 </div>
-                <p className="text-metadata text-text-secondary">{[address.city, address.addressLine].filter(Boolean).join("، ")}</p>
+                <p className="text-metadata text-text-secondary">{[address.city, address.addressLine].filter(Boolean).join(locale === "fa" ? "، " : ", ")}</p>
                 {address.postalCode || address.recipient ? (
-                  <p className="text-metadata text-text-secondary">{[address.recipient, address.postalCode ? t("address.postalCodeValue", { code: address.postalCode }) : null].filter(Boolean).join(" · ")}</p>
+                  <p className="text-metadata text-text-secondary">{[address.recipient, address.postalCode ? t("address.postalCodeValue", { code: localizeDigits(address.postalCode, locale) }) : null].filter(Boolean).join(" · ")}</p>
                 ) : null}
               </ContextSurface>
             </button>
@@ -407,8 +424,9 @@ export function CheckoutView() {
   }
 
   if (step === "safety-ack") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(1)}
         <h1 className="text-page-title text-text-primary">{t("safetyAck.title")}</h1>
         <ContextSurface className="flex flex-col gap-2">
           <StatusLabel tone="urgent">{t("safetyAck.warning")}</StatusLabel>
@@ -431,8 +449,9 @@ export function CheckoutView() {
   }
 
   if (step === "review") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(1)}
         <h1 className="text-page-title text-text-primary">{t("review.title")}</h1>
 
         {checkout.validationIssues.map((issue) => (
@@ -475,8 +494,9 @@ export function CheckoutView() {
   }
 
   if (step === "shipping") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(2)}
         <h1 className="text-page-title text-text-primary">{t("shipping.title")}</h1>
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
@@ -536,8 +556,9 @@ export function CheckoutView() {
   if (step === "method") {
     const onlineOptions = (paymentOptions ?? []).filter((o) => o.methodType === "ONLINE_PAYMENT");
     const installmentOptions = (paymentOptions ?? []).filter((o) => o.methodType === "INSTALLMENTS");
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("method.title")}</h1>
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
@@ -580,8 +601,9 @@ export function CheckoutView() {
   }
 
   if (step === "payment") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("payment.title")}</h1>
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("payment.amountDue")}</span>
@@ -618,8 +640,9 @@ export function CheckoutView() {
 
   if (step === "financing-eligibility") {
     const eligibility = financingIntent?.eligibility;
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("financingEligibility.title")}</h1>
         <ContextSurface className="flex flex-col gap-2">
           <StatusLabel tone={eligibility === "ELIGIBLE" ? "success" : eligibility === "NOT_ELIGIBLE" ? "urgent" : "neutral"}>
@@ -642,8 +665,9 @@ export function CheckoutView() {
   }
 
   if (step === "financing-plans") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("financingPlans.title")}</h1>
         <div className="flex flex-col gap-2">
           {(plans ?? []).map((plan) => (
@@ -673,8 +697,9 @@ export function CheckoutView() {
 
   if (step === "financing-authorize") {
     const plan = financingIntent?.selectedPlan;
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("financingAuthorize.title")}</h1>
         <ContextSurface className="flex flex-col gap-2">
           <p className="text-metadata text-text-secondary">{t("financingAuthorize.redirectNotice", { provider: financingIntent ? t(`method.provider.${financingIntent.provider}`) : "" })}</p>
@@ -784,5 +809,44 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-metadata text-text-secondary">{label}</span>
       <span className="text-body text-text-primary">{value}</span>
     </div>
+  );
+}
+
+function CheckoutSummary({ cart, checkout }: { cart: CartDto; checkout: CheckoutDto | null }) {
+  const t = useTranslations("commerce.checkout.summary");
+  const tCart = useTranslations("commerce.cart");
+  const tOrder = useTranslations("commerce.orderDetail");
+  const locale = useLocale() as "fa" | "en";
+  const lines = cart.sellerGroups.flatMap((g) => g.lines);
+  return (
+    <aside className="flow-summary" aria-label={t("title")}>
+      <h2>{t("title")}</h2>
+      <ul className="checkout-summary__lines">
+        {lines.map((line) => (
+          <li key={line.id}>
+            <span>
+              {isolate(line.productTitle)}
+              {line.quantity > 1 ? ` × ${formatCount(line.quantity, locale)}` : ""}
+            </span>
+            <span>{formatCurrency(line.lineTotal, locale)}</span>
+          </li>
+        ))}
+      </ul>
+      {checkout ? (
+        <dl>
+          <div><dt>{tOrder("subtotal")}</dt><dd>{formatCurrency(checkout.subtotalAmount, locale)}</dd></div>
+          {checkout.discountAmount > 0 ? <div><dt>{tOrder("discount")}</dt><dd>− {formatCurrency(checkout.discountAmount, locale)}</dd></div> : null}
+          <div><dt>{tOrder("delivery")}</dt><dd>{formatCurrency(checkout.deliveryAmount, locale)}</dd></div>
+          <div className="flow-summary__total"><dt>{tOrder("total")}</dt><dd>{formatCurrency(checkout.totalAmount, locale)}</dd></div>
+        </dl>
+      ) : (
+        <dl>
+          <div><dt>{tCart("itemsTotal", { count: cart.totalItems })}</dt><dd>{formatCurrency(cart.subtotalAmount + cart.discountAmount, locale)}</dd></div>
+          {cart.discountAmount > 0 ? <div><dt>{tCart("promotions")}</dt><dd>− {formatCurrency(cart.discountAmount, locale)}</dd></div> : null}
+          <div><dt>{tCart("delivery")}</dt><dd className="is-note">{t("deliveryNext")}</dd></div>
+          <div className="flow-summary__total"><dt>{tCart("subtotal")}</dt><dd>{formatCurrency(cart.subtotalAmount, locale)}</dd></div>
+        </dl>
+      )}
+    </aside>
   );
 }

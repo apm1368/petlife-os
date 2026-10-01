@@ -5,7 +5,7 @@ import { randomId } from "@/lib/id/random-id";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, Dialog, ErrorRecovery, Select, Skeleton, Star, StatusLabel } from "@petlife/ui";
+import { Button, Dialog, ErrorRecovery, Select, Skeleton, Star, StatusLabel } from "@petlife/ui";
 import type { OrderDetailDto, OrderItemDto, ShipmentTrackingDto } from "@petlife/types";
 import { commerceService, REFUND_REQUEST_REASONS, type RefundRequestReason } from "@/services/commerce.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
@@ -110,69 +110,26 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
         </p>
       ) : null}
 
-      {order.canCancel || order.canRequestRefund ? (
-        <ContextSurface className="flex flex-col gap-2">
-          {order.canCancel ? (
-            <>
-              <p className="text-body text-text-primary">{t("cancel.available")}</p>
-              <Button variant="secondary" onClick={() => setCancelOpen(true)}>
-                {t("cancel.button")}
-              </Button>
-            </>
-          ) : null}
-          {order.canRequestRefund ? (
-            <>
-              <p className="text-body text-text-primary">{order.fulfillment?.status === "FAILED" ? t("refundRequest.availableFailed") : t("refundRequest.available")}</p>
-              <Button variant="secondary" onClick={() => setRequestOpen(true)}>
-                {t("refundRequest.button")}
-              </Button>
-            </>
-          ) : null}
-        </ContextSurface>
-      ) : null}
-
+      <div className="split-layout">
+        <div className="split-main">
       {order.cancelledAt && order.cancelReason ? (
-        <ContextSurface className="flex flex-col gap-1">
+        <section className="split-section flex flex-col gap-1">
           <p className="text-metadata text-text-secondary">{t("cancel.reasonLabel")}</p>
           <p className="text-body text-text-primary">{order.cancelReason}</p>
-        </ContextSurface>
+        </section>
       ) : null}
-
-      <ContextSurface className="flex flex-col gap-3">
+      <section className="split-section flex flex-col gap-3">
         {order.items.map((item) => (
           <OrderItemRow key={item.id} orderId={orderId} item={item} canReview={delivered && order.status === "CONFIRMED" && !order.cancelledAt} petName={item.targetPetId ? pets.find((p) => p.id === item.targetPetId)?.name ?? t("unknownPet") : null} onReviewed={load} />
         ))}
-      </ContextSurface>
-
-      <ContextSurface className="flex flex-col gap-2">
-        <Row label={t("subtotal")} value={formatCurrency(order.subtotalAmount, locale)} />
-        {order.discountAmount > 0 ? <Row label={t("discount")} value={`− ${formatCurrency(order.discountAmount, locale)}`} /> : null}
-        <Row label={t("delivery")} value={formatCurrency(order.deliveryAmount, locale)} />
-        <div className="border-t border-border-subtle pt-2">
-          <Row label={t("total")} value={formatCurrency(order.totalAmount, locale)} strong />
-        </div>
-      </ContextSurface>
-
-      {order.paymentStatus || order.financingStatus ? (
-        <ContextSurface className="flex flex-col gap-2">
-          {order.paymentStatus ? (
-            <Row label={t("paymentStatusLabel")}>
-              <StatusLabel tone={order.paymentStatus === "CAPTURED" ? "success" : order.paymentStatus === "FAILED" ? "urgent" : "neutral"}>{tStatus(`payment.${order.paymentStatus}`)}</StatusLabel>
-            </Row>
-          ) : null}
-          {order.financingStatus ? (
-            <Row label={t("financingStatusLabel")}>
-              <StatusLabel tone={order.financingStatus === "APPROVED" ? "success" : order.financingStatus === "DECLINED" ? "urgent" : "neutral"}>{tStatus(`financing.${order.financingStatus}`)}</StatusLabel>
-            </Row>
-          ) : null}
-        </ContextSurface>
-      ) : null}
-
-      <ContextSurface className="flex flex-col gap-2">
+      </section>
+      <section className="split-section flex flex-col gap-2">
         <p className="text-section-title text-text-primary">{t("fulfillment")}</p>
         {order.fulfillment ? (
           <>
-            <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tStatus(`fulfillment.${order.fulfillment.status}`)}</StatusLabel>
+            <div>
+              <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tStatus(`fulfillment.${order.fulfillment.status}`)}</StatusLabel>
+            </div>
             {tracking?.shipment?.trackingCode ? (
               <p className="text-metadata text-text-secondary">
                 {t("trackingCode")}: <span dir="ltr">{tracking.shipment.trackingCode}</span>
@@ -196,10 +153,9 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
         ) : (
           <StatusLabel tone="neutral">{t("fulfillmentPlaceholder")}</StatusLabel>
         )}
-      </ContextSurface>
-
+      </section>
       {order.timeline.length ? (
-        <ContextSurface className="flex flex-col gap-2">
+        <section className="split-section flex flex-col gap-2">
           <p className="text-section-title text-text-primary">{t("timeline.title")}</p>
           <ol className="flex flex-col gap-2">
             {order.timeline.map((event, i) => (
@@ -209,11 +165,54 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
               </li>
             ))}
           </ol>
-        </ContextSurface>
+        </section>
       ) : null}
-
+        </div>
+        <aside className="split-aside">
+      {order.canCancel || order.canRequestRefund ? (
+        <section className="split-section flex flex-col gap-2">
+          {order.canCancel ? (
+            <>
+              <p className="text-body text-text-primary">{t("cancel.available")}</p>
+              <Button variant="secondary" onClick={() => setCancelOpen(true)}>
+                {t("cancel.button")}
+              </Button>
+            </>
+          ) : null}
+          {order.canRequestRefund ? (
+            <>
+              <p className="text-body text-text-primary">{order.fulfillment?.status === "FAILED" ? t("refundRequest.availableFailed") : t("refundRequest.available")}</p>
+              <Button variant="secondary" onClick={() => setRequestOpen(true)}>
+                {t("refundRequest.button")}
+              </Button>
+            </>
+          ) : null}
+        </section>
+      ) : null}
+      <section className="split-panel flex flex-col gap-2">
+        <Row label={t("subtotal")} value={formatCurrency(order.subtotalAmount, locale)} />
+        {order.discountAmount > 0 ? <Row label={t("discount")} value={`− ${formatCurrency(order.discountAmount, locale)}`} /> : null}
+        <Row label={t("delivery")} value={formatCurrency(order.deliveryAmount, locale)} />
+        <div className="border-t border-border-subtle pt-2">
+          <Row label={t("total")} value={formatCurrency(order.totalAmount, locale)} strong />
+        </div>
+      </section>
+      {order.paymentStatus || order.financingStatus ? (
+        <section className="split-section flex flex-col gap-2">
+          {order.paymentStatus ? (
+            <Row label={t("paymentStatusLabel")}>
+              <StatusLabel tone={order.paymentStatus === "CAPTURED" ? "success" : order.paymentStatus === "FAILED" ? "urgent" : "neutral"}>{tStatus(`payment.${order.paymentStatus}`)}</StatusLabel>
+            </Row>
+          ) : null}
+          {order.financingStatus ? (
+            <Row label={t("financingStatusLabel")}>
+              <StatusLabel tone={order.financingStatus === "APPROVED" ? "success" : order.financingStatus === "DECLINED" ? "urgent" : "neutral"}>{tStatus(`financing.${order.financingStatus}`)}</StatusLabel>
+            </Row>
+          ) : null}
+        </section>
+      ) : null}
       {order.refundRequests.length || order.refunds.length ? (
-        <ContextSurface className="flex flex-col gap-3">
+        <section className="split-section flex flex-col gap-3">
           <p className="text-section-title text-text-primary">{t("refunds.title")}</p>
           {order.refundRequests.map((request) => (
             <div key={request.id} className="flex flex-col gap-1 border-b border-border-subtle pb-2 last:border-b-0 last:pb-0">
@@ -237,25 +236,18 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                 <StatusLabel tone={refund.status === "SUCCEEDED" ? "success" : refund.status === "FAILED" ? "urgent" : "neutral"}>{tStatus(`refund.${refund.status}`)}</StatusLabel>
                 <span className="text-body text-text-primary">{formatCurrency(refund.amount, locale)}</span>
               </div>
-              {refund.providerReference ? (
-                <p className="text-metadata text-text-secondary">
-                  {t("refunds.providerReference")}: <span dir="ltr">{refund.providerReference}</span>
-                </p>
-              ) : null}
               <p className="text-metadata text-text-secondary">{t("refunds.requestedAt", { when: dateTime(refund.createdAt, locale) })}</p>
             </div>
           ))}
-        </ContextSurface>
+        </section>
       ) : null}
-
       {order.shippingAddress ? (
-        <ContextSurface className="flex flex-col gap-1">
+        <section className="split-section flex flex-col gap-1">
           <p className="text-metadata text-text-secondary">{t("shippingAddress")}</p>
           <p className="text-body text-text-primary">{order.shippingAddress.addressLine}</p>
           <p className="text-metadata text-text-secondary">{order.shippingAddress.city}</p>
-        </ContextSurface>
+        </section>
       ) : null}
-
       <div className="flex flex-wrap gap-3">
         {order.checkoutId ? (
           <Link href={`/${locale}/checkout/${order.checkoutId}/ops`} className="text-metadata text-text-secondary underline">
@@ -264,9 +256,11 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
         ) : null}
       </div>
 
-      <Button variant="ghost" onClick={() => router.push(`/${locale}/support/new?relatedEntityType=ORDER&relatedEntityId=${orderId}&category=ORDER`)}>
+      <Button variant="secondary" className="self-start" onClick={() => router.push(`/${locale}/support/new?relatedEntityType=ORDER&relatedEntityId=${orderId}&category=ORDER`)}>
         {t("getSupport")}
       </Button>
+        </aside>
+      </div>
 
       <Dialog open={cancelOpen} onClose={() => setCancelOpen(false)} title={t("cancel.title")}>
         <div className="flex flex-col gap-3">
@@ -343,7 +337,7 @@ function OrderItemRow({ orderId, item, canReview, petName, onReviewed }: { order
         <button type="button" className="text-start text-body text-text-primary hover:underline" onClick={() => router.push(`/${locale}/shop/products/${item.productId}`)}>
           {item.productTitleSnapshot}
         </button>
-        <p className="text-body text-text-primary">{formatCurrency(item.totalPrice, locale)}</p>
+        <p className="shrink-0 whitespace-nowrap text-body text-text-primary">{formatCurrency(item.totalPrice, locale)}</p>
       </div>
       {item.variantTitleSnapshot ? <p className="text-metadata text-text-secondary">{item.variantTitleSnapshot}</p> : null}
       <p className="text-metadata text-text-secondary">{t("quantityAndUnitPrice", { quantity: item.quantity.toLocaleString(locale === "fa" ? "fa-IR" : "en-US"), price: formatCurrency(item.unitPrice, locale) })}</p>
