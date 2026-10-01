@@ -183,6 +183,40 @@ async function main() {
     update: { active: true, expiresAt: days(60) },
   });
 
+  // Showcase: the owner's support history and the admin queue — every status, several categories and
+  // priorities, each with the user's opening message (and a team reply where the case has progressed).
+  const CASES: [string, "ACCOUNT" | "PET" | "HEALTH" | "BOOKING" | "PAYMENT" | "REFUND" | "ORDER" | "DELIVERY" | "OTHER", "LOW" | "NORMAL" | "HIGH" | "URGENT", "OPEN" | "IN_PROGRESS" | "WAITING_ON_USER" | "WAITING_ON_INTERNAL" | "RESOLVED" | "CLOSED", string, string, number][] = [
+    ["login", "ACCOUNT", "HIGH", "OPEN", "کد ورود به موبایلم نمی‌رسد", "از دیروز کد یک‌بارمصرف دریافت نمی‌کنم.", -1],
+    ["order-late", "DELIVERY", "NORMAL", "IN_PROGRESS", "سفارش غذای سگ هنوز نرسیده", "سفارش سه روز پیش ثبت شده و وضعیتش تغییری نکرده.", -3],
+    ["refund", "REFUND", "NORMAL", "WAITING_ON_INTERNAL", "بازپرداخت سفارش لغوشده", "سفارش را لغو کردم ولی مبلغ هنوز برنگشته.", -6],
+    ["booking-change", "BOOKING", "LOW", "WAITING_ON_USER", "تغییر ساعت نوبت آرایش", "می‌خواهم نوبت را یک ساعت جابه‌جا کنم.", -4],
+    ["pet-transfer", "PET", "NORMAL", "OPEN", "انتقال پروفایل پیشی به خانوادهٔ دیگر", "پیشی را به خواهرم سپرده‌ام؛ پروفایل را چطور منتقل کنم؟", -2],
+    ["health-record", "HEALTH", "NORMAL", "RESOLVED", "نتیجهٔ آزمایش در پرونده نیست", "کلینیک گفت نتیجه را فرستاده ولی در پرونده نمی‌بینم.", -15],
+    ["payment-double", "PAYMENT", "URGENT", "IN_PROGRESS", "مبلغ دو بار کسر شده", "برای عضویت دو پیامک کسر مبلغ گرفتم.", -1],
+    ["wrong-item", "ORDER", "NORMAL", "CLOSED", "کالای اشتباه ارسال شده", "به‌جای قلادهٔ متوسط، اندازهٔ کوچک رسید.", -40],
+    ["suggestion", "OTHER", "LOW", "CLOSED", "پیشنهاد: یادآور خرید غذا", "کاش برنامه زمان تمام‌شدن غذا را یادآوری کند.", -60],
+    ["email-change", "ACCOUNT", "NORMAL", "RESOLVED", "تغییر ایمیل حساب", "ایمیل قدیمی‌ام دیگر فعال نیست.", -25],
+    ["vet-share", "HEALTH", "HIGH", "WAITING_ON_USER", "دامپزشک پرونده را نمی‌بیند", "اشتراک پرونده را فعال کردم ولی دامپزشک چیزی نمی‌بیند.", -5],
+  ];
+  for (const [i, [key, category, priority, status, subject, description, daysAgo]] of CASES.entries()) {
+    const createdAt = days(daysAgo);
+    const progressed = status !== "OPEN";
+    const done = status === "RESOLVED" || status === "CLOSED";
+    const supportCase = await db.supportCase.upsert({
+      where: { id: id(`case:${key}`) },
+      create: {
+        id: id(`case:${key}`), caseNumber: `CASE-QA8-${String(i + 1).padStart(3, "0")}`, requesterUserId: owner.id, householdId: ownerHome.id, subject: `${subject} (نمایشی)`, description, category, priority, status,
+        assignedAdminId: progressed ? adminUser.id : null, createdAt, firstResponseAt: progressed ? new Date(createdAt.getTime() + 3 * 3_600_000) : null, lastUserMessageAt: createdAt,
+        lastAdminMessageAt: progressed ? new Date(createdAt.getTime() + 3 * 3_600_000) : null, resolvedAt: done ? new Date(createdAt.getTime() + 2 * 86_400_000) : null, closedAt: status === "CLOSED" ? new Date(createdAt.getTime() + 3 * 86_400_000) : null,
+      },
+      update: {},
+    });
+    await db.supportMessage.upsert({ where: { id: id(`case-msg:${key}:user`) }, create: { id: id(`case-msg:${key}:user`), caseId: supportCase.id, authorType: "USER", authorUserId: owner.id, body: description, visibility: "PUBLIC", createdAt }, update: {} });
+    if (progressed) {
+      await db.supportMessage.upsert({ where: { id: id(`case-msg:${key}:admin`) }, create: { id: id(`case-msg:${key}:admin`), caseId: supportCase.id, authorType: "ADMIN", authorAdminId: adminUser.id, body: done ? "مشکل برطرف شد. اگر دوباره رخ داد همین‌جا بنویسید. (پاسخ نمایشی)" : "پیام شما را دریافت کردیم و در حال بررسی هستیم. (پاسخ نمایشی)", visibility: "PUBLIC", createdAt: new Date(createdAt.getTime() + 3 * 3_600_000) }, update: {} });
+    }
+  }
+
   console.log("Batch 8 QA seed ready: owner, family(+member,+invitee), trial, expired, cancelled, pastdue, grace, security(+sitter), comp — all @example.test.");
 }
 

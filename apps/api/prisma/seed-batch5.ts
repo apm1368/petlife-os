@@ -116,6 +116,58 @@ const LISTINGS: ListingSeed[] = [
     unit: { name: "اتاق دونفره", quantity: 2, maxOccupancy: 2, price: 12_000_000 },
     plans: [],
   },
+  // Showcase additions — enough published stays for the search and destination screens to read as a real catalogue.
+  {
+    key: "isfahan", partner: "B", type: "HOTEL", title: "هتل نقش جهان اصفهان (نمایشی)", city: "اصفهان", province: "اصفهان", lat: 32.6575, lng: 51.6776, image: "/images/travel/hotel-shiraz.svg",
+    description: "هتل چهارستاره در فاصلهٔ پیاده تا میدان نقش جهان. دو طبقهٔ مخصوص مهمانان همراه حیوان با کف‌پوش قابل شست‌وشو.",
+    status: "PUBLISHED", bookingMode: "INSTANT_BOOKING", verified: true, amenities: ["BREAKFAST", "WIFI", "ELEVATOR", "AIR_CONDITIONING", "PARKING"], checkInFrom: "14:00", checkOutUntil: "12:00",
+    policy: { dogsAllowed: true, catsAllowed: true, otherAllowed: false, maxPets: 1, maxWeightKg: 12, minWeightKg: null, petFeeIrr: 4_000_000, depositIrr: null, vaccinationRequired: true, leashRequired: true },
+    unit: { name: "اتاق دبل حیوان‌پذیر", quantity: 4, maxOccupancy: 2, price: 32_000_000, maxPets: 1, bedInfo: "۱ تخت دونفره" },
+    plans: [{ key: "flex", name: "انعطاف‌پذیر — پرداخت در محل", ...PLAN_DEFAULTS, includesBreakfast: true, cancellationType: "FREE_UNTIL", freeCancellationDays: 2, lateRefundPercent: 0, paymentTiming: "PAY_AT_PROPERTY" }],
+  },
+  {
+    key: "tabriz", partner: "A", type: "GUESTHOUSE", title: "خانهٔ قدیمی تبریز (نمایشی)", city: "تبریز", province: "آذربایجان شرقی", lat: 38.0800, lng: 46.2919, image: "/images/travel/guesthouse-rasht.svg",
+    description: "مهمان‌خانهٔ خانوادگی در بافت تاریخی با حیاط آجری. گربه‌ها پذیرفته می‌شوند؛ سگ فقط با هماهنگی قبلی.",
+    status: "PUBLISHED", bookingMode: "REQUEST_TO_BOOK", verified: true, amenities: ["YARD", "BREAKFAST", "HEATING", "WIFI"], checkInFrom: "13:00", checkOutUntil: "11:00",
+    policy: { dogsAllowed: false, catsAllowed: true, otherAllowed: false, maxPets: 2, maxWeightKg: null, minWeightKg: null, petFeeIrr: 0, depositIrr: null },
+    unit: { name: "اتاق حیاطی", quantity: 3, maxOccupancy: 3, price: 14_000_000, maxPets: 2 },
+    plans: [{ key: "std", name: "استاندارد — پرداخت در محل", ...PLAN_DEFAULTS, cancellationType: "FREE_UNTIL", freeCancellationDays: 3, lateRefundPercent: 0, paymentTiming: "PAY_AT_PROPERTY" }],
+  },
+  {
+    key: "chalus", partner: "A", type: "VILLA", title: "ویلای جنگلی چالوس (نمایشی)", city: "چالوس", province: "مازندران", lat: 36.6550, lng: 51.4200, image: "/images/travel/villa-ramsar.svg",
+    description: "ویلای سه‌خوابه در دل جنگل با حیاط بزرگ محصور؛ مناسب سگ‌های بزرگ‌جثه. نزدیک‌ترین دامپزشکی ۱۵ دقیقه فاصله دارد.",
+    status: "PUBLISHED", bookingMode: "INSTANT_BOOKING", verified: true, amenities: ["FENCED_YARD", "PARKING", "KITCHEN", "HEATING", "PET_BED"], checkInFrom: "15:00", checkOutUntil: "12:00", houseRules: "حیوان در جنگل اطراف همیشه با قلاده باشد.",
+    policy: { dogsAllowed: true, catsAllowed: true, otherAllowed: false, maxPets: 3, maxWeightKg: 45, minWeightKg: null, petFeeIrr: 6_000_000, depositIrr: 15_000_000, vaccinationRequired: true, leashRequired: true },
+    unit: { name: "کل ویلا", quantity: 1, maxOccupancy: 7, price: 62_000_000, maxPets: 3, bedInfo: "۳ تخت دونفره و ۱ کاناپه" },
+    plans: [
+      { key: "flex", name: "انعطاف‌پذیر — پرداخت در محل", ...PLAN_DEFAULTS, cancellationType: "FREE_UNTIL", freeCancellationDays: 5, lateRefundPercent: 30, paymentTiming: "PAY_AT_PROPERTY" },
+      { key: "saver", name: "اقتصادی — غیرقابل استرداد", ...PLAN_DEFAULTS, priceModifierPercent: -12, cancellationType: "NON_REFUNDABLE", paymentTiming: "PAY_NOW", minNights: 2 },
+    ],
+  },
+  {
+    key: "mashhad", partner: "B", type: "HOTEL", title: "هتل آپارتمان مشهد (نمایشی)", city: "مشهد", province: "خراسان رضوی", lat: 36.2972, lng: 59.6067, image: "/images/travel/hotel-shiraz.svg",
+    description: "سوئیت‌های آشپزخانه‌دار با پارکینگ اختصاصی. فقط حیوانات کوچک‌جثه؛ پیاده‌روی در فضای سبز مجاور.",
+    status: "PUBLISHED", bookingMode: "INSTANT_BOOKING", verified: false, amenities: ["KITCHEN", "PARKING", "WIFI", "AIR_CONDITIONING"], checkInFrom: "14:00", checkOutUntil: "12:00",
+    policy: { dogsAllowed: true, catsAllowed: true, otherAllowed: false, maxPets: 1, maxWeightKg: 8, minWeightKg: null, petFeeIrr: 2_500_000, depositIrr: null },
+    unit: { name: "سوئیت یک‌خوابه", quantity: 5, maxOccupancy: 3, price: 22_000_000, maxPets: 1 },
+    plans: [{ key: "std", name: "پرداخت در محل", ...PLAN_DEFAULTS, cancellationType: "PARTIAL", lateRefundPercent: 50, paymentTiming: "PAY_AT_PROPERTY" }],
+  },
+  {
+    key: "karaj-pethotel", partner: "C", type: "PET_HOTEL", title: "هتل حیوانات کرج — شعبهٔ مهرشهر (نمایشی)", city: "کرج", province: "البرز", lat: 35.8150, lng: 50.9300, image: "/images/travel/pet-hotel-tehran.svg",
+    description: "نگهداری روزانه و شبانه با حیاط بازی، دوربین آنلاین و گزارش روزانه به صاحب حیوان.",
+    status: "PUBLISHED", bookingMode: "REQUEST_TO_BOOK", verified: true, amenities: ["PET_SITTING", "GROOMING", "VET_ON_CALL"], checkInFrom: "08:00", checkOutUntil: "20:00",
+    policy: { dogsAllowed: true, catsAllowed: true, otherAllowed: true, maxPets: 2, maxWeightKg: 50, minWeightKg: null, petFeeIrr: 0, depositIrr: null, vaccinationRequired: true },
+    unit: { name: "اتاقک بزرگ", quantity: 8, maxOccupancy: 1, price: 5_000_000, maxPets: 1 },
+    plans: [{ key: "std", name: "پرداخت در محل", ...PLAN_DEFAULTS, cancellationType: "FREE_UNTIL", freeCancellationDays: 1, lateRefundPercent: 0, paymentTiming: "PAY_AT_PROPERTY" }],
+  },
+  {
+    key: "yazd", partner: "B", type: "ECO_LODGE", title: "اقامتگاه بوم‌گردی بادگیر یزد (نمایشی)", city: "یزد", province: "یزد", lat: 31.8974, lng: 54.3569, image: "/images/travel/ecolodge-kashan.svg",
+    description: "خانهٔ سنتی با بادگیر و حوض. سگ‌ها فقط در حیاط؛ گربه‌ها در اتاق هم پذیرفته می‌شوند.",
+    status: "PUBLISHED", bookingMode: "INSTANT_BOOKING", verified: true, amenities: ["YARD", "BREAKFAST", "AIR_CONDITIONING"], checkInFrom: "14:00", checkOutUntil: "12:00",
+    policy: { dogsAllowed: true, catsAllowed: true, otherAllowed: false, maxPets: 2, maxWeightKg: 20, minWeightKg: null, petFeeIrr: 1_500_000, depositIrr: null, notes: "سگ‌ها شب را در حیاط سرپوشیده می‌گذرانند." },
+    unit: { name: "اتاق شاه‌نشین", quantity: 2, maxOccupancy: 4, price: 20_000_000, maxPets: 2 },
+    plans: [{ key: "std", name: "با صبحانه — پرداخت در محل", ...PLAN_DEFAULTS, includesBreakfast: true, cancellationType: "FREE_UNTIL", freeCancellationDays: 2, lateRefundPercent: 0, paymentTiming: "PAY_AT_PROPERTY" }],
+  },
 ];
 
 const PLACES = [
@@ -125,6 +177,11 @@ const PLACES = [
   { key: "shiraz-cafe", name: "کافه نارنجستان شیراز (نمایشی)", category: "CAFE", city: "شیراز", province: "فارس", lat: 29.6200, lng: 52.5450, leash: null, water: null, area: null },
   { key: "tehran-park", name: "پارک سگ‌های شمال تهران (نمایشی)", category: "PARK", city: "تهران", province: "تهران", lat: 35.8000, lng: 51.4300, leash: false, water: true, area: true },
   { key: "tehran-store", name: "فروشگاه لوازم سفر حیوانات تهران (نمایشی)", category: "STORE", city: "تهران", province: "تهران", lat: 35.7600, lng: 51.4100, leash: true, water: null, area: false },
+  { key: "isfahan-park", name: "پارک ناژوان اصفهان — مسیر سگ‌گردانی (نمایشی)", category: "PARK", city: "اصفهان", province: "اصفهان", lat: 32.6290, lng: 51.6180, leash: true, water: true, area: false },
+  { key: "isfahan-cafe", name: "کافه چهارباغ اصفهان (نمایشی)", category: "CAFE", city: "اصفهان", province: "اصفهان", lat: 32.6480, lng: 51.6690, leash: true, water: true, area: null },
+  { key: "tehran-cafe", name: "کافه پاتوق حیوانات تجریش (نمایشی)", category: "CAFE", city: "تهران", province: "تهران", lat: 35.8040, lng: 51.4270, leash: null, water: true, area: null },
+  { key: "chalus-beach", name: "ساحل نمک‌آبرود — بخش حیوان‌پذیر (نمایشی)", category: "BEACH", city: "چالوس", province: "مازندران", lat: 36.6900, lng: 51.3300, leash: true, water: false, area: true },
+  { key: "karaj-store", name: "فروشگاه پت‌شاپ گوهردشت کرج (نمایشی)", category: "STORE", city: "کرج", province: "البرز", lat: 35.8300, lng: 50.9500, leash: true, water: null, area: false },
 ] as const;
 
 async function main() {
@@ -307,6 +364,26 @@ async function main() {
     update: {},
   });
 
+  // Showcase additions: trips across every state so "My trips" and each pet's travel tab read as real history.
+  const TRIPS: { key: string; pet: keyof typeof pets; to: string; from?: string; depart: number; back: number | null; mode: "AIR" | "ROAD" | "RAIL"; status: "DRAFT" | "PLANNING" | "READY" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"; note: string }[] = [
+    { key: "isfahan", pet: "nazi", to: "اصفهان", depart: 9, back: 12, mode: "RAIL", status: "READY", note: "دیدار با خانواده (نمایشی)" },
+    { key: "mashhad", pet: "cookie", to: "مشهد", depart: 40, back: 45, mode: "AIR", status: "PLANNING", note: "سفر هوایی؛ باکس حمل لازم است (نمایشی)" },
+    { key: "chalus", pet: "bamby", to: "چالوس", depart: 2, back: 4, mode: "ROAD", status: "READY", note: "آخر هفتهٔ جنگل (نمایشی)" },
+    { key: "yazd-draft", pet: "nazi", to: "یزد", depart: 70, back: null, mode: "ROAD", status: "DRAFT", note: "هنوز تاریخ قطعی نیست (نمایشی)" },
+    { key: "tabriz-now", pet: "cookie", to: "تبریز", depart: -1, back: 3, mode: "ROAD", status: "IN_PROGRESS", note: "در راه تبریز (نمایشی)" },
+    { key: "kashan-done", pet: "cookie", to: "کاشان", depart: -30, back: -27, mode: "ROAD", status: "COMPLETED", note: "سفر کوتاه به کاشان (نمایشی)" },
+    { key: "shiraz-done", pet: "nazi", to: "شیراز", depart: -90, back: -84, mode: "AIR", status: "COMPLETED", note: "تعطیلات نوروز (نمایشی)" },
+    { key: "rasht-cancel", pet: "bamby", to: "رشت", depart: -12, back: -10, mode: "ROAD", status: "CANCELLED", note: "به‌خاطر بیماری بامبی لغو شد (نمایشی)" },
+    { key: "karaj", pet: "bamby", to: "کرج", depart: 15, back: 16, mode: "ROAD", status: "PLANNING", note: "سپردن بامبی به هتل حیوانات (نمایشی)" },
+  ];
+  for (const t of TRIPS) {
+    await db.trip.upsert({
+      where: { id: id(`trip:${t.key}`) },
+      create: { id: id(`trip:${t.key}`), householdId, petId: pets[t.pet].id, createdByUserId: traveller.id, originCountry: "IR", originCity: t.from ?? "تهران", destinationCountry: "IR", destinationCity: t.to, departAt: new Date(midnight(t.depart).getTime() + 8 * 3_600_000), returnAt: t.back === null ? null : midnight(t.back), travelMode: t.mode, status: t.status, notes: t.note },
+      update: {},
+    });
+  }
+
   // ---- Insurer, products, member, applications
   const insurerId = id("insurer");
   await db.insuranceProvider.upsert({ where: { id: insurerId }, create: { id: insurerId, name: "بیمهٔ همراه پت (نمایشی)", country: "IR", status: "VERIFIED", isPubliclyListed: true, description: "بیمه‌گر نمایشی برای QA." }, update: {} });
@@ -322,6 +399,27 @@ async function main() {
     create: { id: productPlus, providerId: insurerId, name: "طرح جامع سگ (نمایشی)", country: "IR", speciesEligibility: ["DOG"], coverageTypes: ["ACCIDENT", "ILLNESS", "SURGERY", "HOSPITALIZATION"], coverageSummary: "حوادث، بیماری، جراحی و بستری با فرانشیز ۲۰٪.", exclusions: ["بیماری‌های پیشین", "دندان‌پزشکی زیبایی", "نژادهای دارای بیماری ارثی شناخته‌شده (طبق فهرست بیمه‌گر)"], annualLimitIrr: 900_000_000, coinsurancePercent: 20, waitingPeriodDays: 30, premiumMinIrr: 12_000_000, premiumMaxIrr: 20_000_000, maxAgeMonths: 96, status: "VERIFIED", isPubliclyListed: true },
     update: {},
   });
+  // Showcase additions: a second insurer and enough plans for the comparison list to be meaningful.
+  const insurer2 = id("insurer:asayesh");
+  await db.insuranceProvider.upsert({ where: { id: insurer2 }, create: { id: insurer2, name: "بیمهٔ آسایش حیوانات (نمایشی)", country: "IR", status: "VERIFIED", isPubliclyListed: true, description: "بیمه‌گر نمایشی دوم برای QA." }, update: {} });
+  const PLANS: { key: string; provider: string; name: string; species: ("DOG" | "CAT")[]; types: ("ACCIDENT" | "ILLNESS" | "SURGERY" | "DIAGNOSTICS" | "MEDICATION" | "DENTAL" | "PREVENTIVE" | "HOSPITALIZATION" | "EMERGENCY")[]; summary: string; exclusions: string[]; limit: number; wait: number; min: number; max: number; maxAge: number; co?: number }[] = [
+    { key: "cat-basic", provider: insurerId, name: "طرح پایهٔ گربه (نمایشی)", species: ["CAT"], types: ["ACCIDENT", "ILLNESS"], summary: "بیماری‌ها و حوادث رایج گربه با سقف سالانهٔ متوسط.", exclusions: ["بیماری‌های پیشین", "عقیم‌سازی"], limit: 250_000_000, wait: 21, min: 5_000_000, max: 8_000_000, maxAge: 120 },
+    { key: "senior", provider: insurerId, name: "طرح حیوانات مسن (نمایشی)", species: ["DOG", "CAT"], types: ["ILLNESS", "DIAGNOSTICS", "MEDICATION"], summary: "تمرکز بر آزمایش‌ها و داروهای دورهٔ سالمندی.", exclusions: ["بیماری‌های پیشین", "جراحی‌های انتخابی"], limit: 400_000_000, wait: 45, min: 15_000_000, max: 26_000_000, maxAge: 168, co: 30 },
+    { key: "preventive", provider: insurerId, name: "بستهٔ مراقبت پیشگیرانه (نمایشی)", species: ["DOG", "CAT"], types: ["PREVENTIVE", "DENTAL"], summary: "واکسن‌ها، معاینهٔ سالانه و جرم‌گیری دندان.", exclusions: ["درمان بیماری", "جراحی"], limit: 60_000_000, wait: 0, min: 3_000_000, max: 4_500_000, maxAge: 180 },
+    { key: "asayesh-dog", provider: insurer2, name: "طرح جامع سگ آسایش (نمایشی)", species: ["DOG"], types: ["ACCIDENT", "ILLNESS", "SURGERY", "HOSPITALIZATION", "MEDICATION"], summary: "پوشش کامل درمان و جراحی با فرانشیز ۱۵٪.", exclusions: ["بیماری‌های پیشین", "رفتار درمانی", "تغذیهٔ درمانی"], limit: 1_200_000_000, wait: 30, min: 16_000_000, max: 28_000_000, maxAge: 96, co: 15 },
+    { key: "asayesh-cat", provider: insurer2, name: "طرح جامع گربه آسایش (نمایشی)", species: ["CAT"], types: ["ACCIDENT", "ILLNESS", "SURGERY", "HOSPITALIZATION"], summary: "درمان، جراحی و بستری گربه با شبکهٔ کلینیک‌های طرف قرارداد.", exclusions: ["بیماری‌های پیشین", "عقیم‌سازی"], limit: 700_000_000, wait: 30, min: 10_000_000, max: 17_000_000, maxAge: 120, co: 15 },
+    { key: "asayesh-accident", provider: insurer2, name: "طرح فقط حوادث آسایش (نمایشی)", species: ["DOG", "CAT"], types: ["ACCIDENT", "EMERGENCY"], summary: "اقتصادی‌ترین طرح؛ فقط حوادث و فوریت‌ها.", exclusions: ["بیماری", "واکسیناسیون"], limit: 150_000_000, wait: 3, min: 2_500_000, max: 4_000_000, maxAge: 144 },
+    { key: "asayesh-surgery", provider: insurer2, name: "طرح جراحی و بستری آسایش (نمایشی)", species: ["DOG", "CAT"], types: ["SURGERY", "HOSPITALIZATION"], summary: "فقط هزینه‌های جراحی و بستری؛ مکمل مناسب برای طرح پایه.", exclusions: ["جراحی‌های زیبایی", "بیماری‌های پیشین"], limit: 500_000_000, wait: 60, min: 7_000_000, max: 12_000_000, maxAge: 108, co: 20 },
+    { key: "asayesh-diag", provider: insurer2, name: "طرح تشخیص و آزمایش آسایش (نمایشی)", species: ["DOG", "CAT"], types: ["DIAGNOSTICS", "MEDICATION"], summary: "آزمایش خون، تصویربرداری و داروهای تجویزی.", exclusions: ["جراحی", "بیماری‌های پیشین"], limit: 200_000_000, wait: 14, min: 4_500_000, max: 7_500_000, maxAge: 156 },
+  ];
+  for (const p of PLANS) {
+    const planProductId = id(`product:${p.key}`);
+    await db.insuranceProduct.upsert({
+      where: { id: planProductId },
+      create: { id: planProductId, providerId: p.provider, name: p.name, country: "IR", speciesEligibility: p.species, coverageTypes: p.types, coverageSummary: p.summary, exclusions: p.exclusions, annualLimitIrr: p.limit, coinsurancePercent: p.co ?? null, waitingPeriodDays: p.wait, premiumMinIrr: p.min, premiumMaxIrr: p.max, maxAgeMonths: p.maxAge, status: "VERIFIED", isPubliclyListed: true },
+      update: {},
+    });
+  }
   const underwriter = await user("batch5-insurer@example.test", "کارشناس بیمه (نمایشی)");
   await db.insurerMembership.upsert({ where: { providerId_userId: { providerId: insurerId, userId: underwriter.id } }, create: { providerId: insurerId, userId: underwriter.id, role: "UNDERWRITING" }, update: {} });
   const consentText = "I agree that PET LIFE shares this application, my contact details and my pet's species, breed, age and weight with the insurer so it can review the application. This is not an insurance policy; cover starts only if the insurer issues one.";

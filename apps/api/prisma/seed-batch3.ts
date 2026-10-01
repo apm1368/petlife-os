@@ -44,7 +44,7 @@ interface ProviderSeed {
   type: ProviderType;
   description: string;
   specialties: string[];
-  cover: string;
+  cover?: string;
   region: string;
   address: string;
   lat: number;
@@ -199,6 +199,93 @@ const PROVIDERS: ProviderSeed[] = [
       { key: "train", name: "جلسه آموزش", type: "TRAINING_SESSION", category: "TRAINING", minutes: 60, price: 9_000_000, paymentMode: "FULL_PREPAYMENT", variants: [{ key: "single", name: "جلسه تکی", minutes: 60, price: 9_000_000 }, { key: "assessment", name: "ارزیابی رفتار", minutes: 90, price: 12_000_000 }] },
     ],
   },
+  // Showcase additions — enough verified vets and services for "find a vet" and discovery to read as a real directory.
+  ...[
+    ["pasdaran", "کلینیک دامپزشکی پاسداران", "پاسداران", "تهران، پاسداران، بوستان نهم", 35.7700, 51.4700, "دکتر الهام نیک‌نام", ["داخلی", "پوست", "واکسیناسیون"]],
+    ["karaj", "درمانگاه دامپزشکی گوهردشت کرج", "گوهردشت", "کرج، گوهردشت، بلوار موذن", 35.8320, 50.9550, "دکتر محمد رستمی", ["جراحی", "ارتوپدی"]],
+    ["isfahan", "کلینیک دامپزشکی چهارباغ اصفهان", "چهارباغ", "اصفهان، چهارباغ بالا", 32.6450, 51.6680, "دکتر زهرا میرزایی", ["گربه‌ها", "دندانپزشکی"]],
+    ["shiraz", "کلینیک دامپزشکی ارم شیراز", "معالی‌آباد", "شیراز، معالی‌آباد، خیابان عدالت", 29.6480, 52.4900, "دکتر کیوان فرهادی", ["داخلی", "تغذیه"]],
+    ["mashhad", "کلینیک دامپزشکی سجاد مشهد", "سجاد", "مشهد، بلوار سجاد", 36.3200, 59.5600, "دکتر سمیرا قاسمی", ["پوست", "آلرژی"]],
+    ["tajrish", "کلینیک دامپزشکی تجریش", "تجریش", "تهران، تجریش، خیابان دربند", 35.8050, 51.4300, "دکتر بابک امیری", ["قلب", "تصویربرداری"]],
+  ].map(([key, name, region, address, lat, lng, vet, specialties]): ProviderSeed => ({
+    key: key as string,
+    name: `${name as string} (نمایشی)`,
+    type: "VET_CLINIC",
+    description: `درمانگاه حیوانات کوچک با ویزیت عمومی، واکسیناسیون و پیگیری منظم. تخصص‌ها: ${(specialties as string[]).join("، ")}.`,
+    specialties: specialties as string[],
+    region: region as string,
+    address: address as string,
+    lat: lat as number,
+    lng: lng as number,
+    policies: "لطفاً کارت واکسن و سوابق درمانی را همراه داشته باشید.",
+    faqs: [{ question: "پرونده سلامت حیوان را می‌بینید؟", answer: "فقط اگر شما در PET LIFE دسترسی را به اشتراک بگذارید." }],
+    staff: [{ key: "owner", name: vet as string, title: "دامپزشک مسئول", bio: "دامپزشک حیوانات کوچک (نمایشی).", role: "OWNER" }],
+    hours: ["09:00", "21:00"],
+    resources: [{ key: "room1", name: "اتاق معاینه", type: "EXAM_ROOM" }],
+    services: [
+      { key: "general", name: "ویزیت عمومی", type: "GENERAL_VET_VISIT", category: "VET", minutes: 30, price: 12_000_000, resource: "EXAM_ROOM" },
+      { key: "vaccine", name: "واکسیناسیون", type: "VACCINATION", category: "VET", minutes: 20, price: 7_000_000, resource: "EXAM_ROOM" },
+    ],
+  })),
+  {
+    key: "hospital",
+    name: "بیمارستان شبانه‌روزی حیوانات البرز (نمایشی)",
+    type: "VET_HOSPITAL",
+    description: "بیمارستان ۲۴ ساعته با بخش بستری، جراحی و تصویربرداری. موارد اورژانسی بدون نوبت پذیرش می‌شوند.",
+    specialties: ["اورژانس", "جراحی", "بستری", "تصویربرداری"],
+    region: "شهرک غرب",
+    address: "تهران، شهرک غرب، بلوار دریا",
+    lat: 35.7550,
+    lng: 51.3700,
+    policies: "اورژانس بدون نوبت؛ برای بقیهٔ خدمات نوبت بگیرید.",
+    faqs: [{ question: "شب‌ها باز هستید؟", answer: "بله، شبانه‌روزی." }],
+    staff: [{ key: "owner", name: "دکتر شیرین افشار", title: "رئیس بخش جراحی", bio: "جراح حیوانات کوچک (نمایشی).", role: "OWNER" }],
+    hours: ["00:00", "23:59"],
+    resources: [{ key: "room1", name: "اتاق معاینه ۱", type: "EXAM_ROOM" }],
+    services: [
+      { key: "consult", name: "مشاوره و معاینه تخصصی", type: "CONSULTATION", category: "VET", minutes: 45, price: 18_000_000, resource: "EXAM_ROOM" },
+      { key: "imaging", name: "رادیوگرافی", type: "IMAGING_STUDY", category: "VET", minutes: 30, price: 22_000_000, bookingMode: "REQUEST", resource: "EXAM_ROOM" },
+      { key: "lab", name: "آزمایش خون کامل", type: "LAB_TEST", category: "VET", minutes: 15, price: 9_500_000, resource: "EXAM_ROOM" },
+    ],
+  },
+  {
+    key: "groomer2",
+    name: "سالن آرایش حیوانات پشمالو (نمایشی)",
+    type: "GROOMER",
+    description: "آرایش و حمام سگ و گربه با محصولات کم‌حساسیت. سرویس رفت‌وبرگشت در محدودهٔ غرب تهران.",
+    specialties: ["آرایش گربه", "حمام دارویی"],
+    region: "سعادت‌آباد",
+    address: "تهران، سعادت‌آباد، میدان کاج",
+    lat: 35.7800,
+    lng: 51.3800,
+    policies: "حیوان را ۲ ساعت پیش از نوبت غذا ندهید.",
+    faqs: [{ question: "گربه هم آرایش می‌کنید؟", answer: "بله، با آرایشگر مخصوص گربه." }],
+    staff: [{ key: "owner", name: "لیلا صدری", title: "آرایشگر", bio: "متخصص آرایش گربه (نمایشی).", role: "OWNER" }],
+    hours: ["10:00", "19:00"],
+    services: [
+      { key: "bath", name: "حمام و خشک‌کردن", type: "GROOMING_SESSION", category: "GROOMING", minutes: 60, price: 12_000_000 },
+      { key: "cat-groom", name: "آرایش گربه", type: "GROOMING_SESSION", category: "GROOMING", minutes: 75, price: 16_000_000 },
+    ],
+  },
+  {
+    key: "boarding",
+    name: "پانسیون روزانهٔ حیوانات شمیران (نمایشی)",
+    type: "BOARDING",
+    description: "نگهداری روزانه و شبانه با حیاط بازی و گزارش تصویری روزانه.",
+    specialties: ["نگهداری شبانه", "مهدکودک روزانه"],
+    region: "شمیران",
+    address: "تهران، شمیران، نیاوران",
+    lat: 35.8100,
+    lng: 51.4700,
+    policies: "واکسن‌های سالانه باید معتبر باشند.",
+    faqs: [{ question: "می‌توانم غذای حیوانم را بیاورم؟", answer: "بله، توصیه می‌کنیم." }],
+    staff: [{ key: "owner", name: "پویا رضایی", title: "مدیر پانسیون", bio: "مراقب حیوانات (نمایشی).", role: "OWNER" }],
+    hours: ["08:00", "20:00"],
+    services: [
+      { key: "daycare", name: "مهدکودک روزانه", type: "BOARDING_STAY", category: "BOARDING", minutes: 600, price: 8_000_000 },
+      { key: "overnight", name: "نگهداری شبانه", type: "BOARDING_STAY", category: "BOARDING", minutes: 1440, price: 14_000_000, bookingMode: "REQUEST" },
+    ],
+  },
 ];
 
 async function user(email: string, name: string) {
@@ -247,8 +334,8 @@ async function main() {
     const orgId = id(`org:${p.key}`);
     await db.providerOrganization.upsert({
       where: { id: orgId },
-      create: { id: orgId, name: p.name, type: p.type, verificationStatus: "VERIFIED", description: p.description, specialties: p.specialties, coverImageUrl: p.cover, galleryUrls: [p.cover], policiesText: p.policies, faqs: p.faqs, phone: "021-88000000" },
-      update: { description: p.description, specialties: p.specialties, coverImageUrl: p.cover, policiesText: p.policies, faqs: p.faqs },
+      create: { id: orgId, name: p.name, type: p.type, verificationStatus: "VERIFIED", description: p.description, specialties: p.specialties, coverImageUrl: p.cover ?? null, galleryUrls: p.cover ? [p.cover] : [], policiesText: p.policies, faqs: p.faqs, phone: "021-88000000" },
+      update: { description: p.description, specialties: p.specialties, coverImageUrl: p.cover ?? null, policiesText: p.policies, faqs: p.faqs },
     });
     const locationId = id(`loc:${p.key}`);
     await db.providerLocation.upsert({

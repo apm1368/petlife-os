@@ -137,6 +137,40 @@ const PRODUCTS: ProductSeed[] = [
     specs: [{ label: "حجم", value: "۲۵۰ میلی‌لیتر" }],
     variants: [{ key: "250ml", title: "۲۵۰ میلی‌لیتر", sku: "QA-KIMIA-SHAMPOO-250", offers: [{ seller: "B", price: 640_000, onHand: 18 }] }],
   },
+  // Showcase additions — enough variety for search, categories and the shop home to read as a store.
+  {
+    key: "cat-toy", title: "توپ بازی گربه با پر و زنگوله، بستهٔ ۳ عددی (نمایشی)", brand: "مهرپت", category: "toys", image: "/images/products/cat-toy.svg",
+    description: "توپ‌های سبک با پر طبیعی و زنگولهٔ کوچک برای بازی روزانه. همیشه زیر نظر شما بازی کند.", dog: false, cat: true,
+    specs: [{ label: "تعداد", value: "۳ عدد" }, { label: "جنس", value: "پلاستیک نرم و پر" }],
+    variants: [{ key: "3pack", title: "بستهٔ ۳ عددی", sku: "QA-MEHR-CATTOY-3", offers: [{ seller: "A", price: 390_000, onHand: 60 }, { seller: "C", price: 360_000, onHand: 22 }] }],
+  },
+  {
+    key: "dog-bed", title: "تشک طبی سگ ضدآب با روکش قابل شست‌وشو (نمایشی)", brand: "راهرو", category: "travel-sleep", image: "/images/products/dog-bed.svg",
+    description: "فوم طبی برای مفاصل سگ‌های مسن و روکش ضدآب. روکش را در ماشین لباسشویی با آب سرد بشویید.", dog: true, cat: false,
+    specs: [{ label: "ضخامت", value: "۸ سانتی‌متر" }, { label: "روکش", value: "پارچهٔ ضدآب" }],
+    variants: [
+      { key: "m", title: "متوسط (۷۰×۵۰)", sku: "QA-RAHRO-BED-M", attributes: { اندازه: "متوسط" }, offers: [{ seller: "A", price: 4_200_000, onHand: 7 }] },
+      { key: "l", title: "بزرگ (۱۰۰×۷۰)", sku: "QA-RAHRO-BED-L", attributes: { اندازه: "بزرگ" }, offers: [{ seller: "A", price: 5_900_000, onHand: 2 }, { seller: "B", price: 6_100_000, onHand: 5 }] },
+    ],
+  },
+  {
+    key: "carrier", title: "باکس حمل حیوان مناسب سفر هوایی (نمایشی)", brand: "راهرو", category: "travel-sleep", image: "/images/products/pet-carrier.svg",
+    description: "باکس سخت با تهویهٔ چهارطرفه و درب فلزی قفل‌دار. ابعاد را با قوانین شرکت هواپیمایی مقایسه کنید.", dog: true, cat: true,
+    specs: [{ label: "حداکثر وزن حیوان", value: "۱۰ کیلوگرم" }, { label: "ابعاد", value: "۵۸×۳۹×۳۸ سانتی‌متر" }],
+    variants: [{ key: "std", title: "استاندارد", sku: "QA-RAHRO-CARRIER", offers: [{ seller: "B", price: 3_750_000, onHand: 9 }] }],
+  },
+  {
+    key: "dog-treats", title: "تشویقی دندانی سگ با طعم مرغ — ۳۰۰ گرم (نمایشی)", brand: "آوا پت", category: "dog-food", image: "/images/products/dog-treats.svg",
+    description: "تشویقی جویدنی برای کمک به تمیزی دندان. حداکثر ۲ عدد در روز برای سگ‌های متوسط.", dog: true, cat: false, minAge: 6,
+    specs: [{ label: "وزن", value: "۳۰۰ گرم" }, { label: "پروتئین", value: "۱۸٪" }],
+    variants: [{ key: "300g", title: "۳۰۰ گرم", sku: "QA-AVA-TREATS-300", offers: [{ seller: "A", price: 720_000, onHand: 35, repeat: [30] }, { seller: "C", price: 690_000, onHand: 0 }] }],
+  },
+  {
+    key: "scratcher", title: "اسکرچر ستونی گربه با طناب سیسال (نمایشی)", brand: "کیمیا", category: "toys", image: "/images/products/cat-scratcher.svg",
+    description: "ستون ۶۰ سانتی با طناب سیسال طبیعی و پایهٔ سنگین برای جلوگیری از واژگونی.", dog: false, cat: true,
+    specs: [{ label: "ارتفاع", value: "۶۰ سانتی‌متر" }],
+    variants: [{ key: "60", title: "۶۰ سانتی‌متر", sku: "QA-KIMIA-SCRATCH-60", offers: [{ seller: "C", price: 1_980_000, onHand: 4 }] }],
+  },
 ];
 
 const CATEGORIES = [
@@ -147,6 +181,8 @@ const CATEGORIES = [
   { key: "walking", name: "قلاده و گردش", parent: null },
   { key: "supplements", name: "مکمل و سلامت", parent: null },
   { key: "grooming", name: "آرایش و نظافت", parent: null },
+  { key: "toys", name: "اسباب‌بازی", parent: null },
+  { key: "travel-sleep", name: "سفر و خواب", parent: null },
 ];
 
 async function user(email: string, name: string) {

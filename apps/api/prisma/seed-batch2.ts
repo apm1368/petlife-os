@@ -45,6 +45,40 @@ async function main(){
   await db.careReminder.upsert({where:{id:id("showcase-completed")},create:{id:id("showcase-completed"),petId,createdByUserId:ownerId,title:"کنترل وزن انجام‌شده",type:"WEIGHT_CHECK",dueAt:past,originalDueAt:past,state:"COMPLETED",completedAt:past},update:{}});
   await db.petMemory.upsert({where:{id:id("showcase-memory")},create:{id:id("showcase-memory"),petId,householdId,createdByUserId:ownerId,type:"STORY",title:"اولین قدم‌زدن در پارک",description:"کوکی برای اولین بار بدون ترس از صدای دوچرخه‌ها کنار ما راه رفت.",occurredAt:past},update:{}});
   await db.referral.upsert({where:{id:id("showcase-referral")},create:{id:id("showcase-referral"),petId,fromProviderOrganizationId:org,fromProviderUserId:staff,externalProviderName:"مرکز تخصصی پوست دام پارس",externalSpecialty:"پوست",reason:"ارزیابی تخصصی درماتیت و تست حساسیت",status:"SENT",clinicalVisitId:id("showcase-visit")},update:{}});
+  // Showcase additions: a care plan, lab panel and memories deep enough for the pet's care, health and memory lists.
+  const at=(days:number)=>new Date(Date.now()+days*86400000);
+  const care:[string,string,string,number,"UPCOMING"|"COMPLETED"|"CANCELLED",number|null][]=[
+    ["vaccine-rabies","واکسن هاری سالانه","VACCINATION",21,"UPCOMING",null],
+    ["deworming","قرص ضدانگل سه‌ماهه","DEWORMING",-3,"UPCOMING",null],
+    ["flea","قطرهٔ ضدکک و کنه","PARASITE_PREVENTION",10,"UPCOMING",null],
+    ["dental","معاینهٔ دندان و جرم‌گیری","DENTAL",45,"UPCOMING",null],
+    ["refill","تهیهٔ دوبارهٔ آپوکوئل","MEDICATION_REFILL",4,"UPCOMING",2],
+    ["grooming","حمام و کوتاه‌کردن ناخن","GROOMING",14,"UPCOMING",null],
+    ["weight","کنترل وزن ماهانه","WEIGHT_CHECK",-35,"COMPLETED",null],
+    ["followup-skin","پیگیری درماتیت با دامپزشک","FOLLOW_UP",-20,"COMPLETED",null],
+    ["lab-recheck","تکرار آزمایش خون","LAB_TEST",60,"UPCOMING",null],
+    ["old-groom","آرایش پیش از عید","GROOMING",-50,"CANCELLED",null],
+  ];
+  for(const [key,title,type,days,state,snooze] of care){
+    await db.careReminder.upsert({where:{id:id(`showcase-care-${key}`)},create:{id:id(`showcase-care-${key}`),petId,createdByUserId:ownerId,title,type,dueAt:at(days),originalDueAt:at(days),state,completedAt:state==="COMPLETED"?at(days):null,snoozedUntil:snooze?at(days+snooze):null},update:{}});
+  }
+  const labDay=at(-14);
+  const panel:[string,string,string,string,number,number,"NORMAL"|"ABNORMAL"][]=[
+    ["wbc","گلبول سفید (WBC)","WBC","14.8",6,17,"NORMAL"],["rbc","گلبول قرمز (RBC)","RBC","6.9",5.5,8.5,"NORMAL"],["hgb","هموگلوبین (HGB)","HGB","16.2",12,18,"NORMAL"],
+    ["plt","پلاکت (PLT)","PLT","520",200,500,"ABNORMAL"],["alt","آنزیم کبدی (ALT)","ALT","64",10,100,"NORMAL"],["alp","آلکالین فسفاتاز (ALP)","ALP","180",20,150,"ABNORMAL"],
+    ["bun","اوره خون (BUN)","BUN","18",7,27,"NORMAL"],["crea","کراتینین (CREA)","CREA","1.2",0.5,1.8,"NORMAL"],["glu","قند خون (GLU)","GLU","96",70,143,"NORMAL"],
+  ];
+  for(const [key,testName,testCode,value,low,high,flag] of panel){
+    await db.labResult.upsert({where:{id:id(`showcase-lab-${key}`)},create:{id:id(`showcase-lab-${key}`),petId,testName,testCode,sampleDate:labDay,resultDate:labDay,value,unit:null,referenceRangeLow:low,referenceRangeHigh:high,flag,status:"FINAL"},update:{}});
+  }
+  const memories:[string,"PHOTO"|"MILESTONE"|"STORY"|"BIRTHDAY"|"TRAVEL"|"ACHIEVEMENT"|"FIRST_DAY",string,number][]=[
+    ["first-day","FIRST_DAY","اولین روز در خانهٔ جدید",-700],["birthday","BIRTHDAY","تولد دوسالگی",-365],["sea","TRAVEL","اولین بار کنار دریا",-200],
+    ["trick","ACHIEVEMENT","یاد گرفت دست بدهد",-150],["snow","PHOTO","بازی در برف",-120],["vet-brave","STORY","شجاع در ویزیت دامپزشک",-60],
+    ["friend","STORY","دوستی با گربهٔ همسایه",-30],["park","MILESTONE","پیاده‌روی ۵ کیلومتری",-7],
+  ];
+  for(const [key,type,title,days] of memories){
+    await db.petMemory.upsert({where:{id:id(`showcase-memory-${key}`)},create:{id:id(`showcase-memory-${key}`),petId,householdId,createdByUserId:ownerId,type,title,description:"خاطرهٔ نمایشی برای آزمون.",occurredAt:at(days)},update:{}});
+  }
   const fileObjectKey=`health-documents/${petId}/qa-owned-photo.jpg`;
   const source=resolve(__dirname,"../../web/public/images/landing/cookie-reference.jpg");
   const destination=resolve(process.env.STORAGE_LOCAL_DIR??"./local-storage",fileObjectKey);

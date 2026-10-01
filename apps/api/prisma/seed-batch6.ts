@@ -259,6 +259,81 @@ async function seed(app: any, services: Record<string, any>) {
     await db.communityReaction.upsert({ where: { postId_userId: { postId: post[postKey]!.id, userId: u.id } }, create: { postId: post[postKey]!.id, userId: u.id, type }, update: { type } });
   }
 
+  // ---- Showcase additions: enough verified organizations, open needs, active lost-pet reports and community
+  // activity for each public list to read as a real network. Everything is labelled (نمایشی); no payments are
+  // recorded here — donations only ever go through the sandbox path below.
+  const moreOrgs = [
+    ["tehran-cats", "SHELTER", "پناهگاه گربه‌های تهران", "تهران"],
+    ["isfahan-rescue", "RESCUE_GROUP", "گروه نجات حیوانات اصفهان", "اصفهان"],
+    ["mashhad-ngo", "NGO", "انجمن حمایت از حیوانات مشهد", "مشهد"],
+    ["tabriz-shelter", "SHELTER", "پناهگاه سگ‌های تبریز", "تبریز"],
+    ["shiraz-ngo", "NGO", "انجمن مهربانی با حیوانات شیراز", "شیراز"],
+    ["karaj-foster", "NGO", "شبکهٔ خانه‌های موقت کرج", "کرج"],
+    ["gilan-rescue", "RESCUE_GROUP", "تیم نجات حیات‌وحش و حیوانات گیلان", "رشت"],
+    ["ahvaz-ngo", "NGO", "انجمن یاری حیوانات خوزستان", "اهواز"],
+  ] as const;
+  for (const [key, type, name, location] of moreOrgs) {
+    const orgRow = await db.animalSupportOrganization.upsert({
+      where: { id: id(`org:${key}`) },
+      create: { id: id(`org:${key}`), type, name: `${name} (نمایشی)`, description: "سازمان نمایشی برای آزمون؛ اطلاعات واقعی نیست.", location, verificationStatus: "VERIFIED", isPubliclyListed: true, contactEmail: `contact-${key}@example.test`, verificationSubmittedAt: days(-30), verificationDocumentKeys: [`animal-support-verification/${id(`org:${key}`)}/registration-qa.pdf`] },
+      update: {},
+    });
+    org[key] = orgRow;
+    await db.supportCampaign.upsert({
+      where: { id: id(`campaign:${key}`) },
+      create: { id: id(`campaign:${key}`), organizationId: orgRow.id, title: `هزینه‌های ماهانهٔ ${name} (نمایشی)`, description: "غذا، دارو و نگهداری ماهانه.", fundType: "GENERAL", targetAmountIrr: 200_000_000 + moreOrgs.findIndex((o) => o[0] === key) * 50_000_000, status: "ACTIVE", startsAt: days(-15) },
+      update: {},
+    });
+  }
+  const moreNeeds = [
+    ["tehran-cats-food", "tehran-cats", "غذای مرطوب برای گربه‌های بیمار (نمایشی)", "FOOD", "URGENT", "تهران", "تهران", "نارمک", 35.7400, 51.5000, 30, 8, "پوچ"],
+    ["isfahan-transport", "isfahan-rescue", "رانندهٔ داوطلب برای انتقال به کلینیک (نمایشی)", "TRANSPORT", "IMPORTANT", "اصفهان", "اصفهان", "جلفا", 32.6380, 51.6600, 3, 1, "سفر"],
+    ["mashhad-medicine", "mashhad-ngo", "داروی ضدانگل برای ۴۰ سگ (نمایشی)", "MEDICINE", "IMPORTANT", "خراسان رضوی", "مشهد", "وکیل‌آباد", 36.3300, 59.5200, 40, 15, "دوز"],
+    ["tabriz-equipment", "tabriz-shelter", "قفس حمل و پتو برای زمستان (نمایشی)", "EQUIPMENT", "NORMAL", "آذربایجان شرقی", "تبریز", "ولیعصر", 38.0600, 46.3200, 15, 3, "عدد"],
+    ["karaj-temp-home", "karaj-foster", "خانهٔ موقت برای گربهٔ مادر و بچه‌ها (نمایشی)", "TEMPORARY_HOME", "URGENT", "البرز", "کرج", "عظیمیه", 35.8400, 50.9900, 1, 0, "خانه"],
+    ["shiraz-volunteer", "shiraz-ngo", "داوطلب برای روز واکسیناسیون (نمایشی)", "VOLUNTEER", "NORMAL", "فارس", "شیراز", "معالی‌آباد", 29.6500, 52.4900, 6, 2, "نفر"],
+    ["ahvaz-water", "ahvaz-ngo", "آب و سایه‌بان برای حیوانات خیابانی در گرما (نمایشی)", "SHELTER_SUPPLIES", "CRITICAL", "خوزستان", "اهواز", "کیانپارس", 31.3200, 48.6800, 50, 12, "بطری"],
+    ["gilan-vet", "gilan-rescue", "هزینهٔ درمان جغد زخمی و دو سگ (نمایشی)", "VETERINARY_CARE", "URGENT", "گیلان", "رشت", "گلسار", 37.2900, 49.5800, 3, 0, "مورد"],
+    ["tehran-cats-foster", "tehran-cats", "خانهٔ موقت برای گربهٔ سه‌پا (نمایشی)", "FOSTER", "IMPORTANT", "تهران", "تهران", "یوسف‌آباد", 35.7300, 51.4060, 1, 0, "خانه"],
+  ] as const;
+  for (const [key, orgKey, title, category, urgency, province, city, neighborhood, lat, lng, needed, fulfilled, unit] of moreNeeds) {
+    await db.supportNeedListing.upsert({
+      where: { id: id(`need:${key}`) },
+      create: { id: id(`need:${key}`), creatorUserId: ngoCoordinator.id, organizationId: org[orgKey]!.id, campaignId: null, title, description: "درخواست نمایشی برای آزمون کیفیت؛ نیاز واقعی نیست.", category, urgency, status: fulfilled > 0 ? "PARTIALLY_FULFILLED" : "PUBLISHED", province, city, neighborhood, latitude: lat, longitude: lng, neededQuantity: needed, fulfilledQuantity: fulfilled, quantityUnit: unit, contactMode: "BOTH", publishedAt: days(-5), expiresAt: days(25) },
+      update: {},
+    });
+  }
+  const moreLost = [
+    ["lost-isfahan", dogOwner, "مکس", "DOG", "SEARCHING", "پارک ناژوان، اصفهان", 32.6290, 51.6180, -2],
+    ["lost-karaj", catOwner, "ملوس", "CAT", "SEARCHING", "گوهردشت، کرج", 35.8320, 50.9550, -3],
+    ["lost-shiraz", dogOwner, "برفی", "DOG", "SIGHTING_REPORTED", "خیابان زند، شیراز", 29.6100, 52.5400, -4],
+    ["lost-tabriz", catOwner, "خاکستری", "CAT", "SEARCHING", "ائل‌گلی، تبریز", 38.0250, 46.3400, -1],
+    ["lost-mashhad", dogOwner, "تارزان", "DOG", "SEARCHING", "بلوار سجاد، مشهد", 36.3200, 59.5600, -6],
+    ["lost-reunited2", catOwner, "پرنسس", "CAT", "REUNITED", "پاسداران، تهران", 35.7700, 51.4700, -20],
+    ["lost-rasht", dogOwner, "جسی", "DOG", "SEARCHING", "پارک شهر، رشت", 37.2800, 49.5900, -2],
+    ["lost-ahvaz", catOwner, "لیمو", "CAT", "SIGHTING_REPORTED", "کیانپارس، اهواز", 31.3200, 48.6800, -5],
+    ["lost-yazd", dogOwner, "شیرو", "DOG", "SEARCHING", "میدان امیرچخماق، یزد", 31.8950, 54.3650, -1],
+  ] as const;
+  for (const [key, owner, name, species, status, area, lat, lng, seenOffset] of moreLost) {
+    const h = await household(key, owner, name, species);
+    const seen = days(seenOffset);
+    const data = { petId: h.pet.id, householdId: h.home.id, status, publicArea: area, lastKnownLocation: area, lastKnownLatitude: lat, lastKnownLongitude: lng, lastSeenAt: seen, description: "گزارش نمایشی برای آزمون؛ حیوان واقعی گم نشده است.", privateNotes: null, contactPreference: "IN_APP_MESSAGE" as const, createdByUserId: owner.id, foundAt: status === "REUNITED" ? days(seenOffset + 3) : null, reunitedAt: status === "REUNITED" ? days(seenOffset + 3) : null, closedAt: null };
+    await db.lostPetIncident.upsert({ where: { id: id(`incident:${key}`) }, create: { id: id(`incident:${key}`), createdAt: new Date(seen.getTime() + 3_600_000), ...data }, update: data });
+    if (status !== "REUNITED") await db.pet.update({ where: { id: h.pet.id }, data: { lifecycleStatus: "LOST" } });
+  }
+  const morePosts = [
+    ["local-park", helperA, "LOCAL", "پارک سگ تازه در شمال تهران (نمایشی)", "محوطهٔ محصور با آب آشامیدنی؛ صبح‌ها خلوت‌تر است."],
+    ["adoption", ngoOwner, "ADOPTION", "دو بچه‌گربه آمادهٔ واگذاری (نمایشی)", "واکسن اول را زده‌اند و با بچه‌ها خوب کنار می‌آیند."],
+    ["memory", individual, "MEMORY", "یادی از پیشی که پانزده سال با ما بود (نمایشی)", "هر روز صبح کنار پنجره منتظرش هستیم."],
+    ["question-travel", catOwner, "QUESTION", "سفر هوایی با گربه، تجربه دارید؟ (نمایشی)", "کدام شرکت‌ها گربه را در کابین می‌پذیرند؟"],
+    ["question-vaccine", dogOwner, "QUESTION", "فاصلهٔ واکسن هاری چقدر است؟ (نمایشی)", "دامپزشک گفت سالانه؛ شما چه تجربه‌ای دارید؟"],
+    ["rescue-update", ngoCoordinator, "RESCUE", "سگ نجات‌یافته از جاده به خانه رسید (نمایشی)", "بعد از دو ماه درمان حالا خانوادهٔ دائمی دارد."],
+  ] as const;
+  for (const [key, author, type, title, body] of morePosts) {
+    const data = { authorUserId: author.id, type, title, body, locale: "fa" as const, countryCode: "IR", mediaObjectKeys: [], status: "PUBLISHED" as const, sourceType: "USER" as const, sourceLostPetIncidentId: null, sourceSupportCampaignId: null };
+    await db.communityPost.upsert({ where: { id: id(`post:${key}`) }, create: { id: id(`post:${key}`), ...data }, update: {} });
+  }
+
   // ---- Donations through the real sandbox payment path (ledger-correct), then one real refund
   const general1 = await donations.donate(general.id, donorAnon.id, { amountIrr: 20_000_000, idempotencyKey: "b6-qa-general-anon" });
   await donations.donate(general.id, donorPublic.id, { amountIrr: 35_000_000, showDonorPublicly: true, publicDisplayName: "سمیرا", idempotencyKey: "b6-qa-general-public" });
