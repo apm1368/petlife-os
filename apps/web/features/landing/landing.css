@@ -8,7 +8,7 @@
   --t-milad: #6e7d76; --t-milad-head: #56655e; --t-milad-light: #e9c46a;
   --t-ivory: #fbf8f1; --t-sand: #ecdfc8; --t-sage: #d5e3d8; --t-stone: #e3dccf; --t-dark: #3a3a35;
   --t-win: #34433d; --t-win-active: #e9b85a; --t-glass: #a9c2b9; --t-mullion: #f4f1ea; --t-door: #2b2a27; --t-shade: rgb(0 0 0 / .06);
-  --t-green: #17633f; --t-mint: #8fd3b5; --t-violet: #7a6bb0; --t-teal: #2f7f7a; --t-coral: #d9785a; --t-turq: #3c9fa0; --t-finial: #c8a34a;
+  --t-green: #17633f; --t-cta: #17633f; --t-mint: #8fd3b5; --t-violet: #7a6bb0; --t-teal: #2f7f7a; --t-coral: #d9785a; --t-turq: #3c9fa0; --t-finial: #c8a34a;
   --t-tree: #6b9a7c; --t-trunk: #7a5c40; --t-fence: #8a7a62;
   --t-ground: #e2d7c3; --t-curb: #cdbfa6; --t-lane: #f6f0e4; --t-plaza: #d7ccb6;
   --t-sign-bg: rgb(255 255 255 / .94); --t-sign-fg: #24302b; --t-sign-border: rgb(36 48 43 / .14); --t-sign-icon: var(--t-green);
@@ -28,7 +28,7 @@
   --t-milad: #4a5953; --t-milad-head: #5d6c66; --t-milad-light: #f2c46d;
   --t-ivory: #2e3934; --t-sand: #3a3a33; --t-sage: #2b3b35; --t-stone: #34362f; --t-dark: #161b19;
   --t-win: #e9b85a; --t-win-active: #ffd98a; --t-glass: #c99a4a; --t-mullion: #2b2a27; --t-door: #10140f; --t-shade: rgb(0 0 0 / .22);
-  --t-green: #2f8a5f; --t-mint: #3f8c6d; --t-violet: #8f81c9; --t-teal: #3c938d; --t-coral: #d98466; --t-turq: #4cb3b3; --t-finial: #d9b55c;
+  --t-green: #2f8a5f; --t-cta: #1c6a45; --t-mint: #3f8c6d; --t-violet: #8f81c9; --t-teal: #3c938d; --t-coral: #d98466; --t-turq: #4cb3b3; --t-finial: #d9b55c;
   --t-tree: #2f4a3d; --t-trunk: #3d3024; --t-fence: #5a5040;
   --t-ground: #1b2420; --t-curb: #26302b; --t-lane: #3a443f; --t-plaza: #222c27;
   --t-sign-bg: rgb(18 26 23 / .92); --t-sign-fg: #edf3ef; --t-sign-border: rgb(237 243 239 / .16); --t-sign-icon: #8fd3b5;
@@ -43,7 +43,7 @@
     --t-milad: #4a5953; --t-milad-head: #5d6c66; --t-milad-light: #f2c46d;
     --t-ivory: #2e3934; --t-sand: #3a3a33; --t-sage: #2b3b35; --t-stone: #34362f; --t-dark: #161b19;
     --t-win: #e9b85a; --t-win-active: #ffd98a; --t-glass: #c99a4a; --t-mullion: #2b2a27; --t-door: #10140f; --t-shade: rgb(0 0 0 / .22);
-    --t-green: #2f8a5f; --t-mint: #3f8c6d; --t-violet: #8f81c9; --t-teal: #3c938d; --t-coral: #d98466; --t-turq: #4cb3b3; --t-finial: #d9b55c;
+    --t-green: #2f8a5f; --t-cta: #1c6a45; --t-mint: #3f8c6d; --t-violet: #8f81c9; --t-teal: #3c938d; --t-coral: #d98466; --t-turq: #4cb3b3; --t-finial: #d9b55c;
     --t-tree: #2f4a3d; --t-trunk: #3d3024; --t-fence: #5a5040;
     --t-ground: #1b2420; --t-curb: #26302b; --t-lane: #3a443f; --t-plaza: #222c27;
     --t-sign-bg: rgb(18 26 23 / .92); --t-sign-fg: #edf3ef; --t-sign-border: rgb(237 243 239 / .16); --t-sign-icon: #8fd3b5;
@@ -84,7 +84,7 @@
 .tehran-hero__text h1 { margin: 0; text-wrap: balance; font-size: clamp(2.1rem, 4.2vw, 4rem); font-weight: 800; line-height: 1.22; white-space: pre-line; color: var(--t-ink); }
 .tehran-hero__text p { margin: 14px 0 0; max-width: 46ch; color: var(--t-ink-2); font-size: clamp(1rem, 1.2vw, 1.15rem); line-height: 1.9; }
 .tehran-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 22px; }
-.tehran-start { display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; background: var(--t-green); color: #fff !important; font-weight: 800; box-shadow: 0 10px 24px rgb(23 99 63 / .22); transition: transform var(--dur-1) var(--ease-out); }
+.tehran-start { display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; background: var(--t-cta); color: #fff !important; font-weight: 800; box-shadow: 0 10px 24px rgb(23 99 63 / .22); transition: transform var(--dur-1) var(--ease-out); }
 .tehran-start:hover { transform: translateY(-1px); }
 .tehran-hint { color: var(--t-ink-2); font-size: .86rem; }
 
