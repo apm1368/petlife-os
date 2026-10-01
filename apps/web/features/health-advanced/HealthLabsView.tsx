@@ -1,6 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localizeDigits } from "@/lib/date/jalali";
 import { StatusLabel } from "@petlife/ui";
 import type { LabResultDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
@@ -10,6 +11,8 @@ import { useStatusText } from "@/lib/status/use-status-text";
 export function HealthLabsView({ petId }: { petId: string }) {
   const statusText = useStatusText();
   const t = useTranslations("healthAdvanced");
+  const fa = useLocale() === "fa";
+  const digits = (v: string | number) => localizeDigits(v, fa ? "fa" : "en");
   return (
     <HealthRecordListView<LabResultDto>
       petId={petId}
@@ -26,7 +29,9 @@ export function HealthLabsView({ petId }: { petId: string }) {
           </div>
           {lab.value ? (
             <span className="text-metadata text-text-secondary">
-              {lab.value} {lab.unit}
+              {/* Recorded value and the source's own range — digits in the UI language, order as a reader expects. */}
+              <bdi>{digits(lab.value)}{lab.unit ? ` ${lab.unit}` : ""}</bdi>
+              {lab.referenceRangeLow !== null && lab.referenceRangeHigh !== null ? <> · {fa ? "بازهٔ مرجع" : "Range"} <bdi>{digits(lab.referenceRangeLow)} {fa ? "تا" : "–"} {digits(lab.referenceRangeHigh)}</bdi></> : null}
             </span>
           ) : null}
           {lab.source.providerOrganizationName ? <span className="text-metadata text-text-secondary">{lab.source.providerOrganizationName}</span> : null}

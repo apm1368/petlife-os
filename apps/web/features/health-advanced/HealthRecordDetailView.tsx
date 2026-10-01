@@ -101,8 +101,9 @@ export function HealthRecordDetailView({ petId, recordId, kind }: { petId: strin
 /**
  * The recorded result, large and unambiguous: value and unit, the source's own reference range, and a bar
  * that places the value against that range. No interpretation is added — the bar only plots recorded numbers
- * and the flag is the source's. Digits follow the UI language; the decimal point, unit and range order are
- * kept as recorded, inside a direction-isolated span so a range can never visually flip in RTL.
+ * and the flag is the source's. Digits follow the UI language; the decimal point and unit are kept as
+ * recorded. Persian ranges read "۲۰ تا ۱۵۰" in natural right-to-left order (a dash between bare digits would
+ * lay out left-to-right inside the isolate and show the high bound first to a Persian reader).
  */
 function LabResultBand({ item, locale }: { item: LabResultDto; locale: "fa" | "en" }) {
   const fa = locale === "fa";
@@ -122,7 +123,7 @@ function LabResultBand({ item, locale }: { item: LabResultDto; locale: "fa" | "e
       </div>
       <div className="lab-band__range">
         <span className="lab-band__label">{fa ? "بازهٔ مرجع ثبت‌شده" : "Recorded reference range"}</span>
-        <span><bdi>{Number.isFinite(low) || Number.isFinite(high) ? `${Number.isFinite(low) ? digits(item.referenceRangeLow!) : "—"} – ${Number.isFinite(high) ? digits(item.referenceRangeHigh!) : "—"}` : (fa ? "ثبت نشده" : "Not recorded")}</bdi></span>
+        <span><bdi>{Number.isFinite(low) || Number.isFinite(high) ? `${Number.isFinite(low) ? digits(item.referenceRangeLow!) : "—"} ${fa ? "تا" : "–"} ${Number.isFinite(high) ? digits(item.referenceRangeHigh!) : "—"}` : (fa ? "ثبت نشده" : "Not recorded")}</bdi></span>
       </div>
       {plottable ? (
         <div className="lab-band__track" role="img" aria-label={fa ? `مقدار ${digits(item.value!)} در برابر بازهٔ ${digits(item.referenceRangeLow!)} تا ${digits(item.referenceRangeHigh!)}` : `Value ${item.value} against the range ${item.referenceRangeLow} to ${item.referenceRangeHigh}`}>

@@ -14,7 +14,7 @@ describe("HealthRecordDetailView — lab result", () => {
     renderWithIntl(<HealthRecordDetailView petId="p1" recordId="l1" kind="lab" />, "fa");
     expect(await screen.findByText("۱۸۰")).toBeTruthy(); // Persian digits; stored value untouched
     expect(screen.getByText("U/L", { exact: false })).toBeTruthy(); // unit as recorded
-    expect(screen.getByText("۲۰ – ۱۵۰")).toBeTruthy(); // low → high, never reordered
+    expect(screen.getByText("۲۰ تا ۱۵۰")).toBeTruthy(); // low → high in natural Persian order
     expect(document.querySelector(".lab-band")?.getAttribute("data-flagged")).toBe("true");
     expect(screen.getByRole("img", { name: /۱۸۰.*۲۰.*۱۵۰/ })).toBeTruthy();
     expect(document.body.textContent).not.toMatch(/normal|abnormal|healthy|سالم/i);
