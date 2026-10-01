@@ -5,6 +5,8 @@ import type { UserDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { usersService } from "@/services/users.service";
 import { useSessionStore } from "@/stores/session-store";
+import { useThemeStore } from "@/stores/theme-store";
+import { useLocale } from "next-intl";
 import { AccountPageHeader } from "./AccountNav";
 import { useAccountCopy } from "./account-copy";
 import { apiErrorText } from "@/lib/errors/api-error-text";
@@ -21,8 +23,13 @@ export function PersonalSettingsView() {
   const [user, setUser] = useState<UserDto | null>(null);
   const [failed, setFailed] = useState(false);
   const [name, setName] = useState("");
-  const [language, setLanguage] = useState<"fa" | "en">("fa");
-  const [theme, setTheme] = useState<"SYSTEM" | "LIGHT" | "DARK">("SYSTEM");
+  // Language and theme start from what is on screen (URL locale, applied theme) — never from the
+  // account's stored values — so saving one never silently changes the other.
+  const uiLocale = useLocale() === "en" ? "en" : "fa";
+  const appliedTheme = useThemeStore((s) => s.theme);
+  const applyTheme = useThemeStore((s) => s.setTheme);
+  const [language, setLanguage] = useState<"fa" | "en">(uiLocale);
+  const [theme, setTheme] = useState<"SYSTEM" | "LIGHT" | "DARK">(appliedTheme);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -34,11 +41,13 @@ export function PersonalSettingsView() {
       const me = await usersService.getMe();
       setUser(me);
       setName(me.displayName);
-      setLanguage(me.locale);
-      setTheme(me.themePreference);
+      setLanguage(uiLocale);
+      setTheme(appliedTheme);
     } catch {
       setFailed(true);
     }
+    // Initial values only; later theme/locale changes must not reset unsaved edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -57,10 +66,10 @@ export function PersonalSettingsView() {
     try {
       const updated = await usersService.updateMe({ displayName: name.trim(), locale: language, themePreference: theme });
       applyUser(updated);
+      applyTheme(theme);
       setSaved(true);
-      // A language change moves the whole app to the new locale.
-      const current = window.location.pathname.match(/^\/(fa|en)(?=\/|$)/)?.[1];
-      if (current && current !== updated.locale) window.location.assign(window.location.pathname.replace(/^\/(fa|en)(?=\/|$)/, `/${updated.locale}`));
+      // Only an explicit language change moves the app; a theme-only save stays on this locale.
+      if (language !== uiLocale) window.location.assign(window.location.pathname.replace(/^\/(fa|en)(?=\/|$)/, `/${language}`));
     } catch (err) {
       setSaveError(apiErrorText(err, undefined, t("ذخیره انجام نشد. دوباره تلاش کنید.", "Could not save. Try again.")));
     } finally {
@@ -71,7 +80,7 @@ export function PersonalSettingsView() {
   if (failed) return <ErrorRecovery title={t("اطلاعات شخصی", "Personal")} message={t("اطلاعات حساب بارگذاری نشد.", "Your account details didn't load.")} retryLabel={t("تلاش دوباره", "Retry")} onRetry={load} />;
   if (!user) return <Skeleton className="h-80 w-full" aria-label={t("در حال بارگذاری", "Loading")} />;
 
-  const dirty = name.trim() !== user.displayName || language !== user.locale || theme !== user.themePreference;
+  const dirty = name.trim() !== user.displayName || language !== uiLocale || theme !== appliedTheme;
 
   return (
     <div className="account-stack">

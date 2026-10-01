@@ -645,3 +645,10 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
    their tracking in English only. */
 :lang(fa),:lang(fa)::before,:lang(fa)::after{letter-spacing:0!important}
 .account-identity-band>:first-child{flex:none}
+/* Account menu preferences: language and appearance as compact segmented controls. */
+.account-menu__prefs{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px;border-bottom:1px solid var(--border-subtle)}
+.account-menu__prefs>span{color:var(--text-secondary);font-size:.78rem}
+.account-menu__prefs>div{display:inline-flex;padding:2px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-base)}
+.account-menu__panel .account-menu__prefs button{min-height:32px;padding:0 10px;border-radius:999px;font-size:.78rem}
+.account-menu__panel .account-menu__prefs button[aria-pressed="true"]{background:var(--brand-natural);color:#fff}
+.account-menu__panel{min-width:260px}

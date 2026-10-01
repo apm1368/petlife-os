@@ -13,7 +13,9 @@ export function LocaleSwitcher() {
   function onChange(nextLocale: string) {
     const segments = pathname.split("/");
     segments[1] = nextLocale;
-    router.push(segments.join("/") || "/");
+    // Keep the query (filters, tabs) — switching language must change nothing else, theme included.
+    const search = typeof window === "undefined" ? "" : window.location.search;
+    router.push((segments.join("/") || "/") + search);
   }
 
   return (
