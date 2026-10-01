@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDay, localizeDigits, WEEKDAYS_EN, WEEKDAYS_FA } from "@/lib/date/jalali";
-import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 export function PlaceDetailView({ placeId }: { placeId: string }) {
   const t = useTranslations("places");
@@ -15,6 +16,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
 
   const [place, setPlace] = useState<PetFriendlyPlaceDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
   const [requiresAuth, setRequiresAuth] = useState(false);
   const lang = useLocale() as "fa" | "en";
@@ -39,10 +41,11 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setPlace(await placesService.get(placeId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -74,7 +77,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
     }
   }
 
-  if (error && !place) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !place) return <LoadFailure error={loadError} onRetry={load} />;
   if (!place) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

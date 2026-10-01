@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { MedicalDocumentType, SourceType, type MedicalDocumentDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { documentTypeLabel } from "./document-labels";
 
 /** spec: "private medical documents must never be publicly exposed" — download always goes through a freshly-minted signed URL, never a stored/cached link. */
 export function HealthDocumentsView({ petId }: { petId: string }) {
+  const lang = useLocale() === "en" ? "en" : "fa";
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
 
   const [documents, setDocuments] = useState<MedicalDocumentDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [title, setTitle] = useState("");
   const [documentType, setDocumentType] = useState<MedicalDocumentType>(MedicalDocumentType.OTHER);
   const [isUploading, setIsUploading] = useState(false);
@@ -21,10 +25,11 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setDocuments(await healthAdvancedService.listDocuments(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -61,7 +66,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
     }
   }
 
-  if (error && !documents) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !documents) return <LoadFailure error={loadError} onRetry={load} />;
   if (!documents) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -74,9 +79,12 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
           label={t("documents.documentType")}
           value={documentType}
           onChange={(e) => setDocumentType(e.target.value as MedicalDocumentType)}
-          options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: type }))}
+          options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: documentTypeLabel(type, lang) }))}
         />
-        <input ref={fileInputRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
+          <input ref={fileInputRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
+        </label>
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
         <Button variant="primary" isLoading={isUploading} onClick={handleUpload} disabled={!title.trim()}>
           {isUploading ? t("documents.uploading") : t("documents.upload")}
@@ -95,7 +103,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
                   {doc.sourceType === SourceType.PROVIDER || doc.sourceType === SourceType.CLINIC ? t("documents.provenanceProvider") : t("documents.provenanceOwner")}
                 </StatusLabel>
               </div>
-              <span className="text-metadata text-text-secondary">{doc.documentType}</span>
+              <span className="text-metadata text-text-secondary">{documentTypeLabel(doc.documentType, lang)}</span>
               <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id)}>
                 {t("documents.download")}
               </Button>

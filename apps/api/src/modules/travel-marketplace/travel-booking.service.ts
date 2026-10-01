@@ -298,8 +298,12 @@ export class TravelBookingService {
     if (amount <= 0) throw new ValidationApiException({ field: "amount", reason: "NOTHING_TO_PAY" });
 
     const intentId = await this.prisma.$transaction(async (tx) => {
-      if (row.paymentIntentId) {
-        const existing = await tx.paymentIntent.findUniqueOrThrow({ where: { id: row.paymentIntentId } });
+      // One intent per booking even when pay is tapped twice (see BookingsService.pay).
+      await tx.$queryRaw`SELECT id FROM "travel_bookings" WHERE id = ${bookingId}::uuid FOR UPDATE`;
+      const current = await tx.travelBooking.findUniqueOrThrow({ where: { id: bookingId }, select: { paymentIntentId: true, status: true } });
+      if (current.status !== TravelBookingStatus.AWAITING_PAYMENT) throw new InvalidTravelBookingTransitionException({ bookingId, from: current.status, to: TravelBookingStatus.CONFIRMED });
+      if (current.paymentIntentId) {
+        const existing = await tx.paymentIntent.findUniqueOrThrow({ where: { id: current.paymentIntentId } });
         if (existing.status !== "FAILED" && existing.status !== "CANCELLED") return existing.id;
       }
       const cart = await tx.cart.create({ data: { userId, status: CartStatus.CONVERTED } });

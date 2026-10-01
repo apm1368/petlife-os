@@ -272,6 +272,23 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
       expect(paid.body.timeline.map((e: { toStatus: string }) => e.toStatus)).toEqual(["HELD", "AWAITING_PAYMENT", "CONFIRMED"]);
     });
 
+    it("paying twice at once charges once and posts one balanced ledger entry", async () => {
+      const p = await partner();
+      const l = await listing(p.orgId);
+      const t = await traveler();
+      const booking = await holdAndSubmit(t.c, l, t.petIds);
+      const results = await Promise.all([1, 2, 3].map(() => t.c.post(`/travel/bookings/${booking.id}/pay`).send({ mode: "SUCCESS" })));
+      expect(results.every((r) => r.status < 500)).toBe(true);
+      expect(results.some((r) => r.status === 201 && r.body.status === "CONFIRMED")).toBe(true);
+      const row = await prisma.travelBooking.findUniqueOrThrow({ where: { id: booking.id } });
+      const checkouts = await prisma.paymentIntent.findMany({ where: { idempotencyKey: { startsWith: `travel:${booking.id}:` }, status: "CAPTURED" } });
+      expect(checkouts).toHaveLength(1);
+      expect(checkouts[0]!.id).toBe(row.paymentIntentId);
+      const legs = await prisma.ledgerEntry.findMany({ where: { ledgerTransaction: { referenceType: "PAYMENT", referenceId: checkouts[0]!.checkoutId } } });
+      expect(legs.filter((e) => e.direction === "DEBIT").reduce((a, e) => a + e.amount, 0)).toBe(2_100_000);
+      expect(legs.filter((e) => e.direction === "CREDIT").reduce((a, e) => a + e.amount, 0)).toBe(2_100_000);
+    });
+
     it("two travellers racing for the last room: exactly one hold succeeds", async () => {
       const p = await partner();
       const l = await listing(p.orgId, { quantity: 1 });

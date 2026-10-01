@@ -7,6 +7,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "retry": "Retry",
+    "attachFile": "Attach a file",
     "loading": "Loading",
     "optional": "Optional",
     "selected": "Selected",
@@ -3376,6 +3377,7 @@
       "OTHER": "Other"
     },
     "list": {
+      "search": "Search",
       "title": "Pet-friendly places",
       "subtitle": "Verified places that welcome pets.",
       "empty": "No places found.",

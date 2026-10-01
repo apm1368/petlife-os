@@ -167,7 +167,7 @@ export function SubscriptionOverviewView() {
                     ? t("usageOf", { used: new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(usageItem.used), limit: usageItem.limit === null ? "∞" : new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(usageItem.limit) })
                     : entitlement.limitValue === null
                       ? t("unlimited")
-                      : entitlement.limitValue}
+                      : entitlement.limitValue.toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}
                 {entitlement.overridden ? ` · ${t("overridden")}` : ""}
               </span>
             </div>

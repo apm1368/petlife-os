@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { PetMemoryDto } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /**
  * Renders a memory's first image. A PRIVATE memory (the default, and the
@@ -13,6 +14,7 @@ import { memoriesService } from "@/services/memories.service";
  * falls back to a neutral placeholder rather than a broken image.
  */
 export function MemoryMediaThumb({ petId, memory, className }: { petId: string; memory: PetMemoryDto; className?: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("memories");
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
@@ -41,7 +43,7 @@ export function MemoryMediaThumb({ petId, memory, className }: { petId: string; 
   }, [petId, memory.id, needsSignedUrl]);
 
   const url = publicUrl ?? signedUrl;
-  const alt = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+  const alt = memory.title ?? fmt.date(memory.occurredAt);
 
   if (!url) {
     return (

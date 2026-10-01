@@ -4,13 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDay } from "@/lib/date/jalali";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MedicalDocumentDto, TravelRequirementDto, TripDto, TripReadinessSummaryDto } from "@petlife/types";
 import { MedicalDocumentType, TravelRequirementStatus, TravelRequirementType, TripStatus } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { requirementStatusTone, tripStatusTone } from "./travel-status";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const ALLOWED_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
   [TripStatus.DRAFT]: [TripStatus.PLANNING, TripStatus.CANCELLED],
@@ -55,12 +57,14 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
   const [suggestions, setSuggestions] = useState<TravelRequirementType[]>([]);
   const [documents, setDocuments] = useState<MedicalDocumentDto[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
   const [newRequirementType, setNewRequirementType] = useState<TravelRequirementType>(TravelRequirementType.VACCINATION);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const [tripData, readinessData, suggestionsData, documentsData] = await Promise.all([
         travelService.get(petId, tripId),
@@ -73,7 +77,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
       setSuggestions(suggestionsData);
       setDocuments(documentsData.filter((doc) => doc.documentType === MedicalDocumentType.TRAVEL_DOCUMENT));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -117,7 +121,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
     }
   }
 
-  if (error && !trip) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !trip) return <LoadFailure error={loadError} onRetry={load} />;
   if (!trip || !readiness) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const availableTransitions = ALLOWED_TRANSITIONS[trip.status] ?? [];
@@ -232,7 +236,9 @@ function RequirementCard({
   documents: MedicalDocumentDto[];
   fileInputRef: (el: HTMLInputElement | null) => void;
 }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("travel");
+  const tCommon = useTranslations("common");
 
   return (
     <ContextSurface className="flex flex-col gap-2">
@@ -247,7 +253,7 @@ function RequirementCard({
       {requirement.source ? <p className="text-metadata text-text-secondary">{t("detail.source", { source: requirement.source })}</p> : null}
       {requirement.jurisdiction ? <p className="text-metadata text-text-secondary">{t("detail.jurisdiction", { jurisdiction: requirement.jurisdiction })}</p> : null}
       <p className="text-metadata text-text-secondary">
-        {requirement.verifiedAt ? t("detail.verifiedAt", { date: new Date(requirement.verifiedAt).toLocaleDateString() }) : t("detail.neverVerified")}
+        {requirement.verifiedAt ? t("detail.verifiedAt", { date: fmt.date(requirement.verifiedAt) }) : t("detail.neverVerified")}
       </p>
       {requirement.linkedMedicalDocumentTitle ? <p className="text-metadata text-text-secondary">{t("detail.linkedDocument", { title: requirement.linkedMedicalDocumentTitle })}</p> : null}
 
@@ -275,16 +281,19 @@ function RequirementCard({
             options={[{ value: "", label: t("detail.linkDocumentNone") }, ...documents.map((doc) => ({ value: doc.id, label: doc.title }))]}
           />
         ) : null}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/pdf,image/jpeg,image/png,image/webp"
-          className="text-metadata text-text-primary"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) onUploadFile(file);
-          }}
-        />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf,image/jpeg,image/png,image/webp"
+            className="text-metadata text-text-primary"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onUploadFile(file);
+            }}
+          />
+        </label>
       </div>
     </ContextSurface>
   );

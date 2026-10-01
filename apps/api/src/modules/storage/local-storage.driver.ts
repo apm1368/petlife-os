@@ -9,6 +9,9 @@ import { dirname, join, normalize } from "node:path";
 import type { DownloadOptions, DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
 
 const UPLOAD_TOKEN_TTL_SECONDS = 15 * 60;
+/** Uploads without a declared size (pet photos, CMS media) and the hard ceiling for any upload. */
+export const DEFAULT_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+export const UPLOAD_CEILING_BYTES = 50 * 1024 * 1024;
 /** Same short-TTL rationale as S3StorageDriver's presigned GET — see its doc comment. */
 const DOWNLOAD_TOKEN_TTL_SECONDS = 5 * 60;
 
@@ -24,9 +27,9 @@ export class LocalStorageDriver implements StorageDriver {
     private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
-  async createUploadTarget(key: string, contentType: string): Promise<UploadTarget> {
+  async createUploadTarget(key: string, contentType: string, maxBytes?: number): Promise<UploadTarget> {
     const token = randomUUID();
-    await this.redis.set(`upload-token:${token}`, JSON.stringify({ key, contentType }), "EX", UPLOAD_TOKEN_TTL_SECONDS);
+    await this.redis.set(`upload-token:${token}`, JSON.stringify({ key, contentType, maxBytes: Math.min(maxBytes ?? DEFAULT_UPLOAD_MAX_BYTES, UPLOAD_CEILING_BYTES) }), "EX", UPLOAD_TOKEN_TTL_SECONDS);
 
     const apiOrigin = this.config.get("STORAGE_PUBLIC_BASE_URL", { infer: true }).replace(/\/uploads$/, "");
     return {

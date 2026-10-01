@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentPublicDto, PaginatedDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
-import { ApiError } from "@/lib/api/client";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { lostPetStatusTone } from "./lost-pet-status";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 /** Public, paginated list of open incidents — approximate area only, never an exact location. */
 export function PublicLostPetListView() {
@@ -17,7 +17,7 @@ export function PublicLostPetListView() {
   const lang = useLocale() as "fa" | "en";
   const fa = lang === "fa";
   const [data, setData] = useState<PaginatedDto<LostPetIncidentPublicDto> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [page, setPage] = useState(1);
   const [species, setSpecies] = useState("");
 
@@ -27,9 +27,9 @@ export function PublicLostPetListView() {
     try {
       setData(await lostPetService.listPublic({ page, species: species || undefined }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
-  }, [page, species, tCommon]);
+  }, [page, species]);
   useEffect(() => void load(), [load]);
 
   return (
@@ -43,7 +43,7 @@ export function PublicLostPetListView() {
           <button key={value} type="button" aria-pressed={species === value} onClick={() => { setSpecies(value!); setPage(1); }} className={`min-h-11 rounded-full border px-4 text-sm ${species === value ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{label}</button>
         ))}
       </div>
-      {error ? <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={() => void load()} /> : !data ? (
+      {error ? <LoadFailure error={error} onRetry={() => void load()} /> : !data ? (
         <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />
       ) : data.items.length === 0 ? (
         <EmptyState title={t("list.empty")} description={fa ? "در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است." : "There are no active lost-pet reports right now."} />

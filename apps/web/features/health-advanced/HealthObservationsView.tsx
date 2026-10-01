@@ -2,18 +2,22 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { ObservationCategory, type PetObservationDto } from "@petlife/types";
 import { petObservationService } from "@/services/pet-observation.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /** spec: "these are OWNER OBSERVATIONS, not diagnoses" — the UI labels every entry as such and never offers a "diagnosis" field. */
 export function HealthObservationsView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
 
   const [observations, setObservations] = useState<PetObservationDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [category, setCategory] = useState<ObservationCategory>(ObservationCategory.OTHER);
   const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -21,10 +25,11 @@ export function HealthObservationsView({ petId }: { petId: string }) {
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setObservations(await petObservationService.list(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -60,7 +65,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
     }
   }
 
-  if (error && !observations) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !observations) return <LoadFailure error={loadError} onRetry={load} />;
   if (!observations) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -85,7 +90,10 @@ export function HealthObservationsView({ petId }: { petId: string }) {
           rows={3}
           className="rounded-md border border-border-strong bg-surface-elevated p-3 text-body text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
         />
-        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" className="text-body text-text-primary" />
+        <label className="flex flex-col gap-1.5">
+          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" className="text-body text-text-primary" />
+        </label>
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
         <Button variant="primary" isLoading={isSaving} onClick={handleSave} disabled={!description.trim()}>
           {t("observations.save")}
@@ -100,7 +108,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
             <ContextSurface key={obs.id} className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <StatusLabel tone="neutral">{obs.category}</StatusLabel>
-                <span className="text-metadata text-text-secondary">{new Date(obs.observedAt).toLocaleDateString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.date(obs.observedAt)}</span>
               </div>
               <p className="text-body text-text-primary">{obs.description}</p>
             </ContextSurface>

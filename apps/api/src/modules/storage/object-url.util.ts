@@ -53,6 +53,18 @@ export function resolveObjectUrl(key: string | null): string | null {
   return `${base}/${key}`;
 }
 
+/**
+ * For media galleries on list/detail payloads. A private key here is still a bug (and is logged as
+ * one), but it is dropped rather than thrown: one bad row must not turn a whole public feed into a
+ * 500 for every visitor. Keys are validated on write (IsObjectKeyFor), so this is a backstop.
+ */
 export function resolveObjectUrls(keys: string[]): string[] {
-  return keys.map((key) => resolveObjectUrl(key)).filter((url): url is string => url !== null);
+  return keys
+    .filter((key) => {
+      if (!isPrivateKey(key)) return true;
+      console.error(`resolveObjectUrls() dropped a private object key from a public payload: "${key.split("/")[0]}/…"`);
+      return false;
+    })
+    .map((key) => resolveObjectUrl(key))
+    .filter((url): url is string => url !== null);
 }

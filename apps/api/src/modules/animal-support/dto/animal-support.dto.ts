@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
 import { AnimalSupportOrgType, AnimalSupportVerificationStatus, CampaignFundType, RescueCaseStatus, SupportCampaignStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreateAnimalSupportOrganizationDto {
   @IsEnum(AnimalSupportOrgType)
@@ -66,11 +67,13 @@ export class UpdateAnimalSupportOrganizationDto {
 
   @IsOptional()
   @IsString()
+  @IsObjectKeyFor(["animal-support-orgs"])
   logoObjectKey?: string;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["animal-support-orgs"])
   imageObjectKeys?: string[];
 }
 
@@ -130,6 +133,7 @@ export class CreateRescueCaseDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["animal-support-evidence"])
   evidenceObjectKeys?: string[];
 }
 
@@ -203,6 +207,7 @@ export class PostSupportCampaignUpdateDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["animal-support-evidence"])
   evidenceObjectKeys?: string[];
 }
 

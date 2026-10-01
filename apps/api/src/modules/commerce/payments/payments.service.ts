@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PaymentAttemptStatus, PaymentIntentStatus, PaymentProvider, Prisma, TransactionStatus, TransactionType, type PaymentIntent } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { PaymentAlreadyCompletedException } from "../../../common/errors/api-exception";
+import { PaymentAlreadyCompletedException, PaymentInProgressException } from "../../../common/errors/api-exception";
 import { PaymentGatewayRegistry } from "./payment-gateway-registry.service";
 import type { PaymentChargeMode } from "./payment-gateway.interface";
 
@@ -90,6 +90,18 @@ export class PaymentsService {
   async charge(intentId: string, mode: PaymentChargeMode | undefined, client: QueryClient = this.prisma): Promise<ChargeOutcome> {
     const intent = await client.paymentIntent.findUniqueOrThrow({ where: { id: intentId } });
     if (intent.status === PaymentIntentStatus.CAPTURED) throw new PaymentAlreadyCompletedException({ paymentIntentId: intentId });
+    // Claim the intent before touching the gateway: only one caller can move it out of a chargeable
+    // state, so two requests racing on the same intent (a double tap, a retry) never charge twice.
+    // An interrupted charge leaves it PENDING, which reconciliation resolves against the gateway.
+    const claimed = await client.paymentIntent.updateMany({
+      where: { id: intentId, status: { in: [PaymentIntentStatus.REQUIRES_PAYMENT_METHOD, PaymentIntentStatus.FAILED] } },
+      data: { status: PaymentIntentStatus.PENDING },
+    });
+    if (claimed.count !== 1) {
+      const now = await client.paymentIntent.findUniqueOrThrow({ where: { id: intentId } });
+      if (now.status === PaymentIntentStatus.CAPTURED) throw new PaymentAlreadyCompletedException({ paymentIntentId: intentId });
+      throw new PaymentInProgressException({ paymentIntentId: intentId });
+    }
 
     const attempt = await client.paymentAttempt.create({
       data: { paymentIntentId: intentId, provider: intent.provider, status: PaymentAttemptStatus.STARTED },

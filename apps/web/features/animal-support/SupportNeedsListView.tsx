@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedUrgency } from "@petlife/types";
 import type { SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService, type SupportNeedLocationDto } from "@/services/support-needs.service";
-import { ApiError } from "@/lib/api/client";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 const CATEGORIES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -59,7 +59,7 @@ export function SupportNeedsListView() {
   const fa = locale === "fa";
   const [listings, setListings] = useState<SupportNeedListingDto[] | null>(null);
   const [locations, setLocations] = useState<SupportNeedLocationDto[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   // `tCommon` is deliberately not a dependency: next-intl hands back a fresh
   // function each render, which would make this refetch in a loop.
@@ -79,9 +79,9 @@ export function SupportNeedsListView() {
       setListings(result.items);
       setTotal(result.total);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [search, category, urgency, city, sort, needState, page]);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export function SupportNeedsListView() {
       .catch(() => setLocations([]));
   }, []);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
 
   const cities = Array.from(new Set(locations.map((l) => l.city))).sort();
 

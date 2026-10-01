@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { HealthTimelineEntryDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /** Canonical detail route per timeline record type; rehab sessions have no standalone detail page. */
 const DETAIL_PATH: Record<string, string> = {
@@ -27,19 +28,20 @@ const DETAIL_PATH: Record<string, string> = {
 
 /** Every entry always shows its provenance (spec: "provenance indicator") — never just a bare fact with no origin. */
 export function HealthTimelineView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
   const locale = useLocale();
 
   const [entries, setEntries] = useState<HealthTimelineEntryDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setEntries(await healthAdvancedService.getTimeline(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -48,7 +50,7 @@ export function HealthTimelineView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!entries) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -61,7 +63,7 @@ export function HealthTimelineView({ petId }: { petId: string }) {
           {entries.map((entry, index) => (
             <ContextSurface key={`${entry.recordType}-${entry.recordId}-${index}`} className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <span className="text-metadata text-text-secondary">{new Date(entry.occurredAt).toLocaleDateString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.date(entry.occurredAt)}</span>
                 <StatusLabel tone="neutral">{entry.sourceType}</StatusLabel>
               </div>
               {DETAIL_PATH[entry.recordType] ? (

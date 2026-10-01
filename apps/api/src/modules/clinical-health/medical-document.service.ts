@@ -7,6 +7,7 @@ import { MedicalDocumentNotFoundException, NotFoundApiException } from "../../co
 import { EntitlementService } from "../subscriptions/entitlement.service";
 import { StorageService } from "../storage/storage.service";
 import type { UploadTarget } from "../storage/storage-driver.interface";
+import { assertObjectKeyUnder } from "../../common/storage-keys/object-key.validator";
 import { MEDICAL_DOCUMENT_INCLUDE, toMedicalDocumentDto } from "./clinical-health-mapper";
 import type { CreateMedicalDocumentDto, RequestMedicalDocumentUploadDto } from "./dto/medical-document.dto";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
@@ -48,6 +49,7 @@ export class MedicalDocumentService {
       await this.entitlements.assertWithinLimit(pet.householdId, "health.documents.max");
     }
 
+    assertObjectKeyUnder(dto.key, "health-documents", petId);
     const row = await this.prisma.$transaction(async (tx) => {
       const created = await tx.medicalDocument.create({
         data: {

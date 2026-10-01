@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalNoteTemplateDto, ClinicalVisitDetailDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VetVisitClinicalTools } from "@/features/vet-panel/VetVisitClinicalTools";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const STATUS_TONE: Record<string, "success" | "attention" | "neutral" | "urgent"> = {
   DRAFT: "neutral",
@@ -23,11 +25,13 @@ const STATUS_TONE: Record<string, "success" | "attention" | "neutral" | "urgent"
  * snapshots the prior content first (see ClinicalVisitService.amend).
  */
 export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; visitId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("clinicalOs.visit");
   const tCommon = useTranslations("common");
 
   const [visit, setVisit] = useState<ClinicalVisitDetailDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [notes, setNotes] = useState({ reasonForVisit: "", historyText: "", observationsText: "", assessmentText: "", planText: "" });
   const [amendReason, setAmendReason] = useState("");
@@ -37,6 +41,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const detail = await providerClinicalService.getVisit(petId, visitId);
       setVisit(detail);
@@ -48,7 +53,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
         planText: detail.planText ?? "",
       });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -130,7 +135,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
     }));
   }
 
-  if (error && !visit) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !visit) return <LoadFailure error={loadError} onRetry={load} />;
   if (!visit) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const isEditable = visit.status === "DRAFT" || visit.status === "IN_PROGRESS";
@@ -198,7 +203,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
           <h2 className="text-section-title text-text-primary">{t("revisionHistory")}</h2>
           {visit.revisions.map((rev) => (
             <div key={rev.id} className="flex flex-col gap-1 border-b border-border-subtle pb-2 last:border-0">
-              <span className="text-metadata text-text-secondary">{new Date(rev.createdAt).toLocaleString()}</span>
+              <span className="text-metadata text-text-secondary">{fmt.dateTime(rev.createdAt)}</span>
               <span className="text-body text-text-primary">{rev.reason}</span>
             </div>
           ))}

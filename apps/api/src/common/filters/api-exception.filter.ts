@@ -40,6 +40,12 @@ export class ApiExceptionFilter implements ExceptionFilter {
       } else {
         message = exception.message;
       }
+    } else if (isClientHttpError(exception)) {
+      // Raised by the body parser before any handler runs (body too large, malformed JSON): the
+      // client's fault, so its own 4xx — not a 500 that pages someone.
+      status = exception.status;
+      code = httpStatusToCode(status);
+      message = status === HttpStatus.PAYLOAD_TOO_LARGE ? "The request body is too large." : "The request body could not be read.";
     } else {
       this.logger.error(exception instanceof Error ? exception.stack : String(exception), undefined, { requestId });
     }
@@ -56,8 +62,15 @@ export class ApiExceptionFilter implements ExceptionFilter {
   }
 }
 
+function isClientHttpError(exception: unknown): exception is { status: number } {
+  const e = exception as { status?: unknown; expose?: unknown } | null;
+  return !!e && typeof e.status === "number" && e.status >= 400 && e.status < 500 && e.expose === true;
+}
+
 function httpStatusToCode(status: HttpStatus): string {
   switch (status) {
+    case HttpStatus.PAYLOAD_TOO_LARGE:
+      return "PAYLOAD_TOO_LARGE";
     case HttpStatus.BAD_REQUEST:
       return "VALIDATION_ERROR";
     case HttpStatus.UNAUTHORIZED:

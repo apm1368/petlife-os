@@ -27,7 +27,8 @@ export interface DownloadTarget {
  * nothing above this boundary should know which one is active.
  */
 export interface StorageDriver {
-  createUploadTarget(key: string, contentType: string): Promise<UploadTarget>;
+  /** `maxBytes`: the size the client declared when asking for the target; the upload is refused beyond it. */
+  createUploadTarget(key: string, contentType: string, maxBytes?: number): Promise<UploadTarget>;
   /**
    * Handoff 17: mints a short-TTL signed GET for a key in the PRIVATE
    * object space. Distinct from `createUploadTarget`'s `publicUrl` — a

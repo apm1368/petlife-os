@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceEligibilityResultDto, InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { eligibilityStatusTone, verificationStatusTone } from "./insurance-status";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /**
  * Spec hard UX rule: exclusions must be highly visible — this renders them
@@ -15,6 +17,7 @@ import { eligibilityStatusTone, verificationStatusTone } from "./insurance-statu
  * benefits, never folded below or scrolled past.
  */
 export function InsuranceProductDetailView({ productId }: { productId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("insurance");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -24,15 +27,17 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
   const [product, setProduct] = useState<InsuranceProductDto | null>(null);
   const [eligibility, setEligibility] = useState<InsuranceEligibilityResultDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setProduct(await insuranceService.getProduct(productId));
       if (petId) setEligibility(await insuranceService.checkEligibility(petId, productId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -55,7 +60,7 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
     }
   }
 
-  if (error && !product) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !product) return <LoadFailure error={loadError} onRetry={load} />;
   if (!product) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -92,13 +97,13 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
             </StatusLabel>
           ))}
         </div>
-        {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: product.waitingPeriodDays })}</p> : null}
+        {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: fmt.number(product.waitingPeriodDays) })}</p> : null}
         {product.deductibleAmountIrr !== null ? (
-          <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: product.deductibleAmountIrr.toLocaleString() })}</p>
+          <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: fmt.number(product.deductibleAmountIrr) })}</p>
         ) : null}
-        {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: product.annualLimitIrr.toLocaleString() })}</p> : null}
+        {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: fmt.number(product.annualLimitIrr) })}</p> : null}
         {product.premiumMinIrr !== null && product.premiumMaxIrr !== null ? (
-          <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: product.premiumMinIrr.toLocaleString(), max: product.premiumMaxIrr.toLocaleString() })}</p>
+          <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: fmt.number(product.premiumMinIrr), max: fmt.number(product.premiumMaxIrr) })}</p>
         ) : null}
         {product.termsSource ? <p className="text-metadata text-text-secondary">{t("detail.termsSource", { source: product.termsSource })}</p> : null}
       </ContextSurface>

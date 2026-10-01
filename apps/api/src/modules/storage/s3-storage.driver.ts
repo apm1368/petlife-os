@@ -27,8 +27,9 @@ export class S3StorageDriver implements StorageDriver {
     });
   }
 
-  async createUploadTarget(key: string, contentType: string): Promise<UploadTarget> {
-    const command = new PutObjectCommand({ Bucket: this.bucket, Key: key, ContentType: contentType });
+  async createUploadTarget(key: string, contentType: string, maxBytes?: number): Promise<UploadTarget> {
+    // A presigned PUT signs Content-Length, so S3 itself refuses a body of any other size.
+    const command = new PutObjectCommand({ Bucket: this.bucket, Key: key, ContentType: contentType, ContentLength: maxBytes });
     const uploadUrl = await getSignedUrl(this.client, command, { expiresIn: UPLOAD_URL_TTL_SECONDS });
 
     return {

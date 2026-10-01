@@ -279,6 +279,12 @@ export class PaymentPendingException extends ApiException {
   }
 }
 
+export class PaymentInProgressException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_IN_PROGRESS", "This payment is already being processed.", HttpStatus.CONFLICT, details);
+  }
+}
+
 export class PaymentAlreadyCompletedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PAYMENT_ALREADY_COMPLETED", "This checkout has already been paid.", HttpStatus.CONFLICT, details);
@@ -396,6 +402,18 @@ export class InventoryChangedAfterPaymentException extends ApiException {
 export class PaymentOrderConfirmationIssueException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PAYMENT_ORDER_CONFIRMATION_ISSUE", "Payment succeeded but the order could not be confirmed automatically.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ForeignUploadKeyException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_UPLOAD_KEY", "This file wasn't uploaded for this item. Upload it again.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class PaymentIntentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_INTENT_NOT_FOUND", "Payment not found.", HttpStatus.NOT_FOUND, details);
   }
 }
 

@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { localizeDigits } from "@/lib/date/jalali";
 import type { AnimalSupportOrganizationDto, PaginatedDto, RescueCaseDto, SupportCampaignDto, SupportNeedListingDto } from "@petlife/types";
 import { animalSupportService } from "@/services/animal-support.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
 import { CampaignProgressBar } from "./CampaignProgressBar";
@@ -20,7 +20,7 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
   const [org, setOrg] = useState<AnimalSupportOrganizationDto | null>(null);
   const [campaigns, setCampaigns] = useState<PaginatedDto<SupportCampaignDto> | null>(null);
   const [rescueCases, setRescueCases] = useState<PaginatedDto<RescueCaseDto> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const locale = useLocale() as "fa" | "en";
   const fa = locale === "fa";
   const [openNeeds, setOpenNeeds] = useState<SupportNeedListingDto[] | null>(null);
@@ -31,7 +31,7 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
   }, [organizationId]);
 
   async function load() {
-    setError(null);
+    setLoadError(null);
     try {
       const [orgData, campaignData, rescueCaseData] = await Promise.all([
         animalSupportService.getOrganization(organizationId),
@@ -42,7 +42,7 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
       setCampaigns(campaignData);
       setRescueCases(rescueCaseData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -51,7 +51,7 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!org || !campaigns || !rescueCases) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

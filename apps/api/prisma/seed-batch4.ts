@@ -1,5 +1,6 @@
 import { PrismaClient, type FulfillmentStatus, type OrderStatus, type Prisma } from "@prisma/client";
 import { createHash } from "node:crypto";
+import { PetAccessService } from "../src/modules/pet-access/pet-access.service";
 
 /**
  * Batch 4 QA scenarios — commerce. Two verified sellers and one pending
@@ -259,6 +260,8 @@ async function main() {
   await db.householdMember.upsert({ where: { householdId_userId: { householdId, userId: customer.id } }, create: { householdId, userId: customer.id, role: "OWNER" }, update: {} });
   await db.pet.upsert({ where: { id: id("pet:dog") }, create: { id: id("pet:dog"), householdId, name: "هاپو", species: "DOG", approximateAgeMonths: 30, latestWeightValue: 18, latestWeightUnit: "KG" }, update: {} });
   await db.pet.upsert({ where: { id: id("pet:cat") }, create: { id: id("pet:cat"), householdId, name: "پیشی", species: "CAT", approximateAgeMonths: 40, latestWeightValue: 4.2, latestWeightUnit: "KG" }, update: {} });
+  // Same household-default grants the product creates with a pet (the owner reaches the pet through a grant, not household membership).
+  for (const key of ["pet:dog", "pet:cat"]) await new PetAccessService(db as never).applyHouseholdDefaults(id(key), householdId);
   const addressId = id("address:home");
   await db.customerAddress.upsert({
     where: { id: addressId },

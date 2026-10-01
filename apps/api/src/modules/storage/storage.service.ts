@@ -84,7 +84,7 @@ export class StorageService {
     }
     // randomUUID() as the filename — never the client-supplied original name — sidesteps path traversal / unsafe-filename concerns entirely.
     const key = `health-documents/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -96,7 +96,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: OBSERVATION_MEDIA_MAX_BYTES });
     }
     const key = `pet-observations/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -143,7 +143,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: LOST_PET_PHOTO_MAX_BYTES });
     }
     const key = `lost-pet-photos/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -155,7 +155,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: LOST_PET_PHOTO_MAX_BYTES });
     }
     const key = `lost-pet-sightings/${incidentId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -175,7 +175,7 @@ export class StorageService {
     }
     const prefix = visibility === "PUBLIC" ? "pet-memories-public" : "pet-memories-private";
     const key = `${prefix}/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -187,7 +187,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: ANIMAL_SUPPORT_MEDIA_MAX_BYTES });
     }
     const key = `animal-support-orgs/${organizationId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -199,7 +199,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
     }
     const key = `insurance-providers/${providerId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -211,7 +211,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
     }
     const key = `pet-friendly-places/${placeId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -223,7 +223,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: ANIMAL_SUPPORT_MEDIA_MAX_BYTES });
     }
     const key = `animal-support-evidence/${aggregateId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -235,7 +235,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
     }
     const key = `animal-support-verification/${organizationId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -247,7 +247,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
     }
     const key = `community-media/${userId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -264,7 +264,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
     }
     const key = `support-need-images/${userId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -280,7 +280,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
     }
     const key = `travel-listing-images/${organizationId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 }

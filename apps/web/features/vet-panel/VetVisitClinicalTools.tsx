@@ -7,6 +7,7 @@ import { PrescriptionRoute, WeightUnit } from "@petlife/types";
 import type { ClinicalNoteTemplateDto, DischargeSummaryDto, PatientVitalsDto, PrescriptionDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { vetPanelService, type RecordVitalsInput } from "@/services/vet-panel.service";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 const ROUTES: PrescriptionRoute[] = [
   PrescriptionRoute.ORAL,
@@ -49,6 +50,7 @@ export function VetVisitClinicalTools({
   isVisitEditable: boolean;
   onApplyTemplate: (template: ClinicalNoteTemplateDto) => void;
 }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.visitTools");
   const tCommon = useTranslations("common");
 
@@ -305,7 +307,7 @@ export function VetVisitClinicalTools({
         {discharge?.status === "ISSUED" ? (
           <div className="flex flex-col gap-1">
             {/* Immutable once the owner has it — the form is gone, not merely disabled. */}
-            <p className="text-metadata text-text-secondary">{t("issuedNotice", { time: new Date(discharge.issuedAt!).toLocaleString() })}</p>
+            <p className="text-metadata text-text-secondary">{t("issuedNotice", { time: fmt.dateTime(discharge.issuedAt!) })}</p>
             <p className="text-body text-text-primary">{discharge.summaryText ?? t("noneRecorded")}</p>
             {discharge.homeCareInstructions ? <p className="text-body text-text-secondary">{discharge.homeCareInstructions}</p> : null}
             {discharge.warningSignsText ? <p className="text-body text-state-attention">{discharge.warningSignsText}</p> : null}

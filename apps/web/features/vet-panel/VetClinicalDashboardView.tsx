@@ -7,6 +7,7 @@ import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from
 import type { ClinicalDashboardDto, TriageLevel } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { vetPanelService } from "@/services/vet-panel.service";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /**
  * The clinical whiteboard — "who is in the building and what is overdue".
@@ -26,6 +27,7 @@ export const TRIAGE_TONE: Record<TriageLevel, "neutral" | "attention" | "urgent"
 };
 
 export function VetClinicalDashboardView() {
+  const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.dashboard");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -86,7 +88,7 @@ export function VetClinicalDashboardView() {
                 <StatusLabel tone={row.overdueTaskCount > 0 ? "urgent" : "neutral"}>{t("dueTasks", { count: row.dueTaskCount })}</StatusLabel>
                 {/* An inpatient with no vitals yet reads as "not recorded", never as stable. */}
                 <StatusLabel tone={row.latestVitalsAt ? "neutral" : "attention"}>
-                  {row.latestVitalsAt ? t("lastVitals", { time: new Date(row.latestVitalsAt).toLocaleTimeString() }) : t("noVitalsYet")}
+                  {row.latestVitalsAt ? t("lastVitals", { time: fmt.dateTime(row.latestVitalsAt) }) : t("noVitalsYet")}
                 </StatusLabel>
               </div>
             </button>
@@ -103,7 +105,7 @@ export function VetClinicalDashboardView() {
             <ContextSurface key={task.id} className="flex items-center justify-between gap-2">
               <div className="flex flex-col">
                 <span className="text-body text-text-primary">{task.title}</span>
-                <span className="text-metadata text-text-secondary">{new Date(task.scheduledAt).toLocaleString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.dateTime(task.scheduledAt)}</span>
               </div>
               <StatusLabel tone="urgent">{t("overdue")}</StatusLabel>
             </ContextSurface>
@@ -119,7 +121,7 @@ export function VetClinicalDashboardView() {
           dashboard.pendingEstimates.map((estimate) => (
             <ContextSurface key={estimate.id} className="flex items-center justify-between gap-2">
               <span className="text-body text-text-primary">{estimate.title}</span>
-              <span className="text-metadata text-text-secondary">{t("estimateRange", { low: estimate.lowTotalIrr.toLocaleString(), high: estimate.highTotalIrr.toLocaleString() })}</span>
+              <span className="text-metadata text-text-secondary">{t("estimateRange", { low: fmt.number(estimate.lowTotalIrr), high: fmt.number(estimate.highTotalIrr) })}</span>
             </ContextSurface>
           ))
         )}
@@ -135,7 +137,7 @@ export function VetClinicalDashboardView() {
               onClick={() => router.push(`/${locale}/provider/visits/${visit.id}?petId=${visit.petId}`)}
               className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface-elevated p-3 text-start hover:bg-surface-subtle"
             >
-              <span className="text-body text-text-primary">{visit.reasonForVisit ?? new Date(visit.startedAt).toLocaleString()}</span>
+              <span className="text-body text-text-primary">{visit.reasonForVisit ?? fmt.dateTime(visit.startedAt)}</span>
               <StatusLabel tone="attention">{t("inProgress")}</StatusLabel>
             </button>
           ))}

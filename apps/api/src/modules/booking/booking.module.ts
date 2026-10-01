@@ -13,9 +13,10 @@ import { ProviderReviewsService } from "./provider-reviews.service";
 import { BookingEngagementController, PublicProviderReviewsController } from "./engagement.controller";
 import { ServicesModule } from "../services/services.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
+import { LedgerModule } from "../commerce/ledger/ledger.module";
 
 @Module({
-  imports: [PetAccessModule, ProvidersModule, CareCalendarModule, ServicesModule, PaymentsModule],
+  imports: [PetAccessModule, ProvidersModule, CareCalendarModule, ServicesModule, PaymentsModule, LedgerModule],
   controllers: [BookingsController, BookingEngagementController, PublicProviderReviewsController],
   providers: [BookingsService, BookingHoldService, BookingPetAccessService, BookingLifecycleService, BookingExpiryWorker, WaitlistService, ProviderReviewsService],
   exports: [BookingPetAccessService, BookingLifecycleService, BookingHoldService, WaitlistService, ProviderReviewsService],

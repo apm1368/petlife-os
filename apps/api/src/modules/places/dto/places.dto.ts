@@ -2,6 +2,7 @@ import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLo
 import { Type } from "class-transformer";
 import { PetFriendlyPlaceCategory, PetFriendlyPlaceStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class OpeningHoursDto {
   @IsInt() @Min(0) @Max(6) day!: number;
@@ -142,6 +143,7 @@ export class UpdatePetFriendlyPlaceDto {
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(20)
+  @IsObjectKeyFor(["pet-friendly-places"])
   imageObjectKeys?: string[];
 
   @IsOptional()

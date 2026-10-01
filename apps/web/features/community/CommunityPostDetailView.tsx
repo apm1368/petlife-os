@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Input, Skeleton } from "@petlife/ui";
 import { CommunityReactionType } from "@petlife/types";
 import type { CommunityCommentDto, CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { useSessionStore } from "@/stores/session-store";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 
@@ -22,7 +23,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
 
   const [post, setPost] = useState<CommunityPostDto | null>(null);
   const [comments, setComments] = useState<PaginatedDto<CommunityCommentDto> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   const [commentBody, setCommentBody] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
@@ -30,13 +31,13 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
 
   async function load() {
-    setError(null);
+    setLoadError(null);
     try {
       const [postData, commentsData] = await Promise.all([communityService.getPost(postId), communityService.listComments(postId, { pageSize: 50 })]);
       setPost(postData);
       setComments(commentsData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -86,7 +87,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
     }
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!post || !comments) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

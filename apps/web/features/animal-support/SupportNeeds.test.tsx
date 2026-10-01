@@ -133,6 +133,25 @@ describe("SupportNeedDetailView", () => {
     });
   });
 
+  it("a missing listing shows the not-found state — no raw API message and no pointless Retry (FA)", async () => {
+    vi.mocked(supportNeedsService.get).mockRejectedValue(new ApiError({ code: "NOT_FOUND", message: "Listing not found.", requestId: "r" }, 404));
+    vi.mocked(supportNeedsService.getSummary).mockRejectedValue(new ApiError({ code: "NOT_FOUND", message: "Listing not found.", requestId: "r" }, 404));
+    renderWithIntl(<SupportNeedDetailView listingId="missing" />, "fa");
+    expect(await screen.findByRole("heading", { name: "این صفحه پیدا نشد" })).toBeTruthy();
+    expect(document.body.textContent).not.toContain("Listing not found");
+    expect(screen.queryByRole("button", { name: "تلاش دوباره" })).toBeNull();
+    expect(screen.getByRole("link", { name: "بازگشت به خانه" }).getAttribute("href")).toBe("/fa/home");
+  });
+
+  it("a transient failure offers Retry, which reloads (EN)", async () => {
+    vi.mocked(supportNeedsService.get).mockRejectedValueOnce(new ApiError({ code: "INTERNAL_ERROR", message: "boom", requestId: "r" }, 500));
+    renderWithIntl(<SupportNeedDetailView listingId="listing-1" />, "en");
+    const retry = await screen.findByRole("button", { name: "Try again" });
+    expect(document.body.textContent).not.toContain("boom");
+    fireEvent.click(retry);
+    await waitFor(() => expect(supportNeedsService.get).toHaveBeenCalledTimes(2));
+  });
+
   it("explains that contact stays inside the product and never shows a phone number", async () => {
     vi.mocked(supportNeedsService.get).mockResolvedValue(listing());
     renderWithIntl(<SupportNeedDetailView listingId="listing-1" />);

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { HealthOverviewDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 // "vitals", "estimates" and "discharge" are the Handoff 24 additions — the
 // owner's read of what the clinic measured, quoted, and sent home with them.
@@ -25,14 +25,14 @@ export function AdvancedHealthOverviewView({ petId }: { petId: string }) {
   const locale = useLocale();
 
   const [overview, setOverview] = useState<HealthOverviewDto | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setOverview(await healthAdvancedService.getOverview(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -41,7 +41,7 @@ export function AdvancedHealthOverviewView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!overview) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (

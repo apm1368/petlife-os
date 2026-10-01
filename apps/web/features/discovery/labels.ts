@@ -21,6 +21,7 @@ const PROVIDER_TYPE: Record<string, [string, string]> = {
   BOARDING: ["پانسیون", "Boarding"],
   PET_TAXI: ["تاکسی حیوانات", "Pet taxi"],
   MULTI_SERVICE_PROVIDER: ["مرکز چندخدمتی", "Multi-service center"],
+  TRAVEL_ACCOMMODATION: ["اقامتگاه سفر", "Travel accommodation"],
 };
 
 export function categoryLabel(category: string, fa: boolean): string {

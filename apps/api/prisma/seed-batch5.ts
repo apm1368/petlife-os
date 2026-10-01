@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient, TravelBookingStatus } from "@prisma/client";
 import { createHash } from "node:crypto";
 import { priceStay, type PolicyTerms, type RatePlanTerms } from "../src/modules/travel-marketplace/travel-pricing.util";
+import { PetAccessService } from "../src/modules/pet-access/pet-access.service";
 
 /**
  * Batch 5 QA scenarios — travel, trip hub, insurance and places.
@@ -190,6 +191,8 @@ async function main() {
     nazi: await db.pet.upsert({ where: { id: id("pet:nazi") }, create: { id: id("pet:nazi"), householdId, name: "نازی", species: "CAT", approximateAgeMonths: 48, latestWeightValue: 4, latestWeightUnit: "KG" }, update: {} }),
     bamby: await db.pet.upsert({ where: { id: id("pet:bamby") }, create: { id: id("pet:bamby"), householdId, name: "بامبی", species: "DOG", approximateAgeMonths: 14 }, update: {} }),
   };
+  // Same household-default grants the product creates with a pet (the owner reaches the pet through a grant, not household membership).
+  for (const pet of Object.values(pets)) await new PetAccessService(db as never).applyHouseholdDefaults(pet.id, householdId);
   const vaccineDoc = await db.medicalDocument.upsert({
     where: { id: id("doc:cookie-vaccine") },
     create: { id: id("doc:cookie-vaccine"), petId: pets.cookie.id, householdId, documentType: "VACCINATION_CERTIFICATE", title: "کارت واکسن کوکی (نمایشی)", sourceType: "OWNER", sourceUserId: traveller.id, fileObjectKey: `qa/batch5/${id("doc:cookie-vaccine")}.pdf`, mimeType: "application/pdf", fileSizeBytes: 12_000, recordedAt: new Date(Date.now() - 60 * DAY) },

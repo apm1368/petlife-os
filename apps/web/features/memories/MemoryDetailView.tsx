@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, ErrorRecovery, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, Skeleton } from "@petlife/ui";
 import type { PetMemoryDto } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
 import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("memories");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -17,10 +20,12 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
   const [memory, setMemory] = useState<PetMemoryDto | null>(null);
   const [privateMediaUrls, setPrivateMediaUrls] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       const loaded = await memoriesService.get(petId, memoryId);
       setMemory(loaded);
@@ -33,7 +38,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
         setPrivateMediaUrls([]);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -68,10 +73,10 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
     }
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!memory) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
-  const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+  const displayTitle = memory.title ?? fmt.date(memory.occurredAt);
 
   return (
     <div className="flex flex-col gap-5">
@@ -86,7 +91,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
             ))}
           </div>
         ) : null}
-        <p className="text-metadata text-text-secondary">{new Date(memory.occurredAt).toLocaleDateString()}</p>
+        <p className="text-metadata text-text-secondary">{fmt.date(memory.occurredAt)}</p>
         {memory.location ? <p className="text-metadata text-text-secondary">{memory.location}</p> : null}
         {memory.tags.length > 0 ? <p className="text-metadata text-text-secondary">{memory.tags.join(" · ")}</p> : null}
         {memory.description ? <p className="text-body text-text-primary">{memory.description}</p> : null}
@@ -105,6 +110,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
             </Button>
           )}
         </div>
+        {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
       </ContextSurface>
     </div>
   );

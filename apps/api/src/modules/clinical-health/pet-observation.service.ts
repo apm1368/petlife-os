@@ -7,6 +7,7 @@ import { NotFoundApiException } from "../../common/errors/api-exception";
 import { EntitlementService } from "../subscriptions/entitlement.service";
 import { StorageService } from "../storage/storage.service";
 import type { UploadTarget } from "../storage/storage-driver.interface";
+import { assertObjectKeyUnder } from "../../common/storage-keys/object-key.validator";
 import { toPetObservationDto } from "./clinical-health-mapper";
 import type { CreatePetObservationDto, RequestObservationMediaUploadDto } from "./dto/pet-observation.dto";
 
@@ -32,6 +33,7 @@ export class PetObservationService {
     const pet = await this.prisma.pet.findUnique({ where: { id: petId } });
     if (!pet) throw new NotFoundApiException("Pet");
     await this.entitlements.assertWithinLimit(pet.householdId, "health.observations.max");
+    if (dto.mediaKey) assertObjectKeyUnder(dto.mediaKey, "pet-observations", petId);
 
     const row = await this.prisma.$transaction(async (tx) => {
       const created = await tx.petObservation.create({

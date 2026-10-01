@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, PriorityAction, Skeleton, ActivePetSwitcher } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, PriorityAction, Skeleton, ActivePetSwitcher } from "@petlife/ui";
 import type { HomeResponseDto } from "@petlife/types";
 import { homeService } from "@/services/home.service";
 import { useActivePet } from "@/hooks/use-active-pet";
+import { SystemState } from "@/features/system/SystemState";
 
 export function HomeView() {
   const t = useTranslations("home");
@@ -39,7 +40,7 @@ export function HomeView() {
   }, [activePetId, isSwitching]);
 
   if (error) {
-    return <ErrorRecovery title={tCommon("loading")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
+    return <SystemState kind="GENERIC_RETRYABLE_ERROR" onRetry={load} />;
   }
 
   if (!home) {
