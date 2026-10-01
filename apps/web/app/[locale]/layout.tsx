@@ -37,6 +37,8 @@ export default async function LocaleLayout({
     <html lang={locale} dir={localeDirection[locale]} className={`${vazirmatn.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Which commit this bundle was built from — lets a reviewer confirm the preview is current. */}
+        <meta name="petlife-build" content={process.env.NEXT_PUBLIC_BUILD_SHA ?? "dev"} />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
