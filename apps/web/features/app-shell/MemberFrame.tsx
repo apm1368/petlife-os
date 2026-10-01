@@ -6,7 +6,7 @@ import { IconButton } from "@petlife/ui";
 import { useSessionStore } from "@/stores/session-store";
 import { MobileTabBar, PetContextControl, PrimaryNav } from "@/features/navigation/MemberNavigation";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
-import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
+import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 import { AccountMenu } from "@/features/account/AccountMenu";
 
@@ -47,7 +47,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
             </span>
             <NotificationBell />
             <span className="member-header__secondary">
-              <LocaleSwitcher />
+              <LanguageToggle />
               <ThemeToggle />
             </span>
             {user ? <AccountMenu user={user} /> : null}

@@ -36,7 +36,9 @@ const ACTORS = [["anonymous", "-", "/"], ["consumer", "batch8-owner@example.test
     const sel = p.locator('select[aria-label="زبان"]:visible').first();
     const link = p.locator('a[href="/en"]:visible').first();
     let via = "";
-    if (await sel.count()) { await sel.selectOption("en"); via = "header select"; }
+    const toggle = p.locator('button.language-toggle:visible').first();
+    if (await toggle.count()) { await toggle.click(); via = "header toggle"; }
+    else if (await sel.count()) { await sel.selectOption("en"); via = "header select"; }
     else if (await link.count()) { await link.click(); via = "landing link"; }
     else if (await menu()) { await p.locator('.account-menu__prefs button:has-text("English")').first().click(); via = "account menu"; }
     if (via) { await p.waitForURL(/\/en(\/|$)/, { timeout: 15000 }).catch(() => {}); await p.waitForTimeout(1000); }

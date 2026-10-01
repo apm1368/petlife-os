@@ -82,8 +82,8 @@ export function PrimaryNav() {
       </nav>
       <div id={panelId} ref={panel} className="mega" data-open={open} hidden={!open} onPointerEnter={hover(true)}>
         <div className="mega__inner">
-          {EXPLORE_GROUPS.map((group) => (
-            <section key={group.key} className="mega__group" aria-labelledby={`${panelId}-${group.key}`}>
+          {EXPLORE_GROUPS.map((group, gi) => (
+            <section key={group.key} className="mega__group" style={{ ["--g" as string]: gi }} aria-labelledby={`${panelId}-${group.key}`}>
               <h2 id={`${panelId}-${group.key}`}>{fa ? group.fa : group.en}</h2>
               <ul>
                 {group.links.map(({ href, icon: Icon, fa: f, en }) => (

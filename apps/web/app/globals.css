@@ -652,3 +652,20 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
 .account-menu__panel .account-menu__prefs button{min-height:32px;padding:0 10px;border-radius:999px;font-size:.78rem}
 .account-menu__panel .account-menu__prefs button[aria-pressed="true"]{background:var(--brand-natural);color:#fff}
 .account-menu__panel{min-width:260px}
+
+/* Mega menu refinement: groups separated by quiet vertical rules, brand-coloured headings, a softer icon
+   tile, and groups that settle in one after another when the panel opens. */
+.mega__inner{gap:0;padding-top:30px;padding-bottom:22px}
+.mega__group{padding-inline:22px;border-inline-start:1px solid var(--border-subtle)}
+.mega__group:first-child{padding-inline-start:0;border-inline-start:0}
+.mega__group:last-child{padding-inline-end:0}
+.mega__group h2{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding-bottom:0;border-bottom:0;color:var(--brand-natural);font-size:.8rem;font-weight:800}
+.mega__group h2::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--brand-mint)}
+.mega__icon{width:32px;height:32px;border-radius:9px;background:color-mix(in srgb,var(--brand-natural) 7%,var(--surface-elevated));border:1px solid color-mix(in srgb,var(--brand-natural) 14%,transparent)}
+.mega__link:hover .mega__icon{background:var(--brand-natural);color:#fff;border-color:transparent}
+.mega__link .mega__icon{transition:background-color var(--dur-1),color var(--dur-1)}
+.mega[data-open=true] .mega__group{animation:pl-rise var(--dur-3) var(--ease-out) backwards;animation-delay:calc(var(--g,0) * 35ms + 40ms)}
+/* Consumer header language toggle. */
+.language-toggle{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-elevated);color:var(--text-primary);font-size:.84rem;font-weight:700;cursor:pointer;transition:border-color var(--dur-1)}
+.language-toggle:hover{border-color:var(--border-strong)}
+.language-toggle:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
