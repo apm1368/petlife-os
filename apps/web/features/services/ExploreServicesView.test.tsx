@@ -7,7 +7,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/hooks/use-active-pet", () => ({ useActivePet: () => ({ activePet: { id: "pet-1", name: "Luna" } }) }));
 
 describe("ExploreServicesView", () => {
-  it("shows a tile for every service category and the active pet's name", () => {
+  it("lists every service category as a link and the active pet's name", () => {
     renderWithIntl(<ExploreServicesView />);
 
     expect(screen.getByText("For Luna")).toBeTruthy();
@@ -17,5 +17,6 @@ describe("ExploreServicesView", () => {
     expect(screen.getByText("Sitting")).toBeTruthy();
     expect(screen.getByText("Boarding")).toBeTruthy();
     expect(screen.getByText("Pet Taxi")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Veterinary/ }).getAttribute("href")).toBe("/en/services/VET");
   });
 });
