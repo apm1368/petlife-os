@@ -32,7 +32,7 @@ export function TehranLanding({ locale }: { locale: AppLocale }) {
           PET LIFE <span>OS</span>
         </Link>
         <div className="tehran-header__tools">
-          <Link href={locale === "fa" ? "/en" : "/fa"} className="tehran-lang" lang={locale === "fa" ? "en" : "fa"} aria-label={copy.languageLabel}>
+          <Link href={locale === "fa" ? "/en" : "/fa"} className="tehran-lang" hrefLang={locale === "fa" ? "en" : "fa"} aria-label={copy.languageLabel}>
             {copy.language}
           </Link>
           <LandingTheme />

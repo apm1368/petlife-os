@@ -55,7 +55,8 @@ describe("Landing — the Tehran city is the navigation", () => {
     renderWithIntl(await RootPage({ params: Promise.resolve({ locale: "fa" }) }), "fa");
     const toEnglish = screen.getByRole("link", { name: landingCopy.fa.languageLabel });
     expect(toEnglish.getAttribute("href")).toBe("/en");
-    expect(toEnglish.getAttribute("lang")).toBe("en");
+    expect(toEnglish.getAttribute("hreflang")).toBe("en");
+    expect(toEnglish.textContent).toBe("انگلیسی");
   });
 
   it("rejects unsupported locales", async () => {

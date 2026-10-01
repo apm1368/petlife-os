@@ -60,8 +60,8 @@ export function AccountMenu({ user }: { user: UserDto }) {
           <div className="account-menu__prefs" role="group" aria-label={t("زبان", "Language")}>
             <span>{t("زبان", "Language")}</span>
             <div>
-              <button type="button" aria-pressed={locale === "fa"} lang="fa" onClick={() => switchLanguage("fa")}>فارسی</button>
-              <button type="button" aria-pressed={locale === "en"} lang="en" onClick={() => switchLanguage("en")}>English</button>
+              <button type="button" aria-pressed={locale === "fa"} onClick={() => switchLanguage("fa")}>{t("فارسی", "Persian")}</button>
+              <button type="button" aria-pressed={locale === "en"} onClick={() => switchLanguage("en")}>{t("انگلیسی", "English")}</button>
             </div>
           </div>
           <div className="account-menu__prefs" role="group" aria-label={t("ظاهر", "Appearance")}>

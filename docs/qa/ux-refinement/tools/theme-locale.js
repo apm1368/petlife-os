@@ -40,7 +40,7 @@ const ACTORS = [["anonymous", "-", "/"], ["consumer", "batch8-owner@example.test
     if (await langToggle.count()) { await langToggle.click(); via = "header toggle"; }
     else if (await sel.count()) { await sel.selectOption("en"); via = "header select"; }
     else if (await link.count()) { await link.click(); via = "landing link"; }
-    else if (await menu()) { await p.locator('.account-menu__prefs button:has-text("English")').first().click(); via = "account menu"; }
+    else if (await menu()) { await p.locator('.account-menu__prefs button:has-text("انگلیسی")').first().click(); via = "account menu"; }
     if (via) { await p.waitForURL(/\/en(\/|$)/, { timeout: 15000 }).catch(() => {}); await p.waitForTimeout(1000); }
     steps.push(["switch to EN", await state(), via || "no visible language control"]);
     await p.reload({ waitUntil: "networkidle" });

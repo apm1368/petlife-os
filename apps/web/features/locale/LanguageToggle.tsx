@@ -4,9 +4,9 @@ import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 
 /**
- * The consumer header's language control: with two languages a single toggle naming the other one in its
- * own language (English / فارسی) is clearer than a select. It changes only the locale segment of the URL —
- * path, query and theme stay as they are.
+ * The consumer header's language control: a single toggle naming the other language — in the language of
+ * the current page (Persian pages say «انگلیسی», English pages say "Persian"), so the visible UI never mixes
+ * languages. It changes only the locale segment of the URL — path, query and theme stay as they are.
  */
 export function LanguageToggle() {
   const locale = useLocale();
@@ -17,7 +17,6 @@ export function LanguageToggle() {
     <button
       type="button"
       className="language-toggle"
-      lang={next}
       aria-label={locale === "fa" ? "تغییر زبان به انگلیسی" : "Switch language to Persian"}
       onClick={() => {
         const segments = pathname.split("/");
@@ -25,7 +24,7 @@ export function LanguageToggle() {
         router.push((segments.join("/") || "/") + window.location.search);
       }}
     >
-      {next === "en" ? "English" : "فارسی"}
+      {locale === "fa" ? "انگلیسی" : "Persian"}
     </button>
   );
 }

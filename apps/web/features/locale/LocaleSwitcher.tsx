@@ -4,6 +4,9 @@ import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { locales } from "@/lib/i18n/config";
 
+/** Language names in the language of the current page, so the visible UI never mixes languages. */
+const LANGUAGE_NAMES = { fa: { fa: "فارسی", en: "انگلیسی" }, en: { fa: "Persian", en: "English" } } as const;
+
 /** Swaps the leading /fa or /en path segment, preserving the rest of the URL. */
 export function LocaleSwitcher() {
   const locale = useLocale();
@@ -27,7 +30,7 @@ export function LocaleSwitcher() {
     >
       {locales.map((l) => (
         <option key={l} value={l}>
-          {l.toUpperCase()}
+          {LANGUAGE_NAMES[locale === "fa" ? "fa" : "en"][l as "fa" | "en"]}
         </option>
       ))}
     </select>
