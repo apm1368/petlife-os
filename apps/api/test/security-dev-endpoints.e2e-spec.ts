@@ -13,8 +13,8 @@ describe("Security: development sign-in simulation is opt-in", () => {
     // Config is validated when AppModule is first imported, so the flag must be set before loading it.
     process.env.GOOGLE_DEV_SIMULATE_ENABLED = "false";
     let testApp!: typeof TestAppModule;
-    jest.isolateModules(() => {
-      testApp = require("./test-app") as typeof TestAppModule;
+    await jest.isolateModulesAsync(async () => {
+      testApp = await import("./test-app");
     });
     extractCookie = testApp.extractCookie;
     app = await testApp.createTestApp();
