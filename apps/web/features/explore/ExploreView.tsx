@@ -1,14 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { ChevronLeft, ChevronRight, ClipboardList, HeartPulse, House, Images, LifeBuoy, Plane, Receipt } from "@petlife/ui";
+import { ChevronLeft, ChevronRight, ClipboardList, HeartPulse, House, Images, LifeBuoy, PackageCheck, Plane } from "@petlife/ui";
 import { EXPLORE_GROUPS } from "@/features/navigation/consumer-nav";
 
 type Entry = { href: string; icon: typeof House; fa: [string, string]; en: [string, string] };
 
 const MINE: Entry[] = [
   { href: "/bookings", icon: ClipboardList, fa: ["نوبت‌های من", ""], en: ["My bookings", ""] },
-  { href: "/orders", icon: Receipt, fa: ["سفارش‌های من", ""], en: ["My orders", ""] },
+  { href: "/orders", icon: PackageCheck, fa: ["سفارش‌های من", ""], en: ["My orders", ""] },
   { href: "/travel/trips", icon: Plane, fa: ["سفرهای من", ""], en: ["My trips", ""] },
   { href: "/pets/active?view=memories", icon: Images, fa: ["خاطرات", ""], en: ["Memories", ""] },
   { href: "/pets", icon: HeartPulse, fa: ["حیوانات من", ""], en: ["My pets", ""] },

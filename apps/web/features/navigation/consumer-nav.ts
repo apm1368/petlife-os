@@ -1,5 +1,5 @@
 import {
-  BookOpen, CalendarDays, Compass, Heart, HandHeart, HeartPulse, House, Images, MapPin, Plane, Receipt, Repeat, Scissors, ShieldPlus,
+  BookOpen, CalendarDays, Compass, Heart, HandHeart, HeartPulse, House, Images, MapPin, PackageCheck, Plane, Repeat, Scissors, ShieldPlus,
   ShoppingBag, Siren, Stethoscope, Users,
 } from "@petlife/ui";
 
@@ -61,7 +61,7 @@ export const EXPLORE_GROUPS: ExploreGroup[] = [
       { href: "/shop", icon: ShoppingBag, fa: ["فروشگاه", "غذا و لوازم از فروشندگان معتبر"], en: ["Shop", "Food and supplies from trusted sellers"] },
       { href: "/favorites", icon: Heart, fa: ["علاقه‌مندی‌ها", "آنچه نشان کرده‌اید"], en: ["Favorites", "What you saved"] },
       { href: "/repeat-delivery", icon: Repeat, fa: ["تحویل دوره‌ای", "غذا و لوازم مصرفی، بی‌دغدغه"], en: ["Repeat delivery", "Regular supplies without the hassle"] },
-      { href: "/orders", icon: Receipt, fa: ["سفارش‌ها", "پیگیری و تاریخچهٔ خرید"], en: ["Orders", "Tracking and purchase history"] },
+      { href: "/orders", icon: PackageCheck, fa: ["سفارش‌ها", "پیگیری و تاریخچهٔ خرید"], en: ["Orders", "Tracking and purchase history"] },
     ],
   },
   {
@@ -69,7 +69,7 @@ export const EXPLORE_GROUPS: ExploreGroup[] = [
     links: [
       { href: "/lost-pets", icon: Siren, fa: ["حیوانات گم‌شده", "گزارش‌های اطراف و ثبت مشاهده"], en: ["Lost pets", "Reports nearby and sightings"] },
       { href: "/animal-support/needs", icon: HandHeart, fa: ["حمایت از حیوانات", "نیازهای پناهگاه‌ها و افراد"], en: ["Animal support", "Needs from shelters and people"] },
-      { href: "/animal-support", icon: Users, fa: ["سازمان‌ها و پناهگاه‌ها", "سازمان‌های تأییدشده و کمپین‌ها"], en: ["Shelters and NGOs", "Verified organizations and campaigns"] },
+      { href: "/animal-support", icon: House, fa: ["سازمان‌ها و پناهگاه‌ها", "سازمان‌های تأییدشده و کمپین‌ها"], en: ["Shelters and NGOs", "Verified organizations and campaigns"] },
       { href: "/community", icon: Users, fa: ["جامعه", "پرسش و تجربهٔ صاحبان حیوانات"], en: ["Community", "Questions and stories from owners"] },
     ],
   },

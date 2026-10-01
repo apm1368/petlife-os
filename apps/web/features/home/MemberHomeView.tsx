@@ -229,8 +229,7 @@ export function MemberHomeView() {
           )}
         </section>
 
-        <nav className="member-home__card member-home__shortcuts" aria-label={c.shortcuts}>
-          <h2>{c.shortcuts}</h2>
+        <nav className="member-home__shortcuts" aria-label={c.shortcuts}>
           <Link href={`${petBase}/health`}><HeartPulse size={18} aria-hidden="true" />{c.health}</Link>
           <Link href={`${petBase}/care`}><CalendarDays size={18} aria-hidden="true" />{c.care}</Link>
           <Link href={`${petBase}/memories`}><Images size={18} aria-hidden="true" />{c.memories}</Link>

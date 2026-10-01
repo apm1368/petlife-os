@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import {
   PetLifecycleStatus,
   type PetAccessFlags,
@@ -164,62 +164,61 @@ export function PetProfileView({ petId }: { petId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <header className="max-w-3xl">
-        <p className="text-xs font-black uppercase tracking-[.14em] text-brand-natural">{c.eyebrow}</p>
-        <h1 className="mt-2 text-page-title text-text-primary">{isMemorial ? c.memorialTitle : c.title}</h1>
-        <p className="mt-3 max-w-2xl text-body leading-8 text-text-secondary">{isMemorial ? c.memorialDescription : c.description}</p>
-        {overview.householdName ? <p className="mt-3 text-xs text-text-secondary">{c.household}: {overview.householdName}</p> : null}
-      </header>
-
-      {!isMemorial ? (
-        <OverviewSection title={c.attention}>
-          {overview.attention.length === 0 ? (
-            <ContextSurface className="border-s-4 border-s-brand-natural">
-              <p className="text-body text-text-primary">{c.noAttention}</p>
-              <p className="mt-2 text-sm leading-7 text-text-secondary">{c.noAttentionHint}</p>
-            </ContextSurface>
-          ) : (
-            <div className="divide-y divide-border-subtle border-y border-border-subtle">
-              {overview.attention.map((item) => <AttentionRow key={item.id} item={item} base={base} locale={locale} />)}
-            </div>
-          )}
-        </OverviewSection>
-      ) : null}
-
-      {!isMemorial ? (
-        <OverviewSection title={c.upcoming}>
-          <EventList items={overview.upcoming} empty={c.noUpcoming} base={base} locale={locale} />
-        </OverviewSection>
-      ) : null}
-
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+    <div className="pet-overview">
+      <h1 className="sr-only">{isMemorial ? c.memorialTitle : c.title}</h1>
+      <div className="pet-overview__main">
+        {isMemorial ? (
+          <section className="pet-overview__memorial">
+            <h2>{c.memorialTitle}</h2>
+            <p>{c.memorialDescription}</p>
+          </section>
+        ) : null}
+        {!isMemorial ? (
+          <OverviewSection title={c.attention}>
+            {overview.attention.length === 0 ? (
+              <div className="pet-overview__calm">
+                <p>{c.noAttention}</p>
+                <p>{c.noAttentionHint}</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border-subtle border-y border-border-subtle">
+                {overview.attention.map((item) => <AttentionRow key={item.id} item={item} base={base} locale={locale} />)}
+              </div>
+            )}
+          </OverviewSection>
+        ) : null}
+        {!isMemorial ? (
+          <OverviewSection title={c.upcoming}>
+            <EventList items={overview.upcoming} empty={c.noUpcoming} base={base} locale={locale} showSource={false} compact />
+          </OverviewSection>
+        ) : null}
         <OverviewSection title={c.recentHealth}>
           <EventList items={overview.recentHealth} empty={c.noHealth} base={base} locale={locale} compact />
         </OverviewSection>
-        <OverviewSection title={c.recentActivity}>
-          <EventList items={overview.recentActivity} empty={c.noActivity} base={base} locale={locale} compact />
-        </OverviewSection>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 border-t border-border-subtle pt-8 md:grid-cols-[1fr_1.2fr]">
-        <OverviewSection title={c.recentMemory}>
-          {overview.recentMemory ? (
-            <Link href={base + "/memories/" + overview.recentMemory.id} className="block border-s-2 border-[#76638c] ps-4">
-              <p className="font-bold text-text-primary">{overview.recentMemory.title ?? formatOverviewDate(overview.recentMemory.occurredAt, locale)}</p>
-              <p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(overview.recentMemory.occurredAt, locale)}</p>
-            </Link>
-          ) : <p className="text-sm text-text-secondary">{c.noMemory}</p>}
-        </OverviewSection>
+      <aside className="pet-overview__aside">
         <OverviewSection title={c.useful}>
-          <div className="grid grid-cols-1 gap-px overflow-hidden border border-border-subtle bg-border-subtle sm:grid-cols-2">
+          <div className="pet-overview__actions">
             {access.canViewHealth ? <Shortcut href={base + "/health"} label={c.health} /> : null}
             {access.canViewCareProfile ? <Shortcut href={base + "/care"} label={c.care} /> : null}
             {access.canEditHealth ? <Shortcut href={base + "/health/advanced/documents"} label={c.document} /> : null}
             <Shortcut href={base + "/memories/new"} label={c.memory} />
           </div>
         </OverviewSection>
-      </div>
+        <OverviewSection title={c.recentActivity}>
+          <EventList items={overview.recentActivity} empty={c.noActivity} base={base} locale={locale} compact />
+        </OverviewSection>
+        <OverviewSection title={c.recentMemory}>
+          {overview.recentMemory ? (
+            <Link href={base + "/memories/" + overview.recentMemory.id} className="pet-overview__memory">
+              <p>{overview.recentMemory.title ?? formatOverviewDate(overview.recentMemory.occurredAt, locale)}</p>
+              <span>{formatOverviewDate(overview.recentMemory.occurredAt, locale)}</span>
+            </Link>
+          ) : <p className="text-sm text-text-secondary">{c.noMemory}</p>}
+        </OverviewSection>
+        {overview.householdName ? <p className="pet-overview__household">{c.household}: {overview.householdName}</p> : null}
+      </aside>
     </div>
   );
 }
@@ -235,21 +234,21 @@ function AttentionRow({ item, base, locale }: { item: PetOverviewAttentionDto; b
     <Link href={base + item.href} className="grid min-h-20 grid-cols-[auto_1fr_auto] items-center gap-4 py-4">
       <span className={"h-10 w-1 " + severityBarClass(item.severity)} aria-hidden="true" />
       <div><p className="font-bold text-text-primary">{label}</p>{item.dueAt ? <p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.dueAt, locale)}</p> : null}</div>
-      <StatusLabel tone={tone}>{severityLabel(item.severity, locale)}</StatusLabel>
+      {item.severity === "ATTENTION" ? null : <StatusLabel tone={tone}>{severityLabel(item.severity, locale)}</StatusLabel>}
     </Link>
   );
 }
 
-function EventList({ items, empty, base, locale, compact = false }: { items: PetOverviewEventDto[]; empty: string; base: string; locale: "fa" | "en"; compact?: boolean }) {
+function EventList({ items, empty, base, locale, compact = false, showSource = true }: { items: PetOverviewEventDto[]; empty: string; base: string; locale: "fa" | "en"; compact?: boolean; showSource?: boolean }) {
   if (items.length === 0) return <p className="border-y border-border-subtle py-5 text-sm text-text-secondary">{empty}</p>;
   return (
     <div className="divide-y divide-border-subtle border-y border-border-subtle">
       {items.map((item) => {
         const href = item.href.startsWith("/bookings/") ? "/" + locale + item.href : base + item.href;
         return (
-          <Link key={item.type + "-" + item.id} href={href} className={"flex items-start justify-between gap-4 py-4 " + (compact ? "min-h-20" : "min-h-24")}>
+          <Link key={item.type + "-" + item.id} href={href} className={"flex items-center justify-between gap-4 " + (compact ? "min-h-16 py-3" : "min-h-20 py-4")}>
             <div className="min-w-0"><p className="truncate font-bold text-text-primary">{eventTitle(item.title, locale)}</p><p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.occurredAt, locale)}{item.providerName ? " · " + item.providerName : ""}</p></div>
-            <StatusLabel tone="neutral">{eventSourceLabel(item, locale)}</StatusLabel>
+            {showSource ? <StatusLabel tone="neutral">{eventSourceLabel(item, locale)}</StatusLabel> : null}
           </Link>
         );
       })}
@@ -258,7 +257,7 @@ function EventList({ items, empty, base, locale, compact = false }: { items: Pet
 }
 
 function Shortcut({ href, label }: { href: string; label: string }) {
-  return <Link href={href} className="flex min-h-16 items-center justify-between bg-surface-elevated px-4 py-3 text-sm font-bold text-text-primary hover:bg-surface-subtle"><span>{label}</span><span aria-hidden="true" className="dir-flip">←</span></Link>;
+  return <Link href={href} className="pet-overview__action"><span>{label}</span><span aria-hidden="true" className="dir-flip">←</span></Link>;
 }
 
 

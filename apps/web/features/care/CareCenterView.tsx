@@ -2,12 +2,14 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton } from "@petlife/ui";
 import { careRemindersService, type CareReminder, type ReminderInput } from "@/services/care-reminders.service";
 import { petsService } from "@/services/pets.service";
 import { CareProfileView } from "./CareProfileView";
+import { CARE_KINDS, careTitle } from "./care-labels";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
-const kinds: Record<string, [string, string]> = { VACCINATION:["واکسن","Vaccination"], VET_VISIT:["ویزیت دامپزشک","Vet visit"], LAB_TEST:["آزمایش","Lab test"], IMAGING:["تصویربرداری","Imaging"], DENTAL:["دندان","Dental"], MEDICATION:["دارو","Medication"], MEDICATION_REFILL:["تهیه مجدد دارو","Medication refill"], DEWORMING:["ضدانگل داخلی","Deworming"], PARASITE_PREVENTION:["پیشگیری از انگل","Parasite prevention"], FOLLOW_UP:["پیگیری","Follow-up"], WEIGHT_CHECK:["کنترل وزن","Weight check"], DOCUMENT_EXPIRY:["انقضای سند","Document expiry"], GROOMING:["آرایش و نظافت","Grooming"], CUSTOM:["شخصی","Custom"] };
+const kinds = CARE_KINDS;
 const repeat: Record<string, [string, string]> = { ONCE:["یک‌بار","Once"], DAILY:["روزانه","Daily"], WEEKLY:["هفتگی","Weekly"], MONTHLY:["ماهانه","Monthly"], YEARLY:["سالانه","Yearly"], CUSTOM:["فاصله دلخواه (روز)","Custom interval (days)"] };
 const states: Record<string, [string,string]> = { DUE:["به‌زودی","Due soon"], OVERDUE:["عقب‌افتاده","Overdue"], UPCOMING:["آینده","Upcoming"], COMPLETED:["انجام‌شده","Completed"], SNOOZED:["یادآوری به تعویق افتاده","Snoozed"], CANCELLED:["لغوشده","Cancelled"], CUSTOM:["شخصی","Custom"] };
 const sources: Record<string,[string,string]> = { USER_CREATED:["صاحب حیوان","Owner"], PROVIDER_CREATED:["ارائه‌دهنده","Provider"], MEDICAL_RECORD_DERIVED:["پرونده پزشکی","Medical record"], BOOKING_DERIVED:["رزرو","Booking"], SYSTEM_SCHEDULED:["سیستم","System"] };
@@ -16,7 +18,7 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
   const [items, setItems] = useState<CareReminder[] | null>(null);
   const [canEdit, setCanEdit] = useState(false);
   const [petName, setPetName] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [filter, setFilter] = useState("DUE");
   const [form, setForm] = useState<CareReminder | "new" | null>(null);
@@ -25,21 +27,21 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
   const load = useCallback(async () => {
     setError(null);
     try { const [data, access, pet] = await Promise.all([itemId ? careRemindersService.get(petId, itemId).then(item => [item]) : careRemindersService.list(petId), petsService.getMyAccess(petId), petsService.getById(petId)]); setItems(data); setCanEdit(access.canEditCareProfile); setPetName(pet.name); }
-    catch (e) { setError(e instanceof Error ? e.message : "Unable to load care"); }
+    catch (e) { setError(e); }
   }, [petId, itemId]);
   useEffect(() => { void load(); }, [load]);
-  const run = async (id: string, action: string, date?: string) => { setBusy(true); setActionError(null); try { await careRemindersService.act(petId, id, action, date); await load(); } catch(e) { setActionError(e instanceof Error ? e.message : "Action failed"); } finally { setBusy(false); } };
+  const run = async (id: string, action: string, date?: string) => { setBusy(true); setActionError(null); try { await careRemindersService.act(petId, id, action, date); await load(); } catch { setActionError(fa ? "انجام نشد. دوباره تلاش کنید." : "That didn't work. Please try again."); } finally { setBusy(false); } };
   const format = (date: string) => new Intl.DateTimeFormat(fa ? "fa-IR-u-ca-persian" : "en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Tehran" }).format(new Date(date));
-  if(error) return <ErrorRecovery title={fa ? "مراقبت در دسترس نیست" : "Care unavailable"} message={error} retryLabel={fa ? "تلاش دوباره" : "Retry"} onRetry={load}/>;
-  if(!items) return <Skeleton className="h-64 w-full"/>;
+  if(error) return <LoadFailure error={error} onRetry={load}/>;
+  if(!items) return <Skeleton className="h-64 w-full" aria-label={fa ? "در حال بارگذاری" : "Loading"}/>;
   const visible = itemId ? items : items.filter(item => filter === "CUSTOM" ? item.type === "CUSTOM" : item.state === filter);
   return <div className="flex flex-col gap-6">
-    <header className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="text-page-title">{fa ? "مرکز مراقبت" : "Care center"}</h1><p className="mt-2 text-sm text-text-secondary">{fa ? "یادآورها و پیگیری‌ها؛ زمان‌ها به وقت تهران" : "Reminders and follow-ups; times shown in Tehran time"}</p></div><div className="flex gap-3"><Link className="text-brand-natural" href={`/${locale}/pets/${petId}/care/calendar`}>{fa ? "تقویم" : "Calendar"}</Link><Link className="text-brand-natural" href={`/${locale}/pets/${petId}?view=travel`}>{fa ? "آمادگی سفر" : "Travel readiness"}</Link>{canEdit ? <Button onClick={() => setForm("new")}>{fa ? "یادآور جدید" : "Create reminder"}</Button> : null}</div></header>
+    <header className="section-head"><div><h1>{fa ? "مرکز مراقبت" : "Care center"}</h1><p>{fa ? "یادآورها و پیگیری‌ها؛ زمان‌ها به وقت تهران" : "Reminders and follow-ups; times shown in Tehran time"}</p></div><div className="flex flex-wrap items-center gap-2"><Link className="btn-quiet" href={`/${locale}/pets/${petId}/care/calendar`}>{fa ? "تقویم" : "Calendar"}</Link><Link className="btn-quiet" href={`/${locale}/pets/${petId}?view=travel`}>{fa ? "آمادگی سفر" : "Travel readiness"}</Link>{canEdit ? <Button onClick={() => setForm("new")}>{fa ? "یادآور جدید" : "Create reminder"}</Button> : null}</div></header>
     {itemId ? <Link href={`/${locale}/pets/${petId}/care`}>{fa ? "بازگشت به مراقبت‌ها" : "Back to care"}</Link> : <nav aria-label={fa ? "فیلتر مراقبت" : "Care filters"} className="flex flex-wrap gap-2">{Object.entries(states).map(([key, label]) => <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)} className="rounded-full border border-border-subtle px-4 py-2 text-sm aria-pressed:bg-brand-natural aria-pressed:text-white">{label[ix]}</button>)}</nav>}
     {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
     {form ? <ReminderForm petId={petId} initial={form === "new" ? undefined : form} onClose={() => setForm(null)} onSaved={async () => { setForm(null); await load(); }} /> : null}
-    {!visible.length ? <EmptyState title={fa ? "در این بخش مراقبتی ثبت نشده" : "No care in this view"}/> : visible.map(item => <ContextSurface key={item.id} className="flex flex-col gap-4">
-      <div className="flex flex-wrap justify-between gap-3"><Link className="text-section-title text-text-primary" href={`/${locale}/pets/${petId}/care/${item.id}`}>{item.title}</Link><span>{states[item.state]?.[ix] ?? item.state}</span></div>
+    {!visible.length ? <EmptyState title={emptyCopy(filter, fa).title} description={emptyCopy(filter, fa).body} actionLabel={canEdit && !itemId ? (fa ? "یادآور جدید" : "Create reminder") : undefined} onAction={canEdit && !itemId ? () => setForm("new") : undefined}/> : visible.map(item => <ContextSurface key={item.id} className="flex flex-col gap-4">
+      <div className="flex flex-wrap justify-between gap-3"><Link className="text-section-title text-text-primary" href={`/${locale}/pets/${petId}/care/${item.id}`}>{careTitle(item, locale)}</Link><span>{states[item.state]?.[ix] ?? item.state}</span></div>
       <dl className="grid gap-3 text-sm sm:grid-cols-2"><Meta label={fa ? "حیوان" : "Pet"} value={petName}/><Meta label={fa ? "نوع" : "Type"} value={kinds[item.type]?.[ix] ?? item.type}/><Meta label={fa ? "زمان" : "Due"} value={format(item.dueAt)}/><Meta label={fa ? "منبع" : "Source"} value={sources[item.source]?.[ix] ?? item.source}/><Meta label={fa ? "تکرار" : "Recurrence"} value={`${repeat[item.recurrence]?.[ix] ?? item.recurrence}${item.intervalDays ? ` · ${item.intervalDays}` : ""}`}/>{item.dueAt !== item.originalDueAt ? <Meta label={fa ? "زمان اصلی" : "Original due date"} value={format(item.originalDueAt)}/> : null}{item.snoozedUntil ? <Meta label={fa ? "یادآوری در" : "Remind at"} value={format(item.snoozedUntil)}/> : null}{item.completedAt ? <Meta label={fa ? "انجام شده در" : "Completed at"} value={format(item.completedAt)}/> : null}{!["COMPLETED","CANCELLED"].includes(item.state) ? <Meta label={fa ? "اعلان" : "Notification"} value={item.notifiedAt ? `${fa ? "ارسال شد" : "Sent"} · ${format(item.notifiedAt)}` : (fa ? "هنوز ارسال نشده" : "Not sent yet")}/> : null}</dl>
       {related(item) ? <Link className="text-sm text-brand-natural" href={`/${locale}/pets/${petId}/${related(item)}`}>{fa ? "مشاهده سابقه مرتبط" : "View related record"}</Link> : null}
       {canEdit && !["COMPLETED","CANCELLED"].includes(item.state) ? <div className="flex flex-wrap gap-2"><Button disabled={busy} onClick={() => void run(item.id,"COMPLETE")}>{fa ? "انجام شد" : "Complete"}</Button>{item.source === "USER_CREATED" ? <Button variant="secondary" disabled={busy} onClick={() => setForm(item)}>{fa ? "ویرایش" : "Edit"}</Button> : null}<Button variant="secondary" disabled={busy} onClick={() => void run(item.id,"SNOOZE",laterToday())}>{fa ? "بعداً امروز" : "Later today"}</Button><Button variant="secondary" disabled={busy} onClick={() => void run(item.id,"SNOOZE",tomorrowMorning())}>{fa ? "فردا" : "Tomorrow"}</Button><Button variant="ghost" disabled={busy} onClick={() => void run(item.id,"CANCEL")}>{fa ? "لغو" : "Cancel"}</Button></div> : null}
@@ -47,6 +49,12 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
     </ContextSurface>)}
     {!itemId ? <details className="border-t border-border-subtle pt-5"><summary className="cursor-pointer text-section-title">{fa ? "دستورالعمل مراقبت روزمره" : "Daily care instructions"}</summary><div className="mt-5"><CareProfileView petId={petId}/></div></details> : null}
   </div>;
+}
+/** Empty state per filter: what is empty, why, and (for editors) the next step via the action button. */
+function emptyCopy(filter: string, fa: boolean): { title: string; body: string } {
+  const why = fa ? "یادآورها از واکسن‌ها، داروها و نوبت‌ها ساخته می‌شوند؛ یادآور شخصی هم می‌توانید بسازید." : "Reminders come from vaccines, medications and bookings — you can also add your own.";
+  const t: Record<string, [string, string]> = { DUE: ["یادآور نزدیکی ندارید", "Nothing is due soon"], OVERDUE: ["هیچ مراقبتی عقب نیفتاده است", "Nothing is overdue"], UPCOMING: ["یادآور آینده‌ای ثبت نشده", "No upcoming reminders"], COMPLETED: ["هنوز مراقبتی انجام‌شده ثبت نشده", "No completed care yet"], SNOOZED: ["یادآور به تعویق افتاده‌ای ندارید", "No snoozed reminders"], CANCELLED: ["یادآور لغوشده‌ای ندارید", "No cancelled reminders"], CUSTOM: ["یادآور شخصی ندارید", "No personal reminders"] };
+  return { title: (t[filter] ?? t.UPCOMING!)[fa ? 0 : 1], body: why };
 }
 /** Related record for source-derived care; provider care plans live in the canonical care profile. */
 function related(item: CareReminder): string | null {

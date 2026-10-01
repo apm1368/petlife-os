@@ -117,25 +117,25 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
   const base = "/" + locale + "/pets/" + petId;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-0">
-      <header className="flex flex-col gap-5 border-b border-border-subtle pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-center gap-4">
-          <Avatar src={pet.photoUrl} name={pet.name} size="lg" />
+    <div className="pet-shell">
+      <header className="pet-hero">
+        <div className="pet-hero__identity">
+          <div className="pet-hero__photo"><Avatar src={pet.photoUrl} name={pet.name} size="lg" /></div>
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-[clamp(1.6rem,4vw,2.5rem)] font-bold leading-tight text-text-primary">{pet.name}</p>
+            <div className="pet-hero__title">
+              <p className="pet-hero__name">{pet.name}</p>
               <StatusLabel tone={lifecycle.tone}>{lifecycle.label}</StatusLabel>
             </div>
-            <p className="mt-1 text-sm text-text-secondary">
+            <p className="pet-hero__meta">
               {speciesLabel(pet, locale)} · {pet.breed ?? c.unknownBreed} · {formatAge(pet, locale, c.unknownAge)}
             </p>
-            <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs">
-              <div className="flex gap-2"><dt className="text-text-secondary">{c.weight}</dt><dd className="text-text-primary">{formatWeight(pet, locale, c.unknown)}</dd></div>
-              <div className="flex gap-2"><dt className="text-text-secondary">{c.microchip}</dt><dd className="text-text-primary">{pet.microchipNumber ?? c.unknown}</dd></div>
+            <dl className="pet-hero__facts">
+              <div><dt>{c.weight}</dt><dd>{formatWeight(pet, locale, c.unknown)}</dd></div>
+              <div><dt>{c.microchip}</dt><dd>{pet.microchipNumber ?? c.unknown}</dd></div>
             </dl>
           </div>
         </div>
-        {access.canEditIdentity ? <Link className="self-start border-b border-brand-natural pb-1 text-sm font-bold text-brand-natural" href={base + "?edit=identity"}>{c.edit}</Link> : null}
+        {access.canEditIdentity ? <Link className="pet-hero__edit" href={base + "?edit=identity"}>{c.edit}</Link> : null}
       </header>
 
       {lifecycle.message ? (
@@ -144,21 +144,21 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
         </div>
       ) : null}
 
-      <nav className="flex gap-1 overflow-x-auto border-b border-border-subtle py-3" aria-label={c.aria}>
+      <nav className="pet-tabs" aria-label={c.aria}>
         {visibleSections.map((section) => {
           const href = base + section.suffix;
           const active = section.key === "health"
             ? (pathname === href || pathname.startsWith(href + "/")) && !pathname.startsWith(base + "/health/documents")
             : section.suffix ? pathname === href || pathname.startsWith(href + "/") : pathname === base;
           return (
-            <Link key={section.key} href={href} aria-current={active ? "page" : undefined} className="shrink-0 border-b-2 border-transparent px-3 py-2 text-sm text-text-secondary hover:text-text-primary aria-[current=page]:border-brand-natural aria-[current=page]:font-bold aria-[current=page]:text-brand-natural">
+            <Link key={section.key} href={href} aria-current={active ? "page" : undefined} className="pet-tabs__link">
               {c[section.key]}
             </Link>
           );
         })}
       </nav>
 
-      <main className="min-w-0 py-7">{children}</main>
+      <div className="pet-shell__content">{children}</div>
     </div>
   );
 }
