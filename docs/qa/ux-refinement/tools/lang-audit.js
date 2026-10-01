@@ -54,6 +54,10 @@ const ALLOW = /^(PET|LIFE|OS|FA|EN|IRR|PDF|SMS|OTP|QR|AI|ID|PL|BK|Apoquel|CBC|kg
       };
       for (const el of document.querySelectorAll(chrome)) {
         if (!visible(el) || el.closest("[data-user-content]")) continue;
+        // Text explicitly marked with its own language (e.g. a language switch naming "English" on a Persian
+        // page) is intentional, accessible content — not contamination.
+        const marked = el.closest("[lang]");
+        if (marked && marked !== document.documentElement && marked.getAttribute("lang") !== document.documentElement.lang) continue;
         // only the element's own text (not nested data rows): direct text + short labels
         const txt = el.innerText ?? el.textContent ?? "";
         const own = el.matches("h1,h2,h3,h4") ? txt : txt.length < 80 ? txt : "";

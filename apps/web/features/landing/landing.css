@@ -89,7 +89,8 @@
 .tehran-hint { color: var(--t-ink-2); font-size: .86rem; }
 
 /* The city */
-.tehran-city { position: relative; margin-top: clamp(-120px, -7vw, -20px); }
+.tehran-city { position: relative; margin-top: auto; padding-top: clamp(0px, 2vw, 24px); }
+.tehran-hero__text { margin-bottom: clamp(-120px, -7vw, -20px); }
 .tehran-scene { position: relative; width: 100%; aspect-ratio: 1600 / 600; }
 .tehran-scene__art { display: block; width: 100%; height: 100%; }
 [dir="rtl"] .tehran-scene__art { transform: scaleX(-1); }
@@ -121,7 +122,7 @@
 .tehran-dest__desc { position: absolute; bottom: calc(var(--sign-bottom) + 44px); left: 50%; translate: -50% 0; width: max-content; max-width: 220px; padding: 6px 10px; border-radius: 8px; background: var(--t-sign-bg); color: var(--t-ink-2); font-size: .8rem; line-height: 1.6; text-align: center; opacity: 0; pointer-events: none; transform: translateY(4px); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
 .tehran-dest__link:hover .tehran-sign, .tehran-dest__link:focus-visible .tehran-sign { transform: translateY(-6px); box-shadow: 0 10px 22px rgb(0 0 0 / .18); }
 .tehran-dest__link:hover .tehran-dest__desc, .tehran-dest__link:focus-visible .tehran-dest__desc { opacity: 1; transform: translateY(-6px); }
-@media (max-width: 1200px) { .tehran-sign { white-space: normal; max-width: 120px; text-align: center; } }
+@media (max-width: 1200px) { .tehran-sign { white-space: normal; max-width: 170px; width: max-content; text-align: center; } }
 
 /* The street below the city: secondary destinations as quiet signs. */
 .tehran-street { display: flex; flex-wrap: wrap; gap: 6px 26px; padding: 14px var(--shell-gutter) max(22px, env(safe-area-inset-bottom)); background: var(--t-ground); border-top: 6px solid var(--t-curb); }
