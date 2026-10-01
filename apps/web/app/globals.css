@@ -449,7 +449,7 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 .calendar-toolbar__month{display:flex;align-items:center;gap:14px}
 .calendar-toolbar__views{display:inline-flex;padding:3px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-elevated)}
 .calendar-toolbar__views button{min-height:38px;padding:0 16px;border:0;border-radius:999px;background:none;color:var(--text-secondary);font:inherit;font-size:.86rem;font-weight:700;cursor:pointer;transition:background-color var(--dur-2),color var(--dur-2)}
-.calendar-toolbar__views button[aria-pressed=true]{background:var(--brand-natural);color:#fff}
+.calendar-toolbar__views button[aria-pressed=true]{background:color-mix(in srgb,var(--brand-natural) 70%,#000);color:#fff}
 .calendar-toolbar__pet{display:inline-flex;align-items:center;gap:8px;font-size:.86rem;color:var(--text-secondary)}
 .calendar-toolbar__pet select{min-height:40px;padding:0 12px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface-elevated);color:var(--text-primary);font:inherit;font-weight:600}
 .calendar-toolbar button:focus-visible,.calendar-toolbar select:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
@@ -673,7 +673,7 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
 /* Care center: an agenda of divided rows. Overdue gets a calm attention edge, completed reads as done. */
 .care-filters{display:flex;flex-wrap:wrap;gap:8px}
 .care-filters button{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-elevated);color:var(--text-secondary);font-size:.86rem;font-weight:600;cursor:pointer;transition:border-color var(--dur-1),background-color var(--dur-1)}
-.care-filters button[aria-pressed="true"]{border-color:var(--brand-natural);background:var(--brand-natural);color:#fff}
+.care-filters button[aria-pressed="true"]{border-color:transparent;background:color-mix(in srgb,var(--brand-natural) 70%,#000);color:#fff}
 .care-filters button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 .care-filters__count{min-width:20px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:.76rem;text-align:center}
 .care-agenda{display:flex;flex-direction:column;gap:6px;animation:pl-rise var(--dur-3) var(--ease-out) backwards}

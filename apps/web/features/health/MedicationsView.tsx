@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MedicationDto } from "@petlife/types";
+import { localizeDigits } from "@/lib/date/jalali";
 import { healthService } from "@/services/health.service";
 
 export function MedicationsView({ petId }: { petId: string }) {
@@ -84,7 +85,7 @@ export function MedicationsView({ petId }: { petId: string }) {
           <div>
             <Link dir="auto" href={`/${locale}/pets/${petId}/health/medications/${medication.id}`} className="block text-body text-text-primary underline-offset-4 hover:underline">
               {medication.name}
-              {medication.dosage ? ` — ${medication.dosage}${medication.unit ? ` ${medication.unit}` : ""}` : ""}
+              {medication.dosage ? ` — ${localizeDigits(medication.dosage, locale === "fa" ? "fa" : "en")}${medication.unit ? ` ${medication.unit}` : ""}` : ""}
             </Link>
             {medication.frequencyText ? <p className="text-metadata text-text-secondary">{medication.frequencyText}</p> : null}
           </div>

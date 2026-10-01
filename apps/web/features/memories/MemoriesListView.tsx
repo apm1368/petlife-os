@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Select, Skeleton } from "@petlife/ui";
 import type { PetDto, PetMemoryDto } from "@petlife/types";
 import { PetLifecycleStatus } from "@petlife/types";
@@ -11,6 +11,7 @@ import { petsService } from "@/services/pets.service";
 import { MemoryMediaThumb } from "./MemoryMediaThumb";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { calendarFromIso, localizeDigits } from "@/lib/date/jalali";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type ViewMode = "JOURNAL" | "GALLERY";
@@ -30,6 +31,7 @@ type ViewMode = "JOURNAL" | "GALLERY";
 export function MemoriesListView({ petId }: { petId: string }) {
   const fmt = useInstantFormat();
   const t = useTranslations("memories");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
 
   const [pet, setPet] = useState<PetDto | null>(null);
@@ -126,7 +128,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
             label={t("list.yearLabel")}
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            options={[{ value: "", label: t("list.allYears") }, ...yearOptions.map((value) => ({ value: String(value), label: String(value) }))]}
+            options={[{ value: "", label: t("list.allYears") }, ...yearOptions.map((value) => ({ value: String(value), label: locale === "fa" ? `${localizeDigits(value, "fa")} میلادی` : String(value) }))]}
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -154,9 +156,9 @@ export function MemoriesListView({ petId }: { petId: string }) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {groupByYear(memories).map(([groupYear, entries]) => (
+          {groupByYear(memories, locale === "fa").map(([groupYear, entries]) => (
             <section key={groupYear} className="flex flex-col gap-2">
-              <h2 className="text-section-title text-text-secondary">{groupYear}</h2>
+              <h2 className="text-section-title text-text-secondary">{localizeDigits(groupYear, locale === "fa" ? "fa" : "en")}</h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {entries.map((memory) => {
                   const displayTitle = memory.title ?? fmt.date(memory.occurredAt);
@@ -190,10 +192,12 @@ export function MemoriesListView({ petId }: { petId: string }) {
 }
 
 /** The list arrives already sorted newest-first, so grouping preserves that order without re-sorting. */
-function groupByYear(memories: PetMemoryDto[]): [number, PetMemoryDto[]][] {
+/** Groups by the year in the UI calendar — Jalali on Persian pages, Gregorian on English ones. */
+function groupByYear(memories: PetMemoryDto[], fa: boolean): [number, PetMemoryDto[]][] {
   const groups = new Map<number, PetMemoryDto[]>();
   for (const memory of memories) {
-    const entryYear = new Date(memory.occurredAt).getFullYear();
+    const tehranDay = new Date(new Date(memory.occurredAt).getTime() + 3.5 * 3_600_000).toISOString().slice(0, 10);
+    const entryYear = fa ? calendarFromIso("jalali", tehranDay).year : new Date(memory.occurredAt).getFullYear();
     const existing = groups.get(entryYear);
     if (existing) existing.push(memory);
     else groups.set(entryYear, [memory]);
