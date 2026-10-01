@@ -16,10 +16,15 @@ const DATA: Customer360Dto = {
   households: [{ id: "h1", name: "Doe Family", city: "Tehran", memberCount: 2, pets: [{ id: "p1", name: "Milo", species: "CAT" as never, lifecycleStatus: "ACTIVE" as never }] }],
   recentOrders: [],
   recentBookings: [],
+  subscriptions: [],
+  recentTravelBookings: [],
   supportCases: [],
   disputes: [],
   internalNotes: [],
   communications: [],
+  sessions: [],
+  consents: [],
+  auditReferences: [],
   activityTimeline: [],
 };
 

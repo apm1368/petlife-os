@@ -3,9 +3,13 @@ import type { Prisma } from "@prisma/client";
 import type {
   ActivityTimelineEntryDto,
   AdminCustomerListItemDto,
+  AdminConsentSummaryDto,
   AdminOrderSummaryDto,
   AdminPiiRevealDto,
+  AdminSessionSummaryDto,
   AdminSearchResultDto,
+  AdminCustomerSubscriptionDto,
+  AdminTravelBookingSummaryDto,
   Customer360Dto,
 } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -53,11 +57,12 @@ export class AdminCustomerService {
     private readonly auditLog: AdminAuditLogService,
   ) {}
 
-  /** Postgres `contains`/insensitive-mode matching only (spec: "no Elasticsearch") — matches displayName, email, or phone. */
+  /** Postgres `contains`/insensitive-mode matching only (spec: "no Elasticsearch") — matches safe support identifiers only. */
   async search(q: string, query: PaginationQueryDto) {
     const { page, pageSize, skip, take } = resolvePagination(query);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q);
     const where: Prisma.UserWhereInput = q
-      ? { OR: [{ displayName: { contains: q, mode: "insensitive" } }, { email: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }] }
+      ? { OR: [{ displayName: { contains: q, mode: "insensitive" } }, { email: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }, ...(isUuid ? [{ id: q }] : [])] }
       : {};
     const [rows, total] = await Promise.all([
       this.prisma.user.findMany({ where, orderBy: { createdAt: "desc" }, skip, take }),
@@ -94,7 +99,7 @@ export class AdminCustomerService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new AdminCustomerNotFoundException({ userId });
 
-    const [households, orders, bookings, supportCases, disputes, internalNotes, notifications] = await Promise.all([
+    const [households, orders, bookings, supportCases, disputes, internalNotes, notifications, sessions, consents, auditReferences] = await Promise.all([
       this.prisma.household.findMany({
         where: { members: { some: { userId } } },
         include: { members: true, pets: true },
@@ -122,6 +127,15 @@ export class AdminCustomerService {
         orderBy: { createdAt: "desc" },
       }),
       this.prisma.notification.findMany({ where: { userId }, include: { deliveries: true }, orderBy: { createdAt: "desc" }, take: RECENT_LIMIT }),
+      this.prisma.session.findMany({ where: { userId }, select: { id: true, lastSeenAt: true, expiresAt: true, revokedAt: true }, orderBy: { lastSeenAt: "desc" }, take: RECENT_LIMIT }),
+      this.prisma.userConsent.findMany({ where: { userId }, select: { id: true, kind: true, grantedAt: true, revokedAt: true }, orderBy: { updatedAt: "desc" }, take: RECENT_LIMIT }),
+      this.prisma.adminAuditLog.findMany({ where: { entityType: "USER", entityId: userId }, include: { adminUser: { include: { user: true } } }, orderBy: { createdAt: "desc" }, take: RECENT_LIMIT }),
+    ]);
+
+    const householdIds = households.map((household) => household.id);
+    const [subscriptions, travelBookings] = await Promise.all([
+      this.prisma.subscription.findMany({ where: { householdId: { in: householdIds } }, include: { plan: true, currentPeriod: true }, take: RECENT_LIMIT }),
+      this.prisma.travelBooking.findMany({ where: { bookedByUserId: userId }, include: { listing: { select: { title: true } } }, orderBy: { createdAt: "desc" }, take: RECENT_LIMIT }),
     ]);
 
     const householdDtos = households.map((h) => ({
@@ -146,6 +160,11 @@ export class AdminCustomerService {
       updatedAt: n.updatedAt ? n.updatedAt.toISOString() : null,
     }));
     const notificationDtos = notifications.map(toNotificationDto);
+    const subscriptionDtos: AdminCustomerSubscriptionDto[] = subscriptions.map((subscription) => ({ id: subscription.id, householdId: subscription.householdId, planNameFa: subscription.plan.nameFa, planNameEn: subscription.plan.nameEn, status: subscription.status, periodEndsAt: subscription.currentPeriod?.endAt.toISOString() ?? null }));
+    const travelBookingDtos: AdminTravelBookingSummaryDto[] = travelBookings.map((booking) => ({ id: booking.id, reference: booking.reference, listingTitle: booking.listing.title, status: booking.status, checkIn: booking.checkIn.toISOString(), totalAmountIrr: booking.totalAmountIrr }));
+    const sessionDtos: AdminSessionSummaryDto[] = sessions.map((session) => ({ id: session.id, lastSeenAt: session.lastSeenAt.toISOString(), expiresAt: session.expiresAt.toISOString(), revokedAt: session.revokedAt?.toISOString() ?? null }));
+    const consentDtos: AdminConsentSummaryDto[] = consents.map((consent) => ({ id: consent.id, kind: consent.kind, grantedAt: consent.grantedAt?.toISOString() ?? null, revokedAt: consent.revokedAt?.toISOString() ?? null }));
+    const auditDtos = auditReferences.map((row) => ({ id: row.id, adminUser: { id: row.adminUser.id, displayName: row.adminUser.user.displayName, role: row.adminUser.role as never }, action: row.action, entityType: row.entityType, entityId: row.entityId, reason: row.reason, beforeSummary: row.beforeSummary as Record<string, unknown> | null, afterSummary: row.afterSummary as Record<string, unknown> | null, requestId: row.requestId, createdAt: row.createdAt.toISOString() }));
 
     const timeline: ActivityTimelineEntryDto[] = [
       ...orderDtos.map((o) => ({ type: "order" as const, id: o.id, summary: `Order ${o.status}`, occurredAt: o.createdAt })),
@@ -160,10 +179,15 @@ export class AdminCustomerService {
       households: householdDtos,
       recentOrders: orderDtos,
       recentBookings: bookingDtos,
+      subscriptions: subscriptionDtos,
+      recentTravelBookings: travelBookingDtos,
       supportCases: supportCaseDtos,
       disputes: disputeDtos,
       internalNotes: noteDtos,
       communications: notificationDtos,
+      sessions: sessionDtos,
+      consents: consentDtos,
+      auditReferences: auditDtos,
       activityTimeline: timeline,
     };
   }

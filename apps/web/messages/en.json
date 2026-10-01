@@ -2179,8 +2179,11 @@
     },
     "customers": {
       "title": "Customers",
-      "searchPlaceholder": "Search by name, email, or phone",
-      "view": "View 360"
+      "searchPlaceholder": "Search by name, email, phone, or user ID",
+      "view": "View 360",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page}"
     },
     "customer360": {
       "notFound": "Customer not found.",
@@ -2189,11 +2192,16 @@
         "households": "Households & pets",
         "recentOrders": "Recent orders",
         "recentBookings": "Recent bookings",
+        "subscription": "Subscription",
+        "trips": "Trips",
         "supportCases": "Support cases",
         "disputes": "Disputes",
         "internalNotes": "Internal notes",
         "communications": "Communications history",
-        "activity": "Activity timeline"
+        "activity": "Activity timeline",
+        "security": "Security sessions",
+        "consents": "Consent & privacy",
+        "audit": "Audit references"
       },
       "reveal": {
         "email": "Reveal email",

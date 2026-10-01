@@ -2763,6 +2763,38 @@ export interface AdminBookingSummaryDto {
   petId: string;
 }
 
+export interface AdminCustomerSubscriptionDto {
+  id: string;
+  householdId: string;
+  planNameFa: string;
+  planNameEn: string;
+  status: string;
+  periodEndsAt: string | null;
+}
+
+export interface AdminTravelBookingSummaryDto {
+  id: string;
+  reference: string;
+  listingTitle: string;
+  status: string;
+  checkIn: string;
+  totalAmountIrr: number;
+}
+
+export interface AdminSessionSummaryDto {
+  id: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  revokedAt: string | null;
+}
+
+export interface AdminConsentSummaryDto {
+  id: string;
+  kind: string;
+  grantedAt: string | null;
+  revokedAt: string | null;
+}
+
 /** One entry in the merged, application-code-composed activity feed (mirrors Handoff 09's own "unified view via in-app merge" precedent — never a query against the internal DomainEvent outbox table, which lacks direct userId/householdId columns). */
 export interface ActivityTimelineEntryDto {
   type: "order" | "booking" | "support_case" | "dispute" | "notification";
@@ -2777,10 +2809,15 @@ export interface Customer360Dto {
   households: AdminHouseholdSummaryDto[];
   recentOrders: AdminOrderSummaryDto[];
   recentBookings: AdminBookingSummaryDto[];
+  subscriptions: AdminCustomerSubscriptionDto[];
+  recentTravelBookings: AdminTravelBookingSummaryDto[];
   supportCases: SupportCaseSummaryDto[];
   disputes: DisputeDto[];
   internalNotes: InternalNoteDto[];
   communications: NotificationDto[];
+  sessions: AdminSessionSummaryDto[];
+  consents: AdminConsentSummaryDto[];
+  auditReferences: AdminAuditLogDto[];
   activityTimeline: ActivityTimelineEntryDto[];
 }
 

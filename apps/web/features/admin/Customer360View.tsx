@@ -109,6 +109,25 @@ export function Customer360View({ userId }: { userId: string }) {
         ))}
       </ContextSurface>
 
+      <section className="grid gap-4 lg:grid-cols-2">
+        <ContextSurface className="flex flex-col gap-2">
+          <span className="text-metadata text-text-secondary">{t("sections.recentBookings")}</span>
+          {data.recentBookings.length === 0 ? <span className="text-body text-text-secondary">—</span> : null}
+          {data.recentBookings.map((booking) => <div key={booking.id} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0"><span className="text-body text-text-primary">{booking.category}</span><StatusLabel tone={adminStatusTone(booking.bookingStatus)}>{booking.bookingStatus}</StatusLabel><span className="text-metadata text-text-secondary">{formatDate(booking.startAt, locale)}</span></div>)}
+        </ContextSurface>
+        <ContextSurface className="flex flex-col gap-2">
+          <span className="text-metadata text-text-secondary">{t("sections.subscription")}</span>
+          {data.subscriptions.length === 0 ? <span className="text-body text-text-secondary">—</span> : null}
+          {data.subscriptions.map((subscription) => <div key={subscription.id} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0"><span className="text-body text-text-primary">{locale === "fa" ? subscription.planNameFa : subscription.planNameEn}</span><StatusLabel tone={adminStatusTone(subscription.status)}>{subscription.status}</StatusLabel></div>)}
+        </ContextSurface>
+      </section>
+
+      <ContextSurface className="flex flex-col gap-2">
+        <span className="text-metadata text-text-secondary">{t("sections.trips")}</span>
+        {data.recentTravelBookings.length === 0 ? <span className="text-body text-text-secondary">—</span> : null}
+        {data.recentTravelBookings.map((booking) => <div key={booking.id} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0"><span className="text-body text-text-primary">{booking.listingTitle}</span><StatusLabel tone={adminStatusTone(booking.status)}>{booking.status}</StatusLabel><span className="text-metadata text-text-secondary">{formatDate(booking.checkIn, locale)}</span></div>)}
+      </ContextSurface>
+
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-metadata text-text-secondary">{t("sections.supportCases")}</span>
         {data.supportCases.length === 0 ? <span className="text-body text-text-secondary">—</span> : null}
@@ -168,6 +187,13 @@ export function Customer360View({ userId }: { userId: string }) {
           </div>
         ))}
       </ContextSurface>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <ContextSurface className="flex flex-col gap-2"><span className="text-metadata text-text-secondary">{t("sections.security")}</span>{data.sessions.length === 0 ? <span className="text-body text-text-secondary">—</span> : null}{data.sessions.map((session) => <div key={session.id} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0"><span className="text-body text-text-primary">{session.revokedAt ? (locale === "fa" ? "نشست لغوشده" : "Revoked session") : (locale === "fa" ? "نشست فعال" : "Active session")}</span><span className="text-metadata text-text-secondary">{formatDate(session.lastSeenAt, locale)}</span></div>)}</ContextSurface>
+        <ContextSurface className="flex flex-col gap-2"><span className="text-metadata text-text-secondary">{t("sections.consents")}</span>{data.consents.length === 0 ? <span className="text-body text-text-secondary">—</span> : null}{data.consents.map((consent) => <div key={consent.id} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0"><span className="text-body text-text-primary">{consent.kind}</span><StatusLabel tone={consent.grantedAt && !consent.revokedAt ? "success" : "neutral"}>{consent.grantedAt && !consent.revokedAt ? (locale === "fa" ? "فعال" : "Granted") : (locale === "fa" ? "غیرفعال" : "Not granted")}</StatusLabel></div>)}</ContextSurface>
+      </section>
+
+      <ContextSurface className="flex flex-col gap-2"><span className="text-metadata text-text-secondary">{t("sections.audit")}</span>{data.auditReferences.length === 0 ? <span className="text-body text-text-secondary">—</span> : null}{data.auditReferences.map((audit) => <div key={audit.id} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0"><span className="text-body text-text-primary">{audit.action}</span><span className="text-metadata text-text-secondary">{audit.adminUser.displayName} · {formatDate(audit.createdAt, locale)}</span></div>)}</ContextSurface>
     </div>
   );
 }

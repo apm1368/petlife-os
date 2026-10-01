@@ -2179,8 +2179,11 @@
     },
     "customers": {
       "title": "مشتریان",
-      "searchPlaceholder": "جستجو بر اساس نام، ایمیل یا شماره تماس",
-      "view": "مشاهده کامل"
+      "searchPlaceholder": "جستجو بر اساس نام، ایمیل، شماره تماس یا شناسه کاربر",
+      "view": "مشاهده کامل",
+      "previous": "قبلی",
+      "next": "بعدی",
+      "page": "صفحه {page}"
     },
     "customer360": {
       "notFound": "مشتری پیدا نشد.",
@@ -2189,11 +2192,16 @@
         "households": "خانواده‌ها و حیوانات خانگی",
         "recentOrders": "سفارش‌های اخیر",
         "recentBookings": "نوبت‌های اخیر",
+        "subscription": "اشتراک",
+        "trips": "سفرها",
         "supportCases": "درخواست‌های پشتیبانی",
         "disputes": "اختلافات",
         "internalNotes": "یادداشت‌های داخلی",
         "communications": "تاریخچه ارتباطات",
-        "activity": "جدول زمانی فعالیت"
+        "activity": "جدول زمانی فعالیت",
+        "security": "نشست‌های امنیتی",
+        "consents": "رضایت‌ها و حریم خصوصی",
+        "audit": "سوابق ممیزی"
       },
       "reveal": {
         "email": "نمایش ایمیل",
