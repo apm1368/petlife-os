@@ -5,11 +5,12 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { deviceLabel } from "../../../common/session/device-label.util";
 import { SessionService, type SessionUser } from "../../../common/session/session.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { CurrentPasswordIncorrectException, InvalidCredentialsException, UsernameTakenException } from "../../../common/errors/api-exception";
+import { CurrentPasswordIncorrectException, AuthRateLimitedException, InvalidCredentialsException, UsernameTakenException } from "../../../common/errors/api-exception";
 import { hashPassword, verifyPassword } from "../../../common/password/password-hash.util";
 import { normalizeUsername } from "../identifier.util";
 import type { RegisterDto } from "../dto/register.dto";
 import type { LoginPasswordDto } from "../dto/login-password.dto";
+import { IDENTIFIER_LIMITS, IdentifierRateLimiter } from "../../../common/rate-limit/identifier-rate-limiter.service";
 import type { ChangePasswordDto } from "../dto/change-password.dto";
 
 function isUniqueConstraintViolation(error: unknown): boolean {
@@ -41,6 +42,7 @@ export class AuthPasswordService {
     private readonly prisma: PrismaService,
     private readonly sessions: SessionService,
     private readonly events: DomainEventsService,
+    private readonly limiter: IdentifierRateLimiter,
   ) {}
 
   async register(dto: RegisterDto, res: Response, meta: { userAgent?: string; ipAddress?: string }): Promise<SessionUser> {
@@ -72,12 +74,20 @@ export class AuthPasswordService {
 
   async login(dto: LoginPasswordDto, res: Response, meta: { userAgent?: string; ipAddress?: string }): Promise<SessionUser> {
     const normalizedUsername = normalizeUsername(dto.username);
+    // Per-username failure budget, applied identically to names that do not exist, so the 429 never
+    // tells an attacker which usernames are real; spreading guesses across IPs does not reset it.
+    const { bucket, limit, windowSeconds } = IDENTIFIER_LIMITS.passwordFail;
+    const wait = await this.limiter.retryAfter(bucket, normalizedUsername, limit);
+    if (wait > 0) throw new AuthRateLimitedException(wait);
+
     const user = await this.prisma.user.findUnique({ where: { normalizedUsername } });
 
     const isValid = await verifyPassword(user?.passwordHash ?? DUMMY_PASSWORD_HASH, dto.password);
     if (!user || !user.passwordHash || !isValid) {
+      await this.limiter.hit(bucket, normalizedUsername, windowSeconds);
       throw new InvalidCredentialsException();
     }
+    await this.limiter.reset(bucket, normalizedUsername);
 
     const sessionId = await this.sessions.issueSession(user.id, res, meta);
     await this.events.publish("UserAuthenticated", { userId: user.id, method: "PASSWORD", sessionId, device: deviceLabel(meta.userAgent) }, { aggregateType: "User", aggregateId: user.id });

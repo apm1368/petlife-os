@@ -53,6 +53,13 @@ export class OtpRateLimitedException extends ApiException {
   }
 }
 
+/** Per-identifier sign-in budget exhausted (password attempts) — same response whether or not the account exists. */
+export class AuthRateLimitedException extends ApiException {
+  constructor(retryAfterSeconds: number) {
+    super("AUTH_RATE_LIMITED", "Too many attempts. Please try again later.", HttpStatus.TOO_MANY_REQUESTS, { retryAfterSeconds });
+  }
+}
+
 export class ValidationApiException extends ApiException {
   constructor(details: Record<string, unknown>) {
     super("VALIDATION_ERROR", "The request did not pass validation.", HttpStatus.BAD_REQUEST, details);

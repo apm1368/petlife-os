@@ -54,6 +54,7 @@ const FA: Record<string, string> = {
   ORDER_NOT_CANCELLABLE: "این سفارش دیگر قابل لغو نیست؛ به پیک تحویل داده شده است.",
   OTP_INVALID: "کد واردشده درست نیست یا منقضی شده است.",
   OTP_RATE_LIMITED: "تلاش‌ها بیش از حد بود. کمی بعد دوباره امتحان کنید.",
+  AUTH_RATE_LIMITED: "تلاش‌های ورود بیش از حد بود. چند دقیقهٔ دیگر دوباره امتحان کنید.",
   PASSWORD_RESET_TOKEN_INVALID: "این پیوند تغییر رمز معتبر نیست یا منقضی شده است.",
   PAYMENT_ALREADY_COMPLETED: "این پرداخت قبلاً انجام شده است.",
   PAYMENT_AUTHORIZATION_FAILED: "درگاه پرداخت این تراکنش را تأیید نکرد.",
