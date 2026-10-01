@@ -2,14 +2,14 @@
 
 import { useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { BookOpen, ChevronLeft, ChevronRight, HandHeart, HeartPulse, MapPin, Plane, Scissors, ShieldPlus, ShoppingBag, Siren, Users } from "@petlife/ui";
+import { BookOpen, ChevronLeft, ChevronRight, HandHeart, HeartPulse, Images, MapPin, Plane, Scissors, ShieldPlus, ShoppingBag, Siren, Users } from "@petlife/ui";
 import type { AppLocale } from "@/lib/i18n/config";
 import { DESTINATIONS, MORE_LINKS, landingCopy, type DestinationKey } from "./copy";
 import { BUILDINGS, BuildingTile, TehranScene, WORLD } from "./TehranScene";
 import { LandingTheme } from "./LandingTheme";
 
-const ICONS: Record<DestinationKey, typeof HeartPulse> = { health: HeartPulse, services: Scissors, shop: ShoppingBag, travel: Plane, animalSupport: HandHeart, community: Users };
-const MORE_ICONS = { lostPets: Siren, places: MapPin, insurance: ShieldPlus, guides: BookOpen } as const;
+const ICONS: Record<DestinationKey, typeof HeartPulse> = { health: HeartPulse, services: Scissors, shop: ShoppingBag, travel: Plane, animalSupport: HandHeart, community: Users, memories: Images };
+const MORE_ICONS = { lostPets: Siren, places: MapPin, insurance: ShieldPlus, blog: BookOpen } as const;
 
 const pct = (n: number, of: number) => `${(n / of) * 100}%`;
 
@@ -66,14 +66,14 @@ export function TehranLanding({ locale }: { locale: AppLocale }) {
                 const Icon = ICONS[key];
                 const place = {
                   insetInlineStart: pct(b.x, WORLD.width),
-                  top: pct(WORLD.ground - b.h, WORLD.height),
+                  top: pct((b.base ?? WORLD.ground) - b.h, WORLD.height),
                   width: pct(b.w, WORLD.width),
                   height: pct(b.h, WORLD.height),
                   ["--sign-bottom" as string]: pct(b.door, b.h),
                   ["--i" as string]: i,
                 } as CSSProperties;
                 return (
-                  <li key={key} className="tehran-dest" style={place}>
+                  <li key={key} className="tehran-dest" data-key={key} style={place}>
                     <Link
                       href={`/${locale}/${href}`}
                       className="tehran-dest__link"

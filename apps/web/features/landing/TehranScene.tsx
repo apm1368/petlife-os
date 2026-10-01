@@ -9,15 +9,17 @@ import type { DestinationKey } from "./copy";
  * Coordinates live in a 1600 × 600 world; the ground line is y = 540. Building geometry is exported so the
  * link overlay and the mobile tiles use the same numbers.
  */
-export const WORLD = { width: 1600, height: 600, ground: 540 } as const;
+export const WORLD = { width: 1600, height: 680, ground: 540 } as const;
 
-export const BUILDINGS: Record<DestinationKey, { x: number; w: number; h: number; door: number }> = {
+/** `base` is the y of the object's foot — the street line for buildings, the park lawn for the memories board. */
+export const BUILDINGS: Record<DestinationKey, { x: number; w: number; h: number; door: number; base?: number }> = {
   health: { x: 60, w: 190, h: 210, door: 70 },
   services: { x: 275, w: 165, h: 180, door: 66 },
   shop: { x: 770, w: 180, h: 170, door: 64 },
   travel: { x: 1060, w: 215, h: 150, door: 70 },
   animalSupport: { x: 1295, w: 150, h: 172, door: 62 },
   community: { x: 1462, w: 128, h: 205, door: 66 },
+  memories: { x: 800, w: 150, h: 104, door: 18, base: 664 },
 };
 
 const RIDGE_BACK = "M0 330 L80 300 L170 320 L260 262 L340 300 L430 242 L520 286 L610 232 L700 272 L800 216 L900 262 L990 228 L1080 270 L1180 236 L1270 276 L1360 230 L1450 266 L1540 242 L1600 260 L1600 600 L0 600Z";
@@ -41,7 +43,7 @@ export function BuildingArt({ kind }: { kind: DestinationKey }) {
     case "health": // A clinic: calm ivory volume, mint band, a canopy over the entrance.
       return (
         <>
-          <rect className="t-facade-ivory" x={0} y={-210} width={190} height={210} />
+          <rect className="t-facade-health" x={0} y={-210} width={190} height={210} />
           <rect className="t-accent-mint" x={0} y={-210} width={190} height={20} />
           <path className="t-mark" d="M70 -200 h14 l6 -7 l7 14 l6 -7 h18" fill="none" strokeWidth={3} />
           <Windows cols={3} rows={3} x0={20} y0={-176} w={38} h={26} gx={56} gy={38} />
@@ -53,7 +55,7 @@ export function BuildingArt({ kind }: { kind: DestinationKey }) {
     case "services": // A grooming & training studio: arched windows and a striped awning.
       return (
         <>
-          <rect className="t-facade-sand" x={0} y={-180} width={165} height={180} />
+          <rect className="t-facade-services" x={0} y={-180} width={165} height={180} />
           <rect className="t-facade-dark" x={-6} y={-188} width={177} height={11} />
           {[18, 92].map((x) => [-160, -112].map((y) => <path key={`${x}${y}`} className="t-win" d={`M${x} ${y + 34} v-22 a27 18 0 0 1 54 0 v22 z`} />))}
           <path className="t-accent-violet" d="M36 -74 h93 l10 16 h-113z" />
@@ -65,7 +67,7 @@ export function BuildingArt({ kind }: { kind: DestinationKey }) {
     case "shop": // A shop: sign band and a full-height glass storefront.
       return (
         <>
-          <rect className="t-facade-sage" x={0} y={-170} width={180} height={170} />
+          <rect className="t-facade-shop" x={0} y={-170} width={180} height={170} />
           <Windows cols={4} rows={1} x0={16} y0={-150} w={30} h={34} gx={40} gy={0} />
           <rect className="t-accent-green" x={0} y={-96} width={180} height={18} />
           <rect className="t-glass" x={10} y={-70} width={160} height={70} />
@@ -79,7 +81,7 @@ export function BuildingArt({ kind }: { kind: DestinationKey }) {
         <>
           <path className="t-accent-teal" d="M0 -100 Q107 -196 215 -100z" />
           <path className="t-glass" d="M28 -104 Q107 -168 187 -104z" />
-          <rect className="t-facade-stone" x={0} y={-104} width={215} height={104} />
+          <rect className="t-facade-travel" x={0} y={-104} width={215} height={104} />
           <Windows cols={5} rows={1} x0={14} y0={-90} w={30} h={24} gx={40} gy={0} />
           <path className="t-door" d="M86 0 v-46 a21 21 0 0 1 42 0 v46z" />
           <rect className="t-shade" x={180} y={-104} width={35} height={104} />
@@ -89,7 +91,7 @@ export function BuildingArt({ kind }: { kind: DestinationKey }) {
       return (
         <>
           <path className="t-accent-coral" d="M-6 -110 L75 -172 L156 -110z" />
-          <rect className="t-facade-ivory" x={0} y={-112} width={150} height={112} />
+          <rect className="t-facade-support" x={0} y={-112} width={150} height={112} />
           <circle className="t-win" cx={75} cy={-134} r={14} />
           <Windows cols={2} rows={1} x0={18} y0={-96} w={30} h={30} gx={84} gy={0} />
           <rect className="t-door" x={58} y={-62} width={34} height={62} />
@@ -104,13 +106,69 @@ export function BuildingArt({ kind }: { kind: DestinationKey }) {
         <>
           <path className="t-accent-turq" d="M12 -122 Q64 -222 116 -122z" />
           <rect className="t-finial" x={62} y={-212} width={4} height={14} />
-          <rect className="t-facade-sand" x={0} y={-124} width={128} height={124} />
+          <rect className="t-facade-community" x={0} y={-124} width={128} height={124} />
           {[16, 52, 88].map((x) => <path key={x} className="t-win" d={`M${x} -64 v-28 q12 -18 24 0 v28z`} />)}
           <path className="t-door" d="M46 0 v-40 q18 -26 36 0 v40z" />
           <rect className="t-shade" x={98} y={-124} width={30} height={124} />
         </>
       );
+    case "memories": // A photo board on the lawn: three pinned prints of moments, on a little easel.
+      return (
+        <>
+          <rect className="t-trunk" x={18} y={-30} width={6} height={30} />
+          <rect className="t-trunk" x={126} y={-30} width={6} height={30} />
+          <rect className="t-board" x={0} y={-104} width={150} height={78} rx={6} />
+          {[[12, -96, -4], [56, -98, 3], [100, -95, -2]].map(([x, y, r]) => (
+            <g key={x} transform={`rotate(${r} ${x! + 19} ${y! + 26})`}>
+              <rect className="t-print" x={x} y={y} width={38} height={50} rx={2} />
+              <rect className={`t-photo t-photo-${x}`} x={x! + 4} y={y! + 4} width={30} height={32} />
+              <circle className="t-photo-sun" cx={x! + 26} cy={y! + 12} r={4} />
+            </g>
+          ))}
+          <circle className="t-pin" cx={31} cy={-94} r={2.6} />
+          <circle className="t-pin" cx={75} cy={-96} r={2.6} />
+          <circle className="t-pin" cx={119} cy={-93} r={2.6} />
+        </>
+      );
   }
+}
+
+/** A park bench, origin at its left foot on the lawn. */
+function Bench({ x, y }: { x: number; y: number }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <rect className="t-bench" x={0} y={-22} width={70} height={6} rx={2} />
+      <rect className="t-bench" x={0} y={-36} width={70} height={5} rx={2} />
+      <rect className="t-bench-leg" x={6} y={-16} width={4} height={16} />
+      <rect className="t-bench-leg" x={60} y={-16} width={4} height={16} />
+    </g>
+  );
+}
+
+/** A sitting cat seen from the side; `flip` turns it to face the other way. */
+function Cat({ x, y, tone = "a", flip = false }: { x: number; y: number; tone?: "a" | "b" | "c"; flip?: boolean }) {
+  return (
+    <g className={`t-cat t-cat-${tone}`} transform={`translate(${x} ${y}) scale(${flip ? -1 : 1} 1)`}>
+      <path d="M-9 0 C-12 -10 -8 -20 0 -21 C8 -20 11 -10 8 0Z" />
+      <circle cx={2} cy={-25} r={7} />
+      <path d="M-3 -30 L-4 -37 L1 -32Z M5 -31 L8 -37 L9 -30Z" />
+      <path className="t-cat-tail" d="M7 -2 C16 -2 18 -10 14 -15" fill="none" strokeWidth={3} strokeLinecap="round" />
+    </g>
+  );
+}
+
+/** A dog standing on the lawn. */
+function Dog({ x, y }: { x: number; y: number }) {
+  return (
+    <g className="t-dog" transform={`translate(${x} ${y})`}>
+      <rect x={-16} y={-22} width={30} height={13} rx={6} />
+      <rect x={-14} y={-12} width={4} height={12} rx={1.5} />
+      <rect x={6} y={-12} width={4} height={12} rx={1.5} />
+      <circle cx={16} cy={-26} r={7} />
+      <path d="M13 -31 L10 -24 L15 -26Z" />
+      <path className="t-dog-tail" d="M-16 -18 L-23 -27" fill="none" strokeWidth={3} strokeLinecap="round" />
+    </g>
+  );
 }
 
 function Azadi() {
@@ -141,9 +199,9 @@ function Milad() {
   );
 }
 
-function Tree({ x, s = 1 }: { x: number; s?: number }) {
+function Tree({ x, s = 1, y = 540 }: { x: number; s?: number; y?: number }) {
   return (
-    <g className="t-tree-g" transform={`translate(${x} 540) scale(${s})`}>
+    <g className="t-tree-g" transform={`translate(${x} ${y}) scale(${s})`}>
       <rect className="t-trunk" x={-3} y={-30} width={6} height={30} />
       <circle className="t-tree" cx={0} cy={-44} r={20} />
       <circle className="t-tree" cx={-12} cy={-34} r={13} />
@@ -161,7 +219,7 @@ export function TehranScene({ className }: { className?: string }) {
           <stop offset="1" className="t-sky-bottom" />
         </linearGradient>
       </defs>
-      <rect x={0} y={0} width={1600} height={600} fill="url(#t-sky)" />
+      <rect x={0} y={0} width={1600} height={680} fill="url(#t-sky)" />
       <circle className="t-orb" cx={1430} cy={118} r={44} />
       <g className="t-stars">
         {[[180, 70], [340, 130], [520, 60], [760, 110], [880, 50], [1120, 90], [1260, 40], [1530, 70], [640, 150], [60, 140]].map(([x, y]) => (
@@ -176,7 +234,7 @@ export function TehranScene({ className }: { className?: string }) {
       <Azadi />
       <rect className="t-plaza" x={440} y={528} width={320} height={12} rx={3} />
       {[262, 455, 745, 962, 1050, 1285, 1452].map((x, i) => <Tree key={x} x={x} s={i % 2 ? 0.85 : 1} />)}
-      {(Object.keys(BUILDINGS) as DestinationKey[]).map((key, i) => {
+      {(Object.keys(BUILDINGS) as DestinationKey[]).filter((k) => k !== "memories").map((key, i) => {
         const b = BUILDINGS[key];
         return (
           <g key={key} className={`t-bld t-bld-${key}`} style={{ ["--i" as string]: i }}>
@@ -186,9 +244,22 @@ export function TehranScene({ className }: { className?: string }) {
           </g>
         );
       })}
-      <rect className="t-ground" x={0} y={540} width={1600} height={60} />
-      <rect className="t-curb" x={0} y={540} width={1600} height={6} />
-      {Array.from({ length: 20 }, (_, i) => <rect key={i} className="t-lane" x={i * 82 + 20} y={572} width={40} height={4} rx={2} />)}
+      <rect className="t-curb" x={0} y={540} width={1600} height={10} />
+      <rect className="t-lawn" x={0} y={550} width={1600} height={130} />
+      <path className="t-path" d="M0 640 C220 612 420 668 640 640 S1080 610 1300 642 S1520 660 1600 646 L1600 664 C1500 676 1400 664 1300 660 S860 630 640 660 S220 632 0 660Z" />
+      {[[120, 600], [470, 604], [1150, 600], [1390, 606]].map(([x, y]) => <Bench key={x} x={x!} y={y!} />)}
+      <Cat x={146} y={582} tone="a" />
+      <Cat x={176} y={582} tone="c" flip />
+      <Cat x={500} y={586} tone="b" />
+      <Cat x={1420} y={588} tone="c" flip />
+      <Dog x={1230} y={618} />
+      <Dog x={330} y={622} />
+      {[60, 700, 1000, 1540].map((x, i) => <Tree key={`p${x}`} x={x} s={i % 2 ? 0.7 : 0.8} y={600} />)}
+      <g className="t-bld t-bld-memories" style={{ ["--i" as string]: 6 }}>
+        <g transform={`translate(${BUILDINGS.memories.x} ${BUILDINGS.memories.base})`}>
+          <BuildingArt kind="memories" />
+        </g>
+      </g>
     </svg>
   );
 }

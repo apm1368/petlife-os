@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
 beforeEach(() => vi.clearAllMocks());
 
 describe("Landing — the Tehran city is the navigation", () => {
-  it.each(["fa", "en"] as const)("%s: six buildings, each a real public destination, signed only in the page language", async (locale) => {
+  it.each(["fa", "en"] as const)("%s: six buildings and the memories board, each a real destination, signed only in the page language", async (locale) => {
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const copy = landingCopy[locale];
     renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
@@ -24,7 +24,8 @@ describe("Landing — the Tehran city is the navigation", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(copy.title);
     const city = screen.getByRole("navigation", { name: copy.cityLabel });
     const links = within(city).getAllByRole("link");
-    expect(links).toHaveLength(6);
+    expect(links).toHaveLength(DESTINATIONS.length);
+    expect(DESTINATIONS).toHaveLength(7);
     DESTINATIONS.forEach(({ key, href }, i) => {
       expect(links[i]!.getAttribute("href")).toBe(`/${locale}/${href}`);
       expect(links[i]!.textContent).toContain(copy.destinations[key][0]);

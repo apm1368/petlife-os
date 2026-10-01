@@ -13,6 +13,11 @@
   --t-ground: #e2d7c3; --t-curb: #cdbfa6; --t-lane: #f6f0e4; --t-plaza: #d7ccb6;
   --t-sign-bg: rgb(255 255 255 / .94); --t-sign-fg: #24302b; --t-sign-border: rgb(36 48 43 / .14); --t-sign-icon: var(--t-green);
   --t-ink: #1f2925; --t-ink-2: #4a5a53;
+  --t-fac-health: #f7fbfa; --t-fac-services: #f3c9bb; --t-fac-shop: #f5d68c; --t-fac-travel: #bcd8ec; --t-fac-support: #f8dcc8; --t-fac-community: #d8d0f0;
+  --t-lawn: #b9d7a4; --t-path: #e9dcc0; --t-bench: #9a6b43; --t-bench-leg: #5a4636; --t-board: #8a6a4a; --t-print: #fffdf8; --t-pin: #d9534f;
+  --t-photo-1: #9cc7e6; --t-photo-2: #f2b8a2; --t-photo-3: #b6dba2; --t-photo-sun: #ffe08a;
+  --t-cat-a: #3b3b3b; --t-cat-b: #c97b3e; --t-cat-c: #8f8f8f; --t-dog: #a8743f;
+  --s-health: #0f6e66; --s-services: #9a3f5a; --s-shop: #7a4f00; --s-travel: #1f5f8b; --s-animalSupport: #a13f26; --s-community: #5b4a9e; --s-memories: #8a4b1e;
   position: relative;
   display: flex;
   min-height: 100dvh;
@@ -33,6 +38,11 @@
   --t-ground: #1b2420; --t-curb: #26302b; --t-lane: #3a443f; --t-plaza: #222c27;
   --t-sign-bg: rgb(18 26 23 / .92); --t-sign-fg: #edf3ef; --t-sign-border: rgb(237 243 239 / .16); --t-sign-icon: #8fd3b5;
   --t-ink: #eef3f0; --t-ink-2: #b5c3bc;
+  --t-fac-health: #2b3a37; --t-fac-services: #4a3530; --t-fac-shop: #4a4026; --t-fac-travel: #263845; --t-fac-support: #47362d; --t-fac-community: #36314a;
+  --t-lawn: #1f3226; --t-path: #2c342d; --t-bench: #5c4330; --t-bench-leg: #3a2d22; --t-board: #4a3a2a; --t-print: #e9e3d6; --t-pin: #e07a72;
+  --t-photo-1: #5b86a6; --t-photo-2: #a8705e; --t-photo-3: #6d9160; --t-photo-sun: #f2c46d;
+  --t-cat-a: #0f1210; --t-cat-b: #b06a35; --t-cat-c: #6d716e; --t-dog: #8a5f35;
+  --s-health: #0f6e66; --s-services: #9a3f5a; --s-shop: #7a4f00; --s-travel: #1f5f8b; --s-animalSupport: #a13f26; --s-community: #5b4a9e; --s-memories: #8a4b1e;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .tehran {
@@ -48,6 +58,11 @@
     --t-ground: #1b2420; --t-curb: #26302b; --t-lane: #3a443f; --t-plaza: #222c27;
     --t-sign-bg: rgb(18 26 23 / .92); --t-sign-fg: #edf3ef; --t-sign-border: rgb(237 243 239 / .16); --t-sign-icon: #8fd3b5;
     --t-ink: #eef3f0; --t-ink-2: #b5c3bc;
+    --t-fac-health: #2b3a37; --t-fac-services: #4a3530; --t-fac-shop: #4a4026; --t-fac-travel: #263845; --t-fac-support: #47362d; --t-fac-community: #36314a;
+    --t-lawn: #1f3226; --t-path: #2c342d; --t-bench: #5c4330; --t-bench-leg: #3a2d22; --t-board: #4a3a2a; --t-print: #e9e3d6; --t-pin: #e07a72;
+    --t-photo-1: #5b86a6; --t-photo-2: #a8705e; --t-photo-3: #6d9160; --t-photo-sun: #f2c46d;
+    --t-cat-a: #0f1210; --t-cat-b: #b06a35; --t-cat-c: #6d716e; --t-dog: #8a5f35;
+    --s-health: #0f6e66; --s-services: #9a3f5a; --s-shop: #7a4f00; --s-travel: #1f5f8b; --s-animalSupport: #a13f26; --s-community: #5b4a9e; --s-memories: #8a4b1e;
   }
 }
 .tehran a { color: inherit; text-decoration: none; }
@@ -66,6 +81,17 @@
 .t-accent-green { fill: var(--t-green); } .t-accent-mint { fill: var(--t-mint); } .t-accent-violet { fill: var(--t-violet); } .t-accent-teal { fill: var(--t-teal); } .t-accent-coral { fill: var(--t-coral); } .t-accent-turq { fill: var(--t-turq); }
 .t-finial { fill: var(--t-finial); } .t-stripe { fill: rgb(255 255 255 / .75); } .t-mark { stroke: #fff; }
 .t-tree { fill: var(--t-tree); } .t-trunk { fill: var(--t-trunk); } .t-fence { fill: var(--t-fence); }
+.t-facade-health { fill: var(--t-fac-health); } .t-facade-services { fill: var(--t-fac-services); } .t-facade-shop { fill: var(--t-fac-shop); } .t-facade-travel { fill: var(--t-fac-travel); } .t-facade-support { fill: var(--t-fac-support); } .t-facade-community { fill: var(--t-fac-community); }
+.t-lawn { fill: var(--t-lawn); } .t-path { fill: var(--t-path); } .t-bench { fill: var(--t-bench); } .t-bench-leg { fill: var(--t-bench-leg); }
+.t-board { fill: var(--t-board); } .t-print { fill: var(--t-print); } .t-pin { fill: var(--t-pin); } .t-photo-sun { fill: var(--t-photo-sun); }
+.t-photo-12 { fill: var(--t-photo-1); } .t-photo-56 { fill: var(--t-photo-2); } .t-photo-100 { fill: var(--t-photo-3); }
+.t-cat-a { fill: var(--t-cat-a); stroke: var(--t-cat-a); } .t-cat-b { fill: var(--t-cat-b); stroke: var(--t-cat-b); } .t-cat-c { fill: var(--t-cat-c); stroke: var(--t-cat-c); }
+.t-cat path:not(.t-cat-tail), .t-cat circle { stroke: none; }
+.t-dog { fill: var(--t-dog); stroke: var(--t-dog); } .t-dog rect, .t-dog circle, .t-dog path:not(.t-dog-tail) { stroke: none; }
+.t-cat-tail { animation: t-tail 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 100%; }
+.t-dog-tail { animation: t-tail 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 100% 100%; }
+@keyframes t-tail { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg); } }
+@media (prefers-reduced-motion: reduce) { .t-cat-tail, .t-dog-tail { animation: none; } }
 .t-ground { fill: var(--t-ground); } .t-curb { fill: var(--t-curb); } .t-lane { fill: var(--t-lane); } .t-plaza { fill: var(--t-plaza); }
 
 /* Header */
@@ -91,7 +117,7 @@
 /* The city */
 .tehran-city { position: relative; margin-top: auto; padding-top: clamp(0px, 2vw, 24px); }
 .tehran-hero__text { margin-bottom: clamp(-120px, -7vw, -20px); }
-.tehran-scene { position: relative; width: 100%; aspect-ratio: 1600 / 600; }
+.tehran-scene { position: relative; width: 100%; aspect-ratio: 1600 / 680; }
 .tehran-scene__art { display: block; width: 100%; height: 100%; }
 [dir="rtl"] .tehran-scene__art { transform: scaleX(-1); }
 .t-bld { transform-box: fill-box; transform-origin: 50% 100%; transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out); animation: t-rise .7s var(--ease-out) backwards; animation-delay: calc(var(--i) * 70ms + 150ms); }
@@ -104,7 +130,8 @@
 .tehran-scene[data-active="shop"] .t-bld-shop,
 .tehran-scene[data-active="travel"] .t-bld-travel,
 .tehran-scene[data-active="animalSupport"] .t-bld-animalSupport,
-.tehran-scene[data-active="community"] .t-bld-community { opacity: 1; transform: translateY(-6px); }
+.tehran-scene[data-active="community"] .t-bld-community,
+.tehran-scene[data-active="memories"] .t-bld-memories { opacity: 1; transform: translateY(-6px); }
 .tehran-scene[data-active="health"] .t-bld-health .t-win,
 .tehran-scene[data-active="services"] .t-bld-services .t-win,
 .tehran-scene[data-active="shop"] .t-bld-shop .t-win,
@@ -135,7 +162,7 @@
 @media (max-width: 900px) {
   .tehran-city { margin-top: 18px; }
   .tehran-scene { --scene-h: clamp(210px, 42vw, 300px); aspect-ratio: auto; height: var(--scene-h); overflow: hidden; }
-  .tehran-scene__art { position: absolute; bottom: 0; left: 50%; width: calc(var(--scene-h) * 8 / 3); height: var(--scene-h); translate: -50% 0; }
+  .tehran-scene__art { position: absolute; bottom: 0; left: 50%; width: calc(var(--scene-h) * 1600 / 680); height: var(--scene-h); translate: -50% 0; }
   .tehran-nav { padding: 6px var(--shell-gutter) 10px; background: var(--t-ground); }
   .tehran-nav ul { position: static; display: grid; grid-template-columns: 1fr; }
   .tehran-dest { position: static; width: auto !important; height: auto !important; }
@@ -154,3 +181,20 @@
 .tehran { overflow-x: clip; }
 .tehran-dest:first-child .tehran-dest__desc { left: auto; inset-inline-start: 0; translate: none; }
 .tehran-dest:last-child .tehran-dest__desc { left: auto; inset-inline-end: 0; translate: none; }
+
+/* Each building's sign is its own colour, so the city reads as distinct places, not one beige row. */
+.tehran-dest { --sign: var(--s-health); }
+.tehran-dest[data-key="services"] { --sign: var(--s-services); }
+.tehran-dest[data-key="shop"] { --sign: var(--s-shop); }
+.tehran-dest[data-key="travel"] { --sign: var(--s-travel); }
+.tehran-dest[data-key="animalSupport"] { --sign: var(--s-animalSupport); }
+.tehran-dest[data-key="community"] { --sign: var(--s-community); }
+.tehran-dest[data-key="memories"] { --sign: var(--s-memories); }
+@media (min-width: 901px) {
+  .tehran-sign { border-color: transparent; background: var(--sign); color: #fff; }
+  .tehran-sign svg { color: #fff; }
+}
+@media (max-width: 900px) {
+  .tehran-sign svg { color: var(--sign); }
+  :root[data-theme="dark"] .tehran-sign svg { color: #fff; }
+}

@@ -1,8 +1,8 @@
 import type { AppLocale } from "@/lib/i18n/config";
 
-export type DestinationKey = "health" | "services" | "shop" | "travel" | "animalSupport" | "community";
+export type DestinationKey = "health" | "services" | "shop" | "travel" | "animalSupport" | "community" | "memories";
 
-/** Every destination is a shipped public route; the building that stands for it is drawn in TehranScene. */
+/** Every destination is a shipped route; the building (or, for memories, the photo board in the park) is drawn in TehranScene. Memories is the one signed-in destination — visitors pass through sign-in first. */
 export const DESTINATIONS: { key: DestinationKey; href: string }[] = [
   { key: "health", href: "vet/find" },
   { key: "services", href: "services" },
@@ -10,13 +10,14 @@ export const DESTINATIONS: { key: DestinationKey; href: string }[] = [
   { key: "travel", href: "travel" },
   { key: "animalSupport", href: "animal-support" },
   { key: "community", href: "community" },
+  { key: "memories", href: "pets/active?view=memories" },
 ];
 
 export const MORE_LINKS = [
   { key: "lostPets", href: "lost-pets" },
   { key: "places", href: "places" },
   { key: "insurance", href: "insurance" },
-  { key: "guides", href: "blog" },
+  { key: "blog", href: "blog" },
 ] as const;
 
 const fa = {
@@ -37,8 +38,9 @@ const fa = {
     travel: ["سفر", "اقامتگاه‌هایی که حیوانتان را می‌پذیرند"],
     animalSupport: ["حمایت از حیوانات", "پناهگاه‌ها و نیازهای امروز"],
     community: ["جامعه", "پرسش و تجربهٔ صاحبان حیوانات"],
+    memories: ["خاطره‌ها", "عکس‌ها و لحظه‌های زندگی حیوانتان"],
   } satisfies Record<DestinationKey, [string, string]>,
-  more: { lostPets: "حیوانات گم‌شده", places: "مکان‌های دوستدار حیوان", insurance: "بیمهٔ حیوانات", guides: "راهنماها" },
+  more: { lostPets: "حیوانات گم‌شده", places: "مکان‌های دوستدار حیوان", insurance: "بیمهٔ حیوانات", blog: "وبلاگ" },
 };
 
 const en: typeof fa = {
@@ -59,8 +61,9 @@ const en: typeof fa = {
     travel: ["Travel", "Stays that welcome your pet"],
     animalSupport: ["Animal support", "Shelters and today's needs"],
     community: ["Community", "Questions and stories from owners"],
+    memories: ["Memories", "Photos and moments from your pet's life"],
   },
-  more: { lostPets: "Lost pets", places: "Pet-friendly places", insurance: "Pet insurance", guides: "Guides" },
+  more: { lostPets: "Lost pets", places: "Pet-friendly places", insurance: "Pet insurance", blog: "Blog" },
 };
 
 export const landingCopy: Record<AppLocale, typeof fa> = { fa, en };

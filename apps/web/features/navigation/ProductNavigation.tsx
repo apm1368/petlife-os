@@ -21,7 +21,7 @@ export const exploreDestinations: NavigationItem[] = [
   { path: "/shop", fa: "فروشگاه", en: "Shop" }, { path: "/places", fa: "مکان‌ها", en: "Places" },
   { path: "/travel", fa: "سفر", en: "Travel" }, { path: "/insurance", fa: "بیمه", en: "Insurance" },
   { path: "/animal-support", fa: "حمایت از حیوانات", en: "Animal support" }, { path: "/community", fa: "جامعه", en: "Community" },
-  { path: "/blog", fa: "راهنماها", en: "Guides" },
+  { path: "/blog", fa: "وبلاگ", en: "Blog" },
 ];
 
 export const publicDestinations = [

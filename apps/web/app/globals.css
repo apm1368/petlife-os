@@ -292,7 +292,8 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 @media(min-width:1024px){.member-header__pet{display:block}.member-header__bar{gap:28px}}
 
 .member-nav{display:none}
-@media(min-width:1024px){.member-nav{display:block}}
+@media(min-width:1024px){.member-nav{display:block;margin-inline-start:auto}.member-nav+.member-header__tools{margin-inline-start:0}}
+/* The main menu sits at the end of the bar beside the tools — on Persian pages that is the left side, as the owner asked; the brand alone holds the start. */
 .member-nav>nav>ul{display:flex;align-items:stretch;gap:2px;margin:0;padding:0;list-style:none}
 .member-nav__link{position:relative;display:inline-flex;align-items:center;gap:7px;height:64px;padding:0 14px;border:0;background:none;color:var(--text-secondary);font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;transition:color var(--dur-1)}
 .member-nav__link::after{content:"";position:absolute;inset-inline:14px;bottom:-1px;height:2px;border-radius:2px;background:var(--brand-natural);transform:scaleX(0);transition:transform var(--dur-2) var(--ease-out)}

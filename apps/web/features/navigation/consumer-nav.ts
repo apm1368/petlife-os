@@ -74,10 +74,10 @@ export const EXPLORE_GROUPS: ExploreGroup[] = [
     ],
   },
   {
-    key: "stories", fa: "خاطره و راهنما", en: "Stories and guides",
+    key: "stories", fa: "خاطره و مقاله", en: "Stories and articles",
     links: [
       { href: "/pets/active?view=memories", icon: Images, fa: ["خاطرات", "لحظه‌ها و خط زمانی زندگی"], en: ["Memories", "Moments and the life timeline"] },
-      { href: "/blog", icon: BookOpen, fa: ["راهنماها", "مقاله‌های مراقبت و سلامت"], en: ["Guides", "Care and health articles"] },
+      { href: "/blog", icon: BookOpen, fa: ["وبلاگ", "مقاله‌های مراقبت و سلامت"], en: ["Blog", "Care and health articles"] },
     ],
   },
 ];
