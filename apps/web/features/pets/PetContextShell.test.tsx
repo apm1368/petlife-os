@@ -1,39 +1,46 @@
-import { describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
-import { ApiError } from "@/lib/api/client";
+import { usePetStore } from "@/stores/pet-store";
+import { householdsService } from "@/services/households.service";
 import { petsService } from "@/services/pets.service";
 import { PetContextShell } from "./PetContextShell";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/en/pets/p1", useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/fa/pets/cookie" }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn(), getMyAccess: vi.fn() } }));
+vi.mock("@/services/households.service", () => ({ householdsService: { setActivePet: vi.fn(async () => undefined) } }));
 
-const denied = (details?: Record<string, unknown>) => new ApiError({ code: "PET_ACCESS_DENIED", message: "You do not have access to this pet.", details, requestId: "r" }, 403);
+const pet = (id: string, name: string) => ({ id, name, species: "DOG", lifecycleStatus: "ACTIVE", breed: null, photoUrl: null, microchipNumber: null, latestWeightValue: null, latestWeightUnit: null }) as never;
 
-describe("PetContextShell access states", () => {
-  it("an expired temporary grant says the access ended — and shows nothing about the pet", async () => {
-    vi.mocked(petsService.getById).mockRejectedValue(denied({ petId: "p1", lapse: { reason: "EXPIRED", at: "2026-09-29T00:00:00Z" } }));
-    vi.mocked(petsService.getMyAccess).mockRejectedValue(denied());
-    renderWithIntl(<PetContextShell petId="p1">child</PetContextShell>, "en");
-    expect(await screen.findByRole("heading", { name: "Your access has ended" })).toBeTruthy();
-    expect(screen.queryByText("child")).toBeNull();
+describe("PetContextShell — the pet on screen is the pet in context", () => {
+  beforeEach(() => {
+    vi.mocked(petsService.getById).mockResolvedValue(pet("cookie", "Cookie"));
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewHealth: true, canViewCareProfile: true, canEditIdentity: false } as never);
+    vi.mocked(householdsService.setActivePet).mockClear();
   });
 
-  it("a revoked grant and a stranger get different, safe explanations", async () => {
-    vi.mocked(petsService.getById).mockRejectedValue(denied({ petId: "p1", lapse: { reason: "REVOKED" } }));
-    vi.mocked(petsService.getMyAccess).mockRejectedValue(denied());
-    const { unmount } = renderWithIntl(<PetContextShell petId="p1">child</PetContextShell>, "fa");
-    expect(await screen.findByRole("heading", { name: "دسترسی شما برداشته شده است" })).toBeTruthy();
-    unmount();
-    vi.mocked(petsService.getById).mockRejectedValue(denied({ petId: "p1" }));
-    renderWithIntl(<PetContextShell petId="p1">child</PetContextShell>, "en");
-    expect(await screen.findByRole("heading", { name: "You don't have access to this" })).toBeTruthy();
+  it("makes the viewed household pet active", async () => {
+    usePetStore.setState({ householdId: "h1", pets: [pet("pashmak", "Pashmak"), pet("cookie", "Cookie")], activePetId: "pashmak" });
+    renderWithIntl(<PetContextShell petId="cookie"><p>overview</p></PetContextShell>, "fa");
+    await waitFor(() => expect(householdsService.setActivePet).toHaveBeenCalledWith("h1", "cookie"));
+    expect(usePetStore.getState().activePetId).toBe("cookie");
   });
 
-  it("a missing pet is a 404 state", async () => {
-    vi.mocked(petsService.getById).mockRejectedValue(new ApiError({ code: "NOT_FOUND", message: "Pet not found.", requestId: "r" }, 404));
-    vi.mocked(petsService.getMyAccess).mockRejectedValue(new ApiError({ code: "NOT_FOUND", message: "Pet not found.", requestId: "r" }, 404));
-    renderWithIntl(<PetContextShell petId="p1">child</PetContextShell>, "en");
-    expect(await screen.findByRole("heading", { name: "We couldn't find that page" })).toBeTruthy();
+  it("never activates a pet shared from another household", async () => {
+    usePetStore.setState({ householdId: "h1", pets: [pet("pashmak", "Pashmak")], activePetId: "pashmak" });
+    renderWithIntl(<PetContextShell petId="cookie"><p>overview</p></PetContextShell>, "fa");
+    await new Promise((r) => setTimeout(r, 50));
+    expect(householdsService.setActivePet).not.toHaveBeenCalled();
+  });
+});
+
+describe("PetContextShell — no active pet saved yet", () => {
+  it("makes the viewed pet active instead of leaving the header on the first pet", async () => {
+    vi.mocked(petsService.getById).mockResolvedValue(pet("cookie", "Cookie"));
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewHealth: true, canViewCareProfile: true, canEditIdentity: false } as never);
+    vi.mocked(householdsService.setActivePet).mockClear();
+    usePetStore.setState({ householdId: "h1", pets: [pet("pashmak", "Pashmak"), pet("cookie", "Cookie")], activePetId: null });
+    renderWithIntl(<PetContextShell petId="cookie"><p>overview</p></PetContextShell>, "fa");
+    await waitFor(() => expect(householdsService.setActivePet).toHaveBeenCalledWith("h1", "cookie"));
   });
 });

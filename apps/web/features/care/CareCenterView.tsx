@@ -118,7 +118,11 @@ function CareRow(props: RowProps) {
     </div>
     <div className="care-row__side">
       {book && open ? <Link className="care-row__book" href={`/${locale}/${book}`}>{fa ? "رزرو نوبت" : "Book a visit"}</Link> : null}
-      {open && props.canEdit ? <CareRowActions {...props}/> : null}
+      {open && props.canEdit ? <div className="care-row__actions">
+        {/* The two everyday actions; edit, later-today and cancel live on the item's own page. */}
+        <Button size="sm" disabled={props.busy} onClick={() => props.onRun(item.id, "COMPLETE")}>{fa ? "انجام شد" : "Complete"}</Button>
+        <Button size="sm" variant="secondary" disabled={props.busy} onClick={() => props.onRun(item.id, "SNOOZE", tomorrowMorning())}>{fa ? "فردا" : "Tomorrow"}</Button>
+      </div> : null}
     </div>
   </li>;
 }

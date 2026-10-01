@@ -89,7 +89,8 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
   // The pet on screen is the pet in context: keep the header's active-pet control in step with it
   // (household pets only — a pet shared with you from another household never becomes "active").
   useEffect(() => {
-    if (activePetId && activePetId !== petId && householdPets.some((p) => p.id === petId)) void switchActivePet(petId).catch(() => undefined);
+    // Also when no active pet is saved yet (the header would otherwise fall back to the first pet).
+    if (activePetId !== petId && householdPets.some((p) => p.id === petId)) void switchActivePet(petId).catch(() => undefined);
   }, [petId, activePetId, householdPets, switchActivePet]);
 
   async function load() {
