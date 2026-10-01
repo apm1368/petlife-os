@@ -8,6 +8,7 @@ import { Avatar, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import { PetLifecycleStatus, type PetAccessFlags, type PetDto } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { SystemState, systemStateFor, type SystemStateKind } from "@/features/system/SystemState";
+import { formatAge, formatWeight, speciesLabel } from "./pet-identity";
 
 const copy = {
   fa: {
@@ -129,7 +130,7 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
               {speciesLabel(pet, locale)} · {pet.breed ?? c.unknownBreed} · {formatAge(pet, locale, c.unknownAge)}
             </p>
             <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs">
-              <div className="flex gap-2"><dt className="text-text-secondary">{c.weight}</dt><dd className="text-text-primary">{pet.latestWeightValue ? String(pet.latestWeightValue) + " " + (pet.latestWeightUnit ?? "") : c.unknown}</dd></div>
+              <div className="flex gap-2"><dt className="text-text-secondary">{c.weight}</dt><dd className="text-text-primary">{formatWeight(pet, locale, c.unknown)}</dd></div>
               <div className="flex gap-2"><dt className="text-text-secondary">{c.microchip}</dt><dd className="text-text-primary">{pet.microchipNumber ?? c.unknown}</dd></div>
             </dl>
           </div>
@@ -170,16 +171,3 @@ function lifecyclePresentation(status: PetLifecycleStatus, c: typeof copy.fa | t
   return { label: c.active, message: null, tone: "success" as const, className: "" };
 }
 
-function speciesLabel(pet: PetDto, locale: "fa" | "en") {
-  if (locale === "fa") return pet.species === "DOG" ? "سگ" : "گربه";
-  return pet.species === "DOG" ? "Dog" : "Cat";
-}
-
-function formatAge(pet: PetDto, locale: "fa" | "en", unknown: string): string {
-  const months = pet.birthDate ? Math.max(0, Math.floor((Date.now() - new Date(pet.birthDate).getTime()) / 2629746000)) : pet.approximateAgeMonths;
-  if (months === null) return unknown;
-  const years = Math.floor(months / 12);
-  const remaining = months % 12;
-  if (locale === "fa") return years > 0 ? String(years) + " سال و " + String(remaining) + " ماه" : String(remaining) + " ماه";
-  return years > 0 ? String(years) + "y " + String(remaining) + "m" : String(remaining) + "m";
-}

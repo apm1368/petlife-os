@@ -23,4 +23,5 @@ export {
   House, CarFront, ShoppingBag, Bone, HeartPulse, BadgeCheck, Clock3, Star,
   ChevronLeft, ArrowLeft, LockKeyhole, Mail, Phone, UserRound, PackageCheck,
   Heart, Users, Info, ChevronRight, LocateFixed, Timer, CircleAlert, RotateCcw, Repeat,
+  Compass, Images, Plane, BookOpen, LifeBuoy, HandHeart, ClipboardList, Receipt, ShieldPlus, Siren, Newspaper,
 } from "lucide-react";

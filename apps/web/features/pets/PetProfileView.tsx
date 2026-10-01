@@ -13,6 +13,7 @@ import {
 } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { usePetStore } from "@/stores/pet-store";
+import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone } from "./overview-labels";
 
 const copy = {
   fa: {
@@ -205,8 +206,8 @@ export function PetProfileView({ petId }: { petId: string }) {
         <OverviewSection title={c.recentMemory}>
           {overview.recentMemory ? (
             <Link href={base + "/memories/" + overview.recentMemory.id} className="block border-s-2 border-[#76638c] ps-4">
-              <p className="font-bold text-text-primary">{overview.recentMemory.title ?? formatDate(overview.recentMemory.occurredAt, locale)}</p>
-              <p className="mt-1 text-xs text-text-secondary">{formatDate(overview.recentMemory.occurredAt, locale)}</p>
+              <p className="font-bold text-text-primary">{overview.recentMemory.title ?? formatOverviewDate(overview.recentMemory.occurredAt, locale)}</p>
+              <p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(overview.recentMemory.occurredAt, locale)}</p>
             </Link>
           ) : <p className="text-sm text-text-secondary">{c.noMemory}</p>}
         </OverviewSection>
@@ -228,14 +229,13 @@ function OverviewSection({ title, children }: { title: string; children: React.R
 }
 
 function AttentionRow({ item, base, locale }: { item: PetOverviewAttentionDto; base: string; locale: "fa" | "en" }) {
-  const c = copy[locale];
-  const label = item.title === "VACCINATION_OVERDUE" ? c.vaccinationOverdue : item.title === "VACCINATION_DUE_SOON" ? c.vaccinationDue : item.title === "HEALTH_PROFILE_INCOMPLETE" ? c.incomplete : item.title;
-  const tone = item.severity === "INFORMATIONAL" ? "neutral" : "attention";
+  const label = attentionTitle(item.title, locale);
+  const tone = severityTone(item.severity);
   return (
     <Link href={base + item.href} className="grid min-h-20 grid-cols-[auto_1fr_auto] items-center gap-4 py-4">
-      <span className={"h-10 w-1 " + severityClass(item.severity)} aria-hidden="true" />
-      <div><p className="font-bold text-text-primary">{label}</p>{item.dueAt ? <p className="mt-1 text-xs text-text-secondary">{formatDate(item.dueAt, locale)}</p> : null}</div>
-      <StatusLabel tone={tone}>{item.severity}</StatusLabel>
+      <span className={"h-10 w-1 " + severityBarClass(item.severity)} aria-hidden="true" />
+      <div><p className="font-bold text-text-primary">{label}</p>{item.dueAt ? <p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.dueAt, locale)}</p> : null}</div>
+      <StatusLabel tone={tone}>{severityLabel(item.severity, locale)}</StatusLabel>
     </Link>
   );
 }
@@ -248,8 +248,8 @@ function EventList({ items, empty, base, locale, compact = false }: { items: Pet
         const href = item.href.startsWith("/bookings/") ? "/" + locale + item.href : base + item.href;
         return (
           <Link key={item.type + "-" + item.id} href={href} className={"flex items-start justify-between gap-4 py-4 " + (compact ? "min-h-20" : "min-h-24")}>
-            <div className="min-w-0"><p className="truncate font-bold text-text-primary">{eventTitle(item.title, locale)}</p><p className="mt-1 text-xs text-text-secondary">{formatDate(item.occurredAt, locale)}{item.providerName ? " · " + item.providerName : ""}</p></div>
-            <StatusLabel tone="neutral">{sourceLabel(item, locale)}</StatusLabel>
+            <div className="min-w-0"><p className="truncate font-bold text-text-primary">{eventTitle(item.title, locale)}</p><p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.occurredAt, locale)}{item.providerName ? " · " + item.providerName : ""}</p></div>
+            <StatusLabel tone="neutral">{eventSourceLabel(item, locale)}</StatusLabel>
           </Link>
         );
       })}
@@ -258,37 +258,9 @@ function EventList({ items, empty, base, locale, compact = false }: { items: Pet
 }
 
 function Shortcut({ href, label }: { href: string; label: string }) {
-  return <Link href={href} className="flex min-h-16 items-center justify-between bg-surface-elevated px-4 py-3 text-sm font-bold text-text-primary hover:bg-surface-subtle"><span>{label}</span><span aria-hidden="true">←</span></Link>;
+  return <Link href={href} className="flex min-h-16 items-center justify-between bg-surface-elevated px-4 py-3 text-sm font-bold text-text-primary hover:bg-surface-subtle"><span>{label}</span><span aria-hidden="true" className="dir-flip">←</span></Link>;
 }
 
-function sourceLabel(item: PetOverviewEventDto, locale: "fa" | "en") {
-  const c = copy[locale];
-  if (item.sourceType === "PROVIDER" || item.sourceType === "CLINIC") return c.provider;
-  if (item.sourceType === "OWNER" || item.sourceType === "HOUSEHOLD_MEMBER") return c.owner;
-  return item.type === "BOOKING" ? c.recordedData : c.system;
-}
 
-function eventTitle(title: string, locale: "fa" | "en") {
-  const labels: Record<string, readonly [string, string]> = {
-    "careCalendar.event.vetAppointment": ["وقت دامپزشکی", "Vet appointment"],
-    "careCalendar.event.grooming": ["آرایش و نظافت", "Grooming"],
-    "careCalendar.event.training": ["جلسه آموزش", "Training session"],
-    "careCalendar.event.walk": ["پیاده‌روی", "Walk"],
-    "careCalendar.event.sitting": ["نگهداری", "Pet sitting"],
-    "careCalendar.event.boarding": ["پانسیون", "Boarding"],
-    "careCalendar.event.petTaxi": ["تاکسی حیوانات", "Pet taxi"],
-    MEMORY: ["خاطره", "Memory"],
-  };
-  return labels[title]?.[locale === "fa" ? 0 : 1] ?? title;
-}
 
-function formatDate(value: string, locale: "fa" | "en") {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : "en-US", { dateStyle: "medium", timeZone: "Asia/Tehran" }).format(new Date(value));
-}
 
-function severityClass(severity: PetOverviewAttentionDto["severity"]) {
-  if (severity === "EMERGENCY" || severity === "URGENT") return "bg-state-urgent";
-  if (severity === "CONCERN") return "bg-[#d86f61]";
-  if (severity === "ATTENTION") return "bg-state-attention";
-  return "bg-brand-natural";
-}

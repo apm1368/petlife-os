@@ -11,6 +11,7 @@ import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavigation";
 import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 import { PublicFooter } from "./PublicFooter";
+import { MemberFrame } from "./MemberFrame";
 
 /**
  * The shell for public browsing surfaces (vet/service/shop discovery) —
@@ -30,6 +31,9 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const router = useRouter();
   const preview = useLocalPreview();
+
+  // A signed-in member keeps the member frame on public discovery pages.
+  if (!preview && status === "authenticated" && user) return <MemberFrame>{children}</MemberFrame>;
 
   return (
     <div className="min-h-screen bg-surface-base">

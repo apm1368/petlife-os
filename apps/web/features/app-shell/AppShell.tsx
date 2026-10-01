@@ -1,22 +1,16 @@
 "use client";
-import { ConsumerSidebar } from "@/features/navigation/ConsumerSidebar";
-import { ProductNavigation } from "@/features/navigation/ProductNavigation";
+import { MemberFrame } from "./MemberFrame";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { ErrorRecovery, IconButton, Skeleton } from "@petlife/ui";
+import { ErrorRecovery, Skeleton } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
-import { ThemeToggle } from "@/features/theme/ThemeToggle";
-import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
-import { NotificationBell } from "@/features/notifications/NotificationBell";
-import { AccountMenu } from "@/features/account/AccountMenu";
 
 function LiveAppShell({ children }: { children: React.ReactNode }) {
   const { isLoading, error, retry } = useAppBootstrap();
-  const user = useSessionStore((s) => s.user);
   const status = useSessionStore((s) => s.status);
   const t = useTranslations("common");
   const router = useRouter();
@@ -49,56 +43,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return (
-    <div
-      className={
-        pathname === `/${locale}/home`
-          ? "min-h-screen bg-surface-base"
-          : "workspace-shell min-h-screen bg-surface-base"
-      }
-    >
-      <header className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
-        <span className="text-section-title text-text-primary">{t("appName")}</span>
-        <div className="flex items-center gap-2">
-          <IconButton
-            label={t("support")}
-            onClick={() => router.push(`/${locale}/support`)}
-            icon={
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            }
-          />
-          <NotificationBell />
-          <LocaleSwitcher />
-          <ThemeToggle />
-          {user ? <AccountMenu user={user} /> : null}
-        </div>
-      </header>
-      {pathname === `/${locale}/home` ? <ProductNavigation audience="consumer" /> : <ConsumerSidebar />}
-      <main
-        className={
-          pathname === `/${locale}/home`
-            ? "mx-auto max-w-2xl px-4 py-6"
-            : "workspace-main w-full min-w-0 px-4 py-6"
-        }
-      >
-        {children}
-      </main>
-    </div>
-  );
+  return <MemberFrame>{children}</MemberFrame>;
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {

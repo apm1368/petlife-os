@@ -1,5 +1,5 @@
-import { ApprovedDashboardView } from "@/features/home/ApprovedDashboardView";
+import { MemberHomeView } from "@/features/home/MemberHomeView";
 
 export default function HomePage() {
-  return <ApprovedDashboardView />;
+  return <MemberHomeView />;
 }
