@@ -11,6 +11,7 @@ import { vetPanelService } from "@/services/vet-panel.service";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VitalsSparkline } from "./VitalsSparkline";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { useStatusText } from "@/lib/status/use-status-text";
 
 type Tab = "summary" | "problems" | "vitals" | "prescriptions" | "visits" | "financial";
 
@@ -36,6 +37,7 @@ function orDash(value: string | number | null | undefined): string {
  * range. Where a value was never recorded the page says so with a dash.
  */
 export function VetPatientRecordView({ petId, bookingId }: { petId: string; bookingId?: string }) {
+  const statusText = useStatusText();
   const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.record");
   const tCommon = useTranslations("common");
@@ -356,7 +358,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                   <span className="text-body text-text-primary">{v.reasonForVisit ?? fmt.date(v.startedAt)}</span>
                   <span className="text-metadata text-text-secondary">{v.providerOrganizationName}</span>
                 </div>
-                <StatusLabel tone="neutral">{v.status}</StatusLabel>
+                <StatusLabel tone="neutral">{statusText.label(v.status, "visit")}</StatusLabel>
               </button>
             ))
           )}

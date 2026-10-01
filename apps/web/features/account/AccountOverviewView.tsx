@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Avatar, Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import { accountService, type AccountOverviewDto } from "@/services/account.service";
 import { AccountPageHeader } from "./AccountNav";
+import { formatCount } from "@/lib/number/format-number";
+import { statusLabel } from "@/lib/status/status-labels";
 
 export function AccountOverviewView() {
   const locale = useLocale(); const router = useRouter();
@@ -27,14 +29,14 @@ export function AccountOverviewView() {
     </ContextSurface>}
     <section className="account-summary-list">
       <button onClick={() => router.push(`/${locale}/profile/household`)}>
-        <span><b>{home?.name || (locale === "fa" ? "خانواده من" : "My household")}</b><small>{home ? `${home._count.members} ${locale === "fa" ? "عضو" : "members"} · ${home._count.pets} ${locale === "fa" ? "حیوان" : "pets"}` : (locale === "fa" ? "هنوز خانواده‌ای ثبت نشده" : "No household yet")}</small></span>
+        <span><b>{home?.name || (locale === "fa" ? "خانواده من" : "My household")}</b><small>{home ? `${formatCount(home._count.members, locale)} ${locale === "fa" ? "عضو" : "members"} · ${formatCount(home._count.pets, locale)} ${locale === "fa" ? "حیوان" : "pets"}` : (locale === "fa" ? "هنوز خانواده‌ای ثبت نشده" : "No household yet")}</small></span>
         <StatusLabel tone={home ? "success" : "neutral"}>{home?.role === "OWNER" ? (locale === "fa" ? "مدیر" : "Organizer") : (locale === "fa" ? "عضو" : "Member")}</StatusLabel>
       </button>
       <button onClick={() => router.push(`/${locale}/subscription`)}>
-        <span><b>{locale === "fa" ? "عضویت PET LIFE Care" : "PET LIFE Care membership"}</b><small>{home?.subscription?.status || (locale === "fa" ? "مشاهده طرح‌ها و مزایا" : "See plans and benefits")}</small></span><span aria-hidden>←</span>
+        <span><b>{locale === "fa" ? "عضویت PET LIFE Care" : "PET LIFE Care membership"}</b><small>{home?.subscription?.status ? statusLabel(home.subscription.status, locale === "en" ? "en" : "fa", "subscription") : (locale === "fa" ? "مشاهده طرح‌ها و مزایا" : "See plans and benefits")}</small></span><span aria-hidden className="dir-flip">←</span>
       </button>
       <button onClick={() => router.push(`/${locale}/profile/activity`)}>
-        <span><b>{locale === "fa" ? "فعالیت‌های اخیر" : "Recent activity"}</b><small>{locale === "fa" ? "ورودها و تغییرات مهم حساب" : "Sign-ins and important account changes"}</small></span><span aria-hidden>←</span>
+        <span><b>{locale === "fa" ? "فعالیت‌های اخیر" : "Recent activity"}</b><small>{locale === "fa" ? "ورودها و تغییرات مهم حساب" : "Sign-ins and important account changes"}</small></span><span aria-hidden className="dir-flip">←</span>
       </button>
     </section>
   </div>;

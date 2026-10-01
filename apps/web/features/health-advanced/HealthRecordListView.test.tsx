@@ -56,8 +56,9 @@ describe("HealthLabsView", () => {
     renderWithIntl(<HealthLabsView petId="pet-1" />);
 
     await waitFor(() => expect(screen.getAllByText("CBC Panel").length).toBe(2));
-    expect(screen.getByText("COMPLETED")).toBeTruthy();
-    expect(screen.getByText("ABNORMAL")).toBeTruthy();
+    expect(screen.getByText("Completed")).toBeTruthy();
+    expect(screen.getByText("Out of range")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/\b(COMPLETED|ABNORMAL)\b/);
   });
 });
 
@@ -94,7 +95,7 @@ describe("HealthImagingView", () => {
 
     renderWithIntl(<HealthImagingView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.getByText("XRAY")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("X-ray")).toBeTruthy());
     expect(screen.getByText("No acute findings noted by radiologist.")).toBeTruthy();
   });
 });
@@ -136,7 +137,8 @@ describe("HealthReferralsView", () => {
     renderWithIntl(<HealthReferralsView petId="pet-1" />);
 
     await waitFor(() => expect(screen.getByText("Suspected heart murmur")).toBeTruthy());
-    expect(screen.getByText("SENT")).toBeTruthy();
+    expect(screen.getByText("Sent")).toBeTruthy();
+    expect(document.body.textContent).not.toContain("SENT");
     expect(screen.getByText("Tehran Specialty Vet")).toBeTruthy();
   });
 });

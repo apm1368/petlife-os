@@ -354,3 +354,5 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 [dir=rtl] .explore-sheet__pets button{padding:4px 6px 4px 14px}
 .explore-sheet__pets button[aria-pressed=true]{border-color:var(--brand-natural);color:var(--brand-natural)}
 .explore-sheet__close{min-height:48px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--surface-elevated);color:var(--text-primary);font:inherit;font-weight:700}
+/* Glyphs drawn for LTR (→ = forward in en): mirrored in RTL. */
+[dir=rtl] .dir-flip-rtl{display:inline-block;transform:scaleX(-1)}

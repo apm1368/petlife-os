@@ -8,9 +8,11 @@ import type { SellerDashboardDto } from "@petlife/types";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { useStatusText } from "@/lib/status/use-status-text";
 
 /** Minimal but operational Seller Dashboard (spec section 40) — priorities are orders needing action, low stock, and channel sync health; never a marketing-style landing page. */
 export function SellerDashboardView() {
+  const statusText = useStatusText();
   const t = useTranslations("seller.dashboard");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
@@ -78,7 +80,7 @@ export function SellerDashboardView() {
                     <span className="text-metadata text-text-secondary">{t("itemCount", { count: order.itemCount })}</span>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <StatusLabel tone={order.status === "CANCELLED" ? "urgent" : "neutral"}>{order.status}</StatusLabel>
+                    <StatusLabel tone={order.status === "CANCELLED" ? "urgent" : "neutral"}>{statusText.label(order.status, "order")}</StatusLabel>
                     <span className="text-body text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
                   </div>
                 </ContextSurface>

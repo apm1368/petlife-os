@@ -47,28 +47,28 @@ export function TravelHubView({ petId }: { petId: string }) {
       <Link href="/travel">
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.staysLink")}</span>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
         </ContextSurface>
       </Link>
 
       <Link href={`/pets/${petId}/travel/passport`}>
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.passportReadinessLink")}</span>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
         </ContextSurface>
       </Link>
 
       <Link href="/places">
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.placesLink")}</span>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
         </ContextSurface>
       </Link>
 
       <Link href="/insurance">
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.insuranceLink")}</span>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
         </ContextSurface>
       </Link>
 

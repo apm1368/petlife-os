@@ -1,5 +1,6 @@
 import type { PetDto } from "@petlife/types";
 import { localizeDigits } from "@/lib/date/jalali";
+import { statusLabel } from "@/lib/status/status-labels";
 
 /** Shared pet identity text — the pet header, the home hero and the pet list say the same thing. */
 export function speciesLabel(pet: Pick<PetDto, "species">, locale: "fa" | "en"): string {
@@ -27,4 +28,9 @@ export function formatWeight(pet: Pick<PetDto, "latestWeightValue" | "latestWeig
   const unit = pet.latestWeightUnit === "LB" ? (locale === "fa" ? "پوند" : "lb") : locale === "fa" ? "کیلوگرم" : "kg";
   const value = locale === "fa" ? pet.latestWeightValue.toLocaleString("fa-IR", { maximumFractionDigits: 2 }) : String(pet.latestWeightValue);
   return `${value} ${unit}`;
+}
+
+/** The labels PetIdentity (UI package, no i18n) needs, in the UI language. */
+export function petIdentityLabels(pet: Pick<PetDto, "species" | "lifecycleStatus">, locale: "fa" | "en") {
+  return { active: locale === "fa" ? "فعال" : "Active", species: speciesLabel(pet, locale), lifecycle: statusLabel(pet.lifecycleStatus, locale, "lifecycle") };
 }

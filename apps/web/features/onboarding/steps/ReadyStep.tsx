@@ -9,6 +9,7 @@ import { PetLifecycleStatus } from "@petlife/types";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { onboardingService } from "@/services/onboarding.service";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
+import { petIdentityLabels } from "@/features/pets/pet-identity";
 
 export function ReadyStep({ returnTo }: { returnTo?: string | null }) {
   const t = useTranslations("onboarding.ready");
@@ -49,6 +50,7 @@ export function ReadyStep({ returnTo }: { returnTo?: string | null }) {
           }}
           isActive
           size="lg"
+          labels={petIdentityLabels({ species: draft.species, lifecycleStatus: PetLifecycleStatus.ACTIVE }, locale === "en" ? "en" : "fa")}
         />
       ) : null}
       <Button variant="primary" isLoading={isCompleting} onClick={goToHome}>

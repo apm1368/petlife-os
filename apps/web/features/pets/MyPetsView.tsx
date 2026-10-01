@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, PetIdentity } from "@petlife/ui";
 import { useActivePet } from "@/hooks/use-active-pet";
+import { petIdentityLabels } from "./pet-identity";
 
 export function MyPetsView() {
   const t = useTranslations("pets");
@@ -22,7 +23,7 @@ export function MyPetsView() {
 
       {pets.map((pet) => (
         <ContextSurface key={pet.id} className="flex items-center justify-between gap-4">
-          <PetIdentity pet={pet} isActive={pet.id === activePetId} />
+          <PetIdentity pet={pet} isActive={pet.id === activePetId} labels={petIdentityLabels(pet, locale === "en" ? "en" : "fa")} />
           <div className="flex flex-col gap-2">
             {pet.id !== activePetId ? (
               <Button variant="secondary" size="sm" onClick={() => void switchActivePet(pet.id)}>

@@ -232,7 +232,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
           <header className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2 text-metadata text-text-secondary">
               <span>{listingTypeLabel(listing.type, lang)}</span>
-              <span>· {listing.city}{listing.province ? `، ${listing.province}` : ""}</span>
+              <span>· {listing.city}{listing.province ? `${fa ? "، " : ", "}${listing.province}` : ""}</span>
               {listing.isVerified ? <span className="inline-flex items-center gap-1 text-state-success"><BadgeCheck aria-hidden className="h-4 w-4" />{fa ? "تأییدشده توسط PET LIFE" : "Verified by PET LIFE"}</span> : null}
             </div>
             <div className="flex items-start justify-between gap-3">

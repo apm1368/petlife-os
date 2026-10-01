@@ -5,8 +5,10 @@ import { StatusLabel } from "@petlife/ui";
 import type { ReferralDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { HealthRecordListView } from "./HealthRecordListView";
+import { useStatusText } from "@/lib/status/use-status-text";
 
 export function HealthReferralsView({ petId }: { petId: string }) {
+  const statusText = useStatusText();
   const t = useTranslations("healthAdvanced");
   return (
     <HealthRecordListView<ReferralDto>
@@ -19,7 +21,7 @@ export function HealthReferralsView({ petId }: { petId: string }) {
         <>
           <div className="flex items-center justify-between">
             <span className="text-body text-text-primary">{referral.reason}</span>
-            <StatusLabel tone={referral.status === "COMPLETED" ? "success" : referral.status === "CANCELLED" ? "neutral" : "attention"}>{referral.status}</StatusLabel>
+            <StatusLabel tone={referral.status === "COMPLETED" ? "success" : referral.status === "CANCELLED" ? "neutral" : "attention"}>{statusText.label(referral.status, "referral")}</StatusLabel>
           </div>
           <span className="text-metadata text-text-secondary">{referral.toProviderOrganizationName ?? referral.externalProviderName}</span>
         </>

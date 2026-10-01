@@ -7,6 +7,7 @@ import type { MarketplaceChannelAccountDto, MarketplaceListingDto, MarketplacePr
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { useStatusText } from "@/lib/status/use-status-text";
 
 /** DEV is never shown as a connectable channel in this UI (spec section 43: "do not show DEV channel in production UI") — only real providers appear here; DEV simulation is exercised through tests, never this screen. */
 const CONNECTABLE_PROVIDERS: MarketplaceProvider[] = ["TOROB" as MarketplaceProvider, "DIGIKALA" as MarketplaceProvider];
@@ -20,6 +21,7 @@ function listingSyncTone(status: string): "success" | "attention" | "urgent" | "
 
 /** Seller Marketplace Channels + Listings (spec section 43-46) — sync errors are never hidden; connecting a channel never asks for pasted secrets (spec section 44). */
 export function SellerChannelsView() {
+  const statusText = useStatusText();
   const fmt = useInstantFormat();
   const t = useTranslations("seller.channels");
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
@@ -100,7 +102,7 @@ export function SellerChannelsView() {
                   {channel.lastSuccessfulSyncAt ? t("lastSync", { when: fmt.dateTime(channel.lastSuccessfulSyncAt) }) : t("neverSynced")}
                 </span>
               </div>
-              <StatusLabel tone={channel.status === "CONNECTED" ? "success" : channel.status === "DEGRADED" || channel.status === "ERROR" ? "urgent" : "neutral"}>{channel.status}</StatusLabel>
+              <StatusLabel tone={channel.status === "CONNECTED" ? "success" : channel.status === "DEGRADED" || channel.status === "ERROR" ? "urgent" : "neutral"}>{statusText.label(channel.status, "marketplace")}</StatusLabel>
             </ContextSurface>
           ))}
           {CONNECTABLE_PROVIDERS.filter((p) => !connectedProviders.has(p)).map((provider) => (
@@ -125,8 +127,8 @@ export function SellerChannelsView() {
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-body font-medium text-text-primary">{listing.provider}</span>
                   <div className="flex gap-1.5">
-                    <StatusLabel tone="neutral">{listing.status}</StatusLabel>
-                    <StatusLabel tone={listingSyncTone(listing.syncStatus)}>{listing.syncStatus}</StatusLabel>
+                    <StatusLabel tone="neutral">{statusText.label(listing.status, "marketplace")}</StatusLabel>
+                    <StatusLabel tone={listingSyncTone(listing.syncStatus)}>{statusText.label(listing.syncStatus, "sync")}</StatusLabel>
                   </div>
                 </div>
                 {listing.lastErrorMessage ? <p className="text-metadata text-state-urgent">{listing.lastErrorMessage}</p> : null}

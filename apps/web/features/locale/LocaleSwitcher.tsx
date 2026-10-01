@@ -18,7 +18,7 @@ export function LocaleSwitcher() {
 
   return (
     <select
-      aria-label="Language"
+      aria-label={locale === "fa" ? "زبان" : "Language"}
       value={locale}
       onChange={(e) => onChange(e.target.value)}
       className="h-9 rounded-md border border-border-strong bg-surface-elevated px-2 text-metadata text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"

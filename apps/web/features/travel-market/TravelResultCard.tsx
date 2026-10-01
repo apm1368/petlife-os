@@ -35,7 +35,7 @@ export function TravelResultCard({ item, href, onFavorite, compareOn, onCompare,
         <div className="flex flex-wrap items-center gap-2 text-metadata text-text-secondary">
           <span>{listingTypeLabel(item.type, lang)}</span>
           <span aria-hidden>·</span>
-          <span>{item.city}{item.province ? `، ${item.province}` : ""}</span>
+          <span>{item.city}{item.province ? `${fa ? "، " : ", "}${item.province}` : ""}</span>
           {item.distanceKm !== null ? <span>· {fa ? `${localizeDigits(item.distanceKm.toFixed(1), "fa")} کیلومتر` : `${item.distanceKm.toFixed(1)} km`}</span> : null}
           {item.isVerified ? <span className="inline-flex items-center gap-1 text-state-success"><BadgeCheck aria-hidden className="h-4 w-4" />{fa ? "تأییدشده" : "Verified"}</span> : null}
         </div>

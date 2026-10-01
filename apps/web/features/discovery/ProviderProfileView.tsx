@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { discoveryService, type ProviderProfile } from "@/services/discovery.service";
 import { categoryLabel, paymentModeLabel, providerTypeLabel } from "./labels";
+import { formatCount } from "@/lib/number/format-number";
 
 /**
  * PUBLIC ENTITY DETAIL PATTERN: identity + trust header, section anchors, then About → Services →
@@ -171,7 +172,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
           <ul className="divide-y divide-border-subtle">
             {profile.reviews.map((r) => (
               <li key={r.id} className="flex flex-col gap-1 py-4">
-                <p className="text-sm"><span aria-label={fa ? `${r.rating} از ۵` : `${r.rating} of 5`}>{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span> · {r.authorName}{r.serviceName ? ` · ${r.serviceName}` : ""} · <time dateTime={r.createdAt}>{new Intl.DateTimeFormat(fa ? "fa-IR-u-ca-persian" : "en-GB", { dateStyle: "medium" }).format(new Date(r.createdAt))}</time></p>
+                <p className="text-sm"><span aria-label={fa ? `${formatCount(r.rating, "fa")} از ۵` : `${r.rating} of 5`}>{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span> · {r.authorName}{r.serviceName ? ` · ${r.serviceName}` : ""} · <time dateTime={r.createdAt}>{new Intl.DateTimeFormat(fa ? "fa-IR-u-ca-persian" : "en-GB", { dateStyle: "medium" }).format(new Date(r.createdAt))}</time></p>
                 {r.body ? <p className="text-body">{r.body}</p> : null}
                 {r.providerResponse ? <p className="border-s-2 border-brand-natural ps-3 text-sm text-text-secondary"><strong>{fa ? "پاسخ ارائه‌دهنده: " : "Provider response: "}</strong>{r.providerResponse}</p> : null}
               </li>

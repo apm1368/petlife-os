@@ -62,11 +62,11 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
       setBooking(data);
       setState("ready");
       const names = await Promise.all([data.petId, ...data.additionalPetIds].map((id) => petsService.getById(id).then((p) => p.name).catch(() => "")));
-      setPetNames(names.filter(Boolean).join("، "));
+      setPetNames(names.filter(Boolean).join(fa ? "، " : ", "));
     } catch (e) {
       setState(e instanceof ApiError ? (e.status === 403 ? "forbidden" : e.status === 404 ? "notFound" : "error") : "error");
     }
-  }, [bookingId]);
+  }, [bookingId, fa]);
   useEffect(() => void load(), [load]);
 
   useEffect(() => {

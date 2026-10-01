@@ -13,6 +13,7 @@ import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { requirementStatusTone, tripStatusTone } from "./travel-status";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { countryName } from "@/lib/number/format-number";
 
 const ALLOWED_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
   [TripStatus.DRAFT]: [TripStatus.PLANNING, TripStatus.CANCELLED],
@@ -131,7 +132,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <h1 className="text-page-title text-text-primary">
-          {trip.originCountry} → {trip.destinationCountry}
+          {trip.originCity || countryName(trip.originCountry, locale)} {locale === "fa" ? "←" : "→"} {trip.destinationCity || countryName(trip.destinationCountry, locale)}
         </h1>
         <StatusLabel tone={tripStatusTone(trip.status)}>{t(`status.${trip.status}`)}</StatusLabel>
       </div>

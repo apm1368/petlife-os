@@ -7,6 +7,8 @@ import { ContextSurface, ErrorRecovery, PriorityAction, Skeleton, StatusLabel } 
 import { KnowledgeState, type HealthOverviewDto, type HealthSummaryDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
 import { healthAdvancedService } from "@/services/health-advanced.service";
+import { useStatusText } from "@/lib/status/use-status-text";
+import { formatCount } from "@/lib/number/format-number";
 
 const copy = {
   fa: { title: "سلامت", subtitle: "یک نمای کامل از سابقه پزشکی، وضعیت فعلی و مراقبت‌های بعدی", attention: "نیازمند توجه", complete: "اطلاعات اصلی سلامت تکمیل است", current: "وضعیت فعلی", records: "پرونده پزشکی", care: "مراقبت و پیگیری", allergy: "آلرژی‌ها", condition: "بیماری‌ها", medication: "داروها", vaccination: "واکسیناسیون", active: "داروی فعال", none: "بدون داروی فعال", upcoming: "مراقبت پیش رو", overdue: "عقب‌افتاده", openPlan: "اقدام درمانی باز", recentVisits: "ویزیت‌های اخیر", recentDocuments: "اسناد اخیر", noVisit: "هنوز ویزیتی ثبت نشده", noDocument: "هنوز سندی ثبت نشده", timeline: "خط زمانی سلامت", documents: "اسناد پزشکی", labs: "آزمایش‌ها", imaging: "تصویربرداری", referrals: "ارجاع‌ها", dental: "دندان‌پزشکی", nutrition: "تغذیه", rehab: "توان‌بخشی", observations: "مشاهدات صاحب حیوان", visits: "ویزیت‌های بالینی", open: "مشاهده" },
@@ -16,6 +18,7 @@ const copy = {
 const tone = (state: KnowledgeState) => state === KnowledgeState.KNOWN_NEGATIVE ? "success" as const : state === KnowledgeState.KNOWN_PRESENT ? "neutral" as const : "attention" as const;
 
 export function HealthOverviewView({ petId }: { petId: string }) {
+  const statusText = useStatusText();
   const locale = useLocale() as "fa" | "en";
   const t = useTranslations("health");
   const c = copy[locale];
@@ -35,8 +38,8 @@ export function HealthOverviewView({ petId }: { petId: string }) {
     <section><h2 className="mb-3 text-section-title text-text-primary">{c.current}</h2><ContextSurface className="divide-y divide-border-subtle">
       <Row href={`${base}/allergies`} label={c.allergy}><StatusLabel tone={tone(summary.allergyState)}>{t(`knowledgeState.${summary.allergyState}`)}</StatusLabel></Row>
       <Row href={`${base}/conditions`} label={c.condition}><StatusLabel tone={tone(summary.conditionsState)}>{t(`knowledgeState.${summary.conditionsState}`)}</StatusLabel></Row>
-      <Row href={`${base}/medications`} label={c.medication}><StatusLabel tone={summary.activeMedicationCount ? "attention" : "neutral"}>{summary.activeMedicationCount ? `${summary.activeMedicationCount} ${c.active}` : c.none}</StatusLabel></Row>
-      <Row href={`${base}/vaccination`} label={c.vaccination}><StatusLabel tone={summary.vaccinationStatus === "UP_TO_DATE" ? "success" : "attention"}>{summary.vaccinationStatus}</StatusLabel></Row>
+      <Row href={`${base}/medications`} label={c.medication}><StatusLabel tone={summary.activeMedicationCount ? "attention" : "neutral"}>{summary.activeMedicationCount ? `${formatCount(summary.activeMedicationCount, locale)} ${c.active}` : c.none}</StatusLabel></Row>
+      <Row href={`${base}/vaccination`} label={c.vaccination}><StatusLabel tone={statusText.tone(summary.vaccinationStatus, "vaccination")}>{statusText.label(summary.vaccinationStatus, "vaccination")}</StatusLabel></Row>
     </ContextSurface></section>
     <section><h2 className="mb-3 text-section-title text-text-primary">{c.care}</h2><ContextSurface className="divide-y divide-border-subtle"><Metric label={c.upcoming} value={overview.upcomingCare.length}/><Metric label={c.overdue} value={overview.overdueCare.length} attention={overview.overdueCare.length > 0}/><Metric label={c.openPlan} value={overview.unresolvedCarePlanItemsCount} attention={overview.unresolvedCarePlanItemsCount > 0}/></ContextSurface></section>
     <section><h2 className="mb-3 text-section-title text-text-primary">{c.records}</h2><div className="grid gap-x-7 md:grid-cols-2">{[["timeline",c.timeline],["visits",c.visits],["documents",c.documents],["labs",c.labs],["imaging",c.imaging],["referrals",c.referrals],["dental",c.dental],["nutrition",c.nutrition],["rehab",c.rehab],["observations",c.observations]].map(([path,label]) => <Link key={path} href={`${base}/${path}`} className="flex items-center justify-between border-b border-border-subtle py-4 text-body text-text-primary hover:text-brand-natural"><span>{label}</span><span aria-hidden>←</span></Link>)}</div></section>
@@ -45,4 +48,4 @@ export function HealthOverviewView({ petId }: { petId: string }) {
 }
 
 function Row({ href, label, children }: { href: string; label: string; children: ReactNode }) { return <Link href={href} className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"><span className="text-body text-text-primary">{label}</span>{children}</Link>; }
-function Metric({ label, value, attention=false }: { label: string; value: number; attention?: boolean }) { return <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0"><span className="text-body text-text-primary">{label}</span><StatusLabel tone={attention ? "attention" : "neutral"}>{String(value)}</StatusLabel></div>; }
+function Metric({ label, value, attention=false }: { label: string; value: number; attention?: boolean }) { const locale = useLocale(); return <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0"><span className="text-body text-text-primary">{label}</span><StatusLabel tone={attention ? "attention" : "neutral"}>{formatCount(value, locale)}</StatusLabel></div>; }

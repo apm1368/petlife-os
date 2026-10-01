@@ -12,6 +12,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { CinematicPageHero } from "@/features/experience/CinematicPageHero";
 import { categoryLabel, providerTypeLabel } from "./labels";
 import { DateReading } from "@/lib/date/date-reading";
+import { formatCount } from "@/lib/number/format-number";
 
 const SORTS: { value: DiscoverySort; fa: string; en: string }[] = [
   { value: "RECOMMENDED", fa: "پیشنهادی", en: "Recommended" },
@@ -241,7 +242,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                     <div className="experience-card__row">
                       <span className="experience-badge"><BadgeCheck size={14} aria-hidden="true" />{fa ? "تأییدشده" : "Verified"}</span>
                       {p.rating.count ? (
-                        <span className="experience-badge experience-badge--gold" aria-label={fa ? `امتیاز ${p.rating.average} از ۵ در ${p.rating.count} نظر` : `Rated ${p.rating.average} of 5 from ${p.rating.count} reviews`}>
+                        <span className="experience-badge experience-badge--gold" aria-label={fa ? `امتیاز ${formatCount(p.rating.average ?? 0, "fa")} از ۵ در ${formatCount(p.rating.count, "fa")} نظر` : `Rated ${p.rating.average} of 5 from ${p.rating.count} reviews`}>
                           <Star size={13} aria-hidden="true" />
                           {p.rating.average?.toLocaleString(locale)} ({p.rating.count.toLocaleString(locale)})
                         </span>

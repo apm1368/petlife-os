@@ -358,7 +358,7 @@ function PromotionForm({
             <Input label={L.searchProducts[lang]} value={productQuery} disabled={priceLocked} onChange={(e) => setProductQuery(e.target.value)} />
             {productIds.length ? (
               <p className="text-metadata text-text-secondary">
-                {L.selected[lang]}: {productIds.map((id) => knownProducts[id] ?? id.slice(0, 8)).join("، ")}
+                {L.selected[lang]}: {productIds.map((id) => knownProducts[id] ?? id.slice(0, 8)).join(lang === "fa" ? "، " : ", ")}
               </p>
             ) : null}
             <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
