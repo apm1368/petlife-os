@@ -1,98 +1,64 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import RootPage from "@/app/[locale]/page";
-import AuthPage from "@/app/[locale]/(auth)/auth/page";
-import { landingCopy } from "./copy";
-import { cameraAt, cameraStops, nearestStop, wheelProgress } from "./camera";
-import { consumeLandingIntent, rememberLandingIntent } from "./intent";
-const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+import { DESTINATIONS, landingCopy } from "./copy";
+
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
-  usePathname: () => "/en",
+  useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/fa",
   useSearchParams: () => new URLSearchParams(),
   notFound: () => {
     throw new Error("NOT_FOUND");
   },
 }));
-beforeEach(() => {
-  vi.clearAllMocks();
-  sessionStorage.clear();
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
-  );
-  vi.stubGlobal("requestAnimationFrame", (fn: FrameRequestCallback) => window.setTimeout(() => fn(0), 0));
-  vi.stubGlobal("cancelAnimationFrame", (id: number) => window.clearTimeout(id));
-});
-describe("Public spatial landing", () => {
-  it.each(["fa", "en"] as const)("renders %s without domain requests", async (locale) => {
+
+beforeEach(() => vi.clearAllMocks());
+
+describe("Landing — the Tehran city is the navigation", () => {
+  it.each(["fa", "en"] as const)("%s: six buildings, each a real public destination, signed only in the page language", async (locale) => {
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const copy = landingCopy[locale];
     renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(copy.contexts[0]![1]);
-    expect(screen.getByRole("link", { name: copy.start }).getAttribute("href")).toBe(`/${locale}/auth`);
-    expect(document.querySelectorAll(".persistent-world")).toHaveLength(1);
-    expect(document.querySelectorAll(".context-copy")).toHaveLength(1);
-    expect(document.body.textContent).not.toMatch(/Luna|لونا/);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    fetchSpy.mockRestore();
-  });
-  it("changes camera context without routing; keyboard returns to overview", async () => {
-    renderWithIntl(await RootPage({ params: Promise.resolve({ locale: "en" }) }));
-    fireEvent.change(screen.getByRole("combobox", { name: landingCopy.en.destinations }), {
-      target: { value: "5" },
+
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(copy.title);
+    const city = screen.getByRole("navigation", { name: copy.cityLabel });
+    const links = within(city).getAllByRole("link");
+    expect(links).toHaveLength(6);
+    DESTINATIONS.forEach(({ key, href }, i) => {
+      expect(links[i]!.getAttribute("href")).toBe(`/${locale}/${href}`);
+      expect(links[i]!.textContent).toContain(copy.destinations[key][0]);
     });
-    await waitFor(() =>
-      expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("shop"),
-    );
-    expect(push).not.toHaveBeenCalled();
-    const cta = screen.getByRole("link", { name: landingCopy.en.contexts[5]![3] });
-    cta.addEventListener("click", (event) => event.preventDefault());
-    fireEvent.click(cta);
-    expect(consumeLandingIntent("en")).toBe("/en/shop?landingPet=cookie&landingAction=shop");
-    fireEvent.keyDown(document.querySelector(".spatial-landing")!, { key: "Escape" });
-    await waitFor(() =>
-      expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("overview"),
-    );
+    // Language purity: Persian signage carries no Latin words, English signage no Persian letters.
+    const signage = links.map((l) => l.textContent ?? "").join(" ");
+    if (locale === "fa") expect(signage).not.toMatch(/[A-Za-z]/);
+    else expect(signage).not.toMatch(/[؀-ۿ]/);
+    // The drawing is decorative; meaning lives in the links.
+    expect(document.querySelector(".tehran-scene__art")?.getAttribute("aria-hidden")).toBe("true");
+    expect(screen.getByRole("link", { name: copy.start }).getAttribute("href")).toBe(`/${locale}/auth`);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
-  it.each(["fa", "en"] as const)("keeps phone-first auth and the email fallback for %s", (locale) => {
-    renderWithIntl(<AuthPage />, locale);
-    const buttons = screen.getAllByRole("button");
-    fireEvent.click(buttons[0]!);
-    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=phone`);
-    fireEvent.click(buttons[1]!);
-    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
+
+  it("raises the building whose sign is hovered or focused", async () => {
+    renderWithIntl(await RootPage({ params: Promise.resolve({ locale: "fa" }) }), "fa");
+    const scene = document.querySelector(".tehran-scene")!;
+    const shop = screen.getByRole("link", { name: new RegExp(landingCopy.fa.destinations.shop[0]) });
+    fireEvent.focus(shop);
+    expect(scene.getAttribute("data-active")).toBe("shop");
+    fireEvent.blur(shop);
+    expect(scene.getAttribute("data-active")).toBeNull();
+    fireEvent.mouseEnter(screen.getByRole("link", { name: new RegExp(landingCopy.fa.destinations.travel[0]) }));
+    expect(scene.getAttribute("data-active")).toBe("travel");
   });
+
+  it("switches language without touching anything else", async () => {
+    renderWithIntl(await RootPage({ params: Promise.resolve({ locale: "fa" }) }), "fa");
+    const toEnglish = screen.getByRole("link", { name: landingCopy.fa.languageLabel });
+    expect(toEnglish.getAttribute("href")).toBe("/en");
+    expect(toEnglish.getAttribute("lang")).toBe("en");
+  });
+
   it("rejects unsupported locales", async () => {
     await expect(RootPage({ params: Promise.resolve({ locale: "xx" }) })).rejects.toThrow("NOT_FOUND");
-  });
-});
-describe("Camera and intent boundaries", () => {
-  it("bounds progress and wheel deltas", () => {
-    expect(cameraAt(-10)).toEqual(cameraAt(0));
-    expect(cameraAt(10)).toEqual(cameraAt(1));
-    expect(nearestStop(100)).toBe(cameraStops.length - 1);
-    expect(wheelProgress(99999, 0)).toBeCloseTo(0.06);
-    expect(wheelProgress(-99999, 2)).toBeCloseTo(-0.06);
-    expect(nearestStop(wheelProgress(100, 0))).toBe(1);
-  });
-  it("consumes a local destination once and rejects prototype or external routes", () => {
-    rememberLandingIntent("vet");
-    expect(consumeLandingIntent("fa")).toBe("/fa/vet/find?landingPet=cookie&landingAction=vet");
-    expect(consumeLandingIntent("fa")).toBeNull();
-    for (const action of ["toString", "__proto__", "https://evil.example"]) {
-      rememberLandingIntent(action);
-      expect(consumeLandingIntent("fa")).toBeNull();
-    }
-  });
-  it("rejects stale or malformed saved intent", () => {
-    sessionStorage.setItem(
-      "petlife-landing-intent",
-      JSON.stringify({ action: "shop", pet: "cookie", at: Date.now() - 1800001 }),
-    );
-    expect(consumeLandingIntent("en")).toBeNull();
-    sessionStorage.setItem("petlife-landing-intent", "null");
-    expect(consumeLandingIntent("en")).toBeNull();
   });
 });
