@@ -20,11 +20,11 @@ export function AccountOverviewView() {
     <AccountPageHeader eyebrow={locale === "fa" ? "مرکز حساب" : "ACCOUNT CENTER"} title={locale === "fa" ? `سلام ${data.user.displayName}` : `Hello, ${data.user.displayName}`} description={locale === "fa" ? "هویت، امنیت و دسترسی‌های خانواده را یک‌جا و شفاف مدیریت کنید." : "Manage identity, security and household access in one clear place."} />
     <section className="account-identity-band">
       <Avatar name={data.user.displayName} src={data.user.avatarUrl} size="lg" />
-      <div><h2>{data.user.displayName}</h2><p>{data.user.email ?? data.user.phone ?? (locale === "fa" ? "راه ارتباطی ثبت نشده" : "No contact method")}</p></div>
+      <div><h2>{data.user.displayName}</h2><p>{data.user.email || data.user.phone ? <span dir="ltr">{data.user.email ?? data.user.phone}</span> : locale === "fa" ? "راه ارتباطی ثبت نشده" : "No contact method"}</p></div>
       <Button variant="secondary" onClick={() => router.push(`/${locale}/profile/personal`)}>{locale === "fa" ? "ویرایش اطلاعات" : "Edit profile"}</Button>
     </section>
     {(data.attention.pendingInvitations > 0 || data.security.activeSessions > 1) && <ContextSurface className="account-attention">
-      <div><p className="text-label font-semibold">{locale === "fa" ? "نیازمند توجه" : "Needs attention"}</p><p className="text-metadata text-text-secondary">{locale === "fa" ? `${data.attention.pendingInvitations} دعوت باز و ${data.security.activeSessions} نشست فعال دارید.` : `${data.attention.pendingInvitations} pending invites and ${data.security.activeSessions} active sessions.`}</p></div>
+      <div><p className="text-label font-semibold">{locale === "fa" ? "نیازمند توجه" : "Needs attention"}</p><p className="text-metadata text-text-secondary">{locale === "fa" ? `${formatCount(data.attention.pendingInvitations, locale)} دعوت باز و ${formatCount(data.security.activeSessions, locale)} نشست فعال دارید.` : `${data.attention.pendingInvitations} pending invites and ${data.security.activeSessions} active sessions.`}</p></div>
       <Button size="sm" onClick={() => router.push(`/${locale}/profile/security`)}>{locale === "fa" ? "بررسی امنیت" : "Review security"}</Button>
     </ContextSurface>}
     <section className="account-summary-list">

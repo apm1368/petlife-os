@@ -139,7 +139,7 @@ export function MyBookingsView() {
               <Link href={`/${locale}/bookings/${b.id}`} className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div>
                   <p className="font-bold text-text-primary">{b.serviceName ?? b.service?.name ?? categoryLabel(b.category, fa)}{b.variantName ? ` — ${b.variantName}` : ""}</p>
-                  <p className="text-sm text-text-secondary">{b.provider?.name}{b.bookingNumber ? ` · ${b.bookingNumber}` : ""}</p>
+                  <p className="text-sm text-text-secondary">{b.provider?.name}{b.bookingNumber ? <> · <span dir="ltr">{b.bookingNumber}</span></> : null}</p>
                   <p className="text-sm text-text-secondary">{formatDateTimeRange(b.startAt, b.endAt, locale, b.timezone)}</p>
                 </div>
                 <StatusLabel tone={bookingStatusTone(b.bookingStatus)}>{bookingStatusLabel(b.bookingStatus, fa)}</StatusLabel>

@@ -7,7 +7,7 @@ import { Button, Input } from "@petlife/ui";
 import { PetSpecies } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { usePetStore } from "@/stores/pet-store";
-import { DateReading } from "@/lib/date/date-reading";
+import { BirthDateField } from "@/features/shared/date-picker/BirthDateField";
 
 export function AddPetView() {
   const router = useRouter();
@@ -51,10 +51,7 @@ export function AddPetView() {
         </div>
       </fieldset>
       <Input label={fa ? "نام" : "Name"} value={name} onChange={(e) => setName(e.target.value)} />
-      <div>
-        <Input label={fa ? "تاریخ تولد" : "Birth date"} type="date" max={new Date().toISOString().slice(0, 10)} value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
-        <DateReading value={birthDate} />
-      </div>
+      <BirthDateField label={fa ? "تاریخ تولد" : "Birth date"} value={birthDate} onChange={setBirthDate} />
       {error ? <p role="alert" className="text-metadata text-state-urgent">{error}</p> : null}
       <div><Button variant="primary" isLoading={isSubmitting} disabled={!name.trim() || !birthDate} onClick={submit}>{fa ? "ذخیره" : "Save"}</Button></div>
     </div>

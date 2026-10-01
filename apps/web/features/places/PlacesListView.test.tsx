@@ -51,7 +51,7 @@ describe("PlacesListView", () => {
     renderWithIntl(<PlacesListView />);
 
     await waitFor(() => expect(screen.getByText("Central Park")).toBeTruthy());
-    expect(screen.getByText("Tehran, IR")).toBeTruthy();
+    expect(screen.getByText("Tehran, Iran")).toBeTruthy();
   });
 
   it("flags an unverified place rather than presenting it as confirmed", async () => {

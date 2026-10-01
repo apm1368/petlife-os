@@ -49,7 +49,7 @@ export function MemberProfileView() {
     <header className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex items-center gap-4"><Avatar src={user.avatarUrl} name={user.displayName} size="lg" /><div>
         <p className="text-metadata text-text-secondary">{t("eyebrow")}</p><h1 className="text-page-title text-text-primary">{user.displayName}</h1>
-        <p className="text-body text-text-secondary">{user.email ?? user.phone ?? t("contactMissing")}</p>
+        <p className="text-body text-text-secondary">{user.email || user.phone ? <span dir="ltr">{user.email ?? user.phone}</span> : t("contactMissing")}</p>
       </div></div>
       <Button variant="secondary" onClick={() => { setDisplayName(user.displayName); setEditing(true); setSaved(false); }}>{locale === "fa" ? "ویرایش پروفایل" : "Edit profile"}</Button>
     </header>

@@ -13,6 +13,7 @@ import type {
   RehabPlanDto,
 } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
+import { localizeDigits } from "@/lib/date/jalali";
 import { recordStatusLabel } from "@/features/health/record-status-labels";
 
 type RecordKind = "lab" | "imaging" | "referral" | "dental" | "nutrition" | "rehab";
@@ -87,8 +88,9 @@ function presentRecord(kind: RecordKind, record: RecordValue, locale: "fa" | "en
   const fa = locale === "fa";
   if (kind === "lab") {
     const item = record as LabResultDto;
-    const range = item.referenceRangeLow !== null || item.referenceRangeHigh !== null ? String(item.referenceRangeLow ?? "—") + " – " + String(item.referenceRangeHigh ?? "—") : unknown;
-    return { eyebrow: fa ? "نتیجه آزمایش" : "Lab result", title: item.testName, subtitle: item.testCode, date: item.resultDate ?? item.sampleDate ?? item.createdAt, sourceLabel: source(item.sourceType, fa), provider: item.source.providerOrganizationName, status: recordStatusLabel(item.flag ?? item.status, fa), statusTone: item.flag === "ABNORMAL" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "نتیجه" : "Result", value: item.value ? item.value + (item.unit ? " " + item.unit : "") : item.qualitativeResult }, { label: fa ? "بازه مرجع ثبت‌شده" : "Recorded reference range", value: range }, { label: fa ? "یادداشت منبع" : "Source notes", value: item.notes }]) };
+    const digits = (v: string | number) => localizeDigits(v, fa ? "fa" : "en");
+    const range = item.referenceRangeLow !== null || item.referenceRangeHigh !== null ? digits(item.referenceRangeLow ?? "—") + " – " + digits(item.referenceRangeHigh ?? "—") : unknown;
+    return { eyebrow: fa ? "نتیجه آزمایش" : "Lab result", title: item.testName, subtitle: item.testCode, date: item.resultDate ?? item.sampleDate ?? item.createdAt, sourceLabel: source(item.sourceType, fa), provider: item.source.providerOrganizationName, status: recordStatusLabel(item.flag ?? item.status, fa), statusTone: item.flag === "ABNORMAL" ? "attention" as const : "neutral" as const, visitId: item.clinicalVisitId, fields: compact([{ label: fa ? "نتیجه" : "Result", value: item.value ? digits(item.value) + (item.unit ? " " + item.unit : "") : item.qualitativeResult }, { label: fa ? "بازه مرجع ثبت‌شده" : "Recorded reference range", value: range }, { label: fa ? "یادداشت منبع" : "Source notes", value: item.notes }]) };
   }
   if (kind === "imaging") {
     const item = record as ImagingStudyDto;

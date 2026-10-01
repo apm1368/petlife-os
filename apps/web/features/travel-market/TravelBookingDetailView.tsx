@@ -44,9 +44,9 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
   }, [bookingId]);
   useEffect(() => void fetchBooking(), [fetchBooking]);
 
-  if (load === "loading") return <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6"><Skeleton className="h-28" /><Skeleton className="h-64" /></div>;
-  if (load === "notFound") return <div className="mx-auto max-w-3xl px-4 py-10"><EmptyState title={fa ? "این رزرو پیدا نشد" : "Booking not found"} actionLabel={fa ? "سفرهای من" : "My trips"} onAction={() => router.push(`/${lang}/travel/trips`)} /></div>;
-  if (load === "error" || !b) return <div className="mx-auto max-w-3xl px-4 py-10"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchBooking()} /></div>;
+  if (load === "loading") return <div className="flex flex-col gap-4"><Skeleton className="h-28" /><Skeleton className="h-64" /></div>;
+  if (load === "notFound") return <div className="mx-auto max-w-3xl py-6"><EmptyState title={fa ? "این رزرو پیدا نشد" : "Booking not found"} actionLabel={fa ? "سفرهای من" : "My trips"} onAction={() => router.push(`/${lang}/travel/trips`)} /></div>;
+  if (load === "error" || !b) return <div className="mx-auto max-w-3xl py-6"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchBooking()} /></div>;
 
   const run = async (fn: () => Promise<TravelBookingDto | unknown>, ok: string, fail: (e: unknown) => string) => {
     setBusy(true);
@@ -69,7 +69,7 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
   const canShare = ["AWAITING_PROVIDER", "AWAITING_PAYMENT", "CONFIRMED", "IN_PROGRESS"].includes(b.status);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6">
+    <div className="flex w-full flex-col gap-6">
       <nav className="text-metadata text-text-secondary" aria-label={fa ? "مسیر" : "Breadcrumb"}><Link href={`/${lang}/travel/trips`} className="hover:underline">{fa ? "سفرهای من" : "My trips"}</Link></nav>
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -82,36 +82,9 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
       </header>
       {notice ? <p role="status" className="rounded-md bg-state-success/10 p-3 text-sm text-state-success">{notice}</p> : null}
 
-      {b.status === "HELD" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse" href={`/${lang}/travel/book/${b.id}`}>{fa ? "ادامهٔ رزرو" : "Continue booking"}</Link> : null}
-      {b.status === "AWAITING_PAYMENT" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse" href={`/${lang}/travel/book/${b.id}`}>{fa ? `پرداخت ${money(b.payNowAmountIrr, lang)}` : `Pay ${money(b.payNowAmountIrr, lang)}`}</Link> : null}
-      {b.status === "AWAITING_PROVIDER" && b.requestExpiresAt ? <p className="rounded-md bg-surface-subtle p-3 text-sm">{fa ? `اقامتگاه تا ${formatDay(b.requestExpiresAt.slice(0, 10), lang)} فرصت پاسخ دارد؛ در غیر این صورت درخواست منقضی می‌شود.` : `The property has until ${formatDay(b.requestExpiresAt.slice(0, 10), lang)} to answer; otherwise the request expires.`}</p> : null}
-      {b.providerNote ? <p className="rounded-md bg-surface-subtle p-3 text-sm"><span className="font-bold">{fa ? "پیام اقامتگاه: " : "From the property: "}</span>{b.providerNote}</p> : null}
-
-      <div className="flex flex-wrap gap-2">
-        {b.canModify ? <Button variant="secondary" onClick={() => { setError(null); setDialog("modify"); }}>{fa ? "تغییر تاریخ" : "Change dates"}</Button> : null}
-        {b.canCancel ? <Button variant="secondary" onClick={() => { setError(null); setDialog("cancel"); }}>{fa ? "لغو رزرو" : "Cancel booking"}</Button> : null}
-        {b.canReview ? <Button onClick={() => { setError(null); setDialog("review"); }}>{fa ? "ثبت نظر" : "Write a review"}</Button> : null}
-        {canShare ? <Button variant="secondary" onClick={() => { setError(null); setDialog("share"); }}>{fa ? "اشتراک مدرک با اقامتگاه" : "Share a document"}</Button> : null}
-        {!b.tripId && !["CANCELLED", "EXPIRED", "REJECTED", "MODIFIED"].includes(b.status) ? <Button variant="ghost" onClick={() => { setError(null); setDialog("trip"); }}>{fa ? "افزودن به سفر" : "Add to a trip"}</Button> : null}
-        {b.tripId ? <Link className="inline-flex min-h-11 items-center rounded-full border border-border-subtle px-4 text-sm" href={`/${lang}/travel/trips/${b.tripId}`}>{fa ? "مشاهدهٔ سفر" : "View trip"}</Link> : null}
-        <Link className="inline-flex min-h-11 items-center rounded-full border border-border-subtle px-4 text-sm" href={`/${lang}/support/new?relatedEntityType=TRAVEL_BOOKING&relatedEntityId=${b.id}&category=BOOKING`}>{fa ? "درخواست پشتیبانی" : "Get help"}</Link>
-      </div>
-
-      <section aria-labelledby="terms" className="flex flex-col gap-2">
-        <h2 id="terms" className="text-section-title">{fa ? "مبلغ و شرایط" : "Price and terms"}</h2>
-        <dl className="flex flex-col gap-1.5 rounded-md bg-surface-subtle p-3 text-sm">
-          <div className="flex justify-between font-bold"><dt>{fa ? "جمع کل" : "Total"}</dt><dd className="tabular-nums">{money(b.totalAmountIrr, lang)}</dd></div>
-          {bd?.petFeeIrr ? <div className="flex justify-between"><dt>{fa ? "شامل هزینهٔ حیوان" : "Incl. pet fee"}</dt><dd className="tabular-nums">{money(bd.petFeeIrr, lang)}</dd></div> : null}
-          <div className="flex justify-between"><dt>{fa ? "پرداخت آنلاین" : "Paid / due online"}</dt><dd className="tabular-nums">{money(b.payNowAmountIrr, lang)}</dd></div>
-          {bd?.payLaterIrr ? <div className="flex justify-between"><dt>{fa ? "پرداخت در محل" : "At the property"}</dt><dd className="tabular-nums">{money(bd.payLaterIrr, lang)}</dd></div> : null}
-          {b.refundAmountIrr ? <div className="flex justify-between text-state-success"><dt>{fa ? "بازپرداخت" : "Refunded"}</dt><dd className="tabular-nums">{money(b.refundAmountIrr, lang)}</dd></div> : null}
-        </dl>
-        <p className="text-sm"><span className="font-bold">{fa ? "لغو: " : "Cancellation: "}</span>{b.ratePlan ? cancellationSummary(b.ratePlan, lang) : b.cancellationPolicySnapshot ?? (fa ? "اعلام نشده" : "Not specified")}</p>
-        <p className="text-sm"><span className="font-bold">{fa ? "پرداخت: " : "Payment: "}</span>{paymentTimingSummary(b.ratePlan, lang)}</p>
-        {b.cancelReason ? <p className="text-sm text-text-secondary">{fa ? "علت لغو: " : "Cancellation reason: "}{b.cancelReason}</p> : null}
-      </section>
-
-      <section aria-labelledby="pets" className="flex flex-col gap-2">
+      <div className="split-layout">
+        <div className="split-main">
+      <section aria-labelledby="pets" className="split-section flex flex-col gap-2">
         <h2 id="pets" className="text-section-title">{fa ? "حیوانات و قوانین (همان زمان رزرو)" : "Pets and rules (as at booking)"}</h2>
         <p className="text-sm">{b.pets.map((p) => p.petName).join(fa ? "، " : ", ") || (fa ? "بدون حیوان" : "No pets")}</p>
         <details className="text-sm">
@@ -120,10 +93,10 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
         </details>
       </section>
 
-      <section aria-labelledby="docs" className="flex flex-col gap-2">
+      <section aria-labelledby="docs" className="split-section flex flex-col gap-2">
         <h2 id="docs" className="text-section-title">{fa ? "مدارک به‌اشتراک‌گذاشته" : "Shared documents"}</h2>
         {b.documentShares.length === 0 ? <p className="text-sm text-text-secondary">{fa ? "مدرکی با اقامتگاه به اشتراک گذاشته نشده است." : "No documents shared with the property."}</p> : (
-          <ul className="flex flex-col gap-2">
+          <ul className="split-section flex flex-col gap-2">
             {b.documentShares.map((s) => (
               <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border-subtle p-3 text-sm">
                 <span>{s.title} <span className="text-text-secondary">· {s.isActive ? (fa ? `تا ${formatDay(s.expiresAt.slice(0, 10), lang)}` : `until ${formatDay(s.expiresAt.slice(0, 10), lang)}`) : s.revokedAt ? (fa ? "لغو شده" : "revoked") : fa ? "منقضی" : "expired"}</span></span>
@@ -135,7 +108,7 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
         {activeShares.length ? <p className="text-metadata text-text-secondary">{fa ? "اقامتگاه فقط همین مدارک را، از طریق پیوند امضاشدهٔ کوتاه‌مدت، می‌بیند." : "The property sees only these documents, through short-lived signed links."}</p> : null}
       </section>
 
-      <section aria-labelledby="timeline" className="flex flex-col gap-2">
+      <section aria-labelledby="timeline" className="split-section flex flex-col gap-2">
         <h2 id="timeline" className="text-section-title">{fa ? "تاریخچه" : "Timeline"}</h2>
         <ol className="flex flex-col gap-2 border-s border-border-subtle ps-4">
           {b.timeline.map((e, i) => (
@@ -147,6 +120,38 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
           ))}
         </ol>
       </section>
+        </div>
+        <aside className="split-aside">
+      {b.status === "HELD" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse" href={`/${lang}/travel/book/${b.id}`}>{fa ? "ادامهٔ رزرو" : "Continue booking"}</Link> : null}
+      {b.status === "AWAITING_PAYMENT" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse" href={`/${lang}/travel/book/${b.id}`}>{fa ? `پرداخت ${money(b.payNowAmountIrr, lang)}` : `Pay ${money(b.payNowAmountIrr, lang)}`}</Link> : null}
+      {b.status === "AWAITING_PROVIDER" && b.requestExpiresAt ? <p className="rounded-md bg-surface-subtle p-3 text-sm">{fa ? `اقامتگاه تا ${formatDay(b.requestExpiresAt.slice(0, 10), lang)} فرصت پاسخ دارد؛ در غیر این صورت درخواست منقضی می‌شود.` : `The property has until ${formatDay(b.requestExpiresAt.slice(0, 10), lang)} to answer; otherwise the request expires.`}</p> : null}
+      {b.providerNote ? <p className="rounded-md bg-surface-subtle p-3 text-sm"><span className="font-bold">{fa ? "پیام اقامتگاه: " : "From the property: "}</span>{b.providerNote}</p> : null}
+
+      <section aria-labelledby="terms" className="split-panel flex flex-col gap-2">
+        <h2 id="terms" className="text-section-title">{fa ? "مبلغ و شرایط" : "Price and terms"}</h2>
+        <dl className="flex flex-col gap-1.5 text-sm">
+          <div className="flex justify-between font-bold"><dt>{fa ? "جمع کل" : "Total"}</dt><dd className="tabular-nums">{money(b.totalAmountIrr, lang)}</dd></div>
+          {bd?.petFeeIrr ? <div className="flex justify-between"><dt>{fa ? "شامل هزینهٔ حیوان" : "Incl. pet fee"}</dt><dd className="tabular-nums">{money(bd.petFeeIrr, lang)}</dd></div> : null}
+          <div className="flex justify-between"><dt>{fa ? "پرداخت آنلاین" : "Paid / due online"}</dt><dd className="tabular-nums">{money(b.payNowAmountIrr, lang)}</dd></div>
+          {bd?.payLaterIrr ? <div className="flex justify-between"><dt>{fa ? "پرداخت در محل" : "At the property"}</dt><dd className="tabular-nums">{money(bd.payLaterIrr, lang)}</dd></div> : null}
+          {b.refundAmountIrr ? <div className="flex justify-between text-state-success"><dt>{fa ? "بازپرداخت" : "Refunded"}</dt><dd className="tabular-nums">{money(b.refundAmountIrr, lang)}</dd></div> : null}
+        </dl>
+        <p className="text-sm"><span className="font-bold">{fa ? "لغو: " : "Cancellation: "}</span>{b.ratePlan ? cancellationSummary(b.ratePlan, lang) : b.cancellationPolicySnapshot ?? (fa ? "اعلام نشده" : "Not specified")}</p>
+        <p className="text-sm"><span className="font-bold">{fa ? "پرداخت: " : "Payment: "}</span>{paymentTimingSummary(b.ratePlan, lang)}</p>
+        {b.cancelReason ? <p className="text-sm text-text-secondary">{fa ? "علت لغو: " : "Cancellation reason: "}{b.cancelReason}</p> : null}
+      </section>
+
+      <div className="flex flex-wrap gap-2">
+        {b.canModify ? <Button variant="secondary" onClick={() => { setError(null); setDialog("modify"); }}>{fa ? "تغییر تاریخ" : "Change dates"}</Button> : null}
+        {b.canCancel ? <Button variant="secondary" onClick={() => { setError(null); setDialog("cancel"); }}>{fa ? "لغو رزرو" : "Cancel booking"}</Button> : null}
+        {b.canReview ? <Button onClick={() => { setError(null); setDialog("review"); }}>{fa ? "ثبت نظر" : "Write a review"}</Button> : null}
+        {canShare ? <Button variant="secondary" onClick={() => { setError(null); setDialog("share"); }}>{fa ? "اشتراک مدرک با اقامتگاه" : "Share a document"}</Button> : null}
+        {!b.tripId && !["CANCELLED", "EXPIRED", "REJECTED", "MODIFIED"].includes(b.status) ? <Button variant="ghost" onClick={() => { setError(null); setDialog("trip"); }}>{fa ? "افزودن به سفر" : "Add to a trip"}</Button> : null}
+        {b.tripId ? <Link className="inline-flex min-h-11 items-center rounded-full border border-border-subtle px-4 text-sm" href={`/${lang}/travel/trips/${b.tripId}`}>{fa ? "مشاهدهٔ سفر" : "View trip"}</Link> : null}
+        <Link className="inline-flex min-h-11 items-center rounded-full border border-border-subtle px-4 text-sm" href={`/${lang}/support/new?relatedEntityType=TRAVEL_BOOKING&relatedEntityId=${b.id}&category=BOOKING`}>{fa ? "درخواست پشتیبانی" : "Get help"}</Link>
+      </div>
+        </aside>
+      </div>
 
       <Dialog open={dialog === "cancel"} onClose={() => setDialog(null)} title={fa ? "لغو رزرو" : "Cancel booking"}>
         <CancelForm booking={b} busy={busy} error={error} onSubmit={(reason) => void run(() => travelMarketService.cancel(b.id, reason), fa ? "رزرو لغو شد." : "The booking was cancelled.", () => (fa ? "لغو انجام نشد. ممکن است وضعیت رزرو تغییر کرده باشد." : "Could not cancel; the booking may have changed."))} />

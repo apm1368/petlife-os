@@ -9,6 +9,7 @@ import { memoriesService } from "@/services/memories.service";
 import { parseTags } from "./EditMemoryView";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 const MEMORY_TYPES: PetMemoryType[] = [
   PetMemoryType.PHOTO,
@@ -81,10 +82,7 @@ export function CreateMemoryView({ petId }: { petId: string }) {
         <DateField label={t("newMemory.occurredAtLabel")} value={occurredAt} onChange={setOccurredAt} max={new Date().toISOString().slice(0, 10)} />
         <Input label={t("newMemory.locationLabel")} hint={tCommon("optional")} value={location} onChange={(e) => setLocation(e.target.value)} />
         <Input label={t("newMemory.tagsLabel")} hint={t("newMemory.tagsHint")} value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
-        <div className="flex flex-col gap-1.5">
-          <span className="text-metadata text-text-secondary">{t("newMemory.mediaLabel")}</span>
-          <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </div>
+        <FilePicker ref={fileInputRef} label={t("newMemory.mediaLabel")} multiple accept="image/jpeg,image/png,image/webp" />
         {error ? <p className="text-body text-state-urgent">{error}</p> : null}
         <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit} disabled={!occurredAt}>
           {t("newMemory.submit")}

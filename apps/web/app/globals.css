@@ -583,3 +583,60 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 .flow-summary__total dt{color:var(--text-primary);font-weight:700}
 .flow-summary__total dd{font-weight:800}
 .flow-summary dd.is-note{color:var(--text-secondary);font-weight:500}
+
+/* Neutral descriptor tag (a category, a type) — not a status, so no tone and no check mark. */
+.tag{display:inline-flex;flex-shrink:0;align-items:center;padding:3px 10px;border-radius:999px;background:var(--surface-subtle);color:var(--text-secondary);font-size:.78rem;font-weight:600;white-space:nowrap}
+/* Filters sit in a quiet band under the page head, not in a card. */
+.filter-band{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px}
+.filter-band>*{min-width:0}
+.filter-band>*:not(button){flex:1 1 200px}
+/* Native choice controls take the brand colour instead of the browser blue. */
+input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
+
+/* File picker: the native input stays (focusable, sr-only); the button and names speak the UI language. */
+.file-picker{display:flex;flex-direction:column;gap:6px}
+.file-picker__label{color:var(--text-secondary);font-size:.82rem}
+.file-picker__row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.file-picker__button{cursor:pointer;color:var(--text-primary)}
+.file-picker input:focus-visible+.file-picker__button{outline:2px solid var(--focus-ring);outline-offset:2px}
+.file-picker__names{min-width:0;color:var(--text-secondary);font-size:.85rem;overflow-wrap:anywhere}
+
+/* Travel home: a brand band holds the promise and the search; destinations and the "how it works"
+   trio are divided bands, not cards. */
+.travel-hero{display:flex;flex-direction:column;gap:22px;padding:clamp(24px,4vw,44px);border-radius:var(--radius-lg,16px);background:linear-gradient(135deg,#0f3b27,#17633f);color:#fff}
+.travel-hero__head{display:flex;flex-direction:column;gap:10px;max-width:760px}
+.travel-hero__eyebrow{margin:0;color:#bfe3cf;font-size:.82rem;font-weight:700}
+.travel-hero h1{margin:0;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;line-height:1.3}
+.travel-hero__head>p:last-child{margin:0;color:rgba(255,255,255,.86);font-size:.95rem;line-height:1.9}
+.travel-hero form{color:var(--text-primary);border:0;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.dest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));column-gap:28px;margin:0;padding:0;list-style:none}
+.dest-grid__item{display:flex;flex-direction:column;gap:2px;padding:14px 2px;border-top:1px solid var(--border-subtle);transition:color var(--dur-1)}
+.dest-grid__item:hover span:first-child{color:var(--brand-natural)}
+.dest-grid__item:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.feature-trio{display:grid;gap:24px;padding:24px 0;border-block:1px solid var(--border-subtle)}
+.feature-trio__item{display:flex;flex-direction:column;gap:8px}
+@media(min-width:768px){.feature-trio{grid-template-columns:repeat(3,minmax(0,1fr));gap:0}.feature-trio__item{padding-inline:24px}.feature-trio__item:first-of-type{padding-inline-start:0}.feature-trio__item+.feature-trio__item{border-inline-start:1px solid var(--border-subtle)}}
+.attention-banner--static{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.attention-banner--static:hover{background:color-mix(in srgb,var(--state-attention) 7%,var(--surface-elevated))}
+/* Requirement rows on a trip: divided, each with its own controls. */
+.req-row{padding:18px 0;border-top:1px solid var(--border-subtle)}
+.req-row:last-child{border-bottom:1px solid var(--border-subtle)}
+
+/* Plan rows (insurance): the plan and what it covers on the start side, trust + compare + open on the end. */
+.plan-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:20px 2px;border-top:1px solid var(--border-subtle)}
+.plan-row:last-child{border-bottom:1px solid var(--border-subtle)}
+.plan-row__main{display:flex;min-width:0;flex:1 1 420px;flex-direction:column;gap:4px}
+.plan-row__title{color:var(--text-primary);font-size:1.02rem;font-weight:700}
+.plan-row__title:hover{color:var(--brand-natural)}
+.plan-row__title:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.plan-row__side{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.fact-line{margin:0;padding:10px 0;border-top:1px solid var(--border-subtle);color:var(--text-primary);font-size:.9rem}
+.split-panel>.fact-line:first-child{border-top:0;padding-top:0}
+.split-panel>.fact-line:last-child{padding-bottom:0}
+.row-list__item--stack{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px;padding:14px 4px}
+
+/* Birth date: three selects under one legend. */
+.birth-date{margin:0;padding:0;border:0;min-width:0}
+.birth-date legend{margin-bottom:6px;color:var(--text-primary);font-size:.88rem;font-weight:600}
+.birth-date__row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.3fr) minmax(0,1fr);gap:10px}
+.birth-date__row label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}

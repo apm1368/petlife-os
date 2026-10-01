@@ -7,6 +7,7 @@ import { Button, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petli
 import type { TravelBookingDto, TripListItemDto } from "@petlife/types";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
+import { countryName } from "@/lib/number/format-number";
 import { bookingStatusLabel, bookingStatusTone, stayDates } from "./labels";
 
 const PHASE: Record<TripListItemDto["phase"], [string, string]> = {
@@ -41,7 +42,7 @@ export function MyTripsView() {
   useEffect(() => void load(), [load]);
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-6">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{fa ? "سفرهای من" : "My trips"}</h1>
         <Link href={`/${lang}/travel`} className="inline-flex min-h-11 items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse">{fa ? "جستجوی اقامت" : "Find a stay"}</Link>
@@ -60,12 +61,12 @@ export function MyTripsView() {
           {trips.length ? (
             <section aria-labelledby="trips-h" className="flex flex-col gap-3">
               <h2 id="trips-h" className="text-section-title">{fa ? "سفرها" : "Trips"}</h2>
-              <ul className="flex flex-col gap-3">
+              <ul className="row-list">
                 {trips.map((t) => (
                   <li key={t.id}>
-                    <Link href={`/${lang}/travel/trips/${t.id}`} className="flex flex-col gap-1 rounded-lg border border-border-subtle bg-surface-elevated p-4 hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+                    <Link href={`/${lang}/travel/trips/${t.id}`} className="row-list__item row-list__item--stack">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-bold text-text-primary">{t.destinationCity ?? t.destinationCountry} · {t.petName}</span>
+                        <span className="font-bold text-text-primary">{t.destinationCity ?? countryName(t.destinationCountry, lang)} · {t.petName}</span>
                         <StatusLabel tone={t.phase === "UPCOMING" || t.phase === "IN_PROGRESS" ? "success" : t.phase === "PLANNING" ? "attention" : "neutral"}>{PHASE[t.phase][fa ? 0 : 1]}</StatusLabel>
                       </div>
                       <span className="text-sm text-text-secondary">{formatDay(t.departAt.slice(0, 10), lang)}{t.returnAt ? ` — ${formatDay(t.returnAt.slice(0, 10), lang)}` : ""}</span>
@@ -79,10 +80,10 @@ export function MyTripsView() {
           {stays.length ? (
             <section aria-labelledby="stays-h" className="flex flex-col gap-3">
               <h2 id="stays-h" className="text-section-title">{fa ? "اقامت‌های خارج از سفر" : "Stays not in a trip"}</h2>
-              <ul className="flex flex-col gap-3">
+              <ul className="row-list">
                 {stays.map((b) => (
                   <li key={b.id}>
-                    <Link href={`/${lang}/travel/bookings/${b.id}`} className="flex flex-col gap-1 rounded-lg border border-border-subtle bg-surface-elevated p-4 hover:border-border-strong">
+                    <Link href={`/${lang}/travel/bookings/${b.id}`} className="row-list__item row-list__item--stack">
                       <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-bold">{b.listingTitle}</span><StatusLabel tone={bookingStatusTone(b.status)}>{bookingStatusLabel(b.status, lang)}</StatusLabel></div>
                       <span className="text-sm text-text-secondary">{stayDates(b, lang)}</span>
                     </Link>

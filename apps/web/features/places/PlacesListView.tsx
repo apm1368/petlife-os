@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, EmptyState, Input, Select, Skeleton } from "@petlife/ui";
 import { PetFriendlyPlaceCategory } from "@petlife/types";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { placeLocation, formatDistanceKm } from "@/features/places/place-format";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.PARK,
@@ -24,6 +25,7 @@ const CATEGORIES: PetFriendlyPlaceCategory[] = [
 
 /** Public directory — no guard by design; works fully for anonymous visitors (spec: "public browsing" for pet-friendly places must work without auth). */
 export function PlacesListView() {
+  const locale = useLocale() as "fa" | "en";
   const t = useTranslations("places");
   const tCommon = useTranslations("common");
 
@@ -72,14 +74,16 @@ export function PlacesListView() {
   if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
-      <div>
-        <h1 className="text-page-title text-text-primary">{t("list.title")}</h1>
-        <p className="text-body text-text-secondary">{t("list.subtitle")}</p>
-      </div>
+      <header className="section-head">
+        <div>
+          <h1>{t("list.title")}</h1>
+          <p>{t("list.subtitle")}</p>
+        </div>
+      </header>
 
-      <ContextSurface className="flex flex-wrap items-end gap-3">
+      <div className="filter-band">
         <Input label={t("list.filtersCity")} value={city} onChange={(e) => setCity(e.target.value)} />
         <Select
           label={t("list.filtersCategory")}
@@ -93,30 +97,30 @@ export function PlacesListView() {
         <Button variant="primary" isLoading={isSearchingNearby} onClick={searchNearMe}>
           {t("list.nearMe")}
         </Button>
-      </ContextSurface>
+      </div>
 
       {!places ? (
         <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />
       ) : places.length === 0 ? (
         <EmptyState title={t("list.empty")} />
       ) : (
-        <div className="flex flex-col gap-3">
+        <ul className="row-list">
           {places.map((place) => (
-            <Link key={place.id} href={`/places/${place.id}`}>
-              <ContextSurface className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-body text-text-primary">{place.name}</span>
-                  <StatusLabel tone={place.status === "VERIFIED" ? "success" : "neutral"}>{t(`category.${place.category}`)}</StatusLabel>
-                </div>
-                <p className="text-metadata text-text-secondary">
-                  {place.city}, {place.country}
-                </p>
-                {place.status !== "VERIFIED" ? <p className="text-metadata text-state-urgent">{t("detail.unverified")}</p> : null}
-                {place.distanceMeters !== null ? <p className="text-metadata text-text-secondary">{t("detail.distance", { distance: (place.distanceMeters / 1000).toFixed(1) })}</p> : null}
-              </ContextSurface>
-            </Link>
+            <li key={place.id}>
+              <Link href={`/${locale}/places/${place.id}`} className="row-list__item">
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="font-semibold">{place.name}</span>
+                  <span className="text-metadata text-text-secondary">
+                    {placeLocation(place, locale)}
+                    {place.distanceMeters !== null ? ` · ${t("detail.distance", { distance: formatDistanceKm(place.distanceMeters, locale) })}` : ""}
+                  </span>
+                  {place.status !== "VERIFIED" ? <span className="text-metadata text-state-attention">{t("detail.unverified")}</span> : null}
+                </span>
+                <span className="tag">{t(`category.${place.category}`)}</span>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );

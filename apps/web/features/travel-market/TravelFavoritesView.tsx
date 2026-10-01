@@ -26,7 +26,7 @@ export function TravelFavoritesView() {
     }
   };
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-6">
+    <div className="flex w-full flex-col gap-6">
       <h1 className="text-page-title text-text-primary">{fa ? "اقامتگاه‌های ذخیره‌شده" : "Saved stays"}</h1>
       {error ? <ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={load} /> : items === null ? <Skeleton className="h-56" /> : items.length === 0 ? (
         <EmptyState title={fa ? "هنوز اقامتگاهی ذخیره نکرده‌اید" : "No saved stays yet"} description={fa ? "با نماد قلب در نتایج جستجو، اقامتگاه‌ها را ذخیره کنید." : "Tap the heart on a search result to save it."} />

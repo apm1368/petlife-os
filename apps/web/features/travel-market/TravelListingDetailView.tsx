@@ -159,9 +159,9 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
     }
   };
 
-  if (load === "loading") return <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6"><Skeleton className="h-72 w-full" /><Skeleton className="h-10 w-2/3" /><Skeleton className="h-40 w-full" /></div>;
-  if (load === "notFound") return <div className="mx-auto max-w-3xl px-4 py-10"><EmptyState title={fa ? "این اقامتگاه در دسترس نیست" : "This stay is not available"} description={fa ? "ممکن است منتشر نشده یا حذف شده باشد." : "It may be unpublished or removed."} actionLabel={fa ? "جستجوی اقامتگاه‌ها" : "Search stays"} onAction={() => router.push(`/${lang}/travel`)} /></div>;
-  if (load === "error" || !listing) return <div className="mx-auto max-w-3xl px-4 py-10"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchListing()} /></div>;
+  if (load === "loading") return <div className="flex flex-col gap-4"><Skeleton className="h-72 w-full" /><Skeleton className="h-10 w-2/3" /><Skeleton className="h-40 w-full" /></div>;
+  if (load === "notFound") return <div className="mx-auto max-w-3xl py-6"><EmptyState title={fa ? "این اقامتگاه در دسترس نیست" : "This stay is not available"} description={fa ? "ممکن است منتشر نشده یا حذف شده باشد." : "It may be unpublished or removed."} actionLabel={fa ? "جستجوی اقامتگاه‌ها" : "Search stays"} onAction={() => router.push(`/${lang}/travel`)} /></div>;
+  if (load === "error" || !listing) return <div className="mx-auto max-w-3xl py-6"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchListing()} /></div>;
 
   const images = listing.media.length ? listing.media.map((m) => ({ url: m.url, alt: m.alt ?? listing.title })) : listing.imageUrls.map((url) => ({ url, alt: listing.title }));
   const chosenPets = myPets?.filter((p) => petIds.includes(p.id)) ?? [];
@@ -209,7 +209,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 pb-28 lg:pb-6">
+    <div className="flex w-full flex-col gap-6 pb-28 lg:pb-0">
       <nav aria-label={fa ? "مسیر" : "Breadcrumb"} className="text-metadata text-text-secondary">
         <Link href={`/${lang}/travel`} className="hover:underline">{fa ? "سفر" : "Travel"}</Link> / <Link href={`/${lang}/travel/search?city=${encodeURIComponent(listing.city)}`} className="hover:underline">{listing.city}</Link>
       </nav>
@@ -356,7 +356,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
       <section className="lg:hidden" aria-label={fa ? "رزرو" : "Booking"} id="book">
         <div className="rounded-lg border border-border-subtle bg-surface-elevated p-4">{bookingPanel}</div>
       </section>
-      <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between gap-3 border-t border-border-subtle bg-surface-elevated px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className="product-buy-bar flex items-center justify-between gap-3 lg:hidden">
         <div className="min-w-0 text-sm">
           {quote?.isBookable ? <><p className="font-bold tabular-nums">{money(quote.totalAmountIrr, lang)}</p><p className="text-metadata text-text-secondary">{fa ? `${localizeDigits(nights, "fa")} شب` : `${nights} nights`}</p></> : <p className="text-text-secondary">{fa ? "تاریخ را انتخاب کنید" : "Choose dates"}</p>}
         </div>

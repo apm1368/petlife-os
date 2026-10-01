@@ -64,9 +64,9 @@ export function TravelBookingFlowView({ bookingId }: { bookingId: string }) {
     }).catch(() => setTrips([]));
   }, [step, trips, booking]);
 
-  if (load === "loading") return <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6"><Skeleton className="h-24" /><Skeleton className="h-64" /></div>;
-  if (load === "notFound") return <div className="mx-auto max-w-3xl px-4 py-10"><EmptyState title={fa ? "این رزرو پیدا نشد" : "Booking not found"} actionLabel={fa ? "سفرهای من" : "My trips"} onAction={() => router.push(`/${lang}/travel/trips`)} /></div>;
-  if (load === "error" || !booking) return <div className="mx-auto max-w-3xl px-4 py-10"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchBooking()} /></div>;
+  if (load === "loading") return <div className="flex flex-col gap-4"><Skeleton className="h-24" /><Skeleton className="h-64" /></div>;
+  if (load === "notFound") return <div className="mx-auto max-w-3xl py-6"><EmptyState title={fa ? "این رزرو پیدا نشد" : "Booking not found"} actionLabel={fa ? "سفرهای من" : "My trips"} onAction={() => router.push(`/${lang}/travel/trips`)} /></div>;
+  if (load === "error" || !booking) return <div className="mx-auto max-w-3xl py-6"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchBooking()} /></div>;
 
   const holdLeft = booking.holdExpiresAt ? new Date(booking.holdExpiresAt).getTime() - now : 0;
   const payLeft = booking.requestExpiresAt ? new Date(booking.requestExpiresAt).getTime() - now : 0;
@@ -135,7 +135,7 @@ export function TravelBookingFlowView({ bookingId }: { bookingId: string }) {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{step === "done" ? (fa ? "وضعیت رزرو" : "Booking status") : fa ? "تکمیل رزرو" : "Complete your booking"}</h1>
       {Summary}
 

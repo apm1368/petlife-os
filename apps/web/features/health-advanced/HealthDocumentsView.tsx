@@ -8,6 +8,7 @@ import { healthAdvancedService } from "@/services/health-advanced.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { documentTypeLabel } from "./document-labels";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 /** spec: "private medical documents must never be publicly exposed" — download always goes through a freshly-minted signed URL, never a stored/cached link. */
 export function HealthDocumentsView({ petId }: { petId: string }) {
@@ -81,10 +82,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
           onChange={(e) => setDocumentType(e.target.value as MedicalDocumentType)}
           options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: documentTypeLabel(type, lang) }))}
         />
-        <label className="flex flex-col gap-1.5">
-          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
-          <input ref={fileInputRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </label>
+        <FilePicker ref={fileInputRef} label={tCommon("attachFile")} accept="application/pdf,image/jpeg,image/png,image/webp" />
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
         <Button variant="primary" isLoading={isUploading} onClick={handleUpload} disabled={!title.trim()}>
           {isUploading ? t("documents.uploading") : t("documents.upload")}

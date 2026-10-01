@@ -10,8 +10,9 @@ import { supportNeedsService } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
 import { ngoService } from "@/services/ngo.service";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
-import { addDays, todayIso } from "@/lib/date/jalali";
+import { addDays, localizeDigits, todayIso } from "@/lib/date/jalali";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 const CATEGORIES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -114,7 +115,7 @@ export function CreateSupportNeedView() {
             {t(`category.${category}`)} · {t(`urgency.${urgency}`)} · {[city, province].filter(Boolean).join(" · ")}
           </p>
           <p className="text-body text-text-primary">{description}</p>
-          {neededQuantity ? <p className="text-metadata text-text-secondary">{t("create.previewQuantity", { quantity: neededQuantity, unit: quantityUnit })}</p> : null}
+          {neededQuantity ? <p className="text-metadata text-text-secondary">{t("create.previewQuantity", { quantity: localizeDigits(neededQuantity, locale === "fa" ? "fa" : "en"), unit: quantityUnit })}</p> : null}
         </ContextSurface>
         <p className="text-metadata text-text-secondary">{t("create.moderationNotice")}</p>
         {needsSignIn ? (
@@ -164,10 +165,7 @@ export function CreateSupportNeedView() {
           </label>
         ) : null}
         <DateRangeField mode="single" label={locale === "fa" ? "مهلت (اختیاری)" : "Deadline (optional)"} placeholder={locale === "fa" ? "بدون مهلت" : "No deadline"} value={{ start: deadline, end: null }} onChange={(v) => setDeadline(v.start)} min={addDays(todayIso(), 1)} max={addDays(todayIso(), 180)} />
-        <label className="flex flex-col gap-1.5">
-          <span className="text-metadata text-text-secondary">{t("create.photosLabel")}</span>
-          <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </label>
+        <FilePicker ref={fileInputRef} label={t("create.photosLabel")} multiple accept="image/jpeg,image/png,image/webp" />
         <div>
           <Button variant="primary" onClick={() => setStep("PREVIEW")} disabled={!canContinue}>
             {t("create.continue")}

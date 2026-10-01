@@ -138,7 +138,7 @@ export function TravelResultsView() {
   const filters = <TravelFilters params={params} facets={data?.facets ?? null} onApply={(patch) => { setParams(patch); setFiltersOpen(false); }} />;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-page-title text-text-primary">{search.city ? (fa ? `اقامت در ${search.city}` : `Stays in ${search.city}`) : fa ? "اقامتگاه‌های دوستدار حیوانات" : "Pet-friendly stays"}</h1>

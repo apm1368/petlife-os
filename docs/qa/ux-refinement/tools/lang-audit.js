@@ -63,6 +63,20 @@ const ALLOW = /^(PET|LIFE|OS|FA|EN|IRR|PDF|SMS|OTP|QR|AI|ID|PL|BK|Apoquel|CBC|kg
         if (!visible(el)) continue;
         for (const a of ["placeholder", "aria-label", "title"]) if (el.getAttribute(a)) check(el.getAttribute(a), a);
       }
+      if (fa) {
+        // Body text, not only chrome: any Latin digit in visible text outside LTR islands (codes, order
+        // numbers, phone/IBAN fields are marked dir=ltr) and outside user content.
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          const el = n.parentElement;
+          if (!el || !/[0-9]/.test(n.nodeValue) || el.closest('[dir="ltr"],code,kbd,pre,script,style,[data-user-content],.sr-only') || !visible(el)) continue;
+          const t = n.nodeValue.replace(/\s+/g, " ").trim();
+          if (/^[A-Z]{1,4}-[A-Z0-9]+$/.test(t)) continue;
+          issues.add(`body-digits [${el.tagName.toLowerCase()}] ${t.slice(0, 60)}`);
+        }
+        for (const el of document.querySelectorAll('input[type="file"]')) if (visible(el) && el.getBoundingClientRect().width > 4) issues.add("native-file-input (English browser UI)");
+        for (const el of document.querySelectorAll('input[type="date"],input[type="datetime-local"],input[type="time"]')) if (visible(el)) issues.add(`native-${el.type}-input`);
+      }
       return {
         issues: [...issues].slice(0, 40),
         overflow: document.documentElement.scrollWidth - innerWidth,

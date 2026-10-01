@@ -12,6 +12,7 @@ import { ngoService, selectNgo, selectedNgo, type NgoDonationRow, type NgoMember
 import { OFFER_TONE } from "@/features/animal-support/SupportOfferInbox";
 import type { SupportNeedListingDto } from "@petlife/types";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 type Lang = "fa" | "en";
 const useLang = () => {
@@ -342,7 +343,7 @@ export function NgoVerificationView() {
           <p className="text-sm text-text-secondary">{fa ? "مدارک (مثلاً مجوز یا ثبت رسمی) خصوصی می‌مانند و فقط تیم PET LIFE برای بررسی آن‌ها را می‌بیند؛ هرگز در صفحهٔ عمومی نمایش داده نمی‌شوند." : "Documents (e.g. registration or permit) stay private and are seen only by the PET LIFE team for review; never on the public page."}</p>
           {v.canSubmit && role === "OWNER" ? (
             <div className="flex flex-col gap-2 rounded-md border border-border-subtle p-3">
-              <label className="flex flex-col gap-1 text-sm">{fa ? "مدارک (PDF یا تصویر، حداکثر ۱۰)" : "Documents (PDF or image, up to 10)"}<input type="file" multiple accept="application/pdf,image/jpeg,image/png" onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 10))} /></label>
+              <FilePicker label={fa ? "مدارک (PDF یا تصویر، حداکثر ۱۰)" : "Documents (PDF or image, up to 10)"} multiple accept="application/pdf,image/jpeg,image/png" onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 10))} />
               {msg ? <p role={msg.ok ? "status" : "alert"} className={`text-sm ${msg.ok ? "text-state-success" : "text-state-urgent"}`}>{msg.text}</p> : null}
               <Button disabled={files.length === 0} isLoading={busy} onClick={() => void submit()}>{fa ? "ارسال برای بررسی" : "Submit for review"}</Button>
             </div>

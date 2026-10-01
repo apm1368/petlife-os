@@ -14,6 +14,8 @@ import { communityService } from "@/services/community.service";
 import { lostPetStatusTone } from "./lost-pet-status";
 import { SystemState } from "@/features/system/SystemState";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { TimeSelect } from "@/features/shared/date-picker/TimeSelect";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 const SPECIES: Record<string, [string, string]> = { DOG: ["سگ", "Dog"], CAT: ["گربه", "Cat"], OTHER: ["سایر", "Other"] };
 
@@ -130,14 +132,11 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
               <>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <DateRangeField mode="single" label={fa ? "تاریخ مشاهده" : "Date seen"} value={{ start: seenDay, end: null }} onChange={(v) => setSeenDay(v.start)} min={addDays(todayIso(), -60)} max={todayIso()} />
-                  <Input label={fa ? "ساعت تقریبی" : "Approximate time"} type="time" dir="ltr" value={seenTime} onChange={(e) => setSeenTime(e.target.value)} />
+                  <TimeSelect label={fa ? "ساعت تقریبی" : "Approximate time"} value={seenTime} onChange={setSeenTime} />
                 </div>
                 <Input dir="auto" label={t("public.reportSighting.locationLabel")} value={location} onChange={(e) => setLocation(e.target.value)} />
                 <Input dir="auto" label={t("public.reportSighting.descriptionLabel")} value={description} onChange={(e) => setDescription(e.target.value)} />
-                <label className="flex flex-col gap-1.5 text-sm">
-                  <span className="text-metadata text-text-secondary">{t("report.photoLabel")}</span>
-                  <input type="file" accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
-                </label>
+                <FilePicker label={t("report.photoLabel")} accept="image/jpeg,image/png,image/webp" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
                 <p className="text-metadata text-text-secondary">{fa ? "گزارش شما فقط برای صاحب حیوان فرستاده می‌شود؛ نام و اطلاعات تماس شما عمومی نمی‌شود." : "Your report goes only to the owner; your name and contact details are never made public."}</p>
                 {submitError ? <p role="alert" className="text-body text-state-urgent">{submitError}</p> : null}
                 <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmitSighting} disabled={!seenDay}>

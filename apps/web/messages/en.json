@@ -39,10 +39,10 @@
       "title": "Enter the code",
       "subtitle": "We sent a 6-digit code to {identifier}",
       "resend": "Resend code",
-      "resendIn": "Resend in {seconds}s",
+      "resendIn": "Resend in {seconds, number}s",
       "verify": "Verify",
       "invalid": "That code is incorrect or has expired.",
-      "rateLimited": "Too many attempts. Try again in {seconds}s."
+      "rateLimited": "Too many attempts. Try again in {seconds, number}s."
     },
     "password": {
       "usernameLabel": "Username",
@@ -258,7 +258,7 @@
     "free": "Free",
     "notAvailableHere": "Not available in your country",
     "downgradeToFree": "Downgrade to Free",
-    "startTrial": "Start {days}-day trial",
+    "startTrial": "Start {days, number}-day trial",
     "subscribe": "Subscribe",
     "upgradeNow": "Upgrade now",
     "switchAtRenewal": "Switch at renewal",
@@ -827,7 +827,7 @@
         "allClear": "All clear"
       },
       "nextBooking": "Next booking",
-      "today": "Today ({count})",
+      "today": "Today ({count, number})",
       "noBookingsToday": "No bookings today."
     },
     "bookings": {
@@ -2805,7 +2805,7 @@
     "rehab": {
       "title": "Rehabilitation Plans",
       "empty": "No rehabilitation plans recorded.",
-      "sessionsLogged": "{count} sessions logged"
+      "sessionsLogged": "{count, number} sessions logged"
     },
     "observations": {
       "title": "Observations",
@@ -2827,7 +2827,7 @@
       "title": "Exams & vitals",
       "disclaimer": "These are measurements your clinic recorded. PET LIFE OS does not interpret them — ask your vet what a value means.",
       "weightTrend": "Weight over time",
-      "trendCaption": "{count} recorded measurements. Each point is an actual reading.",
+      "trendCaption": "{count, number} recorded measurements. Each point is an actual reading.",
       "empty": "No measurements recorded.",
       "emptyDescription": "Measurements appear here after a clinic records an exam for your pet.",
       "noneRecorded": "Nothing recorded",
@@ -3252,7 +3252,7 @@
       "linkedDocument": "Linked document: {title}"
     },
     "readiness": {
-      "summary": "{ready} of {total} requirements ready",
+      "summary": "{ready, number} of {total, number} requirements ready",
       "allReady": "Ready to travel",
       "notReady": "Not ready yet",
       "stale": "Stale",
@@ -3450,7 +3450,7 @@
     },
     "detail": {
       "animalType": "Animal: {type}",
-      "offerCounts": "{pending} pending · {accepted} accepted · {completed} completed",
+      "offerCounts": "{pending, number} pending · {accepted, number} accepted · {completed, number} completed",
       "offerTitle": "Offer help",
       "contactExplainer": "Your message goes to the publisher inside PET LIFE. Phone numbers and emails are never shown publicly.",
       "helpTypeLabel": "What can you offer?",
@@ -3566,14 +3566,14 @@
   "vetPanel": {
     "dashboard": {
       "title": "Clinical board",
-      "todaysAppointments": "{count} appointments today",
-      "openVisits": "{count} open visits",
-      "overdueTasks": "{count} overdue treatments",
-      "activeAlerts": "{count} patient alerts",
+      "todaysAppointments": "{count, number} appointments today",
+      "openVisits": "{count, number} open visits",
+      "overdueTasks": "{count, number} overdue treatments",
+      "activeAlerts": "{count, number} patient alerts",
       "whiteboard": "In the clinic now",
       "noInpatients": "No patients are admitted.",
       "kennel": "Kennel {label}",
-      "dueTasks": "{count} treatments due",
+      "dueTasks": "{count, number} treatments due",
       "lastVitals": "Vitals {time}",
       "noVitalsYet": "No vitals recorded yet",
       "overdueTasksHeading": "Overdue treatments",
@@ -3606,12 +3606,12 @@
       "ownedBy": "Owner: {name}",
       "inpatient": "Admitted",
       "visitOpen": "Visit open",
-      "alerts": "{count} alerts",
+      "alerts": "{count, number} alerts",
       "lastVisit": "Last visit {date}",
       "noVisitsYet": "No visits recorded",
       "previous": "Previous",
       "next": "Next",
-      "pageOf": "Page {page} of {totalPages}",
+      "pageOf": "Page {page, number} of {totalPages, number}",
       "species": {
         "DOG": "Dog",
         "CAT": "Cat"
@@ -3638,13 +3638,13 @@
       "bodyCondition": "Body condition",
       "painScore": "Pain score",
       "weightTrend": "Weight over time",
-      "trendCaption": "{count} recorded measurements. Points are actual readings — nothing between them is estimated.",
+      "trendCaption": "{count, number} recorded measurements. Points are actual readings — nothing between them is estimated.",
       "onset": "Onset {date}",
       "noProblems": "No problems recorded.",
       "noPrescriptions": "No prescriptions recorded.",
       "noVisits": "No visits recorded.",
       "noEstimates": "No estimates recorded.",
-      "refills": "Refills {used}/{authorized}",
+      "refills": "Refills {used, number}/{authorized, number}",
       "controlledSubstance": "Controlled substance",
       "dispenseRefill": "Dispense refill",
       "cancelPrescription": "Cancel",
@@ -3721,11 +3721,11 @@
       "admittedAt": "Admitted {time}",
       "dischargedAt": "Discharged {time}",
       "counts": {
-        "scheduled": "{count} scheduled",
-        "overdue": "{count} overdue",
-        "done": "{count} done",
-        "skipped": "{count} skipped",
-        "missed": "{count} missed"
+        "scheduled": "{count, number} scheduled",
+        "overdue": "{count, number} overdue",
+        "done": "{count, number} done",
+        "skipped": "{count, number} skipped",
+        "missed": "{count, number} missed"
       },
       "scheduleTreatment": "Schedule treatment",
       "discharge": "Discharge",

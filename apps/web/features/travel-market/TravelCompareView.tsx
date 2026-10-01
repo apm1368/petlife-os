@@ -40,7 +40,7 @@ export function TravelCompareView() {
   ];
   const href = (id: string) => `/${lang}/travel/stays/${id}${checkIn && checkOut ? `?checkIn=${checkIn}&checkOut=${checkOut}` : ""}`;
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
+    <div className="flex w-full flex-col gap-6">
       <h1 className="text-page-title text-text-primary">{fa ? "مقایسهٔ اقامتگاه‌ها" : "Compare stays"}</h1>
       {items === null ? <Skeleton className="h-80" /> : items.length < 2 ? <EmptyState title={fa ? "حداقل دو اقامتگاه برای مقایسه لازم است" : "Pick at least two stays to compare"} /> : (
         <>

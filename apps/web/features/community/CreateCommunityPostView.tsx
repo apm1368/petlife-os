@@ -7,6 +7,7 @@ import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { CommunityPostType } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 const POST_TYPES: CommunityPostType[] = [CommunityPostType.GENERAL, CommunityPostType.QUESTION, CommunityPostType.LOCAL, CommunityPostType.RESCUE, CommunityPostType.ADOPTION, CommunityPostType.MEMORY];
 
@@ -56,10 +57,7 @@ export function CreateCommunityPostView() {
         />
         <Input label={t("newPost.titleLabel")} hint={tCommon("optional")} value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input label={t("newPost.bodyLabel")} value={body} onChange={(e) => setBody(e.target.value)} />
-        <label className="flex flex-col gap-1.5">
-          <span className="text-metadata text-text-secondary">{t("newPost.mediaLabel")}</span>
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </label>
+        <FilePicker ref={fileInputRef} label={t("newPost.mediaLabel")} accept="image/jpeg,image/png,image/webp" />
         {error ? <p className="text-body text-state-urgent">{error}</p> : null}
         <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit} disabled={!body.trim()}>
           {t("newPost.submit")}

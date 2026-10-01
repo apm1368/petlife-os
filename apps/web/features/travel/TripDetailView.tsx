@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDay } from "@/lib/date/jalali";
-import { Button, ContextSurface, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MedicalDocumentDto, TravelRequirementDto, TripDto, TripReadinessSummaryDto } from "@petlife/types";
 import { MedicalDocumentType, TravelRequirementStatus, TravelRequirementType, TripStatus } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
@@ -14,6 +14,7 @@ import { requirementStatusTone, tripStatusTone } from "./travel-status";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { countryName } from "@/lib/number/format-number";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 const ALLOWED_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
   [TripStatus.DRAFT]: [TripStatus.PLANNING, TripStatus.CANCELLED],
@@ -129,7 +130,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
   const remainingSuggestions = suggestions.filter((type) => !readiness.requirements.some((r) => r.requirementType === type));
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-page-title text-text-primary">
           {trip.originCity || countryName(trip.originCountry, locale)} {locale === "fa" ? "←" : "→"} {trip.destinationCity || countryName(trip.destinationCountry, locale)}
@@ -137,81 +138,82 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
         <StatusLabel tone={tripStatusTone(trip.status)}>{t(`status.${trip.status}`)}</StatusLabel>
       </div>
 
-      <ContextSurface className="flex flex-col gap-2">
-        <p className="text-body text-text-primary">{t("detail.departAt", { date: formatDay(trip.departAt.slice(0, 10), locale) })}</p>
-        {trip.returnAt ? <p className="text-body text-text-primary">{t("detail.returnAt", { date: formatDay(trip.returnAt.slice(0, 10), locale) })}</p> : null}
-        <p className="text-metadata text-text-secondary">{t(`travelMode.${trip.travelMode}`)}</p>
-        {trip.notes ? <p className="text-metadata text-text-secondary">{trip.notes}</p> : null}
-        <Link href={`/${locale}/travel/trips/${trip.id}`} className="w-fit text-sm font-bold text-brand-natural underline">{locale === "fa" ? "مرکز سفر: اقامت‌ها، آمادگی و مکان‌ها" : "Trip hub: stays, readiness and places"}</Link>
-      </ContextSurface>
+      <div className="split-layout">
+        <div className="split-main">
+          {/* spec locked rule: never infer readiness from one field — allReady only true when every requirement is READY/NOT_REQUIRED, and an empty checklist is never "ready". */}
+          <div className={readiness.allReady ? "calm-note flex flex-col gap-2" : "attention-banner attention-banner--static"}>
+            <div className="flex items-center justify-between">
+              <span className="text-body text-text-primary">{t("readiness.summary", { ready: readiness.readyCount, total: readiness.totalCount })}</span>
+              <StatusLabel tone={readiness.allReady ? "success" : "attention"}>{readiness.allReady ? t("readiness.allReady") : t("readiness.notReady")}</StatusLabel>
+            </div>
+            {readiness.hasStaleRequirement ? <p className="text-metadata text-state-urgent">{t("readiness.staleWarning")}</p> : null}
+          </div>
+          <h2 className="text-section-title text-text-primary">{t("detail.requirementsTitle")}</h2>
 
-      {error ? <p className="text-body text-state-urgent">{error}</p> : null}
-
-      <div className="flex flex-wrap gap-2">
-        {availableTransitions.map((next) => (
-          <Button key={next} variant={next === "CANCELLED" ? "ghost" : "secondary"} isLoading={isActing} onClick={() => runAction(() => travelService.transition(petId, tripId, next))}>
-            {t(`transitions.${next}`)}
-          </Button>
-        ))}
-      </div>
-
-      {/* spec locked rule: never infer readiness from one field — allReady only true when every requirement is READY/NOT_REQUIRED, and an empty checklist is never "ready". */}
-      <ContextSurface className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <span className="text-body text-text-primary">{t("readiness.summary", { ready: readiness.readyCount, total: readiness.totalCount })}</span>
-          <StatusLabel tone={readiness.allReady ? "success" : "attention"}>{readiness.allReady ? t("readiness.allReady") : t("readiness.notReady")}</StatusLabel>
+          {readiness.requirements.length === 0 ? (
+            <EmptyState title={t("detail.requirementsEmpty")} />
+          ) : (
+            <div className="flex flex-col">
+              {readiness.requirements.map((requirement) => (
+                <RequirementCard
+                  key={requirement.id}
+                  requirement={requirement}
+                  isActing={isActing}
+                  onChangeStatus={(status) => runAction(() => travelService.updateRequirement(petId, tripId, requirement.id, { status }))}
+                  onMarkVerified={() => runAction(() => travelService.updateRequirement(petId, tripId, requirement.id, { markVerified: true }))}
+                  onDelete={() => runAction(() => travelService.deleteRequirement(petId, tripId, requirement.id))}
+                  onLinkExisting={(documentId) => runAction(() => travelService.updateRequirement(petId, tripId, requirement.id, { linkedMedicalDocumentId: documentId || null }))}
+                  onUploadFile={(file) => uploadTravelDocument(requirement.id, file)}
+                  documents={documents}
+                  fileInputRef={(el) => {
+                    fileInputRefs.current[requirement.id] = el;
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          <section className="split-section flex flex-col gap-3">
+            <h3 className="text-section-title text-text-primary">{t("detail.addRequirementTitle")}</h3>
+            {remainingSuggestions.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {remainingSuggestions.map((type) => (
+                  <Button key={type} variant="ghost" size="sm" isLoading={isActing} onClick={() => runAction(() => travelService.createRequirement(petId, tripId, { requirementType: type }))}>
+                    {t(`requirementType.${type}`)}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+            <div className="flex items-center gap-2">
+              <Select
+                label={t("detail.requirementTypeLabel")}
+                value={newRequirementType}
+                onChange={(e) => setNewRequirementType(e.target.value as TravelRequirementType)}
+                options={REQUIREMENT_TYPES.map((type) => ({ value: type, label: t(`requirementType.${type}`) }))}
+              />
+              <Button variant="secondary" isLoading={isActing} onClick={() => runAction(() => travelService.createRequirement(petId, tripId, { requirementType: newRequirementType }))}>
+                {t("detail.addRequirement")}
+              </Button>
+            </div>
+          </section>
         </div>
-        {readiness.hasStaleRequirement ? <p className="text-metadata text-state-urgent">{t("readiness.staleWarning")}</p> : null}
-      </ContextSurface>
-
-      <h2 className="text-section-title text-text-primary">{t("detail.requirementsTitle")}</h2>
-
-      {readiness.requirements.length === 0 ? (
-        <EmptyState title={t("detail.requirementsEmpty")} />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {readiness.requirements.map((requirement) => (
-            <RequirementCard
-              key={requirement.id}
-              requirement={requirement}
-              isActing={isActing}
-              onChangeStatus={(status) => runAction(() => travelService.updateRequirement(petId, tripId, requirement.id, { status }))}
-              onMarkVerified={() => runAction(() => travelService.updateRequirement(petId, tripId, requirement.id, { markVerified: true }))}
-              onDelete={() => runAction(() => travelService.deleteRequirement(petId, tripId, requirement.id))}
-              onLinkExisting={(documentId) => runAction(() => travelService.updateRequirement(petId, tripId, requirement.id, { linkedMedicalDocumentId: documentId || null }))}
-              onUploadFile={(file) => uploadTravelDocument(requirement.id, file)}
-              documents={documents}
-              fileInputRef={(el) => {
-                fileInputRefs.current[requirement.id] = el;
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      <ContextSurface className="flex flex-col gap-3">
-        <h3 className="text-body text-text-primary">{t("detail.addRequirementTitle")}</h3>
-        {remainingSuggestions.length > 0 ? (
+        <aside className="split-aside">
+          <section className="split-panel flex flex-col gap-2">
+            <p className="text-body text-text-primary">{t("detail.departAt", { date: formatDay(trip.departAt.slice(0, 10), locale) })}</p>
+            {trip.returnAt ? <p className="text-body text-text-primary">{t("detail.returnAt", { date: formatDay(trip.returnAt.slice(0, 10), locale) })}</p> : null}
+            <p className="text-metadata text-text-secondary">{t(`travelMode.${trip.travelMode}`)}</p>
+            {trip.notes ? <p className="text-metadata text-text-secondary">{trip.notes}</p> : null}
+            <Link href={`/${locale}/travel/trips/${trip.id}`} className="w-fit text-sm font-bold text-brand-natural underline">{locale === "fa" ? "مرکز سفر: اقامت‌ها، آمادگی و مکان‌ها" : "Trip hub: stays, readiness and places"}</Link>
+          </section>
+          {error ? <p className="text-body text-state-urgent">{error}</p> : null}
           <div className="flex flex-wrap gap-2">
-            {remainingSuggestions.map((type) => (
-              <Button key={type} variant="ghost" size="sm" isLoading={isActing} onClick={() => runAction(() => travelService.createRequirement(petId, tripId, { requirementType: type }))}>
-                {t(`requirementType.${type}`)}
+            {availableTransitions.map((next) => (
+              <Button key={next} variant={next === "CANCELLED" ? "ghost" : "secondary"} isLoading={isActing} onClick={() => runAction(() => travelService.transition(petId, tripId, next))}>
+                {t(`transitions.${next}`)}
               </Button>
             ))}
           </div>
-        ) : null}
-        <div className="flex items-center gap-2">
-          <Select
-            label={t("detail.requirementTypeLabel")}
-            value={newRequirementType}
-            onChange={(e) => setNewRequirementType(e.target.value as TravelRequirementType)}
-            options={REQUIREMENT_TYPES.map((type) => ({ value: type, label: t(`requirementType.${type}`) }))}
-          />
-          <Button variant="secondary" isLoading={isActing} onClick={() => runAction(() => travelService.createRequirement(petId, tripId, { requirementType: newRequirementType }))}>
-            {t("detail.addRequirement")}
-          </Button>
-        </div>
-      </ContextSurface>
+        </aside>
+      </div>
     </div>
   );
 }
@@ -240,9 +242,10 @@ function RequirementCard({
   const fmt = useInstantFormat();
   const t = useTranslations("travel");
   const tCommon = useTranslations("common");
+  const locale = useLocale() as "fa" | "en";
 
   return (
-    <ContextSurface className="flex flex-col gap-2">
+    <article className="req-row flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <span className="text-body text-text-primary">{t(`requirementType.${requirement.requirementType}`)}</span>
         <div className="flex items-center gap-2">
@@ -252,7 +255,7 @@ function RequirementCard({
       </div>
 
       {requirement.source ? <p className="text-metadata text-text-secondary">{t("detail.source", { source: requirement.source })}</p> : null}
-      {requirement.jurisdiction ? <p className="text-metadata text-text-secondary">{t("detail.jurisdiction", { jurisdiction: requirement.jurisdiction })}</p> : null}
+      {requirement.jurisdiction ? <p className="text-metadata text-text-secondary">{t("detail.jurisdiction", { jurisdiction: countryName(requirement.jurisdiction, locale) })}</p> : null}
       <p className="text-metadata text-text-secondary">
         {requirement.verifiedAt ? t("detail.verifiedAt", { date: fmt.date(requirement.verifiedAt) }) : t("detail.neverVerified")}
       </p>
@@ -282,20 +285,16 @@ function RequirementCard({
             options={[{ value: "", label: t("detail.linkDocumentNone") }, ...documents.map((doc) => ({ value: doc.id, label: doc.title }))]}
           />
         ) : null}
-        <label className="flex flex-col gap-1.5">
-          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/pdf,image/jpeg,image/png,image/webp"
-            className="text-metadata text-text-primary"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onUploadFile(file);
-            }}
-          />
-        </label>
+        <FilePicker
+          ref={fileInputRef}
+          label={tCommon("attachFile")}
+          accept="application/pdf,image/jpeg,image/png,image/webp"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onUploadFile(file);
+          }}
+        />
       </div>
-    </ContextSurface>
+    </article>
   );
 }

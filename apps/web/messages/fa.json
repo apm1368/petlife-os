@@ -39,10 +39,10 @@
       "title": "کد را وارد کنید",
       "subtitle": "یک کد ۶ رقمی به {identifier} ارسال شد",
       "resend": "ارسال دوباره کد",
-      "resendIn": "ارسال دوباره تا {seconds} ثانیه دیگر",
+      "resendIn": "ارسال دوباره تا {seconds, number} ثانیه دیگر",
       "verify": "تأیید",
       "invalid": "این کد نادرست است یا منقضی شده.",
-      "rateLimited": "تلاش بیش از حد. {seconds} ثانیه دیگر دوباره امتحان کنید."
+      "rateLimited": "تلاش بیش از حد. {seconds, number} ثانیه دیگر دوباره امتحان کنید."
     },
     "password": {
       "usernameLabel": "نام کاربری",
@@ -258,7 +258,7 @@
     "free": "رایگان",
     "notAvailableHere": "در کشور شما در دسترس نیست",
     "downgradeToFree": "بازگشت به رایگان",
-    "startTrial": "شروع دوره آزمایشی {days} روزه",
+    "startTrial": "شروع دوره آزمایشی {days, number} روزه",
     "subscribe": "اشتراک",
     "upgradeNow": "ارتقا اکنون",
     "switchAtRenewal": "تغییر در زمان تمدید",
@@ -827,7 +827,7 @@
         "allClear": "همه‌چیز مرتب است"
       },
       "nextBooking": "رزرو بعدی",
-      "today": "امروز ({count})",
+      "today": "امروز ({count, number})",
       "noBookingsToday": "امروز رزروی وجود ندارد."
     },
     "bookings": {
@@ -2805,7 +2805,7 @@
     "rehab": {
       "title": "برنامه‌های توان‌بخشی",
       "empty": "هیچ برنامه توان‌بخشی ثبت نشده است.",
-      "sessionsLogged": "{count} جلسه ثبت‌شده"
+      "sessionsLogged": "{count, number} جلسه ثبت‌شده"
     },
     "observations": {
       "title": "مشاهدات",
@@ -2827,7 +2827,7 @@
       "title": "معاینه و علائم حیاتی",
       "disclaimer": "این‌ها اندازه‌گیری‌هایی است که درمانگاه ثبت کرده است. پت‌لایف آن‌ها را تفسیر نمی‌کند — معنای هر مقدار را از دامپزشک خود بپرسید.",
       "weightTrend": "روند وزن",
-      "trendCaption": "{count} اندازه‌گیری ثبت‌شده. هر نقطه یک اندازه‌گیری واقعی است.",
+      "trendCaption": "{count, number} اندازه‌گیری ثبت‌شده. هر نقطه یک اندازه‌گیری واقعی است.",
       "empty": "اندازه‌گیری‌ای ثبت نشده است.",
       "emptyDescription": "پس از آنکه درمانگاه معاینه‌ای برای حیوان شما ثبت کند، اندازه‌گیری‌ها اینجا دیده می‌شود.",
       "noneRecorded": "چیزی ثبت نشده",
@@ -3252,7 +3252,7 @@
       "linkedDocument": "مدرک پیوست‌شده: {title}"
     },
     "readiness": {
-      "summary": "{ready} از {total} الزام آماده است",
+      "summary": "{ready, number} از {total, number} الزام آماده است",
       "allReady": "آماده سفر",
       "notReady": "هنوز آماده نیست",
       "stale": "قدیمی",
@@ -3450,7 +3450,7 @@
     },
     "detail": {
       "animalType": "حیوان: {type}",
-      "offerCounts": "{pending} در انتظار · {accepted} پذیرفته‌شده · {completed} انجام‌شده",
+      "offerCounts": "{pending, number} در انتظار · {accepted, number} پذیرفته‌شده · {completed, number} انجام‌شده",
       "offerTitle": "کمک می‌کنم",
       "contactExplainer": "پیام شما داخل پت‌لایف به ثبت‌کننده می‌رسد. شماره تماس و ایمیل هرگز عمومی نمایش داده نمی‌شود.",
       "helpTypeLabel": "چه کمکی می‌توانید بکنید؟",
@@ -3566,14 +3566,14 @@
   "vetPanel": {
     "dashboard": {
       "title": "تخته درمانگاه",
-      "todaysAppointments": "{count} نوبت امروز",
-      "openVisits": "{count} ویزیت باز",
-      "overdueTasks": "{count} درمان عقب‌افتاده",
-      "activeAlerts": "{count} هشدار بیمار",
+      "todaysAppointments": "{count, number} نوبت امروز",
+      "openVisits": "{count, number} ویزیت باز",
+      "overdueTasks": "{count, number} درمان عقب‌افتاده",
+      "activeAlerts": "{count, number} هشدار بیمار",
       "whiteboard": "همین حالا در درمانگاه",
       "noInpatients": "هیچ بیماری بستری نیست.",
       "kennel": "قفس {label}",
-      "dueTasks": "{count} درمان سررسیده",
+      "dueTasks": "{count, number} درمان سررسیده",
       "lastVitals": "علائم حیاتی {time}",
       "noVitalsYet": "هنوز علائم حیاتی ثبت نشده",
       "overdueTasksHeading": "درمان‌های عقب‌افتاده",
@@ -3606,12 +3606,12 @@
       "ownedBy": "صاحب: {name}",
       "inpatient": "بستری",
       "visitOpen": "ویزیت باز",
-      "alerts": "{count} هشدار",
+      "alerts": "{count, number} هشدار",
       "lastVisit": "آخرین ویزیت {date}",
       "noVisitsYet": "ویزیتی ثبت نشده",
       "previous": "قبلی",
       "next": "بعدی",
-      "pageOf": "صفحه {page} از {totalPages}",
+      "pageOf": "صفحه {page, number} از {totalPages, number}",
       "species": {
         "DOG": "سگ",
         "CAT": "گربه"
@@ -3638,13 +3638,13 @@
       "bodyCondition": "وضعیت بدنی",
       "painScore": "امتیاز درد",
       "weightTrend": "روند وزن",
-      "trendCaption": "{count} اندازه‌گیری ثبت‌شده. هر نقطه یک اندازه‌گیری واقعی است و بین نقطه‌ها هیچ مقداری تخمین زده نشده.",
+      "trendCaption": "{count, number} اندازه‌گیری ثبت‌شده. هر نقطه یک اندازه‌گیری واقعی است و بین نقطه‌ها هیچ مقداری تخمین زده نشده.",
       "onset": "شروع {date}",
       "noProblems": "مشکلی ثبت نشده است.",
       "noPrescriptions": "نسخه‌ای ثبت نشده است.",
       "noVisits": "ویزیتی ثبت نشده است.",
       "noEstimates": "برآوردی ثبت نشده است.",
-      "refills": "تکرار نسخه {used} از {authorized}",
+      "refills": "تکرار نسخه {used, number} از {authorized, number}",
       "controlledSubstance": "داروی تحت کنترل",
       "dispenseRefill": "تحویل تکرار نسخه",
       "cancelPrescription": "لغو",
@@ -3721,11 +3721,11 @@
       "admittedAt": "بستری {time}",
       "dischargedAt": "ترخیص {time}",
       "counts": {
-        "scheduled": "{count} زمان‌بندی‌شده",
-        "overdue": "{count} عقب‌افتاده",
-        "done": "{count} انجام‌شده",
-        "skipped": "{count} صرف‌نظر‌شده",
-        "missed": "{count} انجام‌نشده"
+        "scheduled": "{count, number} زمان‌بندی‌شده",
+        "overdue": "{count, number} عقب‌افتاده",
+        "done": "{count, number} انجام‌شده",
+        "skipped": "{count, number} صرف‌نظر‌شده",
+        "missed": "{count, number} انجام‌نشده"
       },
       "scheduleTreatment": "زمان‌بندی درمان",
       "discharge": "ترخیص",

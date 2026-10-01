@@ -8,6 +8,7 @@ import type { SellerDashboardDto } from "@petlife/types";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { formatCount } from "@/lib/number/format-number";
 import { useStatusText } from "@/lib/status/use-status-text";
 
 /** Minimal but operational Seller Dashboard (spec section 40) — priorities are orders needing action, low stock, and channel sync health; never a marketing-style landing page. */
@@ -57,7 +58,7 @@ export function SellerDashboardView() {
         {tiles.map((tile) => (
           <ContextSurface key={tile.key} className="flex flex-col gap-1">
             <span className="text-metadata text-text-secondary">{t(`tiles.${tile.key}`)}</span>
-            <span className={"text-page-title " + (tile.urgent ? "text-state-urgent" : "text-text-primary")}>{tile.value}</span>
+            <span className={"text-page-title " + (tile.urgent ? "text-state-urgent" : "text-text-primary")}>{typeof tile.value === "number" ? formatCount(tile.value, locale) : tile.value}</span>
           </ContextSurface>
         ))}
         <ContextSurface className="flex flex-col gap-1">

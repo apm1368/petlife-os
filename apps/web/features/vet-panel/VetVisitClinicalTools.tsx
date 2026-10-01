@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localizeDigits } from "@/lib/date/jalali";
 import { Button, ContextSurface, EmptyState, Input, Select, StatusLabel } from "@petlife/ui";
 import { PrescriptionRoute, WeightUnit } from "@petlife/types";
 import type { ClinicalNoteTemplateDto, DischargeSummaryDto, PatientVitalsDto, PrescriptionDto } from "@petlife/types";
@@ -52,6 +53,7 @@ export function VetVisitClinicalTools({
 }) {
   const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.visitTools");
+  const locale = useLocale() === "fa" ? "fa" : "en";
   const tCommon = useTranslations("common");
 
   const [templates, setTemplates] = useState<ClinicalNoteTemplateDto[]>([]);
@@ -254,7 +256,7 @@ export function VetVisitClinicalTools({
                 <Input label={t("mgPerKg")} type="number" step="0.01" value={doseHelper.mgPerKg} onChange={(e) => setDoseHelper((d) => ({ ...d, mgPerKg: e.target.value }))} />
                 <Input label={t("weightKg")} type="number" step="0.01" value={doseHelper.weightKg} onChange={(e) => setDoseHelper((d) => ({ ...d, weightKg: e.target.value }))} />
               </div>
-              <p className="mt-2 text-body text-text-primary">{suggestedDose ? t("suggestedDose", { value: suggestedDose }) : t("doseHelperEmpty")}</p>
+              <p className="mt-2 text-body text-text-primary">{suggestedDose ? t("suggestedDose", { value: localizeDigits(suggestedDose, locale) }) : t("doseHelperEmpty")}</p>
               <p className="mt-1 text-metadata text-text-secondary">{t("doseHelperDisclaimer")}</p>
             </div>
 

@@ -46,9 +46,9 @@ export function TripHubView({ tripId }: { tripId: string }) {
   }, [tripId]);
   useEffect(() => void fetchHub(), [fetchHub]);
 
-  if (load === "loading") return <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6"><Skeleton className="h-24" /><Skeleton className="h-64" /></div>;
-  if (load === "notFound") return <div className="mx-auto max-w-3xl px-4 py-10"><EmptyState title={fa ? "این سفر پیدا نشد" : "Trip not found"} /></div>;
-  if (load === "error" || !hub) return <div className="mx-auto max-w-3xl px-4 py-10"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchHub()} /></div>;
+  if (load === "loading") return <div className="flex flex-col gap-4"><Skeleton className="h-24" /><Skeleton className="h-64" /></div>;
+  if (load === "notFound") return <div className="mx-auto max-w-3xl py-6"><EmptyState title={fa ? "این سفر پیدا نشد" : "Trip not found"} /></div>;
+  if (load === "error" || !hub) return <div className="mx-auto max-w-3xl py-6"><ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void fetchHub()} /></div>;
 
   const { trip, readiness } = hub;
   const addRules = async () => {
@@ -66,7 +66,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
   const city = trip.destinationCity ?? "";
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
+    <div className="flex w-full flex-col gap-6">
       <nav className="text-metadata text-text-secondary" aria-label={fa ? "مسیر" : "Breadcrumb"}><Link className="hover:underline" href={`/${lang}/travel/trips`}>{fa ? "سفرهای من" : "My trips"}</Link></nav>
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">

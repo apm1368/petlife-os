@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, Input } from "@petlife/ui";
+import { Button, ContextSurface } from "@petlife/ui";
 import { lostPetService } from "@/services/lost-pet.service";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { addDays, formatDay, todayIso } from "@/lib/date/jalali";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { TimeSelect } from "@/features/shared/date-picker/TimeSelect";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 type Step = "where" | "photo" | "describe" | "contact" | "review";
 const STEPS: Step[] = ["where", "photo", "describe", "contact", "review"];
@@ -111,18 +113,14 @@ export function ReportLostPetView({ petId }: { petId: string }) {
             </label>
             <div className="grid gap-3 sm:grid-cols-2">
               <DateRangeField mode="single" label={fa ? "تاریخ آخرین مشاهده" : "Date last seen"} value={{ start: seenDay, end: null }} onChange={(v) => setSeenDay(v.start)} min={addDays(todayIso(), -60)} max={todayIso()} />
-              <Input label={fa ? "ساعت تقریبی" : "Approximate time"} type="time" dir="ltr" value={seenTime} onChange={(e) => setSeenTime(e.target.value)} />
+              <TimeSelect label={fa ? "ساعت تقریبی" : "Approximate time"} value={seenTime} onChange={setSeenTime} />
             </div>
           </>
         ) : null}
 
         {step === "photo" ? (
           <div className="flex flex-col gap-2">
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-text-primary">{t("report.photoLabel")}<PublicTag /></span>
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
-            </label>
-            {photo ? <p className="text-sm text-text-primary">{fa ? `انتخاب شد: ${photo.name}` : `Selected: ${photo.name}`}</p> : null}
+            <FilePicker label={<>{t("report.photoLabel")}<PublicTag /></>} aria-label={t("report.photoLabel")} accept="image/jpeg,image/png,image/webp" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
             <p className="text-metadata text-text-secondary">{fa ? "عکسی واضح که صورت و علامت‌های خاص را نشان دهد. بدون چهرهٔ افراد یا پلاک خانه." : "A clear photo showing the face and distinctive markings — no people's faces or house numbers."}</p>
           </div>
         ) : null}

@@ -9,6 +9,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { useStatusText } from "@/lib/status/use-status-text";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 /** spec: "these are OWNER OBSERVATIONS, not diagnoses" — the UI labels every entry as such and never offers a "diagnosis" field. */
 export function HealthObservationsView({ petId }: { petId: string }) {
@@ -92,10 +93,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
           rows={3}
           className="rounded-md border border-border-strong bg-surface-elevated p-3 text-body text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
         />
-        <label className="flex flex-col gap-1.5">
-          <span className="text-metadata text-text-secondary">{tCommon("attachFile")}</span>
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" className="text-body text-text-primary" />
-        </label>
+        <FilePicker ref={fileInputRef} label={tCommon("attachFile")} accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" />
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
         <Button variant="primary" isLoading={isSaving} onClick={handleSave} disabled={!description.trim()}>
           {t("observations.save")}

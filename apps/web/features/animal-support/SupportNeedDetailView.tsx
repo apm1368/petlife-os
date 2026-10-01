@@ -9,7 +9,7 @@ import type { SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService, type SupportNeedOfferSummaryDto } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
-import { formatDay } from "@/lib/date/jalali";
+import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { URGENCY_TONE } from "./SupportNeedsListView";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
@@ -136,7 +136,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
         {listing.animalType ? <p className="text-metadata text-text-secondary">{t("detail.animalType", { type: listing.animalType })}</p> : null}
         {summary && summary.neededQuantity !== null ? (
           <p className="text-body text-text-primary">
-            {t("list.progress", { fulfilled: summary.fulfilledQuantity, needed: summary.neededQuantity, unit: listing.quantityUnit ?? "" })}
+            {t("list.progress", { fulfilled: localizeDigits(summary.fulfilledQuantity, locale === "fa" ? "fa" : "en"), needed: localizeDigits(summary.neededQuantity, locale === "fa" ? "fa" : "en"), unit: listing.quantityUnit ?? "" })}
           </p>
         ) : null}
         {summary ? <p className="text-metadata text-text-secondary">{t("detail.offerCounts", { pending: summary.pendingOffers, accepted: summary.acceptedOffers, completed: summary.completedOffers })}</p> : null}

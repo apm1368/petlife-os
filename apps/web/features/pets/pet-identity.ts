@@ -26,7 +26,8 @@ export function formatAge(pet: Pick<PetDto, "birthDate" | "approximateAgeMonths"
 export function formatWeight(pet: Pick<PetDto, "latestWeightValue" | "latestWeightUnit">, locale: "fa" | "en", unknown: string): string {
   if (pet.latestWeightValue === null || pet.latestWeightValue === undefined) return unknown;
   const unit = pet.latestWeightUnit === "LB" ? (locale === "fa" ? "پوند" : "lb") : locale === "fa" ? "کیلوگرم" : "kg";
-  const value = locale === "fa" ? pet.latestWeightValue.toLocaleString("fa-IR", { maximumFractionDigits: 2 }) : String(pet.latestWeightValue);
+  // The API serialises the decimal weight as a string; format the number, not the string.
+  const value = Number(pet.latestWeightValue).toLocaleString(locale === "fa" ? "fa-IR" : "en-US", { maximumFractionDigits: 2 });
   return `${value} ${unit}`;
 }
 
