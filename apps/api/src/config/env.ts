@@ -9,6 +9,9 @@ const envSchema = z.object({
   /// nginx, so req.ip is the real client (per-IP throttling works) and a client talking to the API
   /// directly cannot spoof its address. "false" disables, a number trusts that many hops.
   TRUST_PROXY: z.string().default("loopback"),
+  /// The /dev/auth/google/simulate test endpoint signs in as any Google identity. It must be opted
+  /// into explicitly (the e2e suite does) and is never honoured in production, whatever the flag.
+  GOOGLE_DEV_SIMULATE_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
   PORT: z.coerce.number().int().positive().default(4000),
 
   // Immutable release metadata injected by CI/deploy. These values are
