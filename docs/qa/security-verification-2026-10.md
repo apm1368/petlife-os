@@ -15,7 +15,7 @@ report was re-checked against current code and, where possible, reproduced on th
 | G | Rate limiting | CONFIRMED_P1 — FIXED | `security-rate-limit.e2e-spec.ts` |
 | H | Audit logging | NOT_REPRODUCED (minor gaps) | — |
 | X1 | Dev Google sign-in simulation reachable outside production | CONFIRMED_P0 — FIXED | `security-dev-endpoints.e2e-spec.ts` |
-| X2 | App ports reachable directly (bypassing nginx) | CONFIRMED_P1 — FIXED in code | loopback defaults |
+| X2 | App ports reachable directly (bypassing nginx) | NOT_REPRODUCED (host-local test artefact) | API loopback bind kept as defence in depth |
 | X3 | Live served over plain HTTP | CONFIRMED_P1 — BLOCKED_EXTERNAL | needs domain + TLS |
 
 ## A — OTP provider
@@ -90,12 +90,29 @@ report was re-checked against current code and, where possible, reproduced on th
   is refused in production regardless. Preview patched and verified (`GOOGLE_AUTH_DISABLED`).
 - Shipped first as a security-only hotfix (`claude/security-hotfix`).
 
-## X2 — Direct port exposure
-- API :4000 / web :3000 (and preview :4100/:3100, bypassing its basic auth) answered from the
-  internet. Code now binds to 127.0.0.1 by default (`HOST`, `next start -H ${WEB_HOST}`); nginx and
-  the deploy smoke checks already use 127.0.0.1. Preview verified closed. A host firewall is still
-  recommended.
+## X2 — Direct port exposure (corrected)
+- The first test ran on the server itself, where traffic to its own public address never crosses the
+  external firewall. ufw is active with default-deny inbound and allows only 22, 80, 443 and 8088,
+  so :3000/:4000/:3100/:4100 were never reachable from the internet. Retracted.
+- Kept: the API binds 127.0.0.1 by default (defence in depth). The web loopback bind was reverted
+  (`ed5a3d4`) — it broke Next.js's internal requests to `localhost` and took the site down for one
+  deploy (`b6db9f8`); the restore went through the same gated path.
 
 ## X3 — No TLS on live
 - Live is served on `http://185.231.112.154`; session cookies cannot be `Secure`. Needs a domain and
   certificate → BLOCKED_EXTERNAL, launch blocker.
+
+## Release (2026-10-01)
+- `claude/security-hotfix` → integration/local, fast-forward only: `b6db9f8` (CI 36847610859 green,
+  deploy 36847611348 failed its web smoke check — see X2), then `ed5a3d4` (web binding restored).
+- Live verified at `ed5a3d4`: `/api/health/live` 200, `/fa` and `/en` 200, pm2 online,
+  `/dev/auth/google/simulate` → 503 `GOOGLE_AUTH_DISABLED` with no session cookie, rate-limit headers
+  show a per-client bucket.
+- Live runtime: `NODE_ENV=development`, `OTP_PROVIDER=dev`, `STORAGE_DRIVER=local`. Switching to
+  production is blocked by the existing boot rules until S3 storage and a real OTP provider
+  (Faraz credentials) exist → BLOCKED_EXTERNAL. Until then OTP codes appear in the server log.
+- Also found: the live API `.env` is world-readable (0644) on the host — recommend `chmod 600`
+  (owner-only; processes run as root).
+- Public production readiness = BLOCKED: no domain/TLS. Needed: production domain, DNS A record,
+  TLS certificate (e.g. Let's Encrypt), nginx 443 server block, HTTP→HTTPS redirect; the existing
+  production-only `Secure` cookie flag then applies.
