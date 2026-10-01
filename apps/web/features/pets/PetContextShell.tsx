@@ -9,6 +9,7 @@ import { PetLifecycleStatus, type PetAccessFlags, type PetDto } from "@petlife/t
 import { petsService } from "@/services/pets.service";
 import { SystemState, systemStateFor, type SystemStateKind } from "@/features/system/SystemState";
 import { formatAge, formatWeight, speciesLabel } from "./pet-identity";
+import { useActivePet } from "@/hooks/use-active-pet";
 
 const copy = {
   fa: {
@@ -25,7 +26,7 @@ const copy = {
     unknownAge: "سن ثبت نشده",
     weight: "وزن",
     microchip: "میکروچیپ",
-    unknown: "نامشخص",
+    unknown: "ثبت نشده",
     loadError: "پرونده این حیوان در دسترس نیست.",
     retry: "تلاش دوباره",
     loading: "در حال بارگذاری پرونده",
@@ -52,7 +53,7 @@ const copy = {
     unknownAge: "Age not recorded",
     weight: "Weight",
     microchip: "Microchip",
-    unknown: "Unknown",
+    unknown: "Not recorded",
     loadError: "This pet profile is unavailable.",
     retry: "Try again",
     loading: "Loading pet profile",
@@ -84,6 +85,12 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
   const [pet, setPet] = useState<PetDto | null>(null);
   const [access, setAccess] = useState<PetAccessFlags | null>(null);
   const [error, setError] = useState<SystemStateKind | null>(null);
+  const { pets: householdPets, activePetId, switchActivePet } = useActivePet();
+  // The pet on screen is the pet in context: keep the header's active-pet control in step with it
+  // (household pets only — a pet shared with you from another household never becomes "active").
+  useEffect(() => {
+    if (activePetId && activePetId !== petId && householdPets.some((p) => p.id === petId)) void switchActivePet(petId).catch(() => undefined);
+  }, [petId, activePetId, householdPets, switchActivePet]);
 
   async function load() {
     setError(null);
@@ -131,7 +138,8 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
             </p>
             <dl className="pet-hero__facts">
               <div><dt>{c.weight}</dt><dd>{formatWeight(pet, locale, c.unknown)}</dd></div>
-              <div><dt>{c.microchip}</dt><dd>{pet.microchipNumber ?? c.unknown}</dd></div>
+              {/* An identifier, not a headline: say that a chip is registered, never print its number here. */}
+              {pet.microchipNumber ? <div><dt>{c.microchip}</dt><dd>{locale === "fa" ? "ثبت شده" : "Registered"}</dd></div> : null}
             </dl>
           </div>
         </div>

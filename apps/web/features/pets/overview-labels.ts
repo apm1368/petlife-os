@@ -48,3 +48,22 @@ export function eventSourceLabel(item: PetOverviewEventDto, locale: Locale) {
 export function formatOverviewDate(value: string, locale: Locale) {
   return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : "en-US", { dateStyle: "medium", timeZone: "Asia/Tehran" }).format(new Date(value));
 }
+
+/**
+ * A lab panel reported on one day arrives as one event per test; nine rows of "HGB", "PLT"… drown the
+ * overview. Same-day lab results collapse into one "Lab results · n tests" row that opens the lab list.
+ * Presentation only — every result keeps its own record and detail page.
+ */
+export function collapseLabPanels(items: PetOverviewEventDto[], locale: Locale): PetOverviewEventDto[] {
+  const day = (iso: string) => new Date(new Date(iso).getTime() + 3.5 * 3_600_000).toISOString().slice(0, 10);
+  const out: PetOverviewEventDto[] = [];
+  for (const item of items) {
+    if (item.type !== "LAB") { out.push(item); continue; }
+    const sameDay = items.filter((other) => other.type === "LAB" && day(other.occurredAt) === day(item.occurredAt));
+    if (sameDay.length < 2) { out.push(item); continue; }
+    if (sameDay[0] !== item) continue; // the panel row is emitted once, where its first test appears
+    const n = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(sameDay.length);
+    out.push({ ...item, id: `panel-${day(item.occurredAt)}`, title: pick([`نتایج آزمایش — ${n} مورد`, `Lab results — ${n} tests`], locale), href: "/health/labs" });
+  }
+  return out;
+}

@@ -13,7 +13,9 @@ import {
 } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { usePetStore } from "@/stores/pet-store";
-import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone } from "./overview-labels";
+import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
+import { careTitle } from "@/features/care/care-labels";
+import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone, collapseLabPanels } from "./overview-labels";
 
 const copy = {
   fa: {
@@ -107,6 +109,8 @@ export function PetProfileView({ petId }: { petId: string }) {
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  // The owner's care items (the care center's data) — read only when this person may see care.
+  const [care, setCare] = useState<CareReminder[]>([]);
 
   async function load() {
     setError(false);
@@ -114,6 +118,7 @@ export function PetProfileView({ petId }: { petId: string }) {
       const [data, permissions] = await Promise.all([petsService.getOverview(petId), petsService.getMyAccess(petId)]);
       setOverview(data);
       setAccess(permissions);
+      setCare(permissions.canViewCareProfile ? await careRemindersService.list(petId).catch(() => []) : []);
       setName(data.pet.name);
       setBreed(data.pet.breed ?? "");
     } catch {
@@ -163,6 +168,17 @@ export function PetProfileView({ petId }: { petId: string }) {
     );
   }
 
+  // Overdue / soon-due care belongs with "needs attention"; the next care items with "upcoming".
+  const careAttention: PetOverviewAttentionDto[] = care
+    .filter((item) => item.state === "OVERDUE" || item.state === "DUE")
+    .map((item) => ({ id: `care-${item.id}`, severity: item.state === "OVERDUE" ? "ATTENTION" : "INFORMATIONAL", title: careTitle(item, locale), dueAt: item.dueAt, href: `/care/${item.id}` }));
+  const careUpcoming: PetOverviewEventDto[] = care
+    .filter((item) => item.state === "UPCOMING" || item.state === "SNOOZED")
+    .slice(0, 3)
+    .map((item) => ({ id: `care-${item.id}`, type: "CARE", title: careTitle(item, locale), occurredAt: item.snoozedUntil ?? item.dueAt, sourceType: null, providerName: null, href: `/care/${item.id}`, status: item.state }));
+  const attention = [...careAttention.filter((i) => i.severity === "ATTENTION"), ...overview.attention, ...careAttention.filter((i) => i.severity !== "ATTENTION")];
+  const upcoming = [...overview.upcoming, ...careUpcoming].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt)).slice(0, 5);
+
   return (
     <div className="pet-overview">
       <h1 className="sr-only">{isMemorial ? c.memorialTitle : c.title}</h1>
@@ -175,25 +191,25 @@ export function PetProfileView({ petId }: { petId: string }) {
         ) : null}
         {!isMemorial ? (
           <OverviewSection title={c.attention}>
-            {overview.attention.length === 0 ? (
+            {attention.length === 0 ? (
               <div className="pet-overview__calm">
                 <p>{c.noAttention}</p>
                 <p>{c.noAttentionHint}</p>
               </div>
             ) : (
               <div className="divide-y divide-border-subtle border-y border-border-subtle">
-                {overview.attention.map((item) => <AttentionRow key={item.id} item={item} base={base} locale={locale} />)}
+                {attention.map((item) => <AttentionRow key={item.id} item={item} base={base} locale={locale} />)}
               </div>
             )}
           </OverviewSection>
         ) : null}
         {!isMemorial ? (
           <OverviewSection title={c.upcoming}>
-            <EventList items={overview.upcoming} empty={c.noUpcoming} base={base} locale={locale} showSource={false} compact />
+            <EventList items={upcoming} empty={c.noUpcoming} base={base} locale={locale} showSource={false} compact />
           </OverviewSection>
         ) : null}
         <OverviewSection title={c.recentHealth}>
-          <EventList items={overview.recentHealth} empty={c.noHealth} base={base} locale={locale} compact />
+          <EventList items={collapseLabPanels(overview.recentHealth, locale)} empty={c.noHealth} base={base} locale={locale} compact />
         </OverviewSection>
       </div>
 
@@ -207,7 +223,7 @@ export function PetProfileView({ petId }: { petId: string }) {
           </div>
         </OverviewSection>
         <OverviewSection title={c.recentActivity}>
-          <EventList items={overview.recentActivity} empty={c.noActivity} base={base} locale={locale} compact />
+          <EventList items={collapseLabPanels(overview.recentActivity.filter((a) => !overview.recentHealth.some((h) => h.type === a.type && h.id === a.id)), locale)} empty={c.noActivity} base={base} locale={locale} compact />
         </OverviewSection>
         <OverviewSection title={c.recentMemory}>
           {overview.recentMemory ? (
