@@ -80,8 +80,8 @@
 
 /* Hero: identity and one line, set straight on the sky — no card. */
 .tehran-hero { position: relative; display: flex; flex: 1; flex-direction: column; }
-.tehran-hero__text { position: relative; z-index: 2; max-width: 760px; padding: clamp(8px, 2vw, 28px) var(--shell-gutter) 0; }
-.tehran-hero__text h1 { margin: 0; font-size: clamp(2.1rem, 4.2vw, 4rem); font-weight: 800; line-height: 1.22; white-space: pre-line; color: var(--t-ink); }
+.tehran-hero__text { position: relative; z-index: 2; max-width: 980px; padding: clamp(8px, 2vw, 28px) var(--shell-gutter) 0; }
+.tehran-hero__text h1 { margin: 0; text-wrap: balance; font-size: clamp(2.1rem, 4.2vw, 4rem); font-weight: 800; line-height: 1.22; white-space: pre-line; color: var(--t-ink); }
 .tehran-hero__text p { margin: 14px 0 0; max-width: 46ch; color: var(--t-ink-2); font-size: clamp(1rem, 1.2vw, 1.15rem); line-height: 1.9; }
 .tehran-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 22px; }
 .tehran-start { display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; background: var(--t-green); color: #fff !important; font-weight: 800; box-shadow: 0 10px 24px rgb(23 99 63 / .22); transition: transform var(--dur-1) var(--ease-out); }
@@ -149,3 +149,7 @@
 }
 @media (min-width: 620px) and (max-width: 900px) { .tehran-nav ul { grid-template-columns: 1fr 1fr; column-gap: 24px; } }
 @media (max-width: 520px) { .tehran-hint { display: none; } .tehran-signin { padding: 0 14px; } }
+/* Edge buildings: keep their hover description inside the page. */
+.tehran { overflow-x: clip; }
+.tehran-dest:first-child .tehran-dest__desc { left: auto; inset-inline-start: 0; translate: none; }
+.tehran-dest:last-child .tehran-dest__desc { left: auto; inset-inline-end: 0; translate: none; }
