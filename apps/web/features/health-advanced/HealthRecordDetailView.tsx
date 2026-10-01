@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type {
   ClinicalNutritionPlanDto,
   DentalRecordDto,
@@ -55,32 +55,82 @@ export function HealthRecordDetailView({ petId, recordId, kind }: { petId: strin
   const model = presentRecord(kind, record, locale, c.unknown);
   const base = "/" + locale + "/pets/" + petId + "/health/advanced";
 
+  const isLab = kind === "lab";
+  const labFields = new Set(locale === "fa" ? ["نتیجه", "بازه مرجع ثبت‌شده"] : ["Result", "Recorded reference range"]);
+  const fields = isLab ? model.fields.filter((field) => !labFields.has(field.label)) : model.fields;
+
   return (
-    <article className="mx-auto flex max-w-3xl flex-col gap-7">
-      <header className="border-b border-border-subtle pb-6">
-        <Link href={base + "/" + listSlug(kind)} className="text-sm font-bold text-brand-natural">{c.back}</Link>
-        <div className="mt-5 flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-xs font-black uppercase tracking-[.14em] text-text-secondary">{model.eyebrow}</p><h1 className="mt-2 text-page-title text-text-primary">{model.title}</h1></div>
-          {model.status ? <StatusLabel tone={model.statusTone}>{model.status}</StatusLabel> : null}
+    <article className="record-detail">
+      <header className="section-head">
+        <div>
+          <Link href={base + "/" + listSlug(kind)} className="record-detail__back">{c.back}</Link>
+          <p className="record-detail__eyebrow">{model.eyebrow}</p>
+          <h1>{model.title}</h1>
+          {model.subtitle ? <p>{model.subtitle}</p> : null}
         </div>
-        {model.subtitle ? <p className="mt-3 text-body leading-8 text-text-secondary">{model.subtitle}</p> : null}
+        {model.status ? <StatusLabel tone={model.statusTone}>{model.status}</StatusLabel> : null}
       </header>
 
-      {kind === "lab" ? <p className="border-s-4 border-s-brand-natural bg-surface-subtle px-4 py-3 text-sm leading-7 text-text-secondary">{c.noInterpretation}</p> : null}
-
-      <dl className="grid grid-cols-1 border-y border-border-subtle sm:grid-cols-2">
-        <Meta label={c.date} value={model.date ? formatDate(model.date, locale) : c.unknown} />
-        <Meta label={c.source} value={model.sourceLabel} />
-        <Meta label={c.provider} value={model.provider ?? c.unknown} />
-        <Meta label={c.status} value={model.status ?? c.unknown} />
-      </dl>
-
-      <section className="flex flex-col gap-5">
-        {model.fields.map((field) => <ContextSurface key={field.label}><h2 className="text-sm font-bold text-text-primary">{field.label}</h2><p className="mt-2 whitespace-pre-wrap text-body leading-8 text-text-secondary">{field.value}</p></ContextSurface>)}
-      </section>
-
-      {model.visitId ? <Link className="border-t border-border-subtle pt-5 text-sm font-bold text-brand-natural" href={base + "/visits/" + model.visitId}>{c.relatedVisit}</Link> : null}
+      <div className="split-layout">
+        <div className="split-main">
+          {isLab ? <LabResultBand item={record as LabResultDto} locale={locale} /> : null}
+          {isLab ? <p className="calm-note text-sm leading-7">{c.noInterpretation}</p> : null}
+          {fields.map((field) => (
+            <section key={field.label} className="split-section">
+              <h2 className="text-sm font-bold text-text-primary">{field.label}</h2>
+              <p className="mt-2 max-w-[70ch] whitespace-pre-wrap text-body leading-8 text-text-secondary">{field.value}</p>
+            </section>
+          ))}
+          {model.visitId ? <Link className="split-section text-sm font-bold text-brand-natural" href={base + "/visits/" + model.visitId}>{c.relatedVisit}</Link> : null}
+        </div>
+        <aside className="split-aside">
+          <section className="split-panel" aria-label={c.source}>
+            <dl className="record-provenance">
+              <Meta label={c.date} value={model.date ? formatDate(model.date, locale) : c.unknown} />
+              <Meta label={c.source} value={model.sourceLabel} />
+              <Meta label={c.provider} value={model.provider ?? c.unknown} />
+              <Meta label={c.status} value={model.status ?? c.unknown} />
+            </dl>
+          </section>
+        </aside>
+      </div>
     </article>
+  );
+}
+
+/**
+ * The recorded result, large and unambiguous: value and unit, the source's own reference range, and a bar
+ * that places the value against that range. No interpretation is added — the bar only plots recorded numbers
+ * and the flag is the source's. Digits follow the UI language; the decimal point, unit and range order are
+ * kept as recorded, inside a direction-isolated span so a range can never visually flip in RTL.
+ */
+function LabResultBand({ item, locale }: { item: LabResultDto; locale: "fa" | "en" }) {
+  const fa = locale === "fa";
+  const digits = (v: string | number) => localizeDigits(v, fa ? "fa" : "en");
+  const value = item.value !== null && item.value !== undefined ? Number(item.value) : NaN;
+  const low = item.referenceRangeLow !== null && item.referenceRangeLow !== undefined ? Number(item.referenceRangeLow) : NaN;
+  const high = item.referenceRangeHigh !== null && item.referenceRangeHigh !== undefined ? Number(item.referenceRangeHigh) : NaN;
+  const plottable = [value, low, high].every(Number.isFinite) && high > low;
+  // The range occupies the middle 60% of the track; values outside it fall into the margins (clamped).
+  const position = plottable ? Math.min(100, Math.max(0, 20 + ((value - low) / (high - low)) * 60)) : 0;
+  const flagged = item.flag === "ABNORMAL";
+  return (
+    <section className="lab-band" data-flagged={flagged || undefined}>
+      <div className="lab-band__value">
+        <span className="lab-band__label">{fa ? "نتیجه" : "Result"}</span>
+        <strong><bdi>{item.value !== null && item.value !== undefined ? digits(item.value) : item.qualitativeResult ?? (fa ? "ثبت نشده" : "Not recorded")}</bdi>{item.unit ? <span className="lab-band__unit"> {item.unit}</span> : null}</strong>
+      </div>
+      <div className="lab-band__range">
+        <span className="lab-band__label">{fa ? "بازهٔ مرجع ثبت‌شده" : "Recorded reference range"}</span>
+        <span><bdi>{Number.isFinite(low) || Number.isFinite(high) ? `${Number.isFinite(low) ? digits(item.referenceRangeLow!) : "—"} – ${Number.isFinite(high) ? digits(item.referenceRangeHigh!) : "—"}` : (fa ? "ثبت نشده" : "Not recorded")}</bdi></span>
+      </div>
+      {plottable ? (
+        <div className="lab-band__track" role="img" aria-label={fa ? `مقدار ${digits(item.value!)} در برابر بازهٔ ${digits(item.referenceRangeLow!)} تا ${digits(item.referenceRangeHigh!)}` : `Value ${item.value} against the range ${item.referenceRangeLow} to ${item.referenceRangeHigh}`}>
+          <span className="lab-band__range-fill" />
+          <span className="lab-band__marker" style={{ insetInlineStart: `${position}%` }} />
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -115,7 +165,7 @@ function presentRecord(kind: RecordKind, record: RecordValue, locale: "fa" | "en
 function compact(fields: { label: string; value: string | null | undefined }[]) {
   return fields.filter((field): field is { label: string; value: string } => Boolean(field.value));
 }
-function Meta({ label, value }: { label: string; value: string }) { return <div className="border-b border-border-subtle px-1 py-4 sm:odd:border-e"><dt className="text-xs text-text-secondary">{label}</dt><dd className="mt-1 text-sm font-bold text-text-primary">{value}</dd></div>; }
+function Meta({ label, value }: { label: string; value: string }) { return <div><dt>{label}</dt><dd>{value}</dd></div>; }
 function source(value: string, fa: boolean) { return value === "PROVIDER" || value === "CLINIC" ? (fa ? "ارائه‌دهنده" : "Provider") : (fa ? "مالک/خانواده" : "Owner/household"); }
 function formatDate(value: string, locale: "fa" | "en") { return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : "en-US", { dateStyle: "medium", timeZone: "Asia/Tehran" }).format(new Date(value)); }
 function listSlug(kind: RecordKind) { return kind === "lab" ? "labs" : kind; }

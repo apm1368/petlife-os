@@ -9,6 +9,7 @@ import { KnowledgeState, type HealthOverviewDto, type HealthSummaryDto } from "@
 import { healthService } from "@/services/health.service";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { useStatusText } from "@/lib/status/use-status-text";
+import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
 import { formatCount } from "@/lib/number/format-number";
 
 const copy = {
@@ -24,13 +25,16 @@ export function HealthOverviewView({ petId }: { petId: string }) {
   const t = useTranslations("health");
   const c = copy[locale];
   const base = `/${locale}/pets/${petId}/health`;
-  const [data, setData] = useState<{ summary: HealthSummaryDto; overview: HealthOverviewDto } | null>(null);
+  const [data, setData] = useState<{ summary: HealthSummaryDto; overview: HealthOverviewDto; names: { allergies: string[]; conditions: string[]; medications: string[] }; care: CareReminder[] } | null>(null);
   const [error, setError] = useState(false);
-  const load = useCallback(async () => { setError(false); try { const [summary, overview] = await Promise.all([healthService.getSummary(petId), healthAdvancedService.getOverview(petId)]); setData({ summary, overview }); } catch { setError(true); } }, [petId]);
+  const load = useCallback(async () => { setError(false); try { const [summary, overview, allergies, conditions, medications, care] = await Promise.all([healthService.getSummary(petId), healthAdvancedService.getOverview(petId), healthService.listAllergies(petId).catch(() => []), healthService.listConditions(petId).catch(() => []), healthService.listMedications(petId).catch(() => []), careRemindersService.list(petId).catch(() => [])]); setData({ summary, overview, care, names: { allergies: allergies.filter((a) => a.status === "ACTIVE").map((a) => a.name), conditions: conditions.filter((x) => x.status === "ACTIVE").map((x) => x.name), medications: medications.filter((m) => m.status === "ACTIVE").map((m) => m.name) } }); } catch { setError(true); } }, [petId]);
   useEffect(() => { void load(); }, [load]);
   if (error) return <SystemState kind="GENERIC_RETRYABLE_ERROR" onRetry={load} />;
   if (!data) return <Skeleton className="h-72 w-full" aria-label={c.title} />;
-  const { summary, overview } = data;
+  const { summary, overview, names, care } = data;
+  // The owner's care items count alongside provider care-plan items, as in the care center.
+  const careUpcoming = overview.upcomingCare.length + care.filter((i) => ["UPCOMING", "DUE", "SNOOZED"].includes(i.state)).length;
+  const careOverdue = overview.overdueCare.length + care.filter((i) => i.state === "OVERDUE").length;
   const attention = summary.primaryAttention;
   const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
   return <div className="health-overview">
@@ -48,17 +52,17 @@ export function HealthOverviewView({ petId }: { petId: string }) {
     <div className="health-overview__grid">
       <div className="health-overview__main">
         <section aria-labelledby="health-current"><h2 id="health-current" className="section-title">{c.current}</h2><div className="row-list">
-          <Row href={`${base}/allergies`} label={c.allergy}><StatusLabel tone={tone(summary.allergyState)}>{t(`knowledgeState.${summary.allergyState}`)}</StatusLabel></Row>
-          <Row href={`${base}/conditions`} label={c.condition}><StatusLabel tone={tone(summary.conditionsState)}>{t(`knowledgeState.${summary.conditionsState}`)}</StatusLabel></Row>
-          <Row href={`${base}/medications`} label={c.medication}><StatusLabel tone={summary.activeMedicationCount ? "attention" : "neutral"}>{summary.activeMedicationCount ? `${formatCount(summary.activeMedicationCount, locale)} ${c.active}` : c.none}</StatusLabel></Row>
+          <Row href={`${base}/allergies`} label={c.allergy} detail={nameList(names.allergies, locale)}><StatusLabel tone={tone(summary.allergyState)}>{t(`knowledgeState.${summary.allergyState}`)}</StatusLabel></Row>
+          <Row href={`${base}/conditions`} label={c.condition} detail={nameList(names.conditions, locale)}><StatusLabel tone={tone(summary.conditionsState)}>{t(`knowledgeState.${summary.conditionsState}`)}</StatusLabel></Row>
+          <Row href={`${base}/medications`} label={c.medication} detail={nameList(names.medications, locale)}><StatusLabel tone={summary.activeMedicationCount ? "attention" : "neutral"}>{summary.activeMedicationCount ? `${formatCount(summary.activeMedicationCount, locale)} ${c.active}` : c.none}</StatusLabel></Row>
           <Row href={`${base}/vaccination`} label={c.vaccination}><StatusLabel tone={statusText.tone(summary.vaccinationStatus, "vaccination")}>{statusText.label(summary.vaccinationStatus, "vaccination")}</StatusLabel></Row>
         </div></section>
         <section aria-labelledby="health-records"><h2 id="health-records" className="section-title">{c.records}</h2><div className="index-list">{[["timeline",c.timeline],["visits",c.visits],["documents",c.documents],["labs",c.labs],["imaging",c.imaging],["referrals",c.referrals],["dental",c.dental],["nutrition",c.nutrition],["rehab",c.rehab],["observations",c.observations]].map(([path,label]) => <Link key={path} href={`${base}/${path}`}><span>{label}</span><Forward size={16} aria-hidden="true" /></Link>)}</div></section>
       </div>
       <aside className="health-overview__aside">
         <section aria-labelledby="health-care"><h2 id="health-care" className="section-title">{c.care}</h2><div className="stat-row">
-          <Stat label={c.upcoming} value={overview.upcomingCare.length} />
-          <Stat label={c.overdue} value={overview.overdueCare.length} attention={overview.overdueCare.length > 0} />
+          <Stat label={c.upcoming} value={careUpcoming} />
+          <Stat label={c.overdue} value={careOverdue} attention={careOverdue > 0} />
           <Stat label={c.openPlan} value={overview.unresolvedCarePlanItemsCount} attention={overview.unresolvedCarePlanItemsCount > 0} />
         </div></section>
         <section aria-labelledby="health-visits"><h2 id="health-visits" className="section-title">{c.recentVisits}</h2>{overview.recentVisits.length ? <div className="row-list">{overview.recentVisits.slice(0,3).map(v => <Link key={v.id} href={`${base}/visits/${v.id}`} className="row-list__item"><span>{v.providerOrganizationName}</span><Forward size={16} aria-hidden="true" /></Link>)}</div> : <p className="empty-line">{c.noVisit}</p>}</section>
@@ -68,5 +72,11 @@ export function HealthOverviewView({ petId }: { petId: string }) {
   </div>;
 }
 
-function Row({ href, label, children }: { href: string; label: string; children: ReactNode }) { return <Link href={href} className="row-list__item"><span>{label}</span>{children}</Link>; }
+function Row({ href, label, detail, children }: { href: string; label: string; detail?: string | null; children: ReactNode }) { return <Link href={href} className="row-list__item"><span className="flex min-w-0 flex-col gap-0.5"><span>{label}</span>{detail ? <span className="health-overview__names">{detail}</span> : null}</span>{children}</Link>; }
+/** What is on record, by name (clinical names are shown exactly as recorded): two names, then a count. */
+function nameList(items: string[], locale: "fa" | "en"): string | null {
+  if (!items.length) return null;
+  const shown = items.slice(0, 2).join(locale === "fa" ? "، " : ", ");
+  return items.length > 2 ? `${shown} ${locale === "fa" ? `و ${formatCount(items.length - 2, locale)} مورد دیگر` : `and ${items.length - 2} more`}` : shown;
+}
 function Stat({ label, value, attention=false }: { label: string; value: number; attention?: boolean }) { const locale = useLocale(); return <div className={attention ? "stat stat--attention" : "stat"}><strong>{formatCount(value, locale)}</strong><span>{label}</span></div>; }

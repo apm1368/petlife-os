@@ -15,7 +15,8 @@ import { healthAdvancedService } from "@/services/health-advanced.service";
 import { HealthOverviewView } from "./HealthOverviewView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/services/health.service", () => ({ healthService: { getSummary: vi.fn() } }));
+vi.mock("@/services/health.service", () => ({ healthService: { getSummary: vi.fn(), listAllergies: vi.fn(async () => []), listConditions: vi.fn(async () => []), listMedications: vi.fn(async () => []) } }));
+vi.mock("@/services/care-reminders.service", () => ({ careRemindersService: { list: vi.fn(async () => []) } }));
 vi.mock("@/services/health-advanced.service", () => ({ healthAdvancedService: { getOverview: vi.fn() } }));
 
 const BASE_SUMMARY: HealthSummaryDto = {
@@ -83,5 +84,15 @@ describe("HealthOverviewView", () => {
     renderWithIntl(<HealthOverviewView petId="pet-1" />);
     expect(await screen.findAllByText("None known")).toHaveLength(2);
     expect(screen.queryByText("Unknown")).toBeNull();
+  });
+
+  it("names what is on record — active allergies and medications — not just that something is recorded", async () => {
+    vi.mocked(healthService.getSummary).mockResolvedValue({ ...BASE_SUMMARY, allergyState: KnowledgeState.KNOWN_PRESENT, activeMedicationCount: 1 });
+    vi.mocked(healthService.listAllergies).mockResolvedValue([{ name: "Chicken protein", status: "ACTIVE" }, { name: "Old reaction", status: "RESOLVED" }] as never);
+    vi.mocked(healthService.listMedications).mockResolvedValue([{ name: "Apoquel (oclacitinib)", status: "ACTIVE" }] as never);
+    renderWithIntl(<HealthOverviewView petId="pet-1" />, "en");
+    expect(await screen.findByText("Chicken protein")).toBeTruthy();
+    expect(screen.queryByText(/Old reaction/)).toBeNull();
+    expect(screen.getByText("Apoquel (oclacitinib)")).toBeTruthy();
   });
 });
