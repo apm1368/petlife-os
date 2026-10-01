@@ -1,7 +1,6 @@
 import type { AppLocale } from "@/lib/i18n/config";
-import { TehranLanding } from "./TehranLanding";
+import { SpatialLanding } from "./SpatialLanding";
 import "./landing.css";
-
 export function LandingPage({ locale }: { locale: AppLocale }) {
-  return <TehranLanding locale={locale} />;
+  return <SpatialLanding locale={locale} />;
 }
