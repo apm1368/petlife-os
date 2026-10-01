@@ -41,7 +41,9 @@ export class AuthGoogleDevController {
   ) {}
 
   private assertDevAllowed(): void {
-    if (this.config.get("NODE_ENV", { infer: true }) === "production") throw new GoogleAuthDisabledException();
+    // Off unless explicitly enabled — a non-production NODE_ENV alone is not enough, because a
+    // pre-launch server can run in development mode while reachable by the public.
+    if (this.config.get("NODE_ENV", { infer: true }) === "production" || !this.config.get("GOOGLE_DEV_SIMULATE_ENABLED", { infer: true })) throw new GoogleAuthDisabledException();
   }
 
   @Post("simulate")

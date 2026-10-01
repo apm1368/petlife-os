@@ -23,3 +23,10 @@ describe("validateEnv — security invariants", () => {
     expect(env.TRUST_PROXY).toBe("loopback");
   });
 });
+
+describe("validateEnv — development Google sign-in simulation", () => {
+  it("is off unless explicitly enabled, even outside production", () => {
+    expect(validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv).GOOGLE_DEV_SIMULATE_ENABLED).toBe(false);
+    expect(validateEnv({ ...base, NODE_ENV: "development", GOOGLE_DEV_SIMULATE_ENABLED: "true" } as NodeJS.ProcessEnv).GOOGLE_DEV_SIMULATE_ENABLED).toBe(true);
+  });
+});
