@@ -452,3 +452,10 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 .calendar-toolbar__pet select{min-height:40px;padding:0 12px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface-elevated);color:var(--text-primary);font:inherit;font-weight:600}
 .calendar-toolbar button:focus-visible,.calendar-toolbar select:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 @media(max-width:767px){.calendar-toolbar__views{display:none}}
+/* 1024–1279: same header, tighter — pet control shows the portrait only, nav links slimmer. */
+@media(min-width:1024px) and (max-width:1279px){
+ .member-header__bar{gap:16px}
+ .member-nav__link{padding:0 10px}
+ .member-nav__link::after{inset-inline:10px}
+ .pet-context__trigger>span:not(.member-nav__caret){display:none}
+}
