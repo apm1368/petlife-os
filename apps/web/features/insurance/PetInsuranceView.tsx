@@ -6,9 +6,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceApplicationDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
-import { ApiError } from "@/lib/api/client";
 import { applicationStatusTone } from "./insurance-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 export function PetInsuranceView({ petId }: { petId: string }) {
   const t = useTranslations("insurance");
@@ -49,7 +49,7 @@ export function PetInsuranceView({ petId }: { petId: string }) {
       await action();
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, (fa ? "fa" : "en"), tCommon("genericError")));
     } finally {
       setIsActing(false);
     }

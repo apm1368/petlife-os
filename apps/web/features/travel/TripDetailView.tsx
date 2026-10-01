@@ -9,11 +9,11 @@ import type { MedicalDocumentDto, TravelRequirementDto, TripDto, TripReadinessSu
 import { MedicalDocumentType, TravelRequirementStatus, TravelRequirementType, TripStatus } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
 import { healthAdvancedService } from "@/services/health-advanced.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { requirementStatusTone, tripStatusTone } from "./travel-status";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { countryName } from "@/lib/number/format-number";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const ALLOWED_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
   [TripStatus.DRAFT]: [TripStatus.PLANNING, TripStatus.CANCELLED],
@@ -94,7 +94,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
       await action();
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsActing(false);
     }
@@ -116,7 +116,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
       await travelService.updateRequirement(petId, tripId, requirementId, { linkedMedicalDocumentId: document.id });
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsActing(false);
     }

@@ -7,8 +7,9 @@ import { Button, ContextSurface, Input, Select, Skeleton } from "@petlife/ui";
 import type { PetMemoryDto } from "@petlife/types";
 import { PetMemoryType } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { DateField } from "@/features/shared/date-picker/DateField";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const MEMORY_TYPES: PetMemoryType[] = [
   PetMemoryType.PHOTO,
@@ -76,7 +77,7 @@ export function EditMemoryView({ petId, memoryId }: { petId: string; memoryId: s
       });
       router.push(`/pets/${petId}/memories/${memoryId}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
       setIsSubmitting(false);
     }
   }
@@ -92,7 +93,7 @@ export function EditMemoryView({ petId, memoryId }: { petId: string; memoryId: s
         <Select label={t("newMemory.typeLabel")} value={type} onChange={(e) => setType(e.target.value as PetMemoryType)} options={MEMORY_TYPES.map((value) => ({ value, label: t(`memoryType.${value}`) }))} />
         <Input label={t("newMemory.titleLabel")} hint={tCommon("optional")} value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input label={t("newMemory.descriptionLabel")} hint={tCommon("optional")} value={description} onChange={(e) => setDescription(e.target.value)} />
-        <Input label={t("newMemory.occurredAtLabel")} type="date" value={occurredAt} onChange={(e) => setOccurredAt(e.target.value)} />
+        <DateField label={t("newMemory.occurredAtLabel")} value={occurredAt} onChange={setOccurredAt} max={new Date().toISOString().slice(0, 10)} />
         <Input label={t("newMemory.locationLabel")} hint={tCommon("optional")} value={location} onChange={(e) => setLocation(e.target.value)} />
         <Input label={t("newMemory.tagsLabel")} hint={t("newMemory.tagsHint")} value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
         {error ? <p className="text-body text-state-urgent">{error}</p> : null}

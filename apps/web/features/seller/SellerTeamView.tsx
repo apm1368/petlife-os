@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { SellerMembershipRole, SellerTeamMemberDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const ROLES: SellerMembershipRole[] = ["OWNER", "ADMIN", "OPERATIONS", "CATALOG_MANAGER", "ORDER_MANAGER", "FINANCE", "SUPPORT", "VIEWER"] as SellerMembershipRole[];
 
@@ -48,7 +48,7 @@ export function SellerTeamView() {
       setMembers((prev) => [...(prev ?? []), member]);
       setInviteIdentifier("");
     } catch (err) {
-      setInviteError(err instanceof ApiError ? err.message : t("inviteFailed"));
+      setInviteError(apiErrorText(err, undefined, t("inviteFailed")));
     } finally {
       setInviting(false);
     }

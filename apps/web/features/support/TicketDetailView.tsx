@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import { UserFacingSupportCaseStatus, type SupportCaseUserDetailDto } from "@petlife/types";
 import { supportService } from "@/services/support.service";
-import { ApiError } from "@/lib/api/client";
 import { supportStatusTone } from "./support-status-tone";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 function formatDate(iso: string, locale: string) {
   return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
@@ -65,7 +65,7 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
       setMessageBody("");
       await load();
     } catch (err) {
-      setSendError(err instanceof ApiError ? err.message : t("detail.sendFailed"));
+      setSendError(apiErrorText(err, locale, t("detail.sendFailed")));
     } finally {
       setSending(false);
     }

@@ -41,7 +41,7 @@ function LiveRequireAuth({ children }: { children: React.ReactNode }) {
   if (status !== "authenticated") {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <Skeleton className="h-8 w-40" aria-label="Loading" />
+        <Skeleton className="h-8 w-40" aria-label={locale==="fa"?"در حال بارگذاری":"Loading"} />
       </div>
     );
   }

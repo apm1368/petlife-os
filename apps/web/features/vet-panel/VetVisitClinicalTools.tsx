@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Select, StatusLabel } from "@petlife/ui";
 import { PrescriptionRoute, WeightUnit } from "@petlife/types";
 import type { ClinicalNoteTemplateDto, DischargeSummaryDto, PatientVitalsDto, PrescriptionDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { vetPanelService, type RecordVitalsInput } from "@/services/vet-panel.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const ROUTES: PrescriptionRoute[] = [
   PrescriptionRoute.ORAL,
@@ -90,7 +90,7 @@ export function VetVisitClinicalTools({
         });
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     }
   }
 
@@ -106,7 +106,7 @@ export function VetVisitClinicalTools({
       await action();
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsBusy(false);
     }

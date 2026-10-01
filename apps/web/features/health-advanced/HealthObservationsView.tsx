@@ -5,10 +5,10 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { ObservationCategory, type PetObservationDto } from "@petlife/types";
 import { petObservationService } from "@/services/pet-observation.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { useStatusText } from "@/lib/status/use-status-text";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /** spec: "these are OWNER OBSERVATIONS, not diagnoses" — the UI labels every entry as such and never offers a "diagnosis" field. */
 export function HealthObservationsView({ petId }: { petId: string }) {
@@ -61,7 +61,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSaving(false);
     }

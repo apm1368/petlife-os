@@ -7,9 +7,9 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Skeleton } from "@petlife/ui";
 import type { PetMemoryDto } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId: string }) {
   const fmt = useInstantFormat();
@@ -55,7 +55,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
       await memoriesService.delete(petId, memoryId);
       router.push(`/pets/${petId}/memories`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
       setIsDeleting(false);
     }
   }
@@ -67,7 +67,7 @@ export function MemoryDetailView({ petId, memoryId }: { petId: string; memoryId:
       await memoriesService.restore(petId, memoryId);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsDeleting(false);
     }

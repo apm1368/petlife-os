@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceEligibilityResultDto, InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { eligibilityStatusTone, verificationStatusTone } from "./insurance-status";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * Spec hard UX rule: exclusions must be highly visible — this renders them
@@ -54,7 +54,7 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
       const application = await insuranceService.createApplication(petId, productId);
       router.push(`/pets/${petId}/insurance?applicationId=${application.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsActing(false);
     }

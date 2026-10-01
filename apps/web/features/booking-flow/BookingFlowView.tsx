@@ -16,6 +16,8 @@ import { householdsService } from "@/services/households.service";
 import { addressesService } from "@/services/addresses.service";
 import { useSessionStore } from "@/stores/session-store";
 import { categoryLabel, paymentModeLabel } from "@/features/discovery/labels";
+import { DateField } from "@/features/shared/date-picker/DateField";
+import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 
 type Step = "service" | "pets" | "time" | "details" | "review";
 const STEPS: Step[] = ["service", "pets", "time", "details", "review"];
@@ -302,16 +304,16 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
             </label>
           ) : null}
           <div className="flex flex-wrap items-end gap-3">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-bold">{isRange ? (fa ? "تاریخ ورود" : "Check-in") : fa ? "روز" : "Day"}</span>
-              <input type="date" className="rounded border border-border-subtle bg-surface-base p-2" min={dayKey(new Date())} value={date} onChange={(e) => setDate(e.target.value)} />
-            </label>
             {isRange ? (
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="font-bold">{fa ? "تاریخ خروج" : "Check-out"}</span>
-                <input type="date" className="rounded border border-border-subtle bg-surface-base p-2" min={date} value={rangeEnd} onChange={(e) => setRangeEnd(e.target.value)} />
-              </label>
-            ) : null}
+              <DateRangeField
+                label={fa ? "تاریخ ورود و خروج" : "Check-in and check-out"}
+                min={dayKey(new Date())}
+                value={{ start: date || null, end: rangeEnd || null }}
+                onChange={(v) => { setDate(v.start ?? ""); setRangeEnd(v.end ?? ""); }}
+              />
+            ) : (
+              <DateField label={fa ? "روز" : "Day"} min={dayKey(new Date())} value={date} onChange={setDate} />
+            )}
           </div>
           {!isRange ? (
             slots === null ? (

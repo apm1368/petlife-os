@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { PatientVitalsDto, VitalsTrendsDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { clinicalOwnerService } from "@/services/vet-panel.service";
 import { VitalsSparkline } from "@/features/vet-panel/VitalsSparkline";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * The owner's view of measurements taken at the clinic (Handoff 24) — the
@@ -35,7 +35,7 @@ export function HealthVitalsView({ petId }: { petId: string }) {
       setRecords(rows);
       setTrends(trendRows);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     }
   }
 

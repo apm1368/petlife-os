@@ -7,6 +7,7 @@ import { Button, Input, Select } from "@petlife/ui";
 import { CommunityReportReason } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { useSessionStore } from "@/stores/session-store";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const REASONS: CommunityReportReason[] = [
   CommunityReportReason.SCAM,
@@ -58,7 +59,7 @@ export function ReportContentPanel({ submit, successMessage }: { submit: (reason
     } catch (err) {
       if (err instanceof ApiError && err.code === "DUPLICATE_REPORT") setOutcome("duplicate");
       else if (err instanceof ApiError && err.code === "REPORT_LIMIT_REACHED") setError(t("limitReached"));
-      else setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      else setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }

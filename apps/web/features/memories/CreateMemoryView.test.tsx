@@ -20,10 +20,14 @@ describe("CreateMemoryView", () => {
     renderWithIntl(<CreateMemoryView petId="pet-1" />);
 
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "First trip to the beach" } });
-    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "2026-02-01" } });
+    // The canonical date picker: open the field, choose the 1st of this month, apply.
+    const firstOfMonth = new Date().toISOString().slice(0, 8) + "01";
+    fireEvent.click(screen.getByRole("button", { name: /^Date/ }));
+    fireEvent.click(document.querySelector(`[data-iso="${firstOfMonth}"]`)!);
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     fireEvent.click(screen.getByText("Save memory"));
 
-    await waitFor(() => expect(memoriesService.create).toHaveBeenCalledWith("pet-1", expect.objectContaining({ title: "First trip to the beach", occurredAt: "2026-02-01" })));
+    await waitFor(() => expect(memoriesService.create).toHaveBeenCalledWith("pet-1", expect.objectContaining({ title: "First trip to the beach", occurredAt: new Date().toISOString().slice(0, 8) + "01" })));
     expect(push).toHaveBeenCalledWith("/pets/pet-1/memories/memory-9");
   });
 
@@ -37,7 +41,8 @@ describe("CreateMemoryView", () => {
   it("disables submit only if the date is cleared", () => {
     renderWithIntl(<CreateMemoryView petId="pet-1" />);
 
-    fireEvent.change(screen.getByLabelText("Date"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Date/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
 
     const button = screen.getByText("Save memory").closest("button");
     expect(button?.disabled).toBe(true);

@@ -8,6 +8,7 @@ import type { ProviderAvailabilityExceptionDto, ProviderAvailabilityRuleDto } fr
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -69,7 +70,7 @@ export function ProviderAvailabilityView() {
       await providerOsService.createAvailabilityRule({ locationId, dayOfWeek: Number(dayOfWeek), startLocalTime, endLocalTime, timezone });
       await load();
     } catch (err) {
-      setRuleError(err instanceof ApiError ? err.message : t("rules.createFailed"));
+      setRuleError(apiErrorText(err, locale, t("rules.createFailed")));
     }
   }
 
@@ -103,7 +104,7 @@ export function ProviderAvailabilityView() {
         setConflictWarning({ count: Number(err.details?.count ?? 0) });
         return;
       }
-      setExceptionError(err instanceof ApiError ? err.message : t("exceptions.createFailed"));
+      setExceptionError(apiErrorText(err, locale, t("exceptions.createFailed")));
     }
   }
 

@@ -11,6 +11,7 @@ import { ApiError } from "@/lib/api/client";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { SupportOfferInbox } from "./SupportOfferInbox";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const TABS: (SupportNeedStatus | "ALL")[] = [
   "ALL",
@@ -83,7 +84,7 @@ export function MySupportNeedsView() {
       const offers = await supportNeedsService.listOffers(listingId);
       setOffersByListing((current) => ({ ...current, [listingId]: offers }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     }
   }
 
@@ -95,7 +96,7 @@ export function MySupportNeedsView() {
       setOffersByListing((current) => ({ ...current, [listingId]: offers }));
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setBusyId(null);
     }
@@ -110,7 +111,7 @@ export function MySupportNeedsView() {
       else await supportNeedsService.close(listingId);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setBusyId(null);
     }

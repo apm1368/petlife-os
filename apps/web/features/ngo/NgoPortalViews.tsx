@@ -11,6 +11,7 @@ import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { ngoService, selectNgo, selectedNgo, type NgoDonationRow, type NgoMembership, type NgoOffer, type NgoOverview, type NgoRole, type NgoVerification } from "@/services/ngo.service";
 import { OFFER_TONE } from "@/features/animal-support/SupportOfferInbox";
 import type { SupportNeedListingDto } from "@petlife/types";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type Lang = "fa" | "en";
 const useLang = () => {
@@ -325,7 +326,7 @@ export function NgoVerificationView() {
       setFiles([]);
       setMsg({ ok: true, text: fa ? "برای بررسی ارسال شد." : "Submitted for review." });
     } catch (e) {
-      setMsg({ ok: false, text: e instanceof ApiError ? e.message : fa ? "ارسال نشد." : "Not submitted." });
+      setMsg({ ok: false, text: apiErrorText(e, lang, fa ? "ارسال نشد." : "Not submitted.")});
     } finally {
       setBusy(false);
     }
@@ -371,7 +372,7 @@ export function NgoSettingsView() {
           <Input dir="ltr" label={fa ? "ایمیل رسمی" : "Official e-mail"} disabled={role !== "OWNER"} value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} />
           <Input dir="ltr" label={fa ? "تلفن رسمی" : "Official phone"} disabled={role !== "OWNER"} value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} />
           {msg ? <p role={msg.ok ? "status" : "alert"} className={`text-sm ${msg.ok ? "text-state-success" : "text-state-urgent"}`}>{msg.text}</p> : null}
-          {role === "OWNER" ? <Button onClick={() => void ngoService.updateProfile({ description: form.description.trim() || undefined, location: form.location.trim() || undefined, contactEmail: form.contactEmail.trim() || null, contactPhone: form.contactPhone.trim() || null }).then(() => setMsg({ ok: true, text: fa ? "ذخیره شد." : "Saved." })).catch((e) => setMsg({ ok: false, text: e instanceof ApiError ? e.message : fa ? "ذخیره نشد." : "Not saved." }))}>{fa ? "ذخیره" : "Save"}</Button> : null}
+          {role === "OWNER" ? <Button onClick={() => void ngoService.updateProfile({ description: form.description.trim() || undefined, location: form.location.trim() || undefined, contactEmail: form.contactEmail.trim() || null, contactPhone: form.contactPhone.trim() || null }).then(() => setMsg({ ok: true, text: fa ? "ذخیره شد." : "Saved." })).catch((e) => setMsg({ ok: false, text: apiErrorText(e, undefined, fa ? "ذخیره نشد." : "Not saved.")}))}>{fa ? "ذخیره" : "Save"}</Button> : null}
         </div>
       )}
     </NgoFrame>

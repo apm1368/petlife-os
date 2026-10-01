@@ -11,6 +11,7 @@ import { ApiError } from "@/lib/api/client";
 import { ngoService } from "@/services/ngo.service";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { addDays, todayIso } from "@/lib/date/jalali";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const CATEGORIES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -98,7 +99,7 @@ export function CreateSupportNeedView() {
       router.push("/animal-support/needs/mine");
     } catch (err) {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) setNeedsSignIn(true);
-      else setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      else setError(apiErrorText(err, locale, tCommon("genericError")));
       setIsSubmitting(false);
     }
   }

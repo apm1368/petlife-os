@@ -97,7 +97,7 @@ function OnboardingWizardInner() {
 
   if (loadError) return <ErrorRecovery title={locale === "fa" ? "اتصال به اطلاعات راه‌اندازی برقرار نشد" : "Could not load onboarding"} message="" retryLabel={locale === "fa" ? "تلاش دوباره" : "Retry"} onRetry={() => { setLoadError(false); setAttempt((value) => value + 1); }} />;
   if (!step) {
-    return <Skeleton className="h-64 w-full" aria-label="Loading onboarding" />;
+    return <Skeleton className="h-64 w-full" aria-label={locale==="fa"?"در حال آماده‌سازی":"Loading"} />;
   }
 
   function renderStep() {
@@ -162,8 +162,9 @@ function OnboardingWizardInner() {
 }
 
 export function OnboardingWizard() {
+  const locale = useLocale();
   return (
-    <Suspense fallback={<Skeleton className="h-64 w-full" aria-label="Loading onboarding" />}>
+    <Suspense fallback={<Skeleton className="h-64 w-full" aria-label={locale==="fa"?"در حال آماده‌سازی":"Loading"} />}>
       <OnboardingWizardInner />
     </Suspense>
   );

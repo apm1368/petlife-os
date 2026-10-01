@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalNoteTemplateDto, ClinicalVisitDetailDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VetVisitClinicalTools } from "@/features/vet-panel/VetVisitClinicalTools";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const STATUS_TONE: Record<string, "success" | "attention" | "neutral" | "urgent"> = {
   DRAFT: "neutral",
@@ -69,7 +69,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
       await providerClinicalService.updateVisitNotes(petId, visitId, notes);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSaving(false);
     }
@@ -82,7 +82,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
       await providerClinicalService.completeVisit(petId, visitId);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSaving(false);
     }
@@ -98,7 +98,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
       setShowAmend(false);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSaving(false);
     }
@@ -113,7 +113,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
       setShowVoid(false);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSaving(false);
     }

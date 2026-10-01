@@ -10,6 +10,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { AccountPageHeader } from "./AccountNav";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type Preset = "NONE" | "VIEW_ONLY" | "CARE_HELPER" | "FULL";
 type Member = HouseholdCollaborationDto["members"][number];
@@ -130,7 +131,7 @@ export function HouseholdCenterView() {
       setNotice(action === "resend" ? t("دعوت دوباره ارسال شد و مهلت آن تمدید شد.", "The invitation was resent with a fresh expiry.") : t("دعوت لغو شد.", "The invitation was cancelled."));
       await loadDetail();
     } catch (err) {
-      setNotice(err instanceof ApiError ? err.message : t("انجام نشد.", "That didn't work."));
+      setNotice(apiErrorText(err, undefined, t("انجام نشد.", "That didn't work.")));
     } finally {
       setBusyInvitation(null);
     }
@@ -350,7 +351,7 @@ function InviteDialog({ open, onClose, household, onSent }: { open: boolean; onC
           : t("دعوت ذخیره شد، اما ارسال پیامک و ایمیل هنوز متصل نیست؛ از او بخواهید با همین ایمیل یا موبایل وارد PET LIFE شود تا دعوت را ببیند.", "Invitation saved, but SMS and email delivery isn't connected yet. Ask them to sign in to PET LIFE with this email or phone to see it."),
       );
     } catch (err) {
-      setError(err instanceof ApiError && err.code === "ALREADY_HOUSEHOLD_MEMBER" ? t("این فرد همین حالا عضو خانواده است.", "This person is already in your household.") : err instanceof ApiError ? err.message : t("دعوت ارسال نشد.", "The invitation wasn't sent."));
+      setError(err instanceof ApiError && err.code === "ALREADY_HOUSEHOLD_MEMBER" ? t("این فرد همین حالا عضو خانواده است.", "This person is already in your household.") : apiErrorText(err, undefined, t("دعوت ارسال نشد.", "The invitation wasn't sent.")));
     } finally {
       setBusy(false);
     }

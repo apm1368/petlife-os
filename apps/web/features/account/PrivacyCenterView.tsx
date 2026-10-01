@@ -9,6 +9,7 @@ import { PasswordInput } from "@/features/auth/PasswordInput";
 import { AccountPageHeader } from "./AccountNav";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const EXPORT_STATUS: Record<PrivacyRequestStatusValue, { fa: string; en: string; tone: StatusTone }> = {
   PENDING: { fa: "در صف", en: "Queued", tone: "neutral" },
@@ -124,7 +125,7 @@ export function PrivacyCenterView() {
       if (success) setNotice(success);
       await load();
     } catch (err) {
-      setNotice(err instanceof ApiError && err.code === "EXPORT_LIMIT_REACHED" ? t("امروز چند بار دریافت داده درخواست داده‌اید؛ فردا دوباره تلاش کنید.", "You've requested several exports today; try again tomorrow.") : err instanceof ApiError ? err.message : t("انجام نشد.", "That didn't work."));
+      setNotice(err instanceof ApiError && err.code === "EXPORT_LIMIT_REACHED" ? t("امروز چند بار دریافت داده درخواست داده‌اید؛ فردا دوباره تلاش کنید.", "You've requested several exports today; try again tomorrow.") : apiErrorText(err, undefined, t("انجام نشد.", "That didn't work.")));
     } finally {
       setBusy(null);
     }
@@ -357,7 +358,7 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
     } catch (err) {
       if (err instanceof ApiError && err.code === "REAUTHENTICATION_REQUIRED") setError(t("رمز یا کد درست نیست.", "That password or code isn't right."));
       else if (err instanceof ApiError && err.code === "DELETION_BLOCKED") setError(t("هنوز مواردی باز است؛ فهرست بالا را ببینید.", "Some things are still open; see the list above."));
-      else setError(err instanceof ApiError ? err.message : t("درخواست ثبت نشد.", "The request wasn't recorded."));
+      else setError(apiErrorText(err, undefined, t("درخواست ثبت نشد.", "The request wasn't recorded.")));
     } finally {
       setBusy(false);
     }

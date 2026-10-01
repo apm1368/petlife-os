@@ -1,8 +1,8 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import { Button, Dialog, Input } from "@petlife/ui";
-import { ApiError } from "@/lib/api/client";
 import { useAccountCopy } from "./account-copy";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * The one confirmation grammar for consequential account actions (sign out
@@ -54,7 +54,7 @@ export function ConfirmActionDialog({
       setTyped("");
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("انجام نشد. دوباره تلاش کنید.", "That didn't work. Please try again."));
+      setError(apiErrorText(err, undefined, t("انجام نشد. دوباره تلاش کنید.", "That didn't work. Please try again.")));
     } finally {
       setBusy(false);
     }

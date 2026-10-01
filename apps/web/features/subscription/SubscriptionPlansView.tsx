@@ -10,6 +10,7 @@ import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { entitlementLabelKey } from "./entitlement-labels";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * Plan comparison (spec: "must not visually hide Free"). FREE is rendered
@@ -53,7 +54,7 @@ export function SubscriptionPlansView() {
       await action();
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError && err.status === 403 ? t("ownerOnly") : err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(err instanceof ApiError && err.status === 403 ? t("ownerOnly") : apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setBusyPlanId(null);
     }

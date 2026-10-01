@@ -7,6 +7,7 @@ import { usersService } from "@/services/users.service";
 import { useSessionStore } from "@/stores/session-store";
 import { AccountPageHeader } from "./AccountNav";
 import { useAccountCopy } from "./account-copy";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type ContactKind = "email" | "phone";
 
@@ -61,7 +62,7 @@ export function PersonalSettingsView() {
       const current = window.location.pathname.match(/^\/(fa|en)(?=\/|$)/)?.[1];
       if (current && current !== updated.locale) window.location.assign(window.location.pathname.replace(/^\/(fa|en)(?=\/|$)/, `/${updated.locale}`));
     } catch (err) {
-      setSaveError(err instanceof ApiError ? err.message : t("ذخیره انجام نشد. دوباره تلاش کنید.", "Could not save. Try again."));
+      setSaveError(apiErrorText(err, undefined, t("ذخیره انجام نشد. دوباره تلاش کنید.", "Could not save. Try again.")));
     } finally {
       setSaving(false);
     }

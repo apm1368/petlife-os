@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { CommunityPostType } from "@petlife/types";
 import { communityService } from "@/services/community.service";
-import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const POST_TYPES: CommunityPostType[] = [CommunityPostType.GENERAL, CommunityPostType.QUESTION, CommunityPostType.LOCAL, CommunityPostType.RESCUE, CommunityPostType.ADOPTION, CommunityPostType.MEMORY];
 
@@ -37,7 +37,7 @@ export function CreateCommunityPostView() {
       const post = await communityService.createPost({ type, title: title.trim() || undefined, body: body.trim(), mediaObjectKeys: mediaObjectKeys.length > 0 ? mediaObjectKeys : undefined });
       router.push(`/community/posts/${post.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }

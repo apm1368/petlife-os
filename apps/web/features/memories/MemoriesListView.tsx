@@ -8,10 +8,10 @@ import type { PetDto, PetMemoryDto } from "@petlife/types";
 import { PetLifecycleStatus } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
 import { petsService } from "@/services/pets.service";
-import { ApiError } from "@/lib/api/client";
 import { MemoryMediaThumb } from "./MemoryMediaThumb";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type ViewMode = "JOURNAL" | "GALLERY";
 
@@ -79,7 +79,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
       await memoriesService.restore(petId, memoryId);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setRestoringId(null);
     }

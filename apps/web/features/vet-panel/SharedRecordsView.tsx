@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { MedicalDocumentDownloadDto } from "@petlife/types";
 import { ApiError, apiFetch } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type ReceivedShare = { id: string; pet: { id: string; name: string; species: string }; scopes: string[]; documentCount: number; startsAt: string; expiresAt: string };
 type Named = { id: string; name: string };
@@ -22,7 +23,7 @@ export function SharedRecordsInboxView() {
   const locale = useLocale(); const fa = locale === "fa"; const ix = fa ? 0 : 1; const format = useFormat();
   const [shares, setShares] = useState<ReceivedShare[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const load = useCallback(async () => { setError(null); try { setShares(await apiFetch<ReceivedShare[]>("/vet-shares/received")); } catch (e) { setError(e instanceof Error ? e.message : "Unable to load"); } }, []);
+  const load = useCallback(async () => { setError(null); try { setShares(await apiFetch<ReceivedShare[]>("/vet-shares/received")); } catch (e) { setError(apiErrorText(e, undefined, "Unable to load")); } }, []);
   useEffect(() => { void load(); }, [load]);
   if (error) return <ErrorRecovery title={fa ? "پرونده‌های اشتراکی در دسترس نیست" : "Shared records unavailable"} message={error} retryLabel={fa ? "تلاش دوباره" : "Retry"} onRetry={load} />;
   if (!shares) return <Skeleton className="h-64 w-full" />;
@@ -42,12 +43,12 @@ export function SharedRecordDetailView({ petId, shareId }: { petId: string; shar
   const [error, setError] = useState<{ message: string; denied: boolean } | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const base = `/shared-pets/${petId}/vet-shares/${shareId}`;
-  const load = useCallback(async () => { setError(null); try { setRecord(await apiFetch<SharedRecord>(base)); } catch (e) { setError({ message: e instanceof Error ? e.message : "Unable to load", denied: e instanceof ApiError && (e.status === 403 || e.status === 404) }); } }, [base]);
+  const load = useCallback(async () => { setError(null); try { setRecord(await apiFetch<SharedRecord>(base)); } catch (e) { setError({ message: apiErrorText(e, undefined, "Unable to load"), denied: e instanceof ApiError && (e.status === 403 || e.status === 404) }); } }, [base]);
   useEffect(() => { void load(); }, [load]);
   async function download(documentId: string) {
     setDownloadError(null);
     try { const target = await apiFetch<MedicalDocumentDownloadDto>(`${base}/documents/${documentId}/download`); window.open(target.downloadUrl, "_blank", "noopener,noreferrer"); }
-    catch (e) { setDownloadError(e instanceof Error ? e.message : "Download denied"); }
+    catch (e) { setDownloadError(apiErrorText(e, locale, "Download denied")); }
   }
   const back = <Link className="text-brand-natural" href={`/${locale}/provider/shared-records`}>{fa ? "بازگشت به پرونده‌های اشتراکی" : "Back to shared records"}</Link>;
   if (error?.denied) return <div className="flex flex-col gap-4"><EmptyState title={fa ? "این اشتراک دیگر فعال نیست" : "This share is no longer active"} description={fa ? "دسترسی منقضی یا توسط صاحب حیوان لغو شده است." : "Access has expired or was revoked by the owner."} />{back}</div>;

@@ -7,8 +7,8 @@ import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabe
 import { PetFriendlyPlaceCategory } from "@petlife/types";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.PARK,
@@ -60,7 +60,7 @@ export function PlacesListView() {
           const result = await placesService.nearby({ latitude: position.coords.latitude, longitude: position.coords.longitude, category: category || undefined, pageSize: 50 });
           setPlaces(result.items);
         } catch (err) {
-          setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+          setError(apiErrorText(err, undefined, tCommon("genericError")));
         } finally {
           setIsSearchingNearby(false);
         }

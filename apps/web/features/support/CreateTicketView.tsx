@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button, ContextSurface, Select } from "@petlife/ui";
 import { SupportCaseCategory } from "@petlife/types";
 import { supportService } from "@/services/support.service";
-import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * Create Ticket. Contextual entry points ("Get support" on Order/Booking
@@ -51,7 +51,7 @@ export function CreateTicketView() {
       });
       router.push(`/${locale}/support/tickets/${created.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("create.failed"));
+      setError(apiErrorText(err, locale, t("create.failed")));
     } finally {
       setSubmitting(false);
     }

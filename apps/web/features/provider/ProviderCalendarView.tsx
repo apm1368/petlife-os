@@ -8,6 +8,7 @@ import type { ProviderAvailabilityExceptionDto, ProviderBookingSummaryDto } from
 import { providerOsService, type ProviderStaffMember } from "@/services/provider-os.service";
 import { bookingStatusLabel } from "@/features/discovery/labels";
 import { DateReading } from "@/lib/date/date-reading";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type View = "day" | "week" | "month";
 const DAY_MS = 86400_000;
@@ -126,7 +127,7 @@ export function ProviderCalendarView() {
       setBlockOpen(false);
       await load();
     } catch (e) {
-      setBlockError(e instanceof Error ? e.message : fa ? "ثبت نشد" : "Could not save");
+      setBlockError(apiErrorText(e, locale, fa ? "ثبت نشد" : "Could not save"));
     } finally {
       setBusy(false);
     }

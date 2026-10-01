@@ -7,9 +7,9 @@ import { formatDay } from "@/lib/date/jalali";
 import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentDto, LostPetSightingDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { lostPetStatusTone } from "./lost-pet-status";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const ACTIONS_BY_STATUS: Record<string, ("markSearching" | "markFound" | "reunite" | "close" | "share")[]> = {
   // Batch 6: an owner who finds the pet themselves can record the reunion directly.
@@ -58,7 +58,7 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
       await action();
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, lang, tCommon("genericError")));
     } finally {
       setIsActing(false);
     }

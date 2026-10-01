@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, Input } from "@petlife/ui";
 import { lostPetService } from "@/services/lost-pet.service";
-import { ApiError } from "@/lib/api/client";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { addDays, formatDay, todayIso } from "@/lib/date/jalali";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type Step = "where" | "photo" | "describe" | "contact" | "review";
 const STEPS: Step[] = ["where", "photo", "describe", "contact", "review"];
@@ -73,7 +73,7 @@ export function ReportLostPetView({ petId }: { petId: string }) {
       });
       router.push(`/pets/${petId}/lost/${incident.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, lang, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }

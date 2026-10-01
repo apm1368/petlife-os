@@ -12,6 +12,7 @@ import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { ShareBar } from "@/features/shared/ShareBar";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { SupportOfferInbox } from "./SupportOfferInbox";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * HELP / FULFILLMENT PATTERN — the publisher's workspace for one listing: status, progress,
@@ -48,7 +49,7 @@ export function ManageSupportNeedView({ listingId }: { listingId: string }) {
       await load();
       setMsg({ ok: true, text: ok });
     } catch (e) {
-      setMsg({ ok: false, text: e instanceof ApiError ? e.message : fa ? "انجام نشد." : "That did not work." });
+      setMsg({ ok: false, text: apiErrorText(e, lang, fa ? "انجام نشد." : "That did not work.")});
     } finally {
       setBusyId(null);
     }

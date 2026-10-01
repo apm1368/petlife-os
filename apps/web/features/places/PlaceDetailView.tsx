@@ -9,6 +9,7 @@ import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
 import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 export function PlaceDetailView({ placeId }: { placeId: string }) {
   const t = useTranslations("places");
@@ -70,7 +71,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
       if (err instanceof ApiError && err.status === 401) {
         setRequiresAuth(true);
       } else {
-        setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+        setError(apiErrorText(err, lang, tCommon("genericError")));
       }
     } finally {
       setIsActing(false);

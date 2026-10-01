@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalEstimateDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { clinicalOwnerService } from "@/services/vet-panel.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const STATUS_TONE: Record<ClinicalEstimateDto["status"], "neutral" | "attention" | "success" | "urgent"> = {
   DRAFT: "neutral",
@@ -43,7 +43,7 @@ export function HealthEstimatesView({ petId }: { petId: string }) {
     try {
       setEstimates(await clinicalOwnerService.listEstimates(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     }
   }
 
@@ -64,7 +64,7 @@ export function HealthEstimatesView({ petId }: { petId: string }) {
       }
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setBusyId(null);
     }

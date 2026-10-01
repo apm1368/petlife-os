@@ -5,9 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { PaginatedDto, ProviderPatientSummaryDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const PAGE_SIZE = 20;
 
@@ -41,7 +41,7 @@ export function VetPatientRegistryView() {
     try {
       setResult(await vetPanelService.listPatients({ q: submittedQuery || undefined, hospitalizedOnly: hospitalizedOnly || undefined, page, pageSize: PAGE_SIZE }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     }
   }
 

@@ -14,7 +14,7 @@ export function AccountOverviewView() {
   const load = useCallback(async () => { setFailed(false); try { setData(await accountService.overview()); } catch { setFailed(true); } }, []);
   useEffect(() => { void load(); }, [load]);
   if (failed) return <ErrorRecovery title={locale === "fa" ? "حساب کاربری" : "Account"} message="" retryLabel={locale === "fa" ? "تلاش دوباره" : "Retry"} onRetry={load} />;
-  if (!data) return <Skeleton className="h-96 w-full" aria-label="loading" />;
+  if (!data) return <Skeleton className="h-96 w-full" aria-label={locale==="fa"?"در حال بارگذاری":"Loading"} />;
   const home = data.households[0];
   return <div className="account-stack">
     <AccountPageHeader eyebrow={locale === "fa" ? "مرکز حساب" : "ACCOUNT CENTER"} title={locale === "fa" ? `سلام ${data.user.displayName}` : `Hello, ${data.user.displayName}`} description={locale === "fa" ? "هویت، امنیت و دسترسی‌های خانواده را یک‌جا و شفاف مدیریت کنید." : "Manage identity, security and household access in one clear place."} />

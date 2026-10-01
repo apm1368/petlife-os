@@ -22,6 +22,7 @@ import { commerceService } from "@/services/commerce.service";
 import { addressesService } from "@/services/addresses.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type Step =
   | "address"
@@ -136,7 +137,7 @@ export function CheckoutView() {
         router.push(`/${locale}/cart`);
         return;
       }
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("address");
     }
   }
@@ -149,7 +150,7 @@ export function CheckoutView() {
       setShippingOptions(options);
       setStep("shipping");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("review");
     }
   }
@@ -163,7 +164,7 @@ export function CheckoutView() {
       setShippingOptions(options);
       setCheckout(updatedCheckout);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
     } finally {
       setShippingQuoteSelectingId(null);
     }
@@ -176,7 +177,7 @@ export function CheckoutView() {
       const options = await commerceService.refreshShippingOptions(checkout.id);
       setShippingOptions(options);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
     }
   }
 
@@ -188,7 +189,7 @@ export function CheckoutView() {
       setPaymentOptions(options);
       setStep("method");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("review");
     }
   }
@@ -200,7 +201,7 @@ export function CheckoutView() {
       await commerceService.createPaymentIntent(checkout.id, provider, paymentIntentIdempotencyKey);
       setStep("payment");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("method");
     }
   }
@@ -219,7 +220,7 @@ export function CheckoutView() {
         await loadPlans(intent.id);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("method");
     }
   }
@@ -239,7 +240,7 @@ export function CheckoutView() {
       setFinancingIntent(updated);
       setStep("financing-authorize");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("financing-plans");
     }
   }
@@ -260,7 +261,7 @@ export function CheckoutView() {
         setStep("financing-declined");
       }
     } catch (err) {
-      setFailureMessage(err instanceof ApiError ? err.message : t("financingDeclined.generic"));
+      setFailureMessage(apiErrorText(err, locale, t("financingDeclined.generic")));
       setStep("financing-declined");
     }
   }
@@ -293,7 +294,7 @@ export function CheckoutView() {
         setStep("failed");
       }
     } catch (err) {
-      setFailureMessage(err instanceof ApiError ? err.message : t("paymentFailed.generic"));
+      setFailureMessage(apiErrorText(err, locale, t("paymentFailed.generic")));
       setStep("failed");
     }
   }

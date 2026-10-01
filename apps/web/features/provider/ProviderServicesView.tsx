@@ -7,6 +7,7 @@ import type { ProviderServiceDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
 import { ProviderResourcesSection, ProviderServiceSettings } from "./ProviderServiceSettings";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * Minimal service admin (spec sections 24-25) — editable fields only, no
@@ -51,7 +52,7 @@ export function ProviderServicesView() {
       const updated = await providerOsService.updateService(service.id, { isActive: !service.isActive });
       setServices((prev) => prev?.map((s) => (s.id === service.id ? updated : s)) ?? null);
     } catch (err) {
-      setSaveError(err instanceof ApiError ? err.message : t("saveFailed"));
+      setSaveError(apiErrorText(err, (fa ? "fa" : "en"), t("saveFailed")));
     }
   }
 
@@ -67,7 +68,7 @@ export function ProviderServicesView() {
       setServices((prev) => prev?.map((s) => (s.id === service.id ? updated : s)) ?? null);
       setEditingId(null);
     } catch (err) {
-      setSaveError(err instanceof ApiError && err.code === "PROVIDER_ACCESS_DENIED" ? t("ownerOnly") : err instanceof ApiError ? err.message : t("saveFailed"));
+      setSaveError(err instanceof ApiError && err.code === "PROVIDER_ACCESS_DENIED" ? t("ownerOnly") : apiErrorText(err, (fa ? "fa" : "en"), t("saveFailed")));
     } finally {
       setIsSaving(false);
     }

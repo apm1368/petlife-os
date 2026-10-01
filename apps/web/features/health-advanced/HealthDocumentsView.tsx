@@ -5,9 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { MedicalDocumentType, SourceType, type MedicalDocumentDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { documentTypeLabel } from "./document-labels";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /** spec: "private medical documents must never be publicly exposed" — download always goes through a freshly-minted signed URL, never a stored/cached link. */
 export function HealthDocumentsView({ petId }: { petId: string }) {
@@ -51,7 +51,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, lang, tCommon("genericError")));
     } finally {
       setIsUploading(false);
     }
@@ -62,7 +62,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
       const { downloadUrl } = await healthAdvancedService.downloadDocument(petId, documentId);
       window.open(downloadUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, lang, tCommon("genericError")));
     }
   }
 

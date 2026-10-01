@@ -8,7 +8,7 @@ import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { addDays, todayIso } from "@/lib/date/jalali";
 import { TravelMode } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
-import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const TRAVEL_MODES: TravelMode[] = [TravelMode.AIR, TravelMode.ROAD, TravelMode.RAIL, TravelMode.SEA, TravelMode.OTHER];
 
@@ -48,7 +48,7 @@ export function NewTripView({ petId }: { petId: string }) {
       });
       router.push(`/pets/${petId}/travel/${trip.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }

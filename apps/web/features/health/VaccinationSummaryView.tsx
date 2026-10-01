@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select, Skeleton } from "@petlife/ui";
 import { VaccinationStatus, type VaccinationSummaryDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
-import { DateReading } from "@/lib/date/date-reading";
+import { DateField } from "@/features/shared/date-picker/DateField";
 
 export function VaccinationSummaryView({ petId }: { petId: string }) {
   const t = useTranslations("health.vaccinationSummary");
@@ -58,10 +58,8 @@ export function VaccinationSummaryView({ petId }: { petId: string }) {
             label: tHealth(`vaccinationStatus.${value}`),
           }))}
         />
-        <Input label={t("nextDueDate")} type="date" value={nextDueDate} onChange={(e) => setNextDueDate(e.target.value)} />
-        <DateReading value={nextDueDate} />
-        <Input label={t("lastKnownDate")} type="date" value={lastKnownDate} onChange={(e) => setLastKnownDate(e.target.value)} />
-        <DateReading value={lastKnownDate} />
+        <DateField label={t("nextDueDate")} value={nextDueDate} onChange={setNextDueDate} />
+        <DateField label={t("lastKnownDate")} value={lastKnownDate} onChange={setLastKnownDate} max={new Date().toISOString().slice(0, 10)} />
         <Input label={t("notes")} value={notes} onChange={(e) => setNotes(e.target.value)} />
         <Button variant="primary" isLoading={isSaving} onClick={save}>
           {t("save")}

@@ -5,13 +5,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalAlertSeverity, ProviderPatientRecordDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { providerClinicalService } from "@/services/provider-clinical.service";
 import { VitalsSparkline } from "./VitalsSparkline";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { useStatusText } from "@/lib/status/use-status-text";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type Tab = "summary" | "problems" | "vitals" | "prescriptions" | "visits" | "financial";
 
@@ -84,7 +84,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
       const visit = await providerClinicalService.startVisit({ petId, bookingId });
       router.push(`/${locale}/provider/visits/${visit.id}?petId=${petId}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
       setIsBusy(false);
     }
   }
@@ -98,7 +98,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
       const admission = await vetPanelService.admitPatient({ petId, reasonForAdmission: reason.trim() });
       router.push(`/${locale}/provider/hospitalizations/${admission.id}?petId=${petId}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
       setIsBusy(false);
     }
   }

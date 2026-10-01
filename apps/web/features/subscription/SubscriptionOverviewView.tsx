@@ -13,6 +13,7 @@ import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { entitlementLabelKey } from "./entitlement-labels";
 import { ConfirmActionDialog } from "@/features/account/ConfirmActionDialog";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
   [SubscriptionStatus.TRIALING]: "neutral",
@@ -96,7 +97,7 @@ export function SubscriptionOverviewView() {
       const updated = await subscriptionService.resume(householdId);
       setSub(updated);
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setActionBusy(false);
     }

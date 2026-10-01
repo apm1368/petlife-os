@@ -6,12 +6,12 @@ import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@petlife/ui";
 import type { SupportCampaignDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { randomId } from "@/lib/id/random-id";
 import { localizeDigits } from "@/lib/date/jalali";
 import { animalSupportService } from "@/services/animal-support.service";
 import { useSessionStore } from "@/stores/session-store";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const PRESETS_TOMAN = [100_000, 300_000, 500_000, 1_000_000];
 type Step = "amount" | "review" | "done";
@@ -69,7 +69,7 @@ export function DonationPanel({ campaign, need, onDonated }: { campaign: Support
         setKey(randomId());
       }
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : fa ? "پرداخت انجام نشد." : "The payment did not go through.");
+      setError(apiErrorText(e, lang, fa ? "پرداخت انجام نشد." : "The payment did not go through."));
       setKey(randomId());
     } finally {
       setBusy(false);

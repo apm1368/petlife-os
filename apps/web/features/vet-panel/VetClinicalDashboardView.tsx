@@ -5,9 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalDashboardDto, TriageLevel } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * The clinical whiteboard — "who is in the building and what is overdue".
@@ -41,7 +41,7 @@ export function VetClinicalDashboardView() {
     try {
       setDashboard(await vetPanelService.getDashboard());
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     }
   }
 

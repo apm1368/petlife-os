@@ -13,6 +13,7 @@ import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
 import { lostPetStatusTone } from "./lost-pet-status";
 import { SystemState } from "@/features/system/SystemState";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const SPECIES: Record<string, [string, string]> = { DOG: ["سگ", "Dog"], CAT: ["گربه", "Cat"], OTHER: ["سایر", "Other"] };
 
@@ -71,7 +72,7 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
       });
       setSubmitted(true);
     } catch (err) {
-      setSubmitError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setSubmitError(apiErrorText(err, lang, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }

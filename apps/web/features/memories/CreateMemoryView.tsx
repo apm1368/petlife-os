@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { PetMemoryType, PetMemoryVisibility } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
-import { ApiError } from "@/lib/api/client";
 import { parseTags } from "./EditMemoryView";
+import { DateField } from "@/features/shared/date-picker/DateField";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const MEMORY_TYPES: PetMemoryType[] = [
   PetMemoryType.PHOTO,
@@ -63,7 +64,7 @@ export function CreateMemoryView({ petId }: { petId: string }) {
       });
       router.push(`/pets/${petId}/memories/${memory.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +78,7 @@ export function CreateMemoryView({ petId }: { petId: string }) {
         <Select label={t("newMemory.typeLabel")} value={type} onChange={(e) => setType(e.target.value as PetMemoryType)} options={MEMORY_TYPES.map((value) => ({ value, label: t(`memoryType.${value}`) }))} />
         <Input label={t("newMemory.titleLabel")} hint={tCommon("optional")} value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input label={t("newMemory.descriptionLabel")} hint={tCommon("optional")} value={description} onChange={(e) => setDescription(e.target.value)} />
-        <Input label={t("newMemory.occurredAtLabel")} type="date" value={occurredAt} onChange={(e) => setOccurredAt(e.target.value)} />
+        <DateField label={t("newMemory.occurredAtLabel")} value={occurredAt} onChange={setOccurredAt} max={new Date().toISOString().slice(0, 10)} />
         <Input label={t("newMemory.locationLabel")} hint={tCommon("optional")} value={location} onChange={(e) => setLocation(e.target.value)} />
         <Input label={t("newMemory.tagsLabel")} hint={t("newMemory.tagsHint")} value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
         <div className="flex flex-col gap-1.5">

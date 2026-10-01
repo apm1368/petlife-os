@@ -459,3 +459,8 @@ ol.activity-list{margin:0;padding:0;list-style:none}
  .member-nav__link::after{inset-inline:10px}
  .pet-context__trigger>span:not(.member-nav__caret){display:none}
 }
+/* Add pet: a short, calm form — one column at a readable width. */
+.add-pet{display:flex;flex-direction:column;gap:20px;max-width:560px}
+.add-pet__species{margin:0;padding:0;border:0}
+.add-pet__species legend{margin-bottom:8px;color:var(--text-secondary);font-size:.86rem;font-weight:600}
+.add-pet__species>div{display:grid;grid-template-columns:1fr 1fr;gap:8px}

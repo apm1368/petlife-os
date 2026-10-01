@@ -7,10 +7,10 @@ import { Button, ContextSurface, EmptyState, Input, Skeleton } from "@petlife/ui
 import { CommunityReactionType } from "@petlife/types";
 import type { CommunityCommentDto, CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
-import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { useSessionStore } from "@/stores/session-store";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const REACTIONS: CommunityReactionType[] = [CommunityReactionType.LIKE, CommunityReactionType.LOVE, CommunityReactionType.HELPFUL];
 
@@ -66,7 +66,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
       }
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsReacting(false);
     }
@@ -81,7 +81,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
       setCommentBody("");
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsCommenting(false);
     }

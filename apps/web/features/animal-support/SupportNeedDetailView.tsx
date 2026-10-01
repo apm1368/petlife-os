@@ -15,6 +15,7 @@ import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
 import { ShareBar } from "@/features/shared/ShareBar";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const HELP_TYPES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -90,7 +91,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
     } catch (err) {
       // 401/403 here means "sign in first", not a broken form.
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) setNeedsSignIn(true);
-      else setOfferError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      else setOfferError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsOffering(false);
     }

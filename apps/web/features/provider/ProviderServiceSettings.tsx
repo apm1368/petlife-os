@@ -7,6 +7,7 @@ import type { ProviderServiceDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerOsService, type ProviderResource } from "@/services/provider-os.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const RESOURCE_TYPES: Record<string, [string, string]> = {
   EXAM_ROOM: ["اتاق معاینه", "Exam room"],
@@ -39,7 +40,7 @@ export function ProviderServiceSettings({ service, onSaved }: { service: Provide
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const fail = (e: unknown) => setMessage({ tone: "error", text: e instanceof ApiError && e.code === "PROVIDER_ACCESS_DENIED" ? (fa ? "فقط مالک مجموعه می‌تواند تغییر دهد." : "Only the organization owner can change this.") : e instanceof ApiError ? e.message : fa ? "ذخیره نشد." : "Could not save." });
+  const fail = (e: unknown) => setMessage({ tone: "error", text: e instanceof ApiError && e.code === "PROVIDER_ACCESS_DENIED" ? (fa ? "فقط مالک مجموعه می‌تواند تغییر دهد." : "Only the organization owner can change this.") : apiErrorText(e, (fa ? "fa" : "en"), fa ? "ذخیره نشد." : "Could not save.")});
 
   async function savePolicy() {
     setBusy(true);
@@ -170,7 +171,7 @@ export function ProviderResourcesSection({ locationId }: { locationId: string | 
       setDraft({ ...draft, name: "" });
       load();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : fa ? "ثبت نشد" : "Could not save");
+      setError(apiErrorText(e, (fa ? "fa" : "en"), fa ? "ثبت نشد" : "Could not save"));
     }
   }
 
@@ -180,7 +181,7 @@ export function ProviderResourcesSection({ locationId }: { locationId: string | 
       await providerOsService.updateResource(r.id, { isActive: !r.isActive });
       load();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : fa ? "ذخیره نشد" : "Could not save");
+      setError(apiErrorText(e, (fa ? "fa" : "en"), fa ? "ذخیره نشد" : "Could not save"));
     }
   }
 

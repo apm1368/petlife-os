@@ -5,10 +5,10 @@ import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { TreatmentTaskStatus, TreatmentTaskType } from "@petlife/types";
 import type { HospitalizationDetailDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { TRIAGE_TONE } from "./VetClinicalDashboardView";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const TASK_TYPES: TreatmentTaskType[] = [
   TreatmentTaskType.MEDICATION,
@@ -61,7 +61,7 @@ export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitaliz
     try {
       setDetail(await vetPanelService.getHospitalization(petId, hospitalizationId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     }
   }
 
@@ -77,7 +77,7 @@ export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitaliz
       await action();
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsBusy(false);
     }
