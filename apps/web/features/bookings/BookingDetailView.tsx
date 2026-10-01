@@ -16,6 +16,7 @@ import { petsService } from "@/services/pets.service";
 import { bookingStatusLabel, bookingStatusTone, paymentModeLabel, TIMELINE_ACTOR } from "@/features/discovery/labels";
 import { errorMessage } from "@/features/booking-flow/BookingFlowView";
 import { DateField } from "@/features/shared/date-picker/DateField";
+import { BackLink } from "@/features/shared/BackLink";
 
 const CANCELLABLE = new Set(["PENDING_CONFIRMATION", "REQUESTED", "AWAITING_PAYMENT", "CONFIRMED"]);
 const RECURRING_CATEGORIES = new Set(["WALKING", "TRAINING", "GROOMING"]);
@@ -124,7 +125,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
       {notice ? <p role="status" className="text-brand-natural">{notice}</p> : null}
 
       <header className="flex flex-col gap-2 border-b border-border-subtle pb-4">
-        <Link href={`/${locale}/bookings`} className="text-sm text-brand-natural">← {fa ? "نوبت‌های من" : "My bookings"}</Link>
+        <BackLink href={`/${locale}/bookings`} label={fa ? "نوبت‌های من" : "My bookings"} />
         <h1 className="text-page-title text-text-primary">{booking.serviceName ?? booking.service?.name}{booking.variantName ? ` — ${booking.variantName}` : ""}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <StatusLabel tone={bookingStatusTone(s)}>{bookingStatusLabel(s, fa)}</StatusLabel>

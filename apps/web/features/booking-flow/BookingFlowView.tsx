@@ -18,6 +18,9 @@ import { useSessionStore } from "@/stores/session-store";
 import { categoryLabel, paymentModeLabel } from "@/features/discovery/labels";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
+import { BackLink } from "@/features/shared/BackLink";
+import { Stepper } from "@/features/shared/Stepper";
+import { formatDay } from "@/lib/date/jalali";
 
 type Step = "service" | "pets" | "time" | "details" | "review";
 const STEPS: Step[] = ["service", "pets", "time", "details", "review"];
@@ -216,17 +219,12 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   };
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <Link href={`/${locale}/providers/${providerId}`} className="text-sm text-brand-natural">← {profile.name}</Link>
+    <div className="flow-layout">
+    <div className="flow-main">
+      <header className="flex flex-col gap-3">
+        <BackLink href={`/${locale}/providers/${providerId}`} label={profile.name} />
         <h1 className="text-page-title">{fa ? "رزرو نوبت" : "Book an appointment"}</h1>
-        <ol className="flex flex-wrap gap-2 text-sm" aria-label={fa ? "مراحل رزرو" : "Booking steps"}>
-          {STEPS.map((s, i) => (
-            <li key={s} aria-current={s === step ? "step" : undefined} className={`rounded-full px-3 py-1 ${s === step ? "bg-brand-natural text-white" : i < stepIndex ? "bg-surface-subtle text-text-primary" : "text-text-secondary"}`}>
-              {(i + 1).toLocaleString(locale)}. {STEP_LABEL[s][fa ? 0 : 1]}
-            </li>
-          ))}
-        </ol>
+        <Stepper steps={STEPS.map((s) => STEP_LABEL[s][fa ? 0 : 1])} current={stepIndex} label={fa ? "مراحل رزرو" : "Booking steps"} />
       </header>
 
       {hold && step !== "review" && step !== "details" ? null : hold ? (
@@ -247,7 +245,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
           {profile.services.map((s) => (
             <label key={s.id} className={`flex cursor-pointer flex-col gap-1 rounded-md border p-4 ${s.id === serviceId ? "border-brand-natural" : "border-border-subtle"}`}>
               <span className="flex items-center gap-3"><input type="radio" name="service" checked={s.id === serviceId} onChange={() => { setServiceId(s.id); setVariantId(null); }} /><span className="font-bold">{s.name}</span></span>
-              <span className="text-sm text-text-secondary">{categoryLabel(s.category, fa)} · {s.durationMinutes.toLocaleString(locale)} {fa ? "دقیقه" : "min"} · {s.startingPrice !== null ? formatCurrency(s.startingPrice, locale) : fa ? "قیمت پس از استعلام" : "Price on request"}</span>
+              <span className="text-sm text-text-secondary">{categoryLabel(s.category, fa)} · {s.durationMinutes.toLocaleString(locale)} {fa ? "دقیقه" : "min"} · {s.startingPrice ? formatCurrency(s.startingPrice, locale) : fa ? "قیمت پس از استعلام" : "Price on request"}</span>
             </label>
           ))}
           {service?.variants.length ? (
@@ -410,6 +408,19 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
           <Button disabled={!canContinue[step] || busy} onClick={() => (step === "pets" && !requireSession() ? undefined : setStep(STEPS[stepIndex + 1]!))}>{fa ? "ادامه" : "Continue"}</Button>
         )}
       </footer>
+    </div>
+    <aside className="flow-summary" aria-label={fa ? "خلاصهٔ رزرو" : "Booking summary"}>
+      <h2>{fa ? "خلاصهٔ رزرو" : "Your booking"}</h2>
+      <dl>
+        <div><dt>{fa ? "ارائه‌دهنده" : "Provider"}</dt><dd>{profile.name}</dd></div>
+        <div><dt>{fa ? "خدمت" : "Service"}</dt><dd className={service ? "" : "is-empty"}>{service ? `${service.name}${variant ? ` — ${variant.name}` : ""}` : fa ? "انتخاب نشده" : "Not chosen"}</dd></div>
+        <div><dt>{fa ? "حیوان" : "Pet"}</dt><dd className={petIds.length ? "" : "is-empty"}>{petIds.length ? (pets?.filter((p) => petIds.includes(p.id)).map((p) => p.name).join(fa ? "، " : ", ") ?? "") : fa ? "انتخاب نشده" : "Not chosen"}</dd></div>
+        <div><dt>{fa ? "زمان" : "When"}</dt><dd className={hold || slot || (isRange && rangeEnd) ? "" : "is-empty"}>{hold ? fmtDateTime(hold.slotStart, hold.timezone) : slot ? fmtDateTime(slot.startAt, slot.timezone) : isRange && rangeEnd ? `${formatDay(date, fa ? "fa" : "en")} — ${formatDay(rangeEnd, fa ? "fa" : "en")}` : fa ? "انتخاب نشده" : "Not chosen"}</dd></div>
+        {service ? <div><dt>{fa ? "مدت" : "Duration"}</dt><dd>{`${(variant?.durationMinutes ?? service.durationMinutes).toLocaleString(locale)} ${fa ? "دقیقه" : "min"}`}</dd></div> : null}
+      </dl>
+      <div className="flow-summary__total"><span>{fa ? "مبلغ" : "Price"}</span><strong>{total ? formatCurrency(total, locale) : fa ? "پس از استعلام" : "On request"}</strong></div>
+      {service ? <p className="flow-summary__note">{service.cancellationPolicy ?? (fa ? `لغو رایگان تا ${service.freeCancellationHours.toLocaleString(locale)} ساعت قبل از نوبت.` : `Free cancellation up to ${service.freeCancellationHours} hours before.`)}</p> : null}
+    </aside>
     </div>
   );
 }

@@ -232,7 +232,12 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
               <li key={p.id} className="experience-card relative flex flex-col">
                 <Link href={`/${locale}/providers/${p.id}`} className="flex flex-1 flex-col focus-visible:outline-none">
                   <div className="experience-card__media">
-                    <Image unoptimized={Boolean(p.coverImageUrl)} src={p.coverImageUrl ?? FALLBACK_COVER[category ?? p.services[0]?.category ?? ""] ?? "/images/experience/grooming-hero.png"} alt="" fill sizes="(max-width:768px) 100vw, 33vw" />
+                    {p.coverImageUrl ? (
+                      <Image unoptimized src={p.coverImageUrl} alt="" fill sizes="(max-width:768px) 100vw, 33vw" />
+                    ) : (
+                      // No photo of their own: a monogram, never a stock photo that implies a different place.
+                      <span className="provider-monogram" aria-hidden="true">{p.name.trim().charAt(0)}</span>
+                    )}
                   </div>
                   <div className="experience-card__body flex flex-1 flex-col gap-2">
                     <div className="experience-card__row">
@@ -247,9 +252,9 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                       )}
                     </div>
                     <h3 className="text-section-title text-text-primary">{p.name}</h3>
-                    <p className="text-sm text-text-secondary">{providerTypeLabel(p.type, fa)} · {p.services.slice(0, 3).map((s) => s.name).join("، ")}</p>
+                    <p className="text-sm text-text-secondary">{providerTypeLabel(p.type, fa)} · {p.services.slice(0, 3).map((s) => s.name).join(fa ? "، " : ", ")}</p>
                     <div className="experience-meta">
-                      {p.location ? <span><MapPin size={14} aria-hidden="true" />{[p.location.region, p.location.city].filter(Boolean).join("، ")}{p.distanceKm !== null ? ` · ${p.distanceKm.toLocaleString(locale)} ${fa ? "کیلومتر" : "km"}` : ""}</span> : null}
+                      {p.location ? <span><MapPin size={14} aria-hidden="true" />{[p.location.region, p.location.city].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${p.distanceKm.toLocaleString(locale)} ${fa ? "کیلومتر" : "km"}` : ""}</span> : null}
                       <span><Clock3 size={14} aria-hidden="true" />{p.nextAvailableAt ? fmtTime(p.nextAvailableAt) : fa ? "در ۷ روز آینده زمان آزاد ندارد" : "No opening in the next 7 days"}</span>
                       {p.homeVisit ? <span><House size={14} aria-hidden="true" />{fa ? "خدمت در منزل" : "Home visits"}</span> : null}
                     </div>
@@ -257,7 +262,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                       {p.petTypes.map((t) => (t === "DOG" ? (fa ? "سگ" : "Dogs") : fa ? "گربه" : "Cats")).join(fa ? " و " : " & ")}
                       {p.completedBookings ? ` · ${p.completedBookings.toLocaleString(locale)} ${fa ? "نوبت انجام‌شده" : "completed bookings"}` : ""}
                     </p>
-                    <div className="experience-price mt-auto">{p.startingPrice !== null ? `${fa ? "از" : "From"} ${formatCurrency(p.startingPrice, locale)}` : fa ? "قیمت پس از استعلام" : "Price on request"}</div>
+                    <div className="experience-price mt-auto">{p.startingPrice ? `${fa ? "از" : "From"} ${formatCurrency(p.startingPrice, locale)}` : fa ? "قیمت پس از استعلام" : "Price on request"}</div>
                   </div>
                 </Link>
                 <button type="button" onClick={() => void toggleFavorite(p.id)} aria-pressed={favorites.has(p.id)} aria-label={favorites.has(p.id) ? (fa ? `حذف ${p.name} از ذخیره‌ها` : `Remove ${p.name} from saved`) : fa ? `ذخیره ${p.name}` : `Save ${p.name}`} className="absolute end-3 top-3 rounded-full bg-surface-base/90 p-2 shadow-sm">

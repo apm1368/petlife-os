@@ -49,8 +49,9 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
     ...(profile.faqs.length ? [{ id: "faq", fa: "پرسش‌ها", en: "FAQ" }] : []),
   ];
 
+  const lowestPrice = profile.services.map((sv) => sv.startingPrice).filter((p): p is number => !!p).sort((a, b) => a - b)[0] ?? null;
   return (
-    <article className="mx-auto flex max-w-5xl flex-col gap-8 pb-28 lg:pb-8">
+    <article className="provider-profile">
       <header className="flex flex-col gap-5 border-b border-border-subtle pb-6">
         {profile.coverImageUrl ? (
           <div className="relative aspect-[3/1] w-full overflow-hidden rounded-lg bg-surface-subtle">
@@ -74,7 +75,6 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
               </div>
             </div>
           </div>
-          <Link href={bookHref()} className="hidden rounded-md bg-brand-natural px-6 py-3 font-bold text-white lg:inline-block">{fa ? "رزرو نوبت" : "Book"}</Link>
         </div>
         <nav aria-label={fa ? "بخش‌های پروفایل" : "Profile sections"} className="-mx-1 flex gap-1 overflow-x-auto">
           {sections.map((s) => (
@@ -112,7 +112,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
                   <p className="text-sm text-text-secondary">{categoryLabel(s.category, fa)} · <Clock3 size={13} aria-hidden="true" className="inline" /> {s.durationMinutes.toLocaleString(locale)} {fa ? "دقیقه" : "min"}{s.homeVisit ? <> · <House size={13} aria-hidden="true" className="inline" /> {fa ? "در منزل" : "At home"}</> : null}</p>
                 </div>
                 <div className="text-end">
-                  <p className="font-bold">{s.startingPrice !== null ? `${s.variants.length ? (fa ? "از " : "From ") : ""}${formatCurrency(s.startingPrice, locale)}` : fa ? "قیمت پس از استعلام" : "Price on request"}</p>
+                  <p className="font-bold">{s.startingPrice ? `${s.variants.length ? (fa ? "از " : "From ") : ""}${formatCurrency(s.startingPrice, locale)}` : fa ? "قیمت پس از استعلام" : "Price on request"}</p>
                   <p className="text-xs text-text-secondary">{paymentModeLabel(s.paymentMode, fa)}{s.bookingMode === "REQUEST" ? (fa ? " · نیازمند تأیید ارائه‌دهنده" : " · provider approval required") : fa ? " · رزرو فوری" : " · instant booking"}</p>
                 </div>
               </div>
@@ -120,7 +120,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
               {s.variants.length ? (
                 <ul className="flex flex-wrap gap-2 text-sm" aria-label={fa ? "گزینه‌ها" : "Options"}>
                   {s.variants.map((v) => (
-                    <li key={v.id} className="rounded border border-border-subtle px-3 py-1">{v.name} · {v.durationMinutes.toLocaleString(locale)} {fa ? "دقیقه" : "min"}{v.priceAmount !== null ? ` · ${formatCurrency(v.priceAmount, locale)}` : ""}</li>
+                    <li key={v.id} className="rounded border border-border-subtle px-3 py-1">{v.name} · {v.durationMinutes.toLocaleString(locale)} {fa ? "دقیقه" : "min"}{v.priceAmount ? ` · ${formatCurrency(v.priceAmount, locale)}` : ""}</li>
                   ))}
                 </ul>
               ) : null}
@@ -207,8 +207,20 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
         </section>
       ) : null}
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border-subtle bg-surface-base p-4 lg:hidden" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-        <Link href={bookHref()} className="block rounded-md bg-brand-natural py-3 text-center font-bold text-white">{fa ? "رزرو نوبت" : "Book an appointment"}</Link>
+      <aside className="provider-book-panel" aria-label={fa ? "رزرو" : "Booking"}>
+        <p className="provider-book-panel__type">{providerTypeLabel(profile.type, fa)}</p>
+        <p className="provider-book-panel__name">{profile.name}</p>
+        <ul>
+          <li><BadgeCheck size={16} aria-hidden="true" />{fa ? "هویت و مجوز تأییدشده" : "Identity and license verified"}</li>
+          <li><Star size={16} aria-hidden="true" />{profile.rating.count ? (fa ? `${profile.rating.average?.toLocaleString(locale)} از ${profile.rating.count.toLocaleString(locale)} نظر` : `${profile.rating.average} from ${profile.rating.count} reviews`) : fa ? "هنوز نظری ثبت نشده" : "No reviews yet"}</li>
+          {lowestPrice ? <li><span aria-hidden="true" className="provider-book-panel__dot" />{fa ? `از ${formatCurrency(lowestPrice, locale)}` : `From ${formatCurrency(lowestPrice, locale)}`}</li> : null}
+        </ul>
+        <Link href={bookHref()} className="provider-book-panel__cta">{fa ? "رزرو نوبت" : "Book an appointment"}</Link>
+        <p className="provider-book-panel__note">{fa ? "پرداخت و قوانین لغو پیش از تأیید نهایی نمایش داده می‌شود." : "Payment and cancellation terms are shown before you confirm."}</p>
+      </aside>
+
+      <div className="provider-sticky-cta" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
+        <Link href={bookHref()}>{fa ? "رزرو نوبت" : "Book an appointment"}</Link>
       </div>
     </article>
   );
