@@ -669,3 +669,74 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
 .language-toggle{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-elevated);color:var(--text-primary);font-size:.84rem;font-weight:700;cursor:pointer;transition:border-color var(--dur-1)}
 .language-toggle:hover{border-color:var(--border-strong)}
 .language-toggle:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+
+/* Care center: an agenda of divided rows. Overdue gets a calm attention edge, completed reads as done. */
+.care-filters{display:flex;flex-wrap:wrap;gap:8px}
+.care-filters button{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-elevated);color:var(--text-secondary);font-size:.86rem;font-weight:600;cursor:pointer;transition:border-color var(--dur-1),background-color var(--dur-1)}
+.care-filters button[aria-pressed="true"]{border-color:var(--brand-natural);background:var(--brand-natural);color:#fff}
+.care-filters button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.care-filters__count{min-width:20px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:.76rem;text-align:center}
+.care-agenda{display:flex;flex-direction:column;gap:6px;animation:pl-rise var(--dur-3) var(--ease-out) backwards}
+.care-agenda__head{display:flex;align-items:center;gap:10px;margin:0;color:var(--text-primary);font-size:1rem;font-weight:800}
+.care-agenda__head span{color:var(--text-secondary);font-size:.82rem;font-weight:600}
+.care-agenda__head[data-state="OVERDUE"]{color:var(--state-attention)}
+.care-rows{margin:0;padding:0;list-style:none;border-top:1px solid var(--border-subtle)}
+.care-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 24px;padding:14px 4px 14px 4px;border-bottom:1px solid var(--border-subtle)}
+.care-row[data-state="OVERDUE"]{padding-inline-start:14px;border-inline-start:3px solid var(--state-attention);background:color-mix(in srgb,var(--state-attention) 5%,transparent)}
+.care-row[data-state="COMPLETED"] .care-row__title{color:var(--text-secondary);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--text-secondary) 50%,transparent)}
+.care-row[data-state="COMPLETED"] .care-row__when{color:var(--state-success)}
+.care-row[data-state="SNOOZED"] .care-row__when{color:var(--brand-natural);font-weight:700}
+.care-row__main{display:flex;min-width:0;flex:1 1 320px;flex-direction:column;gap:2px}
+.care-row__title{color:var(--text-primary);font-size:.98rem;font-weight:700}
+.care-row__title:hover{color:var(--brand-natural)}
+.care-row__when{color:var(--text-primary);font-size:.86rem}
+.care-row__meta{color:var(--text-secondary);font-size:.8rem}
+.care-row__side{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.care-row__actions{display:flex;flex-wrap:wrap;gap:6px}
+.care-row__book{color:var(--brand-natural);font-size:.86rem;font-weight:700}
+.care-row a:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px;border-radius:4px}
+.care-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 28px;margin:0}
+.care-facts>div{padding:12px 0;border-bottom:1px solid var(--border-subtle)}
+.care-facts dt{color:var(--text-secondary);font-size:.8rem}
+.care-facts dd{margin:4px 0 0;color:var(--text-primary);font-weight:600}
+.health-overview__names{color:var(--text-secondary);font-size:.82rem;font-weight:500;overflow-wrap:anywhere}
+
+/* Health record detail: the record and its provenance side by side; a lab result reads at a glance. */
+.record-detail{display:flex;flex-direction:column;gap:24px}
+.record-detail__back{display:inline-block;margin-bottom:10px;color:var(--brand-natural);font-size:.86rem;font-weight:700}
+.record-detail__eyebrow{margin:0 0 4px!important;color:var(--text-secondary);font-size:.8rem!important;font-weight:700}
+.record-provenance{display:flex;flex-direction:column;margin:0}
+.record-provenance>div{padding:10px 0;border-top:1px solid var(--border-subtle)}
+.record-provenance>div:first-child{border-top:0;padding-top:0}
+.record-provenance dt{color:var(--text-secondary);font-size:.78rem}
+.record-provenance dd{margin:3px 0 0;color:var(--text-primary);font-weight:700}
+.lab-band{display:grid;grid-template-columns:auto 1fr;align-items:end;gap:14px 40px;padding:22px 24px;border:1px solid var(--border-subtle);border-radius:var(--radius-lg,16px);background:var(--surface-elevated)}
+.lab-band[data-flagged]{border-inline-start:4px solid var(--state-attention)}
+.lab-band__label{display:block;margin-bottom:4px;color:var(--text-secondary);font-size:.8rem}
+.lab-band__value strong{font-size:2.2rem;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+.lab-band__unit{color:var(--text-secondary);font-size:1rem;font-weight:600}
+.lab-band__range span:last-child{font-size:1.05rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+.lab-band bdi{unicode-bidi:isolate}
+.lab-band__track{position:relative;grid-column:1 / -1;height:10px;border-radius:999px;background:var(--surface-subtle)}
+.lab-band__range-fill{position:absolute;inset-block:0;inset-inline-start:20%;width:60%;border-radius:999px;background:color-mix(in srgb,var(--brand-natural) 28%,transparent)}
+.lab-band__marker{position:absolute;top:50%;width:16px;height:16px;margin-inline-start:-8px;border:3px solid var(--surface-elevated);border-radius:999px;background:var(--brand-natural);transform:translateY(-50%);box-shadow:0 0 0 1px var(--border-strong)}
+.lab-band[data-flagged] .lab-band__marker{background:var(--state-attention)}
+@media(max-width:520px){.lab-band{grid-template-columns:1fr;padding:18px}}
+
+/* Care calendar: today is marked, events are status-coloured chips (overdue calm amber, done muted). */
+.cal-day{min-height:7rem;padding:8px;border:1px solid var(--border-subtle);background:var(--surface-elevated);transition:background-color var(--dur-1)}
+.cal-day[data-selected]{background:color-mix(in srgb,var(--brand-natural) 6%,var(--surface-elevated))}
+.cal-day__num{display:inline-grid;place-items:center;min-width:32px;height:32px;margin-bottom:6px;padding:0 6px;border:0;border-radius:999px;background:transparent;color:var(--text-primary);font-weight:700;cursor:pointer}
+.cal-day__num:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.cal-day[data-today] .cal-day__num{background:var(--brand-natural);color:#fff}
+.cal-chip{display:block;margin-bottom:4px;padding:3px 8px;overflow:hidden;border-radius:6px;border-inline-start:3px solid var(--brand-natural);background:color-mix(in srgb,var(--brand-natural) 9%,var(--surface-elevated));color:var(--text-primary);font-size:.76rem;font-weight:600;white-space:nowrap;text-overflow:ellipsis}
+.cal-chip[data-status="OVERDUE"]{border-inline-start-color:var(--state-attention);background:color-mix(in srgb,var(--state-attention) 10%,var(--surface-elevated))}
+.cal-chip[data-status="COMPLETED"],.cal-chip[data-status="CANCELLED"]{border-inline-start-color:var(--border-strong);background:var(--surface-subtle);color:var(--text-secondary);text-decoration:line-through}
+.cal-chip[data-source="BOOKING_DERIVED"]{border-inline-start-color:#7a6bb0;background:color-mix(in srgb,#7a6bb0 10%,var(--surface-elevated))}
+.cal-chip:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
+.cal-more{border:0;background:none;color:var(--brand-natural);font-size:.76rem;font-weight:700;cursor:pointer}
+.cal-agenda-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 4px 14px 16px;padding-inline-start:16px;position:relative}
+.cal-agenda-row::before{content:"";position:absolute;inset-inline-start:2px;top:50%;width:7px;height:7px;border-radius:2px;background:var(--brand-natural);transform:translateY(-50%)}
+.cal-agenda-row[data-status="OVERDUE"]::before{background:var(--state-attention)}
+.cal-agenda-row[data-status="COMPLETED"]::before,.cal-agenda-row[data-status="CANCELLED"]::before{background:var(--border-strong)}
+.cal-agenda-row[data-source="BOOKING_DERIVED"]::before{background:#7a6bb0}
