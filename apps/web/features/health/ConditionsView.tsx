@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import { SourceType, type ConditionDto } from "@petlife/types";
+import { statusLabel } from "@/lib/status/status-labels";
 import { healthService } from "@/services/health.service";
 
 export function ConditionsView({ petId }: { petId: string }) {
@@ -80,7 +81,7 @@ export function ConditionsView({ petId }: { petId: string }) {
             {t(`status_${condition.status}`)}
           </StatusLabel>
           {condition.sourceType !== SourceType.OWNER ? (
-            <span className="text-metadata text-text-disabled">{condition.sourceType}</span>
+            <span className="text-metadata text-text-secondary">{statusLabel(condition.sourceType, locale === "fa" ? "fa" : "en", "source")}</span>
           ) : null}
         </ContextSurface>
       ))}

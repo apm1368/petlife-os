@@ -676,6 +676,7 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
 .care-filters button[aria-pressed="true"]{border-color:transparent;background:color-mix(in srgb,var(--brand-natural) 70%,#000);color:#fff}
 .care-filters button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 .care-filters__count{min-width:20px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:.76rem;text-align:center}
+.care-filters button[aria-pressed="true"] .care-filters__count{background:rgba(0,0,0,.28);color:#fff}
 .care-agenda{display:flex;flex-direction:column;gap:6px;animation:pl-rise var(--dur-3) var(--ease-out) backwards}
 .care-agenda__head{display:flex;align-items:center;gap:10px;margin:0;color:var(--text-primary);font-size:1rem;font-weight:800}
 .care-agenda__head span{color:var(--text-secondary);font-size:.82rem;font-weight:600}
