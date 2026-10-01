@@ -8,6 +8,7 @@ import { DomainEventsService } from "../../../common/events/domain-events.servic
 import { PasswordResetTokenInvalidException } from "../../../common/errors/api-exception";
 import { hashPassword } from "../../../common/password/password-hash.util";
 import { classifyLoginIdentifier } from "../identifier.util";
+import { IDENTIFIER_LIMITS, IdentifierRateLimiter } from "../../../common/rate-limit/identifier-rate-limiter.service";
 
 function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -31,11 +32,17 @@ export class AuthPasswordResetService {
     private readonly sessions: SessionService,
     private readonly events: DomainEventsService,
     private readonly config: ConfigService<AppEnv, true>,
+    private readonly limiter: IdentifierRateLimiter,
   ) {}
 
   /** Always resolves the same way regardless of whether identifier matched anything — never reveals account existence. */
   async requestReset(identifier: string): Promise<void> {
     const { kind, value } = classifyLoginIdentifier(identifier);
+    // Hourly budget per identifier; when spent the request is accepted and silently dropped, exactly
+    // like an unknown identifier, so neither the limit nor the response reveals an account.
+    const { bucket, limit, windowSeconds } = IDENTIFIER_LIMITS.passwordForgot;
+    if ((await this.limiter.retryAfter(bucket, value, limit)) > 0) return;
+    await this.limiter.hit(bucket, value, windowSeconds);
     const user = await this.prisma.user.findUnique({
       where: kind === "email" ? { email: value } : { normalizedUsername: value },
     });

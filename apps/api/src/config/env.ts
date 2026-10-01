@@ -2,6 +2,13 @@ import { loadEnv, z } from "@petlife/config";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  /// Interface the API listens on. nginx reaches it on 127.0.0.1, so the default keeps the raw port
+  /// off the public internet (a direct hit would bypass the proxy's limits and headers).
+  HOST: z.string().default("127.0.0.1"),
+  /// Express "trust proxy": which peers may supply X-Forwarded-For. "loopback" trusts only the local
+  /// nginx, so req.ip is the real client (per-IP throttling works) and a client talking to the API
+  /// directly cannot spoof its address. "false" disables, a number trusts that many hops.
+  TRUST_PROXY: z.string().default("loopback"),
   PORT: z.coerce.number().int().positive().default(4000),
 
   // Immutable release metadata injected by CI/deploy. These values are
@@ -294,6 +301,15 @@ function validateStorageConfig(env: AppEnv): void {
   }
 }
 
+/// The only OTP provider is the development one (it prints codes to the server log outside
+/// production and delivers nothing). A production process must never start with it: sign-in would
+/// silently fail for every user. Fail at boot instead, exactly like the storage rule below.
+function validateOtpConfig(env: AppEnv): void {
+  if (env.NODE_ENV === "production" && env.OTP_PROVIDER === "dev") {
+    throw new Error('OTP_PROVIDER "dev" cannot run with NODE_ENV=production — configure a real OTP delivery provider.');
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   const env = loadEnv(envSchema, source);
   validatePaymentConfig(env);
@@ -301,6 +317,7 @@ export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   validateMarketplaceConfig(env);
   validateMessagingConfig(env);
   validateGoogleAuthConfig(env);
+  validateOtpConfig(env);
   validateStorageConfig(env);
   return env;
 }

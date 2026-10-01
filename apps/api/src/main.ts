@@ -10,6 +10,7 @@ import type { NextFunction, Request, Response } from "express";
 import { AppModule } from "./app.module";
 import type { AppEnv } from "./config/env";
 import { isPrivateUploadPath } from "./modules/storage/object-url.util";
+import { applyTrustProxy } from "./common/http/trust-proxy.util";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -18,6 +19,7 @@ async function bootstrap() {
 
   const config = app.get(ConfigService<AppEnv, true>);
 
+  applyTrustProxy(app, config.get("TRUST_PROXY", { infer: true }));
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors({
@@ -51,7 +53,7 @@ async function bootstrap() {
   }
 
   const port = config.get("PORT", { infer: true });
-  await app.listen(port);
+  await app.listen(port, config.get("HOST", { infer: true }));
   console.log(`PET LIFE OS API listening on port ${port}`);
 }
 

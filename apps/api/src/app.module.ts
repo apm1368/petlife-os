@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { RateLimitModule } from "./common/rate-limit/rate-limit.module";
 import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
 import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor";
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware";
@@ -73,11 +74,12 @@ import { PlacesModule } from "./modules/places/places.module";
       throttlers: [{ ttl: 60_000, limit: 100 }],
       // The e2e suite creates many users in quick succession from the same
       // "IP" (supertest has no real network layer); production rate limits
-      // stay intact, only the test run bypasses them.
-      skipIf: () => process.env.NODE_ENV === "test",
+      // stay intact, only the test run bypasses them — except the rate-limit spec, which opts in.
+      skipIf: () => process.env.NODE_ENV === "test" && process.env.PETLIFE_TEST_THROTTLE !== "1",
     }),
     PrismaModule,
     RedisModule,
+    RateLimitModule,
     SessionModule,
     DomainEventsModule,
     HealthModule,

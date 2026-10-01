@@ -8,6 +8,7 @@ import { REDIS_CLIENT } from "../src/common/redis/redis.module";
 import { AccountExportService } from "../src/modules/account/account-export.service";
 import { NotificationOrchestratorService } from "../src/modules/notifications/notification-orchestrator.service";
 import { sanitizeReturnTo } from "../src/common/return-to/return-to.util";
+import { IDENTIFIER_LIMITS, identifierRateLimitKey } from "../src/common/rate-limit/identifier-rate-limiter.service";
 import { isPrivateUploadPath } from "../src/modules/storage/object-url.util";
 
 interface Cookies {
@@ -34,9 +35,9 @@ describe("Batch 8 — Account & security", () => {
     redis = app.get(REDIS_CLIENT);
   });
 
-  /** Tests reuse identifiers faster than the real resend cooldown allows. */
+  /** Tests reuse identifiers faster than the real resend cooldown and hourly send budget allow. */
   async function clearOtpCooldown(identifier: string) {
-    await redis.del(`otp:cooldown:${identifier}`);
+    await redis.del(`otp:cooldown:${identifier}`, identifierRateLimitKey(IDENTIFIER_LIMITS.otpSend.bucket, identifier));
   }
 
   afterAll(async () => {
