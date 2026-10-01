@@ -640,3 +640,8 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
 .birth-date legend{margin-bottom:6px;color:var(--text-primary);font-size:.88rem;font-weight:600}
 .birth-date__row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.3fr) minmax(0,1fr);gap:10px}
 .birth-date__row label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* Persian is a joined script: any tracking pulls letters apart ("م ر ک ز"). Eyebrows and labels keep
+   their tracking in English only. */
+:lang(fa),:lang(fa)::before,:lang(fa)::after{letter-spacing:0!important}
+.account-identity-band>:first-child{flex:none}

@@ -10,6 +10,7 @@ import { AccountPageHeader } from "./AccountNav";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { formatDay } from "@/lib/date/jalali";
 
 const EXPORT_STATUS: Record<PrivacyRequestStatusValue, { fa: string; en: string; tone: StatusTone }> = {
   PENDING: { fa: "در صف", en: "Queued", tone: "neutral" },
@@ -155,7 +156,7 @@ export function PrivacyCenterView() {
         <div className="account-section-title">
           <div>
             <h2 id="consents-title">{t("رضایت‌ها", "Consents")}</h2>
-            <p>{t(`نسخهٔ فعلی: ${data.consentVersion}`, `Current version: ${data.consentVersion}`)}</p>
+            {data.consentVersion ? <p>{t(`نسخهٔ فعلی: ${formatDay(data.consentVersion, "fa")}`, `Current version: ${formatDay(data.consentVersion, "en")}`)}</p> : null}
           </div>
         </div>
         <div className="security-list">
