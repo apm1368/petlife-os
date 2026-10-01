@@ -4,6 +4,11 @@ set -Eeuo pipefail
 APP_DIR="/var/www/petlife-os"
 cd "$APP_DIR"
 
+# Runtime secrets are never in git; keep them owner-only even if someone recreates them by hand.
+for env_file in apps/api/.env apps/web/.env; do
+  [ -f "$env_file" ] && chmod 600 "$env_file"
+done
+
 export CI=true
 
 pnpm install --frozen-lockfile
