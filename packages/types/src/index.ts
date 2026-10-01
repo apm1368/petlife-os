@@ -2911,6 +2911,29 @@ export interface AdminSellerOrgSummaryDto {
   createdAt: string;
 }
 
+export interface AdminPartnerTeamMemberDto {
+  id: string;
+  displayName: string;
+  role: string;
+  status: string | null;
+}
+
+export interface AdminPartner360Dto {
+  id: string;
+  kind: "PROVIDER" | "SELLER";
+  name: string;
+  type: string;
+  verificationStatus: string;
+  operationalStatus: string;
+  locationSummary: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  createdAt: string;
+  team: AdminPartnerTeamMemberDto[];
+  activity: Array<{ key: string; count: number }>;
+  auditReferences: AdminAuditLogDto[];
+}
+
 export interface AdminDashboardSummaryDto {
   openSupportCases: number;
   openDisputes: number;

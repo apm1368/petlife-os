@@ -3,6 +3,7 @@ import type {
   AdminCustomerListItemDto,
   AdminDashboardSummaryDto,
   AdminOrderFinancialsDto,
+  AdminPartner360Dto,
   AdminPiiRevealDto,
   AdminPriority,
   AdminProviderOrgSummaryDto,
@@ -145,6 +146,8 @@ export const adminService = {
     apiFetch<PaginatedDto<AdminProviderOrgSummaryDto>>(`/admin/providers${toQueryString({ q, page: input.page, pageSize: input.pageSize })}`),
   listSellers: (q: string, input: AdminPaginationInput = {}) =>
     apiFetch<PaginatedDto<AdminSellerOrgSummaryDto>>(`/admin/sellers${toQueryString({ q, page: input.page, pageSize: input.pageSize })}`),
+  getPartner360: (kind: "providers" | "sellers", id: string) =>
+    apiFetch<AdminPartner360Dto>(`/admin/${kind}/${id}/360`),
 
   // Tasks
   listTasks: (input: { status?: AdminTaskStatus; assigneeAdminId?: string } & AdminPaginationInput = {}) =>

@@ -22,6 +22,12 @@ export class AdminOrgController {
     return this.orgs.getProvider(id);
   }
 
+  @Get("providers/:id/360")
+  @RequireAdminPermission("verification.manage", "customer.view")
+  getProvider360(@Param("id") id: string) {
+    return this.orgs.getProvider360(id);
+  }
+
   @Get("sellers")
   @RequireAdminPermission("verification.manage", "customer.view")
   listSellers(@Query() query: ListOrgsQueryDto) {
@@ -32,5 +38,11 @@ export class AdminOrgController {
   @RequireAdminPermission("verification.manage", "customer.view")
   getSeller(@Param("id") id: string) {
     return this.orgs.getSeller(id);
+  }
+
+  @Get("sellers/:id/360")
+  @RequireAdminPermission("verification.manage", "customer.view")
+  getSeller360(@Param("id") id: string) {
+    return this.orgs.getSeller360(id);
   }
 }

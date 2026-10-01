@@ -1,56 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
-import { ProviderVerificationStatus, type AdminProviderOrgSummaryDto } from "@petlife/types";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
+import type { AdminProviderOrgSummaryDto, PaginatedDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
-
-function VerificationForm({ org, onChanged }: { org: AdminProviderOrgSummaryDto; onChanged: () => void }) {
-  const t = useTranslations("admin.orgs");
-  const tCommon = useTranslations("admin.common");
-  const [status, setStatus] = useState<ProviderVerificationStatus>(org.verificationStatus);
-  const [reason, setReason] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  return (
-    <div className="flex flex-wrap items-end gap-2 border-t border-border-subtle pt-2">
-      <Select label={t("verification.changeStatus")} value={status} onChange={(e) => setStatus(e.target.value as ProviderVerificationStatus)} options={Object.values(ProviderVerificationStatus).map((s) => ({ value: s, label: s }))} />
-      <Input label={tCommon("reasonLabel")} placeholder={tCommon("reasonPlaceholder")} value={reason} onChange={(e) => setReason(e.target.value)} className="min-w-40 flex-1" />
-      <Button
-        size="sm"
-        isLoading={saving}
-        onClick={async () => {
-          if (!reason.trim()) return;
-          setSaving(true);
-          try {
-            await adminService.transitionProviderVerification(org.id, status, reason);
-            onChanged();
-          } finally {
-            setSaving(false);
-          }
-        }}
-      >
-        {t("verification.submit")}
-      </Button>
-    </div>
-  );
-}
+import { EmptyRow, TableWrap, Td, Th } from "./console-ui";
 
 export function AdminProvidersView() {
   const t = useTranslations("admin.orgs");
   const tCommon = useTranslations("admin.common");
+  const locale = useLocale();
   const [q, setQ] = useState("");
-  const [orgs, setOrgs] = useState<AdminProviderOrgSummaryDto[] | null>(null);
+  const [orgs, setOrgs] = useState<PaginatedDto<AdminProviderOrgSummaryDto> | null>(null);
   const [error, setError] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [searched, setSearched] = useState(true);
 
-  async function search() {
+  useEffect(() => {
+    let active = true;
+    adminService.listProviders("", { page: 1, pageSize: 30 }).then((result) => { if (active) { setOrgs(result); setSearched(true); } }).catch(() => { if (active) setError(true); });
+    return () => { active = false; };
+  }, []);
+
+  async function search(page = 1) {
     setError(false);
+    setOrgs(null);
     try {
-      const page = await adminService.listProviders(q, { pageSize: 30 });
-      setOrgs(page.items);
+      setOrgs(await adminService.listProviders(q.trim(), { page, pageSize: 30 }));
       setSearched(true);
     } catch {
       setError(true);
@@ -71,16 +49,8 @@ export function AdminProvidersView() {
       />
       {error ? <ErrorRecovery title={t("providersTitle")} message="" retryLabel={tCommon("retry")} onRetry={search} /> : null}
       {!error && searched && !orgs ? <Skeleton className="h-40 w-full" aria-label={tCommon("loading")} /> : null}
-      {!error && orgs && orgs.length === 0 ? <EmptyState title={tCommon("empty")} /> : null}
-      {orgs?.map((org) => (
-        <ContextSurface key={org.id} className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-body font-medium text-text-primary">{org.name}</span>
-            <StatusLabel tone={adminStatusTone(org.verificationStatus)}>{org.verificationStatus}</StatusLabel>
-          </div>
-          <VerificationForm org={org} onChanged={search} />
-        </ContextSurface>
-      ))}
+      {!error && orgs ? <TableWrap><table className="w-full"><thead><tr><Th>{t("columns.name")}</Th><Th>{t("columns.type")}</Th><Th>{t("columns.verification")}</Th><Th>{t("columns.created")}</Th></tr></thead><tbody>{orgs.items.length ? orgs.items.map((org) => <tr key={org.id}><Td><Link className="font-medium text-brand-natural hover:underline" href={`/${locale}/admin/providers/${org.id}`}>{org.name}</Link></Td><Td>{t.has(`type.${org.type}`) ? t(`type.${org.type}`) : org.type}</Td><Td><StatusLabel tone={adminStatusTone(org.verificationStatus)}>{t(`status.${org.verificationStatus}`)}</StatusLabel></Td><Td>{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(org.createdAt))}</Td></tr>) : <EmptyRow colSpan={4} label={tCommon("empty")} />}</tbody></table></TableWrap> : null}
+      {orgs && orgs.total > orgs.pageSize ? <div className="flex items-center justify-between gap-2 border-t border-border-subtle pt-3"><span className="text-metadata text-text-secondary">{tCommon("page", { page: orgs.page })}</span><div className="flex gap-2"><Button size="sm" variant="secondary" disabled={orgs.page <= 1} onClick={() => void search(orgs.page - 1)}>{tCommon("previous")}</Button><Button size="sm" variant="secondary" disabled={orgs.page * orgs.pageSize >= orgs.total} onClick={() => void search(orgs.page + 1)}>{tCommon("next")}</Button></div></div> : null}
     </div>
   );
 }
