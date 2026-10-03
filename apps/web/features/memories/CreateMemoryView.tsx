@@ -79,7 +79,7 @@ export function CreateMemoryView({ petId }: { petId: string }) {
         <Select label={t("newMemory.typeLabel")} value={type} onChange={(e) => setType(e.target.value as PetMemoryType)} options={MEMORY_TYPES.map((value) => ({ value, label: t(`memoryType.${value}`) }))} />
         <Input label={t("newMemory.titleLabel")} hint={tCommon("optional")} value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input label={t("newMemory.descriptionLabel")} hint={tCommon("optional")} value={description} onChange={(e) => setDescription(e.target.value)} />
-        <DateField label={t("newMemory.occurredAtLabel")} value={occurredAt} onChange={setOccurredAt} max={new Date().toISOString().slice(0, 10)} />
+        <DateField label={t("newMemory.occurredAtLabel")} value={occurredAt} onChange={setOccurredAt} min="1900-01-01" max={new Date().toISOString().slice(0, 10)} />
         <Input label={t("newMemory.locationLabel")} hint={tCommon("optional")} value={location} onChange={(e) => setLocation(e.target.value)} />
         <Input label={t("newMemory.tagsLabel")} hint={t("newMemory.tagsHint")} value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
         <FilePicker ref={fileInputRef} label={t("newMemory.mediaLabel")} multiple accept="image/jpeg,image/png,image/webp" />
