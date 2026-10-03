@@ -6,10 +6,14 @@ import { bookingsService } from "@/services/bookings.service";
 import { usePetStore } from "@/stores/pet-store";
 import { useSessionStore } from "@/stores/session-store";
 import { MemberHomeView } from "./MemberHomeView";
+import { routeExists } from "@/test/route-exists";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/fa/home" }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getOverview: vi.fn() } }));
 vi.mock("@/services/bookings.service", () => ({ bookingsService: { list: vi.fn() } }));
+vi.mock("@/services/commerce.service", () => ({ commerceService: { listOrders: vi.fn().mockResolvedValue([]) } }));
+vi.mock("@/services/travel-marketplace.service", () => ({ travelMarketService: { listBookings: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 }) } }));
+vi.mock("@/services/subscription.service", () => ({ subscriptionService: { getCurrent: vi.fn().mockRejectedValue(Object.assign(new Error("none"), { status: 404 })) } }));
 
 const PET = { id: "pet-1", name: "پشمک", species: "DOG", breed: null, birthDate: null, approximateAgeMonths: 18, photoUrl: null, lifecycleStatus: "ACTIVE" };
 
@@ -55,5 +59,19 @@ describe("MemberHomeView", () => {
     renderWithIntl(<MemberHomeView />, "fa");
     expect(screen.getByRole("link", { name: "افزودن اولین حیوان" }).getAttribute("href")).toBe("/fa/onboarding");
     expect(petsService.getOverview).not.toHaveBeenCalled();
+  });
+
+  it("every link on the dashboard opens a page that exists — no dead CTA", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ attention: [{ id: "a1", severity: "ATTENTION", title: "HEALTH_PROFILE_INCOMPLETE", dueAt: null, href: "/health" }] }));
+    renderWithIntl(<MemberHomeView />, "fa");
+    await screen.findByRole("heading", { name: "پشمک" });
+    expect(await screen.findByText("اشتراکی فعال نیست. مزایا و پلن‌ها را ببینید.")).toBeTruthy();
+    const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href")!);
+    expect(hrefs.length).toBeGreaterThan(12);
+    const dead = hrefs.filter((h) => !routeExists(h));
+    expect(dead).toEqual([]);
+    // The pet's own sections are one tap away, and membership is reachable from home.
+    for (const section of ["/health", "/care", "/memories", "/health/documents", "/travel"]) expect(hrefs).toContain(`/fa/pets/pet-1${section}`);
+    expect(hrefs).toContain("/fa/subscription");
   });
 });
