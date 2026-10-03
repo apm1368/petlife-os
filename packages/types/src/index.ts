@@ -16,6 +16,13 @@ export interface PaginatedDto<T> {
 export enum PetSpecies {
   DOG = "DOG",
   CAT = "CAT",
+  BIRD = "BIRD",
+  RABBIT = "RABBIT",
+  /** Hamsters, guinea pigs, rats, mice, chinchillas. */
+  RODENT = "RODENT",
+  FISH = "FISH",
+  REPTILE = "REPTILE",
+  OTHER = "OTHER",
 }
 
 export enum PetLifecycleStatus {

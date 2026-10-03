@@ -1,0 +1,7 @@
+-- Household pets beyond dogs and cats. Additive only: existing DOG/CAT rows are untouched.
+ALTER TYPE "PetSpecies" ADD VALUE IF NOT EXISTS 'BIRD';
+ALTER TYPE "PetSpecies" ADD VALUE IF NOT EXISTS 'RABBIT';
+ALTER TYPE "PetSpecies" ADD VALUE IF NOT EXISTS 'RODENT';
+ALTER TYPE "PetSpecies" ADD VALUE IF NOT EXISTS 'FISH';
+ALTER TYPE "PetSpecies" ADD VALUE IF NOT EXISTS 'REPTILE';
+ALTER TYPE "PetSpecies" ADD VALUE IF NOT EXISTS 'OTHER';

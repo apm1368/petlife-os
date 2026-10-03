@@ -67,7 +67,7 @@ export class ProductCompatibilityService {
       if (RANK[status] > RANK[worst]) worst = status;
     };
 
-    const speciesSupported = pet.species === "DOG" ? product.supportsDog : pet.species === "CAT" ? product.supportsCat : true;
+    const speciesSupported = pet.species === "DOG" ? product.supportsDog : pet.species === "CAT" ? product.supportsCat : false; // products declare dog/cat support only
     if (!speciesSupported) {
       reasons.push("SPECIES_MISMATCH");
       escalate(ProductCompatibilityStatus.NOT_RECOMMENDED);

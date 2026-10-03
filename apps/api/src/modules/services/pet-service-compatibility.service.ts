@@ -54,7 +54,7 @@ export class PetServiceCompatibilityService {
       if (rank[status] > rank[worst]) worst = status;
     };
 
-    const speciesSupported = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : true;
+    const speciesSupported = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : false; // services declare dog/cat support only; other species are never assumed
     if (!speciesSupported) {
       reasons.push("SPECIES_UNSUPPORTED");
       escalate(PetCompatibilityStatus.NOT_SUPPORTED);

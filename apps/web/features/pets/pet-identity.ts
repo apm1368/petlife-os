@@ -3,9 +3,23 @@ import { localizeDigits } from "@/lib/date/jalali";
 import { statusLabel } from "@/lib/status/status-labels";
 
 /** Shared pet identity text — the pet header, the home hero and the pet list say the same thing. */
+export const SPECIES_LABELS: Record<string, [string, string]> = {
+  DOG: ["سگ", "Dog"],
+  CAT: ["گربه", "Cat"],
+  BIRD: ["پرنده", "Bird"],
+  RABBIT: ["خرگوش", "Rabbit"],
+  RODENT: ["جونده (همستر، خوکچهٔ هندی…)", "Small rodent (hamster, guinea pig…)"],
+  FISH: ["ماهی", "Fish"],
+  REPTILE: ["خزنده", "Reptile"],
+  OTHER: ["سایر", "Other"],
+};
+
+/** Short species name for identity lines ("Rodent" rather than the long picker hint). */
+const SPECIES_SHORT: Record<string, [string, string]> = { RODENT: ["جونده", "Rodent"] };
+
 export function speciesLabel(pet: Pick<PetDto, "species">, locale: "fa" | "en"): string {
-  if (locale === "fa") return pet.species === "DOG" ? "سگ" : "گربه";
-  return pet.species === "DOG" ? "Dog" : "Cat";
+  const entry = SPECIES_SHORT[pet.species] ?? SPECIES_LABELS[pet.species];
+  return entry ? entry[locale === "fa" ? 0 : 1] : locale === "fa" ? "حیوان" : "Pet";
 }
 
 export function petAgeMonths(pet: Pick<PetDto, "birthDate" | "approximateAgeMonths">): number | null {

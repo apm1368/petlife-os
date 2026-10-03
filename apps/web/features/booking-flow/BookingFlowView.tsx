@@ -276,7 +276,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-2 font-bold">{service && service.maxPetsPerBooking > 1 ? (fa ? `تا ${service.maxPetsPerBooking.toLocaleString(locale)} حیوان انتخاب کنید` : `Choose up to ${service.maxPetsPerBooking} pets`) : fa ? "برای کدام حیوان؟" : "For which pet?"}</legend>
             {pets.map((p) => {
-              const supported = !service || (p.species === "DOG" ? service.supportsDog : p.species === "CAT" ? service.supportsCat : true);
+              const supported = !service || (p.species === "DOG" ? service.supportsDog : p.species === "CAT" ? service.supportsCat : false);
               const multi = (service?.maxPetsPerBooking ?? 1) > 1;
               return (
                 <label key={p.id} className={`flex items-center gap-3 rounded-md border p-3 ${petIds.includes(p.id) ? "border-brand-natural" : "border-border-subtle"} ${supported ? "" : "opacity-60"}`}>

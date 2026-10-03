@@ -63,6 +63,12 @@ enum ConsentKind {
 enum PetSpecies {
   DOG
   CAT
+  BIRD
+  RABBIT
+  RODENT
+  FISH
+  REPTILE
+  OTHER
 }
 
 enum PetSex {

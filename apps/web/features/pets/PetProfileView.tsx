@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { Button, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
+import { ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import {
   PetLifecycleStatus,
   type PetAccessFlags,
@@ -15,6 +15,7 @@ import { petsService } from "@/services/pets.service";
 import { usePetStore } from "@/stores/pet-store";
 import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
 import { careTitle } from "@/features/care/care-labels";
+import { EditPetIdentity } from "./EditPetIdentity";
 import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone, collapseLabPanels } from "./overview-labels";
 
 const copy = {
@@ -106,9 +107,6 @@ export function PetProfileView({ petId }: { petId: string }) {
   const [access, setAccess] = useState<PetAccessFlags | null>(null);
   const [error, setError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState("");
-  const [breed, setBreed] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   // The owner's care items (the care center's data) — read only when this person may see care.
   const [care, setCare] = useState<CareReminder[]>([]);
 
@@ -119,8 +117,6 @@ export function PetProfileView({ petId }: { petId: string }) {
       setOverview(data);
       setAccess(permissions);
       setCare(permissions.canViewCareProfile ? await careRemindersService.list(petId).catch(() => []) : []);
-      setName(data.pet.name);
-      setBreed(data.pet.breed ?? "");
     } catch {
       setError(true);
     }
@@ -132,19 +128,6 @@ export function PetProfileView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  async function saveIdentity() {
-    if (!name.trim()) return;
-    setIsSaving(true);
-    try {
-      const updated = await petsService.update(petId, { name: name.trim(), breed: breed.trim() || null });
-      upsertPet(updated);
-      setIsEditing(false);
-      await load();
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
   if (error) return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={load} />;
   if (!overview || !access) return <Skeleton className="h-96 w-full" aria-label={c.loading} />;
 
@@ -153,18 +136,16 @@ export function PetProfileView({ petId }: { petId: string }) {
 
   if (isEditing && access.canEditIdentity) {
     return (
-      <section className="max-w-2xl">
-        <p className="text-xs font-black uppercase tracking-[.14em] text-brand-natural">{c.eyebrow}</p>
-        <h1 className="mt-2 text-page-title text-text-primary">{c.editTitle}</h1>
-        <div className="mt-8 flex flex-col gap-5 border-y border-border-subtle py-7">
-          <Input label={c.name} value={name} onChange={(event) => setName(event.target.value)} />
-          <Input label={c.breed} value={breed} onChange={(event) => setBreed(event.target.value)} />
-          <div className="flex flex-wrap gap-2">
-            <Button variant="ghost" onClick={() => setIsEditing(false)}>{c.cancel}</Button>
-            <Button variant="primary" isLoading={isSaving} disabled={!name.trim()} onClick={saveIdentity}>{c.save}</Button>
-          </div>
-        </div>
-      </section>
+      <EditPetIdentity
+        pet={overview.pet}
+        locale={locale}
+        onCancel={() => setIsEditing(false)}
+        onSaved={(updated) => {
+          upsertPet(updated);
+          setIsEditing(false);
+          void load();
+        }}
+      />
     );
   }
 

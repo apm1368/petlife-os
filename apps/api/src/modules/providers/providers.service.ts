@@ -92,7 +92,7 @@ export class ProvidersService {
     if (query.petId) {
       const pet = await this.petAccess.findAccessiblePet(query.petId, viewerId);
       if (pet) {
-        petCompatible = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : true;
+        petCompatible = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : false;
       }
     }
 
