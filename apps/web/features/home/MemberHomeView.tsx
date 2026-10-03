@@ -14,6 +14,7 @@ import { usePetStore } from "@/stores/pet-store";
 import { statusLabel } from "@/lib/status/status-labels";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatDay } from "@/lib/date/jalali";
+import { formatCount } from "@/lib/number/format-number";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { useSessionStore } from "@/stores/session-store";
 import { LoadFailure } from "@/features/system/LoadFailure";
@@ -51,6 +52,7 @@ const COPY = {
     unknownAge: "سن نامشخص",
     switchPet: "انتخاب حیوان",
     sections: "بخش‌های پروفایل",
+    lastHealth: "آخرین ثبت سلامت",
     documents: "اسناد",
     travel: "سفر",
     weight: "وزن",
@@ -107,6 +109,7 @@ const COPY = {
     unknownAge: "Age unknown",
     switchPet: "Choose a pet",
     sections: "Profile sections",
+    lastHealth: "Last health entry",
     documents: "Documents",
     travel: "Travel",
     weight: "Weight",
@@ -241,6 +244,11 @@ export function MemberHomeView() {
               <div><dt>{c.microchip}</dt><dd>{pet.microchipNumber ? c.registered : c.notRecorded}</dd></div>
             </dl>
           </div>
+          <dl className="member-home__stats">
+            <div><dt>{c.attention}</dt><dd>{formatCount(overview.attention.length, locale)}</dd></div>
+            <div><dt>{c.upcoming}</dt><dd>{formatCount(overview.upcoming.length, locale)}</dd></div>
+            <div><dt>{c.lastHealth}</dt><dd>{overview.recentHealth[0] ? formatOverviewDate(overview.recentHealth[0].occurredAt, locale) : c.notRecorded}</dd></div>
+          </dl>
           <Link href={petBase} className="member-home__hero-link">
             {c.profile}
             <Forward size={16} aria-hidden="true" />

@@ -16,9 +16,9 @@ const CLOSED = new Set(["CANCELLED_BY_USER", "CANCELLED_BY_PROVIDER", "REJECTED"
 const STATUS_CLASS: Record<string, string> = {
   REQUESTED: "border-state-attention bg-state-attention/10",
   AWAITING_PAYMENT: "border-state-attention bg-state-attention/10",
-  CONFIRMED: "border-brand-natural bg-brand-natural/10",
-  CHECKED_IN: "border-brand-natural bg-brand-natural/20",
-  IN_PROGRESS: "border-brand-natural bg-brand-natural/30",
+  CONFIRMED: "border-brand-natural bg-brand-solid/10",
+  CHECKED_IN: "border-brand-natural bg-brand-solid/20",
+  IN_PROGRESS: "border-brand-natural bg-brand-solid/30",
   COMPLETED: "border-border-subtle bg-surface-subtle",
   NO_SHOW: "border-state-urgent bg-state-urgent/10",
 };
@@ -156,7 +156,7 @@ export function ProviderCalendarView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-1" role="group" aria-label={fa ? "نمای تقویم" : "Calendar view"}>
           {(["day", "week", "month"] as View[]).map((v) => (
-            <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={`rounded-md px-3 py-1.5 text-sm ${view === v ? "bg-brand-natural text-white" : "text-text-secondary"}`}>
+            <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={`rounded-md px-3 py-1.5 text-sm ${view === v ? "bg-brand-solid text-on-brand" : "text-text-secondary"}`}>
               {v === "day" ? (fa ? "روز" : "Day") : v === "week" ? (fa ? "هفته" : "Week") : fa ? "ماه" : "Month"}
             </button>
           ))}

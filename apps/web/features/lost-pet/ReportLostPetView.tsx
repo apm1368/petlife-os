@@ -91,7 +91,7 @@ export function ReportLostPetView({ petId }: { petId: string }) {
       <p className="text-body text-text-secondary">{t("report.subtitle")}</p>
       <ol className="flex gap-2 overflow-x-auto text-metadata" aria-label={fa ? "مراحل" : "Steps"}>
         {STEPS.map((s, i) => (
-          <li key={s} aria-current={s === step ? "step" : undefined} className={`shrink-0 rounded-full px-3 py-1 ${s === step ? "bg-brand-natural text-text-inverse" : i < index ? "bg-surface-subtle text-text-primary" : "text-text-secondary"}`}>
+          <li key={s} aria-current={s === step ? "step" : undefined} className={`shrink-0 rounded-full px-3 py-1 ${s === step ? "bg-brand-solid text-on-brand" : i < index ? "bg-surface-subtle text-text-primary" : "text-text-secondary"}`}>
             {i < index ? "✓ " : ""}
             {stepLabel[s][fa ? 0 : 1]}
           </li>

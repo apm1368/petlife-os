@@ -56,7 +56,7 @@ export function InsurerHomeView() {
       <section className="flex flex-col gap-3" aria-labelledby="apps">
         <h2 id="apps" className="text-section-title">{fa ? "درخواست‌ها" : "Applications"}</h2>
         <div role="group" className="flex gap-2 overflow-x-auto" aria-label={fa ? "وضعیت" : "Status"}>
-          {FILTERS.map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 shrink-0 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{s ? t(`applicationStatus.${s}`) : fa ? "همه" : "All"}</button>)}
+          {FILTERS.map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 shrink-0 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{s ? t(`applicationStatus.${s}`) : fa ? "همه" : "All"}</button>)}
         </div>
         {rows === null ? <Skeleton className="h-40" /> : rows.length === 0 ? <EmptyState title={fa ? "درخواستی نیست" : "No applications"} /> : (
           <ul className="flex flex-col gap-2">{rows.map((a) => (

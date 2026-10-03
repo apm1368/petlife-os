@@ -72,7 +72,7 @@ export function MyOrdersView() {
             role="tab"
             aria-selected={tab === key}
             onClick={() => setTab(key)}
-            className={`shrink-0 rounded-full border px-4 py-2 text-metadata ${tab === key ? "border-brand-natural bg-brand-natural text-text-inverse" : "border-border-subtle text-text-secondary"}`}
+            className={`shrink-0 rounded-full border px-4 py-2 text-metadata ${tab === key ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle text-text-secondary"}`}
           >
             {t(`tabs.${key}`, { count: counts[key] })}
           </button>

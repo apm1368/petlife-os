@@ -234,7 +234,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
                       type="button"
                       aria-pressed={v.id === variantId}
                       onClick={() => selectVariant(v.id)}
-                      className={`min-h-11 rounded-md border px-3 py-2 text-metadata ${v.id === variantId ? "border-brand-natural bg-brand-natural/10 text-text-primary" : "border-border-subtle text-text-secondary"}`}
+                      className={`min-h-11 rounded-md border px-3 py-2 text-metadata ${v.id === variantId ? "border-brand-natural bg-brand-solid/10 text-text-primary" : "border-border-subtle text-text-secondary"}`}
                     >
                       {v.title ?? v.sku}
                     </button>

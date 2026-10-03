@@ -17,7 +17,7 @@ export function severityBarClass(severity: PetOverviewAttentionDto["severity"]) 
   if (severity === "EMERGENCY" || severity === "URGENT") return "bg-state-urgent";
   if (severity === "CONCERN") return "bg-state-higher-concern";
   if (severity === "ATTENTION") return "bg-state-attention";
-  return "bg-brand-natural";
+  return "bg-brand-solid";
 }
 
 const ATTENTION_TITLE: Record<string, readonly [string, string]> = {

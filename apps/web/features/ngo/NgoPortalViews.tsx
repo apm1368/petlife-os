@@ -146,10 +146,10 @@ export function NgoNeedsView() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-page-title">{fa ? "نیازهای سازمان" : "Organization needs"}</h1>
-            {role !== "VIEWER" ? <Link href={`/${lang}/animal-support/needs/new`} className="inline-flex min-h-11 items-center rounded-full bg-brand-natural px-4 text-sm font-bold text-text-inverse">{fa ? "ثبت نیاز" : "New need"}</Link> : null}
+            {role !== "VIEWER" ? <Link href={`/${lang}/animal-support/needs/new`} className="inline-flex min-h-11 items-center rounded-full bg-brand-solid px-4 text-sm font-bold text-on-brand">{fa ? "ثبت نیاز" : "New need"}</Link> : null}
           </div>
           <div role="group" aria-label={fa ? "وضعیت" : "Status"} className="flex gap-2 overflow-x-auto">
-            {["", "PUBLISHED", "PARTIALLY_FULFILLED", "PAUSED", "PENDING_REVIEW", "REJECTED", "FULFILLED", "EXPIRED"].map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 shrink-0 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{s ? t(`status.${s}`) : fa ? "همه" : "All"}</button>)}
+            {["", "PUBLISHED", "PARTIALLY_FULFILLED", "PAUSED", "PENDING_REVIEW", "REJECTED", "FULFILLED", "EXPIRED"].map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 shrink-0 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{s ? t(`status.${s}`) : fa ? "همه" : "All"}</button>)}
           </div>
           {rows === null ? <Skeleton className="h-40" /> : rows.length === 0 ? <EmptyState title={fa ? "نیازی در این وضعیت نیست" : "No needs in this state"} /> : (
             <ul className="flex flex-col gap-2">
@@ -185,7 +185,7 @@ export function NgoOffersView() {
         <div className="flex flex-col gap-4">
           <h1 className="text-page-title">{fa ? "پیشنهادهای کمک و داوطلبان" : "Help offers & volunteers"}</h1>
           <div className="flex flex-wrap gap-2">
-            {["", "PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED"].map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{s ? t(`offerStatus.${s}`) : fa ? "همه" : "All"}</button>)}
+            {["", "PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED"].map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{s ? t(`offerStatus.${s}`) : fa ? "همه" : "All"}</button>)}
             <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" className="h-5 w-5" checked={volunteer} onChange={(e) => setVolunteer(e.target.checked)} />{fa ? "فقط داوطلبی" : "Volunteering only"}</label>
           </div>
           <p className="text-metadata text-text-secondary">{fa ? "اطلاعات تماس کمک‌کنندگان نمایش داده نمی‌شود؛ پاسخ به هر پیشنهاد از صفحهٔ مدیریت همان نیاز انجام می‌شود." : "Helpers' contact details are never shown; answer each offer from its need's manage page."}</p>

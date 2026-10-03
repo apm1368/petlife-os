@@ -1,110 +1,195 @@
 /*
- * Semantic design tokens for PET LIFE OS.
- * Only semantic surface/text/brand/state variables live here — never a
- * page-specific color. Components reference these variables, not raw hex.
+ * PET LIFE design tokens — visual direction 2027 (docs/design/visual-direction-2027.md).
+ * Semantic only: components reference these variables, never raw hex. The pre-2027 names
+ * (--surface-base, --brand-natural, …) remain as aliases so every screen — including the admin
+ * control plane — inherits the new palette without a rename.
  */
 
 :root {
   color-scheme: light;
 
-  --surface-base: #faf9f6;
-  --surface-subtle: #f5f3ee;
-  --surface-elevated: #ffffff;
-  --surface-overlay: rgba(31, 28, 23, 0.45);
+  /* Surfaces — warm paper, soft stone, one inverse band per page. */
+  --surface-page: #f6f3ec;
+  --surface-raised: #fffdf9;
+  --surface-sunken: #eeeae1;
+  --surface-inverse: #17241d;
+  /* The one identity band per page (pet, provider): deep forest in both themes. */
+  --surface-identity: #17241d;
+  --text-on-identity: #f1ede4;
+  --text-on-identity-muted: #b8c2b9;
+  --surface-overlay: rgba(23, 26, 22, 0.48);
 
-  --text-primary: #18231f;
-  --text-secondary: #59645e;
-  --text-inverse: #faf9f6;
-  --text-disabled: #929b95;
+  /* Text */
+  --text-primary: #1b201c;
+  --text-secondary: #525a53;
+  --text-muted: #646b64;
+  --text-inverse: #faf8f3;
+  --text-disabled: #8c918a;
+  --text-on-inverse: #f1ede4;
+  --text-on-inverse-muted: #b8c2b9;
 
-  --border-subtle: #e6e8e3;
-  --border-strong: #cbd2cb;
+  /* Borders */
+  --border-default: #e2dcd0;
+  --border-strong: #cec6b6;
+  --border-interactive: #1f5a3d;
 
-  --brand-natural: #17633f;
-  --brand-natural-strong: #104e31;
-  --brand-mint: #43a582;
-  --brand-mint-strong: #277e60;
+  /* Brand */
+  --brand-primary: #1f5a3d;
+  --brand-moss: #5b7b4b;
+  --brand-natural: #2e7650;
+  --brand-tint: #e3eee5;
+  --brand-solid: #1f5a3d;
+  --brand-solid-strong: #17462f;
+  --on-brand: #ffffff;
+  --accent-plum: #6a4d78;
+  --accent-cobalt: #2d58a6;
 
-  --ai-primary: #8065d7;
-  --ai-primary-strong: #6353c2;
+  /* Status */
+  --status-success: #2e7049;
+  --status-attention: #8a5a0a;
+  --status-warning: #a4511a;
+  --status-concern: #b4463a;
+  --status-critical: #a3121f;
+  --status-info: #2d58a6;
+  --status-success-tint: #e4efe6;
+  --status-attention-tint: #f6ebd3;
+  --status-concern-tint: #f6e1dc;
 
-  --state-attention: #8f5c0c; /* Batch 6: 5.1:1 on surface-subtle (was 2.7:1, failed WCAG AA as text) */
-  --state-higher-concern: #a64b15; /* Batch 6: 5.2:1 on surface-subtle (was 3.4:1) */
-  --state-urgent: #c93b2e;
-  --state-emergency: #a3121f;
-  --state-success: #2e7049; /* Batch 8: 5.4:1 on surface-subtle (was 3.6:1, failed WCAG AA) */
+  --focus-ring: #2d58a6;
 
-  --focus-ring: #43a582;
+  /* Geometry */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-media: 18px;
+  --radius-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(27, 32, 28, 0.06), 0 1px 1px rgba(27, 32, 28, 0.04);
+  --shadow-2: 0 18px 40px -20px rgba(27, 32, 28, 0.28), 0 2px 6px rgba(27, 32, 28, 0.05);
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 72px;
+
+  /* Layers */
+  --z-sticky: 30;
+  --z-header: 40;
+  --z-menu: 50;
+  --z-drawer: 60;
+  --z-dialog: 70;
+  --z-toast: 80;
+
+  /* Pre-2027 aliases */
+  --surface-base: var(--surface-page);
+  --surface-elevated: var(--surface-raised);
+  --surface-subtle: var(--surface-sunken);
+  --border-subtle: var(--border-default);
+  --brand-natural-strong: var(--brand-primary);
+  --brand-mint: #3f8f6c;
+  --brand-mint-strong: #2b7556;
+  --ai-primary: var(--accent-plum);
+  --ai-primary-strong: #563d63;
+  --state-attention: var(--status-attention);
+  --state-higher-concern: var(--status-warning);
+  --state-urgent: var(--status-concern);
+  --state-emergency: var(--status-critical);
+  --state-success: var(--status-success);
 }
 
+/* Dark is designed, not inverted: warm charcoal, lighter greens for text, a solid green that still carries white. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-
-    --surface-base: #121416;
-    --surface-subtle: #23272c;
-    --surface-elevated: #1a1d20;
-    --surface-overlay: rgba(0, 0, 0, 0.55);
-
-    --text-primary: #f3f4f6;
-    --text-secondary: #c6cbd2;
-    --text-inverse: #121416;
-    --text-disabled: #929aa4;
-
-    --border-subtle: #2e323a;
-    --border-strong: #49515a;
-
-    --brand-natural: #5bac6a;
-    --brand-natural-strong: #83c28c;
+    --surface-page: #141614;
+    --surface-raised: #1b1e1b;
+    --surface-sunken: #232723;
+    --surface-inverse: #e9e5db;
+    --surface-identity: #1b2b21;
+    --surface-overlay: rgba(0, 0, 0, 0.6);
+    --text-primary: #eeebe4;
+    --text-secondary: #b9bcb3;
+    --text-muted: #969b92;
+    --text-inverse: #141614;
+    --text-disabled: #80857d;
+    --text-on-inverse: #1b201c;
+    --text-on-inverse-muted: #525a53;
+    --border-default: #2b2f2a;
+    --border-strong: #40453e;
+    --border-interactive: #8cc79a;
+    --brand-primary: #8cc79a;
+    --brand-moss: #a9c49a;
+    --brand-natural: #6fb585;
+    --brand-tint: #1f2c23;
+    --brand-solid: #2e7650;
+    --brand-solid-strong: #27664a;
+    --on-brand: #ffffff;
+    --accent-plum: #c3a6d1;
+    --accent-cobalt: #8eb0f0;
+    --status-success: #6fbf8c;
+    --status-attention: #e2a94b;
+    --status-warning: #e8925a;
+    --status-concern: #ea7a6c;
+    --status-critical: #f06a64;
+    --status-info: #8eb0f0;
+    --status-success-tint: #1d2b21;
+    --status-attention-tint: #2e2617;
+    --status-concern-tint: #33201c;
+    --focus-ring: #8eb0f0;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 18px 40px -16px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4);
     --brand-mint: #5cc4a5;
     --brand-mint-strong: #79d4b8;
-
-    --ai-primary: #a597e8;
-    --ai-primary-strong: #b8adef;
-
-    --state-attention: #e0a544;
-    --state-higher-concern: #e58a4c;
-    --state-urgent: #e2685a;
-    --state-emergency: #d1544f;
-    --state-success: #56b886;
-
-    --focus-ring: #5cc4a5;
+    --ai-primary-strong: #d3bde0;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-
-  --surface-base: #121416;
-  --surface-subtle: #23272c;
-  --surface-elevated: #1a1d20;
-  --surface-overlay: rgba(0, 0, 0, 0.55);
-
-  --text-primary: #f3f4f6;
-  --text-secondary: #c6cbd2;
-  --text-inverse: #121416;
-  --text-disabled: #929aa4;
-
-  --border-subtle: #2e323a;
-  --border-strong: #49515a;
-
-  --brand-natural: #5bac6a;
-  --brand-natural-strong: #83c28c;
+  --surface-page: #141614;
+  --surface-raised: #1b1e1b;
+  --surface-sunken: #232723;
+  --surface-inverse: #e9e5db;
+  --surface-identity: #1b2b21;
+  --surface-overlay: rgba(0, 0, 0, 0.6);
+  --text-primary: #eeebe4;
+  --text-secondary: #b9bcb3;
+  --text-muted: #969b92;
+  --text-inverse: #141614;
+  --text-disabled: #80857d;
+  --text-on-inverse: #1b201c;
+  --text-on-inverse-muted: #525a53;
+  --border-default: #2b2f2a;
+  --border-strong: #40453e;
+  --border-interactive: #8cc79a;
+  --brand-primary: #8cc79a;
+  --brand-moss: #a9c49a;
+  --brand-natural: #6fb585;
+  --brand-tint: #1f2c23;
+  --brand-solid: #2e7650;
+  --brand-solid-strong: #27664a;
+  --on-brand: #ffffff;
+  --accent-plum: #c3a6d1;
+  --accent-cobalt: #8eb0f0;
+  --status-success: #6fbf8c;
+  --status-attention: #e2a94b;
+  --status-warning: #e8925a;
+  --status-concern: #ea7a6c;
+  --status-critical: #f06a64;
+  --status-info: #8eb0f0;
+  --status-success-tint: #1d2b21;
+  --status-attention-tint: #2e2617;
+  --status-concern-tint: #33201c;
+  --focus-ring: #8eb0f0;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 18px 40px -16px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4);
   --brand-mint: #5cc4a5;
   --brand-mint-strong: #79d4b8;
-
-  --ai-primary: #a597e8;
-  --ai-primary-strong: #b8adef;
-
-  --state-attention: #e0a544;
-  --state-higher-concern: #e58a4c;
-  --state-urgent: #e2685a;
-  --state-emergency: #d1544f;
-  --state-success: #56b886;
-
-  --focus-ring: #5cc4a5;
+  --ai-primary-strong: #d3bde0;
 }

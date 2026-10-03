@@ -182,7 +182,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
               <div className="flex flex-wrap gap-2">
                 {myPets.map((p) => {
                   const on = petIds.includes(p.id);
-                  return <button key={p.id} type="button" aria-pressed={on} onClick={() => setPetIds(on ? petIds.filter((x) => x !== p.id) : [...petIds, p.id].slice(0, 5))} className={`min-h-11 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{on ? "✓ " : ""}{p.name}</button>;
+                  return <button key={p.id} type="button" aria-pressed={on} onClick={() => setPetIds(on ? petIds.filter((x) => x !== p.id) : [...petIds, p.id].slice(0, 5))} className={`min-h-11 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{on ? "✓ " : ""}{p.name}</button>;
                 })}
               </div>
             </fieldset>
@@ -289,7 +289,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
                   <fieldset className="mt-3 flex flex-col gap-2 ps-8">
                     <legend className="sr-only">{fa ? "نرخ" : "Rate"}</legend>
                     {plans.map((p) => (
-                      <label key={p.id} className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 ${p.id === ratePlanId ? "border-brand-natural bg-brand-natural/5" : "border-border-subtle"}`}>
+                      <label key={p.id} className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 ${p.id === ratePlanId ? "border-brand-natural bg-brand-solid/5" : "border-border-subtle"}`}>
                         <input type="radio" name="plan" className="mt-1 h-5 w-5" checked={p.id === ratePlanId} onChange={() => setRatePlanId(p.id)} />
                         <span className="flex flex-col gap-0.5 text-sm">
                           <span className="font-bold text-text-primary">{p.name}{p.priceModifierPercent ? ` (${p.priceModifierPercent > 0 ? "+" : ""}${localizeDigits(p.priceModifierPercent, lang)}٪)` : ""}</span>
@@ -360,7 +360,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
         <div className="min-w-0 text-sm">
           {quote?.isBookable ? <><p className="font-bold tabular-nums">{money(quote.totalAmountIrr, lang)}</p><p className="text-metadata text-text-secondary">{fa ? `${localizeDigits(nights, "fa")} شب` : `${nights} nights`}</p></> : <p className="text-text-secondary">{fa ? "تاریخ را انتخاب کنید" : "Choose dates"}</p>}
         </div>
-        <a href="#book" className="inline-flex min-h-11 items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse">{fa ? "رزرو" : "Reserve"}</a>
+        <a href="#book" className="inline-flex min-h-11 items-center rounded-full bg-brand-solid px-5 font-bold text-on-brand">{fa ? "رزرو" : "Reserve"}</a>
       </div>
 
       <Dialog open={lightbox !== null} onClose={() => setLightbox(null)} title={fa ? "تصاویر" : "Photos"} className="max-w-4xl">

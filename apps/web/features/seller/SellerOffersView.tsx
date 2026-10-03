@@ -149,7 +149,7 @@ export function SellerOffersView() {
                           type="button"
                           aria-pressed={on}
                           onClick={() => setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, repeatIntervalsDays: on ? draft.repeatIntervalsDays.filter((d) => d !== days) : [...draft.repeatIntervalsDays, days].sort((a, b) => a - b) } }))}
-                          className={`min-h-9 rounded-full border px-3 text-metadata ${on ? "border-brand-natural bg-brand-natural text-text-inverse" : "border-border-subtle text-text-secondary"}`}
+                          className={`min-h-9 rounded-full border px-3 text-metadata ${on ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle text-text-secondary"}`}
                         >
                           {t("repeat.everyDays", { days: days.toLocaleString(locale === "fa" ? "fa-IR" : "en-US") })}
                         </button>

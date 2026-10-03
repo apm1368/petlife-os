@@ -333,7 +333,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
                     .filter((s) => s.state === "AVAILABLE")
                     .filter((s, i, all) => staffId || all.findIndex((x) => x.startAt === s.startAt) === i)
                     .map((s) => (
-                      <button key={`${s.startAt}-${s.providerUserId ?? ""}`} type="button" aria-pressed={slot?.startAt === s.startAt} onClick={() => setSlot(s)} className={`rounded border px-2 py-3 text-sm ${slot?.startAt === s.startAt ? "border-brand-natural bg-brand-natural text-white" : "border-border-subtle"}`}>
+                      <button key={`${s.startAt}-${s.providerUserId ?? ""}`} type="button" aria-pressed={slot?.startAt === s.startAt} onClick={() => setSlot(s)} className={`rounded border px-2 py-3 text-sm ${slot?.startAt === s.startAt ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle"}`}>
                         {new Intl.DateTimeFormat(fa ? "fa-IR" : "en-GB", { hour: "2-digit", minute: "2-digit", timeZone: s.timezone }).format(new Date(s.startAt))}
                       </button>
                     ))}

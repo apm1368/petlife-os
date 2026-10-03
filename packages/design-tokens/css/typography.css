@@ -9,37 +9,52 @@
   --font-fa: var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
   --font-en: var(--font-inter, "Inter"), var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
 
-  --text-hero-size: 1.875rem;
-  --text-hero-line: 2.75rem;
-  --text-hero-weight: 700;
+  /* Nine roles, fewer sizes, stronger contrast between them (visual direction 2027). */
+  --text-display-size: 2.5rem;
+  --text-display-line: 1.25;
+  --text-display-weight: 800;
 
-  --text-page-title-size: 2rem;
-  --text-page-title-line: 3rem;
-  --text-page-title-weight: 600;
+  --text-hero-size: 2rem;
+  --text-hero-line: 2.6rem;
+  --text-hero-weight: 800;
 
-  --text-section-title-size: 1.25rem;
-  --text-section-title-line: 2rem;
-  --text-section-title-weight: 600;
+  --text-page-title-size: 1.75rem;
+  --text-page-title-line: 2.4rem;
+  --text-page-title-weight: 750;
 
-  --text-body-size: 1rem;
-  --text-body-line: 1.8rem;
+  --text-section-title-size: 1.125rem;
+  --text-section-title-line: 1.75rem;
+  --text-section-title-weight: 700;
+
+  --text-subheading-size: 1rem;
+  --text-subheading-line: 1.6rem;
+  --text-subheading-weight: 650;
+
+  --text-body-size: 0.95rem;
+  --text-body-line: 1.75rem;
   --text-body-weight: 400;
 
+  --text-small-size: 0.875rem;
+  --text-small-line: 1.5rem;
+
   --text-metadata-size: 0.8125rem;
-  --text-metadata-line: 1.125rem;
+  --text-metadata-line: 1.3rem;
   --text-metadata-weight: 500;
+
+  --text-label-size: 0.8125rem;
+  --text-label-weight: 650;
 
   --text-status-size: 0.75rem;
   --text-status-line: 1rem;
-  --text-status-weight: 600;
+  --text-status-weight: 650;
 
   --text-cta-size: 0.9375rem;
   --text-cta-line: 1.25rem;
-  --text-cta-weight: 600;
+  --text-cta-weight: 650;
 
-  --text-numeric-size: 1rem;
-  --text-numeric-line: 1.25rem;
-  --text-numeric-weight: 600;
+  --text-numeric-size: 1.5rem;
+  --text-numeric-line: 1.2;
+  --text-numeric-weight: 750;
   --text-numeric-feature: "tnum";
 }
 

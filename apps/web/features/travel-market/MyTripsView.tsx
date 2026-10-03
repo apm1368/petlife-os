@@ -45,7 +45,7 @@ export function MyTripsView() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{fa ? "سفرهای من" : "My trips"}</h1>
-        <Link href={`/${lang}/travel`} className="inline-flex min-h-11 items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse">{fa ? "جستجوی اقامت" : "Find a stay"}</Link>
+        <Link href={`/${lang}/travel`} className="inline-flex min-h-11 items-center rounded-full bg-brand-solid px-5 font-bold text-on-brand">{fa ? "جستجوی اقامت" : "Find a stay"}</Link>
       </div>
       <div role="tablist" aria-label={fa ? "بازه" : "Scope"} className="flex gap-2">
         {(["upcoming", "past"] as const).map((s) => (

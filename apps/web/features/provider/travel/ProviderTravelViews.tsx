@@ -225,7 +225,7 @@ function DetailsTab({ listing, busy, onSave }: { listing: TravelListingDto; busy
       <label className="flex flex-col gap-1 text-sm">{fa ? "قوانین اقامتگاه" : "House rules"}<textarea dir="auto" value={v.houseRules} maxLength={2000} onChange={(e) => setV({ ...v, houseRules: e.target.value })} className="min-h-20 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
       <label className="flex flex-col gap-1 text-sm">{fa ? "شرایط لغو عمومی (برای اتاق‌های بدون نرخ)" : "General cancellation terms (rooms without rate plans)"}<textarea dir="auto" value={v.cancellationPolicy} onChange={(e) => setV({ ...v, cancellationPolicy: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
       <fieldset className="flex flex-wrap gap-2"><legend className="mb-1 text-sm font-medium">{fa ? "امکانات" : "Amenities"}</legend>
-        {Object.keys(AMENITY).map((a) => { const on = v.amenities.includes(a); return <button type="button" key={a} aria-pressed={on} onClick={() => setV({ ...v, amenities: on ? v.amenities.filter((x) => x !== a) : [...v.amenities, a] })} className={`min-h-10 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{amenityLabel(a, lang)}</button>; })}
+        {Object.keys(AMENITY).map((a) => { const on = v.amenities.includes(a); return <button type="button" key={a} aria-pressed={on} onClick={() => setV({ ...v, amenities: on ? v.amenities.filter((x) => x !== a) : [...v.amenities, a] })} className={`min-h-10 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{amenityLabel(a, lang)}</button>; })}
       </fieldset>
       <Button isLoading={busy} disabled={(!!v.checkInFrom && !time.test(v.checkInFrom)) || (!!v.checkOutUntil && !time.test(v.checkOutUntil))} onClick={() => onSave({
         title: v.title.trim(), description: v.description.trim(), province: v.province.trim() || undefined, address: v.address.trim() || undefined,
@@ -437,7 +437,7 @@ export function ProviderTravelBookingsView() {
       <ProviderTravelNav />
       <h1 className="text-page-title">{fa ? "رزروهای اقامت" : "Stay bookings"}</h1>
       <div className="flex gap-2 overflow-x-auto" role="group" aria-label={fa ? "فیلتر وضعیت" : "Status filter"}>
-        {BOOKING_FILTERS.map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 shrink-0 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{s ? bookingStatusLabel(s, lang) : fa ? "همه" : "All"}</button>)}
+        {BOOKING_FILTERS.map((s) => <button key={s || "all"} aria-pressed={status === s} onClick={() => setStatus(s)} className={`min-h-10 shrink-0 rounded-full border px-3 text-sm ${status === s ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{s ? bookingStatusLabel(s, lang) : fa ? "همه" : "All"}</button>)}
       </div>
       {error ? <ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message={fa ? "دوباره تلاش کنید." : "Please try again."} retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={load} /> : rows === null ? <Skeleton className="h-40" /> : rows.length === 0 ? <EmptyState title={fa ? "رزروی نیست" : "No bookings"} /> : (
         <ul className="flex flex-col gap-2">

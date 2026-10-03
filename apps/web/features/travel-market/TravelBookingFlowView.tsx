@@ -154,7 +154,7 @@ export function TravelBookingFlowView({ bookingId }: { bookingId: string }) {
             {steps.map((s, i) => {
               const current = s.key === step;
               const doneStep = steps.findIndex((x) => x.key === step) > i;
-              return <li key={s.key} aria-current={current ? "step" : undefined} className={`shrink-0 rounded-full px-3 py-1 ${current ? "bg-brand-natural text-text-inverse" : doneStep ? "bg-surface-subtle text-text-primary" : "text-text-secondary"}`}>{doneStep ? "✓ " : ""}{fa ? s.fa : s.en}</li>;
+              return <li key={s.key} aria-current={current ? "step" : undefined} className={`shrink-0 rounded-full px-3 py-1 ${current ? "bg-brand-solid text-on-brand" : doneStep ? "bg-surface-subtle text-text-primary" : "text-text-secondary"}`}>{doneStep ? "✓ " : ""}{fa ? s.fa : s.en}</li>;
             })}
           </ol>
 
@@ -254,7 +254,7 @@ export function TravelBookingFlowView({ bookingId }: { bookingId: string }) {
                 : fa ? "وضعیت این رزرو در صفحهٔ رزرو قابل پیگیری است." : "Follow this booking on its page."}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href={`/${lang}/travel/bookings/${booking.id}`} className="inline-flex min-h-11 items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse">{fa ? "مشاهدهٔ رزرو" : "View booking"}</Link>
+            <Link href={`/${lang}/travel/bookings/${booking.id}`} className="inline-flex min-h-11 items-center rounded-full bg-brand-solid px-5 font-bold text-on-brand">{fa ? "مشاهدهٔ رزرو" : "View booking"}</Link>
             {booking.tripId ? <Link href={`/${lang}/travel/trips/${booking.tripId}`} className="inline-flex min-h-11 items-center rounded-full border border-border-subtle px-5">{fa ? "مشاهدهٔ سفر" : "View trip"}</Link> : null}
             <Link href={`/${lang}/insurance`} className="inline-flex min-h-11 items-center rounded-full border border-border-subtle px-5">{fa ? "بیمهٔ سفر حیوان" : "Pet insurance"}</Link>
           </div>

@@ -77,7 +77,7 @@ export function MyBookingsView() {
       </header>
       <nav aria-label={fa ? "دسته نوبت‌ها" : "Booking tabs"} className="-mx-1 flex gap-2 overflow-x-auto border-b border-border-subtle pb-2">
         {TABS.map((t) => (
-          <button key={t.key} type="button" aria-pressed={tab === t.key} onClick={() => setParam({ tab: t.key })} className={`whitespace-nowrap rounded-md px-3 py-2 text-sm ${tab === t.key ? "bg-brand-natural text-white" : "text-text-secondary"}`}>
+          <button key={t.key} type="button" aria-pressed={tab === t.key} onClick={() => setParam({ tab: t.key })} className={`whitespace-nowrap rounded-md px-3 py-2 text-sm ${tab === t.key ? "bg-brand-solid text-on-brand" : "text-text-secondary"}`}>
             {fa ? t.fa : t.en}
           </button>
         ))}
@@ -112,7 +112,7 @@ export function MyBookingsView() {
                 </div>
                 <div className="flex gap-2">
                   {w.status === "NOTIFIED" ? (
-                    <Link className="rounded-md bg-brand-natural px-3 py-2 text-sm text-white" href={`/${locale}/providers/${w.providerOrganizationId}/book?serviceId=${w.serviceId}${w.variantId ? `&variantId=${w.variantId}` : ""}&date=${w.windowStart.slice(0, 10)}`}>
+                    <Link className="rounded-md bg-brand-solid px-3 py-2 text-sm text-on-brand" href={`/${locale}/providers/${w.providerOrganizationId}/book?serviceId=${w.serviceId}${w.variantId ? `&variantId=${w.variantId}` : ""}&date=${w.windowStart.slice(0, 10)}`}>
                       {fa ? "رزرو" : "Book"}
                     </Link>
                   ) : null}

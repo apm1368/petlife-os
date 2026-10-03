@@ -226,7 +226,7 @@ export function TravelResultsView() {
           <div className="flex gap-2">
             <Button size="sm" variant="ghost" onClick={() => setCompare([])}>{fa ? "پاک کردن" : "Clear"}</Button>
             {compare.length >= 2 ? (
-              <Link className="inline-flex min-h-10 items-center rounded-full bg-brand-natural px-4 text-sm font-bold text-text-inverse" href={`/${lang}/travel/compare?ids=${compare.join(",")}${search.checkIn && search.checkOut ? `&checkIn=${search.checkIn}&checkOut=${search.checkOut}` : ""}`}>{fa ? "مقایسه" : "Compare"}</Link>
+              <Link className="inline-flex min-h-10 items-center rounded-full bg-brand-solid px-4 text-sm font-bold text-on-brand" href={`/${lang}/travel/compare?ids=${compare.join(",")}${search.checkIn && search.checkOut ? `&checkIn=${search.checkIn}&checkOut=${search.checkOut}` : ""}`}>{fa ? "مقایسه" : "Compare"}</Link>
             ) : <span className="text-metadata text-text-secondary">{fa ? "حداقل ۲ مورد" : "Pick at least 2"}</span>}
           </div>
         </div>

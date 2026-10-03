@@ -225,7 +225,7 @@ export function ProductResultsView() {
                 <span className="inline-flex items-center gap-1.5">
                   <SlidersHorizontal size={16} aria-hidden="true" />
                   {t("filters.title")}
-                  {activeCount ? <span className="rounded-full bg-brand-natural px-1.5 text-metadata text-text-inverse">{formatNumber(activeCount, locale)}</span> : null}
+                  {activeCount ? <span className="rounded-full bg-brand-solid px-1.5 text-metadata text-on-brand">{formatNumber(activeCount, locale)}</span> : null}
                 </span>
               </Button>
               <div className="w-44">
@@ -288,7 +288,7 @@ function CategoryChip({ label, active, onClick }: { label: string; active: boole
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`shrink-0 rounded-full border px-3 py-1.5 text-metadata ${active ? "border-brand-natural bg-brand-natural text-text-inverse" : "border-border-subtle bg-surface-elevated text-text-secondary hover:border-border-strong"}`}
+      className={`shrink-0 rounded-full border px-3 py-1.5 text-metadata ${active ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle bg-surface-elevated text-text-secondary hover:border-border-strong"}`}
     >
       {label}
     </button>

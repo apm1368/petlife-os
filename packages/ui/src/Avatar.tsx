@@ -36,7 +36,7 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
       role="img"
       aria-label={name}
       className={cn(
-        "flex items-center justify-center rounded-full bg-brand-natural font-semibold text-text-inverse",
+        "flex items-center justify-center rounded-full bg-brand-solid font-semibold text-on-brand",
         sizeClasses[size],
         className,
       )}

@@ -99,7 +99,7 @@ export function DonationPanel({ campaign, need, onDonated }: { campaign: Support
             <legend className="mb-1 text-sm font-medium">{fa ? "مبلغ (تومان)" : "Amount (Toman)"}</legend>
             <div className="flex flex-wrap gap-2">
               {PRESETS_TOMAN.map((v) => (
-                <button key={v} type="button" aria-pressed={Number(toman) === v} onClick={() => setToman(String(v))} className={`min-h-11 rounded-full border px-4 text-sm ${Number(toman) === v ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle"}`}>{localizeDigits(v.toLocaleString("en-US"), lang)}</button>
+                <button key={v} type="button" aria-pressed={Number(toman) === v} onClick={() => setToman(String(v))} className={`min-h-11 rounded-full border px-4 text-sm ${Number(toman) === v ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle"}`}>{localizeDigits(v.toLocaleString("en-US"), lang)}</button>
               ))}
             </div>
             <input aria-label={fa ? "مبلغ دلخواه به تومان" : "Custom amount in Toman"} inputMode="numeric" value={toman} onChange={(e) => setToman(e.target.value.replace(/\D/g, "").slice(0, 10))} className="min-h-12 rounded-md border border-border-subtle bg-surface-base px-3" placeholder={fa ? "مبلغ دلخواه" : "Other amount"} />

@@ -133,7 +133,7 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
             {pets.map((p) => {
               const on = chosen.includes(p.id);
               return (
-                <button type="button" key={p.id} aria-pressed={on} onClick={() => setChosen(on ? chosen.filter((x) => x !== p.id) : [...chosen, p.id].slice(0, 5))} className={`min-h-11 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-natural/10 text-text-primary" : "border-border-subtle text-text-secondary"}`}>
+                <button type="button" key={p.id} aria-pressed={on} onClick={() => setChosen(on ? chosen.filter((x) => x !== p.id) : [...chosen, p.id].slice(0, 5))} className={`min-h-11 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-solid/10 text-text-primary" : "border-border-subtle text-text-secondary"}`}>
                   {on ? "✓ " : ""}{p.name}
                 </button>
               );

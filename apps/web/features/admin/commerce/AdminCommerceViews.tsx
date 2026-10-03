@@ -202,7 +202,7 @@ export function AdminCommerceOverviewView() {
                       <li key={d.date} className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-2 text-metadata">
                         <span className="text-text-secondary">{new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { month: "short", day: "numeric" }).format(new Date(d.date))}</span>
                         <span className="block min-w-0" aria-hidden="true">
-                          <span className="block h-2 rounded-full bg-brand-natural" style={{ width: `${Math.max(2, (d.grossSales / maxDay) * 100)}%` }} />
+                          <span className="block h-2 rounded-full bg-brand-solid" style={{ width: `${Math.max(2, (d.grossSales / maxDay) * 100)}%` }} />
                         </span>
                         <span className="whitespace-nowrap">{formatCurrency(d.grossSales, lang)}</span>
                       </li>

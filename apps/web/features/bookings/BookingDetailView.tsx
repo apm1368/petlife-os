@@ -219,7 +219,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
           {rescheduleSlots === null ? <Skeleton className="h-16 w-full" /> : rescheduleSlots.length === 0 ? <p className="text-sm">{fa ? "در این روز زمان آزادی نیست." : "No open times on this day."}</p> : (
             <div className="grid grid-cols-3 gap-2">
               {rescheduleSlots.map((slot) => (
-                <button key={slot.startAt} type="button" aria-pressed={rescheduleSlot === slot.startAt} onClick={() => setRescheduleSlot(slot.startAt)} className={`rounded border px-2 py-2 text-sm ${rescheduleSlot === slot.startAt ? "border-brand-natural bg-brand-natural text-white" : "border-border-subtle"}`}>
+                <button key={slot.startAt} type="button" aria-pressed={rescheduleSlot === slot.startAt} onClick={() => setRescheduleSlot(slot.startAt)} className={`rounded border px-2 py-2 text-sm ${rescheduleSlot === slot.startAt ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle"}`}>
                   {new Intl.DateTimeFormat(fa ? "fa-IR" : "en-GB", { hour: "2-digit", minute: "2-digit", timeZone: slot.timezone }).format(new Date(slot.startAt))}
                 </button>
               ))}

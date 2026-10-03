@@ -45,7 +45,7 @@ function TrendChart({ metric }: { metric: Metric }) {
             <div key={m.month} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
               <span className="text-metadata tabular-nums text-text-secondary">{metric === "revenueIrr" ? formatNumber(Math.round(value / 1_000_000)) : formatNumber(value)}</span>
               <div
-                className={`w-full rounded-t-md ${isPeak ? "bg-brand-mint" : "bg-brand-natural/45"}`}
+                className={`w-full rounded-t-md ${isPeak ? "bg-brand-mint" : "bg-brand-solid/45"}`}
                 style={{ height: `${Math.max(heightPct, 3)}%` }}
                 role="img"
                 aria-label={`${m.month}: ${format(value)}`}

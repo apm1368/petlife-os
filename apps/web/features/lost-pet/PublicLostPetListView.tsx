@@ -40,7 +40,7 @@ export function PublicLostPetListView() {
       </div>
       <div role="group" aria-label={fa ? "گونه" : "Species"} className="flex flex-wrap gap-2">
         {[["", fa ? "همه" : "All"], ["DOG", fa ? "سگ" : "Dogs"], ["CAT", fa ? "گربه" : "Cats"], ["OTHER", fa ? "سایر" : "Other"]].map(([value, label]) => (
-          <button key={value} type="button" aria-pressed={species === value} onClick={() => { setSpecies(value!); setPage(1); }} className={`min-h-11 rounded-full border px-4 text-sm ${species === value ? "border-brand-natural bg-brand-natural/10" : "border-border-subtle text-text-secondary"}`}>{label}</button>
+          <button key={value} type="button" aria-pressed={species === value} onClick={() => { setSpecies(value!); setPage(1); }} className={`min-h-11 rounded-full border px-4 text-sm ${species === value ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{label}</button>
         ))}
       </div>
       {error ? <LoadFailure error={error} onRetry={() => void load()} /> : !data ? (

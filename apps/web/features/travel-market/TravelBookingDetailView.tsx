@@ -122,8 +122,8 @@ export function TravelBookingDetailView({ bookingId }: { bookingId: string }) {
       </section>
         </div>
         <aside className="split-aside">
-      {b.status === "HELD" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse" href={`/${lang}/travel/book/${b.id}`}>{fa ? "ادامهٔ رزرو" : "Continue booking"}</Link> : null}
-      {b.status === "AWAITING_PAYMENT" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-natural px-5 font-bold text-text-inverse" href={`/${lang}/travel/book/${b.id}`}>{fa ? `پرداخت ${money(b.payNowAmountIrr, lang)}` : `Pay ${money(b.payNowAmountIrr, lang)}`}</Link> : null}
+      {b.status === "HELD" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-solid px-5 font-bold text-on-brand" href={`/${lang}/travel/book/${b.id}`}>{fa ? "ادامهٔ رزرو" : "Continue booking"}</Link> : null}
+      {b.status === "AWAITING_PAYMENT" ? <Link className="inline-flex min-h-11 w-fit items-center rounded-full bg-brand-solid px-5 font-bold text-on-brand" href={`/${lang}/travel/book/${b.id}`}>{fa ? `پرداخت ${money(b.payNowAmountIrr, lang)}` : `Pay ${money(b.payNowAmountIrr, lang)}`}</Link> : null}
       {b.status === "AWAITING_PROVIDER" && b.requestExpiresAt ? <p className="rounded-md bg-surface-subtle p-3 text-sm">{fa ? `اقامتگاه تا ${formatDay(b.requestExpiresAt.slice(0, 10), lang)} فرصت پاسخ دارد؛ در غیر این صورت درخواست منقضی می‌شود.` : `The property has until ${formatDay(b.requestExpiresAt.slice(0, 10), lang)} to answer; otherwise the request expires.`}</p> : null}
       {b.providerNote ? <p className="rounded-md bg-surface-subtle p-3 text-sm"><span className="font-bold">{fa ? "پیام اقامتگاه: " : "From the property: "}</span>{b.providerNote}</p> : null}
 
@@ -213,7 +213,7 @@ function Stars({ label, value, onChange }: { label: string; value: number; onCha
       <legend className="text-sm">{label}</legend>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
-          <label key={n} className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-border-subtle has-[:checked]:bg-brand-natural has-[:checked]:text-text-inverse">
+          <label key={n} className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-border-subtle has-[:checked]:bg-brand-solid has-[:checked]:text-on-brand">
             <input type="radio" className="sr-only" name={label} checked={value === n} onChange={() => onChange(n)} />
             {localizeDigits(n, lang)}
           </label>

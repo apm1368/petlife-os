@@ -193,7 +193,7 @@ export function DateRangePicker({
         {allowSystemToggle && fa ? (
           <div role="group" aria-label={fa ? "تقویم" : "Calendar"} className="flex rounded-full border border-border-subtle p-0.5 text-metadata">
             {(["jalali", "gregorian"] as const).map((s) => (
-              <button key={s} type="button" aria-pressed={system === s} onClick={() => setSystem(s)} className={cn("min-h-9 rounded-full px-3", system === s ? "bg-brand-natural text-text-inverse" : "text-text-secondary")}>
+              <button key={s} type="button" aria-pressed={system === s} onClick={() => setSystem(s)} className={cn("min-h-9 rounded-full px-3", system === s ? "bg-brand-solid text-on-brand" : "text-text-secondary")}>
                 {s === "jalali" ? "شمسی" : "میلادی"}
               </button>
             ))}
@@ -228,7 +228,7 @@ export function DateRangePicker({
                       const isToday = cell.iso === today;
                       const label = `${formatDay(cell.iso, lang, { system, weekday: true })}${isStart ? (fa ? "، ورود" : ", check-in") : ""}${isEnd ? (fa ? "، خروج" : ", check-out") : ""}${reason ? `، ${reason}` : ""}`;
                       return (
-                        <div role="gridcell" key={cell.iso} aria-selected={isStart || isEnd || inRange} className={cn("relative h-11", inRange && "bg-brand-natural/10", isStart && value.end && (fa ? "rounded-r-full bg-brand-natural/10" : "rounded-l-full bg-brand-natural/10"), isEnd && (fa ? "rounded-l-full bg-brand-natural/10" : "rounded-r-full bg-brand-natural/10"))}>
+                        <div role="gridcell" key={cell.iso} aria-selected={isStart || isEnd || inRange} className={cn("relative h-11", inRange && "bg-brand-solid/10", isStart && value.end && (fa ? "rounded-r-full bg-brand-solid/10" : "rounded-l-full bg-brand-solid/10"), isEnd && (fa ? "rounded-l-full bg-brand-solid/10" : "rounded-r-full bg-brand-solid/10"))}>
                           <button
                             type="button"
                             data-iso={cell.iso}
@@ -241,7 +241,7 @@ export function DateRangePicker({
                             className={cn(
                               "mx-auto flex h-11 w-full max-w-11 items-center justify-center rounded-full text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
                               reason ? "cursor-not-allowed text-text-disabled line-through decoration-1" : "text-text-primary hover:bg-surface-subtle",
-                              (isStart || isEnd) && "bg-brand-natural font-bold text-text-inverse no-underline hover:bg-brand-natural",
+                              (isStart || isEnd) && "bg-brand-solid font-bold text-on-brand no-underline hover:bg-brand-solid",
                               isToday && !isStart && !isEnd && "ring-1 ring-inset ring-border-strong",
                             )}
                           >
