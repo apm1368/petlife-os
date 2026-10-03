@@ -48,6 +48,17 @@ describe("CreateMemoryView", () => {
     expect(button?.disabled).toBe(true);
   });
 
+  it("lets a memory be dated in the past (regression: the picker used to floor at today)", async () => {
+    renderWithIntl(<CreateMemoryView petId="pet-1" />);
+    fireEvent.click(screen.getByRole("button", { name: /^Date/ }));
+    fireEvent.click(screen.getByRole("button", { name: /previous month/i }));
+    const now = new Date();
+    const prev = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 15)).toISOString().slice(0, 10);
+    const cell = document.querySelector(`[data-iso="${prev}"]`);
+    expect(cell).not.toBeNull();
+    expect(cell!.getAttribute("aria-disabled")).not.toBe("true");
+  });
+
   it("submits without a title, per the quick-entry spec", async () => {
     vi.mocked(memoriesService.create).mockResolvedValue({ id: "memory-10" } as never);
 
