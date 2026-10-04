@@ -62,6 +62,7 @@ export type AdminAuditAction =
   | "subscription_plan_price.created"
   | "subscription_plan_price.updated"
   | "subscription.admin_cancelled"
+  | "clinic_subscription.plan_assigned"
   | "subscription.billing_attempt_refunded"
   | "subscription_entitlement_override.granted"
   | "subscription_entitlement_override.revoked"

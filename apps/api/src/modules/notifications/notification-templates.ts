@@ -376,6 +376,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "پیام تازه", body: "{{sender}} برایتان پیام فرستاد." },
     en: { title: "New message", body: "{{sender}} sent you a message." },
   },
+  "clinic.reminder": {
+    fa: { title: "یادآور از {{clinic}}", body: "{{petName}}: {{title}}" },
+    en: { title: "Reminder from {{clinic}}", body: "{{petName}}: {{title}}" },
+  },
+  "clinic.message": {
+    fa: { title: "پیام از {{clinic}}", body: "درباره‌ی {{petName}}: {{title}}" },
+    en: { title: "Message from {{clinic}}", body: "About {{petName}}: {{title}}" },
+  },
   "animal_support.offer_received": {
     fa: { title: "پیشنهاد کمک تازه", body: "برای «{{title}}» یک پیشنهاد کمک رسید. آن را بررسی کنید." },
     en: { title: "New help offer", body: "Someone offered help for “{{title}}”. Review the offer." },

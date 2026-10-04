@@ -249,6 +249,7 @@ export const DOMAIN_EVENT_TYPES = [
   "SupportNeedHelpOffered",
   // Community chat (v1)
   "ChatMessageSent",
+  "ClinicReminderSent",
   "SupportNeedHelpOfferResolved",
   "SupportNeedExpiringSoon",
   "ContentReportSubmitted",

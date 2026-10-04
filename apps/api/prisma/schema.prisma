@@ -1450,6 +1450,7 @@ model Pet {
   clinicalEstimates      ClinicalEstimate[]
   dischargeSummaries     DischargeSummary[]
   providerClinicalAlerts ProviderClinicalAlert[]
+  clinicReminders        ClinicReminder[]
 
   trips                 Trip[]
   insuranceApplications InsuranceApplication[]
@@ -1864,6 +1865,9 @@ model ProviderOrganization {
   clinicalAlerts        ProviderClinicalAlert[]
 
   travelListings TravelListing[]
+
+  clinicSubscription ClinicSubscription?
+  clinicReminders    ClinicReminder[]
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -9223,4 +9227,152 @@ model UserBlock {
   @@id([blockerUserId, blockedUserId])
   @@index([blockedUserId])
   @@map("user_blocks")
+}
+
+// ---------------------------------------------------------------------------
+// Clinic OS — B2B subscription context (deliberately separate from the
+// household Subscription tables: a clinic plan can never be bought by, or
+// resolved for, a household, and vice versa). See
+// docs/product/clinic-os-architecture.md.
+// ---------------------------------------------------------------------------
+
+enum ClinicPlanStatus {
+  ACTIVE
+  INACTIVE
+}
+
+/// CLINIC_BASIC / CLINIC_GROWTH / CLINIC_PRO. Entitlements are rows, never `code` checks.
+model ClinicPlan {
+  id            String           @id @default(uuid()) @db.Uuid
+  code          String           @unique
+  nameFa        String
+  nameEn        String
+  descriptionFa String?
+  descriptionEn String?
+  status        ClinicPlanStatus @default(ACTIVE)
+  sortOrder     Int              @default(0)
+  /// The plan every clinic resolves to before anything is assigned (exactly one, service-enforced).
+  isDefault     Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entitlements  ClinicPlanEntitlement[]
+  prices        ClinicPlanPrice[]
+  subscriptions ClinicSubscription[]
+
+  @@map("clinic_plans")
+}
+
+model ClinicPlanEntitlement {
+  id         String                      @id @default(uuid()) @db.Uuid
+  planId     String                      @db.Uuid
+  plan       ClinicPlan                  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  key        String
+  type       SubscriptionEntitlementType
+  boolValue  Boolean?
+  /// LIMIT with null = unlimited.
+  limitValue Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([planId, key])
+  @@map("clinic_plan_entitlements")
+}
+
+/// Integer IRR, append-only like SubscriptionPlanPrice. Nothing is seeded until the owner sets clinic pricing.
+model ClinicPlanPrice {
+  id              String                      @id @default(uuid()) @db.Uuid
+  planId          String                      @db.Uuid
+  plan            ClinicPlan                  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  billingInterval SubscriptionBillingInterval
+  amount          Int
+  currency        String                      @default("IRR")
+  status          SubscriptionPlanPriceStatus @default(ACTIVE)
+  effectiveFrom   DateTime                    @default(now())
+  effectiveTo     DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([planId, billingInterval, status])
+  @@map("clinic_plan_prices")
+}
+
+/// One evolving row per clinic organisation; history lives in ClinicSubscriptionChange.
+model ClinicSubscription {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @unique @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  planId                 String               @db.Uuid
+  plan                   ClinicPlan           @relation(fields: [planId], references: [id], onDelete: Restrict)
+  status                 SubscriptionStatus   @default(ACTIVE)
+  /// Null = open-ended (default plan, or an admin assignment without an end date).
+  currentPeriodEndsAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  changes ClinicSubscriptionChange[]
+
+  @@map("clinic_subscriptions")
+}
+
+model ClinicSubscriptionChange {
+  id               String                 @id @default(uuid()) @db.Uuid
+  subscriptionId   String                 @db.Uuid
+  subscription     ClinicSubscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  type             SubscriptionChangeType
+  fromPlanCode     String?
+  toPlanCode       String
+  /// Plain audit references (no FK), like PetAccessGrant.grantedByUserId.
+  actorAdminUserId String?                @db.Uuid
+  reason           String?
+  createdAt        DateTime               @default(now())
+
+  @@index([subscriptionId, createdAt])
+  @@map("clinic_subscription_changes")
+}
+
+enum ClinicReminderKind {
+  VACCINATION
+  CHECKUP
+  MEDICATION
+  FOLLOW_UP
+  MESSAGE
+}
+
+enum ClinicReminderStatus {
+  SCHEDULED
+  SENT
+  CANCELLED
+  /// No owner could be notified (e.g. the household has no owner member left).
+  FAILED
+}
+
+/// A clinic-to-owner reminder or message for one of the clinic's own patients. Delivery is always the
+/// NotificationOrchestrator (in-app + whatever channel MessagingGateway really has) — never a direct SMS.
+model ClinicReminder {
+  id                      String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId  String               @db.Uuid
+  providerOrganization    ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  petId                   String               @db.Uuid
+  pet                     Pet                  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdByProviderUserId String               @db.Uuid
+  kind                    ClinicReminderKind
+  title                   String
+  note                    String?
+  dueAt                   DateTime
+  status                  ClinicReminderStatus @default(SCHEDULED)
+  sentAt                  DateTime?
+  recipientCount          Int                  @default(0)
+  cancelledAt             DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, dueAt])
+  @@index([providerOrganizationId, dueAt])
+  @@index([petId])
+  @@map("clinic_reminders")
 }

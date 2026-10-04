@@ -1,0 +1,109 @@
+# معماری Clinic OS (پنل کلینیک دامپزشکی)
+
+## ۱. اصل طراحی
+Clinic OS یک محصول جدا نیست؛ لایه‌ی B2B روی زیرساخت‌های موجود است:
+
+| قابلیت | منبع حقیقت | وضعیت |
+|---|---|---|
+| هویت کلینیک، اعضا و نقش‌ها (OWNER / VET / STAFF) | `ProviderOrganization`, `ProviderUser` (Provider OS) | موجود |
+| نوبت‌دهی | `Booking` + `/provider/bookings/*` (قبول، رد، پذیرش، شروع، اتمام، غیبت) | موجود، بازاستفاده |
+| پرونده‌ی پزشکی | vet-panel: `/provider/clinical/*` (علائم حیاتی، مشکلات، نسخه، بستری، برآورد، خلاصه‌ی ترخیص، هشدار) | موجود، بازاستفاده |
+| دسترسی به داده‌ی پت | `PetAccessGrant` + `PetAccessGuard` | موجود؛ Clinic OS هیچ‌وقت آن را دور نمی‌زند |
+| اشتراک کلینیک | `ClinicPlan`, `ClinicPlanEntitlement`, `ClinicPlanPrice`, `ClinicSubscription`, `ClinicSubscriptionChange` | **جدید** |
+| فهرست مشتریان | `/provider/clinic/customers` (کوئری روی Booking/ClinicalVisit) | **جدید** |
+| یادآور و پیام به صاحب پت | `ClinicReminder` + NotificationOrchestrator | **جدید** |
+| گزارش مالی | `/provider/clinic/reports/finance` (Booking + PaymentIntent + LedgerEntry) | **جدید** |
+
+## ۲. جدایی کامل از اشتراک مصرف‌کننده
+- جدول‌های اشتراک کلینیک کاملاً جدا هستند. یک خانوار هرگز پلن کلینیک نمی‌بیند یا نمی‌خرد، و یک کلینیک هرگز به پلن خانوار resolve نمی‌شود (این در تست بررسی شده است).
+- هر سازمان یک ردیف `ClinicSubscription` دارد که به‌صورت lazy روی پلن پیش‌فرض (`CLINIC_BASIC`) ساخته می‌شود.
+- اگر وضعیت CANCELLED/EXPIRED شود یا `currentPeriodEndsAt` بگذرد، کلینیک به entitlementهای پلن پیش‌فرض برمی‌گردد.
+- بررسی‌ها فقط روی ردیف‌های entitlement انجام می‌شود و هیچ کدی `plan.code` را مقایسه نمی‌کند.
+
+### Entitlementهای پیشنهادی (قابل تغییر از دیتابیس)
+| کلید | BASIC | GROWTH | PRO |
+|---|---|---|---|
+| `clinic.patients` / `clinic.appointments` / `clinic.medical_records` / `clinic.customers` | ✔ | ✔ | ✔ |
+| `clinic.reminders` (یادآور و پیام به صاحبان) | ✘ | ✔ | ✔ |
+| `clinic.reminders.monthly.max` | — | ۳۰۰ | نامحدود |
+| `clinic.finance.reports` | ✘ | ✔ | ✔ |
+
+- امکانات موجود (نوبت، پرونده‌ی پزشکی، فهرست بیماران) در همه‌ی پلن‌ها باز است. هیچ paywall جدیدی روی قابلیت‌های فعلی گذاشته نشده است.
+- **پیشنهاد، در انتظار تصمیم مالک:** سقف تعداد کارکنان (۳/۱۰/نامحدود) و سقف تعداد شعبه (۱/۳/نامحدود). این دو هنوز اعمال نمی‌شوند، چون اعمال‌شان یعنی محدود کردن قابلیت موجود.
+
+### قیمت‌گذاری و پرداخت
+- هیچ قیمتی seed نشده است، چون قیمت‌گذاری کلینیک تصمیم مالک است. `prices: []` یعنی UI باید بگوید «قیمت اعلام نشده» و هرگز قیمت نسازد.
+- تا وقتی درگاه واقعی وصل نشده، تنها راه رفتن به GROWTH/PRO تخصیص توسط ادمین است:
+  - `POST /admin/clinic-subscriptions/:organizationId/assign`، با مجوز `subscription.manage`؛
+  - دلیل اجباری؛
+  - ثبت در audit log در همان تراکنش؛
+  - ثبت تاریخچه در `ClinicSubscriptionChange`.
+
+## ۳. فهرست مشتریان
+- «مشتری» یعنی خانواری که این کلینیک دست‌کم یک بار برای یکی از پت‌هایش نوبت ثبت کرده یا ویزیت بالینی داشته است.
+- خروجی فقط شامل این موارد است:
+  - نام نمایشی صاحب پت؛
+  - پت‌هایی که همین کلینیک دیده؛
+  - تعداد ویزیت تکمیل‌شده؛
+  - آخرین ویزیت و نوبت بعدی؛
+  - تاریخچه‌ی نوبت‌ها با همین کلینیک.
+- **تلفن، ایمیل و داده‌ی سلامت برنمی‌گردد.** پرونده‌ی پزشکی همچنان فقط از مسیر PetAccessGuard باز می‌شود.
+- خانوار کلینیک دیگر و خانوار ناموجود هر دو پاسخ یکسان 404 می‌گیرند، تا وجود یا عدم وجود خانوار لو نرود.
+
+## ۴. یادآور و پیام به صاحب پت
+- فقط برای پت‌هایی که بیمار همین کلینیک هستند.
+- انواع: VACCINATION / CHECKUP / MEDICATION / FOLLOW_UP / MESSAGE (پیام فوری).
+- **زمان‌بندی:** اگر `dueAt` خالی باشد، پیام همان لحظه ارسال می‌شود. در غیر این صورت worker هر دقیقه یادآورهای سررسیده را می‌فرستد.
+- **ارسال دقیقاً یک‌بار:** claim اتمیک (SCHEDULED→SENT) به‌همراه شناسه‌ی رویداد قطعی به ازای هر گیرنده.
+- **گیرندگان:** همه‌ی OWNERهای خانوار. اگر خانوار OWNER نداشته باشد، وضعیت FAILED می‌شود.
+- **کانال‌ها:** فقط NotificationOrchestrator. اعلان درون‌برنامه همیشه ارسال می‌شود؛ SMS/ایمیل فقط وقتی MessagingGateway ارائه‌دهنده‌ی واقعی داشته باشد و ترجیحات کاربر اجازه بدهد. **هیچ SMS جعلی‌ای ثبت نمی‌شود** (SMS فراز = BLOCKED_EXTERNAL).
+- **دسته و لینک:** دسته‌ی اعلان HEALTH است، بنابراین کاربر با تنظیمات اعلان می‌تواند خاموشش کند. deep link: `/pets/:petId`.
+- لغو فقط در وضعیت SCHEDULED ممکن است.
+- سقف ماهانه از entitlement با کلید LIMIT خوانده می‌شود.
+
+## ۵. گزارش مالی (فقط OWNER کلینیک)
+همه‌ی اعداد از کوئری واقعی می‌آیند و هیچ تخمینی در کار نیست:
+- `billedAmount`: جمع (قیمت snapshot منهای تخفیف) نوبت‌های COMPLETED.
+- `payAtClinic`: بخشی از آن که در خود کلینیک پرداخت شده (PAY_AT_PROVIDER).
+- `collectedOnline`: PaymentIntentهای CAPTURED متصل به نوبت‌های این بازه.
+- `ledgerPosted`: بدهکاری‌های CASH_GATEWAY_RECEIVABLE که ledger برای همان checkoutها ثبت کرده. اگر با `collectedOnline` نخواند، اختلاف دیده می‌شود.
+- شمارش وضعیت‌ها (تکمیل، لغو، غیبت، بازپرداخت)، تفکیک بر اساس خدمت و سری روزانه.
+- بازه حداکثر ۳۶۶ روز است و پیش‌فرض ۳۰ روز اخیر.
+- **تسویه با کلینیک وجود ندارد:** `SELLER_PAYABLE` هنوز placeholder است و تصمیم مالی/حقوقی مالک را لازم دارد. برای همین «مانده‌ی بدهی به کلینیک» گزارش نمی‌شود.
+
+## ۶. امنیت
+- همه‌ی مسیرهای `/provider/clinic/*` پشت `SessionAuthGuard` و `ProviderAuthGuard` هستند و سازمان از عضویت فعال کاربر resolve می‌شود، نه از ورودی.
+- گزارش مالی فقط برای OWNER است؛ VET و STAFF خطای `PROVIDER_ACCESS_DENIED` می‌گیرند.
+- ماتریس امنیت بین‌دامنه‌ای (`final-cross-domain-security.e2e-spec.ts`) مسیرهای جدید را هم پوشش می‌دهد.
+
+## ۷. موارد مسدود / نیازمند تصمیم
+| مورد | وضعیت |
+|---|---|
+| قیمت پلن‌های کلینیک (ماهانه/سه‌ماهه/سالانه) | تصمیم مالک |
+| سقف کارکنان و شعبه | تصمیم مالک |
+| پرداخت آنلاین اشتراک کلینیک | BLOCKED_EXTERNAL (درگاه واقعی) |
+| SMS یادآور | BLOCKED_EXTERNAL (فراز) |
+| تسویه‌ی درآمد آنلاین با کلینیک | تصمیم مالی/حقوقی |
+
+## ۸. API برای Codex (UI)
+| متد | مسیر | توضیح |
+|---|---|---|
+| GET | `/provider/clinic/plans` | فهرست پلن‌ها شامل entitlements و prices (فعلاً خالی) |
+| GET | `/provider/clinic/subscription` | `{status, plan, assignedPlanCode, currentPeriodEndsAt, usage:{remindersThisMonth}}` |
+| GET | `/provider/clinic/customers?q&page&pageSize` | `{items:[{householdId, ownerDisplayName, pets[], completedVisitCount, lastVisitAt, nextAppointment}], total}` |
+| GET | `/provider/clinic/customers/:householdId` | همان، به‌علاوه‌ی `bookings[]` و `reminders[]` |
+| GET | `/provider/clinic/reminders?status&petId&page` | فهرست یادآورها |
+| POST | `/provider/clinic/reminders` | `{petId, kind, title(≤120), note?(≤1000), dueAt?}` و اگر `dueAt` نباشد، ارسال فوری |
+| POST | `/provider/clinic/reminders/:id/cancel` | لغو یادآور SCHEDULED |
+| GET | `/provider/clinic/reports/finance?from&to` | گزارش مالی (فقط OWNER) |
+| GET | `/admin/clinic-subscriptions/plans` | `subscription.view` |
+| GET | `/admin/clinic-subscriptions/:organizationId` | وضعیت فعلی به‌علاوه‌ی history (`subscription.view`) |
+| POST | `/admin/clinic-subscriptions/:organizationId/assign` | `{planCode, reason, periodEndsAt?}` (`subscription.manage`) |
+
+**خطاهایی که UI باید مدیریت کند:**
+- `SUBSCRIPTION_FEATURE_NOT_INCLUDED` (409، `details.context = "CLINIC"`): قابلیت در پلن فعلی نیست؛ به پلن‌های بالاتر ارجاع بده.
+- `SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED` (409): سقف ماهانه پر شده.
+- `PROVIDER_ACCESS_DENIED` (403): نقش کاربر کافی نیست.
+- 404: مشتری یا پت در فهرست این کلینیک نیست.
+
+**مبالغ:** رشته‌ی دسیمال به ریال (IRR) هستند و تبدیل به تومان فقط در لایه‌ی نمایش انجام می‌شود.
