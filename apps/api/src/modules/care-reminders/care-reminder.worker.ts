@@ -4,6 +4,7 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { CareSourceListener } from "./care-source.listener";
+import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 @Injectable()
 export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
   private timer: NodeJS.Timeout | null = null;
@@ -34,7 +35,7 @@ export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
         await this.prisma.domainEvent.upsert({where:{id},create:{id,type:"CareReminderDue",aggregateType:"Pet",aggregateId:row.petId,payload:{petId:row.petId,careItemId:row.id,type:row.type,dueAt:row.dueAt.toISOString()}},update:{}});
         const stillOpen=await this.prisma.careReminder.count({where:{id:row.id,version:row.version,state:{notIn:["COMPLETED","CANCELLED"]}}});
         if(!stillOpen) continue;
-        await this.notifications.notify({userId:row.createdByUserId,type:"health.reminder",category:"HEALTH",petId:row.petId,householdId:row.pet.householdId,deepLink:`/pets/${row.petId}/care/${row.id}`,entityType:"CareReminder",entityId:row.id,domainEventId:id,templateParams:{petName:row.pet.name},metadata:{careType:row.type,phase,dueAt:row.dueAt.toISOString()}});
+        await this.notifications.notify({userId:row.createdByUserId,type:"health.reminder",category:"HEALTH",petId:row.petId,householdId:row.pet.householdId,deepLink:NotificationDeepLinks.careItem(row.petId,row.id),entityType:"CareReminder",entityId:row.id,domainEventId:id,templateParams:{petName:row.pet.name},metadata:{careType:row.type,phase,dueAt:row.dueAt.toISOString()}});
         await this.prisma.careReminder.updateMany({where:{id:row.id,version:row.version},data:{notifiedAt:now}});
         count++;
       }

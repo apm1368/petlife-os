@@ -87,7 +87,7 @@ export function NotificationCenterView() {
         void load();
       }
     }
-    if (notification.deepLink) router.push(`/${locale}${notification.deepLink}`);
+    if (notification.deepLink) router.push(localizeDeepLink(notification.deepLink, locale));
   }
 
   async function markAllRead() {
@@ -163,4 +163,9 @@ export function NotificationCenterView() {
       )}
     </div>
   );
+}
+
+/** Deep links are locale-free; links stored before that fix may already carry one, which must not be doubled. */
+export function localizeDeepLink(deepLink: string, locale: string): string {
+  return /^\/(fa|en)(\/|$)/.test(deepLink) ? deepLink : `/${locale}${deepLink}`;
 }

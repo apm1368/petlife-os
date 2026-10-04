@@ -1,3 +1,4 @@
+import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import { createHash, randomBytes } from "node:crypto";
 import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetAccessSource, type Prisma } from "@prisma/client";
@@ -132,7 +133,7 @@ export class HouseholdsService {
         type: "household.invited",
         category: "HOUSEHOLD",
         templateParams: { inviterName: inviter.displayName },
-        deepLink: `/${target.locale}/invitations/${rawToken}`,
+        deepLink: NotificationDeepLinks.householdInvitation(rawToken),
         entityType: "HouseholdInvitation",
         entityId: invitation.id,
       });
@@ -157,7 +158,7 @@ export class HouseholdsService {
         type: "household.invited",
         category: "HOUSEHOLD",
         templateParams: { inviterName: inviter.displayName },
-        deepLink: `/${target.locale}/invitations/${rawToken}`,
+        deepLink: NotificationDeepLinks.householdInvitation(rawToken),
         entityType: "HouseholdInvitation",
         entityId: invitation.id,
       });
@@ -229,7 +230,7 @@ export class HouseholdsService {
       const revoked = await this.revokeHouseholdGrants(tx, householdId, member.userId, actorUserId);
       await this.events.publish("HouseholdMemberRemoved", { householdId, userId: member.userId, actorUserId, revokedGrants: revoked }, { tx, aggregateType: "Household", aggregateId: householdId });
     });
-    await this.notifications.notify({ userId: member.userId, type: "household.member_removed", category: "HOUSEHOLD", templateParams: {}, deepLink: "/profile/household", entityType: "Household", entityId: householdId }).catch(() => undefined);
+    await this.notifications.notify({ userId: member.userId, type: "household.member_removed", category: "HOUSEHOLD", templateParams: {}, deepLink: NotificationDeepLinks.profileHousehold(), entityType: "Household", entityId: householdId }).catch(() => undefined);
     return { ok: true };
   }
 

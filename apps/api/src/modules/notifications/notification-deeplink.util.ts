@@ -23,6 +23,11 @@ export const NotificationDeepLinks = {
   adminRefundRequests: () => `/admin/commerce/refund-requests`,
   pet: (petId: string) => `/pets/${petId}`,
   petHealth: (petId: string) => `/pets/${petId}/health`,
+  careItem: (petId: string, careItemId: string) => `/pets/${petId}/care/${careItemId}`,
+  /** Locale-free like every other link — the notification centre adds `/{locale}` itself. */
+  householdInvitation: (rawToken: string) => `/invitations/${rawToken}`,
+  profileHousehold: () => `/profile/household`,
+  profileSecurity: () => `/profile/security`,
   sellerChannels: () => `/seller/channels`,
   sellerInventory: () => `/seller/inventory`,
   sellerOrderDetail: (orderId: string) => `/seller/orders/${orderId}`,

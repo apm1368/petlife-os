@@ -115,6 +115,8 @@ describe("Batch 8 — Account & security", () => {
   async function invite(o: Awaited<ReturnType<typeof owner>>, member: { c: Client; email: string; userId: string }, preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" = "VIEW_ONLY") {
     await o.c.post(`/households/${o.householdId}/invitations`).send({ contact: member.email, initialAccess: [{ petId: o.petId, preset }] }).expect(201);
     const note = await prisma.notification.findFirst({ where: { userId: member.userId, type: "household.invited" }, orderBy: { createdAt: "desc" } });
+    // Locale-free: the notification centre prefixes /{locale} itself (a baked-in locale became /fa/fa/…).
+    expect(note!.deepLink).toMatch(/^\/invitations\/[\w-]+$/);
     return note!.deepLink!.split("/invitations/")[1]!;
   }
 

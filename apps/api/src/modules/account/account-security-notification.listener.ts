@@ -1,3 +1,4 @@
+import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import { Injectable, Logger } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
 import { NotificationCategory, NotificationPriority } from "@prisma/client";
@@ -22,7 +23,7 @@ export class AccountSecurityNotificationListener {
 
   private async send(userId: string, type: string, domainEventId: string, templateParams: Record<string, string> = {}, priority: NotificationPriority = NotificationPriority.HIGH) {
     try {
-      await this.orchestrator.notify({ userId, type, category: NotificationCategory.SECURITY, priority, templateParams, deepLink: "/profile/security", entityType: "User", entityId: userId, domainEventId });
+      await this.orchestrator.notify({ userId, type, category: NotificationCategory.SECURITY, priority, templateParams, deepLink: NotificationDeepLinks.profileSecurity(), entityType: "User", entityId: userId, domainEventId });
     } catch (error) {
       this.logger.error(`Security notification ${type} failed`, error instanceof Error ? error.stack : undefined);
     }

@@ -58,7 +58,7 @@ const BLOCKER_COPY: Record<string, { fa: string; en: string; href?: string }> = 
   OPEN_ORDERS: { fa: "سفارش‌های باز دارید که هنوز تحویل یا لغو نشده‌اند.", en: "You have open orders that aren't delivered or cancelled yet.", href: "/orders" },
   OPEN_REFUND_REQUESTS: { fa: "درخواست بازپرداخت در حال بررسی دارید.", en: "A refund request is still being reviewed.", href: "/orders" },
   OPEN_DISPUTES: { fa: "یک اختلاف باز دارید.", en: "You have an open dispute.", href: "/support" },
-  ACTIVE_TRAVEL_BOOKINGS: { fa: "رزرو سفر فعال دارید.", en: "You have an active travel booking.", href: "/travel/bookings" },
+  ACTIVE_TRAVEL_BOOKINGS: { fa: "رزرو سفر فعال دارید.", en: "You have an active travel booking.", href: "/travel/trips" },
   PARTNER_ROLES: { fa: "در یک کسب‌وکار (ارائه‌دهنده یا فروشنده) نقش دارید؛ ابتدا مسئولیت را منتقل کنید.", en: "You hold a role in a partner business (provider or seller); hand it over first." },
   ONLY_OWNER_OF_SHARED_HOUSEHOLD: { fa: "تنها مدیر خانواده‌ای با اعضای دیگر هستید؛ ابتدا عضو دیگری را مدیر کنید.", en: "You're the only owner of a household others share; make someone else an owner first.", href: "/profile/household" },
 };
