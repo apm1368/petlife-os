@@ -5,6 +5,10 @@ import { CommunityPostService } from "./community-post.service";
 import { CommunityReportService } from "./community-report.service";
 import { CommunityController } from "./community.controller";
 import { ContentReportController } from "./content-report.controller";
+import { ChatController } from "./chat/chat.controller";
+import { ChatService } from "./chat/chat.service";
+import { ChatNotificationListener } from "./chat/chat-notification.listener";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 /**
  * The consumer-facing half of the Handoff 18 Community domain — browsing,
@@ -16,9 +20,9 @@ import { ContentReportController } from "./content-report.controller";
  * AnimalSupportModule/AdminModule already established.
  */
 @Module({
-  imports: [PetAccessModule, StorageModule],
-  controllers: [CommunityController, ContentReportController],
-  providers: [CommunityPostService, CommunityReportService],
+  imports: [PetAccessModule, StorageModule, NotificationsModule],
+  controllers: [CommunityController, ContentReportController, ChatController],
+  providers: [CommunityPostService, CommunityReportService, ChatService, ChatNotificationListener],
   exports: [CommunityPostService],
 })
 export class CommunityModule {}

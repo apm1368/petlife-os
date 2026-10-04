@@ -8,7 +8,7 @@ import type { SessionUser } from "../../common/session/session.service";
 import { CommunityReportService, type ReportTargetType } from "./community-report.service";
 
 class ContentReportDto {
-  @IsIn(["SUPPORT_NEED", "LOST_PET_INCIDENT", "LOST_PET_SIGHTING", "ORGANIZATION"]) targetType!: ReportTargetType;
+  @IsIn(["SUPPORT_NEED", "LOST_PET_INCIDENT", "LOST_PET_SIGHTING", "ORGANIZATION", "CHAT_MESSAGE"]) targetType!: ReportTargetType;
   @IsUUID() targetId!: string;
   @IsEnum(CommunityReportReason) reason!: CommunityReportReason;
   @IsOptional() @IsString() @MaxLength(1000) details?: string;

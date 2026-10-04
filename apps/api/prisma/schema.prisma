@@ -1144,6 +1144,10 @@ model User {
   ProductFavorite        ProductFavorite[]
   OrderRefundRequest     OrderRefundRequest[]
   RepeatDeliverySchedule RepeatDeliverySchedule[]
+  chatParticipations     ChatParticipant[]        @relation("ChatParticipations")
+  chatMessagesSent       ChatMessage[]            @relation("ChatMessagesSent")
+  blocksMade             UserBlock[]              @relation("BlocksMade")
+  blocksReceived         UserBlock[]              @relation("BlocksReceived")
 
   @@map("users")
 }
@@ -7149,6 +7153,8 @@ model CommunityReport {
   lostPetIncidentId    String?               @db.Uuid
   lostPetSightingId    String?               @db.Uuid
   organizationId       String?               @db.Uuid
+  /// Community chat — a reported private message (only a participant may report it).
+  chatMessageId        String?               @db.Uuid
   reporterUserId       String                @db.Uuid
   reason               CommunityReportReason
   details              String?
@@ -7164,6 +7170,7 @@ model CommunityReport {
   @@index([lostPetIncidentId])
   @@index([lostPetSightingId])
   @@index([organizationId])
+  @@index([chatMessageId])
   @@index([reporterUserId])
   @@map("community_reports")
 }
@@ -9158,4 +9165,62 @@ model BookingTransportRoute {
   createdAt DateTime @default(now())
 
   @@map("booking_transport_routes")
+}
+
+/// Community chat (v1): one private 1:1 conversation per pair of members. See docs/product/community-chat-architecture.md.
+model ChatConversation {
+  id            String    @id @default(uuid()) @db.Uuid
+  /// "<smaller userId>:<larger userId>" — makes the 1:1 conversation unique per pair.
+  pairKey       String    @unique
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+
+  @@index([lastMessageAt])
+  @@map("chat_conversations")
+}
+
+model ChatParticipant {
+  conversationId String           @db.Uuid
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String           @db.Uuid
+  user           User             @relation("ChatParticipations", fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt       DateTime         @default(now())
+  lastReadAt     DateTime?
+
+  @@id([conversationId, userId])
+  @@index([userId])
+  @@map("chat_participants")
+}
+
+model ChatMessage {
+  id             String                 @id @default(uuid()) @db.Uuid
+  conversationId String                 @db.Uuid
+  conversation   ChatConversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderUserId   String                 @db.Uuid
+  sender         User                   @relation("ChatMessagesSent", fields: [senderUserId], references: [id], onDelete: Cascade)
+  body           String
+  /// PUBLISHED, or HIDDEN/REMOVED after moderation (then never returned to clients).
+  status         CommunityContentStatus @default(PUBLISHED)
+  createdAt      DateTime               @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderUserId, createdAt])
+  @@map("chat_messages")
+}
+
+/// A member's block on another member: no new conversation or message between them, either direction.
+model UserBlock {
+  blockerUserId String   @db.Uuid
+  blocker       User     @relation("BlocksMade", fields: [blockerUserId], references: [id], onDelete: Cascade)
+  blockedUserId String   @db.Uuid
+  blocked       User     @relation("BlocksReceived", fields: [blockedUserId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@id([blockerUserId, blockedUserId])
+  @@index([blockedUserId])
+  @@map("user_blocks")
 }

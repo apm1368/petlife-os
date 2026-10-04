@@ -6,9 +6,10 @@ import { DuplicateReportException, NotFoundApiException, ReportLimitReachedExcep
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { CommunityPostService } from "./community-post.service";
 import { toCommunityReportDto } from "./community-mapper";
+import { ChatService } from "./chat/chat.service";
 import type { SubmitCommunityReportDto } from "./dto/community.dto";
 
-export type ReportTargetType = "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION";
+export type ReportTargetType = "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION" | "CHAT_MESSAGE";
 
 const OPEN_REPORT: CommunityReportStatus[] = [CommunityReportStatus.OPEN, CommunityReportStatus.ESCALATED];
 const DAILY_REPORT_LIMIT = 20;
@@ -29,6 +30,7 @@ export class CommunityReportService {
     private readonly events: DomainEventsService,
     private readonly posts: CommunityPostService,
     private readonly petAccess: PetAccessService,
+    private readonly chat: ChatService,
   ) {}
 
   private async guardAbuse(reporterUserId: string, target: Prisma.CommunityReportWhereInput) {
@@ -78,6 +80,10 @@ export class CommunityReportService {
       const row = await this.prisma.lostPetSighting.findUnique({ where: { id: targetId }, select: { id: true, incident: { select: { petId: true } } } });
       if (!row || !(await this.petAccess.hasActiveAccess(row.incident.petId, reporterUserId))) throw new NotFoundApiException("Sighting");
       data = { lostPetSightingId: targetId, reporterUserId, reason: dto.reason, details: dto.details };
+    } else if (targetType === "CHAT_MESSAGE") {
+      // Private messages: only a member of the conversation can report one; anyone else gets the same 404.
+      await this.chat.assertCanReport(reporterUserId, targetId);
+      data = { chatMessageId: targetId, reporterUserId, reason: dto.reason, details: dto.details };
     } else {
       const row = await this.prisma.animalSupportOrganization.findFirst({ where: { id: targetId, isPubliclyListed: true, verificationStatus: { not: AnimalSupportVerificationStatus.NOT_STARTED } }, select: { id: true } });
       if (!row) throw new NotFoundApiException("Organization");

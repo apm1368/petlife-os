@@ -372,6 +372,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "بازگشت به خانواده", body: "{{petName}} با خانواده دوباره یکی شد!", smsBody: "خبر خوب! {{petName}} با خانواده دوباره یکی شد." },
     en: { title: "Reunited!", body: "{{petName}} has been reunited with the household!", smsBody: "Good news — {{petName}} has been reunited with your household." },
   },
+  "community.chat_message": {
+    fa: { title: "پیام تازه", body: "{{sender}} برایتان پیام فرستاد." },
+    en: { title: "New message", body: "{{sender}} sent you a message." },
+  },
   "animal_support.offer_received": {
     fa: { title: "پیشنهاد کمک تازه", body: "برای «{{title}}» یک پیشنهاد کمک رسید. آن را بررسی کنید." },
     en: { title: "New help offer", body: "Someone offered help for “{{title}}”. Review the offer." },

@@ -33,6 +33,7 @@ export const NotificationDeepLinks = {
   supportNeedManage: (listingId: string) => `/animal-support/needs/${listingId}/manage`,
   supportNeed: (listingId: string) => `/animal-support/needs/${listingId}`,
   myHelpOffers: () => `/animal-support/my-help`,
+  chatConversation: (conversationId: string) => `/community/messages/${conversationId}`,
   ngoPortal: () => `/ngo`,
   ngoDonations: () => `/ngo/donations`,
   ngoVerification: () => `/ngo/verification`,

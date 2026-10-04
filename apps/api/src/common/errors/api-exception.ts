@@ -158,6 +158,13 @@ export class ProviderOrgNotVerifiedException extends ApiException {
   }
 }
 
+/** Community chat — one of the two members has blocked the other: no new conversation or message. */
+export class ChatBlockedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CHAT_BLOCKED", "You can't message this member.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
 export class BookingNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("BOOKING_NOT_FOUND", "Booking not found.", HttpStatus.NOT_FOUND, details);
