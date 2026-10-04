@@ -42,6 +42,7 @@ import type { RescheduleBookingDto } from "./dto/reschedule-booking.dto";
 import type { PayBookingDto } from "./dto/pay-booking.dto";
 import type { CreateBookingHoldDto } from "./dto/create-booking-hold.dto";
 import type { CreateBookingDto } from "./dto/create-booking.dto";
+import { TransportRouteService } from "./transport/transport-route.service";
 import type { CancelBookingDto } from "./dto/cancel-booking.dto";
 
 const CANCELLABLE_STATUSES: BookingStatus[] = [BookingStatus.HOLD, BookingStatus.PENDING_CONFIRMATION, BookingStatus.REQUESTED, BookingStatus.AWAITING_PAYMENT, BookingStatus.CONFIRMED];
@@ -60,6 +61,7 @@ const BOOKING_INCLUDE = {
   providerService: true,
   customerAddress: true,
   dropoffAddress: true,
+  transportRoute: true,
   petAccess: { include: { petAccessGrant: true } },
   variant: true,
   additionalPets: true,
@@ -127,6 +129,7 @@ export class BookingsService {
     private readonly compatibility: PetServiceCompatibilityService,
     private readonly payments: PaymentsService,
     private readonly ledger: LedgerService,
+    private readonly transportRoutes: TransportRouteService,
   ) {}
 
   /**
@@ -291,9 +294,16 @@ export class BookingsService {
 
     await this.assertPetContextComplete(hold.petId, service);
 
+    // Pet taxi: copy the route now (a later address edit must not move this ride) and, when the
+    // provider priced the service by distance and a distance exists, the server's fare is the price.
+    const transportRoute = locationMode === PrismaLocationMode.TRANSPORT && customerAddressId && dropoffAddressId
+      ? await this.transportRoutes.snapshot(service, hold.householdId, customerAddressId, dropoffAddressId)
+      : null;
     const unitPrice = variant?.priceAmount ?? service.priceAmount;
     const petCount = 1 + (hold.additionalPetIds?.length ?? 0);
-    const priceAmount = unitPrice === null ? null : new Prisma.Decimal(unitPrice).mul(petCount);
+    const priceAmount = transportRoute?.distancePricingApplied
+      ? new Prisma.Decimal(transportRoute.estimatedFareIrr!) // one ride, however many pets ride in it
+      : unitPrice === null ? null : new Prisma.Decimal(unitPrice).mul(petCount);
     const onlinePayment = service.paymentMode === BookingPaymentMode.FULL_PREPAYMENT || service.paymentMode === BookingPaymentMode.DEPOSIT;
     if (onlinePayment && (priceAmount === null || (service.paymentMode === BookingPaymentMode.DEPOSIT && !service.depositAmount))) {
       // A misconfigured paid service must never produce an unpriced "paid" booking.
@@ -351,6 +361,7 @@ export class BookingsService {
             additionalPets: { create: (hold.additionalPetIds ?? []).map((petId) => ({ petId })) },
           },
         });
+        if (transportRoute) await tx.bookingTransportRoute.create({ data: { bookingId: created.id, ...transportRoute } });
         await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
 
         const eventType =
@@ -848,6 +859,7 @@ export class BookingsService {
       service: toProviderServiceDto(booking.providerService),
       customerAddress: toAddressDto(booking.customerAddress),
       dropoffAddress: toAddressDto(booking.dropoffAddress),
+      transportRoute: booking.transportRoute ? { pickupAddressText: booking.transportRoute.pickupAddressText, dropoffAddressText: booking.transportRoute.dropoffAddressText, distanceMeters: booking.transportRoute.distanceMeters, distanceSource: booking.transportRoute.distanceSource, estimatedFareIrr: booking.transportRoute.estimatedFareIrr, distancePricingApplied: booking.transportRoute.distancePricingApplied } : null,
       bookingSeriesId: booking.bookingSeriesId,
       petAccess: booking.petAccess ? this.toPetAccessSummary(booking.petAccess) : null,
       bookingNumber: booking.bookingNumber,

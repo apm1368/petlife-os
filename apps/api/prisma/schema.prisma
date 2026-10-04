@@ -1307,20 +1307,20 @@ model UserConsent {
 }
 
 model DataExportRequest {
-  id          String               @id @default(uuid()) @db.Uuid
-  userId      String               @db.Uuid
-  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status      PrivacyRequestStatus @default(PENDING)
-  scope       Json
-  requestedAt DateTime             @default(now())
-  readyAt     DateTime?
-  expiresAt   DateTime?
-  completedAt DateTime?
-  failureCode String?
+  id               String               @id @default(uuid()) @db.Uuid
+  userId           String               @db.Uuid
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           PrivacyRequestStatus @default(PENDING)
+  scope            Json
+  requestedAt      DateTime             @default(now())
+  readyAt          DateTime?
+  expiresAt        DateTime?
+  completedAt      DateTime?
+  failureCode      String?
   /// Batch 8 — the generated file in the private `account-exports/` space; only ever reached through a short-lived signed download.
   fileObjectKey    String?
   fileSizeBytes    Int?
-  downloadCount    Int       @default(0)
+  downloadCount    Int                  @default(0)
   lastDownloadedAt DateTime?
 
   @@index([userId, requestedAt])
@@ -1329,14 +1329,14 @@ model DataExportRequest {
 }
 
 model AccountDeletionRequest {
-  id          String               @id @default(uuid()) @db.Uuid
-  userId      String               @db.Uuid
-  user        User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
-  status      PrivacyRequestStatus @default(PENDING)
-  reason      String?
-  requestedAt DateTime             @default(now())
-  cancelledAt DateTime?
-  completedAt DateTime?
+  id             String               @id @default(uuid()) @db.Uuid
+  userId         String               @db.Uuid
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status         PrivacyRequestStatus @default(PENDING)
+  reason         String?
+  requestedAt    DateTime             @default(now())
+  cancelledAt    DateTime?
+  completedAt    DateTime?
   /// Batch 8 — the consequence preview (households, pets, open obligations) the person saw and confirmed when requesting.
   impactSnapshot Json?
 
@@ -2007,6 +2007,8 @@ model ProviderService {
   availabilityRules ProviderAvailabilityRule[]
   bookings          Booking[]
   bookingSeries     BookingSeries[]
+  /// Pet taxi only — distance pricing for this service (inactive until a provider turns it on).
+  transportPricing  ServiceTransportPricing?
 
   @@index([providerOrganizationId])
   @@index([type])
@@ -2259,6 +2261,8 @@ model Booking {
 
   clinicalVisits     ClinicalVisit[]
   referralsFulfilled Referral[]
+  /// Pet taxi only — immutable route and fare snapshot taken when the booking is made.
+  transportRoute     BookingTransportRoute?
 
   @@index([petId])
   @@index([householdId])
@@ -4650,8 +4654,8 @@ model TrustAction {
   trustCaseId String    @db.Uuid
   trustCase   TrustCase @relation(fields: [trustCaseId], references: [id], onDelete: Cascade)
 
-  actionType TrustActionType
-  reason     String
+  actionType    TrustActionType
+  reason        String
   /// Batch 6 — what the action actually changed on its subject
   /// ({ before, after, ... }), so RESTORE can put back exactly the prior state
   /// instead of a guessed default. Null when the action had no operational effect.
@@ -6797,7 +6801,7 @@ model SupportNeedListing {
   closedAt          DateTime?
   expiresAt         DateTime?
   /// Batch 6 — set once the "expiring soon" reminder was sent to the publisher.
-  expiryWarnedAt DateTime?
+  expiryWarnedAt    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -6838,7 +6842,7 @@ model HelpOffer {
   /// TRANSPORT to deliver it).
   helpType SupportNeedCategory
   /// Batch 6 — when the helper can deliver (free text, e.g. "weekday evenings").
-  timing    String?
+  timing   String?
   quantity Int?
 
   status HelpOfferStatus @default(PENDING)
@@ -6884,17 +6888,17 @@ model DonationIntent {
   /// doc-comment on SupportCampaign above.
   fundType  CampaignFundType
 
-  status            DonationStatus @default(PENDING)
+  status               DonationStatus @default(PENDING)
   /// Donor consented to being shown as themselves rather than "Anonymous"
   /// on the public campaign page — defaults to false (spec: "Do not expose
   /// donor identities publicly unless explicit consent exists").
-  showDonorPublicly Boolean        @default(false)
+  showDonorPublicly    Boolean        @default(false)
   /// Batch 6 — the name the donor chose to be shown as (only when showDonorPublicly).
   /// The account's own display name is never used publicly.
-  publicDisplayName String?
+  publicDisplayName    String?
   /// Batch 6 — optional support need this (restricted) donation is for; validated
   /// against the need's linked campaign at donation time.
-  supportNeedListingId String? @db.Uuid
+  supportNeedListingId String?        @db.Uuid
 
   /// The internal shell Checkout this donation's PaymentIntent hangs off —
   /// required because PaymentIntent.checkoutId is a non-nullable FK.
@@ -7134,25 +7138,25 @@ enum CommunityReportStatus {
 }
 
 model CommunityReport {
-  id             String                @id @default(uuid()) @db.Uuid
-  postId         String?               @db.Uuid
-  post           CommunityPost?        @relation(fields: [postId], references: [id], onDelete: Restrict)
-  commentId      String?               @db.Uuid
-  comment        CommunityComment?     @relation(fields: [commentId], references: [id], onDelete: Restrict)
+  id                   String                @id @default(uuid()) @db.Uuid
+  postId               String?               @db.Uuid
+  post                 CommunityPost?        @relation(fields: [postId], references: [id], onDelete: Restrict)
+  commentId            String?               @db.Uuid
+  comment              CommunityComment?     @relation(fields: [commentId], references: [id], onDelete: Restrict)
   /// Batch 6 — the same user report queue also covers animal-support needs, lost-pet incidents,
   /// sightings and organizations (plain ids, TrustCase-style); exactly one target is set.
-  supportNeedListingId String? @db.Uuid
-  lostPetIncidentId    String? @db.Uuid
-  lostPetSightingId    String? @db.Uuid
-  organizationId       String? @db.Uuid
-  reporterUserId String                @db.Uuid
-  reason         CommunityReportReason
-  details        String?
-  status         CommunityReportStatus @default(OPEN)
+  supportNeedListingId String?               @db.Uuid
+  lostPetIncidentId    String?               @db.Uuid
+  lostPetSightingId    String?               @db.Uuid
+  organizationId       String?               @db.Uuid
+  reporterUserId       String                @db.Uuid
+  reason               CommunityReportReason
+  details              String?
+  status               CommunityReportStatus @default(OPEN)
   /// Set once a moderator escalates this report into the existing Trust &
   /// Safety queue (TrustCase.subjectType = COMMUNITY_CONTENT).
-  trustCaseId    String?               @db.Uuid
-  createdAt      DateTime              @default(now())
+  trustCaseId          String?               @db.Uuid
+  createdAt            DateTime              @default(now())
 
   @@index([postId])
   @@index([commentId])
@@ -9098,4 +9102,60 @@ model PlaceReport {
 
   @@index([status, createdAt])
   @@map("place_reports")
+}
+
+/// Where a pet-taxi distance came from. UNAVAILABLE is the honest state while no map provider is
+/// configured (BLOCKED_EXTERNAL); STRAIGHT_LINE_DEMO is a labelled QA-only estimate, never a route.
+enum TransportDistanceSource {
+  MAP_PROVIDER
+  STRAIGHT_LINE_DEMO
+  UNAVAILABLE
+}
+
+/// Distance pricing for one pet-taxi service. All money is integer IRR. Inactive by default: until a
+/// provider activates it, the service keeps its fixed price — no commercial rate is ever implied.
+model ServiceTransportPricing {
+  id                   String          @id @default(uuid()) @db.Uuid
+  providerServiceId    String          @unique @db.Uuid
+  providerService      ProviderService @relation(fields: [providerServiceId], references: [id], onDelete: Cascade)
+  baseFareIrr          Int
+  perKmRateIrr         Int
+  serviceAdjustmentIrr Int             @default(0)
+  minimumFareIrr       Int?
+  isActive             Boolean         @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("service_transport_pricing")
+}
+
+/// The route and fare of a pet-taxi booking as they were when it was made. Addresses are copied, not
+/// referenced, so editing a saved address later never rewrites a past or upcoming ride.
+model BookingTransportRoute {
+  id        String  @id @default(uuid()) @db.Uuid
+  bookingId String  @unique @db.Uuid
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  pickupAddressText  String
+  pickupLat          Float?
+  pickupLng          Float?
+  dropoffAddressText String
+  dropoffLat         Float?
+  dropoffLng         Float?
+
+  distanceMeters Int?
+  distanceSource TransportDistanceSource
+
+  /// Pricing snapshot; all null when the service was priced at its fixed amount.
+  baseFareIrr            Int?
+  perKmRateIrr           Int?
+  serviceAdjustmentIrr   Int?
+  minimumFareIrr         Int?
+  estimatedFareIrr       Int?
+  distancePricingApplied Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@map("booking_transport_routes")
 }

@@ -11,3 +11,6 @@ process.env.REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 process.env.WEB_APP_ORIGIN = process.env.WEB_APP_ORIGIN ?? "http://localhost:3000";
 process.env.SESSION_SECRET = process.env.SESSION_SECRET ?? "test-only-session-secret-not-for-prod";
 process.env.CSRF_SECRET = process.env.CSRF_SECRET ?? "test-only-csrf-secret-not-for-prod";
+
+// Pet-taxi suites exercise the priced path with the QA-only straight-line distance (never the production default).
+process.env.TRANSPORT_DISTANCE_MODE = process.env.TRANSPORT_DISTANCE_MODE ?? "straight_line_demo";

@@ -217,6 +217,12 @@ const envSchema = z.object({
   SUBSCRIPTION_GRACE_PERIOD_DAYS: z.coerce.number().int().positive().default(4),
   /** Owner decision: every new household gets the full product free for its first week — a real trial of this plan code. Empty disables it. */
   WELCOME_TRIAL_PLAN_CODE: z.string().default("premium"),
+  /**
+   * Pet-taxi distance. No map provider is integrated (BLOCKED_EXTERNAL), so the honest default is
+   * "unavailable": rides keep their fixed price. "straight_line_demo" is a QA-only, clearly labelled
+   * great-circle estimate for test servers — never a route distance.
+   */
+  TRANSPORT_DISTANCE_MODE: z.enum(["unavailable", "straight_line_demo"]).default("unavailable"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

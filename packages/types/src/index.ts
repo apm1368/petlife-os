@@ -897,6 +897,15 @@ export interface BookingDto {
   additionalPetIds: string[];
   timeline: BookingStatusEventDto[];
   review: { id: string; rating: number } | null;
+  /** Pet taxi only: the route and fare as copied when the booking was made (null for other services). */
+  transportRoute?: {
+    pickupAddressText: string;
+    dropoffAddressText: string;
+    distanceMeters: number | null;
+    distanceSource: "MAP_PROVIDER" | "STRAIGHT_LINE_DEMO" | "UNAVAILABLE";
+    estimatedFareIrr: number | null;
+    distancePricingApplied: boolean;
+  } | null;
 }
 
 export interface CareCalendarEventDto {

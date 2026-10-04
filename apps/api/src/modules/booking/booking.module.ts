@@ -14,11 +14,13 @@ import { BookingEngagementController, PublicProviderReviewsController } from "./
 import { ServicesModule } from "../services/services.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { LedgerModule } from "../commerce/ledger/ledger.module";
+import { TransportController } from "./transport/transport.controller";
+import { TransportRouteService } from "./transport/transport-route.service";
 
 @Module({
   imports: [PetAccessModule, ProvidersModule, CareCalendarModule, ServicesModule, PaymentsModule, LedgerModule],
-  controllers: [BookingsController, BookingEngagementController, PublicProviderReviewsController],
-  providers: [BookingsService, BookingHoldService, BookingPetAccessService, BookingLifecycleService, BookingExpiryWorker, WaitlistService, ProviderReviewsService],
+  controllers: [BookingsController, BookingEngagementController, PublicProviderReviewsController, TransportController],
+  providers: [TransportRouteService, BookingsService, BookingHoldService, BookingPetAccessService, BookingLifecycleService, BookingExpiryWorker, WaitlistService, ProviderReviewsService],
   exports: [BookingPetAccessService, BookingLifecycleService, BookingHoldService, WaitlistService, ProviderReviewsService],
 })
 export class BookingModule {}
