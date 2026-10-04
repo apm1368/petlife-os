@@ -58,7 +58,9 @@ describe("Batch 2 care and explicit veterinary sharing",()=>{
     const created=await post("OWNER",`/pets/${petId}/care-items`).send({title:"کنترل وزن",type:"WEIGHT_CHECK",dueAt:due,recurrence:"WEEKLY"}).expect(201);
     const id=created.body.id;
     await post("AUTHORIZED_MEMBER",`/pets/${petId}/care-items/${id}/actions`).send({action:"COMPLETE"}).expect(403);
-    await post("OWNER",`/pets/${petId}/care-items/${id}/actions`).send({action:"SNOOZE",at:new Date(Date.now()+7200000).toISOString()}).expect(201);
+    const snoozed=await post("OWNER",`/pets/${petId}/care-items/${id}/actions`).send({action:"SNOOZE",at:new Date(Date.now()+7200000).toISOString()}).expect(201);
+    // The action's response carries the state the member sees, same as list/get (regression: it returned the stored state).
+    expect(snoozed.body.state).toBe("SNOOZED");
     let row=await db.careReminder.findUniqueOrThrow({where:{id}});expect(row.dueAt.toISOString()).toBe(due);
     await post("OWNER",`/pets/${petId}/care-items/${id}/actions`).send({action:"RESCHEDULE",at:new Date(Date.now()+86400000).toISOString()}).expect(201);
     await post("OWNER",`/pets/${petId}/care-items/${id}/actions`).send({action:"COMPLETE"}).expect(201);

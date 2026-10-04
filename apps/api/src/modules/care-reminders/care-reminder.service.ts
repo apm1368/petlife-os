@@ -25,7 +25,7 @@ export class CareReminderService {
     return this.prisma.$transaction(async tx => {
       const row = await tx.careReminder.create({ data: { petId, createdByUserId: userId, title: dto.title.trim(), type: dto.type, dueAt: new Date(dto.dueAt), originalDueAt: new Date(dto.dueAt), recurrence: dto.recurrence ?? "ONCE", intervalDays: dto.intervalDays } });
       await tx.domainEvent.create({ data: { type: "CareReminderCreated", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: row.id, actorUserId: userId } } });
-      return row;
+      return { ...row, state: visibleCareState(row) };
     });
   }
   async edit(petId: string, id: string, userId: string, dto: EditReminderDto) {
@@ -37,7 +37,8 @@ export class CareReminderService {
       const updated = await tx.careReminder.updateMany({ where: { id, petId, version: row.version }, data: { ...dto, dueAt: dto.dueAt ? new Date(dto.dueAt) : undefined, notifiedAt: dto.dueAt ? null : undefined, version: { increment: 1 } } });
       if (updated.count !== 1) throw new ValidationApiException({ reason: "Care item changed; reload before editing." });
       await tx.domainEvent.create({ data: { type: "CareReminderEdited", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: id, actorUserId: userId } } });
-      return tx.careReminder.findUniqueOrThrow({ where: { id } });
+      const saved = await tx.careReminder.findUniqueOrThrow({ where: { id } });
+      return { ...saved, state: visibleCareState(saved) };
     });
   }
   async act(petId: string, id: string, userId: string, dto: ReminderActionDto) {
@@ -55,7 +56,9 @@ export class CareReminderService {
         const next = nextCareDate(row.dueAt, row.recurrence, row.intervalDays);
         if (next) await tx.careReminder.create({ data: { petId, createdByUserId: row.createdByUserId, title: row.title, type: row.type, source: row.source, sourceId: row.sourceId, parentId: row.id, originalDueAt: next, dueAt: next, recurrence: row.recurrence, intervalDays: row.intervalDays } });
       }
-      return tx.careReminder.findUniqueOrThrow({ where: { id } });
+      // Responses carry the state the member sees (SNOOZED, OVERDUE…), the same as list/get.
+      const saved = await tx.careReminder.findUniqueOrThrow({ where: { id } });
+      return { ...saved, state: visibleCareState(saved) };
     });
   }
   private assertOpen(state: string) {
