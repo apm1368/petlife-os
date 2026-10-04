@@ -6,6 +6,7 @@ export interface ChatConversationSummary {
   lastMessage: { id: string; body: string; senderIsMe: boolean; createdAt: string } | null;
   unreadCount: number;
   blocked: boolean;
+  blockedByMe: boolean;
   lastMessageAt: string | null;
 }
 export interface ChatMessageDto { id: string; body: string; senderIsMe: boolean; createdAt: string }

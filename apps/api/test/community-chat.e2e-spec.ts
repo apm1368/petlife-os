@@ -80,7 +80,13 @@ describe("Community chat", () => {
     await a.post("/chat/conversations").send({ participantUserId: b.id }).expect(403);
     expect((await a.get(`/chat/conversations/${c.id}/messages`).expect(200)).body.items).toHaveLength(1);
     expect((await b.get("/chat/blocks").expect(200)).body.map((r: { userId: string }) => r.userId)).toEqual([a.id]);
+    // Both see the conversation as blocked; only the blocker can lift it, and the blocked side cannot "unblock".
+    const seen = async (who: typeof a) => (await who.get("/chat/conversations").expect(200)).body.find((x: { id: string }) => x.id === c.id);
+    expect(await seen(a)).toMatchObject({ blocked: true, blockedByMe: false });
+    expect(await seen(b)).toMatchObject({ blocked: true, blockedByMe: true });
+    await a.del(`/chat/blocks/${b.id}`).expect(404);
     await b.del(`/chat/blocks/${a.id}`).expect(200);
+    await b.del(`/chat/blocks/${a.id}`).expect(404);
     await a.post(`/chat/conversations/${c.id}/messages`).send({ body: "بعد از رفع مسدودی" }).expect(201);
   });
 

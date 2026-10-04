@@ -90,7 +90,7 @@ export function ChatThreadView({ conversationId }: { conversationId: string }) {
 
   async function toggleBlock() {
     if (!meta?.otherMember) return;
-    await (meta.blocked ? chatService.unblock(meta.otherMember.id) : chatService.block(meta.otherMember.id));
+    await (meta.blockedByMe ? chatService.unblock(meta.otherMember.id) : chatService.block(meta.otherMember.id));
     await load();
   }
 
@@ -102,7 +102,7 @@ export function ChatThreadView({ conversationId }: { conversationId: string }) {
       <header className="chat-thread__head">
         <Link href={`/${locale}/community/messages`}>{fa ? "همهٔ پیام‌ها" : "All messages"}</Link>
         <h1>{meta?.otherMember?.displayName ?? (fa ? "گفت‌وگو" : "Conversation")}</h1>
-        {meta?.otherMember ? <Button variant="ghost" onClick={() => void toggleBlock()}>{meta.blocked ? (fa ? "رفع مسدودی" : "Unblock") : fa ? "مسدود کردن" : "Block"}</Button> : null}
+        {meta?.otherMember ? <Button variant="ghost" onClick={() => void toggleBlock()}>{meta.blockedByMe ? (fa ? "رفع مسدودی" : "Unblock") : fa ? "مسدود کردن" : "Block"}</Button> : null}
       </header>
       <ol className="chat-thread__messages">
         {messages.map((m) => (

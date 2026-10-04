@@ -56,11 +56,12 @@ export class ChatService {
 
   private async summary(conversationId: string, userId: string) {
     const { row, otherUserId } = await this.participation(conversationId, userId);
-    const [other, last, unread, blocked] = await Promise.all([
+    const [other, last, unread, blocked, blockedByMe] = await Promise.all([
       otherUserId ? this.prisma.user.findUnique({ where: { id: otherUserId }, select: { id: true, displayName: true, avatarUrl: true } }) : null,
       this.prisma.chatMessage.findFirst({ where: { conversationId, status: CommunityContentStatus.PUBLISHED }, orderBy: { createdAt: "desc" } }),
       this.unreadCount(conversationId, userId, row.lastReadAt),
       otherUserId ? this.isBlockedBetween(userId, otherUserId) : false,
+      otherUserId ? this.prisma.userBlock.count({ where: { blockerUserId: userId, blockedUserId: otherUserId } }).then((n) => n > 0) : false,
     ]);
     return {
       id: conversationId,
@@ -68,7 +69,10 @@ export class ChatService {
       otherMember: other ? { id: other.id, displayName: other.displayName, avatarUrl: other.avatarUrl } : null,
       lastMessage: last ? { id: last.id, body: last.body, senderIsMe: last.senderUserId === userId, createdAt: last.createdAt.toISOString() } : null,
       unreadCount: unread,
+      /** A block in either direction — messaging is closed. */
       blocked,
+      /** Only the caller's own block can be lifted by the caller. */
+      blockedByMe,
       lastMessageAt: row.conversation.lastMessageAt?.toISOString() ?? null,
     };
   }
@@ -133,7 +137,9 @@ export class ChatService {
   }
 
   async unblock(userId: string, blockedUserId: string) {
-    await this.prisma.userBlock.deleteMany({ where: { blockerUserId: userId, blockedUserId } });
+    // Only ever the caller's own block; "you have no block on that user" is a 404 like any other missing object.
+    const removed = await this.prisma.userBlock.deleteMany({ where: { blockerUserId: userId, blockedUserId } });
+    if (!removed.count) throw new NotFoundApiException("UserBlock");
     return { blocked: false };
   }
 
