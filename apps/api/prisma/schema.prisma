@@ -6773,6 +6773,9 @@ model SupportNeedListing {
   /// fulfilledQuantity is only ever advanced through
   /// SupportNeedService.recordFulfillment, never written directly by a client.
   neededQuantity    Int?
+  /// Optional cash target in IRR for a need that accepts money (via its campaign). The listing never
+  /// holds a balance: raised = SUCCEEDED DonationIntents restricted to this listing (ledger-backed).
+  targetAmountIrr   Int?
   fulfilledQuantity Int     @default(0)
   quantityUnit      String?
 

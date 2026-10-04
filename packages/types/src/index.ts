@@ -4388,6 +4388,8 @@ export interface SupportNeedListingDto {
   imageObjectKeys: string[];
   imageUrls: string[];
   neededQuantity: number | null;
+  /** Cash target (IRR) for a need that accepts money; null when it has none. */
+  targetAmountIrr: number | null;
   fulfilledQuantity: number;
   quantityUnit: string | null;
   /** Money never lives on the listing — it flows through this campaign's ledger. */

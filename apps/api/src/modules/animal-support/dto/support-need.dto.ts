@@ -58,6 +58,12 @@ export class CreateSupportNeedListingDto {
   @Min(1)
   neededQuantity?: number;
 
+  /** Cash target in IRR — only meaningful with a campaignId (money goes to the campaign, restricted to this need). */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  targetAmountIrr?: number;
+
   @IsOptional()
   @IsString()
   @MaxLength(40)
@@ -132,6 +138,12 @@ export class UpdateSupportNeedListingDto {
   @IsInt()
   @Min(1)
   neededQuantity?: number;
+
+  /** Cash target in IRR — only meaningful with a campaignId (money goes to the campaign, restricted to this need). */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  targetAmountIrr?: number;
 
   @IsOptional()
   @IsString()

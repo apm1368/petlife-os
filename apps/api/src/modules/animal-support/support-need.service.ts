@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { AnimalSupportVerificationStatus, HelpOfferStatus, Prisma, SupportNeedStatus } from "@prisma/client";
+import { AnimalSupportVerificationStatus, DonationStatus, HelpOfferStatus, Prisma, SupportNeedStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { StorageService } from "../storage/storage.service";
@@ -148,6 +148,7 @@ export class SupportNeedService {
           longitude: dto.longitude,
           imageObjectKeys: dto.imageObjectKeys ?? [],
           neededQuantity: dto.neededQuantity,
+          targetAmountIrr: dto.targetAmountIrr,
           quantityUnit: dto.quantityUnit,
           campaignId: dto.campaignId,
           contactMode: dto.contactMode,
@@ -184,6 +185,7 @@ export class SupportNeedService {
         neighborhood: dto.neighborhood,
         imageObjectKeys: dto.imageObjectKeys,
         neededQuantity: dto.neededQuantity,
+        targetAmountIrr: dto.targetAmountIrr,
         quantityUnit: dto.quantityUnit,
         animalType: dto.animalType,
         ...(dto.expiresAt !== undefined ? { expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null, expiryWarnedAt: null } : {}),
@@ -400,8 +402,21 @@ export class SupportNeedService {
     if (!OFFER_TRANSITIONS[offer.status].includes(dto.status)) {
       throw new InvalidHelpOfferTransitionException({ offerId, from: offer.status, to: dto.status });
     }
+    // A new pledge can only be accepted while the need is still taking offers; pledges already in
+    // flight may still be completed after it pauses, expires or fills.
+    if (dto.status === HelpOfferStatus.ACCEPTED && !ACCEPTING_OFFERS.includes(listing.status)) {
+      throw new InvalidHelpOfferTransitionException({ offerId, from: offer.status, to: dto.status, reason: "LISTING_NOT_ACCEPTING_OFFERS", listingStatus: listing.status });
+    }
 
     const row = await this.prisma.$transaction(async (tx) => {
+      // Lock the offer and its listing, then re-check: two concurrent "received" confirmations must
+      // never both add to the need's fulfilment.
+      await tx.$queryRaw`SELECT "id" FROM "help_offers" WHERE "id" = ${offerId}::uuid FOR UPDATE`;
+      await tx.$queryRaw`SELECT "id" FROM "support_need_listings" WHERE "id" = ${listingId}::uuid FOR UPDATE`;
+      const fresh = await tx.helpOffer.findUniqueOrThrow({ where: { id: offerId } });
+      if (!OFFER_TRANSITIONS[fresh.status].includes(dto.status)) {
+        throw new InvalidHelpOfferTransitionException({ offerId, from: fresh.status, to: dto.status });
+      }
       const updated = await tx.helpOffer.update({
         where: { id: offerId },
         data: {
@@ -448,8 +463,18 @@ export class SupportNeedService {
     const listing = await this.getPublic(listingId);
     const grouped = await this.prisma.helpOffer.groupBy({ by: ["status"], where: { listingId }, _count: { _all: true } });
     const counts = Object.fromEntries(grouped.map((g) => [g.status, g._count._all]));
+    // Cash progress for a need that accepts money: only SUCCEEDED donations restricted to this need
+    // count (refunded ones drop out). In-kind help never touches money and money never moves the
+    // item quantity — the two progress lines are independent by construction.
+    const raised = await this.prisma.donationIntent.aggregate({ where: { supportNeedListingId: listingId, status: DonationStatus.SUCCEEDED }, _sum: { amountIrr: true }, _count: { _all: true } });
+    const raisedAmountIrr = raised._sum.amountIrr ?? 0;
+    const targetAmountIrr = listing.targetAmountIrr ?? null;
     return {
       listingId: listing.id,
+      targetAmountIrr,
+      raisedAmountIrr,
+      remainingAmountIrr: targetAmountIrr === null ? null : Math.max(0, targetAmountIrr - raisedAmountIrr),
+      donationCount: raised._count._all,
       neededQuantity: listing.neededQuantity,
       fulfilledQuantity: listing.fulfilledQuantity,
       pendingOffers: counts[HelpOfferStatus.PENDING] ?? 0,

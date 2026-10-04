@@ -50,6 +50,7 @@ function listing(overrides: Partial<SupportNeedListingDto> = {}): SupportNeedLis
     imageObjectKeys: [],
     imageUrls: [],
     neededQuantity: 10,
+    targetAmountIrr: null,
     fulfilledQuantity: 4,
     quantityUnit: "bags",
     campaignId: null,

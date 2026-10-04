@@ -37,6 +37,7 @@ export function toSupportNeedListingDto(row: SupportNeedListingWithOrg, includeP
     imageObjectKeys: row.imageObjectKeys,
     imageUrls: resolveObjectUrls(row.imageObjectKeys),
     neededQuantity: row.neededQuantity,
+    targetAmountIrr: row.targetAmountIrr,
     fulfilledQuantity: row.fulfilledQuantity,
     quantityUnit: row.quantityUnit,
     campaignId: row.campaignId,
