@@ -10,10 +10,10 @@ export interface StatusLabelProps {
 
 const toneClasses: Record<StatusTone, string> = {
   neutral: "bg-surface-subtle text-text-secondary",
-  success: "bg-surface-subtle text-state-success",
-  attention: "bg-surface-subtle text-state-attention",
-  higherConcern: "bg-surface-subtle text-state-higher-concern",
-  urgent: "bg-surface-subtle text-state-urgent",
+  success: "bg-[var(--status-success-tint)] text-state-success",
+  attention: "bg-[var(--status-attention-tint)] text-state-attention",
+  higherConcern: "bg-[var(--status-attention-tint)] text-state-higher-concern",
+  urgent: "bg-[var(--status-concern-tint)] text-state-urgent",
   emergency: "bg-state-emergency text-text-inverse",
 };
 

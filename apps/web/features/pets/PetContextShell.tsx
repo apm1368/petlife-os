@@ -139,6 +139,7 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
             </p>
             <dl className="pet-hero__facts">
               <div><dt>{c.weight}</dt><dd>{formatWeight(pet, locale, c.unknown)}</dd></div>
+              {pet.sex && pet.sex !== "UNKNOWN" ? <div><dt>{locale === "fa" ? "جنسیت" : "Sex"}</dt><dd>{pet.sex === "MALE" ? (locale === "fa" ? "نر" : "Male") : locale === "fa" ? "ماده" : "Female"}</dd></div> : null}
               {/* An identifier, not a headline: say that a chip is registered, never print its number here. */}
               {pet.microchipNumber ? <div><dt>{c.microchip}</dt><dd>{locale === "fa" ? "ثبت شده" : "Registered"}</dd></div> : null}
             </dl>
