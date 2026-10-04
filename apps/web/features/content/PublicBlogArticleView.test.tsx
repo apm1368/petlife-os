@@ -2,9 +2,12 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import type { PublicArticleDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
+import { ApiError } from "@/lib/api/client";
 import { blogService } from "@/services/blog.service";
 import { PublicBlogArticleView } from "./PublicBlogArticleView";
 
+const replace = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push: vi.fn() }) }));
 vi.mock("@/services/blog.service", () => ({ blogService: { getArticle: vi.fn() } }));
 
 function detail(overrides: Partial<PublicArticleDetailDto> = {}): PublicArticleDetailDto {
@@ -73,5 +76,22 @@ describe("PublicBlogArticleView", () => {
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "First Post" })).toBeTruthy());
     expect(screen.getByText(/^انتشار/)).toBeTruthy();
+  });
+
+  it("a guide opened under the blog moves to its own section", async () => {
+    vi.mocked(blogService.getArticle).mockResolvedValue(detail({ category: { id: "g", name: "Guides", slug: "guides", description: null } }));
+    renderWithIntl(<PublicBlogArticleView slug="first-post" />);
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/en/guides/first-post"));
+  });
+
+  it("the guides section never shows a blog post, and a missing article offers no retry", async () => {
+    vi.mocked(blogService.getArticle).mockResolvedValue(detail());
+    renderWithIntl(<PublicBlogArticleView slug="first-post" section="guides" />);
+    await waitFor(() => expect(screen.queryByRole("button", { name: /retry/i })).toBeNull());
+    expect(screen.queryByText("First Post")).toBeNull();
+    vi.mocked(blogService.getArticle).mockRejectedValue(new ApiError({ code: "ARTICLE_LOCALE_NOT_FOUND", message: "x", requestId: "r" } as never, 404));
+    renderWithIntl(<PublicBlogArticleView slug="gone" />);
+    await waitFor(() => expect(document.body.textContent).toMatch(/not found|couldn't find|isn't available/i));
+    expect(screen.queryAllByRole("button", { name: /retry/i })).toHaveLength(0);
   });
 });

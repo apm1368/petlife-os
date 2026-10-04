@@ -1,6 +1,6 @@
 import {
   BookOpen, CalendarDays, Compass, Heart, HandHeart, HeartPulse, House, Images, MapPin, PackageCheck, Plane, Repeat, Scissors, ShieldPlus,
-  ShoppingBag, Siren, Stethoscope, Users,
+  ShoppingBag, Siren, Stethoscope, Users, Newspaper,
 } from "@petlife/ui";
 
 export type NavIcon = typeof House;
@@ -77,7 +77,8 @@ export const EXPLORE_GROUPS: ExploreGroup[] = [
     key: "stories", fa: "خاطره و مقاله", en: "Stories and articles",
     links: [
       { href: "/pets/active?view=memories", icon: Images, fa: ["خاطرات", "لحظه‌ها و خط زمانی زندگی"], en: ["Memories", "Moments and the life timeline"] },
-      { href: "/blog", icon: BookOpen, fa: ["وبلاگ", "مقاله‌های مراقبت و سلامت"], en: ["Blog", "Care and health articles"] },
+      { href: "/guides", icon: BookOpen, fa: ["راهنماها", "راهنمای عملی مراقبت از سگ و گربه"], en: ["Guides", "Practical dog and cat care"] },
+      { href: "/blog", icon: Newspaper, fa: ["وبلاگ", "مقاله‌ها و تجربه‌ها"], en: ["Blog", "Articles and stories"] },
     ],
   },
 ];

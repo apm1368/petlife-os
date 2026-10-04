@@ -14,6 +14,11 @@ export class ListPublicArticlesQueryDto extends PaginationQueryDto {
   @IsString()
   tagSlug?: string;
 
+  /** Leave one category out — the blog index omits guides, which live under /guides. */
+  @IsOptional()
+  @IsString()
+  excludeCategorySlug?: string;
+
   @IsOptional()
   @IsString()
   search?: string;

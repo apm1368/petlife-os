@@ -6,10 +6,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { Locale as ContentLocale, PaginatedDto, PublicArticleSummaryDto, PublicCategoryDto } from "@petlife/types";
 import { blogService } from "@/services/blog.service";
+import { GUIDE_CATEGORY_SLUG } from "./content-sections";
 import { PublicBlogArticleCard } from "./PublicBlogArticleCard";
 
 /** Blog index (spec: "featured/recent articles, category navigation, pagination, localized empty state"). */
-export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride }: { categorySlug?: string; tagSlug?: string; titleOverride?: string } = {}) {
+export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, section = "blog" }: { categorySlug?: string; tagSlug?: string; titleOverride?: string; section?: "blog" | "guides" } = {}) {
   const t = useTranslations("blog.index");
   const locale = useLocale() as ContentLocale;
 
@@ -21,9 +22,10 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride }: { 
   async function load(nextPage: number, append = false) {
     setError(false);
     try {
-      const [articles, cats] = await Promise.all([blogService.listArticles(locale, { categorySlug, tagSlug, page: nextPage, pageSize: 12 }), categories.length === 0 ? blogService.listCategories(locale) : Promise.resolve(categories)]);
+      const [articles, cats] = await Promise.all([blogService.listArticles(locale, section === "guides" ? { categorySlug: GUIDE_CATEGORY_SLUG, page: nextPage, pageSize: 12 } : { categorySlug, tagSlug, excludeCategorySlug: categorySlug || tagSlug ? undefined : GUIDE_CATEGORY_SLUG, page: nextPage, pageSize: 12 }), categories.length === 0 ? blogService.listCategories(locale) : Promise.resolve(categories)]);
       setPage((prev) => (append && prev ? { ...articles, items: [...prev.items, ...articles.items] } : articles));
-      setCategories(cats);
+      // Guides are their own section; the blog's category strip never lists them.
+      setCategories(cats.filter((c) => c.slug !== GUIDE_CATEGORY_SLUG));
       setPageNumber(nextPage);
     } catch {
       setError(true);
@@ -41,7 +43,7 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride }: { 
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{titleOverride ?? t("title")}</h1>
 
-      {categories.length > 0 ? (
+      {section === "blog" && categories.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           <Link href={`/${locale}/blog`} className="rounded-full border border-border-strong px-3 py-1 text-metadata text-text-secondary">
             {t("allCategories")}

@@ -17,8 +17,11 @@ function articleInclude(locale: Locale) {
 
 type PublicArticleLocaleRow = Prisma.ArticleLocaleGetPayload<{ include: { article: { include: ReturnType<typeof articleInclude> } } }>;
 
-function canonicalPath(locale: Locale, slug: string): string {
-  return `/${locale}/blog/${slug}`;
+/** Guides are articles in this category; they have their own section (/guides), distinct from the blog. */
+export const GUIDE_CATEGORY_SLUG = "guides";
+
+function canonicalPath(locale: Locale, slug: string, categorySlug?: string | null): string {
+  return categorySlug === GUIDE_CATEGORY_SLUG ? `/${locale}/guides/${slug}` : `/${locale}/blog/${slug}`;
 }
 
 function toSummary(row: PublicArticleLocaleRow): PublicArticleSummaryDto {
@@ -27,7 +30,7 @@ function toSummary(row: PublicArticleLocaleRow): PublicArticleSummaryDto {
     id: article.id,
     locale: row.locale as unknown as PublicArticleSummaryDto["locale"],
     slug: row.slug,
-    canonicalPath: canonicalPath(row.locale, row.slug),
+    canonicalPath: canonicalPath(row.locale, row.slug, article.category?.locales[0]?.slug),
     title: row.title,
     excerpt: row.excerpt,
     coverMediaAsset: article.coverMediaAsset ? toMediaAssetDto(article.coverMediaAsset) : null,
@@ -47,6 +50,7 @@ function toReference(row: PublicArticleLocaleRow): PublicArticleReferenceDto {
 export interface ListPublicArticlesQuery extends PaginationQueryDto {
   categorySlug?: string;
   tagSlug?: string;
+  excludeCategorySlug?: string;
   search?: string;
 }
 
@@ -75,6 +79,9 @@ export class PublicContentReadService {
       article: {
         category: query.categorySlug ? { locales: { some: { locale, slug: query.categorySlug } } } : undefined,
         tags: query.tagSlug ? { some: { tag: { locales: { some: { locale, slug: query.tagSlug } } } } } : undefined,
+        ...(query.excludeCategorySlug
+          ? { OR: [{ categoryId: null }, { category: { locales: { none: { locale, slug: query.excludeCategorySlug } } } }] }
+          : {}),
       },
     };
     const [rows, total] = await Promise.all([

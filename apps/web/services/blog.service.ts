@@ -13,6 +13,7 @@ function toQueryString(params: Record<string, string | number | boolean | undefi
 export interface ListBlogArticlesInput {
   categorySlug?: string;
   tagSlug?: string;
+  excludeCategorySlug?: string;
   search?: string;
   page?: number;
   pageSize?: number;
