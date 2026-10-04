@@ -165,11 +165,17 @@ describe("Subscription + Membership + Metering (Handoff 16)", () => {
   });
 
   describe("Server-side limit enforcement (pets.max)", () => {
-    it("Flow D: creating one more pet than the FREE plan allows is rejected with a typed, specific error — existing pets remain fully accessible", async () => {
+    async function capPets(householdId: string, max: number) {
+      const { plan } = await createPaidPlan({ nameEn: "Capped", petsMax: max });
+      await prisma.subscription.upsert({ where: { householdId }, create: { householdId, planId: plan.id, status: SubscriptionStatus.ACTIVE }, update: { planId: plan.id, status: SubscriptionStatus.ACTIVE } });
+    }
+
+    // The FREE plan no longer caps pets (membership is sold by features), so the limit mechanism is
+    // proven on a plan that does define a cap — the enforcement path is identical for any LIMIT key.
+    it("Flow D: creating one more pet than the plan allows is rejected with a typed, specific error — existing pets remain fully accessible", async () => {
       const { client, householdId } = await setupHousehold();
-      const freePlan = await getFreePlan();
-      const limit = await prisma.subscriptionPlanEntitlement.findUniqueOrThrow({ where: { planId_key: { planId: freePlan.id, key: "pets.max" } } });
-      const max = limit.limitValue!;
+      const max = 2;
+      await capPets(householdId, max);
 
       const petIds: string[] = [];
       for (let i = 0; i < max; i++) {
@@ -189,9 +195,8 @@ describe("Subscription + Membership + Metering (Handoff 16)", () => {
 
     it("Concurrency (Handoff 20): two simultaneous creates at exactly one slot under the limit never both succeed", async () => {
       const { client, householdId } = await setupHousehold();
-      const freePlan = await getFreePlan();
-      const limit = await prisma.subscriptionPlanEntitlement.findUniqueOrThrow({ where: { planId_key: { planId: freePlan.id, key: "pets.max" } } });
-      const max = limit.limitValue!;
+      const max = 2;
+      await capPets(householdId, max);
 
       // Fill every slot but one, leaving room for exactly one more pet.
       for (let i = 0; i < max - 1; i++) {

@@ -93,6 +93,7 @@ const FA: Record<string, string> = {
   SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED: "این کار از سقف طرح فعلی شما بیشتر است.",
   SUBSCRIPTION_PLAN_NOT_AVAILABLE: "این طرح فعلاً برای عضویت در دسترس نیست.",
   SUBSCRIPTION_TRIAL_NOT_ELIGIBLE: "این خانواده شرایط دورهٔ آزمایشی این طرح را ندارد.",
+  SUBSCRIPTION_FEATURE_NOT_INCLUDED: "این امکان در طرح فعلی شما نیست.",
   SUPPORT_CAMPAIGN_NOT_ACCEPTING_DONATIONS: "این کمپین فعلاً کمک نمی‌پذیرد.",
   SUPPORT_CASE_INVALID_REFERENCE: "این مورد به درخواست پشتیبانی شما متصل نشد.",
   SUPPORT_NEED_DEADLINE_INVALID: "مهلت باید در آینده و حداکثر ۱۸۰ روز بعد باشد.",

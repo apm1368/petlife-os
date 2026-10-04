@@ -121,17 +121,19 @@ async function seedSubscriptions() {
     code: DEFAULT_FREE_PLAN_CODE,
     nameFa: "رایگان",
     nameEn: "Free",
-    descriptionFa: "شروع رایگان برای هر خانواده — همیشه رایگان.",
-    descriptionEn: "Every household's starting plan — free forever.",
+    descriptionFa: "پروفایل و پروندهٔ پایهٔ همهٔ حیوانات، بدون محدودیت تعداد. یادآورها و اشتراک با دامپزشک در پلن‌های پولی است.",
+    descriptionEn: "Profiles and a basic record for all your pets, with no pet limit. Reminders and vet sharing come with paid plans.",
     isFree: true,
     sortOrder: 0,
     entitlements: [
-      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 2 },
-      { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
-      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 2 },
       { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 10 },
       { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 20 },
       { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
+      { key: "care.reminders", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+      { key: "vet.share", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
     ],
   });
 
@@ -139,46 +141,48 @@ async function seedSubscriptions() {
     code: "plus",
     nameFa: "پلاس",
     nameEn: "Plus",
-    descriptionFa: "فضای بیشتر برای خانواده‌های چندحیوانی.",
-    descriptionEn: "More room for multi-pet households.",
+    descriptionFa: "یادآورهای مراقبت و تکرارشونده، اشتراک موقت پرونده با دامپزشک، ۶ عضو خانواده و فضای بیشتر برای اسناد و خاطره‌ها.",
+    descriptionEn: "Care and recurring reminders, time-limited vet sharing, 6 household members and more room for documents and memories.",
     isFree: false,
     sortOrder: 1,
     trialDays: 7,
     entitlements: [
-      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
+      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 6 },
-      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
-      { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 50 },
-      { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
-      { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 500 },
+      { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
+      { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 1000 },
+      { key: "care.reminders", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "vet.share", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
     ],
   });
   await ensurePrice(plus.id, SubscriptionBillingInterval.MONTHLY, 990_000);
   await ensurePrice(plus.id, SubscriptionBillingInterval.QUARTERLY, 2_790_000);
-  await ensurePrice(plus.id, SubscriptionBillingInterval.SEMI_ANNUAL, 5_290_000);
   await ensurePrice(plus.id, SubscriptionBillingInterval.ANNUAL, 9_900_000);
 
   const premium = await upsertPlan({
     code: "premium",
     nameFa: "پرمیوم",
     nameEn: "Premium",
-    descriptionFa: "بدون محدودیت تعداد حیوان یا عضو خانواده.",
-    descriptionEn: "No limit on pets or household members.",
+    descriptionFa: "همهٔ امکانات مراقبت، بدون سقف اسناد، خاطره‌ها و اعضای خانواده، به‌اضافهٔ پشتیبانی ویژه.",
+    descriptionEn: "Everything in care, with no cap on documents, memories or household members, plus priority support.",
     isFree: false,
     sortOrder: 2,
     trialDays: 7,
     entitlements: [
       { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
-      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
       { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "care.reminders", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "vet.share", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
     ],
   });
   await ensurePrice(premium.id, SubscriptionBillingInterval.MONTHLY, 1_990_000);
   await ensurePrice(premium.id, SubscriptionBillingInterval.QUARTERLY, 5_590_000);
-  await ensurePrice(premium.id, SubscriptionBillingInterval.SEMI_ANNUAL, 10_690_000);
   await ensurePrice(premium.id, SubscriptionBillingInterval.ANNUAL, 19_900_000);
 
   console.log(`Seeded subscription plans: free=${free.id} plus=${plus.id} premium=${premium.id}`);

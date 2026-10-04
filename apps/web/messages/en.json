@@ -240,7 +240,9 @@
       "prioritySupport": "Priority support",
       "healthDocumentsMax": "Medical documents",
       "healthObservationsMax": "Health observations",
-      "memoriesMax": "Memories"
+      "memoriesMax": "Memories",
+      "careReminders": "Care and recurring reminders",
+      "vetShare": "Time-limited vet sharing"
     },
     "included": "Included",
     "notIncluded": "Not included",
@@ -1187,7 +1189,10 @@
       }
     },
     "checkout": {
-      "summary": { "title": "Order summary", "deliveryNext": "Chosen in the delivery step" },
+      "summary": {
+        "title": "Order summary",
+        "deliveryNext": "Chosen in the delivery step"
+      },
       "address": {
         "title": "Delivery address",
         "addNew": "Add a new address",

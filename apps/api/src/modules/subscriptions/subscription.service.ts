@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { AppEnv } from "../../config/env";
 import { Injectable } from "@nestjs/common";
@@ -51,6 +52,8 @@ export const PAID_ACCESS_STATUSES: SubscriptionStatus[] = [
 
 @Injectable()
 export class SubscriptionService {
+  private readonly logger = new Logger(SubscriptionService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly plans: SubscriptionPlanReadService,
@@ -267,6 +270,51 @@ export class SubscriptionService {
       return row;
     });
     return toSubscriptionDto(updated);
+  }
+
+  /**
+   * The welcome week (owner decision): a new household starts a real trial of the configured plan, so
+   * every feature is open for its first days and the trial then expires like any other — no charge,
+   * no stored payment method. Best effort by design: a missing plan, a plan without trial days, or a
+   * household that already trialed it simply leaves the FREE plan in place.
+   */
+  async startWelcomeTrial(householdId: string, userId: string): Promise<void> {
+    const code = this.config.get("WELCOME_TRIAL_PLAN_CODE", { infer: true });
+    if (!code) return;
+    const plan = await this.prisma.subscriptionPlan.findUnique({ where: { code }, select: { id: true, trialDays: true, status: true } });
+    if (!plan || plan.status !== "ACTIVE" || !plan.trialDays) return;
+    await this.startTrial(householdId, plan.id, userId).catch((error: unknown) => this.logger.warn(`Welcome trial not started for household ${householdId}: ${error instanceof Error ? error.message : String(error)}`));
+  }
+
+  /**
+   * A trial that reached its end without a purchase ends: TRIALING → EXPIRED, the trial period is
+   * closed and entitlements fall back to the FREE plan. Trials never auto-charge (there is no stored
+   * payment method), so expiry — not conversion — is the only automatic outcome. Row-locked and
+   * re-checked, so a purchase that raced the worker wins. Returns true when it expired the trial.
+   */
+  async expireEndedTrial(subscriptionId: string): Promise<boolean> {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "subscriptions" WHERE "id" = ${subscriptionId}::uuid FOR UPDATE`;
+      const sub = await tx.subscription.findUniqueOrThrow({ where: { id: subscriptionId }, include: SUBSCRIPTION_INCLUDE });
+      const now = new Date();
+      if (sub.status !== SubscriptionStatus.TRIALING || !sub.trialEndsAt || sub.trialEndsAt > now) return false;
+      this.assertTransition(sub.status, SubscriptionStatus.EXPIRED);
+      if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED } });
+      await tx.subscription.update({ where: { id: sub.id }, data: { status: SubscriptionStatus.EXPIRED, expiredAt: now } });
+      await tx.subscriptionChange.create({ data: { subscriptionId: sub.id, type: SubscriptionChangeType.EXPIRED, fromPlanId: sub.planId, effectiveAt: now, note: "Trial ended without a purchase" } });
+      await this.events.publish("SubscriptionExpired", { subscriptionId: sub.id, householdId: sub.householdId }, { tx, aggregateType: "Subscription", aggregateId: sub.id });
+      return true;
+    });
+  }
+
+  /** The renewal worker's entry point for a scheduled cancellation whose effective time has passed. Returns true when it cancelled. */
+  async finalizeDueCancellation(subscriptionId: string): Promise<boolean> {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "subscriptions" WHERE "id" = ${subscriptionId}::uuid FOR UPDATE`;
+      const sub = await tx.subscription.findUniqueOrThrow({ where: { id: subscriptionId }, include: SUBSCRIPTION_INCLUDE });
+      const after = await this.applyCancelIfDue(tx, sub);
+      return after.status === SubscriptionStatus.CANCELLED && sub.status !== SubscriptionStatus.CANCELLED;
+    });
   }
 
   /** Applied by the renewal worker once `cancelEffectiveAt` has passed. */

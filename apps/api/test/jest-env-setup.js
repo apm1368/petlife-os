@@ -3,6 +3,8 @@
 // the dedicated test database instead of whatever `.env` points at locally.
 process.env.NODE_ENV = "test";
 process.env.GOOGLE_DEV_SIMULATE_ENABLED = process.env.GOOGLE_DEV_SIMULATE_ENABLED ?? "true";
+// Suites create households and assert FREE-plan limits; the welcome trial is opted into per test.
+process.env.WELCOME_TRIAL_PLAN_CODE = process.env.WELCOME_TRIAL_PLAN_CODE ?? "";
 process.env.DATABASE_URL =
   process.env.TEST_DATABASE_URL ?? "postgresql://petlife:petlife@localhost:5432/petlife_os_test?schema=public";
 process.env.REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";

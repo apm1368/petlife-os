@@ -7,6 +7,7 @@ import { AlreadyHouseholdMemberException, InvitationAlreadyUsedException, Invita
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import type { CreateHouseholdDto } from "./dto/create-household.dto";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
+import { SubscriptionService } from "../subscriptions/subscription.service";
 import type { UpdateHouseholdDto } from "./dto/update-household.dto";
 
 type InitialAccess = Array<{ petId: string; preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" }>;
@@ -31,14 +32,17 @@ function maskContact(contact: string) {
 
 @Injectable()
 export class HouseholdsService {
-  constructor(private readonly prisma: PrismaService, private readonly events: DomainEventsService, private readonly notifications: NotificationOrchestratorService) {}
+  constructor(private readonly prisma: PrismaService, private readonly events: DomainEventsService, private readonly notifications: NotificationOrchestratorService, private readonly subscriptions: SubscriptionService) {}
 
   async create(userId: string, dto: CreateHouseholdDto) {
-    return this.prisma.$transaction(async (tx) => {
-      const household = await tx.household.create({ data: { ...dto, members: { create: { userId, role: HouseholdRole.OWNER } } } });
-      await this.events.publish("HouseholdCreated", { householdId: household.id, ownerId: userId }, { tx, aggregateType: "Household", aggregateId: household.id });
-      return household;
+    const household = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.household.create({ data: { ...dto, members: { create: { userId, role: HouseholdRole.OWNER } } } });
+      await this.events.publish("HouseholdCreated", { householdId: created.id, ownerId: userId }, { tx, aggregateType: "Household", aggregateId: created.id });
+      return created;
     });
+    // After commit: the trial references the household row.
+    await this.subscriptions.startWelcomeTrial(household.id, userId);
+    return household;
   }
 
   async getById(id: string) {

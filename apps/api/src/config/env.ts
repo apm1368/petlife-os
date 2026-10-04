@@ -215,6 +215,8 @@ const envSchema = z.object({
   /// PAST_DUE -> GRACE_PERIOD for this many further days (a final warning
   /// window, full access still retained) before EXPIRED.
   SUBSCRIPTION_GRACE_PERIOD_DAYS: z.coerce.number().int().positive().default(4),
+  /** Owner decision: every new household gets the full product free for its first week — a real trial of this plan code. Empty disables it. */
+  WELCOME_TRIAL_PLAN_CODE: z.string().default("premium"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

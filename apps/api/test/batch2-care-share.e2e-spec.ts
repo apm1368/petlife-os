@@ -4,6 +4,7 @@ import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { signSessionCookie } from "../src/common/session/session-cookie.util";
+import { grantPlanFeatures } from "./plan-features";
 import { CareReminderWorker } from "../src/modules/care-reminders/care-reminder.worker";
 
 describe("Batch 2 care and explicit veterinary sharing",()=>{
@@ -21,6 +22,7 @@ describe("Batch 2 care and explicit veterinary sharing",()=>{
     }
     owner=actors.OWNER!.id;vet=actors.VET!.id;
     const household=await db.household.create({data:{name:"خانواده آزمون"}});
+    await grantPlanFeatures(db,household.id,["care.reminders","vet.share"]);
     const other=await db.household.create({data:{name:"خانواده مستقل"}});
     const pet=await db.pet.create({data:{householdId:household.id,name:"کوکی",species:"DOG"}});petId=pet.id;
     otherPetId=(await db.pet.create({data:{householdId:other.id,name:"پت مستقل",species:"CAT"}})).id;

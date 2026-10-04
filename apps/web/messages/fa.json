@@ -240,7 +240,9 @@
       "prioritySupport": "پشتیبانی اولویت‌دار",
       "healthDocumentsMax": "مدارک پزشکی",
       "healthObservationsMax": "مشاهدات سلامت",
-      "memoriesMax": "خاطرات"
+      "memoriesMax": "خاطرات",
+      "careReminders": "یادآورهای مراقبت و تکرارشونده",
+      "vetShare": "اشتراک موقت پرونده با دامپزشک"
     },
     "included": "شامل می‌شود",
     "notIncluded": "شامل نمی‌شود",
@@ -1187,7 +1189,10 @@
       }
     },
     "checkout": {
-      "summary": { "title": "خلاصهٔ سفارش", "deliveryNext": "در مرحلهٔ ارسال انتخاب می‌شود" },
+      "summary": {
+        "title": "خلاصهٔ سفارش",
+        "deliveryNext": "در مرحلهٔ ارسال انتخاب می‌شود"
+      },
       "address": {
         "title": "آدرس تحویل",
         "addNew": "افزودن آدرس جدید",

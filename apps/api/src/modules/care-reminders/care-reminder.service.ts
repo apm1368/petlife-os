@@ -3,11 +3,12 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { nextCareDate, visibleCareState } from "./care-time";
+import { EntitlementService } from "../subscriptions/entitlement.service";
 import type { CreateReminderDto, EditReminderDto, ReminderActionDto } from "./care-reminder.dto";
 
 @Injectable()
 export class CareReminderService {
-  constructor(private readonly prisma: PrismaService, private readonly access: PetAccessService) {}
+  constructor(private readonly prisma: PrismaService, private readonly access: PetAccessService, private readonly entitlements: EntitlementService) {}
 
   async list(petId: string, userId: string) {
     const health = (await this.access.getEffectivePermissions(petId, userId))?.canViewHealth;
@@ -22,6 +23,10 @@ export class CareReminderService {
   }
   async create(petId: string, userId: string, dto: CreateReminderDto) {
     this.validate(dto);
+    // Personal reminders are a plan feature (care.reminders). Reminders the record derives (vaccines due…)
+    // are never gated, and existing reminders stay readable and actionable after a downgrade.
+    const pet = await this.prisma.pet.findUniqueOrThrow({ where: { id: petId }, select: { householdId: true } });
+    await this.entitlements.assertFeature(pet.householdId, "care.reminders");
     return this.prisma.$transaction(async tx => {
       const row = await tx.careReminder.create({ data: { petId, createdByUserId: userId, title: dto.title.trim(), type: dto.type, dueAt: new Date(dto.dueAt), originalDueAt: new Date(dto.dueAt), recurrence: dto.recurrence ?? "ONCE", intervalDays: dto.intervalDays } });
       await tx.domainEvent.create({ data: { type: "CareReminderCreated", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: row.id, actorUserId: userId } } });

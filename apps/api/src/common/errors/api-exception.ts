@@ -1116,6 +1116,13 @@ export class SubscriptionEntitlementLimitExceededException extends ApiException 
   }
 }
 
+/** A plan feature (BOOLEAN entitlement) the household's current plan does not include. `details.key` names it so the UI can point at the plans that do. */
+export class SubscriptionFeatureNotIncludedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_FEATURE_NOT_INCLUDED", "This feature is not included in the current plan.", HttpStatus.CONFLICT, details);
+  }
+}
+
 export class SubscriptionBillingAttemptNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("SUBSCRIPTION_BILLING_ATTEMPT_NOT_FOUND", "Billing attempt not found.", HttpStatus.NOT_FOUND, details);

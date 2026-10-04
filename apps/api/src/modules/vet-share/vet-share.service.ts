@@ -5,10 +5,11 @@ import { PetAccessService } from "../pet-access/pet-access.service";
 import { MedicalDocumentService } from "../clinical-health/medical-document.service";
 import { ClinicalVisitService } from "../clinical-health/clinical-visit.service";
 import type { VetShareDto } from "./vet-share.dto";
+import { EntitlementService } from "../subscriptions/entitlement.service";
 
 @Injectable()
 export class VetShareService {
-  constructor(private readonly prisma: PrismaService, private readonly access: PetAccessService, private readonly documents: MedicalDocumentService, private readonly visits: ClinicalVisitService) {}
+  constructor(private readonly prisma: PrismaService, private readonly access: PetAccessService, private readonly documents: MedicalDocumentService, private readonly visits: ClinicalVisitService, private readonly entitlements: EntitlementService) {}
   providers() {
     return this.prisma.providerUser.findMany({ where: { role: "VET", providerOrganization: { verificationStatus: "VERIFIED" } }, select: { id:true,displayTitle:true,providerOrganization:{select:{id:true,name:true}},user:{select:{displayName:true}} }, take: 100 });
   }
@@ -32,6 +33,9 @@ export class VetShareService {
   }
   async create(petId:string,userId:string,dto:VetShareDto) {
     await this.assertManager(petId,userId); const provider=await this.validate(petId,dto);
+    // Sharing chosen records with a vet for a set time is a plan feature (vet.share); booking-time sharing stays free.
+    const pet=await this.prisma.pet.findUniqueOrThrow({where:{id:petId},select:{householdId:true}});
+    await this.entitlements.assertFeature(pet.householdId,"vet.share");
     return this.prisma.$transaction(async tx=>{
       const grant=await tx.petAccessGrant.create({data:{petId,userId:provider.userId,canViewIdentity:true,canViewHealth:false,canEditHealth:false,canRecordClinicalData:false,source:"TEMPORARY",reason:"EXPLICIT_VET_SHARE",startsAt:new Date(dto.startsAt),expiresAt:new Date(dto.expiresAt),grantedByUserId:userId,healthScopes:dto.scopes,selectedDocumentIds:dto.documentIds,sharedWithProviderUserId:provider.id}});
       await tx.domainEvent.create({data:{type:"PetHealthShared",aggregateType:"Pet",aggregateId:petId,payload:{petId,grantId:grant.id,actorUserId:userId,scopes:dto.scopes}}});

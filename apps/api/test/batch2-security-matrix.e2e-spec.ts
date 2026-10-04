@@ -6,6 +6,7 @@ import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { signSessionCookie } from "../src/common/session/session-cookie.util";
 import { CareReminderWorker } from "../src/modules/care-reminders/care-reminder.worker";
+import { grantPlanFeatures } from "./plan-features";
 import { CareSourceListener } from "../src/modules/care-reminders/care-source.listener";
 
 /**
@@ -36,6 +37,7 @@ describe("Batch 2 security matrix", () => {
     anonCsrf = extractCookie((await request(app.getHttpServer()).get("/health/live")).headers["set-cookie"], "petlife_csrf")!;
 
     const household = await db.household.create({ data: { name: "خانواده ماتریس" } });
+    await grantPlanFeatures(db, household.id, ["care.reminders", "vet.share"]);
     householdId = household.id;
     const other = await db.household.create({ data: { name: "خانواده دیگر" } });
     otherHouseholdId = other.id;

@@ -10,6 +10,8 @@ import { usePetStore } from "@/stores/pet-store";
 import { BirthDateField } from "@/features/shared/date-picker/BirthDateField";
 import { Stepper } from "@/features/shared/Stepper";
 import { formatCount } from "@/lib/number/format-number";
+import { ApiError } from "@/lib/api/client";
+import { isPlanError, PlanRequiredNote } from "@/features/subscription/PlanRequiredNote";
 import { SPECIES_LABELS } from "./pet-identity";
 
 const SPECIES: { value: PetSpecies; icon: typeof Dog }[] = [
@@ -168,6 +170,7 @@ export function AddPetView() {
   const [neutered, setNeutered] = useState<NeuteredStatus | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [planError, setPlanError] = useState<ApiError | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => () => {
@@ -232,8 +235,9 @@ export function AddPetView() {
       upsertPet(saved);
       if (!activePetId) setActivePetId(saved.id);
       router.push(`/${locale}/pets/${saved.id}`);
-    } catch {
-      setError(c.failed);
+    } catch (e) {
+      if (isPlanError(e)) setPlanError(e);
+      else setError(c.failed);
       setIsSubmitting(false);
     }
   }
@@ -354,6 +358,7 @@ export function AddPetView() {
           ) : null}
 
           {error ? <p role="alert" className="add-pet-error">{error}</p> : null}
+          {planError ? <PlanRequiredNote error={planError} /> : null}
 
           <div className="add-pet-wizard__actions">
             {step > 0 ? <Button variant="ghost" onClick={() => { setError(null); setStep((s) => s - 1); }} disabled={isSubmitting}>{c.back}</Button> : <span />}

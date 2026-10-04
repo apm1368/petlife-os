@@ -23,17 +23,26 @@ describe("default FREE plan entitlements", () => {
     expect(missing).toEqual([]);
   });
 
-  it("declares every entry as a LIMIT, since every metered key is a quota", () => {
+  it("declares every metered key as a LIMIT, and every other entry as a BOOLEAN feature with an explicit value", () => {
+    const metered = new Set(UsageService.meteredKeys());
     for (const entitlement of DEFAULT_FREE_PLAN_ENTITLEMENTS) {
-      expect(entitlement.type).toBe(SubscriptionEntitlementType.LIMIT);
+      if (metered.has(entitlement.key)) expect(entitlement.type).toBe(SubscriptionEntitlementType.LIMIT);
+      else {
+        expect(entitlement.type).toBe(SubscriptionEntitlementType.BOOLEAN);
+        expect(typeof entitlement.boolValue).toBe("boolean");
+      }
     }
+  });
+
+  it("never caps the number of pets — membership is sold by features (owner decision)", () => {
+    expect(DEFAULT_FREE_PLAN_ENTITLEMENTS.find((e) => e.key === "pets.max")?.limitValue).toBeNull();
   });
 
   it("never defaults a metered key to a zero limit, which would block the feature outright", () => {
     const metered = new Set(UsageService.meteredKeys());
     for (const entitlement of DEFAULT_FREE_PLAN_ENTITLEMENTS.filter((e) => metered.has(e.key))) {
       // `null` is legitimate (unlimited); `0` is never a usable default.
-      expect(entitlement.limitValue === null || entitlement.limitValue > 0).toBe(true);
+      expect(entitlement.limitValue === null || (entitlement.limitValue ?? 0) > 0).toBe(true);
     }
   });
 
