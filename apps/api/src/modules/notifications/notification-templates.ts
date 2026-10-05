@@ -372,6 +372,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "بازگشت به خانواده", body: "{{petName}} با خانواده دوباره یکی شد!", smsBody: "خبر خوب! {{petName}} با خانواده دوباره یکی شد." },
     en: { title: "Reunited!", body: "{{petName}} has been reunited with the household!", smsBody: "Good news — {{petName}} has been reunited with your household." },
   },
+  "community.comment_reply": {
+    fa: { title: "پاسخ تازه", body: "کسی به نظر شما پاسخ داد." },
+    en: { title: "New reply", body: "Someone replied to your comment." },
+  },
+  "community.post_comment": {
+    fa: { title: "نظر تازه", body: "کسی زیر پست شما نظر گذاشت." },
+    en: { title: "New comment", body: "Someone commented on your post." },
+  },
   "community.chat_message": {
     fa: { title: "پیام تازه", body: "{{sender}} برایتان پیام فرستاد." },
     en: { title: "New message", body: "{{sender}} sent you a message." },

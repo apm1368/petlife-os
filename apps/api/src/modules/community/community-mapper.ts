@@ -36,6 +36,8 @@ export function toCommunityPostDto(row: PostWithRelations, authorDisplayName: st
     sourceType: row.sourceType as unknown as CommunityPostDto["sourceType"],
     sourceLostPetIncidentId: row.sourceLostPetIncidentId,
     sourceSupportCampaignId: row.sourceSupportCampaignId,
+    topics: row.topics,
+    city: row.city,
     commentCount: row._count.comments,
     reactionCount: row._count.reactions,
     viewerReaction,
@@ -53,6 +55,7 @@ export function toCommunityCommentDto(row: CommunityComment, authorDisplayName: 
     authorDisplayName: publicAuthorName(authorDisplayName),
     body: row.body,
     status: row.status as unknown as CommunityCommentDto["status"],
+    parentCommentId: row.parentCommentId,
     createdAt: row.createdAt.toISOString(),
   };
 }

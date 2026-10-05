@@ -4619,6 +4619,10 @@ export interface CommunityPostDto {
   /** Only present when the request is authenticated — the caller's own reaction, if any. */
   viewerReaction: CommunityReactionType | null;
   createdAt: string;
+  /** Topic tags (fixed vocabulary). */
+  topics?: string[];
+  /** Optional city for the local feed. */
+  city?: string | null;
 }
 
 export interface CommunityCommentDto {
@@ -4629,6 +4633,10 @@ export interface CommunityCommentDto {
   authorDisplayName: string;
   body: string;
   status: CommunityContentStatus;
+  /** Set on replies (one level). */
+  parentCommentId?: string | null;
+  /** Published replies, on top-level comments from the comments list. */
+  replies?: CommunityCommentDto[];
   createdAt: string;
 }
 

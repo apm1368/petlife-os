@@ -5,6 +5,8 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { StorageService } from "../storage/storage.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
+import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
+import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import { CommunityCommentNotFoundException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 import { toCommunityCommentDto, toCommunityPostDto } from "./community-mapper";
@@ -29,6 +31,7 @@ export class CommunityPostService {
     private readonly events: DomainEventsService,
     private readonly storage: StorageService,
     private readonly petAccess: PetAccessService,
+    private readonly notifications: NotificationOrchestratorService,
   ) {}
 
   private async displayNameMap(userIds: string[]): Promise<Map<string, string>> {
@@ -60,6 +63,8 @@ export class CommunityPostService {
           body: dto.body,
           petId: dto.petId,
           mediaObjectKeys: dto.mediaObjectKeys ?? [],
+          topics: dto.topics ?? [],
+          city: dto.city?.trim() || null,
         },
         include: POST_INCLUDE,
       });
@@ -121,6 +126,8 @@ export class CommunityPostService {
       status: CommunityContentStatus.PUBLISHED,
       type: query.type,
       countryCode: query.countryCode,
+      ...(query.topic ? { topics: { has: query.topic } } : {}),
+      ...(query.city ? { city: { equals: query.city.trim(), mode: "insensitive" } } : {}),
       ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { body: { contains: q, mode: "insensitive" } }] } : {}),
     };
     const [rows, total] = await Promise.all([
@@ -150,27 +157,51 @@ export class CommunityPostService {
   }
 
   async addComment(postId: string, authorUserId: string, dto: CreateCommunityCommentDto) {
-    await this.getVisiblePostOrThrow(postId);
+    const post = await this.getVisiblePostOrThrow(postId);
+    // One level of replies: the parent must be a published top-level comment on this same post.
+    const parent = dto.parentCommentId ? await this.prisma.communityComment.findFirst({ where: { id: dto.parentCommentId, postId, parentCommentId: null, status: CommunityContentStatus.PUBLISHED } }) : null;
+    if (dto.parentCommentId && !parent) throw new CommunityCommentNotFoundException({ commentId: dto.parentCommentId });
     const row = await this.prisma.$transaction(async (tx) => {
-      const created = await tx.communityComment.create({ data: { postId, authorUserId, body: dto.body } });
+      const created = await tx.communityComment.create({ data: { postId, authorUserId, body: dto.body, parentCommentId: parent?.id ?? null } });
       await this.events.publish("CommunityCommentAdded", { postId, commentId: created.id, authorUserId }, { tx, aggregateType: "CommunityPost", aggregateId: postId });
       return created;
     });
+    // The person replied to (or the post's author for a top-level comment) hears about it — never themselves.
+    const recipient = parent ? parent.authorUserId : post.authorUserId;
+    if (recipient !== authorUserId) {
+      await this.notifications.notify({ userId: recipient, type: parent ? "community.comment_reply" : "community.post_comment", category: "COMMUNITY", deepLink: NotificationDeepLinks.communityPost(postId), entityType: "CommunityComment", entityId: row.id });
+    }
     const names = await this.displayNameMap([authorUserId]);
     return toCommunityCommentDto(row, names.get(authorUserId) ?? "", authorUserId);
+  }
+
+  async setSaved(postId: string, userId: string, on: boolean) {
+    if (on) {
+      await this.getVisiblePostOrThrow(postId);
+      await this.prisma.communityPostBookmark.upsert({ where: { userId_postId: { userId, postId } }, create: { userId, postId }, update: {} });
+    } else await this.prisma.communityPostBookmark.deleteMany({ where: { userId, postId } });
+    return { saved: on };
+  }
+
+  /** Saved posts that are still published (a removed post silently drops out). */
+  async savedPosts(userId: string) {
+    const rows = await this.prisma.communityPostBookmark.findMany({ where: { userId, post: { status: CommunityContentStatus.PUBLISHED } }, orderBy: { createdAt: "desc" }, take: 100, include: { post: { include: POST_INCLUDE } } });
+    const names = await this.displayNameMap(rows.map((r) => r.post.authorUserId));
+    return rows.map((r) => ({ ...toCommunityPostDto(r.post, names.get(r.post.authorUserId) ?? "", null, userId), savedAt: r.createdAt.toISOString() }));
   }
 
   async listComments(postId: string, query: PaginationQueryDto, viewerUserId?: string) {
     await this.getVisiblePostOrThrow(postId);
     const { page, pageSize, skip, take } = resolvePagination(query);
-    const where: Prisma.CommunityCommentWhereInput = { postId, status: CommunityContentStatus.PUBLISHED };
+    // Top-level comments are paginated; each carries its published replies (one level).
+    const where: Prisma.CommunityCommentWhereInput = { postId, status: CommunityContentStatus.PUBLISHED, parentCommentId: null };
     const [rows, total] = await Promise.all([
-      this.prisma.communityComment.findMany({ where, orderBy: { createdAt: "asc" }, skip, take }),
+      this.prisma.communityComment.findMany({ where, orderBy: { createdAt: "asc" }, skip, take, include: { replies: { where: { status: CommunityContentStatus.PUBLISHED }, orderBy: { createdAt: "asc" }, take: 50 } } }),
       this.prisma.communityComment.count({ where }),
     ]);
-    const names = await this.displayNameMap(rows.map((r) => r.authorUserId));
+    const names = await this.displayNameMap(rows.flatMap((r) => [r.authorUserId, ...r.replies.map((x) => x.authorUserId)]));
     return toPaginatedDto(
-      rows.map((row) => toCommunityCommentDto(row, names.get(row.authorUserId) ?? "", viewerUserId)),
+      rows.map((row) => ({ ...toCommunityCommentDto(row, names.get(row.authorUserId) ?? "", viewerUserId), replies: row.replies.map((reply) => toCommunityCommentDto(reply, names.get(reply.authorUserId) ?? "", viewerUserId)) })),
       total,
       page,
       pageSize,

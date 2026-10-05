@@ -7117,6 +7117,11 @@ model CommunityPost {
   comments  CommunityComment[]
   reactions CommunityReaction[]
   reports   CommunityReport[]
+  savedBy   CommunityPostBookmark[]
+  /// Topic tags from a fixed vocabulary (DOGS, CATS, HEALTH, TRAINING, LOST_PETS, TRAVEL, ADOPTION, NUTRITION, OTHER).
+  topics    String[]                @default([])
+  /// Optional city for local community — never a precise location.
+  city      String?
 
   @@index([authorUserId])
   @@index([status])
@@ -7133,9 +7138,14 @@ model CommunityComment {
   status       CommunityContentStatus @default(PUBLISHED)
   createdAt    DateTime               @default(now())
 
-  reports CommunityReport[]
+  reports         CommunityReport[]
+  /// One level of replies: a reply's parent is always a top-level comment.
+  parentCommentId String?            @db.Uuid
+  parent          CommunityComment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         CommunityComment[] @relation("CommentReplies")
 
   @@index([postId])
+  @@index([parentCommentId])
   @@map("community_comments")
 }
 
@@ -9249,6 +9259,11 @@ model ChatParticipant {
   user           User             @relation("ChatParticipations", fields: [userId], references: [id], onDelete: Cascade)
   joinedAt       DateTime         @default(now())
   lastReadAt     DateTime?
+  /// Per-member conversation controls: archived (hidden from the inbox until a new message), muted (no
+  /// notifications), clearedAt (messages up to then are hidden for this member only).
+  archivedAt     DateTime?
+  muted          Boolean          @default(false)
+  clearedAt      DateTime?
 
   @@id([conversationId, userId])
   @@index([userId])
@@ -9866,4 +9881,29 @@ model VolunteerInterest {
   @@unique([userId, organizationId])
   @@index([organizationId, status])
   @@map("volunteer_interests")
+}
+
+model CommunityPostBookmark {
+  userId    String        @db.Uuid
+  postId    String        @db.Uuid
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@id([userId, postId])
+  @@map("community_post_bookmarks")
+}
+
+/// "Was this helpful?" — one answer per member per article; never shown as public comments.
+model ArticleFeedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  articleId String   @db.Uuid
+  userId    String   @db.Uuid
+  helpful   Boolean
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([articleId, userId])
+  @@index([articleId])
+  @@map("article_feedback")
 }

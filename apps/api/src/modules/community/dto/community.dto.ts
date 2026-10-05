@@ -1,5 +1,7 @@
 import { Type } from "class-transformer";
-import { IsArray, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from "class-validator";
+import { ArrayMaxSize, ArrayUnique, IsArray, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, MaxLength, Min } from "class-validator";
+
+export const COMMUNITY_TOPICS = ["DOGS", "CATS", "HEALTH", "TRAINING", "LOST_PETS", "TRAVEL", "ADOPTION", "NUTRITION", "OTHER"] as const;
 import { CommunityPostType, CommunityReactionType, CommunityReportReason, CommunityReportStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
@@ -26,6 +28,20 @@ export class CreateCommunityPostDto {
   @IsString({ each: true })
   @IsObjectKeyFor(["community-media"])
   mediaObjectKeys?: string[];
+
+  /** Up to three topics from the fixed vocabulary. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @ArrayUnique()
+  @IsIn(COMMUNITY_TOPICS, { each: true })
+  topics?: (typeof COMMUNITY_TOPICS)[number][];
+
+  /** Optional city name for the local feed — never a precise location. */
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  city?: string;
 }
 
 export class ListCommunityPostsQueryDto extends PaginationQueryDto {
@@ -43,12 +59,26 @@ export class ListCommunityPostsQueryDto extends PaginationQueryDto {
   @IsString()
   @MaxLength(80)
   q?: string;
+
+  @IsOptional()
+  @IsIn(COMMUNITY_TOPICS)
+  topic?: (typeof COMMUNITY_TOPICS)[number];
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  city?: string;
 }
 
 export class CreateCommunityCommentDto {
   @IsString()
   @MaxLength(2000)
   body!: string;
+
+  /** Reply to a top-level comment of the same post (one level only). */
+  @IsOptional()
+  @IsUUID()
+  parentCommentId?: string;
 }
 
 export class SetCommunityReactionDto {
