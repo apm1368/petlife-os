@@ -164,7 +164,36 @@ async function main() {
     });
     await db.patientVitalsRecord.upsert({ where: { id: id("clinic:vitals") }, create: { id: id("clinic:vitals"), petId: clinicPet.id, providerOrganizationId: owner.providerOrganizationId, providerUserId: vet.id, recordedAt: visitAt, weightValue: 4.2, temperatureC: 38.6, heartRateBpm: 150, bodyConditionScore: 5 }, update: {} });
 
-    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals.`);
+    // ---------------------------------------------------------------- Pet safety + shared care (rich-profile owner)
+    const rich = await db.user.findUniqueOrThrow({ where: { email: "batch2-review@example.test" } });
+    const richHome = (await db.householdMember.findFirst({ where: { userId: rich.id, role: "OWNER" } }))
+      ?? (await (async () => {
+        const hh = await db.household.upsert({ where: { id: id("rich:household") }, create: { id: id("rich:household"), name: "خانواده‌ی بازبین (نمایشی)", city: "تهران", countryCode: "IR" }, update: {} });
+        return db.householdMember.upsert({ where: { householdId_userId: { householdId: hh.id, userId: rich.id } }, create: { householdId: hh.id, userId: rich.id, role: "OWNER" }, update: {} });
+      })());
+    const richPet = (await db.pet.findFirst({ where: { householdId: richHome.householdId, lifecycleStatus: "ACTIVE" }, orderBy: { createdAt: "asc" } }))
+      ?? (await db.pet.create({ data: { id: id("rich:pet"), householdId: richHome.householdId, name: "کوکی (نمایشی)", species: "DOG", approximateAgeMonths: 36 } }));
+    await db.petEmergencyInfo.upsert({ where: { petId: richPet.id }, create: { petId: richPet.id, contactName: "نگار (نمایشی)", contactPhone: "09120000000", contactRelation: "خواهر", bloodType: "DEA 1.1 منفی", criticalNotes: "به پنی‌سیلین حساسیت دارد (نمایشی).", updatedByUserId: rich.id }, update: {} });
+    // A deterministic demo-only ID tag token so the public card page can be designed (/pet-card/<token>).
+    const demoToken = `demo-${id("id-tag").replace(/-/g, "")}`;
+    const tokenHash = createHash("sha256").update(demoToken).digest("hex");
+    if (!(await db.petShareCard.findUnique({ where: { tokenHash } }))) {
+      await db.petShareCard.updateMany({ where: { petId: richPet.id, kind: "ID_TAG", revokedAt: null }, data: { revokedAt: new Date() } });
+      await db.petShareCard.create({ data: { id: id("card:id-tag"), petId: richPet.id, kind: "ID_TAG", tokenHash, tokenHint: demoToken.slice(-4), includeContact: true, createdByUserId: rich.id } });
+    }
+    const helperMember = await user("household-helper@example.test", "علی (عضو خانواده‌ی نمایشی)");
+    await db.householdMember.upsert({ where: { householdId_userId: { householdId: richHome.householdId, userId: helperMember.id } }, create: { householdId: richHome.householdId, userId: helperMember.id, role: "FAMILY" }, update: {} });
+    await db.petAccessGrant.upsert({ where: { id: id("grant:helper") }, create: { id: id("grant:helper"), petId: richPet.id, userId: helperMember.id, canViewIdentity: true, canViewCareProfile: true, canEditCareProfile: true, grantedByUserId: rich.id }, update: {} });
+    const careAt = (d: number) => new Date(Math.floor((Date.now() + d * DAY) / 3600e3) * 3600e3);
+    const care = (key: string, data: Record<string, unknown>) => db.careReminder.upsert({ where: { id: id(`care:${key}`) }, create: { id: id(`care:${key}`), petId: richPet.id, createdByUserId: rich.id, ...data } as never, update: {} });
+    await care("walk-assigned", { title: "پیاده‌روی عصر", type: "CUSTOM", dueAt: careAt(0.3), originalDueAt: careAt(0.3), recurrence: "DAILY", assignedToUserId: helperMember.id });
+    await care("brush-weekdays", { title: "مسواک زدن", type: "DENTAL", dueAt: careAt(1), originalDueAt: careAt(1), recurrence: "WEEKDAYS", weekdays: [0, 2, 4] });
+    await care("course", { title: "دوره‌ی آنتی‌بیوتیک", type: "MEDICATION", dueAt: careAt(0.5), originalDueAt: careAt(0.5), recurrence: "DAILY", maxOccurrences: 7, occurrenceIndex: 3 });
+    await care("done-1", { title: "حمام", type: "GROOMING", dueAt: careAt(-5), originalDueAt: careAt(-5), state: "COMPLETED", completedAt: careAt(-5), completedByUserId: helperMember.id });
+    await care("skipped-1", { title: "کنترل وزن", type: "WEIGHT_CHECK", dueAt: careAt(-3), originalDueAt: careAt(-3), state: "SKIPPED", skippedAt: careAt(-3), completedByUserId: rich.id });
+    await care("overdue-1", { title: "ضدکک و کنه", type: "PARASITE_PREVENTION", dueAt: careAt(-2), originalDueAt: careAt(-2), recurrence: "MONTHLY" });
+
+    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care.`);
   } finally {
     await app.close();
   }

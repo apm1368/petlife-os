@@ -1452,6 +1452,8 @@ model Pet {
   dischargeSummaries     DischargeSummary[]
   providerClinicalAlerts ProviderClinicalAlert[]
   clinicReminders        ClinicReminder[]
+  emergencyInfo          PetEmergencyInfo?
+  shareCards             PetShareCard[]
 
   trips                 Trip[]
   insuranceApplications InsuranceApplication[]
@@ -4788,27 +4790,37 @@ model AdminAuditLog {
 /// and record failures — without any schema change when that poller is built.
 /// Reminder scheduling is separate from clinical source truth and booking state.
 model CareReminder {
-  id              String    @id @default(uuid()) @db.Uuid
-  petId           String    @db.Uuid
-  pet             Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
-  createdByUserId String    @db.Uuid
-  title           String
-  type            String
-  source          String    @default("USER_CREATED")
-  sourceId        String?   @db.Uuid
-  originalDueAt   DateTime
-  dueAt           DateTime
-  snoozedUntil    DateTime?
-  state           String    @default("UPCOMING")
-  recurrence      String    @default("ONCE")
-  intervalDays    Int?
-  completedAt     DateTime?
-  cancelledAt     DateTime?
-  notifiedAt      DateTime?
-  version         Int       @default(0)
-  parentId        String?   @db.Uuid
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                String    @id @default(uuid()) @db.Uuid
+  petId             String    @db.Uuid
+  pet               Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  createdByUserId   String    @db.Uuid
+  title             String
+  type              String
+  source            String    @default("USER_CREATED")
+  sourceId          String?   @db.Uuid
+  originalDueAt     DateTime
+  dueAt             DateTime
+  snoozedUntil      DateTime?
+  state             String    @default("UPCOMING")
+  recurrence        String    @default("ONCE")
+  intervalDays      Int?
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  notifiedAt        DateTime?
+  version           Int       @default(0)
+  parentId          String?   @db.Uuid
+  /// Shared care: who should do it (a member with care-edit access) and who actually did it.
+  assignedToUserId  String?   @db.Uuid
+  completedByUserId String?   @db.Uuid
+  skippedAt         DateTime?
+  /// recurrence WEEKDAYS: 0=Sunday … 6=Saturday, in Asia/Tehran.
+  weekdays          Int[]     @default([])
+  /// Series end: no occurrence after untilDate, and no more than maxOccurrences in total.
+  untilDate         DateTime?
+  maxOccurrences    Int?
+  occurrenceIndex   Int       @default(1)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@unique([parentId, originalDueAt])
   @@index([petId, dueAt])
@@ -9413,4 +9425,54 @@ model ClinicInvitation {
   @@index([providerOrganizationId, status])
   @@index([invitedUserId, status])
   @@map("clinic_invitations")
+}
+
+// ---------------------------------------------------------------------------
+// Pet safety: emergency info, owner-controlled share cards (emergency / QR ID)
+// ---------------------------------------------------------------------------
+
+/// Owner-entered emergency facts. Never inferred. Read by household members with identity access and, through a
+/// share card or an EMERGENCY_SNAPSHOT care-handoff scope, by people the owner explicitly chose.
+model PetEmergencyInfo {
+  id              String   @id @default(uuid()) @db.Uuid
+  petId           String   @unique @db.Uuid
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  contactName     String?
+  contactPhone    String?
+  contactRelation String?
+  bloodType       String?
+  criticalNotes   String?
+  updatedByUserId String   @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("pet_emergency_info")
+}
+
+enum PetShareCardKind {
+  /// Short-lived: identity + allergies/active conditions/active medications + emergency contact.
+  EMERGENCY
+  /// QR-ready identification for a tag/collar: identity + optional contact, never health. No expiry by default.
+  ID_TAG
+}
+
+/// A revocable public link for one pet. Only a SHA-256 of the token is stored; the raw token is shown once (create
+/// or rotate). At most one active card per (pet, kind) — creating a new one revokes the previous.
+model PetShareCard {
+  id              String           @id @default(uuid()) @db.Uuid
+  petId           String           @db.Uuid
+  pet             Pet              @relation(fields: [petId], references: [id], onDelete: Cascade)
+  kind            PetShareCardKind
+  tokenHash       String           @unique
+  tokenHint       String
+  includeContact  Boolean          @default(true)
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  createdByUserId String           @db.Uuid
+  lastAccessedAt  DateTime?
+  accessCount     Int              @default(0)
+  createdAt       DateTime         @default(now())
+
+  @@index([petId, kind])
+  @@map("pet_share_cards")
 }

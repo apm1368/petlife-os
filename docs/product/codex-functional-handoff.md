@@ -171,3 +171,50 @@
   - نوبت پیش‌رو: `ab0b906d-97f8-4216-8482-8c9dc63a573f`
 - **ویزیت بالینی** با علائم حیاتی: `9e631f8f-74cb-4aee-84e0-976afa095e2e`
 - **یادآور واکسن:** `3c7fc849-d14c-45f0-8149-a013de8103ff`
+
+---
+
+## ۶. پروفایل پت: ایمنی و کامل بودن (G1)
+- `GET /pets/:petId/completeness`: خروجی `{completedFields[], missingFields[], completionScore}`. کلیدهای ممکن:
+  - `photo`
+  - `species`
+  - `breed`
+  - `sex`
+  - `birthDate`
+  - `weight`
+  - `microchip`
+  - `emergencyContact`
+  - `vaccinationHistory`
+  - `medicalDocument`
+
+  امتیاز سمت سرور حساب می‌شود و UI نباید آن را خودش محاسبه کند.
+- **اطلاعات اضطراری:**
+  - `GET` و `PUT /pets/:petId/emergency-info` با فیلدهای `{contactName, contactPhone, contactRelation, bloodType, criticalNotes}`.
+  - برای ویرایش، `canEditIdentity` لازم است.
+- **کارت‌های اشتراکی** (`canManageAccess`):
+  - `GET`/`POST /pets/:petId/share-cards` با بدنهٔ `{kind: EMERGENCY|ID_TAG, expiresInHours?, includeContact?}`.
+  - توکن خام **فقط یک بار** در پاسخ ساختن کارت می‌آید: `token` و `publicPath: /pet-card/<token>`. برای QR از همین استفاده کنید.
+  - چرخش و ابطال: `POST …/share-cards/:id/rotate` و `/revoke`.
+  - `state` در فهرست کارت‌ها: `ACTIVE` | `EXPIRED` | `REVOKED`. `accessCount` و `lastAccessedAt` هم برگردانده می‌شوند.
+  - صفحهٔ عمومی `/{locale}/pet-card/:token` بدون ورود باز می‌شود، index نمی‌شود، و داده‌اش از API `GET /public/pet-cards/:token` می‌آید.
+  - EMERGENCY حساسیت‌ها، بیماری‌های فعال، داروهای فعال و تماس اضطراری را نشان می‌دهد. ID_TAG فقط هویت و `isReportedLost` را نشان می‌دهد و هیچ دادهٔ سلامتی ندارد.
+- **سپردن مراقبت** (`canManageAccess`):
+  - `GET`/`POST /pets/:petId/care-handoffs` با بدنهٔ `{email, scopes:[CARE|EMERGENCY_HEALTH|BOOKINGS], startsAt?, expiresAt}`؛ حداکثر ۳۰ روز.
+  - ابطال: `DELETE …/:grantId`.
+  - `state`: `UPCOMING` | `ACTIVE` | `EXPIRED` | `REVOKED`.
+  - گیرنده با `GET /me/care-handoffs` فهرست پت‌های سپرده‌شده را می‌بیند، و اگر scope `EMERGENCY_HEALTH` داشته باشد با `GET /pets/:petId/emergency-snapshot` خلاصهٔ اضطراری را.
+- **نقش‌ها:** نقش‌های خانوار (OWNER/FAMILY) به‌علاوهٔ دسترسی جدا برای هر پت از قبل وجود داشت. ADULT_MEMBER، CARETAKER و VIEW_ONLY همه با presetهای همان دسترسی پیاده‌شدنی هستند و مدل جدیدی لازم نبود.
+- **دادهٔ نمایشی:** پت اول `batch2-review@example.test`؛ کارت ID در `/fa/pet-card/demo-e230f78e021c492b8cecd9f2e001aef8`.
+
+## ۷. مراقبت: اتوماسیون بدون AI (G2)
+- **وضعیت‌ها:** `UPCOMING` | `DUE` | `OVERDUE` | `SNOOZED` | `COMPLETED` | `SKIPPED` | `CANCELLED`.
+- **اکشن‌ها:** `COMPLETE` | `SKIP` | `CANCEL` | `SNOOZE` | `RESCHEDULE`.
+  - SKIP یعنی این نوبت انجام نشد و نوبت بعدی ساخته می‌شود.
+  - تکمیل هم‌زمانِ دوباره رد می‌شود (۴۰۰).
+- **تکرار:** `ONCE` | `DAILY` | `WEEKLY` | `WEEKDAYS` (همراه `weekdays:[0..6]`، به وقت تهران) | `MONTHLY` | `YEARLY` | `CUSTOM` (همراه `intervalDays`). پایان سری با `untilDate` یا `maxOccurrences` تعیین می‌شود. `occurrenceIndex` شمارهٔ نوبت در سری است.
+- **مراقبت مشترک:** فیلدهای `assignedToUserId` (عضوی که دسترسی ویرایش مراقبت دارد) و `completedByUserId`. یادآور به فرد مسئول می‌رسد، و تخصیص هم اعلان `care.assigned` می‌فرستد.
+- **تاریخچه:** `GET /pets/:petId/care-items/history?page&pageSize`، که نام انجام‌دهنده را هم برمی‌گرداند.
+- **قالب‌ها:**
+  - `GET /care-templates` شش قالب را برمی‌گرداند. موارد با `confirmWithVet: true` باید در UI برچسب «با دامپزشک تأیید کنید» داشته باشند.
+  - `POST /pets/:petId/care-templates/apply` با `{templateKey, startAt, items:[{key, title?, recurrence?, intervalDays?, maxOccurrences?}]}` **فقط موارد تأییدشده** را می‌سازد.
+- **دادهٔ نمایشی:** پت اول `batch2-review@example.test`. شامل یک کار روزانه سپرده‌شده به «علی»، مسواک WEEKDAYS، دوره‌ی دارو (نوبت ۳ از ۷)، یک مورد OVERDUE، و تاریخچه‌ای با یک انجام‌شده و یک ردشده.

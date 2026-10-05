@@ -396,6 +396,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "عضویت در {{clinic}} پایان یافت", body: "دسترسی شما به پنل {{clinic}} برداشته شد." },
     en: { title: "Your access to {{clinic}} ended", body: "You no longer have access to {{clinic}}'s panel." },
   },
+  "care.assigned": {
+    fa: { title: "کار مراقبتی برای شما", body: "{{title}} برای {{petName}} به شما سپرده شد." },
+    en: { title: "Care task for you", body: "{{title}} for {{petName}} was assigned to you." },
+  },
+  "pet.care_handoff_granted": {
+    fa: { title: "سپردن مراقبت {{petName}}", body: "دسترسی موقت مراقبت از {{petName}} به شما داده شد." },
+    en: { title: "Care of {{petName}} handed to you", body: "You were given temporary care access to {{petName}}." },
+  },
   "clinic.message": {
     fa: { title: "پیام از {{clinic}}", body: "درباره‌ی {{petName}}: {{title}}" },
     en: { title: "Message from {{clinic}}", body: "About {{petName}}: {{title}}" },

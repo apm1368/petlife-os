@@ -25,7 +25,9 @@ export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
       const rows=await this.prisma.careReminder.findMany({where:{state:{notIn:["COMPLETED","CANCELLED"]},dueAt:{lte:new Date(now.getTime()+86400000)},AND:[{OR:[{notifiedAt:null},{dueAt:{lte:now},notifiedAt:{lt:this.prisma.careReminder.fields.dueAt}}]},{OR:[{snoozedUntil:null},{snoozedUntil:{lte:now}}]}]},include:{pet:{select:{name:true,householdId:true}}},take:100,orderBy:{dueAt:"asc"}});
       let count=0;
       for(const row of rows) {
-        const access=await this.access.getEffectivePermissions(row.petId,row.createdByUserId);
+        // Shared care: the assignee is reminded; otherwise whoever created it.
+        const recipient=row.assignedToUserId??row.createdByUserId;
+        const access=await this.access.getEffectivePermissions(row.petId,recipient);
         if(!access?.canViewCareProfile) continue;
         if(row.source !== "USER_CREATED" && !access.canViewHealth) continue;
         // Stable event identity makes concurrent workers/retries use H10's notification deduplication.
@@ -35,7 +37,7 @@ export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
         await this.prisma.domainEvent.upsert({where:{id},create:{id,type:"CareReminderDue",aggregateType:"Pet",aggregateId:row.petId,payload:{petId:row.petId,careItemId:row.id,type:row.type,dueAt:row.dueAt.toISOString()}},update:{}});
         const stillOpen=await this.prisma.careReminder.count({where:{id:row.id,version:row.version,state:{notIn:["COMPLETED","CANCELLED"]}}});
         if(!stillOpen) continue;
-        await this.notifications.notify({userId:row.createdByUserId,type:"health.reminder",category:"HEALTH",petId:row.petId,householdId:row.pet.householdId,deepLink:NotificationDeepLinks.careItem(row.petId,row.id),entityType:"CareReminder",entityId:row.id,domainEventId:id,templateParams:{petName:row.pet.name},metadata:{careType:row.type,phase,dueAt:row.dueAt.toISOString()}});
+        await this.notifications.notify({userId:recipient,type:"health.reminder",category:"HEALTH",petId:row.petId,householdId:row.pet.householdId,deepLink:NotificationDeepLinks.careItem(row.petId,row.id),entityType:"CareReminder",entityId:row.id,domainEventId:id,templateParams:{petName:row.pet.name},metadata:{careType:row.type,phase,dueAt:row.dueAt.toISOString()}});
         await this.prisma.careReminder.updateMany({where:{id:row.id,version:row.version},data:{notifiedAt:now}});
         count++;
       }

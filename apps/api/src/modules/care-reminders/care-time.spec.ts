@@ -1,4 +1,4 @@
-import { nextCareDate, visibleCareState } from "./care-time";
+import { nextCareDate, visibleCareState, nextOccurrence, tehranWeekday } from "./care-time";
 describe("Care time semantics", () => {
   const now = new Date("2026-09-26T20:30:00Z");
   it("keeps overdue care overdue without completing it", () => {
@@ -25,5 +25,23 @@ describe("Care time semantics", () => {
     expect(nextCareDate(now, "ONCE")).toBeNull();
     expect(() => nextCareDate(now, "CUSTOM")).toThrow();
     expect(nextCareDate(now, "CUSTOM", 3)?.toISOString()).toBe("2026-09-29T20:30:00.000Z");
+  });
+  it("treats SKIPPED as closed history", () => {
+    expect(visibleCareState({ state: "SKIPPED", dueAt: new Date(0), snoozedUntil: null }, now)).toBe("SKIPPED");
+  });
+  it("WEEKDAYS steps to the next chosen Tehran weekday", () => {
+    // 2026-10-03 is a Saturday; 20:30Z is Sunday 00:00 in Tehran.
+    const sat = new Date("2026-10-03T08:00:00Z");
+    expect(tehranWeekday(sat)).toBe(6);
+    expect(nextCareDate(sat, "WEEKDAYS", null, [1, 3])?.toISOString()).toBe("2026-10-05T08:00:00.000Z");
+    expect(nextCareDate(sat, "WEEKDAYS", null, [6])?.toISOString()).toBe("2026-10-10T08:00:00.000Z");
+    expect(() => nextCareDate(sat, "WEEKDAYS", null, [])).toThrow();
+  });
+  it("ends a series at its until date or occurrence count", () => {
+    const base = { dueAt: new Date("2026-10-01T08:00:00Z"), recurrence: "DAILY", intervalDays: null, weekdays: [], untilDate: null, maxOccurrences: null, occurrenceIndex: 1 };
+    expect(nextOccurrence(base)?.toISOString()).toBe("2026-10-02T08:00:00.000Z");
+    expect(nextOccurrence({ ...base, maxOccurrences: 3, occurrenceIndex: 3 })).toBeNull();
+    expect(nextOccurrence({ ...base, maxOccurrences: 3, occurrenceIndex: 2 })).not.toBeNull();
+    expect(nextOccurrence({ ...base, untilDate: new Date("2026-10-01T23:00:00Z") })).toBeNull();
   });
 });
