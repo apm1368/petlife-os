@@ -4986,6 +4986,14 @@ export interface PetFriendlyPlaceDto {
   leashRequired?: boolean | null;
   waterAvailable?: boolean | null;
   petArea?: boolean | null;
+  shadeAvailable?: boolean | null;
+  fencedArea?: boolean | null;
+  wasteBins?: boolean | null;
+  smallDogArea?: boolean | null;
+  parkingAvailable?: boolean | null;
+  /** IRR; 0 = free, null = unknown. */
+  entryFeeIrr?: number | null;
+  petFriendlyLevel?: "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null;
   openingHours?: { day: number; open: string; close: string }[] | null;
   province?: string | null;
 }

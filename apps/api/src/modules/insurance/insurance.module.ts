@@ -1,3 +1,5 @@
+import { ClaimPrepController } from "./claim-prep.controller";
+import { ClaimPrepService } from "./claim-prep.service";
 import { Module } from "@nestjs/common";
 import { PetAccessModule } from "../pet-access/pet-access.module";
 import { NotificationsModule } from "../notifications/notifications.module";
@@ -21,8 +23,8 @@ import { InsurerAuthGuard, InsurerPortalController } from "./insurer-portal.cont
  */
 @Module({
   imports: [PetAccessModule, NotificationsModule],
-  controllers: [InsuranceController, PublicInsuranceController, InsurerPortalController],
-  providers: [PublicInsuranceReadService, EligibilityService, InsuranceApplicationService, InsuranceNotificationListener, InsurerAuthGuard],
+  controllers: [ClaimPrepController, InsuranceController, PublicInsuranceController, InsurerPortalController],
+  providers: [ClaimPrepService, PublicInsuranceReadService, EligibilityService, InsuranceApplicationService, InsuranceNotificationListener, InsurerAuthGuard],
   exports: [PublicInsuranceReadService, EligibilityService, InsuranceApplicationService],
 })
 export class InsuranceModule {}

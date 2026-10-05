@@ -7362,6 +7362,8 @@ model Trip {
 
   requirements   TravelRequirement[]
   travelBookings TravelBooking[]
+  checklistItems TripChecklistItem[]
+  participants   TripParticipant[]
 
   @@index([householdId])
   @@index([petId])
@@ -7602,17 +7604,27 @@ enum PetFriendlyPlaceStatus {
 }
 
 model PetFriendlyPlace {
-  id             String                   @id @default(uuid()) @db.Uuid
+  id               String                   @id @default(uuid()) @db.Uuid
   /// Batch 5 — null means "not stated", never "no".
-  leashRequired  Boolean?
-  waterAvailable Boolean?
-  petArea        Boolean?
-  openingHours   Json?
-  province       String?
-  reports        PlaceReport[]
-  name           String
-  category       PetFriendlyPlaceCategory
-  description    String?
+  leashRequired    Boolean?
+  waterAvailable   Boolean?
+  petArea          Boolean?
+  /// Structured attributes (null = unknown; never inferred).
+  shadeAvailable   Boolean?
+  fencedArea       Boolean?
+  wasteBins        Boolean?
+  smallDogArea     Boolean?
+  parkingAvailable Boolean?
+  /// Entry fee in IRR; 0 = free, null = unknown.
+  entryFeeIrr      Int?
+  /// FULL (pets welcome everywhere), PARTIAL (some areas), OUTDOOR_ONLY.
+  petFriendlyLevel String?
+  openingHours     Json?
+  province         String?
+  reports          PlaceReport[]
+  name             String
+  category         PetFriendlyPlaceCategory
+  description      String?
 
   country String
   city    String
@@ -9684,4 +9696,104 @@ model ClinicImportedContact {
 
   @@index([providerOrganizationId])
   @@map("clinic_imported_contacts")
+}
+
+// ---------------------------------------------------------------------------
+// Places suggestions, trip checklist/participants, insurance claim preparation
+// ---------------------------------------------------------------------------
+
+enum PlaceSuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A member suggests a new pet-friendly place. Nothing becomes public until an admin approves it; approval creates
+/// an UNVERIFIED, unlisted place the admin can then complete and list.
+model PlaceSuggestion {
+  id                String                   @id @default(uuid()) @db.Uuid
+  userId            String                   @db.Uuid
+  name              String
+  category          PetFriendlyPlaceCategory
+  city              String
+  address           String?
+  latitude          Float?
+  longitude         Float?
+  notes             String?
+  status            PlaceSuggestionStatus    @default(PENDING)
+  reviewedByAdminId String?                  @db.Uuid
+  reviewNote        String?
+  createdPlaceId    String?                  @db.Uuid
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@map("place_suggestions")
+}
+
+/// The member's own packing/preparation list for a trip (documents stay in TravelRequirement).
+model TripChecklistItem {
+  id        String    @id @default(uuid()) @db.Uuid
+  tripId    String    @db.Uuid
+  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  label     String
+  category  String    @default("OTHER")
+  done      Boolean   @default(false)
+  doneAt    DateTime?
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([tripId])
+  @@map("trip_checklist_items")
+}
+
+/// Extra pets and household members on a trip (the trip's own petId stays the primary pet).
+model TripParticipant {
+  id        String   @id @default(uuid()) @db.Uuid
+  tripId    String   @db.Uuid
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  petId     String?  @db.Uuid
+  userId    String?  @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@unique([tripId, petId])
+  @@unique([tripId, userId])
+  @@map("trip_participants")
+}
+
+enum ClaimPrepStatus {
+  DRAFT
+  READY
+}
+
+/// A folder the owner assembles for a future insurance claim. Nothing is ever sent to an insurer from here.
+model InsuranceClaimPrep {
+  id              String                   @id @default(uuid()) @db.Uuid
+  petId           String                   @db.Uuid
+  householdId     String                   @db.Uuid
+  createdByUserId String                   @db.Uuid
+  title           String
+  incidentDate    DateTime?                @db.Date
+  notes           String?
+  status          ClaimPrepStatus          @default(DRAFT)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  items           InsuranceClaimPrepItem[]
+
+  @@index([petId])
+  @@map("insurance_claim_preps")
+}
+
+model InsuranceClaimPrepItem {
+  id          String             @id @default(uuid()) @db.Uuid
+  claimPrepId String             @db.Uuid
+  claimPrep   InsuranceClaimPrep @relation(fields: [claimPrepId], references: [id], onDelete: Cascade)
+  /// MEDICAL_DOCUMENT or BOOKING — always of the same pet.
+  kind        String
+  refId       String             @db.Uuid
+  createdAt   DateTime           @default(now())
+
+  @@unique([claimPrepId, kind, refId])
+  @@map("insurance_claim_prep_items")
 }

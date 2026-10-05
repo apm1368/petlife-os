@@ -39,6 +39,9 @@ export class PublicPlacesReadService {
       city: query.city,
       category: query.category,
       speciesAllowed: query.species ? { has: query.species } : undefined,
+      ...(query.fencedArea === "true" ? { fencedArea: true } : {}),
+      ...(query.smallDogArea === "true" ? { smallDogArea: true } : {}),
+      ...(query.free === "true" ? { entryFeeIrr: 0 } : {}),
     };
     const [rows, total] = await Promise.all([
       this.prisma.petFriendlyPlace.findMany({ where, orderBy: { name: "asc" }, skip, take }),

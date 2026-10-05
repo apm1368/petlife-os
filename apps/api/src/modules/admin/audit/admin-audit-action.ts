@@ -88,6 +88,8 @@ export type AdminAuditAction =
   | "insurance_product.verification_changed"
   | "insurance_product.listed_changed"
   | "pet_friendly_place.created"
+  | "place_suggestion.approved"
+  | "place_suggestion.rejected"
   | "pet_friendly_place.updated"
   | "pet_friendly_place.verification_changed"
   | "pet_friendly_place.listed_changed"

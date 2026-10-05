@@ -299,3 +299,29 @@
   - برچسب‌های VIP، «پیگیری» و «پیگیری پرداخت»؛
   - سه کار: یکی overdue، یکی باز، یکی انجام‌شده؛
   - دو مخاطب واردشده.
+
+## ۱۱. سفر، مکان‌ها و بیمه (G6)
+- **ویژگی‌های مکان:** فیلدهای `shadeAvailable`، `fencedArea`، `wasteBins`، `smallDogArea`، `parkingAvailable`، `entryFeeIrr` (۰ یعنی رایگان، null یعنی نامعلوم) و `petFriendlyLevel` (`FULL` | `PARTIAL` | `OUTDOOR_ONLY`).
+  - null همیشه یعنی «نامعلوم» و نباید «ندارد» نمایش داده شود.
+  - فیلتر فهرست مکان‌ها: `GET /places?fencedArea=true&smallDogArea=true&free=true`.
+- **پیشنهاد مکان جدید:**
+  - صاحب پت: `POST /place-suggestions` با `{name, category, city, address?, latitude?, longitude?, notes?}`، و `GET /place-suggestions/mine`.
+  - ادمین: `GET /admin/place-suggestions?status` و `POST …/:id/approve|reject` با `{note?}`.
+  - تأیید پیشنهاد، مکان را **تأییدنشده و غیرعمومی** می‌سازد. برای عمومی شدن، ادمین باید آن را تکمیل و منتشر کند.
+  - اصلاح یا گزارش بسته شدن مکان موجود، همچنان از مسیر `POST /places/:id/reports` انجام می‌شود.
+- **چک‌لیست سفر:**
+  - `GET`/`POST /pets/:petId/trips/:tripId/checklist` با `{label, category}`.
+  - `POST …/checklist/defaults` شش مورد پیشنهادی را فقط یک بار اضافه می‌کند.
+  - `PATCH …/checklist/:itemId` با `{done}` و `DELETE`.
+  - categoryها: `DOCUMENTS` | `MEDICATION` | `FOOD` | `CARRIER` | `BOOKING` | `EMERGENCY` | `OTHER`.
+  - مدارک رسمی سفر همچنان در requirements هستند و مدرک پزشکی به آن‌ها لینک می‌شود.
+- **همراهان سفر:**
+  - `GET`/`POST …/participants` با `{petId}` یا `{userId}`، فقط از اعضای همان خانوار؛ و `DELETE …/participants/:id`.
+  - خروجی: `{primaryPet, pets[], members[]}`.
+- **پوشهٔ آماده‌سازی ادعای بیمه:**
+  - `GET`/`POST /pets/:petId/claim-preps` با `{title, incidentDate?, notes?}`.
+  - `POST …/:id/items` با `{kind: MEDICAL_DOCUMENT|BOOKING, refId}`، فقط از همان پت.
+  - `PATCH …/:id` با `{status: DRAFT|READY}`.
+  - همیشه `submission: "NOT_AVAILABLE"` است و چیزی برای بیمه‌گر ارسال نمی‌شود.
+- **از قبل موجود بود:** آمادگی سفر، پاسپورت پت، مقایسهٔ بیمه (پوشش، فرانشیز، سقف سالانه، دورهٔ انتظار، گونه و سن)، و چرخهٔ عمر درخواست بیمه.
+- **دادهٔ نمایشی:** سفر تهران به رامسر با چک‌لیست ۴ موردی (یکی انجام‌شده)، یک پیشنهاد مکان در انتظار، یک پوشهٔ ادعا، و ویژگی‌های پارک‌ها.

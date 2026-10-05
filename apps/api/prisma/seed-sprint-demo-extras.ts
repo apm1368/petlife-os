@@ -229,6 +229,16 @@ async function main() {
     await care("skipped-1", { title: "کنترل وزن", type: "WEIGHT_CHECK", dueAt: careAt(-3), originalDueAt: careAt(-3), state: "SKIPPED", skippedAt: careAt(-3), completedByUserId: rich.id });
     await care("overdue-1", { title: "ضدکک و کنه", type: "PARASITE_PREVENTION", dueAt: careAt(-2), originalDueAt: careAt(-2), recurrence: "MONTHLY" });
 
+    // ---------------------------------------------------------------- Places attributes, a suggestion, trip checklist, claim prep
+    await db.petFriendlyPlace.updateMany({ where: { isPubliclyListed: true, category: "PARK", fencedArea: null }, data: { fencedArea: true, shadeAvailable: true, wasteBins: true, entryFeeIrr: 0, petFriendlyLevel: "FULL" } });
+    await db.placeSuggestion.upsert({ where: { id: id("suggestion") }, create: { id: id("suggestion"), userId: rich.id, name: "پارک ساحلی سگ‌ها (پیشنهاد نمایشی)", category: "PARK", city: "رشت", latitude: 37.28, longitude: 49.59, notes: "محوطه‌ی محصور و سایه‌دار" }, update: {} });
+    const trip = await db.trip.upsert({ where: { id: id("trip") }, create: { id: id("trip"), householdId: richHome.householdId, petId: richPet.id, createdByUserId: rich.id, originCountry: "IR", originCity: "تهران", destinationCountry: "IR", destinationCity: "رامسر", departAt: new Date(Date.now() + 21 * DAY), returnAt: new Date(Date.now() + 25 * DAY), travelMode: "ROAD" }, update: {} });
+    const checklist: [string, string, boolean][] = [["DOCUMENTS", "کارت واکسن و شناسنامه‌ی پت", true], ["FOOD", "غذا برای ۵ روز", false], ["CARRIER", "باکس حمل", false], ["EMERGENCY", "شماره‌ی دامپزشک رامسر", false]];
+    for (const [i, [category, label, done]] of checklist.entries()) {
+      await db.tripChecklistItem.upsert({ where: { id: id(`trip:item:${i}`) }, create: { id: id(`trip:item:${i}`), tripId: trip.id, category, label, done, doneAt: done ? new Date() : null, sortOrder: i }, update: {} });
+    }
+    await db.insuranceClaimPrep.upsert({ where: { id: id("claim-prep") }, create: { id: id("claim-prep"), petId: richPet.id, householdId: richHome.householdId, createdByUserId: rich.id, title: "جراحی پای عقب (پوشه‌ی نمایشی)", incidentDate: new Date(Date.now() - 20 * DAY), notes: "فاکتور و گزارش جراحی برای ادعای بعدی." }, update: {} });
+
     console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care.`);
   } finally {
     await app.close();

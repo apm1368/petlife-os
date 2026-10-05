@@ -1,3 +1,5 @@
+import { TripExtrasController } from "./trip-extras.controller";
+import { TripExtrasService } from "./trip-extras.service";
 import { Module } from "@nestjs/common";
 import { PetAccessModule } from "../pet-access/pet-access.module";
 import { TripService } from "./trip.service";
@@ -7,8 +9,8 @@ import { TravelController } from "./travel.controller";
 
 @Module({
   imports: [PetAccessModule],
-  controllers: [TravelController],
-  providers: [TripService, TravelRequirementService, PetPassportReadinessService],
+  controllers: [TravelController, TripExtrasController],
+  providers: [TripExtrasService, TripService, TravelRequirementService, PetPassportReadinessService],
   exports: [TripService, TravelRequirementService, PetPassportReadinessService],
 })
 export class TravelModule {}
