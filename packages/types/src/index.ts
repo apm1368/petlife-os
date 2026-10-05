@@ -2300,6 +2300,8 @@ export interface NotificationDto {
   deepLink: string | null;
   entityType: string | null;
   entityId: string | null;
+  /** Member-facing group (HEALTH, CARE, BOOKING, ORDER, TRAVEL, COMMUNITY, SUPPORT, CLINIC, SUBSCRIPTION, SECURITY, OTHER). */
+  group?: string;
   createdAt: string;
   readAt: string | null;
   dismissedAt: string | null;

@@ -61,6 +61,7 @@ import { ClinicOsModule } from "./modules/clinic-os/clinic-os.module";
 import { PetSafetyModule } from "./modules/pet-safety/pet-safety.module";
 import { ServiceIntakeModule } from "./modules/service-intake/service-intake.module";
 import { PlaceSuggestionsModule } from "./modules/place-suggestions/place-suggestions.module";
+import { ActivityModule } from "./modules/activity/activity.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
 import { CommunityModule } from "./modules/community/community.module";
@@ -133,6 +134,7 @@ import { PlacesModule } from "./modules/places/places.module";
     PetSafetyModule,
     ServiceIntakeModule,
     PlaceSuggestionsModule,
+    ActivityModule,
     LostPetModule,
     AnimalSupportModule,
     CommunityModule,

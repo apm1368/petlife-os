@@ -29,9 +29,8 @@ interface PlanChangedPayload {
  * name in their own locale rather than a single hardcoded language, mirroring
  * next-intl's own fa/en split elsewhere in this codebase.
  *
- * Deliberately NOT implemented: `subscription.trial_ending` /
- * `subscription.renewal_upcoming` (both in the spec's "potential events"
- * list) — `SubscriptionRenewalWorkerService` only acts once a period's
+ * `subscription.trial_ending` is sent by TrialEndingNotifier (2 days ahead, once per trial).
+ * Deliberately NOT implemented: `subscription.renewal_upcoming` — `SubscriptionRenewalWorkerService` only acts once a period's
  * `endAt` has actually passed, never proactively N days ahead (see that
  * worker's own doc comment), so there is no proactive point in time to fire
  * either "ending soon" notification without adding new proactive-scheduling

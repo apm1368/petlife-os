@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Headers, Param, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Headers, Param, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
+import { ValidationApiException } from "../../common/errors/api-exception";
+import { SubscriptionInsightService } from "./subscription-insight.service";
 import { SubscriptionBillingReason } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { HouseholdOwnerGuard } from "../../common/auth/household-owner.guard";
@@ -35,6 +37,7 @@ export class SubscriptionController {
     private readonly entitlements: EntitlementService,
     private readonly plans: SubscriptionPlanReadService,
     private readonly prisma: PrismaService,
+    private readonly insight: SubscriptionInsightService,
   ) {}
 
   @Get()
@@ -46,6 +49,19 @@ export class SubscriptionController {
   @Get("plans")
   getPlans(@Param("householdId") householdId: string) {
     return resolveHouseholdCountry(this.prisma, householdId).then((countryCode) => this.plans.listForCountry(countryCode));
+  }
+
+  /** Server-derived summary: status, plan, trial (with daysRemaining), renewalAt, usage vs limits. */
+  @Get("summary")
+  getSummary(@Param("householdId") householdId: string) {
+    return this.insight.summary(householdId);
+  }
+
+  /** What a move to ?planCode= would change. Read-only; a downgrade never deletes data. */
+  @Get("downgrade-preview")
+  downgradePreview(@Param("householdId") householdId: string, @Query("planCode") planCode: string) {
+    if (!planCode || !/^[A-Za-z0-9_-]{1,64}$/.test(planCode)) throw new ValidationApiException({ field: "planCode" });
+    return this.insight.downgradePreview(householdId, planCode);
   }
 
   @Get("entitlements")

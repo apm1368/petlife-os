@@ -402,3 +402,62 @@
   - برای `batch2-review@example.test`: یک گفت‌وگوی بی‌صدا (فرستندهٔ مشکوک) و یک گفت‌وگوی «حذف برای خودم» (با «مینا»).
   - برای `clinic-demo-customer@example.test`: یک گفت‌وگوی بایگانی‌شده.
   - دو بازخورد روی راهنمای `dog-vaccination-schedule`.
+
+## ۱۵. اعلان‌ها، فعالیت و اشتراک (G9)
+- **گروه اعلان:**
+  - هر اعلان فیلد `group` دارد. مقدارهای ممکن:
+    - `HEALTH`
+    - `CARE`
+    - `BOOKING`
+    - `ORDER`
+    - `TRAVEL`
+    - `COMMUNITY`
+    - `SUPPORT`
+    - `CLINIC`
+    - `SUBSCRIPTION`
+    - `SECURITY`
+    - `OTHER`
+  - گروه از روی دسته و نوع اعلان ساخته می‌شود و دسته‌های ذخیره‌شده تغییر نکرده‌اند. مثلاً یادآورهای مراقبت در گروه CARE و پیام‌های کلینیک در CLINIC قرار می‌گیرند.
+  - فیلتر: `GET /notifications?group=CARE`.
+- **خواندن گروهی:**
+  - `POST /notifications/read-all` همهٔ اعلان‌ها را خوانده می‌کند. نسخهٔ `?group=` فقط یک گروه را.
+  - `POST /notifications/groups/read` با `{groupKey}`.
+  - همه فقط روی اعلان‌های خود کاربر اثر دارند.
+- **گروه‌بندی سمت سرور:** `GET /notifications/grouped`
+  - خروجی: `[{groupKey, group, type, entityType, entityId, groupCount, unreadCount, latestAt, title, body, deepLink, notificationIds}]`.
+  - فقط اعلان‌های هم‌نوع دربارهٔ یک موجودیت با هم ادغام می‌شوند؛ مثلاً ۳ پیام در یک گفت‌وگو.
+  - UI نباید خودش گروه‌بندی کند.
+- **ترجیح دریافت:**
+  - `GET`/`PUT /notification-preferences/digest` با `{group, mode: INSTANT|DAILY|OFF}`.
+  - `deliveryStatus: "STORED_ONLY"`: ترجیح فقط ذخیره می‌شود، چون کانال ارسال خلاصهٔ روزانه هنوز وجود ندارد. UI باید همین را صادقانه بگوید.
+- **خلاصهٔ اشتراک:** `GET /households/:id/subscription/summary`. خروجی:
+  - `status` و `plan`؛
+  - `trial: {startsAt, endsAt, daysRemaining}` (سمت سرور حساب می‌شود)؛
+  - `renewalAt` و `cancelEffectiveAt`؛
+  - `usage[]` به شکل `{key, used, limit, remaining}`.
+- **پیش‌نمایش کاهش پلن:** `GET /households/:id/subscription/downgrade-preview?planCode=`. خروجی:
+  - `overLimitResources[]` به شکل `{resource, usage, targetLimit, behavior: EXISTING_READABLE_NEW_CREATION_BLOCKED}`؛
+  - `lostFeatures[]` با `behavior: FEATURE_UNAVAILABLE_EXISTING_DATA_KEPT`؛
+  - `dataDeleted: false`.
+- **فید فعالیت خانوار:** `GET /households/:id/activity?cursor&limit` (جدیدترین اول؛ صفحهٔ بعد با `nextCursor`).
+  - هر آیتم: `{id, kind, messageKey: "activity.<KIND>", entityType, entityId, petId, petName, occurredAt, deepLink, actor: {displayName, isMe} | null}`.
+  - kindها:
+    - `PET_ADDED`
+    - `PET_UPDATED`
+    - `MEMORY_ADDED`
+    - `TRIP_CREATED`
+    - `CARE_HANDOFF_GRANTED`
+    - `SHARE_CARD_CREATED`
+    - `CARE_COMPLETED`
+    - `DOCUMENT_ADDED`
+    - `HEALTH_RECORD_ADDED`
+    - `VISIT_COMPLETED`
+    - `BOOKING_CONFIRMED`
+    - `BOOKING_COMPLETED`
+  - فیلتر دسترسی برای هر پت جدا اعمال می‌شود: موارد سلامت فقط برای کسی که `canViewHealth` دارد نمایش داده می‌شوند و موارد مراقبت فقط برای کسی که `canViewCareProfile` دارد.
+  - اطلاعات ادمین، مالی، امنیتی، یادداشت‌های داخلی کلینیک و محتوای چت هرگز در فید نمی‌آیند.
+- **اتوماسیون‌ها** (هر کدام فقط یک بار ارسال می‌شود):
+  - `subscription.trial_ending`: ۲ روز پیش از پایان دورهٔ آزمایشی.
+  - `booking.review_invite`: بعد از تکمیل نوبت.
+  - `travel.trip_approaching`: ۳ روز پیش از سفر، همراه تعداد موارد باز چک‌لیست.
+- **دادهٔ نمایشی:** چهار رویداد فعالیت (خاطره، انجام مراقبت توسط «علی»، حساسیت، به‌روزرسانی پروفایل) برای پت اول `batch2-review@example.test`.

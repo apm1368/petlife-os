@@ -134,6 +134,14 @@ export class NotificationEventsListener {
     }
   }
 
+  /** A completed booking is now reviewable — the customer is invited once (deduped on the domain event). */
+  @OnEvent("BookingCompleted")
+  onBookingCompleted(payload: BookingEventPayload, domainEventId: string): Promise<void> {
+    return this.safely("BookingCompleted", async () => {
+      await this.notifyCustomer(payload, "booking.review_invite", domainEventId);
+    });
+  }
+
   @OnEvent("ServiceBookingRequested")
   onBookingRequested(payload: BookingEventPayload, domainEventId: string): Promise<void> {
     return this.safely("ServiceBookingRequested", async () => {

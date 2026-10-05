@@ -9911,3 +9911,15 @@ model ArticleFeedback {
   @@index([articleId])
   @@map("article_feedback")
 }
+
+/// Per-group delivery cadence the member chose. Stored only: no digest is sent until an email/digest channel
+/// exists (BLOCKED_EXTERNAL), and in-app delivery keeps its own on/off preference.
+model NotificationDigestPreference {
+  userId    String   @db.Uuid
+  group     String
+  mode      String   @default("INSTANT")
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, group])
+  @@map("notification_digest_preferences")
+}

@@ -260,6 +260,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "اشتراک شما فعال شد", body: "اشتراک {{planName}} برای خانواده شما فعال شد." },
     en: { title: "Your subscription is active", body: "Your household is now on the {{planName}} plan." },
   },
+  "subscription.trial_ending": {
+    fa: { title: "دوره‌ی آزمایشی رو به پایان است", body: "دوره‌ی آزمایشی {{planName}} تا {{days}} روز دیگر تمام می‌شود." },
+    en: { title: "Your trial is ending", body: "Your {{planName}} trial ends in {{days}} day(s)." },
+  },
   "subscription.trial_started": {
     fa: { title: "دوره آزمایشی شما شروع شد", body: "دوره آزمایشی {{planName}} برای خانواده شما فعال شد." },
     en: { title: "Your trial has started", body: "Your household's {{planName}} trial is now active." },
@@ -407,6 +411,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "clinic.appointment_assigned": {
     fa: { title: "نوبت به شما سپرده شد", body: "یک نوبت {{service}} به شما تخصیص داده شد." },
     en: { title: "Appointment assigned to you", body: "A {{service}} appointment was assigned to you." },
+  },
+  "travel.trip_approaching": {
+    fa: { title: "سفر {{petName}} نزدیک است", body: "سفر به {{destination}} چند روز دیگر است؛ {{open}} مورد از چک‌لیست باز مانده." },
+    en: { title: "{{petName}}'s trip is coming up", body: "The trip to {{destination}} is in a few days; {{open}} checklist item(s) still open." },
+  },
+  "booking.review_invite": {
+    fa: { title: "خدمت انجام شد", body: "تجربه‌تان را با یک امتیاز و چند کلمه ثبت کنید." },
+    en: { title: "Your booking is complete", body: "Share how it went with a rating and a few words." },
   },
   "booking.ride_arriving": {
     fa: { title: "راننده در راه است", body: "{{provider}} به محل سوار شدن نزدیک می‌شود." },

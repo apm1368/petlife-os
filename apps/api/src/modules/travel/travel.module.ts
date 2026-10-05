@@ -1,3 +1,5 @@
+import { NotificationsModule } from "../notifications/notifications.module";
+import { TripReminderNotifier } from "./trip-reminder.notifier";
 import { TripExtrasController } from "./trip-extras.controller";
 import { TripExtrasService } from "./trip-extras.service";
 import { Module } from "@nestjs/common";
@@ -8,9 +10,9 @@ import { PetPassportReadinessService } from "./pet-passport-readiness.service";
 import { TravelController } from "./travel.controller";
 
 @Module({
-  imports: [PetAccessModule],
+  imports: [PetAccessModule, NotificationsModule],
   controllers: [TravelController, TripExtrasController],
-  providers: [TripExtrasService, TripService, TravelRequirementService, PetPassportReadinessService],
+  providers: [TripReminderNotifier, TripExtrasService, TripService, TravelRequirementService, PetPassportReadinessService],
   exports: [TripService, TravelRequirementService, PetPassportReadinessService],
 })
 export class TravelModule {}

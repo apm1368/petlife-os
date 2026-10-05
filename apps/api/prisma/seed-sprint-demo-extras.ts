@@ -261,6 +261,14 @@ async function main() {
     await care("skipped-1", { title: "کنترل وزن", type: "WEIGHT_CHECK", dueAt: careAt(-3), originalDueAt: careAt(-3), state: "SKIPPED", skippedAt: careAt(-3), completedByUserId: rich.id });
     await care("overdue-1", { title: "ضدکک و کنه", type: "PARASITE_PREVENTION", dueAt: careAt(-2), originalDueAt: careAt(-2), recurrence: "MONTHLY" });
 
+    // Activity feed: a few real-shaped events for the rich household's pet (deterministic ids; read by /activity).
+    const ev = (key: string, type: string, payload: Record<string, unknown>, hoursAgo: number) =>
+      db.domainEvent.upsert({ where: { id: id(`event:${key}`) }, create: { id: id(`event:${key}`), type, aggregateType: "Pet", aggregateId: richPet.id, payload: { petId: richPet.id, ...payload } as never, occurredAt: new Date(Date.now() - hoursAgo * 3600e3), processedAt: new Date() }, update: {} });
+    await ev("memory", "PetMemoryAdded", { householdId: richHome.householdId, memoryId: id("memory"), type: "MILESTONE" }, 30);
+    await ev("care-done", "CareReminderCompleted", { careItemId: id("care:done-1"), actorUserId: helperMember.id, action: "COMPLETE" }, 20);
+    await ev("allergy", "AllergyAdded", { allergyId: id("allergy") }, 10);
+    await ev("profile", "PetProfileUpdated", {}, 2);
+
     // ---------------------------------------------------------------- Places attributes, a suggestion, trip checklist, claim prep
     await db.petFriendlyPlace.updateMany({ where: { isPubliclyListed: true, category: "PARK", fencedArea: null }, data: { fencedArea: true, shadeAvailable: true, wasteBins: true, entryFeeIrr: 0, petFriendlyLevel: "FULL" } });
     await db.placeSuggestion.upsert({ where: { id: id("suggestion") }, create: { id: id("suggestion"), userId: rich.id, name: "پارک ساحلی سگ‌ها (پیشنهاد نمایشی)", category: "PARK", city: "رشت", latitude: 37.28, longitude: 49.59, notes: "محوطه‌ی محصور و سایه‌دار" }, update: {} });
