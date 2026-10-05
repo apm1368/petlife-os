@@ -29,6 +29,8 @@ const PUBLIC_GET = new Set([
   "/animal-support/campaigns/:campaignId/updates",
   "/animal-support/needs/:listingId",
   "/animal-support/needs/:listingId/summary",
+  "/animal-support/needs/:listingId/updates",
+  "/animal-support/needs/:listingId/milestones",
   "/animal-support/organizations/:organizationId",
   "/animal-support/rescue-cases/:rescueCaseId",
   "/community/posts/:postId",
@@ -64,6 +66,12 @@ const OWN_ACTION = new Set([
   "DELETE /shop/products/:id/favorite",
   "PUT /providers/:providerId/favorite",
   "DELETE /providers/:providerId/favorite",
+  "POST /animal-support/needs/:listingId/save",
+  "DELETE /animal-support/needs/:listingId/save",
+  "POST /animal-support/organizations/:organizationId/follow",
+  "DELETE /animal-support/organizations/:organizationId/follow",
+  "POST /animal-support/organizations/:organizationId/volunteer",
+  "DELETE /animal-support/organizations/:organizationId/volunteer",
 ]);
 
 const PARAM_ALIASES: Record<string, string[]> = {

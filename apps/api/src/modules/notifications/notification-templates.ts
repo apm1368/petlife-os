@@ -428,6 +428,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "پیام از {{clinic}}", body: "درباره‌ی {{petName}}: {{title}}" },
     en: { title: "Message from {{clinic}}", body: "About {{petName}}: {{title}}" },
   },
+  "animal_support.need_update": {
+    fa: { title: "خبر تازه از «{{title}}»", body: "یک به‌روزرسانی برای نیازی که دنبال می‌کنید منتشر شد." },
+    en: { title: "Update on “{{title}}”", body: "There's a new update on a need you follow." },
+  },
+  "animal_support.volunteer_interest": {
+    fa: { title: "داوطلب تازه", body: "کسی برای کمک داوطلبانه به {{organization}} اعلام آمادگی کرد." },
+    en: { title: "New volunteer", body: "Someone offered to volunteer with {{organization}}." },
+  },
   "animal_support.offer_received": {
     fa: { title: "پیشنهاد کمک تازه", body: "برای «{{title}}» یک پیشنهاد کمک رسید. آن را بررسی کنید." },
     en: { title: "New help offer", body: "Someone offered help for “{{title}}”. Review the offer." },

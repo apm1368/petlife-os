@@ -93,6 +93,12 @@ async function main() {
     await db.supportNeedListing.update({ where: { id: ids["mixed"]! }, data: { status: "PARTIALLY_FULFILLED", fulfilledQuantity: 4 } });
     await db.supportNeedListing.update({ where: { id: ids["fulfilled"]! }, data: { status: "FULFILLED", fulfilledQuantity: 5, fulfilledAt: new Date() } });
 
+    // Engagement: a progress update, a follower, a saved need and volunteer interest.
+    await db.supportNeedUpdate.upsert({ where: { id: id("need-update") }, create: { id: id("need-update"), listingId: ids["cash-only"]!, authorUserId: donor.id, body: "رعنا امروز جراحی شد و حالش خوب است. ممنون از همه‌ی حامیان (به‌روزرسانی نمایشی)." }, update: {} });
+    await db.animalSupportOrgFollow.upsert({ where: { userId_organizationId: { userId: helperA.id, organizationId: campaign.organizationId } }, create: { userId: helperA.id, organizationId: campaign.organizationId }, update: {} });
+    await db.supportNeedBookmark.upsert({ where: { userId_listingId: { userId: helperB.id, listingId: ids["mixed"]! } }, create: { userId: helperB.id, listingId: ids["mixed"]! }, update: {} });
+    await db.volunteerInterest.upsert({ where: { userId_organizationId: { userId: helperB.id, organizationId: campaign.organizationId } }, create: { userId: helperB.id, organizationId: campaign.organizationId, kinds: ["TRANSPORT", "DELIVERY"], city: "تهران", availability: "آخر هفته‌ها", shareContact: true }, update: {} });
+
     // ---------------------------------------------------------------- Pet taxi
     const customer = await db.user.findUniqueOrThrow({ where: { email: "clinic-demo-customer@example.test" } });
     const membership = await db.householdMember.findFirstOrThrow({ where: { userId: customer.id, role: "OWNER" } });

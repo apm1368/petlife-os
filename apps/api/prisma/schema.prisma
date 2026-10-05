@@ -6610,6 +6610,8 @@ model AnimalSupportOrganization {
   donationTransactions       DonationTransaction[]
   supportNeedListings        SupportNeedListing[]
   memberships                AnimalSupportOrgMembership[]
+  followers                  AnimalSupportOrgFollow[]
+  volunteerInterests         VolunteerInterest[]
 
   /// Batch 6 — organization-submitted verification: when submitted, the reviewer's note back to
   /// the organization, and private document keys (never public; admins read them via signed URLs).
@@ -6848,6 +6850,8 @@ model SupportNeedListing {
   updatedAt DateTime @updatedAt
 
   helpOffers HelpOffer[]
+  updates    SupportNeedUpdate[]
+  savedBy    SupportNeedBookmark[]
 
   @@index([status, publishedAt])
   @@index([category])
@@ -9796,4 +9800,70 @@ model InsuranceClaimPrepItem {
 
   @@unique([claimPrepId, kind, refId])
   @@map("insurance_claim_prep_items")
+}
+
+// ---------------------------------------------------------------------------
+// Animal support depth: need updates, follows, saved needs, volunteer interest
+// ---------------------------------------------------------------------------
+
+/// A progress note on one need, posted by whoever manages the listing.
+model SupportNeedUpdate {
+  id           String             @id @default(uuid()) @db.Uuid
+  listingId    String             @db.Uuid
+  listing      SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  authorUserId String             @db.Uuid
+  body         String
+  removedAt    DateTime?
+  createdAt    DateTime           @default(now())
+
+  @@index([listingId, createdAt])
+  @@map("support_need_updates")
+}
+
+model AnimalSupportOrgFollow {
+  userId         String                    @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime                  @default(now())
+
+  @@id([userId, organizationId])
+  @@index([organizationId])
+  @@map("animal_support_org_follows")
+}
+
+model SupportNeedBookmark {
+  userId    String             @db.Uuid
+  listingId String             @db.Uuid
+  listing   SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime           @default(now())
+
+  @@id([userId, listingId])
+  @@map("support_need_bookmarks")
+}
+
+enum VolunteerInterestStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+/// Non-financial help a member offers an organisation (interest only — no scheduling). Contact details are shared
+/// with the organisation only when the member opts in.
+model VolunteerInterest {
+  id             String                    @id @default(uuid()) @db.Uuid
+  userId         String                    @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  kinds          String[]
+  city           String
+  availability   String?
+  note           String?
+  shareContact   Boolean                   @default(false)
+  status         VolunteerInterestStatus   @default(NEW)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, status])
+  @@map("volunteer_interests")
 }

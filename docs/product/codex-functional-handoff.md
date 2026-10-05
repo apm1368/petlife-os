@@ -325,3 +325,29 @@
   - همیشه `submission: "NOT_AVAILABLE"` است و چیزی برای بیمه‌گر ارسال نمی‌شود.
 - **از قبل موجود بود:** آمادگی سفر، پاسپورت پت، مقایسهٔ بیمه (پوشش، فرانشیز، سقف سالانه، دورهٔ انتظار، گونه و سن)، و چرخهٔ عمر درخواست بیمه.
 - **دادهٔ نمایشی:** سفر تهران به رامسر با چک‌لیست ۴ موردی (یکی انجام‌شده)، یک پیشنهاد مکان در انتظار، یک پوشهٔ ادعا، و ویژگی‌های پارک‌ها.
+
+## ۱۲. حمایت از حیوانات: تعامل (G7)
+- **به‌روزرسانی هر نیاز:**
+  - عمومی: `GET /animal-support/needs/:id/updates`.
+  - مدیر نیاز: `POST …/updates` با `{body}` و `DELETE …/updates/:updateId`.
+  - به‌روزرسانی برای این گروه‌ها اعلان `animal_support.need_update` می‌فرستد: دنبال‌کنندگان سازمان، کمک‌کنندگانی که پیشنهادشان پذیرفته یا انجام شده، و اهداکنندگان همان نیاز.
+- **نقاط عطف:** `GET /animal-support/needs/:id/milestones` خروجی `[{key, at}]` می‌دهد. کلیدها:
+  - `FUNDING_50`
+  - `FUNDING_100`
+  - `FIRST_HELP_RECEIVED`
+  - `FULFILLED`
+  - `CLOSED`
+
+  همه از داده‌های واقعی محاسبه می‌شوند و هیچ‌کدام ذخیره یا ساخته نمی‌شوند.
+- **دنبال کردن سازمان:** `POST`/`DELETE /animal-support/organizations/:id/follow` (فقط سازمان تأییدشده)، و `GET /me/followed-organizations`.
+- **ذخیرهٔ نیاز:** `POST`/`DELETE /animal-support/needs/:id/save`، و `GET /me/saved-needs`. نیازی که پنهان یا حذف شود، از این فهرست خارج می‌شود.
+- **علاقه به داوطلبی:**
+  - کاربر: `POST`/`DELETE /animal-support/organizations/:id/volunteer` با `{kinds:[TRANSPORT|TEMPORARY_FOSTER|DELIVERY|ON_SITE_HELP], city, availability?, note?, shareContact?}`، و `GET /me/volunteer-interests`.
+  - پنل NGO: `GET /ngo/volunteers?status` و `POST /ngo/volunteers/:id/status` با `{NEW|CONTACTED|CLOSED}`.
+  - تماس داوطلب فقط وقتی برای سازمان نمایش داده می‌شود که `shareContact` درست باشد.
+- **کمک مالی تکرارشونده:** فقط معماری‌اش آماده است. پرداخت تکرارشونده وجود ندارد، چون درگاه واقعی هنوز `SANDBOX` است، و چیزی هم شبیه‌سازی نمی‌شود.
+- **دادهٔ نمایشی:**
+  - یک به‌روزرسانی روی نیاز «فقط نقدی»؛
+  - یک دنبال‌کننده؛
+  - یک نیاز ذخیره‌شده؛
+  - یک داوطلب با تماس اشتراکی.

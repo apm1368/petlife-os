@@ -268,6 +268,7 @@ export const DOMAIN_EVENT_TYPES = [
   "ClinicCampaignSent",
   "ClinicContactsImported",
   "ClinicExportGenerated",
+  "SupportNeedUpdatePosted",
   "ClinicBranchAdded",
   "SupportNeedHelpOfferResolved",
   "SupportNeedExpiringSoon",
