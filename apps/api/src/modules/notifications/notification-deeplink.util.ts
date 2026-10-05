@@ -10,6 +10,8 @@ export const NotificationDeepLinks = {
   booking: (bookingId: string) => `/bookings/${bookingId}`,
   providerBooking: (bookingId: string) => `/provider/bookings/${bookingId}`,
   providerHome: () => `/provider`,
+  providerTeam: () => `/provider/team`,
+  clinicInvitations: () => `/clinic-invitations`,
   provider: (providerId: string) => `/vet/${providerId}`,
   waitlist: () => `/bookings?tab=waitlist`,
   order: (orderId: string) => `/orders/${orderId}`,

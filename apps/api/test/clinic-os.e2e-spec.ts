@@ -13,6 +13,7 @@ function authed(app: INestApplication, session: string, csrf: string) {
   return {
     get: (url: string) => request(app.getHttpServer()).get(url).set("Cookie", cookie),
     post: (url: string) => request(app.getHttpServer()).post(url).set("Cookie", cookie).set("x-csrf-token", csrf),
+    del: (url: string) => request(app.getHttpServer()).delete(url).set("Cookie", cookie).set("x-csrf-token", csrf),
   };
 }
 
@@ -242,70 +243,172 @@ describe("Clinic OS", () => {
     await vet.client.get("/provider/clinic/reports/finance").expect(403);
   });
 
-  describe("staff and branch limits (clinic.staff.max / clinic.branches.max)", () => {
-    const plainUser = async () => (await prisma.user.create({ data: { email: `clinic-seat-${unique()}@example.com`, displayName: "Seat" } })).email!;
-    const addStaff = async (c: Awaited<ReturnType<typeof clinic>>, email?: string) => {
-      const res = await c.client.post("/provider/clinic/staff").send({ email: email ?? (await plainUser()), role: "VET" });
-      return Object.assign(res, { expect: (status: number) => { expect(res.status).toBe(status); return res; } });
+  describe("team: invitations, seat/branch limits, removal (clinic.staff.max / clinic.branches.max)", () => {
+    type Person = { client: Client; userId: string; email: string };
+    const person = async (tag: string): Promise<Person> => {
+      const p = await signUp(tag);
+      return { ...p, email: (await prisma.user.findUniqueOrThrow({ where: { id: p.userId } })).email! };
     };
-    const addBranch = (c: Awaited<ReturnType<typeof clinic>>, n: number) => c.client.post("/provider/clinic/branches").send({ name: `Branch ${n}`, addressLine: `Street ${n}`, city: "Tehran" });
+    /** Fills seats directly (fast) — the invitation flow itself is covered by the first tests. */
+    const fillSeats = async (orgId: string, n: number) => {
+      for (let i = 0; i < n; i++) {
+        const u = await prisma.user.create({ data: { email: `clinic-seat-${unique()}@example.com`, displayName: "Seat" } });
+        await prisma.providerUser.create({ data: { userId: u.id, providerOrganizationId: orgId, role: ProviderUserRole.STAFF } });
+      }
+    };
+    const invite = (c: { client: Client }, email: string, role = "VET") => c.client.post("/provider/clinic/staff").send({ email, role });
+    const myInvitation = async (p: Person, orgId: string) => ((await p.client.get("/me/clinic-invitations").expect(200)).body as { id: string; organization: { id: string } }[]).find((i) => i.organization.id === orgId)!;
+    const addBranch = (c: { client: Client }, n: number) => c.client.post("/provider/clinic/branches").send({ name: `Branch ${n}`, addressLine: `Street ${n}`, city: "Tehran" });
 
-    it("BASIC: 3 seats (owner included) and 1 branch; owner-only, validated, notified", async () => {
+    it("invite → pending → accept creates the membership; nothing is joined without the invitee", async () => {
       const c = await clinic();
-      const first = await plainUser();
-      const added = (await addStaff(c, first)).expect(201).body;
-      expect(added.usage).toEqual({ used: 2, limit: 3 });
-      const seat = await prisma.user.findUniqueOrThrow({ where: { email: first } });
-      expect(await prisma.notification.count({ where: { userId: seat.id, type: "clinic.staff_added", deepLink: "/provider" } })).toBe(1);
-      expect((await addStaff(c, first)).expect(409).body.error.code).toBe("CLINIC_STAFF_ALREADY_MEMBER");
-      (await addStaff(c, `nobody-${unique()}@example.com`)).expect(404);
-      await c.client.post("/provider/clinic/staff").send({ email: await plainUser(), role: "OWNER" }).expect(400);
-      (await addStaff(c)).expect(201);
-      const over = (await addStaff(c)).expect(409);
-      expect(over.body.error).toMatchObject({ code: "SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED" });
-      expect((await c.client.get("/provider/clinic/staff").expect(200)).body.usage).toEqual({ used: 3, limit: 3 });
+      const a = await person("inv-a");
+      const sent = (await invite(c, a.email).expect(201)).body;
+      expect(sent.invitation).toMatchObject({ status: "PENDING", role: "VET" });
+      expect(sent.usage).toEqual({ used: 1, pending: 1, limit: 3 });
+      // Not a member yet: no provider access, and the invitee was notified with a working link.
+      await a.client.get("/provider/clinic/staff").expect(403);
+      expect(await prisma.notification.count({ where: { userId: a.userId, type: "clinic.staff_invited", deepLink: "/clinic-invitations" } })).toBe(1);
+      expect((await invite(c, a.email).expect(409)).body.error).toMatchObject({ code: "CLINIC_INVITATION_CONFLICT", details: { reason: "ALREADY_PENDING" } });
 
-      expect((await c.client.get("/provider/clinic/branches").expect(200)).body.usage).toEqual({ used: 1, limit: 1 });
-      expect((await addBranch(c, 2).expect(409)).body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
-      await c.client.post("/provider/clinic/branches").send({ name: "", addressLine: "x", city: "" }).expect(400);
-
-      // A VET member of the same clinic can read the roster but cannot add seats or branches.
-      const vet = await signUp("seat-vet");
-      await prisma.providerUser.create({ data: { userId: vet.userId, providerOrganizationId: c.orgId, role: ProviderUserRole.VET } });
-      await vet.client.get("/provider/clinic/staff").expect(200);
-      await vet.client.post("/provider/clinic/staff").send({ email: await plainUser(), role: "VET" }).expect(403);
-      await vet.client.post("/provider/clinic/branches").send({ name: "x", addressLine: "Street", city: "Tehran" }).expect(403);
+      const inv = await myInvitation(a, c.orgId);
+      const accepted = (await a.client.post(`/me/clinic-invitations/${inv.id}/accept`).expect(201)).body;
+      expect(accepted).toMatchObject({ providerOrganizationId: c.orgId, role: "VET" });
+      expect((await a.client.get("/provider/clinic/staff").expect(200)).body.usage).toEqual({ used: 2, pending: 0, limit: 3 });
+      expect(await prisma.notification.count({ where: { userId: c.userId, type: "clinic.invitation_accepted", deepLink: "/provider/team" } })).toBe(1);
+      await a.client.post(`/me/clinic-invitations/${inv.id}/accept`).expect(409);
+      expect((await invite(c, a.email).expect(409)).body.error.code).toBe("CLINIC_STAFF_ALREADY_MEMBER");
+      await invite(c, `nobody-${unique()}@example.com`).expect(404);
+      await invite(c, a.email, "OWNER").expect(400);
+      // A VET member cannot invite.
+      await a.client.post("/provider/clinic/staff").send({ email: (await person("x")).email, role: "STAFF" }).expect(403);
     });
 
-    it("two concurrent adds can never both take the last seat", async () => {
+    it("pending invitations hold seats; revoking frees one; only the invitee can answer; expiry and decline", async () => {
       const c = await clinic();
-      (await addStaff(c)).expect(201);
-      const [a, b] = await Promise.all([addStaff(c), addStaff(c)]);
+      const [a, b, d, outsider] = [await person("p-a"), await person("p-b"), await person("p-d"), await person("p-o")];
+      await invite(c, a.email).expect(201);
+      await invite(c, b.email).expect(201);
+      expect((await invite(c, d.email).expect(409)).body.error).toMatchObject({ code: "SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED" });
+      const invA = await myInvitation(a, c.orgId);
+      // Someone else's invitation looks like a missing one.
+      await outsider.client.post(`/me/clinic-invitations/${invA.id}/accept`).expect(404);
+      await outsider.client.post(`/me/clinic-invitations/${invA.id}/decline`).expect(404);
+      expect((await outsider.client.get("/me/clinic-invitations").expect(200)).body).toEqual([]);
+      // Revoke frees the seat.
+      expect((await c.client.post(`/provider/clinic/staff/invitations/${invA.id}/revoke`).expect(201)).body.usage).toEqual({ used: 1, pending: 1, limit: 3 });
+      await a.client.post(`/me/clinic-invitations/${invA.id}/accept`).expect(409);
+      await c.client.post(`/provider/clinic/staff/invitations/${invA.id}/revoke`).expect(409);
+      await invite(c, d.email).expect(201);
+      // Decline notifies the owners; expired cannot be accepted.
+      const invB = await myInvitation(b, c.orgId);
+      expect((await b.client.post(`/me/clinic-invitations/${invB.id}/decline`).expect(201)).body.status).toBe("DECLINED");
+      expect(await prisma.notification.count({ where: { userId: c.userId, type: "clinic.invitation_declined" } })).toBe(1);
+      const invD = await myInvitation(d, c.orgId);
+      await prisma.clinicInvitation.update({ where: { id: invD.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      expect((await d.client.post(`/me/clinic-invitations/${invD.id}/accept`).expect(409)).body.error.details.reason).toBe("EXPIRED");
+      expect((await d.client.get("/me/clinic-invitations").expect(200)).body).toEqual([]);
+      // An expired invitation no longer blocks a fresh one.
+      await invite(c, d.email).expect(201);
+      // Another clinic cannot revoke this clinic's invitation.
+      const other = await clinic();
+      await other.client.post(`/provider/clinic/staff/invitations/${(await myInvitation(d, c.orgId)).id}/revoke`).expect(404);
+    });
+
+    it("two concurrent invites can never both take the last seat", async () => {
+      const c = await clinic();
+      await fillSeats(c.orgId, 1);
+      const [a, b] = await Promise.all([invite(c, (await person("c-a")).email), invite(c, (await person("c-b")).email)]);
       expect([a.status, b.status].sort()).toEqual([201, 409]);
-      expect(await prisma.providerUser.count({ where: { providerOrganizationId: c.orgId } })).toBe(3);
     });
 
-    it("GROWTH: 10 seats and 3 branches", async () => {
-      const c = await clinic();
-      await setPlan(c.orgId, "CLINIC_GROWTH");
-      for (let i = 0; i < 9; i++) (await addStaff(c)).expect(201);
-      expect((await addStaff(c)).expect(409).body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
-      await addBranch(c, 2).expect(201);
-      expect((await addBranch(c, 3).expect(201)).body.usage).toEqual({ used: 3, limit: 3 });
-      await addBranch(c, 4).expect(409);
+    it("plan limits: BASIC 3 seats/1 branch, GROWTH 10/3, PRO unlimited", async () => {
+      const basic = await clinic();
+      expect((await addBranch(basic, 2).expect(409)).body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
+      await c_assertBranches(basic, { used: 1, limit: 1 });
+
+      const growth = await clinic();
+      await setPlan(growth.orgId, "CLINIC_GROWTH");
+      await fillSeats(growth.orgId, 8);
+      await invite(growth, (await person("g-9")).email).expect(201);
+      expect((await invite(growth, (await person("g-11")).email).expect(409)).body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
+      await addBranch(growth, 2).expect(201);
+      await addBranch(growth, 3).expect(201);
+      await addBranch(growth, 4).expect(409);
+
+      const pro = await clinic();
+      await setPlan(pro.orgId, "CLINIC_PRO");
+      await fillSeats(pro.orgId, 11);
+      const sent = (await invite(pro, (await person("pro-13")).email).expect(201)).body;
+      expect(sent.usage).toEqual({ used: 12, pending: 1, limit: null });
+      for (let i = 2; i <= 5; i++) await addBranch(pro, i).expect(201);
+      await c_assertBranches(pro, { used: 5, limit: null });
     });
 
-    it("PRO: no seat or branch cap", async () => {
+    async function c_assertBranches(c: { client: Client }, usage: { used: number; limit: number | null }) {
+      expect((await c.client.get("/provider/clinic/branches").expect(200)).body.usage).toEqual(usage);
+    }
+
+    it("removing a member ends their access, revokes their clinic grants, unassigns open bookings; owners are protected", async () => {
       const c = await clinic();
       await setPlan(c.orgId, "CLINIC_PRO");
-      for (let i = 0; i < 11; i++) (await addStaff(c)).expect(201);
-      for (let i = 2; i <= 5; i++) await addBranch(c, i).expect(201);
-      const staff = (await c.client.get("/provider/clinic/staff").expect(200)).body;
-      expect(staff.usage).toEqual({ used: 12, limit: null });
-      expect((await c.client.get("/provider/clinic/branches").expect(200)).body.usage).toEqual({ used: 5, limit: null });
-      // Another clinic's owner cannot see or touch this roster.
+      const vet = await person("rm-vet");
+      await invite(c, vet.email).expect(201);
+      const inv = await myInvitation(vet, c.orgId);
+      const member = (await vet.client.post(`/me/clinic-invitations/${inv.id}/accept`).expect(201)).body;
+      const o = await owner("Removal Dog");
+      const open = await booking(c, o, { status: BookingStatus.CONFIRMED, startAt: new Date(Date.now() + 2 * 86400e3) });
+      const done = await booking(c, o);
+      await prisma.booking.updateMany({ where: { id: { in: [open.id, done.id] } }, data: { providerUserId: member.providerUserId } });
+      const grant = await prisma.petAccessGrant.create({ data: { petId: o.petId, userId: vet.userId, canViewHealth: true, canRecordClinicalData: true, source: "TEMPORARY", reason: "BOOKING" } });
+      await prisma.bookingPetAccess.create({ data: { bookingId: open.id, petAccessGrantId: grant.id, scopePreset: "HEALTH_BASICS" } });
+      await vet.client.get(`/provider/clinical/patients/${o.petId}`).expect(200);
+
+      // Not removable: the owner (even by themselves), a member of another clinic, and by a non-owner.
+      const ownerRow = await prisma.providerUser.findFirstOrThrow({ where: { providerOrganizationId: c.orgId, role: ProviderUserRole.OWNER } });
+      expect((await c.client.del(`/provider/clinic/staff/${ownerRow.id}`).expect(409)).body.error.details.reason).toBe("OWNER");
       const other = await clinic();
-      expect((await other.client.get("/provider/clinic/staff").expect(200)).body.items.map((m: { providerUserId: string }) => m.providerUserId)).not.toContain(staff.items[1].providerUserId);
+      await other.client.del(`/provider/clinic/staff/${member.providerUserId}`).expect(404);
+      await vet.client.del(`/provider/clinic/staff/${member.providerUserId}`).expect(403);
+
+      const after = (await c.client.del(`/provider/clinic/staff/${member.providerUserId}`).expect(200)).body;
+      expect(after.items.map((m: { providerUserId: string }) => m.providerUserId)).not.toContain(member.providerUserId);
+      await vet.client.get("/provider/clinic/staff").expect(403);
+      await vet.client.get(`/provider/clinical/patients/${o.petId}`).expect(403);
+      expect((await prisma.petAccessGrant.findUniqueOrThrow({ where: { id: grant.id } })).revokedAt).not.toBeNull();
+      expect((await prisma.booking.findUniqueOrThrow({ where: { id: open.id } })).providerUserId).toBeNull();
+      // History keeps its author.
+      expect((await prisma.booking.findUniqueOrThrow({ where: { id: done.id } })).providerUserId).toBe(member.providerUserId);
+      expect(await prisma.notification.count({ where: { userId: vet.userId, type: "clinic.staff_removed" } })).toBe(1);
+      await c.client.del(`/provider/clinic/staff/${member.providerUserId}`).expect(404);
+
+      // Re-inviting and accepting reactivates the same member row.
+      await invite(c, vet.email).expect(201);
+      const again = (await vet.client.post(`/me/clinic-invitations/${(await myInvitation(vet, c.orgId)).id}/accept`).expect(201)).body;
+      expect(again.providerUserId).toBe(member.providerUserId);
+      await vet.client.get("/provider/clinic/staff").expect(200);
+    });
+
+    it("a branch is removable only when nothing operational points at it", async () => {
+      const c = await clinic();
+      await setPlan(c.orgId, "CLINIC_PRO");
+      expect((await c.client.del(`/provider/clinic/branches/${c.locationId}`).expect(409)).body.error.details.reason).toBe("LAST_BRANCH");
+      const added = (await addBranch(c, 2).expect(201)).body.items.find((b: { name: string }) => b.name === "Branch 2");
+      // In use by a service → refused.
+      const svc = await prisma.providerService.create({ data: { providerOrganizationId: c.orgId, locationId: added.id, name: "Groom", type: "GENERAL_VET_VISIT", category: "VET", durationMinutes: 30 } });
+      expect((await c.client.del(`/provider/clinic/branches/${added.id}`).expect(409)).body.error.details.reason).toBe("HAS_SERVICES_OR_SCHEDULE");
+      await prisma.providerService.delete({ where: { id: svc.id } });
+      // A booking ever made there keeps the branch.
+      const o = await owner("Branch Dog");
+      const b = await booking({ ...c, locationId: added.id }, o);
+      expect((await c.client.del(`/provider/clinic/branches/${added.id}`).expect(409)).body.error.details.reason).toBe("HAS_BOOKINGS");
+      await prisma.booking.delete({ where: { id: b.id } });
+      const vetUser = await person("br-vet");
+      await prisma.providerUser.create({ data: { userId: vetUser.userId, providerOrganizationId: c.orgId, role: ProviderUserRole.VET } });
+      await vetUser.client.del(`/provider/clinic/branches/${added.id}`).expect(403);
+      const other = await clinic();
+      await other.client.del(`/provider/clinic/branches/${added.id}`).expect(404);
+      expect((await c.client.del(`/provider/clinic/branches/${added.id}`).expect(200)).body.usage).toEqual({ used: 1, limit: null });
     });
   });
 });

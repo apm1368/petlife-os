@@ -64,7 +64,7 @@ export class ProviderCatalogService {
 
   async listStaff(ctx: ResolvedProviderContext) {
     const rows = await this.prisma.providerUser.findMany({
-      where: { providerOrganizationId: ctx.organizationId },
+      where: { providerOrganizationId: ctx.organizationId, removedAt: null },
       include: { user: { select: { displayName: true } }, qualifiedServices: { select: { serviceId: true } } },
       orderBy: { createdAt: "asc" },
     });
@@ -72,7 +72,7 @@ export class ProviderCatalogService {
   }
 
   async setStaffServices(ctx: ResolvedProviderContext, providerUserId: string, serviceIds: string[]) {
-    const member = await this.prisma.providerUser.findUnique({ where: { id: providerUserId } });
+    const member = await this.prisma.providerUser.findFirst({ where: { id: providerUserId, removedAt: null } });
     if (!member || member.providerOrganizationId !== ctx.organizationId) throw new NotFoundApiException("Team member");
     const owned = await this.prisma.providerService.count({ where: { id: { in: serviceIds }, providerOrganizationId: ctx.organizationId } });
     if (owned !== new Set(serviceIds).size) throw new NotFoundApiException("Service");

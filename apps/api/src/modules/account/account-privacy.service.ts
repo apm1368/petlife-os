@@ -137,7 +137,7 @@ export class AccountPrivacyService {
       this.prisma.orderRefundRequest.count({ where: { userId, status: "PENDING_REVIEW" } }),
       this.prisma.dispute.count({ where: { raisedByUserId: userId, status: { in: ["OPEN", "UNDER_REVIEW", "AWAITING_EVIDENCE"] } } }),
       this.prisma.travelBooking.count({ where: { bookedByUserId: userId, checkOut: { gt: now }, status: { in: ["HELD", "DRAFT", "AWAITING_PROVIDER", "AWAITING_PAYMENT", "CONFIRMED", "IN_PROGRESS", "MODIFIED"] } } }),
-      this.prisma.providerUser.count({ where: { userId } }),
+      this.prisma.providerUser.count({ where: { userId, removedAt: null } }),
       this.prisma.sellerMembership.count({ where: { userId, status: "ACTIVE" } }),
     ]);
     const households = memberships.map((m) => {

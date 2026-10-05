@@ -11,14 +11,14 @@ import { EntitlementService } from "../subscriptions/entitlement.service";
 export class VetShareService {
   constructor(private readonly prisma: PrismaService, private readonly access: PetAccessService, private readonly documents: MedicalDocumentService, private readonly visits: ClinicalVisitService, private readonly entitlements: EntitlementService) {}
   providers() {
-    return this.prisma.providerUser.findMany({ where: { role: "VET", providerOrganization: { verificationStatus: "VERIFIED" } }, select: { id:true,displayTitle:true,providerOrganization:{select:{id:true,name:true}},user:{select:{displayName:true}} }, take: 100 });
+    return this.prisma.providerUser.findMany({ where: { role: "VET", removedAt: null, providerOrganization: { verificationStatus: "VERIFIED" } }, select: { id:true,displayTitle:true,providerOrganization:{select:{id:true,name:true}},user:{select:{displayName:true}} }, take: 100 });
   }
   private async assertManager(petId: string, userId: string) {
     const access=await this.access.getEffectivePermissions(petId,userId);
     if(!access?.canManageAccess || !access.canViewHealth) throw new PetAccessDeniedException();
   }
   private async validate(petId:string,dto:VetShareDto) {
-    const provider=await this.prisma.providerUser.findFirst({where:{id:dto.providerUserId,role:"VET",providerOrganization:{verificationStatus:"VERIFIED"}}});
+    const provider=await this.prisma.providerUser.findFirst({where:{id:dto.providerUserId,role:"VET",removedAt:null,providerOrganization:{verificationStatus:"VERIFIED"}}});
     if(!provider) throw new NotFoundApiException("Verified veterinarian");
     const startsAt=new Date(dto.startsAt), expiresAt=new Date(dto.expiresAt);
     if(!/(Z|[+-]\d{2}:\d{2})$/.test(dto.startsAt) || !/(Z|[+-]\d{2}:\d{2})$/.test(dto.expiresAt) || startsAt>=expiresAt || expiresAt<=new Date() || expiresAt.getTime()-startsAt.getTime()>90*86400000) throw new ValidationApiException({reason:"Choose a valid period, at most 90 days, with timezone."});
@@ -56,7 +56,7 @@ export class VetShareService {
     const now=new Date();
     const grant=await this.prisma.petAccessGrant.findFirst({where:{id,petId,userId,reason:"EXPLICIT_VET_SHARE",revokedAt:null,startsAt:{lte:now},expiresAt:{gt:now}}});
     if(!grant?.sharedWithProviderUserId) throw new PetAccessDeniedException();
-    const provider=await this.prisma.providerUser.findFirst({where:{id:grant.sharedWithProviderUserId,userId,role:"VET",providerOrganization:{verificationStatus:"VERIFIED"}}});
+    const provider=await this.prisma.providerUser.findFirst({where:{id:grant.sharedWithProviderUserId,userId,role:"VET",removedAt:null,providerOrganization:{verificationStatus:"VERIFIED"}}});
     if(!provider) throw new PetAccessDeniedException();
     return grant;
   }
@@ -64,7 +64,7 @@ export class VetShareService {
   async received(userId:string) {
     const now=new Date();
     const grants=await this.prisma.petAccessGrant.findMany({where:{userId,reason:"EXPLICIT_VET_SHARE",revokedAt:null,startsAt:{lte:now},expiresAt:{gt:now},sharedWithProviderUserId:{not:null}},orderBy:{expiresAt:"asc"},take:100,include:{pet:{select:{id:true,name:true,species:true}}}});
-    const providerIds=new Set((await this.prisma.providerUser.findMany({where:{userId,role:"VET",providerOrganization:{verificationStatus:"VERIFIED"}},select:{id:true}})).map(p=>p.id));
+    const providerIds=new Set((await this.prisma.providerUser.findMany({where:{userId,role:"VET",removedAt:null,providerOrganization:{verificationStatus:"VERIFIED"}},select:{id:true}})).map(p=>p.id));
     return grants.filter(g=>providerIds.has(g.sharedWithProviderUserId!)).map(g=>({id:g.id,pet:g.pet,scopes:g.healthScopes,documentCount:g.selectedDocumentIds.length,startsAt:g.startsAt,expiresAt:g.expiresAt}));
   }
   async read(petId:string,id:string,userId:string) { const grant=await this.active(petId,id,userId); return this.readScope(petId,grant.healthScopes,grant.selectedDocumentIds); }

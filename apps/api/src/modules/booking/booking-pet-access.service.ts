@@ -145,7 +145,7 @@ export class BookingPetAccessService {
     const healthConsented = ownerChoseScope && flags.canViewHealth;
     const canViewLocation = booking.locationMode !== LocationMode.AT_PROVIDER;
 
-    const providerUser = await tx.providerUser.findUnique({ where: { id: providerUserId } });
+    const providerUser = await tx.providerUser.findFirst({ where: { id: providerUserId, removedAt: null } });
     if (!providerUser) return;
 
     const grant = await tx.petAccessGrant.create({

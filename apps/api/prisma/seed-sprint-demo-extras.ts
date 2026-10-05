@@ -142,10 +142,16 @@ async function main() {
     await db.userBlock.upsert({ where: { blockerUserId_blockedUserId: { blockerUserId: reviewer.id, blockedUserId: spammer.id } }, create: { blockerUserId: reviewer.id, blockedUserId: spammer.id }, update: {} });
 
     // ---------------------------------------------------------------- Clinic: vet seat, grant, visit + vitals
-    const owner = await db.providerUser.findFirstOrThrow({ where: { role: "OWNER", user: { email: "batch3-clinic-owner@example.test" } } });
+    const owner = await db.providerUser.findFirstOrThrow({ where: { role: "OWNER", removedAt: null, user: { email: "batch3-clinic-owner@example.test" } } });
     const vetUser = await user("clinic-demo-vet@example.test", "دکتر نیلوفر (دامپزشک نمایشی)");
-    const vet = (await db.providerUser.findFirst({ where: { providerOrganizationId: owner.providerOrganizationId, userId: vetUser.id } }))
+    const vet = (await db.providerUser.findFirst({ where: { providerOrganizationId: owner.providerOrganizationId, userId: vetUser.id, removedAt: null } }))
       ?? (await db.providerUser.create({ data: { id: id("clinic:vet"), providerOrganizationId: owner.providerOrganizationId, userId: vetUser.id, role: "VET", displayTitle: "دامپزشک" } }));
+    // A pending invitation so the invitation states can be designed against real data.
+    const invitee = await user("clinic-demo-invitee@example.test", "سارا (دعوت‌شدهٔ نمایشی)");
+    const pendingExists = await db.clinicInvitation.count({ where: { providerOrganizationId: owner.providerOrganizationId, invitedUserId: invitee.id, status: "PENDING" } });
+    if (!pendingExists) {
+      await db.clinicInvitation.create({ data: { providerOrganizationId: owner.providerOrganizationId, invitedUserId: invitee.id, role: "STAFF", displayTitle: "پذیرش", invitedByProviderUserId: owner.id, expiresAt: new Date(Date.now() + 7 * DAY) } });
+    }
     const clinicPet = await db.pet.findFirstOrThrow({ where: { bookings: { some: { providerOrganizationId: owner.providerOrganizationId, user: { email: "clinic-demo-customer@example.test" } } } } });
     for (const [key, uid] of [["owner", owner.userId], ["vet", vetUser.id]] as const) {
       await db.petAccessGrant.upsert({ where: { id: id(`grant:${key}`) }, create: { id: id(`grant:${key}`), petId: clinicPet.id, userId: uid, canViewIdentity: true, canViewHealth: true, canRecordClinicalData: true, source: "TEMPORARY", reason: "DEMO_CLINIC_CARE", expiresAt: new Date(Date.now() + 30 * DAY) }, update: {} });

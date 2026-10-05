@@ -117,10 +117,10 @@ export class NotificationEventsListener {
     const bookingId = payload.bookingId;
     const booking = await this.bookingRecipients(payload);
     if (!booking) return;
-    const assigned = booking.providerUserId ? await this.prisma.providerUser.findUnique({ where: { id: booking.providerUserId }, select: { userId: true } }) : null;
+    const assigned = booking.providerUserId ? await this.prisma.providerUser.findFirst({ where: { id: booking.providerUserId, removedAt: null }, select: { userId: true } }) : null;
     const recipients = assigned
       ? [assigned.userId]
-      : (await this.prisma.providerUser.findMany({ where: { providerOrganizationId: booking.providerOrganizationId, role: "OWNER" }, select: { userId: true } })).map((u) => u.userId);
+      : (await this.prisma.providerUser.findMany({ where: { providerOrganizationId: booking.providerOrganizationId, role: "OWNER", removedAt: null }, select: { userId: true } })).map((u) => u.userId);
     for (const userId of new Set(recipients)) {
       await this.orchestrator.notify({
         userId,

@@ -106,7 +106,7 @@ export class SlotGeneratorService {
         },
         select: { startAt: true, endAt: true, providerUserId: true, resourceId: true },
       }),
-      this.prisma.providerUser.findMany({ where: { providerOrganizationId }, select: { id: true, isBookable: true } }),
+      this.prisma.providerUser.findMany({ where: { providerOrganizationId, removedAt: null }, select: { id: true, isBookable: true } }),
       service.requiredResourceType
         ? this.prisma.providerResource.findMany({ where: { providerOrganizationId, locationId, type: service.requiredResourceType, isActive: true }, orderBy: { id: "asc" } })
         : Promise.resolve([]),

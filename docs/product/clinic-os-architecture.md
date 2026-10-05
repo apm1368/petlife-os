@@ -91,10 +91,15 @@ Clinic OS یک محصول جدا نیست؛ لایه‌ی B2B روی زیرسا�
 |---|---|---|
 | GET | `/provider/clinic/plans` | فهرست پلن‌ها شامل entitlements و prices (فعلاً خالی) |
 | GET | `/provider/clinic/subscription` | `{status, plan, assignedPlanCode, currentPeriodEndsAt, usage:{remindersThisMonth}}` |
-| GET | `/provider/clinic/staff` | `{items:[{providerUserId, displayName, role, displayTitle, joinedAt}], usage:{used, limit}}` (limit null = نامحدود) |
-| POST | `/provider/clinic/staff` | فقط OWNER: `{email, role: VET\|STAFF, displayTitle?}` → فهرست جدید. خطاها: 404 کاربر ناموجود، 409 `CLINIC_STAFF_ALREADY_MEMBER`، 409 سقف |
+| GET | `/provider/clinic/staff` | `{items:[{providerUserId, displayName, role, displayTitle, joinedAt}], pendingInvitations:[…], usage:{used, pending, limit}}`؛ limit null یعنی نامحدود |
+| POST | `/provider/clinic/staff` | فقط OWNER؛ **دعوت** می‌سازد و عضویت مستقیم ایجاد نمی‌کند. بدنه: `{email, role: VET\|STAFF, displayTitle?}`. خروجی: `{invitation, items, pendingInvitations, usage}`. خطاها: ۴۰۴ کاربر ناموجود، ۴۰۹ `CLINIC_STAFF_ALREADY_MEMBER`، ۴۰۹ `CLINIC_INVITATION_CONFLICT` (`ALREADY_PENDING`)، ۴۰۹ سقف |
+| POST | `/provider/clinic/staff/invitations/:id/revoke` | فقط OWNER؛ لغو دعوت در انتظار |
+| DELETE | `/provider/clinic/staff/:providerUserId` | فقط OWNER؛ حذف نرم عضو VET یا STAFF. مدیر قابل حذف نیست (۴۰۹ `CLINIC_MEMBER_NOT_REMOVABLE`) |
+| GET | `/me/clinic-invitations` | دعوت‌های در انتظار خود کاربر |
+| POST | `/me/clinic-invitations/:id/accept` · `/decline` | فقط خود دعوت‌شده می‌تواند پاسخ بدهد؛ دعوت دیگران ۴۰۴ می‌دهد. خطای ۴۰۹ با `EXPIRED` یا `NOT_PENDING` |
 | GET | `/provider/clinic/branches` | `{items:[{id, name, addressLine, city, region, latitude, longitude, phone, timezone}], usage}` |
 | POST | `/provider/clinic/branches` | فقط OWNER: `{name, addressLine, city, region?, latitude?, longitude?, phone?}` |
+| DELETE | `/provider/clinic/branches/:locationId` | فقط OWNER. ۴۰۹ `CLINIC_BRANCH_IN_USE` با یکی از دلیل‌های `LAST_BRANCH`، `HAS_BOOKINGS` یا `HAS_SERVICES_OR_SCHEDULE` |
 | GET | `/provider/clinic/customers?q&page&pageSize` | `{items:[{householdId, ownerDisplayName, pets[], completedVisitCount, lastVisitAt, nextAppointment}], total}` |
 | GET | `/provider/clinic/customers/:householdId` | همان، به‌علاوه‌ی `bookings[]` و `reminders[]` |
 | GET | `/provider/clinic/reminders?status&petId&page` | فهرست یادآورها |
@@ -112,3 +117,31 @@ Clinic OS یک محصول جدا نیست؛ لایه‌ی B2B روی زیرسا�
 - 404: مشتری یا پت در فهرست این کلینیک نیست.
 
 **مبالغ:** رشته‌ی دسیمال به ریال (IRR) هستند و تبدیل به تومان فقط در لایه‌ی نمایش انجام می‌شود.
+
+## ۹. عضویت: دعوت، پذیرش و حذف
+- **دعوت:** مدیر کلینیک یک حساب موجود را دعوت می‌کند و دعوت در وضعیت PENDING می‌ماند. عضویت فقط وقتی ساخته می‌شود که خود دعوت‌شده آن را بپذیرد.
+- **انقضا و ظرفیت:** هر دعوت ۷ روز اعتبار دارد. دعوت در انتظار یک جای خالی از سقف `clinic.staff.max` را رزرو می‌کند.
+- **حذف عضو** نرم است: ردیف عضو می‌ماند (چون سوابق بالینی به آن ارجاع دارند)، اما `removedAt` تمام دسترسی را قطع می‌کند و همهٔ ۱۹ نقطه‌ای که عضویت خوانده می‌شود این فیلتر را دارند. همراه حذف:
+  - دسترسی‌هایی که این شخص از رزروهای همین کلینیک گرفته بود باطل می‌شود؛
+  - نوبت‌های باز او بدون پزشک می‌مانند تا کلینیک دوباره تخصیص دهد؛
+  - نوبت‌های گذشته نویسندهٔ خود را حفظ می‌کنند.
+- **بازگشت عضو:** دعوت دوباره و پذیرش آن، همان ردیف قبلی را دوباره فعال می‌کند.
+- **حذف شعبه** فقط وقتی ممکن است که شعبه آخرین شعبه نباشد، هیچ نوبتی در آن ثبت نشده باشد، و هیچ خدمت، منبع یا برنامهٔ زمانی‌ای به آن وصل نباشد.
+- **ردگیری:** همهٔ این رویدادها به‌صورت domain event ثبت می‌شوند: ClinicStaffInvited، ClinicInvitationAccepted، ClinicInvitationDeclined، ClinicInvitationRevoked، ClinicStaffRemoved، ClinicBranchRemoved.
+
+## ۱۰. تسویهٔ درآمد آنلاین کلینیک — `PRODUCT_DECISION_REQUIRED`
+**وضع موجود:**
+- پرداخت آنلاین نوبت فقط دو حساب را در دفتر کل اصلی ثبت می‌کند: `CASH_GATEWAY_RECEIVABLE` (بدهکار) و `CUSTOMER_PAYMENT_CLEARING` (بستانکار).
+- هیچ حساب مالی‌ای برای ارائه‌دهنده (کلینیک) وجود ندارد.
+- `SELLER_PAYABLE` و `PLATFORM_REVENUE` برای پرداخت‌های نوبت هرگز ثبت نمی‌شوند.
+- ابزارهای تسویه (قانون کمیسیون، دفتر فروشنده، دورهٔ تسویه، پرداخت دستی) فقط برای فروشندگان فروشگاه ساخته شده‌اند و به کلینیک وصل نیستند.
+
+**تصمیم‌هایی که لازم است** (هیچ‌کدام حدس زده نمی‌شود):
+1. نرخ یا مدل کمیسیون پلتفرم روی نوبت‌ها: درصدی، ثابت، یا وابسته به پلن کلینیک؟
+2. دورهٔ تسویه (هفتگی یا ماهانه) و حداقل مبلغ تسویه.
+3. رفتار بازپرداختی که بعد از تسویه رخ می‌دهد (کسر از تسویهٔ بعدی؟).
+4. پیش‌پرداخت (deposit) و جریمهٔ لغو دیرهنگام: سهم کلینیک چقدر است؟
+5. اطلاعات حساب بانکی یا شبای کلینیک و روش احراز آن.
+6. مالیات و صورتحساب رسمی.
+
+**پس از تصمیم:** می‌توان الگوی تسویهٔ فروشندگان (`SellerFinancialAccount`، `CommissionRule`، `SellerSettlement`) را برای ارائه‌دهندگان تکرار کرد. پیش از آن، گزارش مالی کلینیک فقط «جمع‌آوری‌شده» و «ثبت‌شده در دفتر» را نشان می‌دهد و هیچ «مانده‌ی قابل پرداخت» گزارش نمی‌کند.

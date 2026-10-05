@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { ProviderUserRole } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
+import { CurrentUser } from "../../common/auth/current-user.decorator";
+import type { SessionUser } from "../../common/session/session.service";
 import { ProviderAuthGuard } from "../provider-os/auth/provider-auth.guard";
 import { CurrentProviderContext } from "../provider-os/auth/current-provider-context.decorator";
 import { RequireProviderRole } from "../provider-os/auth/require-provider-role.decorator";
@@ -39,12 +41,28 @@ export class ClinicOsController {
     return this.team.listStaff(ctx);
   }
 
-  /** Owner-only; limited by `clinic.staff.max`. */
+  /**
+   * Owner-only: invites an existing account (PENDING; the invitee accepts or declines). A pending invitation
+   * holds a seat under `clinic.staff.max`. Same path as before — it no longer creates membership directly.
+   */
   @Post("staff")
   @RequireProviderRole(ProviderUserRole.OWNER)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  addStaff(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: AddClinicStaffDto) {
-    return this.team.addStaff(ctx, dto);
+  inviteStaff(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: AddClinicStaffDto) {
+    return this.team.invite(ctx, dto);
+  }
+
+  @Post("staff/invitations/:invitationId/revoke")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  revokeInvitation(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("invitationId", ParseUUIDPipe) invitationId: string) {
+    return this.team.revokeInvitation(ctx, invitationId);
+  }
+
+  /** Owner-only soft removal of a VET/STAFF member (owners are not removable). */
+  @Delete("staff/:providerUserId")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  removeStaff(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("providerUserId", ParseUUIDPipe) providerUserId: string) {
+    return this.team.removeMember(ctx, providerUserId);
   }
 
   @Get("branches")
@@ -58,6 +76,13 @@ export class ClinicOsController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   addBranch(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: AddClinicBranchDto) {
     return this.team.addBranch(ctx, dto);
+  }
+
+  /** Owner-only; refused while the branch is the last one or anything operational still points at it. */
+  @Delete("branches/:locationId")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  removeBranch(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("locationId", ParseUUIDPipe) locationId: string) {
+    return this.team.removeBranch(ctx, locationId);
   }
 
   @Get("subscription")
@@ -120,5 +145,27 @@ export class AdminClinicSubscriptionController {
   @RequireAdminPermission("subscription.manage")
   assign(@Param("organizationId", ParseUUIDPipe) organizationId: string, @Body() dto: AssignClinicPlanDto, @CurrentAdmin() admin: ResolvedAdminContext) {
     return this.subscriptions.adminAssign(admin, organizationId, dto);
+  }
+}
+
+/** The invitee's side of clinic invitations — only ever their own (anyone else's is the same 404). */
+@Controller("me/clinic-invitations")
+@UseGuards(SessionAuthGuard)
+export class MyClinicInvitationsController {
+  constructor(private readonly team: ClinicTeamService) {}
+
+  @Get()
+  list(@CurrentUser() user: SessionUser) {
+    return this.team.myInvitations(user.id);
+  }
+
+  @Post(":invitationId/accept")
+  accept(@CurrentUser() user: SessionUser, @Param("invitationId", ParseUUIDPipe) invitationId: string) {
+    return this.team.accept(user.id, invitationId);
+  }
+
+  @Post(":invitationId/decline")
+  decline(@CurrentUser() user: SessionUser, @Param("invitationId", ParseUUIDPipe) invitationId: string) {
+    return this.team.decline(user.id, invitationId);
   }
 }

@@ -380,9 +380,21 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "یادآور از {{clinic}}", body: "{{petName}}: {{title}}" },
     en: { title: "Reminder from {{clinic}}", body: "{{petName}}: {{title}}" },
   },
-  "clinic.staff_added": {
-    fa: { title: "عضو تیم {{clinic}} شدید", body: "شما به‌عنوان {{role}} به تیم {{clinic}} اضافه شدید." },
-    en: { title: "You joined {{clinic}}", body: "You were added to {{clinic}}'s team as {{role}}." },
+  "clinic.staff_invited": {
+    fa: { title: "دعوت به تیم {{clinic}}", body: "{{clinic}} شما را به‌عنوان {{role}} دعوت کرده است. دعوت را بپذیرید یا رد کنید." },
+    en: { title: "Invitation to join {{clinic}}", body: "{{clinic}} invited you to join as {{role}}. Accept or decline the invitation." },
+  },
+  "clinic.invitation_accepted": {
+    fa: { title: "دعوت پذیرفته شد", body: "{{name}} به تیم کلینیک پیوست." },
+    en: { title: "Invitation accepted", body: "{{name}} joined the clinic team." },
+  },
+  "clinic.invitation_declined": {
+    fa: { title: "دعوت رد شد", body: "{{name}} دعوت پیوستن به تیم را رد کرد." },
+    en: { title: "Invitation declined", body: "{{name}} declined the invitation to join the team." },
+  },
+  "clinic.staff_removed": {
+    fa: { title: "عضویت در {{clinic}} پایان یافت", body: "دسترسی شما به پنل {{clinic}} برداشته شد." },
+    en: { title: "Your access to {{clinic}} ended", body: "You no longer have access to {{clinic}}'s panel." },
   },
   "clinic.message": {
     fa: { title: "پیام از {{clinic}}", body: "درباره‌ی {{petName}}: {{title}}" },

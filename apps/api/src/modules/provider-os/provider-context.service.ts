@@ -46,7 +46,7 @@ export class ProviderContextService {
   ) {}
 
   private async listMemberships(userId: string, client: PrismaService | Prisma.TransactionClient = this.prisma): Promise<MembershipWithOrg[]> {
-    return client.providerUser.findMany({ where: { userId }, include: { providerOrganization: true } });
+    return client.providerUser.findMany({ where: { userId, removedAt: null }, include: { providerOrganization: true } });
   }
 
   /**
@@ -86,7 +86,7 @@ export class ProviderContextService {
   }
 
   async setContext(userId: string, providerOrganizationId: string): Promise<ProviderContextDto> {
-    const membership = await this.prisma.providerUser.findFirst({ where: { userId, providerOrganizationId } });
+    const membership = await this.prisma.providerUser.findFirst({ where: { userId, providerOrganizationId, removedAt: null } });
     if (!membership) throw new ProviderAccessDeniedException({ providerOrganizationId, reason: "CROSS_ORGANIZATION" });
 
     await this.prisma.$transaction(async (tx) => {

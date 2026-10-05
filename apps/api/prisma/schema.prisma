@@ -1131,23 +1131,24 @@ model User {
   accountDeletionRequests AccountDeletionRequest[]
   acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
 
-  adminUser              AdminUser?
-  supportCasesRequested  SupportCase[]
-  supportMessages        SupportMessage[]
-  disputesRaised         Dispute[]
-  disputeEvidence        DisputeEvidence[]
-  appeals                Appeal[]
-  BookingWaitlistEntry   BookingWaitlistEntry[]
-  ProviderReview         ProviderReview[]
-  ProviderFavorite       ProviderFavorite[]
-  ProductReview          ProductReview[]
-  ProductFavorite        ProductFavorite[]
-  OrderRefundRequest     OrderRefundRequest[]
-  RepeatDeliverySchedule RepeatDeliverySchedule[]
-  chatParticipations     ChatParticipant[]        @relation("ChatParticipations")
-  chatMessagesSent       ChatMessage[]            @relation("ChatMessagesSent")
-  blocksMade             UserBlock[]              @relation("BlocksMade")
-  blocksReceived         UserBlock[]              @relation("BlocksReceived")
+  adminUser                 AdminUser?
+  supportCasesRequested     SupportCase[]
+  supportMessages           SupportMessage[]
+  disputesRaised            Dispute[]
+  disputeEvidence           DisputeEvidence[]
+  appeals                   Appeal[]
+  BookingWaitlistEntry      BookingWaitlistEntry[]
+  ProviderReview            ProviderReview[]
+  ProviderFavorite          ProviderFavorite[]
+  ProductReview             ProductReview[]
+  ProductFavorite           ProductFavorite[]
+  OrderRefundRequest        OrderRefundRequest[]
+  RepeatDeliverySchedule    RepeatDeliverySchedule[]
+  chatParticipations        ChatParticipant[]        @relation("ChatParticipations")
+  chatMessagesSent          ChatMessage[]            @relation("ChatMessagesSent")
+  blocksMade                UserBlock[]              @relation("BlocksMade")
+  blocksReceived            UserBlock[]              @relation("BlocksReceived")
+  clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
 
   @@map("users")
 }
@@ -1868,6 +1869,7 @@ model ProviderOrganization {
 
   clinicSubscription ClinicSubscription?
   clinicReminders    ClinicReminder[]
+  clinicInvitations  ClinicInvitation[]
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -1913,13 +1915,17 @@ model ProviderUser {
   providerOrganizationId String               @db.Uuid
   providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
 
-  role              ProviderUserRole      @default(VET)
-  displayTitle      String?
+  role                    ProviderUserRole      @default(VET)
+  displayTitle            String?
+  /// Clinic OS — a removed member keeps this row (their clinical records still reference it) but has no access:
+  /// every membership query filters `removedAt: null`. Plain audit reference, no FK.
+  removedAt               DateTime?
+  removedByProviderUserId String?               @db.Uuid
   /// Public, provider-authored bio. HR/private staff data never lives on this model.
-  publicBio         String?
+  publicBio               String?
   /// Staff can exist without being bookable (e.g. reception).
-  isBookable        Boolean               @default(true)
-  qualifiedServices ProviderUserService[]
+  isBookable              Boolean               @default(true)
+  qualifiedServices       ProviderUserService[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -9375,4 +9381,36 @@ model ClinicReminder {
   @@index([providerOrganizationId, dueAt])
   @@index([petId])
   @@map("clinic_reminders")
+}
+
+enum ClinicInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  REVOKED
+}
+
+/// Joining a clinic is the invitee's choice: an owner invites an existing account, the invitee accepts or
+/// declines from their own session, and only an accepted invitation creates the ProviderUser row. A PENDING
+/// invitation reserves a seat under `clinic.staff.max`. Expiry is evaluated on read (expiresAt), not by a worker.
+model ClinicInvitation {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  providerOrganizationId  String                 @db.Uuid
+  providerOrganization    ProviderOrganization   @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  invitedUserId           String                 @db.Uuid
+  invitedUser             User                   @relation("ClinicInvitationsReceived", fields: [invitedUserId], references: [id], onDelete: Cascade)
+  role                    ProviderUserRole
+  displayTitle            String?
+  status                  ClinicInvitationStatus @default(PENDING)
+  invitedByProviderUserId String                 @db.Uuid
+  expiresAt               DateTime
+  respondedAt             DateTime?
+  acceptedProviderUserId  String?                @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerOrganizationId, status])
+  @@index([invitedUserId, status])
+  @@map("clinic_invitations")
 }

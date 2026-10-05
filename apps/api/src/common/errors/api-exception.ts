@@ -1757,3 +1757,22 @@ export class ClinicStaffAlreadyMemberException extends ApiException {
     super("CLINIC_STAFF_ALREADY_MEMBER", "This person is already on the clinic's team.", HttpStatus.CONFLICT);
   }
 }
+
+/** Clinic OS invitations / removal. `details.reason` says exactly why. */
+export class ClinicInvitationConflictException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("CLINIC_INVITATION_CONFLICT", "This invitation can't be used in its current state.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ClinicMemberNotRemovableException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("CLINIC_MEMBER_NOT_REMOVABLE", "This team member can't be removed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ClinicBranchInUseException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("CLINIC_BRANCH_IN_USE", "This branch is still in use and can't be removed.", HttpStatus.CONFLICT, details);
+  }
+}

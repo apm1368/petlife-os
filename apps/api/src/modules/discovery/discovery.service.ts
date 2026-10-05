@@ -221,7 +221,7 @@ export class DiscoveryService {
       include: {
         locations: true,
         services: { where: { isActive: true }, include: { variants: true, qualifiedStaff: { select: { providerUserId: true } } }, orderBy: { name: "asc" } },
-        providerUsers: { where: { isBookable: true }, include: { user: { select: { displayName: true, avatarUrl: true } }, qualifiedServices: { select: { serviceId: true } } }, orderBy: { createdAt: "asc" } },
+        providerUsers: { where: { isBookable: true, removedAt: null }, include: { user: { select: { displayName: true, avatarUrl: true } }, qualifiedServices: { select: { serviceId: true } } }, orderBy: { createdAt: "asc" } },
       },
     });
     if (!org) throw new NotFoundApiException("Provider");

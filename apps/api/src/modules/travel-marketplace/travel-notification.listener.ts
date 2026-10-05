@@ -54,7 +54,7 @@ export class TravelNotificationListener {
   }
 
   private async provider(p: TravelEventPayload, type: string, domainEventId: string) {
-    const owners = await this.prisma.providerUser.findMany({ where: { providerOrganizationId: p.organizationId, role: "OWNER" }, select: { userId: true } });
+    const owners = await this.prisma.providerUser.findMany({ where: { providerOrganizationId: p.organizationId, role: "OWNER", removedAt: null }, select: { userId: true } });
     for (const owner of owners) {
       await this.orchestrator.notify({
         userId: owner.userId,
@@ -116,7 +116,7 @@ export class TravelNotificationListener {
   onListingStatus(p: { listingId: string; organizationId?: string; to: string }, id: string) {
     return this.safely("TravelListingStatusChanged", async () => {
       if (!p.organizationId || !["PUBLISHED", "DRAFT", "SUSPENDED"].includes(p.to)) return;
-      const owners = await this.prisma.providerUser.findMany({ where: { providerOrganizationId: p.organizationId, role: "OWNER" }, select: { userId: true } });
+      const owners = await this.prisma.providerUser.findMany({ where: { providerOrganizationId: p.organizationId, role: "OWNER", removedAt: null }, select: { userId: true } });
       for (const owner of owners) {
         await this.orchestrator.notify({
           userId: owner.userId,
