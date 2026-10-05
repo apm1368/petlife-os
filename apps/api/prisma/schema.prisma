@@ -9259,10 +9259,14 @@ model ChatParticipant {
   user           User             @relation("ChatParticipations", fields: [userId], references: [id], onDelete: Cascade)
   joinedAt       DateTime         @default(now())
   lastReadAt     DateTime?
-  /// Per-member conversation controls: archived (hidden from the inbox until a new message), muted (no
-  /// notifications), clearedAt (messages up to then are hidden for this member only).
+  /// Per-member conversation controls (never affect the other member):
+  /// archivedAt — out of the main inbox (listed under archived) until a new incoming message;
+  /// mutedUntil — no notifications until then (unread counts unchanged);
+  /// hiddenAt + clearedAt — "delete for me": hidden from every list, and messages up to clearedAt are hidden
+  /// for this member only; a new incoming message brings the conversation back (old messages stay hidden).
   archivedAt     DateTime?
-  muted          Boolean          @default(false)
+  mutedUntil     DateTime?
+  hiddenAt       DateTime?
   clearedAt      DateTime?
 
   @@id([conversationId, userId])

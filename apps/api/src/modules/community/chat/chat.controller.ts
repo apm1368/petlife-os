@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { Type } from "class-transformer";
-import { IsDateString, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
+import { IsDateString, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../../common/session/session.service";
@@ -16,6 +16,14 @@ class MessagesQuery {
 }
 
 /** Community chat v1 — private 1:1 conversations; all routes are the signed-in member's own. */
+class ListConversationsQueryDto {
+  @IsOptional() @IsIn(["true", "false"]) archived?: string;
+}
+
+class MuteConversationDto {
+  @IsIn(["ONE_HOUR", "EIGHT_HOURS", "ONE_DAY", "FOREVER"]) duration!: "ONE_HOUR" | "EIGHT_HOURS" | "ONE_DAY" | "FOREVER";
+}
+
 @Controller("chat")
 @UseGuards(SessionAuthGuard)
 export class ChatController {
@@ -28,8 +36,8 @@ export class ChatController {
   }
 
   @Get("conversations")
-  list(@CurrentUser() user: SessionUser) {
-    return this.chat.list(user.id);
+  list(@CurrentUser() user: SessionUser, @Query() query: ListConversationsQueryDto) {
+    return this.chat.list(user.id, query.archived === "true");
   }
 
   @Get("conversations/:id/messages")
@@ -46,6 +54,32 @@ export class ChatController {
   @Post("conversations/:id/read")
   read(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
     return this.chat.markRead(user.id, id);
+  }
+
+  @Post("conversations/:id/archive")
+  archive(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.chat.setArchived(user.id, id, true);
+  }
+
+  @Post("conversations/:id/unarchive")
+  unarchive(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.chat.setArchived(user.id, id, false);
+  }
+
+  @Post("conversations/:id/mute")
+  mute(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: MuteConversationDto) {
+    return this.chat.mute(user.id, id, dto.duration);
+  }
+
+  @Delete("conversations/:id/mute")
+  unmute(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.chat.mute(user.id, id, null);
+  }
+
+  /** Hides the conversation and its history for the caller only. Never deletes shared messages. */
+  @Post("conversations/:id/delete-for-self")
+  deleteForSelf(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.chat.deleteForSelf(user.id, id);
   }
 
   @Get("unread-count")

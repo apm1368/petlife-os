@@ -1,3 +1,4 @@
+import { estimateReadingMinutes } from "./reading-time.util";
 import { Injectable } from "@nestjs/common";
 import { ArticleLifecycleStatus, Locale, Prisma } from "@prisma/client";
 import type { PaginatedDto, PublicArticleDetailDto, PublicArticleReferenceDto, PublicArticleSummaryDto, PublicCategoryDto, PublicTagDto, RichTextDocument } from "@petlife/types";
@@ -39,6 +40,7 @@ function toSummary(row: PublicArticleLocaleRow): PublicArticleSummaryDto {
     tags: article.tags.map((t) => t.tag.locales[0]).filter((l): l is NonNullable<typeof l> => Boolean(l)).map(toPublicTagDto),
     publishedAt: row.publishedAt!.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    estimatedReadingMinutes: estimateReadingMinutes(row.body, [row.title, row.excerpt ?? ""]),
   };
 }
 
@@ -96,6 +98,56 @@ export class PublicContentReadService {
     if (!row || row.status !== ArticleLifecycleStatus.VISIBLE) throw new ArticleLocaleNotFoundException({ locale, slug });
     const body = await resolveRichTextMedia(this.prisma, row.body as unknown as RichTextDocument);
     return { ...toSummary(row), body, seoTitle: row.seoTitle, seoDescription: row.seoDescription };
+  }
+
+  /**
+   * Related reading by shared category (3 points) and shared tags (1 point each) only — same locale, visible,
+   * never the article itself. Ties break by newest, then id, so the order is stable.
+   */
+  async relatedArticles(locale: Locale, slug: string, limit = 4): Promise<PublicArticleSummaryDto[]> {
+    const current = await this.prisma.articleLocale.findUnique({ where: { locale_slug: { locale, slug } }, include: { article: { select: { id: true, categoryId: true, tags: { select: { tagId: true } } } } } });
+    if (!current || current.status !== ArticleLifecycleStatus.VISIBLE) throw new ArticleLocaleNotFoundException({ locale, slug });
+    const tagIds = current.article.tags.map((t) => t.tagId);
+    const signals: Prisma.ArticleWhereInput[] = [...(current.article.categoryId ? [{ categoryId: current.article.categoryId }] : []), ...(tagIds.length ? [{ tags: { some: { tagId: { in: tagIds } } } }] : [])];
+    if (!signals.length) return [];
+    const rows = await this.prisma.articleLocale.findMany({
+      where: { locale, status: ArticleLifecycleStatus.VISIBLE, articleId: { not: current.articleId }, article: { OR: signals } },
+      include: { article: { include: articleInclude(locale) } },
+      take: 50,
+    });
+    const score = (r: (typeof rows)[number]) => (current.article.categoryId && r.article.categoryId === current.article.categoryId ? 3 : 0) + r.article.tags.filter((t) => tagIds.includes(t.tagId)).length;
+    return rows
+      .map((r) => ({ r, s: score(r) }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s || (b.r.publishedAt?.getTime() ?? 0) - (a.r.publishedAt?.getTime() ?? 0) || a.r.id.localeCompare(b.r.id))
+      .slice(0, Math.min(Math.max(limit, 1), 5))
+      .map((x) => toSummary(x.r));
+  }
+
+  /** Aggregate helpful / not-helpful counts (no identities) plus the caller's own answer when signed in. */
+  async feedbackSummary(locale: Locale, slug: string, userId?: string) {
+    const articleId = await this.visibleArticleId(locale, slug);
+    const [helpful, notHelpful, mine] = await Promise.all([
+      this.prisma.articleFeedback.count({ where: { articleId, helpful: true } }),
+      this.prisma.articleFeedback.count({ where: { articleId, helpful: false } }),
+      userId ? this.prisma.articleFeedback.findUnique({ where: { articleId_userId: { articleId, userId } }, select: { helpful: true } }) : null,
+    ]);
+    return { helpfulCount: helpful, notHelpfulCount: notHelpful, mine: mine ? (mine.helpful ? "HELPFUL" : "NOT_HELPFUL") : null };
+  }
+
+  /** One answer per member per article; changing it updates the same row. A reason is only kept for NOT_HELPFUL. */
+  async giveFeedback(locale: Locale, slug: string, userId: string, vote: "HELPFUL" | "NOT_HELPFUL", reason?: string) {
+    const articleId = await this.visibleArticleId(locale, slug);
+    const helpful = vote === "HELPFUL";
+    const data = { helpful, reason: helpful ? null : reason?.trim() || null };
+    await this.prisma.articleFeedback.upsert({ where: { articleId_userId: { articleId, userId } }, create: { articleId, userId, ...data }, update: data });
+    return this.feedbackSummary(locale, slug, userId);
+  }
+
+  private async visibleArticleId(locale: Locale, slug: string) {
+    const row = await this.prisma.articleLocale.findUnique({ where: { locale_slug: { locale, slug } }, select: { articleId: true, status: true } });
+    if (!row || row.status !== ArticleLifecycleStatus.VISIBLE) throw new ArticleLocaleNotFoundException({ locale, slug });
+    return row.articleId;
   }
 
   async getArticleReference(locale: Locale, articleId: string): Promise<PublicArticleReferenceDto | null> {

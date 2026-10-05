@@ -166,6 +166,23 @@ async function main() {
     await db.communityComment.upsert({ where: { id: id("comment:reply") }, create: { id: id("comment:reply"), postId: p1.id, authorUserId: reviewer.id, body: "ممنون، امتحان می‌کنم. (پاسخ نمایشی)", parentCommentId: top.id }, update: {} });
     await db.communityPostBookmark.upsert({ where: { userId_postId: { userId: helperB.id, postId: p1.id } }, create: { userId: helperB.id, postId: p1.id }, update: {} });
 
+    // Chat controls for the reviewer: the support conversation archived, the spam one muted, a third deleted-for-self.
+    const helperPair = reviewer.id < helperA.id ? `${reviewer.id}:${helperA.id}` : `${helperA.id}:${reviewer.id}`;
+    const hiddenConv = await db.chatConversation.upsert({ where: { pairKey: helperPair }, create: { id: id("chat:hidden"), pairKey: helperPair, lastMessageAt: new Date(Date.now() - 5 * DAY) }, update: {} });
+    for (const u of [reviewer.id, helperA.id]) await db.chatParticipant.upsert({ where: { conversationId_userId: { conversationId: hiddenConv.id, userId: u } }, create: { conversationId: hiddenConv.id, userId: u }, update: {} });
+    await db.chatMessage.upsert({ where: { id: id("chat:hidden:m1") }, create: { id: id("chat:hidden:m1"), conversationId: hiddenConv.id, senderUserId: helperA.id, body: "سلام، برای انتقال غذا هماهنگ کنیم؟ (پیام نمایشی)", createdAt: new Date(Date.now() - 5 * DAY) }, update: {} });
+    await db.chatParticipant.update({ where: { conversationId_userId: { conversationId: hiddenConv.id, userId: reviewer.id } }, data: { hiddenAt: new Date(Date.now() - 4 * DAY), clearedAt: new Date(Date.now() - 4 * DAY) } });
+    await db.chatParticipant.update({ where: { conversationId_userId: { conversationId: conv.id, userId: reviewer.id } }, data: { mutedUntil: new Date("9999-12-31T00:00:00Z") } });
+    const customerConv = await db.chatConversation.findUnique({ where: { id: "25eca4b0-2b66-4361-8e88-59c54571265f" } });
+    if (customerConv) await db.chatParticipant.updateMany({ where: { conversationId: customerConv.id, userId: { not: reviewer.id } }, data: { archivedAt: new Date() } });
+
+    // Content feedback on a demo guide (one helpful, one not helpful with a reason).
+    const guide = await db.articleLocale.findFirst({ where: { slug: "dog-vaccination-schedule" }, select: { articleId: true } });
+    if (guide) {
+      await db.articleFeedback.upsert({ where: { articleId_userId: { articleId: guide.articleId, userId: helperA.id } }, create: { articleId: guide.articleId, userId: helperA.id, helpful: true }, update: {} });
+      await db.articleFeedback.upsert({ where: { articleId_userId: { articleId: guide.articleId, userId: helperB.id } }, create: { articleId: guide.articleId, userId: helperB.id, helpful: false, reason: "جدول واکسن گربه هم لازم است." }, update: {} });
+    }
+
     // ---------------------------------------------------------------- Clinic: vet seat, grant, visit + vitals
     const owner = await db.providerUser.findFirstOrThrow({ where: { role: "OWNER", removedAt: null, user: { email: "batch3-clinic-owner@example.test" } } });
     const vetUser = await user("clinic-demo-vet@example.test", "دکتر نیلوفر (دامپزشک نمایشی)");

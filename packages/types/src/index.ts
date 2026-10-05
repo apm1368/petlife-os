@@ -3399,6 +3399,8 @@ export interface PublicArticleSummaryDto {
   tags: PublicTagDto[];
   publishedAt: string;
   updatedAt: string;
+  /** Server-derived (200 words/minute, minimum 1). */
+  estimatedReadingMinutes?: number;
 }
 
 export interface PublicArticleDetailDto extends PublicArticleSummaryDto {

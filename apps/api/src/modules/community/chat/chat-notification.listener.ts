@@ -15,6 +15,9 @@ export class ChatNotificationListener {
   async onSent(p: { conversationId: string; messageId: string; senderUserId: string; recipientUserId: string | null }, domainEventId: string) {
     try {
       if (!p.recipientUserId) return;
+      // A muted conversation still delivers the message and its unread count — only the notification is skipped.
+      const recipient = await this.prisma.chatParticipant.findUnique({ where: { conversationId_userId: { conversationId: p.conversationId, userId: p.recipientUserId } }, select: { mutedUntil: true } });
+      if (recipient?.mutedUntil && recipient.mutedUntil > new Date()) return;
       const sender = await this.prisma.user.findUnique({ where: { id: p.senderUserId }, select: { displayName: true } });
       await this.orchestrator.notify({
         userId: p.recipientUserId,

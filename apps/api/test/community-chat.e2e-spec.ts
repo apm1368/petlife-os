@@ -100,4 +100,48 @@ describe("Community chat", () => {
     await db.chatMessage.update({ where: { id: m.id }, data: { status: "REMOVED" } });
     expect((await b.get(`/chat/conversations/${c.id}/messages`).expect(200)).body.items).toHaveLength(0);
   });
+
+  it("per-member controls: archive, mute (notifications only), delete-for-self — none touch the other member", async () => {
+    const a = await actor("a-ctrl"), b = await actor("b-ctrl"), outsider = await actor("o-ctrl");
+    const c = (await a.post("/chat/conversations").send({ participantUserId: b.id }).expect(201)).body;
+    await b.post(`/chat/conversations/${c.id}/messages`).send({ body: "first" }).expect(201);
+    const ids = (who: typeof a, q = "") => who.get(`/chat/conversations${q}`).expect(200).then((r) => r.body.map((x: { id: string }) => x.id));
+
+    // Archive: only a's inbox changes; a new incoming message brings it back.
+    expect((await a.post(`/chat/conversations/${c.id}/archive`).expect(201)).body.archived).toBe(true);
+    expect(await ids(a)).not.toContain(c.id);
+    expect(await ids(a, "?archived=true")).toEqual([c.id]);
+    expect(await ids(b)).toContain(c.id);
+    await b.post(`/chat/conversations/${c.id}/messages`).send({ body: "back?" }).expect(201);
+    expect(await ids(a)).toContain(c.id);
+
+    // Mute: no notification, but the message and unread count are unchanged.
+    expect((await a.post(`/chat/conversations/${c.id}/mute`).send({ duration: "ONE_DAY" }).expect(201)).body.mutedUntil).toBeTruthy();
+    await a.post(`/chat/conversations/${c.id}/mute`).send({ duration: "ONE_YEAR" }).expect(400);
+    const before = await db.notification.count({ where: { userId: a.id, type: "community.chat_message" } });
+    await b.post(`/chat/conversations/${c.id}/messages`).send({ body: "while muted" }).expect(201);
+    expect(await db.notification.count({ where: { userId: a.id, type: "community.chat_message" } })).toBe(before);
+    expect((await a.get("/chat/unread-count").expect(200)).body.unreadCount).toBe(3);
+    expect((await b.get("/chat/conversations").expect(200)).body.find((x: { id: string }) => x.id === c.id).mutedUntil).toBeNull();
+    expect((await a.del(`/chat/conversations/${c.id}/mute`).expect(200)).body.mutedUntil).toBeNull();
+    await b.post(`/chat/conversations/${c.id}/messages`).send({ body: "after unmute" }).expect(201);
+    expect(await db.notification.count({ where: { userId: a.id, type: "community.chat_message" } })).toBe(before + 1);
+
+    // Delete for self: gone from a's lists and history; b still has everything; nothing is deleted.
+    const total = await db.chatMessage.count({ where: { conversationId: c.id } });
+    await a.post(`/chat/conversations/${c.id}/delete-for-self`).expect(201);
+    expect(await ids(a)).not.toContain(c.id);
+    expect(await ids(a, "?archived=true")).not.toContain(c.id);
+    expect((await a.get("/chat/unread-count").expect(200)).body.unreadCount).toBe(0);
+    expect((await b.get(`/chat/conversations/${c.id}/messages`).expect(200)).body.items).toHaveLength(total);
+    expect(await db.chatMessage.count({ where: { conversationId: c.id } })).toBe(total);
+    // A new incoming message restores it for a, showing only what came after.
+    await b.post(`/chat/conversations/${c.id}/messages`).send({ body: "new start" }).expect(201);
+    expect(await ids(a)).toContain(c.id);
+    expect((await a.get(`/chat/conversations/${c.id}/messages`).expect(200)).body.items.map((m: { body: string }) => m.body)).toEqual(["new start"]);
+
+    // Participant-only: the outsider gets the same 404 for every control.
+    for (const path of ["archive", "unarchive", "delete-for-self"]) await outsider.post(`/chat/conversations/${c.id}/${path}`).expect(404);
+    await outsider.post(`/chat/conversations/${c.id}/mute`).send({ duration: "FOREVER" }).expect(404);
+  });
 });
