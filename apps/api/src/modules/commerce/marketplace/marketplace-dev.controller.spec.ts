@@ -10,8 +10,8 @@ import { MarketplaceProviderDisabledException } from "../../../common/errors/api
  * exact same `assertDevSimulationAllowed` code path deterministically.
  */
 describe("MarketplaceDevController — production gate", () => {
-  function buildController(nodeEnv: string, devMarketplaceEnabled = true) {
-    const config = { get: (key: string) => (key === "NODE_ENV" ? nodeEnv : devMarketplaceEnabled) };
+  function buildController(nodeEnv: string, devMarketplaceEnabled = true, devSimulationEnabled = true) {
+    const config = { get: (key: string) => (key === "NODE_ENV" ? nodeEnv : key === "DEV_SIMULATION_ENABLED" ? devSimulationEnabled : devMarketplaceEnabled) };
     // Only the guard is exercised in these tests, so the remaining collaborators are never called.
     return new MarketplaceDevController(config as never, undefined as never, undefined as never, undefined as never, undefined as never);
   }
@@ -26,6 +26,11 @@ describe("MarketplaceDevController — production gate", () => {
 
   it("rejects when DEV_MARKETPLACE_ENABLED is false even outside production", async () => {
     const controller = buildController("development", false);
+    await expect(controller.simulateOrder(undefined as never, "channel-1", { externalOrderId: "x", items: [] })).rejects.toBeInstanceOf(MarketplaceProviderDisabledException);
+  });
+
+  it("rejects outside production unless DEV_SIMULATION_ENABLED is set (the canonical server leaves it off)", async () => {
+    const controller = buildController("development", true, false);
     await expect(controller.simulateOrder(undefined as never, "channel-1", { externalOrderId: "x", items: [] })).rejects.toBeInstanceOf(MarketplaceProviderDisabledException);
   });
 });

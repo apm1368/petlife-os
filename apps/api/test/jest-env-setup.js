@@ -3,6 +3,8 @@
 // the dedicated test database instead of whatever `.env` points at locally.
 process.env.NODE_ENV = "test";
 process.env.GOOGLE_DEV_SIMULATE_ENABLED = process.env.GOOGLE_DEV_SIMULATE_ENABLED ?? "true";
+// The suites drive sandbox webhooks and dev/simulate routes; the canonical server leaves this off.
+process.env.DEV_SIMULATION_ENABLED = process.env.DEV_SIMULATION_ENABLED ?? "true";
 // Suites create households and assert FREE-plan limits; the welcome trial is opted into per test.
 process.env.WELCOME_TRIAL_PLAN_CODE = process.env.WELCOME_TRIAL_PLAN_CODE ?? "";
 process.env.DATABASE_URL =

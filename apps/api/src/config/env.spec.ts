@@ -30,3 +30,17 @@ describe("validateEnv — development Google sign-in simulation", () => {
     expect(validateEnv({ ...base, NODE_ENV: "development", GOOGLE_DEV_SIMULATE_ENABLED: "true" } as NodeJS.ProcessEnv).GOOGLE_DEV_SIMULATE_ENABLED).toBe(true);
   });
 });
+
+describe("validateEnv — dev simulation and boolean flags", () => {
+  it("keeps dev simulation off unless explicitly enabled", () => {
+    expect(validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv).DEV_SIMULATION_ENABLED).toBe(false);
+    expect(validateEnv({ ...base, NODE_ENV: "development", DEV_SIMULATION_ENABLED: "true" } as NodeJS.ProcessEnv).DEV_SIMULATION_ENABLED).toBe(true);
+  });
+
+  it("reads the string \"false\" as false for provider flags", () => {
+    const env = validateEnv({ ...base, NODE_ENV: "development", DEV_MESSAGING_ENABLED: "false", DEV_SHIPPING_ENABLED: "0" } as NodeJS.ProcessEnv);
+    expect(env.DEV_MESSAGING_ENABLED).toBe(false);
+    expect(env.DEV_SHIPPING_ENABLED).toBe(false);
+    expect(validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv).DEV_MESSAGING_ENABLED).toBe(true);
+  });
+});

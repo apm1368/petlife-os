@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { NotificationCategory, NotificationPriority } from "@prisma/client";
 import type { AppEnv } from "../../config/env";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
+import { devSimulationAllowed } from "../../common/dev/dev-simulation";
 import { MessagingProviderDisabledException } from "../../common/errors/api-exception";
 import { NotificationOrchestratorService } from "./notification-orchestrator.service";
 import { NotificationDeliveryService } from "./notification-delivery.service";
@@ -38,7 +39,7 @@ export class NotificationDevController {
   ) {}
 
   private assertDevAllowed(): void {
-    if (this.config.get("NODE_ENV", { infer: true }) === "production") throw new MessagingProviderDisabledException({ reason: "Dev simulation is never available in production" });
+    if (!devSimulationAllowed(this.config)) throw new MessagingProviderDisabledException({ reason: "Dev simulation is not enabled on this server" });
     if (!this.config.get("DEV_MESSAGING_ENABLED", { infer: true })) throw new MessagingProviderDisabledException({ provider: "DEV" });
   }
 

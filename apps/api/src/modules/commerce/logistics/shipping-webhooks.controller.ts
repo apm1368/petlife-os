@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { ShippingProvider, type ShipmentStatus } from "@prisma/client";
 import type { AppEnv } from "../../../config/env";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
+import { devSimulationAllowed } from "../../../common/dev/dev-simulation";
 import { CurrentUser } from "../../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../../common/session/session.service";
 import { ShippingProviderDisabledException, ShippingWebhookInvalidException } from "../../../common/errors/api-exception";
@@ -39,6 +40,8 @@ export class ShippingWebhooksController {
   @Post("webhooks/:provider")
   async handleWebhook(@Param("provider") providerSlug: string, @Body() dto: ShippingWebhookDto) {
     const provider = resolveProviderSlug(providerSlug);
+    // Sandbox adapters accept unsigned bodies; outside an explicit dev-simulation server nobody may post them.
+    if (this.config.get("SHIPPING_MODE", { infer: true }) !== "production" && !devSimulationAllowed(this.config)) throw new ShippingWebhookInvalidException({ provider: providerSlug, reason: "SANDBOX_WEBHOOKS_DISABLED" });
     const gateway = this.shippingProviders.resolve(provider);
 
     const result = await gateway.handleWebhook({ rawBody: dto, signatureHeader: undefined });
@@ -79,7 +82,7 @@ export class ShippingWebhooksController {
   @Post("dev/simulate/:providerShipmentId")
   @UseGuards(SessionAuthGuard)
   async simulateDevEvent(@CurrentUser() _user: SessionUser, @Param("providerShipmentId") providerShipmentId: string, @Body() body: { toStatus?: string }) {
-    if (this.config.get("NODE_ENV", { infer: true }) === "production") throw new ShippingProviderDisabledException({ reason: "Dev simulation is never available in production" });
+    if (!devSimulationAllowed(this.config)) throw new ShippingProviderDisabledException({ reason: "Dev simulation is not enabled on this server" });
     if (!this.config.get("DEV_SHIPPING_ENABLED", { infer: true })) throw new ShippingProviderDisabledException({ provider: "DEV" });
 
     const toStatus = body.toStatus as ShipmentStatus | undefined;

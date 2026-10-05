@@ -1,5 +1,12 @@
 import { loadEnv, z } from "@petlife/config";
 
+/** A boolean env flag that reads "false"/"0" as false (z.coerce.boolean() would read the string "false" as true). */
+const flag = (fallback: boolean) =>
+  z
+    .enum(["true", "false", "1", "0"])
+    .default(fallback ? "true" : "false")
+    .transform((v) => v === "true" || v === "1");
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   /// Interface the API listens on. nginx reaches it on 127.0.0.1, so the default keeps the raw port
@@ -12,6 +19,11 @@ const envSchema = z.object({
   /// The /dev/auth/google/simulate test endpoint signs in as any Google identity. It must be opted
   /// into explicitly (the e2e suite does) and is never honoured in production, whatever the flag.
   GOOGLE_DEV_SIMULATE_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
+  /// Dev simulation surfaces — /dev/notifications/*, shipping and marketplace dev/simulate, and the
+  /// unsigned sandbox payment/shipping webhooks — let a caller fabricate notifications, payment results
+  /// and shipment states for anyone. Off unless explicitly enabled (local dev and the e2e suite do);
+  /// never honoured in production. The canonical public server must leave it unset.
+  DEV_SIMULATION_ENABLED: flag(false),
   PORT: z.coerce.number().int().positive().default(4000),
 
   // Immutable release metadata injected by CI/deploy. These values are
@@ -94,9 +106,9 @@ const envSchema = z.object({
   /// documented, precisely to prevent ever calling a real endpoint that was
   /// never actually wired up.
   PAYMENT_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  STANDARD_GATEWAY_ENABLED: z.coerce.boolean().default(true),
-  SNAPPAY_ENABLED: z.coerce.boolean().default(true),
-  DIGIPAY_ENABLED: z.coerce.boolean().default(true),
+  STANDARD_GATEWAY_ENABLED: flag(true),
+  SNAPPAY_ENABLED: flag(true),
+  DIGIPAY_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapters — present only so a
   /// real integration has a place to read credentials from without a schema
   /// change, and so startup validation can require them in "production" mode.
@@ -114,9 +126,9 @@ const envSchema = z.object({
   /// status"), so SHIPPING_MODE=production is rejected unless every enabled
   /// real provider's credentials are actually configured.
   SHIPPING_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  DEV_SHIPPING_ENABLED: z.coerce.boolean().default(true),
-  ALOPEYK_ENABLED: z.coerce.boolean().default(true),
-  SNAPPBOX_ENABLED: z.coerce.boolean().default(true),
+  DEV_SHIPPING_ENABLED: flag(true),
+  ALOPEYK_ENABLED: flag(true),
+  SNAPPBOX_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapters — present only so a
   /// real integration has a place to read credentials from without a schema
   /// change, and so startup validation can require them in "production" mode.
@@ -135,9 +147,9 @@ const envSchema = z.object({
   /// MARKETPLACE_SANDBOX_MODE=production is rejected unless every enabled
   /// real provider's credentials are actually configured.
   MARKETPLACE_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  DEV_MARKETPLACE_ENABLED: z.coerce.boolean().default(true),
-  TOROB_ENABLED: z.coerce.boolean().default(true),
-  DIGIKALA_ENABLED: z.coerce.boolean().default(true),
+  DEV_MARKETPLACE_ENABLED: flag(true),
+  TOROB_ENABLED: flag(true),
+  DIGIKALA_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapters — present only so a
   /// real integration has a place to read credentials from without a schema
   /// change, and so startup validation can require them in "production" mode.
@@ -157,8 +169,8 @@ const envSchema = z.object({
   /// default — "dev" locally/in tests, "faraz" once real credentials exist.
   MESSAGING_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
   MESSAGING_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  DEV_MESSAGING_ENABLED: z.coerce.boolean().default(true),
-  FARAZ_SMS_ENABLED: z.coerce.boolean().default(true),
+  DEV_MESSAGING_ENABLED: flag(true),
+  FARAZ_SMS_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapter — present only so a
   /// real integration has a place to read credentials from without a schema
   /// change, and so startup validation can require them in "production" mode.
