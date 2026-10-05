@@ -58,6 +58,8 @@ const PUBLIC_GET = new Set([
 const OWN_ACTION = new Set([
   "DELETE /community/posts/:postId/reactions",
   "POST /community/posts/:postId/reactions",
+  "POST /community/posts/:postId/save",
+  "DELETE /community/posts/:postId/save",
   "POST /places/favorites/:placeId",
   "DELETE /places/favorites/:placeId",
   "PUT /travel/listings/:id/favorite",

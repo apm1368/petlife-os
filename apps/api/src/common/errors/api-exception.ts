@@ -1776,3 +1776,10 @@ export class ClinicBranchInUseException extends ApiException {
     super("CLINIC_BRANCH_IN_USE", "This branch is still in use and can't be removed.", HttpStatus.CONFLICT, details);
   }
 }
+
+/** A block between two members stops comments and replies between them (either direction). */
+export class CommunityInteractionBlockedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_INTERACTION_BLOCKED", "You can't interact with this member.", HttpStatus.FORBIDDEN, details);
+  }
+}

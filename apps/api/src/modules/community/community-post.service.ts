@@ -7,7 +7,7 @@ import { StorageService } from "../storage/storage.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
-import { CommunityCommentNotFoundException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException } from "../../common/errors/api-exception";
+import { CommunityCommentNotFoundException, CommunityInteractionBlockedException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 import { toCommunityCommentDto, toCommunityPostDto } from "./community-mapper";
 import type { CreateCommunityCommentDto, CreateCommunityPostDto, ListCommunityPostsQueryDto, SetCommunityReactionDto } from "./dto/community.dto";
@@ -161,6 +161,11 @@ export class CommunityPostService {
     // One level of replies: the parent must be a published top-level comment on this same post.
     const parent = dto.parentCommentId ? await this.prisma.communityComment.findFirst({ where: { id: dto.parentCommentId, postId, parentCommentId: null, status: CommunityContentStatus.PUBLISHED } }) : null;
     if (dto.parentCommentId && !parent) throw new CommunityCommentNotFoundException({ commentId: dto.parentCommentId });
+    // A block in either direction between the commenter and the person they'd be addressing stops the interaction.
+    const addressed = [...new Set([post.authorUserId, ...(parent ? [parent.authorUserId] : [])])].filter((u) => u !== authorUserId);
+    if (addressed.length && (await this.prisma.userBlock.count({ where: { OR: addressed.flatMap((u) => [{ blockerUserId: authorUserId, blockedUserId: u }, { blockerUserId: u, blockedUserId: authorUserId }]) } }))) {
+      throw new CommunityInteractionBlockedException({ postId });
+    }
     const row = await this.prisma.$transaction(async (tx) => {
       const created = await tx.communityComment.create({ data: { postId, authorUserId, body: dto.body, parentCommentId: parent?.id ?? null } });
       await this.events.publish("CommunityCommentAdded", { postId, commentId: created.id, authorUserId }, { tx, aggregateType: "CommunityPost", aggregateId: postId });
