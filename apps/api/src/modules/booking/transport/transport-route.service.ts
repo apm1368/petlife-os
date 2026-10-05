@@ -85,14 +85,22 @@ export class TransportRouteService {
     const member = address ? await this.prisma.householdMember.findFirst({ where: { householdId: address.householdId, userId } }) : null;
     if (!address || !member) throw new AddressRequiredException({ locationMode: LocationMode.TRANSPORT, field: "customerAddressId" });
     const snap = await this.snapshot(service, address.householdId, pickupAddressId, dropoffAddressId);
+    const pricingRow = await this.prisma.serviceTransportPricing.findUnique({ where: { providerServiceId: service.id }, select: { isActive: true } });
+    // Honest state for the UI: no active tariff is NOT_CONFIGURED (never a made-up fare); an active tariff
+    // without a measurable distance is DISTANCE_UNAVAILABLE.
+    const pricingStatus = snap.distancePricingApplied ? "CONFIGURED" : !pricingRow?.isActive ? "NOT_CONFIGURED" : "DISTANCE_UNAVAILABLE";
+    const fixed = service.priceAmount === null ? null : Number(service.priceAmount);
     return {
+      pricingStatus,
+      /** What estimatedFareIrr is based on: the distance tariff, the provider's own fixed service price, or nothing. */
+      estimateBasis: snap.distancePricingApplied ? "DISTANCE_TARIFF" : fixed === null ? "NONE" : "SERVICE_FIXED_PRICE",
       serviceId,
       mapProvider: MAP_PROVIDER_STATUS,
       distanceSource: snap.distanceSource,
       distanceMeters: snap.distanceMeters,
       distancePricingApplied: snap.distancePricingApplied,
       pricing: snap.distancePricingApplied ? { baseFareIrr: snap.baseFareIrr, perKmRateIrr: snap.perKmRateIrr, serviceAdjustmentIrr: snap.serviceAdjustmentIrr, minimumFareIrr: snap.minimumFareIrr } : null,
-      estimatedFareIrr: snap.distancePricingApplied ? snap.estimatedFareIrr : service.priceAmount === null ? null : Number(service.priceAmount),
+      estimatedFareIrr: snap.distancePricingApplied ? snap.estimatedFareIrr : fixed,
       pickup: { text: snap.pickupAddressText, lat: snap.pickupLat, lng: snap.pickupLng },
       dropoff: { text: snap.dropoffAddressText, lat: snap.dropoffLat, lng: snap.dropoffLng },
     };

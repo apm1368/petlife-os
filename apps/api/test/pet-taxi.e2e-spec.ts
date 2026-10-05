@@ -77,6 +77,7 @@ describe("Pet taxi — route snapshot and distance pricing", () => {
     expect(quote.mapProvider).toBe("BLOCKED_EXTERNAL");
     expect(quote.distanceSource).toBe("STRAIGHT_LINE_DEMO");
     expect(quote.distancePricingApplied).toBe(true);
+    expect(quote).toMatchObject({ pricingStatus: "CONFIGURED", estimateBasis: "DISTANCE_TARIFF" });
     const expected = 500_000 + Math.ceil((120_000 * quote.distanceMeters) / 1000);
     expect(quote.estimatedFareIrr).toBe(expected);
 
@@ -97,9 +98,11 @@ describe("Pet taxi — route snapshot and distance pricing", () => {
     const inactive = await taxi({ baseFareIrr: 500_000, perKmRateIrr: 120_000, isActive: false });
     const q1 = (await get(owner, `/provider-services/${inactive.service.id}/transport-quote?pickupAddressId=${r.pickup.id}&dropoffAddressId=${r.dropoff.id}`).expect(200)).body;
     expect([q1.distancePricingApplied, q1.estimatedFareIrr]).toEqual([false, 2_000_000]);
+    expect(q1).toMatchObject({ pricingStatus: "NOT_CONFIGURED", estimateBasis: "SERVICE_FIXED_PRICE", pricing: null });
     const priced = await taxi({ baseFareIrr: 500_000, perKmRateIrr: 120_000, isActive: true });
     const q2 = (await get(owner, `/provider-services/${priced.service.id}/transport-quote?pickupAddressId=${r.pickup.id}&dropoffAddressId=${r.noCoords.id}`).expect(200)).body;
     expect([q2.distanceSource, q2.distanceMeters, q2.distancePricingApplied, q2.estimatedFareIrr]).toEqual(["UNAVAILABLE", null, false, 2_000_000]);
+    expect(q2.pricingStatus).toBe("DISTANCE_UNAVAILABLE");
     const booking = await book(owner, r, priced, r.noCoords.id);
     expect(Number(booking.priceAmount)).toBe(2_000_000);
     expect(booking.transportRoute).toMatchObject({ distanceSource: "UNAVAILABLE", distancePricingApplied: false });
