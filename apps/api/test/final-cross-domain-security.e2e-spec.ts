@@ -40,6 +40,7 @@ const PUBLIC_GET = new Set([
   "/places/:placeId",
   "/provider-services/:serviceId",
   "/provider-services/:serviceId/availability",
+  "/provider-services/:serviceId/intake-form",
   "/providers/:providerId/reviews",
   "/providers/vets/:providerId",
   "/providers/vets/:providerId/availability",

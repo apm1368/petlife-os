@@ -396,6 +396,22 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "عضویت در {{clinic}} پایان یافت", body: "دسترسی شما به پنل {{clinic}} برداشته شد." },
     en: { title: "Your access to {{clinic}} ended", body: "You no longer have access to {{clinic}}'s panel." },
   },
+  "booking.ride_arriving": {
+    fa: { title: "راننده در راه است", body: "{{provider}} به محل سوار شدن نزدیک می‌شود." },
+    en: { title: "Your ride is arriving", body: "{{provider}} is arriving at the pickup point." },
+  },
+  "booking.ride_picked_up": {
+    fa: { title: "پت سوار شد", body: "{{provider}} پت شما را سوار کرد." },
+    en: { title: "Pet picked up", body: "{{provider}} picked up your pet." },
+  },
+  "booking.ride_dropped_off": {
+    fa: { title: "پت به مقصد رسید", body: "{{provider}} پت شما را به مقصد رساند." },
+    en: { title: "Pet dropped off", body: "{{provider}} dropped your pet off." },
+  },
+  "booking.provider_document": {
+    fa: { title: "مدرک تازه از {{provider}}", body: "{{provider}} یک فایل به نوبت شما اضافه کرد." },
+    en: { title: "New document from {{provider}}", body: "{{provider}} added a file to your booking." },
+  },
   "care.assigned": {
     fa: { title: "کار مراقبتی برای شما", body: "{{title}} برای {{petName}} به شما سپرده شد." },
     en: { title: "Care task for you", body: "{{title}} for {{petName}} was assigned to you." },

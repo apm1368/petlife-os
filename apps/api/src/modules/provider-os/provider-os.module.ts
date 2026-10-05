@@ -1,3 +1,5 @@
+import { NotificationsModule } from "../notifications/notifications.module";
+import { RideProgressService } from "./ride-progress.service";
 import { Module } from "@nestjs/common";
 import { BookingModule } from "../booking/booking.module";
 import { CareCalendarModule } from "../care-calendar/care-calendar.module";
@@ -21,7 +23,7 @@ import { ProviderCatalogController } from "./provider-catalog.controller";
 import { ProviderCatalogService } from "./provider-catalog.service";
 
 @Module({
-  imports: [BookingModule, CareCalendarModule, CareProfileModule, PetHealthModule],
+  imports: [BookingModule, CareCalendarModule, CareProfileModule, PetHealthModule, NotificationsModule],
   controllers: [
     ProviderContextController,
     ProviderOverviewController,
@@ -32,6 +34,7 @@ import { ProviderCatalogService } from "./provider-catalog.service";
     ProviderCatalogController,
   ],
   providers: [
+    RideProgressService,
     ProviderContextService,
     ProviderAuthGuard,
     ProviderOverviewService,

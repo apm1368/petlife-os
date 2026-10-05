@@ -897,6 +897,10 @@ export interface BookingDto {
   additionalPetIds: string[];
   timeline: BookingStatusEventDto[];
   review: { id: string; rating: number } | null;
+  /** Owner-visible aftercare instructions written by the provider at completion. */
+  aftercareInstructions?: string | null;
+  /** The answered intake form (only on GET /bookings/:id). */
+  intake?: { formVersion: number; answers: { key: string; label: string; type: string; value: string | boolean | string[] | null }[] } | null;
   /** Pet taxi only: the route and fare as copied when the booking was made (null for other services). */
   transportRoute?: {
     pickupAddressText: string;
@@ -905,7 +909,12 @@ export interface BookingDto {
     distanceSource: "MAP_PROVIDER" | "STRAIGHT_LINE_DEMO" | "UNAVAILABLE";
     estimatedFareIrr: number | null;
     distancePricingApplied: boolean;
+    requirements?: string[];
+    pickupContact?: { name: string | null; phone: string } | null;
   } | null;
+  /** Pet taxi only: provider-reported progress (no GPS). */
+  rideTimeline?: { type: "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "DROPPED_OFF"; occurredAt: string; note: string | null }[];
+  cancellationReasonCode?: string | null;
 }
 
 export interface CareCalendarEventDto {

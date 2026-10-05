@@ -37,6 +37,7 @@ import { BookingLifecycleService, OCCUPYING_STATUSES, TERMINAL_RELEASE_STATUSES,
 import { PetServiceCompatibilityService } from "../services/pet-service-compatibility.service";
 import { PaymentsService } from "../commerce/payments/payments.service";
 import { LedgerService } from "../commerce/ledger/ledger.service";
+import { type IntakeQuestion, validateIntakeAnswers } from "../service-intake/service-intake.util";
 import type { PaymentChargeMode } from "../commerce/payments/payment-gateway.interface";
 import type { RescheduleBookingDto } from "./dto/reschedule-booking.dto";
 import type { PayBookingDto } from "./dto/pay-booking.dto";
@@ -62,6 +63,7 @@ const BOOKING_INCLUDE = {
   customerAddress: true,
   dropoffAddress: true,
   transportRoute: true,
+  rideEvents: { orderBy: { occurredAt: "asc" } },
   petAccess: { include: { petAccessGrant: true } },
   variant: true,
   additionalPets: true,
@@ -274,6 +276,9 @@ export class BookingsService {
    * are the last line against double booking.
    */
   async confirm(userId: string, dto: CreateBookingDto): Promise<BookingDto> {
+    // Intake answers are validated before the hold is consumed, so a correctable answer never costs the slot.
+    const peek = await this.bookingHold.getHold(dto.holdId);
+    const intake = peek && peek.userId === userId ? await this.resolveIntake(peek.providerServiceId, dto.intakeAnswers) : { intakeFormId: null, intakeAnswers: undefined };
     const hold = await this.bookingHold.consumeHold(dto.holdId);
     if (hold.petId !== dto.petId || hold.userId !== userId) {
       throw new PetAccessDeniedException({ holdId: dto.holdId });
@@ -291,6 +296,9 @@ export class BookingsService {
     const scopePreset = dto.accessSelection ?? DEFAULT_SCOPE_PRESET_BY_CATEGORY[category];
 
     const { customerAddressId, dropoffAddressId } = await this.resolveAddresses(hold.householdId, locationMode, dto);
+    if (locationMode !== PrismaLocationMode.TRANSPORT && (dto.transportRequirements?.length || dto.pickupContact)) {
+      throw new ValidationApiException({ field: "transportRequirements", reason: "ONLY_FOR_PET_TAXI" });
+    }
 
     await this.assertPetContextComplete(hold.petId, service);
 
@@ -339,6 +347,8 @@ export class BookingsService {
             timezone: hold.timezone,
             reasonForVisit: dto.reasonForVisit,
             ownerNotes: dto.ownerNotes,
+            intakeFormId: intake.intakeFormId,
+            intakeAnswers: intake.intakeAnswers,
             bookingStatus: initialStatus,
             paymentStatus: onlinePayment ? PaymentStatus.PENDING : PaymentStatus.NOT_REQUIRED,
             bookingNumber: await this.lifecycle.nextBookingNumber(tx),
@@ -361,7 +371,11 @@ export class BookingsService {
             additionalPets: { create: (hold.additionalPetIds ?? []).map((petId) => ({ petId })) },
           },
         });
-        if (transportRoute) await tx.bookingTransportRoute.create({ data: { bookingId: created.id, ...transportRoute } });
+        if (transportRoute) {
+          // MULTIPLE_PETS follows from the booking itself rather than from the member's say-so.
+          const requirements = [...new Set([...(dto.transportRequirements ?? []), ...(petCount > 1 ? ["MULTIPLE_PETS" as const] : [])])];
+          await tx.bookingTransportRoute.create({ data: { bookingId: created.id, ...transportRoute, requirements, pickupContactName: dto.pickupContact?.name.trim() ?? null, pickupContactPhone: dto.pickupContact?.phone.trim() ?? null } });
+        }
         await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
 
         const eventType =
@@ -422,7 +436,27 @@ export class BookingsService {
     const hasAccess = booking.userId === userId || (await this.petAccess.hasActiveAccess(booking.petId, userId));
     if (!hasAccess) throw new PetAccessDeniedException({ bookingId: id });
 
-    return this.toDto(booking);
+    return { ...this.toDto(booking), intake: await this.describeIntake(booking.intakeFormId, booking.intakeAnswers) };
+  }
+
+  /** Validates intake answers against the service's active form version (none → answers must be empty). */
+  private async resolveIntake(serviceId: string, raw: unknown): Promise<{ intakeFormId: string | null; intakeAnswers: Prisma.InputJsonValue | undefined }> {
+    const form = await this.prisma.serviceIntakeForm.findFirst({ where: { providerServiceId: serviceId, isActive: true } });
+    if (!form) {
+      if (raw && typeof raw === "object" && Object.keys(raw).length) throw new ValidationApiException({ field: "intakeAnswers", reason: "SERVICE_HAS_NO_INTAKE_FORM" });
+      return { intakeFormId: null, intakeAnswers: undefined };
+    }
+    const { answers, errors } = validateIntakeAnswers(form.questions as unknown as IntakeQuestion[], raw);
+    if (!answers) throw new ValidationApiException({ field: "intakeAnswers", errors, formVersion: form.version });
+    return { intakeFormId: form.id, intakeAnswers: answers as Prisma.InputJsonValue };
+  }
+
+  private async describeIntake(intakeFormId: string | null, answers: Prisma.JsonValue | null) {
+    if (!intakeFormId) return null;
+    const form = await this.prisma.serviceIntakeForm.findUnique({ where: { id: intakeFormId } });
+    if (!form) return null;
+    const given = (answers ?? {}) as Record<string, unknown>;
+    return { formVersion: form.version, answers: (form.questions as unknown as IntakeQuestion[]).map((q) => ({ key: q.key, label: q.label, type: q.type, value: (given[q.key] ?? null) as string | boolean | string[] | null })) };
   }
 
   async cancel(userId: string, id: string, dto: CancelBookingDto): Promise<BookingDto> {
@@ -444,7 +478,7 @@ export class BookingsService {
         actorType: BookingActorType.USER,
         actorId: userId,
         reason: dto.reason ?? null,
-        data: { cancelledAt: new Date(), cancelledReason: dto.reason },
+        data: { cancelledAt: new Date(), cancelledReason: dto.reason, cancellationReasonCode: dto.reasonCode ?? null },
       });
       await this.lifecycle.requestRefund(tx, cancelled, false, userId);
       await this.events.publish(
@@ -849,9 +883,11 @@ export class BookingsService {
       ownerNotes: booking.ownerNotes,
       cancelledAt: booking.cancelledAt?.toISOString() ?? null,
       cancelledReason: booking.cancelledReason,
+      cancellationReasonCode: booking.cancellationReasonCode,
       completedAt: booking.completedAt?.toISOString() ?? null,
       completedByProviderUserId: booking.completedByProviderUserId,
       completionNote: booking.completionNote,
+      aftercareInstructions: booking.aftercareInstructions,
       createdAt: booking.createdAt.toISOString(),
       updatedAt: booking.updatedAt.toISOString(),
       provider: toProviderSummaryDto(booking.providerOrganization),
@@ -859,7 +895,8 @@ export class BookingsService {
       service: toProviderServiceDto(booking.providerService),
       customerAddress: toAddressDto(booking.customerAddress),
       dropoffAddress: toAddressDto(booking.dropoffAddress),
-      transportRoute: booking.transportRoute ? { pickupAddressText: booking.transportRoute.pickupAddressText, dropoffAddressText: booking.transportRoute.dropoffAddressText, distanceMeters: booking.transportRoute.distanceMeters, distanceSource: booking.transportRoute.distanceSource, estimatedFareIrr: booking.transportRoute.estimatedFareIrr, distancePricingApplied: booking.transportRoute.distancePricingApplied } : null,
+      transportRoute: booking.transportRoute ? { pickupAddressText: booking.transportRoute.pickupAddressText, dropoffAddressText: booking.transportRoute.dropoffAddressText, distanceMeters: booking.transportRoute.distanceMeters, distanceSource: booking.transportRoute.distanceSource, estimatedFareIrr: booking.transportRoute.estimatedFareIrr, distancePricingApplied: booking.transportRoute.distancePricingApplied, requirements: booking.transportRoute.requirements, pickupContact: booking.transportRoute.pickupContactPhone ? { name: booking.transportRoute.pickupContactName, phone: booking.transportRoute.pickupContactPhone } : null } : null,
+      rideTimeline: booking.rideEvents.map((e) => ({ type: e.type, occurredAt: e.occurredAt.toISOString(), note: e.note })),
       bookingSeriesId: booking.bookingSeriesId,
       petAccess: booking.petAccess ? this.toPetAccessSummary(booking.petAccess) : null,
       bookingNumber: booking.bookingNumber,

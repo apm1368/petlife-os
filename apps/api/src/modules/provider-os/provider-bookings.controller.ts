@@ -4,13 +4,28 @@ import { ProviderAuthGuard } from "./auth/provider-auth.guard";
 import { CurrentProviderContext } from "./auth/current-provider-context.decorator";
 import type { ResolvedProviderContext } from "./auth/provider-context.types";
 import { ProviderBookingsService } from "./provider-bookings.service";
+import { RideProgressService } from "./ride-progress.service";
 import { ListProviderBookingsDto } from "./dto/list-provider-bookings.dto";
-import { AddBookingProviderNoteDto, CompleteBookingDto, ProviderCancelBookingDto, RejectBookingRequestDto } from "./dto/provider-booking-actions.dto";
+import { AddBookingProviderNoteDto, RecordRideEventDto, CompleteBookingDto, ProviderCancelBookingDto, RejectBookingRequestDto } from "./dto/provider-booking-actions.dto";
 
 @Controller("provider/bookings")
 @UseGuards(SessionAuthGuard, ProviderAuthGuard)
 export class ProviderBookingsController {
-  constructor(private readonly bookings: ProviderBookingsService) {}
+  constructor(
+    private readonly bookings: ProviderBookingsService,
+    private readonly rides: RideProgressService,
+  ) {}
+
+  /** Pet taxi: route, declared needs, pickup contact and the manual progress timeline. */
+  @Get(":id/ride")
+  ride(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string) {
+    return this.rides.get(ctx, id);
+  }
+
+  @Post(":id/ride-events")
+  recordRideEvent(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: RecordRideEventDto) {
+    return this.rides.record(ctx, id, dto.type, dto.note);
+  }
 
   @Get()
   list(@CurrentProviderContext() ctx: ResolvedProviderContext, @Query() query: ListProviderBookingsDto) {

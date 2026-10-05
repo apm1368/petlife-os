@@ -213,7 +213,7 @@ export class ProviderBookingsService {
         actorType: BookingActorType.PROVIDER,
         actorId: ctx.userId,
         reason: dto.reason,
-        data: { cancelledAt: new Date(), cancelledReason: dto.reason },
+        data: { cancelledAt: new Date(), cancelledReason: dto.reason, cancellationReasonCode: dto.reasonCode ?? null },
       });
       // A provider-side cancellation always refunds whatever the customer paid.
       await this.lifecycle.requestRefund(tx, cancelled, true, ctx.userId);
@@ -347,6 +347,7 @@ export class ProviderBookingsService {
       completedAt: new Date(),
       completedByProviderUserId: ctx.providerUserId,
       completionNote: dto.completionNote ?? null,
+      aftercareInstructions: dto.aftercareInstructions?.trim() || null,
     });
     if (dto.followUps?.length) await this.createFollowUpPlan(ctx, id, dto);
     return result;

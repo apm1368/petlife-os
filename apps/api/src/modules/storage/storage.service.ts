@@ -88,6 +88,16 @@ export class StorageService {
     return { ...target, key };
   }
 
+  /** A private file on a booking (owner ↔ provider). Same file types and size cap as medical documents. */
+  async createBookingAttachmentUploadTarget(bookingId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    const key = `booking-attachments/${bookingId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
   /** Owner photo/video observations — same private-storage treatment as medical documents, under their own key prefix. */
   async createObservationMediaUploadTarget(petId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
     const extension = OBSERVATION_MEDIA_MIME_EXTENSIONS[contentType];

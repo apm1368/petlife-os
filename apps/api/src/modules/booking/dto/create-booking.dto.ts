@@ -1,5 +1,14 @@
-import { IsEnum, IsOptional, IsString, IsUUID, Length } from "class-validator";
+import { Type } from "class-transformer";
+import { ArrayUnique, Equals, IsArray, IsBoolean, IsEnum, IsIn, IsObject, IsOptional, IsString, IsUUID, Length, Matches, ValidateNested } from "class-validator";
+import { TRANSPORT_REQUIREMENTS } from "../booking-cancellation.util";
 import { PetAccessScopePreset } from "@petlife/types";
+
+export class PickupContactDto {
+  @IsString() @Length(1, 80) name!: string;
+  @IsString() @Matches(/^[0-9+\-\s()]{5,20}$/) phone!: string;
+  /** The member confirms this person agreed to be contacted for the pickup. */
+  @IsBoolean() @Equals(true) consentConfirmed!: boolean;
+}
 
 export class CreateBookingDto {
   @IsUUID()
@@ -32,4 +41,22 @@ export class CreateBookingDto {
   @IsOptional()
   @IsUUID()
   dropoffAddressId?: string;
+
+  /** Answers to the service's active intake form, keyed by question key (see GET /provider-services/:id/intake-form). */
+  @IsOptional()
+  @IsObject()
+  intakeAnswers?: Record<string, unknown>;
+
+  /** Pet taxi only: declared ride needs. */
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsIn(TRANSPORT_REQUIREMENTS, { each: true })
+  transportRequirements?: (typeof TRANSPORT_REQUIREMENTS)[number][];
+
+  /** Pet taxi only: someone else hands the pet over at pickup. */
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PickupContactDto)
+  pickupContact?: PickupContactDto;
 }

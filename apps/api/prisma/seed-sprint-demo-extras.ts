@@ -129,6 +129,16 @@ async function main() {
         });
         rides++;
       }
+      // Declared ride needs and the manual (no-GPS) timeline for the demo rides.
+      await db.bookingTransportRoute.updateMany({ where: { bookingId: { in: [id("ride-confirmed"), id("ride-completed")] } }, data: { requirements: ["CRATE_REQUIRED"] } });
+      const driver = await db.providerUser.findFirstOrThrow({ where: { providerOrganizationId: taxi.providerOrganizationId, removedAt: null } });
+      const rideEvents: [string, ("DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "DROPPED_OFF")[]][] = [["ride-confirmed", ["DRIVER_ASSIGNED"]], ["ride-completed", ["DRIVER_ASSIGNED", "ARRIVING", "PICKED_UP", "DROPPED_OFF"]]];
+      for (const [key, types] of rideEvents) {
+        const b = await db.booking.findUniqueOrThrow({ where: { id: id(key) } });
+        for (const [i, type] of types.entries()) {
+          await db.bookingRideEvent.upsert({ where: { bookingId_type: { bookingId: b.id, type } }, create: { bookingId: b.id, type, actorProviderUserId: driver.id, occurredAt: new Date(b.startAt.getTime() + (i - 1) * 10 * 60e3) }, update: {} });
+        }
+      }
     }
 
     // ---------------------------------------------------------------- Chat: report + block
@@ -151,6 +161,15 @@ async function main() {
     const pendingExists = await db.clinicInvitation.count({ where: { providerOrganizationId: owner.providerOrganizationId, invitedUserId: invitee.id, status: "PENDING" } });
     if (!pendingExists) {
       await db.clinicInvitation.create({ data: { providerOrganizationId: owner.providerOrganizationId, invitedUserId: invitee.id, role: "STAFF", displayTitle: "پذیرش", invitedByProviderUserId: owner.id, expiresAt: new Date(Date.now() + 7 * DAY) } });
+    }
+    // An intake form on the demo clinic's first service.
+    const clinicService = await db.providerService.findFirst({ where: { providerOrganizationId: owner.providerOrganizationId, isActive: true }, orderBy: { createdAt: "asc" } });
+    if (clinicService && !(await db.serviceIntakeForm.count({ where: { providerServiceId: clinicService.id } }))) {
+      await db.serviceIntakeForm.create({ data: { providerServiceId: clinicService.id, version: 1, createdByProviderUserId: owner.id, questions: [
+        { key: "symptoms", type: "LONG_TEXT", label: "علت مراجعه و علائم", required: true },
+        { key: "vaccinated", type: "YES_NO", label: "واکسن‌ها به‌روز است؟", required: true },
+        { key: "temperament", type: "SINGLE_CHOICE", label: "رفتار در معاینه", required: false, options: ["آرام", "مضطرب", "پرخاشگر"] },
+      ] } });
     }
     const clinicPet = await db.pet.findFirstOrThrow({ where: { bookings: { some: { providerOrganizationId: owner.providerOrganizationId, user: { email: "clinic-demo-customer@example.test" } } } } });
     for (const [key, uid] of [["owner", owner.userId], ["vet", vetUser.id]] as const) {

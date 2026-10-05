@@ -218,3 +218,35 @@
   - `GET /care-templates` شش قالب را برمی‌گرداند. موارد با `confirmWithVet: true` باید در UI برچسب «با دامپزشک تأیید کنید» داشته باشند.
   - `POST /pets/:petId/care-templates/apply` با `{templateKey, startAt, items:[{key, title?, recurrence?, intervalDays?, maxOccurrences?}]}` **فقط موارد تأییدشده** را می‌سازد.
 - **دادهٔ نمایشی:** پت اول `batch2-review@example.test`. شامل یک کار روزانه سپرده‌شده به «علی»، مسواک WEEKDAYS، دوره‌ی دارو (نوبت ۳ از ۷)، یک مورد OVERDUE، و تاریخچه‌ای با یک انجام‌شده و یک ردشده.
+
+## ۸. خدمات و نوبت (G3)
+- **فرم پذیرش (intake):**
+  - **سمت عمومی:** `GET /provider-services/:serviceId/intake-form` فرم فعال را برمی‌گرداند: `{id, version, questions[]}`. اگر خدمت فرمی نداشته باشد خروجی `null` است، و برای خدمت ناموجود ۴۰۴.
+  - **انواع سؤال:** `TEXT` (تا ۲۰۰ نویسه)، `LONG_TEXT` (تا ۲۰۰۰)، `YES_NO`، `SINGLE_CHOICE`، `MULTI_CHOICE` (همراه `options`)، و `required`.
+  - **هنگام رزرو:** `POST /bookings` فیلد `intakeAnswers: {key: value}` را می‌پذیرد. خطا `VALIDATION_ERROR` با `details.errors[]` برمی‌گردد و در این حالت **hold نمی‌سوزد**.
+  - **نمایش پاسخ‌ها:** صاحب پت در `GET /bookings/:id` فیلد `intake: {formVersion, answers:[{key, label, type, value}]}` را می‌بیند؛ ارائه‌دهنده در `GET /provider/bookings/:id/intake`.
+  - **مدیریت فرم (فقط مدیر):** `PUT /provider/services/:serviceId/intake-form` با `{questions}` نسخهٔ جدید می‌سازد؛ `DELETE` فرم را برمی‌دارد.
+- **پیوست نوبت (خصوصی، هر دو طرف):**
+  - **مراحل آپلود:** اول `POST …/attachments/upload-url` با `{contentType: pdf|jpeg|png|webp, fileSizeBytes ≤ 20MB}`، بعد `PUT` فایل، بعد `POST …/attachments` با `{key, mimeType, sizeBytes, title?}`.
+  - **مسیرهای صاحب پت:** `/bookings/:id/attachments` (GET، POST، `:aid/download`، `DELETE :aid` فقط برای فایل خودش).
+  - **مسیرهای ارائه‌دهنده:** `/provider/bookings/:id/attachments` با همان عملیات. فایلی که ارائه‌دهنده اضافه کند، اعلان `booking.provider_document` به صاحب پت می‌فرستد.
+  - `side` یکی از `OWNER` | `PROVIDER` است. سقف ۱۰ فایل برای هر طرف.
+- **دستورالعمل پس از خدمت:** `POST /provider/bookings/:id/complete` حالا `aftercareInstructions` (تا ۲۰۰۰ نویسه) را هم می‌پذیرد. صاحب پت آن را در `GET /bookings/:id` می‌بیند.
+- **علت ساختاریافتهٔ لغو:** `reasonCode`.
+  - صاحب پت: `OWNER_CHANGED_PLANS` | `OWNER_PET_UNWELL` | `OWNER_FOUND_ALTERNATIVE` | `OWNER_OTHER`
+  - ارائه‌دهنده: `PROVIDER_UNAVAILABLE` | `PROVIDER_VEHICLE_ISSUE` | `PROVIDER_SAFETY_CONCERN` | `PROVIDER_OTHER`
+
+  در `BookingDto` با نام `cancellationReasonCode` برمی‌گردد.
+- **از قبل موجود بود:** variant، شرایط گونه/سن/وزن، چند پت در یک نوبت، لیست انتظار، تغییر زمان، check-in/start/complete/no-show، یادداشت داخلی جدا از یادداشت قابل‌مشاهده، و پیگیری بالینی پس از ویزیت (follow-up).
+
+## ۹. پت‌تاکسی (G4)
+- **هنگام رزرو** (فقط TRANSPORT):
+  - `transportRequirements[]` از میان `CRATE_REQUIRED`، `LARGE_PET`، `MEDICAL_TRANSPORT`، `MULTIPLE_PETS` (خودکار وقتی بیش از یک پت باشد)، `ASSISTANT_REQUIRED`.
+  - `pickupContact: {name, phone, consentConfirmed: true}`.
+- **خروجی برای صاحب پت:** `transportRoute.requirements`، `transportRoute.pickupContact`، و `rideTimeline[]`.
+- **تایم‌لاین دستی (بدون GPS):**
+  - ارائه‌دهنده با `GET /provider/bookings/:id/ride` اطلاعات سفر را می‌بیند و با `POST /provider/bookings/:id/ride-events {type, note?}` مرحله ثبت می‌کند.
+  - مراحل: `DRIVER_ASSIGNED` ← `ARRIVING` ← `PICKED_UP` ← `DROPPED_OFF`. فقط رو به جلو، و هر مرحله یک بار. خطای ترتیب: `RIDE_EVENT_OUT_OF_ORDER`.
+  - اعلان: `booking.ride_arriving`، `booking.ride_picked_up` و `booking.ride_dropped_off`.
+- **قیمت:** همچنان `NOT_CONFIGURED`.
+- **دادهٔ نمایشی:** سفر CONFIRMED (فقط DRIVER_ASSIGNED) و سفر COMPLETED (هر چهار مرحله)، هر دو با `CRATE_REQUIRED`.

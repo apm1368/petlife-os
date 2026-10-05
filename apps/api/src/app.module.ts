@@ -59,6 +59,7 @@ import { ClinicalHealthModule } from "./modules/clinical-health/clinical-health.
 import { VetPanelModule } from "./modules/vet-panel/vet-panel.module";
 import { ClinicOsModule } from "./modules/clinic-os/clinic-os.module";
 import { PetSafetyModule } from "./modules/pet-safety/pet-safety.module";
+import { ServiceIntakeModule } from "./modules/service-intake/service-intake.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
 import { CommunityModule } from "./modules/community/community.module";
@@ -129,6 +130,7 @@ import { PlacesModule } from "./modules/places/places.module";
     VetPanelModule,
     ClinicOsModule,
     PetSafetyModule,
+    ServiceIntakeModule,
     LostPetModule,
     AnimalSupportModule,
     CommunityModule,

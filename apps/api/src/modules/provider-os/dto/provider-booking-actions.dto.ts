@@ -1,3 +1,4 @@
+import { PROVIDER_CANCELLATION_CODES } from "../../booking/booking-cancellation.util";
 import { ArrayMaxSize, IsArray, IsDateString, IsIn, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -6,6 +7,10 @@ export class ProviderCancelBookingDto {
   @IsString()
   @MaxLength(500)
   reason?: string;
+
+  @IsOptional()
+  @IsIn(PROVIDER_CANCELLATION_CODES)
+  reasonCode?: (typeof PROVIDER_CANCELLATION_CODES)[number];
 }
 
 /** A follow-up the provider explicitly specifies — projected into the owner's Care Center as PROVIDER_CREATED. */
@@ -33,6 +38,12 @@ export class CompleteBookingDto {
   @MaxLength(280)
   completionNote?: string;
 
+  /** Longer owner-visible care instructions (aftercare), up to 2000 characters. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  aftercareInstructions?: string;
+
   /** VET bookings only. Nothing is scheduled unless the provider enters it here. */
   @IsOptional()
   @IsArray()
@@ -52,4 +63,14 @@ export class RejectBookingRequestDto {
   @IsString()
   @MaxLength(500)
   reason!: string;
+}
+
+export class RecordRideEventDto {
+  @IsIn(["DRIVER_ASSIGNED", "ARRIVING", "PICKED_UP", "DROPPED_OFF"])
+  type!: "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "DROPPED_OFF";
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(280)
+  note?: string;
 }

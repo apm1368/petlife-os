@@ -2025,6 +2025,7 @@ model ProviderService {
   bookingSeries     BookingSeries[]
   /// Pet taxi only — distance pricing for this service (inactive until a provider turns it on).
   transportPricing  ServiceTransportPricing?
+  intakeForms       ServiceIntakeForm[]
 
   @@index([providerOrganizationId])
   @@index([type])
@@ -2250,8 +2251,10 @@ model Booking {
   reasonForVisit String?
   ownerNotes     String?
 
-  cancelledAt     DateTime?
-  cancelledReason String?
+  cancelledAt            DateTime?
+  cancelledReason        String?
+  /// Structured reason (see booking-cancellation.util): OWNER_* by the member, PROVIDER_* by the provider, SYSTEM_* by jobs.
+  cancellationReasonCode String?
 
   /// Handoff 05: set only by the Provider OS's POST .../complete transition
   /// (IN_PROGRESS -> COMPLETED). `completedByProviderUserId` is a plain UUID
@@ -2264,12 +2267,19 @@ model Booking {
   completedAt               DateTime?
   completedByProviderUserId String?   @db.Uuid
   completionNote            String?
+  /// Owner-visible care instructions written at completion (longer than completionNote).
+  aftercareInstructions     String?
+  /// The intake form version answered at booking time, and the answers (validated against it).
+  intakeFormId              String?   @db.Uuid
+  intakeAnswers             Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   petAccess       BookingPetAccess?
   providerNotes   BookingProviderNote[]
+  attachments     BookingAttachment[]
+  rideEvents      BookingRideEvent[]
   additionalPets  BookingPet[]
   statusEvents    BookingStatusEvent[]
   review          ProviderReview?
@@ -9184,6 +9194,12 @@ model BookingTransportRoute {
   estimatedFareIrr       Int?
   distancePricingApplied Boolean @default(false)
 
+  /// Structured ride needs: CRATE_REQUIRED, LARGE_PET, MEDICAL_TRANSPORT, MULTIPLE_PETS, ASSISTANT_REQUIRED.
+  requirements       String[] @default([])
+  /// Someone else hands the pet over at pickup — only with the member's explicit confirmation of their consent.
+  pickupContactName  String?
+  pickupContactPhone String?
+
   createdAt DateTime @default(now())
 
   @@map("booking_transport_routes")
@@ -9475,4 +9491,70 @@ model PetShareCard {
 
   @@index([petId, kind])
   @@map("pet_share_cards")
+}
+
+// ---------------------------------------------------------------------------
+// Services: versioned intake forms and booking attachments
+// ---------------------------------------------------------------------------
+
+/// Structured questions a provider asks at booking time. Every edit is a new version; a booking keeps the version
+/// it answered. Questions are plain data (no HTML), validated by service-intake.util.
+model ServiceIntakeForm {
+  id                      String          @id @default(uuid()) @db.Uuid
+  providerServiceId       String          @db.Uuid
+  providerService         ProviderService @relation(fields: [providerServiceId], references: [id], onDelete: Cascade)
+  version                 Int
+  questions               Json
+  isActive                Boolean         @default(true)
+  createdByProviderUserId String          @db.Uuid
+  createdAt               DateTime        @default(now())
+
+  @@unique([providerServiceId, version])
+  @@map("service_intake_forms")
+}
+
+enum BookingAttachmentSide {
+  OWNER
+  PROVIDER
+}
+
+/// A private file on a booking — the owner's photo/document for the provider, or the provider's document for the
+/// owner. Stored under booking-attachments/<bookingId>/…, downloaded only through a short-lived signed URL.
+model BookingAttachment {
+  id               String                @id @default(uuid()) @db.Uuid
+  bookingId        String                @db.Uuid
+  booking          Booking               @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  side             BookingAttachmentSide
+  uploadedByUserId String                @db.Uuid
+  objectKey        String                @unique
+  mimeType         String
+  sizeBytes        Int
+  title            String?
+  removedAt        DateTime?
+  createdAt        DateTime              @default(now())
+
+  @@index([bookingId])
+  @@map("booking_attachments")
+}
+
+/// Pet taxi operational progress reported by the provider (no GPS). Append-only and strictly forward.
+enum RideEventType {
+  DRIVER_ASSIGNED
+  ARRIVING
+  PICKED_UP
+  DROPPED_OFF
+}
+
+model BookingRideEvent {
+  id                  String        @id @default(uuid()) @db.Uuid
+  bookingId           String        @db.Uuid
+  booking             Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  type                RideEventType
+  actorProviderUserId String        @db.Uuid
+  note                String?
+  occurredAt          DateTime      @default(now())
+
+  @@unique([bookingId, type])
+  @@index([bookingId, occurredAt])
+  @@map("booking_ride_events")
 }
