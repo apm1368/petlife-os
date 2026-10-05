@@ -299,6 +299,32 @@ async function main() {
     const verifiedProvider = await db.providerOrganization.findFirst({ where: { verificationStatus: "VERIFIED" }, orderBy: { createdAt: "asc" } });
     if (verifiedProvider) await db.recentlyViewed.upsert({ where: { userId_entityType_entityId: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id } }, create: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id }, update: {} });
 
+    // ---------------------------------------------------------------- Live-smoke QA accounts (FREE and PAID scenarios)
+    // Two dedicated accounts so the live smoke never writes into showcase accounts. Each owns one household with one
+    // pet (created through PetsService, so grants match the product path). FREE stays on the free plan; PAID holds a
+    // plus membership state row (QA-only: no payment is recorded or captured), refreshed to a 365-day period.
+    const { PetsService } = await import("../src/modules/pets/pets.service");
+    const { SubscriptionService } = await import("../src/modules/subscriptions/subscription.service");
+    const pets = app.get(PetsService);
+    const subscriptions = app.get(SubscriptionService);
+    for (const scenario of ["free", "paid"] as const) {
+      const qa = await user(`qa-smoke-${scenario}@example.test`, scenario === "free" ? "آزمون دودی رایگان (QA)" : "آزمون دودی اشتراکی (QA)");
+      const hh = await db.household.upsert({ where: { id: id(`qa-smoke:${scenario}:household`) }, create: { id: id(`qa-smoke:${scenario}:household`), name: `خانوار آزمون دودی ${scenario === "free" ? "رایگان" : "اشتراکی"} (QA)`, city: "تهران", countryCode: "IR" }, update: {} });
+      await db.householdMember.upsert({ where: { householdId_userId: { householdId: hh.id, userId: qa.id } }, create: { householdId: hh.id, userId: qa.id, role: "OWNER" }, update: {} });
+      if (!(await db.pet.count({ where: { householdId: hh.id } }))) await pets.create(hh.id, qa.id, { name: "پت آزمون دودی (QA)", species: "DOG", approximateAgeMonths: 24 } as never);
+      const sub = await subscriptions.getOrCreateRaw(hh.id);
+      if (scenario === "paid") {
+        const plus = await db.subscriptionPlan.findUniqueOrThrow({ where: { code: "plus" }, include: { prices: { where: { billingInterval: "ANNUAL" } } } });
+        const current = sub.currentPeriodId ? await db.subscriptionPeriod.findUnique({ where: { id: sub.currentPeriodId } }) : null;
+        if (sub.planId !== plus.id || sub.status !== "ACTIVE" || !current || current.endAt.getTime() < Date.now() + 30 * DAY) {
+          await db.$transaction(async (tx) => {
+            const locked = await subscriptions.lockAndGetCurrent(hh.id, tx);
+            await subscriptions.activatePeriod(tx, locked, plus.id, plus.prices[0]!.id, new Date(), new Date(Date.now() + 365 * DAY));
+          });
+        }
+      }
+    }
+
     console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care.`);
   } finally {
     await app.close();

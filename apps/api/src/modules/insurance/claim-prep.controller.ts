@@ -5,7 +5,7 @@ import { PetAccessGuard } from "../../common/auth/pet-access.guard";
 import { RequirePetAccess } from "../../common/auth/require-pet-access.decorator";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
-import { ClaimPrepService } from "./claim-prep.service";
+import { CLAIM_ITEM_KINDS, ClaimPrepService, type ClaimItemKind } from "./claim-prep.service";
 
 class CreateClaimPrepDto {
   @IsString() @Length(1, 120) title!: string;
@@ -13,7 +13,7 @@ class CreateClaimPrepDto {
   @IsOptional() @IsString() @MaxLength(2000) notes?: string;
 }
 class AddClaimItemDto {
-  @IsIn(["MEDICAL_DOCUMENT", "BOOKING"]) kind!: "MEDICAL_DOCUMENT" | "BOOKING";
+  @IsIn(CLAIM_ITEM_KINDS) kind!: ClaimItemKind;
   @IsUUID() refId!: string;
 }
 class SetClaimStatusDto {

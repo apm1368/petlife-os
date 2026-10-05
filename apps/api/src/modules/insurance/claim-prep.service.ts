@@ -3,8 +3,8 @@ import { ClaimPrepStatus, Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 
-const KINDS = ["MEDICAL_DOCUMENT", "BOOKING"] as const;
-export type ClaimItemKind = (typeof KINDS)[number];
+export const CLAIM_ITEM_KINDS = ["MEDICAL_DOCUMENT", "BOOKING"] as const;
+export type ClaimItemKind = (typeof CLAIM_ITEM_KINDS)[number];
 
 /**
  * A claim-preparation folder: the owner groups this pet's invoices (bookings) and medical documents for a future
