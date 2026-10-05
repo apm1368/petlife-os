@@ -24,7 +24,9 @@ describe("Content sections — blog vs guides, and the demo articles", () => {
       for (const g of guides) expect(g.canonicalPath).toBe(`/${locale}/guides/${g.slug}`);
       const blog = (await list(`locale=${locale}&excludeCategorySlug=guides&pageSize=50`)).body.items;
       expect(blog.some((b: { category: { slug: string } | null }) => b.category?.slug === "guides")).toBe(false);
-      expect(blog.some((b: { slug: string }) => b.slug === "cat-nutrition-by-age")).toBe(true);
+      // Looked up within its own category so the check doesn't depend on how many other articles exist.
+      const care = (await list(`locale=${locale}&categorySlug=care-and-health&excludeCategorySlug=guides&pageSize=50`)).body.items;
+      expect(care.some((b: { slug: string }) => b.slug === "cat-nutrition-by-age")).toBe(true);
       for (const b of blog) expect(b.canonicalPath.startsWith(`/${locale}/blog/`)).toBe(true);
     }
   });
