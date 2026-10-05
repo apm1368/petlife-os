@@ -486,3 +486,23 @@
   - یک نظر ساختاریافته روی سفر تاکسی تکمیل‌شده، همراه پاسخ ارائه‌دهنده؛
   - یک هشدار نظارتی با اعتراض ثبت‌شده برای `batch2-review@example.test`؛
   - یک مکان ذخیره‌شده و دو بازدید اخیر برای همان کاربر.
+
+## ۱۷. حالت نگهبان: حساب‌های QA، تغییر امنیتی و ورودی‌های تاریخ
+
+- **حساب‌های آزمون دودی (فقط برای اسکریپت‌های smoke؛ برای طراحی از حساب‌های نمایشی قبلی استفاده کنید):**
+  - `qa-smoke-free@example.test`: پلن رایگان؛ یادآور مراقبت و اشتراک با دامپزشک با `409 SUBSCRIPTION_FEATURE_NOT_INCLUDED` و `details.key` رد می‌شوند. این حالت «ارتقا لازم است» را برای طراحی نشان می‌دهد.
+  - `qa-smoke-paid@example.test`: پلن plus؛ همان قابلیت‌ها کار می‌کنند.
+- **تغییر امنیتی (`8f712ec`):** مسیرهای شبیه‌سازی (`/dev/notifications/*`، `shipping|marketplace …/dev/simulate`) و وبهوک‌های بدون امضای sandbox روی سرور بسته‌اند.
+  - اثر روی UI: در checkout، دکمه‌ی «شبیه‌سازی پرداخت در انتظار» روی سرور یک پرداخت `PENDING` می‌سازد که دیگر با وبهوک تأیید نمی‌شود. دکمه‌های «موفق» و «ناموفق» مثل قبل کار می‌کنند.
+  - هیچ endpoint محصول تغییر نکرده است.
+- **خلاصه‌ی اعلان‌ها:** `deliveryStatus` همچنان `STORED_ONLY` است. متن صفحه باید بگوید ترجیح ذخیره می‌شود ولی ارسال خلاصه فعال نیست (`docs/product/notification-digest-audit.md`).
+- **ورودی‌های تاریخ بومی مرورگر (فقط فهرست، برای بازطراحی شما):** این صفحه‌ها هنوز `type="date|time|datetime-local"` دارند. date-picker جلالی در `features/shared/date-picker` موجود است:
+  - `features/provider/ProviderCalendarView.tsx` (۳)
+  - `features/provider/ProviderAvailabilityView.tsx` (۲)
+  - `features/provider/ProviderBookingDetailView.tsx` (۱)
+  - `features/notifications/NotificationPreferencesView.tsx` (۲، ساعت سکوت)
+  - `features/commerce/PromotionManager.tsx` (۲)
+  - `features/onboarding/steps/AgeStep.tsx` (۱)
+  - `features/health/VetShareView.tsx` (۱)
+  - `features/account/PetAccessView.tsx` (۱)
+  - `features/admin/AdminSupportQueueView.tsx`، `AdminSellerFinanceDetailView.tsx`، `AdminMarketplaceReconciliationView.tsx` (هر کدام ۲؛ این‌ها بخش ادمین Batch 7 و متعلق به شما هستند)
