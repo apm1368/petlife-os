@@ -250,3 +250,52 @@
   - اعلان: `booking.ride_arriving`، `booking.ride_picked_up` و `booking.ride_dropped_off`.
 - **قیمت:** همچنان `NOT_CONFIGURED`.
 - **دادهٔ نمایشی:** سفر CONFIRMED (فقط DRIVER_ASSIGNED) و سفر COMPLETED (هر چهار مرحله)، هر دو با `CRATE_REQUIRED`.
+
+## ۱۰. عملیات Clinic OS (G5)
+همهٔ این مسیرها زیر `/provider/clinic` هستند و فقط به سازمان خود کاربر دسترسی دارند.
+
+- **یادداشت مشتری:**
+  - `GET`/`POST customers/:householdId/notes` با `{body ≤2000, visibleToOwner?}`، و `DELETE …/:noteId` که فقط نویسنده یا مدیر می‌تواند انجام دهد.
+  - یادداشتی که `visibleToOwner` دارد، برای صاحب پت در `GET /me/clinic-notes` نمایش داده می‌شود.
+- **برچسب‌ها:**
+  - `GET`/`POST tags` با `{name}`؛ `DELETE tags/:id` فقط برای مدیر.
+  - `POST`/`DELETE customers/:householdId/tags/:tagId`.
+  - فهرست مشتریان: `GET customers?tagId=`؛ هر ردیف حالا `tags[]` هم دارد.
+- **صف روزانه:** `GET queue?date=YYYY-MM-DD` (به وقت تهران). خروجی `{counts, buckets}` با این گروه‌ها:
+  - `SCHEDULED`
+  - `WAITING`
+  - `IN_CONSULTATION`
+  - `COMPLETED`
+  - `NO_SHOW`
+  - `CANCELLED`
+
+  این صف از همان وضعیت‌های نوبت ساخته می‌شود و مدل جداگانه‌ای ندارد.
+- **تخصیص نوبت:** `POST appointments/:bookingId/assign` با `{providerUserId?, resourceId?}` (مقدار null یعنی برداشتن تخصیص). خطاها: `STAFF_DOUBLE_BOOKED`، `RESOURCE_DOUBLE_BOOKED`، `BOOKING_NOT_ASSIGNABLE`.
+- **کارهای داخلی:**
+  - `GET tasks?status=OPEN|DONE|CANCELLED&mine=true` و `POST tasks` با `{type, title, dueAt?, assigneeProviderUserId?, householdId?, bookingId?}`.
+  - `POST tasks/:id/done` و `POST tasks/:id/cancel`. هر ردیف فیلد `overdue` دارد.
+  - typeها: `CALL_CUSTOMER`، `FOLLOW_UP_LAB`، `CONFIRM_APPOINTMENT`، `COLLECT_PAYMENT`، `OTHER`.
+- **کمپین یادآور** (نیاز به `clinic.bulk_reminders`؛ پلن GROWTH به بالا):
+  - پیش‌نمایش: `POST campaigns/preview` با `{segment: APPOINTMENTS_TOMORROW|VACCINES_DUE|FOLLOW_UP_DUE}`. خروجی: `{count, alreadySentToday, sample[]}`.
+  - ارسال: `POST campaigns` با `{segment, title, note?, confirm: true, expectedCount}`.
+  - خطاها: `AUDIENCE_CHANGED`، `ALREADY_SENT_TODAY`، `MONTHLY_REMINDER_CAP`.
+  - ارسال فقط از سیستم اعلان‌ها انجام می‌شود؛ پیامک واقعی وجود ندارد.
+- **ورود CSV** (فقط مدیر):
+  - `POST contacts/import` با `{csv, dryRun?: true}`. ستون‌ها: `name, phone, email, petName, species, notes`؛ حداکثر ۱۰۰۰ ردیف.
+  - خروجی: `{totalRows, validRows, errors[{row, field, reason}], duplicates[{row, matches: FILE|EXISTING, field}], imported}`.
+  - `dryRun: false` فقط ردیف‌های سالم و غیرتکراری را وارد می‌کند. هیچ ادغامی با حساب‌های PET LIFE انجام نمی‌شود.
+  - فهرست: `GET contacts?q`.
+- **خروجی CSV** (فقط مدیر، نیاز به `clinic.exports`): `GET exports/:kind` که `kind` یکی از `customers`، `appointments`، `services` یا `contacts` است.
+  - خروجی: `{filename, contentType, csv}`.
+  - سلول‌های فرمول‌مانند (شروع با `=`، `+`، `-` یا `@`) با `'` خنثی می‌شوند.
+  - تماس مشتریان پلتفرم هرگز در خروجی نمی‌آید.
+- **entitlementهای جدید:** `clinic.bulk_reminders` و `clinic.exports`؛ در BASIC بسته و در GROWTH و PRO باز.
+- **از قبل موجود بود:**
+  - ویزیت بالینی (encounter) و علائم حیاتی؛
+  - نسخه و پیوند نتیجهٔ آزمایش یا تصویربرداری به ویزیت؛
+  - کاتالوگ خدمات و ساعت کاری، از Provider OS.
+- **دادهٔ نمایشی** (درمانگاه مهر):
+  - دو یادداشت، یکی از آن‌ها قابل‌مشاهده برای صاحب پت؛
+  - برچسب‌های VIP، «پیگیری» و «پیگیری پرداخت»؛
+  - سه کار: یکی overdue، یکی باز، یکی انجام‌شده؛
+  - دو مخاطب واردشده.

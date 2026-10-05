@@ -181,6 +181,23 @@ async function main() {
       create: { id: id("clinic:visit"), petId: clinicPet.id, householdId: clinicPet.householdId, providerOrganizationId: owner.providerOrganizationId, providerUserId: vet.id, status: "COMPLETED", startedAt: visitAt, completedAt: new Date(visitAt.getTime() + 1800e3), reasonForVisit: "معاینهٔ دوره‌ای", observationsText: "وضعیت عمومی خوب، دندان‌ها نیاز به جرم‌گیری در سه ماه آینده.", assessmentText: "سالم", planText: "واکسن سالانه در دو هفتهٔ آینده." },
       update: {},
     });
+    // Clinic operations: a CRM note (one shared with the owner), tags, tasks and a few imported contacts.
+    const org = owner.providerOrganizationId;
+    await db.clinicCustomerNote.upsert({ where: { id: id("note:private") }, create: { id: id("note:private"), providerOrganizationId: org, householdId: clinicPet.householdId, authorProviderUserId: vet.id, body: "صاحب پت نوبت‌های صبح را ترجیح می‌دهد (یادداشت داخلی نمایشی)." }, update: {} });
+    await db.clinicCustomerNote.upsert({ where: { id: id("note:shared") }, create: { id: id("note:shared"), providerOrganizationId: org, householdId: clinicPet.householdId, authorProviderUserId: vet.id, body: "لطفاً جواب آزمایش قبلی را در ویزیت بعد همراه بیاورید.", visibleToOwner: true }, update: {} });
+    for (const name of ["VIP", "پیگیری", "پیگیری پرداخت"]) {
+      await db.clinicCustomerTag.upsert({ where: { providerOrganizationId_name: { providerOrganizationId: org, name } }, create: { id: id(`tag:${name}`), providerOrganizationId: org, name }, update: {} });
+    }
+    const followTag = await db.clinicCustomerTag.findUniqueOrThrow({ where: { providerOrganizationId_name: { providerOrganizationId: org, name: "پیگیری" } } });
+    await db.clinicCustomerTagAssignment.upsert({ where: { tagId_householdId: { tagId: followTag.id, householdId: clinicPet.householdId } }, create: { tagId: followTag.id, householdId: clinicPet.householdId }, update: {} });
+    const task = (key: string, data: Record<string, unknown>) => db.clinicTask.upsert({ where: { id: id(`task:${key}`) }, create: { id: id(`task:${key}`), providerOrganizationId: org, createdByProviderUserId: owner.id, ...data } as never, update: {} });
+    await task("call", { type: "CALL_CUSTOMER", title: "تماس برای نتیجه‌ی آزمایش خون", dueAt: new Date(Date.now() - 3600e3), assigneeProviderUserId: vet.id, householdId: clinicPet.householdId });
+    await task("confirm", { type: "CONFIRM_APPOINTMENT", title: "تأیید نوبت هفته‌ی بعد", dueAt: new Date(Date.now() + 2 * DAY) });
+    await task("done", { type: "FOLLOW_UP_LAB", title: "پیگیری جواب آزمایش", status: "DONE", completedAt: new Date(Date.now() - DAY), completedByProviderUserId: vet.id });
+    const batch = id("import-batch");
+    for (const [key, name, phone, petName, species] of [["c1", "مهسا (مخاطب واردشده‌ی نمایشی)", "09121230001", "لونا", "CAT"], ["c2", "کامران (مخاطب واردشده‌ی نمایشی)", "09121230002", "رکس", "DOG"]] as const) {
+      await db.clinicImportedContact.upsert({ where: { id: id(`contact:${key}`) }, create: { id: id(`contact:${key}`), providerOrganizationId: org, name, phone, petName, species, importBatchId: batch }, update: {} });
+    }
     await db.patientVitalsRecord.upsert({ where: { id: id("clinic:vitals") }, create: { id: id("clinic:vitals"), petId: clinicPet.id, providerOrganizationId: owner.providerOrganizationId, providerUserId: vet.id, recordedAt: visitAt, weightValue: 4.2, temperatureC: 38.6, heartRateBpm: 150, bodyConditionScore: 5 }, update: {} });
 
     // ---------------------------------------------------------------- Pet safety + shared care (rich-profile owner)

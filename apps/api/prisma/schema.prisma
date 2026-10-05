@@ -1872,6 +1872,11 @@ model ProviderOrganization {
   clinicSubscription ClinicSubscription?
   clinicReminders    ClinicReminder[]
   clinicInvitations  ClinicInvitation[]
+  clinicNotes        ClinicCustomerNote[]
+  clinicTags         ClinicCustomerTag[]
+  clinicTasks        ClinicTask[]
+  clinicCampaigns    ClinicCampaign[]
+  clinicContacts     ClinicImportedContact[]
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -9557,4 +9562,126 @@ model BookingRideEvent {
   @@unique([bookingId, type])
   @@index([bookingId, occurredAt])
   @@map("booking_ride_events")
+}
+
+// ---------------------------------------------------------------------------
+// Clinic OS operations: CRM notes/tags, internal tasks, reminder campaigns, imported contacts
+// ---------------------------------------------------------------------------
+
+/// Clinic-local note on a customer household. Never shown to the owner unless `visibleToOwner`.
+model ClinicCustomerNote {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  householdId            String               @db.Uuid
+  authorProviderUserId   String               @db.Uuid
+  body                   String
+  visibleToOwner         Boolean              @default(false)
+  removedAt              DateTime?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@index([providerOrganizationId, householdId])
+  @@map("clinic_customer_notes")
+}
+
+/// Clinic-defined label (VIP, follow-up, payment follow-up, …). Clinic-local only.
+model ClinicCustomerTag {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  providerOrganizationId String                        @db.Uuid
+  providerOrganization   ProviderOrganization          @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  name                   String
+  createdAt              DateTime                      @default(now())
+  assignments            ClinicCustomerTagAssignment[]
+
+  @@unique([providerOrganizationId, name])
+  @@map("clinic_customer_tags")
+}
+
+model ClinicCustomerTagAssignment {
+  tagId       String            @db.Uuid
+  tag         ClinicCustomerTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  householdId String            @db.Uuid
+  createdAt   DateTime          @default(now())
+
+  @@id([tagId, householdId])
+  @@index([householdId])
+  @@map("clinic_customer_tag_assignments")
+}
+
+enum ClinicTaskType {
+  CALL_CUSTOMER
+  FOLLOW_UP_LAB
+  CONFIRM_APPOINTMENT
+  COLLECT_PAYMENT
+  OTHER
+}
+
+enum ClinicTaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+/// Clinic-internal to-do. Never visible outside the clinic.
+model ClinicTask {
+  id                        String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId    String               @db.Uuid
+  providerOrganization      ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  type                      ClinicTaskType
+  title                     String
+  status                    ClinicTaskStatus     @default(OPEN)
+  dueAt                     DateTime?
+  assigneeProviderUserId    String?              @db.Uuid
+  householdId               String?              @db.Uuid
+  bookingId                 String?              @db.Uuid
+  createdByProviderUserId   String               @db.Uuid
+  completedByProviderUserId String?              @db.Uuid
+  completedAt               DateTime?
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+
+  @@index([providerOrganizationId, status, dueAt])
+  @@map("clinic_tasks")
+}
+
+enum ClinicCampaignSegment {
+  APPOINTMENTS_TOMORROW
+  VACCINES_DUE
+  FOLLOW_UP_DUE
+}
+
+/// One confirmed bulk send. (organisation, segment, dayKey) is unique, so the same campaign can't go out twice a day.
+model ClinicCampaign {
+  id                      String                @id @default(uuid()) @db.Uuid
+  providerOrganizationId  String                @db.Uuid
+  providerOrganization    ProviderOrganization  @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  segment                 ClinicCampaignSegment
+  dayKey                  String
+  title                   String
+  recipientCount          Int
+  createdByProviderUserId String                @db.Uuid
+  createdAt               DateTime              @default(now())
+
+  @@unique([providerOrganizationId, segment, dayKey])
+  @@map("clinic_campaigns")
+}
+
+/// A contact the clinic imported from its own records (CSV). Clinic-local, never linked or merged with a PET LIFE
+/// account automatically.
+model ClinicImportedContact {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  name                   String
+  phone                  String?
+  email                  String?
+  petName                String?
+  species                String?
+  notes                  String?
+  importBatchId          String               @db.Uuid
+  createdAt              DateTime             @default(now())
+
+  @@index([providerOrganizationId])
+  @@map("clinic_imported_contacts")
 }

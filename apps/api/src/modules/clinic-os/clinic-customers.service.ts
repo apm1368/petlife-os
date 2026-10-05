@@ -32,6 +32,7 @@ export class ClinicCustomersService {
     const caseload = this.caseloadPet(ctx.organizationId);
     const where: Prisma.HouseholdWhereInput = {
       pets: { some: caseload },
+      ...(query.tagId ? { id: { in: (await this.prisma.clinicCustomerTagAssignment.findMany({ where: { tagId: query.tagId, tag: { providerOrganizationId: ctx.organizationId } }, select: { householdId: true } })).map((a) => a.householdId) } } : {}),
       ...(query.q
         ? { OR: [{ members: { some: { role: "OWNER", user: { displayName: { contains: query.q, mode: "insensitive" } } } } }, { pets: { some: { AND: [caseload, { name: { contains: query.q, mode: "insensitive" } }] } } }] }
         : {}),
@@ -88,9 +89,11 @@ export class ClinicCustomersService {
       this.prisma.booking.findFirst({ where: { providerOrganizationId: organizationId, householdId, bookingStatus: { in: UPCOMING }, startAt: { gte: now } }, orderBy: { startAt: "asc" }, select: { id: true, startAt: true } }),
     ]);
     const last = [lastBooking?.startAt, lastVisit?.startedAt].filter((d): d is Date => Boolean(d)).sort((a, b) => b.getTime() - a.getTime())[0];
+    const tags = await this.prisma.clinicCustomerTagAssignment.findMany({ where: { householdId, tag: { providerOrganizationId: organizationId } }, include: { tag: { select: { id: true, name: true } } } });
     return {
       householdId: household.id,
       ownerDisplayName: household.members[0]?.user.displayName ?? null,
+      tags: tags.map((t) => t.tag),
       pets,
       completedVisitCount: completed,
       lastVisitAt: last?.toISOString() ?? null,

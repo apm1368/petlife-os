@@ -411,4 +411,112 @@ describe("Clinic OS", () => {
       expect((await c.client.del(`/provider/clinic/branches/${added.id}`).expect(200)).body.usage).toEqual({ used: 1, limit: null });
     });
   });
+
+  describe("operations: CRM notes & tags, queue, assignment, tasks, campaigns, import, export", () => {
+    it("notes are clinic-local unless shared; tags filter the registry; other clinics see nothing", async () => {
+      const c = await clinic(ProviderUserRole.OWNER);
+      const o = await owner("Ops Dog");
+      await booking(c, o);
+      const notes = (await c.client.post(`/provider/clinic/customers/${o.householdId}/notes`).send({ body: "Prefers morning slots" }).expect(201)).body;
+      expect(notes[0]).toMatchObject({ body: "Prefers morning slots", visibleToOwner: false });
+      await c.client.post(`/provider/clinic/customers/${o.householdId}/notes`).send({ body: "Bring last lab report next time", visibleToOwner: true }).expect(201);
+      const shared = (await o.client.get("/me/clinic-notes").expect(200)).body;
+      expect(shared.map((n: { body: string }) => n.body)).toEqual(["Bring last lab report next time"]);
+      const other = await clinic();
+      await other.client.get(`/provider/clinic/customers/${o.householdId}/notes`).expect(404);
+      await other.client.post(`/provider/clinic/customers/${o.householdId}/notes`).send({ body: "x" }).expect(404);
+
+      const tags = (await c.client.post("/provider/clinic/tags").send({ name: "VIP" }).expect(201)).body;
+      await c.client.post("/provider/clinic/tags").send({ name: "VIP" }).expect(400);
+      await c.client.post(`/provider/clinic/customers/${o.householdId}/tags/${tags[0].id}`).expect(201);
+      const filtered = (await c.client.get(`/provider/clinic/customers?tagId=${tags[0].id}`).expect(200)).body;
+      expect(filtered.items.map((i: { householdId: string }) => i.householdId)).toEqual([o.householdId]);
+      expect(filtered.items[0].tags).toEqual([{ id: tags[0].id, name: "VIP" }]);
+      await other.client.post(`/provider/clinic/customers/${o.householdId}/tags/${tags[0].id}`).expect(404);
+    });
+
+    it("queue groups the day by state; assignment refuses double-booking and outsiders", async () => {
+      const c = await clinic(ProviderUserRole.OWNER);
+      const o = await owner("Queue Dog");
+      const today = new Date(Date.now() + 3.5 * 3600e3).toISOString().slice(0, 10);
+      const at = (h: number) => new Date(`${today}T${String(h).padStart(2, "0")}:00:00+03:30`);
+      const b1 = await booking(c, o, { status: BookingStatus.CONFIRMED, startAt: at(9) });
+      await booking(c, o, { status: BookingStatus.CHECKED_IN, startAt: at(10) });
+      await booking(c, o, { status: BookingStatus.COMPLETED, startAt: at(8) });
+      const q = (await c.client.get(`/provider/clinic/queue?date=${today}`).expect(200)).body;
+      expect(q.counts).toMatchObject({ SCHEDULED: 1, WAITING: 1, COMPLETED: 1 });
+
+      const vet = await signUp("q-vet");
+      const vetRow = await prisma.providerUser.create({ data: { userId: vet.userId, providerOrganizationId: c.orgId, role: ProviderUserRole.VET } });
+      await c.client.post(`/provider/clinic/appointments/${b1.id}/assign`).send({ providerUserId: vetRow.id }).expect(201);
+      expect((await prisma.booking.findUniqueOrThrow({ where: { id: b1.id } })).providerUserId).toBe(vetRow.id);
+      expect(await prisma.notification.count({ where: { userId: vet.userId, type: "clinic.appointment_assigned" } })).toBe(1);
+      const clash = await booking(c, o, { status: BookingStatus.CONFIRMED, startAt: at(9) });
+      expect((await c.client.post(`/provider/clinic/appointments/${clash.id}/assign`).send({ providerUserId: vetRow.id }).expect(400)).body.error.details.reason).toBe("STAFF_DOUBLE_BOOKED");
+      const other = await clinic();
+      const outsider = await prisma.providerUser.findFirstOrThrow({ where: { providerOrganizationId: other.orgId } });
+      await c.client.post(`/provider/clinic/appointments/${clash.id}/assign`).send({ providerUserId: outsider.id }).expect(404);
+      await other.client.post(`/provider/clinic/appointments/${b1.id}/assign`).send({ providerUserId: null }).expect(404);
+    });
+
+    it("tasks are clinic-internal and close once", async () => {
+      const c = await clinic(ProviderUserRole.OWNER);
+      const list = (await c.client.post("/provider/clinic/tasks").send({ type: "CALL_CUSTOMER", title: "Call about lab results", dueAt: new Date(Date.now() - 3600e3).toISOString() }).expect(201)).body;
+      expect(list[0]).toMatchObject({ status: "OPEN", overdue: true });
+      await c.client.post(`/provider/clinic/tasks/${list[0].id}/done`).expect(201);
+      await c.client.post(`/provider/clinic/tasks/${list[0].id}/done`).expect(400);
+      expect((await c.client.get("/provider/clinic/tasks?status=DONE").expect(200)).body).toHaveLength(1);
+      const other = await clinic();
+      await other.client.post(`/provider/clinic/tasks/${list[0].id}/cancel`).expect(404);
+      expect((await other.client.get("/provider/clinic/tasks").expect(200)).body).toEqual([]);
+    });
+
+    it("campaigns: preview, then send only with matching confirmation, once a day, through the orchestrator", async () => {
+      const c = await clinic(ProviderUserRole.OWNER);
+      const o = await owner("Campaign Dog");
+      await booking(c, o);
+      await c.client.post("/provider/clinic/campaigns/preview").send({ segment: "APPOINTMENTS_TOMORROW" }).expect(409);
+      await setPlan(c.orgId, "CLINIC_GROWTH");
+      const tomorrow = new Date(Date.now() + 86400e3 + 3.5 * 3600e3).toISOString().slice(0, 10);
+      await booking(c, o, { status: BookingStatus.CONFIRMED, startAt: new Date(`${tomorrow}T10:00:00+03:30`) });
+      const preview = (await c.client.post("/provider/clinic/campaigns/preview").send({ segment: "APPOINTMENTS_TOMORROW" }).expect(201)).body;
+      expect(preview).toMatchObject({ count: 1, alreadySentToday: false });
+      await c.client.post("/provider/clinic/campaigns").send({ segment: "APPOINTMENTS_TOMORROW", title: "Reminder: your visit tomorrow", confirm: false, expectedCount: 1 }).expect(400);
+      expect((await c.client.post("/provider/clinic/campaigns").send({ segment: "APPOINTMENTS_TOMORROW", title: "x", confirm: true, expectedCount: 2 }).expect(400)).body.error.details.reason).toBe("AUDIENCE_CHANGED");
+      const sent = (await c.client.post("/provider/clinic/campaigns").send({ segment: "APPOINTMENTS_TOMORROW", title: "Reminder: your visit tomorrow", confirm: true, expectedCount: 1 }).expect(201)).body;
+      expect(sent).toMatchObject({ recipientCount: 1, delivered: 1 });
+      expect(await prisma.notification.count({ where: { userId: o.userId, type: "clinic.reminder" } })).toBe(1);
+      expect((await c.client.post("/provider/clinic/campaigns").send({ segment: "APPOINTMENTS_TOMORROW", title: "again", confirm: true, expectedCount: 1 }).expect(400)).body.error.details.reason).toBe("ALREADY_SENT_TODAY");
+    });
+
+    it("CSV import: dry-run reports errors and duplicates; commit never merges; export is owner-only, gated and formula-safe", async () => {
+      const c = await clinic(ProviderUserRole.OWNER);
+      const csv = "name,phone,email,petName,species,notes\nSara,09121112233,,Milo,DOG,\nNo Contact,,,Kit,CAT,\nSara Again,0912-111-2233,,,,dup in file\nBad,12,,,,\n=cmd(),,evil@example.com,,,\n";
+      const dry = (await c.client.post("/provider/clinic/contacts/import").send({ csv }).expect(201)).body;
+      expect(dry).toMatchObject({ dryRun: true, totalRows: 5, validRows: 2, imported: 0 });
+      expect(dry.errors.map((e: { row: number; reason: string }) => `${e.row}:${e.reason}`)).toEqual(expect.arrayContaining(["3:PHONE_OR_EMAIL_REQUIRED", "5:INVALID"]));
+      expect(dry.duplicates).toEqual([{ row: 4, matches: "FILE", field: "phone" }]);
+      expect(await prisma.clinicImportedContact.count({ where: { providerOrganizationId: c.orgId } })).toBe(0);
+      const done = (await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false }).expect(201)).body;
+      expect(done.imported).toBe(2);
+      const again = (await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false }).expect(201)).body;
+      expect(again.imported).toBe(0);
+      expect(again.duplicates.filter((d: { matches: string }) => d.matches === "EXISTING")).toHaveLength(3);
+
+      await c.client.get("/provider/clinic/exports/contacts").expect(409);
+      await setPlan(c.orgId, "CLINIC_PRO");
+      const exp = (await c.client.get("/provider/clinic/exports/contacts").expect(200)).body;
+      expect(exp).toMatchObject({ contentType: "text/csv" });
+      expect(exp.csv).toContain("'=cmd()");
+      await c.client.get("/provider/clinic/exports/passwords").expect(400);
+      const vet = await signUp("exp-vet");
+      await prisma.providerUser.create({ data: { userId: vet.userId, providerOrganizationId: c.orgId, role: ProviderUserRole.VET } });
+      await vet.client.get("/provider/clinic/exports/contacts").expect(403);
+      await vet.client.post("/provider/clinic/contacts/import").send({ csv }).expect(403);
+      expect(await prisma.domainEvent.count({ where: { type: "ClinicExportGenerated", aggregateId: c.orgId } })).toBe(1);
+      // Another clinic never sees these contacts.
+      const other = await clinic();
+      expect((await other.client.get("/provider/clinic/contacts").expect(200)).body).toEqual([]);
+    });
+  });
 });

@@ -95,7 +95,8 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
    * Claims the row (SCHEDULED → SENT) atomically so two workers can never both deliver it, then notifies every
    * owner of the pet's household. A deterministic domain-event id makes a retried delivery idempotent.
    */
-  private async deliver(id: string): Promise<boolean> {
+  /** Delivers one due reminder now (also used by confirmed campaigns). */
+  async deliver(id: string): Promise<boolean> {
     const now = new Date();
     const claimed = await this.prisma.clinicReminder.updateMany({ where: { id, status: ClinicReminderStatus.SCHEDULED, dueAt: { lte: now } }, data: { status: ClinicReminderStatus.SENT, sentAt: now } });
     if (!claimed.count) return false;

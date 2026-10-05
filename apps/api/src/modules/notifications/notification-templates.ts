@@ -396,6 +396,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "عضویت در {{clinic}} پایان یافت", body: "دسترسی شما به پنل {{clinic}} برداشته شد." },
     en: { title: "Your access to {{clinic}} ended", body: "You no longer have access to {{clinic}}'s panel." },
   },
+  "clinic.appointment_assigned": {
+    fa: { title: "نوبت به شما سپرده شد", body: "یک نوبت {{service}} به شما تخصیص داده شد." },
+    en: { title: "Appointment assigned to you", body: "A {{service}} appointment was assigned to you." },
+  },
   "booking.ride_arriving": {
     fa: { title: "راننده در راه است", body: "{{provider}} به محل سوار شدن نزدیک می‌شود." },
     en: { title: "Your ride is arriving", body: "{{provider}} is arriving at the pickup point." },
