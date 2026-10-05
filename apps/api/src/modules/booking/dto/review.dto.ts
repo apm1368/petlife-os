@@ -10,6 +10,11 @@ export class CreateProviderReviewDto {
   @IsString()
   @MaxLength(2000)
   body?: string;
+
+  /** Optional 1–5 dimensions, given explicitly by the reviewer. */
+  @IsOptional() @IsInt() @Min(1) @Max(5) quality?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(5) communication?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(5) timeliness?: number;
 }
 
 export class RespondToReviewDto {

@@ -279,6 +279,26 @@ async function main() {
     }
     await db.insuranceClaimPrep.upsert({ where: { id: id("claim-prep") }, create: { id: id("claim-prep"), petId: richPet.id, householdId: richHome.householdId, createdByUserId: rich.id, title: "جراحی پای عقب (پوشه‌ی نمایشی)", incidentDate: new Date(Date.now() - 20 * DAY), notes: "فاکتور و گزارش جراحی برای ادعای بعدی." }, update: {} });
 
+    // ---------------------------------------------------------------- Trust, structured review, saved + recently viewed
+    if (taxi) {
+      const review = await db.providerReview.upsert({ where: { bookingId: id("ride-completed") }, create: { id: id("review:ride"), bookingId: id("ride-completed"), providerOrganizationId: taxi.providerOrganizationId, userId: customer.id, rating: 4, quality: 5, communication: 4, timeliness: 3, body: "راننده مهربان بود ولی کمی دیر رسید (نظر نمایشی)." }, update: {} });
+      const replier = await db.providerUser.findFirst({ where: { providerOrganizationId: taxi.providerOrganizationId, role: "OWNER", removedAt: null } });
+      if (!review.providerResponse && replier) await db.providerReview.update({ where: { id: review.id }, data: { providerResponse: "ممنون از بازخوردتان؛ زمان‌بندی را بهتر می‌کنیم (پاسخ نمایشی).", respondedAt: new Date(), respondedByUserId: replier.userId } });
+    }
+    const admin = await db.adminUser.findFirst({ where: { status: "ACTIVE" }, orderBy: { createdAt: "asc" } });
+    if (admin) {
+      const trustCase = await db.trustCase.upsert({ where: { id: id("trust:case") }, create: { id: id("trust:case"), subjectType: "USER", subjectId: rich.id, reason: "گزارش رفتار نامناسب در گفتگو (نمایشی)", status: "CLOSED", openedByAdminId: admin.id, closedAt: new Date() }, update: {} });
+      const action = await db.trustAction.upsert({ where: { id: id("trust:action") }, create: { id: id("trust:action"), trustCaseId: trustCase.id, actionType: "WARNING", reason: "هشدار به‌خاطر پیام نامناسب (نمایشی)", performedByAdminId: admin.id }, update: {} });
+      await db.appeal.upsert({ where: { trustActionId: action.id }, create: { id: id("trust:appeal"), trustActionId: action.id, appellantUserId: rich.id, reason: "پیام من سوءتفاهم بود و قصد توهین نداشتم (اعتراض نمایشی)." }, update: {} });
+    }
+    const place = await db.petFriendlyPlace.findFirst({ where: { isPubliclyListed: true }, orderBy: { createdAt: "asc" } });
+    if (place) {
+      await db.petFriendlyPlaceFavorite.upsert({ where: { placeId_userId: { placeId: place.id, userId: rich.id } }, create: { userId: rich.id, placeId: place.id }, update: {} });
+      await db.recentlyViewed.upsert({ where: { userId_entityType_entityId: { userId: rich.id, entityType: "PLACE", entityId: place.id } }, create: { userId: rich.id, entityType: "PLACE", entityId: place.id }, update: {} });
+    }
+    const verifiedProvider = await db.providerOrganization.findFirst({ where: { verificationStatus: "VERIFIED" }, orderBy: { createdAt: "asc" } });
+    if (verifiedProvider) await db.recentlyViewed.upsert({ where: { userId_entityType_entityId: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id } }, create: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id }, update: {} });
+
     console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care.`);
   } finally {
     await app.close();

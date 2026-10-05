@@ -4413,6 +4413,8 @@ enum AppealStatus {
   UPHELD
   OVERTURNED
   PARTIALLY_OVERTURNED
+  /// The appellant took it back before a decision.
+  WITHDRAWN
 }
 
 /// Two-person control foundation for high-risk refunds (spec: "refund above
@@ -8708,8 +8710,15 @@ model ProviderReview {
   body                   String?
   status                 ProviderReviewStatus @default(PUBLISHED)
   hiddenReason           String?
+  /// Optional structured dimensions (1–5) — given by the reviewer, never derived from text.
+  quality                Int?
+  communication          Int?
+  timeliness             Int?
   providerResponse       String?
   respondedAt            DateTime?
+  respondedByUserId      String?              @db.Uuid
+  /// Set when the single reply is edited; earlier text is kept in the ProviderReviewResponded event payload.
+  responseEditedAt       DateTime?
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
 
@@ -9047,6 +9056,7 @@ model TravelReview {
   overall          Int
   petFriendliness  Int?
   cleanliness      Int?
+  accuracy         Int?
   location         Int?
   body             String?
   status           TravelReviewStatus @default(PUBLISHED)
@@ -9922,4 +9932,16 @@ model NotificationDigestPreference {
 
   @@id([userId, group])
   @@map("notification_digest_preferences")
+}
+
+/// What a member recently looked at among public catalogue items (never health, documents, chat or account pages).
+model RecentlyViewed {
+  userId     String   @db.Uuid
+  entityType String
+  entityId   String   @db.Uuid
+  viewedAt   DateTime @default(now())
+
+  @@id([userId, entityType, entityId])
+  @@index([userId, viewedAt])
+  @@map("recently_viewed")
 }

@@ -650,14 +650,14 @@ export class TravelBookingService {
 
   // --- Reviews --------------------------------------------------------------------
 
-  async review(userId: string, bookingId: string, input: { overall: number; petFriendliness?: number; cleanliness?: number; location?: number; body?: string }): Promise<TravelReviewDto> {
+  async review(userId: string, bookingId: string, input: { overall: number; petFriendliness?: number; cleanliness?: number; location?: number; accuracy?: number; body?: string }): Promise<TravelReviewDto> {
     const row = await this.loadForTraveler(userId, bookingId);
     if (row.status !== TravelBookingStatus.COMPLETED) throw new TravelActionNotAllowedException("TRAVEL_REVIEW_NOT_ALLOWED", "Only completed stays can be reviewed.", { bookingId });
     if (row.review) throw new TravelActionNotAllowedException("TRAVEL_REVIEW_NOT_ALLOWED", "This stay has already been reviewed.", { bookingId });
     try {
       const review = await this.prisma.$transaction(async (tx) => {
         const created = await tx.travelReview.create({
-          data: { bookingId, listingId: row.listingId, userId, overall: input.overall, petFriendliness: input.petFriendliness ?? null, cleanliness: input.cleanliness ?? null, location: input.location ?? null, body: input.body?.trim() || null },
+          data: { bookingId, listingId: row.listingId, userId, overall: input.overall, petFriendliness: input.petFriendliness ?? null, cleanliness: input.cleanliness ?? null, location: input.location ?? null, accuracy: input.accuracy ?? null, body: input.body?.trim() || null },
         });
         await this.events.publish("TravelReviewCreated" as never, { reviewId: created.id, listingId: row.listingId, organizationId: row.listing.organizationId }, { tx, aggregateType: "TravelListing", aggregateId: row.listingId });
         return created;
@@ -669,6 +669,7 @@ export class TravelBookingService {
         petFriendliness: review.petFriendliness,
         cleanliness: review.cleanliness,
         location: review.location,
+        accuracy: review.accuracy,
         body: review.body,
         authorName: firstName(user?.displayName ?? null),
         stayMonth: toDateKey(row.checkIn).slice(0, 7),
@@ -697,6 +698,7 @@ export class TravelBookingService {
         petFriendliness: r.petFriendliness,
         cleanliness: r.cleanliness,
         location: r.location,
+        accuracy: r.accuracy,
         body: r.body,
         authorName: nameById.get(r.userId) ?? "—",
         stayMonth: toDateKey(r.booking.checkIn).slice(0, 7),

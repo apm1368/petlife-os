@@ -437,7 +437,7 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       await post(owner, `/bookings/${booking.id}/review`).send({ rating: 4 }).expect(400);
       await post(c.owner, `/provider/reviews/${review.body.id}/respond`).send({ response: "ممنون از اعتماد شما" }).expect(201);
       const pub = await request(server()).get(`/providers/${c.org.id}/reviews`).expect(200);
-      expect(pub.body.summary).toEqual({ average: 5, count: 1 });
+      expect(pub.body.summary).toMatchObject({ average: 5, count: 1, dimensions: { quality: null, communication: null, timeliness: null } });
       expect(pub.body.reviews[0].providerResponse).toBe("ممنون از اعتماد شما");
       expect(JSON.stringify(pub.body)).not.toContain("@example.com");
 
@@ -593,7 +593,7 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       expect(profile.body.team).toHaveLength(1);
       expect(profile.body.team[0]).toMatchObject({ publicBio: "۱۰ سال تجربه", role: "VET" });
       expect(JSON.stringify(profile.body.team)).not.toContain("@example.com");
-      expect(profile.body.rating).toEqual({ average: 4, count: 1 });
+      expect(profile.body.rating).toMatchObject({ average: 4, count: 1 });
       const unverified = await db.providerOrganization.findFirstOrThrow({ where: { name: "ج تأییدنشده" } });
       await request(server()).get(`/discovery/providers/${unverified.id}`).expect(404);
       await request(server()).get(`/providers/vets/${unverified.id}`).expect(404);

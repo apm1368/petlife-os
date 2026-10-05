@@ -85,7 +85,7 @@ export class ProviderCatalogController {
   @Post("reviews/:reviewId/respond")
   @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.VET)
   respond(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("reviewId", ParseUUIDPipe) reviewId: string, @Body() dto: RespondReviewDto) {
-    return this.reviews.respond(ctx.organizationId, reviewId, dto.response);
+    return this.reviews.respond(ctx.organizationId, reviewId, dto.response, ctx.userId);
   }
 
   @Get("analytics")

@@ -175,6 +175,29 @@ export class AccountExportService implements OnModuleInit, OnModuleDestroy {
       this.prisma.domainEvent.findMany({ where: { aggregateType: "User", aggregateId: userId }, orderBy: { occurredAt: "desc" }, take, select: { type: true, occurredAt: true } }),
     ]);
 
+    // Newer domains — only what this member wrote or chose; never another member's private content.
+    const [posts, comments, sentMessages, conversations, placeFavs, providerFavs, productFavs, stayFavs, savedNeeds, savedPosts, helpOffers, volunteerInterests, donations, handoffsGiven, handoffsReceived, sharedClinicNotes, checklistItems, appeals, feedback] = await Promise.all([
+      this.prisma.communityPost.findMany({ where: { authorUserId: userId }, orderBy: { createdAt: "desc" }, take, select: { id: true, type: true, title: true, body: true, topics: true, city: true, status: true, createdAt: true } }),
+      this.prisma.communityComment.findMany({ where: { authorUserId: userId }, orderBy: { createdAt: "desc" }, take, select: { id: true, postId: true, parentCommentId: true, body: true, status: true, createdAt: true } }),
+      this.prisma.chatMessage.findMany({ where: { senderUserId: userId }, orderBy: { createdAt: "desc" }, take, select: { conversationId: true, body: true, status: true, createdAt: true } }),
+      this.prisma.chatParticipant.findMany({ where: { userId }, select: { conversationId: true, joinedAt: true, lastReadAt: true, archivedAt: true, mutedUntil: true, hiddenAt: true } }),
+      this.prisma.petFriendlyPlaceFavorite.findMany({ where: { userId }, select: { placeId: true, createdAt: true } }),
+      this.prisma.providerFavorite.findMany({ where: { userId }, select: { providerOrganizationId: true, createdAt: true } }),
+      this.prisma.productFavorite.findMany({ where: { userId }, select: { productId: true, createdAt: true } }),
+      this.prisma.travelListingFavorite.findMany({ where: { userId }, select: { listingId: true, createdAt: true } }),
+      this.prisma.supportNeedBookmark.findMany({ where: { userId }, select: { listingId: true, createdAt: true } }),
+      this.prisma.communityPostBookmark.findMany({ where: { userId }, select: { postId: true, createdAt: true } }),
+      this.prisma.helpOffer.findMany({ where: { helperUserId: userId }, orderBy: { createdAt: "desc" }, take, select: { listingId: true, helpType: true, quantity: true, status: true, message: true, createdAt: true } }),
+      this.prisma.volunteerInterest.findMany({ where: { userId }, select: { organizationId: true, kinds: true, city: true, availability: true, shareContact: true, status: true, createdAt: true } }),
+      this.prisma.donationIntent.findMany({ where: { donorUserId: userId }, orderBy: { createdAt: "desc" }, take, select: { id: true, campaignId: true, supportNeedListingId: true, amountIrr: true, status: true, createdAt: true } }),
+      this.prisma.petAccessGrant.findMany({ where: { grantedByUserId: userId, reason: "CARE_HANDOFF" }, select: { petId: true, startsAt: true, expiresAt: true, revokedAt: true, healthScopes: true } }),
+      this.prisma.petAccessGrant.findMany({ where: { userId, reason: "CARE_HANDOFF" }, select: { petId: true, startsAt: true, expiresAt: true, revokedAt: true } }),
+      this.prisma.clinicCustomerNote.findMany({ where: { householdId: { in: householdIds }, visibleToOwner: true, removedAt: null }, select: { body: true, createdAt: true, providerOrganization: { select: { name: true } } } }),
+      this.prisma.tripChecklistItem.findMany({ where: { trip: { createdByUserId: userId } }, select: { tripId: true, label: true, category: true, done: true } }),
+      this.prisma.appeal.findMany({ where: { appellantUserId: userId }, select: { trustActionId: true, reason: true, status: true, createdAt: true, resolvedAt: true } }),
+      this.prisma.articleFeedback.findMany({ where: { userId }, select: { articleId: true, helpful: true, reason: true, createdAt: true } }),
+    ]);
+
     return {
       format: "PET LIFE account export v1",
       account: {
@@ -211,6 +234,14 @@ export class AccountExportService implements OnModuleInit, OnModuleDestroy {
       supportCases: this.bounded(supportCases),
       privacy: { consents: consents.map(clean), notificationPreferences, quietHours: quietHours ? clean(quietHours) : null },
       activity: this.bounded(activity),
+      community: { posts: this.bounded(posts), comments: this.bounded(comments), articleFeedback: this.bounded(feedback) },
+      chat: { conversations, yourMessages: { ...this.bounded(sentMessages), note: "Only messages you sent; other members' messages are theirs." } },
+      saved: { places: placeFavs, providers: providerFavs, products: productFavs, stays: stayFavs, supportNeeds: savedNeeds, posts: savedPosts },
+      animalSupport: { helpOffers: this.bounded(helpOffers), volunteerInterests, donations: this.bounded(donations) },
+      careHandoffs: { given: handoffsGiven, received: handoffsReceived },
+      clinicNotesSharedWithYou: sharedClinicNotes,
+      tripChecklists: checklistItems,
+      moderationAppeals: appeals,
     };
   }
 }

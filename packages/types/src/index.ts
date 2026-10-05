@@ -6008,6 +6008,7 @@ export interface TravelReviewDto {
   petFriendliness: number | null;
   cleanliness: number | null;
   location: number | null;
+  accuracy?: number | null;
   body: string | null;
   authorName: string;
   stayMonth: string;

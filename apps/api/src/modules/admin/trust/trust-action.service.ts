@@ -3,7 +3,7 @@ import { CommunityReportStatus, type Prisma, ProviderVerificationStatus, SellerS
 import type { AppealDto, TrustActionDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { AppealAlreadyExistsException, AppealNotFoundException, TrustActionNotApplicableException, TrustActionNotFoundException, TrustCaseNotFoundException } from "../../../common/errors/api-exception";
+import { AppealAlreadyExistsException, AppealNotFoundException, ValidationApiException, TrustActionNotApplicableException, TrustActionNotFoundException, TrustCaseNotFoundException } from "../../../common/errors/api-exception";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { toAppealDto, toTrustActionDto } from "./trust.mapper";
@@ -149,6 +149,8 @@ export class TrustActionService {
     const appeal = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.appeal.findUnique({ where: { id: appealId } });
       if (!existing) throw new AppealNotFoundException({ appealId });
+      // A withdrawn or already-decided appeal is closed; it is never decided (again).
+      if (existing.status === "WITHDRAWN" || existing.resolvedAt) throw new ValidationApiException({ field: "appealId", reason: "APPEAL_CLOSED", status: existing.status });
 
       const updated = await tx.appeal.update({
         where: { id: appealId },

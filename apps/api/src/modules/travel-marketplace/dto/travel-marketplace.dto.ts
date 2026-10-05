@@ -479,6 +479,7 @@ export class TravelReviewInputDto {
   @IsOptional() @IsInt() @Min(1) @Max(5) petFriendliness?: number;
   @IsOptional() @IsInt() @Min(1) @Max(5) cleanliness?: number;
   @IsOptional() @IsInt() @Min(1) @Max(5) location?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(5) accuracy?: number;
   @IsOptional() @IsString() @MaxLength(2000) body?: string;
 }
 

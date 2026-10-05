@@ -62,6 +62,8 @@ import { PetSafetyModule } from "./modules/pet-safety/pet-safety.module";
 import { ServiceIntakeModule } from "./modules/service-intake/service-intake.module";
 import { PlaceSuggestionsModule } from "./modules/place-suggestions/place-suggestions.module";
 import { ActivityModule } from "./modules/activity/activity.module";
+import { MemberTrustModule } from "./modules/member-trust/member-trust.module";
+import { ConsumerHubModule } from "./modules/consumer-hub/consumer-hub.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
 import { CommunityModule } from "./modules/community/community.module";
@@ -135,6 +137,8 @@ import { PlacesModule } from "./modules/places/places.module";
     ServiceIntakeModule,
     PlaceSuggestionsModule,
     ActivityModule,
+    MemberTrustModule,
+    ConsumerHubModule,
     LostPetModule,
     AnimalSupportModule,
     CommunityModule,

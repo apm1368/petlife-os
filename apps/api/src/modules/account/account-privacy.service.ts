@@ -68,6 +68,47 @@ export class AccountPrivacyService {
     };
   }
 
+  /**
+   * What a deletion would touch, by domain, classified without deciding retention policy:
+   * DELETABLE (personal convenience data), ANONYMIZABLE (shared content that can be detached from the person),
+   * RETENTION_REQUIRED_DECISION (financial, medical-provenance and clinic records awaiting a legal policy).
+   */
+  private async deletionImpact(userId: string, householdIds: string[]) {
+    const [orders, bookings, donations, recordedHealth, documents, clinicVisits, posts, comments, messages, helpOffers, volunteer, saved, recent, memories] = await Promise.all([
+      this.prisma.order.count({ where: { userId } }),
+      this.prisma.booking.count({ where: { userId } }),
+      this.prisma.donationIntent.count({ where: { donorUserId: userId } }),
+      Promise.all([this.prisma.allergy.count({ where: { recordedByUserId: userId } }), this.prisma.condition.count({ where: { recordedByUserId: userId } }), this.prisma.medication.count({ where: { recordedByUserId: userId } })]).then((n) => n.reduce((a, b) => a + b, 0)),
+      this.prisma.medicalDocument.count({ where: { sourceUserId: userId } }),
+      this.prisma.clinicalVisit.count({ where: { householdId: { in: householdIds } } }),
+      this.prisma.communityPost.count({ where: { authorUserId: userId } }),
+      this.prisma.communityComment.count({ where: { authorUserId: userId } }),
+      this.prisma.chatMessage.count({ where: { senderUserId: userId } }),
+      this.prisma.helpOffer.count({ where: { helperUserId: userId } }),
+      this.prisma.volunteerInterest.count({ where: { userId } }),
+      Promise.all([this.prisma.petFriendlyPlaceFavorite.count({ where: { userId } }), this.prisma.providerFavorite.count({ where: { userId } }), this.prisma.productFavorite.count({ where: { userId } }), this.prisma.travelListingFavorite.count({ where: { userId } }), this.prisma.supportNeedBookmark.count({ where: { userId } }), this.prisma.communityPostBookmark.count({ where: { userId } })]).then((n) => n.reduce((a, b) => a + b, 0)),
+      this.prisma.recentlyViewed.count({ where: { userId } }),
+      this.prisma.petMemory.count({ where: { createdByUserId: userId } }),
+    ]);
+    const rows = [
+      { domain: "FINANCIAL_ORDERS", count: orders, classification: "RETENTION_REQUIRED_DECISION" },
+      { domain: "FINANCIAL_BOOKINGS", count: bookings, classification: "RETENTION_REQUIRED_DECISION" },
+      { domain: "DONATIONS", count: donations, classification: "RETENTION_REQUIRED_DECISION" },
+      { domain: "MEDICAL_RECORDS_YOU_RECORDED", count: recordedHealth, classification: "RETENTION_REQUIRED_DECISION" },
+      { domain: "MEDICAL_DOCUMENTS_YOU_UPLOADED", count: documents, classification: "RETENTION_REQUIRED_DECISION" },
+      { domain: "CLINIC_VISIT_RECORDS", count: clinicVisits, classification: "RETENTION_REQUIRED_DECISION" },
+      { domain: "COMMUNITY_POSTS", count: posts, classification: "ANONYMIZABLE" },
+      { domain: "COMMUNITY_COMMENTS", count: comments, classification: "ANONYMIZABLE" },
+      { domain: "CHAT_MESSAGES", count: messages, classification: "ANONYMIZABLE" },
+      { domain: "HELP_OFFERS", count: helpOffers, classification: "ANONYMIZABLE" },
+      { domain: "VOLUNTEER_INTEREST", count: volunteer, classification: "DELETABLE" },
+      { domain: "SAVED_ITEMS", count: saved, classification: "DELETABLE" },
+      { domain: "RECENTLY_VIEWED", count: recent, classification: "DELETABLE" },
+      { domain: "MEMORIES_YOU_WROTE", count: memories, classification: "DELETABLE" },
+    ];
+    return rows.filter((r) => r.count > 0);
+  }
+
   /** Terms and Privacy can be accepted (current version) but not withdrawn here; Marketing is freely revocable. */
   async setConsent(userId: string, kind: ConsentKind, granted: boolean) {
     if (!granted && REQUIRED_CONSENTS.includes(kind)) throw new ConsentRequiredException({ kind });
@@ -170,6 +211,7 @@ export class AccountPrivacyService {
       canRequest: blockers.length === 0,
       reauth: { password: Boolean(user.passwordHash), code: codeContact ? maskContact(codeContact) : null },
       retention: { policyPublished: false },
+      impact: await this.deletionImpact(userId, memberships.map((m) => m.householdId)),
     };
   }
 

@@ -16,6 +16,11 @@ export interface ProviderReviewDto {
   serviceName: string | null;
   providerResponse: string | null;
   respondedAt: string | null;
+  /** Set when the provider edited their single reply. */
+  responseEditedAt: string | null;
+  quality: number | null;
+  communication: number | null;
+  timeliness: number | null;
   status: ProviderReviewStatus;
   createdAt: string;
 }
@@ -23,6 +28,8 @@ export interface ProviderReviewDto {
 export interface ProviderRatingSummary {
   average: number | null;
   count: number;
+  /** Averages of the reviews that gave each dimension (null when none did). */
+  dimensions?: { quality: number | null; communication: number | null; timeliness: number | null };
 }
 
 type ReviewRow = ProviderReview & { user: { displayName: string | null }; booking: { serviceNameSnapshot: string | null } };
@@ -40,8 +47,12 @@ function toDto(row: ReviewRow): ProviderReviewDto {
     body: row.body,
     authorName: firstName(row.user.displayName),
     serviceName: row.booking.serviceNameSnapshot,
-    providerResponse: row.providerResponse,
+    providerResponse: row.status === ProviderReviewStatus.PUBLISHED ? row.providerResponse : null,
     respondedAt: row.respondedAt?.toISOString() ?? null,
+    responseEditedAt: row.responseEditedAt?.toISOString() ?? null,
+    quality: row.quality,
+    communication: row.communication,
+    timeliness: row.timeliness,
     status: row.status,
     createdAt: row.createdAt.toISOString(),
   };
@@ -64,7 +75,7 @@ export class ProviderReviewsService {
     if (booking.bookingStatus !== BookingStatus.COMPLETED) throw new ValidationApiException({ field: "bookingId", reason: "Only completed bookings can be reviewed" });
     if (booking.review) throw new ValidationApiException({ field: "bookingId", reason: "This booking already has a review" });
     const row = await this.prisma.providerReview.create({
-      data: { bookingId, providerOrganizationId: booking.providerOrganizationId, userId, rating: dto.rating, body: dto.body?.trim() || null },
+      data: { bookingId, providerOrganizationId: booking.providerOrganizationId, userId, rating: dto.rating, body: dto.body?.trim() || null, quality: dto.quality ?? null, communication: dto.communication ?? null, timeliness: dto.timeliness ?? null },
       include: INCLUDE,
     });
     await this.events.publish("ProviderReviewCreated", { reviewId: row.id, providerOrganizationId: row.providerOrganizationId, rating: row.rating }, { aggregateType: "ProviderReview", aggregateId: row.id });
@@ -77,8 +88,9 @@ export class ProviderReviewsService {
   }
 
   async summary(providerOrganizationId: string): Promise<ProviderRatingSummary> {
-    const agg = await this.prisma.providerReview.aggregate({ where: { providerOrganizationId, status: ProviderReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } });
-    return { average: agg._avg.rating === null ? null : Math.round(agg._avg.rating * 10) / 10, count: agg._count._all };
+    const agg = await this.prisma.providerReview.aggregate({ where: { providerOrganizationId, status: ProviderReviewStatus.PUBLISHED }, _avg: { rating: true, quality: true, communication: true, timeliness: true }, _count: { _all: true } });
+    const r = (v: number | null) => (v === null ? null : Math.round(v * 10) / 10);
+    return { average: r(agg._avg.rating), count: agg._count._all, dimensions: { quality: r(agg._avg.quality), communication: r(agg._avg.communication), timeliness: r(agg._avg.timeliness) } };
   }
 
   async summaries(providerOrganizationIds: string[]): Promise<Map<string, ProviderRatingSummary>> {
@@ -92,10 +104,20 @@ export class ProviderReviewsService {
     return rows.map(toDto);
   }
 
-  async respond(providerOrganizationId: string, reviewId: string, response: string): Promise<ProviderReviewDto> {
-    const updated = await this.prisma.providerReview.updateMany({ where: { id: reviewId, providerOrganizationId }, data: { providerResponse: response.trim(), respondedAt: new Date() } });
-    if (updated.count !== 1) throw new NotFoundApiException("Review");
-    await this.events.publish("ProviderReviewResponded", { reviewId, providerOrganizationId }, { aggregateType: "ProviderReview", aggregateId: reviewId });
+  /**
+   * One reply per review. Editing it keeps the original respondedAt, stamps responseEditedAt and records the previous
+   * text in the event payload, so nothing said is lost. Hidden (moderated) reviews take no reply.
+   */
+  async respond(providerOrganizationId: string, reviewId: string, response: string, actorUserId?: string): Promise<ProviderReviewDto> {
+    const text = response.trim();
+    if (!text) throw new ValidationApiException({ field: "response" });
+    const review = await this.prisma.providerReview.findFirst({ where: { id: reviewId, providerOrganizationId } });
+    if (!review) throw new NotFoundApiException("Review");
+    if (review.status !== ProviderReviewStatus.PUBLISHED) throw new ValidationApiException({ field: "reviewId", reason: "REVIEW_NOT_PUBLISHED" });
+    const now = new Date();
+    const edit = review.providerResponse !== null;
+    await this.prisma.providerReview.update({ where: { id: reviewId }, data: edit ? { providerResponse: text, responseEditedAt: now } : { providerResponse: text, respondedAt: now, respondedByUserId: actorUserId ?? null } });
+    await this.events.publish("ProviderReviewResponded", { reviewId, providerOrganizationId, actorUserId: actorUserId ?? null, edited: edit, previousResponse: edit ? review.providerResponse : null }, { aggregateType: "ProviderReview", aggregateId: reviewId });
     return toDto(await this.prisma.providerReview.findUniqueOrThrow({ where: { id: reviewId }, include: INCLUDE }));
   }
 

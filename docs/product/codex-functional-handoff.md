@@ -461,3 +461,28 @@
   - `booking.review_invite`: بعد از تکمیل نوبت.
   - `travel.trip_approaching`: ۳ روز پیش از سفر، همراه تعداد موارد باز چک‌لیست.
 - **دادهٔ نمایشی:** چهار رویداد فعالیت (خاطره، انجام مراقبت توسط «علی»، حساسیت، به‌روزرسانی پروفایل) برای پت اول `batch2-review@example.test`.
+
+## ۱۶. اعتماد، نظرها، جست‌وجو و حریم خصوصی (G10)
+
+- **اعتراض به تصمیم‌های نظارتی (سمت عضو):**
+  - `GET /me/moderation-decisions`: فقط تصمیم‌هایی که روی خود عضو اثر گذاشته‌اند (حساب کاربری، پست/کامنت خودش، نیازهای حمایتی که ساخته، سازمان یا کسب‌وکاری که مالک آن است). هر آیتم: `{actionId, actionType, subjectType, subjectId, reason, decidedAt, appealDeadline, canAppeal, appeal}`.
+  - `POST /me/moderation-decisions/:actionId/appeal {reason: 10–2000}`: هر تصمیم فقط یک بار و تا ۳۰ روز. تصمیم دیگران ۴۰۴ می‌دهد. خطاها: `ALREADY_APPEALED` و `APPEAL_WINDOW_CLOSED`.
+  - `GET /me/appeals` و `POST /me/appeals/:id/withdraw` (فقط در وضعیت `SUBMITTED`؛ در غیر این صورت `NOT_WITHDRAWABLE`).
+  - وضعیت‌ها: `SUBMITTED`، `UNDER_REVIEW`، `APPROVED`، `REJECTED`، `WITHDRAWN` (همراه `partial` برای پذیرش بخشی). ثبت اعتراض هیچ تصمیمی را خودکار برنمی‌گرداند؛ تصمیم با ادمین است.
+- **نظرهای ساختاریافته:**
+  - خدمات: `POST /bookings/:id/review {rating, quality?, communication?, timeliness?, body?}` (هر بُعد ۱ تا ۵). `summary.dimensions` میانگین هر بُعد است (اگر کسی آن بُعد را نداده باشد `null`).
+  - سفر: فیلد `accuracy` در کنار `petFriendliness` و `cleanliness` اضافه شد.
+  - پاسخ ارائه‌دهنده: هر نظر فقط یک پاسخ دارد (`POST /provider/reviews/:id/respond`). ویرایش پاسخ `responseEditedAt` را ثبت می‌کند و متن قبلی در رویداد ممیزی می‌ماند. پاسخ به نظر پنهان‌شده ممکن نیست (`REVIEW_NOT_PUBLISHED`) و روی نظر پنهان نمایش داده نمی‌شود.
+- **جست‌وجوی سراسری (عمومی):** `GET /search?q&types&city&locale&limit`.
+  - انواع: `PROVIDER`، `SERVICE`، `PRODUCT`، `TRAVEL_LISTING`، `PLACE`، `ARTICLE`، `SUPPORT_NEED`، `ORGANIZATION`.
+  - فقط آیتم‌های عمومی و تأییدشده؛ هیچ دادهٔ خصوصی (پت، سلامت، سفارش، چت) جست‌وجو نمی‌شود.
+  - خروجی: `{q, total, results: [{type, id, preview: {title, subtitle, deepLink}, facets}], counts}`.
+- **ذخیره‌شده‌ها:** `GET /me/saved` همهٔ موارد ذخیره‌شده را از همهٔ بخش‌ها (مکان، ارائه‌دهنده، محصول، اقامتگاه، نیاز حمایتی، پست) با `type` و پیش‌نمایش برمی‌گرداند. آیتمی که دیگر عمومی نیست حذف می‌شود.
+- **بازدیدهای اخیر:** `GET`/`POST`/`DELETE /me/recently-viewed` (حداکثر ۵۰ مورد؛ فقط آیتم عمومی؛ پاک‌کردن کامل با `DELETE`).
+- **حریم خصوصی:**
+  - خروجی داده شامل این موارد هم می‌شود: پست‌ها و کامنت‌ها و بازخورد مقاله، متادیتای گفتگوها و پیام‌های ارسالی خود عضو، ذخیره‌شده‌ها، کمک‌ها و داوطلبی و حمایت‌ها، سپردن مراقبت، یادداشت‌های کلینیک که با عضو به اشتراک گذاشته شده، چک‌لیست سفر و اعتراض‌ها.
+  - `GET /account/privacy/deletion/preview` حالا `impact[]` دارد به شکل `{domain, count, classification}` و classification یکی از این‌هاست: `DELETABLE`، `ANONYMIZABLE`، `RETENTION_REQUIRED_DECISION`. این فقط گزارش است و چیزی حذف نمی‌کند. سیاست نگهداری هنوز تصمیم محصول است.
+- **دادهٔ نمایشی:**
+  - یک نظر ساختاریافته روی سفر تاکسی تکمیل‌شده، همراه پاسخ ارائه‌دهنده؛
+  - یک هشدار نظارتی با اعتراض ثبت‌شده برای `batch2-review@example.test`؛
+  - یک مکان ذخیره‌شده و دو بازدید اخیر برای همان کاربر.
