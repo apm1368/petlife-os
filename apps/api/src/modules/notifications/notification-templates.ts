@@ -380,6 +380,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "یادآور از {{clinic}}", body: "{{petName}}: {{title}}" },
     en: { title: "Reminder from {{clinic}}", body: "{{petName}}: {{title}}" },
   },
+  "clinic.staff_added": {
+    fa: { title: "عضو تیم {{clinic}} شدید", body: "شما به‌عنوان {{role}} به تیم {{clinic}} اضافه شدید." },
+    en: { title: "You joined {{clinic}}", body: "You were added to {{clinic}}'s team as {{role}}." },
+  },
   "clinic.message": {
     fa: { title: "پیام از {{clinic}}", body: "درباره‌ی {{petName}}: {{title}}" },
     en: { title: "Message from {{clinic}}", body: "About {{petName}}: {{title}}" },

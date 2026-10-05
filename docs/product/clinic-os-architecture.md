@@ -27,12 +27,14 @@ Clinic OS یک محصول جدا نیست؛ لایه‌ی B2B روی زیرسا�
 | `clinic.reminders` (یادآور و پیام به صاحبان) | ✘ | ✔ | ✔ |
 | `clinic.reminders.monthly.max` | — | ۳۰۰ | نامحدود |
 | `clinic.finance.reports` | ✘ | ✔ | ✔ |
+| `clinic.staff.max` (همهٔ اعضا، شامل مدیر) | ۳ | ۱۰ | نامحدود |
+| `clinic.branches.max` | ۱ | ۳ | نامحدود |
 
 - امکانات موجود (نوبت، پرونده‌ی پزشکی، فهرست بیماران) در همه‌ی پلن‌ها باز است. هیچ paywall جدیدی روی قابلیت‌های فعلی گذاشته نشده است.
-- **پیشنهاد، در انتظار تصمیم مالک:** سقف تعداد کارکنان (۳/۱۰/نامحدود) و سقف تعداد شعبه (۱/۳/نامحدود). این دو هنوز اعمال نمی‌شوند، چون اعمال‌شان یعنی محدود کردن قابلیت موجود.
+- سقف کارکنان و شعبه (مصوب مالک، ۱۴۰۵/۰۷/۱۳) سمت سرور اعمال می‌شود. شمارش و ثبت زیر قفل ردیف سازمان انجام می‌شود، پس دو درخواست هم‌زمان نمی‌توانند هر دو آخرین جای خالی را بگیرند. اعضا یا شعبه‌های موجودِ بیش از سقف حذف نمی‌شوند؛ فقط افزودن جدید متوقف می‌شود.
 
 ### قیمت‌گذاری و پرداخت
-- هیچ قیمتی seed نشده است، چون قیمت‌گذاری کلینیک تصمیم مالک است. `prices: []` یعنی UI باید بگوید «قیمت اعلام نشده» و هرگز قیمت نسازد.
+- **وضعیت قیمت: `PRODUCT_DECISION_LATER`.** هیچ قیمتی seed نشده است. `prices: []` یعنی UI باید بگوید «قیمت اعلام نشده» و هرگز قیمت نسازد.
 - تا وقتی درگاه واقعی وصل نشده، تنها راه رفتن به GROWTH/PRO تخصیص توسط ادمین است:
   - `POST /admin/clinic-subscriptions/:organizationId/assign`، با مجوز `subscription.manage`؛
   - دلیل اجباری؛
@@ -79,8 +81,7 @@ Clinic OS یک محصول جدا نیست؛ لایه‌ی B2B روی زیرسا�
 ## ۷. موارد مسدود / نیازمند تصمیم
 | مورد | وضعیت |
 |---|---|
-| قیمت پلن‌های کلینیک (ماهانه/سه‌ماهه/سالانه) | تصمیم مالک |
-| سقف کارکنان و شعبه | تصمیم مالک |
+| قیمت پلن‌های کلینیک | PRODUCT_DECISION_LATER |
 | پرداخت آنلاین اشتراک کلینیک | BLOCKED_EXTERNAL (درگاه واقعی) |
 | SMS یادآور | BLOCKED_EXTERNAL (فراز) |
 | تسویه‌ی درآمد آنلاین با کلینیک | تصمیم مالی/حقوقی |
@@ -90,6 +91,10 @@ Clinic OS یک محصول جدا نیست؛ لایه‌ی B2B روی زیرسا�
 |---|---|---|
 | GET | `/provider/clinic/plans` | فهرست پلن‌ها شامل entitlements و prices (فعلاً خالی) |
 | GET | `/provider/clinic/subscription` | `{status, plan, assignedPlanCode, currentPeriodEndsAt, usage:{remindersThisMonth}}` |
+| GET | `/provider/clinic/staff` | `{items:[{providerUserId, displayName, role, displayTitle, joinedAt}], usage:{used, limit}}` (limit null = نامحدود) |
+| POST | `/provider/clinic/staff` | فقط OWNER: `{email, role: VET\|STAFF, displayTitle?}` → فهرست جدید. خطاها: 404 کاربر ناموجود، 409 `CLINIC_STAFF_ALREADY_MEMBER`، 409 سقف |
+| GET | `/provider/clinic/branches` | `{items:[{id, name, addressLine, city, region, latitude, longitude, phone, timezone}], usage}` |
+| POST | `/provider/clinic/branches` | فقط OWNER: `{name, addressLine, city, region?, latitude?, longitude?, phone?}` |
 | GET | `/provider/clinic/customers?q&page&pageSize` | `{items:[{householdId, ownerDisplayName, pets[], completedVisitCount, lastVisitAt, nextAppointment}], total}` |
 | GET | `/provider/clinic/customers/:householdId` | همان، به‌علاوه‌ی `bookings[]` و `reminders[]` |
 | GET | `/provider/clinic/reminders?status&petId&page` | فهرست یادآورها |

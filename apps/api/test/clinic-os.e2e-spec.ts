@@ -241,4 +241,71 @@ describe("Clinic OS", () => {
     await prisma.providerUser.create({ data: { userId: vet.userId, providerOrganizationId: c.orgId, role: ProviderUserRole.VET } });
     await vet.client.get("/provider/clinic/reports/finance").expect(403);
   });
+
+  describe("staff and branch limits (clinic.staff.max / clinic.branches.max)", () => {
+    const plainUser = async () => (await prisma.user.create({ data: { email: `clinic-seat-${unique()}@example.com`, displayName: "Seat" } })).email!;
+    const addStaff = async (c: Awaited<ReturnType<typeof clinic>>, email?: string) => {
+      const res = await c.client.post("/provider/clinic/staff").send({ email: email ?? (await plainUser()), role: "VET" });
+      return Object.assign(res, { expect: (status: number) => { expect(res.status).toBe(status); return res; } });
+    };
+    const addBranch = (c: Awaited<ReturnType<typeof clinic>>, n: number) => c.client.post("/provider/clinic/branches").send({ name: `Branch ${n}`, addressLine: `Street ${n}`, city: "Tehran" });
+
+    it("BASIC: 3 seats (owner included) and 1 branch; owner-only, validated, notified", async () => {
+      const c = await clinic();
+      const first = await plainUser();
+      const added = (await addStaff(c, first)).expect(201).body;
+      expect(added.usage).toEqual({ used: 2, limit: 3 });
+      const seat = await prisma.user.findUniqueOrThrow({ where: { email: first } });
+      expect(await prisma.notification.count({ where: { userId: seat.id, type: "clinic.staff_added", deepLink: "/provider" } })).toBe(1);
+      expect((await addStaff(c, first)).expect(409).body.error.code).toBe("CLINIC_STAFF_ALREADY_MEMBER");
+      (await addStaff(c, `nobody-${unique()}@example.com`)).expect(404);
+      await c.client.post("/provider/clinic/staff").send({ email: await plainUser(), role: "OWNER" }).expect(400);
+      (await addStaff(c)).expect(201);
+      const over = (await addStaff(c)).expect(409);
+      expect(over.body.error).toMatchObject({ code: "SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED" });
+      expect((await c.client.get("/provider/clinic/staff").expect(200)).body.usage).toEqual({ used: 3, limit: 3 });
+
+      expect((await c.client.get("/provider/clinic/branches").expect(200)).body.usage).toEqual({ used: 1, limit: 1 });
+      expect((await addBranch(c, 2).expect(409)).body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
+      await c.client.post("/provider/clinic/branches").send({ name: "", addressLine: "x", city: "" }).expect(400);
+
+      // A VET member of the same clinic can read the roster but cannot add seats or branches.
+      const vet = await signUp("seat-vet");
+      await prisma.providerUser.create({ data: { userId: vet.userId, providerOrganizationId: c.orgId, role: ProviderUserRole.VET } });
+      await vet.client.get("/provider/clinic/staff").expect(200);
+      await vet.client.post("/provider/clinic/staff").send({ email: await plainUser(), role: "VET" }).expect(403);
+      await vet.client.post("/provider/clinic/branches").send({ name: "x", addressLine: "Street", city: "Tehran" }).expect(403);
+    });
+
+    it("two concurrent adds can never both take the last seat", async () => {
+      const c = await clinic();
+      (await addStaff(c)).expect(201);
+      const [a, b] = await Promise.all([addStaff(c), addStaff(c)]);
+      expect([a.status, b.status].sort()).toEqual([201, 409]);
+      expect(await prisma.providerUser.count({ where: { providerOrganizationId: c.orgId } })).toBe(3);
+    });
+
+    it("GROWTH: 10 seats and 3 branches", async () => {
+      const c = await clinic();
+      await setPlan(c.orgId, "CLINIC_GROWTH");
+      for (let i = 0; i < 9; i++) (await addStaff(c)).expect(201);
+      expect((await addStaff(c)).expect(409).body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
+      await addBranch(c, 2).expect(201);
+      expect((await addBranch(c, 3).expect(201)).body.usage).toEqual({ used: 3, limit: 3 });
+      await addBranch(c, 4).expect(409);
+    });
+
+    it("PRO: no seat or branch cap", async () => {
+      const c = await clinic();
+      await setPlan(c.orgId, "CLINIC_PRO");
+      for (let i = 0; i < 11; i++) (await addStaff(c)).expect(201);
+      for (let i = 2; i <= 5; i++) await addBranch(c, i).expect(201);
+      const staff = (await c.client.get("/provider/clinic/staff").expect(200)).body;
+      expect(staff.usage).toEqual({ used: 12, limit: null });
+      expect((await c.client.get("/provider/clinic/branches").expect(200)).body.usage).toEqual({ used: 5, limit: null });
+      // Another clinic's owner cannot see or touch this roster.
+      const other = await clinic();
+      expect((await other.client.get("/provider/clinic/staff").expect(200)).body.items.map((m: { providerUserId: string }) => m.providerUserId)).not.toContain(staff.items[1].providerUserId);
+    });
+  });
 });

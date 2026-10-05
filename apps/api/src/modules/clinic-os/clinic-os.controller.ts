@@ -14,7 +14,8 @@ import { ClinicSubscriptionService } from "./clinic-subscription.service";
 import { ClinicCustomersService } from "./clinic-customers.service";
 import { ClinicRemindersService } from "./clinic-reminders.service";
 import { ClinicFinanceService } from "./clinic-finance.service";
-import { AssignClinicPlanDto, ClinicFinanceReportQueryDto, CreateClinicReminderDto, ListClinicCustomersQueryDto, ListClinicRemindersQueryDto } from "./dto/clinic-os.dto";
+import { ClinicTeamService } from "./clinic-team.service";
+import { AddClinicBranchDto, AddClinicStaffDto, AssignClinicPlanDto, ClinicFinanceReportQueryDto, CreateClinicReminderDto, ListClinicCustomersQueryDto, ListClinicRemindersQueryDto } from "./dto/clinic-os.dto";
 
 /** Clinic OS endpoints for the caller's active provider organisation. Appointments and medical records reuse /provider/bookings and /provider/clinical. */
 @Controller("provider/clinic")
@@ -25,11 +26,38 @@ export class ClinicOsController {
     private readonly customers: ClinicCustomersService,
     private readonly reminders: ClinicRemindersService,
     private readonly finance: ClinicFinanceService,
+    private readonly team: ClinicTeamService,
   ) {}
 
   @Get("plans")
   plans() {
     return this.subscriptions.catalog();
+  }
+
+  @Get("staff")
+  listStaff(@CurrentProviderContext() ctx: ResolvedProviderContext) {
+    return this.team.listStaff(ctx);
+  }
+
+  /** Owner-only; limited by `clinic.staff.max`. */
+  @Post("staff")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  addStaff(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: AddClinicStaffDto) {
+    return this.team.addStaff(ctx, dto);
+  }
+
+  @Get("branches")
+  listBranches(@CurrentProviderContext() ctx: ResolvedProviderContext) {
+    return this.team.listBranches(ctx);
+  }
+
+  /** Owner-only; limited by `clinic.branches.max`. */
+  @Post("branches")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  addBranch(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: AddClinicBranchDto) {
+    return this.team.addBranch(ctx, dto);
   }
 
   @Get("subscription")

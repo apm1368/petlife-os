@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min } from "class-validator";
+import { IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min } from "class-validator";
 import { ClinicReminderKind, ClinicReminderStatus } from "@prisma/client";
 
 class PageQuery {
@@ -81,4 +81,51 @@ export class AssignClinicPlanDto {
   @IsOptional()
   @IsDateString()
   periodEndsAt?: string;
+}
+
+export class AddClinicStaffDto {
+  /** An existing PET LIFE account. Only VET or STAFF can be added — owners are never created through the API. */
+  @IsEmail()
+  @MaxLength(254)
+  email!: string;
+
+  @IsIn(["VET", "STAFF"])
+  role!: "VET" | "STAFF";
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  displayTitle?: string;
+}
+
+export class AddClinicBranchDto {
+  @IsString()
+  @Length(1, 120)
+  name!: string;
+
+  @IsString()
+  @Length(3, 300)
+  addressLine!: string;
+
+  @IsString()
+  @Length(1, 80)
+  city!: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  region?: string;
+
+  @IsOptional()
+  @IsLatitude()
+  latitude?: number;
+
+  @IsOptional()
+  @IsLongitude()
+  longitude?: number;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9+\-\s()]{5,20}$/)
+  phone?: string;
 }

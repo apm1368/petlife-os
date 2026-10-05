@@ -250,6 +250,8 @@ export const DOMAIN_EVENT_TYPES = [
   // Community chat (v1)
   "ChatMessageSent",
   "ClinicReminderSent",
+  "ClinicStaffAdded",
+  "ClinicBranchAdded",
   "SupportNeedHelpOfferResolved",
   "SupportNeedExpiringSoon",
   "ContentReportSubmitted",

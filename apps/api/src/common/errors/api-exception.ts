@@ -1750,3 +1750,10 @@ export class InvitationNotForYouException extends ApiException {
     super("INVITATION_NOT_FOR_YOU", "This invitation was sent to a different email or phone number.", HttpStatus.FORBIDDEN);
   }
 }
+
+/** The user is already a member of this clinic (Clinic OS staff management). */
+export class ClinicStaffAlreadyMemberException extends ApiException {
+  constructor() {
+    super("CLINIC_STAFF_ALREADY_MEMBER", "This person is already on the clinic's team.", HttpStatus.CONFLICT);
+  }
+}

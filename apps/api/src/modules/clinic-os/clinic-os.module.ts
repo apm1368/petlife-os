@@ -8,12 +8,13 @@ import { ClinicSubscriptionService } from "./clinic-subscription.service";
 import { ClinicCustomersService } from "./clinic-customers.service";
 import { ClinicRemindersService } from "./clinic-reminders.service";
 import { ClinicFinanceService } from "./clinic-finance.service";
+import { ClinicTeamService } from "./clinic-team.service";
 
 /** Clinic OS — the B2B layer over Provider OS + vet panel. See docs/product/clinic-os-architecture.md. */
 @Module({
   imports: [AdminModule, NotificationsModule, ProviderOsModule],
   controllers: [ClinicOsController, AdminClinicSubscriptionController],
-  providers: [ClinicEntitlementService, ClinicSubscriptionService, ClinicCustomersService, ClinicRemindersService, ClinicFinanceService],
+  providers: [ClinicEntitlementService, ClinicSubscriptionService, ClinicCustomersService, ClinicRemindersService, ClinicFinanceService, ClinicTeamService],
   exports: [ClinicEntitlementService],
 })
 export class ClinicOsModule {}

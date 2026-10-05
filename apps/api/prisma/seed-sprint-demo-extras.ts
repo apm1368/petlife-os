@@ -1,0 +1,170 @@
+/**
+ * Sprint demo coverage so design work has every real state to draw against. Run after seed-clinic-chat-demo.ts.
+ * Idempotent (deterministic ids, stable donation idempotency keys), non-destructive, demo accounts only
+ * (…@example.test), and refuses any database that is not *_test unless PETLIFE_QA_SEED_DATABASE names it.
+ *
+ * - Animal support: cash-only, item-only, mixed, partially funded and fully fulfilled needs; an active pledge
+ *   and a received in-kind contribution. Cash goes through the real DonationService sandbox path, so the
+ *   donation ledger balances exactly as for a real donation.
+ * - Pet taxi: requested/confirmed/completed rides with a route snapshot priced by an explicit QA_DEMO_TARIFF.
+ *   The service's live tariff row stays INACTIVE, so real quotes keep saying NOT_CONFIGURED.
+ * - Chat: a third member, a reported message and a block.
+ * - Clinic: a vet seat, an access grant from the booking, a completed visit with vitals.
+ */
+import { createHash } from "node:crypto";
+
+const id = (key: string) => {
+  const h = createHash("sha1").update(`sprint-demo-extras:${key}`).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
+};
+const DAY = 86400e3;
+
+/** QA/demo only — NOT a business price. Real tariffs are a product decision (PRODUCT_DECISION_LATER). */
+const QA_DEMO_TARIFF = { baseFareIrr: 400_000, perKmRateIrr: 50_000, serviceAdjustmentIrr: 0, minimumFareIrr: 600_000 } as const;
+
+async function main() {
+  const database = new URL(process.env.DATABASE_URL ?? "").pathname;
+  if (!database.endsWith("_test") && process.env.PETLIFE_QA_SEED_DATABASE !== database.slice(1)) {
+    throw new Error("This demo seed runs against a *_test database, or a staging database named in PETLIFE_QA_SEED_DATABASE.");
+  }
+  const { NestFactory } = await import("@nestjs/core");
+  const { AppModule } = await import("../src/app.module");
+  const { PrismaService } = await import("../src/common/prisma/prisma.service");
+  const { DonationService } = await import("../src/modules/animal-support/donation.service");
+  const { computeTransportFare, straightLineMeters } = await import("../src/modules/booking/transport/transport-fare.util");
+  const app = await NestFactory.createApplicationContext(AppModule, { logger: ["error"] });
+  try {
+    const db = app.get(PrismaService);
+    const donations = app.get(DonationService);
+
+    const user = async (email: string, displayName: string) => {
+      if (!email.endsWith("@example.test")) throw new Error("demo accounts only");
+      return db.user.upsert({ where: { email }, create: { id: id(`user:${email}`), email, displayName, locale: "fa" }, update: {} });
+    };
+    const helperA = await user("support-helper-a@example.test", "مینا (داوطلب نمایشی)");
+    const helperB = await user("support-helper-b@example.test", "آرش (داوطلب نمایشی)");
+    const donor = await user("support-donor@example.test", "حامی نمایشی");
+
+    // ---------------------------------------------------------------- Animal support
+    const campaign = await db.supportCampaign.findFirst({ where: { status: "ACTIVE", organization: { verificationStatus: "VERIFIED", name: { contains: "(نمایشی)" } } }, orderBy: { createdAt: "asc" } })
+      ?? (await (async () => {
+        const org = await db.animalSupportOrganization.upsert({ where: { id: id("org") }, create: { id: id("org"), type: "SHELTER", name: "پناهگاه نمونه (نمایشی)", verificationStatus: "VERIFIED" }, update: {} });
+        return db.supportCampaign.upsert({ where: { id: id("campaign") }, create: { id: id("campaign"), organizationId: org.id, title: "کمپین درمان (نمایشی)", description: "کمپین نمونه برای درمان حیوانات پناهگاه.", status: "ACTIVE" }, update: {} });
+      })());
+    const base = { organizationId: campaign.organizationId, campaignId: campaign.id, province: "تهران", city: "تهران", animalType: "سگ", publishedAt: new Date(), expiresAt: new Date(Date.now() + 60 * DAY) };
+    type Need = { key: string; title: string; description: string; category: "VETERINARY_CARE" | "FOOD" | "MEDICINE" | "EQUIPMENT"; contactMode: "DONATE" | "OFFER_HELP" | "BOTH"; targetAmountIrr?: number; neededQuantity?: number; quantityUnit?: string; urgency?: "NORMAL" | "URGENT" };
+    const needs: Need[] = [
+      { key: "cash-only", title: "هزینهٔ جراحی پای «رعنا» (نمایشی)", description: "فقط کمک نقدی: هزینهٔ جراحی و بستری سه‌روزه.", category: "VETERINARY_CARE", contactMode: "DONATE", targetAmountIrr: 80_000_000, urgency: "URGENT" },
+      { key: "item-only", title: "۲۰ کیلو غذای خشک سگ (نمایشی)", description: "فقط کمک کالایی: غذای خشک سگ بالغ برای یک ماه.", category: "FOOD", contactMode: "OFFER_HELP", neededQuantity: 20, quantityUnit: "کیلوگرم" },
+      { key: "mixed", title: "دارو و هزینهٔ درمان پوستی (نمایشی)", description: "هم دارو (۱۰ بسته) و هم کمک نقدی برای ویزیت‌های پیگیری.", category: "MEDICINE", contactMode: "BOTH", targetAmountIrr: 40_000_000, neededQuantity: 10, quantityUnit: "بسته" },
+      { key: "fulfilled", title: "قفس حمل برای انتقال (نمایشی) — تکمیل شد", description: "۵ قفس حمل و هزینهٔ انتقال؛ همه تأمین شد.", category: "EQUIPMENT", contactMode: "BOTH", targetAmountIrr: 20_000_000, neededQuantity: 5, quantityUnit: "عدد" },
+    ];
+    const ids: Record<string, string> = {};
+    for (const n of needs) {
+      const row = await db.supportNeedListing.upsert({
+        where: { id: id(`need:${n.key}`) },
+        create: { id: id(`need:${n.key}`), ...base, title: n.title, description: n.description, category: n.category, contactMode: n.contactMode, urgency: n.urgency ?? "NORMAL", status: "PUBLISHED", targetAmountIrr: n.targetAmountIrr ?? null, neededQuantity: n.neededQuantity ?? null, quantityUnit: n.quantityUnit ?? null },
+        update: {},
+      });
+      ids[n.key] = row.id;
+    }
+    // Cash through the real sandbox path (idempotent keys). Donations land while the need is live.
+    const give = async (key: string, listing: string, amountIrr: number) => {
+      const live = await db.supportNeedListing.findUniqueOrThrow({ where: { id: ids[listing]! } });
+      if (!["PUBLISHED", "PARTIALLY_FULFILLED"].includes(live.status)) return;
+      await donations.donate(campaign.id, donor.id, { amountIrr, supportNeedListingId: ids[listing]!, idempotencyKey: `sprint-demo-${key}` });
+    };
+    await give("cash-only-1", "cash-only", 30_000_000); // partially funded: 30M of 80M
+    await give("mixed-1", "mixed", 15_000_000);
+    await give("fulfilled-1", "fulfilled", 20_000_000); // fully funded
+
+    const offer = (key: string, listing: string, helperUserId: string, status: "PENDING" | "ACCEPTED" | "COMPLETED", quantity: number, helpType: Need["category"], message: string) =>
+      db.helpOffer.upsert({
+        where: { id: id(`offer:${key}`) },
+        create: { id: id(`offer:${key}`), listingId: ids[listing]!, helperUserId, status, quantity, helpType, message, respondedAt: status === "PENDING" ? null : new Date(), fulfilledQuantity: status === "COMPLETED" ? quantity : null },
+        update: {},
+      });
+    await offer("item-received", "item-only", helperA.id, "COMPLETED", 8, "FOOD", "۸ کیلو غذا را تحویل پناهگاه دادم."); // received in-kind
+    await offer("item-pledge", "item-only", helperB.id, "ACCEPTED", 5, "FOOD", "۵ کیلو غذا تا آخر هفته می‌آورم."); // active pledge
+    await offer("item-pending", "item-only", donor.id, "PENDING", 3, "FOOD", "می‌توانم ۳ کیلو تهیه کنم.");
+    await offer("mixed-received", "mixed", helperA.id, "COMPLETED", 4, "MEDICINE", "۴ بسته دارو تحویل شد.");
+    await offer("fulfilled-received", "fulfilled", helperB.id, "COMPLETED", 5, "EQUIPMENT", "۵ قفس حمل تحویل شد.");
+    await db.supportNeedListing.update({ where: { id: ids["item-only"]! }, data: { status: "PARTIALLY_FULFILLED", fulfilledQuantity: 8 } });
+    await db.supportNeedListing.update({ where: { id: ids["mixed"]! }, data: { status: "PARTIALLY_FULFILLED", fulfilledQuantity: 4 } });
+    await db.supportNeedListing.update({ where: { id: ids["fulfilled"]! }, data: { status: "FULFILLED", fulfilledQuantity: 5, fulfilledAt: new Date() } });
+
+    // ---------------------------------------------------------------- Pet taxi
+    const customer = await db.user.findUniqueOrThrow({ where: { email: "clinic-demo-customer@example.test" } });
+    const membership = await db.householdMember.findFirstOrThrow({ where: { userId: customer.id, role: "OWNER" } });
+    const pet = await db.pet.findFirstOrThrow({ where: { householdId: membership.householdId }, orderBy: { createdAt: "asc" } });
+    const pickup = await db.customerAddress.upsert({ where: { id: id("addr:home") }, create: { id: id("addr:home"), householdId: membership.householdId, label: "خانه", addressLine: "سعادت‌آباد، خیابان سرو (نمایشی)", city: "تهران", countryCode: "IR", latitude: 35.7797, longitude: 51.3714 }, update: {} });
+    const dropoff = await db.customerAddress.upsert({ where: { id: id("addr:clinic") }, create: { id: id("addr:clinic"), householdId: membership.householdId, label: "درمانگاه", addressLine: "ونک، خیابان ملاصدرا (نمایشی)", city: "تهران", countryCode: "IR", latitude: 35.7575, longitude: 51.4094 }, update: {} });
+    const taxi = await db.providerService.findFirst({ where: { locationMode: "TRANSPORT", isActive: true }, include: { location: true } });
+    let rides = 0;
+    if (taxi) {
+      const location = taxi.location ?? (await db.providerLocation.findFirstOrThrow({ where: { providerOrganizationId: taxi.providerOrganizationId } }));
+      const meters = straightLineMeters({ lat: pickup.latitude!, lng: pickup.longitude! }, { lat: dropoff.latitude!, lng: dropoff.longitude! });
+      const fare = computeTransportFare({ ...QA_DEMO_TARIFF, distanceMeters: meters });
+      const ridesDef: [string, number, "REQUESTED" | "CONFIRMED" | "COMPLETED"][] = [["ride-requested", 2, "REQUESTED"], ["ride-confirmed", 4, "CONFIRMED"], ["ride-completed", -6, "COMPLETED"]];
+      for (const [key, offsetDays, status] of ridesDef) {
+        const startAt = new Date(Math.floor((Date.now() + offsetDays * DAY) / 3600e3) * 3600e3);
+        await db.booking.upsert({
+          where: { id: id(key) },
+          create: {
+            id: id(key), householdId: membership.householdId, petId: pet.id, userId: customer.id, providerOrganizationId: taxi.providerOrganizationId, providerLocationId: location.id, providerServiceId: taxi.id,
+            category: taxi.category, locationMode: "TRANSPORT", customerAddressId: pickup.id, dropoffAddressId: dropoff.id, startAt, endAt: new Date(startAt.getTime() + 45 * 60e3), timezone: "Asia/Tehran",
+            bookingStatus: status, bookingMode: status === "REQUESTED" ? "REQUEST" : "INSTANT", requestExpiresAt: status === "REQUESTED" ? new Date(Date.now() + 2 * DAY) : null,
+            priceAmount: fare.estimatedFareIrr, currency: "IRR", paymentMode: "PAY_AT_PROVIDER", serviceNameSnapshot: taxi.name,
+            ...(status === "COMPLETED" ? { completedAt: new Date(startAt.getTime() + 45 * 60e3), completionNote: "پت سالم به مقصد رسید." } : {}),
+            transportRoute: {
+              create: {
+                pickupAddressText: `${pickup.addressLine}، ${pickup.city}`, pickupLat: pickup.latitude, pickupLng: pickup.longitude,
+                dropoffAddressText: `${dropoff.addressLine}، ${dropoff.city}`, dropoffLat: dropoff.latitude, dropoffLng: dropoff.longitude,
+                distanceMeters: meters, distanceSource: "STRAIGHT_LINE_DEMO",
+                baseFareIrr: fare.baseFareIrr, perKmRateIrr: QA_DEMO_TARIFF.perKmRateIrr, serviceAdjustmentIrr: fare.serviceAdjustmentIrr, minimumFareIrr: fare.minimumFareIrr, estimatedFareIrr: fare.estimatedFareIrr, distancePricingApplied: true,
+              },
+            },
+          },
+          update: {},
+        });
+        rides++;
+      }
+    }
+
+    // ---------------------------------------------------------------- Chat: report + block
+    const reviewer = await user("batch2-review@example.test", "بازبین نمایشی");
+    const spammer = await user("chat-demo-seller@example.test", "فروشندهٔ ناشناس (نمایشی)");
+    const pairKey = reviewer.id < spammer.id ? `${reviewer.id}:${spammer.id}` : `${spammer.id}:${reviewer.id}`;
+    const conv = await db.chatConversation.upsert({ where: { pairKey }, create: { id: id("chat:spam"), pairKey, lastMessageAt: new Date(Date.now() - 3600e3) }, update: {} });
+    for (const u of [reviewer.id, spammer.id]) await db.chatParticipant.upsert({ where: { conversationId_userId: { conversationId: conv.id, userId: u } }, create: { conversationId: conv.id, userId: u, lastReadAt: u === reviewer.id ? new Date() : null }, update: {} });
+    const bad = await db.chatMessage.upsert({ where: { id: id("chat:spam:m1") }, create: { id: id("chat:spam:m1"), conversationId: conv.id, senderUserId: spammer.id, body: "تخفیف ویژه! برای خرید کارت‌به‌کارت کنید (نمونهٔ پیام مشکوک).", createdAt: new Date(Date.now() - 3600e3) }, update: {} });
+    await db.communityReport.upsert({ where: { id: id("chat:spam:report") }, create: { id: id("chat:spam:report"), reporterUserId: reviewer.id, reason: "SCAM", details: "درخواست کارت‌به‌کارت در پیام خصوصی (نمایشی)", chatMessageId: bad.id }, update: {} });
+    await db.userBlock.upsert({ where: { blockerUserId_blockedUserId: { blockerUserId: reviewer.id, blockedUserId: spammer.id } }, create: { blockerUserId: reviewer.id, blockedUserId: spammer.id }, update: {} });
+
+    // ---------------------------------------------------------------- Clinic: vet seat, grant, visit + vitals
+    const owner = await db.providerUser.findFirstOrThrow({ where: { role: "OWNER", user: { email: "batch3-clinic-owner@example.test" } } });
+    const vetUser = await user("clinic-demo-vet@example.test", "دکتر نیلوفر (دامپزشک نمایشی)");
+    const vet = (await db.providerUser.findFirst({ where: { providerOrganizationId: owner.providerOrganizationId, userId: vetUser.id } }))
+      ?? (await db.providerUser.create({ data: { id: id("clinic:vet"), providerOrganizationId: owner.providerOrganizationId, userId: vetUser.id, role: "VET", displayTitle: "دامپزشک" } }));
+    const clinicPet = await db.pet.findFirstOrThrow({ where: { bookings: { some: { providerOrganizationId: owner.providerOrganizationId, user: { email: "clinic-demo-customer@example.test" } } } } });
+    for (const [key, uid] of [["owner", owner.userId], ["vet", vetUser.id]] as const) {
+      await db.petAccessGrant.upsert({ where: { id: id(`grant:${key}`) }, create: { id: id(`grant:${key}`), petId: clinicPet.id, userId: uid, canViewIdentity: true, canViewHealth: true, canRecordClinicalData: true, source: "TEMPORARY", reason: "DEMO_CLINIC_CARE", expiresAt: new Date(Date.now() + 30 * DAY) }, update: {} });
+    }
+    const visitAt = new Date(Date.now() - 12 * DAY);
+    await db.clinicalVisit.upsert({
+      where: { id: id("clinic:visit") },
+      create: { id: id("clinic:visit"), petId: clinicPet.id, householdId: clinicPet.householdId, providerOrganizationId: owner.providerOrganizationId, providerUserId: vet.id, status: "COMPLETED", startedAt: visitAt, completedAt: new Date(visitAt.getTime() + 1800e3), reasonForVisit: "معاینهٔ دوره‌ای", observationsText: "وضعیت عمومی خوب، دندان‌ها نیاز به جرم‌گیری در سه ماه آینده.", assessmentText: "سالم", planText: "واکسن سالانه در دو هفتهٔ آینده." },
+      update: {},
+    });
+    await db.patientVitalsRecord.upsert({ where: { id: id("clinic:vitals") }, create: { id: id("clinic:vitals"), petId: clinicPet.id, providerOrganizationId: owner.providerOrganizationId, providerUserId: vet.id, recordedAt: visitAt, weightValue: 4.2, temperatureC: 38.6, heartRateBpm: 150, bodyConditionScore: 5 }, update: {} });
+
+    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals.`);
+  } finally {
+    await app.close();
+  }
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
