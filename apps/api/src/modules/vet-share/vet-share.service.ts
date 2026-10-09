@@ -38,7 +38,7 @@ export class VetShareService {
     await this.entitlements.assertFeature(pet.householdId,"vet.share");
     return this.prisma.$transaction(async tx=>{
       const grant=await tx.petAccessGrant.create({data:{petId,userId:provider.userId,canViewIdentity:true,canViewHealth:false,canEditHealth:false,canRecordClinicalData:false,source:"TEMPORARY",reason:"EXPLICIT_VET_SHARE",startsAt:new Date(dto.startsAt),expiresAt:new Date(dto.expiresAt),grantedByUserId:userId,healthScopes:dto.scopes,selectedDocumentIds:dto.documentIds,sharedWithProviderUserId:provider.id}});
-      await tx.domainEvent.create({data:{type:"PetHealthShared",aggregateType:"Pet",aggregateId:petId,payload:{petId,grantId:grant.id,actorUserId:userId,scopes:dto.scopes}}});
+      await tx.domainEvent.create({data:{processedAt: new Date(), type:"PetHealthShared",aggregateType:"Pet",aggregateId:petId,payload:{petId,grantId:grant.id,actorUserId:userId,scopes:dto.scopes}}});
       return grant;
     });
   }
@@ -48,7 +48,7 @@ export class VetShareService {
     return this.prisma.$transaction(async tx=>{
       const result=await tx.petAccessGrant.updateMany({where:{id,petId,reason:"EXPLICIT_VET_SHARE",revokedAt:null},data:{revokedAt:new Date(),revokedByUserId:userId}});
       if(!result.count) throw new NotFoundApiException("Share");
-      await tx.domainEvent.create({data:{type:"PetHealthShareRevoked",aggregateType:"Pet",aggregateId:petId,payload:{petId,grantId:id,actorUserId:userId}}});
+      await tx.domainEvent.create({data:{processedAt: new Date(), type:"PetHealthShareRevoked",aggregateType:"Pet",aggregateId:petId,payload:{petId,grantId:id,actorUserId:userId}}});
       return {ok:true};
     });
   }

@@ -271,6 +271,8 @@ export const DOMAIN_EVENT_TYPES = [
   "AccountDeletionStateChanged",
   "AdminMembershipChanged",
   "PlatformSettingChanged",
+  "UserAccountSuspended",
+  "UserAccountReinstated",
   "VolunteerInterestStatusChanged",
   "PetShareCardRevoked",
   "PetCareHandoffGranted",

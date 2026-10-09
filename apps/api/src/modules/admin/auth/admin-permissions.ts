@@ -67,7 +67,11 @@ export type AdminPermission =
   | "settings.approve"
   | "system.view"
   // ERP-J — aggregate analytics only (no row-level PII)
-  | "analytics.view";
+  | "analytics.view"
+  // ERP-B — account suspension (trust/admin), session revocation (support can help a compromised member), pet access repair
+  | "customer.account.manage"
+  | "customer.sessions.revoke"
+  | "pet.access.manage";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -123,6 +127,9 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "settings.approve",
   "system.view",
   "analytics.view",
+  "customer.account.manage",
+  "customer.sessions.revoke",
+  "pet.access.manage",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -209,14 +216,17 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settings.manage",
     "system.view",
     "analytics.view",
+    "customer.account.manage",
+    "customer.sessions.revoke",
+    "pet.access.manage",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
   // (needed for the H13 support context panel) but can never cancel, grant
   // a trial, or override an entitlement.
-  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view", "travel.view", "insurance.applications.view"],
+  [AdminRole.SUPPORT]: ["customer.view", "customer.sessions.revoke", "pet.access.manage", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view", "travel.view", "insurance.applications.view"],
   // Review moderation is a trust action, so TRUST_SAFETY can hide provider reviews.
-  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage", "commerce.view", "commerce.manage", "travel.view", "travel.manage"],
+  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "customer.account.manage", "customer.sessions.revoke", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage", "commerce.view", "commerce.manage", "travel.view", "travel.manage"],
   // Payout execution ("settlement.pay") is FINANCE-only, mirroring
   // finance.refund.execute's own "ADMIN can approve, only FINANCE can move
   // real money" precedent exactly (spec: "do not give SUPPORT role

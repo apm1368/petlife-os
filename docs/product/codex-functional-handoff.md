@@ -880,3 +880,70 @@
 
 ### حالت خالی
 - حالت خالی برای `settings/changes` ممکن است. برای `roles` و `integrations` هرگز خالی نیست.
+
+## ۲۸. ERP-B — Customer 360 و Pet 360
+
+**مجوزهای جدید:**
+- `customer.account.manage`: تعلیق و رفع تعلیق حساب. نقش‌ها: SUPER_ADMIN، ADMIN و TRUST_SAFETY.
+- `customer.sessions.revoke`: خروج اجباری از همه‌ی دستگاه‌ها. نقش‌ها: SUPER_ADMIN، ADMIN، SUPPORT و TRUST_SAFETY.
+- `pet.access.manage`: لغو دسترسی کهنه به پت. نقش‌ها: SUPER_ADMIN، ADMIN و SUPPORT.
+
+### Customer 360 — نمای جامع عضو
+- **مسیر:** `GET /admin/customers/:id/overview` (مجوز `customer.view`). مسیر قدیمی `GET /admin/customers/:id` بدون تغییر باقی است.
+- **بخش‌های پاسخ:**
+  - `identity`: ایمیل و تلفن ماسک‌شده، وضعیت تأیید، روش‌های ورود، و اینکه حساب متعلق به کارمند است یا نه.
+  - `account`: `{status: ACTIVE|SUSPENDED, suspendedAt, suspendedReason, activeSessions, lastSeenAt}`.
+  - `households[]`: نقش، تعداد پت و عضو، اشتراک (`planCode`، `status`، `trialEndsAt`، `cancelEffectiveAt`، `currentPeriodEndsAt`) و `entitlementOverrides[]`.
+  - `bookings` (تعداد بر اساس وضعیت) و `orders` (تعداد و مجموع).
+  - `finance`:
+    - فقط برای ادمین دارای `finance.view` پر می‌شود: payment intents و refunds بر اساس وضعیت، به‌علاوه‌ی `refundRequests`.
+    - برای بقیه فقط `{restricted: true}` برمی‌گردد. UI باید پیام «دسترسی مالی لازم است» نشان دهد.
+  - `support`: پرونده‌ها و اختلاف‌های باز و کل.
+  - `notifications`: تعداد ۳۰ روز اخیر.
+  - `privacy`: رضایت‌ها، آخرین درخواست حذف همراه با `state`، و تعداد درخواست‌های خروجی.
+  - `community`: پست، کامنت، گزارش‌های ثبت‌شده، گزارش‌ها علیه محتوای عضو، بلاک‌ها و تعداد گفتگوها. متن پیام‌ها هرگز برگردانده نمی‌شود.
+  - `animalSupport`: کمک‌ها، دنبال‌کردن‌ها و داوطلبی.
+  - `saved`: تعداد ذخیره‌ها به تفکیک نوع، به‌علاوه‌ی بازدیدهای اخیر.
+  - `recentAdminActions[]`: ده اقدام آخر ادمین روی این عضو.
+  - `links`: لینک به یادداشت‌ها و ممیزی.
+- **محتوای پزشکی:** هیچ محتوای پزشکی در این نما برنمی‌گردد.
+- **دیدن ایمیل یا تلفن کامل:** فقط با `POST /admin/customers/:id/reveal` ممکن است که ممیزی می‌شود (از قبل وجود داشت).
+
+**اقدام‌ها** (همه فیلد `reason` با طول ۵ تا ۵۰۰ می‌خواهند؛ همه دلیل و تأیید در UI لازم دارند):
+- `POST /admin/customers/:id/suspend` → `{accountStatus, sessionsRevoked}`.
+  - همه‌ی نشست‌ها فوراً باطل می‌شوند و ورود بعدی با 403 و کد `ACCOUNT_SUSPENDED` رد می‌شود.
+  - رد با 409 و `ADMIN_GOVERNANCE_RULE`: `STAFF_ACCOUNT` (برای حساب کارمند، اول از Access Control تعلیق شود) یا `SELF_CHANGE_FORBIDDEN`.
+  - رد با 400 و `UNCHANGED`.
+- `POST /admin/customers/:id/unsuspend`.
+- `POST /admin/customers/:id/sessions/revoke` → `{sessionsRevoked}`. برای حساب مشکوک به نفوذ؛ عضو را معلق نمی‌کند.
+- **ممیزی و رویدادها:** `customer.suspended`، `customer.unsuspended`، `customer.sessions_revoked`؛ و رویدادهای `UserAccountSuspended` و `UserAccountReinstated`.
+- **خروجی فهرست:** `GET /admin/customers` حالا برای هر ردیف `accountStatus` هم برمی‌گرداند.
+- **سمت عضو:** وقتی ورود با 403 و `ACCOUNT_SUSPENDED` رد می‌شود، صفحه‌ی ورود باید پیام «حساب معلق است — با پشتیبانی تماس بگیرید» نشان دهد. دلیل تعلیق داخلی است و به عضو نشان داده نمی‌شود.
+
+### Pet 360
+- **جست‌وجو:** `GET /admin/pets?q&species&page` (مجوز `customer.view`). `q` می‌تواند نام، شناسه‌ی پت، شناسه‌ی خانوار یا میکروچیپ کامل (۹ رقم یا بیشتر) باشد.
+- **جزئیات:** `GET /admin/pets/:id`. بخش‌های پاسخ:
+  - `identity`: میکروچیپ ماسک‌شده.
+  - `household`: اعضا با نقش و `accountStatus`.
+  - `accessGrants[]`: منبع (`HOUSEHOLD|MANUAL|TEMPORARY`)، `reason`، `flags`، `healthScopes`، `active`، `isHouseholdMember`، `revokedAt` و `expiresAt`.
+  - `health`: فقط شمارش‌ها، به‌علاوه‌ی `documentsByType` (نوع، منبع، تعداد، آخرین تاریخ). عنوان سند و محتوای بالینی برنمی‌گردد.
+  - `bookings` (ده رزرو آخر).
+  - `lostIncidents`: فقط `publicArea`؛ مختصات مکانی برنمی‌گردد.
+  - `care.reminders`، `travel[]`، `insurance`، `sharing` و `activity[]` (بیست رویداد آخر).
+- **`diagnostics[]`:**
+  - `NO_ACTIVE_OWNER` و `STALE_HOUSEHOLD_GRANT` (هشدار، WARNING).
+  - `EXPIRED_GRANT_NOT_REVOKED`، `MEMBER_WITHOUT_GRANT` و `LONG_OPEN_LOST_INCIDENT` (اطلاعاتی، INFO).
+  - `DELETED_BUT_ACTIVE` (هشدار).
+- **اقدام:** `POST /admin/pets/:id/grants/:grantId/revoke {reason}` (مجوز `pet.access.manage`).
+  - دسترسی مالک هرگز لغو نمی‌شود: 400 با `OWNER_GRANT`. لغو دوباره: 400 با `ALREADY_REVOKED`.
+  - ممیزی با `pet.access_revoked_by_admin` و رویداد `PetAccessRevoked`.
+  - انتقال مالکیت در این بخش وجود ندارد.
+
+### داده‌ی نمایشی
+- `qa-suspended@example.test`: عضو معلق.
+- `qa-erp-owner@example.test`: خانوار «خانوار ERP (QA)» با «پت ERP (QA)».
+- یک دسترسی کهنه برای `qa-erp-leaver@example.test` (عضو سابق خانوار). در Pet 360 تشخیص `STALE_HOUSEHOLD_GRANT` نشان داده می‌شود و از همان‌جا قابل لغو است.
+
+### حالت خالی
+- **Pet 360:** پت بدون سند، رزرو یا گم‌شدن آرایه‌ها و شمارش‌های صفر برمی‌گرداند.
+- **Customer 360:** عضو بدون خانوار آرایه‌ی خالی `households` برمی‌گرداند.

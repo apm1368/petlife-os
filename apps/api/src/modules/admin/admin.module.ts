@@ -6,6 +6,9 @@ import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { Module } from "@nestjs/common";
+import { AdminPet360Service } from "./pets/admin-pet360.service";
+import { AdminPet360Controller } from "./pets/admin-pet360.controller";
+import { AdminCustomerOverviewService } from "./customer/admin-customer-overview.service";
 import { AdminAccessControlService } from "./access/admin-access-control.service";
 import { AdminAccessControlController } from "./access/admin-access-control.controller";
 import { AdminSettingsService } from "./settings/admin-settings.service";
@@ -101,6 +104,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
   imports: [NotificationsModule, RefundsModule, PromotionsModule, TravelMarketplaceModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
   controllers: [
     AdminMeController,
+    AdminPet360Controller,
     AdminAccessControlController,
     AdminSettingsController,
     AdminSystemController,
@@ -132,6 +136,8 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminNgoMembersController,
   ],
   providers: [
+    AdminPet360Service,
+    AdminCustomerOverviewService,
     AdminAccessControlService,
     AdminSettingsService,
     AdminSystemService,

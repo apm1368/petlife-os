@@ -43,7 +43,7 @@ export class TripReminderNotifier implements OnModuleInit, OnModuleDestroy {
     let sent = 0;
     for (const t of trips) {
       const eventId = uuidFrom(`trip-soon:${t.id}:${t.departAt.toISOString()}`);
-      await this.prisma.domainEvent.upsert({ where: { id: eventId }, create: { id: eventId, type: "TripDepartureApproaching", aggregateType: "Pet", aggregateId: t.petId, payload: { tripId: t.id, departAt: t.departAt.toISOString() } }, update: {} });
+      await this.prisma.domainEvent.upsert({ where: { id: eventId }, create: { id: eventId, processedAt: new Date(), type: "TripDepartureApproaching", aggregateType: "Pet", aggregateId: t.petId, payload: { tripId: t.id, departAt: t.departAt.toISOString() } }, update: {} });
       const r = await this.notifications.notify({ userId: t.createdByUserId, type: "travel.trip_approaching", category: NotificationCategory.TRAVEL, petId: t.petId, householdId: t.householdId, entityType: "Trip", entityId: t.id, domainEventId: eventId, deepLink: NotificationDeepLinks.trip(t.id), templateParams: { petName: t.pet.name, destination: t.destinationCity ?? t.destinationCountry, open: String(t._count.checklistItems) } });
       if (r.created) sent++;
     }

@@ -1804,3 +1804,10 @@ export class SettingChangeConflictException extends ApiException {
     super("SETTING_CHANGE_CONFLICT", "This setting changed in the meantime. Reload and try again.", HttpStatus.CONFLICT, details);
   }
 }
+
+/** ERP-B: the account was suspended by platform staff — sign-in is refused (existing sessions simply stop resolving). */
+export class AccountSuspendedException extends ApiException {
+  constructor() {
+    super("ACCOUNT_SUSPENDED", "This account is suspended. Please contact support.", HttpStatus.FORBIDDEN);
+  }
+}

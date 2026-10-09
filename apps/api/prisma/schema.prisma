@@ -1085,13 +1085,13 @@ enum ShippingQuoteStatus {
 /// no multi-column CHECK syntax, so it is not representable here. Application-layer
 /// validation in AuthService remains, but this is no longer the only guarantee.
 model User {
-  id                 String          @id @default(uuid()) @db.Uuid
-  email              String?         @unique
-  phone              String?         @unique
+  id                 String            @id @default(uuid()) @db.Uuid
+  email              String?           @unique
+  phone              String?           @unique
   /// Case-preserved as entered; uniqueness is enforced on normalizedUsername
   /// (lowercased) so "Sarah" and "sarah" can never collide.
   username           String?
-  normalizedUsername String?         @unique
+  normalizedUsername String?           @unique
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
   passwordHash       String?
@@ -1102,10 +1102,16 @@ model User {
   phoneVerifiedAt    DateTime?
   displayName        String
   avatarUrl          String?
-  locale             Locale          @default(fa)
-  themePreference    ThemePreference @default(SYSTEM)
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  locale             Locale            @default(fa)
+  themePreference    ThemePreference   @default(SYSTEM)
+  /// ERP-B: platform-level account suspension by staff (trust/admin). A suspended account can't sign in and its
+  /// sessions stop resolving; nothing is deleted. Reason is internal (never shown on member-facing APIs).
+  accountStatus      UserAccountStatus @default(ACTIVE)
+  suspendedAt        DateTime?
+  suspendedReason    String?
+  suspendedByAdminId String?           @db.Uuid
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   authIdentities          AuthIdentity[]
   passwordResetTokens     PasswordResetToken[]
@@ -10197,4 +10203,9 @@ model PlatformSettingChange {
   @@index([key, createdAt])
   @@index([status])
   @@map("platform_setting_changes")
+}
+
+enum UserAccountStatus {
+  ACTIVE
+  SUSPENDED
 }

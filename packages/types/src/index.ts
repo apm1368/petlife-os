@@ -2765,6 +2765,8 @@ export interface AdminCustomerListItemDto {
   emailMasked: string | null;
   phoneMasked: string | null;
   createdAt: string;
+  /** ERP-B: platform suspension state. */
+  accountStatus?: "ACTIVE" | "SUSPENDED";
 }
 
 export interface AdminPetSummaryDto {
@@ -2971,7 +2973,10 @@ export type AdminPermissionName =
   | "settings.manage"
   | "settings.approve"
   | "system.view"
-  | "analytics.view";
+  | "analytics.view"
+  | "customer.account.manage"
+  | "customer.sessions.revoke"
+  | "pet.access.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {

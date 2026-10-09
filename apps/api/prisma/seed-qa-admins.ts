@@ -61,9 +61,22 @@ async function main() {
       const previous = current ? current.value : Number(process.env.ADMIN_REFUND_APPROVAL_THRESHOLD_IRR ?? 5_000_000); // env default
       await db.platformSettingChange.create({ data: { key, previousValue: previous ?? undefined, proposedValue: 15_000_000, baseVersion: current?.version ?? 0, status: "PENDING", reason: "پیشنهاد نمایشی QA — بازبینی آستانه‌ی تأیید بازپرداخت", requestedByAdminId: qaAdmin.id } });
     }
+    // ERP-B demo states (QA-only accounts): a suspended member, and a pet whose household lost a member who still
+    // holds a HOUSEHOLD grant — so Customer 360 and Pet 360 diagnostics have something real to show.
+    await db.user.upsert({ where: { email: "qa-suspended@example.test" }, create: { email: "qa-suspended@example.test", displayName: "عضو معلق نمایشی (QA)", locale: "fa", accountStatus: "SUSPENDED", suspendedAt: new Date(), suspendedReason: "QA demo — تعلیق نمایشی برای Customer 360", suspendedByAdminId: qaAdmin.id }, update: {} });
+    const erpOwner = await db.user.upsert({ where: { email: "qa-erp-owner@example.test" }, create: { email: "qa-erp-owner@example.test", displayName: "مالک ERP (QA)", locale: "fa" }, update: {} });
+    const leaver = await db.user.upsert({ where: { email: "qa-erp-leaver@example.test" }, create: { email: "qa-erp-leaver@example.test", displayName: "عضو سابق خانوار (QA)", locale: "fa" }, update: {} });
+    let hh = await db.household.findFirst({ where: { members: { some: { userId: erpOwner.id, role: "OWNER" } } } });
+    if (!hh) hh = await db.household.create({ data: { name: "خانوار ERP (QA)", city: "تهران", countryCode: "IR", members: { create: { userId: erpOwner.id, role: "OWNER" } } } });
+    let pet = await db.pet.findFirst({ where: { householdId: hh.id } });
+    if (!pet) pet = await db.pet.create({ data: { householdId: hh.id, name: "پت ERP (QA)", species: "DOG", approximateAgeMonths: 36 } });
+    const full = { canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true, canViewCareProfile: true, canEditCareProfile: true, canManageAccess: true };
+    if (!(await db.petAccessGrant.count({ where: { petId: pet.id, userId: erpOwner.id } }))) await db.petAccessGrant.create({ data: { petId: pet.id, userId: erpOwner.id, ...full } });
+    if (!(await db.petAccessGrant.count({ where: { petId: pet.id, userId: leaver.id } }))) await db.petAccessGrant.create({ data: { petId: pet.id, userId: leaver.id, canViewIdentity: true, canViewHealth: true, source: "HOUSEHOLD", reason: "QA demo — عضو قبلی خانوار" } });
+
     writeFileSync(FILE, `${lines.join("\n")}\n`, { mode: 0o600 });
     chmodSync(FILE, 0o600);
-    console.log(`QA admin personas: ${PERSONAS.length} ready (${generated} password(s) generated); credentials in ${FILE} (600).`);
+    console.log(`QA admin personas + ERP-B demo states: ${PERSONAS.length} ready (${generated} password(s) generated); credentials in ${FILE} (600).`);
   } finally {
     await db.$disconnect();
   }

@@ -35,7 +35,7 @@ export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
         const phase=row.dueAt<=now?"OVERDUE":"DUE";
         const hex=createHash("sha256").update(`care:${row.id}:${row.version}:${phase}`).digest("hex").slice(0,32);
         const id=`${hex.slice(0,8)}-${hex.slice(8,12)}-4${hex.slice(13,16)}-8${hex.slice(17,20)}-${hex.slice(20)}`;
-        await this.prisma.domainEvent.upsert({where:{id},create:{id,type:"CareReminderDue",aggregateType:"Pet",aggregateId:row.petId,payload:{petId:row.petId,careItemId:row.id,type:row.type,dueAt:row.dueAt.toISOString()}},update:{}});
+        await this.prisma.domainEvent.upsert({where:{id},create:{id,processedAt:new Date(),type:"CareReminderDue",aggregateType:"Pet",aggregateId:row.petId,payload:{petId:row.petId,careItemId:row.id,type:row.type,dueAt:row.dueAt.toISOString()}},update:{}});
         const stillOpen=await this.prisma.careReminder.count({where:{id:row.id,version:row.version,state:{notIn:["COMPLETED","CANCELLED"]}}});
         if(!stillOpen) continue;
         await this.notifications.notify({userId:recipient,type:"health.reminder",category:"HEALTH",petId:row.petId,householdId:row.pet.householdId,deepLink:NotificationDeepLinks.careItem(row.petId,row.id),entityType:"CareReminder",entityId:row.id,domainEventId:id,templateParams:{petName:row.pet.name},metadata:{careType:row.type,phase,dueAt:row.dueAt.toISOString()}});
