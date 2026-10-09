@@ -278,6 +278,8 @@ export const DOMAIN_EVENT_TYPES = [
   "ClinicEntitlementOverridden",
   "SellerStatusChanged",
   "AdminTaskAutoCreated",
+  "SellerSettlementHeld",
+  "SellerSettlementReleased",
   "VolunteerInterestStatusChanged",
   "PetShareCardRevoked",
   "PetCareHandoffGranted",
