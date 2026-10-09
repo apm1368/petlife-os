@@ -4142,6 +4142,8 @@ export interface HealthTimelineEntryDto {
   /** The id of the underlying record, and which endpoint/type it belongs to — lets the UI deep-link into the full record. */
   recordId: string;
   recordType: HealthTimelineEntryType;
+  /** When the record was entered (occurredAt is when it happened). */
+  recordedAt?: string | null;
 }
 
 /** spec: "if a score cannot be responsibly calculated, do not show one" — there is deliberately no numeric health score field anywhere in this DTO. */

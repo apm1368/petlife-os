@@ -328,6 +328,27 @@ async function main() {
       await ev("finder", "PetCardContactReceived", { cardId: lostCard.id, messageId: id("multi:finder-msg") }, 3);
     }
 
+    // ---------------------------------------------------------------- G12: care suggestions + a health share (rich pet)
+    // The batch-2 demo clinic suggests care after the showcase visit: one pending, one already accepted into a reminder.
+    const b2 = (key: string) => {
+      const h = createHash("sha256").update(`petlife-batch2-qa:${key}`).digest("hex").slice(0, 32);
+      return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20)}`;
+    };
+    const showcaseVisit = await db.clinicalVisit.findUnique({ where: { id: b2("showcase-visit") } });
+    const g12PetId = showcaseVisit?.petId ?? richPet.id;
+    if (showcaseVisit) {
+      await db.careSuggestion.upsert({ where: { id: id("g12:suggest:pending") }, create: { id: id("g12:suggest:pending"), petId: g12PetId, providerOrganizationId: showcaseVisit.providerOrganizationId, createdByProviderUserId: showcaseVisit.providerUserId, clinicalVisitId: showcaseVisit.id, title: "کنترل دوباره‌ی پوست", type: "FOLLOW_UP", notes: "دو هفته پس از شروع دارو.", suggestedDueAt: new Date(Date.now() + 14 * DAY) }, update: {} });
+      const accepted = await db.careSuggestion.upsert({ where: { id: id("g12:suggest:accepted") }, create: { id: id("g12:suggest:accepted"), petId: g12PetId, providerOrganizationId: showcaseVisit.providerOrganizationId, createdByProviderUserId: showcaseVisit.providerUserId, clinicalVisitId: showcaseVisit.id, title: "شامپوی طبی هفتگی", type: "GROOMING", suggestedDueAt: new Date(Date.now() + 5 * DAY), recurrence: "WEEKLY", status: "ACCEPTED", decidedByUserId: rich.id, decidedAt: new Date() }, update: {} });
+      if (!accepted.careReminderId) {
+        const reminder = await db.careReminder.upsert({ where: { id: id("g12:suggest:reminder") }, create: { id: id("g12:suggest:reminder"), petId: g12PetId, createdByUserId: rich.id, title: accepted.title, type: "GROOMING", dueAt: accepted.suggestedDueAt, originalDueAt: accepted.suggestedDueAt, recurrence: "WEEKLY" } as never, update: {} });
+        await db.careSuggestion.update({ where: { id: accepted.id }, data: { careReminderId: reminder.id } });
+      }
+    }
+    const shareToken = `demo-${id("g12:health-share").replace(/-/g, "")}`;
+    const shareHash = createHash("sha256").update(shareToken).digest("hex");
+    const share = await db.healthShareLink.upsert({ where: { tokenHash: shareHash }, create: { id: id("g12:health-share"), petId: g12PetId, tokenHash: shareHash, tokenHint: shareToken.slice(-4), label: "برای اورژانس دامپزشکی", sections: ["ALLERGIES", "MEDICATIONS", "CONDITIONS"], expiresAt: new Date(Date.now() + 7 * DAY), createdByUserId: rich.id }, update: { expiresAt: new Date(Date.now() + 7 * DAY), revokedAt: null } });
+    if (!(await db.healthShareAccess.count({ where: { linkId: share.id } }))) await db.healthShareAccess.create({ data: { linkId: share.id, userAgent: "Clinic front desk (demo)" } });
+
     // ---------------------------------------------------------------- Live-smoke QA accounts (FREE and PAID scenarios)
     // Two dedicated accounts so the live smoke never writes into showcase accounts. Each owns one household with one
     // pet (created through PetsService, so grants match the product path). FREE stays on the free plan; PAID holds a
@@ -354,7 +375,7 @@ async function main() {
       }
     }
 
-    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care; lost pet with ID card /pet-card/${lostToken}.`);
+    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care; lost pet with ID card /pet-card/${lostToken}; health share /health-share/${shareToken}.`);
   } finally {
     await app.close();
   }

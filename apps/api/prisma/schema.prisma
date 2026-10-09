@@ -1460,6 +1460,8 @@ model Pet {
   travelBookingPets     TravelBookingPet[]
   BookingPet            BookingPet[]
   BookingWaitlistEntry  BookingWaitlistEntry[]
+  healthShareLinks      HealthShareLink[]
+  careSuggestions       CareSuggestion[]
 
   @@index([householdId])
   @@map("pets")
@@ -9979,4 +9981,78 @@ model RecentlyViewed {
   @@id([userId, entityType, entityId])
   @@index([userId, viewedAt])
   @@map("recently_viewed")
+}
+
+// ---------------------------------------------------------------------------
+// G12 — explicit, short-lived health shares and clinic care suggestions
+// ---------------------------------------------------------------------------
+
+/// An owner-created, time-boxed medical share (separate from the public pet card). Only a SHA-256 of the token is
+/// stored; the owner chooses sections and individual recent records; every read is logged.
+model HealthShareLink {
+  id               String    @id @default(uuid()) @db.Uuid
+  petId            String    @db.Uuid
+  pet              Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  tokenHash        String    @unique
+  tokenHint        String
+  label            String?
+  /// HealthShareSection values.
+  sections         String[]  @default([])
+  labResultIds     String[]  @default([])
+  clinicalVisitIds String[]  @default([])
+  imagingStudyIds  String[]  @default([])
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdByUserId  String    @db.Uuid
+  createdAt        DateTime  @default(now())
+
+  accesses HealthShareAccess[]
+
+  @@index([petId, createdAt])
+  @@map("health_share_links")
+}
+
+/// One public read of a health share (no raw IP: a salted hash plus a short user-agent label).
+model HealthShareAccess {
+  id         String          @id @default(uuid()) @db.Uuid
+  linkId     String          @db.Uuid
+  link       HealthShareLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  accessedAt DateTime        @default(now())
+  ipHash     String?
+  userAgent  String?
+
+  @@index([linkId, accessedAt])
+  @@map("health_share_accesses")
+}
+
+enum CareSuggestionStatus {
+  PENDING
+  ACCEPTED
+  DISMISSED
+}
+
+/// A care instruction a clinic attaches to a completed visit or booking. It never becomes a reminder by itself: the
+/// owner accepts (creating a normal CareReminder) or dismisses it.
+model CareSuggestion {
+  id                      String               @id @default(uuid()) @db.Uuid
+  petId                   String               @db.Uuid
+  pet                     Pet                  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  providerOrganizationId  String               @db.Uuid
+  createdByProviderUserId String?              @db.Uuid
+  clinicalVisitId         String?              @db.Uuid
+  bookingId               String?              @db.Uuid
+  title                   String
+  type                    String
+  notes                   String?
+  suggestedDueAt          DateTime
+  recurrence              String?
+  intervalDays            Int?
+  status                  CareSuggestionStatus @default(PENDING)
+  decidedByUserId         String?              @db.Uuid
+  decidedAt               DateTime?
+  careReminderId          String?              @db.Uuid
+  createdAt               DateTime             @default(now())
+
+  @@index([petId, status])
+  @@map("care_suggestions")
 }

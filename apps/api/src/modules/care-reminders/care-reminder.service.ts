@@ -29,7 +29,13 @@ export class CareReminderService {
     const health = (await this.access.getEffectivePermissions(petId, userId))?.canViewHealth;
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
-    const where = { petId, state: { in: [...CLOSED_CARE_STATES] }, ...(health ? {} : { source: "USER_CREATED" }) };
+    const where = {
+      petId,
+      state: query.state ? query.state : { in: [...CLOSED_CARE_STATES] },
+      ...(query.type ? { type: query.type } : {}),
+      ...(query.from || query.to ? { dueAt: { ...(query.from ? { gte: new Date(query.from) } : {}), ...(query.to ? { lte: new Date(query.to) } : {}) } } : {}),
+      ...(health ? {} : { source: "USER_CREATED" }),
+    };
     const [total, rows] = await Promise.all([
       this.prisma.careReminder.count({ where }),
       this.prisma.careReminder.findMany({ where, orderBy: { updatedAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),

@@ -37,6 +37,8 @@ const KINDS: Record<string, KindDef> = {
   LostPetSightingSubmitted: { kind: "SIGHTING_REPORTED", need: "IDENTITY", deepLink: (p) => NotificationDeepLinks.lostIncident(p.petId!, p.incidentId!) },
   LostPetReunited: { kind: "REUNITED", need: "IDENTITY", deepLink: (p) => NotificationDeepLinks.lostIncident(p.petId!, p.incidentId!) },
   PetCardContactReceived: { kind: "FINDER_MESSAGE", need: "IDENTITY", deepLink: (p) => NotificationDeepLinks.pet(p.petId!) },
+  CareSuggestionCreated: { kind: "CARE_SUGGESTED", need: "CARE", deepLink: (p) => `/pets/${p.petId}/care` },
+  CareSuggestionAccepted: { kind: "CARE_SUGGESTION_ACCEPTED", need: "CARE", deepLink: (p) => NotificationDeepLinks.careItem(p.petId!, p.careItemId!) },
   ServiceBookingConfirmed: { kind: "BOOKING_CONFIRMED", need: "IDENTITY", deepLink: (_p, id) => NotificationDeepLinks.booking(id) },
   BookingCompleted: { kind: "BOOKING_COMPLETED", need: "IDENTITY", deepLink: (_p, id) => NotificationDeepLinks.booking(id) },
 };

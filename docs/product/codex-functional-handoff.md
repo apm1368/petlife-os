@@ -549,3 +549,37 @@
   - کارت ID پت فقط فیلدهای هویتی دارد و تماس `IN_APP` است؛ آدرس آن `/pet-card/<توکن نمایشی در خروجی seed>` است.
   - یک گزارش مشاهده و یک پیام یابنده هم ثبت شده است.
 - **حالت خالی:** پت بدون کارت آرایه‌ی خالی برمی‌گرداند؛ صندوق پیام یابنده هم آرایه‌ی خالی برمی‌گرداند.
+
+## ۱۹. سلامت و مراقبت (G12)
+
+- **خلاصه‌ی وضعیت سلامت:** `GET /pets/:petId/health/snapshot` (مجوز `canViewHealth`).
+  - خروجی: `{activeConditions[{id,name,since}], activeMedications[{id,name,dosage,unit,frequency,startedAt}], allergies[{id,name,severity,reaction}], latestWeight{value,unit,recordedAt,source: CLINIC|OWNER}|null, vaccinationStatus, upcomingVaccinations[{kind: VACCINATION_SUMMARY|CARE_REMINDER,id,title,dueAt}], recentVisits(3), recentLabs(5, flag فقط همان مقدار ذخیره‌شده), recentImaging(3), documentsCount}`.
+  - هیچ تفسیر یا تشخیصی در کار نیست.
+- **فید سلامت:** `GET /pets/:petId/health/feed?types&sources&from&to&cursor&limit` (مجوز `canViewHealth`؛ `limit` حداکثر ۱۰۰).
+  - `types`: `VISIT, CONDITION, ALLERGY, VACCINATION, MEDICATION, LAB, IMAGING, WEIGHT, DOCUMENT, OTHER`.
+  - `sources`: `OWNER, CLINIC, VET, IMPORT, SYSTEM`.
+  - هر آیتم: `{id, type, recordType, recordId, occurredAt, recordedAt, source, author{providerUserId,displayTitle,userId}, organization{id,name}|null, summary, deepLink}`.
+  - صفحه‌ی بعد با `nextCursor` گرفته می‌شود.
+  - ثبت‌های وزن از علائم حیاتی کلینیک می‌آیند.
+  - `summary` متن خام منبع است و بومی‌سازی آن با UI است.
+- **اشتراک سلامت کوتاه‌مدت:** `POST /pets/:petId/health-shares` (مجوزهای `canViewHealth` و `canManageAccess`)
+  - بدنه: `{sections: ALLERGIES|MEDICATIONS|CONDITIONS|VACCINATION[], labResultIds?, clinicalVisitIds?, imagingStudyIds?(هر کدام ≤۱۰ و فقط مال همین پت), expiresInHours 1–168 (پیش‌فرض ۲۴), label?}`.
+  - توکن فقط یک بار برمی‌گردد. خطاها: `NOTHING_SELECTED`، `NOT_THIS_PET`.
+  - فهرست: `GET /pets/:petId/health-shares` با `{state: ACTIVE|REVOKED|EXPIRED, accessCount, lastAccessedAt, …}`.
+  - `GET …/:id/access-log` و `POST …/:id/revoke`.
+- **خواندن عمومی اشتراک سلامت:** `GET /public/health-shares/:token` (rate limit ۳۰ در دقیقه؛ هر بار خواندن ثبت می‌شود).
+  - فقط بخش‌ها و رکوردهای انتخاب‌شده برمی‌گردد. مدارک هرگز شامل نیستند.
+  - توکن نامعتبر، باطل یا منقضی 404 برمی‌گرداند.
+- **پیشنهاد مراقبت کلینیک (زنجیره‌ی ۱):**
+  - کلینیک: `POST /provider/clinical/visits/:visitId/care-suggestions` (نقش OWNER یا VET؛ فقط برای ویزیت COMPLETED همان کلینیک) و `POST /provider/bookings/:bookingId/care-suggestions` (فقط نوبت COMPLETED).
+  - بدنه: `{items:[{title,type,suggestedDueAt,recurrence?,intervalDays?,notes?}]}`.
+  - برای اعضای خانوار که دسترسی مراقبت دارند اعلان `care.suggestion_received` ارسال می‌شود.
+  - مالک: `GET /pets/:petId/care-suggestions?status=PENDING|ACCEPTED|DISMISSED`.
+  - `POST …/:id/accept {dueAt?, assignedToUserId?}` یک یادآور عادی می‌سازد. روی پلن رایگان 409 با `details.key=care.reminders` برمی‌گردد و پیشنهاد PENDING می‌ماند. پذیرش هم‌زمان فقط یک یادآور می‌سازد.
+  - `POST …/:id/dismiss`.
+  - فید فعالیت: نوع‌های `CARE_SUGGESTED` و `CARE_SUGGESTION_ACCEPTED`.
+- **تاریخچه‌ی مراقبت:** `GET /pets/:petId/care-items/history?state=COMPLETED|SKIPPED|CANCELLED&type&from&to&page&pageSize`.
+- **قالب‌ها، تکرار و تخصیص:** از قبل وجود دارند (§۹ تا §۱۲): `/care-templates` فقط پیشنهاد می‌دهد و `/pets/:id/care-templates/apply` پس از تأیید رکورد می‌سازد.
+- **داده‌ی نمایشی:** `batch2-review@example.test`، پت «کوکی».
+  - یک پیشنهاد مراقبت PENDING («کنترل دوباره‌ی پوست») و یک پیشنهاد ACCEPTED که به یادآور هفتگی تبدیل شده است.
+  - یک اشتراک سلامت فعال: `/health-share/demo-2e3e9cd46e4945898ddabfe3d253794b`، هفت‌روزه و با یک بار دسترسی ثبت‌شده.
