@@ -1,4 +1,5 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Inject, Res } from "@nestjs/common";
+import type { Response } from "express";
 import type Redis from "ioredis";
 import { PrismaService } from "../common/prisma/prisma.service";
 import { REDIS_CLIENT } from "../common/redis/redis.module";
@@ -13,20 +14,29 @@ export class HealthController {
     private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
+  /** LIVE: the process is up and its HTTP listener answers (boot exits instead of running without one). */
   @Get("live")
   live() {
     return { status: "ok" };
   }
 
+  /**
+   * READY: the dependencies requests need are usable. PostgreSQL is required; Redis backs OTP, download tokens and
+   * rate limits, so it is checked too. Each check is time-bounded (a down Redis queues commands instead of failing).
+   * Only up/down per dependency is exposed — never hosts or error text.
+   */
   @Get("ready")
-  async ready() {
-    try {
-      await this.prisma.$queryRaw`SELECT 1`;
-      await this.redis.ping();
-      return { status: "ok" };
-    } catch {
-      throw new ServiceUnavailableException({ status: "not-ready" });
+  async ready(@Res({ passthrough: true }) res: Response) {
+    const [database, redis] = await Promise.all([
+      withTimeout(this.prisma.$queryRaw`SELECT 1`),
+      withTimeout(this.redis.ping()),
+    ]);
+    const checks = { database: database ? "up" : "down", redis: redis ? "up" : "down" };
+    if (!database || !redis) {
+      res.status(HttpStatus.SERVICE_UNAVAILABLE);
+      return { status: "not-ready", checks };
     }
+    return { status: "ok", checks };
   }
 
   @Get("version")
@@ -38,5 +48,15 @@ export class HealthController {
       environment: this.config.get("DEPLOYMENT_ENVIRONMENT", { infer: true }),
       deploymentId: this.config.get("DEPLOYMENT_ID", { infer: true }),
     };
+  }
+}
+
+async function withTimeout(work: Promise<unknown>, ms = 2000): Promise<boolean> {
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<boolean>((resolve) => { timer = setTimeout(() => resolve(false), ms); });
+  try {
+    return await Promise.race([work.then(() => true, () => false), timeout]);
+  } finally {
+    clearTimeout(timer);
   }
 }

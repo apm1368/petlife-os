@@ -11,12 +11,19 @@ done
 
 export CI=true
 
+# Data services: start them if they are down, and keep the running containers' restart policy in sync with
+# docker-compose.yml (restart: unless-stopped) without recreating them — so they come back by themselves after a reboot.
+docker compose -f "$APP_DIR/docker-compose.yml" up -d --no-recreate --pull never postgres redis minio
+for c in petlife-os-postgres-1 petlife-os-redis-1 petlife-os-minio-1; do docker update --restart unless-stopped "$c" >/dev/null; done
+
 pnpm install --frozen-lockfile
 pnpm --filter @petlife/api db:generate
 pnpm --filter @petlife/api db:migrate:deploy
 pnpm build
 
-pm2 restart petlife-api petlife-web --update-env
+# PM2 apps are defined in git (ecosystem.config.js). Recreate them from it so restart settings never drift.
+pm2 delete petlife-api petlife-web >/dev/null 2>&1 || true
+pm2 start "$APP_DIR/ecosystem.config.js" --update-env
 pm2 save
 
 curl --fail --silent --show-error --retry 12 --retry-delay 5 --retry-connrefused --retry-all-errors \

@@ -2,6 +2,7 @@ name: petlife-os
 
 services:
   postgres:
+    restart: unless-stopped
     # postgis/postgis ships the same postgres:16 base plus the PostGIS extension
     # (Handoff 19: Pet-Friendly Places geo search) — the extension itself is
     # still only enabled by running `CREATE EXTENSION IF NOT EXISTS postgis;`,
@@ -22,6 +23,7 @@ services:
       retries: 10
 
   redis:
+    restart: unless-stopped
     image: redis:7-alpine
     ports:
       - "6379:6379"
@@ -32,6 +34,7 @@ services:
       retries: 10
 
   minio:
+    restart: unless-stopped
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
