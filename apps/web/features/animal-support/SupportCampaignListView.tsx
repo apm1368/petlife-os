@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/features/navigation/localized-link";
 import { useTranslations } from "next-intl";
 import { ContextSurface, EmptyState, Skeleton } from "@petlife/ui";
 import type { PaginatedDto, SupportCampaignDto } from "@petlife/types";

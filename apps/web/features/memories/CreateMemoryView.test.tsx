@@ -28,7 +28,7 @@ describe("CreateMemoryView", () => {
     fireEvent.click(screen.getByText("Save memory"));
 
     await waitFor(() => expect(memoriesService.create).toHaveBeenCalledWith("pet-1", expect.objectContaining({ title: "First trip to the beach", occurredAt: new Date().toISOString().slice(0, 8) + "01" })));
-    expect(push).toHaveBeenCalledWith("/pets/pet-1/memories/memory-9");
+    expect(push).toHaveBeenCalledWith("/en/pets/pet-1/memories/memory-9");
   });
 
   it("allows a quick entry with no title — the date defaults to today so submit is enabled by default", () => {

@@ -61,7 +61,7 @@ describe("EditMemoryView", () => {
     await waitFor(() =>
       expect(memoriesService.update).toHaveBeenCalledWith("pet-1", "memory-1", expect.objectContaining({ tags: ["trip", "milestone"] })),
     );
-    expect(push).toHaveBeenCalledWith("/pets/pet-1/memories/memory-1");
+    expect(push).toHaveBeenCalledWith("/en/pets/pet-1/memories/memory-1");
   });
 
   it("clears an emptied title rather than persisting whitespace", async () => {

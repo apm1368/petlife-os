@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface } from "@petlife/ui";
 import { lostPetService } from "@/services/lost-pet.service";

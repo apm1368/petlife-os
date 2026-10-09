@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/features/navigation/localized-link";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Select, Skeleton } from "@petlife/ui";
 import { CommunityPostType } from "@petlife/types";

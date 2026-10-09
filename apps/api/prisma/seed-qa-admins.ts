@@ -109,8 +109,8 @@ async function main() {
     await partnerDoc("provider-b-licence", "PROVIDER", provB.id, "LICENSE", "PENDING");
     const raise = (dedupeKey: string, data: { title: string; source: "PARTNER_VERIFICATION"; relatedEntityType: string; relatedEntityId: string; priority?: "NORMAL" | "HIGH"; dueAt?: Date }) =>
       db.adminTask.createMany({ data: [{ dedupeKey, team: "PARTNER_OPERATIONS", status: "OPEN", priority: data.priority ?? "NORMAL", ...data }], skipDuplicates: true });
-    await raise(`verification-submitted:PROVIDER:${provB.id}:qa-demo`, { title: `Verification submitted: ${provB.name}`, source: "PARTNER_VERIFICATION", relatedEntityType: "PROVIDER_ORGANIZATION", relatedEntityId: provB.id, dueAt: new Date(Date.now() + 2 * 86400e3) });
-    await raise(`verification-document-expiring:${expiring.id}`, { title: "Verification document expiring (IDENTITY)", source: "PARTNER_VERIFICATION", relatedEntityType: "PROVIDER_ORGANIZATION", relatedEntityId: provA.id, dueAt: expiring.expiresAt ?? undefined });
+    await raise(`verification-submitted:PROVIDER:${provB.id}:qa-demo`, { title: `ارسال مدارک احراز: ${provB.name}`, source: "PARTNER_VERIFICATION", relatedEntityType: "PROVIDER_ORGANIZATION", relatedEntityId: provB.id, dueAt: new Date(Date.now() + 2 * 86400e3) });
+    await raise(`verification-document-expiring:${expiring.id}`, { title: "مدرک احراز رو به انقضاست (هویت)", source: "PARTNER_VERIFICATION", relatedEntityType: "PROVIDER_ORGANIZATION", relatedEntityId: provA.id, dueAt: expiring.expiresAt ?? undefined });
     await db.partnerVerificationDocument.updateMany({ where: { id: expiring.id, expiryAlertedAt: null }, data: { expiryAlertedAt: new Date() } });
     const sellerOrg = async (key: string, name: string, verificationStatus: "VERIFIED" | "REJECTED", note: string | null) => {
       const org = await db.sellerOrganization.upsert({ where: { id: sid(`seller:${key}`) }, create: { id: sid(`seller:${key}`), name, verificationStatus, verificationNote: note, status: verificationStatus === "VERIFIED" ? "ACTIVE" : "PENDING", countryCode: "IR" }, update: {} });

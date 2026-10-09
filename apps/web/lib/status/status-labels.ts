@@ -14,6 +14,15 @@ type Entry = readonly [fa: string, en: string, tone: StatusTone];
 
 const GENERIC: Record<string, Entry> = {
   ACTIVE: ["فعال", "Active", "success"],
+  // Partner verification and settlement states (ERP-C/E), shown in admin lists and selects.
+  NOT_STARTED: ["شروع‌نشده", "Not started", "neutral"],
+  SUBMITTED: ["ارسال‌شده", "Submitted", "attention"],
+  NEEDS_INFORMATION: ["نیازمند اطلاعات", "Needs information", "attention"],
+  UNDER_REVIEW: ["در حال بررسی", "Under review", "attention"],
+  VERIFIED: ["تأییدشده", "Verified", "success"],
+  SUSPENDED: ["تعلیق‌شده", "Suspended", "urgent"],
+  CALCULATED: ["محاسبه‌شده", "Calculated", "neutral"],
+  RECONCILIATION_REQUIRED: ["نیازمند تطبیق", "Reconciliation required", "urgent"],
   INACTIVE: ["غیرفعال", "Inactive", "neutral"],
   PENDING: ["در انتظار", "Pending", "attention"],
   DRAFT: ["پیش‌نویس", "Draft", "neutral"],

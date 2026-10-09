@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
 import { useTranslations } from "next-intl";
 import { Button, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceEligibilityResultDto, InsuranceProductDto } from "@petlife/types";

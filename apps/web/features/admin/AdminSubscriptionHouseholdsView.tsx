@@ -1,5 +1,6 @@
 "use client";
 
+import { useStatusText } from "@/lib/status/use-status-text";
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -20,6 +21,7 @@ const STATUS_TONE: Record<SubscriptionStatus, "neutral" | "success" | "attention
 
 /** spec: "Admin -> Subscriptions -> Household Subscriptions, with filters and pagination (no giant unpaginated tables)." A generous single-page pageSize with a status filter — the same shape every other admin list view (AdminCustomersView, AdminSellerFinanceView) already uses. */
 export function AdminSubscriptionHouseholdsView() {
+  const statusText = useStatusText();
   const t = useTranslations("admin.subscriptions");
   const tCommon = useTranslations("admin.common");
   const router = useRouter();
@@ -52,7 +54,7 @@ export function AdminSubscriptionHouseholdsView() {
         value={status}
         onChange={(e) => setStatus(e.target.value)}
         placeholder={t("allStatuses")}
-        options={Object.values(SubscriptionStatus).map((s) => ({ value: s, label: s }))}
+        options={Object.values(SubscriptionStatus).map((s) => ({ value: s, label: statusText.label(s, "subscription") }))}
         className="max-w-64"
       />
 

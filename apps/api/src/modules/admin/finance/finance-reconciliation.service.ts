@@ -6,6 +6,7 @@ import { resolvePagination, toPaginatedDto } from "../../../common/pagination/pa
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import { AutomaticTaskService } from "../task/automatic-task.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
+import { RECON_CHECK_FA, RECON_OUTCOME_FA } from "../task/task-titles";
 
 type Outcome = "MATCHED" | "PENDING" | ReconciliationOutcome;
 type Result = { check: ReconciliationCheck; entityType: string; entityId: string; outcome: Outcome; detail: Record<string, unknown> };
@@ -194,7 +195,7 @@ export class FinanceReconciliationService {
           const dedupeKey = `finance-mismatch:${check}:${f.entityId}`;
           await tx.financeReconciliationFinding.upsert({ where: key, create: { check, entityType: f.entityType, entityId: f.entityId, outcome: f.outcome as ReconciliationOutcome, detail: f.detail as Prisma.InputJsonValue, firstDetectedAt: ranAt, lastSeenAt: ranAt, taskDedupeKey: dedupeKey }, update: { status: ReconciliationFindingStatus.OPEN, outcome: f.outcome as ReconciliationOutcome, detail: f.detail as Prisma.InputJsonValue, lastSeenAt: ranAt } });
           if (!existing || existing.status === ReconciliationFindingStatus.CLEARED) opened++;
-          await this.tasks.raise({ dedupeKey, title: `Finance ${f.outcome}: ${check} (${f.entityType})`, description: JSON.stringify(f.detail).slice(0, 1000), source: AdminTaskSource.FINANCE_MISMATCH, team: "FINANCE", priority: check === ReconciliationCheck.LEDGER_BALANCE ? AdminPriority.URGENT : AdminPriority.HIGH, relatedEntityType: f.entityType, relatedEntityId: f.entityId }, tx);
+          await this.tasks.raise({ dedupeKey, title: `${RECON_OUTCOME_FA[f.outcome] ?? f.outcome} مالی: ${RECON_CHECK_FA[check] ?? check}`, description: JSON.stringify(f.detail).slice(0, 1000), source: AdminTaskSource.FINANCE_MISMATCH, team: "FINANCE", priority: check === ReconciliationCheck.LEDGER_BALANCE ? AdminPriority.URGENT : AdminPriority.HIGH, relatedEntityType: f.entityType, relatedEntityId: f.entityId }, tx);
         }
         const stale = await tx.financeReconciliationFinding.updateMany({ where: { check, status: ReconciliationFindingStatus.OPEN, lastSeenAt: { lt: ranAt } }, data: { status: ReconciliationFindingStatus.CLEARED } });
         cleared += stale.count;

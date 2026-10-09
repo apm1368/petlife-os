@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { CommunityPostType } from "@petlife/types";

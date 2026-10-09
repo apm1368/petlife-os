@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/features/navigation/localized-link";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import { HelpOfferStatus, SupportNeedStatus } from "@petlife/types";

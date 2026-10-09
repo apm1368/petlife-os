@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
 import { AdminPriority, AdminTaskSource } from "@prisma/client";
 import { AutomaticTaskService } from "./automatic-task.service";
+import { REPORT_REASON_FA } from "./task-titles";
 
 /** Report reasons that need a human quickly (safety, harm, doxxing, fraud). Everything else stays in the normal moderation queue. */
 export const HIGH_SEVERITY_REASONS = ["ANIMAL_WELFARE", "DANGEROUS_CONTENT", "HARASSMENT", "PERSONAL_INFORMATION", "SCAM"];
@@ -16,13 +17,13 @@ export class AutomaticTaskListener {
 
   @OnEvent("AccountDeletionRequested")
   async onDeletionRequested(payload: { userId: string; requestId: string }) {
-    await this.tasks.raise({ dedupeKey: `privacy-deletion-request:${payload.requestId}`, title: "Account deletion request to review", source: AdminTaskSource.PRIVACY_REQUEST, team: "PRIVACY", priority: AdminPriority.HIGH, relatedEntityType: "AccountDeletionRequest", relatedEntityId: payload.requestId, dueAt: new Date(Date.now() + 7 * 86400e3) });
+    await this.tasks.raise({ dedupeKey: `privacy-deletion-request:${payload.requestId}`, title: "درخواست حذف حساب برای بررسی", source: AdminTaskSource.PRIVACY_REQUEST, team: "PRIVACY", priority: AdminPriority.HIGH, relatedEntityType: "AccountDeletionRequest", relatedEntityId: payload.requestId, dueAt: new Date(Date.now() + 7 * 86400e3) });
   }
 
   @OnEvent("CommunityReportSubmitted")
   @OnEvent("ContentReportSubmitted")
   async onReport(payload: { reportId: string; reason?: string; targetType?: string }) {
     if (!payload.reason || !HIGH_SEVERITY_REASONS.includes(payload.reason)) return;
-    await this.tasks.raise({ dedupeKey: `high-severity-report:${payload.reportId}`, title: `High-severity report (${payload.reason})`, source: AdminTaskSource.HIGH_SEVERITY_REPORT, team: "TRUST_SAFETY", priority: AdminPriority.URGENT, relatedEntityType: "CommunityReport", relatedEntityId: payload.reportId, dueAt: new Date(Date.now() + 86400e3) });
+    await this.tasks.raise({ dedupeKey: `high-severity-report:${payload.reportId}`, title: `گزارش با شدت بالا (${REPORT_REASON_FA[payload.reason] ?? payload.reason})`, source: AdminTaskSource.HIGH_SEVERITY_REPORT, team: "TRUST_SAFETY", priority: AdminPriority.URGENT, relatedEntityType: "CommunityReport", relatedEntityId: payload.reportId, dueAt: new Date(Date.now() + 86400e3) });
   }
 }

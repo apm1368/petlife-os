@@ -1,5 +1,6 @@
 "use client";
 
+import { useStatusText } from "@/lib/status/use-status-text";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
@@ -8,6 +9,7 @@ import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
 
 function VerificationForm({ org, onChanged }: { org: AdminProviderOrgSummaryDto; onChanged: () => void }) {
+  const statusText = useStatusText();
   const t = useTranslations("admin.orgs");
   const tCommon = useTranslations("admin.common");
   const [status, setStatus] = useState<ProviderVerificationStatus>(org.verificationStatus);
@@ -16,7 +18,7 @@ function VerificationForm({ org, onChanged }: { org: AdminProviderOrgSummaryDto;
 
   return (
     <div className="flex flex-wrap items-end gap-2 border-t border-border-subtle pt-2">
-      <Select label={t("verification.changeStatus")} value={status} onChange={(e) => setStatus(e.target.value as ProviderVerificationStatus)} options={Object.values(ProviderVerificationStatus).map((s) => ({ value: s, label: s }))} />
+      <Select label={t("verification.changeStatus")} value={status} onChange={(e) => setStatus(e.target.value as ProviderVerificationStatus)} options={Object.values(ProviderVerificationStatus).map((s) => ({ value: s, label: statusText.label(s) }))} />
       <Input label={tCommon("reasonLabel")} placeholder={tCommon("reasonPlaceholder")} value={reason} onChange={(e) => setReason(e.target.value)} className="min-w-40 flex-1" />
       <Button
         size="sm"

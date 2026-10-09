@@ -9,6 +9,7 @@ import { NotificationDeepLinks } from "../notifications/notification-deeplink.ut
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import { AutomaticTaskService } from "../admin/task/automatic-task.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
+import { DOC_KIND_FA } from "../admin/task/task-titles";
 
 /** Provider and seller verification share one status vocabulary (identical enums). */
 type Status = VS;
@@ -123,7 +124,7 @@ export class PartnerVerificationService {
         : await tx.sellerOrganization.updateMany({ where: { id: s.id, verificationStatus: o.verificationStatus as never }, data: data as never });
       if (!done.count) throw new ValidationApiException({ field: "status", reason: "CHANGED_CONCURRENTLY" });
       await this.events.publish("PartnerVerificationSubmitted", { subjectType: s.type, subjectId: s.id, actorUserId: userId }, { tx, aggregateType: s.type === PartnerSubjectType.PROVIDER ? "ProviderOrganization" : "SellerOrganization", aggregateId: s.id });
-      await this.tasks.raise({ dedupeKey: `verification-submitted:${s.type}:${s.id}:${submittedAt.toISOString()}`, title: `Verification submitted: ${o.name}`, source: AdminTaskSource.PARTNER_VERIFICATION, team: "PARTNER_OPERATIONS", priority: AdminPriority.NORMAL, relatedEntityType: s.type === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION", relatedEntityId: s.id, dueAt: new Date(submittedAt.getTime() + 3 * 86400e3) }, tx);
+      await this.tasks.raise({ dedupeKey: `verification-submitted:${s.type}:${s.id}:${submittedAt.toISOString()}`, title: `ارسال مدارک احراز: ${o.name}`, source: AdminTaskSource.PARTNER_VERIFICATION, team: "PARTNER_OPERATIONS", priority: AdminPriority.NORMAL, relatedEntityType: s.type === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION", relatedEntityId: s.id, dueAt: new Date(submittedAt.getTime() + 3 * 86400e3) }, tx);
     });
     return this.status(s);
   }
@@ -207,13 +208,13 @@ export class PartnerVerificationService {
       const done = await this.prisma.partnerVerificationDocument.updateMany({ where: { id: d.id, status: PartnerDocumentStatus.ACCEPTED }, data: { status: PartnerDocumentStatus.EXPIRED } });
       if (!done.count) continue;
       await this.events.publish("PartnerVerificationDocumentExpired", { subjectType: d.subjectType, subjectId: d.subjectId, documentId: d.id, kind: d.kind }, { aggregateType: d.subjectType === PartnerSubjectType.PROVIDER ? "ProviderOrganization" : "SellerOrganization", aggregateId: d.subjectId });
-      await this.tasks.raise({ dedupeKey: `verification-document-expired:${d.id}`, title: `Verification document expired (${d.kind})`, source: AdminTaskSource.PARTNER_VERIFICATION, team: "PARTNER_OPERATIONS", priority: AdminPriority.HIGH, relatedEntityType: d.subjectType === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION", relatedEntityId: d.subjectId });
+      await this.tasks.raise({ dedupeKey: `verification-document-expired:${d.id}`, title: `مدرک احراز منقضی شد (${DOC_KIND_FA[d.kind] ?? d.kind})`, source: AdminTaskSource.PARTNER_VERIFICATION, team: "PARTNER_OPERATIONS", priority: AdminPriority.HIGH, relatedEntityType: d.subjectType === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION", relatedEntityId: d.subjectId });
     }
     const soon = await this.prisma.partnerVerificationDocument.findMany({ where: { status: PartnerDocumentStatus.ACCEPTED, expiryAlertedAt: null, expiresAt: { gt: now, lte: new Date(now.getTime() + EXPIRY_ALERT_DAYS * 86400e3) } }, take: 200 });
     for (const d of soon) {
       const done = await this.prisma.partnerVerificationDocument.updateMany({ where: { id: d.id, expiryAlertedAt: null }, data: { expiryAlertedAt: now } });
       if (!done.count) continue;
-      await this.tasks.raise({ dedupeKey: `verification-document-expiring:${d.id}`, title: `Verification document expiring (${d.kind})`, source: AdminTaskSource.PARTNER_VERIFICATION, team: "PARTNER_OPERATIONS", priority: AdminPriority.NORMAL, relatedEntityType: d.subjectType === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION", relatedEntityId: d.subjectId, dueAt: d.expiresAt ?? undefined });
+      await this.tasks.raise({ dedupeKey: `verification-document-expiring:${d.id}`, title: `مدرک احراز رو به انقضاست (${DOC_KIND_FA[d.kind] ?? d.kind})`, source: AdminTaskSource.PARTNER_VERIFICATION, team: "PARTNER_OPERATIONS", priority: AdminPriority.NORMAL, relatedEntityType: d.subjectType === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION", relatedEntityId: d.subjectId, dueAt: d.expiresAt ?? undefined });
       const o = await this.org({ type: d.subjectType, id: d.subjectId }).catch(() => null);
       if (o) await this.notifyOwners({ type: d.subjectType, id: d.subjectId }, o.name, null, Math.max(1, Math.ceil(((d.expiresAt?.getTime() ?? now.getTime()) - now.getTime()) / 86400e3)), d.id);
     }

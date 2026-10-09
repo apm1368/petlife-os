@@ -32,7 +32,7 @@ describe("ReportLostPetView", () => {
     fireEvent.click(screen.getByText("Report lost pet"));
 
     await waitFor(() => expect(lostPetService.open).toHaveBeenCalledWith("pet-1", expect.objectContaining({ description: "Slipped out the front gate", publicArea: "Yousefabad", lastKnownLocation: "No. 14, Alley 7", contactPreference: "IN_APP_MESSAGE" })));
-    expect(push).toHaveBeenCalledWith("/pets/pet-1/lost/incident-9");
+    expect(push).toHaveBeenCalledWith("/en/pets/pet-1/lost/incident-9");
   });
 
   it("asks for an explicit contact line before a public contact can be chosen", () => {

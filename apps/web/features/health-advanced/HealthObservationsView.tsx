@@ -81,7 +81,7 @@ export function HealthObservationsView({ petId }: { petId: string }) {
           label={t("observations.category")}
           value={category}
           onChange={(e) => setCategory(e.target.value as ObservationCategory)}
-          options={Object.values(ObservationCategory).map((c) => ({ value: c, label: c }))}
+          options={Object.values(ObservationCategory).map((c) => ({ value: c, label: statusText.label(c, "observation") }))}
         />
         <label htmlFor="observation-description" className="text-metadata text-text-secondary">
           {t("observations.description")}

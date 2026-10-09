@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedUrgency } from "@petlife/types";

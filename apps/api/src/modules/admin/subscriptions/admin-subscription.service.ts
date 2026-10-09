@@ -71,8 +71,14 @@ export class AdminSubscriptionService {
   }
 
   async getByHouseholdId(householdId: string): Promise<AdminSubscriptionDetailDto> {
-    const row = await this.prisma.subscription.findUnique({ where: { householdId }, include: { ...SUBSCRIPTION_INCLUDE, household: true } });
-    if (!row) throw new SubscriptionNotFoundException({ householdId });
+    let row = await this.prisma.subscription.findUnique({ where: { householdId }, include: { ...SUBSCRIPTION_INCLUDE, household: true } });
+    if (!row) {
+      // Households created before subscriptions were provisioned have no row yet; the member side lazily creates the
+      // default-plan row on first use — do the same here instead of a 404 for a real household.
+      if (!(await this.prisma.household.count({ where: { id: householdId } }))) throw new SubscriptionNotFoundException({ householdId });
+      await this.subscriptions.getOrCreateRaw(householdId);
+      row = await this.prisma.subscription.findUniqueOrThrow({ where: { householdId }, include: { ...SUBSCRIPTION_INCLUDE, household: true } });
+    }
     const [changes, billingAttempts] = await Promise.all([
       this.prisma.subscriptionChange.findMany({ where: { subscriptionId: row.id }, include: CHANGE_INCLUDE, orderBy: { createdAt: "desc" } }),
       this.prisma.subscriptionBillingAttempt.findMany({ where: { subscriptionId: row.id }, orderBy: { createdAt: "desc" } }),
