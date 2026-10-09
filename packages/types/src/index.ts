@@ -2569,6 +2569,11 @@ export interface SupportCaseSummaryDto {
   updatedAt: string;
   resolvedAt: string | null;
   closedAt: string | null;
+  /** ERP-F SLA + tagging (optional for older consumers). */
+  tags?: string[];
+  firstAssignedAt?: string | null;
+  firstResponseAt?: string | null;
+  reopenCount?: number;
 }
 
 export interface SupportCaseDetailDto extends SupportCaseSummaryDto {

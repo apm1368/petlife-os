@@ -1167,3 +1167,57 @@
 - **اصلاح داده‌ی نمایشی ERP-C:**
   - override دمو حالا روی «کلینیک نمایشی ERP (QA)» است: سقف کارکنان ۵، بالاتر از طرح پیش‌فرض.
   - override قبلی که سقف کلینیک نمایشی batch-3 (با طرح PRO نامحدود) را به ۱۵ محدود کرده بود، لغو شد و به‌عنوان سابقه باقی ماند.
+
+## ۳۱. ERP-F — پشتیبانی، اختلاف‌ها، وظایف و SLA
+
+### پرونده‌ی پشتیبانی (افزوده به مسیرهای قبلی `/admin/support/*`)
+- **وضعیت‌ها:** همان مقادیر قبلی هستند: `OPEN | IN_PROGRESS | WAITING_ON_USER | WAITING_ON_INTERNAL | RESOLVED | CLOSED`. `WAITING_ON_USER` همان «WAITING_USER» و `WAITING_ON_INTERNAL` همان «WAITING_INTERNAL» در درخواست مالک است.
+- **فیلدهای جدید در خلاصه‌ی پرونده:** `tags[]`، `firstAssignedAt`، `firstResponseAt` و `reopenCount`.
+- **اطلاعات تکمیلی:** `GET /admin/support/:id/extras` (مجوز `support.view`) → `{tags, sla, links[], attachments[]}`.
+  - `sla` شامل این فیلدهاست: `firstResponseTargetHours`، `firstResponseDueAt`، `firstAssignedAt`، `firstResponseAt`، `reopenCount` و `breached`.
+- **برچسب‌ها:** `PUT /admin/support/:id/tags {tags[]}` (مجوز `support.manage`). برچسب‌ها کوچک‌حرف و یکتا می‌شوند؛ حداکثر ۲۰ برچسب.
+- **موجودیت‌های مرتبط:**
+  - افزودن: `POST /admin/support/:id/links {entityType, entityId}`.
+  - انواع: `BOOKING | TRAVEL_BOOKING | ORDER | PAYMENT_INTENT | REFUND | PROVIDER | SELLER | PET | HOUSEHOLD`.
+  - موجودیت باید وجود داشته باشد؛ در غیر این صورت 404. افزودن تکراری اثری ندارد.
+  - حذف: `DELETE /admin/support/:id/links/:linkId`.
+- **پیوست‌ها:**
+  - بارگذاری کارمند: `POST /admin/support/:id/attachments/uploads` و سپس `POST /admin/support/:id/attachments {objectKey, contentType, fileSizeBytes, visibility: INTERNAL|SHARED}`.
+  - دانلود کارمند: `POST /admin/support/:id/attachments/:attachmentId/download` → لینک امضاشده؛ ممیزی می‌شود.
+- **سمت درخواست‌کننده:**
+  - `GET /support/cases/:id/attachments`، `POST /support/cases/:id/attachments/uploads`، `POST /support/cases/:id/attachments` و `POST /support/cases/:id/attachments/:attachmentId/download`.
+  - فایلی که درخواست‌کننده بارگذاری می‌کند همیشه `SHARED` است.
+  - درخواست‌کننده فقط فایل‌های SHARED پرونده‌ی خودش را می‌بیند. هر چیز دیگری 404 برمی‌گرداند.
+- **تنظیم جدید:** `support.firstResponseSlaHours` (پیش‌فرض ۲۴، کم‌اثر).
+
+### اختلاف‌ها
+- **وضعیت‌های ذخیره‌شده:** همان مقادیر قبلی. برچسب `lifecycle` در `GET /admin/disputes/:id/outcome` این نگاشت را دارد:
+  - `AWAITING_EVIDENCE` → `WAITING_PARTY`
+  - `RESOLVED_CUSTOMER` → `RESOLVED_USER`، یا `REFUNDED` وقتی تأیید بازپرداخت `EXECUTED` شده باشد
+  - `RESOLVED_SELLER` → `RESOLVED_PROVIDER`
+- **نتیجه‌ی همراه با بازپرداخت:** `POST /admin/disputes/:id/refund-outcome {amount, reason}` (مجوز `finance.refund.request`).
+  - فقط برای اختلاف از نوع ORDER، در وضعیت `UNDER_REVIEW` یا `AWAITING_EVIDENCE`.
+  - یک درخواست بازپرداخت در گردش `AdminRefundService` باز می‌کند (آستانه، تأیید کاربر دوم، اجرا از طریق RefundsService)، سپس اختلاف را `RESOLVED_CUSTOMER` می‌کند. هیچ پولی مستقیماً جابه‌جا نمی‌شود.
+  - **خطاها:** `REFUND_OUTCOME_ORDER_ONLY`، `INVALID_TRANSITION`، `ALREADY_REQUESTED` و `EXCEEDS_ORDER_TOTAL`.
+- **سخت‌گیری جدید:** درخواست بازپرداخت ادمین حالا مبلغ بیش از جمع سفارش را همان ابتدا رد می‌کند (`EXCEEDS_ORDER_TOTAL`).
+
+### SLA صف‌ها (ERP §49)
+- **مسیر:** `GET /admin/queues/sla?days=30` (مجوز `support.view`، `task.manage` یا `audit.view`).
+- **بخش‌های پاسخ:**
+  - `support`: پرونده‌های باز، پرونده‌های باز که از مهلت پاسخ اول گذشته‌اند، میانه‌ی ساعت تا اولین تخصیص، تا اولین پاسخ و تا حل، و نرخ بازگشایی.
+  - `verification`: در انتظار، قدیمی‌ترین انتظار، و میانه‌ی زمان بازبینی سند.
+  - `privacy`: درخواست‌های حذف بر اساس وضعیت، و قدیمی‌ترین درخواست.
+  - `moderation`: گزارش‌های باز، و قدیمی‌ترین گزارش.
+  - `tasks`: وظایف باز بر اساس تیم، و وظایف عقب‌افتاده.
+
+### سخت‌سازی عمومی
+- **شناسه‌ی نامعتبر:** در هر مسیری که شناسه‌ی نامعتبر به ستون uuid برسد، پاسخ حالا 400 با کد `VALIDATION_ERROR` و `details.reason: INVALID_ID` است. قبلاً 500 بود؛ بیش از ۴۰ مسیر بدون ParseUUIDPipe این مشکل را داشتند.
+- **رکورد ناموجود:** به‌روزرسانی یا حذف رکورد ناموجود حالا 404 برمی‌گرداند.
+
+### داده‌ی نمایشی
+- پرونده‌ی `CASE-QA-0001` از طرف `qa-erp-owner@example.test`:
+  - وضعیت IN_PROGRESS با اولویت HIGH، واگذارشده به `qa.admin.support`.
+  - برچسب‌ها: `access` و `qa-demo`.
+  - پیوند به خانوار و پت.
+  - یک پیوست SHARED.
+  - `firstAssignedAt` و `firstResponseAt` پر شده‌اند.

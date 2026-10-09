@@ -1,3 +1,4 @@
+import { ValidationApiException } from "../../../common/errors/api-exception";
 import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -65,6 +66,9 @@ export class AdminRefundService {
   async request(admin: ResolvedAdminContext, orderId: string, amount: number, reason: string, idempotencyKey?: string, requestId?: string): Promise<AdminRefundApprovalDto> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new OrderNotFoundException({ orderId });
+    // Early, honest feedback: execution re-checks against the captured amount (RefundsService), but a request for more
+    // than the order total can never succeed, so it isn't accepted into the approval queue.
+    if (!Number.isInteger(amount) || amount <= 0 || amount > order.totalAmount) throw new ValidationApiException({ field: "amount", reason: "EXCEEDS_ORDER_TOTAL", orderTotal: order.totalAmount });
 
     let row: ApprovalWithRelations;
     if (idempotencyKey) {

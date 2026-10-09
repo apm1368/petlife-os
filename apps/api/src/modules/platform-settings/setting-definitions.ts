@@ -69,6 +69,17 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     description: "Seller settlements at or above this net amount need approval before payout.",
   },
   {
+    key: "support.firstResponseSlaHours",
+    category: "support",
+    type: "integer",
+    scope: "INTERNAL",
+    highImpact: false,
+    min: 1,
+    max: 168,
+    fallback: () => 24,
+    description: "Target hours to the first staff reply on a support case; used by SLA metrics and breach flags.",
+  },
+  {
     key: "privacy.exportsPerDay",
     category: "privacy",
     type: "integer",

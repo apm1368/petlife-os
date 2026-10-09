@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { ParseUUIDPipe, Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
@@ -28,17 +28,17 @@ export class UserSupportController {
   }
 
   @Get(":id")
-  get(@CurrentUser() user: SessionUser, @Param("id") id: string) {
+  get(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
     return this.cases.getForUser(user.id, id);
   }
 
   @Post(":id/messages")
-  postMessage(@CurrentUser() user: SessionUser, @Param("id") id: string, @Body() dto: PostMySupportMessageDto) {
+  postMessage(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: PostMySupportMessageDto) {
     return this.cases.postMessageAsUser(user.id, id, dto.body);
   }
 
   @Post(":id/reopen")
-  reopen(@CurrentUser() user: SessionUser, @Param("id") id: string) {
+  reopen(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
     return this.cases.reopen(user.id, id);
   }
 }

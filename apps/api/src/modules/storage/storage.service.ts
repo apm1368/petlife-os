@@ -249,6 +249,18 @@ export class StorageService {
     return { ...target, key };
   }
 
+  /** ERP-F: a support-case attachment — private, same allow-list and limits as medical documents; read only via signed downloads after a case-access check. */
+  async createSupportAttachmentUploadTarget(caseId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    }
+    const key = `support-attachments/${caseId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
   /** ERP-C: a provider's or seller's verification evidence — private, same allow-list and limits as medical documents; staff read it only through signed, audited downloads. */
   async createPartnerVerificationUploadTarget(subject: "provider" | "seller", subjectId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
     const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];

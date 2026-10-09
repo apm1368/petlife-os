@@ -4559,6 +4559,10 @@ model SupportCase {
   /// First-response-time and resolution-time are computed on read from
   /// these plus createdAt/resolvedAt.
   firstResponseAt    DateTime?
+  /// ERP-F: first time the case got an assignee, how often it was reopened, and free-form staff tags.
+  firstAssignedAt    DateTime?
+  reopenCount        Int       @default(0)
+  tags               String[]  @default([])
   lastUserMessageAt  DateTime?
   lastAdminMessageAt DateTime?
 
@@ -4658,6 +4662,8 @@ model Dispute {
   assignedAdmin   AdminUser? @relation("AssignedDisputes", fields: [assignedAdminId], references: [id], onDelete: SetNull)
 
   resolutionSummary String?
+  /// ERP-F: the refund approval opened through AdminRefundService when the outcome is a refund (never a direct money write).
+  refundApprovalId  String? @db.Uuid
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -10350,4 +10356,52 @@ model FinanceReconciliationFinding {
   @@unique([check, entityType, entityId])
   @@index([status, check])
   @@map("finance_reconciliation_findings")
+}
+
+enum SupportLinkEntityType {
+  BOOKING
+  TRAVEL_BOOKING
+  ORDER
+  PAYMENT_INTENT
+  REFUND
+  PROVIDER
+  SELLER
+  PET
+  HOUSEHOLD
+}
+
+/// ERP-F: extra entities a support case concerns (beyond requester/household/pet), validated to exist when linked.
+model SupportCaseLink {
+  id               String                @id @default(uuid()) @db.Uuid
+  supportCaseId    String                @db.Uuid
+  entityType       SupportLinkEntityType
+  entityId         String                @db.Uuid
+  createdByAdminId String                @db.Uuid
+  createdAt        DateTime              @default(now())
+
+  @@unique([supportCaseId, entityType, entityId])
+  @@index([entityType, entityId])
+  @@map("support_case_links")
+}
+
+enum SupportAttachmentVisibility {
+  INTERNAL
+  SHARED
+}
+
+/// ERP-F: private files on a support case. INTERNAL = staff only; SHARED = visible to the requester too (anything the
+/// requester uploads is SHARED). Read only through short-lived signed downloads.
+model SupportCaseAttachment {
+  id                String                      @id @default(uuid()) @db.Uuid
+  supportCaseId     String                      @db.Uuid
+  objectKey         String                      @unique
+  mimeType          String
+  fileSizeBytes     Int
+  visibility        SupportAttachmentVisibility
+  uploadedByUserId  String?                     @db.Uuid
+  uploadedByAdminId String?                     @db.Uuid
+  createdAt         DateTime                    @default(now())
+
+  @@index([supportCaseId])
+  @@map("support_case_attachments")
 }

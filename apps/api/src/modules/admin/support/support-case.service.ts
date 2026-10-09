@@ -283,7 +283,8 @@ export class SupportCaseService {
       // deterministic final state") — the last commit wins, and there is no
       // business-validity constraint on *who* may hold the assignment (unlike
       // a status transition, any ACTIVE admin is always a valid assignee).
-      const row = await tx.supportCase.update({ where: { id: caseId }, data: { assignedAdminId: assigneeAdminId }, include: CASE_INCLUDE });
+      const firstAssigned = await tx.supportCase.findUniqueOrThrow({ where: { id: caseId }, select: { firstAssignedAt: true } });
+      const row = await tx.supportCase.update({ where: { id: caseId }, data: { assignedAdminId: assigneeAdminId, ...(firstAssigned.firstAssignedAt ? {} : { firstAssignedAt: new Date() }) }, include: CASE_INCLUDE });
       await this.events.publish("SupportCaseAssigned", { caseId, assigneeAdminId, previousAssigneeAdminId: existing.assignedAdminId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_case.assigned", entityType: "SUPPORT_CASE", entityId: caseId, afterSummary: { assigneeAdminId }, requestId, tx });
       return row;
@@ -308,6 +309,7 @@ export class SupportCaseService {
       const data: Prisma.SupportCaseUpdateInput = { status: to };
       if (to === SupportCaseStatus.RESOLVED && !current.resolvedAt) data.resolvedAt = new Date();
       if (to === SupportCaseStatus.CLOSED && !current.closedAt) data.closedAt = new Date();
+      if ((current.status === SupportCaseStatus.RESOLVED || current.status === SupportCaseStatus.CLOSED) && to === SupportCaseStatus.IN_PROGRESS) data.reopenCount = { increment: 1 };
 
       const row = await tx.supportCase.update({ where: { id: caseId }, data, include: CASE_INCLUDE });
 
@@ -562,7 +564,7 @@ export class SupportCaseService {
         throw new InvalidSupportCaseReopenException({ caseId, from: current.status });
       }
 
-      const row = await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.OPEN }, include: CASE_INCLUDE });
+      const row = await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.OPEN, reopenCount: { increment: 1 } }, include: CASE_INCLUDE });
 
       await this.events.publish("SupportCaseReopened", { caseId, from: current.status, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
       await this.events.publish("SupportCaseStatusChanged", { caseId, from: current.status, to: SupportCaseStatus.OPEN }, { tx, aggregateType: "SupportCase", aggregateId: caseId });

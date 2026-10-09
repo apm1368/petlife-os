@@ -134,9 +134,17 @@ async function main() {
     // ERP-E: one zero-amount settlement for the QA seller, held for review (shows hold/release; moves no money).
     await db.sellerSettlement.upsert({ where: { id: sid("settlement:a") }, create: { id: sid("settlement:a"), reference: "QA-DEMO-ST-0001", sellerOrganizationId: sellA.id, periodStart: new Date(Date.now() - 37 * 86400e3), periodEnd: new Date(Date.now() - 7 * 86400e3), currency: "IRR", grossIrr: 0, commissionIrr: 0, refundsIrr: 0, adjustmentsIrr: 0, netIrr: 0, initiatedByAdminId: qaSuper.id, onHold: true, holdReason: "QA demo — بررسی بازپرداخت‌های دوره", heldAt: new Date(), heldByAdminId: qaSuper.id }, update: {} });
 
+    // ERP-F: a support case from the QA owner — tagged, linked to their household, one shared attachment, SLA timestamps.
+    const qaSupport = await db.adminUser.findFirstOrThrow({ where: { user: { email: "qa-admin-support@example.test" } } });
+    const supportCase = await db.supportCase.upsert({ where: { caseNumber: "CASE-QA-0001" }, create: { id: sid("support:case"), caseNumber: "CASE-QA-0001", requesterUserId: erpOwner.id, householdId: hh.id, petId: pet.id, subject: "دسترسی عضو سابق خانوار هنوز فعال است (QA demo)", description: "عضو قبلی خانوار هنوز سوابق پت را می‌بیند.", category: "PET", priority: "HIGH", status: "IN_PROGRESS", assignedAdminId: qaSupport.id, firstAssignedAt: new Date(Date.now() - 20 * 3600e3), firstResponseAt: new Date(Date.now() - 18 * 3600e3), createdAt: new Date(Date.now() - 22 * 3600e3), tags: ["access", "qa-demo"] }, update: {} });
+    await db.supportCaseLink.createMany({ data: [{ supportCaseId: supportCase.id, entityType: "HOUSEHOLD", entityId: hh.id, createdByAdminId: qaSupport.id }, { supportCaseId: supportCase.id, entityType: "PET", entityId: pet.id, createdByAdminId: qaSupport.id }], skipDuplicates: true });
+    const attachKey = `support-attachments/${supportCase.id}/qa-demo-screenshot.pdf`;
+    storeDoc(attachKey);
+    await db.supportCaseAttachment.upsert({ where: { objectKey: attachKey }, create: { supportCaseId: supportCase.id, objectKey: attachKey, mimeType: "application/pdf", fileSizeBytes: pdf.length, visibility: "SHARED", uploadedByUserId: erpOwner.id }, update: {} });
+
     writeFileSync(FILE, `${lines.join("\n")}\n`, { mode: 0o600 });
     chmodSync(FILE, 0o600);
-    console.log(`QA admin personas + ERP-B/C/E demo states: ${PERSONAS.length} ready (${generated} password(s) generated); credentials in ${FILE} (600).`);
+    console.log(`QA admin personas + ERP-B/C/E/F demo states: ${PERSONAS.length} ready (${generated} password(s) generated); credentials in ${FILE} (600).`);
   } finally {
     await db.$disconnect();
   }
