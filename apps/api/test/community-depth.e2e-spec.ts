@@ -30,18 +30,22 @@ describe("Community — topics, replies, saved posts", () => {
   });
   afterAll(async () => app.close());
 
-  it("topics (max 3, fixed vocabulary) and broad city filter the feed", async () => {
+  it("canonical topics (max 3; first is primary; legacy codes mapped), broad city and region filter the feed", async () => {
     const a = await actor("author");
-    await post(a, { topics: ["DOGS", "HEALTH", "TRAINING", "CATS"] }).expect(400);
+    const region = `Region-${city}`;
+    await post(a, { topics: ["DOG", "HEALTH", "TRAINING", "CAT"] }).expect(400);
     await post(a, { topics: ["ALIENS"] }).expect(400);
-    await post(a, { topics: ["DOGS", "DOGS"] }).expect(400);
-    const p1 = (await post(a, { topics: ["DOGS", "HEALTH"], city }).expect(201)).body;
-    expect(p1).toMatchObject({ topics: ["DOGS", "HEALTH"], city });
-    expect(Object.keys(p1)).not.toEqual(expect.arrayContaining(["latitude", "longitude"]));
-    await post(a, { topics: ["CATS"], city }).expect(201);
-    const dogs = (await get(null, `/community/posts?topic=DOGS&city=${encodeURIComponent(city)}`).expect(200)).body;
+    const p1 = (await post(a, { topics: ["DOG", "HEALTH"], city, region }).expect(201)).body;
+    expect(p1).toMatchObject({ topics: ["DOG", "HEALTH"], primaryTopic: "DOG", city, region });
+    expect(Object.keys(p1)).not.toEqual(expect.arrayContaining(["latitude", "longitude", "address"]));
+    // An older client's codes land on the canonical taxonomy (duplicates collapse).
+    const legacy = (await post(a, { topics: ["CATS", "NUTRITION", "CATS"], city }).expect(201)).body;
+    expect(legacy).toMatchObject({ topics: ["CAT", "HEALTH"], primaryTopic: "CAT" });
+    const dogs = (await get(null, `/community/posts?topic=DOG&city=${encodeURIComponent(city)}`).expect(200)).body;
     expect(dogs.items.map((x: { id: string }) => x.id)).toEqual([p1.id]);
+    expect((await get(null, `/community/posts?topic=DOGS&city=${encodeURIComponent(city)}`).expect(200)).body.items.map((x: { id: string }) => x.id)).toEqual([p1.id]);
     expect((await get(null, `/community/posts?city=${encodeURIComponent(city.toLowerCase())}`).expect(200)).body.items).toHaveLength(2);
+    expect((await get(null, `/community/posts?region=${encodeURIComponent(region)}`).expect(200)).body.items.map((x: { id: string }) => x.id)).toEqual([p1.id]);
     await get(null, "/community/posts?topic=NOPE").expect(400);
   });
 

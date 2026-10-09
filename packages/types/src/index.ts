@@ -4632,6 +4632,10 @@ export interface CommunityPostDto {
   createdAt: string;
   /** Topic tags (fixed vocabulary). */
   topics?: string[];
+  /** The first topic (canonical taxonomy), or null. */
+  primaryTopic?: string | null;
+  /** Optional region/province — never an address or coordinates. */
+  region?: string | null;
   /** Optional city for the local feed. */
   city?: string | null;
 }

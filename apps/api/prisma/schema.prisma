@@ -7141,6 +7141,8 @@ model CommunityPost {
   topics    String[]                @default([])
   /// Optional city for local community — never a precise location.
   city      String?
+  /// Optional region/province (G17) — never an address or coordinates.
+  region    String?
 
   @@index([authorUserId])
   @@index([status])

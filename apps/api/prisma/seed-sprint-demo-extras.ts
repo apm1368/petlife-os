@@ -167,9 +167,10 @@ async function main() {
 
     // ---------------------------------------------------------------- Community: topics, city, a reply thread, a saved post
     const cpost = (key: string, data: Record<string, unknown>) => db.communityPost.upsert({ where: { id: id(`post:${key}`) }, create: { id: id(`post:${key}`), type: "GENERAL", ...data } as never, update: {} });
-    const p1 = await cpost("vaccine-q", { authorUserId: reviewer.id, title: "واکسن سالانه‌ی سگ‌ها را کجا بزنیم؟", body: "در تهران کدام درمانگاه‌ها نوبت آخر هفته دارند؟ (پست نمایشی)", topics: ["DOGS", "HEALTH"], city: "تهران" });
-    await cpost("cat-food", { authorUserId: helperA.id, title: "غذای گربه‌ی مسن", body: "برای گربه‌ی ۱۲ ساله چه غذایی مناسب است؟ (پست نمایشی)", topics: ["CATS", "NUTRITION"], city: "اصفهان" });
-    await cpost("training", { authorUserId: helperB.id, body: "تمرین «بمان» را با جایزه‌های کوچک شروع کردیم و جواب داد. (پست نمایشی)", topics: ["DOGS", "TRAINING"] });
+    const p1 = await cpost("vaccine-q", { authorUserId: reviewer.id, title: "واکسن سالانه‌ی سگ‌ها را کجا بزنیم؟", body: "در تهران کدام درمانگاه‌ها نوبت آخر هفته دارند؟ (پست نمایشی)", topics: ["DOG", "HEALTH"], region: "تهران", city: "تهران" });
+    await db.communityPost.updateMany({ where: { id: p1.id, region: null }, data: { region: "تهران" } }); // G17 regional post
+    await cpost("cat-food", { authorUserId: helperA.id, title: "غذای گربه‌ی مسن", body: "برای گربه‌ی ۱۲ ساله چه غذایی مناسب است؟ (پست نمایشی)", topics: ["CAT", "HEALTH"], city: "اصفهان" });
+    await cpost("training", { authorUserId: helperB.id, body: "تمرین «بمان» را با جایزه‌های کوچک شروع کردیم و جواب داد. (پست نمایشی)", topics: ["DOG", "TRAINING"] });
     const top = await db.communityComment.upsert({ where: { id: id("comment:top") }, create: { id: id("comment:top"), postId: p1.id, authorUserId: helperA.id, body: "درمانگاه مهر جمعه‌ها هم نوبت می‌دهد. (نظر نمایشی)" }, update: {} });
     await db.communityComment.upsert({ where: { id: id("comment:reply") }, create: { id: id("comment:reply"), postId: p1.id, authorUserId: reviewer.id, body: "ممنون، امتحان می‌کنم. (پاسخ نمایشی)", parentCommentId: top.id }, update: {} });
     await db.communityPostBookmark.upsert({ where: { userId_postId: { userId: helperB.id, postId: p1.id } }, create: { userId: helperB.id, postId: p1.id }, update: {} });

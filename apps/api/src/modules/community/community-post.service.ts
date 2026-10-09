@@ -65,6 +65,7 @@ export class CommunityPostService {
           mediaObjectKeys: dto.mediaObjectKeys ?? [],
           topics: dto.topics ?? [],
           city: dto.city?.trim() || null,
+          region: dto.region?.trim() || null,
         },
         include: POST_INCLUDE,
       });
@@ -128,6 +129,7 @@ export class CommunityPostService {
       countryCode: query.countryCode,
       ...(query.topic ? { topics: { has: query.topic } } : {}),
       ...(query.city ? { city: { equals: query.city.trim(), mode: "insensitive" } } : {}),
+      ...(query.region ? { region: { equals: query.region.trim(), mode: "insensitive" } } : {}),
       ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { body: { contains: q, mode: "insensitive" } }] } : {}),
     };
     const [rows, total] = await Promise.all([
