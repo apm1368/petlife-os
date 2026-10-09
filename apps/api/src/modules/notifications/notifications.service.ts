@@ -84,6 +84,12 @@ export class NotificationsService {
     return { updatedCount: result.count };
   }
 
+  /** Marks the caller's own notifications among `ids` read; ids that aren't theirs are simply not counted. */
+  async markSelectedRead(userId: string, ids: string[]): Promise<{ updatedCount: number }> {
+    const result = await this.prisma.notification.updateMany({ where: { userId, id: { in: ids }, readAt: null }, data: { readAt: new Date() } });
+    return { updatedCount: result.count };
+  }
+
   /** Marks one server-computed group (see grouped()) read. */
   async markGroupKeyRead(userId: string, groupKey: string): Promise<{ updatedCount: number }> {
     const [type, entityType, entityId] = groupKey.split("|");

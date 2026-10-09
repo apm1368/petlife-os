@@ -5,7 +5,7 @@ import { NotFoundApiException, ValidationApiException } from "../../common/error
 
 export const SEARCH_TYPES = ["PROVIDER", "SERVICE", "PRODUCT", "TRAVEL_LISTING", "PLACE", "ARTICLE", "SUPPORT_NEED", "ORGANIZATION"] as const;
 export type SearchType = (typeof SEARCH_TYPES)[number];
-export const RECENT_TYPES = ["PROVIDER", "PRODUCT", "TRAVEL_LISTING", "PLACE", "ARTICLE", "SUPPORT_NEED"] as const;
+export const RECENT_TYPES = ["PROVIDER", "SERVICE", "PRODUCT", "TRAVEL_LISTING", "PLACE", "ARTICLE", "SUPPORT_NEED"] as const;
 export type RecentType = (typeof RECENT_TYPES)[number];
 
 type Preview = { title: string; subtitle: string | null; deepLink: string };
@@ -125,6 +125,10 @@ export class ConsumerHubService {
       case "PROVIDER": {
         const p = await this.prisma.providerOrganization.findFirst({ where: { id, verificationStatus: "VERIFIED" }, select: { name: true, type: true } });
         return p ? { title: p.name, subtitle: p.type, deepLink: `/providers/${id}` } : null;
+      }
+      case "SERVICE": {
+        const sv = await this.prisma.providerService.findFirst({ where: { id, isActive: true, providerOrganization: { verificationStatus: "VERIFIED" } }, select: { name: true, providerOrganizationId: true, providerOrganization: { select: { name: true } } } });
+        return sv ? { title: sv.name, subtitle: sv.providerOrganization.name, deepLink: `/providers/${sv.providerOrganizationId}` } : null;
       }
       case "PRODUCT": {
         const p = await this.prisma.product.findFirst({ where: { id, status: ProductStatus.ACTIVE }, select: { title: true } });

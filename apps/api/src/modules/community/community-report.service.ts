@@ -2,14 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { AnimalSupportVerificationStatus, CommunityReportStatus, LostPetIncidentStatus, Prisma, SupportNeedStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { DuplicateReportException, NotFoundApiException, ReportLimitReachedException } from "../../common/errors/api-exception";
+import { DuplicateReportException, NotFoundApiException, ReportLimitReachedException, ValidationApiException } from "../../common/errors/api-exception";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { CommunityPostService } from "./community-post.service";
 import { toCommunityReportDto } from "./community-mapper";
 import { ChatService } from "./chat/chat.service";
 import type { SubmitCommunityReportDto } from "./dto/community.dto";
 
-export type ReportTargetType = "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION" | "CHAT_MESSAGE";
+export type ReportTargetType = "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION" | "CHAT_MESSAGE" | "PROVIDER_REVIEW";
 
 const OPEN_REPORT: CommunityReportStatus[] = [CommunityReportStatus.OPEN, CommunityReportStatus.ESCALATED];
 const DAILY_REPORT_LIMIT = 20;
@@ -80,6 +80,12 @@ export class CommunityReportService {
       const row = await this.prisma.lostPetSighting.findUnique({ where: { id: targetId }, select: { id: true, incident: { select: { petId: true } } } });
       if (!row || !(await this.petAccess.hasActiveAccess(row.incident.petId, reporterUserId))) throw new NotFoundApiException("Sighting");
       data = { lostPetSightingId: targetId, reporterUserId, reason: dto.reason, details: dto.details };
+    } else if (targetType === "PROVIDER_REVIEW") {
+      // A published review (or the provider's reply on it); its own author can't report it.
+      const row = await this.prisma.providerReview.findFirst({ where: { id: targetId, status: "PUBLISHED" }, select: { userId: true } });
+      if (!row) throw new NotFoundApiException("ProviderReview");
+      if (row.userId === reporterUserId) throw new ValidationApiException({ field: "targetId", reason: "CANNOT_REPORT_OWN_REVIEW" });
+      data = { providerReviewId: targetId, reporterUserId, reason: dto.reason, details: dto.details };
     } else if (targetType === "CHAT_MESSAGE") {
       // Private messages: only a member of the conversation can report one; anyone else gets the same 404.
       await this.chat.assertCanReport(reporterUserId, targetId);

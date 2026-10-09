@@ -7227,6 +7227,8 @@ model CommunityReport {
   organizationId       String?               @db.Uuid
   /// Community chat — a reported private message (only a participant may report it).
   chatMessageId        String?               @db.Uuid
+  /// G18: a published provider review (or its provider reply) reported as abusive or fake.
+  providerReviewId     String?               @db.Uuid
   reporterUserId       String                @db.Uuid
   reason               CommunityReportReason
   details              String?
@@ -7236,6 +7238,7 @@ model CommunityReport {
   trustCaseId          String?               @db.Uuid
   createdAt            DateTime              @default(now())
 
+  @@index([providerReviewId])
   @@index([postId])
   @@index([commentId])
   @@index([supportNeedListingId])
