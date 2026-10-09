@@ -5,6 +5,7 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { StorageService } from "../storage/storage.service";
 import { PetLifecycleService } from "../pets/pet-lifecycle.service";
 import { CommunityPostService } from "../community/community-post.service";
+import { PetSafetyService } from "../pet-safety/pet-safety.service";
 import {
   InvalidLostPetIncidentTransitionException,
   LostPetIncidentAlreadyOpenException,
@@ -13,6 +14,7 @@ import {
 } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { toLostPetIncidentDto, toLostPetIncidentPublicDto, toLostPetSightingDto } from "./lost-pet-mapper";
+import { PetAccessDeniedException } from "../../common/errors/api-exception";
 import type { CreateLostPetIncidentDto, ReviewLostPetSightingDto, SubmitLostPetSightingDto } from "./dto/lost-pet.dto";
 
 const INCIDENT_INCLUDE = { pet: true, _count: { select: { sightings: true } } } satisfies Prisma.LostPetIncidentInclude;
@@ -50,6 +52,7 @@ export class LostPetIncidentService {
     private readonly storage: StorageService,
     private readonly lifecycle: PetLifecycleService,
     private readonly communityPosts: CommunityPostService,
+    private readonly safety: PetSafetyService,
   ) {}
 
   private async getRaw(petId: string, incidentId: string) {
@@ -64,7 +67,7 @@ export class LostPetIncidentService {
     }
   }
 
-  async open(petId: string, createdByUserId: string, dto: CreateLostPetIncidentDto) {
+  async open(petId: string, createdByUserId: string, dto: CreateLostPetIncidentDto, canManageAccess = false) {
     const row = await this.prisma.$transaction(async (tx) => {
       const pet = await tx.pet.findUniqueOrThrow({ where: { id: petId } });
       const alreadyOpen = await tx.lostPetIncident.findFirst({ where: { petId, status: { in: OPEN_STATUSES } } });
@@ -94,7 +97,32 @@ export class LostPetIncidentService {
       await this.events.publish("LostPetIncidentOpened", { petId, householdId: pet.householdId, incidentId: created.id }, { tx, aggregateType: "Pet", aggregateId: petId });
       return created;
     });
-    return toLostPetIncidentDto(row);
+    if (!dto.exposeIdentityCard) return toLostPetIncidentDto(row);
+    const linked = await this.setIdentityCard(petId, row.id, createdByUserId, true, canManageAccess);
+    return { ...linked.incident, identityCardToken: linked.identityCardToken };
+  }
+
+  /**
+   * Lost Pet ↔ Pet Identity: reference the pet's active ID-tag card from an open incident (creating one with identity
+   * fields and in-app contact if none exists — that needs canManageAccess; its token is returned once). The public
+   * card then shows the incident; the public incident never shows the card token.
+   */
+  async setIdentityCard(petId: string, incidentId: string, actorUserId: string, expose: boolean, canManageAccess: boolean) {
+    const incident = await this.getRaw(petId, incidentId);
+    if (!OPEN_STATUSES.includes(incident.status)) throw new LostPetIncidentNotFoundException({ incidentId });
+    let cardId: string | null = null;
+    let identityCardToken: string | null = null;
+    if (expose) {
+      cardId = await this.safety.activeIdTagCardId(petId);
+      if (!cardId) {
+        if (!canManageAccess) throw new PetAccessDeniedException({ petId, reason: "CAN_MANAGE_ACCESS_REQUIRED_TO_CREATE_CARD" });
+        const card = await this.safety.createCard(petId, actorUserId, { kind: "ID_TAG" });
+        cardId = card.id;
+        identityCardToken = card.token;
+      }
+    }
+    const row = await this.prisma.lostPetIncident.update({ where: { id: incidentId }, data: { identityCardId: cardId }, include: INCIDENT_INCLUDE });
+    return { incident: toLostPetIncidentDto(row), identityCardToken };
   }
 
   async get(petId: string, incidentId: string) {

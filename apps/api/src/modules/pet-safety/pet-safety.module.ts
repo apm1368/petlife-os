@@ -9,5 +9,6 @@ import { PetSafetyService } from "./pet-safety.service";
   imports: [PetAccessModule, NotificationsModule],
   controllers: [PetSafetyController, MyCareHandoffsController, PublicPetCardController],
   providers: [PetSafetyService],
+  exports: [PetSafetyService],
 })
 export class PetSafetyModule {}

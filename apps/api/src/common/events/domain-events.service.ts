@@ -259,6 +259,8 @@ export const DOMAIN_EVENT_TYPES = [
   "ClinicBranchRemoved",
   "PetEmergencyInfoUpdated",
   "PetShareCardCreated",
+  "PetShareCardRotated",
+  "PetCardContactReceived",
   "PetShareCardRevoked",
   "PetCareHandoffGranted",
   "PetCareHandoffRevoked",

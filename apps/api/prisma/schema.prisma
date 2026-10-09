@@ -6483,6 +6483,9 @@ model LostPetIncident {
   /// household's real phone/email column.
   publicContactMode String?
 
+  /// The owner's ID-tag card exposed alongside this incident (owner-visible link only; the token is never public here).
+  identityCardId String? @db.Uuid
+
   createdByUserId String   @db.Uuid
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -9525,22 +9528,54 @@ enum PetShareCardKind {
 /// A revocable public link for one pet. Only a SHA-256 of the token is stored; the raw token is shown once (create
 /// or rotate). At most one active card per (pet, kind) — creating a new one revokes the previous.
 model PetShareCard {
-  id              String           @id @default(uuid()) @db.Uuid
-  petId           String           @db.Uuid
-  pet             Pet              @relation(fields: [petId], references: [id], onDelete: Cascade)
-  kind            PetShareCardKind
-  tokenHash       String           @unique
-  tokenHint       String
-  includeContact  Boolean          @default(true)
-  expiresAt       DateTime?
-  revokedAt       DateTime?
-  createdByUserId String           @db.Uuid
-  lastAccessedAt  DateTime?
-  accessCount     Int              @default(0)
-  createdAt       DateTime         @default(now())
+  id               String             @id @default(uuid()) @db.Uuid
+  petId            String             @db.Uuid
+  pet              Pet                @relation(fields: [petId], references: [id], onDelete: Cascade)
+  kind             PetShareCardKind
+  tokenHash        String             @unique
+  tokenHint        String
+  includeContact   Boolean            @default(true)
+  /// Owner-selected public fields (PetCardField values). The pet's name is always shown; nothing else is unless listed.
+  visibleFields    String[]           @default([])
+  /// How a finder reaches the owner. IN_APP (default) never shows a phone; PHONE/BOTH need phoneConsentAt.
+  contactMode      PetCardContactMode @default(IN_APP)
+  phoneConsentAt   DateTime?
+  expiresAt        DateTime?
+  revokedAt        DateTime?
+  /// Set when the card was replaced by a rotation (status ROTATED rather than REVOKED).
+  replacedByCardId String?            @db.Uuid
+  createdByUserId  String             @db.Uuid
+  lastAccessedAt   DateTime?
+  accessCount      Int                @default(0)
+  createdAt        DateTime           @default(now())
+
+  contactMessages PetCardContactMessage[]
 
   @@index([petId, kind])
   @@map("pet_share_cards")
+}
+
+enum PetCardContactMode {
+  IN_APP
+  PHONE
+  BOTH
+}
+
+/// A finder's message to the owner through a public card (IN_APP/BOTH). The finder never sees the owner's identity;
+/// the owner sees only what the finder chose to leave.
+model PetCardContactMessage {
+  id            String       @id @default(uuid()) @db.Uuid
+  cardId        String       @db.Uuid
+  card          PetShareCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  petId         String       @db.Uuid
+  message       String
+  finderContact String?
+  senderUserId  String?      @db.Uuid
+  readAt        DateTime?
+  createdAt     DateTime     @default(now())
+
+  @@index([petId, createdAt])
+  @@map("pet_card_contact_messages")
 }
 
 // ---------------------------------------------------------------------------

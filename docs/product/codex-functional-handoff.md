@@ -506,3 +506,46 @@
   - `features/health/VetShareView.tsx` (۱)
   - `features/account/PetAccessView.tsx` (۱)
   - `features/admin/AdminSupportQueueView.tsx`، `AdminSellerFinanceDetailView.tsx`، `AdminMarketplaceReconciliationView.tsx` (هر کدام ۲؛ این‌ها بخش ادمین Batch 7 و متعلق به شما هستند)
+
+## ۱۸. هویت پت (G11)
+
+- **تکمیل پروفایل:** `GET /pets/:petId/completeness` (مجوز `canViewIdentity`)
+  - خروجی: `{petId, score, completionScore, completedFields[], missingFields[], recommendedNextFields[]}`.
+  - `score` عددی بین ۰ و ۱۰۰ است و `completionScore` همان مقدار است (برای سازگاری با کلاینت قدیمی).
+  - `recommendedNextFields`: حداکثر سه فیلد از فیلدهای پرنشده، به این ترتیب: microchip، emergencyContact، photo، vaccinationHistory، weight، birthDate، breed، sex، medicalDocument.
+- **کارت عمومی:** `POST /pets/:petId/share-cards` (مجوز `canManageAccess`)
+  - بدنه: `{kind: EMERGENCY|ID_TAG, fields?, contactMode?: IN_APP|PHONE|BOTH, phoneConsent?, expiresInHours?}`.
+  - مقادیر مجاز `fields`: `PHOTO, SPECIES, BREED, SEX, AGE, MICROCHIP_STATUS, ALLERGIES, CONDITIONS, MEDICATIONS, BLOOD_TYPE, CRITICAL_NOTES`.
+  - پیش‌فرض `fields`: برای ID_TAG فقط فیلدهای هویتی؛ برای EMERGENCY فیلدهای هویتی به‌همراه سلامت حیاتی.
+  - پیش‌فرض `contactMode`: `IN_APP`.
+  - حالت‌های `PHONE` و `BOTH` فقط با `phoneConsent: true` و شماره‌ی اضطراری ثبت‌شده پذیرفته می‌شوند. خطاها: `PHONE_CONSENT_REQUIRED`، `EMERGENCY_PHONE_MISSING`.
+  - توکن فقط یک بار برمی‌گردد.
+- **فهرست کارت‌ها:** `GET /pets/:petId/share-cards`
+  - هر کارت `state` دارد: `ACTIVE`، `REVOKED`، `ROTATED` یا `EXPIRED`.
+  - همراه آن: `visibleFields`، `contactMode`، `phoneConsentAt`، `replacedByCardId`.
+- **مدیریت کارت:**
+  - `POST …/share-cards/:id/rotate`: کارت جدید با همان تنظیمات می‌سازد؛ کارت قبلی `ROTATED` می‌شود.
+  - `POST …/share-cards/:id/revoke`.
+- **خواندن عمومی:** `GET /public/pet-cards/:token` (rate limit ۳۰ در دقیقه).
+  - نام پت همیشه نشان داده می‌شود و بقیه‌ی فیلدها فقط اگر انتخاب شده باشند.
+  - `hasMicrochip`؛ شماره‌ی میکروچیپ هرگز نمایش داده نمی‌شود و `microchipNumber` همیشه `null` است.
+  - `contact: {mode, canMessageOwner, emergencyContact|null}`؛ فیلد سطح بالای `emergencyContact` همان مقدار را دارد.
+  - `isReportedLost` و `lostIncidentId`.
+  - توکن نامعتبر، باطل‌شده، چرخیده یا منقضی همگی 404 برمی‌گردانند.
+- **پیام یابنده:** `POST /public/pet-cards/:token/messages` با بدنه‌ی `{message: 5–1000, finderContact?: ≤120}`.
+  - بدون نیاز به ورود و با CSRF؛ rate limit ۵ در دقیقه.
+  - در کارت‌های `PHONE` پیام پذیرفته نمی‌شود (`IN_APP_CONTACT_DISABLED`).
+  - برای مالک اعلان `pet.card_contact_message` ارسال می‌شود.
+- **پیام‌ها برای مالک:**
+  - `GET /pets/:petId/card-messages` و `POST /pets/:petId/card-messages/:id/read` (مجوز `canManageAccess`).
+  - خروجی: `{id, cardKind, message, finderContact, createdAt, readAt}`.
+- **گم‌شدن پت:** `POST /pets/:petId/lost-incidents` حالا `exposeIdentityCard?: boolean` هم می‌گیرد.
+  - کارت ID_TAG فعال پت لینک می‌شود؛ اگر کارتی نباشد ساخته می‌شود و توکنش یک بار در `identityCardToken` برمی‌گردد (برای ساخت کارت مجوز `canManageAccess` لازم است).
+  - `POST /pets/:petId/lost-incidents/:id/identity-card {expose}` کارت را لینک یا جدا می‌کند.
+  - `identityCardId` فقط در خروجی مالک هست و هرگز در `/lost-pets/:id` عمومی نمی‌آید.
+- **فید فعالیت:** نوع‌های جدید `LOST_REPORTED`، `SIGHTING_REPORTED`، `REUNITED` و `FINDER_MESSAGE`.
+- **داده‌ی نمایشی:** `owner-multi-pet@example.test` با سه پت.
+  - «بیسکویت» در وضعیت LOST است و حادثه‌اش `SIGHTING_REPORTED` است.
+  - کارت ID پت فقط فیلدهای هویتی دارد و تماس `IN_APP` است؛ آدرس آن `/pet-card/<توکن نمایشی در خروجی seed>` است.
+  - یک گزارش مشاهده و یک پیام یابنده هم ثبت شده است.
+- **حالت خالی:** پت بدون کارت آرایه‌ی خالی برمی‌گرداند؛ صندوق پیام یابنده هم آرایه‌ی خالی برمی‌گرداند.

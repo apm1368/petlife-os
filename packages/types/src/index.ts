@@ -4213,6 +4213,8 @@ export enum LostPetSightingStatus {
 /** The household/owner view — includes privateNotes and every field. Never returned to an anonymous caller. */
 export interface LostPetIncidentDto {
   id: string;
+  /** The pet's ID-tag share card exposed with this incident (owner view only; the token is never in this payload). */
+  identityCardId?: string | null;
   petId: string;
   petName: string;
   petSpecies: PetSpecies;

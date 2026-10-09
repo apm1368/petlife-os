@@ -299,6 +299,35 @@ async function main() {
     const verifiedProvider = await db.providerOrganization.findFirst({ where: { verificationStatus: "VERIFIED" }, orderBy: { createdAt: "asc" } });
     if (verifiedProvider) await db.recentlyViewed.upsert({ where: { userId_entityType_entityId: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id } }, create: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id }, update: {} });
 
+    // ---------------------------------------------------------------- G11: OWNER_MULTI_PET — lost pet ↔ identity card
+    // A separate persona (showcase accounts and owner.review stay untouched): three pets, one reported LOST with its
+    // ID-tag card exposed (in-app contact, identity fields only), a public sighting and a finder message.
+    const multi = await user("owner-multi-pet@example.test", "نیلوفر (چند پت، نمایشی)");
+    const multiHh = await db.household.upsert({ where: { id: id("multi:household") }, create: { id: id("multi:household"), name: "خانه‌ی سه پت (نمایشی)", city: "تهران", countryCode: "IR" }, update: {} });
+    await db.householdMember.upsert({ where: { householdId_userId: { householdId: multiHh.id, userId: multi.id } }, create: { householdId: multiHh.id, userId: multi.id, role: "OWNER" }, update: {} });
+    const OWNER_FLAGS = { canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true, canViewCareProfile: true, canEditCareProfile: true, canViewLocation: true, canManageAccess: true };
+    const multiPets: [string, string, "DOG" | "CAT", string][] = [["multi:lost", "بیسکویت", "DOG", "تریر"], ["multi:cat", "ماهی", "CAT", "پرشین"], ["multi:pup", "توپی", "DOG", "پاپیون"]];
+    for (const [key, name, species, breed] of multiPets) {
+      await db.pet.upsert({ where: { id: id(key) }, create: { id: id(key), householdId: multiHh.id, name, species, breed, sex: "MALE", approximateAgeMonths: 30, microchipNumber: key === "multi:lost" ? "985112000777001" : null }, update: {} });
+      await db.petAccessGrant.upsert({ where: { id: id(`${key}:grant`) }, create: { id: id(`${key}:grant`), petId: id(key), userId: multi.id, source: "HOUSEHOLD", ...OWNER_FLAGS }, update: {} });
+    }
+    const lostPetId = id("multi:lost");
+    await db.petEmergencyInfo.upsert({ where: { petId: lostPetId }, create: { petId: lostPetId, contactName: "نیلوفر", contactPhone: "09120000777", contactRelation: "صاحب", updatedByUserId: multi.id }, update: {} });
+    const lostToken = `demo-${id("multi:id-tag").replace(/-/g, "")}`;
+    const lostCard = await db.petShareCard.upsert({ where: { tokenHash: createHash("sha256").update(lostToken).digest("hex") }, create: { id: id("multi:card"), petId: lostPetId, kind: "ID_TAG", tokenHash: createHash("sha256").update(lostToken).digest("hex"), tokenHint: lostToken.slice(-4), includeContact: false, visibleFields: ["PHOTO", "SPECIES", "BREED", "SEX", "AGE", "MICROCHIP_STATUS"], contactMode: "IN_APP", createdByUserId: multi.id }, update: {} });
+    const incidentId = id("multi:incident");
+    if (!(await db.lostPetIncident.findUnique({ where: { id: incidentId } }))) {
+      await db.lostPetIncident.create({ data: { id: incidentId, petId: lostPetId, householdId: multiHh.id, status: "SIGHTING_REPORTED", description: "بیسکویت عصر دیروز از در باز حیاط بیرون رفت.", publicArea: "یوسف‌آباد", lastSeenAt: new Date(Date.now() - DAY), publicNotes: "قلاده‌ی قرمز دارد؛ مهربان است ولی از صدای بلند می‌ترسد.", contactPreference: "IN_APP_MESSAGE", identityCardId: lostCard.id, createdByUserId: multi.id } });
+      await db.pet.update({ where: { id: lostPetId }, data: { lifecycleStatus: "LOST" } });
+      await db.lostPetSighting.create({ data: { id: id("multi:sighting"), incidentId, location: "نزدیک پارک یوسف‌آباد", seenAt: new Date(Date.now() - 6 * 3600e3), description: "سگ کوچک با قلاده‌ی قرمز کنار نانوایی." } });
+      await db.petCardContactMessage.create({ data: { id: id("multi:finder-msg"), cardId: lostCard.id, petId: lostPetId, message: "فکر می‌کنم بیسکویت را امروز صبح کنار پارک دیدم.", finderContact: "0912 333 4444" } });
+      const ev = (key: string, type: string, payload: Record<string, unknown>, hoursAgo: number) =>
+        db.domainEvent.upsert({ where: { id: id(`multi:event:${key}`) }, create: { id: id(`multi:event:${key}`), type, aggregateType: "Pet", aggregateId: lostPetId, payload: { petId: lostPetId, ...payload } as never, occurredAt: new Date(Date.now() - hoursAgo * 3600e3), processedAt: new Date() }, update: {} });
+      await ev("lost", "LostPetIncidentOpened", { householdId: multiHh.id, incidentId }, 24);
+      await ev("sighting", "LostPetSightingSubmitted", { incidentId, sightingId: id("multi:sighting") }, 6);
+      await ev("finder", "PetCardContactReceived", { cardId: lostCard.id, messageId: id("multi:finder-msg") }, 3);
+    }
+
     // ---------------------------------------------------------------- Live-smoke QA accounts (FREE and PAID scenarios)
     // Two dedicated accounts so the live smoke never writes into showcase accounts. Each owns one household with one
     // pet (created through PetsService, so grants match the product path). FREE stays on the free plan; PAID holds a
@@ -325,7 +354,7 @@ async function main() {
       }
     }
 
-    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care.`);
+    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care; lost pet with ID card /pet-card/${lostToken}.`);
   } finally {
     await app.close();
   }

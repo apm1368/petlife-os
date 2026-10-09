@@ -7,12 +7,15 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { HouseholdAccessDeniedException, NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
-import type { CareHandoffScope, CreateCareHandoffDto, CreateShareCardDto, UpsertEmergencyInfoDto } from "./pet-safety.dto";
+import { DEFAULT_CARD_FIELDS, type CareHandoffScope, type CreateCareHandoffDto, type CreateShareCardDto, type PetCardContactMessageDto, type PetCardField, type UpsertEmergencyInfoDto } from "./pet-safety.dto";
 
 const HANDOFF_REASON = "CARE_HANDOFF";
 const EMERGENCY_SCOPE = "EMERGENCY_SNAPSHOT";
 const MAX_HANDOFF_MS = 30 * 86400e3;
 const hashToken = (raw: string) => createHash("sha256").update(raw).digest("hex");
+/** Order in which missing profile fields are recommended: what helps most if the pet is lost or ill comes first. */
+const RECOMMENDATION_ORDER = ["microchip", "emergencyContact", "photo", "vaccinationHistory", "weight", "birthDate", "breed", "sex", "medicalDocument", "species"];
+const OPEN_LOST: LostPetIncidentStatus[] = [LostPetIncidentStatus.OPEN, LostPetIncidentStatus.SEARCHING, LostPetIncidentStatus.SIGHTING_REPORTED];
 
 /**
  * Pet safety: a server-derived profile completeness, owner-entered emergency info, owner-controlled public share
@@ -50,7 +53,9 @@ export class PetSafetyService {
     ];
     const completedFields = checks.filter(([, ok]) => ok).map(([k]) => k);
     const missingFields = checks.filter(([, ok]) => !ok).map(([k]) => k);
-    return { petId, completedFields, missingFields, completionScore: Math.round((completedFields.length / checks.length) * 100) };
+    const score = Math.round((completedFields.length / checks.length) * 100);
+    const recommendedNextFields = RECOMMENDATION_ORDER.filter((f) => missingFields.includes(f)).slice(0, 3);
+    return { petId, score, completionScore: score, completedFields, missingFields, recommendedNextFields };
   }
 
   // ---------------------------------------------------------------- emergency info
@@ -110,27 +115,39 @@ export class PetSafetyService {
     return rows.map((c) => toCardDto(c, now));
   }
 
-  /** Creates the card (revoking any active one of the same kind) and returns the raw token exactly once. */
-  async createCard(petId: string, userId: string, dto: CreateShareCardDto) {
+  /**
+   * Creates the card (revoking any active one of the same kind) and returns the raw token exactly once. Only the
+   * owner-selected fields are public; a phone appears only with contactMode PHONE/BOTH and explicit phoneConsent.
+   */
+  async createCard(petId: string, userId: string, dto: CreateShareCardDto, replacing?: string) {
     const kind = dto.kind as PetShareCardKind;
     if (kind === PetShareCardKind.EMERGENCY && dto.expiresInHours === undefined) dto.expiresInHours = 72;
+    const contactMode = dto.contactMode ?? "IN_APP";
+    if (contactMode !== "IN_APP") {
+      if (dto.phoneConsent !== true) throw new ValidationApiException({ field: "phoneConsent", reason: "PHONE_CONSENT_REQUIRED" });
+      const info = await this.prisma.petEmergencyInfo.findUnique({ where: { petId }, select: { contactPhone: true } });
+      if (!info?.contactPhone) throw new ValidationApiException({ field: "contactMode", reason: "EMERGENCY_PHONE_MISSING" });
+    }
+    const fields = dto.fields ?? DEFAULT_CARD_FIELDS[dto.kind];
     const expiresAt = dto.expiresInHours ? new Date(Date.now() + dto.expiresInHours * 3600e3) : null;
     const raw = randomBytes(24).toString("base64url");
     const card = await this.prisma.$transaction(async (tx) => {
-      await tx.petShareCard.updateMany({ where: { petId, kind, revokedAt: null }, data: { revokedAt: new Date() } });
-      const row = await tx.petShareCard.create({ data: { petId, kind, tokenHash: hashToken(raw), tokenHint: raw.slice(-4), includeContact: dto.includeContact ?? true, expiresAt, createdByUserId: userId } });
-      await this.events.publish("PetShareCardCreated", { petId, cardId: row.id, kind, actorUserId: userId, expiresAt }, { aggregateType: "Pet", aggregateId: petId, tx });
+      const now = new Date();
+      await tx.petShareCard.updateMany({ where: { petId, kind, revokedAt: null }, data: { revokedAt: now } });
+      const row = await tx.petShareCard.create({ data: { petId, kind, tokenHash: hashToken(raw), tokenHint: raw.slice(-4), includeContact: contactMode !== "IN_APP", visibleFields: fields, contactMode, phoneConsentAt: contactMode !== "IN_APP" ? now : null, expiresAt, createdByUserId: userId } });
+      if (replacing) await tx.petShareCard.update({ where: { id: replacing }, data: { replacedByCardId: row.id } });
+      await this.events.publish(replacing ? "PetShareCardRotated" : "PetShareCardCreated", { petId, cardId: row.id, kind, actorUserId: userId, expiresAt, replacedCardId: replacing ?? null }, { aggregateType: "Pet", aggregateId: petId, tx });
       return row;
     });
     return { ...toCardDto(card, new Date()), token: raw, publicPath: `/pet-card/${raw}` };
   }
 
-  /** New token, same settings; the old link stops working immediately. */
+  /** New token, same settings; the old link stops working immediately and reads as ROTATED. */
   async rotateCard(petId: string, cardId: string, userId: string) {
     const card = await this.prisma.petShareCard.findFirst({ where: { id: cardId, petId, revokedAt: null } });
     if (!card) throw new NotFoundApiException("PetShareCard");
     const hours = card.expiresAt ? Math.max(1, Math.round((card.expiresAt.getTime() - Date.now()) / 3600e3)) : undefined;
-    return this.createCard(petId, userId, { kind: card.kind, includeContact: card.includeContact, expiresInHours: hours ? Math.min(hours, 720) : undefined });
+    return this.createCard(petId, userId, { kind: card.kind, fields: card.visibleFields as PetCardField[], contactMode: card.contactMode, phoneConsent: card.phoneConsentAt !== null, expiresInHours: hours ? Math.min(hours, 720) : undefined }, card.id);
   }
 
   async revokeCard(petId: string, cardId: string, userId: string) {
@@ -140,17 +157,90 @@ export class PetSafetyService {
     return { revoked: true };
   }
 
-  /** Public read by token. Unknown, revoked and expired tokens all look the same (404). */
-  async readPublicCard(rawToken: string) {
+  private async activeCardByToken(rawToken: string) {
     if (!/^[A-Za-z0-9_-]{20,64}$/.test(rawToken)) throw new NotFoundApiException("PetCard");
-    const now = new Date();
     const card = await this.prisma.petShareCard.findUnique({ where: { tokenHash: hashToken(rawToken) } });
-    if (!card || card.revokedAt || (card.expiresAt && card.expiresAt <= now)) throw new NotFoundApiException("PetCard");
-    await this.prisma.petShareCard.update({ where: { id: card.id }, data: { lastAccessedAt: now, accessCount: { increment: 1 } } });
-    if (card.kind === PetShareCardKind.EMERGENCY) return { kind: card.kind, expiresAt: card.expiresAt?.toISOString() ?? null, ...(await this.emergencySnapshot(card.petId, card.includeContact)) };
-    const pet = await this.prisma.pet.findUniqueOrThrow({ where: { id: card.petId }, include: { emergencyInfo: true } });
-    const lost = await this.prisma.lostPetIncident.findFirst({ where: { petId: card.petId, status: { in: [LostPetIncidentStatus.OPEN, LostPetIncidentStatus.SEARCHING, LostPetIncidentStatus.SIGHTING_REPORTED] } }, select: { id: true } });
-    return { kind: card.kind, expiresAt: card.expiresAt?.toISOString() ?? null, ...identity(pet), isReportedLost: Boolean(lost), lostIncidentId: lost?.id ?? null, emergencyContact: card.includeContact ? contactOf(pet.emergencyInfo) : null };
+    if (!card || card.revokedAt || (card.expiresAt && card.expiresAt <= new Date())) throw new NotFoundApiException("PetCard");
+    return card;
+  }
+
+  /**
+   * Public read by token. Unknown, revoked, rotated and expired tokens all look the same (404). Shows the pet's name
+   * plus only the owner-selected fields; never the household, address, documents, bookings or the microchip number.
+   */
+  async readPublicCard(rawToken: string) {
+    const card = await this.activeCardByToken(rawToken);
+    await this.prisma.petShareCard.update({ where: { id: card.id }, data: { lastAccessedAt: new Date(), accessCount: { increment: 1 } } });
+    const show = new Set(card.visibleFields);
+    const pet = await this.prisma.pet.findUniqueOrThrow({
+      where: { id: card.petId },
+      include: {
+        emergencyInfo: true,
+        allergies: { where: { status: AllergyStatus.ACTIVE }, select: { name: true, reaction: true, severity: true }, orderBy: { name: "asc" } },
+        conditions: { where: { status: ConditionStatus.ACTIVE }, select: { name: true }, orderBy: { name: "asc" } },
+        medications: { where: { status: MedicationStatus.ACTIVE }, select: { name: true, dosage: true, unit: true, frequencyText: true }, orderBy: { name: "asc" } },
+      },
+    });
+    const lost = await this.prisma.lostPetIncident.findFirst({ where: { petId: card.petId, status: { in: OPEN_LOST } }, select: { id: true } });
+    const phoneShown = card.contactMode !== "IN_APP" && card.phoneConsentAt !== null;
+    const pick = <T>(field: PetCardField, value: T) => (show.has(field) ? value : undefined);
+    return {
+      kind: card.kind,
+      expiresAt: card.expiresAt?.toISOString() ?? null,
+      name: pet.name,
+      photoUrl: pick("PHOTO", pet.photoUrl),
+      species: pick("SPECIES", pet.species),
+      breed: pick("BREED", pet.breed),
+      sex: pick("SEX", pet.sex),
+      birthDate: pick("AGE", pet.birthDate?.toISOString().slice(0, 10) ?? null),
+      approximateAgeMonths: pick("AGE", pet.approximateAgeMonths),
+      hasMicrochip: pick("MICROCHIP_STATUS", Boolean(pet.microchipNumber)),
+      allergies: pick("ALLERGIES", pet.allergies.map((a) => ({ name: a.name, reaction: a.reaction, severity: a.severity }))),
+      activeConditions: pick("CONDITIONS", pet.conditions.map((c) => c.name)),
+      activeMedications: pick("MEDICATIONS", pet.medications.map((m) => ({ name: m.name, dosage: m.dosage?.toString() ?? null, unit: m.unit, frequency: m.frequencyText }))),
+      bloodType: pick("BLOOD_TYPE", pet.emergencyInfo?.bloodType ?? null),
+      criticalNotes: pick("CRITICAL_NOTES", pet.emergencyInfo?.criticalNotes ?? null),
+      visibleFields: card.visibleFields,
+      contact: { mode: card.contactMode, canMessageOwner: card.contactMode !== "PHONE", emergencyContact: phoneShown ? contactOf(pet.emergencyInfo) : null },
+      /** Kept for existing clients: the same as contact.emergencyContact. The microchip number itself is never public. */
+      emergencyContact: phoneShown ? contactOf(pet.emergencyInfo) : null,
+      microchipNumber: null,
+      isReportedLost: Boolean(lost),
+      lostIncidentId: lost?.id ?? null,
+    };
+  }
+
+  /** A finder's message to the owner through the card (IN_APP/BOTH). The finder learns nothing about the owner. */
+  async postContactMessage(rawToken: string, dto: PetCardContactMessageDto, senderUserId?: string) {
+    const card = await this.activeCardByToken(rawToken);
+    if (card.contactMode === "PHONE") throw new ValidationApiException({ field: "contactMode", reason: "IN_APP_CONTACT_DISABLED" });
+    const message = dto.message.trim();
+    if (message.length < 5) throw new ValidationApiException({ field: "message" });
+    const row = await this.prisma.petCardContactMessage.create({ data: { cardId: card.id, petId: card.petId, message, finderContact: dto.finderContact?.trim() || null, senderUserId: senderUserId ?? null } });
+    const pet = await this.prisma.pet.findUniqueOrThrow({ where: { id: card.petId }, select: { name: true, householdId: true } });
+    await this.events.publish("PetCardContactReceived", { petId: card.petId, cardId: card.id, messageId: row.id }, { aggregateType: "Pet", aggregateId: card.petId });
+    const owners = await this.prisma.householdMember.findMany({ where: { householdId: pet.householdId, role: "OWNER" }, select: { userId: true } });
+    for (const o of owners) {
+      await this.notifications.notify({ userId: o.userId, type: "pet.card_contact_message", category: "LOST_PET", deepLink: NotificationDeepLinks.pet(card.petId), entityType: "PetCardContactMessage", entityId: row.id, templateParams: { petName: pet.name } });
+    }
+    return { received: true };
+  }
+
+  async listContactMessages(petId: string) {
+    const rows = await this.prisma.petCardContactMessage.findMany({ where: { petId }, orderBy: { createdAt: "desc" }, take: 100, include: { card: { select: { kind: true } } } });
+    return rows.map((m) => ({ id: m.id, cardKind: m.card.kind, message: m.message, finderContact: m.finderContact, createdAt: m.createdAt.toISOString(), readAt: m.readAt?.toISOString() ?? null }));
+  }
+
+  async markContactMessageRead(petId: string, messageId: string) {
+    const done = await this.prisma.petCardContactMessage.updateMany({ where: { id: messageId, petId, readAt: null }, data: { readAt: new Date() } });
+    if (!done.count && !(await this.prisma.petCardContactMessage.count({ where: { id: messageId, petId } }))) throw new NotFoundApiException("PetCardContactMessage");
+    return { read: true };
+  }
+
+  /** The active ID-tag card for this pet, if any (used by lost-pet incidents to reference the identity card). */
+  async activeIdTagCardId(petId: string) {
+    const card = await this.prisma.petShareCard.findFirst({ where: { petId, kind: PetShareCardKind.ID_TAG, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }, select: { id: true } });
+    return card?.id ?? null;
   }
 
   // ---------------------------------------------------------------- care handoffs
@@ -238,8 +328,8 @@ function toEmergencyInfoDto(r: Prisma.PetEmergencyInfoGetPayload<object> | null)
   return { contactName: r?.contactName ?? null, contactPhone: r?.contactPhone ?? null, contactRelation: r?.contactRelation ?? null, bloodType: r?.bloodType ?? null, criticalNotes: r?.criticalNotes ?? null, updatedAt: r?.updatedAt.toISOString() ?? null };
 }
 function toCardDto(c: Prisma.PetShareCardGetPayload<object>, now: Date) {
-  const state = c.revokedAt ? "REVOKED" : c.expiresAt && c.expiresAt <= now ? "EXPIRED" : "ACTIVE";
-  return { id: c.id, kind: c.kind, state, tokenHint: c.tokenHint, includeContact: c.includeContact, expiresAt: c.expiresAt?.toISOString() ?? null, revokedAt: c.revokedAt?.toISOString() ?? null, lastAccessedAt: c.lastAccessedAt?.toISOString() ?? null, accessCount: c.accessCount, createdAt: c.createdAt.toISOString() };
+  const state = c.replacedByCardId ? "ROTATED" : c.revokedAt ? "REVOKED" : c.expiresAt && c.expiresAt <= now ? "EXPIRED" : "ACTIVE";
+  return { id: c.id, kind: c.kind, state, tokenHint: c.tokenHint, visibleFields: c.visibleFields, contactMode: c.contactMode, phoneConsentAt: c.phoneConsentAt?.toISOString() ?? null, replacedByCardId: c.replacedByCardId, includeContact: c.includeContact, expiresAt: c.expiresAt?.toISOString() ?? null, revokedAt: c.revokedAt?.toISOString() ?? null, lastAccessedAt: c.lastAccessedAt?.toISOString() ?? null, accessCount: c.accessCount, createdAt: c.createdAt.toISOString() };
 }
 function toHandoffDto(g: Prisma.PetAccessGrantGetPayload<{ include: { user: { select: { displayName: true } } } }>, now: Date) {
   const scopes = ["BASIC_PROFILE", ...(g.canEditCareProfile ? ["CARE"] : []), ...(g.canBookCare ? ["BOOKINGS"] : []), ...(g.healthScopes.includes(EMERGENCY_SCOPE) ? ["EMERGENCY_HEALTH"] : [])];

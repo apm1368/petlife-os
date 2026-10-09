@@ -440,6 +440,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "کار مراقبتی برای شما", body: "{{title}} برای {{petName}} به شما سپرده شد." },
     en: { title: "Care task for you", body: "{{title}} for {{petName}} was assigned to you." },
   },
+  "pet.card_contact_message": {
+    fa: { title: "پیامی درباره‌ی {{petName}}", body: "کسی از طریق کارت شناسایی {{petName}} برای شما پیام گذاشت." },
+    en: { title: "A message about {{petName}}", body: "Someone left you a message through {{petName}}'s ID card." },
+  },
   "pet.care_handoff_granted": {
     fa: { title: "سپردن مراقبت {{petName}}", body: "دسترسی موقت مراقبت از {{petName}} به شما داده شد." },
     en: { title: "Care of {{petName}} handed to you", body: "You were given temporary care access to {{petName}}." },

@@ -1,9 +1,12 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsIn, IsISO8601, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, Length, Max, Min } from "class-validator";
+import { IsBoolean, IsEnum, IsIn, IsISO8601, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, Length, Max, Min } from "class-validator";
 import { LostPetContactPreference } from "@petlife/types";
 import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreateLostPetIncidentDto {
+  /** Link the pet\'s active ID-tag card (or create one with identity-only fields and in-app contact). */
+  @IsOptional() @IsBoolean() exposeIdentityCard?: boolean;
+
   @IsString()
   @Length(1, 2000)
   description!: string;
@@ -55,6 +58,11 @@ export class CreateLostPetIncidentDto {
   @IsString()
   @Length(0, 100)
   publicContactMode?: string;
+}
+
+/** Expose (or stop exposing) the pet's ID-tag identity card alongside an open incident. */
+export class SetIncidentIdentityCardDto {
+  @IsBoolean() expose!: boolean;
 }
 
 export class RequestLostPetPhotoUploadDto {
