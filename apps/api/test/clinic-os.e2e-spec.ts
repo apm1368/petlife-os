@@ -479,8 +479,14 @@ describe("Clinic OS", () => {
       await setPlan(c.orgId, "CLINIC_GROWTH");
       const tomorrow = new Date(Date.now() + 86400e3 + 3.5 * 3600e3).toISOString().slice(0, 10);
       await booking(c, o, { status: BookingStatus.CONFIRMED, startAt: new Date(`${tomorrow}T10:00:00+03:30`) });
+      // Excluded, with reasons: the same pet twice, and a pet that is no longer active.
+      await booking(c, o, { status: BookingStatus.CONFIRMED, startAt: new Date(`${tomorrow}T12:00:00+03:30`) });
+      const gone = await owner("Gone Dog");
+      await prisma.pet.update({ where: { id: gone.petId }, data: { lifecycleStatus: "DECEASED" } });
+      await booking(c, gone, { status: BookingStatus.CONFIRMED, startAt: new Date(`${tomorrow}T11:00:00+03:30`) });
       const preview = (await c.client.post("/provider/clinic/campaigns/preview").send({ segment: "APPOINTMENTS_TOMORROW" }).expect(201)).body;
-      expect(preview).toMatchObject({ count: 1, alreadySentToday: false });
+      expect(preview).toMatchObject({ count: 1, recipientCount: 1, excludedCount: 2, alreadySentToday: false });
+      expect(preview.exclusionReasons).toEqual(expect.arrayContaining([{ reason: "DUPLICATE_PET", count: 1 }, { reason: "PET_INACTIVE", count: 1 }]));
       await c.client.post("/provider/clinic/campaigns").send({ segment: "APPOINTMENTS_TOMORROW", title: "Reminder: your visit tomorrow", confirm: false, expectedCount: 1 }).expect(400);
       expect((await c.client.post("/provider/clinic/campaigns").send({ segment: "APPOINTMENTS_TOMORROW", title: "x", confirm: true, expectedCount: 2 }).expect(400)).body.error.details.reason).toBe("AUDIENCE_CHANGED");
       const sent = (await c.client.post("/provider/clinic/campaigns").send({ segment: "APPOINTMENTS_TOMORROW", title: "Reminder: your visit tomorrow", confirm: true, expectedCount: 1 }).expect(201)).body;
@@ -497,9 +503,15 @@ describe("Clinic OS", () => {
       expect(dry.errors.map((e: { row: number; reason: string }) => `${e.row}:${e.reason}`)).toEqual(expect.arrayContaining(["3:PHONE_OR_EMAIL_REQUIRED", "5:INVALID"]));
       expect(dry.duplicates).toEqual([{ row: 4, matches: "FILE", field: "phone" }]);
       expect(await prisma.clinicImportedContact.count({ where: { providerOrganizationId: c.orgId } })).toBe(0);
-      const done = (await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false }).expect(201)).body;
+      // Committing needs the dry run's confirmation token for this exact file.
+      expect((await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false }).expect(400)).body.error.details.reason).toBe("DRY_RUN_REQUIRED");
+      expect((await c.client.post("/provider/clinic/contacts/import").send({ csv: `${csv}Extra,09120000999,,,,\n`, dryRun: false, confirmationToken: dry.confirmationToken }).expect(400)).body.error.details.reason).toBe("STALE_DRY_RUN");
+      const done = (await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false, confirmationToken: dry.confirmationToken }).expect(201)).body;
       expect(done.imported).toBe(2);
-      const again = (await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false }).expect(201)).body;
+      // The previous token is stale now (the duplicates changed): a new dry run is required.
+      await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false, confirmationToken: dry.confirmationToken }).expect(400);
+      const dry2 = (await c.client.post("/provider/clinic/contacts/import").send({ csv }).expect(201)).body;
+      const again = (await c.client.post("/provider/clinic/contacts/import").send({ csv, dryRun: false, confirmationToken: dry2.confirmationToken }).expect(201)).body;
       expect(again.imported).toBe(0);
       expect(again.duplicates.filter((d: { matches: string }) => d.matches === "EXISTING")).toHaveLength(3);
 

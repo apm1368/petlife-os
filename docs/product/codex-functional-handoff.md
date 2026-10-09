@@ -614,3 +614,31 @@
   - یک جفت جابه‌جاشده (RESCHEDULED ← CONFIRMED)؛
   - یک NO_SHOW از نوع OWNER؛
   - یک ورودی لیست انتظار OFFERED که هر بار اجرای seed دوباره برای ۶ ساعت فعال می‌شود.
+
+## ۲۱. کلینیک پیشرفته (G14)
+
+**موارد موجود (از G5، §۱۱ و §۱۲):**
+- **یادداشت مشتری:** `visibleToOwner` پیش‌فرض false (داخلی) است.
+- **برچسب‌های کلینیک.**
+- **صف روزانه از نوبت‌ها:** `GET /provider/clinic/queue?date`.
+  - بخش‌ها: `SCHEDULED`، `WAITING`، `IN_CONSULTATION`، `COMPLETED`، `NO_SHOW`، `CANCELLED`.
+  - نوبتی که CHECKED_IN شده در بخش `WAITING` قرار می‌گیرد.
+- **تخصیص نوبت:** فقط به عضو فعال و حذف‌نشده‌ی همان کلینیک.
+- **کاتالوگ خدمات:** صلاحیت کارکنان، گونه، فعال یا غیرفعال، شعبه.
+- **ساعات کاری:** قاعده‌ی هفتگی به‌علاوه‌ی استثنا (`ProviderAvailabilityException`) برای تعطیلی و روز خاص.
+- **وظایف:** OPEN، DONE، CANCELLED.
+- **خروجی‌ها:** CSV مخصوص مالک؛ بدون آرشیو پزشکی؛ با رویداد ممیزی.
+- **ویزیت:** علت، تاریخچه، معاینه، علائم حیاتی ساختاریافته، ارزیابی، برنامه و مدارک.
+- **نسخه:** `Medication.prescription`.
+- **لینک آزمایش و تصویربرداری** به ویزیت، کلینیک و ارائه‌دهنده (`clinicalVisitId`).
+
+**جدید در G14:**
+- **پیش‌نمایش کمپین:** `POST /provider/clinic/campaigns/preview {segment}` حالا این شکل را برمی‌گرداند:
+  `{count, recipientCount, excludedCount, exclusionReasons:[{reason, count}], alreadySentToday, sample[]}`.
+  - دلیل‌های حذف: `DUPLICATE_PET` (همان پت دو بار)، `PET_INACTIVE`، `NO_RECIPIENT` (خانوار بدون مالک).
+  - ارسال همچنان فقط با `confirm: true` و `expectedCount` برابر با `recipientCount` انجام می‌شود؛ در غیر این صورت `AUDIENCE_CHANGED`. ارسال خودکار وجود ندارد.
+- **ورود CSV:**
+  - dry-run حالا `confirmationToken` برمی‌گرداند.
+  - commit (`dryRun: false`) فقط با همان توکن انجام می‌شود. خطاها: `DRY_RUN_REQUIRED` و `STALE_DRY_RUN` (فایل یا نتیجه‌ی اعتبارسنجی عوض شده).
+  - تطبیق خودکار با نام یا حساب هرگز انجام نمی‌شود.
+- **داده‌ی نمایشی:** کلینیک `batch3-clinic-owner@example.test` (CLINIC_PRO) با یادداشت‌ها، برچسب‌ها، وظایف، مشتریان واردشده و صف (seed-clinic-chat-demo و G5).
