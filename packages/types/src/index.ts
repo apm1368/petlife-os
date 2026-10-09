@@ -285,6 +285,38 @@ export interface HomeResponseDto {
   secondaryActions: HomeActionDto[];
 }
 
+export type PetOverviewSeverity = "INFORMATIONAL" | "ATTENTION" | "CONCERN" | "URGENT" | "EMERGENCY";
+
+export interface PetOverviewAttentionDto {
+  id: string;
+  severity: PetOverviewSeverity;
+  title: string;
+  dueAt: string | null;
+  href: string;
+}
+
+export interface PetOverviewEventDto {
+  id: string;
+  type: "VISIT" | "LAB" | "DOCUMENT" | "CARE" | "BOOKING" | "MEMORY";
+  title: string;
+  occurredAt: string;
+  sourceType: SourceType | null;
+  providerName: string | null;
+  href: string;
+  status: string | null;
+}
+
+/** Bounded, permission-aware Pet Overview read model. */
+export interface PetOverviewDto {
+  pet: PetDto;
+  householdName: string | null;
+  attention: PetOverviewAttentionDto[];
+  upcoming: PetOverviewEventDto[];
+  recentHealth: PetOverviewEventDto[];
+  recentActivity: PetOverviewEventDto[];
+  recentMemory: { id: string; title: string | null; occurredAt: string; type: string } | null;
+}
+
 // ---------------------------------------------------------------------------
 // Health & Care DTOs (Handoff 02)
 // ---------------------------------------------------------------------------

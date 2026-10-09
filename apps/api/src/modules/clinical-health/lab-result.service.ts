@@ -67,6 +67,10 @@ export class LabResultService {
     return row;
   }
 
+  async getDto(petId: string, labResultId: string): Promise<LabResultDto> {
+    return toLabResultDto(await this.get(petId, labResultId));
+  }
+
   /**
    * Append/supersede, never edit-in-place (locked principle — see the
    * schema.prisma section doc comment): marks the original FINAL row

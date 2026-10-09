@@ -2,8 +2,8 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { authService } from "@/services/auth.service";
+import { accountService } from "@/services/account.service";
 import { onboardingService } from "@/services/onboarding.service";
-import { ApiError } from "@/lib/api/client";
 import RegisterPage from "./page";
 
 const push = vi.fn();
@@ -14,29 +14,38 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams,
 }));
 vi.mock("@/services/auth.service", () => ({ authService: { register: vi.fn() } }));
+vi.mock("@/services/account.service", () => ({ accountService: { setConsent: vi.fn() } }));
 vi.mock("@/services/onboarding.service", () => ({ onboardingService: { getProgress: vi.fn() } }));
+
+function completeRequiredFields(username: string) {
+  fireEvent.change(screen.getByLabelText("Username"), { target: { value: username } });
+  fireEvent.change(screen.getByLabelText("Password"), { target: { value: "correct-horse-battery" } });
+  fireEvent.change(screen.getByLabelText("Confirm password"), { target: { value: "correct-horse-battery" } });
+  fireEvent.click(screen.getByRole("checkbox"));
+}
 
 describe("RegisterPage", () => {
   beforeEach(() => {
     replace.mockReset();
     searchParams = new URLSearchParams();
     vi.mocked(authService.register).mockReset();
+    vi.mocked(accountService.setConsent).mockReset();
+    vi.mocked(accountService.setConsent).mockResolvedValue({} as never);
     vi.mocked(onboardingService.getProgress).mockReset();
   });
 
-  it("shows a clear error when the username is already taken", async () => {
-    vi.mocked(authService.register).mockRejectedValue(new ApiError({ code: "USERNAME_TAKEN", message: "taken", requestId: "r1" }, 409));
+  it("uses a non-enumerating error when registration is rejected", async () => {
+    vi.mocked(authService.register).mockRejectedValue(new Error("conflict"));
 
     renderWithIntl(<RegisterPage />);
-    fireEvent.change(screen.getByLabelText("Username"), { target: { value: "sarah" } });
-    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "correct-horse-battery" } });
+    completeRequiredFields("sarah");
     fireEvent.click(screen.getByText("Create account"));
 
-    await waitFor(() => expect(screen.getByText("This username is already taken.")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Could not create your account. Check the details and try again.")).toBeTruthy());
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it("registers and routes to the returnTo destination once onboarding is already complete", async () => {
+  it("records required consent and preserves a safe returnTo destination", async () => {
     searchParams = new URLSearchParams({ returnTo: "/en/vet/abc/book" });
     vi.mocked(authService.register).mockResolvedValue({
       user: { id: "u1", email: null, phone: null, displayName: "New User", avatarUrl: null, locale: "en", themePreference: "SYSTEM", createdAt: "", updatedAt: "" },
@@ -44,10 +53,11 @@ describe("RegisterPage", () => {
     vi.mocked(onboardingService.getProgress).mockResolvedValue({ status: "COMPLETED", chapter: "READY" } as never);
 
     renderWithIntl(<RegisterPage />);
-    fireEvent.change(screen.getByLabelText("Username"), { target: { value: "newuser" } });
-    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "correct-horse-battery" } });
+    completeRequiredFields("newuser");
     fireEvent.click(screen.getByText("Create account"));
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/en/vet/abc/book"));
+    expect(accountService.setConsent).toHaveBeenCalledWith("TERMS", true);
+    expect(accountService.setConsent).toHaveBeenCalledWith("PRIVACY", true);
   });
 });

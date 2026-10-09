@@ -96,6 +96,7 @@ export class AuthPasswordService {
 
     const newHash = await hashPassword(dto.newPassword);
     await this.prisma.user.update({ where: { id: userId }, data: { passwordHash: newHash } });
+    await this.sessions.revokeAllForUser(userId);
     await this.events.publish("PasswordChanged", { userId });
   }
 }

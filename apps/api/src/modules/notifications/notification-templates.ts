@@ -85,6 +85,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "درخواست پشتیبانی شما حل شد", body: "درخواست پشتیبانی {{caseNumber}} به عنوان حل‌شده علامت‌گذاری شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف حل شد." },
     en: { title: "Your support case was resolved", body: "Support case {{caseNumber}} was marked resolved.", smsBody: "Your PET LIFE OS support case was resolved." },
   },
+  "household.invited": {
+    fa: { title: "دعوت به خانواده PET LIFE", body: "{{inviterName}} شما را برای همکاری در مراقبت از حیوان‌ها دعوت کرده است.", smsBody: "یک دعوت خانوادگی جدید در PET LIFE دارید." },
+    en: { title: "PET LIFE household invitation", body: "{{inviterName}} invited you to collaborate on pet care.", smsBody: "You have a new PET LIFE household invitation." },
+  },
   /** Handoff 13 — fires when a case moves to WAITING_ON_USER (the requester's own simplified status label is "Waiting"). */
   "support.more_info_requested": {
     fa: { title: "نیاز به اطلاعات بیشتر برای درخواست شما", body: "برای پیگیری درخواست پشتیبانی {{caseNumber}}، به اطلاعات بیشتری از شما نیاز داریم.", smsBody: "برای درخواست پشتیبانی شما در پت‌لایف به اطلاعات بیشتری نیاز است." },

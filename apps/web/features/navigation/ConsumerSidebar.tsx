@@ -34,7 +34,7 @@ const items = [
   ["/animal-support", "حمایت حیوانات", "Animal support", HeartPulse],
   ["/blog", "محتوا و راهنما", "Articles", CalendarDays],
   ["/support", "پشتیبانی", "Support", ShieldCheck],
-  ["/profile", "پروفایل", "Profile", UserRound],
+  ["/profile", "حساب کاربری", "Account", UserRound],
 ] as const;
 export function ConsumerSidebar() {
   const locale = useLocale();

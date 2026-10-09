@@ -127,6 +127,20 @@ function apiDependency(pageDomain) {
   return map[pageDomain] || "Domain API";
 }
 
+/**
+ * Batch 2 (Pet Profile + Health + Care + Share With Vet) routes. Function A needs actions, permissions,
+ * state handling and runtime verified; Visual A needs the canonical pattern checked responsive in fa RTL and en LTR.
+ * Grades here are raised only from recorded evidence (e2e suites + live staging QA), never from build success alone.
+ */
+function isBatch2(route) {
+  return /\/pets\/:id(\/health|\/care|$)/.test(route) || route.endsWith("/care-calendar") || route.includes("/provider/shared-records");
+}
+const BATCH2_GRADE = {
+  function: "B",
+  visual: "C",
+  blockers: "Batch 2: code and API security matrix complete (batch2-care-share, batch2-security-matrix, clinical-health e2e green). LIVE staging desktop/mobile fa RTL + en LTR QA pending; GitHub deploy key read-only (BLOCKED_EXTERNAL).",
+};
+
 function status(route, pageDomain, hasTest) {
   if (pageDomain === "AI" || pageDomain === "CRM" || pageDomain === "Customer Affairs") return "C";
   if (pageDomain === "Checkout") return "E";
@@ -259,8 +273,8 @@ const rows = walk(appRoot)
       domain: pageDomain,
       authRequirement: authRequirement(route, routeActor),
       designReference: referenceAvailable(pageDomain),
-      functionStatus: status(route, pageDomain, hasTest),
-      visualStatus: visualStatus(route, pageDomain),
+      functionStatus: isBatch2(route) ? BATCH2_GRADE.function : status(route, pageDomain, hasTest),
+      visualStatus: isBatch2(route) ? BATCH2_GRADE.visual : visualStatus(route, pageDomain),
       backendApiDependency: apiDependency(pageDomain),
       missingFunctionality: missingFunctionality(route, pageDomain),
       missingStates: missingStates(route, pageDomain),
@@ -268,7 +282,7 @@ const rows = walk(appRoot)
       partnerCounterpart: counterpart(pageDomain, "partner"),
       priority: priority(route, pageDomain),
       estimatedEffort: effort(route, pageDomain),
-      blockers: blockers(route, pageDomain),
+      blockers: isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
       sourceFile: path.relative(root, file).replaceAll(path.sep, "/"),
     };
   })

@@ -117,10 +117,22 @@ export class HealthAdvancedController {
     return this.labs.list(petId);
   }
 
+  @Get("labs/:labResultId")
+  @RequirePetAccess("canViewHealth")
+  getLab(@Param("petId") petId: string, @Param("labResultId") labResultId: string) {
+    return this.labs.getDto(petId, labResultId);
+  }
+
   @Get("imaging")
   @RequirePetAccess("canViewHealth")
   listImaging(@Param("petId") petId: string) {
     return this.imaging.list(petId);
+  }
+
+  @Get("imaging/:imagingStudyId")
+  @RequirePetAccess("canViewHealth")
+  getImaging(@Param("petId") petId: string, @Param("imagingStudyId") imagingStudyId: string) {
+    return this.imaging.getDto(petId, imagingStudyId);
   }
 
   @Get("referrals")
@@ -129,10 +141,22 @@ export class HealthAdvancedController {
     return this.referrals.list(petId);
   }
 
+  @Get("referrals/:referralId")
+  @RequirePetAccess("canViewHealth")
+  getReferral(@Param("petId") petId: string, @Param("referralId") referralId: string) {
+    return this.referrals.getDto(petId, referralId);
+  }
+
   @Get("dental")
   @RequirePetAccess("canViewHealth")
   listDental(@Param("petId") petId: string) {
     return this.dental.list(petId);
+  }
+
+  @Get("dental/:recordId")
+  @RequirePetAccess("canViewHealth")
+  getDental(@Param("petId") petId: string, @Param("recordId") recordId: string) {
+    return this.dental.get(petId, recordId);
   }
 
   @Get("nutrition")
@@ -141,10 +165,22 @@ export class HealthAdvancedController {
     return this.nutrition.list(petId);
   }
 
+  @Get("nutrition/:planId")
+  @RequirePetAccess("canViewHealth")
+  getNutrition(@Param("petId") petId: string, @Param("planId") planId: string) {
+    return this.nutrition.get(petId, planId);
+  }
+
   @Get("rehab")
   @RequirePetAccess("canViewHealth")
   listRehab(@Param("petId") petId: string) {
     return this.rehab.list(petId);
+  }
+
+  @Get("rehab/:planId")
+  @RequirePetAccess("canViewHealth")
+  getRehab(@Param("petId") petId: string, @Param("planId") planId: string) {
+    return this.rehab.get(petId, planId);
   }
 
   @Get("visits")

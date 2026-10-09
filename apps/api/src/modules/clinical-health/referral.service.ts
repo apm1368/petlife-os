@@ -68,6 +68,10 @@ export class ReferralService {
     return row;
   }
 
+  async getDto(petId: string, referralId: string): Promise<ReferralDto> {
+    return toReferralDto(await this.get(petId, referralId));
+  }
+
   async updateStatus(petId: string, referralId: string, nextStatus: ReferralStatus): Promise<ReferralDto> {
     const existing = await this.get(petId, referralId);
     const allowed = ALLOWED_TRANSITIONS[existing.status];

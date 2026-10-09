@@ -64,7 +64,14 @@ export class PetObservationService {
 
   async getDownload(petId: string, observationId: string) {
     const row = await this.prisma.petObservation.findUnique({ where: { id: observationId } });
-    if (!row || row.petId !== petId || !row.mediaObjectKey) return null;
+    if (!row || row.petId !== petId) throw new NotFoundApiException("Observation");
+    if (!row.mediaObjectKey) return null;
     return this.storage.createPrivateDownloadTarget(row.mediaObjectKey);
+  }
+
+  async get(petId: string, observationId: string): Promise<PetObservationDto> {
+    const row = await this.prisma.petObservation.findFirst({ where: { id: observationId, petId } });
+    if (!row) throw new NotFoundApiException("Observation");
+    return toPetObservationDto(row);
   }
 }

@@ -35,6 +35,29 @@ enum HouseholdRole {
   FAMILY
 }
 
+enum HouseholdInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum PrivacyRequestStatus {
+  PENDING
+  PROCESSING
+  READY
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum ConsentKind {
+  TERMS
+  PRIVACY
+  MARKETING
+}
+
 enum PetSpecies {
   DOG
   CAT
@@ -1025,6 +1048,10 @@ model User {
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
   notificationQuietHours  NotificationQuietHours?
+  consents                UserConsent[]
+  dataExportRequests      DataExportRequest[]
+  accountDeletionRequests AccountDeletionRequest[]
+  acceptedInvitations     HouseholdInvitation[] @relation("AcceptedInvitationUser")
 
   adminUser             AdminUser?
   supportCasesRequested SupportCase[]
@@ -1090,6 +1117,8 @@ model Session {
   ipAddress String?
   expiresAt DateTime
   rotatedAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  revokedAt  DateTime?
   createdAt DateTime @default(now())
 
   @@index([userId])
@@ -1132,6 +1161,7 @@ model Household {
   travelBookings        TravelBooking[]
 
   clinicalEstimates ClinicalEstimate[]
+  invitations       HouseholdInvitation[]
 
   @@map("households")
 }
@@ -1150,11 +1180,81 @@ model HouseholdMember {
   @@map("household_members")
 }
 
+model HouseholdInvitation {
+  id              String                    @id @default(uuid()) @db.Uuid
+  householdId     String                    @db.Uuid
+  household       Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  contact         String
+  tokenHash       String                    @unique
+  status          HouseholdInvitationStatus @default(PENDING)
+  invitedByUserId String                    @db.Uuid
+  acceptedByUserId String?                  @db.Uuid
+  acceptedBy       User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+  initialAccess    Json
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  declinedAt      DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  @@index([householdId, status])
+  @@index([contact, status])
+  @@map("household_invitations")
+}
+
+model UserConsent {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String      @db.Uuid
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      ConsentKind
+  version   String
+  grantedAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([userId, kind, version])
+  @@index([userId, kind])
+  @@map("user_consents")
+}
+
+model DataExportRequest {
+  id          String               @id @default(uuid()) @db.Uuid
+  userId      String               @db.Uuid
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      PrivacyRequestStatus @default(PENDING)
+  scope       Json
+  requestedAt DateTime             @default(now())
+  readyAt     DateTime?
+  expiresAt   DateTime?
+  completedAt DateTime?
+  failureCode String?
+
+  @@index([userId, requestedAt])
+  @@map("data_export_requests")
+}
+
+model AccountDeletionRequest {
+  id          String               @id @default(uuid()) @db.Uuid
+  userId      String               @db.Uuid
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status      PrivacyRequestStatus @default(PENDING)
+  reason      String?
+  requestedAt DateTime             @default(now())
+  cancelledAt DateTime?
+  completedAt DateTime?
+
+  @@index([userId, requestedAt])
+  @@map("account_deletion_requests")
+}
+
 // ---------------------------------------------------------------------------
 // Pet identity
 // ---------------------------------------------------------------------------
 
 model Pet {
+  careReminders CareReminder[]
   id          String    @id @default(uuid()) @db.Uuid
   householdId String    @db.Uuid
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
@@ -1275,6 +1375,9 @@ model Pet {
 /// Replaces the old one-row-per-(pet,user) `pet_access` table (schema_hardening
 /// migration); deliberately has NO @@unique([petId, userId]).
 model PetAccessGrant {
+  healthScopes String[] @default([])
+  selectedDocumentIds String[] @default([]) @db.Uuid
+  sharedWithProviderUserId String? @db.Uuid
   id     String @id @default(uuid()) @db.Uuid
   petId  String @db.Uuid
   pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
@@ -4461,6 +4564,35 @@ model AdminAuditLog {
 /// attemptCount, lastError) make this row usable as a real transactional
 /// outbox later — a poller can pick up unprocessed rows, retry with backoff,
 /// and record failures — without any schema change when that poller is built.
+/// Reminder scheduling is separate from clinical source truth and booking state.
+model CareReminder {
+  id String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Restrict)
+  createdByUserId String @db.Uuid
+  title String
+  type String
+  source String @default("USER_CREATED")
+  sourceId String? @db.Uuid
+  originalDueAt DateTime
+  dueAt DateTime
+  snoozedUntil DateTime?
+  state String @default("UPCOMING")
+  recurrence String @default("ONCE")
+  intervalDays Int?
+  completedAt DateTime?
+  cancelledAt DateTime?
+  notifiedAt DateTime?
+  version Int @default(0)
+  parentId String? @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([parentId, originalDueAt])
+  @@index([petId, dueAt])
+  @@index([state, dueAt])
+  @@map("care_reminders")
+}
+
 model DomainEvent {
   id            String    @id @default(uuid()) @db.Uuid
   type          String

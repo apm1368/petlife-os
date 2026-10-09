@@ -19,6 +19,12 @@ export class AllergiesController {
     return this.allergiesService.list(petId);
   }
 
+  @Get(":id")
+  @RequirePetAccess("canViewHealth")
+  get(@Param("petId") petId: string, @Param("id") id: string) {
+    return this.allergiesService.get(petId, id);
+  }
+
   @Post()
   @RequirePetAccess("canEditHealth")
   create(@Param("petId") petId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateAllergyDto) {

@@ -44,27 +44,15 @@ function WelcomeFlow() {
             {t("continueWithGoogle")}
           </Button>
         ) : null}
-        <Button variant="primary" onClick={() => router.push(accountUrl("email"))}>
-          {t("continueWithEmail")}
-        </Button>
-        <Button variant="secondary" onClick={() => router.push(accountUrl("phone"))}>
-          {t("continueWithPhone")}
-        </Button>
-        <Button variant="secondary" onClick={() => router.push(accountUrl("password"))}>
-          {t("continueWithUsername")}
-        </Button>
-        <Button variant="ghost" onClick={() => router.push(registerUrl())}>
-          {t("createAccount")}
-        </Button>
+        <Button variant="primary" onClick={() => router.push(accountUrl("phone"))}>{t("continueWithPhone")}</Button>
+        <Button variant="secondary" onClick={() => router.push(accountUrl("email"))}>{t("continueWithEmail")}</Button>
+        <Button variant="secondary" onClick={() => router.push(accountUrl("password"))}>{t("continueWithUsername")}</Button>
+        <Button variant="ghost" onClick={() => router.push(registerUrl())}>{t("createAccount")}</Button>
       </div>
     </div>
   );
 }
 
 export default function WelcomePage() {
-  return (
-    <Suspense>
-      <WelcomeFlow />
-    </Suspense>
-  );
+  return <Suspense><WelcomeFlow /></Suspense>;
 }

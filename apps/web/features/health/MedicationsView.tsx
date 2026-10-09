@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MedicationDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
@@ -9,6 +10,7 @@ import { healthService } from "@/services/health.service";
 export function MedicationsView({ petId }: { petId: string }) {
   const t = useTranslations("health.medications");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [medications, setMedications] = useState<MedicationDto[] | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState("");
@@ -80,10 +82,10 @@ export function MedicationsView({ petId }: { petId: string }) {
       {medications.map((medication) => (
         <ContextSurface key={medication.id} className="flex items-center justify-between gap-3">
           <div>
-            <p dir="auto" className="text-body text-text-primary">
+            <Link dir="auto" href={`/${locale}/pets/${petId}/health/medications/${medication.id}`} className="block text-body text-text-primary underline-offset-4 hover:underline">
               {medication.name}
               {medication.dosage ? ` — ${medication.dosage}${medication.unit ? ` ${medication.unit}` : ""}` : ""}
-            </p>
+            </Link>
             {medication.frequencyText ? <p className="text-metadata text-text-secondary">{medication.frequencyText}</p> : null}
           </div>
           <StatusLabel tone={medication.status === "ACTIVE" ? "attention" : "neutral"}>

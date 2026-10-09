@@ -35,6 +35,12 @@ export class RehabService {
     return rows.map(toRehabPlanDto);
   }
 
+  async get(petId: string, rehabPlanId: string): Promise<RehabPlanDto> {
+    const row = await this.prisma.rehabPlan.findUnique({ where: { id: rehabPlanId }, include: REHAB_PLAN_INCLUDE });
+    if (!row || row.petId !== petId) throw new NotFoundApiException("Rehab plan");
+    return toRehabPlanDto(row);
+  }
+
   async addSession(petId: string, rehabPlanId: string, dto: CreateRehabSessionDto): Promise<RehabPlanDto> {
     const plan = await this.prisma.rehabPlan.findUnique({ where: { id: rehabPlanId } });
     if (!plan || plan.petId !== petId) throw new NotFoundApiException("Rehab plan");
