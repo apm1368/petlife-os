@@ -682,3 +682,40 @@
 - **داده‌ی نمایشی:** سفر رامسرِ `batch2-review`:
   - یک آیتم DONE، یک آیتم NOT_REQUIRED و یک مدرک لینک‌شده؛
   - یک پیشنهاد اصلاح مکانِ PENDING (پارکینگ و آب).
+
+## ۲۳. حمایت از حیوانات (G16)
+
+- **به‌روزرسانی نیاز:**
+  - انتشار: `POST /animal-support/needs/:id/updates {body: 1–2000, mediaObjectKeys?: ≤4}`. فقط مدیران همان نیاز یا سازمان؛ در غیر این صورت 403.
+  - رسانه فقط از تصاویری است که خود نویسنده با `POST /animal-support/needs/upload-url` آپلود کرده. لینک بیرونی یا فایل شخص دیگر رد می‌شود (`NOT_YOUR_UPLOAD`).
+  - خواندن (عمومی): `GET /animal-support/needs/:id/updates?cursor&limit≤50` و خروجی `{items[{id, body, mediaObjectKeys, mediaUrls, createdAt, updatedAt}], nextCursor}`.
+  - نیاز پنهان یا حذف‌شده 404 برمی‌گرداند.
+- **نقطه‌عطف‌ها:** `GET /animal-support/needs/:id/milestones` و خروجی `[{key, at}]`.
+  - کلیدها: `FUNDING_25|50|75|100`، `ITEM_RECEIVED`، `NEED_COMPLETED`.
+  - هر کلید فقط یک بار، از وضعیت واقعی پس از commit، ثبت می‌شود و هرگز تکرار نمی‌شود.
+  - کلیدهای قبلی `FIRST_HELP_RECEIVED` و `FULFILLED` حذف شدند و جایگزینشان `ITEM_RECEIVED` و `NEED_COMPLETED` است.
+- **زمان‌نمای نیاز (عمومی و ناشناس):** `GET /animal-support/needs/:id/activity` و خروجی `[{kind, at, ref}]`.
+  - انواع: `NEED_PUBLISHED, MILESTONE(ref=key), UPDATE_POSTED(ref=updateId), ITEM_RECEIVED, VOLUNTEER_ACCEPTED, NEED_COMPLETED`.
+  - نام یا شناسه‌ی حامی، کمک‌کننده یا داوطلب هرگز نمایش داده نمی‌شود.
+- **اعلان‌ها:**
+  - `animal_support.new_need`: برای دنبال‌کنندگان سازمان، فقط در اولین انتشار نیاز.
+  - `animal_support.need_update`: از قبل وجود داشت.
+  - `animal_support.milestone`: فقط برای ۵۰٪، ۱۰۰٪ و تکمیل نیاز؛ گیرندگان دنبال‌کنندگان، حامیان و کمک‌کنندگان هستند، هر کدام یک بار.
+  - `animal_support.volunteer_status`.
+  - همه از ترجیحات اعلان پیروی می‌کنند.
+- **دنبال‌کردن سازمان و ذخیره‌ی نیاز:** از قبل وجود داشتند و idempotent هستند. نیاز ذخیره‌شده در `/me/saved` هم دیده می‌شود.
+- **داوطلبی:**
+  - ثبت: `POST /animal-support/organizations/:orgId/volunteer {kinds[TRANSPORT|TEMPORARY_FOSTER|DELIVERY|ON_SITE_HELP|OTHER], city, availability?, note?, shareContact?, listingId?}`.
+  - `listingId` باید نیاز قابل‌مشاهده‌ی همان سازمان باشد.
+  - وضعیت‌ها: `INTERESTED → CONTACTED → ACCEPTED → COMPLETED`. `CANCELLED` از هر وضعیت باز ممکن است. `CLOSED` قدیمی است.
+  - سازمان: `POST /ngo/volunteers/:id/status {status: CONTACTED|ACCEPTED|COMPLETED|CANCELLED}`؛ انتقال نامعتبر خطای `INVALID_TRANSITION` می‌دهد و هر انتقال در audit ثبت می‌شود.
+  - عضو: `DELETE …/volunteer` وضعیت را `CANCELLED` می‌کند و تاریخچه می‌ماند.
+  - اگر عضو جزئیات را ویرایش کند، پیشرفت ثبت‌شده توسط سازمان ریست نمی‌شود.
+  - تماس عضو فقط با رضایت (`shareContact`) و فقط به کارکنان همان سازمان نشان داده می‌شود.
+- **رفع باگ:** دو کمک مالی هم‌زمانِ اول به یک سازمان دیگر یکی را با خطای 500 از کار نمی‌اندازد (ساخت حساب دفتر کمک‌ها حالا race-safe است).
+- **داده‌ی نمایشی (پناهگاه نمونه):**
+  - «هزینه‌ی جراحی رعنا» (فقط نقدی): ۲۵٪.
+  - «دارو و هزینه‌ی درمان پوستی» (ترکیبی): ۵۰٪، دارو رسیده، یک به‌روزرسانی.
+  - «۲۰ کیلو غذای خشک»: کالا رسیده.
+  - «قفس حمل»: ۱۰۰٪ و تکمیل‌شده.
+  - یک داوطلب فعال (helper-b) مرتبط با نیاز نقدی، یک دنبال‌کننده و یک نیاز ذخیره‌شده.

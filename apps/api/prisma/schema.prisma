@@ -6867,9 +6867,10 @@ model SupportNeedListing {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  helpOffers HelpOffer[]
-  updates    SupportNeedUpdate[]
-  savedBy    SupportNeedBookmark[]
+  helpOffers       HelpOffer[]
+  updates          SupportNeedUpdate[]
+  savedBy          SupportNeedBookmark[]
+  milestoneRecords SupportNeedMilestone[]
 
   @@index([status, publishedAt])
   @@index([category])
@@ -9916,16 +9917,33 @@ model InsuranceClaimPrepItem {
 
 /// A progress note on one need, posted by whoever manages the listing.
 model SupportNeedUpdate {
-  id           String             @id @default(uuid()) @db.Uuid
-  listingId    String             @db.Uuid
-  listing      SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  authorUserId String             @db.Uuid
-  body         String
-  removedAt    DateTime?
-  createdAt    DateTime           @default(now())
+  id              String             @id @default(uuid()) @db.Uuid
+  listingId       String             @db.Uuid
+  listing         SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  authorUserId    String             @db.Uuid
+  body            String
+  /// Images uploaded through the support-need upload flow (object keys, never external URLs). At most 4.
+  mediaObjectKeys String[]           @default([])
+  removedAt       DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @default(now()) @updatedAt
 
   @@index([listingId, createdAt])
   @@map("support_need_updates")
+}
+
+/// A milestone a need actually reached, recorded once (unique per need + key) when the real state crossed it.
+/// FUNDING_25/50/75/100 from succeeded donations vs the target, ITEM_RECEIVED from a completed help offer,
+/// NEED_COMPLETED when the need is FULFILLED. Never invented, never emitted twice.
+model SupportNeedMilestone {
+  id        String             @id @default(uuid()) @db.Uuid
+  listingId String             @db.Uuid
+  listing   SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  key       String
+  reachedAt DateTime           @default(now())
+
+  @@unique([listingId, key])
+  @@map("support_need_milestones")
 }
 
 model AnimalSupportOrgFollow {
@@ -9950,8 +9968,12 @@ model SupportNeedBookmark {
 }
 
 enum VolunteerInterestStatus {
-  NEW
+  INTERESTED
   CONTACTED
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+  /// Legacy (before G16): closed by the organisation without an outcome.
   CLOSED
 }
 
@@ -9967,7 +9989,9 @@ model VolunteerInterest {
   availability   String?
   note           String?
   shareContact   Boolean                   @default(false)
-  status         VolunteerInterestStatus   @default(NEW)
+  status         VolunteerInterestStatus   @default(INTERESTED)
+  /// The need this interest was raised from, if any (the interest itself is per organisation).
+  listingId      String?                   @db.Uuid
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
 

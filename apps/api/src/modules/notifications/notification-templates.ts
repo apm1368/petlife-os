@@ -448,6 +448,18 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "کار مراقبتی برای شما", body: "{{title}} برای {{petName}} به شما سپرده شد." },
     en: { title: "Care task for you", body: "{{title}} for {{petName}} was assigned to you." },
   },
+  "animal_support.new_need": {
+    fa: { title: "نیاز تازه از سازمانی که دنبال می‌کنید", body: "«{{title}}» منتشر شد." },
+    en: { title: "A new need from an organisation you follow", body: "“{{title}}” was published." },
+  },
+  "animal_support.milestone": {
+    fa: { title: "پیشرفت «{{title}}»", body: "این نیاز به مرحله‌ی تازه‌ای رسید." },
+    en: { title: "Progress on “{{title}}”", body: "This need reached a new milestone." },
+  },
+  "animal_support.volunteer_status": {
+    fa: { title: "داوطلبی شما در {{organization}}", body: "وضعیت داوطلبی شما به‌روز شد." },
+    en: { title: "Your volunteering with {{organization}}", body: "Your volunteer status was updated." },
+  },
   "care.suggestion_received": {
     fa: { title: "پیشنهاد مراقبت از {{clinic}}", body: "{{clinic}} برای {{petName}} برنامه‌ی مراقبت پیشنهاد کرد. برای ساختن یادآور تأیید کنید." },
     en: { title: "Care suggested by {{clinic}}", body: "{{clinic}} suggested care for {{petName}}. Confirm to create the reminder." },

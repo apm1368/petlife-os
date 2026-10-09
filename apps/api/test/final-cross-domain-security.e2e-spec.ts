@@ -31,6 +31,8 @@ const PUBLIC_GET = new Set([
   "/animal-support/needs/:listingId/summary",
   "/animal-support/needs/:listingId/updates",
   "/animal-support/needs/:listingId/milestones",
+  // G16: anonymous public timeline of a visible need (no donor/helper/volunteer identity).
+  "/animal-support/needs/:listingId/activity",
   "/animal-support/organizations/:organizationId",
   "/animal-support/rescue-cases/:rescueCaseId",
   "/community/posts/:postId",

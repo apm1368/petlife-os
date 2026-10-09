@@ -17,6 +17,7 @@ import {
   SupportNeedListingNotFoundException,
 } from "../../common/errors/api-exception";
 import { toHelpOfferDto, toSupportNeedListingDto } from "./support-need-mapper";
+import { SupportMilestoneService } from "./support-milestone.service";
 import { AnimalSupportOrgAccessService } from "./animal-support-org-access.service";
 import type {
   CreateHelpOfferDto,
@@ -95,6 +96,7 @@ export class SupportNeedService {
     private readonly events: DomainEventsService,
     private readonly storage: StorageService,
     private readonly orgAccess: AnimalSupportOrgAccessService,
+    private readonly milestones: SupportMilestoneService,
   ) {}
 
   private async getRawOrThrow(listingId: string) {
@@ -248,6 +250,7 @@ export class SupportNeedService {
       );
       return updated;
     });
+    if (next === SupportNeedStatus.FULFILLED) await this.milestones.recordSafely(listingId);
     return toSupportNeedListingDto(row, true);
   }
 
@@ -455,6 +458,7 @@ export class SupportNeedService {
       );
       return updated;
     });
+    if (dto.status === HelpOfferStatus.COMPLETED) await this.milestones.recordSafely(listingId);
     return toHelpOfferDto(row);
   }
 

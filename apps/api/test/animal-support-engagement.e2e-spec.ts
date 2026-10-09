@@ -54,10 +54,10 @@ describe("Animal support — engagement", () => {
     for (const u of [follower, donor, helper]) expect(await db.notification.count({ where: { userId: u.id, type: "animal_support.need_update", deepLink: `/animal-support/needs/${o.listingId}` } })).toBe(1);
     // A pending offer is not "involved" yet.
     expect(await db.notification.count({ where: { userId: stranger.id, type: "animal_support.need_update" } })).toBe(0);
-    expect((await get(null, `/animal-support/needs/${o.listingId}/updates`).expect(200)).body.map((u: { body: string }) => u.body)).toEqual(["Surgery went well"]);
+    expect((await get(null, `/animal-support/needs/${o.listingId}/updates`).expect(200)).body.items.map((u: { body: string }) => u.body)).toEqual(["Surgery went well"]);
     await send("delete", stranger, `/animal-support/needs/${o.listingId}/updates/${posted.id}`).expect(404);
     await send("delete", o.manager, `/animal-support/needs/${o.listingId}/updates/${posted.id}`).expect(200);
-    expect((await get(null, `/animal-support/needs/${o.listingId}/updates`).expect(200)).body).toEqual([]);
+    expect((await get(null, `/animal-support/needs/${o.listingId}/updates`).expect(200)).body).toEqual({ items: [], nextCursor: null });
   });
 
   it("milestones come only from real state", async () => {
@@ -65,13 +65,13 @@ describe("Animal support — engagement", () => {
     const donor = await actor("donor");
     expect((await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200)).body).toEqual([]);
     const donations = app.get(DonationService);
-    await donations.donate(o.campaignId, donor.id, { amountIrr: 4_000_000, supportNeedListingId: o.listingId, idempotencyKey: randomUUID() });
-    expect((await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200)).body).toEqual([]);
     await donations.donate(o.campaignId, donor.id, { amountIrr: 2_000_000, supportNeedListingId: o.listingId, idempotencyKey: randomUUID() });
-    expect((await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200)).body.map((m: { key: string }) => m.key)).toEqual(["FUNDING_50"]);
+    expect((await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200)).body).toEqual([]);
+    await donations.donate(o.campaignId, donor.id, { amountIrr: 4_000_000, supportNeedListingId: o.listingId, idempotencyKey: randomUUID() });
+    expect((await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200)).body.map((m: { key: string }) => m.key)).toEqual(["FUNDING_25", "FUNDING_50"]);
     await donations.donate(o.campaignId, donor.id, { amountIrr: 4_000_000, supportNeedListingId: o.listingId, idempotencyKey: randomUUID() });
     await db.helpOffer.create({ data: { listingId: o.listingId, helperUserId: donor.id, message: "x", helpType: "VETERINARY_CARE", status: "COMPLETED", quantity: 1 } });
-    expect((await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200)).body.map((m: { key: string }) => m.key)).toEqual(["FUNDING_50", "FUNDING_100", "FIRST_HELP_RECEIVED"]);
+    expect((await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200)).body.map((m: { key: string }) => m.key)).toEqual(["FUNDING_25", "FUNDING_50", "FUNDING_75", "FUNDING_100", "ITEM_RECEIVED"]);
     await get(null, `/animal-support/needs/${randomUUID()}/milestones`).expect(404);
   });
 
@@ -110,7 +110,7 @@ describe("Animal support — engagement", () => {
     // Another organisation's staff see none of this.
     const other = await org();
     expect((await get(other.manager, "/ngo/volunteers").expect(200)).body).toEqual([]);
-    await send("post", other.manager, `/ngo/volunteers/${shyRow.id}/status`).send({ status: "CLOSED" }).expect(404);
+    await send("post", other.manager, `/ngo/volunteers/${shyRow.id}/status`).send({ status: "CANCELLED" }).expect(404);
     await get(shy, "/ngo/volunteers").expect(403);
     await send("delete", shy, `/animal-support/organizations/${o.orgId}/volunteer`).expect(200);
   });

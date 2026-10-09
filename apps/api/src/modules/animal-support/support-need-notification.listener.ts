@@ -173,8 +173,16 @@ export class SupportNeedNotificationListener {
   }
 
   @OnEvent("SupportNeedListingModerated")
-  onModerated(p: { listingId: string; to: string }, domainEventId: string) {
+  onModerated(p: { listingId: string; to: string; firstPublication?: boolean }, domainEventId: string) {
     return this.safely("SupportNeedListingModerated", async () => {
+      // Followers of the organisation hear about a need once — on its first publication only.
+      if (p.to === "PUBLISHED" && p.firstPublication) {
+        const need = await this.prisma.supportNeedListing.findUnique({ where: { id: p.listingId }, select: { title: true, organizationId: true, creatorUserId: true } });
+        if (need?.organizationId) {
+          const followers = await this.prisma.animalSupportOrgFollow.findMany({ where: { organizationId: need.organizationId }, select: { userId: true }, take: 500 });
+          for (const f of followers) if (f.userId !== need.creatorUserId) await this.send(f.userId, "animal_support.new_need", p.listingId, NotificationDeepLinks.supportNeed(p.listingId), domainEventId);
+        }
+      }
       const type = { PUBLISHED: "animal_support.listing_published", REJECTED: "animal_support.listing_rejected", REMOVED: "animal_support.listing_removed" }[p.to];
       if (!type) return;
       const listing = await this.prisma.supportNeedListing.findUnique({ where: { id: p.listingId }, select: { creatorUserId: true } });

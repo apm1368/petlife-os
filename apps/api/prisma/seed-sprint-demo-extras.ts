@@ -76,6 +76,7 @@ async function main() {
     };
     await give("cash-only-1", "cash-only", 30_000_000); // partially funded: 30M of 80M
     await give("mixed-1", "mixed", 15_000_000);
+    await give("mixed-2", "mixed", 5_000_000); // G16: 20M of 40M → 50 %
     await give("fulfilled-1", "fulfilled", 20_000_000); // fully funded
 
     const offer = (key: string, listing: string, helperUserId: string, status: "PENDING" | "ACCEPTED" | "COMPLETED", quantity: number, helpType: Need["category"], message: string) =>
@@ -98,6 +99,13 @@ async function main() {
     await db.animalSupportOrgFollow.upsert({ where: { userId_organizationId: { userId: helperA.id, organizationId: campaign.organizationId } }, create: { userId: helperA.id, organizationId: campaign.organizationId }, update: {} });
     await db.supportNeedBookmark.upsert({ where: { userId_listingId: { userId: helperB.id, listingId: ids["mixed"]! } }, create: { userId: helperB.id, listingId: ids["mixed"]! }, update: {} });
     await db.volunteerInterest.upsert({ where: { userId_organizationId: { userId: helperB.id, organizationId: campaign.organizationId } }, create: { userId: helperB.id, organizationId: campaign.organizationId, kinds: ["TRANSPORT", "DELIVERY"], city: "تهران", availability: "آخر هفته‌ها", shareContact: true }, update: {} });
+    // G16: the volunteer interest comes from the cash-only need; an update with no media on the mixed need; milestones
+    // recorded from the real state above (single emission — reruns record nothing new).
+    await db.volunteerInterest.updateMany({ where: { userId: helperB.id, organizationId: campaign.organizationId, listingId: null }, data: { listingId: ids["cash-only"]! } });
+    await db.supportNeedUpdate.upsert({ where: { id: id("need-update:mixed") }, create: { id: id("need-update:mixed"), listingId: ids["mixed"]!, authorUserId: donor.id, body: "نیمی از هزینه‌ی درمان تأمین شد؛ داروها هم رسید. ممنون از همه (به‌روزرسانی نمایشی)." }, update: {} });
+    const { SupportMilestoneService } = await import("../src/modules/animal-support/support-milestone.service");
+    const milestoneRecords = app.get(SupportMilestoneService);
+    for (const key of Object.keys(ids)) await milestoneRecords.recordSafely(ids[key]!);
 
     // ---------------------------------------------------------------- Pet taxi
     const customer = await db.user.findUniqueOrThrow({ where: { email: "clinic-demo-customer@example.test" } });
