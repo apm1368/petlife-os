@@ -12,12 +12,25 @@
  * - Clinic: a vet seat, an access grant from the booking, a completed visit with vitals.
  */
 import { createHash } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 
 const id = (key: string) => {
   const h = createHash("sha1").update(`sprint-demo-extras:${key}`).digest("hex");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
 };
 const DAY = 86400e3;
+
+/** A minimal one-page PDF showing a single ASCII line — enough for a real, downloadable demo file. */
+function demoPdf(text: string): Buffer {
+  const stream = `BT /F1 11 Tf 40 780 Td (${text.replace(/[()\\]/g, "")}) Tj ET`;
+  const objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>", `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
+  let body = "%PDF-1.4\n";
+  const offsets = objects.map((o, i) => { const at = body.length; body += `${i + 1} 0 obj\n${o}\nendobj\n`; return at; });
+  const xref = body.length;
+  body += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(body, "latin1");
+}
 
 /** QA/demo only — NOT a business price. Real tariffs are a product decision (PRODUCT_DECISION_LATER). */
 const QA_DEMO_TARIFF = { baseFareIrr: 400_000, perKmRateIrr: 50_000, serviceAdjustmentIrr: 0, minimumFareIrr: 600_000 } as const;
@@ -361,8 +374,16 @@ async function main() {
     // ---------------------------------------------------------------- G15: trip preparation states + a place correction
     await db.tripChecklistItem.updateMany({ where: { id: id("trip:item:3") }, data: { state: "NOT_REQUIRED", done: false } });
     await db.tripChecklistItem.updateMany({ where: { id: id("trip:item:0") }, data: { state: "DONE", done: true } });
-    const travelDoc = await db.medicalDocument.findFirst({ where: { petId: richPet.id, voidedAt: null }, orderBy: { createdAt: "asc" }, select: { id: true } });
-    if (travelDoc) await db.tripDocumentLink.upsert({ where: { tripId_documentId: { tripId: trip.id, documentId: travelDoc.id } }, create: { tripId: trip.id, documentId: travelDoc.id, linkedByUserId: rich.id }, update: {} });
+    // An explicitly-demo travel document (a one-page PDF that says it is NOT an official certificate) on the trip's pet,
+    // stored like an owner upload so the signed download works, then linked to the demo trip. Typed OTHER on purpose:
+    // a TRAVEL_DOCUMENT would mark the trip's HEALTH_CERTIFICATE readiness as MET, which this sample must never do.
+    const travelDocKey = `health-documents/${richPet.id}/demo-travel-readiness-sheet.pdf`;
+    const travelDocPdf = demoPdf("PetLife DEMO travel readiness sheet - sample data only. NOT an official health or travel certificate.");
+    const travelDocPath = resolve(process.env.STORAGE_LOCAL_DIR ?? "./local-storage", travelDocKey);
+    await mkdir(dirname(travelDocPath), { recursive: true });
+    await writeFile(travelDocPath, travelDocPdf);
+    const travelDoc = await db.medicalDocument.upsert({ where: { id: id("trip:document") }, create: { id: id("trip:document"), petId: richPet.id, householdId: richHome.householdId, title: "برگه‌ی نمونه‌ی آمادگی سفر (نمایشی — سند رسمی نیست)", description: "داده‌ی نمایشی. گواهی سلامت یا مجوز سفر معتبر نیست.", documentType: "OTHER", sourceType: "OWNER", sourceUserId: rich.id, fileObjectKey: travelDocKey, mimeType: "application/pdf", fileSizeBytes: travelDocPdf.length }, update: { documentType: "OTHER" } });
+    await db.tripDocumentLink.upsert({ where: { tripId_documentId: { tripId: trip.id, documentId: travelDoc.id } }, create: { tripId: trip.id, documentId: travelDoc.id, linkedByUserId: rich.id }, update: {} });
     const listedPark = await db.petFriendlyPlace.findFirst({ where: { isPubliclyListed: true, category: "PARK" }, orderBy: { createdAt: "asc" } });
     if (listedPark) {
       await db.placeSuggestion.upsert({ where: { id: id("g15:correction") }, create: { id: id("g15:correction"), userId: rich.id, kind: "CORRECTION", placeId: listedPark.id, proposedChanges: { parkingAvailable: true, waterAvailable: true }, name: listedPark.name, category: listedPark.category, city: listedPark.city, address: listedPark.address, notes: "پارکینگ و شیر آب اضافه شده است (پیشنهاد نمایشی)." }, update: {} });
