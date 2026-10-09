@@ -24,6 +24,9 @@ const envSchema = z.object({
   /// and shipment states for anyone. Off unless explicitly enabled (local dev and the e2e suite do);
   /// never honoured in production. The canonical public server must leave it unset.
   DEV_SIMULATION_ENABLED: flag(false),
+  /// Set only after the owner/legal retention policy is approved (docs/product/data-retention-decisions.md). Until then
+  /// account deletions can't reach READY_FOR_EXECUTION, and execution itself does not exist.
+  RETENTION_POLICY_APPROVED: flag(false),
   PORT: z.coerce.number().int().positive().default(4000),
 
   // Immutable release metadata injected by CI/deploy. These values are

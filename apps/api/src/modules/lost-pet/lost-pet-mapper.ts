@@ -7,6 +7,7 @@ type IncidentWithPet = LostPetIncident & { pet: Pet; _count?: { sightings: numbe
 export function toLostPetIncidentDto(row: IncidentWithPet): LostPetIncidentDto {
   return {
     id: row.id,
+    identityCardId: row.identityCardId ?? null,
     petId: row.petId,
     petName: row.pet.name,
     petSpecies: row.pet.species as unknown as LostPetIncidentDto["petSpecies"],

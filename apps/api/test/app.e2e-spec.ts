@@ -1543,14 +1543,10 @@ describe("PET LIFE OS critical paths (e2e)", () => {
         .send({ householdId, addressLine: "42 Home St.", city: "Testville", countryCode: "US" })
         .expect(201);
 
-      const customerSlot2 = await firstAvailableServiceSlot(client, atCustomer.service.id);
-      const customerHold2 = await client
-        .post("/booking-holds")
-        .send({ petId, providerId: atCustomer.organization.id, locationId: atCustomer.location.id, serviceId: atCustomer.service.id, slotStart: customerSlot2.startAt })
-        .expect(201);
+      // A missing address is correctable: the same hold is still valid and confirms once an address is given.
       const withAddress = await client
         .post("/bookings")
-        .send({ holdId: customerHold2.body.holdId, petId, customerAddressId: address.body.id })
+        .send({ holdId: customerHold.body.holdId, petId, customerAddressId: address.body.id })
         .expect(201);
       expect(withAddress.body.customerAddress.id).toBe(address.body.id);
     });

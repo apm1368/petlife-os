@@ -1,3 +1,4 @@
+import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AdminRefundApprovalStatus, Prisma } from "@prisma/client";
@@ -54,10 +55,11 @@ export class AdminRefundService {
     private readonly auditLog: AdminAuditLogService,
     private readonly config: ConfigService<AppEnv, true>,
     private readonly refunds: RefundsService,
+    private readonly settings: PlatformSettingsService,
   ) {}
 
   private threshold(): number {
-    return this.config.get("ADMIN_REFUND_APPROVAL_THRESHOLD_IRR", { infer: true });
+    return this.settings.getInt("commerce.refundApprovalThresholdIrr");
   }
 
   async request(admin: ResolvedAdminContext, orderId: string, amount: number, reason: string, idempotencyKey?: string, requestId?: string): Promise<AdminRefundApprovalDto> {

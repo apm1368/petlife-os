@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { TravelBookingService } from "./travel-booking.service";
 
@@ -11,7 +12,7 @@ export class TravelExpiryWorker implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly bookings: TravelBookingService) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.tick(), 60_000);
+    if (process.env.NODE_ENV !== "test") { registerWorker("travel-expiry", 60_000); this.timer = setInterval(() => void trackWorker("travel-expiry", 60_000, () => this.tick()).catch(() => undefined), 60_000); }
   }
 
   onModuleDestroy() {

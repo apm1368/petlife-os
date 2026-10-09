@@ -1,6 +1,8 @@
 import { Body, Controller, createParamDecorator, Delete, ExecutionContext, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
-import { ArrayMaxSize, ArrayMinSize, ArrayUnique, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, MaxLength } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, ArrayUnique, IsArray, IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min } from "class-validator";
+import { Type } from "class-transformer";
+import { IsObjectKeyFor } from "../../common/storage-keys/object-key.validator";
 import { VolunteerInterestStatus } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
@@ -13,6 +15,12 @@ const CurrentNgo = createParamDecorator((_: unknown, ctx: ExecutionContext): Ngo
 
 class PostUpdateDto {
   @IsString() @Length(1, 2000) body!: string;
+  /** Up to 4 images uploaded via POST /animal-support/needs/upload-url by the posting manager. */
+  @IsOptional() @IsArray() @ArrayMaxSize(4) @ArrayUnique() @IsObjectKeyFor(["support-need-images"], { each: true }) mediaObjectKeys?: string[];
+}
+class UpdatesQueryDto {
+  @IsOptional() @IsUUID() cursor?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50) limit?: number;
 }
 class VolunteerInterestDto {
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(4) @ArrayUnique() @IsIn(VOLUNTEER_KINDS, { each: true }) kinds!: string[];
@@ -20,12 +28,14 @@ class VolunteerInterestDto {
   @IsOptional() @IsString() @MaxLength(200) availability?: string;
   @IsOptional() @IsString() @MaxLength(500) note?: string;
   @IsOptional() @IsBoolean() shareContact?: boolean;
+  /** The need this interest comes from (must be a visible need of this organisation). */
+  @IsOptional() @IsUUID() listingId?: string;
 }
 class InterestStatusDto {
-  @IsIn(["NEW", "CONTACTED", "CLOSED"]) status!: VolunteerInterestStatus;
+  @IsIn(["CONTACTED", "ACCEPTED", "COMPLETED", "CANCELLED"]) status!: VolunteerInterestStatus;
 }
 class InterestQueryDto {
-  @IsOptional() @IsIn(["NEW", "CONTACTED", "CLOSED"]) status?: VolunteerInterestStatus;
+  @IsOptional() @IsIn(["INTERESTED", "CONTACTED", "ACCEPTED", "COMPLETED", "CANCELLED", "CLOSED"]) status?: VolunteerInterestStatus;
 }
 
 /** Public reads of a need's updates and derived milestones. */
@@ -34,8 +44,14 @@ export class PublicSupportEngagementController {
   constructor(private readonly engagement: SupportEngagementService) {}
 
   @Get("updates")
-  updates(@Param("listingId", ParseUUIDPipe) listingId: string) {
-    return this.engagement.listUpdates(listingId);
+  updates(@Param("listingId", ParseUUIDPipe) listingId: string, @Query() q: UpdatesQueryDto) {
+    return this.engagement.listUpdates(listingId, q.cursor, q.limit);
+  }
+
+  /** Anonymous timeline: published, milestones, updates, items received, volunteers accepted, completed. */
+  @Get("activity")
+  activity(@Param("listingId", ParseUUIDPipe) listingId: string) {
+    return this.engagement.activity(listingId);
   }
 
   @Get("milestones")
@@ -52,7 +68,7 @@ export class SupportEngagementController {
   @Post("animal-support/needs/:listingId/updates")
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   postUpdate(@CurrentUser() user: SessionUser, @Param("listingId", ParseUUIDPipe) listingId: string, @Body() dto: PostUpdateDto) {
-    return this.engagement.postUpdate(user.id, listingId, dto.body);
+    return this.engagement.postUpdate(user.id, listingId, dto.body, dto.mediaObjectKeys ?? []);
   }
 
   @Delete("animal-support/needs/:listingId/updates/:updateId")
@@ -119,7 +135,7 @@ export class NgoVolunteersController {
   }
 
   @Post(":interestId/status")
-  setStatus(@CurrentNgo() ngo: NgoContext, @Param("interestId", ParseUUIDPipe) interestId: string, @Body() dto: InterestStatusDto) {
-    return this.engagement.setInterestStatus(ngo.organizationId, interestId, dto.status);
+  setStatus(@CurrentNgo() ngo: NgoContext, @CurrentUser() user: SessionUser, @Param("interestId", ParseUUIDPipe) interestId: string, @Body() dto: InterestStatusDto) {
+    return this.engagement.setInterestStatus(ngo.organizationId, interestId, dto.status, user.id);
   }
 }

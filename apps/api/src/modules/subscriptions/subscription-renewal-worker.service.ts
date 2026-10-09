@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { SubscriptionStatus } from "@prisma/client";
@@ -37,8 +38,9 @@ export class SubscriptionRenewalWorkerService implements OnModuleInit, OnModuleD
   onModuleInit(): void {
     if (process.env.NODE_ENV === "test") return;
     const intervalMs = this.config.get("SUBSCRIPTION_RENEWAL_WORKER_INTERVAL_MS", { infer: true });
+    registerWorker("subscription-renewal", intervalMs);
     this.timer = setInterval(() => {
-      this.processDueRenewals().catch((error) => this.logger.error("Subscription renewal worker tick failed", error instanceof Error ? error.stack : undefined));
+      trackWorker("subscription-renewal", intervalMs, () => this.processDueRenewals()).catch((error) => this.logger.error("Subscription renewal worker tick failed", error instanceof Error ? error.stack : undefined));
     }, intervalMs);
   }
 

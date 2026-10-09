@@ -7,7 +7,7 @@ import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { PetAccessGuard } from "../../common/auth/pet-access.guard";
 import { RequirePetAccess } from "../../common/auth/require-pet-access.decorator";
 import { PetSafetyService } from "./pet-safety.service";
-import { CreateCareHandoffDto, CreateShareCardDto, UpsertEmergencyInfoDto } from "./pet-safety.dto";
+import { CreateCareHandoffDto, CreateShareCardDto, PetCardContactMessageDto, UpsertEmergencyInfoDto } from "./pet-safety.dto";
 
 type PetReq = AuthedRequest & { petAccess?: PetAccessFlags };
 
@@ -67,6 +67,19 @@ export class PetSafetyController {
     return this.safety.revokeCard(petId, cardId, user.id);
   }
 
+  /** Finder messages left through this pet's public cards (newest first). */
+  @Get("card-messages")
+  @RequirePetAccess("canManageAccess")
+  cardMessages(@Param("petId", ParseUUIDPipe) petId: string) {
+    return this.safety.listContactMessages(petId);
+  }
+
+  @Post("card-messages/:messageId/read")
+  @RequirePetAccess("canManageAccess")
+  readCardMessage(@Param("petId", ParseUUIDPipe) petId: string, @Param("messageId", ParseUUIDPipe) messageId: string) {
+    return this.safety.markContactMessageRead(petId, messageId);
+  }
+
   @Get("care-handoffs")
   @RequirePetAccess("canManageAccess")
   listHandoffs(@Param("petId", ParseUUIDPipe) petId: string) {
@@ -107,5 +120,12 @@ export class PublicPetCardController {
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   read(@Param("token") token: string) {
     return this.safety.readPublicCard(token);
+  }
+
+  /** A finder's message to the owner (IN_APP/BOTH cards). Anonymous; strictly rate limited. */
+  @Post(":token/messages")
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  message(@Param("token") token: string, @Body() dto: PetCardContactMessageDto) {
+    return this.safety.postContactMessage(token, dto);
   }
 }

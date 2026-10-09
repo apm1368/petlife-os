@@ -21,13 +21,14 @@ import { toDisputeDto } from "../dispute/dispute.mapper";
 
 const RECENT_LIMIT = 10;
 
-function toListItem(user: { id: string; displayName: string; email: string | null; phone: string | null; createdAt: Date }): AdminCustomerListItemDto {
+function toListItem(user: { id: string; displayName: string; email: string | null; phone: string | null; createdAt: Date; accountStatus?: "ACTIVE" | "SUSPENDED" }): AdminCustomerListItemDto {
   return {
     id: user.id,
     displayName: user.displayName,
     emailMasked: user.email ? maskEmail(user.email) : null,
     phoneMasked: user.phone ? maskPhone(user.phone) : null,
     createdAt: user.createdAt.toISOString(),
+    accountStatus: user.accountStatus,
   };
 }
 

@@ -114,7 +114,7 @@ export class SupportNeedModerationService {
       });
       await this.events.publish(
         "SupportNeedListingModerated",
-        { listingId, from: existing.status, to: dto.status, adminUserId: admin.adminUserId },
+        { listingId, from: existing.status, to: dto.status, adminUserId: admin.adminUserId, firstPublication: dto.status === SupportNeedStatus.PUBLISHED && existing.publishedAt === null },
         { tx, aggregateType: "SupportNeedListing", aggregateId: listingId },
       );
       return updated;

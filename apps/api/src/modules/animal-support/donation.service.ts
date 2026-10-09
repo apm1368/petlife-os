@@ -5,6 +5,7 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PaymentsService } from "../commerce/payments/payments.service";
 import type { PaymentChargeMode } from "../commerce/payments/payment-gateway.interface";
 import { LedgerService } from "../commerce/ledger/ledger.service";
+import { SupportMilestoneService } from "./support-milestone.service";
 import { DonationLedgerService } from "./donation-ledger.service";
 import { DonationAmountInvalidException, DonationNotFoundException, PaymentProviderUnavailableException, SupportCampaignNotAcceptingDonationsException, SupportCampaignNotFoundException, ValidationApiException } from "../../common/errors/api-exception";
 import { PaymentGatewayRegistry } from "../commerce/payments/payment-gateway-registry.service";
@@ -48,6 +49,7 @@ export class DonationService {
     private readonly donationLedger: DonationLedgerService,
     private readonly events: DomainEventsService,
     private readonly gateways: PaymentGatewayRegistry,
+    private readonly milestones: SupportMilestoneService,
   ) {}
 
   /**
@@ -118,7 +120,7 @@ export class DonationService {
     if (showDonorPublicly && !publicDisplayName) throw new ValidationApiException({ field: "publicDisplayName", reason: "REQUIRED_WHEN_SHOWN_PUBLICLY" });
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      const result = await this.prisma.$transaction(async (tx) => {
         const checkout = await this.createShellCheckout(tx, donorUserId, dto.amountIrr, CURRENCY);
         const intent = await this.payments.createIntent(checkout.id, dto.amountIrr, CURRENCY, provider, undefined, tx);
 
@@ -169,6 +171,9 @@ export class DonationService {
 
         return { donationIntentId: succeeded.id, status: succeeded.status };
       });
+      // Chain #5: progress → milestone, from committed state only.
+      if (result.status === DonationStatus.SUCCEEDED) await this.milestones.recordSafely(dto.supportNeedListingId);
+      return result;
     } catch (error) {
       // Two concurrent requests with the same key: the loser returns the winner's donation, never a second charge.
       if (dto.idempotencyKey && error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { BookingStatus, CarePlanItemStatus, ClinicCampaignSegment, ClinicReminderKind, ClinicTaskStatus, Prisma, ProviderUserRole } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -212,9 +212,10 @@ export class ClinicOperationsService {
 
   async previewCampaign(ctx: ResolvedProviderContext, segment: ClinicCampaignSegment) {
     await this.entitlements.assertFeature(ctx.organizationId, "clinic.bulk_reminders");
-    const targets = await this.segmentTargets(ctx.organizationId, segment);
+    const { targets, excludedCount, exclusionReasons } = await this.segmentAudience(ctx.organizationId, segment);
     const sent = await this.prisma.clinicCampaign.findUnique({ where: { providerOrganizationId_segment_dayKey: { providerOrganizationId: ctx.organizationId, segment, dayKey: tehranToday() } } });
-    return { segment, count: targets.length, alreadySentToday: Boolean(sent), sample: targets.slice(0, 20).map((t) => ({ petId: t.petId, petName: t.petName, detail: t.detail })) };
+    // Preview only: nothing is sent until POST /campaigns confirms this exact recipientCount.
+    return { segment, count: targets.length, recipientCount: targets.length, excludedCount, exclusionReasons, alreadySentToday: Boolean(sent), sample: targets.slice(0, 20).map((t) => ({ petId: t.petId, petName: t.petName, detail: t.detail })) };
   }
 
   /** Sends only after explicit confirmation of the current audience size; at most once per segment per day. */
@@ -249,22 +250,44 @@ export class ClinicOperationsService {
     return { campaignId, segment: dto.segment, recipientCount: targets.length, delivered };
   }
 
-  private async segmentTargets(organizationId: string, segment: ClinicCampaignSegment): Promise<{ petId: string; petName: string; detail: string }[]> {
-    const caseload: Prisma.PetWhereInput = { OR: [{ bookings: { some: { providerOrganizationId: organizationId } } }, { clinicalVisits: { some: { providerOrganizationId: organizationId } } }], lifecycleStatus: "ACTIVE" };
+  /**
+   * The audience for a segment, deterministic: raw candidates first, then explicit exclusions — the same pet twice
+   * (DUPLICATE_PET), a pet no longer active (PET_INACTIVE), or a household with no owner to receive it (NO_RECIPIENT).
+   */
+  private async segmentAudience(organizationId: string, segment: ClinicCampaignSegment) {
+    const caseload: Prisma.PetWhereInput = { OR: [{ bookings: { some: { providerOrganizationId: organizationId } } }, { clinicalVisits: { some: { providerOrganizationId: organizationId } } }] };
+    let raw: { petId: string; petName: string; detail: string }[];
     if (segment === ClinicCampaignSegment.APPOINTMENTS_TOMORROW) {
       const start = tehranDayStart(tehranToday(new Date(Date.now() + DAY)));
       const rows = await this.prisma.booking.findMany({ where: { providerOrganizationId: organizationId, bookingStatus: BookingStatus.CONFIRMED, startAt: { gte: start, lt: new Date(start.getTime() + DAY) } }, include: { pet: { select: { id: true, name: true } } }, orderBy: { startAt: "asc" } });
-      const seen = new Set<string>();
-      return rows.filter((b) => !seen.has(b.petId) && seen.add(b.petId)).map((b) => ({ petId: b.petId, petName: b.pet.name, detail: b.startAt.toISOString() }));
-    }
-    if (segment === ClinicCampaignSegment.VACCINES_DUE) {
+      raw = rows.map((b) => ({ petId: b.petId, petName: b.pet.name, detail: b.startAt.toISOString() }));
+    } else if (segment === ClinicCampaignSegment.VACCINES_DUE) {
       const today = new Date(`${tehranToday()}T00:00:00Z`);
       const rows = await this.prisma.pet.findMany({ where: { ...caseload, vaccinationSummary: { nextDueDate: { gte: today, lte: new Date(today.getTime() + 14 * DAY) } } }, select: { id: true, name: true, vaccinationSummary: { select: { nextDueDate: true } } } });
-      return rows.map((p) => ({ petId: p.id, petName: p.name, detail: p.vaccinationSummary!.nextDueDate!.toISOString().slice(0, 10) }));
+      raw = rows.map((p) => ({ petId: p.id, petName: p.name, detail: p.vaccinationSummary!.nextDueDate!.toISOString().slice(0, 10) }));
+    } else {
+      const rows = await this.prisma.carePlanItem.findMany({ where: { status: CarePlanItemStatus.PENDING, dueAt: { gte: new Date(), lte: new Date(Date.now() + 7 * DAY) }, carePlan: { providerOrganizationId: organizationId } }, include: { carePlan: { select: { petId: true, pet: { select: { name: true } } } } }, orderBy: { dueAt: "asc" } });
+      raw = rows.map((i) => ({ petId: i.carePlan.petId, petName: i.carePlan.pet.name, detail: i.title }));
     }
-    const rows = await this.prisma.carePlanItem.findMany({ where: { status: CarePlanItemStatus.PENDING, dueAt: { gte: new Date(), lte: new Date(Date.now() + 7 * DAY) }, carePlan: { providerOrganizationId: organizationId, pet: { lifecycleStatus: "ACTIVE" } } }, include: { carePlan: { select: { petId: true, pet: { select: { name: true } } } } }, orderBy: { dueAt: "asc" } });
+    const pets = await this.prisma.pet.findMany({ where: { id: { in: [...new Set(raw.map((r) => r.petId))] } }, select: { id: true, lifecycleStatus: true, household: { select: { members: { where: { role: "OWNER" }, select: { userId: true } } } } } });
+    const byId = new Map(pets.map((p) => [p.id, p]));
+    const excluded: Record<string, number> = {};
+    const exclude = (reason: string) => void (excluded[reason] = (excluded[reason] ?? 0) + 1);
     const seen = new Set<string>();
-    return rows.filter((i) => !seen.has(i.carePlan.petId) && seen.add(i.carePlan.petId)).map((i) => ({ petId: i.carePlan.petId, petName: i.carePlan.pet.name, detail: i.title }));
+    const targets: typeof raw = [];
+    for (const r of raw) {
+      const pet = byId.get(r.petId);
+      if (seen.has(r.petId)) exclude("DUPLICATE_PET");
+      else if (!pet || pet.lifecycleStatus !== "ACTIVE") exclude("PET_INACTIVE");
+      else if (!pet.household.members.length) exclude("NO_RECIPIENT");
+      else targets.push(r);
+      seen.add(r.petId);
+    }
+    return { targets, excludedCount: raw.length - targets.length, exclusionReasons: Object.entries(excluded).map(([reason, count]) => ({ reason, count })) };
+  }
+
+  private async segmentTargets(organizationId: string, segment: ClinicCampaignSegment) {
+    return (await this.segmentAudience(organizationId, segment)).targets;
   }
 
   // ---------------------------------------------------------------- import
@@ -309,7 +332,10 @@ export class ClinicOperationsService {
       valid.push({ name, phone, email, petName: get("petName").slice(0, 80) || null, species: get("species").slice(0, 40) || null, notes: get("notes") || null });
     });
     const summary = { totalRows: data.length, validRows: valid.length, errors, duplicates };
-    if (dto.dryRun !== false) return { dryRun: true, ...summary, imported: 0 };
+    // The commit must present the token of the dry run it follows: same clinic, same file, same validation result.
+    const confirmationToken = createHash("sha256").update(`${ctx.organizationId}|${dto.csv}|${valid.length}|${duplicates.length}`).digest("hex").slice(0, 32);
+    if (dto.dryRun !== false) return { dryRun: true, ...summary, imported: 0, confirmationToken };
+    if (dto.confirmationToken !== confirmationToken) throw new ValidationApiException({ field: "confirmationToken", reason: dto.confirmationToken ? "STALE_DRY_RUN" : "DRY_RUN_REQUIRED" });
     const batchId = randomUUID();
     const created = await this.prisma.clinicImportedContact.createMany({ data: valid.map((v) => ({ ...v, providerOrganizationId: ctx.organizationId, importBatchId: batchId })), skipDuplicates: true });
     await this.events.publish("ClinicContactsImported", { providerOrganizationId: ctx.organizationId, batchId, imported: created.count, actorProviderUserId: ctx.providerUserId }, { aggregateType: "ProviderOrganization", aggregateId: ctx.organizationId });

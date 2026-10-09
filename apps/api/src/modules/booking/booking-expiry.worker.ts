@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { BookingActorType, BookingStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -21,7 +22,7 @@ export class BookingExpiryWorker implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.process().catch((e) => this.logger.error("Booking expiry tick failed", e)), 60_000);
+    if (process.env.NODE_ENV !== "test") { registerWorker("booking-expiry", 60_000); this.timer = setInterval(() => void trackWorker("booking-expiry", 60_000, () => this.process()).catch((e) => this.logger.error("Booking expiry tick failed", e)), 60_000); }
   }
 
   onModuleDestroy() {

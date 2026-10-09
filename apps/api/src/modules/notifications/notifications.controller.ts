@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { IsIn, IsOptional, IsString, Length } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsIn, IsOptional, IsString, IsUUID, Length } from "class-validator";
 import { NOTIFICATION_GROUPS, type NotificationGroup } from "./notification-groups";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
@@ -22,6 +22,10 @@ class ReadGroupKeyDto {
   @IsString() @Length(3, 200) groupKey!: string;
 }
 
+class ReadSelectedDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @IsUUID(undefined, { each: true }) ids!: string[];
+}
+
 @Controller("notifications")
 @UseGuards(SessionAuthGuard)
 export class NotificationsController {
@@ -36,6 +40,12 @@ export class NotificationsController {
   @Get("grouped")
   grouped(@CurrentUser() user: SessionUser) {
     return this.notifications.grouped(user.id);
+  }
+
+  /** Selected ids (≤100): only the caller's own are touched. */
+  @Post("read")
+  readSelected(@CurrentUser() user: SessionUser, @Body() dto: ReadSelectedDto) {
+    return this.notifications.markSelectedRead(user.id, dto.ids);
   }
 
   @Post("groups/read")

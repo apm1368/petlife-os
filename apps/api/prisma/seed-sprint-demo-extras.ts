@@ -12,12 +12,25 @@
  * - Clinic: a vet seat, an access grant from the booking, a completed visit with vitals.
  */
 import { createHash } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 
 const id = (key: string) => {
   const h = createHash("sha1").update(`sprint-demo-extras:${key}`).digest("hex");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
 };
 const DAY = 86400e3;
+
+/** A minimal one-page PDF showing a single ASCII line — enough for a real, downloadable demo file. */
+function demoPdf(text: string): Buffer {
+  const stream = `BT /F1 11 Tf 40 780 Td (${text.replace(/[()\\]/g, "")}) Tj ET`;
+  const objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>", `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
+  let body = "%PDF-1.4\n";
+  const offsets = objects.map((o, i) => { const at = body.length; body += `${i + 1} 0 obj\n${o}\nendobj\n`; return at; });
+  const xref = body.length;
+  body += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(body, "latin1");
+}
 
 /** QA/demo only — NOT a business price. Real tariffs are a product decision (PRODUCT_DECISION_LATER). */
 const QA_DEMO_TARIFF = { baseFareIrr: 400_000, perKmRateIrr: 50_000, serviceAdjustmentIrr: 0, minimumFareIrr: 600_000 } as const;
@@ -76,6 +89,7 @@ async function main() {
     };
     await give("cash-only-1", "cash-only", 30_000_000); // partially funded: 30M of 80M
     await give("mixed-1", "mixed", 15_000_000);
+    await give("mixed-2", "mixed", 5_000_000); // G16: 20M of 40M → 50 %
     await give("fulfilled-1", "fulfilled", 20_000_000); // fully funded
 
     const offer = (key: string, listing: string, helperUserId: string, status: "PENDING" | "ACCEPTED" | "COMPLETED", quantity: number, helpType: Need["category"], message: string) =>
@@ -98,6 +112,13 @@ async function main() {
     await db.animalSupportOrgFollow.upsert({ where: { userId_organizationId: { userId: helperA.id, organizationId: campaign.organizationId } }, create: { userId: helperA.id, organizationId: campaign.organizationId }, update: {} });
     await db.supportNeedBookmark.upsert({ where: { userId_listingId: { userId: helperB.id, listingId: ids["mixed"]! } }, create: { userId: helperB.id, listingId: ids["mixed"]! }, update: {} });
     await db.volunteerInterest.upsert({ where: { userId_organizationId: { userId: helperB.id, organizationId: campaign.organizationId } }, create: { userId: helperB.id, organizationId: campaign.organizationId, kinds: ["TRANSPORT", "DELIVERY"], city: "تهران", availability: "آخر هفته‌ها", shareContact: true }, update: {} });
+    // G16: the volunteer interest comes from the cash-only need; an update with no media on the mixed need; milestones
+    // recorded from the real state above (single emission — reruns record nothing new).
+    await db.volunteerInterest.updateMany({ where: { userId: helperB.id, organizationId: campaign.organizationId, listingId: null }, data: { listingId: ids["cash-only"]! } });
+    await db.supportNeedUpdate.upsert({ where: { id: id("need-update:mixed") }, create: { id: id("need-update:mixed"), listingId: ids["mixed"]!, authorUserId: donor.id, body: "نیمی از هزینه‌ی درمان تأمین شد؛ داروها هم رسید. ممنون از همه (به‌روزرسانی نمایشی)." }, update: {} });
+    const { SupportMilestoneService } = await import("../src/modules/animal-support/support-milestone.service");
+    const milestoneRecords = app.get(SupportMilestoneService);
+    for (const key of Object.keys(ids)) await milestoneRecords.recordSafely(ids[key]!);
 
     // ---------------------------------------------------------------- Pet taxi
     const customer = await db.user.findUniqueOrThrow({ where: { email: "clinic-demo-customer@example.test" } });
@@ -159,9 +180,10 @@ async function main() {
 
     // ---------------------------------------------------------------- Community: topics, city, a reply thread, a saved post
     const cpost = (key: string, data: Record<string, unknown>) => db.communityPost.upsert({ where: { id: id(`post:${key}`) }, create: { id: id(`post:${key}`), type: "GENERAL", ...data } as never, update: {} });
-    const p1 = await cpost("vaccine-q", { authorUserId: reviewer.id, title: "واکسن سالانه‌ی سگ‌ها را کجا بزنیم؟", body: "در تهران کدام درمانگاه‌ها نوبت آخر هفته دارند؟ (پست نمایشی)", topics: ["DOGS", "HEALTH"], city: "تهران" });
-    await cpost("cat-food", { authorUserId: helperA.id, title: "غذای گربه‌ی مسن", body: "برای گربه‌ی ۱۲ ساله چه غذایی مناسب است؟ (پست نمایشی)", topics: ["CATS", "NUTRITION"], city: "اصفهان" });
-    await cpost("training", { authorUserId: helperB.id, body: "تمرین «بمان» را با جایزه‌های کوچک شروع کردیم و جواب داد. (پست نمایشی)", topics: ["DOGS", "TRAINING"] });
+    const p1 = await cpost("vaccine-q", { authorUserId: reviewer.id, title: "واکسن سالانه‌ی سگ‌ها را کجا بزنیم؟", body: "در تهران کدام درمانگاه‌ها نوبت آخر هفته دارند؟ (پست نمایشی)", topics: ["DOG", "HEALTH"], region: "تهران", city: "تهران" });
+    await db.communityPost.updateMany({ where: { id: p1.id, region: null }, data: { region: "تهران" } }); // G17 regional post
+    await cpost("cat-food", { authorUserId: helperA.id, title: "غذای گربه‌ی مسن", body: "برای گربه‌ی ۱۲ ساله چه غذایی مناسب است؟ (پست نمایشی)", topics: ["CAT", "HEALTH"], city: "اصفهان" });
+    await cpost("training", { authorUserId: helperB.id, body: "تمرین «بمان» را با جایزه‌های کوچک شروع کردیم و جواب داد. (پست نمایشی)", topics: ["DOG", "TRAINING"] });
     const top = await db.communityComment.upsert({ where: { id: id("comment:top") }, create: { id: id("comment:top"), postId: p1.id, authorUserId: helperA.id, body: "درمانگاه مهر جمعه‌ها هم نوبت می‌دهد. (نظر نمایشی)" }, update: {} });
     await db.communityComment.upsert({ where: { id: id("comment:reply") }, create: { id: id("comment:reply"), postId: p1.id, authorUserId: reviewer.id, body: "ممنون، امتحان می‌کنم. (پاسخ نمایشی)", parentCommentId: top.id }, update: {} });
     await db.communityPostBookmark.upsert({ where: { userId_postId: { userId: helperB.id, postId: p1.id } }, create: { userId: helperB.id, postId: p1.id }, update: {} });
@@ -299,6 +321,95 @@ async function main() {
     const verifiedProvider = await db.providerOrganization.findFirst({ where: { verificationStatus: "VERIFIED" }, orderBy: { createdAt: "asc" } });
     if (verifiedProvider) await db.recentlyViewed.upsert({ where: { userId_entityType_entityId: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id } }, create: { userId: rich.id, entityType: "PROVIDER", entityId: verifiedProvider.id }, update: {} });
 
+    // ---------------------------------------------------------------- G11: OWNER_MULTI_PET — lost pet ↔ identity card
+    // A separate persona (showcase accounts and owner.review stay untouched): three pets, one reported LOST with its
+    // ID-tag card exposed (in-app contact, identity fields only), a public sighting and a finder message.
+    const multi = await user("owner-multi-pet@example.test", "نیلوفر (چند پت، نمایشی)");
+    const multiHh = await db.household.upsert({ where: { id: id("multi:household") }, create: { id: id("multi:household"), name: "خانه‌ی سه پت (نمایشی)", city: "تهران", countryCode: "IR" }, update: {} });
+    await db.householdMember.upsert({ where: { householdId_userId: { householdId: multiHh.id, userId: multi.id } }, create: { householdId: multiHh.id, userId: multi.id, role: "OWNER" }, update: {} });
+    const OWNER_FLAGS = { canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true, canViewCareProfile: true, canEditCareProfile: true, canViewLocation: true, canManageAccess: true };
+    const multiPets: [string, string, "DOG" | "CAT", string][] = [["multi:lost", "بیسکویت", "DOG", "تریر"], ["multi:cat", "ماهی", "CAT", "پرشین"], ["multi:pup", "توپی", "DOG", "پاپیون"]];
+    for (const [key, name, species, breed] of multiPets) {
+      await db.pet.upsert({ where: { id: id(key) }, create: { id: id(key), householdId: multiHh.id, name, species, breed, sex: "MALE", approximateAgeMonths: 30, microchipNumber: key === "multi:lost" ? "985112000777001" : null }, update: {} });
+      await db.petAccessGrant.upsert({ where: { id: id(`${key}:grant`) }, create: { id: id(`${key}:grant`), petId: id(key), userId: multi.id, source: "HOUSEHOLD", ...OWNER_FLAGS }, update: {} });
+    }
+    const lostPetId = id("multi:lost");
+    await db.petEmergencyInfo.upsert({ where: { petId: lostPetId }, create: { petId: lostPetId, contactName: "نیلوفر", contactPhone: "09120000777", contactRelation: "صاحب", updatedByUserId: multi.id }, update: {} });
+    const lostToken = `demo-${id("multi:id-tag").replace(/-/g, "")}`;
+    const lostCard = await db.petShareCard.upsert({ where: { tokenHash: createHash("sha256").update(lostToken).digest("hex") }, create: { id: id("multi:card"), petId: lostPetId, kind: "ID_TAG", tokenHash: createHash("sha256").update(lostToken).digest("hex"), tokenHint: lostToken.slice(-4), includeContact: false, visibleFields: ["PHOTO", "SPECIES", "BREED", "SEX", "AGE", "MICROCHIP_STATUS"], contactMode: "IN_APP", createdByUserId: multi.id }, update: {} });
+    const incidentId = id("multi:incident");
+    if (!(await db.lostPetIncident.findUnique({ where: { id: incidentId } }))) {
+      await db.lostPetIncident.create({ data: { id: incidentId, petId: lostPetId, householdId: multiHh.id, status: "SIGHTING_REPORTED", description: "بیسکویت عصر دیروز از در باز حیاط بیرون رفت.", publicArea: "یوسف‌آباد", lastSeenAt: new Date(Date.now() - DAY), publicNotes: "قلاده‌ی قرمز دارد؛ مهربان است ولی از صدای بلند می‌ترسد.", contactPreference: "IN_APP_MESSAGE", identityCardId: lostCard.id, createdByUserId: multi.id } });
+      await db.pet.update({ where: { id: lostPetId }, data: { lifecycleStatus: "LOST" } });
+      await db.lostPetSighting.create({ data: { id: id("multi:sighting"), incidentId, location: "نزدیک پارک یوسف‌آباد", seenAt: new Date(Date.now() - 6 * 3600e3), description: "سگ کوچک با قلاده‌ی قرمز کنار نانوایی." } });
+      await db.petCardContactMessage.create({ data: { id: id("multi:finder-msg"), cardId: lostCard.id, petId: lostPetId, message: "فکر می‌کنم بیسکویت را امروز صبح کنار پارک دیدم.", finderContact: "0912 333 4444" } });
+      const ev = (key: string, type: string, payload: Record<string, unknown>, hoursAgo: number) =>
+        db.domainEvent.upsert({ where: { id: id(`multi:event:${key}`) }, create: { id: id(`multi:event:${key}`), type, aggregateType: "Pet", aggregateId: lostPetId, payload: { petId: lostPetId, ...payload } as never, occurredAt: new Date(Date.now() - hoursAgo * 3600e3), processedAt: new Date() }, update: {} });
+      await ev("lost", "LostPetIncidentOpened", { householdId: multiHh.id, incidentId }, 24);
+      await ev("sighting", "LostPetSightingSubmitted", { incidentId, sightingId: id("multi:sighting") }, 6);
+      await ev("finder", "PetCardContactReceived", { cardId: lostCard.id, messageId: id("multi:finder-msg") }, 3);
+    }
+
+    // ---------------------------------------------------------------- G12: care suggestions + a health share (rich pet)
+    // The batch-2 demo clinic suggests care after the showcase visit: one pending, one already accepted into a reminder.
+    const b2 = (key: string) => {
+      const h = createHash("sha256").update(`petlife-batch2-qa:${key}`).digest("hex").slice(0, 32);
+      return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20)}`;
+    };
+    const showcaseVisit = await db.clinicalVisit.findUnique({ where: { id: b2("showcase-visit") } });
+    const g12PetId = showcaseVisit?.petId ?? richPet.id;
+    if (showcaseVisit) {
+      await db.careSuggestion.upsert({ where: { id: id("g12:suggest:pending") }, create: { id: id("g12:suggest:pending"), petId: g12PetId, providerOrganizationId: showcaseVisit.providerOrganizationId, createdByProviderUserId: showcaseVisit.providerUserId, clinicalVisitId: showcaseVisit.id, title: "کنترل دوباره‌ی پوست", type: "FOLLOW_UP", notes: "دو هفته پس از شروع دارو.", suggestedDueAt: new Date(Date.now() + 14 * DAY) }, update: {} });
+      const accepted = await db.careSuggestion.upsert({ where: { id: id("g12:suggest:accepted") }, create: { id: id("g12:suggest:accepted"), petId: g12PetId, providerOrganizationId: showcaseVisit.providerOrganizationId, createdByProviderUserId: showcaseVisit.providerUserId, clinicalVisitId: showcaseVisit.id, title: "شامپوی طبی هفتگی", type: "GROOMING", suggestedDueAt: new Date(Date.now() + 5 * DAY), recurrence: "WEEKLY", status: "ACCEPTED", decidedByUserId: rich.id, decidedAt: new Date() }, update: {} });
+      if (!accepted.careReminderId) {
+        const reminder = await db.careReminder.upsert({ where: { id: id("g12:suggest:reminder") }, create: { id: id("g12:suggest:reminder"), petId: g12PetId, createdByUserId: rich.id, title: accepted.title, type: "GROOMING", dueAt: accepted.suggestedDueAt, originalDueAt: accepted.suggestedDueAt, recurrence: "WEEKLY" } as never, update: {} });
+        await db.careSuggestion.update({ where: { id: accepted.id }, data: { careReminderId: reminder.id } });
+      }
+    }
+    const shareToken = `demo-${id("g12:health-share").replace(/-/g, "")}`;
+    const shareHash = createHash("sha256").update(shareToken).digest("hex");
+    const share = await db.healthShareLink.upsert({ where: { tokenHash: shareHash }, create: { id: id("g12:health-share"), petId: g12PetId, tokenHash: shareHash, tokenHint: shareToken.slice(-4), label: "برای اورژانس دامپزشکی", sections: ["ALLERGIES", "MEDICATIONS", "CONDITIONS"], expiresAt: new Date(Date.now() + 7 * DAY), createdByUserId: rich.id }, update: { expiresAt: new Date(Date.now() + 7 * DAY), revokedAt: null } });
+    if (!(await db.healthShareAccess.count({ where: { linkId: share.id } }))) await db.healthShareAccess.create({ data: { linkId: share.id, userAgent: "Clinic front desk (demo)" } });
+
+    // ---------------------------------------------------------------- G15: trip preparation states + a place correction
+    await db.tripChecklistItem.updateMany({ where: { id: id("trip:item:3") }, data: { state: "NOT_REQUIRED", done: false } });
+    await db.tripChecklistItem.updateMany({ where: { id: id("trip:item:0") }, data: { state: "DONE", done: true } });
+    // An explicitly-demo travel document (a one-page PDF that says it is NOT an official certificate) on the trip's pet,
+    // stored like an owner upload so the signed download works, then linked to the demo trip. Typed OTHER on purpose:
+    // a TRAVEL_DOCUMENT would mark the trip's HEALTH_CERTIFICATE readiness as MET, which this sample must never do.
+    const travelDocKey = `health-documents/${richPet.id}/demo-travel-readiness-sheet.pdf`;
+    const travelDocPdf = demoPdf("PetLife DEMO travel readiness sheet - sample data only. NOT an official health or travel certificate.");
+    const travelDocPath = resolve(process.env.STORAGE_LOCAL_DIR ?? "./local-storage", travelDocKey);
+    await mkdir(dirname(travelDocPath), { recursive: true });
+    await writeFile(travelDocPath, travelDocPdf);
+    const travelDoc = await db.medicalDocument.upsert({ where: { id: id("trip:document") }, create: { id: id("trip:document"), petId: richPet.id, householdId: richHome.householdId, title: "برگه‌ی نمونه‌ی آمادگی سفر (نمایشی — سند رسمی نیست)", description: "داده‌ی نمایشی. گواهی سلامت یا مجوز سفر معتبر نیست.", documentType: "OTHER", sourceType: "OWNER", sourceUserId: rich.id, fileObjectKey: travelDocKey, mimeType: "application/pdf", fileSizeBytes: travelDocPdf.length }, update: { documentType: "OTHER" } });
+    await db.tripDocumentLink.upsert({ where: { tripId_documentId: { tripId: trip.id, documentId: travelDoc.id } }, create: { tripId: trip.id, documentId: travelDoc.id, linkedByUserId: rich.id }, update: {} });
+    const listedPark = await db.petFriendlyPlace.findFirst({ where: { isPubliclyListed: true, category: "PARK" }, orderBy: { createdAt: "asc" } });
+    if (listedPark) {
+      await db.placeSuggestion.upsert({ where: { id: id("g15:correction") }, create: { id: id("g15:correction"), userId: rich.id, kind: "CORRECTION", placeId: listedPark.id, proposedChanges: { parkingAvailable: true, waterAvailable: true }, name: listedPark.name, category: listedPark.category, city: listedPark.city, address: listedPark.address, notes: "پارکینگ و شیر آب اضافه شده است (پیشنهاد نمایشی)." }, update: {} });
+    }
+
+    // ---------------------------------------------------------------- G13: booking states at the batch-2 demo clinic (Cookie)
+    // A checked-in visit, a completed one with an owner summary + aftercare + a provider-internal note, a rescheduled
+    // pair, a member no-show, and a waitlist entry the clinic offered a slot to (offer re-armed for 6 h on each run).
+    const b2org = b2("clinic"), b2loc = b2("location"), b2svc = b2("service"), b2staff = b2("staff");
+    const cookieId = showcaseVisit?.petId;
+    if (cookieId && (await db.providerService.findUnique({ where: { id: b2svc } }))) {
+      const cookieHh = (await db.pet.findUniqueOrThrow({ where: { id: cookieId }, select: { householdId: true } })).householdId;
+      const at = (hours: number) => new Date(Math.floor((Date.now() + hours * 3600e3) / 900e3) * 900e3);
+      const bk = (key: string, startH: number, status: string, extra: Record<string, unknown> = {}) =>
+        db.booking.upsert({ where: { id: id(`g13:${key}`) }, create: { id: id(`g13:${key}`), householdId: cookieHh, petId: cookieId, userId: rich.id, providerOrganizationId: b2org, providerLocationId: b2loc, providerServiceId: b2svc, providerUserId: b2staff, category: "VET", locationMode: "AT_PROVIDER", startAt: at(startH), endAt: at(startH + 0.5), timezone: "Asia/Tehran", bookingStatus: status, ...extra } as never, update: {} });
+      await bk("checked-in", -0.25, "CHECKED_IN");
+      await bk("completed", -72, "COMPLETED", { completedAt: at(-71.5), completionNote: "معاینه‌ی گوش انجام شد؛ التهاب خفیف.", aftercareInstructions: "سه روز گوش را خشک نگه دارید و قطره را روزی دو بار بریزید." });
+      if (!(await db.bookingProviderNote.count({ where: { bookingId: id("g13:completed") } }))) {
+        await db.bookingProviderNote.create({ data: { bookingId: id("g13:completed"), providerUserId: b2staff, content: "یادداشت داخلی: صاحب پت دو بار دیر رسیده است (فقط برای کلینیک)." } });
+      }
+      await bk("resched-old", 30, "RESCHEDULED");
+      await bk("resched-new", 54, "CONFIRMED", { rescheduledFromBookingId: id("g13:resched-old") });
+      await bk("no-show", -200, "NO_SHOW", { noShowParty: "OWNER" });
+      await db.bookingWaitlistEntry.upsert({ where: { id: id("g13:waitlist") }, create: { id: id("g13:waitlist"), householdId: cookieHh, userId: rich.id, petId: cookieId, providerOrganizationId: b2org, serviceId: b2svc, windowStart: at(24), windowEnd: at(24 * 6), status: "OFFERED", offerStartAt: at(80), offerProviderUserId: b2staff, offerExpiresAt: at(6) }, update: { status: "OFFERED", offerStartAt: at(80), offerExpiresAt: at(6) } });
+    }
+
     // ---------------------------------------------------------------- Live-smoke QA accounts (FREE and PAID scenarios)
     // Two dedicated accounts so the live smoke never writes into showcase accounts. Each owns one household with one
     // pet (created through PetsService, so grants match the product path). FREE stays on the free plan; PAID holds a
@@ -325,7 +436,20 @@ async function main() {
       }
     }
 
-    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care.`);
+    // G19: a QA privacy persona — consent history (accept → withdraw marketing) and a deletion request held at
+    // PENDING_RETENTION (the furthest a request can go until the retention policy is approved; nothing executes).
+    const { AccountPrivacyService } = await import("../src/modules/account/account-privacy.service");
+    const privacy = app.get(AccountPrivacyService);
+    const qaPrivacy = await user("qa-privacy@example.test", "آزمون حریم خصوصی (QA)");
+    if (!(await db.domainEvent.count({ where: { type: "ConsentChanged", aggregateId: qaPrivacy.id } }))) {
+      await privacy.setConsent(qaPrivacy.id, "TERMS", true);
+      await privacy.setConsent(qaPrivacy.id, "PRIVACY", true);
+      await privacy.setConsent(qaPrivacy.id, "MARKETING", true);
+      await privacy.setConsent(qaPrivacy.id, "MARKETING", false);
+    }
+    await db.accountDeletionRequest.upsert({ where: { id: id("qa-privacy:deletion") }, create: { id: id("qa-privacy:deletion"), userId: qaPrivacy.id, reason: "QA demo — نگهداری در انتظار سیاست", state: "PENDING_RETENTION", stateNote: "در انتظار تصویب سیاست نگهداری" }, update: {} });
+
+    console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care; lost pet with ID card /pet-card/${lostToken}; health share /health-share/${shareToken}.`);
   } finally {
     await app.close();
   }

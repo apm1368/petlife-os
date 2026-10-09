@@ -37,6 +37,8 @@ export function toCommunityPostDto(row: PostWithRelations, authorDisplayName: st
     sourceLostPetIncidentId: row.sourceLostPetIncidentId,
     sourceSupportCampaignId: row.sourceSupportCampaignId,
     topics: row.topics,
+    primaryTopic: row.topics[0] ?? null,
+    region: row.region ?? null,
     city: row.city,
     commentCount: row._count.comments,
     reactionCount: row._count.reactions,

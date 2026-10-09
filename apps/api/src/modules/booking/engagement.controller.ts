@@ -33,6 +33,16 @@ export class BookingEngagementController {
     return this.waitlist.listMine(user.id);
   }
 
+  @Post("waitlist/:entryId/accept-offer")
+  acceptWaitlistOffer(@CurrentUser() user: SessionUser, @Param("entryId", ParseUUIDPipe) id: string) {
+    return this.waitlist.acceptOffer(user.id, id);
+  }
+
+  @Post("waitlist/:entryId/decline-offer")
+  declineWaitlistOffer(@CurrentUser() user: SessionUser, @Param("entryId", ParseUUIDPipe) id: string) {
+    return this.waitlist.declineOffer(user.id, id);
+  }
+
   @Post("waitlist/:entryId/cancel")
   cancelWaitlist(@CurrentUser() user: SessionUser, @Param("entryId", ParseUUIDPipe) id: string) {
     return this.waitlist.cancel(user.id, id);

@@ -1,3 +1,5 @@
+import { UserAccountStatus } from "@prisma/client";
+import { AccountSuspendedException } from "../errors/api-exception";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { Response } from "express";
@@ -24,6 +26,9 @@ export class SessionService {
   private get ttlMs(): number { return this.config.get("SESSION_TTL_DAYS", { infer: true }) * 24 * 60 * 60 * 1000; }
 
   async issueSession(userId: string, res: Response, meta: { userAgent?: string; ipAddress?: string }): Promise<string> {
+    // Every sign-in path (password, OTP, Google, signup) ends here, so this is the one suspension check for logins.
+    const account = await this.prisma.user.findUnique({ where: { id: userId }, select: { accountStatus: true } });
+    if (account?.accountStatus === UserAccountStatus.SUSPENDED) throw new AccountSuspendedException();
     const session = await this.prisma.session.create({ data: { userId, userAgent: meta.userAgent, ipAddress: meta.ipAddress, expiresAt: new Date(Date.now() + this.ttlMs) } });
     const cookieValue = signSessionCookie(session.id, this.config.get("SESSION_SECRET", { infer: true }));
     const isProduction = this.config.get("NODE_ENV", { infer: true }) === "production";
@@ -36,6 +41,7 @@ export class SessionService {
     if (!sessionId) return null;
     const session = await this.prisma.session.findUnique({ where: { id: sessionId }, include: { user: true } });
     if (!session || session.revokedAt || session.expiresAt < new Date()) return null;
+    if (session.user.accountStatus === UserAccountStatus.SUSPENDED) return null;
     if (Date.now() - session.lastSeenAt.getTime() > 5 * 60 * 1000) {
       void this.prisma.session.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } }).catch(() => undefined);
     }

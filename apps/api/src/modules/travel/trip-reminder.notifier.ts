@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { NotificationCategory, TripStatus } from "@prisma/client";
@@ -26,7 +27,7 @@ export class TripReminderNotifier implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.process().catch((e) => this.logger.error("Trip reminder tick failed", e)), 3600e3);
+    if (process.env.NODE_ENV !== "test") { registerWorker("trip-reminders", 3600e3); this.timer = setInterval(() => void trackWorker("trip-reminders", 3600e3, () => this.process()).catch((e) => this.logger.error("Trip reminder tick failed", e)), 3600e3); }
   }
 
   onModuleDestroy() {
@@ -42,7 +43,7 @@ export class TripReminderNotifier implements OnModuleInit, OnModuleDestroy {
     let sent = 0;
     for (const t of trips) {
       const eventId = uuidFrom(`trip-soon:${t.id}:${t.departAt.toISOString()}`);
-      await this.prisma.domainEvent.upsert({ where: { id: eventId }, create: { id: eventId, type: "TripDepartureApproaching", aggregateType: "Pet", aggregateId: t.petId, payload: { tripId: t.id, departAt: t.departAt.toISOString() } }, update: {} });
+      await this.prisma.domainEvent.upsert({ where: { id: eventId }, create: { id: eventId, processedAt: new Date(), type: "TripDepartureApproaching", aggregateType: "Pet", aggregateId: t.petId, payload: { tripId: t.id, departAt: t.departAt.toISOString() } }, update: {} });
       const r = await this.notifications.notify({ userId: t.createdByUserId, type: "travel.trip_approaching", category: NotificationCategory.TRAVEL, petId: t.petId, householdId: t.householdId, entityType: "Trip", entityId: t.id, domainEventId: eventId, deepLink: NotificationDeepLinks.trip(t.id), templateParams: { petName: t.pet.name, destination: t.destinationCity ?? t.destinationCountry, open: String(t._count.checklistItems) } });
       if (r.created) sent++;
     }

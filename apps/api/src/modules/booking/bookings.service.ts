@@ -15,6 +15,7 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import {
   AddressRequiredException,
+  ServiceLocationNotSupportedException,
   BookingConflictException,
   BookingNotCancellableException,
   InvalidBookingTransitionException,
@@ -279,6 +280,11 @@ export class BookingsService {
     // Intake answers are validated before the hold is consumed, so a correctable answer never costs the slot.
     const peek = await this.bookingHold.getHold(dto.holdId);
     const intake = peek && peek.userId === userId ? await this.resolveIntake(peek.providerServiceId, dto.intakeAnswers) : { intakeFormId: null, intakeAnswers: undefined };
+    // Same for the address (missing, foreign or outside the service area): a correctable choice never costs the slot.
+    if (peek && peek.userId === userId) {
+      const peekService = await this.prisma.providerService.findUnique({ where: { id: peek.providerServiceId }, select: { locationMode: true, serviceAreaCities: true } });
+      if (peekService) await this.resolveAddresses(peek.householdId, peekService.locationMode, dto, peekService.serviceAreaCities);
+    }
     const hold = await this.bookingHold.consumeHold(dto.holdId);
     if (hold.petId !== dto.petId || hold.userId !== userId) {
       throw new PetAccessDeniedException({ holdId: dto.holdId });
@@ -295,7 +301,7 @@ export class BookingsService {
 
     const scopePreset = dto.accessSelection ?? DEFAULT_SCOPE_PRESET_BY_CATEGORY[category];
 
-    const { customerAddressId, dropoffAddressId } = await this.resolveAddresses(hold.householdId, locationMode, dto);
+    const { customerAddressId, dropoffAddressId } = await this.resolveAddresses(hold.householdId, locationMode, dto, service.serviceAreaCities);
     if (locationMode !== PrismaLocationMode.TRANSPORT && (dto.transportRequirements?.length || dto.pickupContact)) {
       throw new ValidationApiException({ field: "transportRequirements", reason: "ONLY_FOR_PET_TAXI" });
     }
@@ -457,6 +463,55 @@ export class BookingsService {
     if (!form) return null;
     const given = (answers ?? {}) as Record<string, unknown>;
     return { formVersion: form.version, answers: (form.questions as unknown as IntakeQuestion[]).map((q) => ({ key: q.key, label: q.label, type: q.type, value: (given[q.key] ?? null) as string | boolean | string[] | null })) };
+  }
+
+  /** G13 eligibility: the existing compatibility rules plus the at-home service area. Never books anything. */
+  async eligibility(userId: string, serviceId: string, petId: string, addressId?: string) {
+    const access = await this.petAccess.getEffectivePermissions(petId, userId);
+    if (!access?.canViewIdentity) throw new PetAccessDeniedException({ petId });
+    const [pet, service] = await Promise.all([
+      this.prisma.pet.findUniqueOrThrow({ where: { id: petId } }),
+      this.prisma.providerService.findUnique({ where: { id: serviceId } }),
+    ]);
+    if (!service || !service.isActive) throw new NotFoundApiException("Service");
+    const compatibility = await this.compatibility.evaluate(pet, service);
+    const atHome = service.locationMode === PrismaLocationMode.AT_CUSTOMER || service.locationMode === PrismaLocationMode.MOBILE;
+    let location: { status: "NOT_REQUIRED" | "ADDRESS_REQUIRED" | "SUPPORTED" | "NOT_SUPPORTED"; reason: string | null; city: string | null } = { status: "NOT_REQUIRED", reason: null, city: null };
+    if (atHome) {
+      const address = addressId ? await this.prisma.customerAddress.findFirst({ where: { id: addressId, householdId: pet.householdId } }) : null;
+      if (!address) location = { status: "ADDRESS_REQUIRED", reason: null, city: null };
+      else if (inServiceArea(address.city, service.serviceAreaCities)) location = { status: "SUPPORTED", reason: null, city: address.city };
+      else location = { status: "NOT_SUPPORTED", reason: "LOCATION_NOT_SUPPORTED", city: address.city };
+    }
+    const reasons = [...compatibility.reasons, ...(location.reason ? [location.reason] : [])];
+    return {
+      serviceId,
+      petId,
+      eligible: compatibility.status !== "NOT_SUPPORTED" && location.status !== "NOT_SUPPORTED",
+      compatibility,
+      location,
+      locationMode: service.locationMode,
+      serviceAreaCities: service.serviceAreaCities,
+      travelSurchargeIrr: atHome ? service.travelSurchargeIrr : null,
+      reasons,
+    };
+  }
+
+  async reportProviderNoShow(userId: string, id: string): Promise<BookingDto> {
+    const booking = await this.prisma.booking.findUnique({ where: { id } });
+    if (!booking) throw new NotFoundApiException("Booking");
+    const effective = await this.petAccess.getEffectivePermissions(booking.petId, userId);
+    if (booking.userId !== userId && !effective?.canBookCare) throw new PetAccessDeniedException({ bookingId: id });
+    if (booking.bookingStatus !== BookingStatus.CONFIRMED) throw new InvalidBookingTransitionException({ bookingId: id, from: booking.bookingStatus, to: BookingStatus.NO_SHOW });
+    if (Date.now() < booking.startAt.getTime() + 30 * 60_000) throw new ValidationApiException({ field: "startAt", reason: "TOO_EARLY_TO_REPORT" });
+    await this.prisma.$transaction(async (tx) => {
+      await this.lifecycle.transition(tx, { bookingId: id, to: BookingStatus.NO_SHOW, from: [BookingStatus.CONFIRMED], actorType: BookingActorType.USER, actorId: userId, reason: "PROVIDER_NO_SHOW_REPORTED" });
+      await tx.booking.update({ where: { id }, data: { noShowParty: "PROVIDER" } });
+      await this.petAccessGrants.revokeForBooking(id, userId, tx);
+      await this.careCalendar.markCancelled(id, tx);
+      await this.events.publish("ServiceBookingProviderNoShowReported", { bookingId: id, providerOrganizationId: booking.providerOrganizationId, actorUserId: userId }, { tx, aggregateType: "Booking", aggregateId: id });
+    });
+    return this.toDto(await this.loadWithRelations(id));
   }
 
   async cancel(userId: string, id: string, dto: CancelBookingDto): Promise<BookingDto> {
@@ -821,6 +876,7 @@ export class BookingsService {
     householdId: string,
     locationMode: PrismaLocationMode,
     dto: CreateBookingDto,
+    serviceAreaCities: string[] = [],
   ): Promise<{ customerAddressId: string | null; dropoffAddressId: string | null }> {
     if (locationMode === PrismaLocationMode.AT_PROVIDER) {
       return { customerAddressId: null, dropoffAddressId: null };
@@ -829,6 +885,9 @@ export class BookingsService {
     if (!dto.customerAddressId) throw new AddressRequiredException({ locationMode });
     const primary = await this.prisma.customerAddress.findUnique({ where: { id: dto.customerAddressId } });
     if (!primary || primary.householdId !== householdId) throw new AddressRequiredException({ locationMode });
+    if (locationMode !== PrismaLocationMode.TRANSPORT && !inServiceArea(primary.city, serviceAreaCities)) {
+      throw new ServiceLocationNotSupportedException({ city: primary.city, serviceAreaCities });
+    }
 
     if (locationMode === PrismaLocationMode.TRANSPORT) {
       if (!dto.dropoffAddressId) throw new AddressRequiredException({ locationMode, field: "dropoffAddressId" });
@@ -887,6 +946,7 @@ export class BookingsService {
       completedAt: booking.completedAt?.toISOString() ?? null,
       completedByProviderUserId: booking.completedByProviderUserId,
       completionNote: booking.completionNote,
+      noShowParty: booking.noShowParty ?? null,
       aftercareInstructions: booking.aftercareInstructions,
       createdAt: booking.createdAt.toISOString(),
       updatedAt: booking.updatedAt.toISOString(),
@@ -937,4 +997,11 @@ export class BookingsService {
       expiresAt: petAccess.petAccessGrant.expiresAt?.toISOString() ?? "",
     };
   }
+}
+
+/** City match for at-home service areas (case/space-insensitive). An empty area means no restriction. */
+export function inServiceArea(city: string | null | undefined, area: string[]): boolean {
+  if (!area.length) return true;
+  const norm = (v: string) => v.trim().replace(/\s+/g, " ").toLowerCase();
+  return Boolean(city) && area.some((c) => norm(c) === norm(city!));
 }

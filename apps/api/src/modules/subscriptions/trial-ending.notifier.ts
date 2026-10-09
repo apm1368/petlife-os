@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { NotificationCategory, SubscriptionStatus } from "@prisma/client";
@@ -27,7 +28,7 @@ export class TrialEndingNotifier implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.process().catch((e) => this.logger.error("Trial-ending tick failed", e)), 3600e3);
+    if (process.env.NODE_ENV !== "test") { registerWorker("trial-ending", 3600e3); this.timer = setInterval(() => void trackWorker("trial-ending", 3600e3, () => this.process()).catch((e) => this.logger.error("Trial-ending tick failed", e)), 3600e3); }
   }
 
   onModuleDestroy() {
@@ -43,7 +44,7 @@ export class TrialEndingNotifier implements OnModuleInit, OnModuleDestroy {
     let notified = 0;
     for (const s of subs) {
       const eventId = uuidFrom(`trial-ending:${s.id}:${s.trialEndsAt!.toISOString()}`);
-      await this.prisma.domainEvent.upsert({ where: { id: eventId }, create: { id: eventId, type: "SubscriptionTrialEndingSoon", aggregateType: "Subscription", aggregateId: s.id, payload: { householdId: s.householdId, trialEndsAt: s.trialEndsAt!.toISOString() } }, update: {} });
+      await this.prisma.domainEvent.upsert({ where: { id: eventId }, create: { id: eventId, processedAt: new Date(), type: "SubscriptionTrialEndingSoon", aggregateType: "Subscription", aggregateId: s.id, payload: { householdId: s.householdId, trialEndsAt: s.trialEndsAt!.toISOString() } }, update: {} });
       const days = Math.max(1, Math.ceil((s.trialEndsAt!.getTime() - now.getTime()) / 86400e3));
       const members = await this.prisma.householdMember.findMany({ where: { householdId: s.householdId }, select: { userId: true, user: { select: { locale: true } } } });
       for (const m of members) {

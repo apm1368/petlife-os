@@ -38,18 +38,18 @@ export class HealthTimelineService {
     const entries: HealthTimelineEntryDto[] = [];
 
     if (vaccination?.lastKnownDate) {
-      entries.push({ type: HealthTimelineEntryType.VACCINATION, occurredAt: vaccination.lastKnownDate.toISOString(), sourceType: vaccination.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `Vaccination status: ${vaccination.status}`, recordId: vaccination.id, recordType: HealthTimelineEntryType.VACCINATION });
+      entries.push({ type: HealthTimelineEntryType.VACCINATION, occurredAt: vaccination.lastKnownDate.toISOString(), sourceType: vaccination.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `Vaccination status: ${vaccination.status}`, recordId: vaccination.id, recordedAt: vaccination.createdAt.toISOString(), recordType: HealthTimelineEntryType.VACCINATION });
     }
     for (const m of medications) {
-      if (m.startDate) entries.push({ type: HealthTimelineEntryType.MEDICATION_STARTED, occurredAt: m.startDate.toISOString(), sourceType: m.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `${m.name} started`, recordId: m.id, recordType: HealthTimelineEntryType.MEDICATION_STARTED });
-      if (m.endDate) entries.push({ type: HealthTimelineEntryType.MEDICATION_STOPPED, occurredAt: m.endDate.toISOString(), sourceType: m.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `${m.name} stopped`, recordId: m.id, recordType: HealthTimelineEntryType.MEDICATION_STOPPED });
+      if (m.startDate) entries.push({ type: HealthTimelineEntryType.MEDICATION_STARTED, occurredAt: m.startDate.toISOString(), sourceType: m.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `${m.name} started`, recordId: m.id, recordedAt: m.createdAt.toISOString(), recordType: HealthTimelineEntryType.MEDICATION_STARTED });
+      if (m.endDate) entries.push({ type: HealthTimelineEntryType.MEDICATION_STOPPED, occurredAt: m.endDate.toISOString(), sourceType: m.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `${m.name} stopped`, recordId: m.id, recordedAt: m.createdAt.toISOString(), recordType: HealthTimelineEntryType.MEDICATION_STOPPED });
     }
     for (const c of conditions) {
       const occurredAt = (c.firstRecordedAt ?? c.createdAt).toISOString();
-      entries.push({ type: HealthTimelineEntryType.CONDITION_RECORDED, occurredAt, sourceType: c.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `Condition recorded: ${c.name}`, recordId: c.id, recordType: HealthTimelineEntryType.CONDITION_RECORDED });
+      entries.push({ type: HealthTimelineEntryType.CONDITION_RECORDED, occurredAt, sourceType: c.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `Condition recorded: ${c.name}`, recordId: c.id, recordedAt: c.createdAt.toISOString(), recordType: HealthTimelineEntryType.CONDITION_RECORDED });
     }
     for (const a of allergies) {
-      entries.push({ type: HealthTimelineEntryType.ALLERGY_RECORDED, occurredAt: a.recordedAt.toISOString(), sourceType: a.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `Allergy recorded: ${a.name}`, recordId: a.id, recordType: HealthTimelineEntryType.ALLERGY_RECORDED });
+      entries.push({ type: HealthTimelineEntryType.ALLERGY_RECORDED, occurredAt: a.recordedAt.toISOString(), sourceType: a.sourceType as unknown as SourceTypeDto, source: EMPTY_ACTOR, summary: `Allergy recorded: ${a.name}`, recordId: a.id, recordedAt: a.recordedAt.toISOString(), recordType: HealthTimelineEntryType.ALLERGY_RECORDED });
     }
     for (const v of visits) {
       entries.push({
@@ -58,7 +58,7 @@ export class HealthTimelineService {
         sourceType: SourceTypeDto.PROVIDER,
         source: toClinicalActorRefDto({ sourceProviderOrganizationId: v.providerOrganizationId, sourceProviderOrganization: v.providerOrganization, sourceProviderUserId: v.providerUserId, sourceProviderUser: v.providerUser }),
         summary: v.reasonForVisit ?? `Visit at ${v.providerOrganization.name}`,
-        recordId: v.id,
+        recordId: v.id, recordedAt: v.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.CLINICAL_VISIT,
       });
     }
@@ -69,7 +69,7 @@ export class HealthTimelineService {
         sourceType: l.sourceType as unknown as SourceTypeDto,
         source: toClinicalActorRefDto({ sourceProviderOrganizationId: l.providerOrganizationId, sourceProviderOrganization: l.providerOrganization, sourceProviderUserId: l.recordedByProviderUserId, sourceProviderUser: l.recordedByProviderUser }),
         summary: `Lab result: ${l.testName}`,
-        recordId: l.id,
+        recordId: l.id, recordedAt: l.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.LAB_RESULT,
       });
     }
@@ -80,7 +80,7 @@ export class HealthTimelineService {
         sourceType: i.sourceType as unknown as SourceTypeDto,
         source: toClinicalActorRefDto({ sourceProviderOrganizationId: i.providerOrganizationId, sourceProviderOrganization: i.providerOrganization, sourceProviderUserId: i.performedByProviderUserId, sourceProviderUser: i.performedByProviderUser }),
         summary: `Imaging: ${i.studyType}`,
-        recordId: i.id,
+        recordId: i.id, recordedAt: i.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.IMAGING_STUDY,
       });
     }
@@ -91,7 +91,7 @@ export class HealthTimelineService {
         sourceType: SourceTypeDto.PROVIDER,
         source: toClinicalActorRefDto({ sourceProviderOrganizationId: r.fromProviderOrganizationId, sourceProviderOrganization: r.fromProviderOrganization }),
         summary: `Referral: ${r.reason}`,
-        recordId: r.id,
+        recordId: r.id, recordedAt: r.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.REFERRAL,
       });
     }
@@ -102,7 +102,7 @@ export class HealthTimelineService {
         sourceType: d.sourceType as unknown as SourceTypeDto,
         source: toClinicalActorRefDto({ sourceProviderOrganizationId: d.providerOrganizationId, sourceProviderOrganization: d.providerOrganization, sourceProviderUserId: d.providerUserId, sourceProviderUser: d.providerUser }),
         summary: `Dental: ${d.recordType}`,
-        recordId: d.id,
+        recordId: d.id, recordedAt: d.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.DENTAL_RECORD,
       });
     }
@@ -113,7 +113,7 @@ export class HealthTimelineService {
         sourceType: SourceTypeDto.PROVIDER,
         source: toClinicalActorRefDto({ sourceProviderOrganizationId: n.providerOrganizationId, sourceProviderOrganization: n.providerOrganization }),
         summary: n.goal ?? "Nutrition plan created",
-        recordId: n.id,
+        recordId: n.id, recordedAt: n.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.NUTRITION_PLAN,
       });
     }
@@ -124,12 +124,12 @@ export class HealthTimelineService {
         sourceType: SourceTypeDto.PROVIDER,
         source: toClinicalActorRefDto({ sourceProviderOrganizationId: s.rehabPlan.providerOrganizationId, sourceProviderOrganization: s.rehabPlan.providerOrganization }),
         summary: "Rehab session",
-        recordId: s.id,
+        recordId: s.id, recordedAt: s.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.REHAB_SESSION,
       });
     }
     for (const o of observations) {
-      entries.push({ type: HealthTimelineEntryType.OBSERVATION, occurredAt: o.observedAt.toISOString(), sourceType: SourceTypeDto.OWNER, source: EMPTY_ACTOR, summary: `Owner observation: ${o.category}`, recordId: o.id, recordType: HealthTimelineEntryType.OBSERVATION });
+      entries.push({ type: HealthTimelineEntryType.OBSERVATION, occurredAt: o.observedAt.toISOString(), sourceType: SourceTypeDto.OWNER, source: EMPTY_ACTOR, summary: `Owner observation: ${o.category}`, recordId: o.id, recordedAt: o.createdAt.toISOString(), recordType: HealthTimelineEntryType.OBSERVATION });
     }
     for (const doc of documents) {
       entries.push({
@@ -138,7 +138,7 @@ export class HealthTimelineService {
         sourceType: doc.sourceType as unknown as SourceTypeDto,
         source: toClinicalActorRefDto(doc),
         summary: `Document uploaded: ${doc.title}`,
-        recordId: doc.id,
+        recordId: doc.id, recordedAt: doc.createdAt.toISOString(),
         recordType: HealthTimelineEntryType.DOCUMENT_UPLOADED,
       });
     }

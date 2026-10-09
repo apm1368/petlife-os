@@ -67,6 +67,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "نوبت لغو شد", body: "یکی از نوبت‌های شما توسط مشتری لغو شد.", smsBody: "یکی از نوبت‌های شما در پت‌لایف لغو شد." },
     en: { title: "Booking cancelled", body: "A customer cancelled one of your bookings.", smsBody: "A PET LIFE OS booking was cancelled." },
   },
+  "waitlist.offer": {
+    fa: { title: "زمانی برای شما پیشنهاد شد", body: "{{provider}} زمانی از لیست انتظار به شما پیشنهاد داد. تا پیش از انقضا آن را بپذیرید." },
+    en: { title: "A time was offered to you", body: "{{provider}} offered you a time from the waitlist. Accept it before it expires." },
+  },
+  "provider.no_show_reported": {
+    fa: { title: "گزارش عدم حضور ارائه‌دهنده", body: "مشتری گزارش داده که نوبت {{bookingNumber}} انجام نشد چون ارائه‌دهنده حاضر نبود." },
+    en: { title: "Provider no-show reported", body: "A customer reported that booking {{bookingNumber}} did not happen because the provider was absent." },
+  },
   "waitlist.slotAvailable": {
     fa: { title: "زمانی در لیست انتظار آزاد شد", body: "زمانی که منتظرش بودید آزاد شد. برای رزرو اقدام کنید؛ این زمان برای شما نگه داشته نشده است.", smsBody: "در لیست انتظار پت‌لایف، زمانی آزاد شد." },
     en: { title: "A waitlisted time opened", body: "A time you were waiting for opened up. Book it soon — it is not held for you.", smsBody: "A PET LIFE OS waitlisted time opened." },
@@ -439,6 +447,26 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "care.assigned": {
     fa: { title: "کار مراقبتی برای شما", body: "{{title}} برای {{petName}} به شما سپرده شد." },
     en: { title: "Care task for you", body: "{{title}} for {{petName}} was assigned to you." },
+  },
+  "animal_support.new_need": {
+    fa: { title: "نیاز تازه از سازمانی که دنبال می‌کنید", body: "«{{title}}» منتشر شد." },
+    en: { title: "A new need from an organisation you follow", body: "“{{title}}” was published." },
+  },
+  "animal_support.milestone": {
+    fa: { title: "پیشرفت «{{title}}»", body: "این نیاز به مرحله‌ی تازه‌ای رسید." },
+    en: { title: "Progress on “{{title}}”", body: "This need reached a new milestone." },
+  },
+  "animal_support.volunteer_status": {
+    fa: { title: "داوطلبی شما در {{organization}}", body: "وضعیت داوطلبی شما به‌روز شد." },
+    en: { title: "Your volunteering with {{organization}}", body: "Your volunteer status was updated." },
+  },
+  "care.suggestion_received": {
+    fa: { title: "پیشنهاد مراقبت از {{clinic}}", body: "{{clinic}} برای {{petName}} برنامه‌ی مراقبت پیشنهاد کرد. برای ساختن یادآور تأیید کنید." },
+    en: { title: "Care suggested by {{clinic}}", body: "{{clinic}} suggested care for {{petName}}. Confirm to create the reminder." },
+  },
+  "pet.card_contact_message": {
+    fa: { title: "پیامی درباره‌ی {{petName}}", body: "کسی از طریق کارت شناسایی {{petName}} برای شما پیام گذاشت." },
+    en: { title: "A message about {{petName}}", body: "Someone left you a message through {{petName}}'s ID card." },
   },
   "pet.care_handoff_granted": {
     fa: { title: "سپردن مراقبت {{petName}}", body: "دسترسی موقت مراقبت از {{petName}} به شما داده شد." },

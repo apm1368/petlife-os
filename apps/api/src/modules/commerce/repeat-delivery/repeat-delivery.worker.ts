@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { RepeatDeliveryService } from "./repeat-delivery.service";
 
@@ -11,7 +12,7 @@ export class RepeatDeliveryWorker implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly repeat: RepeatDeliveryService) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.tick(), 15 * 60_000);
+    if (process.env.NODE_ENV !== "test") { registerWorker("repeat-delivery", 15 * 60_000); this.timer = setInterval(() => void trackWorker("repeat-delivery", 15 * 60_000, () => this.tick()).catch(() => undefined), 15 * 60_000); }
   }
 
   onModuleDestroy() {

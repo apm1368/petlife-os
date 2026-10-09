@@ -506,3 +506,444 @@
   - `features/health/VetShareView.tsx` (۱)
   - `features/account/PetAccessView.tsx` (۱)
   - `features/admin/AdminSupportQueueView.tsx`، `AdminSellerFinanceDetailView.tsx`، `AdminMarketplaceReconciliationView.tsx` (هر کدام ۲؛ این‌ها بخش ادمین Batch 7 و متعلق به شما هستند)
+
+## ۱۸. هویت پت (G11)
+
+- **تکمیل پروفایل:** `GET /pets/:petId/completeness` (مجوز `canViewIdentity`)
+  - خروجی: `{petId, score, completionScore, completedFields[], missingFields[], recommendedNextFields[]}`.
+  - `score` عددی بین ۰ و ۱۰۰ است و `completionScore` همان مقدار است (برای سازگاری با کلاینت قدیمی).
+  - `recommendedNextFields`: حداکثر سه فیلد از فیلدهای پرنشده، به این ترتیب: microchip، emergencyContact، photo، vaccinationHistory، weight، birthDate، breed، sex، medicalDocument.
+- **کارت عمومی:** `POST /pets/:petId/share-cards` (مجوز `canManageAccess`)
+  - بدنه: `{kind: EMERGENCY|ID_TAG, fields?, contactMode?: IN_APP|PHONE|BOTH, phoneConsent?, expiresInHours?}`.
+  - مقادیر مجاز `fields`: `PHOTO, SPECIES, BREED, SEX, AGE, MICROCHIP_STATUS, ALLERGIES, CONDITIONS, MEDICATIONS, BLOOD_TYPE, CRITICAL_NOTES`.
+  - پیش‌فرض `fields`: برای ID_TAG فقط فیلدهای هویتی؛ برای EMERGENCY فیلدهای هویتی به‌همراه سلامت حیاتی.
+  - پیش‌فرض `contactMode`: `IN_APP`.
+  - حالت‌های `PHONE` و `BOTH` فقط با `phoneConsent: true` و شماره‌ی اضطراری ثبت‌شده پذیرفته می‌شوند. خطاها: `PHONE_CONSENT_REQUIRED`، `EMERGENCY_PHONE_MISSING`.
+  - توکن فقط یک بار برمی‌گردد.
+- **فهرست کارت‌ها:** `GET /pets/:petId/share-cards`
+  - هر کارت `state` دارد: `ACTIVE`، `REVOKED`، `ROTATED` یا `EXPIRED`.
+  - همراه آن: `visibleFields`، `contactMode`، `phoneConsentAt`، `replacedByCardId`.
+- **مدیریت کارت:**
+  - `POST …/share-cards/:id/rotate`: کارت جدید با همان تنظیمات می‌سازد؛ کارت قبلی `ROTATED` می‌شود.
+  - `POST …/share-cards/:id/revoke`.
+- **خواندن عمومی:** `GET /public/pet-cards/:token` (rate limit ۳۰ در دقیقه).
+  - نام پت همیشه نشان داده می‌شود و بقیه‌ی فیلدها فقط اگر انتخاب شده باشند.
+  - `hasMicrochip`؛ شماره‌ی میکروچیپ هرگز نمایش داده نمی‌شود و `microchipNumber` همیشه `null` است.
+  - `contact: {mode, canMessageOwner, emergencyContact|null}`؛ فیلد سطح بالای `emergencyContact` همان مقدار را دارد.
+  - `isReportedLost` و `lostIncidentId`.
+  - توکن نامعتبر، باطل‌شده، چرخیده یا منقضی همگی 404 برمی‌گردانند.
+- **پیام یابنده:** `POST /public/pet-cards/:token/messages` با بدنه‌ی `{message: 5–1000, finderContact?: ≤120}`.
+  - بدون نیاز به ورود و با CSRF؛ rate limit ۵ در دقیقه.
+  - در کارت‌های `PHONE` پیام پذیرفته نمی‌شود (`IN_APP_CONTACT_DISABLED`).
+  - برای مالک اعلان `pet.card_contact_message` ارسال می‌شود.
+- **پیام‌ها برای مالک:**
+  - `GET /pets/:petId/card-messages` و `POST /pets/:petId/card-messages/:id/read` (مجوز `canManageAccess`).
+  - خروجی: `{id, cardKind, message, finderContact, createdAt, readAt}`.
+- **گم‌شدن پت:** `POST /pets/:petId/lost-incidents` حالا `exposeIdentityCard?: boolean` هم می‌گیرد.
+  - کارت ID_TAG فعال پت لینک می‌شود؛ اگر کارتی نباشد ساخته می‌شود و توکنش یک بار در `identityCardToken` برمی‌گردد (برای ساخت کارت مجوز `canManageAccess` لازم است).
+  - `POST /pets/:petId/lost-incidents/:id/identity-card {expose}` کارت را لینک یا جدا می‌کند.
+  - `identityCardId` فقط در خروجی مالک هست و هرگز در `/lost-pets/:id` عمومی نمی‌آید.
+- **فید فعالیت:** نوع‌های جدید `LOST_REPORTED`، `SIGHTING_REPORTED`، `REUNITED` و `FINDER_MESSAGE`.
+- **داده‌ی نمایشی:** `owner-multi-pet@example.test` با سه پت.
+  - «بیسکویت» در وضعیت LOST است و حادثه‌اش `SIGHTING_REPORTED` است.
+  - کارت ID پت فقط فیلدهای هویتی دارد و تماس `IN_APP` است؛ آدرس آن `/pet-card/<توکن نمایشی در خروجی seed>` است.
+  - یک گزارش مشاهده و یک پیام یابنده هم ثبت شده است.
+- **حالت خالی:** پت بدون کارت آرایه‌ی خالی برمی‌گرداند؛ صندوق پیام یابنده هم آرایه‌ی خالی برمی‌گرداند.
+
+## ۱۹. سلامت و مراقبت (G12)
+
+- **خلاصه‌ی وضعیت سلامت:** `GET /pets/:petId/health/snapshot` (مجوز `canViewHealth`).
+  - خروجی: `{activeConditions[{id,name,since}], activeMedications[{id,name,dosage,unit,frequency,startedAt}], allergies[{id,name,severity,reaction}], latestWeight{value,unit,recordedAt,source: CLINIC|OWNER}|null, vaccinationStatus, upcomingVaccinations[{kind: VACCINATION_SUMMARY|CARE_REMINDER,id,title,dueAt}], recentVisits(3), recentLabs(5, flag فقط همان مقدار ذخیره‌شده), recentImaging(3), documentsCount}`.
+  - هیچ تفسیر یا تشخیصی در کار نیست.
+- **فید سلامت:** `GET /pets/:petId/health/feed?types&sources&from&to&cursor&limit` (مجوز `canViewHealth`؛ `limit` حداکثر ۱۰۰).
+  - `types`: `VISIT, CONDITION, ALLERGY, VACCINATION, MEDICATION, LAB, IMAGING, WEIGHT, DOCUMENT, OTHER`.
+  - `sources`: `OWNER, CLINIC, VET, IMPORT, SYSTEM`.
+  - هر آیتم: `{id, type, recordType, recordId, occurredAt, recordedAt, source, author{providerUserId,displayTitle,userId}, organization{id,name}|null, summary, deepLink}`.
+  - صفحه‌ی بعد با `nextCursor` گرفته می‌شود.
+  - ثبت‌های وزن از علائم حیاتی کلینیک می‌آیند.
+  - `summary` متن خام منبع است و بومی‌سازی آن با UI است.
+- **اشتراک سلامت کوتاه‌مدت:** `POST /pets/:petId/health-shares` (مجوزهای `canViewHealth` و `canManageAccess`)
+  - بدنه: `{sections: ALLERGIES|MEDICATIONS|CONDITIONS|VACCINATION[], labResultIds?, clinicalVisitIds?, imagingStudyIds?(هر کدام ≤۱۰ و فقط مال همین پت), expiresInHours 1–168 (پیش‌فرض ۲۴), label?}`.
+  - توکن فقط یک بار برمی‌گردد. خطاها: `NOTHING_SELECTED`، `NOT_THIS_PET`.
+  - فهرست: `GET /pets/:petId/health-shares` با `{state: ACTIVE|REVOKED|EXPIRED, accessCount, lastAccessedAt, …}`.
+  - `GET …/:id/access-log` و `POST …/:id/revoke`.
+- **خواندن عمومی اشتراک سلامت:** `GET /public/health-shares/:token` (rate limit ۳۰ در دقیقه؛ هر بار خواندن ثبت می‌شود).
+  - فقط بخش‌ها و رکوردهای انتخاب‌شده برمی‌گردد. مدارک هرگز شامل نیستند.
+  - توکن نامعتبر، باطل یا منقضی 404 برمی‌گرداند.
+- **پیشنهاد مراقبت کلینیک (زنجیره‌ی ۱):**
+  - کلینیک: `POST /provider/clinical/visits/:visitId/care-suggestions` (نقش OWNER یا VET؛ فقط برای ویزیت COMPLETED همان کلینیک) و `POST /provider/bookings/:bookingId/care-suggestions` (فقط نوبت COMPLETED).
+  - بدنه: `{items:[{title,type,suggestedDueAt,recurrence?,intervalDays?,notes?}]}`.
+  - برای اعضای خانوار که دسترسی مراقبت دارند اعلان `care.suggestion_received` ارسال می‌شود.
+  - مالک: `GET /pets/:petId/care-suggestions?status=PENDING|ACCEPTED|DISMISSED`.
+  - `POST …/:id/accept {dueAt?, assignedToUserId?}` یک یادآور عادی می‌سازد. روی پلن رایگان 409 با `details.key=care.reminders` برمی‌گردد و پیشنهاد PENDING می‌ماند. پذیرش هم‌زمان فقط یک یادآور می‌سازد.
+  - `POST …/:id/dismiss`.
+  - فید فعالیت: نوع‌های `CARE_SUGGESTED` و `CARE_SUGGESTION_ACCEPTED`.
+- **تاریخچه‌ی مراقبت:** `GET /pets/:petId/care-items/history?state=COMPLETED|SKIPPED|CANCELLED&type&from&to&page&pageSize`.
+- **قالب‌ها، تکرار و تخصیص:** از قبل وجود دارند (§۹ تا §۱۲): `/care-templates` فقط پیشنهاد می‌دهد و `/pets/:id/care-templates/apply` پس از تأیید رکورد می‌سازد.
+- **داده‌ی نمایشی:** `batch2-review@example.test`، پت «کوکی».
+  - یک پیشنهاد مراقبت PENDING («کنترل دوباره‌ی پوست») و یک پیشنهاد ACCEPTED که به یادآور هفتگی تبدیل شده است.
+  - یک اشتراک سلامت فعال: `/health-share/demo-2e3e9cd46e4945898ddabfe3d253794b`، هفت‌روزه و با یک بار دسترسی ثبت‌شده.
+
+## ۲۰. خدمات و نوبت (G13)
+
+- **صلاحیت سرویس:** `GET /provider-services/:serviceId/eligibility?petId&addressId?` (کاربر واردشده با دسترسی هویت پت).
+  - خروجی: `{eligible, compatibility{status, reasons}, location{status: NOT_REQUIRED|ADDRESS_REQUIRED|SUPPORTED|NOT_SUPPORTED, reason, city}, locationMode, serviceAreaCities, travelSurchargeIrr, reasons[]}`.
+  - دلیل‌های مربوط به گونه، سن و وزن از قبل وجود داشتند: `SPECIES_UNSUPPORTED`، `AGE_*` و `WEIGHT_*`. دلیل جدید `LOCATION_NOT_SUPPORTED` است.
+  - هنگام تأیید نوبت در منزل با آدرسی بیرون از محدوده: خطای `SERVICE_LOCATION_NOT_SUPPORTED` (کد 400) با `details.reason`. hold از دست نمی‌رود و می‌توان آدرس دیگری انتخاب کرد.
+- **محدوده‌ی خدمت در منزل (ارائه‌دهنده):** `PATCH /provider/services/:id` با `{serviceAreaCities[], travelSurchargeIrr}`.
+  - هزینه‌ی رفت‌وآمد فقط نمایش داده می‌شود و هنوز به پرداخت آنلاین اضافه نمی‌شود (تصمیم محصول).
+  - حالت HYBRID به‌صورت دو سرویس جدا مدل می‌شود.
+- **پیشنهاد زمان از لیست انتظار:**
+  - ارائه‌دهنده: `POST /provider/waitlist/:entryId/offer {startAt, providerUserId?, expiresInMinutes 15–1440}` (نقش OWNER یا STAFF).
+  - زمان باید خالی و داخل بازه‌ی عضو باشد؛ در غیر این صورت `OUTSIDE_MEMBER_WINDOW` یا `SLOT_NOT_AVAILABLE`.
+  - وضعیت ورودی `OFFERED` می‌شود و اعلان `waitlist.offer` می‌رود. هیچ نوبت یا holdی ساخته نمی‌شود.
+  - عضو: `POST /waitlist/:id/accept-offer` که `{entry, hold}` برمی‌گرداند (مسیر عادی hold و تأیید). اگر پیشنهاد منقضی شده باشد `OFFER_EXPIRED`.
+  - عضو: `POST /waitlist/:id/decline-offer` ورودی را به `ACTIVE` برمی‌گرداند.
+  - `GET /waitlist` حالا فیلد `offer{startAt, expiresAt, providerUserId}|null` دارد و پیشنهاد گذشته `EXPIRED` نمایش داده می‌شود.
+- **عدم حضور:**
+  - `noShowParty` در نوبت عضو و ارائه‌دهنده: `OWNER` یعنی ارائه‌دهنده عدم حضور عضو را ثبت کرده، `PROVIDER` یعنی عضو گزارش داده.
+  - `POST /bookings/:id/report-provider-no-show` فقط برای نوبت CONFIRMED و دست‌کم ۳۰ دقیقه پس از شروع؛ در غیر این صورت `TOO_EARLY_TO_REPORT`.
+  - اعلان `provider.no_show_reported` برای ارائه‌دهنده ارسال می‌شود. هیچ پولی جابه‌جا نمی‌شود.
+- **این موارد از قبل وجود داشتند:**
+  - فرم پذیرش نسخه‌دار (§۹)، پیوست نوبت، جابه‌جایی نوبت (`POST /bookings/:id/reschedule`؛ دسترسی دوباره سنجیده می‌شود، تاریخچه با `rescheduledFromBookingId` نگه داشته می‌شود و دسترسی منتقل می‌شود).
+  - چرخه‌ی پذیرش، شروع و پایان (`/provider/bookings/:id/check-in|start|complete`)، `completionNote` و `aftercareInstructions` که برای عضو قابل مشاهده‌اند، یادداشت داخلی `/provider/bookings/:id/notes` که هرگز به عضو نشان داده نمی‌شود، و دعوت به نظر پس از تکمیل.
+- **زنجیره‌ی ۲:** پایان نوبت ← خلاصه و دستورالعمل مراقبت برای عضو ← `POST /provider/bookings/:id/care-suggestions` (§۱۹) ← نظر تأییدشده ← اعلان و فعالیت `BOOKING_COMPLETED`.
+- **داده‌ی نمایشی:** `batch2-review@example.test`، پت «کوکی»، درمانگاه مهر:
+  - یک نوبت CHECKED_IN امروز؛
+  - یک نوبت COMPLETED همراه خلاصه، دستورالعمل و یادداشت داخلی که عضو نمی‌بیند؛
+  - یک جفت جابه‌جاشده (RESCHEDULED ← CONFIRMED)؛
+  - یک NO_SHOW از نوع OWNER؛
+  - یک ورودی لیست انتظار OFFERED که هر بار اجرای seed دوباره برای ۶ ساعت فعال می‌شود.
+
+## ۲۱. کلینیک پیشرفته (G14)
+
+**موارد موجود (از G5، §۱۱ و §۱۲):**
+- **یادداشت مشتری:** `visibleToOwner` پیش‌فرض false (داخلی) است.
+- **برچسب‌های کلینیک.**
+- **صف روزانه از نوبت‌ها:** `GET /provider/clinic/queue?date`.
+  - بخش‌ها: `SCHEDULED`، `WAITING`، `IN_CONSULTATION`، `COMPLETED`، `NO_SHOW`، `CANCELLED`.
+  - نوبتی که CHECKED_IN شده در بخش `WAITING` قرار می‌گیرد.
+- **تخصیص نوبت:** فقط به عضو فعال و حذف‌نشده‌ی همان کلینیک.
+- **کاتالوگ خدمات:** صلاحیت کارکنان، گونه، فعال یا غیرفعال، شعبه.
+- **ساعات کاری:** قاعده‌ی هفتگی به‌علاوه‌ی استثنا (`ProviderAvailabilityException`) برای تعطیلی و روز خاص.
+- **وظایف:** OPEN، DONE، CANCELLED.
+- **خروجی‌ها:** CSV مخصوص مالک؛ بدون آرشیو پزشکی؛ با رویداد ممیزی.
+- **ویزیت:** علت، تاریخچه، معاینه، علائم حیاتی ساختاریافته، ارزیابی، برنامه و مدارک.
+- **نسخه:** `Medication.prescription`.
+- **لینک آزمایش و تصویربرداری** به ویزیت، کلینیک و ارائه‌دهنده (`clinicalVisitId`).
+
+**جدید در G14:**
+- **پیش‌نمایش کمپین:** `POST /provider/clinic/campaigns/preview {segment}` حالا این شکل را برمی‌گرداند:
+  `{count, recipientCount, excludedCount, exclusionReasons:[{reason, count}], alreadySentToday, sample[]}`.
+  - دلیل‌های حذف: `DUPLICATE_PET` (همان پت دو بار)، `PET_INACTIVE`، `NO_RECIPIENT` (خانوار بدون مالک).
+  - ارسال همچنان فقط با `confirm: true` و `expectedCount` برابر با `recipientCount` انجام می‌شود؛ در غیر این صورت `AUDIENCE_CHANGED`. ارسال خودکار وجود ندارد.
+- **ورود CSV:**
+  - dry-run حالا `confirmationToken` برمی‌گرداند.
+  - commit (`dryRun: false`) فقط با همان توکن انجام می‌شود. خطاها: `DRY_RUN_REQUIRED` و `STALE_DRY_RUN` (فایل یا نتیجه‌ی اعتبارسنجی عوض شده).
+  - تطبیق خودکار با نام یا حساب هرگز انجام نمی‌شود.
+- **داده‌ی نمایشی:** کلینیک `batch3-clinic-owner@example.test` (CLINIC_PRO) با یادداشت‌ها، برچسب‌ها، وظایف، مشتریان واردشده و صف (seed-clinic-chat-demo و G5).
+
+## ۲۲. سفر، مکان‌ها و بیمه (G15)
+
+- **چک‌لیست سفر:** `PATCH /pets/:petId/trips/:tripId/checklist/:itemId` با بدنه‌ی `{state: TODO|DONE|NOT_REQUIRED}`.
+  - `{done: boolean}` هنوز پذیرفته می‌شود.
+  - هر آیتم: `{state, done}`.
+  - خلاصه: `{done, todo, notRequired, total}`.
+- **مدارک سفر:** `GET|POST /pets/:petId/trips/:tripId/documents` (بدنه `{documentId}`) و `DELETE …/documents/:documentId`.
+  - مجوز: `canViewHealth`.
+  - سفر فقط به مدرک موجود ارجاع می‌دهد و فایل کپی نمی‌شود.
+  - مدرک باید متعلق به پت سفر یا پتِ شرکت‌کننده در سفر باشد، و کاربر روی همان پت دسترسی سلامت داشته باشد؛ در غیر این صورت 404.
+  - هر آیتم: `{documentId, petId, title, documentType, mimeType, linkedAt, deepLink}`.
+- **آمادگی سفر (زنجیره‌ی ۴):** `GET /pets/:petId/trips/:tripId/preparation`. خروجی:
+  - `trip`
+  - `readiness{authority: "ADVISORY", items[{key, status}]}`
+    - کلیدها: `MICROCHIP, VACCINATION_CERTIFICATE, HEALTH_CERTIFICATE, CARRIER, MEDICATION, INSURANCE`
+    - وضعیت‌ها: `MET, NOT_MET, UNKNOWN, NOT_APPLICABLE`
+    - این موارد صرفاً توصیه‌اند و قانون هیچ کشور یا ایرلاینی نیستند؛ الزامات مبتنی بر قاعده همان `requirements` هستند.
+  - `requirements{readyCount,totalCount,allReady}`
+  - `checklist{total,todo,done,notRequired}`
+  - `documents{linkedCount}`
+  - `insurance{insured, applications[{id,status,productName}], claimPrepCount}`
+  - `reminderProposals[{key,title,type,dueAt}]`
+- **اعمال پیشنهادهای یادآور:** `POST …/reminder-proposals/apply {keys[]}`.
+  - مجوز `canEditCareProfile`؛ entitlement `care.reminders` لازم است.
+  - فقط کلیدهای تأییدشده ساخته می‌شوند و تکرار آن‌ها ساخته نمی‌شود (`skipped`).
+- **سفر چندپتی:** با `TripParticipant` از قبل وجود داشت (§۱۰). وضعیت‌های سفر: `DRAFT, PLANNING, READY, IN_PROGRESS, COMPLETED, CANCELLED`.
+- **اصلاح یا گزارش تعطیلی مکان:** `POST /place-suggestions/changes`.
+  - بدنه: `{kind: CORRECTION|CLOSURE_REPORT, placeId, changes?, notes?}`.
+  - `changes` فقط این فیلدها را می‌پذیرد: `name, address, description, petFriendlyLevel, entryFeeIrr, leashRequired, waterAvailable, shadeAvailable, fencedArea, wasteBins, smallDogArea, parkingAvailable`.
+  - تأیید با ادمین است (`/admin/place-suggestions/:id/approve`). با تأیید، اصلاحات اعمال می‌شود یا مکان از فهرست عمومی خارج می‌شود؛ رویداد در audit ثبت می‌شود.
+  - `GET /place-suggestions/mine` حالا `kind`، `placeId` و `proposedChanges` را هم برمی‌گرداند.
+- **بیمه:**
+  - مقایسه‌ی نرمال‌شده از قبل وجود داشت: `coverage`، `deductible`، `annualLimit`، `waitingPeriod`، `speciesEligibility`، `age`.
+  - وضعیت‌های درخواست: `DRAFT…DECLINED/CANCELLED`.
+  - تصمیم فقط با تیم خود بیمه‌گر در پورتال بیمه‌گر گرفته می‌شود. هیچ اتصال خارجی وجود ندارد و هیچ تأییدی جعل نمی‌شود.
+  - پوشه‌ی آماده‌سازی ادعا (claim prep) ارسال ادعا نیست.
+- **داده‌ی نمایشی:** سفر رامسرِ `batch2-review`:
+  - یک آیتم DONE، یک آیتم NOT_REQUIRED و یک مدرک لینک‌شده؛
+  - یک پیشنهاد اصلاح مکانِ PENDING (پارکینگ و آب).
+
+## ۲۳. حمایت از حیوانات (G16)
+
+- **به‌روزرسانی نیاز:**
+  - انتشار: `POST /animal-support/needs/:id/updates {body: 1–2000, mediaObjectKeys?: ≤4}`. فقط مدیران همان نیاز یا سازمان؛ در غیر این صورت 403.
+  - رسانه فقط از تصاویری است که خود نویسنده با `POST /animal-support/needs/upload-url` آپلود کرده. لینک بیرونی یا فایل شخص دیگر رد می‌شود (`NOT_YOUR_UPLOAD`).
+  - خواندن (عمومی): `GET /animal-support/needs/:id/updates?cursor&limit≤50` و خروجی `{items[{id, body, mediaObjectKeys, mediaUrls, createdAt, updatedAt}], nextCursor}`.
+  - نیاز پنهان یا حذف‌شده 404 برمی‌گرداند.
+- **نقطه‌عطف‌ها:** `GET /animal-support/needs/:id/milestones` و خروجی `[{key, at}]`.
+  - کلیدها: `FUNDING_25|50|75|100`، `ITEM_RECEIVED`، `NEED_COMPLETED`.
+  - هر کلید فقط یک بار، از وضعیت واقعی پس از commit، ثبت می‌شود و هرگز تکرار نمی‌شود.
+  - کلیدهای قبلی `FIRST_HELP_RECEIVED` و `FULFILLED` حذف شدند و جایگزینشان `ITEM_RECEIVED` و `NEED_COMPLETED` است.
+- **زمان‌نمای نیاز (عمومی و ناشناس):** `GET /animal-support/needs/:id/activity` و خروجی `[{kind, at, ref}]`.
+  - انواع: `NEED_PUBLISHED, MILESTONE(ref=key), UPDATE_POSTED(ref=updateId), ITEM_RECEIVED, VOLUNTEER_ACCEPTED, NEED_COMPLETED`.
+  - نام یا شناسه‌ی حامی، کمک‌کننده یا داوطلب هرگز نمایش داده نمی‌شود.
+- **اعلان‌ها:**
+  - `animal_support.new_need`: برای دنبال‌کنندگان سازمان، فقط در اولین انتشار نیاز.
+  - `animal_support.need_update`: از قبل وجود داشت.
+  - `animal_support.milestone`: فقط برای ۵۰٪، ۱۰۰٪ و تکمیل نیاز؛ گیرندگان دنبال‌کنندگان، حامیان و کمک‌کنندگان هستند، هر کدام یک بار.
+  - `animal_support.volunteer_status`.
+  - همه از ترجیحات اعلان پیروی می‌کنند.
+- **دنبال‌کردن سازمان و ذخیره‌ی نیاز:** از قبل وجود داشتند و idempotent هستند. نیاز ذخیره‌شده در `/me/saved` هم دیده می‌شود.
+- **داوطلبی:**
+  - ثبت: `POST /animal-support/organizations/:orgId/volunteer {kinds[TRANSPORT|TEMPORARY_FOSTER|DELIVERY|ON_SITE_HELP|OTHER], city, availability?, note?, shareContact?, listingId?}`.
+  - `listingId` باید نیاز قابل‌مشاهده‌ی همان سازمان باشد.
+  - وضعیت‌ها: `INTERESTED → CONTACTED → ACCEPTED → COMPLETED`. `CANCELLED` از هر وضعیت باز ممکن است. `CLOSED` قدیمی است.
+  - سازمان: `POST /ngo/volunteers/:id/status {status: CONTACTED|ACCEPTED|COMPLETED|CANCELLED}`؛ انتقال نامعتبر خطای `INVALID_TRANSITION` می‌دهد و هر انتقال در audit ثبت می‌شود.
+  - عضو: `DELETE …/volunteer` وضعیت را `CANCELLED` می‌کند و تاریخچه می‌ماند.
+  - اگر عضو جزئیات را ویرایش کند، پیشرفت ثبت‌شده توسط سازمان ریست نمی‌شود.
+  - تماس عضو فقط با رضایت (`shareContact`) و فقط به کارکنان همان سازمان نشان داده می‌شود.
+- **رفع باگ:** دو کمک مالی هم‌زمانِ اول به یک سازمان دیگر یکی را با خطای 500 از کار نمی‌اندازد (ساخت حساب دفتر کمک‌ها حالا race-safe است).
+- **داده‌ی نمایشی (پناهگاه نمونه):**
+  - «هزینه‌ی جراحی رعنا» (فقط نقدی): ۲۵٪.
+  - «دارو و هزینه‌ی درمان پوستی» (ترکیبی): ۵۰٪، دارو رسیده، یک به‌روزرسانی.
+  - «۲۰ کیلو غذای خشک»: کالا رسیده.
+  - «قفس حمل»: ۱۰۰٪ و تکمیل‌شده.
+  - یک داوطلب فعال (helper-b) مرتبط با نیاز نقدی، یک دنبال‌کننده و یک نیاز ذخیره‌شده.
+
+## ۲۴. انجمن و گفتگو (G17)
+
+- **دسته‌بندی رسمی موضوع‌ها:** `DOG, CAT, HEALTH, TRAINING, TRAVEL, LOST_PET, SUPPORT, GENERAL`.
+  - هر پست حداکثر ۳ موضوع دارد و اولی موضوع اصلی است.
+  - خروجی پست دو فیلد جدید دارد: `primaryTopic` و `region`.
+  - کدهای قدیمی همچنان پذیرفته و به معادل جدید تبدیل می‌شوند: `DOGS→DOG`، `CATS→CAT`، `LOST_PETS→LOST_PET`، `ADOPTION→SUPPORT`، `NUTRITION→HEALTH`، `OTHER→GENERAL`. داده‌های موجود هم با مایگریشن تبدیل شدند.
+- **محلی:** هنگام ساخت پست `city?` و `region?` (هر کدام ۱ تا ۸۰ کاراکتر) پذیرفته می‌شود، و فید با `?topic&city&region` فیلتر می‌شود.
+  - هرگز آدرس یا مختصات ذخیره نمی‌شود.
+- **موارد موجود از G8 (§۱۳ و §۱۴):**
+  - ذخیره‌ی پست (`POST|DELETE /community/posts/:id/save` و `/me/saved`)؛
+  - کامنت با فقط یک سطح پاسخ و صفحه‌بندی (`GET /community/posts/:id/comments?page`)؛
+  - گزارش کامنت (`POST /community/comments/:id/report`)؛
+  - بلاک در کامنت و پاسخ (خطای `COMMUNITY_INTERACTION_BLOCKED`)؛
+  - آرشیو، بی‌صدا (`mutedUntil`؛ پیام‌ها می‌رسند و فقط اعلان قطع می‌شود) و حذف برای خود در گفتگو.
+- **رگرسیون امنیت چت:** همه‌ی موارد سبز است: دسترسی فقط برای شرکت‌کنندگان، بلاک، گزارش، IDOR، صفحه‌بندی، خوانده‌نشده‌ها، بی‌صدا و آرشیو.
+- **داده‌ی نمایشی:** پست «واکسن سالانه» با موضوع اصلی `DOG`، شهر و استان تهران، کامنت و یک پاسخ، و ذخیره‌شده. گفتگوهای آرشیوی و بی‌صدا از G8 باقی هستند.
+
+## ۲۵. اعلان‌ها، جست‌وجو، نظرها و ذخیره‌ها (G18)
+
+**موارد موجود از G9 و G10 (§۱۵ و §۱۶):**
+- گروه‌های اعلان `HEALTH, CARE, BOOKING, ORDER, TRAVEL, COMMUNITY, SUPPORT, CLINIC, SUBSCRIPTION, SECURITY, OTHER`.
+- گروه‌بندی سمت سرور (`groupKey`، `groupCount`، `latestAt`)، خواندن همه یا یک گروه، و ترجیحات digest.
+- فید فعالیت خانوار.
+- جست‌وجوی عمومی، ذخیره‌های یکپارچه، و بازدیدهای اخیر.
+- نظر با ابعاد خدمت و سفر، و یک پاسخ ارائه‌دهنده همراه با ممیزی ویرایش.
+
+**جدید در G18:**
+- **خواندن موارد انتخاب‌شده:** `POST /notifications/read {ids: uuid[1..100]}` و خروجی `{updatedCount}`. فقط اعلان‌های خود کاربر تغییر می‌کنند.
+- **بازدیدهای اخیر:** نوع `SERVICE` اضافه شد (فقط خدمت فعالِ ارائه‌دهنده‌ی تأییدشده). انواع مجاز: `PROVIDER, SERVICE, PRODUCT, TRAVEL_LISTING, PLACE, ARTICLE, SUPPORT_NEED`.
+- **گزارش نظر یا پاسخ ارائه‌دهنده:** `POST /reports {targetType: "PROVIDER_REVIEW", targetId, reason, details}`.
+  - فقط برای نظرِ منتشرشده؛ گزارش تکراری رد می‌شود.
+  - نویسنده‌ی نظر نمی‌تواند نظر خودش را گزارش کند (`CANNOT_REPORT_OWN_REVIEW`).
+  - رسیدگی با صف گزارش‌های ادمین و پنهان‌کردن نظر (`/admin/provider-reviews/:id/hide`) است.
+- **فید فعالیت:** نوع جدید `ACCESS_SHARED` (رویداد دادن دسترسی پت به یک نفر).
+
+## ۲۶. حریم خصوصی و حقوق داده (G19)
+
+**موارد موجود از Batch 8 (بدون تغییر):**
+- **درخواست خروجی داده:** `POST /account/privacy/exports` با وضعیت‌های `PENDING → PROCESSING → READY | FAILED`، و `expiresAt` بعد از ۷ روز.
+  - دانلود فقط با `POST /account/privacy/exports/:id/download` انجام می‌شود که لینک امضاشده‌ی کوتاه‌مدت می‌سازد.
+  - سقف درخواست ۳ بار در روز است.
+  - رویدادهای `DataExportRequested` و `DataExportDownloaded` ثبت می‌شوند.
+
+**جدید در G19:**
+- **ماشین وضعیت حذف حساب:** فیلد `state` روی هر درخواست حذف، با مقادیر `REQUESTED | CANCELLED | PENDING_RETENTION | READY_FOR_EXECUTION | COMPLETED`.
+  - `GET /account/privacy` برای هر درخواست حذف این فیلدها را برمی‌گرداند: `state`، `stateChangedAt`، `cancellable` و `executionEnabled: false`.
+  - عضو فقط در وضعیت `REQUESTED` یا `PENDING_RETENTION` می‌تواند لغو کند (`POST /account/privacy/deletion/:id/cancel`).
+  - ادمین (فقط `SUPER_ADMIN` با دسترسی `admin.manage`):
+    - `GET /admin/privacy/deletion-requests?state=` برای فهرست؛
+    - `POST /admin/privacy/deletion-requests/:id/transition {to, note?}` برای تغییر وضعیت.
+  - انتقال‌های مجاز فقط `REQUESTED → PENDING_RETENTION → READY_FOR_EXECUTION` است.
+    - رفتن به `READY_FOR_EXECUTION` تا وقتی `RETENTION_POLICY_APPROVED=true` نشده رد می‌شود (`RETENTION_POLICY_NOT_APPROVED`).
+    - رفتن به `COMPLETED` همیشه رد می‌شود (`EXECUTION_DISABLED`). اجرای حذف اصلاً پیاده نشده و هیچ داده‌ای حذف نمی‌شود.
+  - هر تغییر وضعیت در لاگ ممیزی ادمین (`account_deletion.state_changed`) و در رویداد `AccountDeletionStateChanged` ثبت می‌شود و در فید فعالیت حریم خصوصی هم دیده می‌شود.
+- **تاریخچه‌ی رضایت:** `GET /account/privacy/consents/history` → `{currentVersion, items: [{kind, version, acceptedAt, withdrawnAt, source}]}`، از جدید به قدیم.
+  - `source` امروز `PRIVACY_CENTER` است.
+  - رکوردهای قدیمی‌تر که رویدادی ندارند با `LEGACY_RECORD` نمایش داده می‌شوند.
+  - ثبت رضایت هنگام ثبت‌نام (`SIGNUP`) وابسته به متن حقوقی CMS در Batch 7 است.
+- **دروازه‌ی انتشار برای کاربر واقعی:** `GET /admin/release-gate` (فقط `SUPER_ADMIN`) → `{readyForRealUsers, items: [{key, ready}]}`.
+  - کلیدها:
+    - `NODE_ENV_PRODUCTION`
+    - `TLS_ENABLED`
+    - `SECURE_COOKIES`
+    - `REAL_OTP_PROVIDER`
+    - `REAL_MESSAGING`
+    - `PAYMENT_PRODUCTION_DECISION`
+    - `RETENTION_POLICY_APPROVED`
+    - `DEV_SIMULATION_DISABLED`
+  - مقدارها فقط از پیکربندی در حال اجرا خوانده می‌شوند و این endpoint هیچ تنظیمی را تغییر نمی‌دهد.
+  - روی VPS فعلی انتظار می‌رود `readyForRealUsers=false` باشد. این وضعیت عمداً برای محیط نمایشی است.
+- **نیاز طراحی (Codex):**
+  - نشان (badge) وضعیت حذف و دکمه‌ی لغو بر اساس `cancellable`؛
+  - جدول تاریخچه‌ی رضایت؛
+  - صفحه‌ی ادمین برای صف حذف و جدول دروازه‌ی انتشار، در بخش Admin در Batch 7 که مالک آن Codex است.
+
+## ۲۷. ERP-A — کنترل دسترسی، تنظیمات، سلامت سیستم، وضعیت یکپارچه‌سازی‌ها
+
+همه‌ی مسیرها زیر `/api/admin/...` هستند و نشست ادمین می‌خواهند. هر درخواست تغییر‌دهنده هدر `x-csrf-token` لازم دارد. مجوزها سمت سرور اعمال می‌شوند؛ مخفی‌کردن دکمه در UI فقط راحتی کاربر است، نه مرز امنیتی. فهرست مجوزهای کاربر جاری از `GET /admin/me` → `permissions` می‌آید.
+
+**نقش‌های جدید:**
+- `PARTNER_OPERATIONS`، `CLINIC_OPERATIONS`، `COMMERCE_OPERATIONS` و `ANALYTICS`.
+- مجوزهای جدید: `access.view`، `settings.view`، `settings.manage`، `settings.approve`، `system.view` و `analytics.view`.
+- هیچ‌کدام از نقش‌های جدید این‌ها را ندارند: `admin.manage`، `settings.approve`، اجرای بازپرداخت و override اشتراک.
+
+### کنترل دسترسی (Access Control)
+- **خواندن** (مجوز `access.view`؛ نقش‌های SUPER_ADMIN و ADMIN):
+  - `GET /admin/access/roles` → `[{role, protected, permissions[], activeMembers, suspendedMembers}]`
+  - `GET /admin/access/permissions` → `[{permission, domain, roles[]}]` (برای ماتریس نقش × مجوز)
+  - `GET /admin/access/admins?role&status&q&page&pageSize` → صفحه‌بندی‌شده: `{items:[{id, userId, displayName, emailMasked, role, status, createdAt, updatedAt, lastActiveAt}], total, page, pageSize}`
+  - `GET /admin/access/admins/:id` → همان شکل، به‌علاوه‌ی `permissions[]`
+- **تغییر** (مجوز `admin.manage`، فقط SUPER_ADMIN؛ فیلد `reason` با طول ۵ تا ۵۰۰ اجباری است):
+  - `POST /admin/access/admins {email, role, reason}`: دادن دسترسی ادمین به یک حساب عضو موجود. حساب جدید نمی‌سازد.
+  - `POST /admin/access/admins/:id/role {role, reason}`
+  - `POST /admin/access/admins/:id/suspend {reason}` و `POST /admin/access/admins/:id/reactivate {reason}`
+- **خطاها:** کد `ADMIN_GOVERNANCE_RULE` با وضعیت 409 و یکی از این مقادیر در `details.rule`:
+  - `LAST_SUPER_ADMIN`
+  - `SELF_CHANGE_FORBIDDEN`
+  - `PROTECTED_ROLE`
+  - `ALREADY_ADMIN`
+- **خطاهای دیگر:** 400 با `UNCHANGED`؛ 404 وقتی کاربر پیدا نشود.
+- **اثر تعلیق:** فوری است و از درخواست بعدی اعمال می‌شود. همه‌ی تغییرها در ممیزی ثبت می‌شوند (`admin_user.*`) و رویداد `AdminMembershipChanged` می‌سازند.
+- **عملیات خطرناک** (نیاز به تأیید و دلیل): تعلیق، تغییر نقش، و دادن نقش SUPER_ADMIN.
+
+### تنظیمات (Settings registry)
+- **مسیرها:**
+  - `GET /admin/settings` (مجوز `settings.view`) → `[{key, category, type, scope, highImpact, constraints:{min,max,maxLength}, description, value, defaultValue, source: DEFAULT|OVERRIDE, version, updatedAt, updatedByAdminId, pendingChanges}]`
+  - `PUT /admin/settings/:key {value, baseVersion, reason}` (مجوز `settings.manage`):
+    - کلید کم‌اثر فوراً `APPLIED` می‌شود.
+    - کلید پراثر (`highImpact`) به وضعیت `PENDING` می‌رود.
+  - `POST /admin/settings/changes/:id/review {decision: APPROVE|REJECT, note?}` (مجوز `settings.approve`، فقط SUPER_ADMIN). درخواست‌دهنده نمی‌تواند تغییر خودش را تأیید کند.
+  - `POST /admin/settings/changes/:id/cancel`: درخواست‌دهنده تغییر PENDING خودش را لغو می‌کند.
+  - `GET /admin/settings/changes?key&status&page`: تاریخچه. وضعیت‌ها `PENDING | APPLIED | REJECTED | CANCELLED | SUPERSEDED`.
+- **کلیدهای فعلی** (فقط کلیدهایی که واقعاً در کد خوانده می‌شوند):
+
+| کلید | نوع | دامنه | پراثر |
+|---|---|---|---|
+| `platform.announcement` | `{fa?, en?}` یا `null` | PUBLIC | خیر |
+| `booking.holdTtlSeconds` | عدد ۱۲۰ تا ۱۸۰۰ | INTERNAL | بله |
+| `commerce.refundApprovalThresholdIrr` | عدد | INTERNAL | بله |
+| `commerce.settlementApprovalThresholdIrr` | عدد | INTERNAL | بله |
+| `privacy.exportsPerDay` | عدد ۱ تا ۱۰ | INTERNAL | خیر |
+
+- **خطاها:**
+  - `SETTING_CHANGE_CONFLICT` با وضعیت 409: یعنی `baseVersion` قدیمی است، یا تغییر دیگر PENDING نیست (`details.reason` برابر `SUPERSEDED` یا `NOT_PENDING`). UI باید فهرست را دوباره بارگذاری کند.
+  - 409 با `ADMIN_GOVERNANCE_RULE` و `SELF_APPROVAL_FORBIDDEN`.
+  - 400 با `BELOW_MIN`، `ABOVE_MAX`، `UNKNOWN_LOCALE`، `TOO_LONG`، `UNCHANGED` یا `REQUIRED`.
+- **عمومی:** `GET /api/settings/public` بدون نشست کار می‌کند و فقط کلیدهای PUBLIC را برمی‌گرداند. فعلاً تنها کلید `platform.announcement` است؛ اگر مقدارش `null` باشد بنری نشان داده نمی‌شود.
+- **کاربرد اطلاعیه:** بنر اطلاعیه را Codex طراحی می‌کند.
+- **محدوده:** اسرار و حالت‌های ارائه‌دهنده (درگاه پرداخت، پیامک و…) هرگز در تنظیمات نیستند و فقط در env سرور می‌مانند.
+
+### سلامت سیستم و یکپارچه‌سازی‌ها (مجوز `system.view`؛ نقش‌های SUPER_ADMIN، ADMIN، OPERATIONS و READ_ONLY)
+- `GET /admin/system/health` → `{status: OK|DEGRADED|DOWN, checkedAt, components}`. اجزای `components`:
+  - `api` (uptime)؛
+  - `database` و `redis` (UP/DOWN و latencyMs)؛
+  - `storage` (درایور و قابلیت نوشتن)؛
+  - `outbox` (رویدادهای پردازش‌نشده، قدیمی‌ترین، lagSeconds، وضعیت LAGGING)؛
+  - `workers[]`: ۱۱ کارگر پس‌زمینه با `status: OK|LATE|FAILING|WAITING_FIRST_RUN` و زمان آخرین اجرای موفق یا ناموفق؛
+  - `notifications24h`؛
+  - `failedJobs`؛
+  - `migrations` (تعداد اعمال‌شده، آخرین مهاجرت، ناموفق‌ها، معوق‌ها)؛
+  - `deploy` (SHA و نسخه).
+- `GET /admin/system/integrations` → `{items:[{key, status, mode, configurationComplete, missingConfiguration[] (فقط نام کلیدها), lastSuccessAt, lastErrorAt, lastErrorCategory, note}]}`.
+  - کلیدها: `TLS, OTP, FARAZ_SMS, EMAIL, GOOGLE_AUTH, PAYMENT, BNPL, SHIPPING, MARKETPLACE, MAPS, STORAGE_S3`.
+  - وضعیت‌ها: `LIVE | SANDBOX | NOT_CONFIGURED | NOT_IMPLEMENTED | BLOCKED_EXTERNAL | ERROR`.
+  - هیچ مقدار مخفی، host یا متن خطای ارائه‌دهنده برگردانده نمی‌شود.
+
+### کاوشگر ممیزی
+- `GET /admin/audit` حالا این فیلترها را هم می‌پذیرد:
+  - `action`: یک کنش دقیق، یا پیشوند با نقطه در انتها مثل `setting.`؛
+  - `from` و `to` (ISO)؛
+  - `entityType` به‌تنهایی.
+- این فیلترها با `adminUserId` و `entityId` قابل ترکیب‌اند و نتیجه صفحه‌بندی‌شده است.
+
+### داده‌ی نمایشی
+- **پرسوناهای ادمین:** ۱۲ حساب `qa.admin.<role>`، یکی برای هر نقش: super، admin، ops، support، finance، content(EDITOR)، trust، partner، clinic، commerce، analytics، readonly.
+  - گذرواژه‌ها فقط در `/root/petlife-qa-admin-credentials.txt` روی سرور هستند و از مالک گرفته می‌شوند.
+- **صف تأیید نمایشی:** یک پیشنهاد PENDING برای `commerce.refundApprovalThresholdIrr` از طرف `qa.admin.admin`.
+
+### حالت خالی
+- حالت خالی برای `settings/changes` ممکن است. برای `roles` و `integrations` هرگز خالی نیست.
+
+## ۲۸. ERP-B — Customer 360 و Pet 360
+
+**مجوزهای جدید:**
+- `customer.account.manage`: تعلیق و رفع تعلیق حساب. نقش‌ها: SUPER_ADMIN، ADMIN و TRUST_SAFETY.
+- `customer.sessions.revoke`: خروج اجباری از همه‌ی دستگاه‌ها. نقش‌ها: SUPER_ADMIN، ADMIN، SUPPORT و TRUST_SAFETY.
+- `pet.access.manage`: لغو دسترسی کهنه به پت. نقش‌ها: SUPER_ADMIN، ADMIN و SUPPORT.
+
+### Customer 360 — نمای جامع عضو
+- **مسیر:** `GET /admin/customers/:id/overview` (مجوز `customer.view`). مسیر قدیمی `GET /admin/customers/:id` بدون تغییر باقی است.
+- **بخش‌های پاسخ:**
+  - `identity`: ایمیل و تلفن ماسک‌شده، وضعیت تأیید، روش‌های ورود، و اینکه حساب متعلق به کارمند است یا نه.
+  - `account`: `{status: ACTIVE|SUSPENDED, suspendedAt, suspendedReason, activeSessions, lastSeenAt}`.
+  - `households[]`: نقش، تعداد پت و عضو، اشتراک (`planCode`، `status`، `trialEndsAt`، `cancelEffectiveAt`، `currentPeriodEndsAt`) و `entitlementOverrides[]`.
+  - `bookings` (تعداد بر اساس وضعیت) و `orders` (تعداد و مجموع).
+  - `finance`:
+    - فقط برای ادمین دارای `finance.view` پر می‌شود: payment intents و refunds بر اساس وضعیت، به‌علاوه‌ی `refundRequests`.
+    - برای بقیه فقط `{restricted: true}` برمی‌گردد. UI باید پیام «دسترسی مالی لازم است» نشان دهد.
+  - `support`: پرونده‌ها و اختلاف‌های باز و کل.
+  - `notifications`: تعداد ۳۰ روز اخیر.
+  - `privacy`: رضایت‌ها، آخرین درخواست حذف همراه با `state`، و تعداد درخواست‌های خروجی.
+  - `community`: پست، کامنت، گزارش‌های ثبت‌شده، گزارش‌ها علیه محتوای عضو، بلاک‌ها و تعداد گفتگوها. متن پیام‌ها هرگز برگردانده نمی‌شود.
+  - `animalSupport`: کمک‌ها، دنبال‌کردن‌ها و داوطلبی.
+  - `saved`: تعداد ذخیره‌ها به تفکیک نوع، به‌علاوه‌ی بازدیدهای اخیر.
+  - `recentAdminActions[]`: ده اقدام آخر ادمین روی این عضو.
+  - `links`: لینک به یادداشت‌ها و ممیزی.
+- **محتوای پزشکی:** هیچ محتوای پزشکی در این نما برنمی‌گردد.
+- **دیدن ایمیل یا تلفن کامل:** فقط با `POST /admin/customers/:id/reveal` ممکن است که ممیزی می‌شود (از قبل وجود داشت).
+
+**اقدام‌ها** (همه فیلد `reason` با طول ۵ تا ۵۰۰ می‌خواهند؛ همه دلیل و تأیید در UI لازم دارند):
+- `POST /admin/customers/:id/suspend` → `{accountStatus, sessionsRevoked}`.
+  - همه‌ی نشست‌ها فوراً باطل می‌شوند و ورود بعدی با 403 و کد `ACCOUNT_SUSPENDED` رد می‌شود.
+  - رد با 409 و `ADMIN_GOVERNANCE_RULE`: `STAFF_ACCOUNT` (برای حساب کارمند، اول از Access Control تعلیق شود) یا `SELF_CHANGE_FORBIDDEN`.
+  - رد با 400 و `UNCHANGED`.
+- `POST /admin/customers/:id/unsuspend`.
+- `POST /admin/customers/:id/sessions/revoke` → `{sessionsRevoked}`. برای حساب مشکوک به نفوذ؛ عضو را معلق نمی‌کند.
+- **ممیزی و رویدادها:** `customer.suspended`، `customer.unsuspended`، `customer.sessions_revoked`؛ و رویدادهای `UserAccountSuspended` و `UserAccountReinstated`.
+- **خروجی فهرست:** `GET /admin/customers` حالا برای هر ردیف `accountStatus` هم برمی‌گرداند.
+- **سمت عضو:** وقتی ورود با 403 و `ACCOUNT_SUSPENDED` رد می‌شود، صفحه‌ی ورود باید پیام «حساب معلق است — با پشتیبانی تماس بگیرید» نشان دهد. دلیل تعلیق داخلی است و به عضو نشان داده نمی‌شود.
+
+### Pet 360
+- **جست‌وجو:** `GET /admin/pets?q&species&page` (مجوز `customer.view`). `q` می‌تواند نام، شناسه‌ی پت، شناسه‌ی خانوار یا میکروچیپ کامل (۹ رقم یا بیشتر) باشد.
+- **جزئیات:** `GET /admin/pets/:id`. بخش‌های پاسخ:
+  - `identity`: میکروچیپ ماسک‌شده.
+  - `household`: اعضا با نقش و `accountStatus`.
+  - `accessGrants[]`: منبع (`HOUSEHOLD|MANUAL|TEMPORARY`)، `reason`، `flags`، `healthScopes`، `active`، `isHouseholdMember`، `revokedAt` و `expiresAt`.
+  - `health`: فقط شمارش‌ها، به‌علاوه‌ی `documentsByType` (نوع، منبع، تعداد، آخرین تاریخ). عنوان سند و محتوای بالینی برنمی‌گردد.
+  - `bookings` (ده رزرو آخر).
+  - `lostIncidents`: فقط `publicArea`؛ مختصات مکانی برنمی‌گردد.
+  - `care.reminders`، `travel[]`، `insurance`، `sharing` و `activity[]` (بیست رویداد آخر).
+- **`diagnostics[]`:**
+  - `NO_ACTIVE_OWNER` و `STALE_HOUSEHOLD_GRANT` (هشدار، WARNING).
+  - `EXPIRED_GRANT_NOT_REVOKED`، `MEMBER_WITHOUT_GRANT` و `LONG_OPEN_LOST_INCIDENT` (اطلاعاتی، INFO).
+  - `DELETED_BUT_ACTIVE` (هشدار).
+- **اقدام:** `POST /admin/pets/:id/grants/:grantId/revoke {reason}` (مجوز `pet.access.manage`).
+  - دسترسی مالک هرگز لغو نمی‌شود: 400 با `OWNER_GRANT`. لغو دوباره: 400 با `ALREADY_REVOKED`.
+  - ممیزی با `pet.access_revoked_by_admin` و رویداد `PetAccessRevoked`.
+  - انتقال مالکیت در این بخش وجود ندارد.
+
+### داده‌ی نمایشی
+- `qa-suspended@example.test`: عضو معلق.
+- `qa-erp-owner@example.test`: خانوار «خانوار ERP (QA)» با «پت ERP (QA)».
+- یک دسترسی کهنه برای `qa-erp-leaver@example.test` (عضو سابق خانوار). در Pet 360 تشخیص `STALE_HOUSEHOLD_GRANT` نشان داده می‌شود و از همان‌جا قابل لغو است.
+
+### حالت خالی
+- **Pet 360:** پت بدون سند، رزرو یا گم‌شدن آرایه‌ها و شمارش‌های صفر برمی‌گرداند.
+- **Customer 360:** عضو بدون خانوار آرایه‌ی خالی `households` برمی‌گرداند.

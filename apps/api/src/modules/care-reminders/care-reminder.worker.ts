@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -12,7 +13,7 @@ export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
   private sourceCursor: string | undefined;
   private readonly logger = new Logger(CareReminderWorker.name);
   constructor(private readonly prisma:PrismaService,private readonly access:PetAccessService,private readonly notifications:NotificationOrchestratorService,private readonly sources:CareSourceListener){}
-  onModuleInit() { if(process.env.NODE_ENV!=="test") this.timer=setInterval(()=>{void this.process().catch(e=>this.logger.error("Care notification tick failed",e));},60000); }
+  onModuleInit() { if(process.env.NODE_ENV!=="test") { registerWorker("care-reminders", 60000); this.timer=setInterval(()=>{void trackWorker("care-reminders", 60000, ()=>this.process()).catch(e=>this.logger.error("Care notification tick failed",e));},60000); } }
   onModuleDestroy() {if(this.timer) clearInterval(this.timer);}
   async process() {
     if(this.running) return 0;
@@ -34,7 +35,7 @@ export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
         const phase=row.dueAt<=now?"OVERDUE":"DUE";
         const hex=createHash("sha256").update(`care:${row.id}:${row.version}:${phase}`).digest("hex").slice(0,32);
         const id=`${hex.slice(0,8)}-${hex.slice(8,12)}-4${hex.slice(13,16)}-8${hex.slice(17,20)}-${hex.slice(20)}`;
-        await this.prisma.domainEvent.upsert({where:{id},create:{id,type:"CareReminderDue",aggregateType:"Pet",aggregateId:row.petId,payload:{petId:row.petId,careItemId:row.id,type:row.type,dueAt:row.dueAt.toISOString()}},update:{}});
+        await this.prisma.domainEvent.upsert({where:{id},create:{id,processedAt:new Date(),type:"CareReminderDue",aggregateType:"Pet",aggregateId:row.petId,payload:{petId:row.petId,careItemId:row.id,type:row.type,dueAt:row.dueAt.toISOString()}},update:{}});
         const stillOpen=await this.prisma.careReminder.count({where:{id:row.id,version:row.version,state:{notIn:["COMPLETED","CANCELLED"]}}});
         if(!stillOpen) continue;
         await this.notifications.notify({userId:recipient,type:"health.reminder",category:"HEALTH",petId:row.petId,householdId:row.pet.householdId,deepLink:NotificationDeepLinks.careItem(row.petId,row.id),entityType:"CareReminder",entityId:row.id,domainEventId:id,templateParams:{petName:row.pet.name},metadata:{careType:row.type,phase,dueAt:row.dueAt.toISOString()}});

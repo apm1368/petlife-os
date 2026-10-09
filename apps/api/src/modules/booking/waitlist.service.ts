@@ -5,6 +5,10 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import type { JoinWaitlistDto } from "./dto/waitlist.dto";
+import { SlotGeneratorService } from "../providers/slot-generator.service";
+import { PetAccessService } from "../pet-access/pet-access.service";
+import { BookingsService } from "./bookings.service";
+import type { BookingHoldDto } from "@petlife/types";
 
 const MAX_WINDOW_DAYS = 30;
 const MAX_ACTIVE_ENTRIES_PER_USER = 10;
@@ -22,6 +26,8 @@ export interface WaitlistEntryDto {
   windowEnd: string;
   status: WaitlistStatus;
   notifiedAt: string | null;
+  /** A concrete slot the provider offered (status OFFERED); accept before expiresAt to get a normal booking hold. */
+  offer: { startAt: string; expiresAt: string; providerUserId: string | null } | null;
   createdAt: string;
 }
 
@@ -41,6 +47,7 @@ function toDto(row: EntryRow): WaitlistEntryDto {
     windowEnd: row.windowEnd.toISOString(),
     status: row.status,
     notifiedAt: row.notifiedAt?.toISOString() ?? null,
+    offer: row.status === WaitlistStatus.OFFERED && row.offerStartAt && row.offerExpiresAt ? { startAt: row.offerStartAt.toISOString(), expiresAt: row.offerExpiresAt.toISOString(), providerUserId: row.offerProviderUserId } : null,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -59,7 +66,66 @@ export class WaitlistService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
+    private readonly slots: SlotGeneratorService,
+    private readonly bookings: BookingsService,
+    private readonly petAccess: PetAccessService,
   ) {}
+
+  /** Lapsed offers become EXPIRED (lazily, on every read/act — no hidden booking is ever kept). */
+  private async expireOffers(where: { userId?: string; providerOrganizationId?: string; id?: string }) {
+    await this.prisma.bookingWaitlistEntry.updateMany({ where: { ...where, status: WaitlistStatus.OFFERED, offerExpiresAt: { lte: new Date() } }, data: { status: WaitlistStatus.EXPIRED } });
+  }
+
+  /**
+   * G13: the provider offers one concrete, currently AVAILABLE slot inside the member's window. Nothing is booked or
+   * held yet — the offer expires (15 min – 24 h, default 2 h) and accepting it goes through the normal hold flow,
+   * which re-validates availability, so two offers for one slot can never both turn into bookings.
+   */
+  async offer(providerOrganizationId: string, actorUserId: string, entryId: string, dto: { startAt: string; providerUserId?: string; expiresInMinutes?: number }): Promise<WaitlistEntryDto> {
+    await this.expireOffers({ id: entryId });
+    const entry = await this.prisma.bookingWaitlistEntry.findFirst({ where: { id: entryId, providerOrganizationId }, include: { service: true } });
+    if (!entry) throw new NotFoundApiException("Waitlist entry");
+    if (entry.status !== WaitlistStatus.ACTIVE && entry.status !== WaitlistStatus.NOTIFIED) throw new ValidationApiException({ field: "entryId", reason: "NOT_OPEN", status: entry.status });
+    const startAt = new Date(dto.startAt);
+    const duration = (entry.variantId ? (await this.prisma.providerServiceVariant.findUnique({ where: { id: entry.variantId } }))?.durationMinutes : null) ?? entry.service.durationMinutes;
+    const endAt = new Date(startAt.getTime() + duration * 60_000);
+    if (startAt <= new Date() || startAt < entry.windowStart || endAt > entry.windowEnd) throw new ValidationApiException({ field: "startAt", reason: "OUTSIDE_MEMBER_WINDOW" });
+    const locationId = entry.service.locationId ?? (await this.prisma.providerLocation.findFirst({ where: { providerOrganizationId }, select: { id: true } }))?.id;
+    if (!locationId) throw new ValidationApiException({ field: "locationId", reason: "NO_LOCATION" });
+    const free = await this.slots.generate({ providerOrganizationId, locationId, serviceId: entry.serviceId, providerUserId: dto.providerUserId, variantId: entry.variantId ?? undefined, from: new Date(startAt.getTime() - 60_000), to: new Date(endAt.getTime() + 60_000) });
+    const match = free.find((slot) => slot.startAt.getTime() === startAt.getTime() && slot.state === "AVAILABLE");
+    if (!match) throw new ValidationApiException({ field: "startAt", reason: "SLOT_NOT_AVAILABLE" });
+    const minutes = Math.min(Math.max(dto.expiresInMinutes ?? 120, 15), 1440);
+    const offerExpiresAt = new Date(Math.min(Date.now() + minutes * 60_000, startAt.getTime()));
+    const claimed = await this.prisma.bookingWaitlistEntry.updateMany({
+      where: { id: entryId, status: { in: [WaitlistStatus.ACTIVE, WaitlistStatus.NOTIFIED] } },
+      data: { status: WaitlistStatus.OFFERED, offerStartAt: startAt, offerProviderUserId: dto.providerUserId ?? match.providerUserId ?? null, offerExpiresAt, offeredByUserId: actorUserId },
+    });
+    if (claimed.count !== 1) throw new ValidationApiException({ field: "entryId", reason: "NOT_OPEN" });
+    await this.events.publish("WaitlistOfferMade", { entryId, userId: entry.userId, providerOrganizationId, serviceId: entry.serviceId, startAt: startAt.toISOString(), expiresAt: offerExpiresAt.toISOString() }, { aggregateType: "BookingWaitlistEntry", aggregateId: entryId });
+    return toDto(await this.prisma.bookingWaitlistEntry.findUniqueOrThrow({ where: { id: entryId }, include: INCLUDE }));
+  }
+
+  /** The member takes the offer: a normal booking hold (availability re-checked); the entry is BOOKED on confirmation. */
+  async acceptOffer(userId: string, entryId: string): Promise<{ entry: WaitlistEntryDto; hold: BookingHoldDto }> {
+    await this.expireOffers({ id: entryId });
+    const entry = await this.prisma.bookingWaitlistEntry.findUnique({ where: { id: entryId }, include: { service: true } });
+    if (!entry || entry.userId !== userId) throw new NotFoundApiException("Waitlist entry");
+    if (entry.status === WaitlistStatus.EXPIRED) throw new ValidationApiException({ field: "entryId", reason: "OFFER_EXPIRED" });
+    if (entry.status !== WaitlistStatus.OFFERED || !entry.offerStartAt) throw new ValidationApiException({ field: "entryId", reason: "NO_OPEN_OFFER", status: entry.status });
+    const access = await this.petAccess.getEffectivePermissions(entry.petId, userId);
+    if (!access?.canBookCare) throw new PetAccessDeniedException({ petId: entry.petId });
+    const locationId = entry.service.locationId ?? (await this.prisma.providerLocation.findFirstOrThrow({ where: { providerOrganizationId: entry.providerOrganizationId }, select: { id: true } })).id;
+    const hold = await this.bookings.createHold(userId, { petId: entry.petId, providerId: entry.providerOrganizationId, locationId, serviceId: entry.serviceId, slotStart: entry.offerStartAt.toISOString(), providerUserId: entry.offerProviderUserId ?? undefined, variantId: entry.variantId ?? undefined });
+    return { entry: toDto(await this.prisma.bookingWaitlistEntry.findUniqueOrThrow({ where: { id: entryId }, include: INCLUDE })), hold };
+  }
+
+  /** Decline: back in the queue, offer cleared. */
+  async declineOffer(userId: string, entryId: string): Promise<WaitlistEntryDto> {
+    const done = await this.prisma.bookingWaitlistEntry.updateMany({ where: { id: entryId, userId, status: WaitlistStatus.OFFERED }, data: { status: WaitlistStatus.ACTIVE, offerStartAt: null, offerExpiresAt: null, offerProviderUserId: null, offeredByUserId: null } });
+    if (!done.count) throw new NotFoundApiException("Waitlist offer");
+    return toDto(await this.prisma.bookingWaitlistEntry.findUniqueOrThrow({ where: { id: entryId }, include: INCLUDE }));
+  }
 
   async join(userId: string, dto: JoinWaitlistDto): Promise<WaitlistEntryDto> {
     const pet = await this.prisma.pet.findUnique({ where: { id: dto.petId } });
@@ -84,6 +150,7 @@ export class WaitlistService {
   }
 
   async listMine(userId: string): Promise<WaitlistEntryDto[]> {
+    await this.expireOffers({ userId });
     const rows = await this.prisma.bookingWaitlistEntry.findMany({ where: { userId }, include: INCLUDE, orderBy: { createdAt: "desc" }, take: 100 });
     return rows.map(toDto);
   }
@@ -98,8 +165,9 @@ export class WaitlistService {
 
   /** Provider view: minimal fields only (pet name, window, status) — no household contact details. */
   async listForProvider(providerOrganizationId: string): Promise<WaitlistEntryDto[]> {
+    await this.expireOffers({ providerOrganizationId });
     const rows = await this.prisma.bookingWaitlistEntry.findMany({
-      where: { providerOrganizationId, status: { in: [WaitlistStatus.ACTIVE, WaitlistStatus.NOTIFIED] }, windowEnd: { gt: new Date() } },
+      where: { providerOrganizationId, status: { in: [WaitlistStatus.ACTIVE, WaitlistStatus.NOTIFIED, WaitlistStatus.OFFERED] }, windowEnd: { gt: new Date() } },
       include: INCLUDE,
       orderBy: { createdAt: "asc" },
       take: 200,
@@ -140,7 +208,7 @@ export class WaitlistService {
       // Published inside the booking transaction: use the event's own fields, not a re-read.
       if (!payload.customerUserId || !payload.petId || !payload.serviceId || !payload.startAt || !payload.endAt) return;
       await this.prisma.bookingWaitlistEntry.updateMany({
-        where: { userId: payload.customerUserId, petId: payload.petId, serviceId: payload.serviceId, status: { in: [WaitlistStatus.ACTIVE, WaitlistStatus.NOTIFIED] }, windowStart: { lte: new Date(payload.startAt) }, windowEnd: { gte: new Date(payload.endAt) } },
+        where: { userId: payload.customerUserId, petId: payload.petId, serviceId: payload.serviceId, status: { in: [WaitlistStatus.ACTIVE, WaitlistStatus.NOTIFIED, WaitlistStatus.OFFERED] }, windowStart: { lte: new Date(payload.startAt) }, windowEnd: { gte: new Date(payload.endAt) } },
         data: { status: WaitlistStatus.BOOKED },
       });
     } catch (error) {

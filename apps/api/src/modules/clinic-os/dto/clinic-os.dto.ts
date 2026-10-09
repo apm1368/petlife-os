@@ -187,6 +187,8 @@ export class ImportContactsDto {
   @IsString() @MaxLength(1_000_000) csv!: string;
   /** true (default) only validates; false imports the valid, non-duplicate rows. */
   @IsOptional() @IsBoolean() dryRun?: boolean;
+  /** Required to commit (dryRun: false): the token returned by the dry run of this same file. */
+  @IsOptional() @IsString() @MaxLength(64) confirmationToken?: string;
 }
 
 export class ListContactsQueryDto {

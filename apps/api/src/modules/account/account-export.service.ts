@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { PrivacyRequestStatus, SupportMessageVisibility } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -55,8 +56,9 @@ export class AccountExportService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     if (process.env.NODE_ENV === "test") return;
+    registerWorker("account-export", WORKER_INTERVAL_MS);
     this.timer = setInterval(() => {
-      this.processQueue().catch((error) => this.logger.error("Export worker tick failed", error instanceof Error ? error.stack : undefined));
+      trackWorker("account-export", WORKER_INTERVAL_MS, () => this.processQueue()).catch((error) => this.logger.error("Export worker tick failed", error instanceof Error ? error.stack : undefined));
     }, WORKER_INTERVAL_MS);
   }
 

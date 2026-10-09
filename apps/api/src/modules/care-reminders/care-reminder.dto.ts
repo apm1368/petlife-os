@@ -25,6 +25,12 @@ export class ReminderActionDto {
 export class CareHistoryQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) pageSize?: number;
+  /** One closed state: COMPLETED, SKIPPED or CANCELLED. */
+  @IsOptional() @IsIn(["COMPLETED", "SKIPPED", "CANCELLED"]) state?: string;
+  @IsOptional() @IsIn(CARE_TYPES) type?: string;
+  /** Filter on when the item was due (inclusive range). */
+  @IsOptional() @IsISO8601() from?: string;
+  @IsOptional() @IsISO8601() to?: string;
 }
 
 export class ApplyCareTemplateDto {

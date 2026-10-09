@@ -1,4 +1,5 @@
 import { NgoVolunteersController, PublicSupportEngagementController, SupportEngagementController } from "./support-engagement.controller";
+import { SupportMilestoneService } from "./support-milestone.service";
 import { SupportEngagementService } from "./support-engagement.service";
 import { Module } from "@nestjs/common";
 import { PaymentsModule } from "../commerce/payments/payments.module";
@@ -40,7 +41,7 @@ import { NotificationsModule } from "../notifications/notifications.module";
 @Module({
   imports: [PaymentsModule, LedgerModule, StorageModule, NotificationsModule],
   controllers: [PublicSupportEngagementController, SupportEngagementController, NgoVolunteersController, PublicAnimalSupportController, DonationController, SupportNeedController, NgoPortalController],
-  providers: [SupportEngagementService, PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService, SupportNeedExpiryWorker, SupportNeedNotificationListener, AnimalSupportOrgAccessService, NgoPortalService, NgoAuthGuard],
+  providers: [SupportEngagementService, SupportMilestoneService, PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService, SupportNeedExpiryWorker, SupportNeedNotificationListener, AnimalSupportOrgAccessService, NgoPortalService, NgoAuthGuard],
   exports: [DonationLedgerService, SupportNeedService, AnimalSupportOrgAccessService],
 })
 export class AnimalSupportModule {}

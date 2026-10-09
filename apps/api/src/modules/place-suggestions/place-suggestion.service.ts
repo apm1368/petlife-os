@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { PlaceSuggestionStatus, Prisma } from "@prisma/client";
+import { PlaceSuggestionKind, PlaceSuggestionStatus, Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
-import type { SuggestPlaceDto } from "../places/dto/places.dto";
+import type { SuggestPlaceChangeDto, SuggestPlaceDto } from "../places/dto/places.dto";
 
 const MAX_PENDING_PER_USER = 10;
 
@@ -27,6 +27,19 @@ export class PlaceSuggestionService {
     return toDto(row);
   }
 
+  /** G15: a correction (structured attribute changes) or a closure report for an existing public place. */
+  async suggestChange(userId: string, dto: SuggestPlaceChangeDto) {
+    if (await this.prisma.placeSuggestion.count({ where: { userId, status: PlaceSuggestionStatus.PENDING } }) >= MAX_PENDING_PER_USER) throw new ValidationApiException({ reason: "TOO_MANY_PENDING_SUGGESTIONS", max: MAX_PENDING_PER_USER });
+    const place = await this.prisma.petFriendlyPlace.findFirst({ where: { id: dto.placeId, isPubliclyListed: true } });
+    if (!place) throw new NotFoundApiException("Place");
+    const changes = Object.fromEntries(Object.entries(dto.changes ?? {}).filter(([, v]) => v !== undefined));
+    if (dto.kind === "CORRECTION" && !Object.keys(changes).length) throw new ValidationApiException({ field: "changes", reason: "NOTHING_TO_CORRECT" });
+    const row = await this.prisma.placeSuggestion.create({
+      data: { userId, kind: dto.kind, placeId: place.id, proposedChanges: dto.kind === "CORRECTION" ? (changes as Prisma.InputJsonValue) : Prisma.JsonNull, name: place.name, category: place.category, city: place.city, address: place.address, notes: dto.notes?.trim() || null },
+    });
+    return toDto(row);
+  }
+
   async mine(userId: string) {
     return (await this.prisma.placeSuggestion.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 50 })).map(toDto);
   }
@@ -40,6 +53,17 @@ export class PlaceSuggestionService {
       const s = await tx.placeSuggestion.findUnique({ where: { id } });
       if (!s) throw new NotFoundApiException("PlaceSuggestion");
       if (s.status !== PlaceSuggestionStatus.PENDING) throw new ValidationApiException({ reason: "NOT_PENDING", status: s.status });
+      if (s.kind !== PlaceSuggestionKind.NEW_PLACE) {
+        // Moderated change to an existing place: a correction applies only the whitelisted fields it carried; a
+        // closure takes the place out of public listing (it stays in the database).
+        const before = await tx.petFriendlyPlace.findUniqueOrThrow({ where: { id: s.placeId! } });
+        const changes = (s.proposedChanges ?? {}) as Record<string, unknown>;
+        const data = s.kind === PlaceSuggestionKind.CLOSURE_REPORT ? { isPubliclyListed: false } : changes;
+        await tx.petFriendlyPlace.update({ where: { id: before.id }, data });
+        const updated = await tx.placeSuggestion.update({ where: { id }, data: { status: PlaceSuggestionStatus.APPROVED, reviewedByAdminId: admin.adminUserId, reviewNote: note ?? null } });
+        await this.audit.record({ adminUserId: admin.adminUserId, action: s.kind === PlaceSuggestionKind.CLOSURE_REPORT ? "place_closure.approved" : "place_correction.approved", entityType: "PetFriendlyPlace", entityId: before.id, beforeSummary: Object.fromEntries(Object.keys(data).map((k) => [k, (before as Record<string, unknown>)[k] ?? null])), afterSummary: data, reason: note, tx });
+        return toDto(updated);
+      }
       if (s.latitude === null || s.longitude === null) throw new ValidationApiException({ reason: "COORDINATES_REQUIRED_TO_CREATE_PLACE" });
       const place = await tx.petFriendlyPlace.create({ data: { name: s.name, category: s.category, city: s.city, country: "IR", address: s.address, latitude: s.latitude, longitude: s.longitude, description: s.notes } });
       await tx.$executeRaw`UPDATE "pet_friendly_places" SET "location" = ST_SetSRID(ST_MakePoint(${s.longitude}, ${s.latitude}), 4326)::geography WHERE id = ${place.id}::uuid`;
@@ -60,5 +84,5 @@ export class PlaceSuggestionService {
 }
 
 function toDto(s: Prisma.PlaceSuggestionGetPayload<object>) {
-  return { id: s.id, name: s.name, category: s.category, city: s.city, address: s.address, latitude: s.latitude, longitude: s.longitude, notes: s.notes, status: s.status, reviewNote: s.reviewNote, createdPlaceId: s.createdPlaceId, createdAt: s.createdAt.toISOString() };
+  return { kind: s.kind, placeId: s.placeId, proposedChanges: s.proposedChanges, id: s.id, name: s.name, category: s.category, city: s.city, address: s.address, latitude: s.latitude, longitude: s.longitude, notes: s.notes, status: s.status, reviewNote: s.reviewNote, createdPlaceId: s.createdPlaceId, createdAt: s.createdAt.toISOString() };
 }

@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsUUID } from "class-validator";
+import { IsDateString, IsInt, IsISO8601, IsOptional, IsUUID, Max, Min } from "class-validator";
 
 export class JoinWaitlistDto {
   @IsUUID()
@@ -19,4 +19,10 @@ export class JoinWaitlistDto {
 
   @IsDateString()
   windowEnd!: string;
+}
+
+export class WaitlistOfferDto {
+  @IsISO8601({ strict: true }) startAt!: string;
+  @IsOptional() @IsUUID() providerUserId?: string;
+  @IsOptional() @IsInt() @Min(15) @Max(1440) expiresInMinutes?: number;
 }

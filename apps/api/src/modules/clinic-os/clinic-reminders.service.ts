@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { ClinicReminderStatus, Prisma } from "@prisma/client";
@@ -32,7 +33,7 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.processDue().catch((e) => this.logger.error("Clinic reminder tick failed", e)), 60_000);
+    if (process.env.NODE_ENV !== "test") { registerWorker("clinic-reminders", 60_000); this.timer = setInterval(() => void trackWorker("clinic-reminders", 60_000, () => this.processDue()).catch((e) => this.logger.error("Clinic reminder tick failed", e)), 60_000); }
   }
 
   onModuleDestroy() {
@@ -114,7 +115,7 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
       const eventId = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20)}`;
       await this.prisma.domainEvent.upsert({
         where: { id: eventId },
-        create: { id: eventId, type: "ClinicReminderSent", aggregateType: "Pet", aggregateId: row.petId, payload: { reminderId: row.id, providerOrganizationId: row.providerOrganizationId, kind: row.kind } },
+        create: { id: eventId, processedAt: new Date(), type: "ClinicReminderSent", aggregateType: "Pet", aggregateId: row.petId, payload: { reminderId: row.id, providerOrganizationId: row.providerOrganizationId, kind: row.kind } },
         update: {},
       });
       await this.notifications.notify({

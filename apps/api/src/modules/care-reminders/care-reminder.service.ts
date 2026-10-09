@@ -29,7 +29,13 @@ export class CareReminderService {
     const health = (await this.access.getEffectivePermissions(petId, userId))?.canViewHealth;
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
-    const where = { petId, state: { in: [...CLOSED_CARE_STATES] }, ...(health ? {} : { source: "USER_CREATED" }) };
+    const where = {
+      petId,
+      state: query.state ? query.state : { in: [...CLOSED_CARE_STATES] },
+      ...(query.type ? { type: query.type } : {}),
+      ...(query.from || query.to ? { dueAt: { ...(query.from ? { gte: new Date(query.from) } : {}), ...(query.to ? { lte: new Date(query.to) } : {}) } } : {}),
+      ...(health ? {} : { source: "USER_CREATED" }),
+    };
     const [total, rows] = await Promise.all([
       this.prisma.careReminder.count({ where }),
       this.prisma.careReminder.findMany({ where, orderBy: { updatedAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
@@ -69,7 +75,7 @@ export class CareReminderService {
         const row = await tx.careReminder.create({ data: { petId, createdByUserId: userId, title: p.title, type: p.type, dueAt: p.dueAt, originalDueAt: p.dueAt, recurrence: p.recurrence, intervalDays: p.intervalDays, weekdays: p.weekdays, maxOccurrences: p.maxOccurrences } });
         created.push({ ...row, state: visibleCareState(row) });
       }
-      await tx.domainEvent.create({ data: { type: "CareTemplateApplied", aggregateType: "Pet", aggregateId: petId, payload: { petId, actorUserId: userId, templateKey: template.key, careItemIds: created.map((c) => c.id) } } });
+      await tx.domainEvent.create({ data: { processedAt: new Date(), type: "CareTemplateApplied", aggregateType: "Pet", aggregateId: petId, payload: { petId, actorUserId: userId, templateKey: template.key, careItemIds: created.map((c) => c.id) } } });
       return created;
     });
   }
@@ -83,7 +89,7 @@ export class CareReminderService {
     await this.entitlements.assertFeature(pet.householdId, "care.reminders");
     return this.prisma.$transaction(async tx => {
       const row = await tx.careReminder.create({ data: { petId, createdByUserId: userId, title: dto.title.trim(), type: dto.type, dueAt: new Date(dto.dueAt), originalDueAt: new Date(dto.dueAt), recurrence: dto.recurrence ?? "ONCE", intervalDays: dto.intervalDays, weekdays: dto.weekdays ?? [], untilDate: dto.untilDate ? new Date(dto.untilDate) : null, maxOccurrences: dto.maxOccurrences ?? null, assignedToUserId: dto.assignedToUserId ?? null } });
-      await tx.domainEvent.create({ data: { type: "CareReminderCreated", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: row.id, actorUserId: userId } } });
+      await tx.domainEvent.create({ data: { processedAt: new Date(), type: "CareReminderCreated", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: row.id, actorUserId: userId } } });
       return { ...row, state: visibleCareState(row) };
     }).then(async (row) => {
       await this.notifyAssignee(petId, row.id, row.title, row.assignedToUserId, userId);
@@ -99,7 +105,7 @@ export class CareReminderService {
     const result = await this.prisma.$transaction(async tx => {
       const updated = await tx.careReminder.updateMany({ where: { id, petId, version: row.version }, data: { ...dto, untilDate: dto.untilDate ? new Date(dto.untilDate) : undefined, dueAt: dto.dueAt ? new Date(dto.dueAt) : undefined, notifiedAt: dto.dueAt ? null : undefined, version: { increment: 1 } } });
       if (updated.count !== 1) throw new ValidationApiException({ reason: "Care item changed; reload before editing." });
-      await tx.domainEvent.create({ data: { type: "CareReminderEdited", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: id, actorUserId: userId } } });
+      await tx.domainEvent.create({ data: { processedAt: new Date(), type: "CareReminderEdited", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: id, actorUserId: userId } } });
       const saved = await tx.careReminder.findUniqueOrThrow({ where: { id } });
       return { ...saved, state: visibleCareState(saved) };
     });
@@ -116,7 +122,7 @@ export class CareReminderService {
       const data = dto.action === "COMPLETE" ? { state: "COMPLETED", completedAt: now, completedByUserId: userId } : dto.action === "SKIP" ? { state: "SKIPPED", skippedAt: now, completedByUserId: userId } : dto.action === "CANCEL" ? { state: "CANCELLED", cancelledAt: now } : dto.action === "SNOOZE" ? { snoozedUntil: at, notifiedAt: null } : { dueAt: at!, snoozedUntil: null, notifiedAt: null };
       const updated = await tx.careReminder.updateMany({ where: { id, petId, version: row.version }, data: { ...data, version: { increment: 1 } } });
       if (updated.count !== 1) throw new ValidationApiException({ reason: "Care item changed; reload before acting." });
-      await tx.domainEvent.create({ data: { type: dto.action === "COMPLETE" ? "CareReminderCompleted" : dto.action === "SKIP" ? "CareReminderSkipped" : "CareReminderChanged", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: id, actorUserId: userId, action: dto.action, originalDueAt: row.originalDueAt.toISOString(), at: dto.at ?? null } } });
+      await tx.domainEvent.create({ data: { processedAt: new Date(), type: dto.action === "COMPLETE" ? "CareReminderCompleted" : dto.action === "SKIP" ? "CareReminderSkipped" : "CareReminderChanged", aggregateType: "Pet", aggregateId: petId, payload: { petId, careItemId: id, actorUserId: userId, action: dto.action, originalDueAt: row.originalDueAt.toISOString(), at: dto.at ?? null } } });
       // Completing or skipping one occurrence schedules the next, unless the series has ended.
       if (dto.action === "COMPLETE" || dto.action === "SKIP") {
         const next = nextOccurrence(row);

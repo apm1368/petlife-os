@@ -100,6 +100,13 @@ export class ServiceNotAvailableException extends ApiException {
   }
 }
 
+/** G13: an at-home service whose area doesn't include the booking address's city. */
+export class ServiceLocationNotSupportedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SERVICE_LOCATION_NOT_SUPPORTED", "This provider does not serve this address for the selected service.", HttpStatus.BAD_REQUEST, { reason: "LOCATION_NOT_SUPPORTED", ...details });
+  }
+}
+
 export class PetNotSupportedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PET_NOT_SUPPORTED", "This provider does not support this pet's species for the selected service.", HttpStatus.BAD_REQUEST, details);
@@ -1781,5 +1788,26 @@ export class ClinicBranchInUseException extends ApiException {
 export class CommunityInteractionBlockedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("COMMUNITY_INTERACTION_BLOCKED", "You can't interact with this member.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+/** ERP-A: an access-control change that would break a governance rule (last SUPER_ADMIN, changing your own role, granting above your own reach). */
+export class AdminGovernanceRuleException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("ADMIN_GOVERNANCE_RULE", "This change is not allowed by the admin governance rules.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** ERP-A: a setting change based on a version that is no longer current, or a review of a change that is no longer pending. */
+export class SettingChangeConflictException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("SETTING_CHANGE_CONFLICT", "This setting changed in the meantime. Reload and try again.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** ERP-B: the account was suspended by platform staff — sign-in is refused (existing sessions simply stop resolving). */
+export class AccountSuspendedException extends ApiException {
+  constructor() {
+    super("ACCOUNT_SUSPENDED", "This account is suspended. Please contact support.", HttpStatus.FORBIDDEN);
   }
 }

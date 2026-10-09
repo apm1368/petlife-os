@@ -10,6 +10,7 @@ import type { ResolvedProviderContext } from "./auth/provider-context.types";
 import { ProviderCatalogService } from "./provider-catalog.service";
 import { WaitlistService } from "../booking/waitlist.service";
 import { ProviderReviewsService } from "../booking/provider-reviews.service";
+import { WaitlistOfferDto } from "../booking/dto/waitlist.dto";
 import { CreateResourceDto, CreateServiceVariantDto, RespondReviewDto, SetStaffServicesDto, UpdateResourceDto, UpdateServiceVariantDto, UpdateStaffProfileDto } from "./dto/provider-catalog.dto";
 
 class AnalyticsQuery {
@@ -75,6 +76,13 @@ export class ProviderCatalogController {
   @Get("waitlist")
   listWaitlist(@CurrentProviderContext() ctx: ResolvedProviderContext) {
     return this.waitlist.listForProvider(ctx.organizationId);
+  }
+
+  /** G13: offer one available slot inside the member's window; expires (15–1440 min, default 120). */
+  @Post("waitlist/:entryId/offer")
+  @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.STAFF)
+  offerWaitlistSlot(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("entryId", ParseUUIDPipe) entryId: string, @Body() dto: WaitlistOfferDto) {
+    return this.waitlist.offer(ctx.organizationId, ctx.userId, entryId, dto);
   }
 
   @Get("reviews")

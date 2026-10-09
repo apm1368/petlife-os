@@ -865,6 +865,8 @@ export interface BookingDto {
   completedByProviderUserId: string | null;
   /** The deliberately small owner-visible summary (e.g. "Luna's grooming was completed.") — distinct from internal-only provider notes. */
   completionNote: string | null;
+  /** For NO_SHOW: OWNER (member missed it, marked by the provider) or PROVIDER (reported by the member). */
+  noShowParty?: "OWNER" | "PROVIDER" | null;
   createdAt: string;
   updatedAt: string;
   provider: ProviderSummaryDto | null;
@@ -1037,6 +1039,7 @@ export interface ProviderBookingDetailDto {
     completedAt: string | null;
     completedByProviderUserId: string | null;
     completionNote: string | null;
+    noShowParty?: "OWNER" | "PROVIDER" | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -2356,6 +2359,11 @@ export enum AdminRole {
   CONTENT = "CONTENT",
   VERIFICATION = "VERIFICATION",
   READ_ONLY = "READ_ONLY",
+  EDITOR = "EDITOR",
+  PARTNER_OPERATIONS = "PARTNER_OPERATIONS",
+  CLINIC_OPERATIONS = "CLINIC_OPERATIONS",
+  COMMERCE_OPERATIONS = "COMMERCE_OPERATIONS",
+  ANALYTICS = "ANALYTICS",
 }
 
 export enum AdminMembershipStatus {
@@ -2757,6 +2765,8 @@ export interface AdminCustomerListItemDto {
   emailMasked: string | null;
   phoneMasked: string | null;
   createdAt: string;
+  /** ERP-B: platform suspension state. */
+  accountStatus?: "ACTIVE" | "SUSPENDED";
 }
 
 export interface AdminPetSummaryDto {
@@ -2957,7 +2967,16 @@ export type AdminPermissionName =
   | "travel.view"
   | "travel.manage"
   | "travel.requirements.manage"
-  | "insurance.applications.view";
+  | "insurance.applications.view"
+  | "access.view"
+  | "settings.view"
+  | "settings.manage"
+  | "settings.approve"
+  | "system.view"
+  | "analytics.view"
+  | "customer.account.manage"
+  | "customer.sessions.revoke"
+  | "pet.access.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -4142,6 +4161,8 @@ export interface HealthTimelineEntryDto {
   /** The id of the underlying record, and which endpoint/type it belongs to — lets the UI deep-link into the full record. */
   recordId: string;
   recordType: HealthTimelineEntryType;
+  /** When the record was entered (occurredAt is when it happened). */
+  recordedAt?: string | null;
 }
 
 /** spec: "if a score cannot be responsibly calculated, do not show one" — there is deliberately no numeric health score field anywhere in this DTO. */
@@ -4213,6 +4234,8 @@ export enum LostPetSightingStatus {
 /** The household/owner view — includes privateNotes and every field. Never returned to an anonymous caller. */
 export interface LostPetIncidentDto {
   id: string;
+  /** The pet's ID-tag share card exposed with this incident (owner view only; the token is never in this payload). */
+  identityCardId?: string | null;
   petId: string;
   petName: string;
   petSpecies: PetSpecies;
@@ -4625,6 +4648,10 @@ export interface CommunityPostDto {
   createdAt: string;
   /** Topic tags (fixed vocabulary). */
   topics?: string[];
+  /** The first topic (canonical taxonomy), or null. */
+  primaryTopic?: string | null;
+  /** Optional region/province — never an address or coordinates. */
+  region?: string | null;
   /** Optional city for the local feed. */
   city?: string | null;
 }

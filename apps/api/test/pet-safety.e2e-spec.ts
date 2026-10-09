@@ -71,7 +71,9 @@ describe("Pet safety", () => {
     await o.client.put(`/pets/${o.petId}/emergency-info`).send({ contactName: "Sara", contactPhone: "09120000000", criticalNotes: "Epileptic — keep calm" }).expect(200);
     await o.client.post(`/pets/${o.petId}/health/allergies`).send({ name: "Penicillin", reaction: "Hives" }).expect(201);
 
-    const em = (await o.client.post(`/pets/${o.petId}/share-cards`).send({ kind: "EMERGENCY" }).expect(201)).body;
+    // A phone is public only with explicit consent.
+    await o.client.post(`/pets/${o.petId}/share-cards`).send({ kind: "EMERGENCY", contactMode: "BOTH" }).expect(400);
+    const em = (await o.client.post(`/pets/${o.petId}/share-cards`).send({ kind: "EMERGENCY", contactMode: "BOTH", phoneConsent: true }).expect(201)).body;
     expect(em.token).toMatch(/^[A-Za-z0-9_-]{30,}$/);
     expect(new Date(em.expiresAt).getTime() - Date.now()).toBeGreaterThan(71 * 3600e3);
     const read = (await pub(em.token).expect(200)).body;
@@ -89,13 +91,13 @@ describe("Pet safety", () => {
     await o.client.post(`/pets/${o.petId}/share-cards/${rotated.id}/revoke`).expect(201);
     await pub(rotated.token).expect(404);
 
-    const tag = (await o.client.post(`/pets/${o.petId}/share-cards`).send({ kind: "ID_TAG", includeContact: false }).expect(201)).body;
+    const tag = (await o.client.post(`/pets/${o.petId}/share-cards`).send({ kind: "ID_TAG" }).expect(201)).body;
     expect(tag.expiresAt).toBeNull();
     const tagRead = (await pub(tag.token).expect(200)).body;
     expect(tagRead).toMatchObject({ kind: "ID_TAG", name: "Safety Dog", emergencyContact: null, isReportedLost: false });
     expect(tagRead.allergies).toBeUndefined();
     // A new ID tag replaces the previous one.
-    const tag2 = (await o.client.post(`/pets/${o.petId}/share-cards`).send({ kind: "ID_TAG" }).expect(201)).body;
+    const tag2 = (await o.client.post(`/pets/${o.petId}/share-cards`).send({ kind: "ID_TAG", contactMode: "PHONE", phoneConsent: true }).expect(201)).body;
     await pub(tag.token).expect(404);
     expect((await pub(tag2.token).expect(200)).body.emergencyContact).toMatchObject({ phone: "09120000000" });
     // Expired looks the same as unknown.
