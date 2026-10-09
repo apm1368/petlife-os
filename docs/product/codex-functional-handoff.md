@@ -1009,7 +1009,7 @@
 - **اثرها:**
   - همه‌ی گام‌ها در ممیزی ثبت می‌شوند (`verification.*`).
   - رویدادها: `AdminVerificationStatusChanged`، `PartnerVerificationSubmitted` و `PartnerVerificationDocumentExpired`.
-  - اعلان `partner.verification_updated` به OWNER و ADMIN شریک ارسال می‌شود. لینک‌ها: `/provider/verification` و `/seller/verification` (صفحه‌ها را Codex طراحی می‌کند).
+  - اعلان `partner.verification_updated` به OWNER و ADMIN شریک ارسال می‌شود. لینک‌ها فعلاً به `/provider` و `/seller` اشاره می‌کنند، چون صفحه‌ی احراز هنوز وجود ندارد. وقتی Codex صفحه‌های `/provider/verification` و `/seller/verification` را ساخت، لینک‌ها در `NotificationDeepLinks` به آن‌ها تغییر می‌کنند.
 - **انقضای مدرک:**
   - کارگر ساعتی سند پذیرفته‌شده‌ی منقضی را `EXPIRED` می‌کند و یک وظیفه برای Partner Ops با اولویت HIGH می‌سازد.
   - برای سندی که تا ۳۰ روز دیگر منقضی می‌شود، فقط یک بار وظیفه ساخته و اعلان `partner.document_expiring` ارسال می‌شود.
