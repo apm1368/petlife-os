@@ -9,7 +9,7 @@ import { AdminAuthGuard } from "../admin/auth/admin-auth.guard";
 import { RequireAdminPermission } from "../admin/auth/require-admin-permission.decorator";
 import { CurrentAdmin } from "../admin/auth/current-admin.decorator";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
-import { ReviewPlaceSuggestionDto, SuggestPlaceDto } from "../places/dto/places.dto";
+import { ReviewPlaceSuggestionDto, SuggestPlaceChangeDto, SuggestPlaceDto } from "../places/dto/places.dto";
 import { PlaceSuggestionService } from "./place-suggestion.service";
 
 class SuggestionStatusQuery {
@@ -25,6 +25,13 @@ export class PlaceSuggestionsController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   suggest(@CurrentUser() user: SessionUser, @Body() dto: SuggestPlaceDto) {
     return this.suggestions.suggest(user.id, dto);
+  }
+
+  /** Correction or closure report for an existing public place (moderated). */
+  @Post("changes")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  suggestChange(@CurrentUser() user: SessionUser, @Body() dto: SuggestPlaceChangeDto) {
+    return this.suggestions.suggestChange(user.id, dto);
   }
 
   @Get("mine")

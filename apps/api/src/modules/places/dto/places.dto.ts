@@ -1,4 +1,4 @@
-import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { PetFriendlyPlaceCategory, PetFriendlyPlaceStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
@@ -250,6 +250,29 @@ export class SuggestPlaceDto {
   @IsOptional() @IsString() @MaxLength(300) address?: string;
   @IsOptional() @IsLatitude() latitude?: number;
   @IsOptional() @IsLongitude() longitude?: number;
+  @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+}
+
+/** Allowed fields of a CORRECTION — structured place attributes only, never coordinates, status or verification. */
+export class PlaceCorrectionChangesDto {
+  @IsOptional() @IsString() @Length(1, 200) name?: string;
+  @IsOptional() @IsString() @MaxLength(300) address?: string;
+  @IsOptional() @IsString() @MaxLength(1000) description?: string;
+  @IsOptional() @IsIn(["FULL", "PARTIAL", "OUTDOOR_ONLY"]) petFriendlyLevel?: string;
+  @IsOptional() @IsInt() @Min(0) entryFeeIrr?: number;
+  @IsOptional() @IsBoolean() leashRequired?: boolean;
+  @IsOptional() @IsBoolean() waterAvailable?: boolean;
+  @IsOptional() @IsBoolean() shadeAvailable?: boolean;
+  @IsOptional() @IsBoolean() fencedArea?: boolean;
+  @IsOptional() @IsBoolean() wasteBins?: boolean;
+  @IsOptional() @IsBoolean() smallDogArea?: boolean;
+  @IsOptional() @IsBoolean() parkingAvailable?: boolean;
+}
+
+export class SuggestPlaceChangeDto {
+  @IsIn(["CORRECTION", "CLOSURE_REPORT"]) kind!: "CORRECTION" | "CLOSURE_REPORT";
+  @IsUUID() placeId!: string;
+  @IsOptional() @ValidateNested() @Type(() => PlaceCorrectionChangesDto) changes?: PlaceCorrectionChangesDto;
   @IsOptional() @IsString() @MaxLength(1000) notes?: string;
 }
 

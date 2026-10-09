@@ -349,6 +349,16 @@ async function main() {
     const share = await db.healthShareLink.upsert({ where: { tokenHash: shareHash }, create: { id: id("g12:health-share"), petId: g12PetId, tokenHash: shareHash, tokenHint: shareToken.slice(-4), label: "برای اورژانس دامپزشکی", sections: ["ALLERGIES", "MEDICATIONS", "CONDITIONS"], expiresAt: new Date(Date.now() + 7 * DAY), createdByUserId: rich.id }, update: { expiresAt: new Date(Date.now() + 7 * DAY), revokedAt: null } });
     if (!(await db.healthShareAccess.count({ where: { linkId: share.id } }))) await db.healthShareAccess.create({ data: { linkId: share.id, userAgent: "Clinic front desk (demo)" } });
 
+    // ---------------------------------------------------------------- G15: trip preparation states + a place correction
+    await db.tripChecklistItem.updateMany({ where: { id: id("trip:item:3") }, data: { state: "NOT_REQUIRED", done: false } });
+    await db.tripChecklistItem.updateMany({ where: { id: id("trip:item:0") }, data: { state: "DONE", done: true } });
+    const travelDoc = await db.medicalDocument.findFirst({ where: { petId: richPet.id, voidedAt: null }, orderBy: { createdAt: "asc" }, select: { id: true } });
+    if (travelDoc) await db.tripDocumentLink.upsert({ where: { tripId_documentId: { tripId: trip.id, documentId: travelDoc.id } }, create: { tripId: trip.id, documentId: travelDoc.id, linkedByUserId: rich.id }, update: {} });
+    const listedPark = await db.petFriendlyPlace.findFirst({ where: { isPubliclyListed: true, category: "PARK" }, orderBy: { createdAt: "asc" } });
+    if (listedPark) {
+      await db.placeSuggestion.upsert({ where: { id: id("g15:correction") }, create: { id: id("g15:correction"), userId: rich.id, kind: "CORRECTION", placeId: listedPark.id, proposedChanges: { parkingAvailable: true, waterAvailable: true }, name: listedPark.name, category: listedPark.category, city: listedPark.city, address: listedPark.address, notes: "پارکینگ و شیر آب اضافه شده است (پیشنهاد نمایشی)." }, update: {} });
+    }
+
     // ---------------------------------------------------------------- G13: booking states at the batch-2 demo clinic (Cookie)
     // A checked-in visit, a completed one with an owner summary + aftercare + a provider-internal note, a rescheduled
     // pair, a member no-show, and a waitlist entry the clinic offered a slot to (offer re-armed for 6 h on each run).

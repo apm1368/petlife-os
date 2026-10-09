@@ -7396,6 +7396,7 @@ model Trip {
   travelBookings TravelBooking[]
   checklistItems TripChecklistItem[]
   participants   TripParticipant[]
+  documentLinks  TripDocumentLink[]
 
   @@index([householdId])
   @@index([petId])
@@ -9799,6 +9800,10 @@ enum PlaceSuggestionStatus {
 model PlaceSuggestion {
   id                String                   @id @default(uuid()) @db.Uuid
   userId            String                   @db.Uuid
+  /// NEW_PLACE (default), CORRECTION (proposedChanges for placeId) or CLOSURE_REPORT (placeId). Moderated either way.
+  kind              PlaceSuggestionKind      @default(NEW_PLACE)
+  placeId           String?                  @db.Uuid
+  proposedChanges   Json?
   name              String
   category          PetFriendlyPlaceCategory
   city              String
@@ -9820,18 +9825,39 @@ model PlaceSuggestion {
 
 /// The member's own packing/preparation list for a trip (documents stay in TravelRequirement).
 model TripChecklistItem {
-  id        String    @id @default(uuid()) @db.Uuid
-  tripId    String    @db.Uuid
-  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  id        String             @id @default(uuid()) @db.Uuid
+  tripId    String             @db.Uuid
+  trip      Trip               @relation(fields: [tripId], references: [id], onDelete: Cascade)
   label     String
-  category  String    @default("OTHER")
-  done      Boolean   @default(false)
+  category  String             @default("OTHER")
+  done      Boolean            @default(false)
+  /// TODO / DONE / NOT_REQUIRED; `done` mirrors state === DONE for older clients.
+  state     TripChecklistState @default(TODO)
   doneAt    DateTime?
-  sortOrder Int       @default(0)
-  createdAt DateTime  @default(now())
+  sortOrder Int                @default(0)
+  createdAt DateTime           @default(now())
 
   @@index([tripId])
   @@map("trip_checklist_items")
+}
+
+enum TripChecklistState {
+  TODO
+  DONE
+  NOT_REQUIRED
+}
+
+/// A trip references existing medical documents (never a copy of the file). The document must belong to one of the
+/// trip's pets and stays under its own access rules.
+model TripDocumentLink {
+  tripId         String   @db.Uuid
+  trip           Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  documentId     String   @db.Uuid
+  linkedByUserId String   @db.Uuid
+  createdAt      DateTime @default(now())
+
+  @@id([tripId, documentId])
+  @@map("trip_document_links")
 }
 
 /// Extra pets and household members on a trip (the trip's own petId stays the primary pet).
@@ -10076,4 +10102,10 @@ model CareSuggestion {
 enum NoShowParty {
   OWNER
   PROVIDER
+}
+
+enum PlaceSuggestionKind {
+  NEW_PLACE
+  CORRECTION
+  CLOSURE_REPORT
 }

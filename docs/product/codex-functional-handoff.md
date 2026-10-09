@@ -642,3 +642,43 @@
   - commit (`dryRun: false`) فقط با همان توکن انجام می‌شود. خطاها: `DRY_RUN_REQUIRED` و `STALE_DRY_RUN` (فایل یا نتیجه‌ی اعتبارسنجی عوض شده).
   - تطبیق خودکار با نام یا حساب هرگز انجام نمی‌شود.
 - **داده‌ی نمایشی:** کلینیک `batch3-clinic-owner@example.test` (CLINIC_PRO) با یادداشت‌ها، برچسب‌ها، وظایف، مشتریان واردشده و صف (seed-clinic-chat-demo و G5).
+
+## ۲۲. سفر، مکان‌ها و بیمه (G15)
+
+- **چک‌لیست سفر:** `PATCH /pets/:petId/trips/:tripId/checklist/:itemId` با بدنه‌ی `{state: TODO|DONE|NOT_REQUIRED}`.
+  - `{done: boolean}` هنوز پذیرفته می‌شود.
+  - هر آیتم: `{state, done}`.
+  - خلاصه: `{done, todo, notRequired, total}`.
+- **مدارک سفر:** `GET|POST /pets/:petId/trips/:tripId/documents` (بدنه `{documentId}`) و `DELETE …/documents/:documentId`.
+  - مجوز: `canViewHealth`.
+  - سفر فقط به مدرک موجود ارجاع می‌دهد و فایل کپی نمی‌شود.
+  - مدرک باید متعلق به پت سفر یا پتِ شرکت‌کننده در سفر باشد، و کاربر روی همان پت دسترسی سلامت داشته باشد؛ در غیر این صورت 404.
+  - هر آیتم: `{documentId, petId, title, documentType, mimeType, linkedAt, deepLink}`.
+- **آمادگی سفر (زنجیره‌ی ۴):** `GET /pets/:petId/trips/:tripId/preparation`. خروجی:
+  - `trip`
+  - `readiness{authority: "ADVISORY", items[{key, status}]}`
+    - کلیدها: `MICROCHIP, VACCINATION_CERTIFICATE, HEALTH_CERTIFICATE, CARRIER, MEDICATION, INSURANCE`
+    - وضعیت‌ها: `MET, NOT_MET, UNKNOWN, NOT_APPLICABLE`
+    - این موارد صرفاً توصیه‌اند و قانون هیچ کشور یا ایرلاینی نیستند؛ الزامات مبتنی بر قاعده همان `requirements` هستند.
+  - `requirements{readyCount,totalCount,allReady}`
+  - `checklist{total,todo,done,notRequired}`
+  - `documents{linkedCount}`
+  - `insurance{insured, applications[{id,status,productName}], claimPrepCount}`
+  - `reminderProposals[{key,title,type,dueAt}]`
+- **اعمال پیشنهادهای یادآور:** `POST …/reminder-proposals/apply {keys[]}`.
+  - مجوز `canEditCareProfile`؛ entitlement `care.reminders` لازم است.
+  - فقط کلیدهای تأییدشده ساخته می‌شوند و تکرار آن‌ها ساخته نمی‌شود (`skipped`).
+- **سفر چندپتی:** با `TripParticipant` از قبل وجود داشت (§۱۰). وضعیت‌های سفر: `DRAFT, PLANNING, READY, IN_PROGRESS, COMPLETED, CANCELLED`.
+- **اصلاح یا گزارش تعطیلی مکان:** `POST /place-suggestions/changes`.
+  - بدنه: `{kind: CORRECTION|CLOSURE_REPORT, placeId, changes?, notes?}`.
+  - `changes` فقط این فیلدها را می‌پذیرد: `name, address, description, petFriendlyLevel, entryFeeIrr, leashRequired, waterAvailable, shadeAvailable, fencedArea, wasteBins, smallDogArea, parkingAvailable`.
+  - تأیید با ادمین است (`/admin/place-suggestions/:id/approve`). با تأیید، اصلاحات اعمال می‌شود یا مکان از فهرست عمومی خارج می‌شود؛ رویداد در audit ثبت می‌شود.
+  - `GET /place-suggestions/mine` حالا `kind`، `placeId` و `proposedChanges` را هم برمی‌گرداند.
+- **بیمه:**
+  - مقایسه‌ی نرمال‌شده از قبل وجود داشت: `coverage`، `deductible`، `annualLimit`، `waitingPeriod`، `speciesEligibility`، `age`.
+  - وضعیت‌های درخواست: `DRAFT…DECLINED/CANCELLED`.
+  - تصمیم فقط با تیم خود بیمه‌گر در پورتال بیمه‌گر گرفته می‌شود. هیچ اتصال خارجی وجود ندارد و هیچ تأییدی جعل نمی‌شود.
+  - پوشه‌ی آماده‌سازی ادعا (claim prep) ارسال ادعا نیست.
+- **داده‌ی نمایشی:** سفر رامسرِ `batch2-review`:
+  - یک آیتم DONE، یک آیتم NOT_REQUIRED و یک مدرک لینک‌شده؛
+  - یک پیشنهاد اصلاح مکانِ PENDING (پارکینگ و آب).

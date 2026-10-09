@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Prisma, TripChecklistState } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
+import { PetAccessService } from "../pet-access/pet-access.service";
 
 export const CHECKLIST_CATEGORIES = ["DOCUMENTS", "MEDICATION", "FOOD", "CARRIER", "BOOKING", "EMERGENCY", "OTHER"] as const;
 const DEFAULTS: { category: (typeof CHECKLIST_CATEGORIES)[number]; fa: string; en: string }[] = [
@@ -21,12 +22,23 @@ const MAX_ITEMS = 50;
  */
 @Injectable()
 export class TripExtrasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly access: PetAccessService,
+  ) {}
+
+  /** Pets (among the given) whose health this user can see. */
+  private async healthReadable(userId: string, petIds: string[]) {
+    const ok: string[] = [];
+    for (const id of [...new Set(petIds)]) if ((await this.access.getEffectivePermissions(id, userId))?.canViewHealth) ok.push(id);
+    return ok;
+  }
 
   async checklist(petId: string, tripId: string) {
     await this.trip(petId, tripId);
     const items = await this.prisma.tripChecklistItem.findMany({ where: { tripId }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
-    return { items: items.map(toItem), done: items.filter((i) => i.done).length, total: items.length };
+    const count = (state: TripChecklistState) => items.filter((i) => i.state === state).length;
+    return { items: items.map(toItem), done: count(TripChecklistState.DONE), todo: count(TripChecklistState.TODO), notRequired: count(TripChecklistState.NOT_REQUIRED), total: items.length };
   }
 
   /** Adds the suggested defaults once (skips labels already on the list). */
@@ -50,9 +62,11 @@ export class TripExtrasService {
     return this.checklist(petId, tripId);
   }
 
-  async setDone(petId: string, tripId: string, itemId: string, done: boolean) {
+  /** TODO / DONE / NOT_REQUIRED (a boolean `done` from older clients maps to DONE/TODO). */
+  async setState(petId: string, tripId: string, itemId: string, input: { done?: boolean; state?: TripChecklistState }) {
     await this.trip(petId, tripId);
-    const updated = await this.prisma.tripChecklistItem.updateMany({ where: { id: itemId, tripId }, data: { done, doneAt: done ? new Date() : null } });
+    const state = input.state ?? (input.done ? TripChecklistState.DONE : TripChecklistState.TODO);
+    const updated = await this.prisma.tripChecklistItem.updateMany({ where: { id: itemId, tripId }, data: { state, done: state === TripChecklistState.DONE, doneAt: state === TripChecklistState.DONE ? new Date() : null } });
     if (!updated.count) throw new NotFoundApiException("TripChecklistItem");
     return this.checklist(petId, tripId);
   }
@@ -100,6 +114,42 @@ export class TripExtrasService {
     return this.participants(petId, tripId);
   }
 
+  // ---------------------------------------------------------------- document links
+
+  /** The trip's pets: its own pet plus pet participants. */
+  async tripPetIds(tripId: string, primaryPetId: string) {
+    const extra = await this.prisma.tripParticipant.findMany({ where: { tripId, petId: { not: null } }, select: { petId: true } });
+    return [primaryPetId, ...extra.map((p) => p.petId!).filter((id) => id !== primaryPetId)];
+  }
+
+  async documents(petId: string, tripId: string, userId: string) {
+    await this.trip(petId, tripId);
+    const links = await this.prisma.tripDocumentLink.findMany({ where: { tripId }, orderBy: { createdAt: "asc" } });
+    const all = await this.prisma.medicalDocument.findMany({ where: { id: { in: links.map((l) => l.documentId) }, voidedAt: null }, select: { petId: true } });
+    const readable = await this.healthReadable(userId, all.map((d) => d.petId));
+    const docs = await this.prisma.medicalDocument.findMany({ where: { id: { in: links.map((l) => l.documentId) }, voidedAt: null, petId: { in: readable } }, select: { id: true, petId: true, title: true, documentType: true, mimeType: true, createdAt: true } });
+    return links.flatMap((l) => {
+      const d = docs.find((x) => x.id === l.documentId);
+      return d ? [{ documentId: d.id, petId: d.petId, title: d.title, documentType: d.documentType, mimeType: d.mimeType, createdAt: d.createdAt.toISOString(), linkedAt: l.createdAt.toISOString(), deepLink: `/pets/${d.petId}/health/documents/${d.id}` }] : [];
+    });
+  }
+
+  /** Links an existing document of one of the trip's pets — a reference only; the file is never copied. */
+  async linkDocument(petId: string, tripId: string, documentId: string, userId: string) {
+    const trip = await this.trip(petId, tripId);
+    const doc = await this.prisma.medicalDocument.findFirst({ where: { id: documentId, voidedAt: null, petId: { in: await this.tripPetIds(tripId, trip.petId) } } });
+    if (!doc || !(await this.healthReadable(userId, [doc.petId])).length) throw new NotFoundApiException("MedicalDocument");
+    await this.prisma.tripDocumentLink.upsert({ where: { tripId_documentId: { tripId, documentId } }, create: { tripId, documentId, linkedByUserId: userId }, update: {} });
+    return this.documents(petId, tripId, userId);
+  }
+
+  async unlinkDocument(petId: string, tripId: string, documentId: string, userId: string) {
+    await this.trip(petId, tripId);
+    const done = await this.prisma.tripDocumentLink.deleteMany({ where: { tripId, documentId } });
+    if (!done.count) throw new NotFoundApiException("TripDocumentLink");
+    return this.documents(petId, tripId, userId);
+  }
+
   private async trip(petId: string, tripId: string) {
     const trip = await this.prisma.trip.findFirst({ where: { id: tripId, petId } });
     if (!trip) throw new NotFoundApiException("Trip");
@@ -108,5 +158,5 @@ export class TripExtrasService {
 }
 
 function toItem(i: Prisma.TripChecklistItemGetPayload<object>) {
-  return { id: i.id, label: i.label, category: i.category, done: i.done, doneAt: i.doneAt?.toISOString() ?? null };
+  return { id: i.id, label: i.label, category: i.category, state: i.state, done: i.state === TripChecklistState.DONE, doneAt: i.doneAt?.toISOString() ?? null };
 }
