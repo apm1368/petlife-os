@@ -1095,8 +1095,75 @@
 | «مربی نمایشی B (QA)» | `SUBMITTED`؛ یک مدرک PENDING و یک وظیفه‌ی احراز |
 | «فروشنده نمایشی A (QA)» | `VERIFIED` |
 | «فروشنده نمایشی B (QA)» | `REJECTED`؛ با دلیل رد |
-| کلینیک نمایشی batch-3 | override برای `clinic.staff.max` با سقف ۱۵ برای ۹۰ روز |
+| «کلینیک نمایشی ERP (QA)» | override برای `clinic.staff.max` با سقف ۵ برای ۹۰ روز (اصلاح ERP-E: کلینیک‌های نمایشی اصلی هرگز override نمی‌گیرند) |
 
 ### حالت خالی
 - صف احراز می‌تواند خالی باشد.
 - برای ارائه‌دهنده‌ی غیرکلینیک، `/admin/clinics/:id/operations` خطای 404 برمی‌گرداند.
+
+## ۳۰. ERP-E — ردیابی پرداخت، تطبیق مالی، عملیات تسویه
+
+### ردیابی پرداخت
+- **مسیر:** `GET /admin/finance/trace?type=&id=` (مجوز `finance.view`).
+- **انواع ورودی:** `paymentIntent | transaction | refund | order | booking | travelBooking | checkout | donation | subscriptionAttempt`.
+- **خروجی:** یک گراف یکپارچه از چرخه‌ی پرداخت:
+  - `checkouts[]`
+  - `intents[]`: هرکدام با `attempts[]`، `transactions[]`، `providerEvents[]`، `refunds[]` و `subscriptionAttempts[]`.
+  - `orders[]`، `orderRefundsWithoutIntent[]`، `bookings[]`، `travelBookings[]` و `donations[]`.
+  - `ledger[]`: هر تراکنش دفتر کل با `entries[{account, direction, amount}]` و `balanced`.
+  - `sellerLedger[]` (همراه با تسویه‌ی مرتبط)، `settlementItems[]` و `donationLedger[]`.
+  - `reconciliationFindings[]`.
+- هر بار مشاهده در ممیزی ثبت می‌شود (`finance.trace_viewed`).
+- **خطاها:** 400 برای نوع ناشناخته، 404 برای شناسه‌ی ناموجود.
+
+### موتور تطبیق
+- **بررسی‌ها:**
+
+| بررسی | مقایسه |
+|---|---|
+| `INTENT_TRANSACTION` | intent دریافت‌شده در برابر تراکنش CHARGE موفق |
+| `TRANSACTION_LEDGER` | intent دریافت‌شده در برابر ثبت «Payment captured» در دفتر کل؛ مرجع ثبت برای اشتراک شناسه‌ی تلاش صورت‌حساب است و برای بقیه شناسه‌ی checkout |
+| `REFUND_ORIGINAL` | بازپرداخت در برابر پرداخت اصلی و ثبت آن در دفتر کل |
+| `BOOKING_CAPTURE` | رزرو پرداخت‌شده در برابر مبلغ دریافت‌شده |
+| `ORDER_CAPTURE` | جمع سفارش‌های یک checkout در برابر مبلغ دریافت‌شده |
+| `DONATION_LEDGER` | کمک مالی در برابر دفتر کمک‌ها |
+| `SETTLEMENT_LEDGER` | تسویه در برابر دفتر فروشنده |
+| `LEDGER_BALANCE` | ناترازی هر تراکنش در هر سه دفتر کل |
+
+- **نتیجه‌ی هر مورد:** `MATCHED | PENDING | MISMATCH | MISSING | DUPLICATE`.
+- **اجرا:**
+  - دستی: `POST /admin/finance/reconciliation/run` (مجوز `finance.reconcile`؛ نقش‌ها: FINANCE، ADMIN و SUPER_ADMIN) → `{ranAt, summary: {check: {MATCHED, PENDING, MISMATCH, MISSING, DUPLICATE}}, findingsOpened, findingsCleared}`.
+  - خودکار: هر ۶ ساعت یک بار، با کارگر `finance-reconciliation`.
+  - اجراهای هم‌زمان پشت سر هم اجرا می‌شوند.
+- **یافته‌ها (findings):**
+  - مسیر: `GET /admin/finance/reconciliation/findings?status=OPEN|RESOLVED|CLEARED&check&entityId&page` (مجوز `finance.view`) → صفحه‌بندی‌شده، به‌علاوه‌ی `counts[]`.
+  - هر یافته فیلدهای `detail`، `firstDetectedAt` و `lastSeenAt` دارد، به‌علاوه‌ی وظیفه‌ی مرتبط (`task`).
+  - یافته‌ای که دیگر رخ ندهد خودکار `CLEARED` می‌شود.
+  - بستن دستی: `POST /admin/finance/reconciliation/findings/:id/resolve {resolution, note}`.
+    - `resolution` یکی از: `EXPLAINED | CORRECTED_VIA_WORKFLOW | DEMO_DATA | ESCALATED`.
+    - یافته‌ی بسته‌شده در اجراهای بعدی خودبه‌خود دوباره باز نمی‌شود.
+- **وظیفه‌ی بررسی:** برای هر یافته یک وظیفه‌ی `FINANCE_MISMATCH` برای تیم FINANCE ساخته می‌شود؛ اولویت HIGH، و URGENT برای ناترازی دفتر کل. همین وظیفه نقش «پرونده‌ی بررسی مالی» را دارد: تخصیص، وضعیت، یادداشت داخلی.
+- **قاعده‌ی مهم:** موتور تطبیق هرگز به دفتر کل یا رکورد پرداخت دست نمی‌زند. اصلاح فقط از مسیرهای عادی بازپرداخت و تسویه انجام می‌شود.
+
+### عملیات تسویه‌ی فروشنده (افزوده به مسیرهای قبلی `/admin/settlements/*`)
+- `POST /admin/finance/settlements/:id/hold {reason}` و `POST /admin/finance/settlements/:id/release {reason}` (مجوز `settlement.adjust`).
+  - تسویه‌ی نگه‌داشته‌شده تأیید یا پرداخت نمی‌شود: 409 با `ON_HOLD`.
+  - فقط تسویه‌ی `CALCULATED` یا `APPROVED` قابل نگه‌داشتن است (در غیر این صورت `NOT_HOLDABLE`).
+- `GET /admin/finance/settlements/:id/breakdown` (مجوز `sellerFinance.view`) → `{settlement, included[], refundAdjustments[], excludedInPeriod[], clinicSettlement: "PRODUCT_DECISION_REQUIRED"}`.
+- `GET /admin/finance/settlements/:id/export` → فایل CSV با BOM، مناسب Excel؛ ممیزی می‌شود.
+- تسویه‌ی کلینیک و ارائه‌دهنده همچنان `PRODUCT_DECISION_REQUIRED` است و هیچ منطقی برای آن ساخته نشده.
+
+### بازپرداخت
+- **پیش‌نمایش:** `GET /admin/finance/orders/:orderId/refund-preview?amount=` (مجوز `finance.view` یا `commerce.view`) → `{capturedAmount, alreadyRefundedOrPending, refundable, requiresSecondApproval, approvalThresholdIrr, canRequest, blockers[]}`.
+  - `blockers` شامل این موارد می‌شود: `NO_CAPTURED_PAYMENT`، `ALREADY_REFUNDED`، `NOTHING_REFUNDABLE` و `EXCEEDS_REFUNDABLE`.
+  - پیش‌نمایش هیچ رکوردی نمی‌سازد.
+- **گردش کامل:** همان مسیرهای قبلی `/admin/transactions/refund-approvals` (درخواست، تأیید، اجرا از طریق RefundsService واقعی). ترتیب در UI: پیش‌نمایش → درخواست → تأیید (کاربر دوم، وقتی مبلغ بالای آستانه باشد) → اجرا.
+
+### داده‌ی نمایشی
+- **یافته‌های واقعی در محیط زنده:**
+  - چهار سفارش نمایشی Batch 4 (حساب `batch4-customer@example.test`) با seed ساخته شده‌اند. intent آن‌ها CAPTURED است ولی تراکنش CHARGE و ثبت دفتر کل ندارند، پس اجرای تطبیق آن‌ها را `MISSING` نشان می‌دهد.
+  - این یک ناسازگاری واقعی در داده‌ی نمایشی است و پنهان نشده است. بستن آن با `resolution=DEMO_DATA` در اختیار تیم مالی است.
+- **تسویه‌ی نگه‌داشته:** `QA-DEMO-ST-0001` برای «فروشنده نمایشی A (QA)»، با مبلغ صفر.
+- **اصلاح داده‌ی نمایشی ERP-C:**
+  - override دمو حالا روی «کلینیک نمایشی ERP (QA)» است: سقف کارکنان ۵، بالاتر از طرح پیش‌فرض.
+  - override قبلی که سقف کلینیک نمایشی batch-3 (با طرح PRO نامحدود) را به ۱۵ محدود کرده بود، لغو شد و به‌عنوان سابقه باقی ماند.

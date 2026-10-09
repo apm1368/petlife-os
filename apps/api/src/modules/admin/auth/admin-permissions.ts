@@ -71,7 +71,9 @@ export type AdminPermission =
   // ERP-B — account suspension (trust/admin), session revocation (support can help a compromised member), pet access repair
   | "customer.account.manage"
   | "customer.sessions.revoke"
-  | "pet.access.manage";
+  | "pet.access.manage"
+  // ERP-E — run reconciliation and close findings (never edits money)
+  | "finance.reconcile";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -130,6 +132,7 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.account.manage",
   "customer.sessions.revoke",
   "pet.access.manage",
+  "finance.reconcile",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -219,6 +222,7 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "customer.account.manage",
     "customer.sessions.revoke",
     "pet.access.manage",
+    "finance.reconcile",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
@@ -243,6 +247,7 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settlement.approve",
     "settlement.pay",
     "settlement.adjust",
+    "finance.reconcile",
     // spec: "FINANCE: appropriate billing visibility" — read-only; plan/price
     // management and subscription mutations stay ADMIN/SUPER_ADMIN-only.
     "subscription.view",

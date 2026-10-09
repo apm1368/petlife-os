@@ -207,6 +207,7 @@ export class AdminSellerSettlementService {
       if (existing.status !== SellerSettlementStatus.CALCULATED) {
         throw new InvalidSellerSettlementTransitionException({ settlementId, from: existing.status, to: SellerSettlementStatus.APPROVED });
       }
+      if (existing.onHold) throw new InvalidSellerSettlementTransitionException({ settlementId, from: existing.status, to: SellerSettlementStatus.APPROVED, reason: "ON_HOLD" });
       if (existing.initiatedByAdminId === admin.adminUserId) throw new SellerSettlementSelfApprovalException({ settlementId });
 
       const row = await tx.sellerSettlement.update({
@@ -231,6 +232,7 @@ export class AdminSellerSettlementService {
       if (existing.status === SellerSettlementStatus.PAID) {
         return tx.sellerSettlement.findUniqueOrThrow({ where: { id: settlementId }, include: SETTLEMENT_INCLUDE });
       }
+      if (existing.onHold) throw new InvalidSellerSettlementTransitionException({ settlementId, from: existing.status, to: SellerSettlementStatus.PAID, reason: "ON_HOLD" });
       if (existing.netIrr >= this.threshold() && existing.status !== SellerSettlementStatus.APPROVED) {
         throw new SellerSettlementApprovalRequiredException({ settlementId, threshold: this.threshold() });
       }

@@ -3456,11 +3456,16 @@ model SellerSettlement {
   /// settlement's own history.
   payoutMethodType String?
 
-  createdAt    DateTime  @default(now())
-  approvedAt   DateTime?
-  paidAt       DateTime?
-  reconciledAt DateTime?
-  cancelledAt  DateTime?
+  createdAt     DateTime  @default(now())
+  approvedAt    DateTime?
+  paidAt        DateTime?
+  reconciledAt  DateTime?
+  /// ERP-E: staff hold — a held settlement can't be approved or paid until released. Never changes amounts.
+  onHold        Boolean   @default(false)
+  holdReason    String?
+  heldAt        DateTime?
+  heldByAdminId String?   @db.Uuid
+  cancelledAt   DateTime?
 
   items        SellerSettlementItem[]
   transactions SellerLedgerTransaction[]
@@ -10299,4 +10304,50 @@ enum AdminTaskSource {
   SUPPORT
   CLINIC_FOLLOW_UP
   DATA_QUALITY
+}
+
+enum ReconciliationCheck {
+  INTENT_TRANSACTION
+  TRANSACTION_LEDGER
+  REFUND_ORIGINAL
+  BOOKING_CAPTURE
+  ORDER_CAPTURE
+  DONATION_LEDGER
+  SETTLEMENT_LEDGER
+  LEDGER_BALANCE
+}
+
+enum ReconciliationOutcome {
+  MISMATCH
+  MISSING
+  DUPLICATE
+}
+
+enum ReconciliationFindingStatus {
+  OPEN
+  RESOLVED
+  CLEARED
+}
+
+/// ERP-E: one row per (check, entity) that failed reconciliation. Re-runs refresh lastSeenAt; a finding that stops
+/// failing becomes CLEARED automatically, a human closes it as RESOLVED with a note. Nothing here ever edits money.
+model FinanceReconciliationFinding {
+  id                String                      @id @default(uuid()) @db.Uuid
+  check             ReconciliationCheck
+  entityType        String
+  entityId          String
+  outcome           ReconciliationOutcome
+  detail            Json
+  status            ReconciliationFindingStatus @default(OPEN)
+  firstDetectedAt   DateTime                    @default(now())
+  lastSeenAt        DateTime                    @default(now())
+  resolvedAt        DateTime?
+  resolvedByAdminId String?                     @db.Uuid
+  resolution        String?
+  resolutionNote    String?
+  taskDedupeKey     String?
+
+  @@unique([check, entityType, entityId])
+  @@index([status, check])
+  @@map("finance_reconciliation_findings")
 }

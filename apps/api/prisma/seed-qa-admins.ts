@@ -121,15 +121,22 @@ async function main() {
     await partnerDoc("seller-a-registration", "SELLER", sellA.id, "BUSINESS_REGISTRATION", "ACCEPTED");
     const sellB = await sellerOrg("b", "فروشنده نمایشی B (QA)", "REJECTED", "مدرک ثبت کسب‌وکار خوانا نیست؛ لطفاً نسخه‌ی واضح بارگذاری کنید (QA demo).");
     await partnerDoc("seller-b-registration", "SELLER", sellB.id, "BUSINESS_REGISTRATION", "REJECTED", { reviewNote: "تصویر ناخوانا (QA demo)" });
-    // Clinic: the batch-3 demo clinic gets one entitlement override (no payment, reasoned, by the QA super admin).
-    const clinicOwner = await db.providerUser.findFirst({ where: { role: "OWNER", removedAt: null, user: { email: "batch3-clinic-owner@example.test" } } });
-    if (clinicOwner && !(await db.clinicEntitlementOverride.count({ where: { providerOrganizationId: clinicOwner.providerOrganizationId, key: "clinic.staff.max" } }))) {
-      await db.clinicEntitlementOverride.create({ data: { providerOrganizationId: clinicOwner.providerOrganizationId, key: "clinic.staff.max", limitValue: 15, reason: "QA demo — ظرفیت آزمایشی کارکنان برای پایلوت", createdByAdminId: qaSuper.id, expiresAt: new Date(Date.now() + 90 * 86400e3) } });
+    // Clinic: a QA-only clinic on the default plan gets one *raising* override (staff 5). Showcase clinics are never
+    // overridden — an earlier seed capped the batch-3 PRO clinic; that override is revoked here (kept as history).
+    const qaOrgIds = (await db.providerOrganization.findMany({ where: { name: { contains: "(QA)" } }, select: { id: true } })).map((o) => o.id);
+    await db.clinicEntitlementOverride.updateMany({ where: { active: true, reason: { startsWith: "QA demo" }, providerOrganizationId: { notIn: qaOrgIds } }, data: { active: false, revokedAt: new Date(), revokedByAdminId: qaSuper.id } });
+    const qaClinic = await db.providerOrganization.upsert({ where: { id: sid("clinic") }, create: { id: sid("clinic"), name: "کلینیک نمایشی ERP (QA)", type: "VET_CLINIC", verificationStatus: "VERIFIED" }, update: {} });
+    if (!(await db.providerUser.count({ where: { providerOrganizationId: qaClinic.id, userId: erpOwner.id } }))) await db.providerUser.create({ data: { providerOrganizationId: qaClinic.id, userId: erpOwner.id, role: "OWNER" } });
+    if (!(await db.clinicEntitlementOverride.count({ where: { providerOrganizationId: qaClinic.id, key: "clinic.staff.max" } }))) {
+      await db.clinicEntitlementOverride.create({ data: { providerOrganizationId: qaClinic.id, key: "clinic.staff.max", limitValue: 5, reason: "QA demo — ظرفیت آزمایشی کارکنان برای پایلوت", createdByAdminId: qaSuper.id, expiresAt: new Date(Date.now() + 90 * 86400e3) } });
     }
+
+    // ERP-E: one zero-amount settlement for the QA seller, held for review (shows hold/release; moves no money).
+    await db.sellerSettlement.upsert({ where: { id: sid("settlement:a") }, create: { id: sid("settlement:a"), reference: "QA-DEMO-ST-0001", sellerOrganizationId: sellA.id, periodStart: new Date(Date.now() - 37 * 86400e3), periodEnd: new Date(Date.now() - 7 * 86400e3), currency: "IRR", grossIrr: 0, commissionIrr: 0, refundsIrr: 0, adjustmentsIrr: 0, netIrr: 0, initiatedByAdminId: qaSuper.id, onHold: true, holdReason: "QA demo — بررسی بازپرداخت‌های دوره", heldAt: new Date(), heldByAdminId: qaSuper.id }, update: {} });
 
     writeFileSync(FILE, `${lines.join("\n")}\n`, { mode: 0o600 });
     chmodSync(FILE, 0o600);
-    console.log(`QA admin personas + ERP-B/C demo states: ${PERSONAS.length} ready (${generated} password(s) generated); credentials in ${FILE} (600).`);
+    console.log(`QA admin personas + ERP-B/C/E demo states: ${PERSONAS.length} ready (${generated} password(s) generated); credentials in ${FILE} (600).`);
   } finally {
     await db.$disconnect();
   }

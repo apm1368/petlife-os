@@ -6,6 +6,11 @@ import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { Module } from "@nestjs/common";
+import { FinanceReconciliationService } from "./finance/finance-reconciliation.service";
+import { FinanceReconciliationWorker } from "./finance/finance-reconciliation.worker";
+import { PaymentTraceService } from "./finance/payment-trace.service";
+import { SettlementOpsService } from "./finance/settlement-ops.service";
+import { AdminFinanceOpsController } from "./finance/finance-ops.controller";
 import { AutomaticTaskListener } from "./task/automatic-task.listener";
 import { AdminPartner360Service } from "./partners/admin-partner360.service";
 import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
@@ -106,6 +111,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
   imports: [NotificationsModule, RefundsModule, PromotionsModule, TravelMarketplaceModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
   controllers: [
     AdminMeController,
+    AdminFinanceOpsController,
     AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,
@@ -138,6 +144,10 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminNgoMembersController,
   ],
   providers: [
+    FinanceReconciliationService,
+    FinanceReconciliationWorker,
+    PaymentTraceService,
+    SettlementOpsService,
     AutomaticTaskListener,
     AdminPartner360Service,
     AutomaticTaskService,
