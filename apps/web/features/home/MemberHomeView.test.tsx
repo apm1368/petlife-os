@@ -59,6 +59,20 @@ describe("MemberHomeView", () => {
     renderWithIntl(<MemberHomeView />, "fa");
     expect(screen.getByRole("link", { name: "افزودن اولین حیوان" }).getAttribute("href")).toBe("/fa/onboarding");
     expect(petsService.getOverview).not.toHaveBeenCalled();
+    expect(screen.getByRole("navigation", { name: "حساب شما" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "خانواده و دسترسی‌ها" }).getAttribute("href")).toBe("/fa/profile/household");
+    expect(screen.getAllByRole("link").every((link) => routeExists(link.getAttribute("href")!))).toBe(true);
+    expect(screen.queryByText("۰")).toBeNull(); // No invented empty metrics for a household without pets.
+  });
+
+  it("renders the existing activity feed with provenance and correct booking/pet destinations", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ recentActivity: [
+      { id: "visit-1", type: "BOOKING", title: "careCalendar.event.vetAppointment", occurredAt: "2026-10-04T10:00:00Z", providerName: "Mehran Clinic", sourceType: "PROVIDER", href: "/bookings/visit-1", status: null },
+      { id: "memory-1", type: "MEMORY", title: "First walk", occurredAt: "2026-10-03T10:00:00Z", providerName: null, sourceType: "OWNER", href: "/memories/memory-1", status: null },
+    ] }));
+    renderWithIntl(<MemberHomeView />, "en");
+    expect((await screen.findByRole("link", { name: /Vet appointment.*Mehran Clinic/ })).getAttribute("href")).toBe("/en/bookings/visit-1");
+    expect(screen.getByRole("link", { name: /First walk.*Owner\/household/ }).getAttribute("href")).toBe("/en/pets/pet-1/memories/memory-1");
   });
 
   it("every link on the dashboard opens a page that exists — no dead CTA", async () => {
@@ -68,7 +82,7 @@ describe("MemberHomeView", () => {
     expect(await screen.findByText("اشتراکی فعال نیست. مزایا و پلن‌ها را ببینید.")).toBeTruthy();
     const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href")!);
     expect(hrefs.length).toBeGreaterThan(12);
-    const dead = hrefs.filter((h) => !routeExists(h));
+    const dead = hrefs.filter((h) => h.startsWith("#") ? !document.getElementById(h.slice(1)) : !routeExists(h));
     expect(dead).toEqual([]);
     // The pet's own sections are one tap away, and membership is reachable from home.
     for (const section of ["/health", "/care", "/memories", "/health/documents", "/travel"]) expect(hrefs).toContain(`/fa/pets/pet-1${section}`);

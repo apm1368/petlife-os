@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import { routeExists } from "./route-exists";
 
@@ -32,7 +32,8 @@ function collect(): { link: string; where: string }[] {
   const out: { link: string; where: string }[] = [];
   for (const file of DIRS.flatMap((d) => files(join(ROOT, d)))) {
     const src = readFileSync(file, "utf8");
-    const where = relative(ROOT, file);
+    // Portal-relative links use URL-style prefixes on both Windows and CI/Linux.
+    const where = relative(ROOT, file).split(sep).join("/");
     for (const m of src.matchAll(/`\/\$\{locale\}(\/[^`]*)`/g)) out.push({ link: m[1]!, where });
     for (const m of src.matchAll(/\b(?:href|path)\s*:\s*"(\/[a-z][^"]*)"/g)) out.push({ link: m[1]!, where });
   }
