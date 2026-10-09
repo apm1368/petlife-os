@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 import { AccountMenu } from "@/features/account/AccountMenu";
+import "@/features/navigation/member-shell.css";
 
 /**
  * The one frame a signed-in member sees everywhere — private pages (AppShell) and the public
@@ -21,7 +22,10 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const user = useSessionStore((s) => s.user);
   return (
-    <div className="workspace-shell">
+    <div className="workspace-shell member-shell">
+      <a className="member-skip-link" href="#member-main-content">
+        {locale === "fa" ? "رفتن به محتوای صفحه" : "Skip to content"}
+      </a>
       <header className="member-header">
         <div className="member-header__bar">
           <Link href={`/${locale}/home`} className="member-header__brand">
@@ -32,7 +36,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
             <div className="member-header__pet">
               <PetContextControl />
             </div>
-            <span className="member-header__secondary">
+            <span className="member-header__secondary member-header__support">
               <IconButton
                 label={t("support")}
                 onClick={() => router.push(`/${locale}/support`)}
@@ -54,7 +58,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="workspace-main motion-page">{children}</main>
+      <main id="member-main-content" tabIndex={-1} className="workspace-main motion-page">{children}</main>
       <MobileTabBar />
     </div>
   );

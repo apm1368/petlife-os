@@ -26,8 +26,8 @@ const starts = (...prefixes: string[]) => (path: string) => prefixes.some((p) =>
 const petSection = (...sections: string[]) => (path: string) => sections.some((s) => new RegExp(`^/pets/[^/]+/${s}(?:/|$)`).test(path));
 
 export const PRIMARY_DESTINATIONS: PrimaryDestination[] = [
-  { key: "home", href: "/home", fa: "خانه", en: "Home", icon: House, mobile: true, match: (p) => p === "/home" || p === "/pets" || p === "/pets/new" || /^\/pets\/[^/]+$/.test(p) || petSection("activity", "documents", "lost", "insurance")(p) },
-  { key: "explore", href: "/explore", fa: "کاوش", en: "Explore", icon: Compass, mobile: true, match: (p) => starts("/explore", "/travel", "/places", "/insurance", "/animal-support", "/donations", "/community", "/lost-pets", "/blog", "/support", "/invitations")(p) || petSection("travel")(p) },
+  { key: "home", href: "/home", fa: "داشبورد", en: "Dashboard", icon: House, mobile: true, match: (p) => p === "/home" || p === "/pets" || p === "/pets/new" || /^\/pets\/[^/]+$/.test(p) || petSection("activity", "documents", "lost", "insurance")(p) },
+  { key: "explore", href: "/explore", fa: "کاوش", en: "Explore", icon: Compass, mobile: true, match: (p) => starts("/explore", "/travel", "/places", "/insurance", "/animal-support", "/donations", "/community", "/lost-pets", "/guides", "/blog", "/support", "/invitations")(p) || petSection("travel")(p) },
   { key: "health", href: "/pets/active?view=health", fa: "سلامت", en: "Health", icon: HeartPulse, mobile: true, match: (p) => starts("/vet", "/care-calendar")(p) || petSection("health", "care")(p) },
   { key: "services", href: "/services", fa: "خدمات", en: "Services", icon: Scissors, mobile: true, match: starts("/services", "/bookings", "/providers") },
   { key: "shop", href: "/shop", fa: "فروشگاه", en: "Shop", icon: ShoppingBag, mobile: true, match: starts("/shop", "/cart", "/checkout", "/orders", "/repeat-delivery", "/favorites") },

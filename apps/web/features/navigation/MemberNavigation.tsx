@@ -1,29 +1,41 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Avatar, ChevronLeft, ChevronRight, Compass, Sheet } from "@petlife/ui";
 import { useActivePet } from "@/hooks/use-active-pet";
+import { LanguageToggle } from "@/features/locale/LanguageToggle";
+import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { EXPLORE_GROUPS, PRIMARY_DESTINATIONS, currentDestination } from "./consumer-nav";
 
 type Locale = "fa" | "en";
 const useMemberLocale = (): Locale => (useLocale() === "en" ? "en" : "fa");
 const usePathKey = (locale: string) => (usePathname() ?? "").replace(new RegExp(`^/${locale}`), "") || "/";
 
-/** Closes a popover on Escape (focus back to its trigger), outside pointer-down and route change. */
-function useDismiss(open: boolean, close: () => void, refs: React.RefObject<HTMLElement>[], trigger: React.RefObject<HTMLElement>) {
+/** Non-modal disclosures leave Tab free; Escape alone returns focus to the trigger. */
+function useDismiss(open: boolean, close: () => void, boundary: React.RefObject<HTMLElement>, trigger: React.RefObject<HTMLElement>, panel?: React.RefObject<HTMLElement>) {
   const pathname = usePathname();
-  useEffect(() => { close(); /* route changed */ }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { close(); }, [pathname, close]);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { close(); trigger.current?.focus(); } };
-    const onDown = (e: PointerEvent) => { if (!refs.some((r) => r.current?.contains(e.target as Node))) close(); };
+    const onDown = (e: PointerEvent) => { if (!boundary.current?.contains(e.target as Node)) close(); };
+    const onFocus = (e: FocusEvent) => {
+      const target = e.target as Node;
+      const inside = panel ? trigger.current?.contains(target) || panel.current?.contains(target) : boundary.current?.contains(target);
+      if (!inside) close();
+    };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onDown);
-    return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onDown); };
-  }, [open, close, refs, trigger]);
+    document.addEventListener("focusin", onFocus);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("focusin", onFocus);
+    };
+  }, [open, close, boundary, trigger, panel]);
 }
 
 /** Desktop primary navigation with the Explore mega menu. Hidden below 1024px (the bottom bar takes over). */
@@ -36,13 +48,26 @@ export function PrimaryNav() {
   const button = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const focusOnOpen = useRef(false);
   const panelId = useId();
-  const close = () => setOpen(false);
-  useDismiss(open, close, [wrap], button);
+  const close = useCallback(() => {
+    clearTimeout(hoverTimer.current);
+    focusOnOpen.current = false;
+    setOpen(false);
+  }, []);
+  useDismiss(open, close, wrap, button, panel);
+  useEffect(() => () => clearTimeout(hoverTimer.current), []);
+  useEffect(() => {
+    if (open && focusOnOpen.current) {
+      panel.current?.querySelector<HTMLAnchorElement>("a")?.focus();
+      focusOnOpen.current = false;
+    }
+  }, [open]);
 
   const hover = (next: boolean) => (e: React.PointerEvent) => {
     if (e.pointerType !== "mouse") return;
     clearTimeout(hoverTimer.current);
+    if (!next && panel.current?.contains(document.activeElement)) return;
     hoverTimer.current = setTimeout(() => setOpen(next), next ? 90 : 180);
   };
   const Forward = fa ? ChevronLeft : ChevronRight;
@@ -61,9 +86,17 @@ export function PrimaryNav() {
                   aria-expanded={open}
                   aria-controls={panelId}
                   aria-current={current === "explore" ? "page" : undefined}
-                  onClick={() => setOpen((v) => !v)}
+                  onClick={() => {
+                    clearTimeout(hoverTimer.current);
+                    setOpen((v) => !v);
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); requestAnimationFrame(() => panel.current?.querySelector<HTMLAnchorElement>("a")?.focus()); }
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      clearTimeout(hoverTimer.current);
+                      if (open) panel.current?.querySelector<HTMLAnchorElement>("a")?.focus();
+                      else { focusOnOpen.current = true; setOpen(true); }
+                    }
                   }}
                 >
                   {fa ? d.fa : d.en}
@@ -80,7 +113,7 @@ export function PrimaryNav() {
           )}
         </ul>
       </nav>
-      <div id={panelId} ref={panel} className="mega" data-open={open} hidden={!open} onPointerEnter={hover(true)}>
+      <div id={panelId} ref={panel} className="mega" role="navigation" data-open={open} hidden={!open} onPointerEnter={hover(true)} aria-label={fa ? "بخش‌های پت‌لایف" : "PET LIFE destinations"}>
         <div className="mega__inner">
           {EXPLORE_GROUPS.map((group, gi) => (
             <section key={group.key} className="mega__group" style={{ ["--g" as string]: gi }} aria-labelledby={`${panelId}-${group.key}`}>
@@ -88,7 +121,7 @@ export function PrimaryNav() {
               <ul>
                 {group.links.map(({ href, icon: Icon, fa: f, en }) => (
                   <li key={href}>
-                    <Link href={`/${locale}${href}`} className="mega__link">
+                    <Link href={`/${locale}${href}`} className="mega__link" onClick={close}>
                       <span className="mega__icon"><Icon size={18} aria-hidden="true" /></span>
                       <span className="mega__text"><strong>{fa ? f[0] : en[0]}</strong><span>{fa ? f[1] : en[1]}</span></span>
                     </Link>
@@ -99,7 +132,7 @@ export function PrimaryNav() {
           ))}
         </div>
         <div className="mega__foot">
-          <Link href={`/${locale}/explore`}>{fa ? "همهٔ بخش‌های پت‌لایف" : "Everything in PET LIFE"}<Forward size={16} aria-hidden="true" /></Link>
+          <Link href={`/${locale}/explore`} onClick={close}>{fa ? "همهٔ بخش‌های پت‌لایف" : "Everything in PET LIFE"}<Forward size={16} aria-hidden="true" /></Link>
         </div>
       </div>
     </div>
@@ -117,7 +150,8 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   const listId = useId();
-  useDismiss(open, () => setOpen(false), [wrap], button);
+  const close = useCallback(() => setOpen(false), []);
+  useDismiss(open, close, wrap, button);
   if (!active) {
     return <Link href={`/${locale}/pets/new`} className="pet-context pet-context--add">{fa ? "افزودن حیوان" : "Add a pet"}</Link>;
   }
@@ -133,7 +167,7 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
         <ul>
           {pets.map((p) => (
             <li key={p.id}>
-              <button type="button" aria-pressed={p.id === activeId} onClick={() => { void switchActivePet(p.id); setOpen(false); }}>
+              <button type="button" aria-pressed={p.id === activeId} onClick={() => { void switchActivePet(p.id); setOpen(false); button.current?.focus(); }}>
                 <Avatar name={p.name} src={p.photoUrl ?? undefined} size="sm" />
                 <span>{p.name}</span>
               </button>
@@ -156,12 +190,14 @@ export function MobileTabBar() {
   const router = useRouter();
   const current = currentDestination(usePathKey(locale));
   const [sheet, setSheet] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => setSheet(false), [pathname]);
   return (
     <>
       <nav className="member-tabbar" aria-label={fa ? "منوی پایین" : "Bottom menu"}>
         {PRIMARY_DESTINATIONS.filter((d) => d.mobile).map(({ key, href, fa: labelFa, en, icon: Icon }) =>
           key === "explore" ? (
-            <button key={key} type="button" aria-expanded={sheet} aria-current={current === key ? "page" : undefined} onClick={() => setSheet(true)}>
+            <button key={key} type="button" aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === key ? "page" : undefined} onClick={() => setSheet(true)}>
               <Compass size={21} aria-hidden="true" />
               <span>{fa ? labelFa : en}</span>
             </button>
@@ -173,9 +209,14 @@ export function MobileTabBar() {
           ),
         )}
       </nav>
-      <Sheet open={sheet} onClose={() => setSheet(false)} title={fa ? "کاوش" : "Explore"}>
+      <Sheet open={sheet} onClose={() => setSheet(false)} title={fa ? "کاوش" : "Explore"} className="member-explore-panel">
         <div className="explore-sheet">
           <PetContextSheetRow onNavigate={() => setSheet(false)} />
+          <div className="explore-sheet__preferences" role="group" aria-label={fa ? "زبان و ظاهر" : "Language and appearance"}>
+            <span>{fa ? "زبان و ظاهر" : "Language and appearance"}</span>
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
           {EXPLORE_GROUPS.map((group) => (
             <section key={group.key}>
               <h3>{fa ? group.fa : group.en}</h3>
@@ -191,6 +232,7 @@ export function MobileTabBar() {
               </ul>
             </section>
           ))}
+          <Link href={`/${locale}/support`} className="explore-sheet__support" onClick={() => setSheet(false)}>{fa ? "کمک و پشتیبانی" : "Help and support"}</Link>
           <button type="button" className="explore-sheet__close" onClick={() => setSheet(false)}>{fa ? "بستن" : "Close"}</button>
         </div>
       </Sheet>

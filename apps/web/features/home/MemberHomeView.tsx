@@ -20,12 +20,25 @@ import { useSessionStore } from "@/stores/session-store";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
-import { attentionTitle, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone } from "@/features/pets/overview-labels";
+import { attentionTitle, eventTitle, eventSourceLabel, formatOverviewDate, severityBarClass, severityLabel, severityTone } from "@/features/pets/overview-labels";
+import "./member-home.css";
 
 type Booking = Awaited<ReturnType<typeof bookingsService.list>>[number];
 
 const COPY = {
   fa: {
+    dashboard: "داشبورد",
+    startHere: "از اینجا شروع کنید",
+    firstStep: "اولین قدم، آشنایی با حیوان شماست.",
+    healthIntro: "پرونده، سوابق و مدارک سلامت در کنار هم.",
+    careIntro: "نوبت‌ها و مراقبت‌های پیش‌رو، در زمان مناسب.",
+    memoriesIntro: "جایی برای لحظه‌هایی که می‌خواهید نگه دارید.",
+    account: "حساب شما",
+    accountIntro: "اطلاعات شخصی و خانواده را از همین‌جا مدیریت کنید.",
+    personal: "اطلاعات شخصی",
+    household: "خانواده و دسترسی‌ها",
+    recentActivity: "تازه‌های پرونده",
+    noActivity: "با ثبت مراقبت، مراجعه یا خاطره، تاریخچهٔ حیوانتان اینجا شکل می‌گیرد.",
     hello: (name: string) => `سلام، ${name}`,
     todayIs: "امروز",
     addPet: "افزودن حیوان",
@@ -83,6 +96,18 @@ const COPY = {
     unavailable: "این بخش الان بارگیری نشد.",
   },
   en: {
+    dashboard: "Dashboard",
+    startHere: "Start here",
+    firstStep: "First, let's get to know your pet.",
+    healthIntro: "Health records, history and documents, together.",
+    careIntro: "Appointments and upcoming care, at the right time.",
+    memoriesIntro: "A place for the moments you want to keep.",
+    account: "Your account",
+    accountIntro: "Manage your personal details and household from here.",
+    personal: "Personal details",
+    household: "Household and access",
+    recentActivity: "Latest in their record",
+    noActivity: "Care, visits and memories will build your pet's history here.",
     hello: (name: string) => `Hello, ${name}`,
     todayIs: "Today",
     addPet: "Add a pet",
@@ -198,12 +223,41 @@ export function MemberHomeView() {
 
   if (!petId) {
     return (
-      <div className="member-home">
-        <section className="member-home__welcome">
-          <h1>{c.welcomeTitle}</h1>
-          <p>{c.welcomeBody}</p>
-          <Link className="account-link-button" href={`/${locale}/onboarding`}>{c.welcomeCta}</Link>
-        </section>
+      <div className="member-home member-home--new">
+        <header className="member-home__greeting">
+          <div>
+            <p>{c.dashboard} <span aria-hidden="true"> / </span> {today}</p>
+            <h1>{firstName ? c.hello(firstName) : c.welcomeTitle}</h1>
+          </div>
+        </header>
+        <div className="member-home__welcome-layout">
+          <section className="member-home__welcome" aria-labelledby="home-welcome">
+            <span className="member-home__eyebrow">{c.startHere}</span>
+            <h2 id="home-welcome">{c.firstStep}</h2>
+            <p>{c.welcomeBody}</p>
+            <Link className="member-home__primary" href={`/${locale}/onboarding`}><Plus size={18} aria-hidden="true" />{c.welcomeCta}</Link>
+            <div className="member-home__welcome-details">
+              {[
+                { Icon: HeartPulse, title: c.health, description: c.healthIntro },
+                { Icon: CalendarDays, title: c.care, description: c.careIntro },
+                { Icon: Images, title: c.memories, description: c.memoriesIntro },
+              ].map(({ Icon, title, description }) => (
+                <div key={title}><Icon size={20} aria-hidden="true" /><div><h3>{title}</h3><p>{description}</p></div></div>
+              ))}
+            </div>
+          </section>
+          <aside className="member-home__welcome-account" aria-labelledby="home-account">
+            <span className="member-home__account-avatar"><Avatar name={user?.displayName ?? c.account} size="lg" /></span>
+            <h2 id="home-account">{c.account}</h2>
+            <p>{c.accountIntro}</p>
+            <nav aria-label={c.account}>
+              {[["/profile", c.personal], ["/profile/household", c.household], ["/subscription", c.membership]].map(([href, label]) => (
+                <Link key={href} href={`/${locale}${href}`}><span>{label}</span><Forward size={16} aria-hidden="true" /></Link>
+              ))}
+            </nav>
+          </aside>
+        </div>
+        <DashboardExplore locale={locale} />
       </div>
     );
   }
@@ -216,7 +270,7 @@ export function MemberHomeView() {
     <div className="member-home">
       <header className="member-home__greeting">
         <div>
-          <p>{c.todayIs} · {today}</p>
+          <p>{c.dashboard} <span aria-hidden="true"> / </span> {today}</p>
           <h1>{firstName ? c.hello(firstName) : pet.name}</h1>
         </div>
         <Link href={`/${locale}/pets/new`} className="member-home__add"><Plus size={16} aria-hidden="true" />{c.addPet}</Link>
@@ -235,7 +289,7 @@ export function MemberHomeView() {
 
       <section className="member-home__hero" aria-label={pet.name}>
         <div className="member-home__hero-top">
-          <Avatar name={pet.name} src={pet.photoUrl ?? undefined} size="lg" />
+          <div className="member-home__portrait"><Avatar name={pet.name} src={pet.photoUrl ?? undefined} size="lg" /></div>
           <div className="member-home__hero-text">
             <h2>{pet.name}</h2>
             <p>{[speciesLabel(pet, locale), pet.breed, formatAge(pet, locale, c.unknownAge)].filter(Boolean).join(" · ")}</p>
@@ -245,8 +299,8 @@ export function MemberHomeView() {
             </dl>
           </div>
           <dl className="member-home__stats">
-            <div><dt>{c.attention}</dt><dd>{formatCount(overview.attention.length, locale)}</dd></div>
-            <div><dt>{c.upcoming}</dt><dd>{formatCount(overview.upcoming.length, locale)}</dd></div>
+            <div><dt><Link href="#home-attention">{c.attention}</Link></dt><dd>{formatCount(overview.attention.length, locale)}</dd></div>
+            <div><dt><Link href="#home-upcoming">{c.upcoming}</Link></dt><dd>{formatCount(overview.upcoming.length, locale)}</dd></div>
             <div><dt>{c.lastHealth}</dt><dd>{overview.recentHealth[0] ? formatOverviewDate(overview.recentHealth[0].occurredAt, locale) : c.notRecorded}</dd></div>
           </dl>
           <Link href={petBase} className="member-home__hero-link">
@@ -265,8 +319,8 @@ export function MemberHomeView() {
 
       <div className="member-home__layout">
         <div className="member-home__main">
-          <section className="member-home__card" aria-labelledby="home-attention">
-            <h2 id="home-attention">{c.attention}</h2>
+          <section className="member-home__card member-home__attention" aria-labelledby="home-attention">
+            <div className="member-home__card-head"><h2 id="home-attention">{c.attention}</h2><span className="member-home__count">{formatCount(overview.attention.length, locale)}</span></div>
             {overview.attention.length === 0 ? (
               <div className="member-home__calm"><p>{c.noAttention}</p><p>{c.noAttentionHint}</p></div>
             ) : (
@@ -328,6 +382,22 @@ export function MemberHomeView() {
                         <strong>{eventTitle(item.title, locale)}</strong>
                         <span>{formatOverviewDate(item.occurredAt, locale)}{item.providerName ? ` · ${item.providerName}` : ""}</span>
                       </span>
+                      <Forward size={16} aria-hidden="true" className="member-home__go" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+          <section className="member-home__card" aria-labelledby="home-activity">
+            <div className="member-home__card-head"><h2 id="home-activity">{c.recentActivity}</h2></div>
+            {overview.recentActivity.length === 0 ? <p className="member-home__empty">{c.noActivity}</p> : (
+              <ul className="member-home__list member-home__timeline">
+                {overview.recentActivity.slice(0, 4).map((item) => (
+                  <li key={`${item.type}-${item.id}`}>
+                    <Link href={item.href.startsWith("/bookings/") ? `/${locale}${item.href}` : petBase + item.href}>
+                      <span className="member-home__timeline-dot" aria-hidden="true" />
+                      <span className="member-home__item-text"><strong>{eventTitle(item.title, locale)}</strong><span>{formatOverviewDate(item.occurredAt, locale)} · {item.providerName ?? eventSourceLabel(item, locale)}</span></span>
                       <Forward size={16} aria-hidden="true" className="member-home__go" />
                     </Link>
                   </li>
@@ -439,7 +509,14 @@ export function MemberHomeView() {
         </aside>
       </div>
 
-      <nav className="member-home__explore" aria-label={c.explore}>
+      <DashboardExplore locale={locale} />
+    </div>
+  );
+}
+
+function DashboardExplore({ locale }: { locale: "fa" | "en" }) {
+  const c = COPY[locale];
+  return <nav className="member-home__explore" aria-label={c.explore}>
         <h2>{c.explore}</h2>
         <div>
           <Link href={`/${locale}/services`}><Scissors size={18} aria-hidden="true" />{c.services}</Link>
@@ -448,7 +525,5 @@ export function MemberHomeView() {
           <Link href={`/${locale}/travel`}><MapPin size={18} aria-hidden="true" />{c.stays}</Link>
           <Link href={`/${locale}/community`}><Users size={18} aria-hidden="true" />{c.community}</Link>
         </div>
-      </nav>
-    </div>
-  );
+      </nav>;
 }
