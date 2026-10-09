@@ -754,3 +754,43 @@
   - نویسنده‌ی نظر نمی‌تواند نظر خودش را گزارش کند (`CANNOT_REPORT_OWN_REVIEW`).
   - رسیدگی با صف گزارش‌های ادمین و پنهان‌کردن نظر (`/admin/provider-reviews/:id/hide`) است.
 - **فید فعالیت:** نوع جدید `ACCESS_SHARED` (رویداد دادن دسترسی پت به یک نفر).
+
+## ۲۶. حریم خصوصی و حقوق داده (G19)
+
+**موارد موجود از Batch 8 (بدون تغییر):**
+- **درخواست خروجی داده:** `POST /account/privacy/exports` با وضعیت‌های `PENDING → PROCESSING → READY | FAILED`، و `expiresAt` بعد از ۷ روز.
+  - دانلود فقط با `POST /account/privacy/exports/:id/download` انجام می‌شود که لینک امضاشده‌ی کوتاه‌مدت می‌سازد.
+  - سقف درخواست ۳ بار در روز است.
+  - رویدادهای `DataExportRequested` و `DataExportDownloaded` ثبت می‌شوند.
+
+**جدید در G19:**
+- **ماشین وضعیت حذف حساب:** فیلد `state` روی هر درخواست حذف، با مقادیر `REQUESTED | CANCELLED | PENDING_RETENTION | READY_FOR_EXECUTION | COMPLETED`.
+  - `GET /account/privacy` برای هر درخواست حذف این فیلدها را برمی‌گرداند: `state`، `stateChangedAt`، `cancellable` و `executionEnabled: false`.
+  - عضو فقط در وضعیت `REQUESTED` یا `PENDING_RETENTION` می‌تواند لغو کند (`POST /account/privacy/deletion/:id/cancel`).
+  - ادمین (فقط `SUPER_ADMIN` با دسترسی `admin.manage`):
+    - `GET /admin/privacy/deletion-requests?state=` برای فهرست؛
+    - `POST /admin/privacy/deletion-requests/:id/transition {to, note?}` برای تغییر وضعیت.
+  - انتقال‌های مجاز فقط `REQUESTED → PENDING_RETENTION → READY_FOR_EXECUTION` است.
+    - رفتن به `READY_FOR_EXECUTION` تا وقتی `RETENTION_POLICY_APPROVED=true` نشده رد می‌شود (`RETENTION_POLICY_NOT_APPROVED`).
+    - رفتن به `COMPLETED` همیشه رد می‌شود (`EXECUTION_DISABLED`). اجرای حذف اصلاً پیاده نشده و هیچ داده‌ای حذف نمی‌شود.
+  - هر تغییر وضعیت در لاگ ممیزی ادمین (`account_deletion.state_changed`) و در رویداد `AccountDeletionStateChanged` ثبت می‌شود و در فید فعالیت حریم خصوصی هم دیده می‌شود.
+- **تاریخچه‌ی رضایت:** `GET /account/privacy/consents/history` → `{currentVersion, items: [{kind, version, acceptedAt, withdrawnAt, source}]}`، از جدید به قدیم.
+  - `source` امروز `PRIVACY_CENTER` است.
+  - رکوردهای قدیمی‌تر که رویدادی ندارند با `LEGACY_RECORD` نمایش داده می‌شوند.
+  - ثبت رضایت هنگام ثبت‌نام (`SIGNUP`) وابسته به متن حقوقی CMS در Batch 7 است.
+- **دروازه‌ی انتشار برای کاربر واقعی:** `GET /admin/release-gate` (فقط `SUPER_ADMIN`) → `{readyForRealUsers, items: [{key, ready}]}`.
+  - کلیدها:
+    - `NODE_ENV_PRODUCTION`
+    - `TLS_ENABLED`
+    - `SECURE_COOKIES`
+    - `REAL_OTP_PROVIDER`
+    - `REAL_MESSAGING`
+    - `PAYMENT_PRODUCTION_DECISION`
+    - `RETENTION_POLICY_APPROVED`
+    - `DEV_SIMULATION_DISABLED`
+  - مقدارها فقط از پیکربندی در حال اجرا خوانده می‌شوند و این endpoint هیچ تنظیمی را تغییر نمی‌دهد.
+  - روی VPS فعلی انتظار می‌رود `readyForRealUsers=false` باشد. این وضعیت عمداً برای محیط نمایشی است.
+- **نیاز طراحی (Codex):**
+  - نشان (badge) وضعیت حذف و دکمه‌ی لغو بر اساس `cancellable`؛
+  - جدول تاریخچه‌ی رضایت؛
+  - صفحه‌ی ادمین برای صف حذف و جدول دروازه‌ی انتشار، در بخش Admin در Batch 7 که مالک آن Codex است.

@@ -6,7 +6,7 @@ import { SessionService } from "../../common/session/session.service";
 /** Batch 8 — account activity groups. Only events about this person (their own User aggregate, or naming them as the actor); never another member's household activity. */
 export const ACTIVITY_GROUPS = {
   SECURITY: ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"],
-  PRIVACY: ["ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled"],
+  PRIVACY: ["ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled", "AccountDeletionStateChanged"],
   HOUSEHOLD: ["HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "HouseholdMemberLeft"],
   /** Household membership events — shown only to that household's owners, who hold its billing. */
   MEMBERSHIP: ["SubscriptionStarted", "SubscriptionRenewed", "SubscriptionRenewalFailed", "SubscriptionGraceStarted", "SubscriptionExpired", "SubscriptionPlanChanged", "SubscriptionDowngradeScheduled", "SubscriptionCancelRequested", "SubscriptionCancelReversed"],

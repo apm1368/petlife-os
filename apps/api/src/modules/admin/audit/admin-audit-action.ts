@@ -90,6 +90,7 @@ export type AdminAuditAction =
   | "pet_friendly_place.created"
   | "place_suggestion.approved"
   | "place_correction.approved"
+  | "account_deletion.state_changed"
   | "place_closure.approved"
   | "place_suggestion.rejected"
   | "pet_friendly_place.updated"

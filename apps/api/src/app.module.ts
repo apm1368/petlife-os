@@ -64,6 +64,7 @@ import { PlaceSuggestionsModule } from "./modules/place-suggestions/place-sugges
 import { ActivityModule } from "./modules/activity/activity.module";
 import { MemberTrustModule } from "./modules/member-trust/member-trust.module";
 import { HealthDepthModule } from "./modules/health-depth/health-depth.module";
+import { PrivacyGovernanceModule } from "./modules/privacy-governance/privacy-governance.module";
 import { ConsumerHubModule } from "./modules/consumer-hub/consumer-hub.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
@@ -133,6 +134,7 @@ import { PlacesModule } from "./modules/places/places.module";
     SubscriptionsModule,
     ClinicalHealthModule,
     HealthDepthModule,
+    PrivacyGovernanceModule,
     VetPanelModule,
     ClinicOsModule,
     PetSafetyModule,

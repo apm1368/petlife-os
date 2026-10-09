@@ -103,6 +103,9 @@ export class AccountController {
     return this.privacyCenter.setConsent(user.id, dto.kind, dto.granted);
   }
 
+  @Get("privacy/consents/history")
+  consentHistory(@CurrentUser() user: SessionUser) { return this.privacyCenter.consentHistory(user.id); }
+
   @Get("privacy/sharing")
   sharing(@CurrentUser() user: SessionUser) { return this.privacyCenter.sharing(user.id); }
 

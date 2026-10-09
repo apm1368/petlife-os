@@ -415,6 +415,19 @@ async function main() {
       }
     }
 
+    // G19: a QA privacy persona — consent history (accept → withdraw marketing) and a deletion request held at
+    // PENDING_RETENTION (the furthest a request can go until the retention policy is approved; nothing executes).
+    const { AccountPrivacyService } = await import("../src/modules/account/account-privacy.service");
+    const privacy = app.get(AccountPrivacyService);
+    const qaPrivacy = await user("qa-privacy@example.test", "آزمون حریم خصوصی (QA)");
+    if (!(await db.domainEvent.count({ where: { type: "ConsentChanged", aggregateId: qaPrivacy.id } }))) {
+      await privacy.setConsent(qaPrivacy.id, "TERMS", true);
+      await privacy.setConsent(qaPrivacy.id, "PRIVACY", true);
+      await privacy.setConsent(qaPrivacy.id, "MARKETING", true);
+      await privacy.setConsent(qaPrivacy.id, "MARKETING", false);
+    }
+    await db.accountDeletionRequest.upsert({ where: { id: id("qa-privacy:deletion") }, create: { id: id("qa-privacy:deletion"), userId: qaPrivacy.id, reason: "QA demo — نگهداری در انتظار سیاست", state: "PENDING_RETENTION", stateNote: "در انتظار تصویب سیاست نگهداری" }, update: {} });
+
     console.log(`Sprint demo extras: 4 support needs (${Object.keys(ids).join(", ")}), ${rides} taxi rides (QA tariff snapshot), chat report+block, clinic vet/visit/vitals, pet safety (ID tag /pet-card/${demoToken}) and shared care; lost pet with ID card /pet-card/${lostToken}; health share /health-share/${shareToken}.`);
   } finally {
     await app.close();

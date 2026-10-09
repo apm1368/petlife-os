@@ -1347,6 +1347,12 @@ model AccountDeletionRequest {
   /// Batch 8 — the consequence preview (households, pets, open obligations) the person saw and confirmed when requesting.
   impactSnapshot Json?
 
+  /// G19 deletion lifecycle (execution stays disabled until a retention policy is approved). `status` is kept for
+  /// older clients: CANCELLED/COMPLETED mirror it, every other state reads as PENDING there.
+  state          AccountDeletionState @default(REQUESTED)
+  stateChangedAt DateTime             @default(now())
+  stateNote      String?
+
   @@index([userId, requestedAt])
   @@map("account_deletion_requests")
 }
@@ -10137,4 +10143,12 @@ enum PlaceSuggestionKind {
   NEW_PLACE
   CORRECTION
   CLOSURE_REPORT
+}
+
+enum AccountDeletionState {
+  REQUESTED
+  CANCELLED
+  PENDING_RETENTION
+  READY_FOR_EXECUTION
+  COMPLETED
 }
