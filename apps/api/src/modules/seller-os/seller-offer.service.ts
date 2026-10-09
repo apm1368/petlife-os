@@ -1,3 +1,4 @@
+import { SellerAccessDeniedException } from "../../common/errors/api-exception";
 import { Injectable } from "@nestjs/common";
 import { MarketplaceListingSyncStatus, Prisma, SellerOfferStatus, type InventoryItem, type Product, type ProductVariant, type SellerOffer } from "@prisma/client";
 import type { PaginatedDto, SellerOsOfferDto } from "@petlife/types";
@@ -150,6 +151,10 @@ export class SellerOfferService {
   async update(ctx: ResolvedSellerContext, offerId: string, dto: UpdateSellerOfferDto): Promise<SellerOsOfferDto> {
     this.sellerAccess.assertOperational(ctx.sellerStatus);
     const existing = await this.loadOwned(ctx, offerId);
+    // SUSPENDED is a staff moderation state: a seller can neither set it nor lift it (POST /admin/commerce/offers/:id/status).
+    if (dto.status !== undefined && dto.status !== existing.status && (existing.status === SellerOfferStatus.SUSPENDED || dto.status === SellerOfferStatus.SUSPENDED)) {
+      throw new SellerAccessDeniedException({ reason: "OFFER_SUSPENDED_BY_STAFF", sellerOfferId: offerId });
+    }
     assertRepeatConfig(dto.repeatDeliveryEligible ?? existing.repeatDeliveryEligible, dto.repeatIntervalsDays ?? existing.repeatIntervalsDays);
 
     const updated = await this.prisma.$transaction(async (tx) => {

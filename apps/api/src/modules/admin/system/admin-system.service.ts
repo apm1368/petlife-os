@@ -73,8 +73,13 @@ export class AdminSystemService {
       migrations,
       deploy: { version: this.env("APP_VERSION"), sha: this.env("BUILD_SHA"), buildTime: this.env("BUILD_TIME"), environment: this.env("DEPLOYMENT_ENVIRONMENT"), deploymentId: this.env("DEPLOYMENT_ID") },
     };
-    const degraded = !database.ok || !redis.ok || storage.status !== "UP" || outbox.status !== "OK" || migrations.status !== "OK" || workers.some((w) => w.status === "FAILING" || w.status === "LATE");
-    return { status: !database.ok ? "DOWN" : degraded ? "DEGRADED" : "OK", checkedAt: new Date(now).toISOString(), components };
+    // DOWN: the database is unreachable. DEGRADED: a dependency, a migration or a worker is broken. LAGGING: everything
+    // works but work is queuing (outbox events with listeners waiting > 5 min, or a worker late). HEALTHY otherwise.
+    // Record-only events are written already processed, so only real backlog counts as lag.
+    const degraded = !redis.ok || storage.status !== "UP" || migrations.status !== "OK" || workers.some((w) => w.status === "FAILING");
+    const lagging = outbox.status !== "OK" || workers.some((w) => w.status === "LATE");
+    const status = !database.ok ? "DOWN" : degraded ? "DEGRADED" : lagging ? "LAGGING" : "HEALTHY";
+    return { status, checkedAt: new Date(now).toISOString(), components };
   }
 
   private async storageCheck() {

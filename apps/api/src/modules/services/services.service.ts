@@ -100,7 +100,8 @@ export class ServicesService {
       where: { id: serviceId },
       include: { providerOrganization: { include: { locations: true, services: true } } },
     });
-    if (!service) throw new NotFoundApiException("Service");
+    // Same visibility rule as availability/booking: inactive services and unverified or suspended providers are not public.
+    if (!service || !service.isActive || service.providerOrganization.verificationStatus !== "VERIFIED") throw new NotFoundApiException("Service");
 
     const compatibility = await this.compatibility.evaluateForViewer(query.petId, service, viewerId);
 

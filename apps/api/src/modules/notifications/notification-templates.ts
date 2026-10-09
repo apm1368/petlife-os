@@ -548,6 +548,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "کمک مالی تازه", body: "یک کمک مالی برای «{{title}}» ثبت شد." },
     en: { title: "New donation", body: "A donation was recorded for “{{title}}”." },
   },
+  "partner.verification_updated": {
+    fa: { title: "وضعیت احراز هویت کسب‌وکار", body: "وضعیت احراز «{{title}}» به «{{status}}» تغییر کرد. جزئیات را ببینید." },
+    en: { title: "Verification update", body: "The verification of “{{title}}” is now {{status}}. See the details." },
+  },
+  "partner.document_expiring": {
+    fa: { title: "مدرک احراز رو به انقضا", body: "یکی از مدارک احراز «{{title}}» تا {{days}} روز دیگر منقضی می‌شود. لطفاً نسخه‌ی جدید را بارگذاری کنید." },
+    en: { title: "Verification document expiring", body: "A verification document for “{{title}}” expires in {{days}} days. Please upload a new one." },
+  },
   "ngo.verification_updated": {
     fa: { title: "وضعیت احراز سازمان", body: "وضعیت احراز «{{title}}» به‌روز شد. جزئیات را ببینید." },
     en: { title: "Verification update", body: "The verification status of “{{title}}” changed. See the details." },

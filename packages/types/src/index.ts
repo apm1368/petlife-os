@@ -2427,6 +2427,7 @@ export enum InternalNoteEntityType {
 export enum AdminTaskStatus {
   OPEN = "OPEN",
   IN_PROGRESS = "IN_PROGRESS",
+  BLOCKED = "BLOCKED",
   DONE = "DONE",
   CANCELLED = "CANCELLED",
 }
@@ -2653,7 +2654,11 @@ export interface AdminTaskDto {
   priority: AdminPriority;
   relatedEntityType: string | null;
   relatedEntityId: string | null;
-  createdByAdmin: AdminActorSummaryDto;
+  /** Null when the platform raised the task itself (see `source`). */
+  createdByAdmin: AdminActorSummaryDto | null;
+  /** ERP: MANUAL | PARTNER_VERIFICATION | FINANCE_MISMATCH | HIGH_SEVERITY_REPORT | PRIVACY_REQUEST | FAILED_IMPORT | SUPPORT | CLINIC_FOLLOW_UP | DATA_QUALITY */
+  source?: string;
+  team?: string | null;
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;

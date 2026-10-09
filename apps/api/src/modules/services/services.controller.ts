@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
+import { ParseUUIDPipe, Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
 import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-auth.guard";
 import { OptionalCurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
@@ -24,12 +24,12 @@ export class ServicesController {
   }
 
   @Get("provider-services/:serviceId")
-  getDetail(@Param("serviceId") serviceId: string, @Query() query: GetServiceDetailDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+  getDetail(@Param("serviceId", ParseUUIDPipe) serviceId: string, @Query() query: GetServiceDetailDto, @OptionalCurrentUser() user: SessionUser | undefined) {
     return this.servicesService.getServiceDetail(serviceId, query, user?.id);
   }
 
   @Get("provider-services/:serviceId/availability")
-  getAvailability(@Param("serviceId") serviceId: string, @Query() query: GetServiceAvailabilityDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+  getAvailability(@Param("serviceId", ParseUUIDPipe) serviceId: string, @Query() query: GetServiceAvailabilityDto, @OptionalCurrentUser() user: SessionUser | undefined) {
     return this.servicesService.getServiceAvailability(serviceId, query, user?.id);
   }
 }

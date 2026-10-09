@@ -11,6 +11,10 @@ export const NotificationDeepLinks = {
   providerBooking: (bookingId: string) => `/provider/bookings/${bookingId}`,
   providerHome: () => `/provider`,
   providerTeam: () => `/provider/team`,
+  /** Portal home until Codex ships a dedicated verification page (then switch to /provider/verification). */
+  providerVerification: () => `/provider`,
+  /** Portal home until Codex ships a dedicated verification page (then switch to /seller/verification). */
+  sellerVerification: () => `/seller`,
   clinicInvitations: () => `/clinic-invitations`,
   provider: (providerId: string) => `/vet/${providerId}`,
   waitlist: () => `/bookings?tab=waitlist`,

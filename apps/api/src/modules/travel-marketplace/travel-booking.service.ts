@@ -10,6 +10,7 @@ import {
   TravelBookingStatus,
   TravelListingStatus,
   TravelReviewStatus,
+  ProviderVerificationStatus,
 } from "@prisma/client";
 import type { PaginatedDto, TravelBookingDto, TravelReviewDto, TripTravelSummaryDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -168,7 +169,7 @@ export class TravelBookingService {
   }
 
   async hold(userId: string, input: HoldInput): Promise<TravelBookingDto> {
-    const listing = await this.prisma.travelListing.findFirst({ where: { id: input.listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true }, include: { petPolicy: true } });
+    const listing = await this.prisma.travelListing.findFirst({ where: { id: input.listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } }, include: { petPolicy: true } });
     if (!listing) throw new TravelListingNotFoundException({ listingId: input.listingId });
     const unit = await this.prisma.travelInventoryUnit.findFirst({ where: { id: input.unitId, listingId: listing.id, isActive: true } });
     if (!unit) throw new TravelInventoryUnitNotFoundException({ unitId: input.unitId, listingId: listing.id });

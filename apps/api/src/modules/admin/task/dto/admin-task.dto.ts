@@ -1,5 +1,5 @@
 import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
-import { AdminPriority, AdminTaskStatus } from "@prisma/client";
+import { AdminPriority, AdminTaskSource, AdminTaskStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../../common/pagination/pagination.dto";
 
 export class ListAdminTasksQueryDto extends PaginationQueryDto {
@@ -10,6 +10,14 @@ export class ListAdminTasksQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsUUID()
   assigneeAdminId?: string;
+
+  @IsOptional()
+  @IsEnum(AdminTaskSource)
+  source?: AdminTaskSource;
+
+  @IsOptional()
+  @IsString()
+  team?: string;
 }
 
 export class CreateAdminTaskDto {

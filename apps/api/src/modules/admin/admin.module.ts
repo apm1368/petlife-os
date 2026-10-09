@@ -6,6 +6,10 @@ import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { Module } from "@nestjs/common";
+import { AutomaticTaskListener } from "./task/automatic-task.listener";
+import { AdminPartner360Service } from "./partners/admin-partner360.service";
+import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
+import { AutomaticTaskService } from "./task/automatic-task.service";
 import { AdminPet360Service } from "./pets/admin-pet360.service";
 import { AdminPet360Controller } from "./pets/admin-pet360.controller";
 import { AdminCustomerOverviewService } from "./customer/admin-customer-overview.service";
@@ -41,8 +45,6 @@ import { TrustCaseService } from "./trust/trust-case.service";
 import { TrustCaseContextService } from "./trust/trust-case-context.service";
 import { TrustActionService } from "./trust/trust-action.service";
 import { TrustController } from "./trust/trust.controller";
-import { AdminVerificationService } from "./verification/admin-verification.service";
-import { AdminVerificationController } from "./verification/admin-verification.controller";
 import { AdminTaskService } from "./task/admin-task.service";
 import { AdminTaskController } from "./task/admin-task.controller";
 import { AdminFinanceService } from "./finance/admin-finance.service";
@@ -104,6 +106,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
   imports: [NotificationsModule, RefundsModule, PromotionsModule, TravelMarketplaceModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
   controllers: [
     AdminMeController,
+    AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,
     AdminSettingsController,
@@ -114,7 +117,6 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     SupportCaseController,
     DisputeController,
     TrustController,
-    AdminVerificationController,
     AdminTaskController,
     AdminFinanceController,
     AdminOrgController,
@@ -136,6 +138,9 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminNgoMembersController,
   ],
   providers: [
+    AutomaticTaskListener,
+    AdminPartner360Service,
+    AutomaticTaskService,
     AdminPet360Service,
     AdminCustomerOverviewService,
     AdminAccessControlService,
@@ -156,7 +161,6 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     TrustCaseService,
     TrustCaseContextService,
     TrustActionService,
-    AdminVerificationService,
     AdminTaskService,
     AdminFinanceService,
     AdminRefundService,
@@ -187,6 +191,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     PetFriendlyPlaceService,
   ],
   exports: [
+    AutomaticTaskService,
     AdminAccessService,
     AdminAuthGuard,
     AdminAuditLogService,
