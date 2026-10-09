@@ -195,6 +195,27 @@ export class NotificationEventsListener {
     });
   }
 
+  @OnEvent("WaitlistOfferMade")
+  onWaitlistOffer(payload: { entryId: string; userId: string; providerOrganizationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("WaitlistOfferMade", async () => {
+      const org = await this.prisma.providerOrganization.findUnique({ where: { id: payload.providerOrganizationId }, select: { name: true } });
+      await this.orchestrator.notify({ userId: payload.userId, type: "waitlist.offer", category: NotificationCategory.BOOKING, deepLink: "/bookings", entityType: "BookingWaitlistEntry", entityId: payload.entryId, domainEventId, templateParams: { provider: org?.name ?? "" } });
+    });
+  }
+
+  @OnEvent("ServiceBookingProviderNoShowReported")
+  onProviderNoShow(payload: { bookingId: string; providerOrganizationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("ServiceBookingProviderNoShowReported", async () => {
+      const [booking, owners] = await Promise.all([
+        this.prisma.booking.findUnique({ where: { id: payload.bookingId }, select: { bookingNumber: true } }),
+        this.prisma.providerUser.findMany({ where: { providerOrganizationId: payload.providerOrganizationId, role: "OWNER", removedAt: null }, select: { userId: true } }),
+      ]);
+      for (const o of owners) {
+        await this.orchestrator.notify({ userId: o.userId, type: "provider.no_show_reported", category: NotificationCategory.BOOKING, deepLink: `/provider/bookings/${payload.bookingId}`, entityType: "Booking", entityId: payload.bookingId, domainEventId, templateParams: { bookingNumber: booking?.bookingNumber ?? "" } });
+      }
+    });
+  }
+
   @OnEvent("PaymentSucceeded")
   onPaymentSucceeded(payload: { checkoutId: string }, domainEventId: string): Promise<void> {
     return this.safely("PaymentSucceeded", async () => {

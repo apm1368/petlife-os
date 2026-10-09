@@ -265,6 +265,8 @@ export const DOMAIN_EVENT_TYPES = [
   "HealthShareRevoked",
   "CareSuggestionCreated",
   "CareSuggestionAccepted",
+  "ServiceBookingProviderNoShowReported",
+  "WaitlistOfferMade",
   "PetShareCardRevoked",
   "PetCareHandoffGranted",
   "PetCareHandoffRevoked",

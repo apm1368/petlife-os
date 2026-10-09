@@ -463,6 +463,8 @@ enum ProviderResourceType {
 enum WaitlistStatus {
   ACTIVE
   NOTIFIED
+  /// The provider offered a concrete slot; it expires at offerExpiresAt.
+  OFFERED
   BOOKED
   CANCELLED
   EXPIRED
@@ -1986,6 +1988,13 @@ model ProviderService {
   supportsDog Boolean @default(true)
   supportsCat Boolean @default(true)
 
+  /// At-home (AT_CUSTOMER/MOBILE) service area: cities served, matched against the booking address's city. Empty =
+  /// no area restriction. No map provider is involved (G13).
+  serviceAreaCities  String[] @default([])
+  /// Provider-configured travel surcharge for at-home visits (IRR). Shown to members; not yet added to online
+  /// charges — that needs a product decision on how surcharges are paid.
+  travelSurchargeIrr Int?
+
   /// Compatibility bounds (Handoff 04) — nullable means "no restriction on
   /// this axis". Weight is stored normalized to kg (rather than the spec's
   /// literal minWeight/maxWeight) because Pet.latestWeightValue carries its
@@ -2226,6 +2235,8 @@ model Booking {
   timezone String
 
   bookingStatus BookingStatus @default(CONFIRMED)
+  /// For NO_SHOW: who did not show up (OWNER = the member, marked by the provider; PROVIDER = reported by the member).
+  noShowParty   NoShowParty?
   paymentStatus PaymentStatus @default(NOT_REQUIRED)
 
   /// Batch 3 snapshots — later provider edits never rewrite a confirmed booking.
@@ -8692,6 +8703,11 @@ model BookingWaitlistEntry {
   windowEnd              DateTime
   status                 WaitlistStatus          @default(ACTIVE)
   notifiedAt             DateTime?
+  /// A concrete slot offered by the provider (G13); accepting creates a normal booking hold.
+  offerStartAt           DateTime?
+  offerProviderUserId    String?                 @db.Uuid
+  offerExpiresAt         DateTime?
+  offeredByUserId        String?                 @db.Uuid
   bookedBookingId        String?                 @db.Uuid
   bookedBooking          Booking?                @relation(fields: [bookedBookingId], references: [id], onDelete: SetNull)
   createdAt              DateTime                @default(now())
@@ -10055,4 +10071,9 @@ model CareSuggestion {
 
   @@index([petId, status])
   @@map("care_suggestions")
+}
+
+enum NoShowParty {
+  OWNER
+  PROVIDER
 }

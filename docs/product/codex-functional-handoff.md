@@ -583,3 +583,34 @@
 - **داده‌ی نمایشی:** `batch2-review@example.test`، پت «کوکی».
   - یک پیشنهاد مراقبت PENDING («کنترل دوباره‌ی پوست») و یک پیشنهاد ACCEPTED که به یادآور هفتگی تبدیل شده است.
   - یک اشتراک سلامت فعال: `/health-share/demo-2e3e9cd46e4945898ddabfe3d253794b`، هفت‌روزه و با یک بار دسترسی ثبت‌شده.
+
+## ۲۰. خدمات و نوبت (G13)
+
+- **صلاحیت سرویس:** `GET /provider-services/:serviceId/eligibility?petId&addressId?` (کاربر واردشده با دسترسی هویت پت).
+  - خروجی: `{eligible, compatibility{status, reasons}, location{status: NOT_REQUIRED|ADDRESS_REQUIRED|SUPPORTED|NOT_SUPPORTED, reason, city}, locationMode, serviceAreaCities, travelSurchargeIrr, reasons[]}`.
+  - دلیل‌های مربوط به گونه، سن و وزن از قبل وجود داشتند: `SPECIES_UNSUPPORTED`، `AGE_*` و `WEIGHT_*`. دلیل جدید `LOCATION_NOT_SUPPORTED` است.
+  - هنگام تأیید نوبت در منزل با آدرسی بیرون از محدوده: خطای `SERVICE_LOCATION_NOT_SUPPORTED` (کد 400) با `details.reason`. hold از دست نمی‌رود و می‌توان آدرس دیگری انتخاب کرد.
+- **محدوده‌ی خدمت در منزل (ارائه‌دهنده):** `PATCH /provider/services/:id` با `{serviceAreaCities[], travelSurchargeIrr}`.
+  - هزینه‌ی رفت‌وآمد فقط نمایش داده می‌شود و هنوز به پرداخت آنلاین اضافه نمی‌شود (تصمیم محصول).
+  - حالت HYBRID به‌صورت دو سرویس جدا مدل می‌شود.
+- **پیشنهاد زمان از لیست انتظار:**
+  - ارائه‌دهنده: `POST /provider/waitlist/:entryId/offer {startAt, providerUserId?, expiresInMinutes 15–1440}` (نقش OWNER یا STAFF).
+  - زمان باید خالی و داخل بازه‌ی عضو باشد؛ در غیر این صورت `OUTSIDE_MEMBER_WINDOW` یا `SLOT_NOT_AVAILABLE`.
+  - وضعیت ورودی `OFFERED` می‌شود و اعلان `waitlist.offer` می‌رود. هیچ نوبت یا holdی ساخته نمی‌شود.
+  - عضو: `POST /waitlist/:id/accept-offer` که `{entry, hold}` برمی‌گرداند (مسیر عادی hold و تأیید). اگر پیشنهاد منقضی شده باشد `OFFER_EXPIRED`.
+  - عضو: `POST /waitlist/:id/decline-offer` ورودی را به `ACTIVE` برمی‌گرداند.
+  - `GET /waitlist` حالا فیلد `offer{startAt, expiresAt, providerUserId}|null` دارد و پیشنهاد گذشته `EXPIRED` نمایش داده می‌شود.
+- **عدم حضور:**
+  - `noShowParty` در نوبت عضو و ارائه‌دهنده: `OWNER` یعنی ارائه‌دهنده عدم حضور عضو را ثبت کرده، `PROVIDER` یعنی عضو گزارش داده.
+  - `POST /bookings/:id/report-provider-no-show` فقط برای نوبت CONFIRMED و دست‌کم ۳۰ دقیقه پس از شروع؛ در غیر این صورت `TOO_EARLY_TO_REPORT`.
+  - اعلان `provider.no_show_reported` برای ارائه‌دهنده ارسال می‌شود. هیچ پولی جابه‌جا نمی‌شود.
+- **این موارد از قبل وجود داشتند:**
+  - فرم پذیرش نسخه‌دار (§۹)، پیوست نوبت، جابه‌جایی نوبت (`POST /bookings/:id/reschedule`؛ دسترسی دوباره سنجیده می‌شود، تاریخچه با `rescheduledFromBookingId` نگه داشته می‌شود و دسترسی منتقل می‌شود).
+  - چرخه‌ی پذیرش، شروع و پایان (`/provider/bookings/:id/check-in|start|complete`)، `completionNote` و `aftercareInstructions` که برای عضو قابل مشاهده‌اند، یادداشت داخلی `/provider/bookings/:id/notes` که هرگز به عضو نشان داده نمی‌شود، و دعوت به نظر پس از تکمیل.
+- **زنجیره‌ی ۲:** پایان نوبت ← خلاصه و دستورالعمل مراقبت برای عضو ← `POST /provider/bookings/:id/care-suggestions` (§۱۹) ← نظر تأییدشده ← اعلان و فعالیت `BOOKING_COMPLETED`.
+- **داده‌ی نمایشی:** `batch2-review@example.test`، پت «کوکی»، درمانگاه مهر:
+  - یک نوبت CHECKED_IN امروز؛
+  - یک نوبت COMPLETED همراه خلاصه، دستورالعمل و یادداشت داخلی که عضو نمی‌بیند؛
+  - یک جفت جابه‌جاشده (RESCHEDULED ← CONFIRMED)؛
+  - یک NO_SHOW از نوع OWNER؛
+  - یک ورودی لیست انتظار OFFERED که هر بار اجرای seed دوباره برای ۶ ساعت فعال می‌شود.

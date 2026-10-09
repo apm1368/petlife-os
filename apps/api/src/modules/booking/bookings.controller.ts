@@ -108,6 +108,21 @@ export class BookingsController {
     return this.bookingsService.getById(user.id, id);
   }
 
+  /**
+   * G13: the member reports that the provider did not show up (30 min after the start). Records NO_SHOW with
+   * noShowParty PROVIDER and tells the provider; no money moves (refund policy is a product decision).
+   */
+  @Post("bookings/:id/report-provider-no-show")
+  reportProviderNoShow(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.bookingsService.reportProviderNoShow(user.id, id);
+  }
+
+  /** G13: can this pet use this service (species/age/weight), and does the service reach this address? */
+  @Get("provider-services/:serviceId/eligibility")
+  eligibility(@CurrentUser() user: SessionUser, @Param("serviceId", ParseUUIDPipe) serviceId: string, @Query("petId", ParseUUIDPipe) petId: string, @Query("addressId") addressId?: string) {
+    return this.bookingsService.eligibility(user.id, serviceId, petId, addressId);
+  }
+
   @Post("bookings/:id/cancel")
   cancel(@CurrentUser() user: SessionUser, @Param("id") id: string, @Body() dto: CancelBookingDto) {
     return this.bookingsService.cancel(user.id, id, dto);

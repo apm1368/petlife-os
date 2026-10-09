@@ -161,6 +161,7 @@ export class ProviderBookingsService {
         completedAt: toIsoOrNull(booking.completedAt),
         completedByProviderUserId: booking.completedByProviderUserId,
         completionNote: booking.completionNote,
+        noShowParty: booking.noShowParty ?? null,
         createdAt: booking.createdAt.toISOString(),
         updatedAt: booking.updatedAt.toISOString(),
       },
@@ -286,6 +287,7 @@ export class ProviderBookingsService {
     }
     await this.prisma.$transaction(async (tx) => {
       await this.lifecycle.transition(tx, { bookingId: id, to: BookingStatus.NO_SHOW, from: [BookingStatus.CONFIRMED], actorType: BookingActorType.PROVIDER, actorId: ctx.userId });
+      await tx.booking.update({ where: { id }, data: { noShowParty: "OWNER" } });
       await this.bookingPetAccess.revokeForBooking(id, ctx.userId, tx);
       await this.careCalendar.markCancelled(id, tx);
       await this.events.publish("ServiceBookingNoShow", { bookingId: id, providerOrganizationId: ctx.organizationId }, { tx, aggregateType: "Booking", aggregateId: id });

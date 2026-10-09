@@ -100,6 +100,13 @@ export class ServiceNotAvailableException extends ApiException {
   }
 }
 
+/** G13: an at-home service whose area doesn't include the booking address's city. */
+export class ServiceLocationNotSupportedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SERVICE_LOCATION_NOT_SUPPORTED", "This provider does not serve this address for the selected service.", HttpStatus.BAD_REQUEST, { reason: "LOCATION_NOT_SUPPORTED", ...details });
+  }
+}
+
 export class PetNotSupportedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PET_NOT_SUPPORTED", "This provider does not support this pet's species for the selected service.", HttpStatus.BAD_REQUEST, details);

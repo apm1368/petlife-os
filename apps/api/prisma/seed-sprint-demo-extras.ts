@@ -349,6 +349,27 @@ async function main() {
     const share = await db.healthShareLink.upsert({ where: { tokenHash: shareHash }, create: { id: id("g12:health-share"), petId: g12PetId, tokenHash: shareHash, tokenHint: shareToken.slice(-4), label: "برای اورژانس دامپزشکی", sections: ["ALLERGIES", "MEDICATIONS", "CONDITIONS"], expiresAt: new Date(Date.now() + 7 * DAY), createdByUserId: rich.id }, update: { expiresAt: new Date(Date.now() + 7 * DAY), revokedAt: null } });
     if (!(await db.healthShareAccess.count({ where: { linkId: share.id } }))) await db.healthShareAccess.create({ data: { linkId: share.id, userAgent: "Clinic front desk (demo)" } });
 
+    // ---------------------------------------------------------------- G13: booking states at the batch-2 demo clinic (Cookie)
+    // A checked-in visit, a completed one with an owner summary + aftercare + a provider-internal note, a rescheduled
+    // pair, a member no-show, and a waitlist entry the clinic offered a slot to (offer re-armed for 6 h on each run).
+    const b2org = b2("clinic"), b2loc = b2("location"), b2svc = b2("service"), b2staff = b2("staff");
+    const cookieId = showcaseVisit?.petId;
+    if (cookieId && (await db.providerService.findUnique({ where: { id: b2svc } }))) {
+      const cookieHh = (await db.pet.findUniqueOrThrow({ where: { id: cookieId }, select: { householdId: true } })).householdId;
+      const at = (hours: number) => new Date(Math.floor((Date.now() + hours * 3600e3) / 900e3) * 900e3);
+      const bk = (key: string, startH: number, status: string, extra: Record<string, unknown> = {}) =>
+        db.booking.upsert({ where: { id: id(`g13:${key}`) }, create: { id: id(`g13:${key}`), householdId: cookieHh, petId: cookieId, userId: rich.id, providerOrganizationId: b2org, providerLocationId: b2loc, providerServiceId: b2svc, providerUserId: b2staff, category: "VET", locationMode: "AT_PROVIDER", startAt: at(startH), endAt: at(startH + 0.5), timezone: "Asia/Tehran", bookingStatus: status, ...extra } as never, update: {} });
+      await bk("checked-in", -0.25, "CHECKED_IN");
+      await bk("completed", -72, "COMPLETED", { completedAt: at(-71.5), completionNote: "معاینه‌ی گوش انجام شد؛ التهاب خفیف.", aftercareInstructions: "سه روز گوش را خشک نگه دارید و قطره را روزی دو بار بریزید." });
+      if (!(await db.bookingProviderNote.count({ where: { bookingId: id("g13:completed") } }))) {
+        await db.bookingProviderNote.create({ data: { bookingId: id("g13:completed"), providerUserId: b2staff, content: "یادداشت داخلی: صاحب پت دو بار دیر رسیده است (فقط برای کلینیک)." } });
+      }
+      await bk("resched-old", 30, "RESCHEDULED");
+      await bk("resched-new", 54, "CONFIRMED", { rescheduledFromBookingId: id("g13:resched-old") });
+      await bk("no-show", -200, "NO_SHOW", { noShowParty: "OWNER" });
+      await db.bookingWaitlistEntry.upsert({ where: { id: id("g13:waitlist") }, create: { id: id("g13:waitlist"), householdId: cookieHh, userId: rich.id, petId: cookieId, providerOrganizationId: b2org, serviceId: b2svc, windowStart: at(24), windowEnd: at(24 * 6), status: "OFFERED", offerStartAt: at(80), offerProviderUserId: b2staff, offerExpiresAt: at(6) }, update: { status: "OFFERED", offerStartAt: at(80), offerExpiresAt: at(6) } });
+    }
+
     // ---------------------------------------------------------------- Live-smoke QA accounts (FREE and PAID scenarios)
     // Two dedicated accounts so the live smoke never writes into showcase accounts. Each owns one household with one
     // pet (created through PetsService, so grants match the product path). FREE stays on the free plan; PAID holds a

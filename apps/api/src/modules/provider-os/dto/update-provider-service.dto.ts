@@ -1,5 +1,5 @@
 import { BookingMode, BookingPaymentMode, LocationMode, ProviderResourceType } from "@prisma/client";
-import { IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateIf } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min, ValidateIf } from "class-validator";
 
 /** Editable fields only (spec section 24) — category/type/organization/location are structural and never change via this endpoint. */
 export class UpdateProviderServiceDto {
@@ -35,6 +35,22 @@ export class UpdateProviderServiceDto {
   @IsOptional()
   @IsBoolean()
   supportsCat?: boolean;
+
+  /** At-home service area (cities). Empty array = no area restriction. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  @Length(1, 80, { each: true })
+  serviceAreaCities?: string[];
+
+  /** At-home travel surcharge (IRR), shown to members; null clears it. */
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsInt()
+  @Min(0)
+  @Max(1_000_000_000)
+  travelSurchargeIrr?: number | null;
 
   @IsOptional()
   @IsInt()

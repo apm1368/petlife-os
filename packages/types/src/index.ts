@@ -865,6 +865,8 @@ export interface BookingDto {
   completedByProviderUserId: string | null;
   /** The deliberately small owner-visible summary (e.g. "Luna's grooming was completed.") — distinct from internal-only provider notes. */
   completionNote: string | null;
+  /** For NO_SHOW: OWNER (member missed it, marked by the provider) or PROVIDER (reported by the member). */
+  noShowParty?: "OWNER" | "PROVIDER" | null;
   createdAt: string;
   updatedAt: string;
   provider: ProviderSummaryDto | null;
@@ -1037,6 +1039,7 @@ export interface ProviderBookingDetailDto {
     completedAt: string | null;
     completedByProviderUserId: string | null;
     completionNote: string | null;
+    noShowParty?: "OWNER" | "PROVIDER" | null;
     createdAt: string;
     updatedAt: string;
   };
