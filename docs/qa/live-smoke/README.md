@@ -20,7 +20,7 @@ two QA accounts the smoke writes with:
 
 Rules:
 - Entitlements are asserted, never bypassed. A FREE refusal is a PASS; a FREE success is a FAIL.
-- Showcase accounts (`batch2-review`, `clinic-demo-*`, …) are read only. Writes go to the QA pair, and the scripts
+- Showcase accounts (`batch2-review`, `clinic-demo-*`, …) are read only; the owner's manual accounts (`pedram`, `owner.review`) are never touched. Writes go to the QA pair, and the scripts
   remove what they can (memory, vet share, smoke notification, sessions).
 - Known residue per run: one completed care item on the PAID QA pet, one chat message between the QA pair, one
   replaced pet-photo object in storage, one clinic reminder row on the demo clinic. No pets are created.
