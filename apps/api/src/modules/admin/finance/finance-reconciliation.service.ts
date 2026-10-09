@@ -116,20 +116,21 @@ export class FinanceReconciliationService {
     });
   }
 
+  /** Donation postings reference the DonationTransaction id (DonationLedgerService.recordDonationReceived / recordRefund). */
   private async donationLedger(): Promise<Result[]> {
     const donations = await this.prisma.donationIntent.findMany({ where: { status: { in: [DonationStatus.SUCCEEDED, DonationStatus.REFUNDED] } }, take: ROW_CAP, orderBy: { createdAt: "desc" }, include: { transaction: true } });
-    const ledgerIds = donations.map((d) => d.transaction?.donationLedgerTransactionId).filter((x): x is string => Boolean(x));
-    const ledger = await this.prisma.donationLedgerTransaction.findMany({ where: { id: { in: ledgerIds } }, include: { entries: true } });
-    const refundPosts = await this.prisma.donationLedgerTransaction.findMany({ where: { referenceType: "DONATION_REFUND", referenceId: { in: donations.map((d) => d.transaction?.id).filter((x): x is string => Boolean(x)) } }, select: { referenceId: true } });
+    const txIds = donations.map((d) => d.transaction?.id).filter((x): x is string => Boolean(x));
+    const posts = await this.prisma.donationLedgerTransaction.findMany({ where: { referenceType: { in: ["DONATION", "DONATION_REFUND"] }, referenceId: { in: txIds } }, include: { entries: true } });
     return donations.map((d) => {
       const r = (outcome: Outcome, detail: Record<string, unknown> = {}): Result => ({ check: ReconciliationCheck.DONATION_LEDGER, entityType: "DonationIntent", entityId: d.id, outcome, detail: { status: d.status, amountIrr: d.amountIrr, ...detail } });
       if (!d.transaction) return r(ReconciliationOutcome.MISSING, { expected: "donation transaction" });
       if (d.transaction.amountIrr !== d.amountIrr) return r(ReconciliationOutcome.MISMATCH, { transactionAmount: d.transaction.amountIrr });
-      const post = ledger.find((l) => l.id === d.transaction!.donationLedgerTransactionId);
-      if (!post) return r(ReconciliationOutcome.MISSING, { expected: "donation ledger posting" });
-      const credited = post.entries.filter((e) => e.direction === LedgerEntryDirection.CREDIT).reduce((n, e) => n + e.amount, 0);
+      const received = posts.filter((p) => p.referenceType === "DONATION" && p.referenceId === d.transaction!.id);
+      if (!received.length) return r(ReconciliationOutcome.MISSING, { expected: "donation ledger posting" });
+      if (received.length > 1) return r(ReconciliationOutcome.DUPLICATE, { postings: received.length });
+      const credited = received[0]!.entries.filter((e) => e.direction === LedgerEntryDirection.CREDIT).reduce((n, e) => n + e.amount, 0);
       if (credited !== d.amountIrr) return r(ReconciliationOutcome.MISMATCH, { ledgerAmount: credited });
-      if (d.status === DonationStatus.REFUNDED && !refundPosts.some((p) => p.referenceId === d.transaction!.id)) return r(ReconciliationOutcome.MISSING, { expected: "donation refund ledger posting" });
+      if (d.status === DonationStatus.REFUNDED && !posts.some((p) => p.referenceType === "DONATION_REFUND" && p.referenceId === d.transaction!.id)) return r(ReconciliationOutcome.MISSING, { expected: "donation refund ledger posting" });
       return r("MATCHED");
     });
   }

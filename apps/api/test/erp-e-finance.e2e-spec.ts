@@ -6,6 +6,7 @@ import { createTestApp, extractCookie } from "./test-app";
 import { signSessionCookie } from "../src/common/session/session-cookie.util";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { LedgerService } from "../src/modules/commerce/ledger/ledger.service";
+import { DonationLedgerService } from "../src/modules/animal-support/donation-ledger.service";
 
 type Actor = { id: string; adminUserId?: string; cookie: string; csrf: string };
 
@@ -96,6 +97,24 @@ describe("ERP-E finance control plane", () => {
     expect(await db.adminAuditLog.count({ where: { action: "finance.finding_resolved", entityId: dup.intent.id } })).toBe(1);
     // Nothing in the money tables changed because of reconciliation.
     expect(await db.transaction.count({ where: { paymentIntentId: dup.intent.id } })).toBe(2);
+  });
+
+  it("donation ledger: a donation posted through DonationLedgerService matches; one without its posting is MISSING", async () => {
+    const finance = await actor("finance", AdminRole.FINANCE);
+    const org = await db.animalSupportOrganization.create({ data: { type: "SHELTER", name: `ERP-E Shelter ${randomUUID().slice(0, 6)}`, verificationStatus: "VERIFIED", isPubliclyListed: true } });
+    const campaign = await db.supportCampaign.create({ data: { organizationId: org.id, title: "fund", description: "x", status: "ACTIVE" } });
+    const donation = async (posted: boolean) => {
+      const p = await payment(40_000);
+      const d = await db.donationIntent.create({ data: { campaignId: campaign.id, amountIrr: 40_000, fundType: "GENERAL", status: "SUCCEEDED", checkoutId: p.checkout.id, idempotencyKey: randomUUID(), succeededAt: new Date() } });
+      const t = await db.donationTransaction.create({ data: { donationIntentId: d.id, campaignId: campaign.id, organizationId: org.id, amountIrr: 40_000, fundType: "GENERAL" } });
+      if (posted) await app.get(DonationLedgerService).recordDonationReceived(org.id, t.id, 40_000, "GENERAL", "IRR");
+      return d;
+    };
+    const ok = await donation(true);
+    const missing = await donation(false);
+    await post(finance, "/admin/finance/reconciliation/run").expect(201);
+    expect(await db.financeReconciliationFinding.findUnique({ where: { check_entityType_entityId: { check: "DONATION_LEDGER", entityType: "DonationIntent", entityId: ok.id } } })).toBeNull();
+    expect(await db.financeReconciliationFinding.findUnique({ where: { check_entityType_entityId: { check: "DONATION_LEDGER", entityType: "DonationIntent", entityId: missing.id } } })).toMatchObject({ outcome: "MISSING", status: "OPEN" });
   });
 
   it("payment trace: one graph from intent, checkout or order; permissioned and audited", async () => {
