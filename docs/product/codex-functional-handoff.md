@@ -794,3 +794,89 @@
   - نشان (badge) وضعیت حذف و دکمه‌ی لغو بر اساس `cancellable`؛
   - جدول تاریخچه‌ی رضایت؛
   - صفحه‌ی ادمین برای صف حذف و جدول دروازه‌ی انتشار، در بخش Admin در Batch 7 که مالک آن Codex است.
+
+## ۲۷. ERP-A — کنترل دسترسی، تنظیمات، سلامت سیستم، وضعیت یکپارچه‌سازی‌ها
+
+همه‌ی مسیرها زیر `/api/admin/...` هستند و نشست ادمین می‌خواهند. هر درخواست تغییر‌دهنده هدر `x-csrf-token` لازم دارد. مجوزها سمت سرور اعمال می‌شوند؛ مخفی‌کردن دکمه در UI فقط راحتی کاربر است، نه مرز امنیتی. فهرست مجوزهای کاربر جاری از `GET /admin/me` → `permissions` می‌آید.
+
+**نقش‌های جدید:**
+- `PARTNER_OPERATIONS`، `CLINIC_OPERATIONS`، `COMMERCE_OPERATIONS` و `ANALYTICS`.
+- مجوزهای جدید: `access.view`، `settings.view`، `settings.manage`، `settings.approve`، `system.view` و `analytics.view`.
+- هیچ‌کدام از نقش‌های جدید این‌ها را ندارند: `admin.manage`، `settings.approve`، اجرای بازپرداخت و override اشتراک.
+
+### کنترل دسترسی (Access Control)
+- **خواندن** (مجوز `access.view`؛ نقش‌های SUPER_ADMIN و ADMIN):
+  - `GET /admin/access/roles` → `[{role, protected, permissions[], activeMembers, suspendedMembers}]`
+  - `GET /admin/access/permissions` → `[{permission, domain, roles[]}]` (برای ماتریس نقش × مجوز)
+  - `GET /admin/access/admins?role&status&q&page&pageSize` → صفحه‌بندی‌شده: `{items:[{id, userId, displayName, emailMasked, role, status, createdAt, updatedAt, lastActiveAt}], total, page, pageSize}`
+  - `GET /admin/access/admins/:id` → همان شکل، به‌علاوه‌ی `permissions[]`
+- **تغییر** (مجوز `admin.manage`، فقط SUPER_ADMIN؛ فیلد `reason` با طول ۵ تا ۵۰۰ اجباری است):
+  - `POST /admin/access/admins {email, role, reason}`: دادن دسترسی ادمین به یک حساب عضو موجود. حساب جدید نمی‌سازد.
+  - `POST /admin/access/admins/:id/role {role, reason}`
+  - `POST /admin/access/admins/:id/suspend {reason}` و `POST /admin/access/admins/:id/reactivate {reason}`
+- **خطاها:** کد `ADMIN_GOVERNANCE_RULE` با وضعیت 409 و یکی از این مقادیر در `details.rule`:
+  - `LAST_SUPER_ADMIN`
+  - `SELF_CHANGE_FORBIDDEN`
+  - `PROTECTED_ROLE`
+  - `ALREADY_ADMIN`
+- **خطاهای دیگر:** 400 با `UNCHANGED`؛ 404 وقتی کاربر پیدا نشود.
+- **اثر تعلیق:** فوری است و از درخواست بعدی اعمال می‌شود. همه‌ی تغییرها در ممیزی ثبت می‌شوند (`admin_user.*`) و رویداد `AdminMembershipChanged` می‌سازند.
+- **عملیات خطرناک** (نیاز به تأیید و دلیل): تعلیق، تغییر نقش، و دادن نقش SUPER_ADMIN.
+
+### تنظیمات (Settings registry)
+- **مسیرها:**
+  - `GET /admin/settings` (مجوز `settings.view`) → `[{key, category, type, scope, highImpact, constraints:{min,max,maxLength}, description, value, defaultValue, source: DEFAULT|OVERRIDE, version, updatedAt, updatedByAdminId, pendingChanges}]`
+  - `PUT /admin/settings/:key {value, baseVersion, reason}` (مجوز `settings.manage`):
+    - کلید کم‌اثر فوراً `APPLIED` می‌شود.
+    - کلید پراثر (`highImpact`) به وضعیت `PENDING` می‌رود.
+  - `POST /admin/settings/changes/:id/review {decision: APPROVE|REJECT, note?}` (مجوز `settings.approve`، فقط SUPER_ADMIN). درخواست‌دهنده نمی‌تواند تغییر خودش را تأیید کند.
+  - `POST /admin/settings/changes/:id/cancel`: درخواست‌دهنده تغییر PENDING خودش را لغو می‌کند.
+  - `GET /admin/settings/changes?key&status&page`: تاریخچه. وضعیت‌ها `PENDING | APPLIED | REJECTED | CANCELLED | SUPERSEDED`.
+- **کلیدهای فعلی** (فقط کلیدهایی که واقعاً در کد خوانده می‌شوند):
+
+| کلید | نوع | دامنه | پراثر |
+|---|---|---|---|
+| `platform.announcement` | `{fa?, en?}` یا `null` | PUBLIC | خیر |
+| `booking.holdTtlSeconds` | عدد ۱۲۰ تا ۱۸۰۰ | INTERNAL | بله |
+| `commerce.refundApprovalThresholdIrr` | عدد | INTERNAL | بله |
+| `commerce.settlementApprovalThresholdIrr` | عدد | INTERNAL | بله |
+| `privacy.exportsPerDay` | عدد ۱ تا ۱۰ | INTERNAL | خیر |
+
+- **خطاها:**
+  - `SETTING_CHANGE_CONFLICT` با وضعیت 409: یعنی `baseVersion` قدیمی است، یا تغییر دیگر PENDING نیست (`details.reason` برابر `SUPERSEDED` یا `NOT_PENDING`). UI باید فهرست را دوباره بارگذاری کند.
+  - 409 با `ADMIN_GOVERNANCE_RULE` و `SELF_APPROVAL_FORBIDDEN`.
+  - 400 با `BELOW_MIN`، `ABOVE_MAX`، `UNKNOWN_LOCALE`، `TOO_LONG`، `UNCHANGED` یا `REQUIRED`.
+- **عمومی:** `GET /api/settings/public` بدون نشست کار می‌کند و فقط کلیدهای PUBLIC را برمی‌گرداند. فعلاً تنها کلید `platform.announcement` است؛ اگر مقدارش `null` باشد بنری نشان داده نمی‌شود.
+- **کاربرد اطلاعیه:** بنر اطلاعیه را Codex طراحی می‌کند.
+- **محدوده:** اسرار و حالت‌های ارائه‌دهنده (درگاه پرداخت، پیامک و…) هرگز در تنظیمات نیستند و فقط در env سرور می‌مانند.
+
+### سلامت سیستم و یکپارچه‌سازی‌ها (مجوز `system.view`؛ نقش‌های SUPER_ADMIN، ADMIN، OPERATIONS و READ_ONLY)
+- `GET /admin/system/health` → `{status: OK|DEGRADED|DOWN, checkedAt, components}`. اجزای `components`:
+  - `api` (uptime)؛
+  - `database` و `redis` (UP/DOWN و latencyMs)؛
+  - `storage` (درایور و قابلیت نوشتن)؛
+  - `outbox` (رویدادهای پردازش‌نشده، قدیمی‌ترین، lagSeconds، وضعیت LAGGING)؛
+  - `workers[]`: ۱۱ کارگر پس‌زمینه با `status: OK|LATE|FAILING|WAITING_FIRST_RUN` و زمان آخرین اجرای موفق یا ناموفق؛
+  - `notifications24h`؛
+  - `failedJobs`؛
+  - `migrations` (تعداد اعمال‌شده، آخرین مهاجرت، ناموفق‌ها، معوق‌ها)؛
+  - `deploy` (SHA و نسخه).
+- `GET /admin/system/integrations` → `{items:[{key, status, mode, configurationComplete, missingConfiguration[] (فقط نام کلیدها), lastSuccessAt, lastErrorAt, lastErrorCategory, note}]}`.
+  - کلیدها: `TLS, OTP, FARAZ_SMS, EMAIL, GOOGLE_AUTH, PAYMENT, BNPL, SHIPPING, MARKETPLACE, MAPS, STORAGE_S3`.
+  - وضعیت‌ها: `LIVE | SANDBOX | NOT_CONFIGURED | NOT_IMPLEMENTED | BLOCKED_EXTERNAL | ERROR`.
+  - هیچ مقدار مخفی، host یا متن خطای ارائه‌دهنده برگردانده نمی‌شود.
+
+### کاوشگر ممیزی
+- `GET /admin/audit` حالا این فیلترها را هم می‌پذیرد:
+  - `action`: یک کنش دقیق، یا پیشوند با نقطه در انتها مثل `setting.`؛
+  - `from` و `to` (ISO)؛
+  - `entityType` به‌تنهایی.
+- این فیلترها با `adminUserId` و `entityId` قابل ترکیب‌اند و نتیجه صفحه‌بندی‌شده است.
+
+### داده‌ی نمایشی
+- **پرسوناهای ادمین:** ۱۲ حساب `qa.admin.<role>`، یکی برای هر نقش: super، admin، ops، support، finance، content(EDITOR)، trust، partner، clinic، commerce، analytics، readonly.
+  - گذرواژه‌ها فقط در `/root/petlife-qa-admin-credentials.txt` روی سرور هستند و از مالک گرفته می‌شوند.
+- **صف تأیید نمایشی:** یک پیشنهاد PENDING برای `commerce.refundApprovalThresholdIrr` از طرف `qa.admin.admin`.
+
+### حالت خالی
+- حالت خالی برای `settings/changes` ممکن است. برای `roles` و `integrations` هرگز خالی نیست.

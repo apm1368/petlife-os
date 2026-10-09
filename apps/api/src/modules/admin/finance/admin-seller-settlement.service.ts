@@ -1,3 +1,4 @@
+import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Prisma, SellerSettlementStatus, type SellerSettlementItem } from "@prisma/client";
@@ -104,10 +105,11 @@ export class AdminSellerSettlementService {
     private readonly config: ConfigService<AppEnv, true>,
     private readonly sellerLedger: SellerLedgerService,
     private readonly sellerAccounts: SellerFinancialAccountService,
+    private readonly settings: PlatformSettingsService,
   ) {}
 
   private threshold(): number {
-    return this.config.get("SETTLEMENT_APPROVAL_THRESHOLD_IRR", { infer: true });
+    return this.settings.getInt("commerce.settlementApprovalThresholdIrr");
   }
 
   async calculate(admin: ResolvedAdminContext, sellerOrganizationId: string, periodStart: Date, periodEnd: Date, requestId?: string): Promise<SellerSettlementDto> {

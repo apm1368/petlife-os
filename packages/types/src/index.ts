@@ -2359,6 +2359,11 @@ export enum AdminRole {
   CONTENT = "CONTENT",
   VERIFICATION = "VERIFICATION",
   READ_ONLY = "READ_ONLY",
+  EDITOR = "EDITOR",
+  PARTNER_OPERATIONS = "PARTNER_OPERATIONS",
+  CLINIC_OPERATIONS = "CLINIC_OPERATIONS",
+  COMMERCE_OPERATIONS = "COMMERCE_OPERATIONS",
+  ANALYTICS = "ANALYTICS",
 }
 
 export enum AdminMembershipStatus {
@@ -2960,7 +2965,13 @@ export type AdminPermissionName =
   | "travel.view"
   | "travel.manage"
   | "travel.requirements.manage"
-  | "insurance.applications.view";
+  | "insurance.applications.view"
+  | "access.view"
+  | "settings.view"
+  | "settings.manage"
+  | "settings.approve"
+  | "system.view"
+  | "analytics.view";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {

@@ -1,3 +1,4 @@
+import { PlatformSettingsService } from "../platform-settings/platform-settings.service";
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type Redis from "ioredis";
@@ -41,6 +42,7 @@ export class BookingHoldService {
   constructor(
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly config: ConfigService<AppEnv, true>,
+    private readonly settings: PlatformSettingsService,
   ) {}
 
   private holdKey(holdId: string): string {
@@ -52,7 +54,7 @@ export class BookingHoldService {
   }
 
   async createHold(input: CreateHoldInput): Promise<BookingHoldRecord> {
-    const ttlSeconds = this.config.get("BOOKING_HOLD_TTL_SECONDS", { infer: true });
+    const ttlSeconds = this.settings.getInt("booking.holdTtlSeconds");
     const lockKey = this.slotLockKey(input.providerLocationId, input.providerUserId, input.slotStart);
     const holdId = randomUUID();
 

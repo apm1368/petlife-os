@@ -1790,3 +1790,17 @@ export class CommunityInteractionBlockedException extends ApiException {
     super("COMMUNITY_INTERACTION_BLOCKED", "You can't interact with this member.", HttpStatus.FORBIDDEN, details);
   }
 }
+
+/** ERP-A: an access-control change that would break a governance rule (last SUPER_ADMIN, changing your own role, granting above your own reach). */
+export class AdminGovernanceRuleException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("ADMIN_GOVERNANCE_RULE", "This change is not allowed by the admin governance rules.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** ERP-A: a setting change based on a version that is no longer current, or a review of a change that is no longer pending. */
+export class SettingChangeConflictException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("SETTING_CHANGE_CONFLICT", "This setting changed in the meantime. Reload and try again.", HttpStatus.CONFLICT, details);
+  }
+}

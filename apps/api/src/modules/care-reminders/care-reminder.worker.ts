@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleInit, type OnModuleDestroy } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -12,7 +13,7 @@ export class CareReminderWorker implements OnModuleInit, OnModuleDestroy {
   private sourceCursor: string | undefined;
   private readonly logger = new Logger(CareReminderWorker.name);
   constructor(private readonly prisma:PrismaService,private readonly access:PetAccessService,private readonly notifications:NotificationOrchestratorService,private readonly sources:CareSourceListener){}
-  onModuleInit() { if(process.env.NODE_ENV!=="test") this.timer=setInterval(()=>{void this.process().catch(e=>this.logger.error("Care notification tick failed",e));},60000); }
+  onModuleInit() { if(process.env.NODE_ENV!=="test") { registerWorker("care-reminders", 60000); this.timer=setInterval(()=>{void trackWorker("care-reminders", 60000, ()=>this.process()).catch(e=>this.logger.error("Care notification tick failed",e));},60000); } }
   onModuleDestroy() {if(this.timer) clearInterval(this.timer);}
   async process() {
     if(this.running) return 0;

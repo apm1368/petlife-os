@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { NotificationCategory, TripStatus } from "@prisma/client";
@@ -26,7 +27,7 @@ export class TripReminderNotifier implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.process().catch((e) => this.logger.error("Trip reminder tick failed", e)), 3600e3);
+    if (process.env.NODE_ENV !== "test") { registerWorker("trip-reminders", 3600e3); this.timer = setInterval(() => void trackWorker("trip-reminders", 3600e3, () => this.process()).catch((e) => this.logger.error("Trip reminder tick failed", e)), 3600e3); }
   }
 
   onModuleDestroy() {

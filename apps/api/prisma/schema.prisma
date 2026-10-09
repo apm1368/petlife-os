@@ -4279,6 +4279,10 @@ enum AdminRole {
   VERIFICATION
   READ_ONLY
   EDITOR
+  PARTNER_OPERATIONS
+  CLINIC_OPERATIONS
+  COMMERCE_OPERATIONS
+  ANALYTICS
 }
 
 enum AdminMembershipStatus {
@@ -10151,4 +10155,46 @@ enum AccountDeletionState {
   PENDING_RETENTION
   READY_FOR_EXECUTION
   COMPLETED
+}
+
+/// ERP-A: runtime overrides for the explicit, code-defined settings registry (src/modules/platform-settings/setting-
+/// definitions.ts). A key absent here means "use the registry default / env value". Secrets never live here.
+model PlatformSetting {
+  key              String   @id
+  value            Json
+  version          Int      @default(1)
+  updatedByAdminId String?  @db.Uuid
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
+
+  @@map("platform_settings")
+}
+
+enum PlatformSettingChangeStatus {
+  PENDING
+  APPLIED
+  REJECTED
+  CANCELLED
+  SUPERSEDED
+}
+
+/// Every change to a setting, applied or not. High-impact keys stay PENDING until a different admin with
+/// settings.approve applies them; harmless keys are recorded already APPLIED.
+model PlatformSettingChange {
+  id                 String                      @id @default(uuid()) @db.Uuid
+  key                String
+  previousValue      Json?
+  proposedValue      Json
+  baseVersion        Int
+  status             PlatformSettingChangeStatus
+  reason             String
+  requestedByAdminId String                      @db.Uuid
+  reviewedByAdminId  String?                     @db.Uuid
+  reviewNote         String?
+  createdAt          DateTime                    @default(now())
+  reviewedAt         DateTime?
+
+  @@index([key, createdAt])
+  @@index([status])
+  @@map("platform_setting_changes")
 }

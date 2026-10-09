@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { NotificationCategory, SubscriptionStatus } from "@prisma/client";
@@ -27,7 +28,7 @@ export class TrialEndingNotifier implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.process().catch((e) => this.logger.error("Trial-ending tick failed", e)), 3600e3);
+    if (process.env.NODE_ENV !== "test") { registerWorker("trial-ending", 3600e3); this.timer = setInterval(() => void trackWorker("trial-ending", 3600e3, () => this.process()).catch((e) => this.logger.error("Trial-ending tick failed", e)), 3600e3); }
   }
 
   onModuleDestroy() {

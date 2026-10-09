@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { SupportNeedService } from "./support-need.service";
 
@@ -11,7 +12,7 @@ export class SupportNeedExpiryWorker implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly needs: SupportNeedService) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.tick(), 5 * 60_000);
+    if (process.env.NODE_ENV !== "test") { registerWorker("support-need-expiry", 5 * 60_000); this.timer = setInterval(() => void trackWorker("support-need-expiry", 5 * 60_000, () => this.tick()).catch(() => undefined), 5 * 60_000); }
   }
 
   onModuleDestroy() {

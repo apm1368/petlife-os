@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { ClinicReminderStatus, Prisma } from "@prisma/client";
@@ -32,7 +33,7 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    if (process.env.NODE_ENV !== "test") this.timer = setInterval(() => void this.processDue().catch((e) => this.logger.error("Clinic reminder tick failed", e)), 60_000);
+    if (process.env.NODE_ENV !== "test") { registerWorker("clinic-reminders", 60_000); this.timer = setInterval(() => void trackWorker("clinic-reminders", 60_000, () => this.processDue()).catch((e) => this.logger.error("Clinic reminder tick failed", e)), 60_000); }
   }
 
   onModuleDestroy() {

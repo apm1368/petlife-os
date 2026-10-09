@@ -59,7 +59,15 @@ export type AdminPermission =
   | "travel.view"
   | "travel.manage"
   | "travel.requirements.manage"
-  | "insurance.applications.view";
+  | "insurance.applications.view"
+  // ERP-A — access control (read side; mutations stay admin.manage), settings registry, system/integration health
+  | "access.view"
+  | "settings.view"
+  | "settings.manage"
+  | "settings.approve"
+  | "system.view"
+  // ERP-J — aggregate analytics only (no row-level PII)
+  | "analytics.view";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -109,6 +117,12 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "travel.manage",
   "travel.requirements.manage",
   "insurance.applications.view",
+  "access.view",
+  "settings.view",
+  "settings.manage",
+  "settings.approve",
+  "system.view",
+  "analytics.view",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -128,6 +142,9 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = [
   "commerce.view",
   "travel.view",
   "insurance.applications.view",
+  "settings.view",
+  "system.view",
+  "analytics.view",
 ];
 
 /**
@@ -186,6 +203,12 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "travel.manage",
     "travel.requirements.manage",
     "insurance.applications.view",
+    // Can see who holds which role and propose settings; approving high-impact settings is SUPER_ADMIN-only.
+    "access.view",
+    "settings.view",
+    "settings.manage",
+    "system.view",
+    "analytics.view",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
@@ -245,6 +268,9 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "travel.manage",
     "travel.requirements.manage",
     "insurance.applications.view",
+    "settings.view",
+    "system.view",
+    "analytics.view",
   ],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict
@@ -264,6 +290,12 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   // "broad drafting, narrower execution" shape finance.refund.request
   // (broad) vs. finance.refund.execute (FINANCE-only) already established.
   [AdminRole.EDITOR]: ["content.view", "content.create", "content.edit", "content.media.manage"],
+  // ERP-A operational roles. Each is a narrow slice of existing permissions — none gets admin.manage,
+  // settings.approve, finance execution or entitlement overrides.
+  [AdminRole.PARTNER_OPERATIONS]: ["customer.view", "verification.manage", "services.view", "services.manage", "places.view", "task.manage", "support.view"],
+  [AdminRole.CLINIC_OPERATIONS]: ["customer.view", "services.view", "services.manage", "subscription.view", "verification.manage", "task.manage", "support.view"],
+  [AdminRole.COMMERCE_OPERATIONS]: ["customer.view", "commerce.view", "commerce.manage", "promotions.manage", "sellerFinance.view", "task.manage", "support.view"],
+  [AdminRole.ANALYTICS]: ["analytics.view"],
 };
 
 export function roleHasPermission(role: AdminRole, permission: AdminPermission): boolean {

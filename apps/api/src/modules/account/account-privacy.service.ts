@@ -1,3 +1,4 @@
+import { PlatformSettingsService } from "../platform-settings/platform-settings.service";
 import { Inject, Injectable } from "@nestjs/common";
 import { AccountDeletionState, ConsentKind, HouseholdRole, PrivacyRequestStatus, type Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -13,7 +14,6 @@ export const CONSENT_VERSION = "2026-09-25";
 /** Where a consent decision was made. Only the Privacy Center records consents today; signup acceptance is a Codex/CMS follow-up. */
 export type ConsentSource = "PRIVACY_CENTER" | "SIGNUP" | "ADMIN";
 const REQUIRED_CONSENTS: ConsentKind[] = [ConsentKind.TERMS, ConsentKind.PRIVACY];
-const EXPORTS_PER_DAY = 3;
 const EXPORT_SCOPE = ["ACCOUNT", "HOUSEHOLDS", "PETS", "HEALTH_WHERE_PERMITTED", "MEMORIES_YOU_WROTE", "BOOKINGS", "ORDERS", "TRAVEL", "SUPPORT", "PRIVACY_SETTINGS", "ACTIVITY"] as const;
 
 function maskContact(value: string): string {
@@ -38,6 +38,7 @@ export class AccountPrivacyService {
     private readonly events: DomainEventsService,
     private readonly exports: AccountExportService,
     @Inject(OTP_PROVIDER) private readonly otp: OtpProvider,
+    private readonly settings: PlatformSettingsService,
   ) {}
 
   async overview(userId: string) {
@@ -175,7 +176,7 @@ export class AccountPrivacyService {
     const existing = await this.prisma.dataExportRequest.findFirst({ where: { userId, status: { in: [PrivacyRequestStatus.PENDING, PrivacyRequestStatus.PROCESSING] } } });
     if (existing) return { id: existing.id, status: existing.status, requestedAt: existing.requestedAt };
     const today = await this.prisma.dataExportRequest.count({ where: { userId, requestedAt: { gte: new Date(Date.now() - 86_400_000) } } });
-    if (today >= EXPORTS_PER_DAY) throw new ExportLimitReachedException();
+    if (today >= this.settings.getInt("privacy.exportsPerDay")) throw new ExportLimitReachedException();
     const request = await this.prisma.dataExportRequest.create({ data: { userId, scope: [...EXPORT_SCOPE] } });
     await this.events.publish("DataExportRequested", { userId, requestId: request.id }, { aggregateType: "User", aggregateId: userId });
     // Built right away in the background; the worker retries anything left behind.
