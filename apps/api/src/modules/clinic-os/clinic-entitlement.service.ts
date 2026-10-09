@@ -61,8 +61,19 @@ export class ClinicEntitlementService {
       currentPeriodEndsAt: sub.currentPeriodEndsAt,
       effectivePlan,
       assignedPlanCode: sub.plan.code,
-      entitlements: toEntitlementMap(effectivePlan),
+      entitlements: await this.withOverrides(organizationId, toEntitlementMap(effectivePlan)),
     };
+  }
+
+  /** ERP-C: active, unexpired staff overrides replace the plan value for their key (no payment involved). */
+  private async withOverrides(organizationId: string, map: Record<string, ClinicEntitlementValue>) {
+    const overrides = await this.prisma.clinicEntitlementOverride.findMany({ where: { providerOrganizationId: organizationId, active: true, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }, orderBy: { createdAt: "asc" } });
+    for (const o of overrides) {
+      const base = map[o.key];
+      const type = base?.type ?? (o.boolValue !== null ? SubscriptionEntitlementType.BOOLEAN : SubscriptionEntitlementType.LIMIT);
+      map[o.key] = type === SubscriptionEntitlementType.BOOLEAN ? { key: o.key, type, enabled: o.boolValue === true, limit: null } : { key: o.key, type, enabled: true, limit: o.unlimited ? null : o.limitValue };
+    }
+    return map;
   }
 
   async hasFeature(organizationId: string, key: string): Promise<boolean> {

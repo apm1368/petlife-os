@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { AdminTaskStatus, type Prisma } from "@prisma/client";
+import { AdminTaskSource, AdminTaskStatus, type Prisma } from "@prisma/client";
 import type { AdminTaskDto, PaginatedDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
@@ -23,7 +23,9 @@ function toTaskDto(row: TaskWithRelations): AdminTaskDto {
     priority: row.priority as never,
     relatedEntityType: row.relatedEntityType,
     relatedEntityId: row.relatedEntityId,
-    createdByAdmin: { id: row.createdByAdmin.id, displayName: row.createdByAdmin.user.displayName, role: row.createdByAdmin.role as never },
+    createdByAdmin: row.createdByAdmin ? { id: row.createdByAdmin.id, displayName: row.createdByAdmin.user.displayName, role: row.createdByAdmin.role as never } : null,
+    source: row.source,
+    team: row.team,
     completedAt: row.completedAt ? row.completedAt.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -33,6 +35,8 @@ function toTaskDto(row: TaskWithRelations): AdminTaskDto {
 export interface ListAdminTasksFilter {
   status?: AdminTaskStatus;
   assigneeAdminId?: string;
+  source?: AdminTaskSource;
+  team?: string;
 }
 
 /**
@@ -75,7 +79,7 @@ export class AdminTaskService {
 
   async list(filter: ListAdminTasksFilter, query: PaginationQueryDto): Promise<PaginatedDto<AdminTaskDto>> {
     const { page, pageSize, skip, take } = resolvePagination(query);
-    const where: Prisma.AdminTaskWhereInput = { status: filter.status, assigneeAdminId: filter.assigneeAdminId };
+    const where: Prisma.AdminTaskWhereInput = { status: filter.status, assigneeAdminId: filter.assigneeAdminId, source: filter.source, team: filter.team };
     const [rows, total] = await Promise.all([
       this.prisma.adminTask.findMany({ where, include: TASK_INCLUDE, orderBy: [{ status: "asc" }, { dueAt: "asc" }], skip, take }),
       this.prisma.adminTask.count({ where }),

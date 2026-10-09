@@ -4251,6 +4251,10 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const denied = await support.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "n/a" }).expect(403);
       expect(denied.body.error.details.reason).toBe("INSUFFICIENT_PERMISSION");
 
+      // ERP-C: VERIFIED needs accepted evidence — without it the same request is refused.
+      const noEvidence = await verification.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "Documents checked" }).expect(400);
+      expect(noEvidence.body.error.details.reason).toBe("VERIFICATION_EVIDENCE_REQUIRED");
+      await prisma.partnerVerificationDocument.create({ data: { subjectType: "SELLER", subjectId: seller.id, kind: "BUSINESS_REGISTRATION", objectKey: `partner-verification/seller/${seller.id}/${unique()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 10, status: "ACCEPTED", uploadedByUserId: seller.id } });
       const allowed = await verification.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "Documents checked" }).expect(200);
       expect(allowed.body.verificationStatus).toBe(SellerVerificationStatus.VERIFIED);
     });

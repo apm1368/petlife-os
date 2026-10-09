@@ -119,6 +119,8 @@ export class TravelSearchService {
     const where: Prisma.TravelListingWhereInput = {
       status: TravelListingStatus.PUBLISHED,
       isPubliclyListed: true,
+      // A suspended (or otherwise unverified) partner's listings leave search and can't be booked.
+      organization: { verificationStatus: ProviderVerificationStatus.VERIFIED },
       ...(q.city ? { city: { equals: q.city.trim(), mode: "insensitive" } } : {}),
       ...(q.province ? { province: { equals: q.province.trim(), mode: "insensitive" } } : {}),
       ...(q.country ? { country: { equals: q.country, mode: "insensitive" } } : {}),
@@ -229,7 +231,7 @@ export class TravelSearchService {
   async destinations(): Promise<TravelDestinationDto[]> {
     const rows = await this.prisma.travelListing.groupBy({
       by: ["country", "province", "city"],
-      where: { status: TravelListingStatus.PUBLISHED, isPubliclyListed: true },
+      where: { status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } },
       _count: { _all: true },
       orderBy: [{ country: "asc" }, { city: "asc" }],
     });
@@ -237,7 +239,7 @@ export class TravelSearchService {
   }
 
   async detail(userId: string | undefined, listingId: string): Promise<TravelListingDetailDto> {
-    const row = await this.prisma.travelListing.findFirst({ where: { id: listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true }, include: LISTING_INCLUDE });
+    const row = await this.prisma.travelListing.findFirst({ where: { id: listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } }, include: LISTING_INCLUDE });
     if (!row) throw new TravelListingNotFoundException({ listingId });
     const [ratings, reviews, favorite, nearbyPlaces, nearbyVets] = await Promise.all([
       this.ratings([row.id]),
@@ -291,7 +293,7 @@ export class TravelSearchService {
 
   /** Same item shape and facts as search, for 2–3 chosen listings (optionally priced for dates). */
   async compare(userId: string | undefined, ids: string[], checkInInput?: string, checkOutInput?: string): Promise<TravelSearchResultItemDto[]> {
-    const rows = await this.prisma.travelListing.findMany({ where: { id: { in: ids }, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true }, include: LISTING_INCLUDE });
+    const rows = await this.prisma.travelListing.findMany({ where: { id: { in: ids }, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } }, include: LISTING_INCLUDE });
     const ratings = await this.ratings(rows.map((r) => r.id));
     let nights: Date[] = [];
     let checkIn: Date | null = null;

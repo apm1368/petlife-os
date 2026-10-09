@@ -851,7 +851,7 @@
 - **محدوده:** اسرار و حالت‌های ارائه‌دهنده (درگاه پرداخت، پیامک و…) هرگز در تنظیمات نیستند و فقط در env سرور می‌مانند.
 
 ### سلامت سیستم و یکپارچه‌سازی‌ها (مجوز `system.view`؛ نقش‌های SUPER_ADMIN، ADMIN، OPERATIONS و READ_ONLY)
-- `GET /admin/system/health` → `{status: OK|DEGRADED|DOWN, checkedAt, components}`. اجزای `components`:
+- `GET /admin/system/health` → `{status: HEALTHY|DEGRADED|LAGGING|DOWN, checkedAt, components}`. (اصلاح ERP-C: `OK` به `HEALTHY` تغییر کرد و `LAGGING` اضافه شد؛ معنای هر وضعیت در §۲۹ آمده است.) اجزای `components`:
   - `api` (uptime)؛
   - `database` و `redis` (UP/DOWN و latencyMs)؛
   - `storage` (درایور و قابلیت نوشتن)؛
@@ -947,3 +947,156 @@
 ### حالت خالی
 - **Pet 360:** پت بدون سند، رزرو یا گم‌شدن آرایه‌ها و شمارش‌های صفر برمی‌گرداند.
 - **Customer 360:** عضو بدون خانوار آرایه‌ی خالی `households` برمی‌گرداند.
+
+## ۲۹. ERP-C — احراز شرکا، Provider 360، عملیات کلینیک، Seller 360
+
+### وضعیت سلامت سیستم (اصلاح §۲۷)
+- `status` یکی از این مقادیر است:
+  - `DOWN`: پایگاه داده در دسترس نیست.
+  - `DEGRADED`: Redis، فضای ذخیره‌سازی یا یک مهاجرت مشکل دارد، یا یک کارگر پس‌زمینه با خطا مواجه شده است.
+  - `LAGGING`: همه چیز کار می‌کند ولی کار در صف مانده است؛ رویداد outbox بیش از ۵ دقیقه منتظر است، یا یک کارگر دیر کرده است.
+  - `HEALTHY`: هیچ‌کدام از موارد بالا.
+- رویدادهای فقط‌ثبتی (بدون listener) هنگام نوشتن «پردازش‌شده» علامت می‌خورند، پس فقط صف واقعی به‌عنوان تأخیر شمرده می‌شود.
+
+### گردش احراز ارائه‌دهنده و فروشنده
+- **وضعیت ذخیره‌شده:** همان enum قبلی است، چون جست‌وجو و پرداخت به آن وابسته‌اند:
+  `NOT_STARTED | SUBMITTED | UNDER_REVIEW | NEEDS_INFORMATION | VERIFIED | REJECTED | SUSPENDED`.
+- **برچسب محصول در فیلد `lifecycle`:**
+
+| `lifecycle` | وضعیت ذخیره‌شده |
+|---|---|
+| `NOT_SUBMITTED` | `NOT_STARTED` |
+| `PENDING` | `SUBMITTED` |
+| `UNDER_REVIEW` | `UNDER_REVIEW` |
+| `RESUBMISSION_REQUESTED` | `NEEDS_INFORMATION` |
+| `APPROVED` | `VERIFIED` |
+| `EXPIRED` | `VERIFIED`، وقتی هیچ مدرک پذیرفته‌شده‌ی معتبری نمانده باشد |
+| `REJECTED` | `REJECTED` |
+| `SUSPENDED` | `SUSPENDED` |
+
+- **سمت ارائه‌دهنده (فقط OWNER):**
+  - `GET /provider/verification` → `{status, lifecycle, submittedAt, note, canSubmit, documents[]}`. فیلد `note` دلیل رد یا درخواست مدرک است و به شریک نشان داده می‌شود.
+  - `POST /provider/verification/uploads {contentType, fileSizeBytes}`: انواع مجاز PDF، JPEG، PNG و WebP؛ حداکثر ۲۰ مگابایت.
+  - `POST /provider/verification/documents {objectKey, kind, contentType, fileSizeBytes, expiresAt?}`.
+    - `kind` یکی از: `LICENSE | IDENTITY | BUSINESS_REGISTRATION | BANK_INFO | OTHER`.
+  - `POST /provider/verification/submit`.
+- **سمت فروشنده (نقش OWNER یا ADMIN):** همان مسیرها زیر `/seller-organizations/:sellerId/verification`.
+- **خطاهای سمت شریک:**
+  - `NOT_ISSUED_FOR_THIS_ORGANIZATION`: کلید فایل متعلق به سازمان دیگری است.
+  - `DOCUMENT_REQUIRED`، `NOT_SUBMITTABLE` و `UNDER_REVIEW_LOCKED`.
+  - `OWNER_ONLY` با وضعیت 409.
+- **هر سند:**
+  - فیلدها: `{id, kind, status (PENDING|ACCEPTED|REJECTED|EXPIRED), expiresAt, expiryState (NO_EXPIRY|VALID|EXPIRING_SOON|EXPIRED), submittedAt, reviewedAt, reviewedByAdminId, rejectionReason}`.
+  - مسیر فایل در ذخیره‌ساز هرگز برگردانده نمی‌شود.
+- **سمت کارمند** (مجوز `verification.manage`؛ نقش‌ها: ADMIN، SUPER_ADMIN، VERIFICATION، PARTNER_OPERATIONS و CLINIC_OPERATIONS):
+  - `GET /admin/verification/queue?subjectType=PROVIDER|SELLER&status=`: پیش‌فرض صف SUBMITTED، UNDER_REVIEW و NEEDS_INFORMATION است، مرتب از قدیمی‌ترین. هر ردیف `waitingHours` و تعداد اسناد بر اساس وضعیت دارد.
+  - `GET /admin/verification/:subjectType/:id` → جزئیات به‌علاوه‌ی `allowedTransitions`.
+  - `POST /admin/verification/documents/:documentId/download {reason}` → لینک امضاشده‌ی کوتاه‌مدت. ممیزی می‌شود.
+  - `POST /admin/verification/documents/:documentId/review {decision: ACCEPTED|REJECTED, note?, expiresAt?}`. رد کردن یادداشت لازم دارد. خطای `NOT_PENDING` برای بازبینی تکراری.
+  - `POST /admin/verification/:subjectType/:id/transition {to, reason?}`. انتقال‌های مجاز:
+    - `NOT_STARTED` → `NEEDS_INFORMATION`
+    - `SUBMITTED` → `UNDER_REVIEW`، `NEEDS_INFORMATION`، `REJECTED` یا `VERIFIED`
+    - `UNDER_REVIEW` → `VERIFIED`، `REJECTED` یا `NEEDS_INFORMATION`
+    - `NEEDS_INFORMATION` → `REJECTED`
+    - `VERIFIED` → `SUSPENDED` یا `NEEDS_INFORMATION`
+    - `SUSPENDED` → `VERIFIED` یا `REJECTED`
+    - رفتن به `SUBMITTED` فقط با ارسال خود شریک ممکن است.
+  - **قواعد انتقال:**
+    - رفتن به `NEEDS_INFORMATION`، `REJECTED` یا `SUSPENDED` دلیل می‌خواهد.
+    - رفتن به `VERIFIED` دست‌کم یک سند `ACCEPTED` منقضی‌نشده می‌خواهد (`VERIFICATION_EVIDENCE_REQUIRED`)، مگر در بازگرداندن از `SUSPENDED`.
+    - سایر خطاها: `INVALID_TRANSITION`، `UNCHANGED` و `CHANGED_CONCURRENTLY`.
+  - `PATCH /admin/providers|sellers/:id/verification {status, reason}`: قرارداد قبلی که UI ادمین فعلی از آن استفاده می‌کند. حالا از همین قواعد پیروی می‌کند، پس UI باید فقط `allowedTransitions` را پیشنهاد دهد.
+- **اثرها:**
+  - همه‌ی گام‌ها در ممیزی ثبت می‌شوند (`verification.*`).
+  - رویدادها: `AdminVerificationStatusChanged`، `PartnerVerificationSubmitted` و `PartnerVerificationDocumentExpired`.
+  - اعلان `partner.verification_updated` به OWNER و ADMIN شریک ارسال می‌شود. لینک‌ها: `/provider/verification` و `/seller/verification` (صفحه‌ها را Codex طراحی می‌کند).
+- **انقضای مدرک:**
+  - کارگر ساعتی سند پذیرفته‌شده‌ی منقضی را `EXPIRED` می‌کند و یک وظیفه برای Partner Ops با اولویت HIGH می‌سازد.
+  - برای سندی که تا ۳۰ روز دیگر منقضی می‌شود، فقط یک بار وظیفه ساخته و اعلان `partner.document_expiring` ارسال می‌شود.
+  - شریک هرگز به‌طور خودکار تعلیق نمی‌شود.
+- **اثر تعلیق شریک:**
+  - صفحه‌ی خدمت، تقویم خالی و رزرو فقط برای ارائه‌دهنده‌ی `VERIFIED` در دسترس است.
+  - اقامتگاه‌های سفرِ شریک تعلیق‌شده از جست‌وجو، صفحه‌ی جزئیات و رزرو حذف می‌شوند.
+  - فروشنده‌ی `SUSPENDED` یا `RESTRICTED` نمی‌تواند پیشنهاد یا موجودی را تغییر دهد.
+  - تاریخچه‌ی همه‌ی موارد برای ادمین می‌ماند.
+
+### وظایف خودکار (ERP §19)
+- **فیلدهای جدید `AdminTask`:**
+  - `source`: یکی از `MANUAL | PARTNER_VERIFICATION | FINANCE_MISMATCH | HIGH_SEVERITY_REPORT | PRIVACY_REQUEST | FAILED_IMPORT | SUPPORT | CLINIC_FOLLOW_UP | DATA_QUALITY`.
+  - `team`.
+  - `createdByAdmin`: برای وظیفه‌ی سیستمی `null` است.
+  - وضعیت جدید `BLOCKED`.
+- **فیلتر:** `GET /admin/tasks?source=&team=`.
+- **قواعد فعال:**
+  - ارسال احراز → تیم PARTNER_OPERATIONS.
+  - سند منقضی یا رو به انقضا → PARTNER_OPERATIONS.
+  - درخواست حذف حساب → PRIVACY.
+  - گزارش با دلیل شدید → TRUST_SAFETY با اولویت URGENT. دلیل‌های شدید: ANIMAL_WELFARE، DANGEROUS_CONTENT، HARASSMENT، PERSONAL_INFORMATION و SCAM.
+- **تکرار:** هر وظیفه کلید یکتای `dedupeKey` دارد، پس رخداد تکراری یا هم‌زمان وظیفه‌ی دوم نمی‌سازد. ساخت هر وظیفه رویداد `AdminTaskAutoCreated` ثبت می‌کند.
+- **قواعد بعدی:** `FINANCE_MISMATCH` در ERP-E و `FAILED_IMPORT` در ERP-I اضافه می‌شوند.
+
+### Provider 360
+- **مسیر:** `GET /admin/providers/:id/overview` (مجوز `services.view` یا `verification.manage`).
+- **بخش‌های پاسخ:**
+  - `organization` و `verification` (وضعیت، یادداشت، شمار اسناد، `expiringWithin30Days`).
+  - `branches` و `staff` (تعداد بر اساس نقش و فهرست).
+  - `services` (فعال/غیرفعال و بر اساس دسته) و `availability.rules`.
+  - `bookings` (کل دوره و ۳۰ روز اخیر، به‌علاوه‌ی `completionRate`).
+  - `reviews` (منتشرشده، میانگین، پنهان) و `complaints` (اختلاف‌ها و پرونده‌های اعتماد).
+  - `finance`: برای ارائه‌دهنده‌ها `PRODUCT_DECISION_REQUIRED` است؛ بدون `finance.view` فقط `restricted`.
+  - `subscription` (طرح کلینیک)، `riskFlags[]` و `recentAdminActions`.
+- **پرچم‌های ریسک:** `VERIFICATION_SUSPENDED|REJECTED`، `EXPIRED_VERIFICATION_DOCUMENT`، `DOCUMENT_EXPIRING_SOON`، `HIGH_CANCELLATION_RATE`، `LOW_RATING`، `OPEN_DISPUTES`، `OPEN_TRUST_CASES` و `NO_ACTIVE_SERVICES`.
+- **اقدام‌ها:** تأیید، رد، درخواست مدرک، تعلیق و بازگرداندن همگی از طریق `/admin/verification/provider/:id/transition` انجام می‌شوند.
+
+### عملیات کلینیک
+- **فهرست:** `GET /admin/clinics?q&page`. شامل طرح، وضعیت اشتراک، تعداد کارکنان و تعداد شعبه.
+- **جزئیات:** `GET /admin/clinics/:id/operations`. بخش‌های پاسخ:
+  - `subscription`: طرح، تاریخچه‌ی تغییر، و `pricing: PRODUCT_DECISION_LATER`.
+  - `entitlements[]`: برای هر کلید `planValue`، `effectiveValue` و `overridden`.
+  - `overrides[]`.
+  - `usage`: کارکنان و شعبه‌ها نسبت به سقف.
+  - `customers`، `appointmentsLast30Days` و `medicalActivity` (فقط شمارش؛ هیچ متن بالینی).
+  - `reminders`، `imports[]`، `operationalErrors.failedReminders` و `recentAdminActions`.
+- **override حق دسترسی** (مجوز `subscription.entitlement.override`، فقط SUPER_ADMIN، مثل خانوارها):
+  - ساخت: `POST /admin/clinics/:id/entitlement-overrides {key, boolValue | limitValue | unlimited, reason, expiresAt?}`.
+  - لغو: `POST /admin/clinics/:id/entitlement-overrides/:overrideId/revoke {reason}`.
+  - **ترتیب اعمال:** مقدار طرح مؤثر، سپس override فعال و منقضی‌نشده. هر کلید فقط یک override فعال دارد و override جدید قبلی را غیرفعال می‌کند.
+  - این override جدا از override خانوارهاست و هیچ پرداختی نمی‌سازد.
+  - **خطاها:** `UNKNOWN_ENTITLEMENT`، `VALUE_REQUIRED_FOR_TYPE` و `IN_THE_PAST`.
+- **تغییر طرح:** از مسیرهای قبلی انجام می‌شود: `GET /admin/clinic-subscriptions/:organizationId` و `POST /admin/clinic-subscriptions/:organizationId/assign`.
+- **تعلیق و بازگرداندن کلینیک:** از طریق انتقال احراز (SUSPENDED / VERIFIED).
+
+### Seller 360
+- **مسیر:** `GET /admin/sellers/:id/overview` (مجوز `commerce.view` یا `verification.manage`).
+- **بخش‌های پاسخ:**
+  - `seller`، شامل `allowedStatusTransitions`.
+  - `verification`، `members[]` و `offers` (بر اساس وضعیت).
+  - `products` و `inventory` (ناموجود، موجودی کم).
+  - `orders`.
+  - `refunds` و `settlements`: فقط با `sellerFinance.view`؛ در غیر این صورت `restricted`.
+  - `reviews`، `violations`، `riskFlags[]` و `recentAdminActions`.
+- **اقدام‌ها** (مجوز `commerce.manage`، دلیل اجباری):
+  - `POST /admin/sellers/:id/status {status, reason}`. انتقال‌های مجاز:
+    - `PENDING` → `ACTIVE` یا `CLOSED`
+    - `ACTIVE` → `SUSPENDED`، `RESTRICTED` یا `INACTIVE`
+    - `RESTRICTED` → `ACTIVE` یا `SUSPENDED`
+    - `SUSPENDED` → `ACTIVE` یا `CLOSED`
+    - `INACTIVE` → `ACTIVE`
+  - `POST /admin/commerce/offers/:id/status {status: SUSPENDED|PAUSED, reason}`.
+    - فروشنده نمی‌تواند تعلیق پیشنهاد را بردارد یا خودش آن را تعلیق کند: خطای 403 با `OFFER_SUSPENDED_BY_STAFF`.
+- **محدوده:** هیچ ویرایش مستقیم موجودی حساب مالی وجود ندارد. بررسی تسویه در ERP-E می‌آید.
+
+### داده‌ی نمایشی
+همه‌ی موارد زیر با مالک `qa-erp-owner@example.test` ساخته شده‌اند. هر «مدرک» یک PDF نمونه است که صریحاً می‌گوید معتبر نیست.
+
+| نمونه | وضعیت |
+|---|---|
+| «آرایشگاه نمایشی A (QA)» | `VERIFIED`؛ مجوز پذیرفته‌شده، و یک مدرک هویت که ۲۰ روز دیگر منقضی می‌شود همراه با وظیفه‌ی انقضا |
+| «مربی نمایشی B (QA)» | `SUBMITTED`؛ یک مدرک PENDING و یک وظیفه‌ی احراز |
+| «فروشنده نمایشی A (QA)» | `VERIFIED` |
+| «فروشنده نمایشی B (QA)» | `REJECTED`؛ با دلیل رد |
+| کلینیک نمایشی batch-3 | override برای `clinic.staff.max` با سقف ۱۵ برای ۹۰ روز |
+
+### حالت خالی
+- صف احراز می‌تواند خالی باشد.
+- برای ارائه‌دهنده‌ی غیرکلینیک، `/admin/clinics/:id/operations` خطای 404 برمی‌گرداند.

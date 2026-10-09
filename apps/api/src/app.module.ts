@@ -66,6 +66,7 @@ import { MemberTrustModule } from "./modules/member-trust/member-trust.module";
 import { HealthDepthModule } from "./modules/health-depth/health-depth.module";
 import { PrivacyGovernanceModule } from "./modules/privacy-governance/privacy-governance.module";
 import { PlatformSettingsModule } from "./modules/platform-settings/platform-settings.module";
+import { PartnerVerificationModule } from "./modules/partner-verification/partner-verification.module";
 import { ConsumerHubModule } from "./modules/consumer-hub/consumer-hub.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
@@ -137,6 +138,7 @@ import { PlacesModule } from "./modules/places/places.module";
     HealthDepthModule,
     PrivacyGovernanceModule,
     PlatformSettingsModule,
+    PartnerVerificationModule,
     VetPanelModule,
     ClinicOsModule,
     PetSafetyModule,

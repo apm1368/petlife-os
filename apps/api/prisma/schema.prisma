@@ -1825,10 +1825,13 @@ model CareProfile {
 // ---------------------------------------------------------------------------
 
 model ProviderOrganization {
-  id                 String                     @id @default(uuid()) @db.Uuid
-  name               String
-  type               ProviderType
-  verificationStatus ProviderVerificationStatus @default(NOT_STARTED)
+  id                      String                     @id @default(uuid()) @db.Uuid
+  name                    String
+  type                    ProviderType
+  verificationStatus      ProviderVerificationStatus @default(NOT_STARTED)
+  /// ERP-C: partner-side submission time and the last admin note the partner may see (request for info / rejection).
+  verificationSubmittedAt DateTime?
+  verificationNote        String?
 
   phone       String?
   email       String?
@@ -2445,14 +2448,16 @@ model CareCalendarEvent {
 /// SellerOffers (see ShopService); a seller under review or suspended stays
 /// fully readable for admin/history purposes, just never discoverable.
 model SellerOrganization {
-  id                 String                   @id @default(uuid()) @db.Uuid
-  name               String
-  verificationStatus SellerVerificationStatus @default(NOT_STARTED)
-  status             SellerStatus             @default(ACTIVE)
-  countryCode        String
-  city               String?
-  logoUrl            String?
-  description        String?
+  id                      String                   @id @default(uuid()) @db.Uuid
+  name                    String
+  verificationStatus      SellerVerificationStatus @default(NOT_STARTED)
+  verificationSubmittedAt DateTime?
+  verificationNote        String?
+  status                  SellerStatus             @default(ACTIVE)
+  countryCode             String
+  city                    String?
+  logoUrl                 String?
+  description             String?
 
   /// Handoff 09 (spec section 3) — all additive/optional so every existing
   /// SellerOrganization row remains valid without a data backfill.
@@ -4356,6 +4361,7 @@ enum InternalNoteEntityType {
 enum AdminTaskStatus {
   OPEN
   IN_PROGRESS
+  BLOCKED
   DONE
   CANCELLED
 }
@@ -4613,8 +4619,13 @@ model AdminTask {
   relatedEntityType String?
   relatedEntityId   String?
 
-  createdByAdminId String    @db.Uuid
-  createdByAdmin   AdminUser @relation("CreatedTasks", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  /// Null for tasks the platform raised itself (source != MANUAL).
+  createdByAdminId String?         @db.Uuid
+  createdByAdmin   AdminUser?      @relation("CreatedTasks", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  /// ERP: where the task came from, which team owns it, and an idempotency key for rule-generated tasks.
+  source           AdminTaskSource @default(MANUAL)
+  team             String?
+  dedupeKey        String?         @unique
 
   completedAt DateTime?
   createdAt   DateTime  @default(now())
@@ -10208,4 +10219,84 @@ model PlatformSettingChange {
 enum UserAccountStatus {
   ACTIVE
   SUSPENDED
+}
+
+enum PartnerSubjectType {
+  PROVIDER
+  SELLER
+}
+
+enum PartnerDocumentKind {
+  LICENSE
+  IDENTITY
+  BUSINESS_REGISTRATION
+  BANK_INFO
+  OTHER
+}
+
+enum PartnerDocumentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+/// ERP-C: evidence a provider or seller uploads for verification. Files are private (partner-verification/…) and only
+/// staff read them through signed, audited downloads. BANK_INFO holds a document about the account, never card data.
+model PartnerVerificationDocument {
+  id                String                @id @default(uuid()) @db.Uuid
+  subjectType       PartnerSubjectType
+  subjectId         String                @db.Uuid
+  kind              PartnerDocumentKind
+  objectKey         String                @unique
+  mimeType          String
+  fileSizeBytes     Int
+  status            PartnerDocumentStatus @default(PENDING)
+  expiresAt         DateTime?
+  reviewNote        String?
+  uploadedByUserId  String                @db.Uuid
+  reviewedByAdminId String?               @db.Uuid
+  reviewedAt        DateTime?
+  /// Set once the 30-day expiry alert task was created, so the worker never repeats it.
+  expiryAlertedAt   DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([subjectType, subjectId])
+  @@index([status, expiresAt])
+  @@map("partner_verification_documents")
+}
+
+/// ERP-C: a staff override of one clinic (B2B) entitlement for one organisation — applied on top of the plan in
+/// ClinicEntitlementService.resolve. No payment is ever created for it.
+model ClinicEntitlementOverride {
+  id                     String    @id @default(uuid()) @db.Uuid
+  providerOrganizationId String    @db.Uuid
+  key                    String
+  boolValue              Boolean?
+  limitValue             Int?
+  /// LIMIT override with null limitValue = unlimited.
+  unlimited              Boolean   @default(false)
+  reason                 String
+  createdByAdminId       String    @db.Uuid
+  expiresAt              DateTime?
+  active                 Boolean   @default(true)
+  revokedAt              DateTime?
+  revokedByAdminId       String?   @db.Uuid
+  createdAt              DateTime  @default(now())
+
+  @@index([providerOrganizationId, active])
+  @@map("clinic_entitlement_overrides")
+}
+
+enum AdminTaskSource {
+  MANUAL
+  PARTNER_VERIFICATION
+  FINANCE_MISMATCH
+  HIGH_SEVERITY_REPORT
+  PRIVACY_REQUEST
+  FAILED_IMPORT
+  SUPPORT
+  CLINIC_FOLLOW_UP
+  DATA_QUALITY
 }
