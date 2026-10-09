@@ -126,7 +126,10 @@ describe("Pet taxi — route snapshot and distance pricing", () => {
     const r = await rider(owner);
     const t = await taxi();
     const from = new Date(Date.now() + 48 * 3600_000);
-    const s = (await slots.generate({ providerOrganizationId: t.org.id, locationId: t.location.id, serviceId: t.service.id, from, to: new Date(from.getTime() + 2 * 86400_000) })).find((x) => x.state === "AVAILABLE")!;
+    const generated = await slots.generate({ providerOrganizationId: t.org.id, locationId: t.location.id, serviceId: t.service.id, from, to: new Date(from.getTime() + 2 * 86400_000) });
+    const s = generated.find((x) => x.state === "AVAILABLE")!;
+    // A second, genuinely available slot ≥ 2 h later (adding 2 h blindly crossed the 23:30 window end when the suite ran in the evening, UTC).
+    const s2 = generated.find((x) => x.state === "AVAILABLE" && x.startAt.getTime() >= s.startAt.getTime() + 2 * 3600_000)!;
     const holdId = (await post(owner, "/booking-holds").send({ petId: r.petId, providerId: t.org.id, locationId: t.location.id, serviceId: t.service.id, slotStart: s.startAt.toISOString() }).expect(201)).body.holdId;
     const base = { holdId, petId: r.petId, customerAddressId: r.pickup.id, dropoffAddressId: r.dropoff.id };
     await post(owner, "/bookings").set("Idempotency-Key", randomUUID()).send({ ...base, pickupContact: { name: "Neighbour", phone: "09120000002", consentConfirmed: false } }).expect(400);
@@ -149,15 +152,17 @@ describe("Pet taxi — route snapshot and distance pricing", () => {
     expect([403, 404]).toContain((await request(server()).get(`/provider/bookings/${booking.id}/ride`).set("Cookie", other.driver.cookie)).status);
 
     // Structured cancel reason, validated per side.
-    const holdId2 = (await post(owner, "/booking-holds").send({ petId: r.petId, providerId: t.org.id, locationId: t.location.id, serviceId: t.service.id, slotStart: new Date(s.startAt.getTime() + 2 * 3600_000).toISOString() }).expect(201)).body.holdId;
+    const holdId2 = (await post(owner, "/booking-holds").send({ petId: r.petId, providerId: t.org.id, locationId: t.location.id, serviceId: t.service.id, slotStart: s2.startAt.toISOString() }).expect(201)).body.holdId;
     const b2 = (await post(owner, "/bookings").set("Idempotency-Key", randomUUID()).send({ holdId: holdId2, petId: r.petId, customerAddressId: r.pickup.id, dropoffAddressId: r.dropoff.id }).expect(201)).body;
     await post(owner, `/bookings/${b2.id}/cancel`).send({ reasonCode: "PROVIDER_UNAVAILABLE" }).expect(400);
     const cancelled = (await post(owner, `/bookings/${b2.id}/cancel`).send({ reasonCode: "OWNER_PET_UNWELL", reason: "Fever" }).expect(201)).body;
     expect(cancelled.cancellationReasonCode).toBe("OWNER_PET_UNWELL");
     // A non-taxi service refuses ride details.
     const vet = await db.providerService.create({ data: { providerOrganizationId: t.org.id, locationId: t.location.id, name: "ویزیت", type: ProviderServiceType.GENERAL_VET_VISIT, category: ServiceCategory.VET, locationMode: LocationMode.AT_PROVIDER, durationMinutes: 30, priceAmount: 1, currency: "IRR" } });
-    const vs = (await slots.generate({ providerOrganizationId: t.org.id, locationId: t.location.id, serviceId: vet.id, from, to: new Date(from.getTime() + 2 * 86400_000) })).find((x) => x.state === "AVAILABLE")!;
-    const vHold = (await post(owner, "/booking-holds").send({ petId: r.petId, providerId: t.org.id, locationId: t.location.id, serviceId: vet.id, slotStart: new Date(vs.startAt.getTime() + 6 * 3600_000).toISOString() }).expect(201)).body.holdId;
+    const vetSlots = await slots.generate({ providerOrganizationId: t.org.id, locationId: t.location.id, serviceId: vet.id, from, to: new Date(from.getTime() + 2 * 86400_000) });
+    const vFirst = vetSlots.find((x) => x.state === "AVAILABLE")!;
+    const vs = vetSlots.find((x) => x.state === "AVAILABLE" && x.startAt.getTime() >= vFirst.startAt.getTime() + 6 * 3600_000)!;
+    const vHold = (await post(owner, "/booking-holds").send({ petId: r.petId, providerId: t.org.id, locationId: t.location.id, serviceId: vet.id, slotStart: vs.startAt.toISOString() }).expect(201)).body.holdId;
     await post(owner, "/bookings").set("Idempotency-Key", randomUUID()).send({ holdId: vHold, petId: r.petId, transportRequirements: ["CRATE_REQUIRED"] }).expect(400);
   });
 });
