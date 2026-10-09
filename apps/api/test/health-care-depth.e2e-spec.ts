@@ -44,6 +44,8 @@ describe("Health and care depth", () => {
 
   beforeAll(async () => {
     app = await createTestApp();
+    // Concurrent requests below: listen once on an ephemeral port (supertest's per-request listen() races → ECONNRESET).
+    await app.listen(0);
     db = app.get(PrismaService);
   });
   afterAll(async () => app.close());

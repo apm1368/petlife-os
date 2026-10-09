@@ -34,6 +34,8 @@ describe("Animal support depth", () => {
 
   beforeAll(async () => {
     app = await createTestApp();
+    // Concurrent requests below: listen once on an ephemeral port (supertest's per-request listen() races → ECONNRESET).
+    await app.listen(0);
     db = app.get(PrismaService);
   });
   afterAll(async () => app.close());
@@ -75,9 +77,15 @@ describe("Animal support depth", () => {
     // Reading reconciles but never re-emits.
     await get(null, `/animal-support/needs/${o.listingId}/milestones`).expect(200);
     expect(await db.domainEvent.count({ where: { type: "SupportNeedMilestoneReached", aggregateId: o.listingId } })).toBe(4);
-    // Major milestones only (50 %, 100 %): exactly two notifications for the follower and each donor.
+    // Major milestones only (50 %, 100 %): the follower gets both, once each. A donor gets each milestone at most once —
+    // one whose donation committed after 50 % was recorded wasn't a donor yet then, so they may only get 100 %.
     expect(await db.notification.count({ where: { userId: follower.id, type: "animal_support.milestone" } })).toBe(2);
-    for (const d of donors) expect(await db.notification.count({ where: { userId: d.id, type: "animal_support.milestone" } })).toBe(2);
+    for (const d of donors) {
+      const rows = await db.notification.findMany({ where: { userId: d.id, type: "animal_support.milestone" }, select: { entityId: true } });
+      expect(rows.length).toBeGreaterThanOrEqual(1);
+      expect(new Set(rows.map((r) => r.entityId)).size).toBe(rows.length);
+      expect(rows.map((r) => r.entityId)).toContain(`${o.listingId}:FUNDING_100`);
+    }
     expect(await db.notification.count({ where: { userId: o.manager.id, type: "animal_support.milestone" } })).toBe(0);
 
     await send("post", o.manager, `/animal-support/needs/${o.listingId}/updates`).send({ body: "Thank you" }).expect(201);
