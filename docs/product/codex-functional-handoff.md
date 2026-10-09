@@ -1224,3 +1224,106 @@
   - پیوند به خانوار و پت.
   - یک پیوست SHARED.
   - `firstAssignedAt` و `firstResponseAt` پر شده‌اند.
+
+## ۳۲. TRAVEL-EXT — اقامتگاه‌های pet-friendly از منابع خارجی (لایه‌ی کشف، نه رزرو)
+
+جزئیات کشف منبع در `docs/product/travel-external-sources.md` آمده است.
+
+**وضعیت فعلی:**
+- دریافت خودکار جاباما و علی‌بابا `BLOCKED_EXTERNAL` است.
+- منابع در حالت `MANUAL` هستند و موجودی منتشرشده صفر است تا کارمند آگهی با شواهد ثبت کند.
+- رزرو هرگز در PET LIFE انجام نمی‌شود. CTA کاربر را به سایت منبع می‌برد.
+
+### نوع منبع
+- `code`: یکی از `JABAMA | ALIBABA | OTAGHAK | JAJIGA | SHAB` (و `FIXTURE` فقط در تست‌ها).
+- `mode`: یکی از `AUTOMATED | MANUAL | DISABLED`.
+- `automationStatus`: یکی از `SUPPORTED | NOT_SUPPORTED | BLOCKED_EXTERNAL`.
+- `health`: یکی از `HEALTHY | DEGRADED | BLOCKED | DISABLED`، همراه با `healthReason`.
+
+### شکل آگهی برای عضو
+- **فهرست:** `GET /api/travel/external/stays?city&checkIn&checkOut&guests&pets&stayType&source&minPrice&maxPrice&instantBooking&dogs&cats&page&pageSize`
+- **جزئیات:** `GET /api/travel/external/stays/:id?checkIn&checkOut&guests&pets`
+- **فیلدهای هر آیتم:**
+  - `title`، `city`، `area`، `stayType`، `province`، `capacity`، `bedrooms`، `beds`
+  - `source {code, nameFa, nameEn}`
+  - `pet {accepted: true, evidenceType, evidenceObservedAt, policy, summary}`
+  - `rating`، `reviewCount`، `instantBooking` (در صورت نامشخص بودن `"UNKNOWN"`)
+  - `images[]`: فقط URL منبع؛ وقتی سیاست تصویر `NO_IMAGES` باشد خالی است و تصویر جایگزین نشان داده می‌شود.
+  - `status`: یکی از `ACTIVE | STALE`
+  - `lastCheckedAt`، `outboundPath`، `price`
+  - در صفحه‌ی جزئیات، `alternatives[]`: همان ملک در منابع دیگر، پس از تأیید تطبیق.
+- **`policy` حیوان خانگی:** کلیدهای `dogs`، `cats`، `maxPets`، `sizeLimit`، `indoor`، `extraFeeIrr` و `approvalRequired`.
+  - هر مقدار یا از منبع آمده یا `"UNKNOWN"` است.
+  - فیلترهای `dogs` و `cats` فقط مقدار صریح `true` را حساب می‌کنند و `UNKNOWN` هرگز به معنی «بله» نیست.
+- **پیشنهاد متن نمایش:** «پذیرش حیوان خانگی: بله» به‌علاوه‌ی محدودیت‌های اعلام‌شده در منبع، و «آخرین بررسی: …».
+
+### وضعیت قیمت (`price.state`)
+| وضعیت | معنا |
+|---|---|
+| `DATES_REQUIRED` | تاریخ انتخاب نشده؛ هیچ عددی نشان داده نمی‌شود. |
+| `FRESH` | `priceIrr`، `oldPriceIrr` و `discountPercent`، به‌علاوه‌ی `priceBasis` (`TOTAL_STAY`/`PER_NIGHT`)، `observedAt` و `expiresAt`. باید «قیمت مشاهده‌شده در …» نمایش داده شود. |
+| `STALE` | قیمت منقضی شده؛ `priceIrr: null`. متن پیشنهادی: «قیمت نیازمند به‌روزرسانی». |
+| `NO_PRICE_FOR_DATES` | برای همین تاریخ‌ها و تعداد مهمان قیمتی مشاهده نشده، یا منبع قیمتی نداده است. |
+
+- قیمت هر بازه‌ی تاریخ و تعداد مهمان جداست؛ قیمت ۱۰ مهر هرگز برای ۲۰ مهر نشان داده نمی‌شود.
+- این قیمت‌ها مرجع مالی PET LIFE نیستند.
+
+### دسترس‌پذیری (`price.availability.state`)
+- `UNKNOWN`، `SOURCE_REPORTED_AVAILABLE` یا `SOURCE_REPORTED_UNAVAILABLE`، همراه با `observedAt`.
+- هرگز «موجود» قطعی نمایش داده نشود.
+
+### CTA خروجی
+- **لینک:** `GET /api/travel/external/stays/:id/out?checkIn&checkOut&guests` → ثبت کلیک و سپس 302 به URL اعتبارسنجی‌شده‌ی منبع.
+- **متن دکمه:** «مشاهده و رزرو در جاباما» یا «مشاهده و رزرو در علی‌بابا»، بر اساس `source.nameFa`.
+- هیچ رزرو یا پرداختی در PET LIFE ساخته نمی‌شود و نرخ تبدیل `UNKNOWN` است.
+- برچسب منبع باید همیشه دیده شود؛ آگهی هرگز نباید شبیه موجودی خود PET LIFE باشد.
+
+### علاقه‌مندی و سفر
+- **علاقه‌مندی:**
+  - `GET /api/me/external-stays/favorites` → هر مورد با `available: false` اگر منبع آن را حذف یا کارمند پنهان کرده باشد.
+  - `POST|DELETE /api/me/external-stays/:id/favorite`.
+- **سفر** (مجوز `canViewIdentity` برای خواندن و `canEditCareProfile` برای تغییر):
+  - `GET|POST /api/pets/:petId/trips/:tripId/external-stays {stayId, checkIn?, checkOut?, guests?}` → `state: PLANNED_EXTERNAL_STAY`، `reservationConfirmed: false` و `priceAtAttach`.
+  - حذف: `DELETE .../:stayId`.
+
+### ادمین (`/api/admin/travel/external/*`)
+- **مجوزها:**
+  - `travel.source.view`: نقش‌های SUPER_ADMIN، ADMIN، OPERATIONS و READ_ONLY.
+  - `travel.source.manage`، `travel.sync.run` و `travel.override.manage`: نقش‌های SUPER_ADMIN و ADMIN.
+  - `travel.listing.manage`: نقش‌های SUPER_ADMIN، ADMIN و OPERATIONS.
+- **مسیرها:**
+  - `GET dashboard` → `{totalExternalListings, petFriendlyPublished, bySource[], freshPriceSnapshots, stalePriceSnapshots, failedSyncsLast7Days, sourceRemoved, outboundClicks, conversion: "UNKNOWN"}`
+  - `GET sources` و `GET sources/:code` → شامل پیکربندی، `discoveryNotes` (شواهد)، آخرین اجرا، `nextRunAt`، `circuitOpenUntil`، فهرست وضعیت‌ها و ۲۰ اجرای آخر.
+  - `PATCH sources/:code {reason, syncIntervalMinutes, priceTtlMinutes, metadataTtlMinutes, imagePolicy, maxRequestsPerRun, timeoutMs, retryCount, cityScopes[], autoPublish}`
+  - `POST sources/:code/pause|resume {reason}`
+  - `POST sources/:code/probe`
+  - `POST sources/:code/runs {kind: DISCOVERY|FULL|LISTING|PRICE, listingId?}`: اجرای هم‌زمان رد می‌شود (`SYNC_ALREADY_RUNNING`).
+  - `GET runs?source` → وضعیت هر اجرا یکی از `STARTED | SUCCEEDED | PARTIAL | FAILED | CANCELLED | ABANDONED`، با `itemsScanned`، `created`، `updated`، `unchanged`، `failed` و `errorCategories`.
+  - `GET listings?source&status&publishState&city&q`
+  - `GET listings/:id` (بازرس آگهی) → `normalized`، `source`، `petEvidence`، `overrides {field: {sourceValue, overrideValue}}`، `images`، `priceHistory[]` (حداکثر ۳۰ مورد برای هر بازه)، `changes[]`، `recentSourceErrors`، `matchCandidates`، `publishBlockers` و `engagement`.
+  - `POST listings`: ثبت دستی.
+    - `{sourceCode, sourceUrl (https و دامنه‌ی مجاز), title, city, …, petEvidenceType: SOURCE_FILTER|SOURCE_AMENITY|SOURCE_POLICY_TEXT, petEvidenceText, petPolicy?}`
+    - آگهی به‌صورت `DRAFT` ساخته می‌شود.
+  - `POST listings/:id/visibility {action: hide|unhide|publish|unpublish, reason}`: انتشار وقتی شرط‌ها برقرار نباشد رد می‌شود (`NOT_PUBLISHABLE`، همراه با `blockers`).
+  - `POST listings/:id/override {field, value|null}`: فیلدهای مجاز `title`، `city`، `area`، `stayType`، `petPolicySummary` و `descriptionSummary`. مقدار منبع جداگانه حفظ می‌شود.
+  - `POST listings/:id/prices {checkIn, checkOut, guests, priceIrr?, priceBasis, availability, observedAt}`: قیمت مشاهده‌شده توسط کارمند، با `observedBy: ADMIN`.
+  - `GET matches?status`، `POST matches/:id/approve|reject`: تطبیق بین منابع هرگز خودکار ادغام نمی‌شود. با تأیید، دو آگهی یک `propertyGroupId` می‌گیرند و هر پیشنهاد جداگانه می‌ماند.
+- **ممیزی و تغییرات:** همه‌ی تغییرات در ممیزی ثبت می‌شوند (`travel_source.*` و `travel_listing.*`). رویدادهای تغییر آگهی:
+  - `PRICE_CHANGED`
+  - `PET_POLICY_CHANGED`
+  - `SOURCE_REMOVED`
+  - `IMAGE_CHANGED`
+  - `UNAVAILABLE`
+  - `URL_CHANGED`
+  - `HIDDEN` / `UNHIDDEN`
+  - `OVERRIDE_SET`
+
+### وضعیت آگهی
+- `status`: یکی از `ACTIVE | STALE | SOURCE_REMOVED | HIDDEN`.
+- `publishState`: یکی از `DRAFT | PUBLISHED | REJECTED`.
+- آگهی هرگز حذف فیزیکی نمی‌شود.
+
+### داده‌ی نمایشی و زنده
+- هیچ داده‌ی جعلی جاباما یا علی‌بابا وجود ندارد.
+- منبع `FIXTURE` فقط در تست‌هاست و آگهی‌هایش برچسب fixture دارند.
+- **حالت خالی:** صفحه‌ی سفر خارجی فعلاً بدون آگهی است. باید پیام صادقانه‌ی «هنوز اقامتگاهی با شواهد پذیرش حیوان از منابع ثبت نشده» نمایش داده شود.

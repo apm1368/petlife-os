@@ -10405,3 +10405,328 @@ model SupportCaseAttachment {
   @@index([supportCaseId])
   @@map("support_case_attachments")
 }
+
+// ---------------------------------------------------------------------------
+// TRAVEL-EXT-1 — external pet-friendly stay discovery (source-attributed, never PET LIFE inventory)
+// ---------------------------------------------------------------------------
+
+enum ExternalSourceMode {
+  AUTOMATED
+  MANUAL
+  DISABLED
+}
+
+/// Whether a compliant automated retrieval path exists for the source (evidence in `discoveryNotes`).
+enum ExternalAutomationStatus {
+  SUPPORTED
+  NOT_SUPPORTED
+  BLOCKED_EXTERNAL
+}
+
+enum ExternalSourceHealth {
+  HEALTHY
+  DEGRADED
+  BLOCKED
+  DISABLED
+}
+
+enum ExternalImagePolicy {
+  NO_IMAGES
+  REMOTE_REFERENCE
+  CACHE_PERMITTED
+}
+
+model ExternalTravelSource {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  code                String                   @unique
+  nameFa              String
+  nameEn              String
+  /// Hosts outbound links and fetchers may use (exact host or subdomain). Anything else is rejected.
+  allowedHosts        String[]
+  mode                ExternalSourceMode       @default(DISABLED)
+  automationStatus    ExternalAutomationStatus @default(NOT_SUPPORTED)
+  health              ExternalSourceHealth     @default(DISABLED)
+  healthReason        String?
+  discoveryNotes      Json?
+  syncIntervalMinutes Int                      @default(1440)
+  priceTtlMinutes     Int                      @default(360)
+  metadataTtlMinutes  Int                      @default(2880)
+  imagePolicy         ExternalImagePolicy      @default(NO_IMAGES)
+  maxRequestsPerRun   Int                      @default(50)
+  timeoutMs           Int                      @default(10000)
+  retryCount          Int                      @default(2)
+  cityScopes          String[]                 @default([])
+  autoPublish         Boolean                  @default(false)
+  /// Affiliate readiness only — inactive until a real agreement exists.
+  affiliateId         String?
+  trackingTemplate    String?
+  campaignCode        String?
+  affiliateActive     Boolean                  @default(false)
+  consecutiveFailures Int                      @default(0)
+  circuitOpenUntil    DateTime?
+  lastRunAt           DateTime?
+  lastSuccessAt       DateTime?
+  lastFailureAt       DateTime?
+  lastErrorCategory   String?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+
+  stays ExternalStay[]
+  runs  ExternalSyncRun[]
+
+  @@map("external_travel_sources")
+}
+
+enum ExternalStayStatus {
+  ACTIVE
+  STALE
+  SOURCE_REMOVED
+  HIDDEN
+}
+
+enum ExternalPublishState {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
+enum PetEvidenceType {
+  SOURCE_FILTER
+  SOURCE_AMENITY
+  SOURCE_POLICY_TEXT
+  AUTHORIZED_FEED
+}
+
+enum ExternalEntryMode {
+  MANUAL
+  AUTOMATED
+}
+
+/// One listing on one source. Unique per (source, sourceListingId). Fields are source-observed; staff corrections
+/// live in `overrides` as {field: {sourceValue, overrideValue, adminUserId, at}} and never overwrite source values.
+model ExternalStay {
+  id                    String               @id @default(uuid()) @db.Uuid
+  sourceId              String               @db.Uuid
+  source                ExternalTravelSource @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  sourceListingId       String
+  sourceUrl             String
+  title                 String
+  city                  String
+  province              String?
+  area                  String?
+  stayType              String?
+  latitude              Float?
+  longitude             Float?
+  capacity              Int?
+  bedrooms              Int?
+  beds                  Int?
+  petFriendly           Boolean              @default(true)
+  petEvidenceType       PetEvidenceType
+  petEvidenceText       String
+  petEvidenceObservedAt DateTime
+  /// Normalized pet policy; each key is a value or "UNKNOWN" (dogs, cats, maxPets, sizeLimit, indoor, extraFeeIrr, approvalRequired).
+  petPolicy             Json
+  petPolicySummary      String?
+  rating                Float?
+  reviewCount           Int?
+  instantBooking        Boolean?
+  descriptionSummary    String?
+  status                ExternalStayStatus   @default(ACTIVE)
+  publishState          ExternalPublishState @default(DRAFT)
+  entryMode             ExternalEntryMode
+  createdByAdminId      String?              @db.Uuid
+  overrides             Json?
+  propertyGroupId       String?              @db.Uuid
+  lastSourceUpdateAt    DateTime?
+  lastCheckedAt         DateTime
+  lastSuccessfulSyncAt  DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  prices    ExternalStayPriceSnapshot[]
+  images    ExternalStayImage[]
+  changes   ExternalStayChange[]
+  clicks    OutboundTravelClick[]
+  favorites ExternalStayFavorite[]
+  trips     TripExternalStay[]
+
+  @@unique([sourceId, sourceListingId])
+  @@index([city, status, publishState])
+  @@map("external_stays")
+}
+
+enum ExternalAvailability {
+  UNKNOWN
+  SOURCE_REPORTED_AVAILABLE
+  SOURCE_REPORTED_UNAVAILABLE
+}
+
+enum ExternalPriceBasis {
+  TOTAL_STAY
+  PER_NIGHT
+}
+
+enum ExternalObservedBy {
+  ADAPTER
+  ADMIN
+}
+
+/// A source price observed for one search context (dates + guests). Never PET LIFE's money; never shown without
+/// `observedAt`, and treated as stale after `expiresAt`. Unchanged repeats bump `lastConfirmedAt` instead of a new row.
+model ExternalStayPriceSnapshot {
+  id                String               @id @default(uuid()) @db.Uuid
+  stayId            String               @db.Uuid
+  stay              ExternalStay         @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  checkIn           DateTime             @db.Date
+  checkOut          DateTime             @db.Date
+  guests            Int
+  pets              Int?
+  priceIrr          Int?
+  oldPriceIrr       Int?
+  discountPercent   Int?
+  priceBasis        ExternalPriceBasis
+  availability      ExternalAvailability @default(UNKNOWN)
+  observedAt        DateTime
+  lastConfirmedAt   DateTime
+  expiresAt         DateTime
+  observedBy        ExternalObservedBy
+  observedByAdminId String?              @db.Uuid
+  contentHash       String
+
+  @@index([stayId, checkIn, checkOut, guests, observedAt])
+  @@map("external_stay_price_snapshots")
+}
+
+/// A reference to a source image — never downloaded into our storage unless the source's policy permits caching.
+model ExternalStayImage {
+  id             String       @id @default(uuid()) @db.Uuid
+  stayId         String       @db.Uuid
+  stay           ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  sourceImageUrl String
+  position       Int
+  lastVerifiedAt DateTime
+
+  @@unique([stayId, position])
+  @@map("external_stay_images")
+}
+
+enum ExternalSyncKind {
+  DISCOVERY
+  FULL
+  LISTING
+  PRICE
+}
+
+enum ExternalSyncStatus {
+  STARTED
+  SUCCEEDED
+  PARTIAL
+  FAILED
+  CANCELLED
+  ABANDONED
+}
+
+model ExternalSyncRun {
+  id                 String               @id @default(uuid()) @db.Uuid
+  sourceId           String               @db.Uuid
+  source             ExternalTravelSource @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  kind               ExternalSyncKind
+  status             ExternalSyncStatus   @default(STARTED)
+  startedAt          DateTime             @default(now())
+  finishedAt         DateTime?
+  itemsScanned       Int                  @default(0)
+  created            Int                  @default(0)
+  updated            Int                  @default(0)
+  unchanged          Int                  @default(0)
+  failed             Int                  @default(0)
+  errorCategories    Json?
+  triggeredByAdminId String?              @db.Uuid
+
+  @@index([sourceId, startedAt])
+  @@map("external_sync_runs")
+}
+
+enum ExternalChangeKind {
+  PRICE_CHANGED
+  PET_POLICY_CHANGED
+  SOURCE_REMOVED
+  IMAGE_CHANGED
+  UNAVAILABLE
+  URL_CHANGED
+  HIDDEN
+  UNHIDDEN
+  OVERRIDE_SET
+}
+
+model ExternalStayChange {
+  id        String             @id @default(uuid()) @db.Uuid
+  stayId    String             @db.Uuid
+  stay      ExternalStay       @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  kind      ExternalChangeKind
+  detail    Json
+  createdAt DateTime           @default(now())
+
+  @@index([stayId, createdAt])
+  @@map("external_stay_changes")
+}
+
+enum ExternalMatchStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Cross-source "same physical place?" candidates. Never merged automatically; approval groups them (offers stay separate).
+model ExternalStayMatchCandidate {
+  id                String              @id @default(uuid()) @db.Uuid
+  stayAId           String              @db.Uuid
+  stayBId           String              @db.Uuid
+  score             Float
+  signals           Json
+  status            ExternalMatchStatus @default(PENDING)
+  reviewedByAdminId String?             @db.Uuid
+  reviewedAt        DateTime?
+  createdAt         DateTime            @default(now())
+
+  @@unique([stayAId, stayBId])
+  @@map("external_stay_match_candidates")
+}
+
+/// A user left PET LIFE for the source. No booking/payment is implied; conversion stays UNKNOWN.
+model OutboundTravelClick {
+  id            String       @id @default(uuid()) @db.Uuid
+  stayId        String       @db.Uuid
+  stay          ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  sourceCode    String
+  userId        String?      @db.Uuid
+  searchContext Json?
+  createdAt     DateTime     @default(now())
+
+  @@index([stayId, createdAt])
+  @@map("outbound_travel_clicks")
+}
+
+model ExternalStayFavorite {
+  userId    String       @db.Uuid
+  stayId    String       @db.Uuid
+  stay      ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@id([userId, stayId])
+  @@map("external_stay_favorites")
+}
+
+/// A stay the owner plans to book on the source for a PET LIFE trip. Never a confirmed reservation.
+model TripExternalStay {
+  id              String       @id @default(uuid()) @db.Uuid
+  tripId          String       @db.Uuid
+  stayId          String       @db.Uuid
+  stay            ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  priceSnapshotId String?      @db.Uuid
+  state           String       @default("PLANNED_EXTERNAL_STAY")
+  addedByUserId   String       @db.Uuid
+  createdAt       DateTime     @default(now())
+
+  @@unique([tripId, stayId])
+  @@map("trip_external_stays")
+}

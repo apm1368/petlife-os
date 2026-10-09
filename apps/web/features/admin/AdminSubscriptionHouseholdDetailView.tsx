@@ -1,5 +1,6 @@
 "use client";
 
+import { useStatusText } from "@/lib/status/use-status-text";
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -20,6 +21,7 @@ export function AdminSubscriptionHouseholdDetailView({ householdId }: { househol
   const tCommon = useTranslations("admin.common");
   const router = useRouter();
   const locale = useLocale();
+  const statusText = useStatusText();
 
   const [detail, setDetail] = useState<AdminSubscriptionDetailDto | null>(null);
   const [overrides, setOverrides] = useState<SubscriptionEntitlementOverrideDto[] | null>(null);
@@ -125,7 +127,7 @@ export function AdminSubscriptionHouseholdDetailView({ householdId }: { househol
 
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{detail.household.name ?? detail.household.id}</h1>
-        <StatusLabel tone={detail.status === "ACTIVE" ? "success" : "neutral"}>{detail.status}</StatusLabel>
+        <StatusLabel tone={detail.status === "ACTIVE" ? "success" : "neutral"}>{statusText.label(detail.status, "subscription")}</StatusLabel>
       </div>
       <p className="text-body text-text-secondary">{locale === "fa" ? detail.plan.nameFa : detail.plan.nameEn}</p>
       {detail.currentPeriod ? <p className="text-metadata text-text-secondary">{t("periodEndsAt", { date: formatDate(detail.currentPeriod.endAt, locale) })}</p> : null}
@@ -149,7 +151,7 @@ export function AdminSubscriptionHouseholdDetailView({ householdId }: { househol
                 {attempt.reason} · {formatCurrency(attempt.amount, locale === "fa" ? "fa" : "en")}
               </span>
               <span className="text-metadata text-text-secondary">
-                {attempt.status} · {formatDate(attempt.createdAt, locale)}
+                {statusText.label(attempt.status)} · {formatDate(attempt.createdAt, locale)}
               </span>
             </div>
             {attempt.status === "SUCCEEDED" ? (
@@ -167,7 +169,7 @@ export function AdminSubscriptionHouseholdDetailView({ householdId }: { househol
           <div key={override.id} className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">
             <div className="flex flex-col">
               <span className="text-body text-text-primary">
-                {override.key}: {override.type === "LIMIT" ? (override.limitValue ?? t("unlimitedShort")) : String(override.boolValue)}
+                {override.key}: {override.type === "LIMIT" ? (override.limitValue ?? t("unlimitedShort")) : override.boolValue ? (locale === "fa" ? "فعال" : "On") : (locale === "fa" ? "غیرفعال" : "Off")}
               </span>
               <span className="text-metadata text-text-secondary">{override.reason}</span>
             </div>
@@ -188,8 +190,8 @@ export function AdminSubscriptionHouseholdDetailView({ householdId }: { househol
             value={overrideType}
             onChange={(e) => setOverrideType(e.target.value as SubscriptionEntitlementType)}
             options={[
-              { value: SubscriptionEntitlementType.LIMIT, label: "LIMIT" },
-              { value: SubscriptionEntitlementType.BOOLEAN, label: "BOOLEAN" },
+              { value: SubscriptionEntitlementType.LIMIT, label: locale === "fa" ? "سقف عددی" : "Numeric limit" },
+              { value: SubscriptionEntitlementType.BOOLEAN, label: locale === "fa" ? "روشن/خاموش" : "On/off" },
             ]}
             className="min-w-32"
           />

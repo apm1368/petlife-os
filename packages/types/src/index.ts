@@ -2987,7 +2987,12 @@ export type AdminPermissionName =
   | "customer.account.manage"
   | "customer.sessions.revoke"
   | "pet.access.manage"
-  | "finance.reconcile";
+  | "finance.reconcile"
+  | "travel.source.view"
+  | "travel.source.manage"
+  | "travel.sync.run"
+  | "travel.listing.manage"
+  | "travel.override.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {

@@ -73,7 +73,13 @@ export type AdminPermission =
   | "customer.sessions.revoke"
   | "pet.access.manage"
   // ERP-E — run reconciliation and close findings (never edits money)
-  | "finance.reconcile";
+  | "finance.reconcile"
+  // TRAVEL-EXT — external pet-friendly stay sources
+  | "travel.source.view"
+  | "travel.source.manage"
+  | "travel.sync.run"
+  | "travel.listing.manage"
+  | "travel.override.manage";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -133,6 +139,11 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.sessions.revoke",
   "pet.access.manage",
   "finance.reconcile",
+  "travel.source.view",
+  "travel.source.manage",
+  "travel.sync.run",
+  "travel.listing.manage",
+  "travel.override.manage",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -155,6 +166,7 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = [
   "settings.view",
   "system.view",
   "analytics.view",
+  "travel.source.view",
 ];
 
 /**
@@ -223,6 +235,11 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "customer.sessions.revoke",
     "pet.access.manage",
     "finance.reconcile",
+    "travel.source.view",
+    "travel.source.manage",
+    "travel.sync.run",
+    "travel.listing.manage",
+    "travel.override.manage",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
@@ -286,6 +303,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settings.view",
     "system.view",
     "analytics.view",
+    "travel.source.view",
+    "travel.listing.manage",
   ],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict

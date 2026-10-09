@@ -25,6 +25,9 @@ import { signSessionCookie } from "../src/common/session/session-cookie.util";
 // Public by design: anyone may read these (published catalogue, public listings, reviews).
 const PUBLIC_GET = new Set([
   "/settings/public",
+  "/travel/external/stays",
+  "/travel/external/stays/:id",
+  "/travel/external/stays/:id/out",
   "/animal-support/campaigns/:campaignId",
   "/animal-support/campaigns/:campaignId/donors",
   "/animal-support/campaigns/:campaignId/updates",

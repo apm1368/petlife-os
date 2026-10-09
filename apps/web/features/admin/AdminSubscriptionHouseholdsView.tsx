@@ -69,7 +69,7 @@ export function AdminSubscriptionHouseholdsView() {
               <span className="text-body font-medium text-text-primary">{row.household.name ?? row.household.id}</span>
               <span className="text-metadata text-text-secondary">{locale === "fa" ? row.plan.nameFa : row.plan.nameEn}</span>
             </div>
-            <StatusLabel tone={STATUS_TONE[row.status]}>{row.status}</StatusLabel>
+            <StatusLabel tone={STATUS_TONE[row.status]}>{statusText.label(row.status, "subscription")}</StatusLabel>
           </ContextSurface>
         </button>
       ))}
