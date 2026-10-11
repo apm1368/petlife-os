@@ -14,6 +14,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 export function CommunityFeedView() {
   const t = useTranslations("community");
   const tCommon = useTranslations("common");
+  const locale = useLocale() === "en" ? "en" : "fa";
 
   const [page, setPage] = useState<PaginatedDto<CommunityPostDto> | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -41,7 +42,6 @@ export function CommunityFeedView() {
   if (error) return <LoadFailure error={error} onRetry={() => load(1)} />;
   if (!page) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
-  const locale = useLocale() === "en" ? "en" : "fa";
   const fa = locale === "fa";
   const chooseType = (next: CommunityPostType | "") => { setType(next); void load(1, false, { q: appliedQuery, type: next }); };
 
