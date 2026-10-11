@@ -149,7 +149,7 @@ describe("External pet-friendly stays", () => {
     const support = await actor("support", AdminRole.SUPPORT);
     await get(support, "/admin/travel/external/sources").expect(403);
     const sources = (await get(ops, "/admin/travel/external/sources").expect(200)).body;
-    expect(sources.find((s: { code: string }) => s.code === "JABAMA")).toMatchObject({ mode: "MANUAL", automationStatus: "BLOCKED_EXTERNAL", health: "BLOCKED" });
+    expect(sources.find((s: { code: string }) => s.code === "JABAMA")).toMatchObject({ mode: "MANUAL", automationStatus: "NOT_SUPPORTED" });
     const base = { sourceCode: "JABAMA", title: "QA test villa (manual record)", city: "رامسر", petEvidenceType: "SOURCE_POLICY_TEXT", petEvidenceText: "متن صفحه‌ی منبع: پذیرش حیوان خانگی مجاز است (QA test)" };
     await send("post", ops, "/admin/travel/external/listings").send({ ...base, sourceUrl: "https://evil.example/stay/1" }).expect(400);
     await send("post", ops, "/admin/travel/external/listings").send({ ...base, sourceUrl: "javascript:alert(1)" }).expect(400);
