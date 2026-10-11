@@ -6,8 +6,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { AdminPermissionName } from "@petlife/types";
-import { Button, ContextSurface, Skeleton } from "@petlife/ui";
+import { Button, ChevronDown, ContextSurface, IconButton, Menu, Sheet, Skeleton, X } from "@petlife/ui";
 import { authService } from "@/services/auth.service";
+import { adminService } from "@/services/admin.service";
 import { useAdminBootstrap } from "@/hooks/use-admin-bootstrap";
 import { useAdminStore } from "@/stores/admin-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -47,6 +48,16 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];
 
+/** ERP information architecture: the same items grouped by job — six pills instead of 29 flat links. */
+const NAV_GROUPS: { key: string; fa: string; en: string; hrefs: string[] }[] = [
+  { key: "work", fa: "کار روزانه", en: "Daily work", hrefs: ["/tasks", "/crm", "/customer-affairs"] },
+  { key: "trust", fa: "مشتریان و اعتماد", en: "Customers & trust", hrefs: ["/customers", "/support", "/disputes", "/trust", "/community", "/lost-pets", "/animal-support"] },
+  { key: "network", fa: "شبکه و بازار", en: "Network", hrefs: ["/providers", "/services", "/sellers", "/commerce", "/travel", "/insurance", "/places"] },
+  { key: "finance", fa: "مالی", en: "Finance", hrefs: ["/transactions", "/seller-finance", "/reconciliation", "/subscriptions"] },
+  { key: "content", fa: "محتوا", en: "Content", hrefs: ["/content", "/content/new", "/content/categories", "/content/tags", "/content/media", "/content/placements"] },
+  { key: "system", fa: "سیستم", en: "System", hrefs: ["/audit"] },
+];
+
 /**
  * A deliberately separate shell — not the consumer AppShell, not
  * SellerShell/ProviderShell (spec: "distinct Admin frontend shell, not
@@ -58,6 +69,13 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
  */
 function LiveAdminShell({ children }: { children: React.ReactNode }) {
   const [sessionState, setSessionState] = useState<SessionState>("loading");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [trustCount, setTrustCount] = useState<number | null>(null);
+  useEffect(() => {
+    // Live counter on the trust pill (ERP-G queue); silently absent without permission.
+    Promise.resolve().then(() => adminService.getTrustQueueSummary()).then((q) => setTrustCount(q.total)).catch(() => setTrustCount(null));
+  }, []);
   const { isLoading } = useAdminBootstrap();
   const context = useAdminStore((s) => s.context);
   const status = useAdminStore((s) => s.status);
@@ -106,33 +124,51 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
 
   const permissions = new Set(context.permissions);
   const visibleItems = NAV_ITEMS.filter((item) => !item.permission || permissions.has(item.permission));
+  const visible = new Map(visibleItems.map((item) => [item.href, item]));
+  const fa = locale === "fa";
+  const activeHref = visibleItems.map((i) => i.href).filter((h) => (h === "" ? pathname === `/${locale}/admin` : pathname.startsWith(`/${locale}/admin${h}`))).sort((a, b) => b.length - a.length)[0];
+  const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.hrefs.map((h) => visible.get(h)).filter((i): i is NonNullable<typeof i> => Boolean(i)) })).filter((g) => g.items.length);
+  const groupOf = (href?: string) => groups.find((g) => g.items.some((i) => i.href === href))?.key;
+  const itemLink = (item: (typeof visibleItems)[number], onClick?: () => void) => (
+    <Link key={item.href} href={`/${locale}/admin${item.href}`} onClick={onClick} aria-current={activeHref === item.href ? "page" : undefined} className="erp-menu__item">{t(item.labelKey)}</Link>
+  );
 
   return (
-    <div className={pathname === `/${locale}/admin` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
-      <header className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-2.5">
-        <div className="flex flex-col">
-          <span className="text-metadata font-medium text-text-primary">{t("title")}</span>
-          <span className="text-metadata text-text-secondary">{context.displayName} · {t(`role.${context.role}`)}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <LocaleSwitcher />
-          <ThemeToggle />
+    <div className="erp-shell">
+      <header className="erp-bar">
+        <div className="erp-bar__inner">
+          <Link href={`/${locale}/admin`} className="erp-brand"><span className="erp-brand__mark" aria-hidden="true">PL</span><span>{t("title")}</span></Link>
+          <nav className="erp-pills" aria-label={fa ? "ناوبری مدیریت" : "Admin navigation"} onMouseLeave={() => setOpenGroup(null)}>
+            <Link href={`/${locale}/admin`} className="erp-pill" aria-current={activeHref === "" ? "page" : undefined}>{t("nav.dashboard")}</Link>
+            {groups.map((g) => (
+              <div key={g.key} className="erp-pillwrap">
+                <button type="button" className="erp-pill" aria-expanded={openGroup === g.key} aria-current={groupOf(activeHref) === g.key ? "true" : undefined} onClick={() => setOpenGroup(openGroup === g.key ? null : g.key)}>
+                  {fa ? g.fa : g.en}
+                  {g.key === "trust" && trustCount ? <span className="erp-pill__count">{trustCount.toLocaleString(fa ? "fa-IR" : "en-US")}</span> : null}
+                  <ChevronDown size={14} aria-hidden="true" />
+                </button>
+                {openGroup === g.key ? <div className="erp-menu" role="menu">{g.items.map((i) => itemLink(i, () => setOpenGroup(null)))}</div> : null}
+              </div>
+            ))}
+          </nav>
+          <div className="erp-bar__tools">
+            <LocaleSwitcher />
+            <ThemeToggle />
+            <span className="erp-user" title={t(`role.${context.role}`)}>{context.displayName?.slice(0, 1)}</span>
+            <span className="erp-bar__menu"><IconButton label={fa ? "باز کردن منو" : "Open menu"} onClick={() => setMenuOpen(true)} icon={<Menu size={20} aria-hidden="true" />} /></span>
+          </div>
         </div>
       </header>
-
-      <nav className="flex gap-1 overflow-x-auto border-b border-border-subtle px-4 py-1.5">
-        {visibleItems.map((item) => {
-          const href = `/${locale}/admin${item.href}`;
-          const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
-          return (
-            <Link key={item.href} href={href} className={"shrink-0 rounded-full px-3 py-1 text-metadata " + (isActive ? "bg-surface-subtle text-text-primary" : "text-text-secondary")}>
-              {t(item.labelKey)}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <main className={pathname === `/${locale}/admin` ? "mx-auto max-w-4xl px-4 py-4" : "workspace-main w-full min-w-0 px-4 py-4"}>{children}</main>
+      <main className="erp-main workspace-main w-full min-w-0">{children}</main>
+      {menuOpen ? (
+        <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={fa ? "ناوبری مدیریت" : "Admin navigation"}>
+          <div className="flex justify-end"><IconButton label={fa ? "بستن منو" : "Close menu"} onClick={() => setMenuOpen(false)} icon={<X size={20} aria-hidden="true" />} /></div>
+          <nav className="erp-sheetnav" aria-label={fa ? "ناوبری مدیریت" : "Admin navigation"}>
+            {itemLink(visible.get("")!, () => setMenuOpen(false))}
+            {groups.map((g) => <div key={g.key}><p>{fa ? g.fa : g.en}</p>{g.items.map((i) => itemLink(i, () => setMenuOpen(false)))}</div>)}
+          </nav>
+        </Sheet>
+      ) : null}
     </div>
   );
 }

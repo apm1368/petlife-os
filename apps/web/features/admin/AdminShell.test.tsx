@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { AdminSessionContextDto, UserDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { authService } from "@/services/auth.service";
@@ -54,9 +54,13 @@ describe("AdminShell", () => {
     );
 
     await waitFor(() => expect(screen.getByText("content")).toBeTruthy());
+    // Items live in job groups (dropdown pills); open the one that holds support work.
+    fireEvent.click(screen.getByRole("button", { name: "Customers & trust" }));
     expect(screen.getByText("Support")).toBeTruthy();
     expect(screen.getByText("Disputes")).toBeTruthy();
-    // SUPPORT has neither finance.view nor audit.view — those nav items must not render.
+    // SUPPORT has neither finance.view nor audit.view — those groups and items must not render at all.
+    expect(screen.queryByRole("button", { name: "Finance" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "System" })).toBeNull();
     expect(screen.queryByText("Transactions")).toBeNull();
     expect(screen.queryByText("Audit")).toBeNull();
   });
@@ -95,7 +99,9 @@ describe("AdminShell", () => {
     );
 
     await waitFor(() => expect(screen.getByText("content")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: "Finance" }));
     expect(screen.getByText("Transactions")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "System" }));
     expect(screen.getByText("Audit")).toBeTruthy();
   });
 });

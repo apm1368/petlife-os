@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isAppLocale } from "@/lib/i18n/config";
-import { LandingPage } from "@/features/landing/LandingPage";
+import { HomeLanding } from "@/features/landing/HomeLanding";
+import "@/features/landing/landing.css";
+import "@/features/landing/home-landing.css";
 import { landingCopy } from "@/features/landing/copy";
 
 export async function generateMetadata({
@@ -17,5 +19,5 @@ export async function generateMetadata({
 export default async function RootPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isAppLocale(locale)) notFound();
-  return <LandingPage locale={locale} />;
+  return <HomeLanding locale={locale} />;
 }

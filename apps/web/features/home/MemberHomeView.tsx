@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import type { OrderSummaryDto, PetOverviewDto, SubscriptionDto, TravelBookingDto } from "@petlife/types";
-import { Avatar, CalendarDays, ChevronLeft, ChevronRight, FileText, HeartPulse, Images, MapPin, PackageCheck, Plane, Plus, Scissors, ShoppingBag, Skeleton, Sparkles, StatusLabel, Stethoscope, Users } from "@petlife/ui";
+import { Avatar, CalendarDays, ChevronLeft, ChevronRight, HeartPulse, Images, MapPin, PackageCheck, Plane, Plus, Scissors, ShoppingBag, Skeleton, Sparkles, StatusLabel, Stethoscope, Users } from "@petlife/ui";
 import { petsService } from "@/services/pets.service";
 import { bookingsService } from "@/services/bookings.service";
 import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
 import { careTitle } from "@/features/care/care-labels";
+import { ImmersiveHome } from "./ImmersiveHome";
 import { commerceService } from "@/services/commerce.service";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { subscriptionService } from "@/services/subscription.service";
@@ -21,7 +22,7 @@ import { useActivePet } from "@/hooks/use-active-pet";
 import { useSessionStore } from "@/stores/session-store";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
-import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
+
 import { attentionTitle, eventTitle, eventSourceLabel, formatOverviewDate, mergeCareIntoOverview, severityBarClass, severityLabel, severityTone } from "@/features/pets/overview-labels";
 import "./member-home.css";
 
@@ -180,6 +181,7 @@ export function MemberHomeView() {
   const user = useSessionStore((s) => s.user);
   const { pets, activePetId, switchActivePet, isSwitching } = useActivePet();
   const [overview, setOverview] = useState<PetOverviewDto | null>(null);
+  const [care, setCare] = useState<CareReminder[]>([]);
   const [nextBooking, setNextBooking] = useState<Booking | null | undefined>(undefined);
   const [error, setError] = useState<unknown>(null);
   // Side panels load on their own: one failing never blanks the dashboard ("failed" shows an inline note).
@@ -201,6 +203,7 @@ export function MemberHomeView() {
         careRemindersService.list(petId).catch(() => [] as CareReminder[]),
       ]);
       setOverview({ ...ov, ...mergeCareIntoOverview(ov, care, (item) => careTitle(item, locale)) });
+      setCare(care);
       const sorted = [...bookings].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
       setNextBooking(sorted.find((b) => b.petId === petId) ?? sorted[0] ?? null);
     } catch (err) {
@@ -277,54 +280,8 @@ export function MemberHomeView() {
   const activity = overview.recentActivity.filter((item) => !shownHealth.has(`${item.type}-${item.id}`));
   return (
     <div className="member-home">
-      <header className="member-home__greeting">
-        <div>
-          <p>{c.dashboard} <span aria-hidden="true"> / </span> {today}</p>
-          <h1>{firstName ? c.hello(firstName) : pet.name}</h1>
-        </div>
-        <Link href={`/${locale}/pets/new`} className="member-home__add"><Plus size={16} aria-hidden="true" />{c.addPet}</Link>
-      </header>
-
-      {pets.length > 1 ? (
-        <nav className="member-home__pets" aria-label={c.switchPet}>
-          {pets.map((p) => (
-            <button key={p.id} type="button" aria-pressed={p.id === petId} onClick={() => void switchActivePet(p.id)}>
-              <Avatar name={p.name} src={p.photoUrl ?? undefined} size="sm" />
-              <span>{p.name}</span>
-            </button>
-          ))}
-        </nav>
-      ) : null}
-
-      <section className="member-home__hero" aria-label={pet.name}>
-        <div className="member-home__hero-top">
-          <div className="member-home__portrait"><Avatar name={pet.name} src={pet.photoUrl ?? undefined} size="lg" /></div>
-          <div className="member-home__hero-text">
-            <h2>{pet.name}</h2>
-            <p>{[speciesLabel(pet, locale), pet.breed, formatAge(pet, locale, c.unknownAge)].filter(Boolean).join(" · ")}</p>
-            <dl className="member-home__facts">
-              <div><dt>{c.weight}</dt><dd>{formatWeight(pet, locale, c.notRecorded)}</dd></div>
-              <div><dt>{c.microchip}</dt><dd>{pet.microchipNumber ? c.registered : c.notRecorded}</dd></div>
-            </dl>
-          </div>
-          <dl className="member-home__stats">
-            <div><dt><Link href="#home-attention">{c.attention}</Link></dt><dd>{formatCount(overview.attention.length, locale)}</dd></div>
-            <div><dt><Link href="#home-upcoming">{c.upcoming}</Link></dt><dd>{formatCount(overview.upcoming.length, locale)}</dd></div>
-            <div><dt>{c.lastHealth}</dt><dd>{overview.recentHealth[0] ? formatOverviewDate(overview.recentHealth[0].occurredAt, locale) : c.notRecorded}</dd></div>
-          </dl>
-          <Link href={petBase} className="member-home__hero-link">
-            {c.profile}
-            <Forward size={16} aria-hidden="true" />
-          </Link>
-        </div>
-        <nav className="member-home__sections" aria-label={c.sections}>
-          <Link href={`${petBase}/health`}><HeartPulse size={18} aria-hidden="true" />{c.health}</Link>
-          <Link href={`${petBase}/care`}><CalendarDays size={18} aria-hidden="true" />{c.care}</Link>
-          <Link href={`${petBase}/memories`}><Images size={18} aria-hidden="true" />{c.memories}</Link>
-          <Link href={`${petBase}/health/documents`}><FileText size={18} aria-hidden="true" />{c.documents}</Link>
-          <Link href={`${petBase}/travel`}><Plane size={18} aria-hidden="true" />{c.travel}</Link>
-        </nav>
-      </section>
+      <h1 className="sr-only">{firstName ? c.hello(firstName) : pet.name}</h1>
+      <ImmersiveHome locale={locale} userName={firstName ?? null} pet={pet} overview={overview} care={care} pets={pets} activePetId={petId} onSwitch={(id) => void switchActivePet(id)} />
 
       <div className="member-home__layout">
         <div className="member-home__main">

@@ -61,7 +61,16 @@ export interface AdminPaginationInput {
  * sub-domain — the admin frontend is a single cohesive shell, not several
  * independently-mountable apps.
  */
+/** ERP-G unified Trust & Safety queue (read side used by the admin home). */
+export interface TrustQueueItem { kind: "REPORT" | "PLACE_REPORT" | "TRUST_CASE" | "APPEAL"; key: string; subjectType: string; subjectId: string; severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"; status: string; reasons: string[]; reportCount: number; reporterCount: number; openedAt: string; assignedAdminId: string | null; trustCaseId: string | null; ageHours: number; slaHours: number; slaDueAt: string; slaBreached: boolean }
+export interface TrustQueueSummary { total: number; byKind: Record<string, number>; bySeverity: Record<string, number>; slaBreached: number; unassigned: number; oldestOpenedAt: string | null }
+/** ERP-A system health. */
+export interface SystemHealth { status: "HEALTHY" | "DEGRADED" | "LAGGING" | "DOWN"; checkedAt: string; components: Record<string, unknown> & { workers?: { name: string; intervalMs: number; lastSucceededAt: string | null; lastFailedAt: string | null; status: string }[] } }
+
 export const adminService = {
+  getTrustQueue: (pageSize = 30) => apiFetch<PaginatedDto<TrustQueueItem>>(`/admin/trust/queue?pageSize=${pageSize}`),
+  getTrustQueueSummary: () => apiFetch<TrustQueueSummary>("/admin/trust/queue/summary"),
+  getSystemHealth: () => apiFetch<SystemHealth>("/admin/system/health"),
   getMe: () => apiFetch<AdminSessionContextDto>("/admin/me"),
   getDashboard: () => apiFetch<AdminDashboardSummaryDto>("/admin/dashboard"),
   search: (q: string) => apiFetch<AdminSearchResultDto>(`/admin/search${toQueryString({ q })}`),

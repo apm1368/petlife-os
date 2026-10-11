@@ -34,7 +34,7 @@ describe("MemberHomeView", () => {
     renderWithIntl(<MemberHomeView />, "fa");
     expect(await screen.findByRole("heading", { name: "پشمک" })).toBeTruthy();
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("سلام، مریم");
-    expect(screen.getByText("سگ · ۱ سال و ۶ ماه")).toBeTruthy();
+    expect(screen.getByText("۱ سال و ۶ ماه")).toBeTruthy();
     expect(petsService.getOverview).toHaveBeenCalledWith("pet-1");
   });
 

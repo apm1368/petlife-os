@@ -61,7 +61,7 @@ async function main() {
   const hh = await household("rich", rich.id, "خانه‌ی سارا (QA)");
   const petId = await pet("nilo", hh, rich.id, {
     name: "نیلو", species: "CAT", breed: "بریتیش شورت‌هیر", sex: "MALE", birthDate: new Date("2023-02-20"),
-    photoUrl: "/images/pets/demo-cat-blue.svg", latestWeightValue: 4.2, latestWeightUnit: "KG", colorMarkings: "خاکستری آبی یکدست",
+    photoUrl: "/images/pets/demo-cat-british-blue.webp", latestWeightValue: 4.2, latestWeightUnit: "KG", colorMarkings: "خاکستری آبی یکدست",
     neuteredStatus: "NEUTERED", microchipNumber: "985112004455667", microchipNormalized: "985112004455667",
   });
   await db.petEmergencyInfo.upsert({ where: { petId }, create: { petId, contactName: "علی (همسر)", contactPhone: "09120000002", contactRelation: "همسر", criticalNotes: "به داروهای ضدالتهاب غیراستروئیدی حساس است.", updatedByUserId: rich.id }, update: {} });
