@@ -44,7 +44,7 @@ export class AdminSystemService {
 
   async health() {
     const now = Date.now();
-    const [database, redis, storage, outbox, notifications, payments, exports, migrations] = await Promise.all([
+    const [database, redis, storage, outbox, notifications, payments, exports, migrations, travelScraper] = await Promise.all([
       timed(() => this.prisma.$queryRaw`SELECT 1`),
       timed(() => this.redis.ping()),
       this.storageCheck(),
@@ -53,6 +53,7 @@ export class AdminSystemService {
       this.prisma.paymentProviderEvent.count({ where: { status: ProviderEventStatus.FAILED } }),
       this.prisma.dataExportRequest.count({ where: { status: PrivacyRequestStatus.FAILED } }),
       this.migrations(),
+      this.travelScraper(),
     ]);
     const workers = workerHeartbeats().map((w) => {
       const last = w.lastSucceededAt ? Date.parse(w.lastSucceededAt) : null;
@@ -71,6 +72,7 @@ export class AdminSystemService {
       notifications24h: { sent: (notif.SENT ?? 0) + (notif.DELIVERED ?? 0), failed: notif.FAILED ?? 0, pending: (notif.PENDING ?? 0) + (notif.QUEUED ?? 0) + (notif.SENDING ?? 0), skipped: notif.SKIPPED ?? 0 },
       failedJobs: { paymentProviderEvents: payments, dataExports: exports, outboxEventsWithErrors: outbox.withErrors },
       migrations,
+      travelScraper,
       deploy: { version: this.env("APP_VERSION"), sha: this.env("BUILD_SHA"), buildTime: this.env("BUILD_TIME"), environment: this.env("DEPLOYMENT_ENVIRONMENT"), deploymentId: this.env("DEPLOYMENT_ID") },
     };
     // DOWN: the database is unreachable. DEGRADED: a dependency, a migration or a worker is broken. LAGGING: everything
@@ -92,6 +94,17 @@ export class AdminSystemService {
     const probe = join(dir, `probe-${process.pid}`);
     const write = await timed(async () => { await mkdir(dir, { recursive: true }); await writeFile(probe, "ok"); await unlink(probe); });
     return { status: write.ok ? "UP" : "DOWN", driver, writable: write.ok, missingConfiguration: [] as string[] };
+  }
+
+  /** External travel ingestion: per-source last success / failures / status. Informational — a source blocking us is not a platform outage. */
+  private async travelScraper() {
+    const sources = await this.prisma.externalTravelSource.findMany({ where: { mode: { not: "DISABLED" } }, orderBy: { code: "asc" }, select: { code: true, mode: true, automationStatus: true, accessStatus: true, health: true, lastRunStatus: true, lastSuccessAt: true, lastRunAt: true, consecutiveFailures: true, circuitOpenUntil: true } });
+    const automated = sources.filter((s) => s.mode === "AUTOMATED" && s.automationStatus === "SUPPORTED");
+    const status = !automated.length ? "NOT_ACTIVE" : automated.some((s) => s.health === "BLOCKED") ? "BLOCKED" : automated.some((s) => s.health === "DEGRADED" || s.consecutiveFailures > 0) ? "DEGRADED" : "HEALTHY";
+    return {
+      status,
+      sources: sources.map((s) => ({ code: s.code, mode: s.mode, automationStatus: s.automationStatus, accessStatus: s.accessStatus, health: s.health, lastStatus: s.lastRunStatus, lastRunAt: s.lastRunAt?.toISOString() ?? null, lastSuccessfulRunAt: s.lastSuccessAt?.toISOString() ?? null, failureCount: s.consecutiveFailures, circuitOpenUntil: s.circuitOpenUntil?.toISOString() ?? null })),
+    };
   }
 
   private async outbox(now: number) {

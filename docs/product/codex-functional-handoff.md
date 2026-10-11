@@ -1327,3 +1327,51 @@
 - هیچ داده‌ی جعلی جاباما یا علی‌بابا وجود ندارد.
 - منبع `FIXTURE` فقط در تست‌هاست و آگهی‌هایش برچسب fixture دارند.
 - **حالت خالی:** صفحه‌ی سفر خارجی فعلاً بدون آگهی است. باید پیام صادقانه‌ی «هنوز اقامتگاهی با شواهد پذیرش حیوان از منابع ثبت نشده» نمایش داده شود.
+
+
+## ۳۳. TRAVEL-SCRAPE — موتور دریافت روزانه‌ی داده‌ی عمومی سفر (نسخه‌ی نمایشی)
+تصمیم مالک (۲۰۲۶-۱۰-۱۱): دریافت روزانه‌ی داده‌ی عمومی جاباما و علی‌بابا برای demo تأیید شد. هیچ قرارداد یا API رسمی وجود ندارد. شواهد کامل در `docs/product/travel-external-sources.md` است.
+
+### API کاربر — `GET /api/travel/external/stays`
+- **فیلترها:** همه‌ی فیلترهای قبلی، به‌اضافه‌ی `petPolicy=ANY|CONFIRMED_ALLOWED|UNKNOWN|AMBIGUOUS|CONFIRMED_NOT_ALLOWED`.
+  - پیش‌فرض همه را برمی‌گرداند جز «صراحتاً ممنوع».
+  - آگهی‌های `UNKNOWN` در نتایج هستند و برچسب دارند.
+- **فیلدهای جدید هر آیتم:**
+  - `sourceType` و `sourceUrl`؛
+  - `source.partnership = NONE` و `source.affiliateStatus = NONE`؛
+  - `lastSeenAt` و `dataFreshness`؛
+  - `pet.policyStatus`؛
+  - `pet.accepted` با مقدار `true`، `false` یا `"UNKNOWN"`؛
+  - `pet.authority` با مقدار `ADMIN_CONFIRMED` یا `SOURCE_OBSERVATION`؛
+  - `pet.evidenceText`، `pet.evidenceObservedAt` و `pet.evidenceAgeHours`؛
+  - `amenities`؛
+  - `price.freshness` با مقدار `FRESH`، `AGING`، `STALE` یا `UNKNOWN`، و `price.priceType`؛
+  - `fromPrice` (قیمت «از»، فقط با برچسب؛ هرگز قیمت رزرو نیست)؛
+  - `priceFreshness` و `availabilityStatus`؛
+  - `trustLabels[]`: `PET_POLICY_CONFIRMED`، `PET_POLICY_UNKNOWN`، `PET_POLICY_AMBIGUOUS`، `PET_POLICY_NOT_ALLOWED`، `PRICE_FRESH`، `PRICE_AGING`، `PRICE_STALE`، `PRICE_UNKNOWN`، `AVAILABILITY_UNKNOWN`، `AVAILABILITY_SOURCE_REPORTED`، `UNAVAILABLE_SOURCE_REPORTED`، `LISTING_STALE`، `EXTERNAL_SOURCE`؛
+  - `cta = VIEW_SOURCE`. هیچ‌وقت `BOOK_NOW` نیست، چون رزرو روی سایت منبع انجام می‌شود.
+  - `externalDataDisclaimerRequired = true` و `disclaimerFa`. متن پیشنهادی است و نسخه‌ی نهایی با Codex است.
+  - `canonicalAccommodationId` جای `propertyGroupId` را گرفته است.
+- **وقتی منبع در دسترس نیست:** آخرین موجودی شناخته‌شده با برچسب کهنه نمایش داده می‌شود و چیزی پاک نمی‌شود.
+
+### API ادمین — `/api/admin/travel/external/*`
+- **مسیرهای خواندنی:**
+  - `sources` (فیلدهای جدید `status`، `accessStatus`، `sourceType`، `adapter.parserReady`، `robots`، `terms`، `lastRunStatus`، `lastError`، `lastListingsSeen`، `lastDurationMs` و `config.*`)؛
+  - `runs` و `runs/:id` (با `changesByKind`)؛
+  - `parser-health`، `errors`، `pet-evidence`؛
+  - `daily-diff?date=&source=`؛
+  - `metrics`، `tasks`، `canonical/:id`.
+- **کنش‌ها:**
+  - `sources/:code/health-check`؛
+  - `listings/:id/retry`؛
+  - `listings/:id/pet-policy` با بدنه‌ی `{status|null, note}`؛
+  - `matches/:id/approve` که حالا CanonicalAccommodation می‌سازد.
+- **فیلد جدید inspector:** `lifecycle`، `petPolicy` (source، admin و effective)، `petEvidenceHistory`، `observations`، `changes[].field/oldValue/newValue/runId`، `priceHistory[].priceType/freshness`.
+- **System Health:** `components.travelScraper` با `status` (`HEALTHY`، `DEGRADED`، `BLOCKED` یا `NOT_ACTIVE`) و وضعیت هر منبع.
+- **وظایف خودکار:** با `AdminTaskSource.TRAVEL_SOURCE` و از نوع `SOURCE_BLOCKED`، `PARSER_ANOMALY`، `PET_POLICY_CONFLICT`، `DUPLICATE_CANDIDATE` یا `REPEATED_FAILURE` (dedupe روزانه).
+  - وضعیت `PARSER_PENDING` یا `TOOL_PERMISSION_BLOCKED` هیچ وظیفه یا failure streak نمی‌سازد.
+
+### برای Codex
+- **برچسب فارسی برای:** `DISCOVERED`، `TRAVEL_SOURCE`، `UNOFFICIAL_PUBLIC_WEB_ENDPOINT`، `TOOL_PERMISSION_BLOCKED`، `PARSER_PENDING`، و چهار وضعیت سیاست حیوان خانگی.
+- **پیشنهاد نمایش:** دکمه‌ی «مشاهده در منبع»، disclaimer در هر کارت، و «سیاست حیوان: نامشخص» برای `UNKNOWN`.
+- **ممنوع:** هیچ ادعای «همکار رسمی» نمایش داده نشود.

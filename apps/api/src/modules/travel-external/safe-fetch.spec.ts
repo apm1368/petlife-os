@@ -1,4 +1,4 @@
-import { isPrivateAddress, safeFetch, SourceFetchError, validateSourceUrl } from "./safe-fetch";
+import { isPrivateAddress, parseRetryAfter, safeFetch, SourceFetchError, validateSourceUrl } from "./safe-fetch";
 
 jest.mock("node:dns/promises", () => ({ lookup: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -37,6 +37,21 @@ describe("travel source fetching is SSRF-safe", () => {
     fetchMock.mockResolvedValueOnce(new Response("User-agent: *", { status: 200, headers: { "content-type": "text/plain" } }));
     await expect(safeFetch("https://www.jabama.com/robots.txt", hosts, { timeoutMs: 1000 })).resolves.toMatchObject({ status: 200 });
     // Our identity is honest.
-    expect((fetchMock.mock.calls.at(-1)![1] as RequestInit).headers).toMatchObject({ "user-agent": expect.stringContaining("PetLifeBot") });
+    expect((fetchMock.mock.calls.at(-1)![1] as RequestInit).headers).toMatchObject({ "user-agent": expect.stringContaining("PetLifeDemoTravelCrawler") });
+  });
+
+  it("caps the streamed body size, carries Retry-After on 429, sends JSON POSTs, never impersonates a browser", async () => {
+    dns.lookup.mockResolvedValue([{ address: "93.184.216.34", family: 4 }]);
+    const fetchMock = jest.spyOn(global, "fetch").mockResolvedValueOnce(new Response("x".repeat(5000), { status: 200 }));
+    await expect(safeFetch("https://www.jabama.com/big", hosts, { timeoutMs: 1000, maxBytes: 1000 })).rejects.toMatchObject({ category: "TOO_LARGE" });
+    fetchMock.mockResolvedValueOnce(new Response("slow", { status: 429, headers: { "retry-after": "120" } }));
+    await expect(safeFetch("https://www.jabama.com/x", hosts, { timeoutMs: 1000 })).rejects.toMatchObject({ category: "RATE_LIMITED", retryAfterMs: 120000 });
+    fetchMock.mockResolvedValueOnce(new Response("{}", { status: 200 }));
+    await safeFetch("https://www.jabama.com/api", hosts, { timeoutMs: 1000, method: "POST", json: { a: 1 } });
+    const init = fetchMock.mock.calls.at(-1)![1] as RequestInit;
+    expect(init).toMatchObject({ method: "POST", body: "{\"a\":1}" });
+    expect(String((init.headers as Record<string, string>)["user-agent"])).not.toMatch(/Mozilla|Chrome|Safari/);
+    expect(parseRetryAfter(null)).toBeUndefined();
+    expect(parseRetryAfter("999999")).toBe(86400e3);
   });
 });

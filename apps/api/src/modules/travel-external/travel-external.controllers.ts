@@ -3,7 +3,7 @@ import { Throttle } from "@nestjs/throttler";
 import { Transform, Type } from "class-transformer";
 import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsInt, IsISO8601, IsObject, IsOptional, IsString, IsUrl, Length, Matches, Max, Min } from "class-validator";
 import type { Response } from "express";
-import { ExternalAvailability, ExternalImagePolicy, ExternalMatchStatus, ExternalPriceBasis, ExternalPublishState, ExternalStayStatus, ExternalSyncKind, PetEvidenceType } from "@prisma/client";
+import { ExternalAvailability, ExternalImagePolicy, ExternalMatchStatus, ExternalPriceBasis, ExternalPublishState, ExternalStayStatus, ExternalSyncKind, PetEvidenceType, PetPolicyStatus } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-auth.guard";
 import { CurrentUser, OptionalCurrentUser } from "../../common/auth/current-user.decorator";
@@ -18,6 +18,7 @@ import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
 import { TravelExternalPublicService } from "./travel-external-public.service";
 import { TravelExternalAdminService } from "./travel-external-admin.service";
 import { OVERRIDABLE } from "./travel-external.service";
+import type { PetPolicyFilter } from "./travel-external-public.service";
 
 const bool = ({ value }: { value: unknown }) => (value === "true" ? true : value === "false" ? false : value);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,6 +37,8 @@ class SearchDto extends ContextDto {
   @IsOptional() @Transform(bool) @IsBoolean() instantBooking?: boolean;
   @IsOptional() @Transform(bool) @IsBoolean() dogs?: boolean;
   @IsOptional() @Transform(bool) @IsBoolean() cats?: boolean;
+  /** Default excludes only listings the source explicitly marks "no pets"; UNKNOWN stays in and is labelled. */
+  @IsOptional() @IsIn(["ANY", "CONFIRMED_ALLOWED", "UNKNOWN", "AMBIGUOUS", "CONFIRMED_NOT_ALLOWED"]) petPolicy?: PetPolicyFilter;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50) pageSize?: number;
 }
@@ -105,12 +108,20 @@ class ConfigDto extends ReasonDto {
   @IsOptional() @IsInt() @Min(0) @Max(5) retryCount?: number;
   @IsOptional() @IsArray() @ArrayMaxSize(50) @IsString({ each: true }) cityScopes?: string[];
   @IsOptional() @IsBoolean() autoPublish?: boolean;
+  @IsOptional() @IsInt() @Min(1000) @Max(60000) requestDelayMinMs?: number;
+  @IsOptional() @IsInt() @Min(1000) @Max(120000) requestDelayMaxMs?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) priceFreshHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(720) priceAgingHours?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(30) staleAfterMissedRuns?: number;
+  @IsOptional() @IsInt() @Min(2) @Max(60) removeAfterMissedRuns?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(90) rawRetentionDays?: number;
 }
 class RunDto { @IsIn(Object.values(ExternalSyncKind)) kind!: ExternalSyncKind; @IsOptional() @IsString() @Matches(/^[0-9a-f-]{36}$/) listingId?: string; }
 class ListingsDto extends PaginationQueryDto {
   @IsOptional() @IsString() source?: string;
   @IsOptional() @IsIn(Object.values(ExternalStayStatus)) status?: ExternalStayStatus;
   @IsOptional() @IsIn(Object.values(ExternalPublishState)) publishState?: ExternalPublishState;
+  @IsOptional() @IsIn(Object.values(PetPolicyStatus)) petPolicyStatus?: PetPolicyStatus;
   @IsOptional() @IsString() city?: string;
   @IsOptional() @IsString() @Length(1, 100) q?: string;
 }
@@ -144,6 +155,10 @@ class PriceDto {
 }
 class OverrideDto { @IsIn(OVERRIDABLE as unknown as string[]) field!: (typeof OVERRIDABLE)[number]; @IsOptional() @IsString() @Length(1, 500) value?: string | null; }
 class VisibilityDto extends ReasonDto { @IsIn(["hide", "unhide", "publish", "unpublish"]) action!: "hide" | "unhide" | "publish" | "unpublish"; }
+class PetReviewDto { @IsOptional() @IsIn([...Object.values(PetPolicyStatus), null]) status!: PetPolicyStatus | null; @IsString() @Length(5, 500) note!: string; }
+class EvidenceQueryDto extends PaginationQueryDto { @IsOptional() @IsIn(Object.values(PetPolicyStatus)) status?: PetPolicyStatus; @IsOptional() @IsString() source?: string; @IsOptional() @Transform(bool) @IsBoolean() unreviewedOnly?: boolean; }
+class DiffQueryDto { @IsOptional() @Matches(DATE) date?: string; @IsOptional() @IsString() source?: string; }
+class RunsQueryDto extends PaginationQueryDto { @IsOptional() @IsString() source?: string; }
 class MatchQueryDto { @IsOptional() @IsIn(Object.values(ExternalMatchStatus)) status?: ExternalMatchStatus; }
 
 @Controller("admin/travel/external")
@@ -159,11 +174,22 @@ export class AdminTravelExternalController {
   @Post("sources/:code/resume") @RequireAdminPermission("travel.source.manage") resume(@CurrentAdmin() a: ResolvedAdminContext, @Param("code") code: string, @Body() dto: ReasonDto) { return this.admin.setPaused(a, code, false, dto.reason); }
   @Post("sources/:code/probe") @RequireAdminPermission("travel.sync.run") probe(@CurrentAdmin() a: ResolvedAdminContext, @Param("code") code: string) { return this.admin.probe(a, code); }
   @Post("sources/:code/runs") @RequireAdminPermission("travel.sync.run") run(@CurrentAdmin() a: ResolvedAdminContext, @Param("code") code: string, @Body() dto: RunDto) { return this.admin.run(a, code, dto.kind, dto.listingId); }
-  @Get("runs") @RequireAdminPermission("travel.source.view") runs(@Query() q: PaginationQueryDto & { source?: string }) { return this.admin.runs(q); }
+  @Post("sources/:code/health-check") @RequireAdminPermission("travel.sync.run") healthCheck(@CurrentAdmin() a: ResolvedAdminContext, @Param("code") code: string) { return this.admin.probe(a, code); }
+  @Get("runs") @RequireAdminPermission("travel.source.view") runs(@Query() q: RunsQueryDto) { return this.admin.runs(q); }
+  @Get("runs/:id") @RequireAdminPermission("travel.source.view") runDetail(@Param("id", ParseUUIDPipe) id: string) { return this.admin.runDetail(id); }
+  @Get("parser-health") @RequireAdminPermission("travel.source.view") parserHealth() { return this.admin.parserHealth(); }
+  @Get("errors") @RequireAdminPermission("travel.source.view") errors(@Query() q: RunsQueryDto) { return this.admin.errors(q); }
+  @Get("pet-evidence") @RequireAdminPermission("travel.source.view") petEvidence(@Query() q: EvidenceQueryDto) { return this.admin.petEvidence(q); }
+  @Get("daily-diff") @RequireAdminPermission("travel.source.view") dailyDiff(@Query() q: DiffQueryDto) { return this.admin.dailyDiff(q); }
+  @Get("metrics") @RequireAdminPermission("travel.source.view") metrics() { return this.admin.metrics(); }
+  @Get("tasks") @RequireAdminPermission("travel.source.view") tasks() { return this.admin.sourceTasks(); }
+  @Get("canonical/:id") @RequireAdminPermission("travel.source.view") canonical(@Param("id", ParseUUIDPipe) id: string) { return this.admin.canonical(id); }
   @Get("listings") @RequireAdminPermission("travel.source.view") listings(@Query() q: ListingsDto) { return this.admin.listings(q); }
   @Get("listings/:id") @RequireAdminPermission("travel.source.view") inspect(@Param("id", ParseUUIDPipe) id: string) { return this.admin.inspect(id); }
   @Post("listings") @RequireAdminPermission("travel.listing.manage") manual(@CurrentAdmin() a: ResolvedAdminContext, @Body() dto: ManualStayDto) { return this.admin.manualUpsert(a, dto); }
   @Post("listings/:id/visibility") @RequireAdminPermission("travel.listing.manage") visibility(@CurrentAdmin() a: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: VisibilityDto) { return this.admin.setVisibility(a, id, dto.action, dto.reason); }
+  @Post("listings/:id/retry") @RequireAdminPermission("travel.sync.run") retry(@CurrentAdmin() a: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string) { return this.admin.retryListing(a, id); }
+  @Post("listings/:id/pet-policy") @RequireAdminPermission("travel.listing.manage") reviewPet(@CurrentAdmin() a: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: PetReviewDto) { return this.admin.reviewPetPolicy(a, id, dto.status ?? null, dto.note); }
   @Post("listings/:id/override") @RequireAdminPermission("travel.override.manage") override(@CurrentAdmin() a: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: OverrideDto) { return this.admin.setOverride(a, id, dto.field, dto.value ?? null); }
   @Post("listings/:id/prices")
   @RequireAdminPermission("travel.listing.manage")

@@ -132,6 +132,7 @@ export type AdminAuditAction =
   | "travel_listing.unpublish"
   | "travel_listing.match_approved"
   | "travel_listing.match_rejected"
+  | "travel_listing.pet_policy_reviewed"
   | "travel_listing.manual_upsert"
   | "travel_listing.override_set"
   | "travel_listing.price_recorded"

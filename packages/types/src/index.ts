@@ -2661,7 +2661,7 @@ export interface AdminTaskDto {
   relatedEntityId: string | null;
   /** Null when the platform raised the task itself (see `source`). */
   createdByAdmin: AdminActorSummaryDto | null;
-  /** ERP: MANUAL | PARTNER_VERIFICATION | FINANCE_MISMATCH | HIGH_SEVERITY_REPORT | PRIVACY_REQUEST | FAILED_IMPORT | SUPPORT | CLINIC_FOLLOW_UP | DATA_QUALITY */
+  /** ERP: MANUAL | TRAVEL_SOURCE | PARTNER_VERIFICATION | FINANCE_MISMATCH | HIGH_SEVERITY_REPORT | PRIVACY_REQUEST | FAILED_IMPORT | SUPPORT | CLINIC_FOLLOW_UP | DATA_QUALITY */
   source?: string;
   team?: string | null;
   completedAt: string | null;

@@ -10302,6 +10302,7 @@ model ClinicEntitlementOverride {
 
 enum AdminTaskSource {
   MANUAL
+  TRAVEL_SOURCE
   PARTNER_VERIFICATION
   FINANCE_MISMATCH
   HIGH_SEVERITY_REPORT
@@ -10423,6 +10424,48 @@ enum ExternalAutomationStatus {
   BLOCKED_EXTERNAL
 }
 
+/// How the data reaches us. Unofficial public web endpoints may break any time and are never a partnership.
+enum ExternalSourceType {
+  SCRAPED_PUBLIC_WEB
+  UNOFFICIAL_PUBLIC_WEB_ENDPOINT
+  PARTNER_API
+  AUTHORIZED_FEED
+  MANUAL_ENTRY
+}
+
+/// Whether unauthenticated public access to the source's data has been verified. TOOL_PERMISSION_BLOCKED = our own
+/// development tooling could not run the verification probe (not a source block).
+enum ExternalSourceAccessStatus {
+  UNVERIFIED
+  VERIFIED_PUBLIC
+  TOOL_PERMISSION_BLOCKED
+  BLOCKED_BY_SOURCE
+}
+
+enum PetPolicyStatus {
+  CONFIRMED_ALLOWED
+  CONFIRMED_NOT_ALLOWED
+  AMBIGUOUS
+  UNKNOWN
+}
+
+enum PetPolicyAuthority {
+  SOURCE_OBSERVATION
+  ADMIN_CONFIRMED
+}
+
+enum ExternalPriceType {
+  EXACT
+  FROM_PRICE
+  UNKNOWN
+}
+
+enum ExternalSyncTrigger {
+  SCHEDULED
+  MANUAL
+  RETRY
+}
+
 enum ExternalSourceHealth {
   HEALTHY
   DEGRADED
@@ -10437,39 +10480,60 @@ enum ExternalImagePolicy {
 }
 
 model ExternalTravelSource {
-  id                  String                   @id @default(uuid()) @db.Uuid
-  code                String                   @unique
-  nameFa              String
-  nameEn              String
+  id                    String                     @id @default(uuid()) @db.Uuid
+  code                  String                     @unique
+  nameFa                String
+  nameEn                String
   /// Hosts outbound links and fetchers may use (exact host or subdomain). Anything else is rejected.
-  allowedHosts        String[]
-  mode                ExternalSourceMode       @default(DISABLED)
-  automationStatus    ExternalAutomationStatus @default(NOT_SUPPORTED)
-  health              ExternalSourceHealth     @default(DISABLED)
-  healthReason        String?
-  discoveryNotes      Json?
-  syncIntervalMinutes Int                      @default(1440)
-  priceTtlMinutes     Int                      @default(360)
-  metadataTtlMinutes  Int                      @default(2880)
-  imagePolicy         ExternalImagePolicy      @default(NO_IMAGES)
-  maxRequestsPerRun   Int                      @default(50)
-  timeoutMs           Int                      @default(10000)
-  retryCount          Int                      @default(2)
-  cityScopes          String[]                 @default([])
-  autoPublish         Boolean                  @default(false)
+  allowedHosts          String[]
+  mode                  ExternalSourceMode         @default(DISABLED)
+  automationStatus      ExternalAutomationStatus   @default(NOT_SUPPORTED)
+  health                ExternalSourceHealth       @default(DISABLED)
+  healthReason          String?
+  discoveryNotes        Json?
+  syncIntervalMinutes   Int                        @default(1440)
+  priceTtlMinutes       Int                        @default(360)
+  metadataTtlMinutes    Int                        @default(2880)
+  imagePolicy           ExternalImagePolicy        @default(NO_IMAGES)
+  maxRequestsPerRun     Int                        @default(50)
+  timeoutMs             Int                        @default(10000)
+  retryCount            Int                        @default(2)
+  cityScopes            String[]                   @default([])
+  autoPublish           Boolean                    @default(false)
   /// Affiliate readiness only — inactive until a real agreement exists.
-  affiliateId         String?
-  trackingTemplate    String?
-  campaignCode        String?
-  affiliateActive     Boolean                  @default(false)
-  consecutiveFailures Int                      @default(0)
-  circuitOpenUntil    DateTime?
-  lastRunAt           DateTime?
-  lastSuccessAt       DateTime?
-  lastFailureAt       DateTime?
-  lastErrorCategory   String?
-  createdAt           DateTime                 @default(now())
-  updatedAt           DateTime                 @updatedAt
+  affiliateId           String?
+  trackingTemplate      String?
+  campaignCode          String?
+  affiliateActive       Boolean                    @default(false)
+  consecutiveFailures   Int                        @default(0)
+  circuitOpenUntil      DateTime?
+  lastRunAt             DateTime?
+  lastSuccessAt         DateTime?
+  lastFailureAt         DateTime?
+  lastErrorCategory     String?
+  sourceType            ExternalSourceType         @default(SCRAPED_PUBLIC_WEB)
+  accessStatus          ExternalSourceAccessStatus @default(UNVERIFIED)
+  /// Polite pacing: one request at a time, a random pause in [min, max] ms between requests.
+  requestDelayMinMs     Int                        @default(1500)
+  requestDelayMaxMs     Int                        @default(3000)
+  priceFreshHours       Int                        @default(24)
+  priceAgingHours       Int                        @default(72)
+  /// Consecutive complete, healthy runs a listing may be missing before STALE / REMOVED_FROM_SOURCE.
+  staleAfterMissedRuns  Int                        @default(2)
+  removeAfterMissedRuns Int                        @default(4)
+  /// A run finding fewer than this share of the recent baseline is a PARSER_ANOMALY (no lifecycle changes applied).
+  anomalyDropRatio      Float                      @default(0.3)
+  rawRetentionDays      Int                        @default(7)
+  robotsCheckedAt       DateTime?
+  robotsResult          String?
+  termsCheckedAt        DateTime?
+  termsUrl              String?
+  lastRunStatus         ExternalSyncStatus?
+  lastError             String?
+  lastListingsSeen      Int?
+  lastDurationMs        Int?
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
 
   stays ExternalStay[]
   runs  ExternalSyncRun[]
@@ -10478,6 +10542,7 @@ model ExternalTravelSource {
 }
 
 enum ExternalStayStatus {
+  DISCOVERED
   ACTIVE
   STALE
   SOURCE_REMOVED
@@ -10505,52 +10570,74 @@ enum ExternalEntryMode {
 /// One listing on one source. Unique per (source, sourceListingId). Fields are source-observed; staff corrections
 /// live in `overrides` as {field: {sourceValue, overrideValue, adminUserId, at}} and never overwrite source values.
 model ExternalStay {
-  id                    String               @id @default(uuid()) @db.Uuid
-  sourceId              String               @db.Uuid
-  source                ExternalTravelSource @relation(fields: [sourceId], references: [id], onDelete: Restrict)
-  sourceListingId       String
-  sourceUrl             String
-  title                 String
-  city                  String
-  province              String?
-  area                  String?
-  stayType              String?
-  latitude              Float?
-  longitude             Float?
-  capacity              Int?
-  bedrooms              Int?
-  beds                  Int?
-  petFriendly           Boolean              @default(true)
-  petEvidenceType       PetEvidenceType
-  petEvidenceText       String
-  petEvidenceObservedAt DateTime
+  id                       String                  @id @default(uuid()) @db.Uuid
+  sourceId                 String                  @db.Uuid
+  source                   ExternalTravelSource    @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  sourceListingId          String
+  sourceUrl                String
+  title                    String
+  city                     String
+  province                 String?
+  area                     String?
+  stayType                 String?
+  latitude                 Float?
+  longitude                Float?
+  capacity                 Int?
+  bedrooms                 Int?
+  beds                     Int?
+  /// Mirrors the effective pet policy == CONFIRMED_ALLOWED (admin truth first, then source observation).
+  petFriendly              Boolean                 @default(false)
+  /// Latest source-observed pet policy. Missing data is UNKNOWN, never "not allowed".
+  petPolicyStatus          PetPolicyStatus         @default(UNKNOWN)
+  /// Staff-reviewed truth; takes precedence over the source observation, which is still kept and tracked.
+  adminPetPolicyStatus     PetPolicyStatus?
+  adminPetPolicyNote       String?
+  adminPetPolicyById       String?                 @db.Uuid
+  adminPetPolicyAt         DateTime?
+  petEvidenceType          PetEvidenceType?
+  petEvidenceText          String?
+  petEvidenceObservedAt    DateTime?
   /// Normalized pet policy; each key is a value or "UNKNOWN" (dogs, cats, maxPets, sizeLimit, indoor, extraFeeIrr, approvalRequired).
-  petPolicy             Json
-  petPolicySummary      String?
-  rating                Float?
-  reviewCount           Int?
-  instantBooking        Boolean?
-  descriptionSummary    String?
-  status                ExternalStayStatus   @default(ACTIVE)
-  publishState          ExternalPublishState @default(DRAFT)
-  entryMode             ExternalEntryMode
-  createdByAdminId      String?              @db.Uuid
-  overrides             Json?
-  propertyGroupId       String?              @db.Uuid
-  lastSourceUpdateAt    DateTime?
-  lastCheckedAt         DateTime
-  lastSuccessfulSyncAt  DateTime?
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
+  petPolicy                Json
+  petPolicySummary         String?
+  rating                   Float?
+  reviewCount              Int?
+  instantBooking           Boolean?
+  descriptionSummary       String?
+  country                  String?
+  addressText              String?
+  amenities                String[]                @default([])
+  sourceType               ExternalSourceType      @default(MANUAL_ENTRY)
+  firstSeenAt              DateTime?
+  lastSeenAt               DateTime?
+  lastChangedAt            DateTime?
+  missedRuns               Int                     @default(0)
+  rawFingerprint           String?
+  normalizedFingerprint    String?
+  canonicalAccommodationId String?                 @db.Uuid
+  canonicalAccommodation   CanonicalAccommodation? @relation(fields: [canonicalAccommodationId], references: [id], onDelete: SetNull)
+  status                   ExternalStayStatus      @default(ACTIVE)
+  publishState             ExternalPublishState    @default(DRAFT)
+  entryMode                ExternalEntryMode
+  createdByAdminId         String?                 @db.Uuid
+  overrides                Json?
+  lastSourceUpdateAt       DateTime?
+  lastCheckedAt            DateTime
+  lastSuccessfulSyncAt     DateTime?
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
 
-  prices    ExternalStayPriceSnapshot[]
-  images    ExternalStayImage[]
-  changes   ExternalStayChange[]
-  clicks    OutboundTravelClick[]
-  favorites ExternalStayFavorite[]
-  trips     TripExternalStay[]
+  prices       ExternalStayPriceSnapshot[]
+  images       ExternalStayImage[]
+  changes      ExternalStayChange[]
+  clicks       OutboundTravelClick[]
+  favorites    ExternalStayFavorite[]
+  trips        TripExternalStay[]
+  observations ExternalStayObservation[]
+  petEvidence  ExternalPetPolicyEvidence[]
 
   @@unique([sourceId, sourceListingId])
+  @@index([petPolicyStatus])
   @@index([city, status, publishState])
   @@map("external_stays")
 }
@@ -10577,8 +10664,9 @@ model ExternalStayPriceSnapshot {
   id                String               @id @default(uuid()) @db.Uuid
   stayId            String               @db.Uuid
   stay              ExternalStay         @relation(fields: [stayId], references: [id], onDelete: Cascade)
-  checkIn           DateTime             @db.Date
-  checkOut          DateTime             @db.Date
+  /// Null only for a FROM_PRICE seen without a date context.
+  checkIn           DateTime?            @db.Date
+  checkOut          DateTime?            @db.Date
   guests            Int
   pets              Int?
   priceIrr          Int?
@@ -10592,6 +10680,9 @@ model ExternalStayPriceSnapshot {
   observedBy        ExternalObservedBy
   observedByAdminId String?              @db.Uuid
   contentHash       String
+  priceType         ExternalPriceType    @default(EXACT)
+  currency          String               @default("IRR")
+  runId             String?              @db.Uuid
 
   @@index([stayId, checkIn, checkOut, guests, observedAt])
   @@map("external_stay_price_snapshots")
@@ -10641,12 +10732,28 @@ model ExternalSyncRun {
   failed             Int                  @default(0)
   errorCategories    Json?
   triggeredByAdminId String?              @db.Uuid
+  trigger            ExternalSyncTrigger  @default(MANUAL)
+  pagesRequested     Int                  @default(0)
+  listingsDiscovered Int                  @default(0)
+  removed            Int                  @default(0)
+  staleMarked        Int                  @default(0)
+  durationMs         Int?
+  /// The discovered count fell far below the recent baseline: lifecycle changes were withheld.
+  anomaly            Boolean              @default(false)
+  /// Up to 50 individual failures: [{ externalId?, category, message }].
+  errors             Json?
 
   @@index([sourceId, startedAt])
   @@map("external_sync_runs")
 }
 
 enum ExternalChangeKind {
+  CREATED
+  FIELD_CHANGED
+  STALE
+  REAPPEARED
+  PET_POLICY_CONFLICT
+  PET_POLICY_REVIEWED
   PRICE_CHANGED
   PET_POLICY_CHANGED
   SOURCE_REMOVED
@@ -10664,9 +10771,14 @@ model ExternalStayChange {
   stay      ExternalStay       @relation(fields: [stayId], references: [id], onDelete: Cascade)
   kind      ExternalChangeKind
   detail    Json
+  field     String?
+  oldValue  Json?
+  newValue  Json?
+  runId     String?            @db.Uuid
   createdAt DateTime           @default(now())
 
   @@index([stayId, createdAt])
+  @@index([createdAt, kind])
   @@map("external_stay_changes")
 }
 
@@ -10729,4 +10841,74 @@ model TripExternalStay {
 
   @@unique([tripId, stayId])
   @@map("trip_external_stays")
+}
+
+/// One physical place, possibly listed on several sources (Jabama, Alibaba, a direct feed…). Created only when staff
+/// approve a duplicate candidate — never by automatic merging.
+model CanonicalAccommodation {
+  id               String         @id @default(uuid()) @db.Uuid
+  title            String
+  city             String
+  province         String?
+  latitude         Float?
+  longitude        Float?
+  createdByAdminId String?        @db.Uuid
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  listings         ExternalStay[]
+
+  @@map("canonical_accommodations")
+}
+
+/// A source observation of one listing whose content differed from the previous one. Normalized state is kept; the
+/// size-limited raw excerpt is cleared after the source's rawRetentionDays.
+model ExternalStayObservation {
+  id                    String       @id @default(uuid()) @db.Uuid
+  stayId                String       @db.Uuid
+  stay                  ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  runId                 String?      @db.Uuid
+  sourceListingId       String
+  sourceUrl             String
+  observedAt            DateTime     @default(now())
+  rawFingerprint        String
+  normalizedFingerprint String
+  normalized            Json
+  rawExcerpt            Json?
+
+  @@index([stayId, observedAt])
+  @@index([observedAt])
+  @@map("external_stay_observations")
+}
+
+/// Every pet-policy claim with its evidence (short excerpt only). A new row when the claim changes; repeats bump lastConfirmedAt.
+model ExternalPetPolicyEvidence {
+  id                 String             @id @default(uuid()) @db.Uuid
+  stayId             String             @db.Uuid
+  stay               ExternalStay       @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  runId              String?            @db.Uuid
+  status             PetPolicyStatus
+  authority          PetPolicyAuthority
+  dogsAllowed        Boolean?
+  catsAllowed        Boolean?
+  otherPetsAllowed   Boolean?
+  maxPets            Int?
+  maxWeightKg        Float?
+  petFeeIrr          Int?
+  depositIrr         Int?
+  restrictions       String?
+  allowedAreas       String?
+  notes              String?
+  evidenceSource     String?
+  evidenceUrl        String?
+  evidenceText       String?
+  evidencePath       String?
+  evidenceObservedAt DateTime
+  lastConfirmedAt    DateTime
+  fingerprint        String
+  adminUserId        String?            @db.Uuid
+  createdAt          DateTime           @default(now())
+
+  @@index([stayId, createdAt])
+  @@index([status, createdAt])
+  @@map("external_pet_policy_evidence")
 }
