@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
+import { routeExists } from "@/test/route-exists";
 import RootPage from "@/app/[locale]/page";
 import AuthPage from "@/app/[locale]/(auth)/auth/page";
+import { fireEvent } from "@testing-library/react";
 import { landingCopy } from "./copy";
-import { cameraAt, cameraStops, nearestStop, wheelProgress } from "./camera";
-import { consumeLandingIntent, rememberLandingIntent } from "./intent";
+
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -15,46 +16,60 @@ vi.mock("next/navigation", () => ({
     throw new Error("NOT_FOUND");
   },
 }));
+
 beforeEach(() => {
   vi.clearAllMocks();
-  sessionStorage.clear();
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
-  );
-  vi.stubGlobal("requestAnimationFrame", (fn: FrameRequestCallback) => window.setTimeout(() => fn(0), 0));
-  vi.stubGlobal("cancelAnimationFrame", (id: number) => window.clearTimeout(id));
+  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
+  // The header only asks whether a session exists; an anonymous visitor gets 401.
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ code: "UNAUTHENTICATED" }), { status: 401 })));
 });
-describe("Public spatial landing", () => {
-  it.each(["fa", "en"] as const)("renders %s without domain requests", async (locale) => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+describe("Public landing", () => {
+  it.each(["fa", "en"] as const)("renders the %s story with one h1 and the Tehran scene", async (locale) => {
     const copy = landingCopy[locale];
     renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(copy.contexts[0]![1]);
-    expect(screen.getByRole("link", { name: copy.start }).getAttribute("href")).toBe(`/${locale}/auth`);
-    expect(document.querySelectorAll(".persistent-world")).toHaveLength(1);
-    expect(document.querySelectorAll(".context-copy")).toHaveLength(1);
-    expect(document.body.textContent).not.toMatch(/Luna|لونا/);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    fetchSpy.mockRestore();
+    const h1 = screen.getAllByRole("heading", { level: 1 });
+    expect(h1).toHaveLength(1);
+    expect(h1[0]!.textContent).toBe(copy.hero.title.replace("\n", ""));
+    expect(screen.getByRole("img", { name: copy.hero.sceneLabel })).toBeTruthy();
+    // Section order communicates the product story (§13): identity → health → services → travel → memories → community → providers → trust.
+    const h2 = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    expect(h2).toEqual([copy.identity.title, copy.health.title, copy.services.title, copy.travel.title, copy.memories.title, copy.community.title, copy.ecosystem.title, copy.trust.title, copy.final.title]);
+    // The retired demo pet and vehicle never return.
+    expect(document.body.textContent).not.toMatch(/Cookie|کوکی|Luna|لونا/);
+    expect(document.querySelector(".taxi-motion, .spatial-landing")).toBeNull();
   });
-  it("changes camera context without routing; keyboard returns to overview", async () => {
-    renderWithIntl(await RootPage({ params: Promise.resolve({ locale: "en" }) }));
-    // Destinations are chosen in the world itself (the separate control bar was removed).
-    fireEvent.click(screen.getByRole("button", { name: landingCopy.en.contexts[5]![0] }));
-    await waitFor(() =>
-      expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("shop"),
-    );
-    expect(push).not.toHaveBeenCalled();
-    const cta = screen.getByRole("link", { name: landingCopy.en.contexts[5]![3] });
-    cta.addEventListener("click", (event) => event.preventDefault());
-    fireEvent.click(cta);
-    expect(consumeLandingIntent("en")).toBe("/en/shop?landingPet=cookie&landingAction=shop");
-    fireEvent.keyDown(document.querySelector(".spatial-landing")!, { key: "Escape" });
-    await waitFor(() =>
-      expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("overview"),
-    );
+
+  it.each(["fa", "en"] as const)("every %s landing link is a real localized route (no dead CTA)", async (locale) => {
+    renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]"));
+    expect(links.length).toBeGreaterThan(30);
+    for (const link of links) {
+      const href = link.getAttribute("href")!;
+      if (href === "#lp-main") continue;
+      expect(href, `${link.textContent} → ${href}`).toMatch(new RegExp(`^/(${locale}|${locale === "fa" ? "en" : "fa"})(/|$)`));
+      expect(routeExists(href), `${link.textContent} → ${href}`).toBe(true);
+    }
+    for (const button of Array.from(document.querySelectorAll("button"))) expect(button.getAttribute("aria-label") ?? button.textContent).toBeTruthy();
   });
+
+  it.each(["fa", "en"] as const)("primary %s CTAs go to sign-up, services, add pet and sign-in", async (locale) => {
+    const copy = landingCopy[locale];
+    renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
+    const hrefOf = (name: string) => screen.getAllByRole("link", { name }).map((a) => a.getAttribute("href"));
+    expect(hrefOf(copy.hero.primary)).toContain(`/${locale}/register`);
+    expect(hrefOf(copy.hero.secondary)).toContain(`/${locale}/services`);
+    expect(hrefOf(copy.identity.cta)).toEqual([`/${locale}/pets/new`]);
+    expect(hrefOf(copy.actions.signIn)).toContain(`/${locale}/auth`);
+    expect(screen.getByRole("link", { name: copy.actions.languageLabel }).getAttribute("href")).toBe(`/${locale === "fa" ? "en" : "fa"}`);
+  });
+
+  it("copy for both locales has the same shape", () => {
+    const shape = (v: unknown): unknown => (Array.isArray(v) ? v.map(shape) : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, shape(x)])) : typeof v);
+    expect(shape(landingCopy.fa)).toEqual(shape(landingCopy.en));
+    expect(JSON.stringify(landingCopy.fa)).not.toMatch(/\b(Get started|Sign in|Services)\b/);
+  });
+
   it.each(["fa", "en"] as const)("keeps phone-first auth and the email fallback for %s", (locale) => {
     renderWithIntl(<AuthPage />, locale);
     const buttons = screen.getAllByRole("button");
@@ -63,35 +78,8 @@ describe("Public spatial landing", () => {
     fireEvent.click(buttons[1]!);
     expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
   });
+
   it("rejects unsupported locales", async () => {
     await expect(RootPage({ params: Promise.resolve({ locale: "xx" }) })).rejects.toThrow("NOT_FOUND");
-  });
-});
-describe("Camera and intent boundaries", () => {
-  it("bounds progress and wheel deltas", () => {
-    expect(cameraAt(-10)).toEqual(cameraAt(0));
-    expect(cameraAt(10)).toEqual(cameraAt(1));
-    expect(nearestStop(100)).toBe(cameraStops.length - 1);
-    expect(wheelProgress(99999, 0)).toBeCloseTo(0.06);
-    expect(wheelProgress(-99999, 2)).toBeCloseTo(-0.06);
-    expect(nearestStop(wheelProgress(100, 0))).toBe(1);
-  });
-  it("consumes a local destination once and rejects prototype or external routes", () => {
-    rememberLandingIntent("vet");
-    expect(consumeLandingIntent("fa")).toBe("/fa/vet/find?landingPet=cookie&landingAction=vet");
-    expect(consumeLandingIntent("fa")).toBeNull();
-    for (const action of ["toString", "__proto__", "https://evil.example"]) {
-      rememberLandingIntent(action);
-      expect(consumeLandingIntent("fa")).toBeNull();
-    }
-  });
-  it("rejects stale or malformed saved intent", () => {
-    sessionStorage.setItem(
-      "petlife-landing-intent",
-      JSON.stringify({ action: "shop", pet: "cookie", at: Date.now() - 1800001 }),
-    );
-    expect(consumeLandingIntent("en")).toBeNull();
-    sessionStorage.setItem("petlife-landing-intent", "null");
-    expect(consumeLandingIntent("en")).toBeNull();
   });
 });

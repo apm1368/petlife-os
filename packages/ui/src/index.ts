@@ -25,4 +25,5 @@ export {
   Heart, Users, Info, ChevronRight, LocateFixed, Timer, CircleAlert, RotateCcw, Repeat,
   Compass, Images, Plane, BookOpen, LifeBuoy, HandHeart, ClipboardList, Receipt, ShieldPlus, Siren, Newspaper, Paperclip,
   FileText, Plus, Camera, Cat, Bird, Rabbit, Fish, Turtle, Rat, PawPrint, Car, Route, Navigation, Weight,
+  ArrowRight, BedDouble, Fingerprint, Syringe, Pill, Scale, CircleHelp, Check, ChevronDown,
 } from "lucide-react";

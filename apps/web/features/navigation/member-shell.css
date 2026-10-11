@@ -168,3 +168,10 @@
   .member-shell .member-nav__link::after,
   .member-shell .member-nav__caret { transition: none; }
 }
+
+/* Owner decision: on Persian desktop the main navigation sits on the left (the reading end),
+   grouped with the tools; the brand alone holds the right edge. English keeps nav beside the brand. */
+@media (min-width: 1024px) {
+  [dir="rtl"] .member-shell .member-nav { margin-inline-start: auto; }
+  [dir="rtl"] .member-shell .member-nav + .member-header__tools { margin-inline-start: 0; }
+}
