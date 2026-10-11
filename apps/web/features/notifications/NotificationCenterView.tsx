@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, IconButton, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, EmptyState, ErrorRecovery, IconButton, Skeleton, StatusLabel } from "@petlife/ui";
 import type { NotificationDto } from "@petlife/types";
 import { notificationsService } from "@/services/notifications.service";
 import { useNotificationStore } from "@/stores/notification-store";
@@ -126,28 +126,22 @@ export function NotificationCenterView() {
         <EmptyState title={t("empty")} actionLabel={t("browseHome")} onAction={() => router.push(`/${locale}/home`)} />
       ) : (
         <>
-          <ul className="flex flex-col gap-2">
+          <ul className="notice-rows">
             {items.map((notification) => {
               const isUnread = !notification.readAt;
               const isHighPriority = notification.priority === "HIGH" || notification.priority === "URGENT";
               return (
                 <li key={notification.id}>
-                  <button
-                    type="button"
-                    onClick={() => void openNotification(notification)}
-                    className={`w-full text-start ${isHighPriority ? "border-s-4 border-s-state-urgent ps-2" : ""}`}
-                  >
-                    <ContextSurface className={`flex flex-col gap-1 ${isUnread ? "bg-surface-elevated" : ""}`}>
-                      <div className="flex items-start justify-between gap-3">
-                        <p className={`text-body ${isUnread ? "font-semibold" : "font-medium"} text-text-primary`}>{notification.title}</p>
-                        {isUnread ? <span aria-hidden="true" className="mt-1 h-2 w-2 shrink-0 rounded-full bg-state-urgent" /> : null}
-                      </div>
-                      <p className="text-metadata text-text-secondary">{notification.body}</p>
-                      <div className="flex items-center justify-between gap-3">
+                  <button type="button" onClick={() => void openNotification(notification)} className="notice-row" data-unread={isUnread} data-priority={isHighPriority ? "high" : undefined}>
+                    <span className="notice-row__dot" aria-hidden="true" />
+                    <span className="notice-row__text">
+                      <span className="notice-row__title">{isUnread ? <span className="sr-only">{locale === "fa" ? "خوانده‌نشده: " : "Unread: "}</span> : null}{notification.title}</span>
+                      <span className="notice-row__body">{notification.body}</span>
+                      <span className="notice-row__meta">
                         <StatusLabel tone={CATEGORY_TONE[notification.category] ?? "neutral"}>{t(`category.${notification.category}`)}</StatusLabel>
-                        <span className="text-metadata text-text-secondary">{formatTimestamp(notification.createdAt, locale)}</span>
-                      </div>
-                    </ContextSurface>
+                        <span>{formatTimestamp(notification.createdAt, locale)}</span>
+                      </span>
+                    </span>
                   </button>
                 </li>
               );

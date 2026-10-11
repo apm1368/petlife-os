@@ -1968,7 +1968,14 @@
       "HOUSEHOLD": "Household",
       "PET_ACCESS": "Pet access",
       "SYSTEM": "System",
-      "MARKETING": "Offers"
+      "MARKETING": "Offers",
+      "SUPPORT": "Support",
+      "SUBSCRIPTION": "Membership",
+      "LOST_PET": "Lost pet",
+      "ANIMAL_SUPPORT": "Animal support",
+      "COMMUNITY": "Community",
+      "TRAVEL": "Travel",
+      "INSURANCE": "Insurance"
     },
     "preferencesLink": "Notification preferences",
     "preferencesPage": {

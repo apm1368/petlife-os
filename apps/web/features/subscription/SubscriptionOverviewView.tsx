@@ -127,8 +127,13 @@ export function SubscriptionOverviewView() {
               <StatusLabel tone={STATUS_TONE[sub.status]}>{t(`status.${sub.status}`)}</StatusLabel>
             </div>
 
+            {sub.status === SubscriptionStatus.TRIALING && sub.trialEndsAt ? (() => {
+              const days = Math.max(0, Math.ceil((Date.parse(sub.trialEndsAt) - Date.now()) / 86_400_000));
+              return <p className="text-body font-semibold text-text-primary">{locale === "fa" ? `${days.toLocaleString("fa-IR")} روز از دوره‌ی آزمایشی باقی مانده است.` : `${days} day${days === 1 ? "" : "s"} left in your trial.`}</p>;
+            })() : null}
             {sub.status === SubscriptionStatus.TRIALING && sub.trialEndsAt ? <p className="text-body text-text-secondary">{t("trialEndsAt", { date: formatDate(sub.trialEndsAt, locale) })}</p> : null}
-            {sub.currentPeriod ? <p className="text-body text-text-secondary">{t("periodEndsAt", { date: formatDate(sub.currentPeriod.endAt, locale) })}</p> : null}
+            {/* During a trial the period ends with the trial — saying it twice adds nothing. */}
+            {sub.currentPeriod && !(sub.status === SubscriptionStatus.TRIALING && sub.trialEndsAt?.slice(0, 10) === sub.currentPeriod.endAt.slice(0, 10)) ? <p className="text-body text-text-secondary">{t("periodEndsAt", { date: formatDate(sub.currentPeriod.endAt, locale) })}</p> : null}
             {sub.status === SubscriptionStatus.PAST_DUE ? <p className="text-body text-state-attention">{t("pastDueWarning")}</p> : null}
             {sub.status === SubscriptionStatus.GRACE_PERIOD ? <p className="text-body text-state-higher-concern">{t("graceWarning", { date: sub.gracePeriodEndsAt ? formatDate(sub.gracePeriodEndsAt, locale) : "—" })}</p> : null}
             {sub.status === SubscriptionStatus.EXPIRED ? <p className="text-body text-text-secondary">{t("expiredExplain")}</p> : null}
@@ -158,7 +163,8 @@ export function SubscriptionOverviewView() {
           </section>
           <section className="split-section flex flex-col gap-3">
             <h2 className="text-section-title text-text-primary">{t("entitlements")}</h2>
-            {entitlements.map((entitlement) => {
+            {/* Membership is sold by features, not pet count (owner decision): an unlimited pet allowance is not listed as a feature; a real cap still is. */}
+            {entitlements.filter((entitlement) => !(entitlement.key === "pets.max" && entitlement.limitValue === null)).map((entitlement) => {
               const label = entitlementLabelKey(entitlement.key) ? t(entitlementLabelKey(entitlement.key)!) : entitlement.key;
               const usageItem = usageByKey.get(entitlement.key);
               return (

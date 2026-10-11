@@ -1968,7 +1968,14 @@
       "HOUSEHOLD": "خانواده",
       "PET_ACCESS": "دسترسی حیوان خانگی",
       "SYSTEM": "سیستم",
-      "MARKETING": "پیشنهادها"
+      "MARKETING": "پیشنهادها",
+      "SUPPORT": "پشتیبانی",
+      "SUBSCRIPTION": "عضویت",
+      "LOST_PET": "حیوان گم‌شده",
+      "ANIMAL_SUPPORT": "حمایت از حیوانات",
+      "COMMUNITY": "جامعه",
+      "TRAVEL": "سفر",
+      "INSURANCE": "بیمه"
     },
     "preferencesLink": "تنظیمات اعلان‌ها",
     "preferencesPage": {
