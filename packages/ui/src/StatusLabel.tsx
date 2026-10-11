@@ -1,3 +1,4 @@
+import { Check, CircleAlert, Dot, OctagonAlert, TriangleAlert } from "lucide-react";
 import { cn } from "./cn";
 
 export type StatusTone = "neutral" | "success" | "attention" | "higherConcern" | "urgent" | "emergency";
@@ -17,13 +18,13 @@ const toneClasses: Record<StatusTone, string> = {
   emergency: "bg-state-emergency text-text-inverse",
 };
 
-const toneSymbol: Record<StatusTone, string> = {
-  neutral: "●",
-  success: "✓",
-  attention: "▲",
-  higherConcern: "▲",
-  urgent: "!",
-  emergency: "!!",
+const toneIcon: Record<StatusTone, typeof Check> = {
+  neutral: Dot,
+  success: Check,
+  attention: TriangleAlert,
+  higherConcern: TriangleAlert,
+  urgent: CircleAlert,
+  emergency: OctagonAlert,
 };
 
 /** Status is always conveyed by icon/symbol + text, never color alone. */
@@ -36,7 +37,7 @@ export function StatusLabel({ tone, children, className }: StatusLabelProps) {
         className,
       )}
     >
-      <span aria-hidden>{toneSymbol[tone]}</span>
+      {(() => { const Icon = toneIcon[tone]; return <Icon size={tone === "neutral" ? 16 : 12} strokeWidth={tone === "neutral" ? 4 : 2.5} aria-hidden="true" className={tone === "neutral" ? "-mx-1" : undefined} />; })()}
       {children}
     </span>
   );

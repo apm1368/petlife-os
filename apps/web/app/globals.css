@@ -1045,7 +1045,7 @@ body{background:var(--surface-page);color:var(--text-primary)}
 .pd-faq p{margin:8px 0 0}
 .pd-week-select{display:inline-flex;align-items:center;gap:8px;font-size:.86rem;color:var(--text-secondary)}
 .pd-week-select select{min-height:40px;padding:0 10px;border:1px solid var(--border-default);border-radius:var(--radius-md);background:var(--surface-raised);color:var(--text-primary);font:inherit}
-.provider-sticky-cta{display:flex;align-items:center;justify-content:space-between;gap:12px}
+@media(max-width:1099.98px){.provider-sticky-cta{display:flex;align-items:center;justify-content:space-between;gap:12px}}
 .provider-sticky-cta__info{display:flex;flex-direction:column;min-width:0;font-size:.85rem}
 .provider-sticky-cta a{flex:none}
 .week-avail{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none}

@@ -41,7 +41,9 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
 
   async function handleUpload(): Promise<void> {
     const file = fileInputRef.current?.files?.[0];
-    if (!file || !title.trim()) return;
+    if (!title.trim()) return;
+    // Never a silent no-op: say what is missing.
+    if (!file) { setError(lang === "fa" ? "ابتدا فایل سند را انتخاب کنید." : "Choose the document file first."); return; }
     setIsUploading(true);
     setError(null);
     try {

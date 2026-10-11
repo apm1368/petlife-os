@@ -65,6 +65,7 @@
 .member-home__list a:hover { background:var(--surface-sunken); }
 .member-home__bar { flex-shrink:0; width:3px; height:32px; border-radius:2px; }
 .member-home__item-text { display:flex; flex-direction:column; gap:4px; flex:1; min-width:0; overflow-wrap:anywhere; }
+.member-home__list a > :not(.member-home__item-text) { flex-shrink:0; }
 .member-home__item-text strong { font-size:.92rem; font-weight:600; line-height:1.8; }
 .member-home__item-text span { font-size:.8rem; color:var(--text-secondary); line-height:1.8; }
 .member-home__go { flex-shrink:0; color:var(--text-muted); }

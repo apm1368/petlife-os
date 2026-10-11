@@ -16,3 +16,19 @@ describe("collapseLabPanels", () => {
     expect(panel!.title).toBe("نتایج آزمایش — ۲ مورد");
   });
 });
+
+describe("mergeCareIntoOverview", () => {
+  it("puts overdue care first in attention, due care after, and upcoming care in date order — same rule on profile and dashboard", async () => {
+    const { mergeCareIntoOverview } = await import("./overview-labels");
+    const care = [
+      { id: "a", state: "OVERDUE", dueAt: "2026-10-01T05:30:00.000Z", title: "late" },
+      { id: "b", state: "DUE", dueAt: "2026-10-12T05:30:00.000Z", title: "today" },
+      { id: "c", state: "UPCOMING", dueAt: "2026-10-20T05:30:00.000Z", title: "later" },
+      { id: "d", state: "COMPLETED", dueAt: "2026-09-01T05:30:00.000Z", title: "done" },
+    ];
+    const merged = mergeCareIntoOverview({ attention: [{ id: "x", severity: "INFORMATIONAL", title: "HEALTH_PROFILE_INCOMPLETE", dueAt: null, href: "/health" }], upcoming: [{ id: "v", type: "BOOKING", title: "t", occurredAt: "2026-10-15T05:30:00.000Z", sourceType: null, providerName: null, href: "/bookings/v", status: null }] }, care, (i) => i.title);
+    expect(merged.attention.map((i) => i.id)).toEqual(["care-a", "x", "care-b"]);
+    expect(merged.upcoming.map((i) => i.id)).toEqual(["v", "care-c"]);
+    expect(merged.upcoming[1]!.href).toBe("/care/c");
+  });
+});

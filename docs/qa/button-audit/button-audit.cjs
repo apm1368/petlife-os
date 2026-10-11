@@ -32,16 +32,17 @@ const first = async (p) => { try { return (await p)?.id ?? null; } catch { retur
 (async () => {
   const pages = fs.readFileSync(process.env.PAGES, "utf8").split("\n").filter(Boolean);
   const personas = {
-    app: await sessionFor("qa-erp-owner@example.test"),
-    admin: await sessionFor("qa-admin-super@example.test"),
+    app: await sessionFor(process.env.APP_EMAIL || "qa-erp-owner@example.test"),
+    admin: await sessionFor(process.env.ADMIN_EMAIL || "qa-admin-super@example.test"),
     provider: await sessionFor("qa-erp-owner@example.test"),
     seller: await sessionFor("qa-erp-owner@example.test"),
   };
   const P = personas.app.userId;
   const hh = await db.householdMember.findFirst({ where: { userId: P, role: "OWNER" } });
-  const pet = await db.pet.findFirst({ where: { householdId: hh.householdId } });
+  const pet = (await db.pet.findFirst({ where: { householdId: hh.householdId, memories: { some: {} } } }).catch(() => null)) ?? await db.pet.findFirst({ where: { householdId: hh.householdId } });
   const qaClinic = await db.providerOrganization.findFirst({ where: { name: "کلینیک نمایشی ERP (QA)" } });
-  await db.providerContextPreference.upsert({ where: { userId: P }, create: { userId: P, providerOrganizationId: qaClinic.id }, update: { providerOrganizationId: qaClinic.id } });
+  const PV = personas.provider.userId; // provider context lives on the QA provider persona only
+  await db.providerContextPreference.upsert({ where: { userId: PV }, create: { userId: PV, providerOrganizationId: qaClinic.id }, update: { providerOrganizationId: qaClinic.id } });
   const qaSeller = await db.sellerOrganization.findFirst({ where: { name: "فروشنده نمایشی A (QA)" } });
   const byPet = (model) => first(db[model].findFirst({ where: { petId: pet.id } }));
   const fa = async () => (await db.articleLocale.findFirst({ where: { locale: "fa", status: "VISIBLE" } }))?.slug ?? null;
@@ -89,7 +90,7 @@ const first = async (p) => { try { return (await p)?.id ?? null; } catch { retur
   const rows = [];
   const shellSeen = new Set();
   const linkCache = new Map();
-  const DESTRUCTIVE = /حذف|لغو|delete|remove|cancel|revoke|suspend|تعلیق|ابطال|log ?out|خروج|sign out|block|مسدود|report|گزارش|archive|بایگانی|reject|رد کردن|approve|تأیید|پرداخت|\bpay|submit|ارسال|ثبت|save|ذخیره|send|publish|انتشار|confirm|refund|بازپرداخت|ban|merge|ادغام|run|اجرا|retry|تلاش دوباره|claim|برداشتن|release|رها|dismiss|reset|بازنشانی|disable|غیرفعال|enable|فعال‌سازی|accept|پذیرش|decline|upload|بارگذاری|book|رزرو|checkout|خرید|add to|افزودن به|follow|دنبال|like|پسند|join|عضویت|start trial|آزمایشی|subscribe|اشتراک|upgrade|ارتقا|invite|دعوت|grant|اعطا|share|اشتراک‌گذاری|export|خروجی|download|دانلود|print|چاپ|copy|کپی|mark|علامت|resolve|حل|escalate|ارجاع|assign|واگذاری|close|بستن/i;
+  const DESTRUCTIVE = /حذف|لغو|delete|remove|cancel|revoke|suspend|تعلیق|ابطال|log ?out|خروج|sign out|block|مسدود|report|گزارش|archive|بایگانی|reject|رد کردن|approve|تأیید|پرداخت|\bpay|submit|ارسال|ثبت|save|ذخیره|send|publish|انتشار|confirm|refund|بازپرداخت|ban|merge|ادغام|run|اجرا|retry|تلاش دوباره|claim|برداشتن|release|رها|dismiss|reset|بازنشانی|disable|غیرفعال|enable|فعال‌سازی|accept|پذیرش|decline|upload|بارگذاری|book|رزرو|checkout|خرید|add to|افزودن به|follow|دنبال|like|پسند|join|عضویت|start trial|آزمایشی|subscribe|اشتراک|upgrade|ارتقا|invite|دعوت|grant|اعطا|share|اشتراک‌گذاری|export|خروجی|download|دانلود|print|چاپ|copy|کپی|mark|علامت|resolve|حل|escalate|ارجاع|assign|واگذاری|close|بستن|favorite|علاقه|bookmark|نشان|snooze|تعویق|complete|انجام شد|toggle|vote|رأی/i;
   const SKIP_ROUTES = /\/definitely-missing-page/;
   async function checkLink(href, cookie) {
     if (linkCache.has(href)) return linkCache.get(href);

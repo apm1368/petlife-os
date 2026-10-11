@@ -7,6 +7,8 @@ import type { OrderSummaryDto, PetOverviewDto, SubscriptionDto, TravelBookingDto
 import { Avatar, CalendarDays, ChevronLeft, ChevronRight, FileText, HeartPulse, Images, MapPin, PackageCheck, Plane, Plus, Scissors, ShoppingBag, Skeleton, Sparkles, StatusLabel, Stethoscope, Users } from "@petlife/ui";
 import { petsService } from "@/services/pets.service";
 import { bookingsService } from "@/services/bookings.service";
+import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
+import { careTitle } from "@/features/care/care-labels";
 import { commerceService } from "@/services/commerce.service";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { subscriptionService } from "@/services/subscription.service";
@@ -20,7 +22,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
-import { attentionTitle, eventTitle, eventSourceLabel, formatOverviewDate, severityBarClass, severityLabel, severityTone } from "@/features/pets/overview-labels";
+import { attentionTitle, eventTitle, eventSourceLabel, formatOverviewDate, mergeCareIntoOverview, severityBarClass, severityLabel, severityTone } from "@/features/pets/overview-labels";
 import "./member-home.css";
 
 type Booking = Awaited<ReturnType<typeof bookingsService.list>>[number];
@@ -192,8 +194,13 @@ export function MemberHomeView() {
     setError(null);
     if (!petId) return;
     try {
-      const [ov, bookings] = await Promise.all([petsService.getOverview(petId), bookingsService.list({ upcoming: true }).catch(() => [] as Booking[])]);
-      setOverview(ov);
+      const [ov, bookings, care] = await Promise.all([
+        petsService.getOverview(petId),
+        bookingsService.list({ upcoming: true }).catch(() => [] as Booking[]),
+        // The owner's care reminders count toward attention/upcoming exactly as on the pet profile.
+        careRemindersService.list(petId).catch(() => [] as CareReminder[]),
+      ]);
+      setOverview({ ...ov, ...mergeCareIntoOverview(ov, care, (item) => careTitle(item, locale)) });
       const sorted = [...bookings].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
       setNextBooking(sorted.find((b) => b.petId === petId) ?? sorted[0] ?? null);
     } catch (err) {
@@ -266,6 +273,8 @@ export function MemberHomeView() {
 
   const pet = overview.pet;
   const petBase = `/${locale}/pets/${pet.id}`;
+  const shownHealth = new Set(overview.recentHealth.slice(0, 4).map((item) => `${item.type}-${item.id}`));
+  const activity = overview.recentActivity.filter((item) => !shownHealth.has(`${item.type}-${item.id}`));
   return (
     <div className="member-home">
       <header className="member-home__greeting">
@@ -389,11 +398,12 @@ export function MemberHomeView() {
               </ul>
             )}
           </section>
-          <section className="member-home__card" aria-labelledby="home-activity">
+          {/* Activity repeats nothing already listed under recent health — only care, memories and older records. */}
+          {activity.length > 0 || overview.recentHealth.length === 0 ? <section className="member-home__card" aria-labelledby="home-activity">
             <div className="member-home__card-head"><h2 id="home-activity">{c.recentActivity}</h2></div>
-            {overview.recentActivity.length === 0 ? <p className="member-home__empty">{c.noActivity}</p> : (
+            {activity.length === 0 ? <p className="member-home__empty">{c.noActivity}</p> : (
               <ul className="member-home__list member-home__timeline">
-                {overview.recentActivity.slice(0, 4).map((item) => (
+                {activity.slice(0, 4).map((item) => (
                   <li key={`${item.type}-${item.id}`}>
                     <Link href={item.href.startsWith("/bookings/") ? `/${locale}${item.href}` : petBase + item.href}>
                       <span className="member-home__timeline-dot" aria-hidden="true" />
@@ -404,7 +414,7 @@ export function MemberHomeView() {
                 ))}
               </ul>
             )}
-          </section>
+          </section> : null}
         </div>
 
         <aside className="member-home__side">

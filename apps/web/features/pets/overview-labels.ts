@@ -42,6 +42,8 @@ export const eventTitle = (title: string, locale: Locale) => (EVENT_TITLE[title]
 export function eventSourceLabel(item: PetOverviewEventDto, locale: Locale) {
   if (item.sourceType === "PROVIDER" || item.sourceType === "CLINIC") return pick(["ارائه‌دهنده", "Provider"], locale);
   if (item.sourceType === "OWNER" || item.sourceType === "HOUSEHOLD_MEMBER") return pick(["مالک/خانواده", "Owner/household"], locale);
+  if (item.type === "MEMORY") return pick(["خاطره", "Memory"], locale);
+  if (item.type === "CARE") return pick(["مراقبت", "Care"], locale);
   return item.type === "BOOKING" ? pick(["نوبت", "Booking"], locale) : pick(["سیستم", "System"], locale);
 }
 
@@ -66,4 +68,26 @@ export function collapseLabPanels(items: PetOverviewEventDto[], locale: Locale):
     out.push({ ...item, id: `panel-${day(item.occurredAt)}`, title: pick([`نتایج آزمایش — ${n} مورد`, `Lab results — ${n} tests`], locale), href: "/health/labs" });
   }
   return out;
+}
+
+/**
+ * Folds the owner's care reminders (care center, with server-derived DUE/OVERDUE state) into the overview's
+ * attention and upcoming lists. Shared by the pet profile and the member dashboard so both count the same things.
+ */
+export function mergeCareIntoOverview<C extends { id: string; state: string; dueAt: string; snoozedUntil?: string | null; title: string; type?: string; source?: string }>(
+  overview: { attention: PetOverviewAttentionDto[]; upcoming: PetOverviewEventDto[] },
+  care: C[],
+  title: (item: C) => string,
+): { attention: PetOverviewAttentionDto[]; upcoming: PetOverviewEventDto[] } {
+  const careAttention: PetOverviewAttentionDto[] = care
+    .filter((item) => item.state === "OVERDUE" || item.state === "DUE")
+    .map((item) => ({ id: `care-${item.id}`, severity: item.state === "OVERDUE" ? "ATTENTION" : "INFORMATIONAL", title: title(item), dueAt: item.dueAt, href: `/care/${item.id}` }));
+  const careUpcoming: PetOverviewEventDto[] = care
+    .filter((item) => item.state === "UPCOMING" || item.state === "SNOOZED")
+    .slice(0, 3)
+    .map((item) => ({ id: `care-${item.id}`, type: "CARE", title: title(item), occurredAt: item.snoozedUntil ?? item.dueAt, sourceType: null, providerName: null, href: `/care/${item.id}`, status: item.state }));
+  return {
+    attention: [...careAttention.filter((i) => i.severity === "ATTENTION"), ...overview.attention, ...careAttention.filter((i) => i.severity !== "ATTENTION")],
+    upcoming: [...overview.upcoming, ...careUpcoming].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt)),
+  };
 }

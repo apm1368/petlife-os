@@ -130,12 +130,19 @@ function CareRow(props: RowProps) {
 }
 
 function CareRowActions({ item, fa, busy, onRun, onEdit }: RowProps) {
+  // Cancelling removes the reminder from the agenda and stops its notifications — confirm in place first.
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  if (confirmCancel) return <div className="care-row__actions" role="group" aria-label={fa ? "تأیید لغو" : "Confirm cancel"}>
+    <p className="text-sm text-text-secondary">{fa ? "این یادآور لغو می‌شود و دیگر اعلانی برایش ارسال نمی‌شود." : "This reminder will be cancelled and no further notifications will be sent."}</p>
+    <Button size="sm" variant="danger" disabled={busy} onClick={() => { setConfirmCancel(false); onRun(item.id, "CANCEL"); }}>{fa ? "بله، لغو شود" : "Yes, cancel it"}</Button>
+    <Button size="sm" variant="secondary" disabled={busy} onClick={() => setConfirmCancel(false)}>{fa ? "نه، نگه دار" : "Keep it"}</Button>
+  </div>;
   return <div className="care-row__actions">
     <Button size="sm" disabled={busy} onClick={() => onRun(item.id, "COMPLETE")}>{fa ? "انجام شد" : "Complete"}</Button>
     {item.source === "USER_CREATED" ? <Button size="sm" variant="secondary" disabled={busy} onClick={() => onEdit(item)}>{fa ? "ویرایش" : "Edit"}</Button> : null}
     <Button size="sm" variant="secondary" disabled={busy} onClick={() => onRun(item.id, "SNOOZE", laterToday())}>{fa ? "بعداً امروز" : "Later today"}</Button>
     <Button size="sm" variant="secondary" disabled={busy} onClick={() => onRun(item.id, "SNOOZE", tomorrowMorning())}>{fa ? "فردا" : "Tomorrow"}</Button>
-    <Button size="sm" variant="ghost" disabled={busy} onClick={() => onRun(item.id, "CANCEL")}>{fa ? "لغو" : "Cancel"}</Button>
+    <Button size="sm" variant="ghost" disabled={busy} onClick={() => setConfirmCancel(true)}>{fa ? "لغو" : "Cancel"}</Button>
   </div>;
 }
 

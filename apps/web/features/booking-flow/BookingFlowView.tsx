@@ -177,7 +177,11 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
       setStep("details");
     } catch (e) {
       setError(errorMessage(e, fa));
-      if (e instanceof ApiError && e.code === "SLOT_UNAVAILABLE") setSlots((prev) => prev?.map((s) => (s.startAt === slot?.startAt ? { ...s, state: "BOOKED" } : s)) ?? null);
+      if (e instanceof ApiError && e.code === "SLOT_UNAVAILABLE") {
+        setSlots((prev) => prev?.map((s) => (s.startAt === slot?.startAt ? { ...s, state: "BOOKED" } : s)) ?? null);
+        // The taken time must not linger in the summary or keep "Hold" enabled.
+        setSlot(null);
+      }
     } finally {
       setBusy(false);
     }
@@ -370,6 +374,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
               <p className="text-sm text-text-secondary">{fa ? "رزرو به‌تنهایی به دامپزشک اجازه دیدن پرونده نمی‌دهد. خودتان انتخاب کنید." : "A booking alone never lets the vet see the medical record. You choose."}</p>
               <label className="flex items-start gap-3"><input type="radio" name="health" checked={healthShare === "MINIMAL_VET_CONTEXT"} onChange={() => setHealthShare("MINIMAL_VET_CONTEXT")} /><span>{fa ? "فقط مشخصات پایه حیوان (نام، گونه، سن)" : "Basic identity only (name, species, age)"}</span></label>
               <label className="flex items-start gap-3"><input type="radio" name="health" checked={healthShare === "HEALTH_BASICS"} onChange={() => setHealthShare("HEALTH_BASICS")} /><span>{fa ? "خلاصه سلامت (بیماری‌ها، آلرژی‌ها، داروهای فعال، وضعیت واکسن) تا ۲۴ ساعت پس از نوبت" : "Health summary (conditions, allergies, active medications, vaccination status) until 24h after the visit"}</span></label>
+              {healthShare === null ? <p role="status" className="text-sm text-state-attention">{fa ? "برای ادامه، یکی از دو گزینه را انتخاب کنید." : "Choose one of the two options to continue."}</p> : null}
               {petIds[0] ? <Link className="text-sm text-brand-natural" href={`/${locale}/pets/${petIds[0]}/health/share`}>{fa ? "اشتراک دقیق‌تر اسناد انتخابی از بخش «اشتراک با دامپزشک»" : "Share selected documents precisely via Share with Vet"}</Link> : null}
             </fieldset>
           ) : null}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import {
@@ -16,7 +17,7 @@ import { usePetStore } from "@/stores/pet-store";
 import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
 import { careTitle } from "@/features/care/care-labels";
 import { EditPetIdentity } from "./EditPetIdentity";
-import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone, collapseLabPanels } from "./overview-labels";
+import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone, collapseLabPanels, mergeCareIntoOverview } from "./overview-labels";
 
 const copy = {
   fa: {
@@ -106,7 +107,12 @@ export function PetProfileView({ petId }: { petId: string }) {
   const [overview, setOverview] = useState<PetOverviewDto | null>(null);
   const [access, setAccess] = useState<PetAccessFlags | null>(null);
   const [error, setError] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  // The hero's "Edit details" link only changes the query on this same page, so the edit state must follow the URL.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isEditing = searchParams.get("edit") === "identity";
+  const setIsEditing = (on: boolean) => router.replace(on ? `${pathname}?edit=identity` : pathname, { scroll: false });
   // The owner's care items (the care center's data) — read only when this person may see care.
   const [care, setCare] = useState<CareReminder[]>([]);
 
@@ -124,7 +130,6 @@ export function PetProfileView({ petId }: { petId: string }) {
 
   useEffect(() => {
     void load();
-    setIsEditing(new URLSearchParams(window.location.search).get("edit") === "identity");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
@@ -150,15 +155,9 @@ export function PetProfileView({ petId }: { petId: string }) {
   }
 
   // Overdue / soon-due care belongs with "needs attention"; the next care items with "upcoming".
-  const careAttention: PetOverviewAttentionDto[] = care
-    .filter((item) => item.state === "OVERDUE" || item.state === "DUE")
-    .map((item) => ({ id: `care-${item.id}`, severity: item.state === "OVERDUE" ? "ATTENTION" : "INFORMATIONAL", title: careTitle(item, locale), dueAt: item.dueAt, href: `/care/${item.id}` }));
-  const careUpcoming: PetOverviewEventDto[] = care
-    .filter((item) => item.state === "UPCOMING" || item.state === "SNOOZED")
-    .slice(0, 3)
-    .map((item) => ({ id: `care-${item.id}`, type: "CARE", title: careTitle(item, locale), occurredAt: item.snoozedUntil ?? item.dueAt, sourceType: null, providerName: null, href: `/care/${item.id}`, status: item.state }));
-  const attention = [...careAttention.filter((i) => i.severity === "ATTENTION"), ...overview.attention, ...careAttention.filter((i) => i.severity !== "ATTENTION")];
-  const upcoming = [...overview.upcoming, ...careUpcoming].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt)).slice(0, 5);
+  const merged = mergeCareIntoOverview(overview, care, (item) => careTitle(item, locale));
+  const attention = merged.attention;
+  const upcoming = merged.upcoming.slice(0, 5);
 
   return (
     <div className="pet-overview">
@@ -204,7 +203,7 @@ export function PetProfileView({ petId }: { petId: string }) {
           </div>
         </OverviewSection>
         <OverviewSection title={c.recentActivity}>
-          <EventList items={collapseLabPanels(overview.recentActivity.filter((a) => !overview.recentHealth.some((h) => h.type === a.type && h.id === a.id)), locale)} empty={c.noActivity} base={base} locale={locale} compact />
+          <EventList items={collapseLabPanels(overview.recentActivity.filter((a) => a.type !== "MEMORY" && !overview.recentHealth.some((h) => h.type === a.type && h.id === a.id)), locale)} empty={c.noActivity} base={base} locale={locale} compact />
         </OverviewSection>
         <OverviewSection title={c.recentMemory}>
           {overview.recentMemory ? (
