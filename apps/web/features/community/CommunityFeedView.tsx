@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "@/features/navigation/localized-link";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, Input, Select, Skeleton } from "@petlife/ui";
+import { useLocale, useTranslations } from "next-intl";
+import { Avatar, Button, EmptyState, HandHeart, Input, Mail, Select, Siren, Skeleton } from "@petlife/ui";
+import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { CommunityPostType } from "@petlife/types";
 import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
@@ -40,66 +41,92 @@ export function CommunityFeedView() {
   if (error) return <LoadFailure error={error} onRetry={() => load(1)} />;
   if (!page) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
+  const locale = useLocale() === "en" ? "en" : "fa";
+  const fa = locale === "fa";
+  const chooseType = (next: CommunityPostType | "") => { setType(next); void load(1, false, { q: appliedQuery, type: next }); };
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-page-title text-text-primary">{t("feed.title")}</h1>
-        <Link href="/community/new">
-          <Button variant="primary">{t("feed.newPost")}</Button>
-        </Link>
+    <div className="community-layout">
+      <div className="community-main">
+        <header className="section-head">
+          <div>
+            <h1>{t("feed.title")}</h1>
+            <p>{fa ? "پرسش، تجربه و خبر از صاحبان حیوانات؛ محترمانه و بدون تبلیغ." : "Questions, stories and news from pet owners — respectful, no ads."}</p>
+          </div>
+          <Link href="/community/new" className="btn-primary-link">{t("feed.newPost")}</Link>
+        </header>
+
+        <form
+          role="search"
+          className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const q = query.trim();
+            setAppliedQuery(q);
+            void load(1, false, { q, type });
+          }}
+        >
+          <Input dir="auto" label={t("feed.searchLabel")} value={query} maxLength={80} onChange={(e) => setQuery(e.target.value)} />
+          <Select
+            label={t("feed.typeLabel")}
+            value={type}
+            onChange={(e) => chooseType(e.target.value as CommunityPostType | "")}
+            options={[{ value: "", label: t("feed.allTypes") }, ...Object.values(CommunityPostType).map((value) => ({ value, label: t(`postType.${value}`) }))]}
+          />
+          <Button type="submit" variant="secondary">
+            {t("feed.search")}
+          </Button>
+        </form>
+
+        {page.items.length === 0 ? (
+          <EmptyState title={appliedQuery || type ? t("feed.noResults") : t("feed.empty")} />
+        ) : (
+          <ul className="post-rows">
+            {page.items.map((post) => (
+              <li key={post.id}>
+                <Link href={`/community/posts/${post.id}`} className="post-row">
+                  <span className="post-row__byline">
+                    <Avatar name={post.authorDisplayName} size="sm" />
+                    <span className="post-row__author">{post.authorDisplayName}</span>
+                    {post.pet ? <span className="post-row__pet">· {fa ? "با" : "with"} {post.pet.name}</span> : null}
+                    <span className="post-row__date">· {formatDay(post.createdAt.slice(0, 10), locale, { year: false })}</span>
+                    <span className="tag">{t(`postType.${post.type}`)}</span>
+                  </span>
+                  {post.title ? <span className="post-row__title">{post.title}</span> : null}
+                  <span className="post-row__body">{post.body}</span>
+                  <span className="post-row__meta">{t("feed.commentsAndReactions", { comments: localizeDigits(post.commentCount, locale), reactions: localizeDigits(post.reactionCount, locale) })}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {page.items.length < page.total ? (
+          <Button variant="secondary" onClick={() => load(pageNumber + 1, true)}>
+            {t("feed.loadMore")}
+          </Button>
+        ) : null}
       </div>
 
-      <form
-        role="search"
-        className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const q = query.trim();
-          setAppliedQuery(q);
-          void load(1, false, { q, type });
-        }}
-      >
-        <Input dir="auto" label={t("feed.searchLabel")} value={query} maxLength={80} onChange={(e) => setQuery(e.target.value)} />
-        <Select
-          label={t("feed.typeLabel")}
-          value={type}
-          onChange={(e) => {
-            const next = e.target.value as CommunityPostType | "";
-            setType(next);
-            void load(1, false, { q: appliedQuery, type: next });
-          }}
-          options={[{ value: "", label: t("feed.allTypes") }, ...Object.values(CommunityPostType).map((value) => ({ value, label: t(`postType.${value}`) }))]}
-        />
-        <Button type="submit" variant="secondary">
-          {t("feed.search")}
-        </Button>
-      </form>
-
-      {page.items.length === 0 ? (
-        <EmptyState title={appliedQuery || type ? t("feed.noResults") : t("feed.empty")} />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {page.items.map((post) => (
-            <Link key={post.id} href={`/community/posts/${post.id}`}>
-              <ContextSurface className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-body text-text-primary">{post.authorDisplayName}</span>
-                  <span className="text-metadata text-text-secondary">{t(`postType.${post.type}`)}</span>
-                </div>
-                {post.title ? <p className="text-body text-text-primary">{post.title}</p> : null}
-                <p className="line-clamp-3 text-body text-text-secondary">{post.body}</p>
-                <p className="text-metadata text-text-secondary">{t("feed.commentsAndReactions", { comments: post.commentCount, reactions: post.reactionCount })}</p>
-              </ContextSurface>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {page.items.length < page.total ? (
-        <Button variant="secondary" onClick={() => load(pageNumber + 1, true)}>
-          {t("feed.loadMore")}
-        </Button>
-      ) : null}
+      <aside className="community-side" aria-label={fa ? "میان‌برهای جامعه" : "Community shortcuts"}>
+        <section>
+          <h2>{fa ? "موضوع‌ها" : "Topics"}</h2>
+          <div className="community-side__chips">
+            <button type="button" aria-pressed={type === ""} onClick={() => chooseType("")}>{t("feed.allTypes")}</button>
+            {Object.values(CommunityPostType).map((value) => (
+              <button key={value} type="button" aria-pressed={type === value} onClick={() => chooseType(value)}>{t(`postType.${value}`)}</button>
+            ))}
+          </div>
+        </section>
+        <section>
+          <h2>{fa ? "همین حالا" : "Right now"}</h2>
+          <ul className="community-side__links">
+            <li><Link href="/community/messages"><Mail size={16} aria-hidden="true" />{fa ? "پیام‌های من" : "My messages"}</Link></li>
+            <li><Link href="/lost-pets"><Siren size={16} aria-hidden="true" />{fa ? "حیوانات گم‌شده‌ی اطراف" : "Lost pets nearby"}</Link></li>
+            <li><Link href="/animal-support/needs"><HandHeart size={16} aria-hidden="true" />{fa ? "نیازهای حمایت" : "Support needs"}</Link></li>
+          </ul>
+        </section>
+      </aside>
     </div>
   );
 }

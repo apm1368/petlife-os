@@ -203,7 +203,7 @@ export function VetTreatmentSheetView({ hospitalizationId, petId }: { hospitaliz
                   {TASK_OUTCOMES.map((status) => (
                     <Button
                       key={status}
-                      variant={status === TreatmentTaskStatus.DONE ? "primary" : "secondary"}
+                      aria-pressed={status === TreatmentTaskStatus.DONE} variant={status === TreatmentTaskStatus.DONE ? "primary" : "secondary"}
                       isLoading={isBusy}
                       onClick={async () => {
                         const note = status === TreatmentTaskStatus.DONE ? undefined : (window.prompt(t("outcomePrompt")) ?? undefined);

@@ -136,7 +136,7 @@ const first = async (p) => { try { return (await p)?.id ?? null; } catch { retur
           document.querySelectorAll("button, [role=tab], [role=menuitem], summary").forEach((b, i) => {
             if (!vis(b)) return;
             const form = b.closest("form");
-            out.push({ kind: "button", i, tag: b.tagName, label: label(b) || "(icon button)", disabled: b.disabled || b.getAttribute("aria-disabled") === "true", submit: b.tagName === "BUTTON" && (b.getAttribute("type") ?? (form ? "submit" : "button")) === "submit" && !!form, shell: shell(b), expanded: b.getAttribute("aria-expanded") });
+            out.push({ kind: "button", i, tag: b.tagName, label: label(b) || "(icon button)", active: b.getAttribute("aria-pressed") === "true" || b.getAttribute("aria-selected") === "true" || b.getAttribute("aria-current") === "page" || b.getAttribute("aria-checked") === "true", disabled: b.disabled || b.getAttribute("aria-disabled") === "true", submit: b.tagName === "BUTTON" && (b.getAttribute("type") ?? (form ? "submit" : "button")) === "submit" && !!form, shell: shell(b), expanded: b.getAttribute("aria-expanded") });
           });
           document.querySelectorAll("select").forEach((s, i) => { if (!vis(s)) return; out.push({ kind: "select", i, label: s.getAttribute("aria-label") || s.labels?.[0]?.textContent?.trim() || s.name || "(select)", options: s.options.length, disabled: s.disabled, shell: shell(s) }); });
           return out;
@@ -168,6 +168,7 @@ const first = async (p) => { try { return (await p)?.id ?? null; } catch { retur
           let requests = 0; const onReq = (r) => { if (!/\.(png|jpe?g|webp|svg|woff2?|css)(\?|$)/.test(r.url())) requests++; };
           page.on("request", onReq);
           let popup = false; const onPopup = () => { popup = true; }; ctx.on("page", onPopup);
+          let chooser = false; const onChooser = (fc) => { chooser = true; fc.setFiles([]).catch(() => {}); }; page.on("filechooser", onChooser);
           await page.evaluate(() => { window.__mut = 0; window.__mo?.disconnect(); window.__mo = new MutationObserver((m) => { window.__mut += m.length; }); window.__mo.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true }); });
           let actual = "";
           try {
@@ -176,16 +177,17 @@ const first = async (p) => { try { return (await p)?.id ?? null; } catch { retur
             await page.waitForTimeout(500);
             const mut = await page.evaluate(() => window.__mut).catch(() => -1);
             const moved = page.url() !== before;
-            actual = moved ? `navigated ${new URL(page.url()).pathname}${new URL(page.url()).search}` : popup ? "opened window" : mut > 0 ? `ui changed (${mut})` : requests > 0 ? `request (${requests})` : "no effect";
+            actual = moved ? `navigated ${new URL(page.url()).pathname}${new URL(page.url()).search}` : popup ? "opened window" : chooser ? "opened file chooser" : mut > 0 ? `ui changed (${mut})` : requests > 0 ? `request (${requests})` : c.active ? "already active (selected option)" : "no effect";
             const status = actual === "no effect" ? "DEAD" : moved && /\/definitely|not-found/.test(page.url()) ? "WRONG_DESTINATION" : "PASS";
             push(`button:${c.label}`, "action", actual, status, c.shell);
             if (status === "PASS") pass.buttons++;
-            if (moved) { await page.goto(BASE + url, { waitUntil: "networkidle", timeout: 30000 }); await page.waitForTimeout(250); }
+            // Any change of URL or DOM can shift later controls' indices — start the next click from a fresh page.
+            if (moved || mut > 0 || popup || chooser) { await page.goto(BASE + url, { waitUntil: "networkidle", timeout: 30000 }); await page.waitForTimeout(250); }
             else { await page.keyboard.press("Escape").catch(() => {}); await page.waitForTimeout(150); }
           } catch (e) {
             push(`button:${c.label}`, "action", `click failed: ${String(e.message).split("\n")[0].slice(0, 80)}`, "CONFUSING", c.shell);
             await page.goto(BASE + url, { waitUntil: "networkidle", timeout: 30000 }).catch(() => {});
-          } finally { page.off("request", onReq); ctx.off("page", onPopup); }
+          } finally { page.off("request", onReq); ctx.off("page", onPopup); page.off("filechooser", onChooser); }
         }
       } catch (e) { push("(page)", url, `load failed: ${String(e.message).slice(0, 100)}`, "BROKEN"); }
       await ctx.close();

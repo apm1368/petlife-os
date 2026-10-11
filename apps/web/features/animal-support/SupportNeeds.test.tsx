@@ -9,7 +9,7 @@ import { SupportNeedDetailView } from "./SupportNeedDetailView";
 import { MySupportNeedsView } from "./MySupportNeedsView";
 import { ManageSupportNeedView } from "./ManageSupportNeedView";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/fa/animal-support/needs" }));
 vi.mock("@/services/support-needs.service", () => ({
   supportNeedsService: {
     list: vi.fn(),

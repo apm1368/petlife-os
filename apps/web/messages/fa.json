@@ -3324,9 +3324,9 @@
       "exclusionsEmpty": "استثنایی برای این محصول ثبت نشده است.",
       "coverageTitle": "پوشش",
       "waitingPeriod": "دوره انتظار: {days} روز",
-      "deductible": "فرانشیز: {amount} ریال",
-      "annualLimit": "سقف سالانه: {amount} ریال",
-      "premiumRange": "حق بیمه: {min} تا {max} ریال",
+      "deductible": "فرانشیز: {amount}",
+      "annualLimit": "سقف سالانه: {amount}",
+      "premiumRange": "حق بیمه: {min} تا {max}",
       "termsSource": "منبع: {source}",
       "checkEligibility": "بررسی واجد شرایط بودن برای {petName}",
       "apply": "شروع درخواست"

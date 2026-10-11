@@ -121,12 +121,12 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
 
       <ContextSurface className="flex flex-wrap items-end gap-2">
         <Input label={t("detail.assignTo")} value={assigneeAdminId} onChange={(e) => setAssigneeAdminId(e.target.value)} className="min-w-48 flex-1" />
-        <Button onClick={assign}>{tCommon("assign")}</Button>
+        <Button disabled={!assigneeAdminId.trim()} onClick={assign}>{tCommon("assign")}</Button>
       </ContextSurface>
 
       <ContextSurface className="flex flex-wrap gap-2">
         {STATUSES.map((s) => (
-          <Button key={s} size="sm" variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
+          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
             {t(`status.${s}`)}
           </Button>
         ))}
@@ -155,7 +155,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
             ]}
             className="w-64"
           />
-          <Button onClick={sendMessage}>{t("detail.send")}</Button>
+          <Button disabled={!messageBody.trim()} onClick={sendMessage}>{t("detail.send")}</Button>
         </div>
       </ContextSurface>
 
@@ -169,7 +169,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
         ))}
         <div className="flex gap-2">
           <Input label={t("detail.notes")} placeholder={t("detail.notes")} value={noteBody} onChange={(e) => setNoteBody(e.target.value)} className="flex-1" />
-          <Button onClick={addNote}>{tCommon("save")}</Button>
+          <Button disabled={!noteBody.trim()} onClick={addNote}>{tCommon("save")}</Button>
         </div>
       </ContextSurface>
     </div>

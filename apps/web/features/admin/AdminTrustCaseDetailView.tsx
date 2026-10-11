@@ -155,12 +155,12 @@ export function AdminTrustCaseDetailView({ trustCaseId }: { trustCaseId: string 
 
       <ContextSurface className="flex flex-wrap items-end gap-2">
         <Input label={tCommon("assigneeLabel")} value={assigneeAdminId} onChange={(e) => setAssigneeAdminId(e.target.value)} className="min-w-48 flex-1" />
-        <Button onClick={assign}>{tCommon("assign")}</Button>
+        <Button disabled={!assigneeAdminId.trim()} onClick={assign}>{tCommon("assign")}</Button>
       </ContextSurface>
 
       <ContextSurface className="flex flex-wrap gap-2">
         {STATUSES.map((s) => (
-          <Button key={s} size="sm" variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
+          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
             {t(`status.${s}`)}
           </Button>
         ))}
@@ -187,7 +187,7 @@ export function AdminTrustCaseDetailView({ trustCaseId }: { trustCaseId: string 
         <Select label={t("detail.takeAction")} value={actionType} onChange={(e) => setActionType(e.target.value as TrustActionType)} options={(context ? (context.availableActions as TrustActionType[]) : Object.values(TrustActionType)).map((v) => ({ value: v, label: t(`actionType.${v}`) }))} />
         <Input label={t("detail.actionReason")} value={actionReason} onChange={(e) => setActionReason(e.target.value)} />
         {actionError ? <p role="alert" className="text-body text-state-urgent">{actionError}</p> : null}
-        <Button onClick={takeAction}>{t("detail.takeAction")}</Button>
+        <Button disabled={!actionReason.trim()} onClick={takeAction}>{t("detail.takeAction")}</Button>
       </ContextSurface>
     </div>
   );

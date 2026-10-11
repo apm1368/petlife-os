@@ -3324,9 +3324,9 @@
       "exclusionsEmpty": "No exclusions listed for this product.",
       "coverageTitle": "Coverage",
       "waitingPeriod": "Waiting period: {days} days",
-      "deductible": "Deductible: {amount} IRR",
-      "annualLimit": "Annual limit: {amount} IRR",
-      "premiumRange": "Premium: {min}–{max} IRR",
+      "deductible": "Deductible: {amount}",
+      "annualLimit": "Annual limit: {amount}",
+      "premiumRange": "Premium: {min}–{max}",
       "termsSource": "Source: {source}",
       "checkEligibility": "Check eligibility for {petName}",
       "apply": "Start application"

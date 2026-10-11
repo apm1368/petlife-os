@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceEligibilityResultDto, InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { eligibilityStatusTone, verificationStatusTone } from "./insurance-status";
+import { formatCurrency } from "@/lib/currency/format-currency";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 
@@ -19,6 +20,7 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
  */
 export function InsuranceProductDetailView({ productId }: { productId: string }) {
   const fmt = useInstantFormat();
+  const locale = useLocale() === "en" ? "en" : "fa";
   const t = useTranslations("insurance");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -108,11 +110,11 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
           <section className="split-panel flex flex-col">
               {product.waitingPeriodDays !== null ? <p className="fact-line">{t("detail.waitingPeriod", { days: fmt.number(product.waitingPeriodDays) })}</p> : null}
               {product.deductibleAmountIrr !== null ? (
-                <p className="fact-line">{t("detail.deductible", { amount: fmt.number(product.deductibleAmountIrr) })}</p>
+                <p className="fact-line">{t("detail.deductible", { amount: formatCurrency(product.deductibleAmountIrr, locale) })}</p>
               ) : null}
-              {product.annualLimitIrr !== null ? <p className="fact-line">{t("detail.annualLimit", { amount: fmt.number(product.annualLimitIrr) })}</p> : null}
+              {product.annualLimitIrr !== null ? <p className="fact-line">{t("detail.annualLimit", { amount: formatCurrency(product.annualLimitIrr, locale) })}</p> : null}
               {product.premiumMinIrr !== null && product.premiumMaxIrr !== null ? (
-                <p className="fact-line">{t("detail.premiumRange", { min: fmt.number(product.premiumMinIrr), max: fmt.number(product.premiumMaxIrr) })}</p>
+                <p className="fact-line">{t("detail.premiumRange", { min: formatCurrency(product.premiumMinIrr, locale), max: formatCurrency(product.premiumMaxIrr, locale) })}</p>
               ) : null}
           </section>
           {error ? <p className="text-body text-state-urgent">{error}</p> : null}

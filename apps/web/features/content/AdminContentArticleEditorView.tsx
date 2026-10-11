@@ -172,7 +172,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
           {LOCALES.map((l) => {
             const availability = article?.locales.find((al) => al.locale === l);
             return (
-              <Button key={l} variant={activeLocale === l ? "primary" : "secondary"} size="sm" onClick={() => setActiveLocale(l)}>
+              <Button key={l} aria-pressed={activeLocale === l} variant={activeLocale === l ? "primary" : "secondary"} size="sm" onClick={() => setActiveLocale(l)}>
                 {l.toUpperCase()} {availability ? `· ${t(`status.${availability.status}`)}` : `· ${t("notCreated")}`}
               </Button>
             );
@@ -196,7 +196,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
             const label = tg.locales.find((l) => l.locale === uiLocale)?.name ?? tg.locales[0]?.name ?? tg.id;
             const selected = tagIds.includes(tg.id);
             return (
-              <Button key={tg.id} type="button" size="sm" variant={selected ? "primary" : "secondary"} onClick={() => toggleTag(tg.id)}>
+              <Button key={tg.id} type="button" size="sm" aria-pressed={selected} variant={selected ? "primary" : "secondary"} onClick={() => toggleTag(tg.id)}>
                 {label}
               </Button>
             );

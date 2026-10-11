@@ -69,10 +69,10 @@ export function RichTextBlockEditor({ value, onChange }: { value: RichTextDocume
           <div className="flex items-center justify-between gap-2">
             <span className="text-metadata text-text-secondary">{t(`blockType.${block.type}`)}</span>
             <div className="flex gap-1">
-              <Button type="button" size="sm" variant="ghost" onClick={() => move(i, -1)} aria-label={t("moveUp")}>
+              <Button type="button" size="sm" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t("moveUp")}>
                 ↑
               </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => move(i, 1)} aria-label={t("moveDown")}>
+              <Button type="button" size="sm" variant="ghost" onClick={() => move(i, 1)} disabled={i === value.length - 1} aria-label={t("moveDown")}>
                 ↓
               </Button>
               <Button type="button" size="sm" variant="ghost" onClick={() => remove(i)} aria-label={t("remove")}>

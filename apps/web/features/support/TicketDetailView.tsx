@@ -143,7 +143,7 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
               rows={3}
               className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary"
             />
-            <Button isLoading={sending} onClick={sendMessage}>
+            <Button disabled={!messageBody.trim()} isLoading={sending} onClick={sendMessage}>
               {t("detail.send")}
             </Button>
           </div>

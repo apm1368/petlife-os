@@ -70,7 +70,7 @@ export function SubscriptionPlansView() {
       <h1 className="text-page-title text-text-primary">{t("plansTitle")}</h1>
 
       <div className="flex gap-2 overflow-x-auto border-b border-border-subtle pb-2" aria-label={t("durationLabel")}>
-        {(["MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"] as const).map((value) => <Button key={value} size="sm" variant={interval === SubscriptionBillingInterval[value] ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval[value])}>
+        {(["MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"] as const).map((value) => <Button key={value} size="sm" aria-pressed={interval === SubscriptionBillingInterval[value]} variant={interval === SubscriptionBillingInterval[value] ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval[value])}>
           {t(`interval.${value === "MONTHLY" ? "monthly" : value === "QUARTERLY" ? "quarterly" : value === "SEMI_ANNUAL" ? "semiAnnual" : "annual"}`)}
         </Button>)}
       </div>

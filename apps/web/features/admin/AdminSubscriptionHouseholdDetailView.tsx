@@ -155,7 +155,7 @@ export function AdminSubscriptionHouseholdDetailView({ householdId }: { househol
               </span>
             </div>
             {attempt.status === "SUCCEEDED" ? (
-              <Button size="sm" variant="secondary" isLoading={busy} onClick={() => refund(attempt.id)}>
+              <Button disabled={!refundReason.trim()} size="sm" variant="secondary" isLoading={busy} onClick={() => refund(attempt.id)}>
                 {t("refund")}
               </Button>
             ) : null}

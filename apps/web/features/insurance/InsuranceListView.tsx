@@ -10,6 +10,7 @@ import { insuranceService } from "@/services/insurance.service";
 import { verificationStatusTone } from "./insurance-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatCount } from "@/lib/number/format-number";
+import { formatCurrency } from "@/lib/currency/format-currency";
 
 /** Public discovery — no guard, works for anonymous visitors (spec: "public browsing" for insurance discovery must work without auth). `petId` in the query string is passed through to product detail so a household browsing for a specific pet can check eligibility there. */
 export function InsuranceListView() {
@@ -75,6 +76,14 @@ export function InsuranceListView() {
                   {product.providerName} — {product.name}
                 </Link>
                 <p className="text-metadata text-text-secondary">{product.coverageSummary}</p>
+                {/* The numbers that decide a plan (§36) — only those the insurer has published. */}
+                <dl className="plan-row__facts">
+                  {product.annualLimitIrr !== null ? <div><dt>{locale === "fa" ? "سقف سالانه" : "Annual limit"}</dt><dd>{formatCurrency(product.annualLimitIrr, locale)}</dd></div> : null}
+                  {product.deductibleAmountIrr !== null ? <div><dt>{locale === "fa" ? "فرانشیز" : "Deductible"}</dt><dd>{formatCurrency(product.deductibleAmountIrr, locale)}</dd></div> : null}
+                  {product.coinsurancePercent !== null ? <div><dt>{locale === "fa" ? "سهم شما" : "Coinsurance"}</dt><dd>{formatCount(product.coinsurancePercent, locale)}٪</dd></div> : null}
+                  {product.waitingPeriodDays !== null ? <div><dt>{locale === "fa" ? "دوره‌ی انتظار" : "Waiting period"}</dt><dd>{formatCount(product.waitingPeriodDays, locale)} {locale === "fa" ? "روز" : "days"}</dd></div> : null}
+                  {product.premiumMinIrr !== null ? <div><dt>{locale === "fa" ? "حق بیمه از" : "Premium from"}</dt><dd>{formatCurrency(product.premiumMinIrr, locale)}</dd></div> : null}
+                </dl>
                 {product.exclusions.length > 0 ? (
                   <p className="text-metadata text-text-secondary">
                     <span className="font-semibold text-text-primary">{t("detail.exclusionsTitle")}:</span> {product.exclusions.slice(0, 2).join(locale === "fa" ? "، " : ", ")}

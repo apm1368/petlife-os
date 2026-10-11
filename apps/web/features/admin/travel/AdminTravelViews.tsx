@@ -510,7 +510,7 @@ export function AdminTravelAnalyticsView() {
       <AdminTravelNav />
       {error === "forbidden" ? <Forbidden perm="travel.view" /> : (
         <div className="flex flex-col gap-4">
-          <div className="flex gap-2">{[7, 30, 90].map((n) => <Button key={n} size="sm" variant={days === n ? "primary" : "ghost"} onClick={() => setDays(n)}>{fa ? `${localizeDigits(n, "fa")} روز` : `${n} days`}</Button>)}</div>
+          <div className="flex gap-2">{[7, 30, 90].map((n) => <Button key={n} size="sm" aria-pressed={days === n} variant={days === n ? "primary" : "ghost"} onClick={() => setDays(n)}>{fa ? `${localizeDigits(n, "fa")} روز` : `${n} days`}</Button>)}</div>
           {!d ? <Skeleton className="h-40" /> : (
             <>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

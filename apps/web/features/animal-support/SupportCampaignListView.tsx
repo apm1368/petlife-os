@@ -8,6 +8,7 @@ import type { PaginatedDto, SupportCampaignDto } from "@petlife/types";
 import { animalSupportService } from "@/services/animal-support.service";
 import { CampaignProgressBar } from "./CampaignProgressBar";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { AnimalSupportNav } from "./AnimalSupportNav";
 
 export function SupportCampaignListView() {
   const t = useTranslations("animalSupport");
@@ -39,6 +40,7 @@ export function SupportCampaignListView() {
         <h1 className="text-page-title text-text-primary">{t("campaignList.title")}</h1>
         <p className="text-body text-text-secondary">{t("campaignList.subtitle")}</p>
       </div>
+      <AnimalSupportNav />
 
       {page.items.length === 0 ? (
         <EmptyState title={t("campaignList.empty")} />

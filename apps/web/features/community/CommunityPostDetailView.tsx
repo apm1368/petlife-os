@@ -110,7 +110,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
 
         <div className="flex flex-wrap items-center gap-2 pt-2">
           {REACTIONS.map((type) => (
-            <Button key={type} variant={post.viewerReaction === type ? "primary" : "secondary"} size="sm" isLoading={isReacting} onClick={() => handleReact(type)}>
+            <Button key={type} aria-pressed={post.viewerReaction === type} variant={post.viewerReaction === type ? "primary" : "secondary"} size="sm" isLoading={isReacting} onClick={() => handleReact(type)}>
               {t(`reaction.${type}`)} {post.reactionCount > 0 ? `(${post.reactionCount})` : ""}
             </Button>
           ))}
