@@ -71,6 +71,8 @@ export function toCommunityReportDto(row: CommunityReport): CommunityReportDto {
     lostPetIncidentId: row.lostPetIncidentId,
     lostPetSightingId: row.lostPetSightingId,
     organizationId: row.organizationId,
+    chatMessageId: row.chatMessageId,
+    providerReviewId: row.providerReviewId,
     reason: row.reason as unknown as CommunityReportDto["reason"],
     details: row.details,
     status: row.status as unknown as CommunityReportDto["status"],

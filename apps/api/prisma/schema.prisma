@@ -7274,9 +7274,13 @@ model CommunityReport {
   /// Set once a moderator escalates this report into the existing Trust &
   /// Safety queue (TrustCase.subjectType = COMMUNITY_CONTENT).
   trustCaseId          String?               @db.Uuid
+  /// ERP-G: who in Trust & Safety is working this report (claimed from the unified queue).
+  assignedAdminId      String?               @db.Uuid
+  assignedAt           DateTime?
   createdAt            DateTime              @default(now())
 
   @@index([providerReviewId])
+  @@index([status, createdAt])
   @@index([postId])
   @@index([commentId])
   @@index([supportNeedListingId])
@@ -9243,6 +9247,9 @@ model PlaceReport {
   details           String?
   status            PlaceReportStatus @default(OPEN)
   resolvedByAdminId String?           @db.Uuid
+  /// ERP-G: claimed from the unified Trust & Safety queue.
+  assignedAdminId   String?           @db.Uuid
+  assignedAt        DateTime?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 

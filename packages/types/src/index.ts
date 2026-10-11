@@ -4695,6 +4695,8 @@ export interface CommunityReportDto {
   lostPetIncidentId: string | null;
   lostPetSightingId: string | null;
   organizationId: string | null;
+  chatMessageId: string | null;
+  providerReviewId: string | null;
   reason: CommunityReportReason;
   details: string | null;
   status: CommunityReportStatus;

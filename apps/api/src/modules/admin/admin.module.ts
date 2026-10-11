@@ -53,6 +53,8 @@ import { TrustCaseService } from "./trust/trust-case.service";
 import { TrustCaseContextService } from "./trust/trust-case-context.service";
 import { TrustActionService } from "./trust/trust-action.service";
 import { TrustController } from "./trust/trust.controller";
+import { TrustQueueController } from "./trust/trust-queue.controller";
+import { TrustQueueService } from "./trust/trust-queue.service";
 import { AdminTaskService } from "./task/admin-task.service";
 import { AdminTaskController } from "./task/admin-task.controller";
 import { AdminFinanceService } from "./finance/admin-finance.service";
@@ -128,6 +130,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     SupportCaseController,
     DisputeController,
     TrustController,
+    TrustQueueController,
     AdminTaskController,
     AdminFinanceController,
     AdminOrgController,
@@ -177,6 +180,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     DisputeService,
     TrustCaseService,
     TrustCaseContextService,
+    TrustQueueService,
     TrustActionService,
     AdminTaskService,
     AdminFinanceService,

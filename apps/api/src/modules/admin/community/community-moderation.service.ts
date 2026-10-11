@@ -18,7 +18,7 @@ import type { EscalateCommunityReportDto } from "../../community/dto/community.d
  * when a TrustAction is later taken against that case
  * (TrustActionService.applyCommunityContentEffect), never here directly.
  */
-export type ReportTargetFilter = "COMMUNITY" | "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION";
+export type ReportTargetFilter = "COMMUNITY" | "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION" | "CHAT_MESSAGE" | "PROVIDER_REVIEW";
 
 /** Batch 6 — every report target maps onto an existing TrustSubjectType, so one queue and one case machinery serve all surfaces. */
 export function reportSubject(report: CommunityReport): { subjectType: TrustSubjectType; subjectId: string } {
@@ -27,6 +27,9 @@ export function reportSubject(report: CommunityReport): { subjectType: TrustSubj
   if (report.supportNeedListingId) return { subjectType: TrustSubjectType.SUPPORT_NEED, subjectId: report.supportNeedListingId };
   if (report.lostPetIncidentId) return { subjectType: TrustSubjectType.PET_INCIDENT, subjectId: report.lostPetIncidentId };
   if (report.lostPetSightingId) return { subjectType: TrustSubjectType.LOST_PET_SIGHTING, subjectId: report.lostPetSightingId };
+  // ERP-G fix: chat messages and provider reviews used to fall through to the organization branch (undefined subject → 500).
+  if (report.chatMessageId) return { subjectType: TrustSubjectType.COMMUNITY_CONTENT, subjectId: report.chatMessageId };
+  if (report.providerReviewId) return { subjectType: TrustSubjectType.REVIEW, subjectId: report.providerReviewId };
   return { subjectType: TrustSubjectType.ANIMAL_SUPPORT_ORGANIZATION, subjectId: report.organizationId! };
 }
 
@@ -36,6 +39,8 @@ const TARGET_WHERE: Record<ReportTargetFilter, Prisma.CommunityReportWhereInput>
   LOST_PET_INCIDENT: { lostPetIncidentId: { not: null } },
   LOST_PET_SIGHTING: { lostPetSightingId: { not: null } },
   ORGANIZATION: { organizationId: { not: null } },
+  CHAT_MESSAGE: { chatMessageId: { not: null } },
+  PROVIDER_REVIEW: { providerReviewId: { not: null } },
 };
 
 @Injectable()

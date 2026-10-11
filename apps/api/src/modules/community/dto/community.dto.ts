@@ -120,8 +120,8 @@ export class ListCommunityReportsQueryDto extends PaginationQueryDto {
   status?: CommunityReportStatus;
 
   @IsOptional()
-  @IsIn(["COMMUNITY", "SUPPORT_NEED", "LOST_PET_INCIDENT", "LOST_PET_SIGHTING", "ORGANIZATION"])
-  targetType?: "COMMUNITY" | "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION";
+  @IsIn(["COMMUNITY", "SUPPORT_NEED", "LOST_PET_INCIDENT", "LOST_PET_SIGHTING", "ORGANIZATION", "CHAT_MESSAGE", "PROVIDER_REVIEW"])
+  targetType?: "COMMUNITY" | "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION" | "CHAT_MESSAGE" | "PROVIDER_REVIEW";
 }
 
 export class EscalateCommunityReportDto {

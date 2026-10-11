@@ -1375,3 +1375,31 @@
 - **برچسب فارسی برای:** `DISCOVERED`، `TRAVEL_SOURCE`، `UNOFFICIAL_PUBLIC_WEB_ENDPOINT`، `TOOL_PERMISSION_BLOCKED`، `PARSER_PENDING`، و چهار وضعیت سیاست حیوان خانگی.
 - **پیشنهاد نمایش:** دکمه‌ی «مشاهده در منبع»، disclaimer در هر کارت، و «سیاست حیوان: نامشخص» برای `UNKNOWN`.
 - **ممنوع:** هیچ ادعای «همکار رسمی» نمایش داده نشود.
+
+## ۳۴. ERP-G — صف یکپارچه‌ی Trust & Safety
+یک صف اولویت‌دار روی رکوردهای موجود است و سیستم moderation دومی ساخته نشده است. کنش‌ها همچنان از سرویس‌های موجود case و report انجام می‌شوند.
+
+### API — `/api/admin/trust/queue`
+- **`GET /`** با فیلترهای `kind` (`REPORT`، `PLACE_REPORT`، `TRUST_CASE` یا `APPEAL`)، `severity`، `assigned` (`me`، `unassigned` یا `any`)، `breachedOnly`، `subjectType` و `page/pageSize`.
+  - **هر آیتم:** `key`، `kind`، `subjectType/subjectId`، `severity`، `reasons[]`، `reportCount`، `reporterCount`، `itemIds[]`، `openedAt`، `ageHours`، `slaHours`، `slaDueAt`، `slaBreached`، `assignedAdminId`، `trustCaseId`، `deepLink`.
+  - **گروه‌بندی:** چند گزارش روی یک هدف یک آیتم می‌شوند.
+  - **شدت:** آزار حیوان، محتوای خطرناک، کلاهبرداری، آزار و اطلاعات شخصی `HIGH` هستند؛ abuse، محتوای نامناسب و اطلاعات نادرست `MEDIUM`؛ spam و سایر `LOW`. اگر ۳ گزارش‌دهنده‌ی متمایز یا بیشتر باشند، شدت یک پله بالا می‌رود.
+  - **ترتیب:** اول آیتم‌های عبورکرده از SLA، بعد شدت بیشتر، بعد قدیمی‌تر.
+- **`GET /summary`:** شمارش بر اساس نوع و شدت، تعداد عبورکرده از SLA، تعداد بدون مسئول، قدیمی‌ترین آیتم، و تنظیمات SLA.
+- **`POST /claim`** و **`POST /release`** با بدنه‌ی `{key, reason?}`.
+  - گروه گزارش‌ها با هم جابه‌جا می‌شود.
+  - claim آیتمی که مال کس دیگری است خطای `400 ALREADY_CLAIMED` می‌دهد.
+  - claim یک appeal وضعیت آن را `UNDER_REVIEW` می‌کند.
+- **`POST /dismiss`** با بدنه‌ی `{key, reason}`: رد کردن همه‌ی گزارش‌های باز یک گروه در یک قدم ممیزی‌شده (مثلاً موجی از گزارش‌های spam).
+- **تنظیمات جدید:** `trust.highSeveritySlaHours` (پیش‌فرض ۴) و `trust.standardSlaHours` (پیش‌فرض ۴۸).
+- **مجوزها:** `trust.view` و `trust.manage`.
+
+### رفع باگ
+- **escalate گزارش‌ها:** گزارش پیام چت و نظر ارائه‌دهنده موقع escalate با 500 شکست می‌خورد، چون به شاخه‌ی organization می‌افتاد. حالا:
+  - پیام چت به `COMMUNITY_CONTENT` نگاشت می‌شود؛
+  - نظر ارائه‌دهنده به `REVIEW` نگاشت می‌شود.
+- **کنش‌های case:** `REMOVE_CONTENT`، `RESTRICT` و `RESTORE` حالا واقعاً پیام چت را حذف یا پنهان می‌کنند و نظر ارائه‌دهنده را `HIDDEN` یا `PUBLISHED` می‌کنند.
+- **API گزارش‌ها:** `CommunityReportDto` حالا `chatMessageId` و `providerReviewId` را دارد، و فیلتر `targetType` مقدارهای `CHAT_MESSAGE` و `PROVIDER_REVIEW` را می‌پذیرد.
+
+### برای Codex
+- **صفحه‌ی پیشنهادی:** `/admin/trust/queue` با chip شدت، شمارنده‌ی SLA، دکمه‌های «برداشتن»، «رها کردن» و «رد گروهی»، و لینک به `deepLink`.

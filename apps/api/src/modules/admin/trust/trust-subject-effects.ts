@@ -1,4 +1,4 @@
-import { CommunityContentStatus, LostPetIncidentStatus, LostPetSightingStatus, type Prisma, SupportNeedStatus, TrustActionType, TrustSubjectType } from "@prisma/client";
+import { CommunityContentStatus, LostPetIncidentStatus, LostPetSightingStatus, type Prisma, ProviderReviewStatus, SupportNeedStatus, TrustActionType, TrustSubjectType } from "@prisma/client";
 import { TrustActionNotApplicableException, TrustSubjectNotFoundException } from "../../../common/errors/api-exception";
 
 /**
@@ -24,7 +24,23 @@ export const EFFECT_SUBJECTS: TrustSubjectType[] = [
   TrustSubjectType.PET_INCIDENT,
   TrustSubjectType.LOST_PET_SIGHTING,
   TrustSubjectType.ANIMAL_SUPPORT_ORGANIZATION,
+  TrustSubjectType.REVIEW,
 ];
+
+/** Community content = a post, a comment or a private chat message (all share CommunityContentStatus). */
+async function contentStatus(tx: Prisma.TransactionClient, id: string): Promise<{ kind: "post" | "comment" | "chat"; status: CommunityContentStatus } | null> {
+  const post = await tx.communityPost.findUnique({ where: { id }, select: { status: true } });
+  if (post) return { kind: "post", status: post.status };
+  const comment = await tx.communityComment.findUnique({ where: { id }, select: { status: true } });
+  if (comment) return { kind: "comment", status: comment.status };
+  const chat = await tx.chatMessage.findUnique({ where: { id }, select: { status: true } });
+  return chat ? { kind: "chat", status: chat.status } : null;
+}
+async function setContentStatus(tx: Prisma.TransactionClient, kind: "post" | "comment" | "chat", id: string, status: CommunityContentStatus) {
+  if (kind === "post") await tx.communityPost.update({ where: { id }, data: { status } });
+  else if (kind === "comment") await tx.communityComment.update({ where: { id }, data: { status } });
+  else await tx.chatMessage.update({ where: { id }, data: { status } });
+}
 
 const LISTING_REMOVABLE: SupportNeedStatus[] = [
   SupportNeedStatus.DRAFT,
@@ -49,14 +65,20 @@ export async function applyTrustEffect(tx: Prisma.TransactionClient, subjectType
     case TrustSubjectType.COMMUNITY_CONTENT: {
       const next = actionType === TrustActionType.REMOVE_CONTENT ? CommunityContentStatus.REMOVED : actionType === TrustActionType.RESTRICT ? CommunityContentStatus.HIDDEN : null;
       if (!next) return null;
-      const post = await tx.communityPost.findUnique({ where: { id: subjectId }, select: { status: true } });
-      const comment = post ? null : await tx.communityComment.findUnique({ where: { id: subjectId }, select: { status: true } });
-      const current = post?.status ?? comment?.status;
-      if (!current) throw new TrustSubjectNotFoundException({ subjectType, subjectId });
-      if (current === next) notApplicable(subjectType, actionType, current);
-      if (post) await tx.communityPost.update({ where: { id: subjectId }, data: { status: next } });
-      else await tx.communityComment.update({ where: { id: subjectId }, data: { status: next } });
-      return { before: { status: current }, after: { status: next } };
+      const c = await contentStatus(tx, subjectId);
+      if (!c) throw new TrustSubjectNotFoundException({ subjectType, subjectId });
+      if (c.status === next) notApplicable(subjectType, actionType, c.status);
+      await setContentStatus(tx, c.kind, subjectId, next);
+      return { before: { status: c.status }, after: { status: next } };
+    }
+    case TrustSubjectType.REVIEW: {
+      // A provider review (or its provider reply) reported as abusive/fake: hidden, never deleted.
+      if (actionType !== TrustActionType.REMOVE_CONTENT && actionType !== TrustActionType.RESTRICT) return null;
+      const r = await tx.providerReview.findUnique({ where: { id: subjectId }, select: { status: true } });
+      if (!r) throw new TrustSubjectNotFoundException({ subjectType, subjectId });
+      if (r.status === ProviderReviewStatus.HIDDEN) notApplicable(subjectType, actionType, r.status);
+      await tx.providerReview.update({ where: { id: subjectId }, data: { status: ProviderReviewStatus.HIDDEN } });
+      return { before: { status: r.status }, after: { status: ProviderReviewStatus.HIDDEN } };
     }
     case TrustSubjectType.SUPPORT_NEED: {
       if (actionType !== TrustActionType.REMOVE_CONTENT && actionType !== TrustActionType.RESTRICT) return null;
@@ -112,15 +134,20 @@ export async function restoreTrustEffect(tx: Prisma.TransactionClient, subjectTy
   const after = effect.after;
   switch (subjectType) {
     case TrustSubjectType.COMMUNITY_CONTENT: {
-      const post = await tx.communityPost.findUnique({ where: { id: subjectId }, select: { status: true } });
-      const comment = post ? null : await tx.communityComment.findUnique({ where: { id: subjectId }, select: { status: true } });
-      const current = post?.status ?? comment?.status;
-      if (!current) throw new TrustSubjectNotFoundException({ subjectType, subjectId });
-      if (current !== after.status) notApplicable(subjectType, TrustActionType.RESTORE, current);
+      const c = await contentStatus(tx, subjectId);
+      if (!c) throw new TrustSubjectNotFoundException({ subjectType, subjectId });
+      if (c.status !== after.status) notApplicable(subjectType, TrustActionType.RESTORE, c.status);
       const status = before.status as CommunityContentStatus;
-      if (post) await tx.communityPost.update({ where: { id: subjectId }, data: { status } });
-      else await tx.communityComment.update({ where: { id: subjectId }, data: { status } });
-      return { before: { status: current }, after: { status } };
+      await setContentStatus(tx, c.kind, subjectId, status);
+      return { before: { status: c.status }, after: { status } };
+    }
+    case TrustSubjectType.REVIEW: {
+      const r = await tx.providerReview.findUnique({ where: { id: subjectId }, select: { status: true } });
+      if (!r) throw new TrustSubjectNotFoundException({ subjectType, subjectId });
+      if (r.status !== after.status) notApplicable(subjectType, TrustActionType.RESTORE, r.status);
+      const status = before.status as ProviderReviewStatus;
+      await tx.providerReview.update({ where: { id: subjectId }, data: { status } });
+      return { before: { status: r.status }, after: { status } };
     }
     case TrustSubjectType.SUPPORT_NEED: {
       const listing = await tx.supportNeedListing.findUnique({ where: { id: subjectId }, select: { status: true } });
