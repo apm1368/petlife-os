@@ -521,6 +521,8 @@ export function CheckoutView() {
   }
 
   if (step === "shipping") {
+    // Without a chosen quote the order falls back to a zero delivery amount, so a seller that offers delivery options must have one picked.
+    const deliveryChosen = (shippingOptions ?? []).every((group) => group.quotes.length === 0 || group.quotes.some((q) => q.status === "SELECTED"));
     return frame(
       <div className="flex flex-col gap-5">
         {progress(2)}
@@ -572,10 +574,11 @@ export function CheckoutView() {
           <Button variant="ghost" onClick={() => setStep("review")}>
             {tCommon("back")}
           </Button>
-          <Button variant="primary" className="flex-1" onClick={enterMethodStep}>
+          <Button variant="primary" className="flex-1" onClick={enterMethodStep} disabled={!deliveryChosen}>
             {tCommon("continue")}
           </Button>
         </div>
+        {!deliveryChosen ? <p className="text-metadata text-text-secondary" role="status">{t("shipping.chooseFirst")}</p> : null}
       </div>
     );
   }

@@ -104,6 +104,14 @@ const CHECKOUT: CheckoutDto = {
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
+/** A seller that offers delivery options needs one chosen before payment (otherwise delivery would be charged as zero). */
+async function chooseStandardDelivery() {
+  vi.mocked(commerceService.selectShippingQuote).mockResolvedValue([{ ...SHIPPING_OPTIONS[0]!, quotes: [{ ...SHIPPING_OPTIONS[0]!.quotes[0]!, status: "SELECTED" as never }] }]);
+  vi.mocked(commerceService.getCheckout).mockResolvedValue({ ...CHECKOUT, deliveryAmount: 350_000, totalAmount: 1_600_000 });
+  fireEvent.click(screen.getByText("Standard delivery"));
+  await waitFor(() => expect(screen.getByText("Selected")).toBeTruthy());
+}
+
 async function advanceToPayment() {
   vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
   vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
@@ -135,6 +143,7 @@ async function advanceToPayment() {
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("Choose delivery for each seller")).toBeTruthy());
+  await chooseStandardDelivery();
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("How would you like to pay?")).toBeTruthy());
@@ -198,6 +207,7 @@ async function advanceToInstallmentPlans() {
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("Choose delivery for each seller")).toBeTruthy());
+  await chooseStandardDelivery();
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("SnappPay")).toBeTruthy());
@@ -326,6 +336,24 @@ describe("CheckoutView", () => {
 
     await waitFor(() => expect(commerceService.selectShippingQuote).toHaveBeenCalledWith("checkout-1", "quote-standard"));
     await waitFor(() => expect(screen.getByText("Selected")).toBeTruthy());
+  });
+
+  it("won't continue to payment until a delivery option is chosen", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(commerceService.createCheckout).mockResolvedValue(CHECKOUT);
+    vi.mocked(commerceService.getShippingOptions).mockResolvedValue(SHIPPING_OPTIONS);
+    renderWithIntl(<CheckoutView />);
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
+    fireEvent.click(screen.getByText("Continue"));
+    await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
+    fireEvent.click(screen.getByText("Continue"));
+    await waitFor(() => expect(screen.getByText("Choose delivery for each seller")).toBeTruthy());
+    expect((screen.getByText("Continue").closest("button") as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText("Choose a delivery option to continue.")).toBeTruthy();
+    await chooseStandardDelivery();
+    expect((screen.getByText("Continue").closest("button") as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("refreshes shipping options on demand rather than relying on a frontend-only timer", async () => {

@@ -1376,7 +1376,8 @@
         "eta": "Arrives in about {hours, plural, one {# hour} other {# hours}}",
         "selected": "Selected",
         "unavailable": "No delivery options available right now",
-        "refresh": "Refresh delivery options"
+        "refresh": "Refresh delivery options",
+        "chooseFirst": "Choose a delivery option to continue."
       },
       "payment": {
         "title": "Payment",
