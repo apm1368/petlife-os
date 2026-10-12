@@ -166,7 +166,9 @@
       "resendIn": "ارسال دوباره تا {seconds, number} ثانیه دیگر",
       "verify": "تأیید",
       "invalid": "این کد نادرست است یا منقضی شده.",
-      "rateLimited": "تلاش بیش از حد. {seconds, number} ثانیه دیگر دوباره امتحان کنید."
+      "rateLimited": "تلاش بیش از حد. {seconds, number} ثانیه دیگر دوباره امتحان کنید.",
+      "rateLimitedMinutes": "تلاش بیش از حد. حدود {minutes, number} دقیقه دیگر دوباره امتحان کنید.",
+      "genericError": "مشکلی پیش آمد. لطفاً دوباره تلاش کنید."
     },
     "password": {
       "usernameLabel": "نام کاربری",

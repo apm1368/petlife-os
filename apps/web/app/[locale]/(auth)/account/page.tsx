@@ -11,7 +11,7 @@ import { PasswordInput } from "@/features/auth/PasswordInput";
 import { authService } from "@/services/auth.service";
 import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
-import { ApiError } from "@/lib/api/client";
+import { signInErrorText } from "@/features/auth/sign-in-error";
 import { resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
 
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -58,7 +58,7 @@ function AccountFlow() {
       setStage("otp");
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
-      setError(mapError(err, t));
+      setError(signInErrorText(err, t));
     } finally {
       setIsSubmitting(false);
     }
@@ -72,7 +72,7 @@ function AccountFlow() {
       setUser(user);
       await afterAuth();
     } catch (err) {
-      setError(mapError(err, t));
+      setError(signInErrorText(err, t));
       setCode(""); // keep the OTP layout in place — clear the digits, not the screen
     } finally {
       setIsSubmitting(false);
@@ -87,7 +87,7 @@ function AccountFlow() {
       setUser(user);
       await afterAuth();
     } catch (err) {
-      setError(mapError(err, t));
+      setError(signInErrorText(err, t));
     } finally {
       setIsSubmitting(false);
     }
@@ -147,19 +147,6 @@ function AccountFlow() {
       </Button>
     </div>
   );
-}
-
-function mapError(err: unknown, t: ReturnType<typeof useTranslations<"auth">>): string {
-  if (err instanceof ApiError) {
-    if (err.code === "OTP_INVALID") return t("otp.invalid");
-    if (err.code === "OTP_RATE_LIMITED") {
-      const seconds = typeof err.details?.retryAfterSeconds === "number" ? err.details.retryAfterSeconds : 60;
-      return t("otp.rateLimited", { seconds });
-    }
-    if (err.code === "INVALID_CREDENTIALS") return t("password.invalidCredentials");
-    return t("welcome.googleAuthFailed");
-  }
-  return "Something went wrong. Please try again.";
 }
 
 export default function AccountPage() {

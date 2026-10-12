@@ -166,7 +166,9 @@
       "resendIn": "Resend in {seconds, number}s",
       "verify": "Verify",
       "invalid": "That code is incorrect or has expired.",
-      "rateLimited": "Too many attempts. Try again in {seconds, number}s."
+      "rateLimited": "Too many attempts. Try again in {seconds, number}s.",
+      "rateLimitedMinutes": "Too many attempts. Try again in about {minutes, number} min.",
+      "genericError": "Something went wrong. Please try again."
     },
     "password": {
       "usernameLabel": "Username",
