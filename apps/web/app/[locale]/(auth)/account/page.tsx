@@ -135,7 +135,7 @@ function AccountFlow() {
         <h1 className="text-page-title text-text-primary">{t("otp.title")}</h1>
         <p className="mt-1 text-body text-text-secondary">{t("otp.subtitle", { identifier })}</p>
       </div>
-      <OtpInput value={code} onChange={setCode} errorMessage={error ?? undefined} disabled={isSubmitting} />
+      <OtpInput value={code} onChange={setCode} errorMessage={error ?? undefined} disabled={isSubmitting} label={locale === "fa" ? "کد یک‌بارمصرف" : "One-time passcode"} />
       <Button variant="primary" isLoading={isSubmitting} disabled={code.length !== 6} onClick={verify}>
         {t("otp.verify")}
       </Button>

@@ -190,7 +190,7 @@ const richPet = async () => {
     const color = `خاکستری آبی یکدست (${stamp})`;
     await go(petBase);
     await page.getByRole("link", { name: "ویرایش مشخصات" }).first().click();
-    step("edit form opens in place", await page.getByLabel("رنگ و نشانه‌های ظاهری").isVisible({ timeout: 8000 }).catch(() => false), page.url().replace(BASE, ""));
+    step("edit form opens in place", await page.getByLabel("رنگ و نشانه‌های ظاهری").waitFor({ state: "visible", timeout: 8000 }).then(() => true).catch(() => false), page.url().replace(BASE, ""));
     const field = page.getByLabel("رنگ و نشانه‌های ظاهری");
     await field.fill(color);
     await page.getByRole("button", { name: "ذخیره" }).first().click();

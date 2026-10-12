@@ -160,8 +160,8 @@ export function PetExpensesView({ petId }: { petId: string }) {
         <EmptyState title={c.emptyTitle} description={c.emptyBody} actionLabel={c.add} onAction={() => setForm("new")} />
       ) : (
         <>
-          <dl className="grid gap-4 sm:grid-cols-3">
-            <Stat label={c.total} value={money(data.totalIrr)} strong />
+          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            <Stat label={c.total} value={money(data.totalIrr)} strong className="col-span-2 sm:col-span-1" />
             <Stat label={c.monthlyAverage} value={money(elapsedMonths > 0 ? Math.round(data.totalIrr / elapsedMonths) : 0)} />
             <Stat label={c.entriesCount} value={n(data.entries.length)} />
           </dl>
@@ -192,8 +192,8 @@ export function PetExpensesView({ petId }: { petId: string }) {
               <ol className="flex h-40 items-end gap-1" aria-label={c.byMonth}>
                 {months.map((amount, i) => (
                   <li key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1" aria-label={`${monthName(system, i + 1, locale)}: ${money(amount)}`}>
-                    <div className="w-full bg-brand-solid/80" style={{ height: `${amount === 0 ? 0 : Math.max(4, Math.round((amount / maxMonth) * 100))}%` }} title={money(amount)} />
-                    <span className="text-[10px] leading-none text-text-secondary">{monthName(system, i + 1, locale).slice(0, 3)}</span>
+                    <div className="w-full bg-brand-solid opacity-80" style={{ height: `${amount === 0 ? 0 : Math.max(4, Math.round((amount / maxMonth) * 100))}%` }} title={money(amount)} />
+                    <span className="text-[10px] leading-none text-text-secondary" aria-hidden="true"><span className="hidden lg:inline">{monthName(system, i + 1, locale)}</span><span className="lg:hidden">{localizeDigits(i + 1, locale)}</span></span>
                   </li>
                 ))}
               </ol>
@@ -248,9 +248,9 @@ export function PetExpensesView({ petId }: { petId: string }) {
   );
 }
 
-function Stat({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+function Stat({ label, value, strong, className = "" }: { label: string; value: string; strong?: boolean; className?: string }) {
   return (
-    <div className="split-panel">
+    <div className={"split-panel " + className}>
       <dt className="text-sm text-text-secondary">{label}</dt>
       <dd className={strong ? "mt-1 text-2xl font-bold text-text-primary" : "mt-1 text-xl font-semibold text-text-primary"}>{value}</dd>
     </div>
