@@ -21,6 +21,7 @@ const copy = {
     memories: "خاطرات",
     activity: "فعالیت",
     travel: "سفر",
+    expenses: "هزینه‌ها",
     edit: "ویرایش مشخصات",
     unknownBreed: "نژاد ثبت نشده",
     unknownAge: "سن ثبت نشده",
@@ -48,6 +49,7 @@ const copy = {
     memories: "Memories",
     activity: "Activity",
     travel: "Travel",
+    expenses: "Expenses",
     edit: "Edit identity",
     unknownBreed: "Breed not recorded",
     unknownAge: "Age not recorded",
@@ -76,6 +78,7 @@ const sections = [
   { key: "memories", suffix: "/memories" },
   { key: "activity", suffix: "/life-timeline" },
   { key: "travel", suffix: "/travel" },
+  { key: "expenses", suffix: "/expenses" },
 ] as const;
 
 export function PetContextShell({ petId, children }: { petId: string; children: ReactNode }) {
@@ -119,6 +122,8 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
     if (section.key === "health" || section.key === "documents") return access.canViewHealth;
     if (section.key === "care") return access.canViewCareProfile;
     if (section.key === "travel") return !isMemorial;
+    // Spending is household money: only for a pet in your own household, never one shared with you.
+    if (section.key === "expenses") return householdPets.some((p) => p.id === petId);
     return true;
   });
   const lifecycle = lifecyclePresentation(pet.lifecycleStatus, c);
