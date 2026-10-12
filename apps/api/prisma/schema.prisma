@@ -1487,6 +1487,7 @@ model Pet {
   BookingWaitlistEntry  BookingWaitlistEntry[]
   healthShareLinks      HealthShareLink[]
   careSuggestions       CareSuggestion[]
+  expenses              PetExpense[]
 
   @@index([householdId])
   @@map("pets")
@@ -11008,4 +11009,38 @@ model ExternalPetPolicyEvidence {
   @@index([stayId, createdAt])
   @@index([status, createdAt])
   @@map("external_pet_policy_evidence")
+}
+
+enum PetExpenseCategory {
+  FOOD
+  VET
+  MEDICATION
+  GROOMING
+  TRAINING
+  BOARDING
+  SUPPLIES
+  INSURANCE
+  TRANSPORT
+  OTHER
+}
+
+/// A spend the household recorded by hand for one pet (food bought outside the app, a vet bill
+/// elsewhere). Bookings and shop orders made in PET LIFE are never copied here: the expenses API
+/// reads them live from Booking/OrderItem, so this table only ever holds what the app could not know.
+/// IRR integer like every other money column; householdId is the pet's household when recorded.
+model PetExpense {
+  id              String             @id @default(uuid()) @db.Uuid
+  petId           String             @db.Uuid
+  pet             Pet                @relation(fields: [petId], references: [id], onDelete: Cascade)
+  householdId     String             @db.Uuid
+  createdByUserId String             @db.Uuid
+  category        PetExpenseCategory
+  amountIrr       Int
+  spentOn         DateTime           @db.Date
+  note            String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([petId, spentOn])
+  @@map("pet_expenses")
 }
