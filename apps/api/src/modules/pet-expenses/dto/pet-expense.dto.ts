@@ -44,13 +44,3 @@ export class UpdatePetExpenseDto {
   @Length(0, 300)
   note?: string;
 }
-
-export class ListPetExpensesQueryDto {
-  @IsOptional()
-  @Matches(DAY)
-  from?: string;
-
-  @IsOptional()
-  @Matches(DAY)
-  to?: string;
-}

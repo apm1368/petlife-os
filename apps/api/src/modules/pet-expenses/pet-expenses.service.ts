@@ -2,8 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { BookingStatus, OrderStatus, PetExpenseCategory, ServiceCategory, type PetExpense } from "@prisma/client";
 import type { PetExpenseEntryDto, PetExpenseSource, PetExpensesDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
-import type { CreatePetExpenseDto, ListPetExpensesQueryDto, UpdatePetExpenseDto } from "./dto/pet-expense.dto";
+import { isHouseholdMember } from "../../common/auth/household-member";
+import { NotFoundApiException, PetAccessDeniedException } from "../../common/errors/api-exception";
+import { dayKey, parseDay, parseDayRange } from "../../common/dates/day-range";
+import type { CreatePetExpenseDto, UpdatePetExpenseDto } from "./dto/pet-expense.dto";
+import type { DayRangeQueryDto } from "../../common/dates/day-range-query.dto";
 
 /** Bookings that represent money the household committed to; holds, requests and cancellations never count. */
 const SPENT_BOOKING_STATUSES: BookingStatus[] = [
@@ -33,19 +36,6 @@ const CATEGORY_BY_SERVICE: Record<ServiceCategory, PetExpenseCategory> = {
   OTHER: PetExpenseCategory.OTHER,
 };
 
-const MAX_RANGE_DAYS = 400;
-const DAY_MS = 86_400_000;
-
-function dayKey(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function parseDay(value: string): Date {
-  const date = new Date(value + "T00:00:00.000Z");
-  if (Number.isNaN(date.getTime()) || dayKey(date) !== value) throw new ValidationApiException({ field: "date", value });
-  return date;
-}
-
 @Injectable()
 export class PetExpensesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -58,27 +48,13 @@ export class PetExpensesService {
   private async householdPet(petId: string, userId: string) {
     const pet = await this.prisma.pet.findUnique({ where: { id: petId }, select: { id: true, householdId: true } });
     if (!pet) throw new NotFoundApiException("Pet");
-    const member = await this.prisma.householdMember.findUnique({
-      where: { householdId_userId: { householdId: pet.householdId, userId } },
-      select: { id: true },
-    });
-    if (!member) throw new PetAccessDeniedException({ petId, reason: "HOUSEHOLD_MEMBERS_ONLY" });
+    if (!(await isHouseholdMember(this.prisma, pet.householdId, userId))) throw new PetAccessDeniedException({ petId, reason: "HOUSEHOLD_MEMBERS_ONLY" });
     return pet;
   }
 
-  private range(query: ListPetExpensesQueryDto): { from: Date; to: Date } {
-    const now = new Date();
-    const from = query.from ? parseDay(query.from) : new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
-    const to = query.to ? parseDay(query.to) : new Date(Date.UTC(now.getUTCFullYear(), 11, 31));
-    if (to < from) throw new ValidationApiException({ field: "to", reason: "BEFORE_FROM" });
-    if ((to.getTime() - from.getTime()) / DAY_MS > MAX_RANGE_DAYS) throw new ValidationApiException({ field: "to", reason: "RANGE_TOO_LONG", maxDays: MAX_RANGE_DAYS });
-    return { from, to };
-  }
-
-  async list(petId: string, userId: string, query: ListPetExpensesQueryDto): Promise<PetExpensesDto> {
+  async list(petId: string, userId: string, query: DayRangeQueryDto): Promise<PetExpensesDto> {
     const pet = await this.householdPet(petId, userId);
-    const { from, to } = this.range(query);
-    const toExclusive = new Date(to.getTime() + DAY_MS);
+    const { from, to, toExclusive } = parseDayRange(query);
 
     const [manual, bookings, orderItems] = await Promise.all([
       this.prisma.petExpense.findMany({

@@ -6219,3 +6219,22 @@ export interface PetExpensesDto {
   bySource: { source: PetExpenseSource; amountIrr: number }[];
   entries: PetExpenseEntryDto[];
 }
+
+// ---------------------------------------------------------------------------
+// Pet year in review
+// ---------------------------------------------------------------------------
+
+/**
+ * A derived recap of one period. A section is null when the reader may not see it (health without
+ * canViewHealth, care without canViewCareProfile, household-private services/trips for non-members),
+ * so the page can leave it out rather than show a misleading zero.
+ */
+export interface PetYearReviewDto {
+  from: string;
+  to: string;
+  memories: { total: number; photos: number; highlights: { id: string; title: string; occurredAt: string }[] };
+  care: { completed: number; topTypes: { type: string; count: number }[] } | null;
+  services: { completed: number; byCategory: { category: string; count: number }[] } | null;
+  trips: { count: number; destinations: string[] } | null;
+  health: { visits: number } | null;
+}
