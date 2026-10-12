@@ -233,7 +233,7 @@ function ContactChangeForm({ kind, initial, onDone }: { kind: ContactKind; initi
           <p className="text-body text-text-primary">
             {t("کد فرستاده‌شده به", "Enter the code sent to")} <span dir="ltr">{value}</span>
           </p>
-          <OtpInput value={code} onChange={setCode} disabled={busy} />
+          <OtpInput value={code} onChange={setCode} disabled={busy} label={t("کد یک‌بارمصرف", "One-time passcode")} />
         </>
       )}
       {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}

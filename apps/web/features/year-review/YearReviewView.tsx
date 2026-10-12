@@ -127,6 +127,8 @@ export function YearReviewView({ petId }: { petId: string }) {
     ...(review.trips ? [{ value: review.trips.count, label: c.trips }] : []),
   ];
   const isEmpty = stats.every((s) => s.value === 0);
+  // Six tiles of zero read as an empty dashboard: show what happened, keeping the memory count as the anchor.
+  const shownStats = stats.filter((s, i) => i === 0 || s.value > 0);
   const birthday = !isMemorial && pet.birthDate ? nextBirthday(pet.birthDate.slice(0, 10), today) : null;
   const human = humanYears(pet.species, petAgeMonths(pet));
 
@@ -168,7 +170,7 @@ export function YearReviewView({ petId }: { petId: string }) {
       ) : (
         <>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {stats.map((stat) => (
+            {shownStats.map((stat) => (
               <li key={stat.label} className="split-panel text-center">
                 <p className="text-3xl font-bold text-text-primary">{n(stat.value)}</p>
                 <p className="mt-1 text-sm text-text-secondary">{stat.label}</p>

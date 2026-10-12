@@ -10,13 +10,15 @@ export interface OtpInputProps {
   onChange: (value: string) => void;
   errorMessage?: string;
   disabled?: boolean;
+  /** Accessible name of the digit group, in the page language. */
+  label?: string;
 }
 
 /**
  * Digit-per-box OTP input. Keeps a single string of state (not per-box)
  * so callers never need to reassemble the code, and paste fills every box.
  */
-export function OtpInput({ length = 6, value, onChange, errorMessage, disabled }: OtpInputProps) {
+export function OtpInput({ length = 6, value, onChange, errorMessage, disabled, label = "One-time passcode" }: OtpInputProps) {
   const refs = useRef<Array<HTMLInputElement | null>>([]);
 
   const digits = Array.from({ length }, (_, i) => value[i] ?? "");
@@ -47,7 +49,7 @@ export function OtpInput({ length = 6, value, onChange, errorMessage, disabled }
 
   return (
     <div>
-      <div className="flex gap-2" dir="ltr" role="group" aria-label="One-time passcode">
+      <div className="flex gap-2" dir="ltr" role="group" aria-label={label}>
         {digits.map((digit, index) => (
           <input
             key={index}
