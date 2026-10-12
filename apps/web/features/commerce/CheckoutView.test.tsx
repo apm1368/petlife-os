@@ -355,6 +355,29 @@ describe("CheckoutView", () => {
     expect((screen.getByText("Continue").closest("button") as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it("reads the checkout total only after the delivery choice is saved", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(commerceService.createCheckout).mockResolvedValue(CHECKOUT);
+    vi.mocked(commerceService.getShippingOptions).mockResolvedValue(SHIPPING_OPTIONS);
+    let saveSelection!: (value: typeof SHIPPING_OPTIONS) => void;
+    vi.mocked(commerceService.selectShippingQuote).mockReturnValue(new Promise((resolve) => { saveSelection = resolve as never; }));
+    vi.mocked(commerceService.getCheckout).mockResolvedValue({ ...CHECKOUT, deliveryAmount: 350_000, totalAmount: 1_600_000 });
+    renderWithIntl(<CheckoutView />);
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
+    fireEvent.click(screen.getByText("Continue"));
+    await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
+    fireEvent.click(screen.getByText("Continue"));
+    await waitFor(() => expect(screen.getByText("Standard delivery")).toBeTruthy());
+    vi.mocked(commerceService.getCheckout).mockClear();
+    fireEvent.click(screen.getByText("Standard delivery"));
+    await waitFor(() => expect(commerceService.selectShippingQuote).toHaveBeenCalled());
+    expect(commerceService.getCheckout).not.toHaveBeenCalled();
+    saveSelection([{ ...SHIPPING_OPTIONS[0]!, quotes: [{ ...SHIPPING_OPTIONS[0]!.quotes[0]!, status: "SELECTED" as never }] }]);
+    await waitFor(() => expect(commerceService.getCheckout).toHaveBeenCalledWith("checkout-1"));
+  });
+
   it("refreshes shipping options on demand rather than relying on a frontend-only timer", async () => {
     vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
     vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);

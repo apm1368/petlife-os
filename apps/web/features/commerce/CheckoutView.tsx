@@ -167,9 +167,11 @@ export function CheckoutView() {
     setShippingQuoteSelectingId(quoteId);
     setError(null);
     try {
-      const [options, updatedCheckout] = await Promise.all([commerceService.selectShippingQuote(checkout.id, quoteId), commerceService.getCheckout(checkout.id)]);
+      // Sequential on purpose: read the checkout only after the selection is saved, or the summary and the
+      // payment amount show the pre-delivery total while the server charges the new one.
+      const options = await commerceService.selectShippingQuote(checkout.id, quoteId);
       setShippingOptions(options);
-      setCheckout(updatedCheckout);
+      setCheckout(await commerceService.getCheckout(checkout.id));
     } catch (err) {
       setError(apiErrorText(err, locale, t("createFailed")));
     } finally {
@@ -183,6 +185,7 @@ export function CheckoutView() {
     try {
       const options = await commerceService.refreshShippingOptions(checkout.id);
       setShippingOptions(options);
+      setCheckout(await commerceService.getCheckout(checkout.id));
     } catch (err) {
       setError(apiErrorText(err, locale, t("createFailed")));
     }
