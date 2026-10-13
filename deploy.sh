@@ -73,6 +73,7 @@ pnpm --filter @petlife/api db:migrate:deploy
 # Snapshot the running build so a failed build or health check can put it back. Migrations are additive-only
 # (no destructive migrations), so the previous build keeps working against the migrated schema.
 mkdir -p "$RELEASE_DIR"
+log "disk before snapshot: $(df -h --output=avail,pcent / | tail -1 | xargs)"
 have_previous=false
 if [ -f apps/api/dist/main.js ] && [ -f apps/web/.next/BUILD_ID ]; then
   rm -rf "$RELEASE_DIR/previous.tmp"
