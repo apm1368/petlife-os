@@ -41,6 +41,14 @@ describe("object keys handed back by clients", () => {
     }
   });
 
+  it("passes absolute URLs and /images/ paths through unchanged; an unknown prefix still throws", () => {
+    expect(resolveObjectUrl("https://cdn.example/x.jpg")).toBe("https://cdn.example/x.jpg");
+    expect(resolveObjectUrl("http://cdn.example/x.jpg")).toBe("http://cdn.example/x.jpg");
+    expect(resolveObjectUrl("/images/experience/grooming-hero.png")).toBe("/images/experience/grooming-hero.png");
+    expect(resolveObjectUrls(["https://cdn.example/x.jpg"])).toEqual(["https://cdn.example/x.jpg"]);
+    expect(() => resolveObjectUrl(`legacy-media/${u}/${v}.jpg`)).toThrow();
+  });
+
   it("a private key that reached a gallery is dropped, not a 500 for every reader", () => {
     const err = jest.spyOn(console, "error").mockImplementation(() => undefined);
     expect(resolveObjectUrls([`health-documents/${u}/${v}.pdf`, `community-media/${u}/${v}.jpg`])).toEqual([expect.stringContaining(`community-media/${u}/${v}.jpg`)]);

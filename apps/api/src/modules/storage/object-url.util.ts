@@ -45,9 +45,13 @@ export const PRIVATE_OBJECT_KEY_PREFIXES = [
   "partner-verification/",
 ] as const;
 
+/** Repository-owned static assets (demo/QA media shipped with the web app) and absolute URLs are not object keys. */
+function isPassThrough(key: string): boolean {
+  return key.startsWith("/images/") || /^https?:\/\//i.test(key);
+}
+
 function isPrivateKey(key: string): boolean {
-  // Repository-owned static assets (demo/QA media shipped with the web app) are public paths, not object keys.
-  if (key.startsWith("/images/")) return false;
+  if (isPassThrough(key)) return false;
   return !PUBLIC_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
@@ -70,8 +74,7 @@ export function isPrivateUploadPath(rawPath: string): boolean {
 
 export function resolveObjectUrl(key: string | null): string | null {
   if (!key) return null;
-  // Repository-owned static assets (demo/QA media shipped with the web app) are already public paths.
-  if (key.startsWith("/images/")) return key;
+  if (isPassThrough(key)) return key;
   if (isPrivateKey(key)) {
     throw new Error(`resolveObjectUrl() must never be called with a private object key (got "${key}") — mint a per-request signed download instead.`);
   }
