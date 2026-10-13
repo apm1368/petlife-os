@@ -9,6 +9,12 @@ for env_file in apps/api/.env apps/web/.env; do
   [ -f "$env_file" ] && chmod 600 "$env_file"
 done
 
+# docker-compose.yml takes data-service credentials from the root .env; refuse to fall back to the dev defaults.
+for var in POSTGRES_PASSWORD REDIS_PASSWORD MINIO_ROOT_USER MINIO_ROOT_PASSWORD; do
+  grep -q "^${var}=." .env 2>/dev/null || { echo "deploy: $var missing from $APP_DIR/.env" >&2; exit 1; }
+done
+chmod 600 .env
+
 export CI=true
 
 # Data services: start them if they are down, and keep the running containers' restart policy in sync with
