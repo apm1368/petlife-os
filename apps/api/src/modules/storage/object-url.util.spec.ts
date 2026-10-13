@@ -1,4 +1,4 @@
-import { isPrivateUploadPath, PRIVATE_OBJECT_KEY_PREFIXES, resolveObjectUrl, resolveObjectUrls } from "./object-url.util";
+import { isPrivateUploadPath, PRIVATE_OBJECT_KEY_PREFIXES, PUBLIC_OBJECT_KEY_PREFIXES, resolveObjectUrl, resolveObjectUrls } from "./object-url.util";
 import { isObjectKeyFor } from "../../common/storage-keys/object-key.validator";
 
 describe("isPrivateUploadPath (local /uploads static mount guard)", () => {
@@ -8,6 +8,14 @@ describe("isPrivateUploadPath (local /uploads static mount guard)", () => {
     expect(isPrivateUploadPath("/animal-support-verification/org1/doc.pdf")).toBe(true);
   });
 
+  it("treats booking/support attachments, partner verification and any unknown prefix as private", () => {
+    expect(isPrivateUploadPath("/booking-attachments/b1/file.pdf")).toBe(true);
+    expect(isPrivateUploadPath("/support-attachments/c1/file.pdf")).toBe(true);
+    expect(isPrivateUploadPath("/partner-verification/provider/p1/file.pdf")).toBe(true);
+    expect(isPrivateUploadPath("/some-new-uploader/x/file.pdf")).toBe(true);
+    expect(() => resolveObjectUrl("booking-attachments/b1/file.pdf")).toThrow();
+  });
+
   it("can't be bypassed with dot segments, repeated slashes, encoding or backslashes", () => {
     for (const path of ["/./health-documents/x.pdf", "//health-documents/x.pdf", "/pets/../health-documents/x.pdf", "/%2e/account-exports/x.json", "/%2E%2E/animal-support-verification/x.pdf", "/.\\\\health-documents\\\\x.pdf", "/%E0%A4%A"]) {
       expect(isPrivateUploadPath(path)).toBe(true);
@@ -15,8 +23,9 @@ describe("isPrivateUploadPath (local /uploads static mount guard)", () => {
   });
 
   it("leaves public media alone", () => {
+    for (const prefix of PUBLIC_OBJECT_KEY_PREFIXES) expect(isPrivateUploadPath(`/${prefix}abc/img.webp`)).toBe(false);
     expect(isPrivateUploadPath("/pets/p1/photo.jpg")).toBe(false);
-    expect(isPrivateUploadPath("/community/u1/img.webp")).toBe(false);
+    expect(isPrivateUploadPath("/community-media/u1/img.webp")).toBe(false);
   });
 });
 

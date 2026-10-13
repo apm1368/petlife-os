@@ -9,20 +9,46 @@ import { posix } from "node:path";
 const DEFAULT_STORAGE_PUBLIC_BASE_URL = "http://localhost:4000/uploads";
 
 /**
- * Every object-key prefix StorageService ever mints for content that must
- * never be reachable via a plain, permanent, unauthenticated URL (Handoff 20
- * release-critical privacy check). A mapper for one of these must instead
- * mint a per-request signed download (see MedicalDocumentService.getDownload,
- * PetObservationService.getDownload, PetMemoryService.getMediaDownload) —
- * resolveObjectUrl refuses to run rather than silently returning a public
- * URL for a private key, so a future mapper bug fails loudly instead of
- * leaking. Also used by main.ts to keep the local-dev static file mount from
- * ever serving one of these prefixes.
+ * The object-key prefixes StorageService mints for content that is public by design (a pet's photo, a
+ * public listing's images, CMS media…). Everything else is private: an allow-list, so a new uploader is
+ * private until someone deliberately adds its prefix here — the earlier deny-list silently left
+ * booking attachments, support attachments and partner verification documents publicly reachable.
+ * A private key must be read through a per-request signed download (see MedicalDocumentService.getDownload,
+ * PetObservationService.getDownload, PetMemoryService.getMediaDownload); resolveObjectUrl refuses to run
+ * for one rather than silently returning a public URL, so a mapper bug fails loudly instead of leaking.
+ * Also used by main.ts to keep the local-dev static file mount from ever serving a private key.
  */
-export const PRIVATE_OBJECT_KEY_PREFIXES = ["health-documents/", "pet-observations/", "pet-memories-private/", "account-exports/", "animal-support-verification/"] as const;
+export const PUBLIC_OBJECT_KEY_PREFIXES = [
+  "pets/",
+  "cms/",
+  "lost-pet-photos/",
+  "lost-pet-sightings/",
+  "pet-memories-public/",
+  "animal-support-orgs/",
+  "insurance-providers/",
+  "pet-friendly-places/",
+  "animal-support-evidence/",
+  "community-media/",
+  "support-need-images/",
+  "travel-listing-images/",
+] as const;
+
+/** Private prefixes StorageService mints today — documentation and tests only; privacy is decided by PUBLIC_OBJECT_KEY_PREFIXES. */
+export const PRIVATE_OBJECT_KEY_PREFIXES = [
+  "health-documents/",
+  "pet-observations/",
+  "pet-memories-private/",
+  "account-exports/",
+  "animal-support-verification/",
+  "booking-attachments/",
+  "support-attachments/",
+  "partner-verification/",
+] as const;
 
 function isPrivateKey(key: string): boolean {
-  return PRIVATE_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
+  // Repository-owned static assets (demo/QA media shipped with the web app) are public paths, not object keys.
+  if (key.startsWith("/images/")) return false;
+  return !PUBLIC_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
 /**
