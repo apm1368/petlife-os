@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { normalizeIranPhone } from "@petlife/validation";
 import { Button, Input, OtpInput } from "@petlife/ui";
 import { PasswordInput } from "@/features/auth/PasswordInput";
 import { authService } from "@/services/auth.service";
@@ -47,7 +48,13 @@ function AccountFlow() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await authService.requestOtp(identifier);
+      const normalizedIdentifier = method === "phone" ? normalizeIranPhone(identifier) : identifier;
+      if (!normalizedIdentifier) {
+        setError(t("identifier.invalidPhone"));
+        return;
+      }
+      await authService.requestOtp(normalizedIdentifier);
+      setIdentifier(normalizedIdentifier);
       setStage("otp");
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
