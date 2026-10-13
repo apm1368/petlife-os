@@ -50,7 +50,11 @@ export class HomeService {
       include: { pet: true },
     });
 
-    const activePet = preference?.pet ?? null;
+    // An active-pet preference outlives access (a revoked or expired grant, or a pre-existing membership-only
+    // grant that was withdrawn): never hand back a pet the caller may no longer see.
+    const preferredPet = preference?.pet ?? null;
+    const access = preferredPet ? await this.petAccess.getEffectivePermissions(preferredPet.id, userId) : null;
+    const activePet = preferredPet && access?.canViewIdentity ? preferredPet : null;
 
     if (!activePet) {
       const { primaryAction, secondaryActions } = this.ranking.rank({
@@ -89,7 +93,6 @@ export class HomeService {
     ).map((row) => row.interest as PetInterest);
 
     // Never query health/care data the caller lacks permission to see — Home must not leak it, even indirectly via ranking.
-    const access = await this.petAccess.getEffectivePermissions(activePet.id, userId);
 
     const health: HomeRankingHealthInput = access?.canViewHealth
       ? await this.healthSummary.getSummary(activePet.id).then((summary) => ({
@@ -107,7 +110,7 @@ export class HomeService {
 
     // Scoped to activePet.id specifically (never "any booking in the household") so
     // switching the active pet never leaks one pet's upcoming visit into another's context.
-    const upcomingBooking = await this.prisma.booking.findFirst({
+    const upcomingBooking = !access?.canBookCare ? null : await this.prisma.booking.findFirst({
       where: { petId: activePet.id, bookingStatus: BookingStatus.CONFIRMED, startAt: { gte: new Date() } },
       orderBy: { startAt: "asc" },
     });

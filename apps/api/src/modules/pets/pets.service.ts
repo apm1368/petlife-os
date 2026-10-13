@@ -76,7 +76,7 @@ export class PetsService {
         },
       });
 
-      await this.petAccess.applyHouseholdDefaults(pet.id, householdId, tx);
+      await this.petAccess.applyHouseholdDefaults(pet.id, householdId, creatorUserId, tx);
 
       const hasActivePet = await tx.activePetPreference.findUnique({
         where: { userId_householdId: { userId: creatorUserId, householdId } },
@@ -109,8 +109,11 @@ export class PetsService {
     return pet;
   }
 
-  async listForHousehold(householdId: string) {
-    return this.prisma.pet.findMany({ where: { householdId, deletedAt: null }, orderBy: { createdAt: "asc" } });
+  /** Household membership alone shows nothing: only pets the caller holds an active canViewIdentity grant for. */
+  async listForHousehold(householdId: string, userId: string) {
+    const pets = await this.prisma.pet.findMany({ where: { householdId, deletedAt: null }, orderBy: { createdAt: "asc" } });
+    const visible = await Promise.all(pets.map(async (pet) => (await this.petAccess.getEffectivePermissions(pet.id, userId))?.canViewIdentity === true));
+    return pets.filter((_, i) => visible[i]);
   }
 
   async update(id: string, dto: UpdatePetDto) {

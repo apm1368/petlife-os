@@ -9,9 +9,9 @@ const OWNER_PRESET: PetAccessFlags = {
   canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true,
   canViewCareProfile: true, canEditCareProfile: true, canViewLocation: true, canManageAccess: true, canRecordClinicalData: false,
 };
-const FAMILY_PRESET: PetAccessFlags = {
-  canViewIdentity: true, canEditIdentity: false, canViewHealth: true, canEditHealth: false, canBookCare: true,
-  canViewCareProfile: true, canEditCareProfile: false, canViewLocation: true, canManageAccess: false, canRecordClinicalData: false,
+const CREATOR_IDENTITY_PRESET: PetAccessFlags = {
+  canViewIdentity: true, canEditIdentity: true, canViewHealth: false, canEditHealth: false, canBookCare: false,
+  canViewCareProfile: false, canEditCareProfile: false, canViewLocation: false, canManageAccess: false, canRecordClinicalData: false,
 };
 const NO_ACCESS_PRESET: PetAccessFlags = {
   canViewIdentity: false, canEditIdentity: false, canViewHealth: false, canEditHealth: false, canBookCare: false,
@@ -32,15 +32,24 @@ function isGrantActive(grant: Pick<Grant, "startsAt" | "expiresAt" | "revokedAt"
 export class PetAccessService {
   constructor(private readonly prisma: PrismaService, private readonly events?: DomainEventsService) {}
 
-  async applyHouseholdDefaults(petId: string, householdId: string, client: QueryClient = this.prisma): Promise<void> {
+  /**
+   * Automatic grants for a newly created pet. Only household OWNERs get access automatically (the full owner
+   * preset); membership alone never implies seeing health, location, documents or managing care — an owner
+   * shares those explicitly. A FAMILY member who created the pet themselves gets identity only (see and edit
+   * the pet's profile), so they are not locked out of what they just added.
+   */
+  async applyHouseholdDefaults(petId: string, householdId: string, creatorUserId: string, client: QueryClient = this.prisma): Promise<void> {
     const members = await client.householdMember.findMany({ where: { householdId } });
-    if (!members.length) return;
-    const existing = await client.petAccessGrant.findMany({ where: { petId, userId: { in: members.map((m) => m.userId) }, source: PetAccessSource.HOUSEHOLD } });
+    const recipients = members
+      .map((member) => member.role === HouseholdRole.OWNER ? { userId: member.userId, flags: OWNER_PRESET } : member.userId === creatorUserId ? { userId: member.userId, flags: CREATOR_IDENTITY_PRESET } : null)
+      .filter((r): r is { userId: string; flags: PetAccessFlags } => r !== null);
+    if (!recipients.length) return;
+    const existing = await client.petAccessGrant.findMany({ where: { petId, userId: { in: recipients.map((r) => r.userId) }, source: PetAccessSource.HOUSEHOLD } });
     const now = new Date();
     const activeUsers = new Set(existing.filter((grant) => isGrantActive(grant, now)).map((grant) => grant.userId));
-    const missing = members.filter((member) => !activeUsers.has(member.userId));
+    const missing = recipients.filter((r) => !activeUsers.has(r.userId));
     if (!missing.length) return;
-    await client.petAccessGrant.createMany({ data: missing.map((member) => ({ petId, userId: member.userId, source: PetAccessSource.HOUSEHOLD, ...(member.role === HouseholdRole.OWNER ? OWNER_PRESET : FAMILY_PRESET) })) });
+    await client.petAccessGrant.createMany({ data: missing.map((r) => ({ petId, userId: r.userId, source: PetAccessSource.HOUSEHOLD, ...r.flags })) });
   }
 
   async getEffectivePermissions(petId: string, userId: string, client: QueryClient = this.prisma): Promise<PetAccessFlags | null> {
