@@ -10,10 +10,12 @@ services:
     image: postgis/postgis:16-3.4-alpine
     environment:
       POSTGRES_USER: petlife
-      POSTGRES_PASSWORD: petlife
+      # Only applied when the data volume is first initialised; on an existing volume rotate with ALTER USER.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-petlife}
       POSTGRES_DB: petlife_os
+    # Loopback only: Docker's published ports bypass ufw, so a bare "5432:5432" is open to the internet.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - petlife_postgres:/var/lib/postgresql/data
     healthcheck:
@@ -25,24 +27,28 @@ services:
   redis:
     restart: unless-stopped
     image: redis:7-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-petlife}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\""]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   minio:
     restart: unless-stopped
-    image: minio/minio:latest
+    # Pinned to the release the canonical server already runs; bump deliberately, never via :latest.
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: petlife
-      MINIO_ROOT_PASSWORD: petlife123
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-petlife}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-petlife123}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - petlife_minio:/data
 

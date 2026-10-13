@@ -789,6 +789,16 @@ async function main() {
   if (process.env.NODE_ENV === "production") {
     throw new Error("prisma/seed.ts must never run with NODE_ENV=production — it seeds demo/dev-only data, including a hardcoded demo account password.");
   }
+  // The canonical staging server holds real accounts in a database whose name does not end in "_test", and
+  // NODE_ENV there is not "production" — so the NODE_ENV check alone never protected it. Only throwaway
+  // *_test databases are seeded implicitly; any other target must be named explicitly.
+  const databaseName = new URL(process.env.DATABASE_URL ?? "postgresql://unset/").pathname.replace(/^\//, "");
+  if (!databaseName.endsWith("_test") && process.env.SEED_ALLOW_DATABASE !== databaseName) {
+    throw new Error(
+      `prisma/seed.ts refuses to seed database "${databaseName}": only *_test databases are seeded implicitly. ` +
+        `To seed it anyway (e.g. a local dev database), set SEED_ALLOW_DATABASE=${databaseName}.`,
+    );
+  }
 
   await seedSubscriptions();
 
