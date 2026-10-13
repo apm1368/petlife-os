@@ -5502,6 +5502,7 @@ Errors always look like:
 
 ```bash
 pnpm install
+cp .env.example .env              # data-service credentials (dev defaults; servers use strong values)
 pnpm infra:up                    # postgres, redis, minio via docker-compose
 
 cp apps/api/.env.example apps/api/.env
