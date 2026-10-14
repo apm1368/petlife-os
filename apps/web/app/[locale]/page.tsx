@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isAppLocale } from "@/lib/i18n/config";
 import { HomeLanding } from "@/features/landing/HomeLanding";
-import "@/features/landing/landing.css";
-import "@/features/landing/home-landing.css";
 import "@/features/landing/park-landing.css";
+import "@/features/landing/park-story.css";
 import { landingCopy } from "@/features/landing/copy";
 
 export async function generateMetadata({

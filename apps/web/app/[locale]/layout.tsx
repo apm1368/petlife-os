@@ -9,6 +9,7 @@ import { inter, vazirmatn } from "@/lib/fonts";
 import "../globals.css";
 import { LocalReviewTools } from "@/features/local-preview/LocalReviewTools";
 import { ThemeSync } from "@/features/theme/ThemeSync";
+import { AuthModalOrigin } from "@/features/auth/AuthModalOrigin";
 import { PageMotion } from "@/features/motion/PageMotion";
 
 export function generateStaticParams() {
@@ -22,9 +23,11 @@ export const metadata: Metadata = {
 
 export default async function LocaleLayout({
   children,
+  modal,
   params,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
@@ -42,7 +45,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeSync /><ToastProvider><PageMotion><LocalReviewTools>{children}</LocalReviewTools></PageMotion></ToastProvider>
+          <ThemeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools>{children}{modal}</LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>
