@@ -31,12 +31,22 @@
 [lang="en"] .park-hero__copy h1 { font-size:clamp(26px,3.2vw,50px); line-height:1.3; margin-bottom:12px; }
 .park-hero__description { margin:0; font-size:clamp(14px,1.35vw,22px); line-height:1.7; font-weight:700; }
 .park-hero__subline { margin:5px 0 0; font-size:clamp(12px,1.05vw,16px); line-height:1.8; }
-.park-primary { display:inline-flex; justify-content:center; align-items:center; gap:12px; min-height:48px; padding:10px 34px; margin-top:18px; background:var(--campaign-plum); color:var(--campaign-inverse); border:1px solid var(--campaign-plum-strong); border-radius:999px; text-decoration:none; font-weight:750; font-size:15px; transition:background-color 160ms; }
-.park-primary:hover { background:var(--campaign-plum-strong); }
-.park-pavilion { position:absolute; height:17%; transform:translate(-50%,-25%); border-radius:12px; text-decoration:none; outline-offset:2px; }
+.park-primary { display:inline-flex; justify-content:center; align-items:center; gap:28px; min-height:54px; padding:12px 28px; margin-top:18px; background:var(--campaign-plum); color:var(--campaign-inverse); border:1px solid var(--campaign-plum-strong); border-radius:6px; text-decoration:none; font-weight:750; font-size:15px; transition:background-color 160ms,box-shadow 160ms; }
+.park-primary:hover { background:var(--campaign-plum-strong); box-shadow:inset 0 -3px var(--campaign-copper); }
+.park-primary svg,.park-secondary svg,.park-text-link svg,.park-moments__grid a svg { flex-shrink:0; transition:transform 160ms; }
+.park-primary:hover svg,.park-secondary:hover svg,.park-text-link:hover svg,.park-moments__grid a:hover svg { transform:translateX(3px); }
+[dir="rtl"] .park-primary:hover svg,[dir="rtl"] .park-secondary:hover svg,[dir="rtl"] .park-text-link:hover svg,[dir="rtl"] .park-moments__grid a:hover svg { transform:translateX(-3px); }
+.park-primary:active { background:var(--campaign-plum-strong); box-shadow:inset 0 -2px var(--campaign-copper); }
+.park-pavilions { position:absolute; inset:0; pointer-events:none; }
+.park-pavilion { pointer-events:auto; position:absolute; height:17%; transform:translate(-50%,-25%); border-radius:12px; text-decoration:none; outline-offset:2px; }
 .park-pavilion span { position:absolute; top:-26px; left:50%; transform:translateX(-50%); padding:6px 12px; background:var(--campaign-paper); color:var(--campaign-ink); border:1px solid var(--campaign-line); border-radius:7px; white-space:nowrap; font-size:13px; font-weight:700; opacity:0; transition:opacity 160ms; }
-.park-pavilion:hover,.park-pavilion:focus-visible { outline:3px solid var(--campaign-inverse); background:color-mix(in srgb,var(--tone) 13%,transparent); }
+.park-pavilion:focus-visible { outline:3px solid var(--campaign-inverse); }
 .park-pavilion:hover span,.park-pavilion:focus-visible span { opacity:1; }
+.park-pavilion__light { position:absolute; left:50%; width:24%; height:auto; transform:translate(-50%,-50%); color:var(--campaign-inverse); opacity:0; pointer-events:none; filter:drop-shadow(0 0 5px var(--tone)) drop-shadow(0 0 10px var(--campaign-gold)); }
+.park-pavilions[data-intro="true"] .park-pavilion__light { animation:park-light-welcome 1100ms ease-out both; animation-delay:var(--park-light-delay,0ms); }
+.park-pavilion:hover .park-pavilion__light,.park-pavilion:focus-visible .park-pavilion__light { opacity:1; animation:park-light-pulse 1800ms ease-in-out infinite; }
+@keyframes park-light-welcome { 0%,100% { opacity:0; } 40%,65% { opacity:1; } }
+@keyframes park-light-pulse { 0%,100% { opacity:.45; } 50% { opacity:1; } }
 .park-intro { padding:28px clamp(20px,4vw,56px) 32px; text-align:center; scroll-margin-top:20px; }
 .park-intro h2 { margin:0; font-size:clamp(26px,2.5vw,38px); line-height:1.65; font-weight:850; letter-spacing:-.025em; }
 .park-intro>p { margin:12px auto 24px; max-width:740px; color:var(--campaign-text); font-size:15px; line-height:1.9; }
@@ -75,7 +85,7 @@
   .park-partner-links { display:none; }
   .park-menu-toggle { display:flex; }
   .park-hero__copy { top:18px; }
-  .park-primary { margin-top:12px; min-height:42px; padding:8px 26px; font-size:14px; }
+  .park-primary { margin-top:12px; min-height:48px; padding:8px 26px; font-size:14px; }
   .park-services { grid-template-columns:repeat(4,minmax(0,1fr)); row-gap:26px; }
   .park-service:nth-child(4n) { border-inline-end:0; }
   .park-landing .hl-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -99,7 +109,7 @@
   [lang="en"] .park-hero__copy h1 { font-size:30px; }
   .park-hero__description { font-size:14px; line-height:1.9; margin-top:3px; }
   .park-hero__subline { font-size:12px; margin-top:5px; }
-  .park-primary { margin-top:17px; min-height:46px; padding-inline:28px; }
+  .park-primary { margin-top:17px; min-height:48px; padding-inline:28px; }
   .park-scene__image { width:100%; height:385px; object-fit:cover; object-position:64% 100%; }
   .park-pavilions { display:none; }
   .park-intro { padding:24px 16px 30px; }
@@ -119,3 +129,8 @@
 .park-landing .hl-split,[dir="ltr"] .park-landing .hl-split { background:var(--campaign-plum); }
 .park-landing .hl-footer__legal { border-color:color-mix(in srgb,var(--campaign-inverse) 25%,transparent); }
 .park-landing .hl-footer__demo { color:color-mix(in srgb,var(--campaign-inverse) 80%,transparent); }
+
+@media (prefers-reduced-motion:reduce) {
+  .park-pavilions[data-intro="true"] .park-pavilion__light { animation:none; }
+  .park-pavilion:hover .park-pavilion__light,.park-pavilion:focus-visible .park-pavilion__light { animation:none; opacity:1; }
+}

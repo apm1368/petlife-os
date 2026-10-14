@@ -62,18 +62,18 @@ export function HomeLanding({ locale }: { locale: AppLocale }) {
         <Image unoptimized src={photo("community")} alt="" width={900} height={680} loading="lazy" />
         <div className="park-story__copy"><p className="park-eyebrow">{c.supportEyebrow}</p><h2 id="park-support-title">{c.supportTitle}</h2><p>{c.supportBody}</p>
           <Link className="park-primary" href={href("/animal-support/needs")}>{c.supportCta}<Arrow size={18} aria-hidden="true" /></Link>
-          <Link className="park-text-link" href={href("/community")}>{c.communityCta}</Link>
+          <Link className="park-text-link" href={href("/community")}>{c.communityCta}<Arrow size={18} aria-hidden="true" /></Link>
         </div>
       </section>
       <section id="park-partners" className="park-partners" aria-labelledby="park-partners-title">
         <p className="park-eyebrow">{c.partnerEyebrow}</p><h2 id="park-partners-title">{c.partnerTitle}</h2><p>{c.partnerBody}</p>
         <div className="park-story__actions">
-          <Link href={`${href("/auth")}?returnTo=${encodeURIComponent(href("/provider"))}`} className="park-primary">{c.partnerLogin}</Link>
-          <Link href={`${href("/register")}?returnTo=${encodeURIComponent(href("/provider"))}`} className="park-secondary">{c.partnerJoin}</Link>
+          <Link href={`${href("/auth")}?returnTo=${encodeURIComponent(href("/provider"))}`} className="park-primary">{c.partnerLogin}<Arrow size={18} aria-hidden="true" /></Link>
+          <Link href={`${href("/register")}?returnTo=${encodeURIComponent(href("/provider"))}`} className="park-secondary">{c.partnerJoin}<Arrow size={18} aria-hidden="true" /></Link>
         </div>
       </section>
       <section className="park-final" aria-labelledby="park-final-title"><PawPrint size={34} aria-hidden="true" /><h2 id="park-final-title">{c.finalTitle}</h2><p>{c.finalBody}</p>
-        <div className="park-story__actions"><Link className="park-primary" href={href("/register")}>{c.join}</Link><Link className="park-secondary" href={href("/auth")}>{c.login}</Link></div>
+        <div className="park-story__actions"><Link className="park-primary" href={href("/register")}>{c.join}<Arrow size={18} aria-hidden="true" /></Link><Link className="park-secondary" href={href("/auth")}>{c.login}<Arrow size={18} aria-hidden="true" /></Link></div>
       </section>
     </main>
     <ParkFooter locale={locale} />

@@ -1,13 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import { PawPrint, ShoppingBag, Stethoscope, Scissors, House, Plane, CarFront, HandHeart, ShieldCheck } from "@petlife/ui";
+import { ArrowLeft, ArrowRight, ShoppingBag, Stethoscope, Scissors, House, Plane, CarFront, HandHeart, ShieldCheck } from "@petlife/ui";
 import type { AppLocale } from "@/lib/i18n/config";
+import { ParkPavilions } from "./ParkPavilions";
 import { parkCopy, parkDestinations } from "./park-copy";
 
 const icons = { shop: ShoppingBag, vet: Stethoscope, grooming: Scissors, boarding: House, travel: Plane, taxi: CarFront, support: HandHeart, insurance: ShieldCheck };
 
 export function ParkHero({ locale }: { locale: AppLocale }) {
   const c = parkCopy[locale];
+  const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
   return <>
     <section className="park-hero" aria-labelledby="park-title">
       <div className="park-scene">
@@ -16,13 +18,9 @@ export function ParkHero({ locale }: { locale: AppLocale }) {
           <h1 id="park-title">{c.title}</h1>
           <p className="park-hero__description">{c.description}</p>
           <p className="park-hero__subline">{c.subline}</p>
-          <a href={`/${locale}#park-services`} className="park-primary"><PawPrint size={19} aria-hidden="true" />{c.explore}</a>
+          <a href={`/${locale}#park-services`} className="park-primary">{c.explore}<Arrow size={20} aria-hidden="true" /></a>
         </div>
-        <nav className="park-pavilions" aria-label={c.destinationsLabel}>
-          {parkDestinations.map(destination => <Link key={destination.key} href={`/${locale}${destination.href}`} className={`park-pavilion park-tone-${destination.tone}`} style={{ left: `${destination.x}%`, top: `${destination.y}%`, width: `${destination.width}%` }} aria-label={c.services[destination.key].title}>
-            <span>{c.services[destination.key].title}</span>
-          </Link>)}
-        </nav>
+        <ParkPavilions locale={locale} />
       </div>
     </section>
     <section id="park-services" className="park-intro" aria-labelledby="park-intro-title">
