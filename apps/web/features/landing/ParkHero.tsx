@@ -11,7 +11,7 @@ export function ParkHero({ locale }: { locale: AppLocale }) {
   return <>
     <section className="park-hero" aria-labelledby="park-title">
       <div className="park-scene">
-        <Image unoptimized priority className="park-scene__image" src="/images/landing/tehran-park.webp" alt={c.imageAlt} width={1681} height={936} />
+        <Image unoptimized priority className="park-scene__image" src={c.imageSrc} alt={c.imageAlt} width={1681} height={936} />
         <div className="park-hero__copy">
           <h1 id="park-title">{c.title}</h1>
           <p className="park-hero__description">{c.description}</p>

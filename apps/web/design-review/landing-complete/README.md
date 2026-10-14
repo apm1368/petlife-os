@@ -46,3 +46,11 @@ Before: [desktop footer](before-footer-fa-1440.webp), [mobile footer](before-foo
 PR and board #4 update are pending GitHub API access and completion of the repository-wide gate. No direct push to `stabilization/wave-1` or `main`. Proposed board line:
 
 `codex/stab-landing-footer-auth — PR pending — complete landing + footer + auth modals; 617 web tests passed; global typecheck blocked by Prisma environment; supersedes prior landing branch.`
+
+## Review revision: localized pavilion signs
+
+English uses a separate AI-edited park artwork with all eight physical pavilion signs in English. Persian retains its original artwork. Hero, auth modal and standalone auth share the locale-specific image source. The general hero headline now addresses every pet owner without naming Cookie.
+
+Screenshots: [English desktop](signs-en-1440.webp), [English mobile](signs-en-390.webp), [Persian desktop](signs-fa-1440.webp), [Persian mobile](signs-fa-390.webp).
+
+Revision validation: lint passed (five existing warnings); web typecheck passed; three focused suites passed (21 tests), including locale artwork regression coverage. Browser screenshots verified both locale image sources and no horizontal overflow at 390px and 1440px. The initial full-suite attempt was interrupted after timeouts during concurrent compilation; it is not a passing full-suite result. Existing repository-wide Prisma typecheck and PR/board access limitations above remain.

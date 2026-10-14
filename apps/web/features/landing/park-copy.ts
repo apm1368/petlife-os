@@ -12,7 +12,7 @@ export const parkDestinations = [
 ] as const;
 export type ParkDestinationKey = typeof parkDestinations[number]["key"];
 interface ParkCopy {
-  title: string; description: string; subline: string; explore: string;
+  imageSrc: string; title: string; description: string; subline: string; explore: string;
   imageAlt: string; destinationsLabel: string; introTitle: string; introBody: string;
   brandTagline: string; partnerSignIn: string; partnerJoin: string;
   memberJoin: string; home: string; about: string; partners: string; photoCredits: string;
@@ -21,7 +21,8 @@ interface ParkCopy {
 }
 export const parkCopy: Record<AppLocale, ParkCopy> = {
   fa: {
-    title: "یک دنیا برای تو و کوکی",
+    imageSrc: "/images/landing/tehran-park.webp",
+    title: "یک دنیا برای تو و همراهت",
     description: "همهٔ خدمات مورد نیاز حیوانات خانگی، در یک اپلیکیشن",
     subline: "زندگی سالم‌تر، شادتر و همراه‌تر برای دوست کوچک شما",
     explore: "کشف خدمات",
@@ -47,7 +48,8 @@ export const parkCopy: Record<AppLocale, ParkCopy> = {
     processing: "برش و بازکدگذاری شده", licence: "مجوز و شرایط استفاده",
   },
   en: {
-    title: "A whole world for you and Cookie",
+    imageSrc: "/images/landing/tehran-park-en.webp",
+    title: "A whole world for you and your pet",
     description: "Everything your pet needs, in one app",
     subline: "A healthier, happier life with your little companion",
     explore: "Explore services",
