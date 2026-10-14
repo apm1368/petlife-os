@@ -3,7 +3,7 @@ import { LabResultStatus, SourceType } from "@prisma/client";
 import type { LabResultDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { LabResultNotFoundException } from "../../common/errors/api-exception";
+import { ProviderAccessDeniedException, LabResultNotFoundException } from "../../common/errors/api-exception";
 import { LAB_RESULT_INCLUDE, toLabResultDto } from "./clinical-health-mapper";
 import { assertVisitBelongsToPet } from "./clinical-link.util";
 import type { AmendLabResultDto, CreateLabResultDto } from "./dto/lab-result.dto";
@@ -79,6 +79,8 @@ export class LabResultService {
    */
   async amend(ctx: ResolvedProviderContext, petId: string, labResultId: string, dto: AmendLabResultDto): Promise<LabResultDto> {
     const existing = await this.get(petId, labResultId);
+    // Access to the pet lets a provider add its own records, never rewrite another organisation's.
+    if (existing.providerOrganizationId !== ctx.organizationId) throw new ProviderAccessDeniedException({ reason: "NOT_OWNING_ORGANIZATION" });
     await assertVisitBelongsToPet(this.prisma, dto.clinicalVisitId, petId);
 
     const row = await this.prisma.$transaction(async (tx) => {

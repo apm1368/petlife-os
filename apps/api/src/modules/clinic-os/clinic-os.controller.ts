@@ -108,6 +108,7 @@ export class ClinicOsController {
 
   // ---- Campaigns (preview, then explicit confirmation)
   @Post("campaigns/preview")
+  @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.VET)
   previewCampaign(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: CampaignPreviewDto) {
     return this.ops.previewCampaign(ctx, dto.segment);
   }

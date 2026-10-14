@@ -3,7 +3,7 @@ import { SourceType } from "@prisma/client";
 import type { ImagingStudyDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { ImagingStudyNotFoundException } from "../../common/errors/api-exception";
+import { ImagingStudyNotFoundException, ProviderAccessDeniedException } from "../../common/errors/api-exception";
 import { IMAGING_STUDY_INCLUDE, toImagingStudyDto } from "./clinical-health-mapper";
 import { assertVisitBelongsToPet } from "./clinical-link.util";
 import type { CreateImagingStudyDto } from "./dto/imaging-study.dto";
@@ -66,12 +66,17 @@ export class ImagingStudyService {
     return toImagingStudyDto(await this.get(petId, imagingStudyId));
   }
 
-  async voidStudy(petId: string, imagingStudyId: string, reason: string): Promise<ImagingStudyDto> {
+  async voidStudy(ctx: ResolvedProviderContext, petId: string, imagingStudyId: string, reason: string): Promise<ImagingStudyDto> {
     const existing = await this.get(petId, imagingStudyId);
-    const row = await this.prisma.imagingStudy.update({
-      where: { id: existing.id },
-      data: { voidedAt: new Date(), voidedReason: reason },
-      include: IMAGING_STUDY_INCLUDE,
+    if (existing.providerOrganizationId !== ctx.organizationId) throw new ProviderAccessDeniedException({ reason: "NOT_OWNING_ORGANIZATION" });
+    const row = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.imagingStudy.update({
+        where: { id: existing.id },
+        data: { voidedAt: new Date(), voidedReason: reason },
+        include: IMAGING_STUDY_INCLUDE,
+      });
+      await this.events.publish("ImagingStudyVoided", { petId, imagingStudyId, providerOrganizationId: ctx.organizationId, actorUserId: ctx.userId, reason }, { tx, aggregateType: "Pet", aggregateId: petId });
+      return updated;
     });
     return toImagingStudyDto(row);
   }
