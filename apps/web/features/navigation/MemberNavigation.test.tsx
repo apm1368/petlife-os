@@ -25,6 +25,15 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe("member navigation", () => {
+  it("hides the current pet's health destination when access is denied", () => {
+    renderWithIntl(<PrimaryNav canViewHealth={false} />, "fa");
+    expect(screen.queryByRole("link", { name: "سلامت" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "کاوش" }));
+    const links = screen.getAllByRole("link").map(link => link.getAttribute("href"));
+    expect(links).not.toContain("/fa/pets/active?view=health");
+    expect(links).toContain("/fa/vet/find");
+  });
+
   it("has the six primary destinations; deep pages keep their section current", () => {
     expect(PRIMARY_DESTINATIONS.map((d) => d.key)).toEqual(["home", "explore", "health", "services", "shop", "memories"]);
     expect(currentDestination("/pets/p1/health/labs/x")).toBe("health");

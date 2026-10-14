@@ -1,0 +1,29 @@
+.glass-home { min-width:0; color:var(--text-primary); }
+.glass-home__greeting { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:22px; align-items:center; margin-bottom:26px; }
+.member-home .glass-home__greeting h2 { font-size:clamp(26px,2.8vw,42px); font-weight:750; line-height:1.6; }
+.glass-home__greeting p { margin:4px 0 0; color:var(--text-secondary); line-height:1.9; font-size:14px; }
+.glass-home__greeting .glass-home__eyebrow { font-size:11px; letter-spacing:.12em; }
+.glass-panel,.glass-home__summary,.glass-home__switch { border:1px solid var(--border-subtle); background:var(--surface-elevated); backdrop-filter:blur(24px); border-radius:28px; }
+.glass-home__summary { padding:18px 22px; display:grid; grid-template-columns:auto auto; align-items:center; gap:4px 12px; }
+.glass-home__summary strong { font-size:28px; }.glass-home__summary span { grid-column:1/-1; font-size:12px; }
+.glass-home__switch { padding:12px 16px; display:grid; grid-template-columns:auto auto; gap:8px; align-items:center; }
+.glass-home__switch label { font-size:12px; }.glass-home__switch select { min-height:40px; max-width:130px; border-radius:10px; padding:4px 8px; background:var(--surface-subtle); }
+.glass-home__switch a { display:flex; align-items:center; gap:7px; grid-column:1/-1; font-size:12px; min-height:36px; }
+.glass-home__grid { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(280px,.82fr); gap:24px; }
+.glass-home__identity { padding:22px; order:1; }.glass-home__pet { display:flex; gap:18px; align-items:center; }.glass-home__pet> :first-child { width:110px; height:110px; border-radius:22px; flex-shrink:0; }.member-home .glass-home__pet h2 { font-size:27px; }.glass-home__pet p { font-size:13px; line-height:1.8; color:var(--text-secondary); margin-top:6px; }
+.glass-home__sections { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:22px; padding:12px; border-radius:22px; background:var(--surface-sunken); }
+.glass-home__sections a { min-height:76px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; border-radius:14px; font-size:11px; }
+.glass-home__sections a:hover { background:var(--surface-subtle); }
+.glass-home__attention { margin-top:22px; padding:16px; border-radius:20px; background:var(--surface-subtle); }
+.glass-home__attention h2 { font-size:16px; margin-bottom:12px; }.glass-home__attention p { font-size:13px; line-height:1.9; }.glass-home__attention .glass-home__hint { font-size:11px; margin-top:8px; color:var(--text-secondary); }
+.glass-home__attention ul { list-style:none; margin:0; padding:0; }.glass-home__attention li+li { border-top:1px solid var(--border-subtle); }.glass-home__attention li a { display:flex; gap:8px; align-items:center; min-height:56px; padding:10px 0; }.glass-home__attention li a>span:first-child { flex:1; }.glass-home__attention strong { font-size:12px; font-weight:600; }.glass-home__attention small { display:block; font-size:11px; }
+.glass-home__calendar { padding:24px; display:flex; flex-direction:column; }.glass-home__calendar header { display:flex; justify-content:space-between; gap:16px; }.glass-home__calendar h2 { font-size:22px; }.glass-home__calendar header p { font-size:12px; line-height:1.8; color:var(--text-secondary); margin-top:4px; }
+.glass-home__calendar ol { flex:1; display:flex; flex-direction:column; list-style:none; padding:20px; margin:20px 0; border-radius:24px; background:var(--surface-sunken); gap:14px; min-height:270px; }
+.glass-home__calendar li { width:85%; border-radius:18px; background:var(--campaign-rose-tint); color:var(--campaign-ink); }
+.glass-home__calendar li[data-tone="1"] { margin-inline-start:8%; background:var(--campaign-teal-tint); }.glass-home__calendar li[data-tone="2"] { margin-inline-start:15%; background:var(--campaign-copper-tint); }
+.glass-home__calendar li a { display:flex; align-items:center; gap:12px; padding:14px 18px; min-height:72px; }.glass-home__calendar li a>div { flex:1; }.glass-home__calendar strong { font-size:14px; display:block; }.glass-home__calendar time,.glass-home__calendar small { display:block; font-size:11px; margin-top:5px; }
+.glass-home__calendar-link { display:flex; align-items:center; justify-content:space-between; min-height:44px; font-size:13px; }.glass-home__empty { flex:1; display:grid; place-content:center; min-height:270px; padding:28px; font-size:14px; line-height:2; color:var(--text-secondary); }
+@media(max-width:1100px) { .glass-home__greeting { grid-template-columns:minmax(0,1fr) auto; }.glass-home__greeting>div:first-child { grid-column:1/-1; }.glass-home__grid { grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr); gap:18px; }.glass-home__pet { flex-wrap:wrap; }.glass-home__calendar { padding:20px; } }
+@media(max-width:700px) { .glass-home__grid { grid-template-columns:minmax(0,1fr); }.glass-home__identity { order:0; }.glass-home__calendar { order:1; }.glass-home__greeting { gap:14px; }.glass-home__summary { padding:12px 16px; }.glass-home__identity { padding:20px; }.glass-home__pet { flex-wrap:nowrap; }.glass-home__calendar ol { padding:12px; }.glass-home__calendar li { width:94%; }.glass-home__calendar li[data-tone="1"],.glass-home__calendar li[data-tone="2"] { margin-inline-start:6%; }.glass-home__calendar li a { padding:14px; }.glass-home__switch { padding:10px 12px; } }
+.glass-home button { min-height:44px; padding:8px 14px; border:1px solid var(--border-subtle); border-radius:8px; background:var(--surface-subtle); color:var(--text-primary); font-size:13px; }
+.glass-home button:hover { background:var(--surface-elevated); }

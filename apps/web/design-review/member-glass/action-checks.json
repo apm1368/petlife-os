@@ -1,0 +1,8 @@
+{
+  "apiMode": "controlled responses, not live server",
+  "petSwitchSendsRealServiceRequest": true,
+  "restrictedPetHidesHealthAndCare": true,
+  "oldPetPermissionsNotReused": true,
+  "switchFailureVisibleAndRollsBack": true,
+  "lightDarkChangesPanelAndRetainsFrame": true
+}
