@@ -1,17 +1,23 @@
+import { isAppLocale } from "@/lib/i18n/config";
+import { notFound } from "next/navigation";
+import { ParkCredits } from "@/features/landing/ParkCredits";
+import { parkCopy } from "@/features/landing/park-copy";
 import credits from "@/features/landing/photo-credits.json";
 
 /** Photo credits — every third-party photograph we publish, its author and licence (CC BY / CC BY-SA require it). */
 export default async function CreditsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const fa = locale !== "en";
+  if (!isAppLocale(locale)) notFound();
+  const c = parkCopy[locale];
   return (
     <div className="flex flex-col gap-6">
       <header className="section-head">
         <div>
-          <h1>{fa ? "اعتبار عکس‌ها" : "Photo credits"}</h1>
-          <p>{fa ? "عکس‌های سایت از Wikimedia Commons با مجوز آزاد هستند؛ عکس «کوکی» متعلق به صاحب خودش است." : "Site photos come from Wikimedia Commons under free licences; Cookie's photo belongs to her owner."}</p>
+          <h1>{c.photoCredits}</h1>
+
         </div>
       </header>
+      <ParkCredits locale={locale} />
       <ul className="row-list">
         {(credits as { file: string; title: string; page: string; author: string; license: string; licenseUrl: string | null }[]).map((c) => (
           <li key={c.file}>
@@ -25,6 +31,10 @@ export default async function CreditsPage({ params }: { params: Promise<{ locale
                 </span>
               </span>
             </a>
+            <p className="px-4 pb-4 text-metadata text-text-secondary">
+              {parkCopy[locale].processing}{" · "}
+              <a href={c.licenseUrl ?? "https://creativecommons.org/publicdomain/mark/1.0/"} target="_blank" rel="noopener noreferrer" className="underline">{parkCopy[locale].licence}</a>
+            </p>
           </li>
         ))}
       </ul>

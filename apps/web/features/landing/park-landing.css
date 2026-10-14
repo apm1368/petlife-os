@@ -1,0 +1,121 @@
+/* Approved Tehran park campaign. All rules are local to the landing. */
+.park-landing { background:var(--campaign-cream); color:var(--campaign-ink); }
+.park-landing a:focus-visible,.park-landing button:focus-visible { outline:3px solid var(--campaign-copper); outline-offset:5px; }
+.park-header { position:relative; z-index:10; background:var(--campaign-plum); color:var(--campaign-inverse); }
+.park-header__inner { min-height:78px; max-width:1600px; margin:auto; padding:12px clamp(18px,3vw,44px); display:flex; align-items:center; justify-content:space-between; gap:26px; }
+.park-brand { display:flex; align-items:center; flex-shrink:0; gap:10px; text-decoration:none; color:inherit; }
+.park-brand__mark { width:44px; height:46px; display:grid; place-items:center; border-radius:12px; background:var(--campaign-cream); color:var(--campaign-plum); }
+.park-brand bdi { display:block; font-size:22px; font-weight:850; line-height:1.1; letter-spacing:-.04em; }
+.park-brand small { display:block; margin-top:6px; font-size:10px; text-align:center; }
+.park-desktop-nav { display:flex; align-items:center; gap:26px; }
+.park-desktop-nav a { padding-block:12px; color:inherit; text-decoration:none; font-size:13px; white-space:nowrap; }
+.park-desktop-nav a:hover { text-decoration:underline; text-underline-offset:8px; }
+.park-header__actions { display:flex; align-items:center; gap:12px; font-size:12px; }
+.park-partner-links,.park-account-links { min-height:38px; display:flex; align-items:center; justify-content:center; gap:6px; border:1px solid color-mix(in srgb,var(--campaign-inverse) 50%,transparent); border-radius:7px; padding:0 12px; white-space:nowrap; }
+.park-header__actions a { text-decoration:none; color:inherit; }
+.park-header__actions a:hover { text-decoration:underline; text-underline-offset:4px; }
+.park-account-links { background:var(--campaign-cream); color:var(--campaign-plum); border-color:var(--campaign-cream); font-weight:700; }
+.park-account-links a { display:inline-flex; align-items:center; min-height:38px; }
+.park-language { display:grid; place-items:center; min-height:38px; min-width:30px; font-size:11px; }
+.park-menu-toggle { display:none; background:transparent; border:1px solid color-mix(in srgb,var(--campaign-inverse) 50%,transparent); border-radius:8px; color:inherit; min-height:44px; min-width:44px; align-items:center; justify-content:center; cursor:pointer; }
+.park-mobile-nav { padding:12px 20px 20px; border-top:1px solid color-mix(in srgb,var(--campaign-inverse) 20%,transparent); }
+.park-mobile-nav:not([hidden]) { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.park-mobile-nav a { display:flex; align-items:center; min-height:44px; padding:8px; color:inherit; text-decoration:none; font-size:14px; }
+.park-skip { position:absolute; top:-100px; inset-inline-start:20px; padding:12px; background:var(--campaign-cream); color:var(--campaign-plum); }
+.park-skip:focus { top:10px; z-index:20; }
+.park-hero { overflow:hidden; }
+.park-scene { position:relative; width:100%; aspect-ratio:1681 / 936; isolation:isolate; }
+.park-scene__image { display:block; width:100%; height:100%; object-fit:cover; }
+.park-hero__copy { position:absolute; top:28px; left:20%; width:60%; text-align:center; color:var(--campaign-ink); }
+.park-hero__copy h1 { margin:0; font-size:clamp(30px,4.5vw,72px); font-weight:900; line-height:1.5; letter-spacing:-.045em; }
+[lang="en"] .park-hero__copy h1 { font-size:clamp(26px,3.2vw,50px); line-height:1.3; margin-bottom:12px; }
+.park-hero__description { margin:0; font-size:clamp(14px,1.35vw,22px); line-height:1.7; font-weight:700; }
+.park-hero__subline { margin:5px 0 0; font-size:clamp(12px,1.05vw,16px); line-height:1.8; }
+.park-primary { display:inline-flex; justify-content:center; align-items:center; gap:12px; min-height:48px; padding:10px 34px; margin-top:18px; background:var(--campaign-plum); color:var(--campaign-inverse); border:1px solid var(--campaign-plum-strong); border-radius:999px; text-decoration:none; font-weight:750; font-size:15px; transition:background-color 160ms; }
+.park-primary:hover { background:var(--campaign-plum-strong); }
+.park-pavilion { position:absolute; height:17%; transform:translate(-50%,-25%); border-radius:12px; text-decoration:none; outline-offset:2px; }
+.park-pavilion span { position:absolute; top:-26px; left:50%; transform:translateX(-50%); padding:6px 12px; background:var(--campaign-paper); color:var(--campaign-ink); border:1px solid var(--campaign-line); border-radius:7px; white-space:nowrap; font-size:13px; font-weight:700; opacity:0; transition:opacity 160ms; }
+.park-pavilion:hover,.park-pavilion:focus-visible { outline:3px solid var(--campaign-inverse); background:color-mix(in srgb,var(--tone) 13%,transparent); }
+.park-pavilion:hover span,.park-pavilion:focus-visible span { opacity:1; }
+.park-intro { padding:28px clamp(20px,4vw,56px) 32px; text-align:center; scroll-margin-top:20px; }
+.park-intro h2 { margin:0; font-size:clamp(26px,2.5vw,38px); line-height:1.65; font-weight:850; letter-spacing:-.025em; }
+.park-intro>p { margin:12px auto 24px; max-width:740px; color:var(--campaign-text); font-size:15px; line-height:1.9; }
+.park-services { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); max-width:1440px; margin:auto; }
+.park-tone-plum { --tone:var(--campaign-plum); --tint:var(--campaign-plum-tint); }
+.park-tone-teal { --tone:var(--campaign-teal); --tint:var(--campaign-teal-tint); }
+.park-tone-rose { --tone:var(--campaign-rose); --tint:var(--campaign-rose-tint); }
+.park-tone-copper { --tone:var(--campaign-copper); --tint:var(--campaign-copper-tint); }
+.park-tone-green { --tone:var(--campaign-green); --tint:var(--campaign-green-tint); }
+.park-tone-gold { --tone:var(--campaign-gold); --tint:var(--campaign-gold-tint); }
+.park-tone-coral { --tone:var(--campaign-coral); --tint:var(--campaign-coral-tint); }
+.park-tone-blue { --tone:var(--campaign-blue); --tint:var(--campaign-blue-tint); }
+.park-service { display:flex; align-items:center; flex-direction:column; padding:0 8px; text-decoration:none; color:var(--campaign-ink); gap:6px; min-width:0; border-inline-end:1px solid var(--campaign-line); }
+.park-service:last-child { border-inline-end:0; }
+.park-service__icon { width:50px; height:50px; display:grid; place-items:center; color:var(--tone); background:var(--tint); border-radius:17px; margin-bottom:2px; transition:transform 160ms; }
+.park-service:hover .park-service__icon { transform:translateY(-4px); }
+.park-service strong { font-size:14px; font-weight:750; }
+.park-service small { font-size:11px; color:var(--campaign-text); line-height:1.8; }
+.park-landing .hl-section { background:var(--campaign-cream); }
+.park-landing .hl-h2 { color:var(--campaign-ink); }
+.park-landing .hl-h2--light { color:var(--campaign-inverse); }
+.park-landing .hl-final,.park-landing .hl-footer { background:var(--campaign-plum); color:var(--campaign-inverse); }
+.park-landing .hl-btn--yellow,.park-landing .hl-tag { background:var(--campaign-cream); color:var(--campaign-plum); }
+.park-landing .hl-btn--yellow:hover { background:var(--campaign-plum-tint); }
+.park-landing .hl-cards { grid-auto-flow:initial; grid-template-columns:repeat(4,minmax(0,1fr)); overflow:visible; }
+.park-landing .hl-footer a { color:var(--campaign-inverse); }
+.park-landing .hl-footer__legal { display:flex; justify-content:space-between; gap:20px; }
+.park-partners { padding:64px 24px; text-align:center; border-top:1px solid var(--campaign-line); }
+.park-partners h2 { color:var(--campaign-ink); font-size:30px; font-weight:800; }
+.park-partners p { max-width:650px; margin:16px auto; color:var(--campaign-text); line-height:1.9; }
+.park-credits a { text-decoration:underline; text-underline-offset:3px; }
+@media (min-width:1600px) { .park-hero__copy { top:45px; } }
+@media (max-width:1199px) {
+  .park-desktop-nav { gap:18px; }
+  .park-header__inner { gap:18px; }
+  .park-partner-links { display:none; }
+  .park-menu-toggle { display:flex; }
+  .park-hero__copy { top:18px; }
+  .park-primary { margin-top:12px; min-height:42px; padding:8px 26px; font-size:14px; }
+  .park-services { grid-template-columns:repeat(4,minmax(0,1fr)); row-gap:26px; }
+  .park-service:nth-child(4n) { border-inline-end:0; }
+  .park-landing .hl-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:767px) {
+  .park-header__inner { min-height:72px; padding:12px 16px; gap:10px; }
+  .park-brand { gap:8px; }
+  .park-brand bdi { font-size:17px; }
+  .park-brand small { font-size:8px; margin-top:4px; }
+  .park-brand__mark { width:35px; height:38px; border-radius:9px; }
+  .park-brand__mark svg { width:25px; }
+  .park-desktop-nav { display:none; }
+  .park-header__actions { gap:7px; font-size:11px; }
+  .park-account-links { padding:0 8px; gap:3px; min-height:38px; }
+  .park-account-links>svg { display:none; }
+  .park-language { min-width:22px; }
+  .park-menu-toggle { min-width:36px; min-height:38px; }
+  .park-scene { aspect-ratio:auto; display:flex; flex-direction:column; }
+  .park-hero__copy { position:static; width:auto; order:-1; padding:22px 16px 24px; background:var(--campaign-cream); }
+  .park-hero__copy h1 { font-size:32px; line-height:1.6; letter-spacing:-.05em; }
+  [lang="en"] .park-hero__copy h1 { font-size:30px; }
+  .park-hero__description { font-size:14px; line-height:1.9; margin-top:3px; }
+  .park-hero__subline { font-size:12px; margin-top:5px; }
+  .park-primary { margin-top:17px; min-height:46px; padding-inline:28px; }
+  .park-scene__image { width:100%; height:385px; object-fit:cover; object-position:64% 100%; }
+  .park-pavilions { display:none; }
+  .park-intro { padding:24px 16px 30px; }
+  .park-intro h2 { font-size:26px; }
+  .park-intro>p { margin:8px 0 22px; font-size:13px; }
+  .park-services { grid-template-columns:repeat(4,minmax(0,1fr)); row-gap:24px; }
+  .park-service { padding-inline:4px; border:0; gap:5px; }
+  .park-service strong { font-size:11px; }
+  .park-service small { font-size:10px; }
+  .park-service__icon { height:43px; width:43px; border-radius:14px; }
+  .park-landing .hl-cards { grid-template-columns:1fr; }
+  .park-landing .hl-footer__legal { flex-wrap:wrap; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .park-landing *, .park-landing *::before, .park-landing *::after { scroll-behavior:auto; transition:none; animation:none; }
+}
+.park-landing .hl-split,[dir="ltr"] .park-landing .hl-split { background:var(--campaign-plum); }
+.park-landing .hl-footer__legal { border-color:color-mix(in srgb,var(--campaign-inverse) 25%,transparent); }
+.park-landing .hl-footer__demo { color:color-mix(in srgb,var(--campaign-inverse) 80%,transparent); }
