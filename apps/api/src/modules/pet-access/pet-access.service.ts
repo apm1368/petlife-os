@@ -81,6 +81,21 @@ export class PetAccessService {
     }, NO_ACCESS_PRESET);
   }
 
+  /**
+   * Who may read or act on a household's booking besides its booker: a member of that household who can book care
+   * for the pet through their own household or owner-given grant. Temporary grants (a sitter's window) and
+   * system grants (a provider's booking access, a vet share) never qualify — a provider must not read the pet's
+   * other bookings, intake answers or attachments through the access its own booking gave it.
+   */
+  async canActOnBooking(booking: { userId: string; petId: string; householdId: string }, userId: string): Promise<boolean> {
+    if (booking.userId === userId) return true;
+    const member = await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId: booking.householdId, userId } } });
+    if (!member) return false;
+    const now = new Date();
+    const grants = await this.prisma.petAccessGrant.findMany({ where: { petId: booking.petId, userId, canBookCare: true, source: { in: [PetAccessSource.HOUSEHOLD, PetAccessSource.MANUAL] } } });
+    return grants.some((grant) => isGrantActive(grant, now) && !(grant.reason && isSystemReason(grant.reason)));
+  }
+
   async hasActiveAccess(petId: string, userId: string, client: QueryClient = this.prisma): Promise<boolean> {
     return (await this.getEffectivePermissions(petId, userId, client)) !== null;
   }

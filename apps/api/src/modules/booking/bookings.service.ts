@@ -439,8 +439,7 @@ export class BookingsService {
   async getById(userId: string, id: string): Promise<BookingDto> {
     const booking = await this.loadWithRelations(id);
 
-    const hasAccess = booking.userId === userId || (await this.petAccess.hasActiveAccess(booking.petId, userId));
-    if (!hasAccess) throw new PetAccessDeniedException({ bookingId: id });
+    if (!(await this.petAccess.canActOnBooking(booking, userId))) throw new PetAccessDeniedException({ bookingId: id });
 
     return { ...this.toDto(booking), intake: await this.describeIntake(booking.intakeFormId, booking.intakeAnswers) };
   }
@@ -713,11 +712,19 @@ export class BookingsService {
     const origin = await this.prisma.booking.findUnique({ where: { id: originBookingId }, include: { petAccess: true } });
     if (!origin) throw new NotFoundApiException("Booking");
 
-    const hasAccess = origin.userId === userId || (await this.petAccess.hasActiveAccess(origin.petId, userId));
-    if (!hasAccess) throw new PetAccessDeniedException({ bookingId: originBookingId });
+    if (!(await this.petAccess.canActOnBooking(origin, userId))) throw new PetAccessDeniedException({ bookingId: originBookingId });
 
     const category = origin.category as unknown as ServiceCategory;
-    const originService = await this.prisma.providerService.findUniqueOrThrow({ where: { id: origin.providerServiceId } });
+    const originService = await this.prisma.providerService.findUniqueOrThrow({ where: { id: origin.providerServiceId }, include: { providerOrganization: { select: { verificationStatus: true } } } });
+    // Re-checked now, not inherited from the origin booking: a provider can lose verification or retire the service.
+    if (originService.providerOrganization.verificationStatus !== "VERIFIED") throw new ProviderNotVerifiedException({ providerId: origin.providerOrganizationId });
+    if (!originService.isActive) throw new ServiceNotAvailableException({ serviceId: originService.id });
+    if (origin.variantId && !(await this.prisma.providerServiceVariant.findFirst({ where: { id: origin.variantId, isActive: true } }))) {
+      throw new ServiceNotAvailableException({ serviceId: originService.id, variantId: origin.variantId });
+    }
+    // Each occurrence goes through the service's current booking mode: a REQUEST service needs the provider to
+    // accept every appointment, so occurrences start REQUESTED rather than silently CONFIRMED.
+    const occurrenceStatus = originService.bookingMode === BookingMode.REQUEST ? BookingStatus.REQUESTED : BookingStatus.CONFIRMED;
     const isRehab = originService.type === "REHAB_SESSION";
     if (!RECURRING_CATEGORIES.includes(category) && !isRehab) {
       throw new ValidationApiException({ field: "category", reason: `Recurring bookings are only supported for ${RECURRING_CATEGORIES.join(", ")}` });
@@ -800,7 +807,10 @@ export class BookingsService {
               bookingNumber: await this.lifecycle.nextBookingNumber(tx),
               variantId: origin.variantId,
               resourceId: slot.resourceId ?? null,
-              bookingMode: origin.bookingMode,
+              bookingMode: originService.bookingMode,
+              bookingStatus: occurrenceStatus,
+              // Same request window as a single REQUEST booking, so the expiry worker closes an unanswered one.
+              requestExpiresAt: occurrenceStatus === BookingStatus.REQUESTED ? new Date(Math.min(Date.now() + originService.requestTtlHours * 3600_000, startAt.getTime())) : null,
               paymentMode: origin.paymentMode,
               priceAmount: origin.priceAmount,
               discountAmount: origin.discountAmount,
@@ -816,12 +826,12 @@ export class BookingsService {
           });
           await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
           await this.events.publish(
-            "ServiceBookingConfirmed",
+            occurrenceStatus === BookingStatus.REQUESTED ? "ServiceBookingRequested" : "ServiceBookingConfirmed",
             { ...bookingEventFields(created), bookingSeriesId: series.id },
             { tx, aggregateType: "Booking", aggregateId: created.id },
           );
           await this.petAccessGrants.grantForBooking(created, origin.providerUserId ?? undefined, scopePreset, tx, originConsented);
-          await this.careCalendar.upsertForBooking(created, tx);
+          if (occurrenceStatus !== BookingStatus.REQUESTED) await this.careCalendar.upsertForBooking(created, tx);
           return created.id;
         });
         createdBookingIds.push(occurrenceId);
