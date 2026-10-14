@@ -39,7 +39,7 @@ function useDismiss(open: boolean, close: () => void, boundary: React.RefObject<
 }
 
 /** Desktop primary navigation with the Explore mega menu. Hidden below 1024px (the bottom bar takes over). */
-export function PrimaryNav() {
+export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }) {
   const locale = useMemberLocale();
   const fa = locale === "fa";
   const current = currentDestination(usePathKey(locale));
@@ -76,7 +76,7 @@ export function PrimaryNav() {
     <div className="member-nav" ref={wrap} onPointerLeave={hover(false)}>
       <nav aria-label={fa ? "منوی اصلی" : "Main menu"}>
         <ul>
-          {PRIMARY_DESTINATIONS.map((d) =>
+          {PRIMARY_DESTINATIONS.filter(d => d.key !== "health" || canViewHealth).map((d) =>
             d.key === "explore" ? (
               <li key={d.key} onPointerEnter={hover(true)}>
                 <button
@@ -119,7 +119,7 @@ export function PrimaryNav() {
             <section key={group.key} className="mega__group" style={{ ["--g" as string]: gi }} aria-labelledby={`${panelId}-${group.key}`}>
               <h2 id={`${panelId}-${group.key}`}>{fa ? group.fa : group.en}</h2>
               <ul>
-                {group.links.map(({ href, icon: Icon, fa: f, en }) => (
+                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, fa: f, en }) => (
                   <li key={href}>
                     <Link href={`/${locale}${href}`} className="mega__link" onClick={close}>
                       <span className="mega__icon"><Icon size={18} aria-hidden="true" /></span>
@@ -184,7 +184,7 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
 }
 
 /** Below 1024px: five large targets at the thumb; Explore opens a grouped sheet instead of a page. */
-export function MobileTabBar() {
+export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean }) {
   const locale = useMemberLocale();
   const fa = locale === "fa";
   const router = useRouter();
@@ -195,7 +195,7 @@ export function MobileTabBar() {
   return (
     <>
       <nav className="member-tabbar" aria-label={fa ? "منوی پایین" : "Bottom menu"}>
-        {PRIMARY_DESTINATIONS.filter((d) => d.mobile).map(({ key, href, fa: labelFa, en, icon: Icon }) =>
+        {PRIMARY_DESTINATIONS.filter((d) => d.mobile && (d.key !== "health" || canViewHealth)).map(({ key, href, fa: labelFa, en, icon: Icon }) =>
           key === "explore" ? (
             <button key={key} type="button" aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === key ? "page" : undefined} onClick={() => setSheet(true)}>
               <Compass size={21} aria-hidden="true" />
@@ -221,7 +221,7 @@ export function MobileTabBar() {
             <section key={group.key}>
               <h3>{fa ? group.fa : group.en}</h3>
               <ul>
-                {group.links.map(({ href, icon: Icon, fa: f, en }) => (
+                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, fa: f, en }) => (
                   <li key={href}>
                     <button type="button" onClick={() => { setSheet(false); router.push(`/${locale}${href}`); }}>
                       <Icon size={20} aria-hidden="true" />

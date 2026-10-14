@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { petsService } from "@/services/pets.service";
+import { careRemindersService } from "@/services/care-reminders.service";
 import { bookingsService } from "@/services/bookings.service";
 import { usePetStore } from "@/stores/pet-store";
 import { useSessionStore } from "@/stores/session-store";
@@ -9,7 +10,8 @@ import { MemberHomeView } from "./MemberHomeView";
 import { routeExists } from "@/test/route-exists";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/fa/home" }));
-vi.mock("@/services/pets.service", () => ({ petsService: { getOverview: vi.fn() } }));
+vi.mock("@/services/pets.service", () => ({ petsService: { getOverview: vi.fn(), getMyAccess: vi.fn().mockResolvedValue({ canViewIdentity: true, canViewHealth: true, canViewCareProfile: true }) } }));
+vi.mock("@/services/care-reminders.service", () => ({ careRemindersService: { list: vi.fn().mockResolvedValue([]) } }));
 vi.mock("@/services/bookings.service", () => ({ bookingsService: { list: vi.fn() } }));
 vi.mock("@/services/commerce.service", () => ({ commerceService: { listOrders: vi.fn().mockResolvedValue([]) } }));
 vi.mock("@/services/travel-marketplace.service", () => ({ travelMarketService: { listBookings: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 }) } }));
@@ -24,7 +26,9 @@ function overview(extra: Record<string, unknown> = {}) {
 describe("MemberHomeView", () => {
   beforeEach(() => {
     vi.mocked(petsService.getOverview).mockReset();
+    vi.mocked(petsService.getMyAccess).mockReset().mockResolvedValue({ canViewIdentity: true, canViewHealth: true, canViewCareProfile: true } as never);
     vi.mocked(bookingsService.list).mockReset().mockResolvedValue([]);
+    vi.mocked(careRemindersService.list).mockReset().mockResolvedValue([]);
     usePetStore.setState({ householdId: "h1", pets: [PET as never], activePetId: null });
     useSessionStore.setState({ user: { id: "u1", displayName: "مریم رضایی" } as never, status: "authenticated" });
   });
@@ -88,4 +92,35 @@ describe("MemberHomeView", () => {
     for (const section of ["/health", "/care", "/memories", "/health/documents", "/travel"]) expect(hrefs).toContain(`/fa/pets/pet-1${section}`);
     expect(hrefs).toContain("/fa/subscription");
   });
+  it("hides health, documents and care controls when the member lacks those permissions", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewIdentity: true, canViewHealth: false, canViewCareProfile: false } as never);
+    renderWithIntl(<MemberHomeView />, "en");
+    await screen.findByRole("heading", { name: "پشمک" });
+    await waitFor(() => expect(petsService.getMyAccess).toHaveBeenCalledWith("pet-1"));
+    const hrefs = screen.getAllByRole("link").map(a => a.getAttribute("href"));
+    expect(hrefs).not.toContain("/en/pets/pet-1/health");
+    expect(hrefs).not.toContain("/en/pets/pet-1/health/documents");
+    expect(hrefs).not.toContain("/en/pets/pet-1/care");
+  });
+
+  it("distinguishes a permission load failure and lets the member retry", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    vi.mocked(petsService.getMyAccess).mockRejectedValueOnce(new Error("offline"));
+    renderWithIntl(<MemberHomeView />, "en");
+    const message = await screen.findByRole("alert");
+    expect(message.textContent).toContain("Profile permissions could not load.");
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(await screen.findByRole("link", { name: "Health record" })).toBeTruthy();
+  });
+
+  it("shows a failed booking load instead of saying no appointment exists", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    vi.mocked(bookingsService.list).mockRejectedValue(new Error("offline"));
+    renderWithIntl(<MemberHomeView />, "en");
+    await screen.findByRole("heading", { name: "پشمک" });
+    await screen.findAllByText("This section could not load right now.");
+    expect(screen.queryByText("You have no upcoming appointment.")).toBeNull();
+  });
+
 });
