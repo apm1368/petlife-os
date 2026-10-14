@@ -1,3 +1,4 @@
+import { classifyIdentifier } from "../auth/identifier.util";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import { createHash, randomBytes } from "node:crypto";
 import { Injectable } from "@nestjs/common";
@@ -20,10 +21,17 @@ const PRESETS: Record<InitialAccess[number]["preset"], PetAccessFlags> = {
 };
 
 function tokenHash(token: string) { return createHash("sha256").update(token).digest("hex"); }
-/** Emails are compared case-insensitively as typed (hyphens are legal in addresses); only phone numbers drop formatting characters. */
+/** Emails are compared case-insensitively as typed (hyphens are legal in addresses); phones in canonical E.164, the form users.phone stores. */
 function normalizeContact(contact: string) {
-  const value = contact.trim().toLowerCase();
-  return value.includes("@") ? value : value.replace(/[\s()-]/g, "");
+  return classifyIdentifier(contact).value;
+}
+/** For contacts already stored (an account's own email/phone): never throws on a legacy value, it just won't match. */
+function normalizeStoredContact(contact: string) {
+  try {
+    return normalizeContact(contact);
+  } catch {
+    return contact.trim().toLowerCase();
+  }
 }
 function maskContact(contact: string) {
   const [name, domain] = contact.split("@");
@@ -123,9 +131,10 @@ export class HouseholdsService {
     const invitation = await this.prisma.householdInvitation.create({
       data: { householdId, contact, tokenHash: tokenHash(rawToken), invitedByUserId: actorUserId, initialAccess: dto.initialAccess as Prisma.InputJsonValue, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
     });
+    // Notify only an account that verified this contact (see requireInvitee).
     const target = contact.includes("@")
-      ? await this.prisma.user.findUnique({ where: { email: contact }, select: { id: true, locale: true } })
-      : await this.prisma.user.findUnique({ where: { phone: contact }, select: { id: true, locale: true } });
+      ? await this.prisma.user.findFirst({ where: { email: contact, emailVerifiedAt: { not: null } }, select: { id: true, locale: true } })
+      : await this.prisma.user.findFirst({ where: { phone: contact, phoneVerifiedAt: { not: null } }, select: { id: true, locale: true } });
     if (target) {
       const inviter = await this.prisma.user.findUniqueOrThrow({ where: { id: actorUserId }, select: { displayName: true } });
       await this.notifications.notify({
@@ -149,8 +158,8 @@ export class HouseholdsService {
     const rawToken = randomBytes(32).toString("base64url");
     const updated = await this.prisma.householdInvitation.update({ where: { id: invitationId }, data: { tokenHash: tokenHash(rawToken), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) } });
     const target = updated.contact.includes("@")
-      ? await this.prisma.user.findUnique({ where: { email: updated.contact }, select: { id: true, locale: true } })
-      : await this.prisma.user.findUnique({ where: { phone: updated.contact }, select: { id: true, locale: true } });
+      ? await this.prisma.user.findFirst({ where: { email: updated.contact, emailVerifiedAt: { not: null } }, select: { id: true, locale: true } })
+      : await this.prisma.user.findFirst({ where: { phone: updated.contact, phoneVerifiedAt: { not: null } }, select: { id: true, locale: true } });
     if (target) {
       const inviter = await this.prisma.user.findUniqueOrThrow({ where: { id: actorUserId }, select: { displayName: true } });
       await this.notifications.notify({
@@ -295,8 +304,10 @@ export class HouseholdsService {
   }
 
   private async requireInvitee(contact: string, userId: string) {
-    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true } });
-    const contacts = [user.email, user.phone].filter(Boolean).map((value) => normalizeContact(value!));
+    // Only a contact the account has proven it controls: anyone can type someone else's number or address into
+    // their profile, and that must not let them accept (and gain pet access from) an invitation meant for it.
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, emailVerifiedAt: true, phoneVerifiedAt: true } });
+    const contacts = [user.emailVerifiedAt ? user.email : null, user.phoneVerifiedAt ? user.phone : null].filter(Boolean).map((value) => normalizeStoredContact(value!));
     if (!contacts.includes(contact)) throw new InvitationNotForYouException();
   }
 

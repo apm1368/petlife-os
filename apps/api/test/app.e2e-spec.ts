@@ -49,16 +49,21 @@ import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { DevPaymentGateway } from "../src/modules/commerce/payments/dev-payment-gateway.service";
 import { FulfillmentTransitionService } from "../src/modules/commerce/logistics/fulfillment-transition.service";
+import { normalizeIranianPhone } from "../src/common/phone/phone-normalizer";
 
 interface Cookies {
   session?: string;
   csrf?: string;
 }
 
+/** The identifier exactly as the API stores, logs and rate-limits it (phones in E.164). */
+const canonicalIdentifier = (identifier: string) => (identifier.includes("@") ? identifier.trim().toLowerCase() : normalizeIranianPhone(identifier)?.e164 ?? identifier);
+
 /** Extracts the code the DevOtpProvider logs instead of sending an SMS/email. */
 function captureOtpCode(logSpy: jest.SpyInstance, identifier: string): string {
+  const logged = canonicalIdentifier(identifier);
   const call = logSpy.mock.calls.find(
-    (args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(identifier),
+    (args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(logged),
   );
   if (!call) throw new Error(`No OTP log found for ${identifier}`);
   const match = /code=(\d+)/.exec(call[0] as string);
