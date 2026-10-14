@@ -167,11 +167,11 @@ export class ServiceIntakeService {
     return this.storage.createPrivateDownloadTarget(a.objectKey);
   }
 
-  /** Same rule as reading the booking: the booker, or anyone with active access to its pet. Others get 404. */
+  /** Same rule as reading the booking (PetAccessService.canActOnBooking): the booker or a permitted household member. */
   private async ownerBooking(userId: string, bookingId: string) {
-    const b = await this.prisma.booking.findUnique({ where: { id: bookingId }, select: { id: true, userId: true, petId: true } });
+    const b = await this.prisma.booking.findUnique({ where: { id: bookingId }, select: { id: true, userId: true, petId: true, householdId: true } });
     if (!b) throw new NotFoundApiException("Booking");
-    if (b.userId !== userId && !(await this.access.hasActiveAccess(b.petId, userId))) throw new PetAccessDeniedException({ bookingId });
+    if (!(await this.access.canActOnBooking(b, userId))) throw new PetAccessDeniedException({ bookingId });
     return b;
   }
 
