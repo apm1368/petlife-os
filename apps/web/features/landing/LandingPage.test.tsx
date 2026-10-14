@@ -47,9 +47,16 @@ describe("Public landing", () => {
     expect(links.length).toBeGreaterThan(25);
     for (const link of links) {
       const href = link.getAttribute("href")!;
-      if (href === "#lp-main") continue;
-      expect(href, `${link.textContent} → ${href}`).toMatch(/^\/(fa|en)(\/|$)/);
-      expect(routeExists(href), `${link.textContent} → ${href}`).toBe(true);
+      const [path, fragment] = href.split("#");
+      // Same-document links must name a real section; localized route links
+      // still have to resolve to a shipped page, including when they carry a hash.
+      if (fragment) expect(document.getElementById(fragment), href).not.toBeNull();
+      if (!path) {
+        expect(fragment, href).toBeTruthy();
+        continue;
+      }
+      expect(path, `${link.textContent} → ${href}`).toMatch(/^\/(fa|en)(\/|$)/);
+      expect(routeExists(path), `${link.textContent} → ${href}`).toBe(true);
     }
   });
 

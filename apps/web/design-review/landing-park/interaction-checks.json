@@ -1,0 +1,10 @@
+[
+  {
+    "locale": "fa",
+    "width": 390,
+    "reducedMotion": true,
+    "escapeRestoresFocus": true,
+    "serviceRoute": "http://127.0.0.1:3000/fa/services/PET_TAXI",
+    "heading": "تاکسی حیوانات"
+  }
+]

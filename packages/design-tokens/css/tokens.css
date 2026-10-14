@@ -193,3 +193,30 @@
   --brand-mint-strong: #79d4b8;
   --ai-primary-strong: #d3bde0;
 }
+
+/* Warm campaign palette. Kept stable across themes for photographic surfaces. */
+:root {
+  --campaign-plum: #481d39;
+  --campaign-plum-strong: #622346;
+  --campaign-plum-tint: #f2e4eb;
+  --campaign-cream: #fbf6ee;
+  --campaign-paper: #fffaf3;
+  --campaign-ink: #36152d;
+  --campaign-text: #65545d;
+  --campaign-inverse: #fff8ef;
+  --campaign-line: #e6d8cf;
+  --campaign-teal: #24585b;
+  --campaign-teal-tint: #e2efed;
+  --campaign-rose: #98565d;
+  --campaign-rose-tint: #f6e7e9;
+  --campaign-copper: #a65929;
+  --campaign-copper-tint: #f8e9db;
+  --campaign-green: #326249;
+  --campaign-green-tint: #deeee5;
+  --campaign-gold: #986719;
+  --campaign-gold-tint: #faedce;
+  --campaign-coral: #b34138;
+  --campaign-coral-tint: #fbe5e0;
+  --campaign-blue: #2b5989;
+  --campaign-blue-tint: #e2edf8;
+}

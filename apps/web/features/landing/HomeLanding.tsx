@@ -1,17 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check } from "@petlife/ui";
 import type { AppLocale } from "@/lib/i18n/config";
 import { landingCopy } from "./copy";
-import { LandingHeader } from "./LandingHeader";
+import { ParkHeader } from "./ParkHeader";
+import { ParkHero } from "./ParkHero";
+import { parkCopy } from "./park-copy";
 import { LandingReveal } from "./LandingReveal";
 
-/**
- * Landing (owner direction 2026-10-11): the structure and rhythm of a leading premium pet-tech site — black
- * header, full-bleed photo hero with a huge headline, full-photo product cards, photo bands with dark gradients,
- * a phone showing our real app — rebuilt in PET LIFE's words, with Cookie as the example pet. Real photographs
- * only (Cookie's own photo + free-licence Wikimedia Commons, credited on /credits); no promotions or reviews are
- * invented.
- */
+/** Approved Tehran park hero with the existing product story below it. */
 const COPY = {
   fa: {
     bar: "هر خانواده‌ی تازه ۷ روز دسترسی کامل و رایگان دارد", barCta: "شروع کنید",
@@ -81,40 +76,19 @@ const COPY = {
 
 export function HomeLanding({ locale }: { locale: AppLocale }) {
   const c = COPY[locale];
+  const park = parkCopy[locale];
   const base = landingCopy[locale];
   const href = (p: string) => `/${locale}${p}`;
-  const Forward = locale === "fa" ? ArrowLeft : ArrowRight;
   const img = (k: string) => `/images/landing/home/${k}.webp`;
 
   return (
-    <div className="hl">
-      <Link href={href("/register")} className="hl-bar"><span>{c.bar}</span><span className="hl-bar__cta">{c.barCta} <Forward size={14} aria-hidden="true" /></span></Link>
-      <div className="hl-header"><LandingHeader locale={locale} copy={base} /></div>
+    <div className="hl park-landing">
+      <ParkHeader locale={locale} />
       <LandingReveal />
       <main id="lp-main" tabIndex={-1}>
-        <section className="hl-hero" aria-labelledby="hl-hero-title">
-          <img className="hl-hero__bg" src={img("cookie")} alt="" aria-hidden="true" />
-          <img className="hl-hero__img" src={img("cookie")} alt={locale === "fa" ? "کوکی، سگ کوچک بلوند با یقه‌ی صورتی، در جای خوابش" : "Cookie, a small blonde dog with a pink collar, on her bed"} />
-          <div className="hl-hero__shade" aria-hidden="true" />
-          <div className="hl-wrap hl-hero__copy">
-            <h1 id="hl-hero-title" className="hl-hero__title">{c.heroTitle.map((l) => <span key={l}>{l}</span>)}</h1>
-            <p className="hl-hero__body">{c.heroBody}</p>
-            <div className="hl-actions">
-              <Link href={href("/register")} className="hl-btn hl-btn--yellow">{c.heroCta}</Link>
-              <Link href={href("/services")} className="hl-btn hl-btn--ghost">{c.heroCta2}</Link>
-            </div>
-          </div>
-          <aside className="hl-cookie" aria-label={c.cookieCard.name}>
-            <img src={img("cookie")} alt="" />
-            <span>
-              <b>{c.cookieCard.name}</b><small>{c.cookieCard.meta}</small>
-              {c.cookieCard.facts.map((f) => <em key={f}><Check size={12} aria-hidden="true" />{f}</em>)}
-            </span>
-            <i>{c.cookieCard.sample}</i>
-          </aside>
-        </section>
+        <ParkHero locale={locale} />
 
-        <section className="hl-section" data-reveal aria-labelledby="hl-cards">
+        <section id="park-about" className="hl-section" data-reveal aria-labelledby="hl-cards">
           <div className="hl-wrap"><h2 id="hl-cards" className="hl-h2">{c.cardsTitle}</h2></div>
           <ul className="hl-cards">
             {c.cards.map((card) => (
@@ -196,6 +170,14 @@ export function HomeLanding({ locale }: { locale: AppLocale }) {
             </div>
           </div>
         </section>
+        <section id="park-partners" className="park-partners" aria-labelledby="park-partners-title">
+          <h2 id="park-partners-title">{base.ecosystem.title}</h2>
+          <p>{base.ecosystem.body}</p>
+          <div className="hl-actions hl-actions--center">
+            <Link href={`${href("/auth")}?returnTo=${encodeURIComponent(href("/provider"))}`} className="park-primary">{park.partnerSignIn}</Link>
+            <Link href={`${href("/register")}?returnTo=${encodeURIComponent(href("/provider"))}`} className="park-primary">{park.partnerJoin}</Link>
+          </div>
+        </section>
       </main>
 
       <footer className="hl-footer">
@@ -205,7 +187,7 @@ export function HomeLanding({ locale }: { locale: AppLocale }) {
             <nav key={g.title} aria-label={g.title}><p className="hl-footer__title">{g.title}</p><ul>{g.links.map((l) => <li key={l.href}><Link href={href(l.href)}>{l.label}</Link></li>)}</ul></nav>
           ))}
         </div>
-        <div className="hl-wrap hl-footer__legal"><Link href={href("/credits")}>{c.credits}</Link></div>
+        <div className="hl-wrap hl-footer__legal"><Link href={href("/credits")}>{park.photoCredits}</Link><bdi>PET LIFE OS</bdi></div>
       </footer>
     </div>
   );
