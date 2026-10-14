@@ -11,6 +11,8 @@ export class UpsertEmergencyInfoDto {
 /** Fields an owner can choose to show on a public card. The pet's name is always shown; nothing else unless listed. */
 export const PET_CARD_FIELDS = ["PHOTO", "SPECIES", "BREED", "SEX", "AGE", "MICROCHIP_STATUS", "ALLERGIES", "CONDITIONS", "MEDICATIONS", "BLOOD_TYPE", "CRITICAL_NOTES"] as const;
 export type PetCardField = (typeof PET_CARD_FIELDS)[number];
+/** Fields that publish health data; only someone who may view the pet's health can put them on a card. */
+export const HEALTH_CARD_FIELDS: readonly PetCardField[] = ["ALLERGIES", "CONDITIONS", "MEDICATIONS", "BLOOD_TYPE", "CRITICAL_NOTES"];
 /** Used when `fields` is omitted: identity only for an ID tag; identity + critical health for an emergency card. */
 export const DEFAULT_CARD_FIELDS: Record<"EMERGENCY" | "ID_TAG", PetCardField[]> = {
   ID_TAG: ["PHOTO", "SPECIES", "BREED", "SEX", "AGE", "MICROCHIP_STATUS"],
