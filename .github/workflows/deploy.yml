@@ -36,7 +36,9 @@ jobs:
             git remote set-url origin ssh://git@ssh.github.com:443/apm1368/petlife-os.git
             export GIT_SSH_COMMAND="ssh -p 443 -i /root/.ssh/petlife_github_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
             git fetch --prune origin
-            git checkout -B main origin/main
+            # -f: the next line hard-resets anyway; without it a local edit (e.g. a hot-applied docker-compose.yml
+            # identical to the one in main) makes checkout abort and the deploy never starts.
+            git checkout -f -B main origin/main
             git reset --hard "${{ github.sha }}"
             export BUILD_SHA='${{ github.sha }}'
             export BUILD_TIME='${{ github.event.head_commit.timestamp }}'
