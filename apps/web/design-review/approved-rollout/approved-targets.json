@@ -1,0 +1,46 @@
+{
+  "approvedBy": "owner",
+  "date": "2026-10-14",
+  "targets": {
+    "admin": {
+      "file": "targets/admin.webp",
+      "original": "exec-18918979-7c05-4ce1-a8ad-05a35481f663.png"
+    },
+    "member-home": {
+      "file": "targets/member-home.webp",
+      "original": "exec-db16493f-0d25-44d5-8764-f2dc32a7536a.png"
+    },
+    "shop": {
+      "file": "targets/shop.webp",
+      "original": "exec-af9c3c21-7f9f-432b-9fc3-677d7ae7f9ab.png"
+    },
+    "products": {
+      "file": "targets/products.webp",
+      "original": "exec-fdc70e81-5095-4379-b25b-4015dd6301c0.png"
+    },
+    "clinic": {
+      "file": "targets/clinic.webp",
+      "original": "exec-86e46baf-f9c4-4557-94a7-e207466efeb3.png"
+    },
+    "booking": {
+      "file": "targets/booking.webp",
+      "original": "exec-d86a0ac7-89ad-46eb-911c-311ab86eb073.png"
+    },
+    "blog": {
+      "file": "targets/blog.webp",
+      "original": "exec-b197d115-d6e9-4338-b9cb-b32d3d756587.png"
+    },
+    "article": {
+      "file": "targets/article.webp",
+      "original": "exec-c8f7edfc-5490-41ad-b31d-96b4acdd94d6.png"
+    },
+    "support": {
+      "file": "targets/support.webp",
+      "original": "exec-87089866-ce60-427d-bef4-b480aed1e409.png"
+    },
+    "contact": {
+      "file": "targets/contact.webp",
+      "original": "exec-6bc45cab-708d-442a-b3aa-4beb6da0a316.png"
+    }
+  }
+}

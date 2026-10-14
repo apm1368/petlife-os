@@ -1,0 +1,34 @@
+[
+  {
+    "locale": "fa",
+    "width": 1440,
+    "glassHome": true,
+    "profileKeepsGlass": true,
+    "noHorizontalOverflow": true,
+    "pageErrors": []
+  },
+  {
+    "locale": "fa",
+    "width": 390,
+    "glassHome": true,
+    "profileKeepsGlass": true,
+    "noHorizontalOverflow": true,
+    "pageErrors": []
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "glassHome": true,
+    "profileKeepsGlass": true,
+    "noHorizontalOverflow": true,
+    "pageErrors": []
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "glassHome": true,
+    "profileKeepsGlass": true,
+    "noHorizontalOverflow": true,
+    "pageErrors": []
+  }
+]

@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { IconButton } from "@petlife/ui";
+import { CircleHelp, IconButton } from "@petlife/ui";
 import { useSessionStore } from "@/stores/session-store";
 import { MobileTabBar, PetContextControl, PrimaryNav } from "@/features/navigation/MemberNavigation";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
@@ -10,19 +10,27 @@ import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 import { AccountMenu } from "@/features/account/AccountMenu";
 import "@/features/navigation/member-shell.css";
+import "./member-surfaces.css";
+import { memberSurface } from "./member-surface";
+import { useActivePet } from "@/hooks/use-active-pet";
+import { usePetAccess } from "@/hooks/use-pet-access";
+import { MemberGlassDock } from "./MemberGlassDock";
 
 /**
  * The one frame a signed-in member sees everywhere — private pages (AppShell) and the public
- * discovery pages they browse while signed in (PublicShell) — so the navigation never changes
- * under them when they move from Health to Shop to Travel.
+ * discovery pages (PublicShell). Personal records retain the glass surface;
+ * commerce and service journeys keep member navigation on their dedicated surface.
  */
 export function MemberFrame({ children }: { children: React.ReactNode }) {
   const t = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
+  const glass = memberSurface(usePathname() ?? "") === "glass";
   const user = useSessionStore((s) => s.user);
+  const { activePet, pets } = useActivePet();
+  const { access } = usePetAccess(activePet?.id ?? pets[0]?.id ?? null);
   return (
-    <div className="workspace-shell member-shell">
+    <div className={`workspace-shell member-shell ${glass ? "member-shell--glass" : "member-shell--service"}`}>
       <a className="member-skip-link" href="#member-main-content">
         {locale === "fa" ? "رفتن به محتوای صفحه" : "Skip to content"}
       </a>
@@ -31,7 +39,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
           <Link href={`/${locale}/home`} className="member-header__brand">
             {t("appName")}
           </Link>
-          <PrimaryNav />
+          <PrimaryNav canViewHealth={access?.canViewHealth === true} />
           <div className="member-header__tools">
             <div className="member-header__pet">
               <PetContextControl />
@@ -41,11 +49,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
                 label={t("support")}
                 onClick={() => router.push(`/${locale}/support`)}
                 icon={
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
+                  <CircleHelp size={20} aria-hidden="true" />
                 }
               />
             </span>
@@ -59,7 +63,8 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main id="member-main-content" tabIndex={-1} className="workspace-main motion-page">{children}</main>
-      <MobileTabBar />
+      {glass ? <MemberGlassDock access={access} /> : null}
+      <MobileTabBar canViewHealth={access?.canViewHealth === true} />
     </div>
   );
 }

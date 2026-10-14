@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import type { OrderSummaryDto, PetOverviewDto, SubscriptionDto, TravelBookingDto } from "@petlife/types";
 import { Avatar, CalendarDays, ChevronLeft, ChevronRight, HeartPulse, Images, MapPin, PackageCheck, Plane, Plus, Scissors, ShoppingBag, Skeleton, Sparkles, StatusLabel, Stethoscope, Users } from "@petlife/ui";
 import { petsService } from "@/services/pets.service";
 import { bookingsService } from "@/services/bookings.service";
-import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
+import { careRemindersService } from "@/services/care-reminders.service";
 import { careTitle } from "@/features/care/care-labels";
-import { ImmersiveHome } from "./ImmersiveHome";
+import { GlassMemberHome } from "./GlassMemberHome";
 import { commerceService } from "@/services/commerce.service";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { subscriptionService } from "@/services/subscription.service";
@@ -17,13 +17,13 @@ import { usePetStore } from "@/stores/pet-store";
 import { statusLabel } from "@/lib/status/status-labels";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatDay } from "@/lib/date/jalali";
-import { formatCount } from "@/lib/number/format-number";
+import { usePetAccess } from "@/hooks/use-pet-access";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { useSessionStore } from "@/stores/session-store";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 
-import { attentionTitle, eventTitle, eventSourceLabel, formatOverviewDate, mergeCareIntoOverview, severityBarClass, severityLabel, severityTone } from "@/features/pets/overview-labels";
+import { eventTitle, eventSourceLabel, formatOverviewDate, mergeCareIntoOverview } from "@/features/pets/overview-labels";
 import "./member-home.css";
 
 type Booking = Awaited<ReturnType<typeof bookingsService.list>>[number];
@@ -97,6 +97,7 @@ const COPY = {
     stays: "سفر و اقامت",
     community: "جامعه",
     unavailable: "این بخش الان بارگیری نشد.",
+    retry: "تلاش دوباره",
   },
   en: {
     dashboard: "Dashboard",
@@ -166,6 +167,7 @@ const COPY = {
     stays: "Travel and stays",
     community: "Community",
     unavailable: "This section could not load right now.",
+    retry: "Retry",
   },
 } as const;
 
@@ -181,9 +183,11 @@ export function MemberHomeView() {
   const user = useSessionStore((s) => s.user);
   const { pets, activePetId, switchActivePet, isSwitching } = useActivePet();
   const [overview, setOverview] = useState<PetOverviewDto | null>(null);
-  const [care, setCare] = useState<CareReminder[]>([]);
-  const [nextBooking, setNextBooking] = useState<Booking | null | undefined>(undefined);
+  const [nextBooking, setNextBooking] = useState<Booking | "failed" | null | undefined>(undefined);
   const [error, setError] = useState<unknown>(null);
+  const [switchError, setSwitchError] = useState(false);
+  const [careFailed, setCareFailed] = useState(false);
+  const loadId = useRef(0);
   // Side panels load on their own: one failing never blanks the dashboard ("failed" shows an inline note).
   const [orders, setOrders] = useState<OrderSummaryDto[] | "failed" | null>(null);
   const [trips, setTrips] = useState<TravelBookingDto[] | "failed" | null>(null);
@@ -191,28 +195,34 @@ export function MemberHomeView() {
   const householdId = usePetStore((s) => s.householdId);
   // No active pet recorded yet (e.g. a household created before active-pet existed): use the first pet.
   const petId = activePetId ?? pets[0]?.id ?? null;
+  const permission = usePetAccess(petId);
 
   async function load() {
+    const requestId = ++loadId.current;
     setError(null);
+    setOverview(null);
+    setNextBooking(undefined);
     if (!petId) return;
     try {
       const [ov, bookings, care] = await Promise.all([
         petsService.getOverview(petId),
-        bookingsService.list({ upcoming: true }).catch(() => [] as Booking[]),
+        bookingsService.list({ upcoming: true }).catch(() => null),
         // The owner's care reminders count toward attention/upcoming exactly as on the pet profile.
-        careRemindersService.list(petId).catch(() => [] as CareReminder[]),
+        careRemindersService.list(petId).catch(() => null),
       ]);
-      setOverview({ ...ov, ...mergeCareIntoOverview(ov, care, (item) => careTitle(item, locale)) });
-      setCare(care);
-      const sorted = [...bookings].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
-      setNextBooking(sorted.find((b) => b.petId === petId) ?? sorted[0] ?? null);
+      if (requestId !== loadId.current) return;
+      setCareFailed(care === null);
+      setOverview({ ...ov, ...mergeCareIntoOverview(ov, care ?? [], (item) => careTitle(item, locale)) });
+      const sorted = [...(bookings ?? [])].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+      setNextBooking(bookings === null ? "failed" : sorted.find((b) => b.petId === petId) ?? sorted[0] ?? null);
     } catch (err) {
-      setError(err);
+      if (requestId === loadId.current) setError(err);
     }
   }
 
   useEffect(() => {
     void load();
+    return () => { loadId.current += 1; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId, isSwitching]);
 
@@ -281,58 +291,12 @@ export function MemberHomeView() {
   return (
     <div className="member-home">
       <h1 className="sr-only">{firstName ? c.hello(firstName) : pet.name}</h1>
-      <ImmersiveHome locale={locale} userName={firstName ?? null} pet={pet} overview={overview} care={care} pets={pets} activePetId={petId} onSwitch={(id) => void switchActivePet(id)} />
+      {switchError ? <p role="alert">{c.unavailable}</p> : null}
+      <GlassMemberHome locale={locale} userName={firstName ?? null} pet={pet} overview={overview} pets={pets} activePetId={petId} careFailed={careFailed} onRetryCare={load} permission={permission} isSwitching={isSwitching} onSwitch={(id) => { setSwitchError(false); void switchActivePet(id).catch(() => setSwitchError(true)); }} />
 
       <div className="member-home__layout">
         <div className="member-home__main">
-          <section className="member-home__card member-home__attention" aria-labelledby="home-attention">
-            <div className="member-home__card-head"><h2 id="home-attention">{c.attention}</h2><span className="member-home__count">{formatCount(overview.attention.length, locale)}</span></div>
-            {overview.attention.length === 0 ? (
-              <div className="member-home__calm"><p>{c.noAttention}</p><p>{c.noAttentionHint}</p></div>
-            ) : (
-              <ul className="member-home__list">
-                {overview.attention.slice(0, 4).map((item) => (
-                  <li key={item.id}>
-                    <Link href={petBase + item.href}>
-                      <span className={`member-home__bar ${severityBarClass(item.severity)}`} aria-hidden="true" />
-                      <span className="member-home__item-text">
-                        <strong>{attentionTitle(item.title, locale)}</strong>
-                        {item.dueAt ? <span>{formatOverviewDate(item.dueAt, locale)}</span> : null}
-                      </span>
-                      {item.severity === "ATTENTION" ? null : <StatusLabel tone={severityTone(item.severity)}>{severityLabel(item.severity, locale)}</StatusLabel>}
-                      <Forward size={16} aria-hidden="true" className="member-home__go" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="member-home__card" aria-labelledby="home-upcoming">
-            <div className="member-home__card-head">
-              <h2 id="home-upcoming">{c.upcoming}</h2>
-              <Link href={`${petBase}/care`}>{c.calendar}</Link>
-            </div>
-            {overview.upcoming.length === 0 ? (
-              <p className="member-home__empty">{c.noUpcoming}</p>
-            ) : (
-              <ul className="member-home__list">
-                {overview.upcoming.slice(0, 5).map((item) => (
-                  <li key={`${item.type}-${item.id}`}>
-                    <Link href={item.href.startsWith("/bookings/") ? `/${locale}${item.href}` : petBase + item.href}>
-                      <span className="member-home__item-text">
-                        <strong>{eventTitle(item.title, locale)}</strong>
-                        <span>{formatOverviewDate(item.occurredAt, locale)}{item.providerName ? ` · ${item.providerName}` : ""}</span>
-                      </span>
-                      <Forward size={16} aria-hidden="true" className="member-home__go" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="member-home__card" aria-labelledby="home-health">
+          {permission.access?.canViewHealth ? <section className="member-home__card" aria-labelledby="home-health">
             <div className="member-home__card-head">
               <h2 id="home-health">{c.recentHealth}</h2>
               <Link href={`${petBase}/health`}>{c.allHealth}</Link>
@@ -354,7 +318,7 @@ export function MemberHomeView() {
                 ))}
               </ul>
             )}
-          </section>
+          </section> : null}
           {/* Activity repeats nothing already listed under recent health — only care, memories and older records. */}
           {activity.length > 0 || overview.recentHealth.length === 0 ? <section className="member-home__card" aria-labelledby="home-activity">
             <div className="member-home__card-head"><h2 id="home-activity">{c.recentActivity}</h2></div>
@@ -377,7 +341,7 @@ export function MemberHomeView() {
         <aside className="member-home__side">
           <section className="member-home__card" aria-labelledby="home-next">
             <h2 id="home-next">{c.next}</h2>
-            {nextBooking ? (
+            {nextBooking === "failed" ? <div role="status"><p>{c.unavailable}</p><button type="button" onClick={load}>{c.retry}</button></div> : nextBooking ? (
               <Link href={`/${locale}/bookings/${nextBooking.id}`} className="member-home__next">
                 <span className="member-home__next-icon"><Stethoscope size={20} aria-hidden="true" /></span>
                 <span className="member-home__item-text">
