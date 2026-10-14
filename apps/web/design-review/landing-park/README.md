@@ -1,8 +1,8 @@
 # Approved Tehran park landing
 
-Branch: `codex/stab-landing-tehran-park`  
-Base: `stabilization/wave-1`  
-PR: not opened; pending the repository-wide typecheck prerequisite and GitHub API access.  
+Branch: `codex/stab-landing-tehran-park`
+Base: `stabilization/wave-1`
+PR: not opened; pending the repository-wide typecheck prerequisite and GitHub API access.
 Board #4 line to publish: `codex/stab-landing-tehran-park — PR pending — approved landing implemented; frontend/browser validation complete; full gate blocked by Prisma download access.`
 
 ## What changed
