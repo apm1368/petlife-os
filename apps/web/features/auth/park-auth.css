@@ -6,7 +6,7 @@
   color:var(--campaign-ink); color-scheme:light;
 }
 .park-auth { width:min(900px,calc(100% - 40px)); max-width:900px; max-height:calc(100dvh - 40px); padding:0; margin:auto; border:1px solid var(--campaign-line); border-radius:24px; overflow-y:auto; background:var(--campaign-cream); }
-.park-auth::backdrop { background:color-mix(in srgb,var(--campaign-plum) 65%,transparent); backdrop-filter:blur(5px); }
+.park-auth::backdrop { background:color-mix(in srgb,var(--campaign-plum) 30%,transparent); backdrop-filter:blur(1.5px); }
 .park-auth__grid { display:grid; grid-template-columns:340px minmax(0,1fr); min-height:560px; }
 .park-auth__scene { position:relative; min-height:560px; overflow:hidden; background:var(--campaign-teal-tint); }
 .park-auth__scene>img { object-fit:cover; object-position:65% 100%; }
