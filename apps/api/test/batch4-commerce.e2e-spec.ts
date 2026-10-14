@@ -607,7 +607,10 @@ describe("Batch 4 — Commerce", () => {
       const ops = await admin(AdminRole.ADMIN);
       await ops.c.post("/admin/commerce/promotions").send({ name: "Too big", discountType: "PERCENT", value: 95, scope: "ALL", startsAt: new Date().toISOString() }).expect(400);
       await ops.c.post("/admin/commerce/promotions").send({ name: "Services", discountType: "PERCENT", value: 5, scope: "SERVICE", startsAt: new Date().toISOString() }).expect(400);
-      const created = await ops.c.post("/admin/commerce/promotions").send({ name: `Yalda ${unique()}`, discountType: "FIXED", value: 50_000, scope: "ALL", startsAt: new Date().toISOString(), usageLimit: 100 }).expect(201);
+      // Scoped to this test's own product: an ACTIVE store-wide (scope ALL) promotion, even for a moment, discounts
+      // every checkout another suite runs in parallel (it made seller-finance's settlement net 45,000 short).
+      const { product: promoted } = await product();
+      const created = await ops.c.post("/admin/commerce/promotions").send({ name: `Yalda ${unique()}`, discountType: "FIXED", value: 50_000, scope: "PRODUCT", productIds: [promoted.id], startsAt: new Date().toISOString(), usageLimit: 100 }).expect(201);
       const live = await ops.c.post(`/admin/commerce/promotions/${created.body.id}/status`).send({ status: "ACTIVE" }).expect(201);
       expect(live.body.isLive).toBe(true);
       await ops.c.post(`/admin/commerce/promotions/${created.body.id}/status`).send({ status: "ENDED" }).expect(201);
