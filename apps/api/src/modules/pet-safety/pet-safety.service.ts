@@ -7,7 +7,7 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { HouseholdAccessDeniedException, NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
-import { DEFAULT_CARD_FIELDS, type CareHandoffScope, type CreateCareHandoffDto, type CreateShareCardDto, type PetCardContactMessageDto, type PetCardField, type UpsertEmergencyInfoDto } from "./pet-safety.dto";
+import { DEFAULT_CARD_FIELDS, HEALTH_CARD_FIELDS, type CareHandoffScope, type CreateCareHandoffDto, type CreateShareCardDto, type PetCardContactMessageDto, type PetCardField, type UpsertEmergencyInfoDto } from "./pet-safety.dto";
 
 const HANDOFF_REASON = "CARE_HANDOFF";
 const EMERGENCY_SCOPE = "EMERGENCY_SNAPSHOT";
@@ -119,7 +119,7 @@ export class PetSafetyService {
    * Creates the card (revoking any active one of the same kind) and returns the raw token exactly once. Only the
    * owner-selected fields are public; a phone appears only with contactMode PHONE/BOTH and explicit phoneConsent.
    */
-  async createCard(petId: string, userId: string, dto: CreateShareCardDto, replacing?: string) {
+  async createCard(petId: string, userId: string, access: Pick<PetAccessFlags, "canViewHealth">, dto: CreateShareCardDto, replacing?: string) {
     const kind = dto.kind as PetShareCardKind;
     if (kind === PetShareCardKind.EMERGENCY && dto.expiresInHours === undefined) dto.expiresInHours = 72;
     const contactMode = dto.contactMode ?? "IN_APP";
@@ -129,6 +129,10 @@ export class PetSafetyService {
       if (!info?.contactPhone) throw new ValidationApiException({ field: "contactMode", reason: "EMERGENCY_PHONE_MISSING" });
     }
     const fields = dto.fields ?? DEFAULT_CARD_FIELDS[dto.kind];
+    // A card is public: someone who may manage access but not see the pet's health must not publish it.
+    if (!access.canViewHealth && fields.some((field) => HEALTH_CARD_FIELDS.includes(field))) {
+      throw new PetAccessDeniedException({ petId, reason: "HEALTH_FIELDS_REQUIRE_HEALTH_ACCESS", fields: fields.filter((field) => HEALTH_CARD_FIELDS.includes(field)) });
+    }
     const expiresAt = dto.expiresInHours ? new Date(Date.now() + dto.expiresInHours * 3600e3) : null;
     const raw = randomBytes(24).toString("base64url");
     const card = await this.prisma.$transaction(async (tx) => {
@@ -143,11 +147,11 @@ export class PetSafetyService {
   }
 
   /** New token, same settings; the old link stops working immediately and reads as ROTATED. */
-  async rotateCard(petId: string, cardId: string, userId: string) {
+  async rotateCard(petId: string, cardId: string, userId: string, access: Pick<PetAccessFlags, "canViewHealth">) {
     const card = await this.prisma.petShareCard.findFirst({ where: { id: cardId, petId, revokedAt: null } });
     if (!card) throw new NotFoundApiException("PetShareCard");
     const hours = card.expiresAt ? Math.max(1, Math.round((card.expiresAt.getTime() - Date.now()) / 3600e3)) : undefined;
-    return this.createCard(petId, userId, { kind: card.kind, fields: card.visibleFields as PetCardField[], contactMode: card.contactMode, phoneConsent: card.phoneConsentAt !== null, expiresInHours: hours ? Math.min(hours, 720) : undefined }, card.id);
+    return this.createCard(petId, userId, access, { kind: card.kind, fields: card.visibleFields as PetCardField[], contactMode: card.contactMode, phoneConsent: card.phoneConsentAt !== null, expiresInHours: hours ? Math.min(hours, 720) : undefined }, card.id);
   }
 
   async revokeCard(petId: string, cardId: string, userId: string) {

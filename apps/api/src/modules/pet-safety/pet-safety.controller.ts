@@ -51,14 +51,14 @@ export class PetSafetyController {
   @Post("share-cards")
   @RequirePetAccess("canManageAccess")
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  createCard(@Param("petId", ParseUUIDPipe) petId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateShareCardDto) {
-    return this.safety.createCard(petId, user.id, dto);
+  createCard(@Param("petId", ParseUUIDPipe) petId: string, @CurrentUser() user: SessionUser, @Req() req: PetReq, @Body() dto: CreateShareCardDto) {
+    return this.safety.createCard(petId, user.id, req.petAccess!, dto);
   }
 
   @Post("share-cards/:cardId/rotate")
   @RequirePetAccess("canManageAccess")
-  rotateCard(@Param("petId", ParseUUIDPipe) petId: string, @Param("cardId", ParseUUIDPipe) cardId: string, @CurrentUser() user: SessionUser) {
-    return this.safety.rotateCard(petId, cardId, user.id);
+  rotateCard(@Param("petId", ParseUUIDPipe) petId: string, @Param("cardId", ParseUUIDPipe) cardId: string, @CurrentUser() user: SessionUser, @Req() req: PetReq) {
+    return this.safety.rotateCard(petId, cardId, user.id, req.petAccess!);
   }
 
   @Post("share-cards/:cardId/revoke")

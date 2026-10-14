@@ -116,7 +116,8 @@ export class LostPetIncidentService {
       cardId = await this.safety.activeIdTagCardId(petId);
       if (!cardId) {
         if (!canManageAccess) throw new PetAccessDeniedException({ petId, reason: "CAN_MANAGE_ACCESS_REQUIRED_TO_CREATE_CARD" });
-        const card = await this.safety.createCard(petId, actorUserId, { kind: "ID_TAG" });
+        // An ID tag carries identity fields only, so no health access is needed (or claimed) to create it.
+        const card = await this.safety.createCard(petId, actorUserId, { canViewHealth: false }, { kind: "ID_TAG" });
         cardId = card.id;
         identityCardToken = card.token;
       }
