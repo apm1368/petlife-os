@@ -92,6 +92,21 @@ describe("Welcome trial: once per user and household, from the first pet", () =>
     expect((await db.user.findUniqueOrThrow({ where: { id: b.id } })).welcomeTrialConsumedAt).toBeNull();
   });
 
+  it("a family member adding the first pet starts the household's trial on the owner's account, not their own", async () => {
+    const owner = await user();
+    const h = await household(owner);
+    const member = await user();
+    await db.householdMember.create({ data: { householdId: h, userId: member.id, role: "FAMILY" } });
+    await addPet(member, h).expect(201);
+    expect(await status(owner, h)).toBe("TRIALING");
+    expect((await db.user.findUniqueOrThrow({ where: { id: owner.id } })).welcomeTrialConsumedAt).not.toBeNull();
+    expect((await db.user.findUniqueOrThrow({ where: { id: member.id } })).welcomeTrialConsumedAt).toBeNull();
+    // The member keeps their own trial for a household of their own.
+    const own = await household(member);
+    await addPet(member, own).expect(201);
+    expect(await status(member, own)).toBe("TRIALING");
+  });
+
   it("is plan-independent: after the welcome trial, no trial of another plan", async () => {
     const u = await user();
     const h = await household(u);

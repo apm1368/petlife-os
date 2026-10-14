@@ -2,7 +2,7 @@ import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { AppEnv } from "../../config/env";
 import { Injectable } from "@nestjs/common";
-import { Prisma, SubscriptionChangeType, SubscriptionPeriodStatus, SubscriptionStatus } from "@prisma/client";
+import { HouseholdRole, Prisma, SubscriptionChangeType, SubscriptionPeriodStatus, SubscriptionStatus } from "@prisma/client";
 import type { SubscriptionBillingHistoryDto, SubscriptionChangeDto, SubscriptionDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -140,7 +140,11 @@ export class SubscriptionService {
    * planId)` is the actual anti-abuse enforcement; the pre-check here just
    * gives a friendlier error than a raw constraint violation.
    */
-  async startTrial(householdId: string, planId: string, userId: string): Promise<SubscriptionDto> {
+  /**
+   * `userId` is who acts (recorded on the TRIAL_STARTED change); `trialUserId` is whose one lifetime trial is
+   * consumed — the actor for a manual trial, the household owner for the welcome trial (see startWelcomeTrial).
+   */
+  async startTrial(householdId: string, planId: string, userId: string, trialUserId: string = userId): Promise<SubscriptionDto> {
     const plan = await this.plans.getRawById(planId);
     if (!plan.trialDays || plan.trialDays <= 0) throw new SubscriptionTrialNotEligibleException({ planId, reason: "PLAN_HAS_NO_TRIAL" });
 
@@ -160,7 +164,10 @@ export class SubscriptionService {
           // Decision 4: one trial per household AND per user, for life, whichever plan. Trials from before the
           // consumed-at columns existed still count (their subscription_trials / TRIAL_STARTED rows).
           if (await tx.subscriptionTrial.count({ where: { householdId } })) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
-          if (await tx.subscriptionChange.count({ where: { type: SubscriptionChangeType.TRIAL_STARTED, initiatedByUserId: userId } })) {
+          // Legacy only: every trial started since the consumed-at columns exist marks its household, so an unmarked
+          // household's TRIAL_STARTED row is a pre-migration trial of whoever started it. (Marked ones are already
+          // covered by the users column, and their actor may have been a family member spending the owner's trial.)
+          if (await tx.subscriptionChange.count({ where: { type: SubscriptionChangeType.TRIAL_STARTED, initiatedByUserId: trialUserId, subscription: { household: { welcomeTrialConsumedAt: null } } } })) {
             throw new SubscriptionTrialNotEligibleException({ planId, reason: "USER_TRIAL_ALREADY_USED" });
           }
           // The single-use guarantee itself: conditional row updates. A concurrent attempt for the same household
@@ -168,7 +175,7 @@ export class SubscriptionService {
           const consumedAt = new Date();
           const household = await tx.household.updateMany({ where: { id: householdId, welcomeTrialConsumedAt: null }, data: { welcomeTrialConsumedAt: consumedAt } });
           if (household.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
-          const user = await tx.user.updateMany({ where: { id: userId, welcomeTrialConsumedAt: null }, data: { welcomeTrialConsumedAt: consumedAt } });
+          const user = await tx.user.updateMany({ where: { id: trialUserId, welcomeTrialConsumedAt: null }, data: { welcomeTrialConsumedAt: consumedAt } });
           if (user.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "USER_TRIAL_ALREADY_USED" });
 
           if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED } });
@@ -293,14 +300,16 @@ export class SubscriptionService {
   async startWelcomeTrial(householdId: string, userId: string): Promise<void> {
     const code = this.config.get("WELCOME_TRIAL_PLAN_CODE", { infer: true });
     if (!code) return;
-    const [household, user] = await Promise.all([
+    // The household's own trial is its owner's: a family member who adds the first pet must not spend their
+    // own lifetime trial on someone else's household (or, having used it elsewhere, deny this household one).
+    const [household, owner] = await Promise.all([
       this.prisma.household.findUnique({ where: { id: householdId }, select: { welcomeTrialConsumedAt: true } }),
-      this.prisma.user.findUnique({ where: { id: userId }, select: { welcomeTrialConsumedAt: true } }),
+      this.prisma.householdMember.findFirst({ where: { householdId, role: HouseholdRole.OWNER }, orderBy: { createdAt: "asc" }, select: { user: { select: { id: true, welcomeTrialConsumedAt: true } } } }),
     ]);
-    if (!household || !user || household.welcomeTrialConsumedAt || user.welcomeTrialConsumedAt) return;
+    if (!household || !owner || household.welcomeTrialConsumedAt || owner.user.welcomeTrialConsumedAt) return;
     const plan = await this.prisma.subscriptionPlan.findUnique({ where: { code }, select: { id: true, trialDays: true, status: true } });
     if (!plan || plan.status !== "ACTIVE" || !plan.trialDays) return;
-    await this.startTrial(householdId, plan.id, userId).catch((error: unknown) => this.logger.warn(`Welcome trial not started for household ${householdId}: ${error instanceof Error ? error.message : String(error)}`));
+    await this.startTrial(householdId, plan.id, userId, owner.user.id).catch((error: unknown) => this.logger.warn(`Welcome trial not started for household ${householdId}: ${error instanceof Error ? error.message : String(error)}`));
   }
 
   /**
