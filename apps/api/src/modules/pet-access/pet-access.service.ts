@@ -28,6 +28,18 @@ function isGrantActive(grant: Pick<Grant, "startsAt" | "expiresAt" | "revokedAt"
   return true;
 }
 
+/** Reasons the system writes for its own grants; they change how a grant is read, so clients can't set them. */
+function isSystemReason(reason: string): boolean {
+  return reason === "EXPLICIT_VET_SHARE" || reason.endsWith("_BOOKING");
+}
+
+function assertWithinActorExpiry(expiresAt: Date | null, actorExpiry: Date | null) {
+  if (!actorExpiry) return;
+  if (!expiresAt || expiresAt > actorExpiry) {
+    throw new ValidationApiException({ field: "expiresAt", reason: "Access you grant cannot outlast your own access.", maxExpiresAt: actorExpiry.toISOString() });
+  }
+}
+
 @Injectable()
 export class PetAccessService {
   constructor(private readonly prisma: PrismaService, private readonly events?: DomainEventsService) {}
@@ -119,10 +131,13 @@ export class PetAccessService {
     const member = await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId: pet.householdId, userId: targetUserId } } });
     if (!member) throw new HouseholdAccessDeniedException();
     if (member.role === HouseholdRole.OWNER) throw new ValidationApiException({ field: "userId", reason: "Owner access cannot be replaced." });
-    await this.assertNoEscalation(petId, actorUserId, flags);
+    if (targetUserId === actorUserId) throw new ValidationApiException({ field: "userId", reason: "You cannot grant access to yourself." });
+    if (timing.reason && isSystemReason(timing.reason)) throw new ValidationApiException({ field: "reason", reason: "This reason is reserved for system grants." });
+    const actorExpiry = await this.assertNoEscalation(petId, actorUserId, flags);
     const startsAt = timing.startsAt ? new Date(timing.startsAt) : null;
     const expiresAt = timing.expiresAt ? new Date(timing.expiresAt) : null;
     if (startsAt && expiresAt && startsAt >= expiresAt) throw new ValidationApiException({ field: "expiresAt", reason: "Expiry must be after start." });
+    assertWithinActorExpiry(expiresAt, actorExpiry);
     const grant = await this.prisma.petAccessGrant.create({
       data: { petId, userId: targetUserId, ...flags, startsAt, expiresAt, reason: timing.reason, source: expiresAt ? PetAccessSource.TEMPORARY : PetAccessSource.MANUAL, grantedByUserId: actorUserId },
     });
@@ -135,13 +150,18 @@ export class PetAccessService {
     if (!grant) throw new NotFoundApiException("Access grant");
     const targetMembership = await this.prisma.householdMember.findFirst({ where: { userId: grant.userId, household: { pets: { some: { id: petId } } } }, select: { role: true } });
     if (targetMembership?.role === HouseholdRole.OWNER) throw new ValidationApiException({ field: "grantId", reason: "Owner access cannot be changed." });
+    if (grant.userId === actorUserId) throw new ValidationApiException({ field: "grantId", reason: "You cannot change your own access." });
     const { startsAt, expiresAt, reason, ...partialFlags } = input;
+    // A grant's reason carries meaning (booking grants never read health, vet shares only work through the
+    // scoped API), so it is fixed at creation; re-sending the same value is accepted.
+    if (reason !== undefined && reason !== grant.reason) throw new ValidationApiException({ field: "reason", reason: "A grant's reason cannot be changed." });
     const nextFlags = Object.fromEntries(FLAG_KEYS.map((key) => [key, partialFlags[key] ?? grant[key]])) as unknown as PetAccessFlags;
-    await this.assertNoEscalation(petId, actorUserId, nextFlags);
+    const actorExpiry = await this.assertNoEscalation(petId, actorUserId, nextFlags);
     const nextStart = startsAt ? new Date(startsAt) : grant.startsAt;
     const nextExpiry = expiresAt ? new Date(expiresAt) : grant.expiresAt;
     if (nextStart && nextExpiry && nextStart >= nextExpiry) throw new ValidationApiException({ field: "expiresAt", reason: "Expiry must be after start." });
-    const updated = await this.prisma.petAccessGrant.update({ where: { id: grantId }, data: { ...partialFlags, startsAt: nextStart, expiresAt: nextExpiry, reason } });
+    assertWithinActorExpiry(nextExpiry, actorExpiry);
+    const updated = await this.prisma.petAccessGrant.update({ where: { id: grantId }, data: { ...partialFlags, startsAt: nextStart, expiresAt: nextExpiry } });
     await this.events?.publish("PetAccessChanged", { petId, grantId, actorUserId, targetUserId: grant.userId }, { aggregateType: "Pet", aggregateId: petId });
     return updated;
   }
@@ -155,12 +175,21 @@ export class PetAccessService {
     return { ok: true };
   }
 
-  private async assertNoEscalation(petId: string, actorUserId: string, requested: PetAccessFlags) {
+  /**
+   * The actor may only hand out permissions they hold, and never for longer than their own ability to manage
+   * access lasts. Returns that limit: null when the actor's manage access does not expire.
+   */
+  private async assertNoEscalation(petId: string, actorUserId: string, requested: PetAccessFlags): Promise<Date | null> {
     const actor = await this.getEffectivePermissions(petId, actorUserId);
     if (!actor?.canManageAccess) throw new HouseholdAccessDeniedException();
     for (const key of FLAG_KEYS) {
       if (requested[key] && !actor[key]) throw new ValidationApiException({ field: key, reason: "Cannot grant a permission you do not hold." });
     }
+    const now = new Date();
+    const managing = (await this.prisma.petAccessGrant.findMany({ where: { petId, userId: actorUserId, canManageAccess: true } }))
+      .filter((grant) => grant.reason !== "EXPLICIT_VET_SHARE" && isGrantActive(grant, now));
+    if (managing.some((grant) => grant.expiresAt === null)) return null;
+    return new Date(Math.max(...managing.map((grant) => grant.expiresAt!.getTime())));
   }
 }
 
