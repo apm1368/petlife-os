@@ -1,3 +1,5 @@
+export { toAsciiDigits, normalizeIranPhone } from "./digits";
+
 import { z } from "zod";
 import { NeuteredStatus, PetInterest, PetSex, PetSpecies, WeightUnit } from "@petlife/types";
 

@@ -32,6 +32,7 @@
     },
     "identifier": {
       "emailLabel": "Email address",
+      "invalidPhone": "Enter a valid Iranian mobile number.",
       "phoneLabel": "Phone number",
       "sendCode": "Send code"
     },

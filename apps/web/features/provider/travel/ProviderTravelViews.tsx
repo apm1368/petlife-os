@@ -1,5 +1,7 @@
 "use client";
 
+import { toAsciiDigits } from "@petlife/validation";
+
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
@@ -251,10 +253,10 @@ function PolicyTab({ listing, busy, onSave }: { listing: TravelListingDto; busy:
         {box("vaccinationRequired", fa ? "مدرک واکسن لازم است" : "Vaccination proof required")}{box("healthCertificateRequired", fa ? "گواهی سلامت لازم است" : "Health certificate required")}{box("leashRequired", fa ? "قلاده در فضاهای عمومی" : "Leash in shared areas")}{box("carrierRequired", fa ? "باکس حمل الزامی" : "Carrier required")}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Input label={fa ? "حداکثر تعداد حیوان" : "Maximum pets"} inputMode="numeric" value={v.maxPets} onChange={(e) => setV({ ...v, maxPets: e.target.value.replace(/\D/g, "") })} />
-        <Input label={fa ? "حداکثر وزن (کیلوگرم)" : "Maximum weight (kg)"} inputMode="decimal" value={v.maxWeightKg} onChange={(e) => setV({ ...v, maxWeightKg: e.target.value.replace(/[^\d.]/g, "") })} />
-        <Input label={fa ? "هزینهٔ حیوان برای هر حیوان در هر اقامت (تومان) — ۰ یعنی رایگان" : "Pet fee per pet per stay (Toman) — 0 means free"} inputMode="numeric" value={v.petFeeIrr} onChange={(e) => setV({ ...v, petFeeIrr: e.target.value.replace(/\D/g, "") })} />
-        <Input label={fa ? "ودیعهٔ حیوان (تومان)" : "Pet deposit (Toman)"} inputMode="numeric" value={v.depositIrr} onChange={(e) => setV({ ...v, depositIrr: e.target.value.replace(/\D/g, "") })} />
+        <Input label={fa ? "حداکثر تعداد حیوان" : "Maximum pets"} inputMode="numeric" value={v.maxPets} onChange={(e) => setV({ ...v, maxPets: toAsciiDigits(e.target.value).replace(/\D/g, "") })} />
+        <Input label={fa ? "حداکثر وزن (کیلوگرم)" : "Maximum weight (kg)"} inputMode="decimal" value={v.maxWeightKg} onChange={(e) => setV({ ...v, maxWeightKg: toAsciiDigits(e.target.value).replace(/[^\d.]/g, "") })} />
+        <Input label={fa ? "هزینهٔ حیوان برای هر حیوان در هر اقامت (تومان) — ۰ یعنی رایگان" : "Pet fee per pet per stay (Toman) — 0 means free"} inputMode="numeric" value={v.petFeeIrr} onChange={(e) => setV({ ...v, petFeeIrr: toAsciiDigits(e.target.value).replace(/\D/g, "") })} />
+        <Input label={fa ? "ودیعهٔ حیوان (تومان)" : "Pet deposit (Toman)"} inputMode="numeric" value={v.depositIrr} onChange={(e) => setV({ ...v, depositIrr: toAsciiDigits(e.target.value).replace(/\D/g, "") })} />
       </div>
       <Input dir="auto" label={fa ? "نژادهای محدود (با ویرگول جدا کنید)" : "Restricted breeds (comma separated)"} value={v.breedRestrictions} onChange={(e) => setV({ ...v, breedRestrictions: e.target.value })} />
       <Input dir="auto" label={fa ? "فضاهای ممنوع برای حیوان" : "Areas pets may not enter"} value={v.restrictedAreas} onChange={(e) => setV({ ...v, restrictedAreas: e.target.value })} />
@@ -298,7 +300,7 @@ function RoomsTab({ listing, busy, save }: { listing: TravelListingDto; busy: bo
           {planFor === u.id ? (
             <div className="grid gap-3 rounded-md border border-border-subtle p-3 sm:grid-cols-2">
               <Input dir="auto" label={fa ? "نام نرخ" : "Rate name"} value={plan.name} onChange={(e) => setPlan({ ...plan, name: e.target.value })} />
-              <Input label={fa ? "تغییر قیمت نسبت به پایه (٪)" : "Price change vs base (%)"} inputMode="numeric" value={String(plan.priceModifierPercent ?? 0)} onChange={(e) => setPlan({ ...plan, priceModifierPercent: Number(e.target.value.replace(/[^\d-]/g, "")) || 0 })} />
+              <Input label={fa ? "تغییر قیمت نسبت به پایه (٪)" : "Price change vs base (%)"} inputMode="numeric" value={String(plan.priceModifierPercent ?? 0)} onChange={(e) => setPlan({ ...plan, priceModifierPercent: Number(toAsciiDigits(e.target.value).replace(/[^\d-]/g, "")) || 0 })} />
               <label className="flex flex-col gap-1 text-sm">{fa ? "شرایط لغو" : "Cancellation"}
                 <select value={plan.cancellationType} onChange={(e) => setPlan({ ...plan, cancellationType: e.target.value as RatePlanInput["cancellationType"] })} className="min-h-11 rounded-md border border-border-subtle bg-surface-base px-2">
                   <option value="FREE_UNTIL">{fa ? "لغو رایگان تا چند روز قبل" : "Free until N days before"}</option>
@@ -306,8 +308,8 @@ function RoomsTab({ listing, busy, save }: { listing: TravelListingDto; busy: bo
                   <option value="NON_REFUNDABLE">{fa ? "غیرقابل استرداد" : "Non-refundable"}</option>
                 </select>
               </label>
-              {plan.cancellationType === "FREE_UNTIL" ? <Input label={fa ? "روزهای لغو رایگان پیش از ورود" : "Free-cancellation days before check-in"} inputMode="numeric" value={String(plan.freeCancellationDays ?? 0)} onChange={(e) => setPlan({ ...plan, freeCancellationDays: Number(e.target.value.replace(/\D/g, "")) || 0 })} /> : null}
-              {plan.cancellationType !== "NON_REFUNDABLE" ? <Input label={fa ? "درصد بازپرداخت دیرهنگام" : "Late refund %"} inputMode="numeric" value={String(plan.lateRefundPercent ?? 0)} onChange={(e) => setPlan({ ...plan, lateRefundPercent: Math.min(100, Number(e.target.value.replace(/\D/g, "")) || 0) })} /> : null}
+              {plan.cancellationType === "FREE_UNTIL" ? <Input label={fa ? "روزهای لغو رایگان پیش از ورود" : "Free-cancellation days before check-in"} inputMode="numeric" value={String(plan.freeCancellationDays ?? 0)} onChange={(e) => setPlan({ ...plan, freeCancellationDays: Number(toAsciiDigits(e.target.value).replace(/\D/g, "")) || 0 })} /> : null}
+              {plan.cancellationType !== "NON_REFUNDABLE" ? <Input label={fa ? "درصد بازپرداخت دیرهنگام" : "Late refund %"} inputMode="numeric" value={String(plan.lateRefundPercent ?? 0)} onChange={(e) => setPlan({ ...plan, lateRefundPercent: Math.min(100, Number(toAsciiDigits(e.target.value).replace(/\D/g, "")) || 0) })} /> : null}
               <label className="flex flex-col gap-1 text-sm">{fa ? "زمان پرداخت" : "Payment timing"}
                 <select value={plan.paymentTiming} onChange={(e) => setPlan({ ...plan, paymentTiming: e.target.value as RatePlanInput["paymentTiming"] })} className="min-h-11 rounded-md border border-border-subtle bg-surface-base px-2">
                   <option value="PAY_NOW">{fa ? "پرداخت کامل آنلاین" : "Pay in full online"}</option>
@@ -315,8 +317,8 @@ function RoomsTab({ listing, busy, save }: { listing: TravelListingDto; busy: bo
                   <option value="PAY_AT_PROPERTY">{fa ? "پرداخت در محل" : "Pay at the property"}</option>
                 </select>
               </label>
-              {plan.paymentTiming === "DEPOSIT" ? <Input label={fa ? "درصد پیش‌پرداخت" : "Deposit %"} inputMode="numeric" value={String(plan.depositPercent ?? "")} onChange={(e) => setPlan({ ...plan, depositPercent: Math.min(100, Number(e.target.value.replace(/\D/g, "")) || 0) })} /> : null}
-              <Input label={fa ? "حداقل شب (اختیاری)" : "Minimum nights (optional)"} inputMode="numeric" value={String(plan.minNights ?? "")} onChange={(e) => setPlan({ ...plan, minNights: Number(e.target.value.replace(/\D/g, "")) || undefined })} />
+              {plan.paymentTiming === "DEPOSIT" ? <Input label={fa ? "درصد پیش‌پرداخت" : "Deposit %"} inputMode="numeric" value={String(plan.depositPercent ?? "")} onChange={(e) => setPlan({ ...plan, depositPercent: Math.min(100, Number(toAsciiDigits(e.target.value).replace(/\D/g, "")) || 0) })} /> : null}
+              <Input label={fa ? "حداقل شب (اختیاری)" : "Minimum nights (optional)"} inputMode="numeric" value={String(plan.minNights ?? "")} onChange={(e) => setPlan({ ...plan, minNights: Number(toAsciiDigits(e.target.value).replace(/\D/g, "")) || undefined })} />
               <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" className="h-5 w-5" checked={!!plan.includesBreakfast} onChange={(e) => setPlan({ ...plan, includesBreakfast: e.target.checked })} />{fa ? "با صبحانه" : "Breakfast included"}</label>
               <Button className="sm:col-span-2" isLoading={busy} disabled={plan.name.trim().length < 2 || (plan.paymentTiming === "DEPOSIT" && !plan.depositPercent)} onClick={() => void save(async () => { const r = await travelProviderService.createRatePlan(listing.id, u.id, { ...plan, name: plan.name.trim() }); setPlanFor(null); return r; })}>{fa ? "افزودن نرخ" : "Add rate plan"}</Button>
             </div>
@@ -326,10 +328,10 @@ function RoomsTab({ listing, busy, save }: { listing: TravelListingDto; busy: bo
       <ContextSurface className="grid gap-3 sm:grid-cols-2">
         <h3 className="font-bold sm:col-span-2">{fa ? "افزودن نوع اتاق" : "Add a room type"}</h3>
         <Input dir="auto" label={fa ? "نام" : "Name"} value={room.name} onChange={(e) => setRoom({ ...room, name: e.target.value })} />
-        <Input label={fa ? "تعداد واحدهای مشابه" : "Identical units"} inputMode="numeric" value={room.quantity} onChange={(e) => setRoom({ ...room, quantity: e.target.value.replace(/\D/g, "") })} />
-        <Input label={fa ? "حداکثر نفرات" : "Max guests"} inputMode="numeric" value={room.maxOccupancy} onChange={(e) => setRoom({ ...room, maxOccupancy: e.target.value.replace(/\D/g, "") })} />
-        <Input label={fa ? "قیمت پایهٔ هر شب (تومان)" : "Base price per night (Toman)"} inputMode="numeric" value={room.basePrice} onChange={(e) => setRoom({ ...room, basePrice: e.target.value.replace(/\D/g, "") })} />
-        <Input label={fa ? "حداکثر حیوان در این اتاق" : "Max pets in this room"} inputMode="numeric" value={room.maxPets} onChange={(e) => setRoom({ ...room, maxPets: e.target.value.replace(/\D/g, "") })} />
+        <Input label={fa ? "تعداد واحدهای مشابه" : "Identical units"} inputMode="numeric" value={room.quantity} onChange={(e) => setRoom({ ...room, quantity: toAsciiDigits(e.target.value).replace(/\D/g, "") })} />
+        <Input label={fa ? "حداکثر نفرات" : "Max guests"} inputMode="numeric" value={room.maxOccupancy} onChange={(e) => setRoom({ ...room, maxOccupancy: toAsciiDigits(e.target.value).replace(/\D/g, "") })} />
+        <Input label={fa ? "قیمت پایهٔ هر شب (تومان)" : "Base price per night (Toman)"} inputMode="numeric" value={room.basePrice} onChange={(e) => setRoom({ ...room, basePrice: toAsciiDigits(e.target.value).replace(/\D/g, "") })} />
+        <Input label={fa ? "حداکثر حیوان در این اتاق" : "Max pets in this room"} inputMode="numeric" value={room.maxPets} onChange={(e) => setRoom({ ...room, maxPets: toAsciiDigits(e.target.value).replace(/\D/g, "") })} />
         <Input dir="auto" label={fa ? "تخت‌ها" : "Beds"} value={room.bedInfo} onChange={(e) => setRoom({ ...room, bedInfo: e.target.value })} />
         <Button className="sm:col-span-2" isLoading={busy} disabled={room.name.trim().length < 2 || !room.basePrice} onClick={() => void save(async () => { const r = await travelProviderService.createUnit(listing.id, { name: room.name.trim(), quantity: Number(room.quantity) || 1, maxOccupancy: Number(room.maxOccupancy) || undefined, basePriceIrr: Number(room.basePrice) * 10, maxPets: room.maxPets ? Number(room.maxPets) : undefined, bedInfo: room.bedInfo.trim() || undefined }); setRoom({ name: "", quantity: "1", maxOccupancy: "2", basePrice: "", maxPets: "", bedInfo: "" }); return r; })}>{fa ? "افزودن اتاق" : "Add room"}</Button>
       </ContextSurface>
@@ -408,7 +410,7 @@ function CalendarTab({ listing, busy, save }: { listing: TravelListingDto; busy:
       <ContextSurface className="flex flex-col gap-3">
         <h3 className="font-bold">{fa ? "مسدود کردن یا قیمت‌گذاری بازه" : "Block or price a range"}</h3>
         <DateRangeField label={fa ? "بازهٔ شب‌ها" : "Nights"} value={range} onChange={setRange} min={todayIso()} max={addDays(todayIso(), 365)} maxNights={366} />
-        <Input label={fa ? "قیمت ویژهٔ هر شب (تومان) — خالی یعنی قیمت پایه" : "Special nightly price (Toman) — blank uses the base price"} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))} />
+        <Input label={fa ? "قیمت ویژهٔ هر شب (تومان) — خالی یعنی قیمت پایه" : "Special nightly price (Toman) — blank uses the base price"} inputMode="numeric" value={price} onChange={(e) => setPrice(toAsciiDigits(e.target.value).replace(/\D/g, ""))} />
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="danger" disabled={!range.start || busy} onClick={() => apply(true)}>{fa ? "مسدود کن" : "Block"}</Button>
           <Button size="sm" disabled={!range.start || busy} onClick={() => apply(false)}>{price ? (fa ? "اعمال قیمت و باز کردن" : "Open with this price") : fa ? "باز کردن (قیمت پایه)" : "Open at base price"}</Button>

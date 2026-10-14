@@ -32,6 +32,7 @@
     },
     "identifier": {
       "emailLabel": "آدرس ایمیل",
+      "invalidPhone": "شماره موبایل معتبر ایران را وارد کنید.",
       "phoneLabel": "شماره موبایل",
       "sendCode": "ارسال کد"
     },
