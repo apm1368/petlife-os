@@ -60,11 +60,12 @@ chmod 600 "$backup"
 log "database backup: $backup ($(du -h "$backup" | cut -f1))"
 ls -1t "$BACKUP_DIR"/petlife_os-*-deploy-*.dump | tail -n +$((BACKUP_KEEP + 1)) | xargs -r rm -f
 
-# `migrate status` exits non-zero whenever migrations are pending (the normal case for a deploy), so only a
-# failed migration or a history mismatch stops the deploy here.
-migrate_status="$(pnpm --filter @petlife/api exec prisma migrate status 2>&1 || true)"
-echo "$migrate_status" | grep -E "migrations? found|not yet been applied|up to date|failed|modified" || true
-if echo "$migrate_status" | grep -qiE "failed|modified after (they were|it was) applied|drift"; then
+# `migrate status` exits non-zero whenever migrations are pending (the normal case for a deploy), so its exit
+# code says nothing; only Prisma's own failed/modified-migration messages stop the deploy. The binary is called
+# directly: through `pnpm exec`, pnpm adds "Command failed with exit code 1" for that normal non-zero exit.
+migrate_status="$(cd apps/api && ./node_modules/.bin/prisma migrate status 2>&1 || true)"
+echo "$migrate_status" | grep -E "migrations? found|not yet been applied|up to date|have failed|modified after" || true
+if echo "$migrate_status" | grep -qiE "migrations? ha(ve|s) failed|failed migrations?|modified after (it was|they were) applied"; then
   echo "deploy: prisma migrate status reports a failed or modified migration; resolve it before deploying" >&2
   exit 1
 fi
