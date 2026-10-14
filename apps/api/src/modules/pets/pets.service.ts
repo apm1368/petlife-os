@@ -6,6 +6,7 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { EntitlementService } from "../subscriptions/entitlement.service";
 import { PetLifecycleService } from "./pet-lifecycle.service";
+import { SubscriptionService } from "../subscriptions/subscription.service";
 import type { CreatePetDto } from "./dto/create-pet.dto";
 import type { UpdatePetDto } from "./dto/update-pet.dto";
 
@@ -30,6 +31,7 @@ export class PetsService {
     private readonly events: DomainEventsService,
     private readonly entitlements: EntitlementService,
     private readonly lifecycle: PetLifecycleService,
+    private readonly subscriptions: SubscriptionService,
   ) {}
 
   async create(householdId: string, creatorUserId: string, dto: CreatePetDto) {
@@ -53,7 +55,7 @@ export class PetsService {
     // EntitlementService/UsageService (which read via a separate,
     // non-transactional connection and therefore only ever see committed
     // state) and does not serialize unrelated households against each other.
-    return this.prisma.$transaction(async (tx) => {
+    const created = await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${householdId})::bigint)`;
       await this.entitlements.assertWithinLimit(householdId, "pets.max");
 
@@ -101,6 +103,10 @@ export class PetsService {
 
       return pet;
     });
+    // After commit: the household's first successful pet starts its welcome trial (decision 4). Best effort —
+    // an already-used trial never fails the pet creation.
+    await this.subscriptions.startWelcomeTrial(householdId, creatorUserId);
+    return created;
   }
 
   async getById(id: string) {

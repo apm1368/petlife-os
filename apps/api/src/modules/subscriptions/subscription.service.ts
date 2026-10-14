@@ -157,8 +157,19 @@ export class SubscriptionService {
           }
           this.assertTransition(sub.status, SubscriptionStatus.TRIALING);
 
-          const alreadyTrialed = await tx.subscriptionTrial.findUnique({ where: { householdId_planId: { householdId, planId } } });
-          if (alreadyTrialed) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
+          // Decision 4: one trial per household AND per user, for life, whichever plan. Trials from before the
+          // consumed-at columns existed still count (their subscription_trials / TRIAL_STARTED rows).
+          if (await tx.subscriptionTrial.count({ where: { householdId } })) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
+          if (await tx.subscriptionChange.count({ where: { type: SubscriptionChangeType.TRIAL_STARTED, initiatedByUserId: userId } })) {
+            throw new SubscriptionTrialNotEligibleException({ planId, reason: "USER_TRIAL_ALREADY_USED" });
+          }
+          // The single-use guarantee itself: conditional row updates. A concurrent attempt for the same household
+          // or user blocks on the row lock, then sees the column already set and updates nothing.
+          const consumedAt = new Date();
+          const household = await tx.household.updateMany({ where: { id: householdId, welcomeTrialConsumedAt: null }, data: { welcomeTrialConsumedAt: consumedAt } });
+          if (household.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
+          const user = await tx.user.updateMany({ where: { id: userId, welcomeTrialConsumedAt: null }, data: { welcomeTrialConsumedAt: consumedAt } });
+          if (user.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "USER_TRIAL_ALREADY_USED" });
 
           if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED } });
           const period = await tx.subscriptionPeriod.create({ data: { subscriptionId: sub.id, planId, priceId: null, startAt, endAt, isTrial: true, status: SubscriptionPeriodStatus.ACTIVE } });
@@ -273,14 +284,20 @@ export class SubscriptionService {
   }
 
   /**
-   * The welcome week (owner decision): a new household starts a real trial of the configured plan, so
-   * every feature is open for its first days and the trial then expires like any other — no charge,
-   * no stored payment method. Best effort by design: a missing plan, a plan without trial days, or a
-   * household that already trialed it simply leaves the FREE plan in place.
+   * The welcome week (owner decisions): a household's first successful pet starts a real trial of the
+   * configured plan, so every feature is open for its first days and the trial then expires like any other —
+   * no charge, no stored payment method. One per user and per household, for life (startTrial enforces it).
+   * Best effort by design: a missing plan, a plan without trial days, or an already-used trial simply leaves
+   * the FREE plan in place and never fails the pet creation.
    */
   async startWelcomeTrial(householdId: string, userId: string): Promise<void> {
     const code = this.config.get("WELCOME_TRIAL_PLAN_CODE", { infer: true });
     if (!code) return;
+    const [household, user] = await Promise.all([
+      this.prisma.household.findUnique({ where: { id: householdId }, select: { welcomeTrialConsumedAt: true } }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { welcomeTrialConsumedAt: true } }),
+    ]);
+    if (!household || !user || household.welcomeTrialConsumedAt || user.welcomeTrialConsumedAt) return;
     const plan = await this.prisma.subscriptionPlan.findUnique({ where: { code }, select: { id: true, trialDays: true, status: true } });
     if (!plan || plan.status !== "ACTIVE" || !plan.trialDays) return;
     await this.startTrial(householdId, plan.id, userId).catch((error: unknown) => this.logger.warn(`Welcome trial not started for household ${householdId}: ${error instanceof Error ? error.message : String(error)}`));

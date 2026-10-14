@@ -62,8 +62,11 @@ describe("Feature-based membership, welcome week and lifecycle ends", () => {
     return pet.id;
   }
 
-  it("a household created through the product starts a one-week trial with every feature", async () => {
+  it("a household's first pet created through the product starts a one-week trial with every feature", async () => {
     const created = await post("/households").send({ name: "خانهٔ تازه" }).expect(201);
+    // Decision 4: the trial starts with the first successful pet, not with the household.
+    expect((await get(`/households/${created.body.id}/subscription`).expect(200)).body.status).not.toBe("TRIALING");
+    await post(`/households/${created.body.id}/pets`).send({ name: "Biscuit", species: "DOG", approximateAgeMonths: 12 }).expect(201);
     const sub = await get(`/households/${created.body.id}/subscription`).expect(200);
     expect(sub.body.status).toBe("TRIALING");
     const days = (new Date(sub.body.trialEndsAt).getTime() - Date.now()) / 86400000;
@@ -82,9 +85,15 @@ describe("Feature-based membership, welcome week and lifecycle ends", () => {
   });
 
   it("a trial that ends without a purchase expires, falls back to FREE, and keeps existing reminders readable", async () => {
+    // A new person: the welcome trial is once per user (decision 4), and the member above already used theirs.
+    const fresh = await db.user.create({ data: { displayName: "Second member", email: `features-${randomUUID()}@example.com` } });
+    const freshSession = await db.session.create({ data: { userId: fresh.id, expiresAt: new Date(Date.now() + 86400000) } });
+    const freshCookie = `petlife_session=${signSessionCookie(freshSession.id, process.env.SESSION_SECRET!)}; petlife_csrf=${csrf}`;
+    const post = (url: string) => request(app.getHttpServer()).post(url).set("Cookie", freshCookie).set("x-csrf-token", csrf);
+    const get = (url: string) => request(app.getHttpServer()).get(url).set("Cookie", freshCookie);
     const created = await post("/households").send({ name: "پایان آزمایش" }).expect(201);
     const householdId = created.body.id;
-    const petId = await petIn(householdId);
+    const petId = (await post(`/households/${householdId}/pets`).send({ name: "Pistachio", species: "RABBIT", approximateAgeMonths: 12 }).expect(201)).body.id as string;
     await post(`/pets/${petId}/care-items`).send({ title: "قبل از پایان", type: "CUSTOM", dueAt: due(), recurrence: "ONCE" }).expect(201);
     await db.subscription.update({ where: { householdId }, data: { trialEndsAt: new Date(Date.now() - 1000) } });
     await worker.processDueRenewals();
