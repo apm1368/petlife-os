@@ -21,7 +21,7 @@ export {
   Sun, Moon, Monitor, Menu, X, Search, SlidersHorizontal, MapPin, CalendarDays,
   ShieldCheck, Sparkles, Scissors, Stethoscope, Dog, GraduationCap, Footprints,
   House, CarFront, ShoppingBag, Bone, HeartPulse, BadgeCheck, Clock3, Star,
-  ChevronLeft, ArrowLeft, LockKeyhole, Mail, Phone, UserRound, PackageCheck,
+  ChevronLeft, ArrowLeft, ArrowUp, LockKeyhole, Mail, Phone, UserRound, PackageCheck,
   Heart, Users, Info, ChevronRight, LocateFixed, Timer, CircleAlert, RotateCcw, Repeat,
   Compass, Images, Plane, BookOpen, LifeBuoy, HandHeart, ClipboardList, Receipt, ShieldPlus, Siren, Newspaper, Paperclip,
   FileText, Plus, Camera, Cat, Bird, Rabbit, Fish, Turtle, Rat, PawPrint, Car, Route, Navigation, Weight,
