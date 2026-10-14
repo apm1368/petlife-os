@@ -63,6 +63,12 @@ describe("AdminShell", () => {
     expect(screen.queryByRole("button", { name: "System" })).toBeNull();
     expect(screen.queryByText("Transactions")).toBeNull();
     expect(screen.queryByText("Audit")).toBeNull();
+    // Decision 5: the sample-data CRM / customer-affairs workspaces are never offered to a real admin, even one
+    // holding the permissions they used to be listed under.
+    fireEvent.click(screen.getByRole("button", { name: "Daily work" }));
+    expect(screen.getByText("Tasks")).toBeTruthy();
+    expect(screen.queryByText("CRM")).toBeNull();
+    expect(screen.queryByText("Customer Affairs")).toBeNull();
   });
 
   it("shows every nav item for a SUPER_ADMIN with every permission", async () => {

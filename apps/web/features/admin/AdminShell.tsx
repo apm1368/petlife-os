@@ -48,6 +48,9 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];
 
+/** Sample-data workspaces with no backend: shown only in the local design preview, never to real admins (decision 5). */
+const PREVIEW_ONLY_HREFS = new Set(["/crm", "/customer-affairs"]);
+
 /** ERP information architecture: the same items grouped by job — six pills instead of 29 flat links. */
 const NAV_GROUPS: { key: string; fa: string; en: string; hrefs: string[] }[] = [
   { key: "work", fa: "کار روزانه", en: "Daily work", hrefs: ["/tasks", "/crm", "/customer-affairs"] },
@@ -123,7 +126,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   }
 
   const permissions = new Set(context.permissions);
-  const visibleItems = NAV_ITEMS.filter((item) => !item.permission || permissions.has(item.permission));
+  const visibleItems = NAV_ITEMS.filter((item) => !PREVIEW_ONLY_HREFS.has(item.href) && (!item.permission || permissions.has(item.permission)));
   const visible = new Map(visibleItems.map((item) => [item.href, item]));
   const fa = locale === "fa";
   const activeHref = visibleItems.map((i) => i.href).filter((h) => (h === "" ? pathname === `/${locale}/admin` : pathname.startsWith(`/${locale}/admin${h}`))).sort((a, b) => b.length - a.length)[0];
