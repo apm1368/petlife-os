@@ -262,9 +262,27 @@ export class ClinicOperationsService {
       const rows = await this.prisma.booking.findMany({ where: { providerOrganizationId: organizationId, bookingStatus: BookingStatus.CONFIRMED, startAt: { gte: start, lt: new Date(start.getTime() + DAY) } }, include: { pet: { select: { id: true, name: true } } }, orderBy: { startAt: "asc" } });
       raw = rows.map((b) => ({ petId: b.petId, petName: b.pet.name, detail: b.startAt.toISOString() }));
     } else if (segment === ClinicCampaignSegment.VACCINES_DUE) {
+      // A vaccination due date is health data: only pets whose owners currently let someone at this clinic see
+      // their health (an active canViewHealth grant — not a booking grant without health consent, not a vet
+      // share, which only works through its scoped API), and the date itself never leaves the server.
       const today = new Date(`${tehranToday()}T00:00:00Z`);
-      const rows = await this.prisma.pet.findMany({ where: { ...caseload, vaccinationSummary: { nextDueDate: { gte: today, lte: new Date(today.getTime() + 14 * DAY) } } }, select: { id: true, name: true, vaccinationSummary: { select: { nextDueDate: true } } } });
-      raw = rows.map((p) => ({ petId: p.id, petName: p.name, detail: p.vaccinationSummary!.nextDueDate!.toISOString().slice(0, 10) }));
+      const now = new Date();
+      const healthShared: Prisma.PetWhereInput = {
+        accessGrants: {
+          some: {
+            canViewHealth: true,
+            revokedAt: null,
+            AND: [
+              { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+              { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+              { OR: [{ reason: null }, { AND: [{ NOT: { reason: { endsWith: "_BOOKING" } } }, { NOT: { reason: "EXPLICIT_VET_SHARE" } }] }] },
+            ],
+            user: { providerProfiles: { some: { providerOrganizationId: organizationId, removedAt: null } } },
+          },
+        },
+      };
+      const rows = await this.prisma.pet.findMany({ where: { AND: [caseload, healthShared], vaccinationSummary: { nextDueDate: { gte: today, lte: new Date(today.getTime() + 14 * DAY) } } }, select: { id: true, name: true } });
+      raw = rows.map((p) => ({ petId: p.id, petName: p.name, detail: "" }));
     } else {
       const rows = await this.prisma.carePlanItem.findMany({ where: { status: CarePlanItemStatus.PENDING, dueAt: { gte: new Date(), lte: new Date(Date.now() + 7 * DAY) }, carePlan: { providerOrganizationId: organizationId } }, include: { carePlan: { select: { petId: true, pet: { select: { name: true } } } } }, orderBy: { dueAt: "asc" } });
       raw = rows.map((i) => ({ petId: i.carePlan.petId, petName: i.carePlan.pet.name, detail: i.title }));

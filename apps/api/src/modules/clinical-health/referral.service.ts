@@ -3,7 +3,7 @@ import { ReferralStatus } from "@prisma/client";
 import type { ReferralDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { InvalidReferralTransitionException, ReferralNotFoundException, ValidationApiException } from "../../common/errors/api-exception";
+import { ProviderAccessDeniedException, InvalidReferralTransitionException, ReferralNotFoundException, ValidationApiException } from "../../common/errors/api-exception";
 import { REFERRAL_INCLUDE, toReferralDto } from "./clinical-health-mapper";
 import { assertVisitBelongsToPet } from "./clinical-link.util";
 import type { CreateReferralDto } from "./dto/referral.dto";
@@ -72,8 +72,10 @@ export class ReferralService {
     return toReferralDto(await this.get(petId, referralId));
   }
 
-  async updateStatus(petId: string, referralId: string, nextStatus: ReferralStatus): Promise<ReferralDto> {
+  async updateStatus(ctx: ResolvedProviderContext, petId: string, referralId: string, nextStatus: ReferralStatus): Promise<ReferralDto> {
     const existing = await this.get(petId, referralId);
+    // Only the referring organisation or the one it was sent to may move a referral along.
+    if (existing.fromProviderOrganizationId !== ctx.organizationId && existing.toProviderOrganizationId !== ctx.organizationId) throw new ProviderAccessDeniedException({ reason: "NOT_OWNING_ORGANIZATION" });
     const allowed = ALLOWED_TRANSITIONS[existing.status];
     if (!allowed.includes(nextStatus)) {
       throw new InvalidReferralTransitionException({ referralId, from: existing.status, to: nextStatus });

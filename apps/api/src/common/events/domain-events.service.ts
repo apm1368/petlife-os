@@ -210,6 +210,7 @@ export const DOMAIN_EVENT_TYPES = [
   "ReferralCreated",
   "ReferralStatusChanged",
   "ReferralCompleted",
+  "ImagingStudyVoided",
   "CarePlanCreated",
   "CarePlanUpdated",
   "PetObservationAdded",

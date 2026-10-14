@@ -3,7 +3,7 @@ import { CarePlanItemStatus, SourceType } from "@prisma/client";
 import type { CarePlanDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { CarePlanItemNotFoundException, CarePlanNotFoundException } from "../../common/errors/api-exception";
+import { ProviderAccessDeniedException, CarePlanItemNotFoundException, CarePlanNotFoundException } from "../../common/errors/api-exception";
 import { CARE_PLAN_INCLUDE, toCarePlanDto } from "./clinical-health-mapper";
 import { assertVisitBelongsToPet } from "./clinical-link.util";
 import type { CreateCarePlanDto, UpdateCarePlanItemStatusDto } from "./dto/care-plan.dto";
@@ -61,8 +61,9 @@ export class CarePlanService {
     return row;
   }
 
-  async addItem(petId: string, carePlanId: string, item: { type: string; title: string; detail?: string; dueAt?: string }): Promise<CarePlanDto> {
-    await this.get(petId, carePlanId); // existence + ownership check
+  async addItem(ctx: ResolvedProviderContext, petId: string, carePlanId: string, item: { type: string; title: string; detail?: string; dueAt?: string }): Promise<CarePlanDto> {
+    const plan = await this.get(petId, carePlanId);
+    if (plan.providerOrganizationId !== ctx.organizationId) throw new ProviderAccessDeniedException({ reason: "NOT_OWNING_ORGANIZATION" });
 
     const row = await this.prisma.$transaction(async (tx) => {
       await tx.carePlanItem.create({ data: { carePlanId, type: item.type as never, title: item.title, detail: item.detail, dueAt: item.dueAt ? new Date(item.dueAt) : undefined, source: SourceType.PROVIDER } });
@@ -73,8 +74,9 @@ export class CarePlanService {
     return toCarePlanDto(row);
   }
 
-  async updateItemStatus(petId: string, carePlanId: string, itemId: string, dto: UpdateCarePlanItemStatusDto): Promise<CarePlanDto> {
+  async updateItemStatus(ctx: ResolvedProviderContext, petId: string, carePlanId: string, itemId: string, dto: UpdateCarePlanItemStatusDto): Promise<CarePlanDto> {
     const plan = await this.get(petId, carePlanId);
+    if (plan.providerOrganizationId !== ctx.organizationId) throw new ProviderAccessDeniedException({ reason: "NOT_OWNING_ORGANIZATION" });
     const item = plan.items.find((i) => i.id === itemId);
     if (!item) throw new CarePlanItemNotFoundException({ itemId });
 
