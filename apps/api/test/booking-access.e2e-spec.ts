@@ -110,6 +110,16 @@ describe("Booking access and weekly series", () => {
     const occurrences = await db.booking.findMany({ where: { id: { in: series.body.createdBookingIds.filter((id: string) => id !== origin.id) } } });
     expect(occurrences.length).toBeGreaterThan(0);
     expect(occurrences.every((b) => b.bookingStatus === "REQUESTED" && b.bookingMode === "REQUEST")).toBe(true);
+    // Same request lifecycle as a single REQUEST booking: an expiry window, and no calendar entry until accepted.
+    expect(occurrences.every((b) => b.requestExpiresAt !== null && b.requestExpiresAt <= b.startAt)).toBe(true);
+    const first = occurrences[0]!;
+    expect(await db.careCalendarEvent.count({ where: { sourceId: first.id } })).toBe(0);
+
+    await post(walkers.staff, `/provider/bookings/${first.id}/accept`).send({}).expect(201);
+    const accepted = await db.booking.findUniqueOrThrow({ where: { id: first.id } });
+    expect(accepted.bookingStatus).toBe("CONFIRMED");
+    expect(accepted.requestExpiresAt).toBeNull();
+    expect(await db.careCalendarEvent.count({ where: { sourceId: first.id } })).toBe(1);
   });
 
   it("a series is refused once the service is retired or the provider loses verification", async () => {

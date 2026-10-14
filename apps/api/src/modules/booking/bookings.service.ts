@@ -809,6 +809,8 @@ export class BookingsService {
               resourceId: slot.resourceId ?? null,
               bookingMode: originService.bookingMode,
               bookingStatus: occurrenceStatus,
+              // Same request window as a single REQUEST booking, so the expiry worker closes an unanswered one.
+              requestExpiresAt: occurrenceStatus === BookingStatus.REQUESTED ? new Date(Math.min(Date.now() + originService.requestTtlHours * 3600_000, startAt.getTime())) : null,
               paymentMode: origin.paymentMode,
               priceAmount: origin.priceAmount,
               discountAmount: origin.discountAmount,
