@@ -1107,6 +1107,8 @@ model User {
   /// ERP-B: platform-level account suspension by staff (trust/admin). A suspended account can't sign in and its
   /// sessions stop resolving; nothing is deleted. Reason is internal (never shown on member-facing APIs).
   accountStatus      UserAccountStatus @default(ACTIVE)
+  /// Decision 4: set (atomically, once) when this user starts their one lifetime trial; never cleared.
+  welcomeTrialConsumedAt DateTime?
   suspendedAt        DateTime?
   suspendedReason    String?
   suspendedByAdminId String?           @db.Uuid
@@ -1229,6 +1231,8 @@ model Household {
   city        String?
   region      String?
   countryCode String?
+  /// Decision 4: set (atomically, once) when this household starts its one lifetime trial; never cleared.
+  welcomeTrialConsumedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

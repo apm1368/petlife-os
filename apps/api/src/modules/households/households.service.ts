@@ -9,7 +9,6 @@ import { AlreadyHouseholdMemberException, InvitationAlreadyUsedException, Invita
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import type { CreateHouseholdDto } from "./dto/create-household.dto";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
-import { SubscriptionService } from "../subscriptions/subscription.service";
 import type { UpdateHouseholdDto } from "./dto/update-household.dto";
 
 type InitialAccess = Array<{ petId: string; preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" }>;
@@ -41,7 +40,7 @@ function maskContact(contact: string) {
 
 @Injectable()
 export class HouseholdsService {
-  constructor(private readonly prisma: PrismaService, private readonly events: DomainEventsService, private readonly notifications: NotificationOrchestratorService, private readonly subscriptions: SubscriptionService) {}
+  constructor(private readonly prisma: PrismaService, private readonly events: DomainEventsService, private readonly notifications: NotificationOrchestratorService) {}
 
   async create(userId: string, dto: CreateHouseholdDto) {
     const household = await this.prisma.$transaction(async (tx) => {
@@ -49,8 +48,7 @@ export class HouseholdsService {
       await this.events.publish("HouseholdCreated", { householdId: created.id, ownerId: userId }, { tx, aggregateType: "Household", aggregateId: created.id });
       return created;
     });
-    // After commit: the trial references the household row.
-    await this.subscriptions.startWelcomeTrial(household.id, userId);
+    // The welcome trial starts with the household's first pet (PetsService.create), not here.
     return household;
   }
 
