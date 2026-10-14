@@ -6,12 +6,16 @@ import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { REDIS_CLIENT } from "../src/common/redis/redis.module";
 import { applyTrustProxy } from "../src/common/http/trust-proxy.util";
+import { normalizeIranianPhone } from "../src/common/phone/phone-normalizer";
 
 /**
  * Security finding G — effective rate limits. The general e2e suite skips the IP throttler; this spec
  * opts in and runs the API exactly as deployed: behind a loopback proxy (TRUST_PROXY default), with
  * X-Forwarded-For carrying the client address the way nginx sends it.
  */
+/** The identifier exactly as the API stores, logs and rate-limits it (phones in E.164). */
+const canonicalIdentifier = (identifier: string) => (identifier.includes("@") ? identifier.trim().toLowerCase() : normalizeIranianPhone(identifier)?.e164 ?? identifier);
+
 describe("Security: rate limiting (finding G)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -53,10 +57,10 @@ describe("Security: rate limiting (finding G)", () => {
   it("caps OTP sends per phone number across addresses (SMS bombing / code cycling)", async () => {
     const victim = phone(30);
     for (let i = 0; i < 5; i++) {
-      await redis.del(`otp:cooldown:${victim}`); // the provider's 30s resend cooldown, elapsed
+      await redis.del(`otp:cooldown:${canonicalIdentifier(victim)}`); // the provider's 30s resend cooldown, elapsed
       await post("/auth/request-otp", nextIp(), { identifier: victim }).expect(200);
     }
-    await redis.del(`otp:cooldown:${victim}`);
+    await redis.del(`otp:cooldown:${canonicalIdentifier(victim)}`);
     const sixth = await post("/auth/request-otp", nextIp(), { identifier: victim });
     expect(sixth.status).toBe(429);
     expect(sixth.body.error.code).toBe("OTP_RATE_LIMITED");

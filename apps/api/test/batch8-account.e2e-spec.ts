@@ -10,6 +10,7 @@ import { NotificationOrchestratorService } from "../src/modules/notifications/no
 import { sanitizeReturnTo } from "../src/common/return-to/return-to.util";
 import { IDENTIFIER_LIMITS, identifierRateLimitKey } from "../src/common/rate-limit/identifier-rate-limiter.service";
 import { isPrivateUploadPath } from "../src/modules/storage/object-url.util";
+import { normalizeIranianPhone } from "../src/common/phone/phone-normalizer";
 
 interface Cookies {
   session?: string;
@@ -20,6 +21,9 @@ interface Cookies {
  * Batch 8 — Account, security, privacy, household access, notifications and
  * membership through the real HTTP surface.
  */
+/** The identifier exactly as the API stores, logs and rate-limits it (phones in E.164). */
+const canonicalIdentifier = (identifier: string) => (identifier.includes("@") ? identifier.trim().toLowerCase() : normalizeIranianPhone(identifier)?.e164 ?? identifier);
+
 describe("Batch 8 — Account & security", () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -37,7 +41,8 @@ describe("Batch 8 — Account & security", () => {
 
   /** Tests reuse identifiers faster than the real resend cooldown and hourly send budget allow. */
   async function clearOtpCooldown(identifier: string) {
-    await redis.del(`otp:cooldown:${identifier}`, identifierRateLimitKey(IDENTIFIER_LIMITS.otpSend.bucket, identifier));
+    const key = canonicalIdentifier(identifier);
+    await redis.del(`otp:cooldown:${key}`, identifierRateLimitKey(IDENTIFIER_LIMITS.otpSend.bucket, key));
   }
 
   afterAll(async () => {
@@ -54,7 +59,7 @@ describe("Batch 8 — Account & security", () => {
   const uniquePhone = () => `0912${Math.floor(1_000_000 + Math.random() * 8_999_999)}`;
 
   function lastOtp(identifier: string): string {
-    const calls = logSpy.mock.calls.filter((args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(`identifier=${identifier} `));
+    const calls = logSpy.mock.calls.filter((args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(`identifier=${canonicalIdentifier(identifier)} `));
     const call = calls[calls.length - 1];
     if (!call) throw new Error(`No OTP log found for ${identifier}`);
     return /code=(\d+)/.exec(call[0] as string)![1]!;
@@ -150,7 +155,7 @@ describe("Batch 8 — Account & security", () => {
       await u.c.post("/me/contact/confirm").send({ kind: "phone", value: phone, code: "000000" }).expect(400);
       expect((await prisma.user.findUniqueOrThrow({ where: { id: u.userId } })).phone).toBeNull();
       const done = await u.c.post("/me/contact/confirm").send({ kind: "phone", value: phone, code: lastOtp(phone) }).expect(200);
-      expect(done.body).toMatchObject({ phone, phoneVerified: true });
+      expect(done.body).toMatchObject({ phone: canonicalIdentifier(phone), phoneVerified: true });
       expect(await prisma.domainEvent.count({ where: { type: "ContactChanged", aggregateId: u.userId } })).toBe(1);
 
       // Asking for a code for someone else's email looks exactly like any other request (no account probing)…
