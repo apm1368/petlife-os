@@ -2,45 +2,16 @@
 
 import { useStatusText } from "@/lib/status/use-status-text";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
-import { SellerVerificationStatus, type AdminSellerOrgSummaryDto } from "@petlife/types";
+import Link from "next/link";
+import {useAdminStore} from "@/stores/admin-store";
+import { useLocale, useTranslations } from "next-intl";
+import { ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
+import type { AdminSellerOrgSummaryDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
 
-function VerificationForm({ org, onChanged }: { org: AdminSellerOrgSummaryDto; onChanged: () => void }) {
-  const statusText = useStatusText();
-  const t = useTranslations("admin.orgs");
-  const tCommon = useTranslations("admin.common");
-  const [status, setStatus] = useState<SellerVerificationStatus>(org.verificationStatus);
-  const [reason, setReason] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  return (
-    <div className="flex flex-wrap items-end gap-2 border-t border-border-subtle pt-2">
-      <Select label={t("verification.changeStatus")} value={status} onChange={(e) => setStatus(e.target.value as SellerVerificationStatus)} options={Object.values(SellerVerificationStatus).map((s) => ({ value: s, label: statusText.label(s) }))} />
-      <Input label={tCommon("reasonLabel")} placeholder={tCommon("reasonPlaceholder")} value={reason} onChange={(e) => setReason(e.target.value)} className="min-w-40 flex-1" />
-      <Button
-        size="sm"
-        isLoading={saving}
-        onClick={async () => {
-          if (!reason.trim()) return;
-          setSaving(true);
-          try {
-            await adminService.transitionSellerVerification(org.id, status, reason);
-            onChanged();
-          } finally {
-            setSaving(false);
-          }
-        }}
-      >
-        {t("verification.submit")}
-      </Button>
-    </div>
-  );
-}
-
 export function AdminSellersView() {
+  const locale=useLocale(),statusText=useStatusText(),verification=useTranslations("partnerVerification"),context=useAdminStore(s=>s.context),canReview=!!context?.permissions.includes("verification.manage");
   const t = useTranslations("admin.orgs");
   const tCommon = useTranslations("admin.common");
   const [q, setQ] = useState("");
@@ -79,11 +50,11 @@ export function AdminSellersView() {
           <div className="flex items-center justify-between gap-3">
             <span className="text-body font-medium text-text-primary">{org.name}</span>
             <div className="flex items-center gap-2">
-              <StatusLabel tone={adminStatusTone(org.status)}>{org.status}</StatusLabel>
-              <StatusLabel tone={adminStatusTone(org.verificationStatus)}>{org.verificationStatus}</StatusLabel>
+              <StatusLabel tone={adminStatusTone(org.status)}>{statusText.label(org.status)}</StatusLabel>
+              <StatusLabel tone={adminStatusTone(org.verificationStatus)}>{statusText.label(org.verificationStatus)}</StatusLabel>
             </div>
           </div>
-          <VerificationForm org={org} onChanged={search} />
+          {canReview&&<Link className="underline" href={`/${locale}/admin/verification/seller/${org.id}`}>{verification("reviewCase")}</Link>}
         </ContextSurface>
       ))}
     </div>

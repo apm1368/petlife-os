@@ -43,6 +43,8 @@ export interface AccountActivityItemDto extends ActivityEventDto {
 export type ConsentKindValue = "TERMS" | "PRIVACY" | "MARKETING";
 export type PrivacyRequestStatusValue = "PENDING" | "PROCESSING" | "READY" | "COMPLETED" | "CANCELLED" | "FAILED" | "EXPIRED";
 
+export interface ConsentHistoryDto {currentVersion:string;items:{kind:ConsentKindValue;version:string;acceptedAt:string|null;withdrawnAt:string|null;source:string}[]}
+
 export interface PrivacyCenterDto {
   consentVersion: string;
   consents: Array<{ kind: ConsentKindValue; required: boolean; currentVersion: string; granted: boolean; grantedAt: string | null; revokedAt: string | null; lastRecordedVersion: string | null }>;
@@ -81,6 +83,7 @@ export const accountService = {
   revokeSession: (sessionId: string) => apiFetch<{ ok: true }>(`/account/security/sessions/${sessionId}`, { method: "DELETE" }),
   revokeOtherSessions: () => apiFetch<{ ok: true; count: number }>("/account/security/sessions/revoke-others", { method: "POST" }),
   revokeAllSessions: () => apiFetch<{ ok: true; count: number }>("/account/security/sessions/revoke-all", { method: "POST" }),
+  consentHistory: (signal?:AbortSignal) => apiFetch<ConsentHistoryDto>("/account/privacy/consents/history",{signal}),
   privacy: () => apiFetch<PrivacyCenterDto>("/account/privacy"),
   setConsent: (kind: ConsentKindValue, granted: boolean) => apiFetch("/account/privacy/consent", { method: "PATCH", body: { kind, granted } }),
   sharing: () => apiFetch<SharingSummaryDto>("/account/privacy/sharing"),

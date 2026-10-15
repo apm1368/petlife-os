@@ -54,6 +54,8 @@ export function AdminDashboardView() {
   return <div className="approved-admin">
     <header className="approved-admin__heading"><div><p>{context?.displayName}</p><h1>{t("title")}</h1><p>{t("subtitle")}</p></div><time dateTime={new Date().toISOString()}>{date(new Date().toISOString())}</time></header>
     <AdminOperationalSearch />
+    {allowed("verification.manage") && <Link href="/admin/verification" className="underline">{t("verificationQueue")}</Link>}
+    {allowed("access.view") && <Link href="/admin/access" className="underline">{t("accessControl")}</Link>}
     {allowed("travel.source.view") && <Link href="/admin/travel/external" className="underline">{t("externalSources")}</Link>}
     {allowed("insurance.view") && <Link href="/admin/insurance/providers" className="underline">{t("insuranceProviders")}</Link>}
     {allowed("sellerFinance.view") && <Link href="/admin/marketplace-statements" className="underline">{t("marketplaceStatements")}</Link>}
