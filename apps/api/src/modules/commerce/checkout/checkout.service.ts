@@ -78,7 +78,9 @@ function allLines(cart: Pick<CartDto, "sellerGroups">): CartLineDto[] {
 }
 
 /** Regroups frozen checkout lines by seller for display. */
-function snapshotAsCart(lines: CartLineDto[]): Pick<CartDto, "sellerGroups"> & { sellerGroups: CartDto["sellerGroups"] } {
+function snapshotAsCart(snapshot: CartLineDto[]): Pick<CartDto, "sellerGroups"> & { sellerGroups: CartDto["sellerGroups"] } {
+  // Snapshots priced before CartLineDto.imageUrl existed lack the field; the contract says null, never undefined.
+  const lines = snapshot.map((line) => ({ ...line, imageUrl: line.imageUrl ?? null }));
   const groups = new Map<string, CartDto["sellerGroups"][number]>();
   for (const line of lines) {
     const seller = line.sellerOffer.sellerOrganization;

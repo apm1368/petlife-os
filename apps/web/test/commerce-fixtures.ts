@@ -88,6 +88,7 @@ export function cartLine(overrides: Partial<CartLineDto> = {}): CartLineDto {
     sellerOffer: offer(),
     productId: "prod-1",
     productTitle: "Royal Canin Adult Dog Food",
+    imageUrl: null,
     variantTitle: "2kg",
     variantSku: "RC-DOG-2KG",
     targetPetId: null,

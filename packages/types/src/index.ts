@@ -1535,6 +1535,8 @@ export interface CartLineDto {
   sellerOffer: SellerOfferDto;
   productId: string;
   productTitle: string;
+  /** The line's own variant image if it has one, else the product's first image (ProductMedia.url), else null. */
+  imageUrl: string | null;
   variantTitle: string | null;
   variantSku: string;
   targetPetId: string | null;
