@@ -76,6 +76,7 @@ const CHECKOUT: CheckoutDto = {
           id: "line-a",
           sellerOffer: {} as never,
           productId: "prod-1",
+          imageUrl: null,
           productTitle: "Royal Canin Adult Dog Food",
           variantTitle: "2kg",
           variantSku: "RC-DOG-2KG",

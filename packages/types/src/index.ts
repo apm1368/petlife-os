@@ -1535,6 +1535,8 @@ export interface CartLineDto {
   sellerOffer: SellerOfferDto;
   productId: string;
   productTitle: string;
+  /** The line's own variant image if it has one, else the product's first image (ProductMedia.url), else null. */
+  imageUrl: string | null;
   variantTitle: string | null;
   variantSku: string;
   targetPetId: string | null;
@@ -2840,6 +2842,11 @@ export interface AdminSearchResultDto {
   customers: AdminCustomerListItemDto[];
   orders: AdminOrderSummaryDto[];
   supportCases: SupportCaseSummaryDto[];
+  /**
+   * Which sections the caller's role may search (customers: customer.view, orders: commerce.view, supportCases:
+   * support.view). A section outside the role is always empty — "not allowed", not "no matches".
+   */
+  searched: { customers: boolean; orders: boolean; supportCases: boolean };
 }
 
 // ---------------------------------------------------------------------------
