@@ -775,6 +775,10 @@
       "route": "[locale]/profile/activity"
     },
     {
+      "file": "app/[locale]/(app)/profile/clinic-notes/page.tsx",
+      "route": "[locale]/profile/clinic-notes"
+    },
+    {
       "file": "app/[locale]/(app)/profile/household/page.tsx",
       "route": "[locale]/profile/household"
     },
@@ -3802,6 +3806,69 @@
       "status": "UI_CONSUMER_FOUND"
     },
     {
+      "service": "clinicCustomerExtrasService",
+      "method": "tags",
+      "source": "services/clinic-customer-extras.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTags.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicCustomerExtrasService",
+      "method": "createTag",
+      "source": "services/clinic-customer-extras.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTags.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicCustomerExtrasService",
+      "method": "deleteTag",
+      "source": "services/clinic-customer-extras.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTags.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicCustomerExtrasService",
+      "method": "customerTags",
+      "source": "services/clinic-customer-extras.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTags.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicCustomerExtrasService",
+      "method": "tagCustomer",
+      "source": "services/clinic-customer-extras.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTags.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicCustomerExtrasService",
+      "method": "untagCustomer",
+      "source": "services/clinic-customer-extras.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTags.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicCustomerExtrasService",
+      "method": "sharedNotes",
+      "source": "services/clinic-customer-extras.service.ts",
+      "consumers": [
+        "features/clinic/MemberClinicNotesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
       "service": "clinicInvitationsService",
       "method": "mine",
       "source": "services/clinic-invitations.service.ts",
@@ -3825,6 +3892,15 @@
       "source": "services/clinic-invitations.service.ts",
       "consumers": [
         "features/clinic/ClinicInvitationsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "assign",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicAppointmentAssignment.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -4013,6 +4089,7 @@
       "method": "branches",
       "source": "services/clinic-team.service.ts",
       "consumers": [
+        "features/clinic/ClinicAppointmentAssignment.tsx",
         "features/clinic/ClinicTeamManagement.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
@@ -6446,6 +6523,7 @@
       "method": "listResources",
       "source": "services/provider-os.service.ts",
       "consumers": [
+        "features/clinic/ClinicAppointmentAssignment.tsx",
         "features/provider/ProviderServiceSettings.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
@@ -6473,6 +6551,7 @@
       "method": "listStaff",
       "source": "services/provider-os.service.ts",
       "consumers": [
+        "features/clinic/ClinicAppointmentAssignment.tsx",
         "features/provider/ProviderCalendarView.tsx",
         "features/provider/ProviderOperationsViews.tsx"
       ],

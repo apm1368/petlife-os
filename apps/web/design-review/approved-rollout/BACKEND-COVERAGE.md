@@ -48,7 +48,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/care-calendar/care-calendar.controller.ts | 0 | 0 | 1 | 0 |
 | modules/care-profile/care-profile.controller.ts | 2 | 0 | 0 | 0 |
 | modules/care-reminders/care-reminder.controller.ts | 0 | 0 | 8 | 0 |
-| modules/clinic-os/clinic-os.controller.ts | 28 | 0 | 13 | 0 |
+| modules/clinic-os/clinic-os.controller.ts | 36 | 0 | 5 | 0 |
 | modules/clinical-health/health-advanced.controller.ts | 29 | 0 | 0 | 0 |
 | modules/clinical-health/pet-observation.controller.ts | 4 | 0 | 1 | 0 |
 | modules/clinical-health/provider-clinical.controller.ts | 8 | 1 | 14 | 0 |

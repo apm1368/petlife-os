@@ -1,8 +1,20 @@
 {
-  "base": "a5a672d",
+  "base": "f3bf064",
   "branch": "codex/stab-approved-design-rollout",
   "scope": "All existing routes receive their domain pattern through DesignRoot/MemberFrame. Applying a shared pattern is distinct from individually redesigning/testing a feature form. Protected lanes remain unchanged. Browser results use controlled API data, not a live server certification.",
   "routes": [
+    {
+      "file": "app/[locale]/(admin)/admin/access/[id]/page.tsx",
+      "route": "[locale]/admin/access/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/access/page.tsx",
+      "route": "[locale]/admin/access",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/donations/page.tsx",
       "route": "[locale]/admin/animal-support/donations",
@@ -169,6 +181,21 @@
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/[id]/page.tsx",
+      "route": "[locale]/admin/insurance/providers/[id]",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/[id]/products/page.tsx",
+      "route": "[locale]/admin/insurance/providers/[id]/products",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/page.tsx",
+      "route": "[locale]/admin/insurance/providers",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
       "file": "app/[locale]/(admin)/admin/lost-pets/[id]/page.tsx",
       "route": "[locale]/admin/lost-pets/[id]",
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
@@ -177,6 +204,16 @@
       "file": "app/[locale]/(admin)/admin/lost-pets/page.tsx",
       "route": "[locale]/admin/lost-pets",
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/marketplace-statements/[id]/page.tsx",
+      "route": "[locale]/admin/marketplace-statements/[id]",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/marketplace-statements/page.tsx",
+      "route": "[locale]/admin/marketplace-statements",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/(admin)/admin/page.tsx",
@@ -294,6 +331,58 @@
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
+      "file": "app/[locale]/(admin)/admin/travel/external/canonical/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/canonical/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/listings/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/new/page.tsx",
+      "route": "[locale]/admin/travel/external/listings/new",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/page.tsx",
+      "route": "[locale]/admin/travel/external/listings",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/matches/page.tsx",
+      "route": "[locale]/admin/travel/external/matches",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/page.tsx",
+      "route": "[locale]/admin/travel/external",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/reports/page.tsx",
+      "route": "[locale]/admin/travel/external/reports",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/runs/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/runs/[id]",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/sources/[code]/page.tsx",
+      "route": "[locale]/admin/travel/external/sources/[code]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
       "file": "app/[locale]/(admin)/admin/travel/listings/[id]/page.tsx",
       "route": "[locale]/admin/travel/listings/[id]",
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
@@ -327,6 +416,18 @@
       "file": "app/[locale]/(admin)/admin/trust/page.tsx",
       "route": "[locale]/admin/trust",
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/verification/[subject]/[id]/page.tsx",
+      "route": "[locale]/admin/verification/[subject]/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/verification/page.tsx",
+      "route": "[locale]/admin/verification",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
     },
     {
       "file": "app/[locale]/(app)/ai/page.tsx",
@@ -499,9 +600,21 @@
       "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
+      "file": "app/[locale]/(app)/pets/[id]/care/suggestions/page.tsx",
+      "route": "[locale]/pets/[id]/care/suggestions",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
       "file": "app/[locale]/(app)/pets/[id]/care-sheet/page.tsx",
       "route": "[locale]/pets/[id]/care-sheet",
       "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/activity/page.tsx",
+      "route": "[locale]/pets/[id]/health/activity",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/dental/[recordId]/page.tsx",
@@ -679,6 +792,12 @@
       "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
+      "file": "app/[locale]/(app)/pets/[id]/health/links/page.tsx",
+      "route": "[locale]/pets/[id]/health/links",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
       "file": "app/[locale]/(app)/pets/[id]/health/medications/[medicationId]/page.tsx",
       "route": "[locale]/pets/[id]/health/medications/[medicationId]",
       "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
@@ -814,6 +933,12 @@
       "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
+      "file": "app/[locale]/(app)/pets/[id]/travel/[tripId]/external-stays/page.tsx",
+      "route": "[locale]/pets/[id]/travel/[tripId]/external-stays",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
       "file": "app/[locale]/(app)/pets/[id]/travel/[tripId]/page.tsx",
       "route": "[locale]/pets/[id]/travel/[tripId]",
       "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
@@ -857,6 +982,12 @@
       "file": "app/[locale]/(app)/profile/activity/page.tsx",
       "route": "[locale]/profile/activity",
       "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/clinic-notes/page.tsx",
+      "route": "[locale]/profile/clinic-notes",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Read-only household-visible clinic notes; glass member frame preserved."
     },
     {
       "file": "app/[locale]/(app)/profile/household/page.tsx",
@@ -976,17 +1107,17 @@
     {
       "file": "app/[locale]/(auth)/account/forgot/page.tsx",
       "route": "[locale]/account/forgot",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/(auth)/account/page.tsx",
       "route": "[locale]/account",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/(auth)/account/reset/page.tsx",
       "route": "[locale]/account/reset",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/(auth)/auth/complete/page.tsx",
@@ -996,17 +1127,17 @@
     {
       "file": "app/[locale]/(auth)/auth/page.tsx",
       "route": "[locale]/auth",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/(auth)/register/page.tsx",
       "route": "[locale]/register",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/(auth)/welcome/page.tsx",
       "route": "[locale]/welcome",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/(provider)/provider/analytics/page.tsx",
@@ -1032,6 +1163,12 @@
       "file": "app/[locale]/(provider)/provider/calendar/page.tsx",
       "route": "[locale]/provider/calendar",
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/clinic/page.tsx",
+      "route": "[locale]/provider/clinic",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Queue baseline plus team/branches/contacts/reminders/campaigns/finance controlled captures. Not live side-effect certification."
     },
     {
       "file": "app/[locale]/(provider)/provider/clinical/page.tsx",
@@ -1112,6 +1249,12 @@
       "file": "app/[locale]/(provider)/provider/travel/reviews/page.tsx",
       "route": "[locale]/provider/travel/reviews",
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/verification/page.tsx",
+      "route": "[locale]/provider/verification",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
     },
     {
       "file": "app/[locale]/(provider)/provider/visits/[id]/page.tsx",
@@ -1229,6 +1372,12 @@
       "visualStatus": "EDITORIAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
+      "file": "app/[locale]/(public)/health-share/[token]/page.tsx",
+      "route": "[locale]/health-share/[token]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
       "file": "app/[locale]/(public)/insurance/[productId]/page.tsx",
       "route": "[locale]/insurance/[productId]",
       "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
@@ -1317,6 +1466,24 @@
       "file": "app/[locale]/(public)/travel/compare/page.tsx",
       "route": "[locale]/travel/compare",
       "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/[id]/page.tsx",
+      "route": "[locale]/travel/external/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/favorites/page.tsx",
+      "route": "[locale]/travel/external/favorites",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/page.tsx",
+      "route": "[locale]/travel/external",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
     },
     {
       "file": "app/[locale]/(public)/travel/page.tsx",
@@ -1414,6 +1581,12 @@
       "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
+      "file": "app/[locale]/(seller)/seller/verification/page.tsx",
+      "route": "[locale]/seller/verification",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
       "file": "app/[locale]/@modal/(.)account/forgot/page.tsx",
       "route": "[locale]/account/forgot",
       "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
@@ -1446,12 +1619,12 @@
     {
       "file": "app/[locale]/@modal/[...rest]/page.tsx",
       "route": "[locale]/[...rest]",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/@modal/page.tsx",
       "route": "[locale]",
-      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
     },
     {
       "file": "app/[locale]/[...rest]/page.tsx",
@@ -1462,11 +1635,6 @@
       "file": "app/[locale]/page.tsx",
       "route": "[locale]",
       "visualStatus": "LIVE_APPROVED_LANDING_UNCHANGED"
-    },
-    {
-      "file": "app/[locale]/(provider)/provider/clinic/page.tsx",
-      "route": "[locale]/provider/clinic",
-      "visualStatus": "BROWSER_VERIFIED_FA_EN_390_1440_CONTROLLED_DATA"
     }
   ]
 }

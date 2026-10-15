@@ -82,5 +82,61 @@
     "width": 390,
     "overflow": false,
     "pageErrors": []
+  },
+  {
+    "page": "care-suggestions",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "public-health-share",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "provider-care-suggestion",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "health-activity",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "health-links",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "care-suggestions",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "public-health-share",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "provider-care-suggestion",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
   }
 ]

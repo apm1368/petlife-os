@@ -1,18 +1,16 @@
-# [codex] Apply approved PET LIFE page patterns and complete operational forms
+# [codex] Apply approved page patterns and connect operational workflows
 
-Base: `stabilization/wave-1`. Head: `codex/stab-approved-design-rollout`.
+Base: `stabilization/wave-1`. This is a local draft, not an opened GitHub PR.
 
-Existing service/content/operations pages still used their previous presentation after the landing release. This combines the approved warm shop, discovery/reservation, support, editorial/contact and admin content patterns, while personal tabs retain the glass member frame. It also completes real owner/clinical/content/availability/seller/subscription actions with permission gates and visible save failures.
+Applies the approved glass personal workspace and warm plum/cream domain patterns, and connects the real clinic operations, insurer catalog/team, marketplace statements, health sharing/care suggestions, external travel planning and source administration. Adds manual partner verification portals and the admin evidence queue with private audited document access, separate document/organization decisions and server-provided transitions. Admin access maintenance protects self changes and the last active super admin.
 
-Changes are confined to `apps/web`: shared route patterns/shell content, commerce, discovery/reservation/support styling, editorial/contact, admin dashboard and existing feature forms, paired fa/en messages and review artifacts. API/prisma/deploy/workflows and protected AdminShell navigation/CRM/customer-affairs are unchanged. No sample API fixtures are imported by application code.
+Frontend changes stay in apps/web, packages/ui, packages/design-tokens and packages/validation. Protected backend/deployment/admin navigation/CRM/customer-affairs are not edited. Upstream provenance/search fixes and nullable cart media are included by rebasing onto f3bf064; the cart now uses its actual nullable product image.
 
-Validation: frozen install, lint, web typecheck and **669 web tests / 168 files passed**, followed by 12 passing targeted tests on final clinic/content changes. 68 controlled browser checks (40 new-domain + 24 commerce) cover fa/en at 390/1440 for the newly reviewed domains. Before/after screenshots and shop/member evidence are linked in [README.md](README.md). Repository-wide typecheck remains blocked by legitimate Prisma generation in this cloud instance, so this is a draft description, not a claim that required PR gates have passed.
+Validation: see VALIDATION.md for full versus targeted test chronology and exact browser counts. Before/after and fa/en 390/1440 captures are in screenshots. These use controlled API data, not live mutations. Root API typecheck still needs legitimate Prisma generation.
 
-[Single backend handoff](BACKEND-HANDOFF.fa.md) records real contract gaps and source/access issues. [API coverage decisions](API-DISPOSITIONS.md) also lists remaining frontend work; this PR does not certify that every backend endpoint now has a complete UI.
+The single backend handoff is BACKEND-HANDOFF.fa.md. API-DISPOSITIONS.md and the reproducible inventories distinguish real remaining frontend work from aliases/internal routes. Universal backend/UI coverage and production readiness are not claimed.
 
-خلاصه برای مالک:
-رنگ و الگوی صفحات تأییدشده هماهنگ شده و بخش شخصی همچنان شیشه‌ای می‌ماند.
-فرم‌های واقعی، دسترسی‌ها و خطاهای ذخیره تکمیل و ۶۶۶ تست وب پاس شده‌اند؛ تصاویر قبل و بعد پیوست‌اند.
-انتشار و ادعای پوشش کامل همهٔ APIها هنوز منوط به رفع موارد ثبت‌شده و بررسی سراسری مخزن است.
-
-Follow-up adds `/provider/clinic` and content-version snapshot inspection. See `VALIDATION.md` for exact test chronology and `FRONTEND-CONTRACT-QUEUE.fa.md` for per-contract review work. No GitHub PR has been opened.
+خلاصهٔ سه‌خطی برای مالک:
+الگوهای تأییدشده حفظ و جریان‌های عملیاتی کلینیک، بیمه، سلامت، سفر و مدیریت به API موجود وصل شده‌اند.
+احراز هویت همکاران، بارگذاری خصوصی مدارک، صف بررسی و تصمیم مستند ادمین رابط مستقل دارند؛ استعلام رسمی خودکار جعل نشده است.
+نتیجهٔ دقیق تست‌ها و تصاویر ثبت شده؛ موارد باقی‌مانده و کمبود واقعی بکند در مستند واحد آمده و انتشار هنوز انجام نشده است.

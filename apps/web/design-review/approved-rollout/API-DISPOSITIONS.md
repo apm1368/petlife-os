@@ -48,3 +48,11 @@ The following have existing backend contracts. **They must not be handed back as
 `BACKEND-COVERAGE.md` groups all endpoint declarations. `backend-ui-coverage.json` retains per-endpoint evidence and direct UI file references. `ui-coverage-audit.json` records exported wrappers and their consumers. `route-design-status.json` distinguishes shared styling from individual browser verification. Tests and controlled browser captures are necessary evidence; they do not replace authenticated live integration checks after legitimate Prisma generation.
 
 This rollout completes the approved **shared page patterns and the listed feature additions**. It does **not** certify universal UI/API coverage, redesign the protected admin navigation/CRM/customer-affairs, or authorize production deployment with a failing repository-wide check.
+
+## Partner verification implementation
+
+`provider/verification`, seller verification uploads/documents/submit, admin queue/case/transition/document-review/private-download now have dedicated UI. `PATCH /admin/providers/:id/verification` and the seller equivalent are legacy aliases for the same server transition engine; directories now link the evidence case. They intentionally no longer present an unrestricted status selector. No duplicate buttons are needed for the aliases.
+
+## Clinic continuation
+
+Clinic customer tags, open-appointment staff/resource assignment, and the member-facing explicitly shared clinic notes now have functional UI. Tag deletion is owner-only; assignment uses actual bookable staff and active named resources, preserves untouched fields and reports server conflicts. The customer-detail read is used to refresh actual tag assignments; this does not claim every field in its aggregate has a separate screen. The clinic plan catalog/admin assignment group remains a genuine frontend review item; current-plan usage is already visible and no clinic payment flow is fabricated.

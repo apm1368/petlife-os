@@ -1,6 +1,6 @@
 # PET LIFE — combined approved design rollout
 
-Branch: `codex/stab-approved-design-rollout`, based on `a5a672d` from the latest fetched `origin/stabilization/wave-1`. Shop work is included in this branch; do not release the old shop-only bundle separately. No production deploy or merge has been performed.
+Branch: `codex/stab-approved-design-rollout`, rebased onto `f3bf064` from the latest fetched `origin/stabilization/wave-1`. Shop work is included in this branch; do not release the old shop-only bundle separately. No production deploy or merge has been performed.
 
 The owner authorized combining the approved page patterns for a single release. The member's personal tabs retain the glass frame; service, reservation, commerce, editorial and operations destinations use the warm plum/cream/copper vocabulary. Existing route guards and transaction engines remain in place. Protected admin navigation/CRM/customer-affairs are unchanged.
 
@@ -62,3 +62,5 @@ The owner supplied [another original Cookie photo](references/cookie-owner-photo
 - Partner verification queue, private audited document access and separate evidence/organization decisions. Provider/seller portals upload and register actual files, then explicitly submit. Old free-status selectors in provider/seller directories now link the actual evidence case.
 
 KYC is manual organization evidence review. It does not claim official national-identity or veterinary-license lookup. Profession-specific mandatory document rules require an explicit backend policy; the current initial-approval rule accepts any one accepted unexpired document. See the single backend handoff.
+
+[Persian KYC flow guide and previews](KYC-FLOW.fa.md) explains the organization-level manual review and the current backend policy limits.

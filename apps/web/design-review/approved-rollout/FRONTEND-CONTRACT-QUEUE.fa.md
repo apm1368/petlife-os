@@ -1,408 +1,309 @@
-# صف بررسی قراردادهای فرانت برای کلود
+# صف بررسی قراردادهای فرانت
 
-این فهرست خروجی تحلیل ایستا است: هر ردیف نیازمند بررسی است، نه الزاماً فیچر مفقود. جایگزین‌های aggregate و مسیرهای داخلی را با API-DISPOSITIONS.md تطبیق بده. endpoint موجود را دوباره در بک‌اند نساز. موارد واقعاً نیازمند تغییر سرور فقط در BACKEND-HANDOFF.fa.md ثبت شده‌اند.
+این خروجی تحلیل ایستا است؛ نیاز به بررسی با «قابلیت فاقد فرانت» یا «API مفقود» یکسان نیست. مسئول اتصال فرانت همین شاخه است؛ فقط کمبود واقعی قرارداد سرور به BACKEND-HANDOFF.fa.md می‌رود.
 
-کد فعلی روی شاخه codex/stab-approved-design-rollout است. فرم‌های جدید باید همان تم، دسترسی سرور، حالت‌های بارگذاری/خطا/خالی و fa/en را رعایت کنند. برای صفحات فاقد اتصال، جریان قابل استفاده بساز؛ از ورودی UUID و پاسخ JSON خام به جای رابط محصول استفاده نکن. دسترسی آزمایشی یا موفقیت ساختگی اضافه نکن.
+مبنا: `f3bf064` از `stabilization/wave-1`. موارد متصل‌شدهٔ این ادامه شامل Clinic OS، کاتالوگ و تیم بیمه، صورت‌حساب بازارگاه، health-depth، سفر خارجی، مدیریت دسترسی و KYC است. helperهای پویای URL و aliasها ممکن است همچنان در جدول باشند؛ ابتدا API-DISPOSITIONS.md و سرویس/مصرف‌کننده را بررسی کنید. برای پوشاندن ردیف اسکن، صفحهٔ خالی، دکمهٔ بدون مجوز یا API تکراری نسازید.
 
-## قراردادهای نیازمند بررسی
-
-| روش | مسیر | کنترلر | منبع |
-| --- | --- | --- | --- |
-| GET | `/account/privacy/consents/history` | AccountController | `apps/api/src/modules/account/account.controller.ts:106` |
-| GET | `/account/activity` | AccountController | `apps/api/src/modules/account/account.controller.ts:144` |
-| GET | `/households/:param/activity` | HouseholdActivityController | `apps/api/src/modules/activity/household-activity.controller.ts:21` |
-| GET | `/admin/access/roles` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:34` |
-| GET | `/admin/access/permissions` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:38` |
-| GET | `/admin/access/admins` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:42` |
-| GET | `/admin/access/admins/:param` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:46` |
-| POST | `/admin/access/admins` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:50` |
-| POST | `/admin/access/admins/:param/role` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:54` |
-| POST | `/admin/access/admins/:param/suspend` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:58` |
-| POST | `/admin/access/admins/:param/reactivate` | AdminAccessControlController | `apps/api/src/modules/admin/access/admin-access-control.controller.ts:62` |
-| PATCH | `/admin/animal-support/organizations/:param` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:84` |
-| POST | `/admin/animal-support/organizations/:param/logo-upload-url` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:102` |
-| GET | `/admin/animal-support/rescue-cases` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:110` |
-| GET | `/admin/animal-support/rescue-cases/:param` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:116` |
-| POST | `/admin/animal-support/organizations/:param/rescue-cases` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:122` |
-| PATCH | `/admin/animal-support/rescue-cases/:param/status` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:128` |
-| POST | `/admin/animal-support/rescue-cases/:param/evidence-upload-url` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:134` |
-| GET | `/admin/animal-support/campaigns` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:142` |
-| GET | `/admin/animal-support/campaigns/:param` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:148` |
-| POST | `/admin/animal-support/organizations/:param/campaigns` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:154` |
-| PATCH | `/admin/animal-support/campaigns/:param/status` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:160` |
-| GET | `/admin/animal-support/campaigns/:param/updates` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:166` |
-| POST | `/admin/animal-support/campaigns/:param/updates` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:172` |
-| POST | `/admin/animal-support/campaigns/:param/evidence-upload-url` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:178` |
-| POST | `/admin/animal-support/campaigns/:param/share-to-community` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:184` |
-| GET | `/admin/animal-support/organizations/:param/fund-balance` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:192` |
-| POST | `/admin/animal-support/organizations/:param/payouts` | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:198` |
-| GET | `/admin/commerce/promotions/:param` | AdminCommerceController | `apps/api/src/modules/admin/commerce/admin-commerce.controller.ts:159` |
-| GET | `/admin/content/media/:param` | AdminContentController | `apps/api/src/modules/admin/content/admin-content.controller.ts:200` |
-| GET | `/admin/content/placements` | AdminContentController | `apps/api/src/modules/admin/content/admin-content.controller.ts:220` |
-| GET | `/admin/customers/:param/overview` | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:45` |
-| POST | `/admin/customers/:param/suspend` | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:51` |
-| POST | `/admin/customers/:param/unsuspend` | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:57` |
-| POST | `/admin/customers/:param/sessions/revoke` | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:63` |
-| POST | `/admin/settlements/:param/adjustments` | AdminSellerFinanceController | `apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts:113` |
-| GET | `/admin/marketplace-settlements` | AdminSellerFinanceController | `apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts:145` |
-| GET | `/admin/marketplace-settlements/:param` | AdminSellerFinanceController | `apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts:151` |
-| GET | `/admin/marketplace-reconciliation/:param` | AdminSellerFinanceController | `apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts:163` |
-| GET | `/admin/finance/trace` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:46` |
-| GET | `/admin/finance/reconciliation/findings` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:50` |
-| POST | `/admin/finance/reconciliation/run` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:54` |
-| POST | `/admin/finance/reconciliation/findings/:param/resolve` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:58` |
-| GET | `/admin/finance/settlements/:param/breakdown` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:62` |
-| GET | `/admin/finance/settlements/:param/export` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:66` |
-| POST | `/admin/finance/settlements/:param/hold` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:75` |
-| POST | `/admin/finance/settlements/:param/release` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:79` |
-| GET | `/admin/finance/orders/:param/refund-preview` | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:83` |
-| GET | `/admin/insurance/providers/:param/members` | AdminInsuranceApplicationsController | `apps/api/src/modules/admin/insurance/admin-insurance-applications.controller.ts:70` |
-| POST | `/admin/insurance/providers/:param/members` | AdminInsuranceApplicationsController | `apps/api/src/modules/admin/insurance/admin-insurance-applications.controller.ts:79` |
-| DELETE | `/admin/insurance/providers/:param/members/:param` | AdminInsuranceApplicationsController | `apps/api/src/modules/admin/insurance/admin-insurance-applications.controller.ts:95` |
-| GET | `/admin/insurance/providers` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:31` |
-| GET | `/admin/insurance/providers/:param` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:37` |
-| POST | `/admin/insurance/providers` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:43` |
-| PATCH | `/admin/insurance/providers/:param` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:49` |
-| POST | `/admin/insurance/providers/:param/verification` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:55` |
-| POST | `/admin/insurance/providers/:param/listing` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:61` |
-| POST | `/admin/insurance/providers/:param/logo-upload-url` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:67` |
-| GET | `/admin/insurance/products` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:75` |
-| GET | `/admin/insurance/products/:param` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:81` |
-| POST | `/admin/insurance/providers/:param/products` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:87` |
-| PATCH | `/admin/insurance/products/:param` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:93` |
-| POST | `/admin/insurance/products/:param/verification` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:99` |
-| POST | `/admin/insurance/products/:param/listing` | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:105` |
-| GET | `/admin/providers/:param` | AdminOrgController | `apps/api/src/modules/admin/orgs/admin-org.controller.ts:19` |
-| GET | `/admin/sellers/:param` | AdminOrgController | `apps/api/src/modules/admin/orgs/admin-org.controller.ts:31` |
-| GET | `/admin/providers/:param/overview` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:38` |
-| GET | `/admin/clinics` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:42` |
-| GET | `/admin/clinics/:param/operations` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:46` |
-| POST | `/admin/clinics/:param/entitlement-overrides` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:51` |
-| POST | `/admin/clinics/:param/entitlement-overrides/:param/revoke` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:55` |
-| GET | `/admin/sellers/:param/overview` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:59` |
-| POST | `/admin/sellers/:param/status` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:63` |
-| POST | `/admin/commerce/offers/:param/status` | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:67` |
-| GET | `/admin/pets` | AdminPet360Controller | `apps/api/src/modules/admin/pets/admin-pet360.controller.ts:25` |
-| GET | `/admin/pets/:param` | AdminPet360Controller | `apps/api/src/modules/admin/pets/admin-pet360.controller.ts:29` |
-| POST | `/admin/pets/:param/grants/:param/revoke` | AdminPet360Controller | `apps/api/src/modules/admin/pets/admin-pet360.controller.ts:33` |
-| GET | `/admin/places/:param` | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:60` |
-| POST | `/admin/places` | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:66` |
-| PATCH | `/admin/places/:param` | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:72` |
-| POST | `/admin/places/:param/image-upload-url` | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:90` |
-| POST | `/admin/provider-services/:param/deactivate` | AdminServicesController | `apps/api/src/modules/admin/services/admin-services.controller.ts:60` |
-| POST | `/admin/provider-services/:param/reactivate` | AdminServicesController | `apps/api/src/modules/admin/services/admin-services.controller.ts:66` |
-| GET | `/admin/settings` | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:32` |
-| GET | `/admin/settings/changes` | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:36` |
-| PUT | `/admin/settings/:param` | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:40` |
-| POST | `/admin/settings/changes/:param/review` | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:44` |
-| POST | `/admin/settings/changes/:param/cancel` | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:48` |
-| GET | `/admin/subscriptions/plans/:param` | AdminSubscriptionController | `apps/api/src/modules/admin/subscriptions/admin-subscription.controller.ts:35` |
-| GET | `/admin/subscriptions/billing-attempts` | AdminSubscriptionController | `apps/api/src/modules/admin/subscriptions/admin-subscription.controller.ts:93` |
-| GET | `/admin/support/:param/extras` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:31` |
-| PUT | `/admin/support/:param/tags` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:35` |
-| POST | `/admin/support/:param/links` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:39` |
-| DELETE | `/admin/support/:param/links/:param` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:43` |
-| POST | `/admin/support/:param/attachments/uploads` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:47` |
-| POST | `/admin/support/:param/attachments` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:51` |
-| POST | `/admin/support/:param/attachments/:param/download` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:55` |
-| GET | `/admin/queues/sla` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:59` |
-| GET | `/admin/disputes/:param/outcome` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:63` |
-| POST | `/admin/disputes/:param/refund-outcome` | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:68` |
-| GET | `/support/cases/:param/attachments` | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:79` |
-| POST | `/support/cases/:param/attachments/uploads` | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:82` |
-| POST | `/support/cases/:param/attachments` | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:85` |
-| POST | `/support/cases/:param/attachments/:param/download` | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:88` |
-| GET | `/admin/system/integrations` | AdminSystemController | `apps/api/src/modules/admin/system/admin-system.controller.ts:16` |
-| POST | `/admin/trust/queue/claim` | TrustQueueController | `apps/api/src/modules/admin/trust/trust-queue.controller.ts:33` |
-| POST | `/admin/trust/queue/release` | TrustQueueController | `apps/api/src/modules/admin/trust/trust-queue.controller.ts:34` |
-| POST | `/admin/trust/queue/dismiss` | TrustQueueController | `apps/api/src/modules/admin/trust/trust-queue.controller.ts:35` |
-| GET | `/animal-support/rescue-cases/:param` | PublicAnimalSupportController | `apps/api/src/modules/animal-support/public-animal-support.controller.ts:36` |
-| GET | `/animal-support/needs/:param/updates` | PublicSupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:46` |
-| GET | `/animal-support/needs/:param/activity` | PublicSupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:52` |
-| GET | `/animal-support/needs/:param/milestones` | PublicSupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:57` |
-| POST | `/animal-support/needs/:param/updates` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:68` |
-| DELETE | `/animal-support/needs/:param/updates/:param` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:74` |
-| POST | `/animal-support/needs/:param/save` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:79` |
-| DELETE | `/animal-support/needs/:param/save` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:84` |
-| POST | `/animal-support/organizations/:param/follow` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:89` |
-| DELETE | `/animal-support/organizations/:param/follow` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:94` |
-| POST | `/animal-support/organizations/:param/volunteer` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:99` |
-| DELETE | `/animal-support/organizations/:param/volunteer` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:105` |
-| GET | `/me/followed-organizations` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:110` |
-| GET | `/me/saved-needs` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:115` |
-| GET | `/me/volunteer-interests` | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:120` |
-| GET | `/ngo/volunteers` | NgoVolunteersController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:132` |
-| POST | `/ngo/volunteers/:param/status` | NgoVolunteersController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:137` |
-| POST | `/dev/auth/google/simulate` | AuthGoogleDevController | `apps/api/src/modules/auth/google/auth-google-dev.controller.ts:49` |
-| GET | `/auth/google` | AuthGoogleController | `apps/api/src/modules/auth/google/auth-google.controller.ts:37` |
-| POST | `/bookings/:param/report-provider-no-show` | BookingsController | `apps/api/src/modules/booking/bookings.controller.ts:115` |
-| GET | `/provider-services/:param/eligibility` | BookingsController | `apps/api/src/modules/booking/bookings.controller.ts:121` |
-| POST | `/waitlist/:param/accept-offer` | BookingEngagementController | `apps/api/src/modules/booking/engagement.controller.ts:36` |
-| POST | `/waitlist/:param/decline-offer` | BookingEngagementController | `apps/api/src/modules/booking/engagement.controller.ts:41` |
-| GET | `/providers/:param/reviews` | PublicProviderReviewsController | `apps/api/src/modules/booking/engagement.controller.ts:82` |
-| GET | `/provider-services/:param/transport-quote` | TransportController | `apps/api/src/modules/booking/transport/transport.controller.ts:19` |
-| GET | `/care-calendar` | CareCalendarController | `apps/api/src/modules/care-calendar/care-calendar.controller.ts:26` |
-| GET | `/pets/:param/care-items` | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:14` |
-| GET | `/pets/:param/care-items/history` | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:17` |
-| GET | `/pets/:param/care-items/:param` | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:19` |
-| POST | `/pets/:param/care-items` | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:21` |
-| PATCH | `/pets/:param/care-items/:param` | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:23` |
-| POST | `/pets/:param/care-items/:param/actions` | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:25` |
-| POST | `/pets/:param/care-templates/apply` | PetCareTemplateController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:34` |
-| GET | `/care-templates` | CareTemplateCatalogController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:42` |
-| GET | `/provider/clinic/tags` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:52` |
-| POST | `/provider/clinic/tags` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:57` |
-| DELETE | `/provider/clinic/tags/:param` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:62` |
-| POST | `/provider/clinic/customers/:param/tags/:param` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:68` |
-| DELETE | `/provider/clinic/customers/:param/tags/:param` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:73` |
-| POST | `/provider/clinic/appointments/:param/assign` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:84` |
-| POST | `/provider/clinic/campaigns/preview` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:110` |
-| POST | `/provider/clinic/campaigns` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:116` |
-| POST | `/provider/clinic/contacts/import` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:124` |
-| GET | `/provider/clinic/contacts` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:131` |
-| GET | `/provider/clinic/exports/:param` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:136` |
-| GET | `/provider/clinic/plans` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:143` |
-| GET | `/provider/clinic/staff` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:148` |
-| POST | `/provider/clinic/staff` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:157` |
-| POST | `/provider/clinic/staff/invitations/:param/revoke` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:164` |
-| DELETE | `/provider/clinic/staff/:param` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:171` |
-| GET | `/provider/clinic/branches` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:177` |
-| POST | `/provider/clinic/branches` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:183` |
-| DELETE | `/provider/clinic/branches/:param` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:191` |
-| GET | `/provider/clinic/customers/:param` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:207` |
-| GET | `/provider/clinic/reminders` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:212` |
-| POST | `/provider/clinic/reminders` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:217` |
-| POST | `/provider/clinic/reminders/:param/cancel` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:223` |
-| GET | `/provider/clinic/reports/finance` | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:229` |
-| GET | `/admin/clinic-subscriptions/plans` | AdminClinicSubscriptionController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:241` |
-| GET | `/admin/clinic-subscriptions/:param` | AdminClinicSubscriptionController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:247` |
-| POST | `/admin/clinic-subscriptions/:param/assign` | AdminClinicSubscriptionController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:253` |
-| GET | `/me/clinic-notes` | MyClinicNotesController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:288` |
-| GET | `/pets/:param/observations/:param/download` | PetObservationController | `apps/api/src/modules/clinical-health/pet-observation.controller.ts:33` |
-| GET | `/provider/patients/:param` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:56` |
-| GET | `/provider/patients/:param/visits` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:62` |
-| POST | `/provider/labs/:param/amend` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:110` |
-| POST | `/provider/imaging` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:116` |
-| POST | `/provider/imaging/:param/void` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:122` |
-| PATCH | `/provider/referrals/:param/status` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:134` |
-| POST | `/provider/dental-records` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:140` |
-| POST | `/provider/nutrition-plans` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:146` |
-| POST | `/provider/rehab-plans` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:152` |
-| POST | `/provider/patients/:param/rehab-plans/:param/sessions` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:158` |
-| POST | `/provider/care-plans` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:164` |
-| POST | `/provider/patients/:param/care-plans/:param/items` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:170` |
-| PATCH | `/provider/patients/:param/care-plans/:param/items/:param/status` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:176` |
-| POST | `/provider/patients/:param/documents/upload-url` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:182` |
-| POST | `/provider/patients/:param/documents` | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:188` |
-| GET | `/shop/products/:param/offers` | CatalogController | `apps/api/src/modules/commerce/catalog/catalog.controller.ts:30` |
-| POST | `/checkout/:param/revalidate` | CheckoutController | `apps/api/src/modules/commerce/checkout/checkout.controller.ts:33` |
-| PATCH | `/checkout/:param` | CheckoutController | `apps/api/src/modules/commerce/checkout/checkout.controller.ts:38` |
-| GET | `/checkout/:param/financing-intent/:param` | CheckoutController | `apps/api/src/modules/commerce/checkout/checkout.controller.ts:66` |
-| POST | `/shipping/dev/simulate/:param` | ShippingWebhooksController | `apps/api/src/modules/commerce/logistics/shipping-webhooks.controller.ts:82` |
-| GET | `/orders/:param/fulfillment` | OrderLogisticsController | `apps/api/src/modules/commerce/logistics/shipping.controller.ts:73` |
-| GET | `/orders/:param/shipment` | OrderLogisticsController | `apps/api/src/modules/commerce/logistics/shipping.controller.ts:79` |
-| POST | `/orders/:param/shipment/reconcile` | OrderLogisticsController | `apps/api/src/modules/commerce/logistics/shipping.controller.ts:114` |
-| GET | `/seller-organizations/:param/channels/:param` | MarketplaceChannelController | `apps/api/src/modules/commerce/marketplace/marketplace-channel.controller.ts:26` |
-| POST | `/seller-organizations/:param/channels/:param/reconcile` | MarketplaceChannelController | `apps/api/src/modules/commerce/marketplace/marketplace-channel.controller.ts:44` |
-| POST | `/seller-organizations/:param/channels/:param/dev/simulate/order` | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:75` |
-| POST | `/seller-organizations/:param/channels/:param/dev/simulate/cancellation` | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:84` |
-| POST | `/seller-organizations/:param/channels/:param/dev/simulate/mismatch` | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:93` |
-| POST | `/seller-organizations/:param/channels/:param/dev/simulate/publish-rejection` | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:101` |
-| GET | `/seller-organizations/:param/marketplace-listings/:param` | MarketplaceListingController | `apps/api/src/modules/commerce/marketplace/marketplace-listing.controller.ts:22` |
-| PATCH | `/seller-organizations/:param/marketplace-listings/:param` | MarketplaceListingController | `apps/api/src/modules/commerce/marketplace/marketplace-listing.controller.ts:33` |
-| POST | `/orders/:param/refunds` | OrdersController | `apps/api/src/modules/commerce/orders/orders.controller.ts:36` |
-| POST | `/payments/reconcile/:param` | ReconciliationController | `apps/api/src/modules/commerce/reconciliation/reconciliation.controller.ts:19` |
-| POST | `/financing/reconcile/:param` | ReconciliationController | `apps/api/src/modules/commerce/reconciliation/reconciliation.controller.ts:25` |
-| GET | `/orders/:param/refunds` | RefundsController | `apps/api/src/modules/commerce/refunds/refunds.controller.ts:13` |
-| GET | `/refunds/:param` | RefundsController | `apps/api/src/modules/commerce/refunds/refunds.controller.ts:18` |
-| POST | `/repeat-deliveries/:param/skip` | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:47` |
-| POST | `/repeat-deliveries/:param/pause` | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:52` |
-| POST | `/repeat-deliveries/:param/resume` | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:57` |
-| POST | `/repeat-deliveries/:param/cancel` | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:62` |
-| POST | `/repeat-deliveries/:param/accept-price` | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:67` |
-| POST | `/chat/conversations` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:32` |
-| GET | `/chat/conversations/:param/messages` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:43` |
-| POST | `/chat/conversations/:param/archive` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:59` |
-| POST | `/chat/conversations/:param/unarchive` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:64` |
-| POST | `/chat/conversations/:param/mute` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:69` |
-| DELETE | `/chat/conversations/:param/mute` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:74` |
-| POST | `/chat/conversations/:param/delete-for-self` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:80` |
-| GET | `/chat/unread-count` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:85` |
-| GET | `/chat/blocks` | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:90` |
-| POST | `/community/posts/:param/save` | CommunityController | `apps/api/src/modules/community/community.controller.ts:76` |
-| DELETE | `/community/posts/:param/save` | CommunityController | `apps/api/src/modules/community/community.controller.ts:82` |
-| GET | `/community/saved-posts` | CommunityController | `apps/api/src/modules/community/community.controller.ts:88` |
-| GET | `/search` | SearchController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:32` |
-| GET | `/me/saved` | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:45` |
-| GET | `/me/recently-viewed` | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:50` |
-| POST | `/me/recently-viewed` | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:55` |
-| DELETE | `/me/recently-viewed` | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:61` |
-| GET | `/blog/articles/:param/related` | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:39` |
-| GET | `/blog/articles/:param/feedback` | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:44` |
-| POST | `/blog/articles/:param/feedback` | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:51` |
-| GET | `/blog/tags` | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:68` |
-| GET | `/content/placements/:param` | PublicContentPlacementController | `apps/api/src/modules/content/public-content-placement.controller.ts:11` |
-| GET | `/pets/:param/health/snapshot` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:72` |
-| GET | `/pets/:param/health/feed` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:78` |
-| POST | `/pets/:param/health-shares` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:85` |
-| GET | `/pets/:param/health-shares` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:93` |
-| GET | `/pets/:param/health-shares/:param/access-log` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:99` |
-| POST | `/pets/:param/health-shares/:param/revoke` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:105` |
-| GET | `/pets/:param/care-suggestions` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:111` |
-| POST | `/pets/:param/care-suggestions/:param/accept` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:117` |
-| POST | `/pets/:param/care-suggestions/:param/dismiss` | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:123` |
-| GET | `/public/health-shares/:param` | PublicHealthShareController | `apps/api/src/modules/health-depth/health-depth.controller.ts:135` |
-| POST | `/provider/clinical/visits/:param/care-suggestions` | ProviderCareSuggestionController | `apps/api/src/modules/health-depth/health-depth.controller.ts:148` |
-| POST | `/provider/bookings/:param/care-suggestions` | ProviderCareSuggestionController | `apps/api/src/modules/health-depth/health-depth.controller.ts:154` |
-| GET | `/home` | HomeController | `apps/api/src/modules/home/home.controller.ts:12` |
-| GET | `/pets/:param/claim-preps` | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:29` |
-| POST | `/pets/:param/claim-preps` | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:35` |
-| GET | `/pets/:param/claim-preps/:param` | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:41` |
-| POST | `/pets/:param/claim-preps/:param/items` | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:47` |
-| DELETE | `/pets/:param/claim-preps/:param/items/:param` | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:53` |
-| PATCH | `/pets/:param/claim-preps/:param` | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:59` |
-| GET | `/pets/:param/insurance-applications/:param` | InsuranceController | `apps/api/src/modules/insurance/insurance.controller.ts:34` |
-| GET | `/insurance/providers` | PublicInsuranceController | `apps/api/src/modules/insurance/public-insurance.controller.ts:17` |
-| GET | `/insurance/providers/:param` | PublicInsuranceController | `apps/api/src/modules/insurance/public-insurance.controller.ts:22` |
-| POST | `/pets/:param/lost-incidents/:param/identity-card` | LostPetController | `apps/api/src/modules/lost-pet/lost-pet.controller.ts:30` |
-| GET | `/me/moderation-decisions` | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:19` |
-| POST | `/me/moderation-decisions/:param/appeal` | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:24` |
-| GET | `/me/appeals` | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:30` |
-| POST | `/me/appeals/:param/withdraw` | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:35` |
-| GET | `/pets/:param/memories` | MemoryController | `apps/api/src/modules/memories/memory.controller.ts:36` |
-| POST | `/dev/notifications/simulate` | NotificationDevController | `apps/api/src/modules/notifications/notification-dev.controller.ts:46` |
-| POST | `/dev/notifications/deliveries/:param/force-attempt` | NotificationDevController | `apps/api/src/modules/notifications/notification-dev.controller.ts:62` |
-| POST | `/dev/notifications/deliveries/process-due` | NotificationDevController | `apps/api/src/modules/notifications/notification-dev.controller.ts:70` |
-| GET | `/notification-preferences/digest` | NotificationPreferenceController | `apps/api/src/modules/notifications/notification-preference.controller.ts:35` |
-| PUT | `/notification-preferences/digest` | NotificationPreferenceController | `apps/api/src/modules/notifications/notification-preference.controller.ts:40` |
-| GET | `/notifications/grouped` | NotificationsController | `apps/api/src/modules/notifications/notifications.controller.ts:40` |
-| POST | `/notifications/read` | NotificationsController | `apps/api/src/modules/notifications/notifications.controller.ts:46` |
-| POST | `/notifications/groups/read` | NotificationsController | `apps/api/src/modules/notifications/notifications.controller.ts:51` |
-| GET | `/provider/verification` | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:57` |
-| POST | `/provider/verification/uploads` | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:60` |
-| POST | `/provider/verification/documents` | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:63` |
-| POST | `/provider/verification/submit` | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:66` |
-| GET | `/seller-organizations/:param/verification` | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:77` |
-| POST | `/seller-organizations/:param/verification/uploads` | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:80` |
-| POST | `/seller-organizations/:param/verification/documents` | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:84` |
-| POST | `/seller-organizations/:param/verification/submit` | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:88` |
-| GET | `/admin/verification/queue` | AdminPartnerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:99` |
-| GET | `/admin/verification/:param/:param` | AdminPartnerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:103` |
-| POST | `/admin/verification/:param/:param/transition` | AdminPartnerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:107` |
-| POST | `/admin/verification/documents/:param/review` | AdminPartnerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:113` |
-| POST | `/admin/verification/documents/:param/download` | AdminPartnerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:117` |
-| GET | `/pets/:param/completeness` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:20` |
-| GET | `/pets/:param/emergency-info` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:26` |
-| PUT | `/pets/:param/emergency-info` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:32` |
-| GET | `/pets/:param/emergency-snapshot` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:39` |
-| GET | `/pets/:param/share-cards` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:45` |
-| POST | `/pets/:param/share-cards` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:51` |
-| POST | `/pets/:param/share-cards/:param/rotate` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:58` |
-| POST | `/pets/:param/share-cards/:param/revoke` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:64` |
-| GET | `/pets/:param/card-messages` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:71` |
-| POST | `/pets/:param/card-messages/:param/read` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:77` |
-| GET | `/pets/:param/care-handoffs` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:83` |
-| POST | `/pets/:param/care-handoffs` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:89` |
-| DELETE | `/pets/:param/care-handoffs/:param` | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:96` |
-| GET | `/me/care-handoffs` | MyCareHandoffsController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:108` |
-| POST | `/public/pet-cards/:param/messages` | PublicPetCardController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:126` |
-| POST | `/place-suggestions` | PlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:24` |
-| POST | `/place-suggestions/changes` | PlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:31` |
-| GET | `/place-suggestions/mine` | PlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:37` |
-| GET | `/admin/place-suggestions` | AdminPlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:48` |
-| POST | `/admin/place-suggestions/:param/approve` | AdminPlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:54` |
-| POST | `/admin/place-suggestions/:param/reject` | AdminPlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:60` |
-| GET | `/settings/public` | PublicSettingsController | `apps/api/src/modules/platform-settings/platform-settings.controller.ts:9` |
-| GET | `/admin/privacy/deletion-requests` | AdminPrivacyGovernanceController | `apps/api/src/modules/privacy-governance/privacy-governance.controller.ts:25` |
-| POST | `/admin/privacy/deletion-requests/:param/transition` | AdminPrivacyGovernanceController | `apps/api/src/modules/privacy-governance/privacy-governance.controller.ts:31` |
-| GET | `/admin/release-gate` | AdminPrivacyGovernanceController | `apps/api/src/modules/privacy-governance/privacy-governance.controller.ts:37` |
-| GET | `/provider/bookings/:param/ride` | ProviderBookingsController | `apps/api/src/modules/provider-os/provider-bookings.controller.ts:20` |
-| POST | `/provider/bookings/:param/ride-events` | ProviderBookingsController | `apps/api/src/modules/provider-os/provider-bookings.controller.ts:25` |
-| POST | `/provider/waitlist/:param/offer` | ProviderCatalogController | `apps/api/src/modules/provider-os/provider-catalog.controller.ts:82` |
-| GET | `/providers/vets` | ProvidersController | `apps/api/src/modules/providers/providers.controller.ts:15` |
-| GET | `/providers/vets/:param` | ProvidersController | `apps/api/src/modules/providers/providers.controller.ts:20` |
-| GET | `/providers/vets/:param/availability` | ProvidersController | `apps/api/src/modules/providers/providers.controller.ts:25` |
-| GET | `/seller-organizations` | SellerContextController | `apps/api/src/modules/seller-os/seller-context.controller.ts:19` |
-| GET | `/seller-organizations/:param/offers/:param` | SellerOfferController | `apps/api/src/modules/seller-os/seller-offer.controller.ts:22` |
-| GET | `/seller-organizations/:param/promotions/:param` | SellerPromotionController | `apps/api/src/modules/seller-os/seller-promotion.controller.ts:26` |
-| GET | `/provider-services/:param/intake-form` | PublicIntakeFormController | `apps/api/src/modules/service-intake/service-intake.controller.ts:18` |
-| GET | `/bookings/:param/attachments` | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:28` |
-| POST | `/bookings/:param/attachments/upload-url` | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:32` |
-| POST | `/bookings/:param/attachments` | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:37` |
-| GET | `/bookings/:param/attachments/:param/download` | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:41` |
-| DELETE | `/bookings/:param/attachments/:param` | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:45` |
-| PUT | `/provider/services/:param/intake-form` | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:57` |
-| DELETE | `/provider/services/:param/intake-form` | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:63` |
-| GET | `/provider/bookings/:param/intake` | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:69` |
-| GET | `/provider/bookings/:param/attachments` | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:74` |
-| POST | `/provider/bookings/:param/attachments/upload-url` | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:79` |
-| POST | `/provider/bookings/:param/attachments` | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:85` |
-| GET | `/provider/bookings/:param/attachments/:param/download` | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:90` |
-| GET | `/services/categories` | ServicesController | `apps/api/src/modules/services/services.controller.ts:16` |
-| GET | `/providers/services` | ServicesController | `apps/api/src/modules/services/services.controller.ts:21` |
-| GET | `/downloads/:param` | DownloadsController | `apps/api/src/modules/storage/downloads.controller.ts:25` |
-| PUT | `/uploads/:param` | UploadsController | `apps/api/src/modules/storage/uploads.controller.ts:20` |
-| GET | `/households/:param/subscription/summary` | SubscriptionController | `apps/api/src/modules/subscriptions/subscription.controller.ts:55` |
-| GET | `/households/:param/subscription/downgrade-preview` | SubscriptionController | `apps/api/src/modules/subscriptions/subscription.controller.ts:61` |
-| GET | `/pets/:param/trips/:param/requirements` | TravelController | `apps/api/src/modules/travel/travel.controller.ts:64` |
-| GET | `/pets/:param/trips/:param/preparation` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:39` |
-| POST | `/pets/:param/trips/:param/reminder-proposals/apply` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:46` |
-| GET | `/pets/:param/trips/:param/checklist` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:52` |
-| POST | `/pets/:param/trips/:param/checklist/defaults` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:58` |
-| POST | `/pets/:param/trips/:param/checklist` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:64` |
-| PATCH | `/pets/:param/trips/:param/checklist/:param` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:70` |
-| GET | `/pets/:param/trips/:param/documents` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:77` |
-| POST | `/pets/:param/trips/:param/documents` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:83` |
-| DELETE | `/pets/:param/trips/:param/documents/:param` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:89` |
-| DELETE | `/pets/:param/trips/:param/checklist/:param` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:95` |
-| GET | `/pets/:param/trips/:param/participants` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:101` |
-| POST | `/pets/:param/trips/:param/participants` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:107` |
-| DELETE | `/pets/:param/trips/:param/participants/:param` | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:113` |
-| GET | `/travel/external/stays` | TravelExternalPublicController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:53` |
-| GET | `/travel/external/stays/:param` | TravelExternalPublicController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:56` |
-| GET | `/travel/external/stays/:param/out` | TravelExternalPublicController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:61` |
-| GET | `/me/external-stays/favorites` | ExternalStayFavoritesController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:74` |
-| POST | `/me/external-stays/:param/favorite` | ExternalStayFavoritesController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:76` |
-| DELETE | `/me/external-stays/:param/favorite` | ExternalStayFavoritesController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:78` |
-| GET | `/pets/:param/trips/:param/external-stays` | TripExternalStaysController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:86` |
-| POST | `/pets/:param/trips/:param/external-stays` | TripExternalStaysController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:89` |
-| DELETE | `/pets/:param/trips/:param/external-stays/:param` | TripExternalStaysController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:94` |
-| GET | `/admin/travel/external/dashboard` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:169` |
-| GET | `/admin/travel/external/sources` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:170` |
-| GET | `/admin/travel/external/sources/:param` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:171` |
-| PATCH | `/admin/travel/external/sources/:param` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:172` |
-| POST | `/admin/travel/external/sources/:param/pause` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:173` |
-| POST | `/admin/travel/external/sources/:param/resume` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:174` |
-| POST | `/admin/travel/external/sources/:param/probe` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:175` |
-| POST | `/admin/travel/external/sources/:param/runs` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:176` |
-| POST | `/admin/travel/external/sources/:param/health-check` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:177` |
-| GET | `/admin/travel/external/runs` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:178` |
-| GET | `/admin/travel/external/runs/:param` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:179` |
-| GET | `/admin/travel/external/parser-health` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:180` |
-| GET | `/admin/travel/external/errors` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:181` |
-| GET | `/admin/travel/external/pet-evidence` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:182` |
-| GET | `/admin/travel/external/daily-diff` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:183` |
-| GET | `/admin/travel/external/metrics` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:184` |
-| GET | `/admin/travel/external/tasks` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:185` |
-| GET | `/admin/travel/external/canonical/:param` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:186` |
-| GET | `/admin/travel/external/listings` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:187` |
-| GET | `/admin/travel/external/listings/:param` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:188` |
-| POST | `/admin/travel/external/listings` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:189` |
-| POST | `/admin/travel/external/listings/:param/visibility` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:190` |
-| POST | `/admin/travel/external/listings/:param/retry` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:191` |
-| POST | `/admin/travel/external/listings/:param/pet-policy` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:192` |
-| POST | `/admin/travel/external/listings/:param/override` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:193` |
-| POST | `/admin/travel/external/listings/:param/prices` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:194` |
-| GET | `/admin/travel/external/matches` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:199` |
-| POST | `/admin/travel/external/matches/:param/approve` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:200` |
-| POST | `/admin/travel/external/matches/:param/reject` | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:201` |
-| POST | `/provider/travel/listings/:param/archive` | TravelProviderController | `apps/api/src/modules/travel-marketplace/travel-provider.controller.ts:82` |
-| PATCH | `/provider/clinical/note-templates/:param` | VetPanelOrgController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:74` |
-| GET | `/provider/clinical/patients/:param/vitals/trends` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:111` |
-| GET | `/provider/clinical/patients/:param/problems` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:125` |
-| GET | `/provider/clinical/patients/:param/hospitalizations` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:171` |
-| PATCH | `/provider/clinical/hospitalizations/:param` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:189` |
-| POST | `/provider/clinical/hospitalizations/:param/tasks` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:201` |
-| GET | `/provider/clinical/patients/:param/estimates` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:226` |
-| PATCH | `/provider/clinical/estimates/:param` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:238` |
-| GET | `/provider/clinical/patients/:param/alerts` | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:278` |
+| روش | مسیر | وضعیت اسکن | کنترلر | منبع |
+| --- | --- | --- | --- | --- |
+| GET | `/account/activity` | NO_EXACT_CLIENT_MATCH_REVIEW | AccountController | `apps/api/src/modules/account/account.controller.ts:144` |
+| GET | `/households/:param/activity` | NO_EXACT_CLIENT_MATCH_REVIEW | HouseholdActivityController | `apps/api/src/modules/activity/household-activity.controller.ts:21` |
+| PATCH | `/admin/animal-support/organizations/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:84` |
+| POST | `/admin/animal-support/organizations/:param/logo-upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:102` |
+| GET | `/admin/animal-support/rescue-cases` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:110` |
+| GET | `/admin/animal-support/rescue-cases/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:116` |
+| POST | `/admin/animal-support/organizations/:param/rescue-cases` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:122` |
+| PATCH | `/admin/animal-support/rescue-cases/:param/status` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:128` |
+| POST | `/admin/animal-support/rescue-cases/:param/evidence-upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:134` |
+| GET | `/admin/animal-support/campaigns` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:142` |
+| GET | `/admin/animal-support/campaigns/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:148` |
+| POST | `/admin/animal-support/organizations/:param/campaigns` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:154` |
+| PATCH | `/admin/animal-support/campaigns/:param/status` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:160` |
+| GET | `/admin/animal-support/campaigns/:param/updates` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:166` |
+| POST | `/admin/animal-support/campaigns/:param/updates` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:172` |
+| POST | `/admin/animal-support/campaigns/:param/evidence-upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:178` |
+| POST | `/admin/animal-support/campaigns/:param/share-to-community` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:184` |
+| GET | `/admin/animal-support/organizations/:param/fund-balance` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:192` |
+| POST | `/admin/animal-support/organizations/:param/payouts` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminAnimalSupportController | `apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts:198` |
+| GET | `/admin/commerce/promotions/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminCommerceController | `apps/api/src/modules/admin/commerce/admin-commerce.controller.ts:159` |
+| GET | `/admin/content/media/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminContentController | `apps/api/src/modules/admin/content/admin-content.controller.ts:200` |
+| GET | `/admin/content/placements` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | AdminContentController | `apps/api/src/modules/admin/content/admin-content.controller.ts:220` |
+| GET | `/admin/customers/:param/overview` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:45` |
+| POST | `/admin/customers/:param/suspend` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:51` |
+| POST | `/admin/customers/:param/unsuspend` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:57` |
+| POST | `/admin/customers/:param/sessions/revoke` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminCustomerController | `apps/api/src/modules/admin/customer/admin-customer.controller.ts:63` |
+| POST | `/admin/settlements/:param/adjustments` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSellerFinanceController | `apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts:113` |
+| GET | `/admin/marketplace-reconciliation/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | AdminSellerFinanceController | `apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts:163` |
+| GET | `/admin/finance/trace` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:46` |
+| GET | `/admin/finance/reconciliation/findings` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:50` |
+| POST | `/admin/finance/reconciliation/run` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:54` |
+| POST | `/admin/finance/reconciliation/findings/:param/resolve` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:58` |
+| GET | `/admin/finance/settlements/:param/breakdown` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:62` |
+| GET | `/admin/finance/settlements/:param/export` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:66` |
+| POST | `/admin/finance/settlements/:param/hold` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:75` |
+| POST | `/admin/finance/settlements/:param/release` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:79` |
+| GET | `/admin/finance/orders/:param/refund-preview` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminFinanceOpsController | `apps/api/src/modules/admin/finance/finance-ops.controller.ts:83` |
+| POST | `/admin/insurance/providers/:param/logo-upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminInsuranceController | `apps/api/src/modules/admin/insurance/admin-insurance.controller.ts:67` |
+| GET | `/admin/providers/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminOrgController | `apps/api/src/modules/admin/orgs/admin-org.controller.ts:19` |
+| GET | `/admin/sellers/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminOrgController | `apps/api/src/modules/admin/orgs/admin-org.controller.ts:31` |
+| GET | `/admin/providers/:param/overview` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:38` |
+| GET | `/admin/clinics` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:42` |
+| GET | `/admin/clinics/:param/operations` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:46` |
+| POST | `/admin/clinics/:param/entitlement-overrides` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:51` |
+| POST | `/admin/clinics/:param/entitlement-overrides/:param/revoke` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:55` |
+| GET | `/admin/sellers/:param/overview` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:59` |
+| POST | `/admin/sellers/:param/status` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:63` |
+| POST | `/admin/commerce/offers/:param/status` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPartner360Controller | `apps/api/src/modules/admin/partners/admin-partner360.controller.ts:67` |
+| GET | `/admin/pets` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPet360Controller | `apps/api/src/modules/admin/pets/admin-pet360.controller.ts:25` |
+| GET | `/admin/pets/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPet360Controller | `apps/api/src/modules/admin/pets/admin-pet360.controller.ts:29` |
+| POST | `/admin/pets/:param/grants/:param/revoke` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPet360Controller | `apps/api/src/modules/admin/pets/admin-pet360.controller.ts:33` |
+| GET | `/admin/places/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:60` |
+| POST | `/admin/places` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:66` |
+| PATCH | `/admin/places/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:72` |
+| POST | `/admin/places/:param/image-upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPlacesController | `apps/api/src/modules/admin/places/admin-places.controller.ts:90` |
+| POST | `/admin/provider-services/:param/deactivate` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminServicesController | `apps/api/src/modules/admin/services/admin-services.controller.ts:60` |
+| POST | `/admin/provider-services/:param/reactivate` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminServicesController | `apps/api/src/modules/admin/services/admin-services.controller.ts:66` |
+| GET | `/admin/settings` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:32` |
+| GET | `/admin/settings/changes` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:36` |
+| PUT | `/admin/settings/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:40` |
+| POST | `/admin/settings/changes/:param/review` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:44` |
+| POST | `/admin/settings/changes/:param/cancel` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSettingsController | `apps/api/src/modules/admin/settings/admin-settings.controller.ts:48` |
+| GET | `/admin/subscriptions/plans/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | AdminSubscriptionController | `apps/api/src/modules/admin/subscriptions/admin-subscription.controller.ts:35` |
+| GET | `/admin/subscriptions/billing-attempts` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | AdminSubscriptionController | `apps/api/src/modules/admin/subscriptions/admin-subscription.controller.ts:93` |
+| GET | `/admin/support/:param/extras` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:31` |
+| PUT | `/admin/support/:param/tags` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:35` |
+| POST | `/admin/support/:param/links` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:39` |
+| DELETE | `/admin/support/:param/links/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:43` |
+| POST | `/admin/support/:param/attachments/uploads` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:47` |
+| POST | `/admin/support/:param/attachments` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:51` |
+| POST | `/admin/support/:param/attachments/:param/download` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:55` |
+| GET | `/admin/queues/sla` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:59` |
+| GET | `/admin/disputes/:param/outcome` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:63` |
+| POST | `/admin/disputes/:param/refund-outcome` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSupportOpsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:68` |
+| GET | `/support/cases/:param/attachments` | NO_EXACT_CLIENT_MATCH_REVIEW | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:79` |
+| POST | `/support/cases/:param/attachments/uploads` | NO_EXACT_CLIENT_MATCH_REVIEW | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:82` |
+| POST | `/support/cases/:param/attachments` | NO_EXACT_CLIENT_MATCH_REVIEW | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:85` |
+| POST | `/support/cases/:param/attachments/:param/download` | NO_EXACT_CLIENT_MATCH_REVIEW | UserSupportAttachmentsController | `apps/api/src/modules/admin/support/support-ops.controller.ts:88` |
+| GET | `/admin/system/integrations` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminSystemController | `apps/api/src/modules/admin/system/admin-system.controller.ts:16` |
+| POST | `/admin/trust/queue/claim` | NO_EXACT_CLIENT_MATCH_REVIEW | TrustQueueController | `apps/api/src/modules/admin/trust/trust-queue.controller.ts:33` |
+| POST | `/admin/trust/queue/release` | NO_EXACT_CLIENT_MATCH_REVIEW | TrustQueueController | `apps/api/src/modules/admin/trust/trust-queue.controller.ts:34` |
+| POST | `/admin/trust/queue/dismiss` | NO_EXACT_CLIENT_MATCH_REVIEW | TrustQueueController | `apps/api/src/modules/admin/trust/trust-queue.controller.ts:35` |
+| GET | `/animal-support/rescue-cases/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | PublicAnimalSupportController | `apps/api/src/modules/animal-support/public-animal-support.controller.ts:36` |
+| GET | `/animal-support/needs/:param/updates` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicSupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:46` |
+| GET | `/animal-support/needs/:param/activity` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicSupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:52` |
+| GET | `/animal-support/needs/:param/milestones` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicSupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:57` |
+| POST | `/animal-support/needs/:param/updates` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:68` |
+| DELETE | `/animal-support/needs/:param/updates/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:74` |
+| POST | `/animal-support/needs/:param/save` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:79` |
+| DELETE | `/animal-support/needs/:param/save` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:84` |
+| POST | `/animal-support/organizations/:param/follow` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:89` |
+| DELETE | `/animal-support/organizations/:param/follow` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:94` |
+| POST | `/animal-support/organizations/:param/volunteer` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:99` |
+| DELETE | `/animal-support/organizations/:param/volunteer` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:105` |
+| GET | `/me/followed-organizations` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:110` |
+| GET | `/me/saved-needs` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:115` |
+| GET | `/me/volunteer-interests` | NO_EXACT_CLIENT_MATCH_REVIEW | SupportEngagementController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:120` |
+| GET | `/ngo/volunteers` | NO_EXACT_CLIENT_MATCH_REVIEW | NgoVolunteersController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:132` |
+| POST | `/ngo/volunteers/:param/status` | NO_EXACT_CLIENT_MATCH_REVIEW | NgoVolunteersController | `apps/api/src/modules/animal-support/support-engagement.controller.ts:137` |
+| POST | `/dev/auth/google/simulate` | NO_EXACT_CLIENT_MATCH_REVIEW | AuthGoogleDevController | `apps/api/src/modules/auth/google/auth-google-dev.controller.ts:49` |
+| GET | `/auth/google` | NO_EXACT_CLIENT_MATCH_REVIEW | AuthGoogleController | `apps/api/src/modules/auth/google/auth-google.controller.ts:37` |
+| POST | `/bookings/:param/report-provider-no-show` | NO_EXACT_CLIENT_MATCH_REVIEW | BookingsController | `apps/api/src/modules/booking/bookings.controller.ts:115` |
+| GET | `/provider-services/:param/eligibility` | NO_EXACT_CLIENT_MATCH_REVIEW | BookingsController | `apps/api/src/modules/booking/bookings.controller.ts:121` |
+| POST | `/waitlist/:param/accept-offer` | NO_EXACT_CLIENT_MATCH_REVIEW | BookingEngagementController | `apps/api/src/modules/booking/engagement.controller.ts:36` |
+| POST | `/waitlist/:param/decline-offer` | NO_EXACT_CLIENT_MATCH_REVIEW | BookingEngagementController | `apps/api/src/modules/booking/engagement.controller.ts:41` |
+| GET | `/providers/:param/reviews` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicProviderReviewsController | `apps/api/src/modules/booking/engagement.controller.ts:82` |
+| GET | `/provider-services/:param/transport-quote` | NO_EXACT_CLIENT_MATCH_REVIEW | TransportController | `apps/api/src/modules/booking/transport/transport.controller.ts:19` |
+| GET | `/care-calendar` | NO_EXACT_CLIENT_MATCH_REVIEW | CareCalendarController | `apps/api/src/modules/care-calendar/care-calendar.controller.ts:26` |
+| GET | `/pets/:param/care-items` | NO_EXACT_CLIENT_MATCH_REVIEW | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:14` |
+| GET | `/pets/:param/care-items/history` | NO_EXACT_CLIENT_MATCH_REVIEW | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:17` |
+| GET | `/pets/:param/care-items/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:19` |
+| POST | `/pets/:param/care-items` | NO_EXACT_CLIENT_MATCH_REVIEW | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:21` |
+| PATCH | `/pets/:param/care-items/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:23` |
+| POST | `/pets/:param/care-items/:param/actions` | NO_EXACT_CLIENT_MATCH_REVIEW | CareReminderController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:25` |
+| POST | `/pets/:param/care-templates/apply` | NO_EXACT_CLIENT_MATCH_REVIEW | PetCareTemplateController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:34` |
+| GET | `/care-templates` | NO_EXACT_CLIENT_MATCH_REVIEW | CareTemplateCatalogController | `apps/api/src/modules/care-reminders/care-reminder.controller.ts:42` |
+| GET | `/provider/clinic/contacts` | NO_EXACT_CLIENT_MATCH_REVIEW | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:131` |
+| GET | `/provider/clinic/plans` | NO_EXACT_CLIENT_MATCH_REVIEW | ClinicOsController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:143` |
+| GET | `/admin/clinic-subscriptions/plans` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminClinicSubscriptionController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:241` |
+| GET | `/admin/clinic-subscriptions/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminClinicSubscriptionController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:247` |
+| POST | `/admin/clinic-subscriptions/:param/assign` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminClinicSubscriptionController | `apps/api/src/modules/clinic-os/clinic-os.controller.ts:253` |
+| GET | `/pets/:param/observations/:param/download` | NO_EXACT_CLIENT_MATCH_REVIEW | PetObservationController | `apps/api/src/modules/clinical-health/pet-observation.controller.ts:33` |
+| GET | `/provider/patients/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:56` |
+| GET | `/provider/patients/:param/visits` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:62` |
+| POST | `/provider/labs/:param/amend` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:110` |
+| POST | `/provider/imaging` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:116` |
+| POST | `/provider/imaging/:param/void` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:122` |
+| PATCH | `/provider/referrals/:param/status` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:134` |
+| POST | `/provider/dental-records` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:140` |
+| POST | `/provider/nutrition-plans` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:146` |
+| POST | `/provider/rehab-plans` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:152` |
+| POST | `/provider/patients/:param/rehab-plans/:param/sessions` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:158` |
+| POST | `/provider/care-plans` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:164` |
+| POST | `/provider/patients/:param/care-plans/:param/items` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:170` |
+| PATCH | `/provider/patients/:param/care-plans/:param/items/:param/status` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:176` |
+| POST | `/provider/patients/:param/documents/upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:182` |
+| POST | `/provider/patients/:param/documents` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderClinicalController | `apps/api/src/modules/clinical-health/provider-clinical.controller.ts:188` |
+| GET | `/shop/products/:param/offers` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | CatalogController | `apps/api/src/modules/commerce/catalog/catalog.controller.ts:30` |
+| POST | `/checkout/:param/revalidate` | NO_EXACT_CLIENT_MATCH_REVIEW | CheckoutController | `apps/api/src/modules/commerce/checkout/checkout.controller.ts:33` |
+| PATCH | `/checkout/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | CheckoutController | `apps/api/src/modules/commerce/checkout/checkout.controller.ts:38` |
+| GET | `/checkout/:param/financing-intent/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | CheckoutController | `apps/api/src/modules/commerce/checkout/checkout.controller.ts:66` |
+| POST | `/shipping/dev/simulate/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | ShippingWebhooksController | `apps/api/src/modules/commerce/logistics/shipping-webhooks.controller.ts:82` |
+| GET | `/orders/:param/fulfillment` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | OrderLogisticsController | `apps/api/src/modules/commerce/logistics/shipping.controller.ts:73` |
+| GET | `/orders/:param/shipment` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | OrderLogisticsController | `apps/api/src/modules/commerce/logistics/shipping.controller.ts:79` |
+| POST | `/orders/:param/shipment/reconcile` | NO_EXACT_CLIENT_MATCH_REVIEW | OrderLogisticsController | `apps/api/src/modules/commerce/logistics/shipping.controller.ts:114` |
+| GET | `/seller-organizations/:param/channels/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceChannelController | `apps/api/src/modules/commerce/marketplace/marketplace-channel.controller.ts:26` |
+| POST | `/seller-organizations/:param/channels/:param/reconcile` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceChannelController | `apps/api/src/modules/commerce/marketplace/marketplace-channel.controller.ts:44` |
+| POST | `/seller-organizations/:param/channels/:param/dev/simulate/order` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:75` |
+| POST | `/seller-organizations/:param/channels/:param/dev/simulate/cancellation` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:84` |
+| POST | `/seller-organizations/:param/channels/:param/dev/simulate/mismatch` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:93` |
+| POST | `/seller-organizations/:param/channels/:param/dev/simulate/publish-rejection` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceDevController | `apps/api/src/modules/commerce/marketplace/marketplace-dev.controller.ts:101` |
+| GET | `/seller-organizations/:param/marketplace-listings/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceListingController | `apps/api/src/modules/commerce/marketplace/marketplace-listing.controller.ts:22` |
+| PATCH | `/seller-organizations/:param/marketplace-listings/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | MarketplaceListingController | `apps/api/src/modules/commerce/marketplace/marketplace-listing.controller.ts:33` |
+| POST | `/orders/:param/refunds` | NO_EXACT_CLIENT_MATCH_REVIEW | OrdersController | `apps/api/src/modules/commerce/orders/orders.controller.ts:36` |
+| POST | `/payments/reconcile/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | ReconciliationController | `apps/api/src/modules/commerce/reconciliation/reconciliation.controller.ts:19` |
+| POST | `/financing/reconcile/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | ReconciliationController | `apps/api/src/modules/commerce/reconciliation/reconciliation.controller.ts:25` |
+| GET | `/orders/:param/refunds` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | RefundsController | `apps/api/src/modules/commerce/refunds/refunds.controller.ts:13` |
+| GET | `/refunds/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | RefundsController | `apps/api/src/modules/commerce/refunds/refunds.controller.ts:18` |
+| POST | `/repeat-deliveries/:param/skip` | NO_EXACT_CLIENT_MATCH_REVIEW | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:47` |
+| POST | `/repeat-deliveries/:param/pause` | NO_EXACT_CLIENT_MATCH_REVIEW | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:52` |
+| POST | `/repeat-deliveries/:param/resume` | NO_EXACT_CLIENT_MATCH_REVIEW | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:57` |
+| POST | `/repeat-deliveries/:param/cancel` | NO_EXACT_CLIENT_MATCH_REVIEW | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:62` |
+| POST | `/repeat-deliveries/:param/accept-price` | NO_EXACT_CLIENT_MATCH_REVIEW | RepeatDeliveryController | `apps/api/src/modules/commerce/repeat-delivery/repeat-delivery.controller.ts:67` |
+| POST | `/chat/conversations` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:32` |
+| GET | `/chat/conversations/:param/messages` | NO_EXACT_CLIENT_MATCH_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:43` |
+| POST | `/chat/conversations/:param/archive` | NO_EXACT_CLIENT_MATCH_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:59` |
+| POST | `/chat/conversations/:param/unarchive` | NO_EXACT_CLIENT_MATCH_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:64` |
+| POST | `/chat/conversations/:param/mute` | NO_EXACT_CLIENT_MATCH_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:69` |
+| DELETE | `/chat/conversations/:param/mute` | NO_EXACT_CLIENT_MATCH_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:74` |
+| POST | `/chat/conversations/:param/delete-for-self` | NO_EXACT_CLIENT_MATCH_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:80` |
+| GET | `/chat/unread-count` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:85` |
+| GET | `/chat/blocks` | NO_EXACT_CLIENT_MATCH_REVIEW | ChatController | `apps/api/src/modules/community/chat/chat.controller.ts:90` |
+| POST | `/community/posts/:param/save` | NO_EXACT_CLIENT_MATCH_REVIEW | CommunityController | `apps/api/src/modules/community/community.controller.ts:76` |
+| DELETE | `/community/posts/:param/save` | NO_EXACT_CLIENT_MATCH_REVIEW | CommunityController | `apps/api/src/modules/community/community.controller.ts:82` |
+| GET | `/community/saved-posts` | NO_EXACT_CLIENT_MATCH_REVIEW | CommunityController | `apps/api/src/modules/community/community.controller.ts:88` |
+| GET | `/search` | NO_EXACT_CLIENT_MATCH_REVIEW | SearchController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:32` |
+| GET | `/me/saved` | NO_EXACT_CLIENT_MATCH_REVIEW | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:45` |
+| GET | `/me/recently-viewed` | NO_EXACT_CLIENT_MATCH_REVIEW | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:50` |
+| POST | `/me/recently-viewed` | NO_EXACT_CLIENT_MATCH_REVIEW | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:55` |
+| DELETE | `/me/recently-viewed` | NO_EXACT_CLIENT_MATCH_REVIEW | ConsumerHubController | `apps/api/src/modules/consumer-hub/consumer-hub.controller.ts:61` |
+| GET | `/blog/articles/:param/related` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:39` |
+| GET | `/blog/articles/:param/feedback` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:44` |
+| POST | `/blog/articles/:param/feedback` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:51` |
+| GET | `/blog/tags` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | PublicBlogController | `apps/api/src/modules/content/public-blog.controller.ts:68` |
+| GET | `/content/placements/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | PublicContentPlacementController | `apps/api/src/modules/content/public-content-placement.controller.ts:11` |
+| GET | `/pets/:param/care-suggestions` | NO_EXACT_CLIENT_MATCH_REVIEW | HealthDepthController | `apps/api/src/modules/health-depth/health-depth.controller.ts:111` |
+| GET | `/home` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | HomeController | `apps/api/src/modules/home/home.controller.ts:12` |
+| GET | `/pets/:param/claim-preps` | NO_EXACT_CLIENT_MATCH_REVIEW | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:29` |
+| POST | `/pets/:param/claim-preps` | NO_EXACT_CLIENT_MATCH_REVIEW | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:35` |
+| GET | `/pets/:param/claim-preps/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:41` |
+| POST | `/pets/:param/claim-preps/:param/items` | NO_EXACT_CLIENT_MATCH_REVIEW | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:47` |
+| DELETE | `/pets/:param/claim-preps/:param/items/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:53` |
+| PATCH | `/pets/:param/claim-preps/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | ClaimPrepController | `apps/api/src/modules/insurance/claim-prep.controller.ts:59` |
+| GET | `/pets/:param/insurance-applications/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | InsuranceController | `apps/api/src/modules/insurance/insurance.controller.ts:34` |
+| GET | `/insurance/providers` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | PublicInsuranceController | `apps/api/src/modules/insurance/public-insurance.controller.ts:17` |
+| GET | `/insurance/providers/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | PublicInsuranceController | `apps/api/src/modules/insurance/public-insurance.controller.ts:22` |
+| POST | `/pets/:param/lost-incidents/:param/identity-card` | NO_EXACT_CLIENT_MATCH_REVIEW | LostPetController | `apps/api/src/modules/lost-pet/lost-pet.controller.ts:30` |
+| GET | `/me/moderation-decisions` | NO_EXACT_CLIENT_MATCH_REVIEW | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:19` |
+| POST | `/me/moderation-decisions/:param/appeal` | NO_EXACT_CLIENT_MATCH_REVIEW | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:24` |
+| GET | `/me/appeals` | NO_EXACT_CLIENT_MATCH_REVIEW | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:30` |
+| POST | `/me/appeals/:param/withdraw` | NO_EXACT_CLIENT_MATCH_REVIEW | MemberTrustController | `apps/api/src/modules/member-trust/member-trust.controller.ts:35` |
+| GET | `/pets/:param/memories` | NO_EXACT_CLIENT_MATCH_REVIEW | MemoryController | `apps/api/src/modules/memories/memory.controller.ts:36` |
+| POST | `/dev/notifications/simulate` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationDevController | `apps/api/src/modules/notifications/notification-dev.controller.ts:46` |
+| POST | `/dev/notifications/deliveries/:param/force-attempt` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationDevController | `apps/api/src/modules/notifications/notification-dev.controller.ts:62` |
+| POST | `/dev/notifications/deliveries/process-due` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationDevController | `apps/api/src/modules/notifications/notification-dev.controller.ts:70` |
+| GET | `/notification-preferences/digest` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationPreferenceController | `apps/api/src/modules/notifications/notification-preference.controller.ts:35` |
+| PUT | `/notification-preferences/digest` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationPreferenceController | `apps/api/src/modules/notifications/notification-preference.controller.ts:40` |
+| GET | `/notifications/grouped` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationsController | `apps/api/src/modules/notifications/notifications.controller.ts:40` |
+| POST | `/notifications/read` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationsController | `apps/api/src/modules/notifications/notifications.controller.ts:46` |
+| POST | `/notifications/groups/read` | NO_EXACT_CLIENT_MATCH_REVIEW | NotificationsController | `apps/api/src/modules/notifications/notifications.controller.ts:51` |
+| GET | `/provider/verification` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:57` |
+| POST | `/provider/verification/uploads` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:60` |
+| POST | `/provider/verification/documents` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:63` |
+| POST | `/provider/verification/submit` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:66` |
+| GET | `/seller-organizations/:param/verification` | NO_EXACT_CLIENT_MATCH_REVIEW | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:77` |
+| POST | `/seller-organizations/:param/verification/uploads` | NO_EXACT_CLIENT_MATCH_REVIEW | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:80` |
+| POST | `/seller-organizations/:param/verification/documents` | NO_EXACT_CLIENT_MATCH_REVIEW | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:84` |
+| POST | `/seller-organizations/:param/verification/submit` | NO_EXACT_CLIENT_MATCH_REVIEW | SellerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:88` |
+| PATCH | `/admin/providers/:param/verification` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | AdminPartnerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:122` |
+| PATCH | `/admin/sellers/:param/verification` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | AdminPartnerVerificationController | `apps/api/src/modules/partner-verification/partner-verification.controllers.ts:128` |
+| GET | `/pets/:param/completeness` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:20` |
+| GET | `/pets/:param/emergency-info` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:26` |
+| PUT | `/pets/:param/emergency-info` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:32` |
+| GET | `/pets/:param/emergency-snapshot` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:39` |
+| GET | `/pets/:param/share-cards` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:45` |
+| POST | `/pets/:param/share-cards` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:51` |
+| POST | `/pets/:param/share-cards/:param/rotate` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:58` |
+| POST | `/pets/:param/share-cards/:param/revoke` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:64` |
+| GET | `/pets/:param/card-messages` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:71` |
+| POST | `/pets/:param/card-messages/:param/read` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:77` |
+| GET | `/pets/:param/care-handoffs` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:83` |
+| POST | `/pets/:param/care-handoffs` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:89` |
+| DELETE | `/pets/:param/care-handoffs/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | PetSafetyController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:96` |
+| GET | `/me/care-handoffs` | NO_EXACT_CLIENT_MATCH_REVIEW | MyCareHandoffsController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:108` |
+| POST | `/public/pet-cards/:param/messages` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicPetCardController | `apps/api/src/modules/pet-safety/pet-safety.controller.ts:126` |
+| POST | `/place-suggestions` | NO_EXACT_CLIENT_MATCH_REVIEW | PlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:24` |
+| POST | `/place-suggestions/changes` | NO_EXACT_CLIENT_MATCH_REVIEW | PlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:31` |
+| GET | `/place-suggestions/mine` | NO_EXACT_CLIENT_MATCH_REVIEW | PlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:37` |
+| GET | `/admin/place-suggestions` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:48` |
+| POST | `/admin/place-suggestions/:param/approve` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:54` |
+| POST | `/admin/place-suggestions/:param/reject` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPlaceSuggestionsController | `apps/api/src/modules/place-suggestions/place-suggestions.controller.ts:60` |
+| GET | `/settings/public` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicSettingsController | `apps/api/src/modules/platform-settings/platform-settings.controller.ts:9` |
+| GET | `/admin/privacy/deletion-requests` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPrivacyGovernanceController | `apps/api/src/modules/privacy-governance/privacy-governance.controller.ts:25` |
+| POST | `/admin/privacy/deletion-requests/:param/transition` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPrivacyGovernanceController | `apps/api/src/modules/privacy-governance/privacy-governance.controller.ts:31` |
+| GET | `/admin/release-gate` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminPrivacyGovernanceController | `apps/api/src/modules/privacy-governance/privacy-governance.controller.ts:37` |
+| GET | `/provider/bookings/:param/ride` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderBookingsController | `apps/api/src/modules/provider-os/provider-bookings.controller.ts:20` |
+| POST | `/provider/bookings/:param/ride-events` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderBookingsController | `apps/api/src/modules/provider-os/provider-bookings.controller.ts:25` |
+| POST | `/provider/waitlist/:param/offer` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderCatalogController | `apps/api/src/modules/provider-os/provider-catalog.controller.ts:82` |
+| GET | `/providers/vets` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ProvidersController | `apps/api/src/modules/providers/providers.controller.ts:15` |
+| GET | `/providers/vets/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ProvidersController | `apps/api/src/modules/providers/providers.controller.ts:20` |
+| GET | `/providers/vets/:param/availability` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ProvidersController | `apps/api/src/modules/providers/providers.controller.ts:25` |
+| GET | `/seller-organizations` | NO_EXACT_CLIENT_MATCH_REVIEW | SellerContextController | `apps/api/src/modules/seller-os/seller-context.controller.ts:19` |
+| GET | `/seller-organizations/:param/offers/:param` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | SellerOfferController | `apps/api/src/modules/seller-os/seller-offer.controller.ts:22` |
+| GET | `/seller-organizations/:param/promotions/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | SellerPromotionController | `apps/api/src/modules/seller-os/seller-promotion.controller.ts:26` |
+| GET | `/provider-services/:param/intake-form` | NO_EXACT_CLIENT_MATCH_REVIEW | PublicIntakeFormController | `apps/api/src/modules/service-intake/service-intake.controller.ts:18` |
+| GET | `/bookings/:param/attachments` | NO_EXACT_CLIENT_MATCH_REVIEW | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:28` |
+| POST | `/bookings/:param/attachments/upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:32` |
+| POST | `/bookings/:param/attachments` | NO_EXACT_CLIENT_MATCH_REVIEW | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:37` |
+| GET | `/bookings/:param/attachments/:param/download` | NO_EXACT_CLIENT_MATCH_REVIEW | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:41` |
+| DELETE | `/bookings/:param/attachments/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | OwnerBookingAttachmentsController | `apps/api/src/modules/service-intake/service-intake.controller.ts:45` |
+| PUT | `/provider/services/:param/intake-form` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:57` |
+| DELETE | `/provider/services/:param/intake-form` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:63` |
+| GET | `/provider/bookings/:param/intake` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:69` |
+| GET | `/provider/bookings/:param/attachments` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:74` |
+| POST | `/provider/bookings/:param/attachments/upload-url` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:79` |
+| POST | `/provider/bookings/:param/attachments` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:85` |
+| GET | `/provider/bookings/:param/attachments/:param/download` | NO_EXACT_CLIENT_MATCH_REVIEW | ProviderIntakeController | `apps/api/src/modules/service-intake/service-intake.controller.ts:90` |
+| GET | `/services/categories` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ServicesController | `apps/api/src/modules/services/services.controller.ts:16` |
+| GET | `/providers/services` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | ServicesController | `apps/api/src/modules/services/services.controller.ts:21` |
+| GET | `/downloads/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | DownloadsController | `apps/api/src/modules/storage/downloads.controller.ts:25` |
+| PUT | `/uploads/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | UploadsController | `apps/api/src/modules/storage/uploads.controller.ts:20` |
+| GET | `/households/:param/subscription/summary` | NO_EXACT_CLIENT_MATCH_REVIEW | SubscriptionController | `apps/api/src/modules/subscriptions/subscription.controller.ts:55` |
+| GET | `/households/:param/subscription/downgrade-preview` | NO_EXACT_CLIENT_MATCH_REVIEW | SubscriptionController | `apps/api/src/modules/subscriptions/subscription.controller.ts:61` |
+| GET | `/pets/:param/trips/:param/requirements` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | TravelController | `apps/api/src/modules/travel/travel.controller.ts:64` |
+| GET | `/pets/:param/trips/:param/preparation` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:39` |
+| POST | `/pets/:param/trips/:param/reminder-proposals/apply` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:46` |
+| GET | `/pets/:param/trips/:param/checklist` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:52` |
+| POST | `/pets/:param/trips/:param/checklist/defaults` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:58` |
+| POST | `/pets/:param/trips/:param/checklist` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:64` |
+| PATCH | `/pets/:param/trips/:param/checklist/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:70` |
+| GET | `/pets/:param/trips/:param/documents` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:77` |
+| POST | `/pets/:param/trips/:param/documents` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:83` |
+| DELETE | `/pets/:param/trips/:param/documents/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:89` |
+| DELETE | `/pets/:param/trips/:param/checklist/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:95` |
+| GET | `/pets/:param/trips/:param/participants` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:101` |
+| POST | `/pets/:param/trips/:param/participants` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:107` |
+| DELETE | `/pets/:param/trips/:param/participants/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | TripExtrasController | `apps/api/src/modules/travel/trip-extras.controller.ts:113` |
+| GET | `/travel/external/stays/:param/out` | NO_EXACT_CLIENT_MATCH_REVIEW | TravelExternalPublicController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:61` |
+| POST | `/admin/travel/external/sources/:param/probe` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:175` |
+| POST | `/admin/travel/external/matches/:param/approve` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:200` |
+| POST | `/admin/travel/external/matches/:param/reject` | NO_EXACT_CLIENT_MATCH_REVIEW | AdminTravelExternalController | `apps/api/src/modules/travel-external/travel-external.controllers.ts:201` |
+| POST | `/provider/travel/listings/:param/archive` | NO_EXACT_CLIENT_MATCH_REVIEW | TravelProviderController | `apps/api/src/modules/travel-marketplace/travel-provider.controller.ts:82` |
+| PATCH | `/provider/clinical/note-templates/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | VetPanelOrgController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:74` |
+| GET | `/provider/clinical/patients/:param/vitals/trends` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:111` |
+| GET | `/provider/clinical/patients/:param/problems` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:125` |
+| GET | `/provider/clinical/patients/:param/hospitalizations` | NO_EXACT_CLIENT_MATCH_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:171` |
+| PATCH | `/provider/clinical/hospitalizations/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:189` |
+| POST | `/provider/clinical/hospitalizations/:param/tasks` | NO_EXACT_CLIENT_MATCH_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:201` |
+| GET | `/provider/clinical/patients/:param/estimates` | NO_EXACT_CLIENT_MATCH_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:226` |
+| PATCH | `/provider/clinical/estimates/:param` | NO_EXACT_CLIENT_MATCH_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:238` |
+| GET | `/provider/clinical/patients/:param/alerts` | CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW | VetPanelPatientController | `apps/api/src/modules/vet-panel/vet-panel.controller.ts:278` |
