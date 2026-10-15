@@ -48,3 +48,7 @@ Frozen install, lint, web typecheck, web tests and browser evidence are recorded
 ## Clinic workspace follow-up
 
 `/provider/clinic` adds the real daily queue, task lifecycle/status filters, paginated customer search, current clinic plan usage and author/owner-controlled customer notes. Notes default to clinic-only. Four fa/en 390/1440 captures are in `screenshots/clinic-workspace-*.webp`; `clinic-browser-checks.json` records no document overflow or page errors. Content version history now inspects server snapshots and reports restore failures. These additions do not implement the remaining campaign/import/team/finance Clinic OS work.
+
+## Additional owner photo reference
+
+The owner supplied [another original Cookie photo](references/cookie-owner-photo-02.jpg) for the design collection. [Usage notes](references/README.fa.md) retain its provenance and distinguish a design reference from an already published page asset.
