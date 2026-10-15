@@ -5561,6 +5561,21 @@
       "REJECTED": "Reject organization",
       "VERIFIED": "Approve organization",
       "SUSPENDED": "Suspend organization"
-    }
+    },
+    "businessKinds": {
+      "TRAVEL_ACCOMMODATION": "Travel accommodation",
+      "VET_CLINIC": "Veterinary clinic",
+      "VET_HOSPITAL": "Veterinary hospital",
+      "VETERINARIAN": "Veterinarian",
+      "GROOMER": "Grooming",
+      "TRAINER": "Trainer",
+      "WALKER": "Pet walking",
+      "SITTER": "Pet sitter",
+      "BOARDING": "Boarding",
+      "PET_TAXI": "Pet taxi",
+      "MULTI_SERVICE_PROVIDER": "Multiple-service provider",
+      "SELLER": "Seller"
+    },
+    "otherBusiness": "Other organization"
   }
 }

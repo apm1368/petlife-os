@@ -10,7 +10,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
 import { CommercePage } from "./CommercePage";
 import { Stepper } from "@/features/shared/Stepper";
-import { formatNumber, PriceBlock } from "./commerce-ui";
+import { formatNumber, PriceBlock, ProductImage } from "./commerce-ui";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
   COMPATIBLE: "success",
@@ -179,10 +179,13 @@ function CartLine({ line, busy, onQuantity, onRemove, onOpen, compatibilityLabel
   return (
     <div className="commerce-cart__line flex flex-col gap-2 border-t border-border-subtle first:border-t-0">
       <div className="flex items-start justify-between gap-3">
-        <button type="button" className="text-start" onClick={onOpen}>
+        <button type="button" className="flex min-w-0 items-start gap-3 text-start" onClick={onOpen}>
+          {line.imageUrl&&<ProductImage src={line.imageUrl} alt="" className="h-20 w-20 shrink-0 rounded-xl"/>}
+          <span className="min-w-0">
           <p className="text-body text-text-primary">{line.productTitle}</p>
           {line.variantTitle ? <p className="text-metadata text-text-secondary">{line.variantTitle}</p> : null}
           <p className="text-metadata text-text-secondary">{line.targetPetName ? t("forPet", { name: line.targetPetName }) : t("noTargetPet")}</p>
+          </span>
         </button>
         <Button variant="ghost" size="sm" onClick={onRemove} disabled={busy}>
           {t("remove")}

@@ -179,4 +179,11 @@ describe("CartView", () => {
     expect(commerceService.clearCart).toHaveBeenCalledOnce();
   });
 
+// The server, not the client, selects media belonging to the cart product/variant.
+it("uses the actual cart line photo when provided and leaves null lines without substitute photos",async()=>{
+ const cart=structuredClone(MULTI_SELLER_CART);cart.sellerGroups[0]!.lines[0]!.imageUrl="https://media.example.com/actual-cart-product.webp";
+ vi.mocked(commerceService.getCart).mockResolvedValueOnce(cart);const {container}=renderWithIntl(<CartView/>);
+ await waitFor(()=>expect(container.querySelectorAll("img").length).toBe(1));expect(container.querySelector("img")?.getAttribute("src")).toBe("https://media.example.com/actual-cart-product.webp");
+});
+
 });

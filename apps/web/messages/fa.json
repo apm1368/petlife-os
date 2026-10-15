@@ -5561,6 +5561,21 @@
       "REJECTED": "رد مجموعه",
       "VERIFIED": "تأیید مجموعه",
       "SUSPENDED": "تعلیق مجموعه"
-    }
+    },
+    "businessKinds": {
+      "TRAVEL_ACCOMMODATION": "اقامتگاه سفر",
+      "VET_CLINIC": "کلینیک دامپزشکی",
+      "VET_HOSPITAL": "بیمارستان دامپزشکی",
+      "VETERINARIAN": "دامپزشک",
+      "GROOMER": "نظافت و آرایش",
+      "TRAINER": "مربی",
+      "WALKER": "گردش حیوان",
+      "SITTER": "نگهدار حیوان",
+      "BOARDING": "پانسیون",
+      "PET_TAXI": "تاکسی حیوان",
+      "MULTI_SERVICE_PROVIDER": "مجموعهٔ چندخدمتی",
+      "SELLER": "فروشگاه"
+    },
+    "otherBusiness": "سایر مجموعه‌ها"
   }
 }
