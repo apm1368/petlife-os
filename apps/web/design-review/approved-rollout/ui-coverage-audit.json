@@ -3,6 +3,14 @@
   "scope": "Static service consumer scan, excluding tests. Aliases, generic action dispatch and legacy wrappers require manual review; no automatic feature claims.",
   "routes": [
     {
+      "file": "app/[locale]/(admin)/admin/access/[id]/page.tsx",
+      "route": "[locale]/admin/access/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/access/page.tsx",
+      "route": "[locale]/admin/access"
+    },
+    {
       "file": "app/[locale]/(admin)/admin/animal-support/donations/page.tsx",
       "route": "[locale]/admin/animal-support/donations"
     },
@@ -135,12 +143,32 @@
       "route": "[locale]/admin/insurance"
     },
     {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/[id]/page.tsx",
+      "route": "[locale]/admin/insurance/providers/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/[id]/products/page.tsx",
+      "route": "[locale]/admin/insurance/providers/[id]/products"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/page.tsx",
+      "route": "[locale]/admin/insurance/providers"
+    },
+    {
       "file": "app/[locale]/(admin)/admin/lost-pets/[id]/page.tsx",
       "route": "[locale]/admin/lost-pets/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/lost-pets/page.tsx",
       "route": "[locale]/admin/lost-pets"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/marketplace-statements/[id]/page.tsx",
+      "route": "[locale]/admin/marketplace-statements/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/marketplace-statements/page.tsx",
+      "route": "[locale]/admin/marketplace-statements"
     },
     {
       "file": "app/[locale]/(admin)/admin/page.tsx",
@@ -235,6 +263,42 @@
       "route": "[locale]/admin/travel/bookings"
     },
     {
+      "file": "app/[locale]/(admin)/admin/travel/external/canonical/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/canonical/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/listings/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/new/page.tsx",
+      "route": "[locale]/admin/travel/external/listings/new"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/page.tsx",
+      "route": "[locale]/admin/travel/external/listings"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/matches/page.tsx",
+      "route": "[locale]/admin/travel/external/matches"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/page.tsx",
+      "route": "[locale]/admin/travel/external"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/reports/page.tsx",
+      "route": "[locale]/admin/travel/external/reports"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/runs/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/runs/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/sources/[code]/page.tsx",
+      "route": "[locale]/admin/travel/external/sources/[code]"
+    },
+    {
       "file": "app/[locale]/(admin)/admin/travel/listings/[id]/page.tsx",
       "route": "[locale]/admin/travel/listings/[id]"
     },
@@ -261,6 +325,14 @@
     {
       "file": "app/[locale]/(admin)/admin/trust/page.tsx",
       "route": "[locale]/admin/trust"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/verification/[subject]/[id]/page.tsx",
+      "route": "[locale]/admin/verification/[subject]/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/verification/page.tsx",
+      "route": "[locale]/admin/verification"
     },
     {
       "file": "app/[locale]/(app)/ai/page.tsx",
@@ -399,8 +471,16 @@
       "route": "[locale]/pets/[id]/care"
     },
     {
+      "file": "app/[locale]/(app)/pets/[id]/care/suggestions/page.tsx",
+      "route": "[locale]/pets/[id]/care/suggestions"
+    },
+    {
       "file": "app/[locale]/(app)/pets/[id]/care-sheet/page.tsx",
       "route": "[locale]/pets/[id]/care-sheet"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/activity/page.tsx",
+      "route": "[locale]/pets/[id]/health/activity"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/dental/[recordId]/page.tsx",
@@ -543,6 +623,10 @@
       "route": "[locale]/pets/[id]/health/labs"
     },
     {
+      "file": "app/[locale]/(app)/pets/[id]/health/links/page.tsx",
+      "route": "[locale]/pets/[id]/health/links"
+    },
+    {
       "file": "app/[locale]/(app)/pets/[id]/health/medications/[medicationId]/page.tsx",
       "route": "[locale]/pets/[id]/health/medications/[medicationId]"
     },
@@ -649,6 +733,10 @@
     {
       "file": "app/[locale]/(app)/pets/[id]/page.tsx",
       "route": "[locale]/pets/[id]"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/travel/[tripId]/external-stays/page.tsx",
+      "route": "[locale]/pets/[id]/travel/[tripId]/external-stays"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/travel/[tripId]/page.tsx",
@@ -895,6 +983,10 @@
       "route": "[locale]/provider/travel/reviews"
     },
     {
+      "file": "app/[locale]/(provider)/provider/verification/page.tsx",
+      "route": "[locale]/provider/verification"
+    },
+    {
       "file": "app/[locale]/(provider)/provider/visits/[id]/page.tsx",
       "route": "[locale]/provider/visits/[id]"
     },
@@ -987,6 +1079,10 @@
       "route": "[locale]/guides"
     },
     {
+      "file": "app/[locale]/(public)/health-share/[token]/page.tsx",
+      "route": "[locale]/health-share/[token]"
+    },
+    {
       "file": "app/[locale]/(public)/insurance/[productId]/page.tsx",
       "route": "[locale]/insurance/[productId]"
     },
@@ -1057,6 +1153,18 @@
     {
       "file": "app/[locale]/(public)/travel/compare/page.tsx",
       "route": "[locale]/travel/compare"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/[id]/page.tsx",
+      "route": "[locale]/travel/external/[id]"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/favorites/page.tsx",
+      "route": "[locale]/travel/external/favorites"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/page.tsx",
+      "route": "[locale]/travel/external"
     },
     {
       "file": "app/[locale]/(public)/travel/page.tsx",
@@ -1133,6 +1241,10 @@
     {
       "file": "app/[locale]/(seller)/seller/team/page.tsx",
       "route": "[locale]/seller/team"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/verification/page.tsx",
+      "route": "[locale]/seller/verification"
     },
     {
       "file": "app/[locale]/@modal/(.)account/forgot/page.tsx",
@@ -1218,6 +1330,15 @@
       "source": "services/account.service.ts",
       "consumers": [
         "features/account/SecurityCenterView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "accountService",
+      "method": "consentHistory",
+      "source": "services/account.service.ts",
+      "consumers": [
+        "features/account/ConsentHistory.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -1338,6 +1459,78 @@
       "source": "services/addresses.service.ts",
       "consumers": [
         "features/commerce/CheckoutView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "roles",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "permissions",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "list",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "get",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "grant",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "changeRole",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "suspend",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAccessService",
+      "method": "reactivate",
+      "source": "services/admin-access.service.ts",
+      "consumers": [
+        "features/admin-access/AdminAccessView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -1962,6 +2155,106 @@
       "status": "UI_CONSUMER_FOUND"
     },
     {
+      "service": "adminExternalListingsService",
+      "method": "list",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalListingsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "inspect",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalMatchesView.tsx",
+        "features/admin-travel-external/ExternalStayInspector.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "manual",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ManualExternalStayView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "visibility",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalStayInspector.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "policy",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalStayInspector.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "override",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalStayInspector.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "price",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalPriceForm.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "retry",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalStayInspector.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "matches",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalMatchesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "review",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalMatchesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminExternalListingsService",
+      "method": "canonical",
+      "source": "services/admin-external-listings.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalMatchesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
       "service": "adminFinanceService",
       "method": "listSellerFinance",
       "source": "services/admin-finance.service.ts",
@@ -2073,15 +2366,19 @@
       "service": "adminFinanceService",
       "method": "listMarketplaceStatements",
       "source": "services/admin-finance.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin/AdminMarketplaceStatementsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminFinanceService",
       "method": "getMarketplaceStatement",
       "source": "services/admin-finance.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin/AdminMarketplaceStatementsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminFinanceService",
@@ -2105,6 +2402,115 @@
       "source": "services/admin-finance.service.ts",
       "consumers": [
         "features/admin/AdminMarketplaceReconciliationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "products",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProducts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "product",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProducts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "createProduct",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProducts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "updateProduct",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProducts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "verifyProduct",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProducts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "listProduct",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProducts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "providers",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "provider",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProducts.tsx",
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "createProvider",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "updateProvider",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "verifyProvider",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminInsuranceService",
+      "method": "listProvider",
+      "source": "services/admin-insurance.service.ts",
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -2308,6 +2714,107 @@
       "source": "services/admin-subscription.service.ts",
       "consumers": [
         "features/admin/AdminSubscriptionHouseholdDetailView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "dashboard",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "sources",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalListingsView.tsx",
+        "features/admin-travel-external/AdminExternalSourcesView.tsx",
+        "features/admin-travel-external/ExternalSourceReportsView.tsx",
+        "features/admin-travel-external/ManualExternalStayView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "source",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx",
+        "features/admin-travel-external/ExternalStayInspector.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "config",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "pause",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "resume",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "probe",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [],
+      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "healthCheck",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "run",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "runs",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminTravelExternalService",
+      "method": "runDetail",
+      "source": "services/admin-travel-external.service.ts",
+      "consumers": [
+        "features/admin-travel-external/AdminExternalSourcesView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -2603,19 +3110,15 @@
       "service": "adminService",
       "method": "transitionProviderVerification",
       "source": "services/admin.service.ts",
-      "consumers": [
-        "features/admin/AdminProvidersView.tsx"
-      ],
-      "status": "UI_CONSUMER_FOUND"
+      "consumers": [],
+      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
     },
     {
       "service": "adminService",
       "method": "transitionSellerVerification",
       "source": "services/admin.service.ts",
-      "consumers": [
-        "features/admin/AdminSellersView.tsx"
-      ],
-      "status": "UI_CONSUMER_FOUND"
+      "consumers": [],
+      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
     },
     {
       "service": "adminService",
@@ -3263,6 +3766,42 @@
       "status": "UI_CONSUMER_FOUND"
     },
     {
+      "service": "clinicContactsService",
+      "method": "list",
+      "source": "services/clinic-contacts.service.ts",
+      "consumers": [
+        "features/clinic/ClinicContacts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicContactsService",
+      "method": "preview",
+      "source": "services/clinic-contacts.service.ts",
+      "consumers": [
+        "features/clinic/ClinicContacts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicContactsService",
+      "method": "import",
+      "source": "services/clinic-contacts.service.ts",
+      "consumers": [
+        "features/clinic/ClinicContacts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicContactsService",
+      "method": "export",
+      "source": "services/clinic-contacts.service.ts",
+      "consumers": [
+        "features/clinic/ClinicContacts.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
       "service": "clinicInvitationsService",
       "method": "mine",
       "source": "services/clinic-invitations.service.ts",
@@ -3376,6 +3915,123 @@
       "source": "services/clinic-os.service.ts",
       "consumers": [
         "features/clinic/ClinicWorkspace.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOutreachService",
+      "method": "preview",
+      "source": "services/clinic-outreach.service.ts",
+      "consumers": [
+        "features/clinic/ClinicCampaigns.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOutreachService",
+      "method": "send",
+      "source": "services/clinic-outreach.service.ts",
+      "consumers": [
+        "features/clinic/ClinicCampaigns.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOutreachService",
+      "method": "finance",
+      "source": "services/clinic-outreach.service.ts",
+      "consumers": [
+        "features/clinic/ClinicFinance.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicRemindersService",
+      "method": "list",
+      "source": "services/clinic-reminders.service.ts",
+      "consumers": [
+        "features/clinic/ClinicReminders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicRemindersService",
+      "method": "create",
+      "source": "services/clinic-reminders.service.ts",
+      "consumers": [
+        "features/clinic/ClinicReminders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicRemindersService",
+      "method": "cancel",
+      "source": "services/clinic-reminders.service.ts",
+      "consumers": [
+        "features/clinic/ClinicReminders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicTeamService",
+      "method": "staff",
+      "source": "services/clinic-team.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTeamManagement.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicTeamService",
+      "method": "invite",
+      "source": "services/clinic-team.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTeamManagement.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicTeamService",
+      "method": "revoke",
+      "source": "services/clinic-team.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTeamManagement.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicTeamService",
+      "method": "removeMember",
+      "source": "services/clinic-team.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTeamManagement.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicTeamService",
+      "method": "branches",
+      "source": "services/clinic-team.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTeamManagement.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicTeamService",
+      "method": "addBranch",
+      "source": "services/clinic-team.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTeamManagement.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicTeamService",
+      "method": "removeBranch",
+      "source": "services/clinic-team.service.ts",
+      "consumers": [
+        "features/clinic/ClinicTeamManagement.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -3945,6 +4601,60 @@
       "status": "UI_CONSUMER_FOUND"
     },
     {
+      "service": "externalSourceReportsService",
+      "method": "metrics",
+      "source": "services/external-source-reports.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalSourceReportsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "externalSourceReportsService",
+      "method": "parser",
+      "source": "services/external-source-reports.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalSourceReportsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "externalSourceReportsService",
+      "method": "errors",
+      "source": "services/external-source-reports.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalSourceReportsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "externalSourceReportsService",
+      "method": "evidence",
+      "source": "services/external-source-reports.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalSourceReportsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "externalSourceReportsService",
+      "method": "tasks",
+      "source": "services/external-source-reports.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalSourceReportsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "externalSourceReportsService",
+      "method": "diff",
+      "source": "services/external-source-reports.service.ts",
+      "consumers": [
+        "features/admin-travel-external/ExternalSourceReportsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
       "service": "healthAdvancedService",
       "method": "getOverview",
       "source": "services/health-advanced.service.ts",
@@ -4210,6 +4920,115 @@
       "source": "services/health-advanced.service.ts",
       "consumers": [
         "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "snapshot",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/HealthActivityView.tsx",
+        "features/health-depth/HealthSharesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "feed",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/HealthActivityView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "shares",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/HealthSharesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "createShare",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/HealthSharesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "shareLog",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/HealthSharesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "revokeShare",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/HealthSharesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "publicShare",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/PublicHealthShareView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "suggestions",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/CareSuggestionsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "acceptSuggestion",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/CareSuggestionsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "dismissSuggestion",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/CareSuggestionsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "suggestForVisit",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/ProviderCareSuggestionForm.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "healthDepthService",
+      "method": "suggestForBooking",
+      "source": "services/health-depth.service.ts",
+      "consumers": [
+        "features/health-depth/ProviderCareSuggestionForm.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -5094,6 +5913,87 @@
       "source": "services/onboarding.service.ts",
       "consumers": [
         "features/onboarding/steps/ReadyStep.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "queue",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/AdminVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "detail",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/AdminVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "transition",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/AdminVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "review",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/AdminVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "download",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/AdminVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "status",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/PartnerVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "upload",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/PartnerVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "register",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/PartnerVerificationView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "partnerVerificationService",
+      "method": "submit",
+      "source": "services/partner-verification.service.ts",
+      "consumers": [
+        "features/partner-verification/PartnerVerificationView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -6532,6 +7432,90 @@
       "status": "UI_CONSUMER_FOUND"
     },
     {
+      "service": "travelExternalService",
+      "method": "search",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/ExternalStaysView.tsx",
+        "features/travel-external/TripExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "detail",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/ExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "outboundUrl",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/ExternalStayCard.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "favorites",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/ExternalFavoritesView.tsx",
+        "features/travel-external/ExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "favorite",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/ExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "unfavorite",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/ExternalFavoritesView.tsx",
+        "features/travel-external/ExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "tripStays",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/TripExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "attach",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/TripExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "travelExternalService",
+      "method": "detach",
+      "source": "services/travel-external.service.ts",
+      "consumers": [
+        "features/travel-external/TripExternalStaysView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
       "service": "travelMarketService",
       "method": "destinations",
       "source": "services/travel-marketplace.service.ts",
@@ -7182,22 +8166,28 @@
       "service": "adminInsuranceOpsService",
       "method": "members",
       "source": "services/travel-marketplace.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminInsuranceOpsService",
       "method": "grant",
       "source": "services/travel-marketplace.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminInsuranceOpsService",
       "method": "revoke",
       "source": "services/travel-marketplace.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin-insurance/AdminInsuranceProviders.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "travelService",
@@ -7213,7 +8203,8 @@
       "method": "get",
       "source": "services/travel.service.ts",
       "consumers": [
-        "features/travel/TripDetailView.tsx"
+        "features/travel/TripDetailView.tsx",
+        "features/travel-external/TripExternalStaysView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },

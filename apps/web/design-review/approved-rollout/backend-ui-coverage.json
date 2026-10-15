@@ -1,12 +1,12 @@
 {
   "generated": "2026-10-15",
-  "baseCommit": "7a4ee652cfd27dc72016d1e6688b7300bef8f025",
+  "baseCommit": "dc8d8e0b7fe816390d906bc05f416aa479dd1bc1",
   "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
   "counts": {
     "SYSTEM_ENDPOINT_REVIEW_NOT_A_SCREEN": 7,
-    "STATIC_UI_CHAIN_FOUND": 674,
-    "NO_EXACT_CLIENT_MATCH_REVIEW": 362,
-    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 36
+    "STATIC_UI_CHAIN_FOUND": 763,
+    "NO_EXACT_CLIENT_MATCH_REVIEW": 275,
+    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 34
   },
   "unresolvedDecorators": [],
   "endpoints": [
@@ -57,7 +57,7 @@
           "service": "accountService",
           "method": "overview",
           "source": "apps/web/services/account.service.ts",
-          "line": 79,
+          "line": 81,
           "consumers": [
             "apps/web/features/account/AccountOverviewView.tsx"
           ]
@@ -78,7 +78,7 @@
           "service": "accountService",
           "method": "security",
           "source": "apps/web/services/account.service.ts",
-          "line": 80,
+          "line": 82,
           "consumers": [
             "apps/web/features/account/SecurityCenterView.tsx"
           ]
@@ -99,7 +99,7 @@
           "service": "accountService",
           "method": "revokeSession",
           "source": "apps/web/services/account.service.ts",
-          "line": 81,
+          "line": 83,
           "consumers": [
             "apps/web/features/account/SecurityCenterView.tsx"
           ]
@@ -120,7 +120,7 @@
           "service": "accountService",
           "method": "revokeOtherSessions",
           "source": "apps/web/services/account.service.ts",
-          "line": 82,
+          "line": 84,
           "consumers": [
             "apps/web/features/account/SecurityCenterView.tsx"
           ]
@@ -141,7 +141,7 @@
           "service": "accountService",
           "method": "revokeAllSessions",
           "source": "apps/web/services/account.service.ts",
-          "line": 83,
+          "line": 85,
           "consumers": [
             "apps/web/features/account/SecurityCenterView.tsx"
           ]
@@ -162,7 +162,7 @@
           "service": "accountService",
           "method": "privacy",
           "source": "apps/web/services/account.service.ts",
-          "line": 84,
+          "line": 87,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -183,7 +183,7 @@
           "service": "accountService",
           "method": "setConsent",
           "source": "apps/web/services/account.service.ts",
-          "line": 85,
+          "line": 88,
           "consumers": [
             "apps/web/app/[locale]/(auth)/register/page.tsx",
             "apps/web/features/account/PrivacyCenterView.tsx"
@@ -199,8 +199,18 @@
       "source": "apps/api/src/modules/account/account.controller.ts",
       "line": 106,
       "group": "modules/account/account.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "accountService",
+          "method": "consentHistory",
+          "source": "apps/web/services/account.service.ts",
+          "line": 86,
+          "consumers": [
+            "apps/web/features/account/ConsentHistory.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -216,7 +226,7 @@
           "service": "accountService",
           "method": "sharing",
           "source": "apps/web/services/account.service.ts",
-          "line": 86,
+          "line": 89,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -237,7 +247,7 @@
           "service": "accountService",
           "method": "requestExport",
           "source": "apps/web/services/account.service.ts",
-          "line": 87,
+          "line": 90,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -258,7 +268,7 @@
           "service": "accountService",
           "method": "downloadExport",
           "source": "apps/web/services/account.service.ts",
-          "line": 88,
+          "line": 91,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -279,7 +289,7 @@
           "service": "accountService",
           "method": "deletionPreview",
           "source": "apps/web/services/account.service.ts",
-          "line": 89,
+          "line": 92,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -300,7 +310,7 @@
           "service": "accountService",
           "method": "sendDeletionCode",
           "source": "apps/web/services/account.service.ts",
-          "line": 90,
+          "line": 93,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -321,7 +331,7 @@
           "service": "accountService",
           "method": "requestDeletion",
           "source": "apps/web/services/account.service.ts",
-          "line": 91,
+          "line": 94,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -342,7 +352,7 @@
           "service": "accountService",
           "method": "cancelDeletion",
           "source": "apps/web/services/account.service.ts",
-          "line": 92,
+          "line": 95,
           "consumers": [
             "apps/web/features/account/PrivacyCenterView.tsx"
           ]
@@ -444,8 +454,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 34,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "roles",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 8,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -455,8 +475,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 38,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "permissions",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 9,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -466,8 +496,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 42,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "list",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 10,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -477,8 +517,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 46,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "get",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 11,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -488,8 +538,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 50,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "grant",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 12,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -499,8 +559,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 54,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "changeRole",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 13,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -510,8 +580,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 58,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "suspend",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 14,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -521,8 +601,18 @@
       "source": "apps/api/src/modules/admin/access/admin-access-control.controller.ts",
       "line": 62,
       "group": "modules/admin/access",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAccessService",
+          "method": "reactivate",
+          "source": "apps/web/services/admin-access.service.ts",
+          "line": 15,
+          "consumers": [
+            "apps/web/features/admin-access/AdminAccessView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -2778,14 +2868,16 @@
       "source": "apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts",
       "line": 145,
       "group": "modules/admin/finance",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminFinanceService",
           "method": "listMarketplaceStatements",
           "source": "apps/web/services/admin-finance.service.ts",
           "line": 61,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin/AdminMarketplaceStatementsView.tsx"
+          ]
         }
       ]
     },
@@ -2797,14 +2889,16 @@
       "source": "apps/api/src/modules/admin/finance/admin-seller-finance.controller.ts",
       "line": 151,
       "group": "modules/admin/finance",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminFinanceService",
           "method": "getMarketplaceStatement",
           "source": "apps/web/services/admin-finance.service.ts",
           "line": 62,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin/AdminMarketplaceStatementsView.tsx"
+          ]
         }
       ]
     },
@@ -2997,14 +3091,16 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance-applications.controller.ts",
       "line": 70,
       "group": "modules/admin/insurance",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminInsuranceOpsService",
           "method": "members",
           "source": "apps/web/services/travel-marketplace.service.ts",
           "line": 333,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
         }
       ]
     },
@@ -3016,14 +3112,16 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance-applications.controller.ts",
       "line": 79,
       "group": "modules/admin/insurance",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminInsuranceOpsService",
           "method": "grant",
           "source": "apps/web/services/travel-marketplace.service.ts",
           "line": 334,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
         }
       ]
     },
@@ -3035,14 +3133,16 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance-applications.controller.ts",
       "line": 95,
       "group": "modules/admin/insurance",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminInsuranceOpsService",
           "method": "revoke",
           "source": "apps/web/services/travel-marketplace.service.ts",
           "line": 335,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
         }
       ]
     },
@@ -3054,8 +3154,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 31,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "providers",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 13,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -3065,8 +3175,19 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 37,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "provider",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 14,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProducts.tsx",
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3076,8 +3197,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 43,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "createProvider",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 15,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -3087,8 +3218,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 49,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "updateProvider",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 16,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3098,8 +3239,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 55,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "verifyProvider",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 17,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3109,8 +3260,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 61,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "listProvider",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 18,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProviders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3131,8 +3292,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 75,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "products",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 7,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProducts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -3142,8 +3313,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 81,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "product",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 8,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProducts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3153,8 +3334,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 87,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "createProduct",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 9,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProducts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -3164,8 +3355,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 93,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "updateProduct",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 10,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProducts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3175,8 +3376,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 99,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "verifyProduct",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 11,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProducts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3186,8 +3397,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance.controller.ts",
       "line": 105,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceService",
+          "method": "listProduct",
+          "source": "apps/web/services/admin-insurance.service.ts",
+          "line": 12,
+          "consumers": [
+            "apps/web/features/admin-insurance/AdminInsuranceProducts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7242,8 +7463,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 110,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOutreachService",
+          "method": "preview",
+          "source": "apps/web/services/clinic-outreach.service.ts",
+          "line": 12,
+          "consumers": [
+            "apps/web/features/clinic/ClinicCampaigns.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7253,8 +7484,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 116,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOutreachService",
+          "method": "send",
+          "source": "apps/web/services/clinic-outreach.service.ts",
+          "line": 13,
+          "consumers": [
+            "apps/web/features/clinic/ClinicCampaigns.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7264,8 +7505,27 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 124,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicContactsService",
+          "method": "preview",
+          "source": "apps/web/services/clinic-contacts.service.ts",
+          "line": 11,
+          "consumers": [
+            "apps/web/features/clinic/ClinicContacts.tsx"
+          ]
+        },
+        {
+          "service": "clinicContactsService",
+          "method": "import",
+          "source": "apps/web/services/clinic-contacts.service.ts",
+          "line": 12,
+          "consumers": [
+            "apps/web/features/clinic/ClinicContacts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7286,8 +7546,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 136,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicContactsService",
+          "method": "export",
+          "source": "apps/web/services/clinic-contacts.service.ts",
+          "line": 13,
+          "consumers": [
+            "apps/web/features/clinic/ClinicContacts.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7308,8 +7578,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 148,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicTeamService",
+          "method": "staff",
+          "source": "apps/web/services/clinic-team.service.ts",
+          "line": 18,
+          "consumers": [
+            "apps/web/features/clinic/ClinicTeamManagement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7319,8 +7599,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 157,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicTeamService",
+          "method": "invite",
+          "source": "apps/web/services/clinic-team.service.ts",
+          "line": 19,
+          "consumers": [
+            "apps/web/features/clinic/ClinicTeamManagement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7330,8 +7620,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 164,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicTeamService",
+          "method": "revoke",
+          "source": "apps/web/services/clinic-team.service.ts",
+          "line": 20,
+          "consumers": [
+            "apps/web/features/clinic/ClinicTeamManagement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "DELETE",
@@ -7341,8 +7641,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 171,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicTeamService",
+          "method": "removeMember",
+          "source": "apps/web/services/clinic-team.service.ts",
+          "line": 21,
+          "consumers": [
+            "apps/web/features/clinic/ClinicTeamManagement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7352,8 +7662,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 177,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicTeamService",
+          "method": "branches",
+          "source": "apps/web/services/clinic-team.service.ts",
+          "line": 22,
+          "consumers": [
+            "apps/web/features/clinic/ClinicTeamManagement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7363,8 +7683,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 183,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicTeamService",
+          "method": "addBranch",
+          "source": "apps/web/services/clinic-team.service.ts",
+          "line": 23,
+          "consumers": [
+            "apps/web/features/clinic/ClinicTeamManagement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "DELETE",
@@ -7374,8 +7704,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 191,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicTeamService",
+          "method": "removeBranch",
+          "source": "apps/web/services/clinic-team.service.ts",
+          "line": 24,
+          "consumers": [
+            "apps/web/features/clinic/ClinicTeamManagement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7438,8 +7778,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 212,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicRemindersService",
+          "method": "list",
+          "source": "apps/web/services/clinic-reminders.service.ts",
+          "line": 5,
+          "consumers": [
+            "apps/web/features/clinic/ClinicReminders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7449,8 +7799,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 217,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicRemindersService",
+          "method": "create",
+          "source": "apps/web/services/clinic-reminders.service.ts",
+          "line": 6,
+          "consumers": [
+            "apps/web/features/clinic/ClinicReminders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7460,8 +7820,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 223,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicRemindersService",
+          "method": "cancel",
+          "source": "apps/web/services/clinic-reminders.service.ts",
+          "line": 7,
+          "consumers": [
+            "apps/web/features/clinic/ClinicReminders.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7471,8 +7841,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 229,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOutreachService",
+          "method": "finance",
+          "source": "apps/web/services/clinic-outreach.service.ts",
+          "line": 14,
+          "consumers": [
+            "apps/web/features/clinic/ClinicFinance.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -11246,8 +11626,19 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 72,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "snapshot",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 25,
+          "consumers": [
+            "apps/web/features/health-depth/HealthActivityView.tsx",
+            "apps/web/features/health-depth/HealthSharesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -11257,8 +11648,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 78,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "feed",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 26,
+          "consumers": [
+            "apps/web/features/health-depth/HealthActivityView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -11268,8 +11669,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 85,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "createShare",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 28,
+          "consumers": [
+            "apps/web/features/health-depth/HealthSharesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -11279,8 +11690,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 93,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "shares",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 27,
+          "consumers": [
+            "apps/web/features/health-depth/HealthSharesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -11290,8 +11711,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 99,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "shareLog",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 29,
+          "consumers": [
+            "apps/web/features/health-depth/HealthSharesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -11301,8 +11732,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 105,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "revokeShare",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 30,
+          "consumers": [
+            "apps/web/features/health-depth/HealthSharesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -11323,8 +11764,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 117,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "acceptSuggestion",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 33,
+          "consumers": [
+            "apps/web/features/health-depth/CareSuggestionsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -11334,8 +11785,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 123,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "dismissSuggestion",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 34,
+          "consumers": [
+            "apps/web/features/health-depth/CareSuggestionsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -11345,8 +11806,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 135,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "publicShare",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 31,
+          "consumers": [
+            "apps/web/features/health-depth/PublicHealthShareView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -11356,8 +11827,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 148,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "suggestForVisit",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 35,
+          "consumers": [
+            "apps/web/features/health-depth/ProviderCareSuggestionForm.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -11367,8 +11848,18 @@
       "source": "apps/api/src/modules/health-depth/health-depth.controller.ts",
       "line": 154,
       "group": "modules/health-depth/health-depth.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "healthDepthService",
+          "method": "suggestForBooking",
+          "source": "apps/web/services/health-depth.service.ts",
+          "line": 36,
+          "consumers": [
+            "apps/web/features/health-depth/ProviderCareSuggestionForm.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -13129,8 +13620,18 @@
       "source": "apps/api/src/modules/partner-verification/partner-verification.controllers.ts",
       "line": 99,
       "group": "modules/partner-verification/partner-verification.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "partnerVerificationService",
+          "method": "queue",
+          "source": "apps/web/services/partner-verification.service.ts",
+          "line": 15,
+          "consumers": [
+            "apps/web/features/partner-verification/AdminVerificationView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -13140,8 +13641,18 @@
       "source": "apps/api/src/modules/partner-verification/partner-verification.controllers.ts",
       "line": 103,
       "group": "modules/partner-verification/partner-verification.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "partnerVerificationService",
+          "method": "detail",
+          "source": "apps/web/services/partner-verification.service.ts",
+          "line": 16,
+          "consumers": [
+            "apps/web/features/partner-verification/AdminVerificationView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -13151,8 +13662,18 @@
       "source": "apps/api/src/modules/partner-verification/partner-verification.controllers.ts",
       "line": 107,
       "group": "modules/partner-verification/partner-verification.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "partnerVerificationService",
+          "method": "transition",
+          "source": "apps/web/services/partner-verification.service.ts",
+          "line": 17,
+          "consumers": [
+            "apps/web/features/partner-verification/AdminVerificationView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -13162,8 +13683,18 @@
       "source": "apps/api/src/modules/partner-verification/partner-verification.controllers.ts",
       "line": 113,
       "group": "modules/partner-verification/partner-verification.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "partnerVerificationService",
+          "method": "review",
+          "source": "apps/web/services/partner-verification.service.ts",
+          "line": 18,
+          "consumers": [
+            "apps/web/features/partner-verification/AdminVerificationView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -13173,8 +13704,18 @@
       "source": "apps/api/src/modules/partner-verification/partner-verification.controllers.ts",
       "line": 117,
       "group": "modules/partner-verification/partner-verification.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "partnerVerificationService",
+          "method": "download",
+          "source": "apps/web/services/partner-verification.service.ts",
+          "line": 19,
+          "consumers": [
+            "apps/web/features/partner-verification/AdminVerificationView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -13184,16 +13725,14 @@
       "source": "apps/api/src/modules/partner-verification/partner-verification.controllers.ts",
       "line": 122,
       "group": "modules/partner-verification/partner-verification.controllers.ts",
-      "status": "STATIC_UI_CHAIN_FOUND",
+      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
       "clients": [
         {
           "service": "adminService",
           "method": "transitionProviderVerification",
           "source": "apps/web/services/admin.service.ts",
           "line": 148,
-          "consumers": [
-            "apps/web/features/admin/AdminProvidersView.tsx"
-          ]
+          "consumers": []
         }
       ]
     },
@@ -13205,16 +13744,14 @@
       "source": "apps/api/src/modules/partner-verification/partner-verification.controllers.ts",
       "line": 128,
       "group": "modules/partner-verification/partner-verification.controllers.ts",
-      "status": "STATIC_UI_CHAIN_FOUND",
+      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
       "clients": [
         {
           "service": "adminService",
           "method": "transitionSellerVerification",
           "source": "apps/web/services/admin.service.ts",
           "line": 150,
-          "consumers": [
-            "apps/web/features/admin/AdminSellersView.tsx"
-          ]
+          "consumers": []
         }
       ]
     },
@@ -16201,7 +16738,8 @@
           "source": "apps/web/services/travel.service.ts",
           "line": 55,
           "consumers": [
-            "apps/web/features/travel/TripDetailView.tsx"
+            "apps/web/features/travel/TripDetailView.tsx",
+            "apps/web/features/travel-external/TripExternalStaysView.tsx"
           ]
         }
       ]
@@ -16523,8 +17061,19 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 53,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "search",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 16,
+          "consumers": [
+            "apps/web/features/travel-external/ExternalStaysView.tsx",
+            "apps/web/features/travel-external/TripExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16534,8 +17083,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 56,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "detail",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 17,
+          "consumers": [
+            "apps/web/features/travel-external/ExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16556,8 +17115,19 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 74,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "favorites",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 19,
+          "consumers": [
+            "apps/web/features/travel-external/ExternalFavoritesView.tsx",
+            "apps/web/features/travel-external/ExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16567,8 +17137,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 76,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "favorite",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 20,
+          "consumers": [
+            "apps/web/features/travel-external/ExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "DELETE",
@@ -16578,8 +17158,19 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 78,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "unfavorite",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 21,
+          "consumers": [
+            "apps/web/features/travel-external/ExternalFavoritesView.tsx",
+            "apps/web/features/travel-external/ExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16589,8 +17180,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 86,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "tripStays",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 22,
+          "consumers": [
+            "apps/web/features/travel-external/TripExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16600,8 +17201,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 89,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "attach",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 23,
+          "consumers": [
+            "apps/web/features/travel-external/TripExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "DELETE",
@@ -16611,8 +17222,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 94,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelExternalService",
+          "method": "detach",
+          "source": "apps/web/services/travel-external.service.ts",
+          "line": 24,
+          "consumers": [
+            "apps/web/features/travel-external/TripExternalStaysView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16622,8 +17243,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 169,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "dashboard",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 12,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16633,8 +17264,21 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 170,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "sources",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 13,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalListingsView.tsx",
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx",
+            "apps/web/features/admin-travel-external/ExternalSourceReportsView.tsx",
+            "apps/web/features/admin-travel-external/ManualExternalStayView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16644,8 +17288,19 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 171,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "source",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 14,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx",
+            "apps/web/features/admin-travel-external/ExternalStayInspector.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -16655,8 +17310,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 172,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "config",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 15,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16666,8 +17331,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 173,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "pause",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 16,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16677,8 +17352,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 174,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "resume",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 17,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16688,8 +17373,16 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 175,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "probe",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 18,
+          "consumers": []
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16699,8 +17392,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 176,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "run",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 20,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16710,8 +17413,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 177,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "healthCheck",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 19,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16721,8 +17434,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 178,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "runs",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 21,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16732,8 +17455,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 179,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelExternalService",
+          "method": "runDetail",
+          "source": "apps/web/services/admin-travel-external.service.ts",
+          "line": 22,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalSourcesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16743,8 +17476,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 180,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "externalSourceReportsService",
+          "method": "parser",
+          "source": "apps/web/services/external-source-reports.service.ts",
+          "line": 13,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalSourceReportsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16754,8 +17497,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 181,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "externalSourceReportsService",
+          "method": "errors",
+          "source": "apps/web/services/external-source-reports.service.ts",
+          "line": 14,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalSourceReportsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16765,8 +17518,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 182,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "externalSourceReportsService",
+          "method": "evidence",
+          "source": "apps/web/services/external-source-reports.service.ts",
+          "line": 15,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalSourceReportsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16776,8 +17539,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 183,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "externalSourceReportsService",
+          "method": "diff",
+          "source": "apps/web/services/external-source-reports.service.ts",
+          "line": 17,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalSourceReportsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16787,8 +17560,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 184,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "externalSourceReportsService",
+          "method": "metrics",
+          "source": "apps/web/services/external-source-reports.service.ts",
+          "line": 12,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalSourceReportsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16798,8 +17581,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 185,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "externalSourceReportsService",
+          "method": "tasks",
+          "source": "apps/web/services/external-source-reports.service.ts",
+          "line": 16,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalSourceReportsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16809,8 +17602,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 186,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "canonical",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 36,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalMatchesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16820,8 +17623,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 187,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "list",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 26,
+          "consumers": [
+            "apps/web/features/admin-travel-external/AdminExternalListingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16831,8 +17644,19 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 188,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "inspect",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 27,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalMatchesView.tsx",
+            "apps/web/features/admin-travel-external/ExternalStayInspector.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16842,8 +17666,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 189,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "manual",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 28,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ManualExternalStayView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16853,8 +17687,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 190,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "visibility",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 29,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalStayInspector.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16864,8 +17708,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 191,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "retry",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 33,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalStayInspector.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16875,8 +17729,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 192,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "policy",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 30,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalStayInspector.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16886,8 +17750,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 193,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "override",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 31,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalStayInspector.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -16897,8 +17771,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 194,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "price",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 32,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalPriceForm.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16908,8 +17792,18 @@
       "source": "apps/api/src/modules/travel-external/travel-external.controllers.ts",
       "line": 199,
       "group": "modules/travel-external/travel-external.controllers.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminExternalListingsService",
+          "method": "matches",
+          "source": "apps/web/services/admin-external-listings.service.ts",
+          "line": 34,
+          "consumers": [
+            "apps/web/features/admin-travel-external/ExternalMatchesView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",

@@ -21,7 +21,7 @@ The owner authorized combining the approved page patterns for a single release. 
 
 Use [BACKEND-HANDOFF.fa.md](BACKEND-HANDOFF.fa.md). It includes the single Persian prompt, verified contract gaps, provenance/access issues and ownership boundaries. [API-DISPOSITIONS.md](API-DISPOSITIONS.md) distinguishes existing replacement/aggregate APIs from **remaining frontend work**. Do not request a duplicate backend for an already-existing endpoint.
 
-The request for universal backend-to-frontend coverage is **not certified complete**. The controller inventory has unresolved review candidates and some genuine missing frontend areas (including wider Clinic OS and insurance administration). A shared stylesheet does not close them. See `backend-ui-coverage.json`, `BACKEND-COVERAGE.md` and `ui-coverage-audit.json` for evidence. Reproduce the service inventory with `node apps/web/design-review/approved-rollout/audit-service-consumers.cjs`. `route-design-status.json` records all inventoried routes and explicitly distinguishes shared patterns from individual verification.
+The request for universal backend-to-frontend coverage is **not certified complete**. The controller inventory has unresolved review candidates and remaining specialist and protected-lane frontend work. A shared stylesheet does not close them. See `backend-ui-coverage.json`, `BACKEND-COVERAGE.md` and `ui-coverage-audit.json` for evidence. Reproduce the service inventory with `node apps/web/design-review/approved-rollout/audit-service-consumers.cjs`. `route-design-status.json` records all inventoried routes and explicitly distinguishes shared patterns from individual verification.
 
 ## Visual review
 
@@ -47,8 +47,18 @@ Frozen install, lint, web typecheck, web tests and browser evidence are recorded
 
 ## Clinic workspace follow-up
 
-`/provider/clinic` adds the real daily queue, task lifecycle/status filters, paginated customer search, current clinic plan usage and author/owner-controlled customer notes. Notes default to clinic-only. Four fa/en 390/1440 captures are in `screenshots/clinic-workspace-*.webp`; `clinic-browser-checks.json` records no document overflow or page errors. Content version history now inspects server snapshots and reports restore failures. These additions do not implement the remaining campaign/import/team/finance Clinic OS work.
+`/provider/clinic` adds the real daily queue, task lifecycle/status filters, paginated customer search, current clinic plan usage and author/owner-controlled customer notes. Notes default to clinic-only. Four fa/en 390/1440 captures are in `screenshots/clinic-workspace-*.webp`; `clinic-browser-checks.json` records no document overflow or page errors. Content version history now inspects server snapshots and reports restore failures. The continuation implements team and branches, CSV import/export, single/bulk reminders and owner-only finance, with typed contracts and role gates.
 
 ## Additional owner photo reference
 
 The owner supplied [another original Cookie photo](references/cookie-owner-photo-02.jpg) for the design collection. [Usage notes](references/README.fa.md) retain its provenance and distinguish a design reference from an already published page asset.
+
+## Continued operational coverage
+
+- Clinic team/branches/contacts/import-export/reminders/campaigns/finance, insurer catalog/team and marketplace statement explorer.
+- Unified health feed, private expiring share links, public selected-record view, clinic suggestions and owner decisions.
+- External travel source browsing/favorites/trip planning; admin source/config/run controls, listing inspection and policy/price/override controls, duplicate comparison and diagnostic reports.
+- Account consent history and admin membership/role/permission management with self-change and last-super-admin protections.
+- Partner verification queue, private audited document access and separate evidence/organization decisions. Provider/seller portals upload and register actual files, then explicitly submit. Old free-status selectors in provider/seller directories now link the actual evidence case.
+
+KYC is manual organization evidence review. It does not claim official national-identity or veterinary-license lookup. Profession-specific mandatory document rules require an explicit backend policy; the current initial-approval rule accepts any one accepted unexpired document. See the single backend handoff.

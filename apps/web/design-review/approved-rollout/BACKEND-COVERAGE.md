@@ -5,10 +5,10 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | Backend group | Direct UI chain | Client needs review | No exact client match | System endpoint |
 | --- | ---: | ---: | ---: | ---: |
 | health/health.controller.ts | 0 | 0 | 0 | 3 |
-| modules/account/account.controller.ts | 14 | 0 | 2 | 0 |
+| modules/account/account.controller.ts | 15 | 0 | 1 | 0 |
 | modules/activity/household-activity.controller.ts | 0 | 0 | 1 | 0 |
 | modules/addresses/addresses.controller.ts | 3 | 0 | 0 | 0 |
-| modules/admin/access | 0 | 0 | 8 | 0 |
+| modules/admin/access | 8 | 0 | 0 | 0 |
 | modules/admin/animal-support | 15 | 0 | 17 | 0 |
 | modules/admin/audit | 1 | 0 | 0 | 0 |
 | modules/admin/auth | 1 | 0 | 0 | 0 |
@@ -18,8 +18,8 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/admin/customer | 4 | 0 | 4 | 0 |
 | modules/admin/dashboard | 1 | 0 | 0 | 0 |
 | modules/admin/dispute | 6 | 0 | 0 | 0 |
-| modules/admin/finance | 20 | 3 | 10 | 0 |
-| modules/admin/insurance | 1 | 3 | 13 | 0 |
+| modules/admin/finance | 22 | 1 | 10 | 0 |
+| modules/admin/insurance | 16 | 0 | 1 | 0 |
 | modules/admin/lost-pet | 4 | 0 | 0 | 0 |
 | modules/admin/notes | 1 | 0 | 0 | 0 |
 | modules/admin/orgs | 2 | 0 | 2 | 0 |
@@ -48,7 +48,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/care-calendar/care-calendar.controller.ts | 0 | 0 | 1 | 0 |
 | modules/care-profile/care-profile.controller.ts | 2 | 0 | 0 | 0 |
 | modules/care-reminders/care-reminder.controller.ts | 0 | 0 | 8 | 0 |
-| modules/clinic-os/clinic-os.controller.ts | 13 | 0 | 28 | 0 |
+| modules/clinic-os/clinic-os.controller.ts | 28 | 0 | 13 | 0 |
 | modules/clinical-health/health-advanced.controller.ts | 29 | 0 | 0 | 0 |
 | modules/clinical-health/pet-observation.controller.ts | 4 | 0 | 1 | 0 |
 | modules/clinical-health/provider-clinical.controller.ts | 8 | 1 | 14 | 0 |
@@ -70,7 +70,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/content/public-blog.controller.ts | 5 | 1 | 3 | 0 |
 | modules/content/public-content-placement.controller.ts | 0 | 1 | 0 | 0 |
 | modules/discovery/discovery.controller.ts | 3 | 0 | 0 | 0 |
-| modules/health-depth/health-depth.controller.ts | 0 | 0 | 12 | 0 |
+| modules/health-depth/health-depth.controller.ts | 11 | 0 | 1 | 0 |
 | modules/health/allergies.controller.ts | 5 | 0 | 0 | 0 |
 | modules/health/conditions.controller.ts | 4 | 0 | 0 | 0 |
 | modules/health/health.controller.ts | 2 | 0 | 0 | 0 |
@@ -92,7 +92,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/notifications/notifications.controller.ts | 4 | 0 | 3 | 0 |
 | modules/nutrition/nutrition.controller.ts | 2 | 0 | 0 | 0 |
 | modules/onboarding/onboarding.controller.ts | 3 | 0 | 0 | 0 |
-| modules/partner-verification/partner-verification.controllers.ts | 2 | 0 | 13 | 0 |
+| modules/partner-verification/partner-verification.controllers.ts | 5 | 2 | 8 | 0 |
 | modules/pet-access/pet-access.controller.ts | 4 | 0 | 0 | 0 |
 | modules/pet-safety/pet-safety.controller.ts | 1 | 0 | 15 | 0 |
 | modules/pets/active-pet.controller.ts | 2 | 0 | 0 | 0 |
@@ -126,7 +126,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/storage/uploads.controller.ts | 0 | 0 | 1 | 0 |
 | modules/subscriptions/subscription.controller.ts | 12 | 0 | 2 | 0 |
 | modules/support/user-support.controller.ts | 5 | 0 | 0 | 0 |
-| modules/travel-external/travel-external.controllers.ts | 0 | 0 | 38 | 0 |
+| modules/travel-external/travel-external.controllers.ts | 34 | 1 | 3 | 0 |
 | modules/travel-marketplace/travel-provider.controller.ts | 27 | 0 | 1 | 0 |
 | modules/travel-marketplace/travel-public.controller.ts | 7 | 0 | 0 | 0 |
 | modules/travel-marketplace/travel-traveler.controller.ts | 17 | 0 | 0 | 0 |
