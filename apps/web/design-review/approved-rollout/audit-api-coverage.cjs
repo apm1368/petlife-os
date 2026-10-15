@@ -16,14 +16,30 @@ function literals(n) {
   return [];
 }
 function norm(s) { return ('/' + s).replace(/\/+/g, '/').replace(/\/$/, '').replace(/:[A-Za-z_][A-Za-z_0-9]*|\{[^}]+\}/g, ':param') || '/'; }
-function requestPath(n) {
-  if (!n) return null;
+function requestPath(n, seen = new Set()) {
+  if (!n || seen.has(n)) return null;
+  seen = new Set(seen); seen.add(n);
   if (ts.isStringLiteralLike(n)) return n.text.split('?')[0];
+  // NGO's q(path) appends only the active organization query; it cannot change the route.
+  if (ts.isCallExpression(n) && n.expression.getText() === 'q' && n.getSourceFile().fileName.endsWith('ngo.service.ts')) return requestPath(n.arguments[0], seen);
+  if (ts.isIdentifier(n)) {
+    for (let scope = n.parent; scope; scope = scope.parent) {
+      if (!scope.statements) continue;
+      for (const st of scope.statements) if (ts.isVariableStatement(st)) {
+        const binding = st.declarationList.declarations.find(d => ts.isIdentifier(d.name) && d.name.text === n.text);
+        if (binding?.initializer) return requestPath(binding.initializer, seen);
+      }
+    }
+    return null;
+  }
+  if (ts.isBinaryExpression(n) && n.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+    const left = requestPath(n.left, seen), right = requestPath(n.right, seen);
+    return left === null ? null : left + (right ?? ':param');
+  }
   if (!ts.isTemplateExpression(n)) return null;
   let p = n.head.text;
   for (const span of n.templateSpans) {
-    // Query builders add no route segment. Other substitutions represent route parameters.
-    if (!/toQueryString|queryString|params\.toString|searchParams|query\b/.test(span.expression.getText())) p += ':param';
+    if (!/toQueryString|toQuery\b|\bqs\(|queryString|params\.toString|searchParams|query\b/.test(span.expression.getText())) p += requestPath(span.expression, seen) ?? ':param';
     p += span.literal.text;
   }
   return p.split('?')[0];
@@ -62,6 +78,20 @@ for (const file of walk(path.join(web, 'services')).filter(f => f.endsWith('.ser
     }
   }
 }
+// Some older screens call apiFetch directly instead of an exported service object.
+for (const file of uiFiles) {
+  const sf = read(file);
+  visit(sf, n => {
+    if (!ts.isCallExpression(n) || n.expression.getText(sf) !== 'apiFetch') return;
+    const p = requestPath(n.arguments[0]); if (p === null) return;
+    const opts = n.arguments[1]; let verbs = ['GET'];
+    if (opts && ts.isObjectLiteralExpression(opts)) {
+      const method = opts.properties.find(p => p.name?.getText(sf) === 'method');
+      if (method?.initializer) verbs = ts.isConditionalExpression(method.initializer) ? [...literals(method.initializer.whenTrue), ...literals(method.initializer.whenFalse)] : literals(method.initializer);
+    }
+    for (const verb of verbs) clients.push({service:'inline apiFetch',method:path.basename(file),verb,path:norm(p),source:path.relative(root,file),line:sf.getLineAndCharacterOfPosition(n.getStart(sf)).line+1,consumers:[path.relative(root,file)]});
+  });
+}
 const endpoints = [];
 const unresolvedDecorators = [];
 for (const file of walk(path.join(root, 'apps/api/src')).filter(f => /\.controllers?\.ts$/.test(f))) {
@@ -89,7 +119,7 @@ for (const file of walk(path.join(root, 'apps/api/src')).filter(f => /\.controll
 }
 const counts = endpoints.reduce((acc, e) => { acc[e.status] = (acc[e.status] || 0) + 1; return acc; }, {});
 const out = path.join(web, 'design-review/approved-rollout');
-fs.writeFileSync(path.join(out, 'backend-ui-coverage.json'), JSON.stringify({ generated: new Date().toISOString().slice(0, 10), baseCommit: require('child_process').execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), scope: 'Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.', counts, unresolvedDecorators, endpoints }, null, 2) + '\n');
+fs.writeFileSync(path.join(out, 'backend-ui-coverage.json'), JSON.stringify({ generated: new Date().toISOString().slice(0, 10), baseCommit: require('child_process').execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), scope: 'Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.', counts, unresolvedDecorators, endpoints }, null, 2) + '\n');
 const groups = {};
 for (const e of endpoints) { groups[e.group] ??= {}; groups[e.group][e.status] = (groups[e.group][e.status] || 0) + 1; }
 const md = ['# Backend → frontend coverage inventory', '', 'Generated from actual source controllers and client methods. Each endpoint and its source line is in `backend-ui-coverage.json`. A static chain is evidence of wiring, not proof of permission correctness, complete UX or live API success. Missing exact matches are review candidates, not automatically missing features.', '', '| Backend group | Direct UI chain | Client needs review | No exact client match | System endpoint |', '| --- | ---: | ---: | ---: | ---: |'];

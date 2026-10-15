@@ -4,1448 +4,1171 @@
   "routes": [
     {
       "file": "app/[locale]/(admin)/admin/animal-support/donations/page.tsx",
-      "route": "[locale]/admin/animal-support/donations",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/animal-support/donations"
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/needs/[id]/page.tsx",
-      "route": "[locale]/admin/animal-support/needs/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/animal-support/needs/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/needs/page.tsx",
-      "route": "[locale]/admin/animal-support/needs",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/animal-support/needs"
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/organizations/[id]/page.tsx",
-      "route": "[locale]/admin/animal-support/organizations/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/animal-support/organizations/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/organizations/page.tsx",
-      "route": "[locale]/admin/animal-support/organizations",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/animal-support/organizations"
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/page.tsx",
-      "route": "[locale]/admin/animal-support",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/animal-support"
     },
     {
       "file": "app/[locale]/(admin)/admin/audit/page.tsx",
-      "route": "[locale]/admin/audit",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/audit"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/inventory/page.tsx",
-      "route": "[locale]/admin/commerce/inventory",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/inventory"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/orders/[id]/page.tsx",
-      "route": "[locale]/admin/commerce/orders/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/orders/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/orders/page.tsx",
-      "route": "[locale]/admin/commerce/orders",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/orders"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/page.tsx",
-      "route": "[locale]/admin/commerce",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/products/page.tsx",
-      "route": "[locale]/admin/commerce/products",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/products"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/promotions/page.tsx",
-      "route": "[locale]/admin/commerce/promotions",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/promotions"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/refund-requests/page.tsx",
-      "route": "[locale]/admin/commerce/refund-requests",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/refund-requests"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/reviews/page.tsx",
-      "route": "[locale]/admin/commerce/reviews",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/reviews"
     },
     {
       "file": "app/[locale]/(admin)/admin/commerce/sellers/page.tsx",
-      "route": "[locale]/admin/commerce/sellers",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/commerce/sellers"
     },
     {
       "file": "app/[locale]/(admin)/admin/community/page.tsx",
-      "route": "[locale]/admin/community",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/community"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/[id]/page.tsx",
-      "route": "[locale]/admin/content/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/[id]/versions/page.tsx",
-      "route": "[locale]/admin/content/[id]/versions",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content/[id]/versions"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/authors/page.tsx",
+      "route": "[locale]/admin/content/authors"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/categories/page.tsx",
-      "route": "[locale]/admin/content/categories",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content/categories"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/media/page.tsx",
-      "route": "[locale]/admin/content/media",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content/media"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/new/page.tsx",
-      "route": "[locale]/admin/content/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content/new"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/page.tsx",
-      "route": "[locale]/admin/content",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/placements/page.tsx",
-      "route": "[locale]/admin/content/placements",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content/placements"
     },
     {
       "file": "app/[locale]/(admin)/admin/content/tags/page.tsx",
-      "route": "[locale]/admin/content/tags",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/content/tags"
     },
     {
       "file": "app/[locale]/(admin)/admin/crm/page.tsx",
-      "route": "[locale]/admin/crm",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/crm"
     },
     {
       "file": "app/[locale]/(admin)/admin/customer-affairs/page.tsx",
-      "route": "[locale]/admin/customer-affairs",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/customer-affairs"
     },
     {
       "file": "app/[locale]/(admin)/admin/customers/[id]/page.tsx",
-      "route": "[locale]/admin/customers/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/customers/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/customers/page.tsx",
-      "route": "[locale]/admin/customers",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/customers"
     },
     {
       "file": "app/[locale]/(admin)/admin/disputes/[id]/page.tsx",
-      "route": "[locale]/admin/disputes/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/disputes/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/disputes/page.tsx",
-      "route": "[locale]/admin/disputes",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/disputes"
     },
     {
       "file": "app/[locale]/(admin)/admin/insurance/page.tsx",
-      "route": "[locale]/admin/insurance",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/insurance"
     },
     {
       "file": "app/[locale]/(admin)/admin/lost-pets/[id]/page.tsx",
-      "route": "[locale]/admin/lost-pets/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/lost-pets/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/lost-pets/page.tsx",
-      "route": "[locale]/admin/lost-pets",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/lost-pets"
     },
     {
       "file": "app/[locale]/(admin)/admin/page.tsx",
-      "route": "[locale]/admin",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin"
     },
     {
       "file": "app/[locale]/(admin)/admin/places/page.tsx",
-      "route": "[locale]/admin/places",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/places"
     },
     {
       "file": "app/[locale]/(admin)/admin/providers/page.tsx",
-      "route": "[locale]/admin/providers",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/providers"
     },
     {
       "file": "app/[locale]/(admin)/admin/reconciliation/page.tsx",
-      "route": "[locale]/admin/reconciliation",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/reconciliation"
     },
     {
       "file": "app/[locale]/(admin)/admin/seller-finance/[id]/page.tsx",
-      "route": "[locale]/admin/seller-finance/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/seller-finance/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/seller-finance/page.tsx",
-      "route": "[locale]/admin/seller-finance",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/seller-finance"
     },
     {
       "file": "app/[locale]/(admin)/admin/sellers/page.tsx",
-      "route": "[locale]/admin/sellers",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/sellers"
     },
     {
       "file": "app/[locale]/(admin)/admin/services/analytics/page.tsx",
-      "route": "[locale]/admin/services/analytics",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/services/analytics"
     },
     {
       "file": "app/[locale]/(admin)/admin/services/bookings/[id]/page.tsx",
-      "route": "[locale]/admin/services/bookings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/services/bookings/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/services/catalog/page.tsx",
-      "route": "[locale]/admin/services/catalog",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/services/catalog"
     },
     {
       "file": "app/[locale]/(admin)/admin/services/page.tsx",
-      "route": "[locale]/admin/services",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/services"
     },
     {
       "file": "app/[locale]/(admin)/admin/services/reviews/page.tsx",
-      "route": "[locale]/admin/services/reviews",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/services/reviews"
     },
     {
       "file": "app/[locale]/(admin)/admin/settlements/[id]/page.tsx",
-      "route": "[locale]/admin/settlements/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/settlements/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/subscriptions/households/[id]/page.tsx",
-      "route": "[locale]/admin/subscriptions/households/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/subscriptions/households/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/subscriptions/households/page.tsx",
-      "route": "[locale]/admin/subscriptions/households",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/subscriptions/households"
     },
     {
       "file": "app/[locale]/(admin)/admin/subscriptions/page.tsx",
-      "route": "[locale]/admin/subscriptions",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/subscriptions"
     },
     {
       "file": "app/[locale]/(admin)/admin/support/[caseId]/page.tsx",
-      "route": "[locale]/admin/support/[caseId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/support/[caseId]"
     },
     {
       "file": "app/[locale]/(admin)/admin/support/page.tsx",
-      "route": "[locale]/admin/support",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/support"
     },
     {
       "file": "app/[locale]/(admin)/admin/tasks/page.tsx",
-      "route": "[locale]/admin/tasks",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/tasks"
     },
     {
       "file": "app/[locale]/(admin)/admin/transactions/page.tsx",
-      "route": "[locale]/admin/transactions",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/transactions"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/analytics/page.tsx",
-      "route": "[locale]/admin/travel/analytics",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel/analytics"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/bookings/[id]/page.tsx",
-      "route": "[locale]/admin/travel/bookings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel/bookings/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/bookings/page.tsx",
-      "route": "[locale]/admin/travel/bookings",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel/bookings"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/listings/[id]/page.tsx",
-      "route": "[locale]/admin/travel/listings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel/listings/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/page.tsx",
-      "route": "[locale]/admin/travel",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/partners/page.tsx",
-      "route": "[locale]/admin/travel/partners",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel/partners"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/requirements/page.tsx",
-      "route": "[locale]/admin/travel/requirements",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel/requirements"
     },
     {
       "file": "app/[locale]/(admin)/admin/travel/reviews/page.tsx",
-      "route": "[locale]/admin/travel/reviews",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/travel/reviews"
     },
     {
       "file": "app/[locale]/(admin)/admin/trust/[id]/page.tsx",
-      "route": "[locale]/admin/trust/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/trust/[id]"
     },
     {
       "file": "app/[locale]/(admin)/admin/trust/page.tsx",
-      "route": "[locale]/admin/trust",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/admin/trust"
     },
     {
       "file": "app/[locale]/(app)/ai/page.tsx",
-      "route": "[locale]/ai",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ai"
     },
     {
       "file": "app/[locale]/(app)/bookings/[id]/page.tsx",
-      "route": "[locale]/bookings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/bookings/[id]"
     },
     {
       "file": "app/[locale]/(app)/bookings/page.tsx",
-      "route": "[locale]/bookings",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/bookings"
     },
     {
       "file": "app/[locale]/(app)/care-calendar/page.tsx",
-      "route": "[locale]/care-calendar",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/care-calendar"
     },
     {
       "file": "app/[locale]/(app)/cart/page.tsx",
-      "route": "[locale]/cart",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/cart"
     },
     {
       "file": "app/[locale]/(app)/checkout/[id]/confirmation/page.tsx",
-      "route": "[locale]/checkout/[id]/confirmation",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/checkout/[id]/confirmation"
     },
     {
       "file": "app/[locale]/(app)/checkout/[id]/ops/page.tsx",
-      "route": "[locale]/checkout/[id]/ops",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/checkout/[id]/ops"
     },
     {
       "file": "app/[locale]/(app)/checkout/page.tsx",
-      "route": "[locale]/checkout",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/checkout"
     },
     {
       "file": "app/[locale]/(app)/clinic-invitations/page.tsx",
-      "route": "[locale]/clinic-invitations",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/clinic-invitations"
     },
     {
       "file": "app/[locale]/(app)/community/messages/[id]/page.tsx",
-      "route": "[locale]/community/messages/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/community/messages/[id]"
     },
     {
       "file": "app/[locale]/(app)/community/messages/page.tsx",
-      "route": "[locale]/community/messages",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/community/messages"
     },
     {
       "file": "app/[locale]/(app)/donations/[id]/page.tsx",
-      "route": "[locale]/donations/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/donations/[id]"
     },
     {
       "file": "app/[locale]/(app)/donations/page.tsx",
-      "route": "[locale]/donations",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/donations"
     },
     {
       "file": "app/[locale]/(app)/explore/page.tsx",
-      "route": "[locale]/explore",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/explore"
     },
     {
       "file": "app/[locale]/(app)/favorites/page.tsx",
-      "route": "[locale]/favorites",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/favorites"
     },
     {
       "file": "app/[locale]/(app)/home/page.tsx",
-      "route": "[locale]/home",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/home"
     },
     {
       "file": "app/[locale]/(app)/insurer/applications/[id]/page.tsx",
-      "route": "[locale]/insurer/applications/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/insurer/applications/[id]"
     },
     {
       "file": "app/[locale]/(app)/insurer/page.tsx",
-      "route": "[locale]/insurer",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/insurer"
     },
     {
       "file": "app/[locale]/(app)/invitations/[token]/page.tsx",
-      "route": "[locale]/invitations/[token]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/invitations/[token]"
     },
     {
       "file": "app/[locale]/(app)/ngo/donations/page.tsx",
-      "route": "[locale]/ngo/donations",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ngo/donations"
     },
     {
       "file": "app/[locale]/(app)/ngo/needs/page.tsx",
-      "route": "[locale]/ngo/needs",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ngo/needs"
     },
     {
       "file": "app/[locale]/(app)/ngo/offers/page.tsx",
-      "route": "[locale]/ngo/offers",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ngo/offers"
     },
     {
       "file": "app/[locale]/(app)/ngo/page.tsx",
-      "route": "[locale]/ngo",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ngo"
     },
     {
       "file": "app/[locale]/(app)/ngo/settings/page.tsx",
-      "route": "[locale]/ngo/settings",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ngo/settings"
     },
     {
       "file": "app/[locale]/(app)/ngo/team/page.tsx",
-      "route": "[locale]/ngo/team",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ngo/team"
     },
     {
       "file": "app/[locale]/(app)/ngo/verification/page.tsx",
-      "route": "[locale]/ngo/verification",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/ngo/verification"
     },
     {
       "file": "app/[locale]/(app)/notifications/page.tsx",
-      "route": "[locale]/notifications",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/notifications"
     },
     {
       "file": "app/[locale]/(app)/notifications/preferences/page.tsx",
-      "route": "[locale]/notifications/preferences",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/notifications/preferences"
     },
     {
       "file": "app/[locale]/(app)/onboarding/page.tsx",
-      "route": "[locale]/onboarding",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/onboarding"
     },
     {
       "file": "app/[locale]/(app)/orders/[id]/page.tsx",
-      "route": "[locale]/orders/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/orders/[id]"
     },
     {
       "file": "app/[locale]/(app)/orders/page.tsx",
-      "route": "[locale]/orders",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/orders"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/care/[careItemId]/page.tsx",
-      "route": "[locale]/pets/[id]/care/[careItemId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/care/[careItemId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/care/calendar/page.tsx",
-      "route": "[locale]/pets/[id]/care/calendar",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/care/calendar"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/care/page.tsx",
-      "route": "[locale]/pets/[id]/care",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/care"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/care-sheet/page.tsx",
-      "route": "[locale]/pets/[id]/care-sheet",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/care-sheet"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/dental/[recordId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/dental/[recordId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/dental/[recordId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/dental/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/dental",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/dental"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/discharge/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/discharge",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/discharge"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/documents/[documentId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/documents/[documentId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/documents/[documentId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/documents/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/documents",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/documents"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/estimates/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/estimates",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/estimates"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/imaging/[imagingStudyId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/imaging/[imagingStudyId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/imaging/[imagingStudyId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/imaging/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/imaging",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/imaging"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/labs/[labResultId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/labs/[labResultId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/labs/[labResultId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/labs/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/labs",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/labs"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/nutrition/[planId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/nutrition/[planId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/nutrition/[planId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/nutrition/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/nutrition",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/nutrition"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/observations/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/observations",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/observations"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/referrals/[referralId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/referrals/[referralId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/referrals/[referralId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/referrals/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/referrals",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/referrals"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/rehab/[planId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/rehab/[planId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/rehab/[planId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/rehab/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/rehab",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/rehab"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/timeline/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/timeline",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/timeline"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/visits/[visitId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/visits/[visitId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/visits/[visitId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/visits/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/visits",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/visits"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/advanced/vitals/page.tsx",
-      "route": "[locale]/pets/[id]/health/advanced/vitals",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/advanced/vitals"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/allergies/[allergyId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/allergies/[allergyId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/allergies/[allergyId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/allergies/page.tsx",
-      "route": "[locale]/pets/[id]/health/allergies",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/allergies"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/clinical/page.tsx",
+      "route": "[locale]/pets/[id]/health/clinical"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/conditions/[conditionId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/conditions/[conditionId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/conditions/[conditionId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/conditions/page.tsx",
-      "route": "[locale]/pets/[id]/health/conditions",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/conditions"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/dental/[recordId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/dental/[recordId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/dental/[recordId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/dental/page.tsx",
-      "route": "[locale]/pets/[id]/health/dental",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/dental"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/documents/[documentId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/documents/[documentId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/documents/[documentId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/documents/page.tsx",
-      "route": "[locale]/pets/[id]/health/documents",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/documents"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/imaging/[imagingStudyId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/imaging/[imagingStudyId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/imaging/[imagingStudyId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/imaging/page.tsx",
-      "route": "[locale]/pets/[id]/health/imaging",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/imaging"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/labs/[labResultId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/labs/[labResultId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/labs/[labResultId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/labs/page.tsx",
-      "route": "[locale]/pets/[id]/health/labs",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/labs"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/medications/[medicationId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/medications/[medicationId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/medications/[medicationId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/medications/page.tsx",
-      "route": "[locale]/pets/[id]/health/medications",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/medications"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/nutrition/clinical/[planId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/nutrition/clinical/[planId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/nutrition/clinical/[planId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/nutrition/clinical/page.tsx",
-      "route": "[locale]/pets/[id]/health/nutrition/clinical",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/nutrition/clinical"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/nutrition/page.tsx",
-      "route": "[locale]/pets/[id]/health/nutrition",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/nutrition"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/observations/[observationId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/observations/[observationId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/observations/[observationId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/observations/page.tsx",
-      "route": "[locale]/pets/[id]/health/observations",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/observations"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/page.tsx",
-      "route": "[locale]/pets/[id]/health",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/referrals/[referralId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/referrals/[referralId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/referrals/[referralId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/referrals/page.tsx",
-      "route": "[locale]/pets/[id]/health/referrals",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/referrals"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/rehab/[planId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/rehab/[planId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/rehab/[planId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/rehab/page.tsx",
-      "route": "[locale]/pets/[id]/health/rehab",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/rehab"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/share/page.tsx",
-      "route": "[locale]/pets/[id]/health/share",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/share"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/timeline/page.tsx",
-      "route": "[locale]/pets/[id]/health/timeline",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/timeline"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/vaccination/page.tsx",
-      "route": "[locale]/pets/[id]/health/vaccination",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/vaccination"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/visits/[visitId]/page.tsx",
-      "route": "[locale]/pets/[id]/health/visits/[visitId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/visits/[visitId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/health/visits/page.tsx",
-      "route": "[locale]/pets/[id]/health/visits",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/health/visits"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/insurance/page.tsx",
-      "route": "[locale]/pets/[id]/insurance",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/insurance"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/life-timeline/page.tsx",
-      "route": "[locale]/pets/[id]/life-timeline",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/life-timeline"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/lost/[incidentId]/page.tsx",
-      "route": "[locale]/pets/[id]/lost/[incidentId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/lost/[incidentId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/lost/page.tsx",
-      "route": "[locale]/pets/[id]/lost",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/lost"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/lost/report/page.tsx",
-      "route": "[locale]/pets/[id]/lost/report",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/lost/report"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/memories/[memoryId]/edit/page.tsx",
-      "route": "[locale]/pets/[id]/memories/[memoryId]/edit",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/memories/[memoryId]/edit"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/memories/[memoryId]/page.tsx",
-      "route": "[locale]/pets/[id]/memories/[memoryId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/memories/[memoryId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/memories/new/page.tsx",
-      "route": "[locale]/pets/[id]/memories/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/memories/new"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/memories/page.tsx",
-      "route": "[locale]/pets/[id]/memories",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/memories"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/page.tsx",
-      "route": "[locale]/pets/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/travel/[tripId]/page.tsx",
-      "route": "[locale]/pets/[id]/travel/[tripId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/travel/[tripId]"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/travel/new/page.tsx",
-      "route": "[locale]/pets/[id]/travel/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/travel/new"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/travel/page.tsx",
-      "route": "[locale]/pets/[id]/travel",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/travel"
     },
     {
       "file": "app/[locale]/(app)/pets/[id]/travel/passport/page.tsx",
-      "route": "[locale]/pets/[id]/travel/passport",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/[id]/travel/passport"
     },
     {
       "file": "app/[locale]/(app)/pets/active/page.tsx",
-      "route": "[locale]/pets/active",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/active"
     },
     {
       "file": "app/[locale]/(app)/pets/new/page.tsx",
-      "route": "[locale]/pets/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets/new"
     },
     {
       "file": "app/[locale]/(app)/pets/page.tsx",
-      "route": "[locale]/pets",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pets"
     },
     {
       "file": "app/[locale]/(app)/places/favorites/page.tsx",
-      "route": "[locale]/places/favorites",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/places/favorites"
     },
     {
       "file": "app/[locale]/(app)/profile/activity/page.tsx",
-      "route": "[locale]/profile/activity",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/activity"
     },
     {
       "file": "app/[locale]/(app)/profile/household/page.tsx",
-      "route": "[locale]/profile/household",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/household"
     },
     {
       "file": "app/[locale]/(app)/profile/household/pets/[petId]/access/page.tsx",
-      "route": "[locale]/profile/household/pets/[petId]/access",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/household/pets/[petId]/access"
     },
     {
       "file": "app/[locale]/(app)/profile/household/pets/[petId]/lifecycle/page.tsx",
-      "route": "[locale]/profile/household/pets/[petId]/lifecycle",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/household/pets/[petId]/lifecycle"
     },
     {
       "file": "app/[locale]/(app)/profile/membership/page.tsx",
-      "route": "[locale]/profile/membership",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/membership"
     },
     {
       "file": "app/[locale]/(app)/profile/notifications/page.tsx",
-      "route": "[locale]/profile/notifications",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/notifications"
     },
     {
       "file": "app/[locale]/(app)/profile/page.tsx",
-      "route": "[locale]/profile",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile"
     },
     {
       "file": "app/[locale]/(app)/profile/personal/page.tsx",
-      "route": "[locale]/profile/personal",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/personal"
     },
     {
       "file": "app/[locale]/(app)/profile/privacy/page.tsx",
-      "route": "[locale]/profile/privacy",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/privacy"
     },
     {
       "file": "app/[locale]/(app)/profile/security/page.tsx",
-      "route": "[locale]/profile/security",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/profile/security"
     },
     {
       "file": "app/[locale]/(app)/repeat-delivery/[id]/page.tsx",
-      "route": "[locale]/repeat-delivery/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/repeat-delivery/[id]"
     },
     {
       "file": "app/[locale]/(app)/repeat-delivery/new/page.tsx",
-      "route": "[locale]/repeat-delivery/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/repeat-delivery/new"
     },
     {
       "file": "app/[locale]/(app)/repeat-delivery/page.tsx",
-      "route": "[locale]/repeat-delivery",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/repeat-delivery"
     },
     {
       "file": "app/[locale]/(app)/subscription/page.tsx",
-      "route": "[locale]/subscription",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/subscription"
     },
     {
       "file": "app/[locale]/(app)/subscription/plans/page.tsx",
-      "route": "[locale]/subscription/plans",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/subscription/plans"
     },
     {
       "file": "app/[locale]/(app)/support/new/page.tsx",
-      "route": "[locale]/support/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/support/new"
     },
     {
       "file": "app/[locale]/(app)/support/page.tsx",
-      "route": "[locale]/support",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/support"
     },
     {
       "file": "app/[locale]/(app)/support/tickets/[id]/page.tsx",
-      "route": "[locale]/support/tickets/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/support/tickets/[id]"
     },
     {
       "file": "app/[locale]/(app)/support/tickets/page.tsx",
-      "route": "[locale]/support/tickets",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/support/tickets"
     },
     {
       "file": "app/[locale]/(app)/travel/book/[bookingId]/page.tsx",
-      "route": "[locale]/travel/book/[bookingId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/book/[bookingId]"
     },
     {
       "file": "app/[locale]/(app)/travel/bookings/[id]/page.tsx",
-      "route": "[locale]/travel/bookings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/bookings/[id]"
     },
     {
       "file": "app/[locale]/(app)/travel/favorites/page.tsx",
-      "route": "[locale]/travel/favorites",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/favorites"
     },
     {
       "file": "app/[locale]/(app)/travel/trips/[tripId]/page.tsx",
-      "route": "[locale]/travel/trips/[tripId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/trips/[tripId]"
     },
     {
       "file": "app/[locale]/(app)/travel/trips/page.tsx",
-      "route": "[locale]/travel/trips",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/trips"
     },
     {
       "file": "app/[locale]/(auth)/account/forgot/page.tsx",
-      "route": "[locale]/account/forgot",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/account/forgot"
     },
     {
       "file": "app/[locale]/(auth)/account/page.tsx",
-      "route": "[locale]/account",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/account"
     },
     {
       "file": "app/[locale]/(auth)/account/reset/page.tsx",
-      "route": "[locale]/account/reset",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/account/reset"
     },
     {
       "file": "app/[locale]/(auth)/auth/complete/page.tsx",
-      "route": "[locale]/auth/complete",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/auth/complete"
     },
     {
       "file": "app/[locale]/(auth)/auth/page.tsx",
-      "route": "[locale]/auth",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/auth"
     },
     {
       "file": "app/[locale]/(auth)/register/page.tsx",
-      "route": "[locale]/register",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/register"
     },
     {
       "file": "app/[locale]/(auth)/welcome/page.tsx",
-      "route": "[locale]/welcome",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/welcome"
     },
     {
       "file": "app/[locale]/(provider)/provider/analytics/page.tsx",
-      "route": "[locale]/provider/analytics",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/analytics"
     },
     {
       "file": "app/[locale]/(provider)/provider/availability/page.tsx",
-      "route": "[locale]/provider/availability",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/availability"
     },
     {
       "file": "app/[locale]/(provider)/provider/bookings/[id]/page.tsx",
-      "route": "[locale]/provider/bookings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/bookings/[id]"
     },
     {
       "file": "app/[locale]/(provider)/provider/bookings/page.tsx",
-      "route": "[locale]/provider/bookings",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/bookings"
     },
     {
       "file": "app/[locale]/(provider)/provider/calendar/page.tsx",
-      "route": "[locale]/provider/calendar",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/calendar"
     },
     {
       "file": "app/[locale]/(provider)/provider/clinical/page.tsx",
-      "route": "[locale]/provider/clinical",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/clinical"
     },
     {
       "file": "app/[locale]/(provider)/provider/hospitalizations/[hospitalizationId]/page.tsx",
-      "route": "[locale]/provider/hospitalizations/[hospitalizationId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/hospitalizations/[hospitalizationId]"
     },
     {
       "file": "app/[locale]/(provider)/provider/page.tsx",
-      "route": "[locale]/provider",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider"
     },
     {
       "file": "app/[locale]/(provider)/provider/patients/[petId]/page.tsx",
-      "route": "[locale]/provider/patients/[petId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/patients/[petId]"
     },
     {
       "file": "app/[locale]/(provider)/provider/patients/page.tsx",
-      "route": "[locale]/provider/patients",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/patients"
     },
     {
       "file": "app/[locale]/(provider)/provider/reviews/page.tsx",
-      "route": "[locale]/provider/reviews",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/reviews"
     },
     {
       "file": "app/[locale]/(provider)/provider/services/page.tsx",
-      "route": "[locale]/provider/services",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/services"
     },
     {
       "file": "app/[locale]/(provider)/provider/shared-records/[petId]/[shareId]/page.tsx",
-      "route": "[locale]/provider/shared-records/[petId]/[shareId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/shared-records/[petId]/[shareId]"
     },
     {
       "file": "app/[locale]/(provider)/provider/shared-records/page.tsx",
-      "route": "[locale]/provider/shared-records",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/shared-records"
     },
     {
       "file": "app/[locale]/(provider)/provider/team/page.tsx",
-      "route": "[locale]/provider/team",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/team"
     },
     {
       "file": "app/[locale]/(provider)/provider/travel/bookings/[id]/page.tsx",
-      "route": "[locale]/provider/travel/bookings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/travel/bookings/[id]"
     },
     {
       "file": "app/[locale]/(provider)/provider/travel/bookings/page.tsx",
-      "route": "[locale]/provider/travel/bookings",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/travel/bookings"
     },
     {
       "file": "app/[locale]/(provider)/provider/travel/finance/page.tsx",
-      "route": "[locale]/provider/travel/finance",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/travel/finance"
     },
     {
       "file": "app/[locale]/(provider)/provider/travel/listings/[id]/page.tsx",
-      "route": "[locale]/provider/travel/listings/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/travel/listings/[id]"
     },
     {
       "file": "app/[locale]/(provider)/provider/travel/page.tsx",
-      "route": "[locale]/provider/travel",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/travel"
     },
     {
       "file": "app/[locale]/(provider)/provider/travel/reviews/page.tsx",
-      "route": "[locale]/provider/travel/reviews",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/travel/reviews"
     },
     {
       "file": "app/[locale]/(provider)/provider/visits/[id]/page.tsx",
-      "route": "[locale]/provider/visits/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/visits/[id]"
     },
     {
       "file": "app/[locale]/(provider)/provider/waitlist/page.tsx",
-      "route": "[locale]/provider/waitlist",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/provider/waitlist"
     },
     {
       "file": "app/[locale]/(public)/animal-support/campaigns/[campaignId]/page.tsx",
-      "route": "[locale]/animal-support/campaigns/[campaignId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/campaigns/[campaignId]"
     },
     {
       "file": "app/[locale]/(public)/animal-support/campaigns/page.tsx",
-      "route": "[locale]/animal-support/campaigns",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/campaigns"
     },
     {
       "file": "app/[locale]/(public)/animal-support/my-help/page.tsx",
-      "route": "[locale]/animal-support/my-help",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/my-help"
     },
     {
       "file": "app/[locale]/(public)/animal-support/needs/[listingId]/manage/page.tsx",
-      "route": "[locale]/animal-support/needs/[listingId]/manage",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/needs/[listingId]/manage"
     },
     {
       "file": "app/[locale]/(public)/animal-support/needs/[listingId]/page.tsx",
-      "route": "[locale]/animal-support/needs/[listingId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/needs/[listingId]"
     },
     {
       "file": "app/[locale]/(public)/animal-support/needs/mine/page.tsx",
-      "route": "[locale]/animal-support/needs/mine",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/needs/mine"
     },
     {
       "file": "app/[locale]/(public)/animal-support/needs/new/page.tsx",
-      "route": "[locale]/animal-support/needs/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/needs/new"
     },
     {
       "file": "app/[locale]/(public)/animal-support/needs/page.tsx",
-      "route": "[locale]/animal-support/needs",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/needs"
     },
     {
       "file": "app/[locale]/(public)/animal-support/organizations/[organizationId]/page.tsx",
-      "route": "[locale]/animal-support/organizations/[organizationId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support/organizations/[organizationId]"
     },
     {
       "file": "app/[locale]/(public)/animal-support/page.tsx",
-      "route": "[locale]/animal-support",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/animal-support"
     },
     {
       "file": "app/[locale]/(public)/blog/[slug]/page.tsx",
-      "route": "[locale]/blog/[slug]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/blog/[slug]"
     },
     {
       "file": "app/[locale]/(public)/blog/category/[slug]/page.tsx",
-      "route": "[locale]/blog/category/[slug]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/blog/category/[slug]"
     },
     {
       "file": "app/[locale]/(public)/blog/page.tsx",
-      "route": "[locale]/blog",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/blog"
     },
     {
       "file": "app/[locale]/(public)/blog/tag/[slug]/page.tsx",
-      "route": "[locale]/blog/tag/[slug]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/blog/tag/[slug]"
     },
     {
       "file": "app/[locale]/(public)/community/new/page.tsx",
-      "route": "[locale]/community/new",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/community/new"
     },
     {
       "file": "app/[locale]/(public)/community/page.tsx",
-      "route": "[locale]/community",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/community"
     },
     {
       "file": "app/[locale]/(public)/community/posts/[postId]/page.tsx",
-      "route": "[locale]/community/posts/[postId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/community/posts/[postId]"
+    },
+    {
+      "file": "app/[locale]/(public)/contact/page.tsx",
+      "route": "[locale]/contact"
     },
     {
       "file": "app/[locale]/(public)/credits/page.tsx",
-      "route": "[locale]/credits",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/credits"
     },
     {
       "file": "app/[locale]/(public)/guides/[slug]/page.tsx",
-      "route": "[locale]/guides/[slug]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/guides/[slug]"
     },
     {
       "file": "app/[locale]/(public)/guides/page.tsx",
-      "route": "[locale]/guides",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/guides"
     },
     {
       "file": "app/[locale]/(public)/insurance/[productId]/page.tsx",
-      "route": "[locale]/insurance/[productId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/insurance/[productId]"
     },
     {
       "file": "app/[locale]/(public)/insurance/compare/page.tsx",
-      "route": "[locale]/insurance/compare",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/insurance/compare"
     },
     {
       "file": "app/[locale]/(public)/insurance/page.tsx",
-      "route": "[locale]/insurance",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/insurance"
     },
     {
       "file": "app/[locale]/(public)/lost-pets/[incidentId]/page.tsx",
-      "route": "[locale]/lost-pets/[incidentId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/lost-pets/[incidentId]"
     },
     {
       "file": "app/[locale]/(public)/lost-pets/page.tsx",
-      "route": "[locale]/lost-pets",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/lost-pets"
     },
     {
       "file": "app/[locale]/(public)/pet-card/[token]/page.tsx",
-      "route": "[locale]/pet-card/[token]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/pet-card/[token]"
     },
     {
       "file": "app/[locale]/(public)/places/[placeId]/page.tsx",
-      "route": "[locale]/places/[placeId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/places/[placeId]"
     },
     {
       "file": "app/[locale]/(public)/places/page.tsx",
-      "route": "[locale]/places",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/places"
     },
     {
       "file": "app/[locale]/(public)/providers/[providerId]/book/page.tsx",
-      "route": "[locale]/providers/[providerId]/book",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/providers/[providerId]/book"
     },
     {
       "file": "app/[locale]/(public)/providers/[providerId]/page.tsx",
-      "route": "[locale]/providers/[providerId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/providers/[providerId]"
     },
     {
       "file": "app/[locale]/(public)/services/[category]/[serviceId]/book/page.tsx",
-      "route": "[locale]/services/[category]/[serviceId]/book",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/services/[category]/[serviceId]/book"
     },
     {
       "file": "app/[locale]/(public)/services/[category]/page.tsx",
-      "route": "[locale]/services/[category]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/services/[category]"
     },
     {
       "file": "app/[locale]/(public)/services/page.tsx",
-      "route": "[locale]/services",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/services"
     },
     {
       "file": "app/[locale]/(public)/services/search/page.tsx",
-      "route": "[locale]/services/search",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/services/search"
     },
     {
       "file": "app/[locale]/(public)/shop/page.tsx",
-      "route": "[locale]/shop",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/shop"
     },
     {
       "file": "app/[locale]/(public)/shop/products/[id]/page.tsx",
-      "route": "[locale]/shop/products/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/shop/products/[id]"
     },
     {
       "file": "app/[locale]/(public)/shop/products/page.tsx",
-      "route": "[locale]/shop/products",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/shop/products"
     },
     {
       "file": "app/[locale]/(public)/travel/compare/page.tsx",
-      "route": "[locale]/travel/compare",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/compare"
     },
     {
       "file": "app/[locale]/(public)/travel/page.tsx",
-      "route": "[locale]/travel",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel"
     },
     {
       "file": "app/[locale]/(public)/travel/search/page.tsx",
-      "route": "[locale]/travel/search",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/search"
     },
     {
       "file": "app/[locale]/(public)/travel/stays/[id]/page.tsx",
-      "route": "[locale]/travel/stays/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/travel/stays/[id]"
     },
     {
       "file": "app/[locale]/(public)/vet/[providerId]/book/page.tsx",
-      "route": "[locale]/vet/[providerId]/book",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/vet/[providerId]/book"
     },
     {
       "file": "app/[locale]/(public)/vet/[providerId]/page.tsx",
-      "route": "[locale]/vet/[providerId]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/vet/[providerId]"
     },
     {
       "file": "app/[locale]/(public)/vet/find/page.tsx",
-      "route": "[locale]/vet/find",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/vet/find"
     },
     {
       "file": "app/[locale]/(seller)/seller/channels/page.tsx",
-      "route": "[locale]/seller/channels",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/channels"
     },
     {
       "file": "app/[locale]/(seller)/seller/finance/page.tsx",
-      "route": "[locale]/seller/finance",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/finance"
     },
     {
       "file": "app/[locale]/(seller)/seller/finance/settlements/[id]/page.tsx",
-      "route": "[locale]/seller/finance/settlements/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/finance/settlements/[id]"
     },
     {
       "file": "app/[locale]/(seller)/seller/finance/settlements/page.tsx",
-      "route": "[locale]/seller/finance/settlements",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/finance/settlements"
     },
     {
       "file": "app/[locale]/(seller)/seller/finance/transactions/page.tsx",
-      "route": "[locale]/seller/finance/transactions",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/finance/transactions"
     },
     {
       "file": "app/[locale]/(seller)/seller/inventory/page.tsx",
-      "route": "[locale]/seller/inventory",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/inventory"
     },
     {
       "file": "app/[locale]/(seller)/seller/offers/page.tsx",
-      "route": "[locale]/seller/offers",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/offers"
     },
     {
       "file": "app/[locale]/(seller)/seller/orders/[id]/page.tsx",
-      "route": "[locale]/seller/orders/[id]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/orders/[id]"
     },
     {
       "file": "app/[locale]/(seller)/seller/orders/page.tsx",
-      "route": "[locale]/seller/orders",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/orders"
     },
     {
       "file": "app/[locale]/(seller)/seller/page.tsx",
-      "route": "[locale]/seller",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller"
     },
     {
       "file": "app/[locale]/(seller)/seller/promotions/page.tsx",
-      "route": "[locale]/seller/promotions",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/promotions"
     },
     {
       "file": "app/[locale]/(seller)/seller/settings/page.tsx",
-      "route": "[locale]/seller/settings",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/settings"
     },
     {
       "file": "app/[locale]/(seller)/seller/team/page.tsx",
-      "route": "[locale]/seller/team",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/seller/team"
     },
     {
       "file": "app/[locale]/@modal/(.)account/forgot/page.tsx",
-      "route": "[locale]/forgot",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/account/forgot"
     },
     {
       "file": "app/[locale]/@modal/(.)account/page.tsx",
-      "route": "[locale]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/account"
     },
     {
       "file": "app/[locale]/@modal/(.)account/reset/page.tsx",
-      "route": "[locale]/reset",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/account/reset"
     },
     {
       "file": "app/[locale]/@modal/(.)auth/page.tsx",
-      "route": "[locale]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/auth"
     },
     {
       "file": "app/[locale]/@modal/(.)register/page.tsx",
-      "route": "[locale]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/register"
     },
     {
       "file": "app/[locale]/@modal/(.)welcome/page.tsx",
-      "route": "[locale]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/welcome"
     },
     {
       "file": "app/[locale]/@modal/[...rest]/page.tsx",
-      "route": "[locale]/[...rest]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/[...rest]"
     },
     {
       "file": "app/[locale]/@modal/page.tsx",
-      "route": "[locale]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]"
     },
     {
       "file": "app/[locale]/[...rest]/page.tsx",
-      "route": "[locale]/[...rest]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]/[...rest]"
     },
     {
       "file": "app/[locale]/page.tsx",
-      "route": "[locale]",
-      "visualStatus": "APPROVED_REDESIGN_NOT_YET_VERIFIED"
+      "route": "[locale]"
     }
   ],
   "methods": [
@@ -2101,8 +1824,10 @@
       "service": "adminContentService",
       "method": "updateCategory",
       "source": "services/admin-content.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/content/AdminContentCategoriesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminContentService",
@@ -2127,15 +1852,18 @@
       "service": "adminContentService",
       "method": "updateTag",
       "source": "services/admin-content.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/content/AdminContentTagsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminContentService",
       "method": "listAuthors",
       "source": "services/admin-content.service.ts",
       "consumers": [
-        "features/content/AdminContentArticleEditorView.tsx"
+        "features/content/AdminContentArticleEditorView.tsx",
+        "features/content/AdminContentAuthorsView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -2143,15 +1871,19 @@
       "service": "adminContentService",
       "method": "createAuthor",
       "source": "services/admin-content.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/content/AdminContentAuthorsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminContentService",
       "method": "updateAuthor",
       "source": "services/admin-content.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/content/AdminContentAuthorsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminContentService",
@@ -2471,15 +2203,19 @@
       "service": "adminSubscriptionService",
       "method": "updatePlan",
       "source": "services/admin-subscription.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin/PlanMaintenance.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminSubscriptionService",
       "method": "upsertEntitlement",
       "source": "services/admin-subscription.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin/PlanMaintenance.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminSubscriptionService",
@@ -2494,8 +2230,10 @@
       "service": "adminSubscriptionService",
       "method": "updatePriceStatus",
       "source": "services/admin-subscription.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin/PlanMaintenance.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminSubscriptionService",
@@ -2581,7 +2319,6 @@
       "method": "getTrustQueueSummary",
       "source": "services/admin.service.ts",
       "consumers": [
-        "features/admin/AdminDashboardView.tsx",
         "features/admin/AdminShell.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
@@ -2617,8 +2354,10 @@
       "service": "adminService",
       "method": "search",
       "source": "services/admin.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin/AdminOperationalSearch.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminService",
@@ -3198,6 +2937,7 @@
       "method": "listArticles",
       "source": "services/blog.service.ts",
       "consumers": [
+        "features/content/PublicBlogArticleView.tsx",
         "features/content/PublicBlogIndexView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
@@ -3561,7 +3301,8 @@
       "consumers": [
         "features/commerce/ProductResultsView.tsx",
         "features/commerce/PromotionManager.tsx",
-        "features/commerce/ShopHomeView.tsx"
+        "features/commerce/ShopHomeView.tsx",
+        "features/seller/CreateSellerOffer.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -4047,8 +3788,10 @@
       "service": "communityService",
       "method": "reportComment",
       "source": "services/community.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/community/CommunityPostDetailView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "discoveryService",
@@ -4179,22 +3922,29 @@
       "service": "healthAdvancedService",
       "method": "voidDocument",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/DocumentRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthAdvancedService",
       "method": "listCorrections",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthAdvancedService",
       "method": "createCorrection",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health/BasicHealthRecordEditor.tsx",
+        "features/health-advanced/DocumentRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthAdvancedService",
@@ -4326,36 +4076,46 @@
       "service": "healthAdvancedService",
       "method": "listCarePlans",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthAdvancedService",
       "method": "listSeniorCare",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthAdvancedService",
       "method": "addSeniorCareNote",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthAdvancedService",
       "method": "getEndOfLife",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthAdvancedService",
       "method": "upsertEndOfLife",
       "source": "services/health-advanced.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthService",
@@ -4409,15 +4169,19 @@
       "service": "healthService",
       "method": "updateAllergy",
       "source": "services/health.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health/BasicHealthRecordEditor.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthService",
       "method": "deleteAllergy",
       "source": "services/health.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health/BasicHealthRecordEditor.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthService",
@@ -4453,8 +4217,10 @@
       "service": "healthService",
       "method": "updateCondition",
       "source": "services/health.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health/BasicHealthRecordEditor.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthService",
@@ -4490,8 +4256,10 @@
       "service": "healthService",
       "method": "updateMedication",
       "source": "services/health.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health/BasicHealthRecordEditor.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "healthService",
@@ -4564,8 +4332,10 @@
       "service": "householdsService",
       "method": "update",
       "source": "services/households.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/account/HouseholdNameEditor.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "householdsService",
@@ -5568,15 +5338,19 @@
       "service": "providerClinicalService",
       "method": "createReferral",
       "source": "services/provider-clinical.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/vet-panel/ClinicalRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "providerClinicalService",
       "method": "createLabResult",
       "source": "services/provider-clinical.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/vet-panel/ClinicalRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "providerOsService",
@@ -5845,8 +5619,10 @@
       "service": "providerOsService",
       "method": "updateAvailabilityRule",
       "source": "services/provider-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/provider/ProviderAvailabilityView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "providerOsService",
@@ -5881,8 +5657,10 @@
       "service": "providerOsService",
       "method": "updateAvailabilityException",
       "source": "services/provider-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/provider/ProviderAvailabilityView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "providerOsService",
@@ -6084,6 +5862,7 @@
       "method": "listOffers",
       "source": "services/seller-os.service.ts",
       "consumers": [
+        "features/seller/MarketplaceActions.tsx",
         "features/seller/SellerOffersView.tsx",
         "features/seller/SellerPromotionsView.tsx"
       ],
@@ -6100,8 +5879,10 @@
       "service": "sellerOsService",
       "method": "createOffer",
       "source": "services/seller-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/seller/CreateSellerOffer.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "sellerOsService",
@@ -6134,8 +5915,10 @@
       "service": "sellerOsService",
       "method": "getInventoryHistory",
       "source": "services/seller-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/seller/InventoryHistory.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "sellerOsService",
@@ -6195,8 +5978,10 @@
       "service": "sellerOsService",
       "method": "updateChannel",
       "source": "services/seller-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/seller/MarketplaceActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "sellerOsService",
@@ -6211,15 +5996,19 @@
       "service": "sellerOsService",
       "method": "createMarketplaceListing",
       "source": "services/seller-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/seller/MarketplaceActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "sellerOsService",
       "method": "publishMarketplaceListing",
       "source": "services/seller-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/seller/SellerChannelsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "sellerOsService",
@@ -6234,8 +6023,10 @@
       "service": "sellerOsService",
       "method": "deactivateMarketplaceListing",
       "source": "services/seller-os.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/seller/SellerChannelsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "sellerOsService",
@@ -6367,8 +6158,10 @@
       "service": "subscriptionService",
       "method": "getChanges",
       "source": "services/subscription.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/subscription/SubscriptionChanges.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "subscriptionService",
@@ -6610,6 +6403,7 @@
       "method": "create",
       "source": "services/support.service.ts",
       "consumers": [
+        "features/contact/ContactView.tsx",
         "features/support/CreateTicketView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
@@ -7340,8 +7134,10 @@
       "service": "travelService",
       "method": "update",
       "source": "services/travel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/travel/TripEditor.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "travelService",
@@ -7491,8 +7287,10 @@
       "service": "vetPanelService",
       "method": "createNoteTemplate",
       "source": "services/vet-panel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/vet-panel/ClinicalRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "vetPanelService",
@@ -7530,15 +7328,19 @@
       "service": "vetPanelService",
       "method": "createProblem",
       "source": "services/vet-panel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/vet-panel/ClinicalRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "vetPanelService",
       "method": "updateProblem",
       "source": "services/vet-panel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/vet-panel/ClinicalRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "vetPanelService",
@@ -7625,8 +7427,10 @@
       "service": "vetPanelService",
       "method": "createEstimate",
       "source": "services/vet-panel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/vet-panel/ClinicalRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "vetPanelService",
@@ -7675,8 +7479,10 @@
       "service": "vetPanelService",
       "method": "createAlert",
       "source": "services/vet-panel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/vet-panel/ClinicalRecordActions.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "vetPanelService",
@@ -7709,15 +7515,19 @@
       "service": "clinicalOwnerService",
       "method": "listProblems",
       "source": "services/vet-panel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "clinicalOwnerService",
       "method": "listPrescriptions",
       "source": "services/vet-panel.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/health-advanced/HealthRecordsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "clinicalOwnerService",

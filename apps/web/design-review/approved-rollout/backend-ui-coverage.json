@@ -1,12 +1,12 @@
 {
   "generated": "2026-10-15",
-  "baseCommit": "a5a672df8dab4625d5cac6f4c2060b3015868d10",
-  "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
+  "baseCommit": "f492289d0cf348ea069cf01a16d27a1bd0e70878",
+  "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
   "counts": {
     "SYSTEM_ENDPOINT_REVIEW_NOT_A_SCREEN": 7,
-    "STATIC_UI_CHAIN_FOUND": 571,
-    "NO_EXACT_CLIENT_MATCH_REVIEW": 423,
-    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 78
+    "STATIC_UI_CHAIN_FOUND": 663,
+    "NO_EXACT_CLIENT_MATCH_REVIEW": 372,
+    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 37
   },
   "unresolvedDecorators": [],
   "endpoints": [
@@ -553,8 +553,18 @@
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
       "line": 58,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listDonations",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 79,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -564,8 +574,18 @@
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
       "line": 66,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listOrganizations",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 69,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -951,8 +971,18 @@
       "source": "apps/api/src/modules/admin/animal-support/admin-support-need.controller.ts",
       "line": 16,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listNeeds",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 65,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -1046,8 +1076,18 @@
       "source": "apps/api/src/modules/admin/commerce/admin-commerce.controller.ts",
       "line": 81,
       "group": "modules/admin/commerce",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminCommerceService",
+          "method": "listOrders",
+          "source": "apps/web/services/admin-commerce.service.ts",
+          "line": 26,
+          "consumers": [
+            "apps/web/features/admin/commerce/AdminCommerceViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -1078,8 +1118,18 @@
       "source": "apps/api/src/modules/admin/commerce/admin-commerce.controller.ts",
       "line": 93,
       "group": "modules/admin/commerce",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminCommerceService",
+          "method": "listRefundRequests",
+          "source": "apps/web/services/admin-commerce.service.ts",
+          "line": 28,
+          "consumers": [
+            "apps/web/features/admin/commerce/AdminCommerceViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -1131,8 +1181,18 @@
       "source": "apps/api/src/modules/admin/commerce/admin-commerce.controller.ts",
       "line": 111,
       "group": "modules/admin/commerce",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminCommerceService",
+          "method": "listProducts",
+          "source": "apps/web/services/admin-commerce.service.ts",
+          "line": 32,
+          "consumers": [
+            "apps/web/features/admin/commerce/AdminCommerceViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -1163,8 +1223,18 @@
       "source": "apps/api/src/modules/admin/commerce/admin-commerce.controller.ts",
       "line": 123,
       "group": "modules/admin/commerce",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminCommerceService",
+          "method": "listReviews",
+          "source": "apps/web/services/admin-commerce.service.ts",
+          "line": 34,
+          "consumers": [
+            "apps/web/features/admin/commerce/AdminCommerceViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -1195,8 +1265,18 @@
       "source": "apps/api/src/modules/admin/commerce/admin-commerce.controller.ts",
       "line": 135,
       "group": "modules/admin/commerce",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminCommerceService",
+          "method": "listInventory",
+          "source": "apps/web/services/admin-commerce.service.ts",
+          "line": 36,
+          "consumers": [
+            "apps/web/features/admin/commerce/AdminCommerceViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -1227,8 +1307,18 @@
       "source": "apps/api/src/modules/admin/commerce/admin-commerce.controller.ts",
       "line": 147,
       "group": "modules/admin/commerce",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminCommerceService",
+          "method": "analytics",
+          "source": "apps/web/services/admin-commerce.service.ts",
+          "line": 38,
+          "consumers": [
+            "apps/web/features/admin/commerce/AdminCommerceViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -1238,8 +1328,18 @@
       "source": "apps/api/src/modules/admin/commerce/admin-commerce.controller.ts",
       "line": 153,
       "group": "modules/admin/commerce",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminCommerceService",
+          "method": "listPromotions",
+          "source": "apps/web/services/admin-commerce.service.ts",
+          "line": 39,
+          "consumers": [
+            "apps/web/features/admin/commerce/AdminCommerceViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -1323,8 +1423,18 @@
       "source": "apps/api/src/modules/admin/community/admin-community.controller.ts",
       "line": 16,
       "group": "modules/admin/community",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listReports",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 87,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -1669,14 +1779,16 @@
       "source": "apps/api/src/modules/admin/content/admin-content.controller.ts",
       "line": 134,
       "group": "modules/admin/content",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminContentService",
           "method": "updateCategory",
           "source": "apps/web/services/admin-content.service.ts",
           "line": 88,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/content/AdminContentCategoriesView.tsx"
+          ]
         }
       ]
     },
@@ -1731,14 +1843,16 @@
       "source": "apps/api/src/modules/admin/content/admin-content.controller.ts",
       "line": 154,
       "group": "modules/admin/content",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminContentService",
           "method": "updateTag",
           "source": "apps/web/services/admin-content.service.ts",
           "line": 92,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/content/AdminContentTagsView.tsx"
+          ]
         }
       ]
     },
@@ -1758,7 +1872,8 @@
           "source": "apps/web/services/admin-content.service.ts",
           "line": 94,
           "consumers": [
-            "apps/web/features/content/AdminContentArticleEditorView.tsx"
+            "apps/web/features/content/AdminContentArticleEditorView.tsx",
+            "apps/web/features/content/AdminContentAuthorsView.tsx"
           ]
         }
       ]
@@ -1771,14 +1886,16 @@
       "source": "apps/api/src/modules/admin/content/admin-content.controller.ts",
       "line": 168,
       "group": "modules/admin/content",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminContentService",
           "method": "createAuthor",
           "source": "apps/web/services/admin-content.service.ts",
           "line": 95,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/content/AdminContentAuthorsView.tsx"
+          ]
         }
       ]
     },
@@ -1790,14 +1907,16 @@
       "source": "apps/api/src/modules/admin/content/admin-content.controller.ts",
       "line": 174,
       "group": "modules/admin/content",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminContentService",
           "method": "updateAuthor",
           "source": "apps/web/services/admin-content.service.ts",
           "line": 96,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/content/AdminContentAuthorsView.tsx"
+          ]
         }
       ]
     },
@@ -2093,14 +2212,16 @@
       "source": "apps/api/src/modules/admin/customer/admin-search.controller.ts",
       "line": 13,
       "group": "modules/admin/customer",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminService",
           "method": "search",
           "source": "apps/web/services/admin.service.ts",
           "line": 76,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin/AdminOperationalSearch.tsx"
+          ]
         }
       ]
     },
@@ -2853,8 +2974,18 @@
       "source": "apps/api/src/modules/admin/insurance/admin-insurance-applications.controller.ts",
       "line": 36,
       "group": "modules/admin/insurance",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminInsuranceOpsService",
+          "method": "applications",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 332,
+          "consumers": [
+            "apps/web/features/admin/travel/AdminTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -3064,8 +3195,18 @@
       "source": "apps/api/src/modules/admin/lost-pet/admin-lost-pet.controller.ts",
       "line": 29,
       "group": "modules/admin/lost-pet",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listLostPets",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 82,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -3493,8 +3634,18 @@
       "source": "apps/api/src/modules/admin/services/admin-services.controller.ts",
       "line": 42,
       "group": "modules/admin/services",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminServicesService",
+          "method": "listBookings",
+          "source": "apps/web/services/admin-services.service.ts",
+          "line": 106,
+          "consumers": [
+            "apps/web/features/admin/services/AdminServicesViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -3525,8 +3676,18 @@
       "source": "apps/api/src/modules/admin/services/admin-services.controller.ts",
       "line": 54,
       "group": "modules/admin/services",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminServicesService",
+          "method": "listServices",
+          "source": "apps/web/services/admin-services.service.ts",
+          "line": 108,
+          "consumers": [
+            "apps/web/features/admin/services/AdminServicesViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3558,8 +3719,18 @@
       "source": "apps/api/src/modules/admin/services/admin-services.controller.ts",
       "line": 72,
       "group": "modules/admin/services",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminServicesService",
+          "method": "listReviews",
+          "source": "apps/web/services/admin-services.service.ts",
+          "line": 110,
+          "consumers": [
+            "apps/web/features/admin/services/AdminServicesViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -3748,14 +3919,16 @@
       "source": "apps/api/src/modules/admin/subscriptions/admin-subscription.controller.ts",
       "line": 47,
       "group": "modules/admin/subscriptions",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminSubscriptionService",
           "method": "updatePlan",
           "source": "apps/web/services/admin-subscription.service.ts",
           "line": 64,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin/PlanMaintenance.tsx"
+          ]
         }
       ]
     },
@@ -3767,14 +3940,16 @@
       "source": "apps/api/src/modules/admin/subscriptions/admin-subscription.controller.ts",
       "line": 53,
       "group": "modules/admin/subscriptions",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminSubscriptionService",
           "method": "upsertEntitlement",
           "source": "apps/web/services/admin-subscription.service.ts",
           "line": 65,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin/PlanMaintenance.tsx"
+          ]
         }
       ]
     },
@@ -3807,14 +3982,16 @@
       "source": "apps/api/src/modules/admin/subscriptions/admin-subscription.controller.ts",
       "line": 65,
       "group": "modules/admin/subscriptions",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminSubscriptionService",
           "method": "updatePriceStatus",
           "source": "apps/web/services/admin-subscription.service.ts",
           "line": 67,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin/PlanMaintenance.tsx"
+          ]
         }
       ]
     },
@@ -4410,8 +4587,18 @@
       "source": "apps/api/src/modules/admin/travel/admin-travel.controller.ts",
       "line": 70,
       "group": "modules/admin/travel",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelService",
+          "method": "listings",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 288,
+          "consumers": [
+            "apps/web/features/admin/travel/AdminTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -4484,8 +4671,18 @@
       "source": "apps/api/src/modules/admin/travel/admin-travel.controller.ts",
       "line": 94,
       "group": "modules/admin/travel",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelService",
+          "method": "bookings",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 292,
+          "consumers": [
+            "apps/web/features/admin/travel/AdminTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -4516,8 +4713,18 @@
       "source": "apps/api/src/modules/admin/travel/admin-travel.controller.ts",
       "line": 106,
       "group": "modules/admin/travel",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelService",
+          "method": "reviews",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 294,
+          "consumers": [
+            "apps/web/features/admin/travel/AdminTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -4548,8 +4755,18 @@
       "source": "apps/api/src/modules/admin/travel/admin-travel.controller.ts",
       "line": 118,
       "group": "modules/admin/travel",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminTravelService",
+          "method": "rules",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 296,
+          "consumers": [
+            "apps/web/features/admin/travel/AdminTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -4672,7 +4889,6 @@
           "source": "apps/web/services/admin.service.ts",
           "line": 72,
           "consumers": [
-            "apps/web/features/admin/AdminDashboardView.tsx",
             "apps/web/features/admin/AdminShell.tsx"
           ]
         }
@@ -4971,8 +5187,19 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 52,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "me",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 59,
+          "consumers": [
+            "apps/web/features/animal-support/CreateSupportNeedView.tsx",
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -4982,8 +5209,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 57,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "overview",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 60,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -4993,8 +5230,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 62,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "needs",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 61,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -5004,8 +5251,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 67,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "offers",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 62,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -5015,8 +5272,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 72,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "donations",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 63,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -5026,8 +5293,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 77,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "team",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 64,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -5037,8 +5314,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 82,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "addMember",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 65,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -5048,8 +5335,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 88,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "updateMember",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 66,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -5059,8 +5356,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 94,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "verification",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 67,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -5070,8 +5377,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 99,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "verificationUpload",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 68,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -5081,8 +5398,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 105,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "submitVerification",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 69,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -5092,8 +5419,18 @@
       "source": "apps/api/src/modules/animal-support/ngo-portal.controller.ts",
       "line": 111,
       "group": "modules/animal-support/ngo-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "ngoService",
+          "method": "updateProfile",
+          "source": "apps/web/services/ngo.service.ts",
+          "line": 70,
+          "consumers": [
+            "apps/web/features/ngo/NgoPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7304,14 +7641,16 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 96,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "voidDocument",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 55,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/DocumentRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -7323,14 +7662,17 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 102,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "createCorrection",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 59,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health/BasicHealthRecordEditor.tsx",
+            "apps/web/features/health-advanced/DocumentRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -7342,14 +7684,16 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 108,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "listCorrections",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 57,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -7655,14 +7999,16 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 198,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "listCarePlans",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 77,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -7674,14 +8020,16 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 204,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "listSeniorCare",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 79,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -7693,14 +8041,16 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 210,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "addSeniorCareNote",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 81,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -7712,14 +8062,16 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 216,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "getEndOfLife",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 83,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -7731,14 +8083,16 @@
       "source": "apps/api/src/modules/clinical-health/health-advanced.controller.ts",
       "line": 222,
       "group": "modules/clinical-health/health-advanced.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthAdvancedService",
           "method": "upsertEndOfLife",
           "source": "apps/web/services/health-advanced.service.ts",
           "line": 85,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -7824,8 +8178,18 @@
       "source": "apps/api/src/modules/clinical-health/pet-observation.controller.ts",
       "line": 39,
       "group": "modules/clinical-health/pet-observation.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "ObservationDetailView.tsx",
+          "source": "apps/web/features/health-advanced/ObservationDetailView.tsx",
+          "line": 10,
+          "consumers": [
+            "apps/web/features/health-advanced/ObservationDetailView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7991,14 +8355,16 @@
       "source": "apps/api/src/modules/clinical-health/provider-clinical.controller.ts",
       "line": 104,
       "group": "modules/clinical-health/provider-clinical.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "providerClinicalService",
           "method": "createLabResult",
           "source": "apps/web/services/provider-clinical.service.ts",
           "line": 34,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/vet-panel/ClinicalRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -8043,14 +8409,16 @@
       "source": "apps/api/src/modules/clinical-health/provider-clinical.controller.ts",
       "line": 128,
       "group": "modules/clinical-health/provider-clinical.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "providerClinicalService",
           "method": "createReferral",
           "source": "apps/web/services/provider-clinical.service.ts",
           "line": 31,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/vet-panel/ClinicalRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -8332,7 +8700,8 @@
           "consumers": [
             "apps/web/features/commerce/ProductResultsView.tsx",
             "apps/web/features/commerce/PromotionManager.tsx",
-            "apps/web/features/commerce/ShopHomeView.tsx"
+            "apps/web/features/commerce/ShopHomeView.tsx",
+            "apps/web/features/seller/CreateSellerOffer.tsx"
           ]
         }
       ]
@@ -9043,14 +9412,16 @@
       "source": "apps/api/src/modules/commerce/marketplace/marketplace-channel.controller.ts",
       "line": 37,
       "group": "modules/commerce/marketplace",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "sellerOsService",
           "method": "updateChannel",
           "source": "apps/web/services/seller-os.service.ts",
           "line": 105,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/seller/MarketplaceActions.tsx"
+          ]
         }
       ]
     },
@@ -9149,14 +9520,16 @@
       "source": "apps/api/src/modules/commerce/marketplace/marketplace-listing.controller.ts",
       "line": 27,
       "group": "modules/commerce/marketplace",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "sellerOsService",
           "method": "createMarketplaceListing",
           "source": "apps/web/services/seller-os.service.ts",
           "line": 112,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/seller/MarketplaceActions.tsx"
+          ]
         }
       ]
     },
@@ -9179,14 +9552,16 @@
       "source": "apps/api/src/modules/commerce/marketplace/marketplace-listing.controller.ts",
       "line": 39,
       "group": "modules/commerce/marketplace",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "sellerOsService",
           "method": "publishMarketplaceListing",
           "source": "apps/web/services/seller-os.service.ts",
           "line": 114,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/seller/SellerChannelsView.tsx"
+          ]
         }
       ]
     },
@@ -9219,14 +9594,16 @@
       "source": "apps/api/src/modules/commerce/marketplace/marketplace-listing.controller.ts",
       "line": 51,
       "group": "modules/commerce/marketplace",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "sellerOsService",
           "method": "deactivateMarketplaceListing",
           "source": "apps/web/services/seller-os.service.ts",
           "line": 118,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/seller/SellerChannelsView.tsx"
+          ]
         }
       ]
     },
@@ -10060,14 +10437,16 @@
       "source": "apps/api/src/modules/community/community.controller.ts",
       "line": 107,
       "group": "modules/community/community.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "communityService",
           "method": "reportComment",
           "source": "apps/web/services/community.service.ts",
           "line": 53,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/community/CommunityPostDetailView.tsx"
+          ]
         }
       ]
     },
@@ -10165,6 +10544,7 @@
           "source": "apps/web/services/blog.service.ts",
           "line": 24,
           "consumers": [
+            "apps/web/features/content/PublicBlogArticleView.tsx",
             "apps/web/features/content/PublicBlogIndexView.tsx"
           ]
         }
@@ -10463,14 +10843,16 @@
       "source": "apps/api/src/modules/health/allergies.controller.ts",
       "line": 34,
       "group": "modules/health/allergies.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthService",
           "method": "updateAllergy",
           "source": "apps/web/services/health.service.ts",
           "line": 68,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health/BasicHealthRecordEditor.tsx"
+          ]
         }
       ]
     },
@@ -10482,14 +10864,16 @@
       "source": "apps/api/src/modules/health/allergies.controller.ts",
       "line": 40,
       "group": "modules/health/allergies.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthService",
           "method": "deleteAllergy",
           "source": "apps/web/services/health.service.ts",
           "line": 70,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health/BasicHealthRecordEditor.tsx"
+          ]
         }
       ]
     },
@@ -10567,14 +10951,16 @@
       "source": "apps/api/src/modules/health/conditions.controller.ts",
       "line": 34,
       "group": "modules/health/conditions.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthService",
           "method": "updateCondition",
           "source": "apps/web/services/health.service.ts",
           "line": 77,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health/BasicHealthRecordEditor.tsx"
+          ]
         }
       ]
     },
@@ -10694,14 +11080,16 @@
       "source": "apps/api/src/modules/health/medications.controller.ts",
       "line": 34,
       "group": "modules/health/medications.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "healthService",
           "method": "updateMedication",
           "source": "apps/web/services/health.service.ts",
           "line": 84,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health/BasicHealthRecordEditor.tsx"
+          ]
         }
       ]
     },
@@ -10996,14 +11384,16 @@
       "source": "apps/api/src/modules/households/households.controller.ts",
       "line": 57,
       "group": "modules/households/households.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "householdsService",
           "method": "update",
           "source": "apps/web/services/households.service.ts",
           "line": 17,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/account/HouseholdNameEditor.tsx"
+          ]
         }
       ]
     },
@@ -11457,8 +11847,18 @@
       "source": "apps/api/src/modules/insurance/insurer-portal.controller.ts",
       "line": 73,
       "group": "modules/insurance/insurer-portal.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "insurerPortalService",
+          "method": "applications",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 312,
+          "consumers": [
+            "apps/web/features/insurer/InsurerPortalViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -13547,14 +13947,16 @@
       "source": "apps/api/src/modules/provider-os/provider-availability.controller.ts",
       "line": 25,
       "group": "modules/provider-os/provider-availability.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "providerOsService",
           "method": "updateAvailabilityRule",
           "source": "apps/web/services/provider-os.service.ts",
           "line": 180,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/provider/ProviderAvailabilityView.tsx"
+          ]
         }
       ]
     },
@@ -13631,14 +14033,16 @@
       "source": "apps/api/src/modules/provider-os/provider-availability.controller.ts",
       "line": 45,
       "group": "modules/provider-os/provider-availability.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "providerOsService",
           "method": "updateAvailabilityException",
           "source": "apps/web/services/provider-os.service.ts",
           "line": 187,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/provider/ProviderAvailabilityView.tsx"
+          ]
         }
       ]
     },
@@ -14584,14 +14988,16 @@
       "source": "apps/api/src/modules/seller-os/seller-inventory.controller.ts",
       "line": 28,
       "group": "modules/seller-os/seller-inventory.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "sellerOsService",
           "method": "getInventoryHistory",
           "source": "apps/web/services/seller-os.service.ts",
           "line": 92,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/seller/InventoryHistory.tsx"
+          ]
         }
       ]
     },
@@ -14611,6 +15017,7 @@
           "source": "apps/web/services/seller-os.service.ts",
           "line": 80,
           "consumers": [
+            "apps/web/features/seller/MarketplaceActions.tsx",
             "apps/web/features/seller/SellerOffersView.tsx",
             "apps/web/features/seller/SellerPromotionsView.tsx"
           ]
@@ -14644,14 +15051,16 @@
       "source": "apps/api/src/modules/seller-os/seller-offer.controller.ts",
       "line": 27,
       "group": "modules/seller-os/seller-offer.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "sellerOsService",
           "method": "createOffer",
           "source": "apps/web/services/seller-os.service.ts",
           "line": 83,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/seller/CreateSellerOffer.tsx"
+          ]
         }
       ]
     },
@@ -15365,14 +15774,16 @@
       "source": "apps/api/src/modules/subscriptions/subscription.controller.ts",
       "line": 83,
       "group": "modules/subscriptions/subscription.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "subscriptionService",
           "method": "getChanges",
           "source": "apps/web/services/subscription.service.ts",
           "line": 30,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/subscription/SubscriptionChanges.tsx"
+          ]
         }
       ]
     },
@@ -15540,6 +15951,7 @@
           "source": "apps/web/services/support.service.ts",
           "line": 23,
           "consumers": [
+            "apps/web/features/contact/ContactView.tsx",
             "apps/web/features/support/CreateTicketView.tsx"
           ]
         }
@@ -15700,14 +16112,16 @@
       "source": "apps/api/src/modules/travel/travel.controller.ts",
       "line": 51,
       "group": "modules/travel/travel.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "travelService",
           "method": "update",
           "source": "apps/web/services/travel.service.ts",
           "line": 57,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/travel/TripEditor.tsx"
+          ]
         }
       ]
     },
@@ -16730,8 +17144,18 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-provider.controller.ts",
       "line": 144,
       "group": "modules/travel-marketplace/travel-provider.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelProviderService",
+          "method": "calendar",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 206,
+          "consumers": [
+            "apps/web/features/provider/travel/ProviderTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16741,8 +17165,18 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-provider.controller.ts",
       "line": 149,
       "group": "modules/travel-marketplace/travel-provider.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelProviderService",
+          "method": "bookings",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 207,
+          "consumers": [
+            "apps/web/features/provider/travel/ProviderTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16962,8 +17396,18 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-provider.controller.ts",
       "line": 206,
       "group": "modules/travel-marketplace/travel-provider.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelProviderService",
+          "method": "finance",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 218,
+          "consumers": [
+            "apps/web/features/provider/travel/ProviderTravelViews.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -16995,8 +17439,18 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-public.controller.ts",
       "line": 36,
       "group": "modules/travel-marketplace/travel-public.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelMarketService",
+          "method": "search",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 162,
+          "consumers": [
+            "apps/web/features/travel-market/TravelResultsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -17006,8 +17460,18 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-public.controller.ts",
       "line": 41,
       "group": "modules/travel-marketplace/travel-public.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelMarketService",
+          "method": "compare",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 163,
+          "consumers": [
+            "apps/web/features/travel-market/TravelCompareView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -17059,8 +17523,18 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-public.controller.ts",
       "line": 56,
       "group": "modules/travel-marketplace/travel-public.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelMarketService",
+          "method": "unitCalendar",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 166,
+          "consumers": [
+            "apps/web/features/travel-market/TravelListingDetailView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -17070,8 +17544,18 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-public.controller.ts",
       "line": 64,
       "group": "modules/travel-marketplace/travel-public.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelMarketService",
+          "method": "quote",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 167,
+          "consumers": [
+            "apps/web/features/travel-market/TravelListingDetailView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -17102,8 +17586,19 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-traveler.controller.ts",
       "line": 49,
       "group": "modules/travel-marketplace/travel-traveler.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelMarketService",
+          "method": "listBookings",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 172,
+          "consumers": [
+            "apps/web/features/home/MemberHomeView.tsx",
+            "apps/web/features/travel-market/MyTripsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -17369,8 +17864,20 @@
       "source": "apps/api/src/modules/travel-marketplace/travel-traveler.controller.ts",
       "line": 126,
       "group": "modules/travel-marketplace/travel-traveler.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "travelMarketService",
+          "method": "trips",
+          "source": "apps/web/services/travel-marketplace.service.ts",
+          "line": 185,
+          "consumers": [
+            "apps/web/features/travel-market/MyTripsView.tsx",
+            "apps/web/features/travel-market/TravelBookingDetailView.tsx",
+            "apps/web/features/travel-market/TravelBookingFlowView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -17508,14 +18015,16 @@
       "source": "apps/api/src/modules/vet-panel/vet-panel-consumer.controller.ts",
       "line": 54,
       "group": "modules/vet-panel/vet-panel-consumer.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "clinicalOwnerService",
           "method": "listProblems",
           "source": "apps/web/services/vet-panel.service.ts",
           "line": 188,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -17527,14 +18036,16 @@
       "source": "apps/api/src/modules/vet-panel/vet-panel-consumer.controller.ts",
       "line": 60,
       "group": "modules/vet-panel/vet-panel-consumer.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "clinicalOwnerService",
           "method": "listPrescriptions",
           "source": "apps/web/services/vet-panel.service.ts",
           "line": 189,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/health-advanced/HealthRecordsView.tsx"
+          ]
         }
       ]
     },
@@ -17693,14 +18204,16 @@
       "source": "apps/api/src/modules/vet-panel/vet-panel.controller.ts",
       "line": 69,
       "group": "modules/vet-panel/vet-panel.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "vetPanelService",
           "method": "createNoteTemplate",
           "source": "apps/web/services/vet-panel.service.ts",
           "line": 130,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/vet-panel/ClinicalRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -17824,14 +18337,16 @@
       "source": "apps/api/src/modules/vet-panel/vet-panel.controller.ts",
       "line": 131,
       "group": "modules/vet-panel/vet-panel.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "vetPanelService",
           "method": "createProblem",
           "source": "apps/web/services/vet-panel.service.ts",
           "line": 140,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/vet-panel/ClinicalRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -17843,14 +18358,16 @@
       "source": "apps/api/src/modules/vet-panel/vet-panel.controller.ts",
       "line": 137,
       "group": "modules/vet-panel/vet-panel.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "vetPanelService",
           "method": "updateProblem",
           "source": "apps/web/services/vet-panel.service.ts",
           "line": 142,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/vet-panel/ClinicalRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -18095,14 +18612,16 @@
       "source": "apps/api/src/modules/vet-panel/vet-panel.controller.ts",
       "line": 232,
       "group": "modules/vet-panel/vet-panel.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "vetPanelService",
           "method": "createEstimate",
           "source": "apps/web/services/vet-panel.service.ts",
           "line": 166,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/vet-panel/ClinicalRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -18228,14 +18747,16 @@
       "source": "apps/api/src/modules/vet-panel/vet-panel.controller.ts",
       "line": 284,
       "group": "modules/vet-panel/vet-panel.controller.ts",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "vetPanelService",
           "method": "createAlert",
           "source": "apps/web/services/vet-panel.service.ts",
           "line": 180,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/vet-panel/ClinicalRecordActions.tsx"
+          ]
         }
       ]
     },
@@ -18268,8 +18789,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 13,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "VetShareView.tsx",
+          "source": "apps/web/features/health/VetShareView.tsx",
+          "line": 18,
+          "consumers": [
+            "apps/web/features/health/VetShareView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -18279,8 +18810,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 14,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "VetShareView.tsx",
+          "source": "apps/web/features/health/VetShareView.tsx",
+          "line": 18,
+          "consumers": [
+            "apps/web/features/health/VetShareView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -18290,8 +18831,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 15,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "VetShareView.tsx",
+          "source": "apps/web/features/health/VetShareView.tsx",
+          "line": 22,
+          "consumers": [
+            "apps/web/features/health/VetShareView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -18301,8 +18852,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 16,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "VetShareView.tsx",
+          "source": "apps/web/features/health/VetShareView.tsx",
+          "line": 22,
+          "consumers": [
+            "apps/web/features/health/VetShareView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -18312,8 +18873,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 17,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "VetShareView.tsx",
+          "source": "apps/web/features/health/VetShareView.tsx",
+          "line": 23,
+          "consumers": [
+            "apps/web/features/health/VetShareView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -18323,8 +18894,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 23,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "SharedRecordsView.tsx",
+          "source": "apps/web/features/vet-panel/SharedRecordsView.tsx",
+          "line": 26,
+          "consumers": [
+            "apps/web/features/vet-panel/SharedRecordsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -18334,8 +18915,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 29,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "SharedRecordsView.tsx",
+          "source": "apps/web/features/vet-panel/SharedRecordsView.tsx",
+          "line": 46,
+          "consumers": [
+            "apps/web/features/vet-panel/SharedRecordsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -18345,8 +18936,18 @@
       "source": "apps/api/src/modules/vet-share/vet-share.controller.ts",
       "line": 30,
       "group": "modules/vet-share/vet-share.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "inline apiFetch",
+          "method": "SharedRecordsView.tsx",
+          "source": "apps/web/features/vet-panel/SharedRecordsView.tsx",
+          "line": 50,
+          "consumers": [
+            "apps/web/features/vet-panel/SharedRecordsView.tsx"
+          ]
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,50 @@
+{
+  "applicationCommit": "f492289",
+  "base": "a5a672d",
+  "checks": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "existingWarnings": 3
+    },
+    {
+      "command": "pnpm --filter @petlife/web typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm --filter @petlife/web test",
+      "exitCode": 0,
+      "passedFiles": 167,
+      "passedTests": 666
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 1,
+      "blocker": "Cloud Prisma Client is not generated. Backend typecheck reports missing generated exports; frontend check passed."
+    }
+  ],
+  "productionDeployed": false,
+  "allBackendApisCertified": false,
+  "protectedLaneChanged": false,
+  "browserChecks": {
+    "main": {
+      "passed": 24,
+      "total": 24
+    },
+    "additional": {
+      "passed": 16,
+      "total": 16
+    },
+    "commerce": {
+      "passed": 24,
+      "total": 24
+    },
+    "actualBaselineNewDomains": 16,
+    "horizontalOverflow": 0,
+    "uncaughtPageErrors": 0
+  }
+}
