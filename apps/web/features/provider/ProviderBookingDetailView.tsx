@@ -1,4 +1,5 @@
 "use client";
+import {ProviderCareSuggestionForm} from "@/features/health-depth/ProviderCareSuggestionForm";
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -100,6 +101,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
 
   return (
     <div className="flex flex-col gap-5">
+      <ProviderCareSuggestionForm source="booking" sourceId={booking.id} completed={booking.bookingStatus === "COMPLETED"}/>
       <div>
         <h1 className="text-page-title text-text-primary">{t("title")}</h1>
         <div className="mt-2 flex flex-wrap gap-2">

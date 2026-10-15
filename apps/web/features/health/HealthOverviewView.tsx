@@ -22,6 +22,7 @@ const tone = (state: KnowledgeState) => state === KnowledgeState.KNOWN_NEGATIVE 
 export function HealthOverviewView({ petId }: { petId: string }) {
   const statusText = useStatusText();
   const recordsT = useTranslations("rollout.records");
+  const depthT = useTranslations("healthDepth");
   const locale = useLocale() as "fa" | "en";
   const t = useTranslations("health");
   const c = copy[locale];
@@ -50,6 +51,7 @@ export function HealthOverviewView({ petId }: { petId: string }) {
         <span className="attention-banner__go">{c.open}<Forward size={16} aria-hidden="true" /></span>
       </Link>
     ) : <p className="calm-note">{t("setupStatus.COMPLETE")}</p>}
+    <nav className="flex flex-wrap gap-3"><Link className="btn-quiet" href={`${base}/activity`}>{depthT("title")}</Link><Link className="btn-quiet" href={`${base}/links`}>{depthT("sharesLink")}</Link></nav>
     <div className="health-overview__grid">
       <div className="health-overview__main">
         <section aria-labelledby="health-current"><h2 id="health-current" className="section-title">{c.current}</h2><div className="row-list">

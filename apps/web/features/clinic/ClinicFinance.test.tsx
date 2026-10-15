@@ -3,6 +3,7 @@ import {fireEvent,screen,waitFor} from "@testing-library/react";
 import {renderWithIntl} from "@/test/render-with-intl";
 import {clinicOutreachService} from "@/services/clinic-outreach.service";
 import {ClinicFinance} from "./ClinicFinance";
+vi.mock("@/features/shared/date-picker/DateField",()=>({DateField:({label,value,onChange}:{label:string;value:string;onChange:(value:string)=>void})=><label>{label}<input type="date" value={value} onChange={e=>onChange(e.target.value)}/></label>}));
 const state=vi.hoisted(()=>({role:"OWNER"}));
 vi.mock("@/stores/provider-store",()=>({useProviderStore:(select:(s:unknown)=>unknown)=>select({context:{active:{role:state.role}}})}));
 vi.mock("@/services/clinic-outreach.service",()=>({clinicOutreachService:{finance:vi.fn()}}));

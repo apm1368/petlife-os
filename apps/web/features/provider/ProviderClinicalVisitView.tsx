@@ -1,4 +1,5 @@
 "use client";
+import {ProviderCareSuggestionForm} from "@/features/health-depth/ProviderCareSuggestionForm";
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -148,6 +149,7 @@ export function ProviderClinicalVisitView({ petId, visitId }: { petId: string; v
         <StatusLabel tone={STATUS_TONE[visit.status] ?? "neutral"}>{t(`status.${visit.status}`)}</StatusLabel>
       </div>
       {error ? <p className="text-body text-state-attention">{error}</p> : null}
+      <ProviderCareSuggestionForm source="visit" sourceId={visit.id} completed={visit.status === "COMPLETED"}/>
       {isCompletedLike ? <p className="text-metadata text-text-secondary">{t("completedNotice")}</p> : null}
 
       <ContextSurface className="flex flex-col gap-3">

@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState} from "react";
 import {useLocale,useTranslations} from "next-intl";
 import {Button,ContextSurface,Dialog,Input,Select} from "@petlife/ui";
+import {LocalDateTimeField} from "@/features/shared/date-picker/LocalDateTimeField";
 import {clinicRemindersService,type ClinicReminder,type ClinicReminderKind} from "@/services/clinic-reminders.service";
 
 export function ClinicReminderComposer({pets,onCreated}:{pets:{id:string;name:string}[];onCreated:()=>void}){
@@ -15,7 +16,7 @@ export function ClinicReminderComposer({pets,onCreated}:{pets:{id:string;name:st
  <Select label={t("kind")} value={kind} onChange={e=>setKind(e.target.value as ClinicReminderKind)} options={(["CHECKUP","VACCINATION","MEDICATION","FOLLOW_UP","MESSAGE"] as const).map(value=>({value,label:t(`kinds.${value}`)}))}/>
  <Input label={t("messageTitle")} maxLength={120} required value={title} onChange={e=>setTitle(e.target.value)}/>
  <label className="block">{t("note")}<textarea className="block w-full" maxLength={1000} value={note} onChange={e=>setNote(e.target.value)}/></label>
- <Input type="datetime-local" label={t("dueAt")} value={dueAt} onChange={e=>setDueAt(e.target.value)}/><p>{t("dueHelp")}</p>
+ <LocalDateTimeField label={t("dueAt")} value={dueAt} onChange={value=>{setDueAt(value);setConfirmed(false)}}/><p>{t("dueHelp")}</p>
  <label className="flex items-start gap-2"><input type="checkbox" checked={confirmed} onChange={e=>{e.stopPropagation();setConfirmed(e.target.checked)}}/>{t(dueAt?"confirmSchedule":"confirmNow")}</label>
  <Button type="submit" disabled={busy||!confirmed||!title.trim()||!petId}>{t(dueAt?"schedule":"sendNow")}</Button>
  </form>}</section>

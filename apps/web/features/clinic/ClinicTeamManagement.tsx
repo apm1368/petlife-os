@@ -88,7 +88,7 @@ function ClinicTeamContent({ section }: { section: "staff" | "branches" }) {
   return <div className="space-y-5">
     <header><h2 className="text-section-title">{t(section)}</h2><p className="text-text-secondary">{t(`${section}Intro`)}</p></header>
     {saved && <p role="status">{t("saved")}</p>}
-    {error && !removal && <p role="alert">{error}</p>}
+
     {section === "staff" && staff && <>
       <ContextSurface><p>{t("staffUsage", { used: number(staff.usage.used), pending: number(staff.usage.pending), limit: staff.usage.limit === null ? t("unlimited") : number(staff.usage.limit) })}</p></ContextSurface>
       <div className="grid gap-3 md:grid-cols-2">{staff.items.map(member => <ContextSurface key={member.providerUserId} className="space-y-2">
@@ -104,7 +104,7 @@ function ClinicTeamContent({ section }: { section: "staff" | "branches" }) {
         <Input label={t("email")} type="email" dir="ltr" required maxLength={254} value={email} onChange={e => setEmail(e.target.value)} />
         <Select label={t("role")} value={role} onChange={e => setRole(e.target.value as "VET" | "STAFF")} options={[{ value: "VET", label: t("roles.VET") }, { value: "STAFF", label: t("roles.STAFF") }]} />
         <Input label={t("displayTitle")} maxLength={80} value={title} onChange={e => setTitle(e.target.value)} />
-        <p className="text-text-secondary">{t("invitationHelp")}</p><Button type="submit" disabled={busy || !email.trim()}>{t("invite")}</Button>
+        <p className="text-text-secondary">{t("invitationHelp")}</p>{error && !removal && <p role="alert" className="md:col-span-2">{error}</p>}<Button type="submit" disabled={busy || !email.trim()}>{t("invite")}</Button>
       </form></ContextSurface>}
       {owner && staffFull && <p>{t("limitReached")}</p>}
     </>}
@@ -120,6 +120,7 @@ function ClinicTeamContent({ section }: { section: "staff" | "branches" }) {
         <Input label={t("phone")} type="tel" dir="ltr" minLength={5} maxLength={20} value={phone} onChange={e => setPhone(e.target.value)} />
         <Input label={t("latitude")} type="number" dir="ltr" min={-90} max={90} step="any" value={latitude} onChange={e => setLatitude(e.target.value)} />
         <Input label={t("longitude")} type="number" dir="ltr" min={-180} max={180} step="any" value={longitude} onChange={e => setLongitude(e.target.value)} />
+        {error && !removal && <p role="alert" className="md:col-span-2">{error}</p>}
         <Button type="submit" disabled={busy || !name.trim() || !city.trim() || address.trim().length < 3}>{t("addBranch")}</Button>
       </form></ContextSurface>}
       {owner && branchesFull && <p>{t("limitReached")}</p>}
