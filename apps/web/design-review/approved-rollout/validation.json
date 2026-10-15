@@ -1,5 +1,5 @@
 {
-  "applicationCommit": "f492289",
+  "applicationCommit": "7a4ee65",
   "base": "a5a672d",
   "checks": [
     {
@@ -18,13 +18,20 @@
     {
       "command": "pnpm --filter @petlife/web test",
       "exitCode": 0,
-      "passedFiles": 167,
-      "passedTests": 666
+      "passedFiles": 168,
+      "passedTests": 669,
+      "note": "Full regression preceded final version follow-up; final changed components separately passed 12 tests in 3 files."
     },
     {
       "command": "pnpm typecheck",
       "exitCode": 1,
       "blocker": "Cloud Prisma Client is not generated. Backend typecheck reports missing generated exports; frontend check passed."
+    },
+    {
+      "command": "web targeted clinic/content tests",
+      "exitCode": 0,
+      "passedFiles": 3,
+      "passedTests": 12
     }
   ],
   "productionDeployed": false,
@@ -45,6 +52,11 @@
     },
     "actualBaselineNewDomains": 16,
     "horizontalOverflow": 0,
-    "uncaughtPageErrors": 0
-  }
+    "uncaughtPageErrors": 0,
+    "clinicWorkspace": {
+      "passed": 4,
+      "total": 4
+    }
+  },
+  "githubPush": "rejected: invalid username or token"
 }

@@ -36,3 +36,11 @@ All browser data is controlled fixture data. Photos used as review article/provi
 5. Protected admin navigation/CRM/customer-affairs remain the other lane's responsibility. No claim that all former admin overflow reports were individually reproduced or fixed.
 
 Heavy validation on the VPS must use `flock /var/lock/petlife-build.lock`; this work ran in the cloud workspace, not the VPS. Deployment remains an owner/Claude action after the required gates.
+
+## Follow-up code `7a4ee65`
+
+- Full web regression run: **669 tests / 168 files passed** before the final content-version follow-up. Subsequently all changed clinic/content components passed **12 targeted tests / 3 files**, including two newly added notes tests and two new version-history tests. This is not a claim of a fresh full 673-test run.
+- Web typecheck passed on the final code. Root lint passed; a new ref warning was then fixed and targeted lint passed with zero findings on all newly changed implementations. The three historical warnings remain as described above.
+- Clinic workspace browser captures: **4/4** fa/en at 390/1440, no overflow or page errors, controlled data. Total captured browser checks now 68; this does not certify every one of the 293 routes.
+- Latest supported Git credential-helper push attempt was rejected by GitHub with `Invalid username or token`. Read-only public fetch still works. No PR, board edit, push, merge or deployment is claimed.
+- Clinic workspace features implemented: queue and booking links, task create/done/cancel/status filter, entitlement-gated paginated customers, current plan/usage, customer notes with explicit sharing and author/owner-only removal. Campaigns, imports, team/branch maintenance and clinic finance remain separate frontend work, not missing APIs.

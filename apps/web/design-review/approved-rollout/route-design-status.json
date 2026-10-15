@@ -1462,6 +1462,11 @@
       "file": "app/[locale]/page.tsx",
       "route": "[locale]",
       "visualStatus": "LIVE_APPROVED_LANDING_UNCHANGED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/clinic/page.tsx",
+      "route": "[locale]/provider/clinic",
+      "visualStatus": "BROWSER_VERIFIED_FA_EN_390_1440_CONTROLLED_DATA"
     }
   ]
 }

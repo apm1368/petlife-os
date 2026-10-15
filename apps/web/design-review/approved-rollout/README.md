@@ -44,3 +44,7 @@ English equivalents replace `-fa-` with `-en-`. Browser JSON records horizontal 
 ## Publication gates
 
 Frozen install, lint, web typecheck, web tests and browser evidence are recorded in `VALIDATION.md`. Repository-wide typecheck remains blocked by the cloud's ungenerated Prisma Client. Do not weaken checks or fake generated types. GitHub write authentication is unavailable in this environment; local commits/bundle are a handoff, not an open PR or a deployment. The required base is `stabilization/wave-1`; owner/Claude handles merge and the final approved release to `main`.
+
+## Clinic workspace follow-up
+
+`/provider/clinic` adds the real daily queue, task lifecycle/status filters, paginated customer search, current clinic plan usage and author/owner-controlled customer notes. Notes default to clinic-only. Four fa/en 390/1440 captures are in `screenshots/clinic-workspace-*.webp`; `clinic-browser-checks.json` records no document overflow or page errors. Content version history now inspects server snapshots and reports restore failures. These additions do not implement the remaining campaign/import/team/finance Clinic OS work.

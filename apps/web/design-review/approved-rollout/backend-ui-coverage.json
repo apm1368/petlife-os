@@ -1,12 +1,12 @@
 {
   "generated": "2026-10-15",
-  "baseCommit": "f492289d0cf348ea069cf01a16d27a1bd0e70878",
+  "baseCommit": "7a4ee652cfd27dc72016d1e6688b7300bef8f025",
   "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
   "counts": {
     "SYSTEM_ENDPOINT_REVIEW_NOT_A_SCREEN": 7,
-    "STATIC_UI_CHAIN_FOUND": 663,
-    "NO_EXACT_CLIENT_MATCH_REVIEW": 372,
-    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 37
+    "STATIC_UI_CHAIN_FOUND": 674,
+    "NO_EXACT_CLIENT_MATCH_REVIEW": 362,
+    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 36
   },
   "unresolvedDecorators": [],
   "endpoints": [
@@ -1696,14 +1696,16 @@
       "source": "apps/api/src/modules/admin/content/admin-content.controller.ts",
       "line": 108,
       "group": "modules/admin/content",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminContentService",
           "method": "getVersion",
           "source": "apps/web/services/admin-content.service.ts",
           "line": 83,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/content/AdminContentVersionHistoryView.tsx"
+          ]
         }
       ]
     },
@@ -7006,8 +7008,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 37,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "notes",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 65,
+          "consumers": [
+            "apps/web/features/clinic/ClinicCustomerNotes.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7017,8 +7029,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 42,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "addNote",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 69,
+          "consumers": [
+            "apps/web/features/clinic/ClinicCustomerNotes.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "DELETE",
@@ -7028,8 +7050,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 47,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "removeNote",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 70,
+          "consumers": [
+            "apps/web/features/clinic/ClinicCustomerNotes.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7094,8 +7126,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 79,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "queue",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 86,
+          "consumers": [
+            "apps/web/features/clinic/ClinicWorkspace.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7116,8 +7158,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 89,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "tasks",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 72,
+          "consumers": [
+            "apps/web/features/clinic/ClinicWorkspace.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7127,8 +7179,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 94,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "createTask",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 77,
+          "consumers": [
+            "apps/web/features/clinic/ClinicWorkspace.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7138,8 +7200,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 99,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "completeTask",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 78,
+          "consumers": [
+            "apps/web/features/clinic/ClinicWorkspace.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7149,8 +7221,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 104,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "cancelTask",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 79,
+          "consumers": [
+            "apps/web/features/clinic/ClinicWorkspace.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -7303,8 +7385,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 197,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "subscription",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 71,
+          "consumers": [
+            "apps/web/features/clinic/ClinicWorkspace.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7314,8 +7406,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 202,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "customers",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 80,
+          "consumers": [
+            "apps/web/features/clinic/ClinicWorkspace.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",

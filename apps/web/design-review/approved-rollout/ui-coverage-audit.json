@@ -827,6 +827,10 @@
       "route": "[locale]/provider/calendar"
     },
     {
+      "file": "app/[locale]/(provider)/provider/clinic/page.tsx",
+      "route": "[locale]/provider/clinic"
+    },
+    {
       "file": "app/[locale]/(provider)/provider/clinical/page.tsx",
       "route": "[locale]/provider/clinical"
     },
@@ -1789,8 +1793,10 @@
       "service": "adminContentService",
       "method": "getVersion",
       "source": "services/admin-content.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/content/AdminContentVersionHistoryView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminContentService",
@@ -3280,6 +3286,96 @@
       "source": "services/clinic-invitations.service.ts",
       "consumers": [
         "features/clinic/ClinicInvitationsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "notes",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicCustomerNotes.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "addNote",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicCustomerNotes.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "removeNote",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicCustomerNotes.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "subscription",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicWorkspace.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "tasks",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicWorkspace.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "createTask",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicWorkspace.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "completeTask",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicWorkspace.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "cancelTask",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicWorkspace.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "customers",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicWorkspace.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "queue",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicWorkspace.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },

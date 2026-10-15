@@ -29,9 +29,9 @@ The following have existing backend contracts. **They must not be handed back as
 
 - Insurer staff directory/grant/revoke (`adminInsuranceOpsService.members/grant/revoke`); dedicated insurer/provider catalog management and its role-dependent entry points.
 - Marketplace settlement statement browsing/detail (`adminFinanceService.listMarketplaceStatements/getMarketplaceStatement`); the existing import/reconciliation view is not a complete statement browser. Per-result detail is also distinct from the queue.
-- Content version detail inspection (`adminContentService.getVersion`), separate from listing/restoring a version.
+- Content version inspection is now implemented with `getVersion`, a rendered server snapshot, and visible restore/inspection failures.
 - Global billing-attempt exploration if required beyond the household-scoped screen.
-- Remaining unmatched controller groups, including the wider Clinic OS, administrative access/settings/partner tooling and newer health-depth operations. Some are protected-lane work; some are real frontend gaps; some are internal or have replacement UI. The endpoint/source/line list in `backend-ui-coverage.json` is the work queue. No automatic match means **review**, not automatically “missing API” or “safe public button”.
+- Remaining unmatched controller groups, including the remaining Clinic OS (the queue, tasks, paginated customers, plan usage and customer notes are now implemented), administrative access/settings/partner tooling and newer health-depth operations. Some are protected-lane work; some are real frontend gaps; some are internal or have replacement UI. The endpoint/source/line list in `backend-ui-coverage.json` is the work queue. No automatic match means **review**, not automatically “missing API” or “safe public button”.
 - `commerceService.updateCheckout`, `providerOsService.complete` and `adminCommerceService.executeRefundApproval`: compare semantics with the currently used checkout/transition/refund actions before adding duplicate mutations. Refund execution remains permission-controlled and audited.
 - Public tags/placements and insurer provider details: optional browsing entry points need a product decision and real content; do not add blank pages to satisfy a method counter.
 
