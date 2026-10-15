@@ -160,9 +160,10 @@ export class CartService {
     const prices = await this.pricing.price(
       cart.lines.map((l) => ({ offerId: l.sellerOffer.id, priceAmount: l.sellerOffer.priceAmount, sellerOrganizationId: l.sellerOffer.sellerOrganizationId, productId: l.sellerOffer.productVariant.product.id, categoryId: l.sellerOffer.productVariant.product.categoryId })),
     );
+    const images = await this.lineImages(cart.lines);
     const lineDtos: (CartLineDto & { sellerOrgId: string })[] = [];
     for (const line of cart.lines) {
-      lineDtos.push(await this.toLineDto(line, userId, prices.get(line.sellerOffer.id)!));
+      lineDtos.push(await this.toLineDto(line, userId, prices.get(line.sellerOffer.id)!, images.get(line.id) ?? null));
     }
 
     const groupsByOrg = new Map<string, CartSellerGroupDto>();
@@ -201,7 +202,26 @@ export class CartService {
    * Every state is explicit and nothing is silently swapped: an unavailable offer or seller stays in
    * the cart, flagged, until the customer removes it — no automatic substitution of seller or variant.
    */
-  private async toLineDto(line: CartLineRow, userId: string, price: EffectivePrice): Promise<CartLineDto & { sellerOrgId: string }> {
+  /**
+   * One query for every line's image (no per-line lookup): the line's own variant image if it has one, else the
+   * product's first image — the same choice the catalog makes. URLs are returned as stored (ProductMedia.url).
+   */
+  private async lineImages(lines: CartLineRow[]): Promise<Map<string, string>> {
+    if (!lines.length) return new Map();
+    const productIds = [...new Set(lines.map((l) => l.sellerOffer.productVariant.product.id))];
+    const media = await this.prisma.productMedia.findMany({ where: { productId: { in: productIds } }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], select: { productId: true, variantId: true, url: true } });
+    const result = new Map<string, string>();
+    for (const line of lines) {
+      const variantId = line.sellerOffer.productVariant.id;
+      const productId = line.sellerOffer.productVariant.product.id;
+      const forProduct = media.filter((m) => m.productId === productId);
+      const url = forProduct.find((m) => m.variantId === variantId)?.url ?? forProduct.find((m) => !m.variantId)?.url ?? forProduct[0]?.url;
+      if (url) result.set(line.id, url);
+    }
+    return result;
+  }
+
+  private async toLineDto(line: CartLineRow, userId: string, price: EffectivePrice, imageUrl: string | null): Promise<CartLineDto & { sellerOrgId: string }> {
     const offer = line.sellerOffer;
     const product = offer.productVariant.product;
     let compatibility = null;
@@ -224,6 +244,7 @@ export class CartService {
       sellerOrgId: offer.sellerOrganizationId,
       productId: product.id,
       productTitle: product.title,
+      imageUrl,
       variantTitle: offer.productVariant.title,
       variantSku: offer.productVariant.sku,
       targetPetId: line.targetPetId,
