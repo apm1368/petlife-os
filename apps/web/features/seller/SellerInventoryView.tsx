@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { SellerOsOfferDto } from "@petlife/types";
+import { InventoryHistory } from "./InventoryHistory";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 
 /** Seller Inventory (spec section 41) — every change requires an explicit save; a rejected adjustment (would go negative) shows the server's own error rather than silently reverting. */
 export function SellerInventoryView() {
   const t = useTranslations("seller.inventory");
+  const role = useSellerStore(s => s.context?.active?.role);
+  const canEdit = !!role && ["OWNER", "ADMIN", "OPERATIONS", "CATALOG_MANAGER"].includes(role);
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [offers, setOffers] = useState<SellerOsOfferDto[] | null>(null);
@@ -38,7 +41,7 @@ export function SellerInventoryView() {
   }, [sellerId]);
 
   async function save(inventoryItemId: string) {
-    if (!sellerId) return;
+    if (!sellerId || !canEdit) return;
     const value = drafts[inventoryItemId];
     if (value === undefined) return;
     setSavingId(inventoryItemId);
@@ -94,10 +97,11 @@ export function SellerInventoryView() {
                   errorMessage={rowError[offer.inventory.id]}
                   className="w-32"
                 />
-                <Button size="sm" isLoading={savingId === offer.inventory.id} disabled={!dirty} onClick={() => save(offer.inventory!.id)}>
+                {canEdit ? <Button size="sm" isLoading={savingId === offer.inventory.id} disabled={!dirty} onClick={() => save(offer.inventory!.id)}>
                   {t("save")}
-                </Button>
+                </Button> : null}
               </div>
+              <InventoryHistory key={sellerId + offer.inventory.id} sellerId={sellerId!} inventoryId={offer.inventory.id} />
             </ContextSurface>
           );
         })

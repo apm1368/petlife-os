@@ -8,6 +8,7 @@ import { householdsService } from "@/services/households.service";
 import type { HouseholdCollaborationDto } from "@/services/account.service";
 import { useSessionStore } from "@/stores/session-store";
 import { AccountPageHeader } from "./AccountNav";
+import { HouseholdNameEditor } from "./HouseholdNameEditor";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
 import { apiErrorText } from "@/lib/errors/api-error-text";
@@ -140,6 +141,7 @@ export function HouseholdCenterView() {
   return (
     <div className="account-stack">
       <AccountPageHeader eyebrow={t("خانواده و دسترسی", "HOUSEHOLD & ACCESS")} title={householdName} description={t("عضویت در خانواده به معنی دسترسی کامل به اطلاعات حیوان نیست؛ هر دسترسی جداگانه، شفاف و قابل لغو است.", "Being in a household never means automatic full pet access; every grant is separate, visible and reversible.")} />
+      {isOwner ? <HouseholdNameEditor key={data.id + householdName} id={data.id} name={householdName} onSaved={async () => { await loadList(); await loadDetail(); }} /> : null}
       {notice ? <div className="account-notice" role="status">{notice}</div> : null}
       {households.length > 1 ? <Select label={t("خانواده", "Household")} value={selectedId} onChange={(e) => setSelectedId(e.target.value)} options={households.map((h) => ({ value: h.id, label: h.name || t("خانهٔ بدون نام", "Unnamed household") }))} /> : null}
 

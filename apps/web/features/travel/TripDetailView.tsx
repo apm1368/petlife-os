@@ -14,6 +14,7 @@ import { requirementStatusTone, tripStatusTone } from "./travel-status";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { countryName } from "@/lib/number/format-number";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { TripEditor } from "./TripEditor";
 import { FilePicker } from "@/features/shared/FilePicker";
 
 const ALLOWED_TRANSITIONS: Record<TripStatus, TripStatus[]> = {
@@ -204,7 +205,8 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
             {trip.notes ? <p className="text-metadata text-text-secondary">{trip.notes}</p> : null}
             <Link href={`/${locale}/travel/trips/${trip.id}`} className="w-fit text-sm font-bold text-brand-natural underline">{locale === "fa" ? "مرکز سفر: اقامت‌ها، آمادگی و مکان‌ها" : "Trip hub: stays, readiness and places"}</Link>
           </section>
-          {error ? <p className="text-body text-state-urgent">{error}</p> : null}
+          <TripEditor key={trip.id + trip.updatedAt} petId={petId} trip={trip} onSaved={load} />
+      {error ? <p className="text-body text-state-urgent">{error}</p> : null}
           <div className="flex flex-wrap gap-2">
             {availableTransitions.map((next) => (
               <Button key={next} variant={next === "CANCELLED" ? "ghost" : "secondary"} isLoading={isActing} onClick={() => runAction(() => travelService.transition(petId, tripId, next))}>

@@ -1,0 +1,19 @@
+"use client";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Button, Input, Select } from "@petlife/ui";
+import { SubscriptionEntitlementType, type SubscriptionPlanDto } from "@petlife/types";
+import { useAdminStore } from "@/stores/admin-store";
+import { adminSubscriptionService } from "@/services/admin-subscription.service";
+export function PlanMaintenance({ plan, onSaved }: { plan: SubscriptionPlanDto; onSaved: () => Promise<void> }) {
+ const t=useTranslations("rollout.plans"); const context=useAdminStore(s=>s.context);
+ const [nameFa,setNameFa]=useState(plan.nameFa); const [nameEn,setNameEn]=useState(plan.nameEn);const [status,setStatus]=useState(plan.status as string);
+ const [key,setKey]=useState("");const [type,setType]=useState(SubscriptionEntitlementType.BOOLEAN);const [boolValue,setBoolValue]=useState(true);const [limit,setLimit]=useState("");const [busy,setBusy]=useState(false);const [failed,setFailed]=useState(false);const [saved,setSaved]=useState(false);
+ if(!context?.permissions.includes("subscription.plan.manage"))return null;
+ async function run(action:()=>Promise<unknown>){if(busy)return;setBusy(true);setFailed(false);setSaved(false);try{await action();setSaved(true);await onSaved();}catch{setFailed(true);}finally{setBusy(false);}}
+ return <details className="mt-4 border-t border-border-subtle pt-4"><summary className="cursor-pointer font-bold">{t("title")}</summary><div className="mt-4 flex flex-col gap-5">
+ <form className="flex flex-wrap items-end gap-3" onSubmit={e=>{e.preventDefault();void run(()=>adminSubscriptionService.updatePlan(plan.id,{nameFa:nameFa.trim(),nameEn:nameEn.trim(),status}));}}><Input label={t("fa")} required value={nameFa} onChange={e=>setNameFa(e.target.value)}/><Input label={t("en")} required value={nameEn} onChange={e=>setNameEn(e.target.value)}/><Select label={t("status")} value={status} onChange={e=>setStatus(e.target.value)} options={[{value:"ACTIVE",label:t("active")},{value:"INACTIVE",label:t("inactive")},{value:"HIDDEN",label:t("hidden")}]} /><Button type="submit" isLoading={busy} disabled={!nameFa.trim()||!nameEn.trim()}>{t("save")}</Button></form>
+ <section><h3 className="font-bold">{t("prices")}</h3><div className="mt-3 flex flex-wrap gap-3">{plan.prices.map(price=><Button key={price.id} size="sm" variant="secondary" disabled={busy} onClick={()=>void run(()=>adminSubscriptionService.updatePriceStatus(price.id,price.status==="ACTIVE"?"INACTIVE":"ACTIVE"))}>{t(price.status==="ACTIVE"?"disablePrice":"enablePrice")} <bdi dir="ltr">{price.id.slice(-8)}</bdi></Button>)}</div></section>
+ <form className="flex flex-wrap items-end gap-3" onSubmit={e=>{e.preventDefault();void run(()=>adminSubscriptionService.upsertEntitlement(plan.id,{key:key.trim(),type,...(type===SubscriptionEntitlementType.BOOLEAN?{boolValue}:{limitValue:Number(limit)})}));}}><Input label={t("key")} required value={key} onChange={e=>setKey(e.target.value)} list={`plan-keys-${plan.id}`}/><datalist id={`plan-keys-${plan.id}`}>{plan.entitlements.map(ent=><option key={ent.key} value={ent.key}/>)}</datalist><Select label={t("type")} value={type} onChange={e=>setType(e.target.value as SubscriptionEntitlementType)} options={[{value:"BOOLEAN",label:t("boolean")},{value:"LIMIT",label:t("limit")}]} />{type===SubscriptionEntitlementType.BOOLEAN?<label className="flex items-center gap-2"><input type="checkbox" checked={boolValue} onChange={e=>setBoolValue(e.target.checked)}/>{t("enabled")}</label>:<Input label={t("limit")} type="number" min={0} step={1} value={limit} required onChange={e=>setLimit(e.target.value)}/>}<Button type="submit" disabled={busy||!key.trim()}>{t("saveEntitlement")}</Button></form>
+ {failed?<p role="alert">{t("failed")}</p>:null}{saved?<p role="status">{t("saved")}</p>:null}</div></details>;
+}
