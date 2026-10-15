@@ -54,6 +54,8 @@ export function AdminDashboardView() {
   return <div className="approved-admin">
     <header className="approved-admin__heading"><div><p>{context?.displayName}</p><h1>{t("title")}</h1><p>{t("subtitle")}</p></div><time dateTime={new Date().toISOString()}>{date(new Date().toISOString())}</time></header>
     <AdminOperationalSearch />
+    {allowed("insurance.view") && <Link href="/admin/insurance/providers" className="underline">{t("insuranceProviders")}</Link>}
+    {allowed("sellerFinance.view") && <Link href="/admin/marketplace-statements" className="underline">{t("marketplaceStatements")}</Link>}
     <div className="approved-admin__stats">{stats.map(({ key, value, href, permission, Icon }) => {
       const content = <><span><Icon size={20} aria-hidden="true" />{t(key)}</span><strong>{formatCount(value, locale)}</strong></>;
       return allowed(permission) ? <Link key={key} href={href} className="approved-admin__stat">{content}</Link> : <div key={key} className="approved-admin__stat">{content}</div>;
