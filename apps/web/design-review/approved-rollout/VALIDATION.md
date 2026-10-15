@@ -1,6 +1,6 @@
 # Validation and release limits
 
-Application code: `7208e85`, rebased onto `origin/stabilization/wave-1` at `f3bf0648761d665bb36f90f710eed2c14e1c0355`. Later commits contain documentation and review evidence only.
+Application code: `7208e85`, rebased onto `origin/stabilization/wave-1` at `f3bf0648761d665bb36f90f710eed2c14e1c0355`. Later commits contain documentation/review evidence and an AccountNav test update for the newly added clinic-notes link; application code is unchanged.
 
 | Check | Result |
 | --- | --- |
@@ -9,7 +9,7 @@ Application code: `7208e85`, rebased onto `origin/stabilization/wave-1` at `f3bf
 | Root lint | Passed on final application code. Existing warnings retained; no weakened rules. |
 | Web typecheck | Passed on final application code. |
 | Root typecheck | Blocked in API by unavailable generated Prisma Client exports. Official engine/checksum downloads returned HTTP 403. No fabricated declarations or checksum/TLS bypass. |
-| Final full web suite | RUNNING; single worker, all tests enabled. Final outcome must be recorded before claiming green. |
+| Final full web suite | 793 passed / 1 failed in 202 files. The sole failure was an outdated AccountNav expectation of 8 links after adding the ninth clinic-notes link. Updated the exact count to 9 and added an explicit assertion for the new destination. Targeted AccountNav + MemberClinicNotes rerun: 4/4 passed. No subsequent complete-suite green run is claimed. |
 | Earlier full suite | 767 tests / 196 files passed before the final KYC/access/clinic additions. A later two-worker run had 782 passes and one SellerTeam timeout; it was not a green run. Unchanged SellerTeam passed in isolation. |
 | New targeted regressions | KYC, access, consent, clinic tags, household notes, assignment, subscription reload and day-only date formatting passed. |
 | Fresh controlled browser checks | 128 passed: KYC 16, external admin/access 36, external public travel 16, health depth 20, clinic operations 24, clinic extras 16. Each includes fa/en at 390/1440; no horizontal overflow or uncaught page errors. |
