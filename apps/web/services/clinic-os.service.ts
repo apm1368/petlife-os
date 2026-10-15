@@ -8,6 +8,7 @@ export interface ClinicTask {
     overdue: boolean;
 }
 export interface ClinicCustomer {
+    tags?:{id:string;name:string}[];
     householdId: string;
     ownerDisplayName: string | null;
     pets: {
@@ -40,6 +41,8 @@ export interface ClinicSubscription {
     };
 }
 export interface ClinicQueueRow {
+    status?:string;
+    resource?:{id:string;name:string}|null;
     bookingId: string;
     bookingNumber: string;
     startAt: string;
@@ -50,7 +53,8 @@ export interface ClinicQueueRow {
         name: string;
     };
     assignedTo: {
-        name: string;
+        providerUserId?:string;
+        name: string|null;
     } | null;
 }
 export interface ClinicNote {
@@ -62,6 +66,7 @@ export interface ClinicNote {
     createdAt: string;
 }
 export const clinicOsService = {
+    assign: (bookingId:string,body:{providerUserId?:string|null;resourceId?:string|null})=>apiFetch<Record<string,ClinicQueueRow[]>>(`/provider/clinic/appointments/${encodeURIComponent(bookingId)}/assign`,{method:"POST",body}),
     notes: (householdId: string, signal?: AbortSignal) => apiFetch<ClinicNote[]>(`/provider/clinic/customers/${householdId}/notes`, { signal }),
     addNote: (householdId: string, body: {
         body: string;
