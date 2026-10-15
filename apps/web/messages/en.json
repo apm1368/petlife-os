@@ -800,7 +800,8 @@
         "waitlist": "Waitlist",
         "reviews": "Reviews",
         "analytics": "Performance",
-        "travel": "Travel & stays"
+        "travel": "Travel & stays",
+        "clinicWorkspace": "Clinic workspace"
       },
       "notAProvider": {
         "title": "No provider access",
@@ -2679,7 +2680,10 @@
         "loading": "Loading versions…",
         "empty": "No versions yet.",
         "version": "Version {number}",
-        "restore": "Restore"
+        "restore": "Restore",
+        "actionError": "The operation failed. Please retry.",
+        "closePreview": "Close preview",
+        "inspect": "Inspect version"
       },
       "categories": {
         "title": "Categories",
@@ -4257,6 +4261,74 @@
       "mode": "Travel mode",
       "save": "Save",
       "failed": "Could not save. Your entries are preserved."
+    }
+  },
+  "clinicWorkspace": {
+    "title": "Clinic workspace",
+    "intro": "Appointments, follow-up tasks and clinic customers in one shared workspace.",
+    "queue": "Visit queue",
+    "tasks": "Follow-up tasks",
+    "customers": "Customers",
+    "plan": "Clinic subscription",
+    "saveError": "Could not save. Your input is preserved; please retry.",
+    "loadError": "Could not load this information.",
+    "retry": "Retry",
+    "loading": "Loading…",
+    "date": "Appointment date",
+    "empty": "No matching records.",
+    "unnamed": "No display name",
+    "openBooking": "Open booking",
+    "taskTitle": "Task title",
+    "taskType": "Follow-up type",
+    "dueAt": "Due date (device local time)",
+    "create": "Create task",
+    "filter": "Task status",
+    "taskLimit": "Up to 200 tasks are shown for each status.",
+    "overdue": "Overdue",
+    "done": "Mark done",
+    "cancel": "Cancel task",
+    "search": "Search customer or pet name",
+    "visits": "Completed visits: {count}",
+    "previous": "Previous",
+    "next": "Next",
+    "reminderUsage": "Reminders this month: {count}",
+    "expires": "Period ends:",
+    "planNote": "Plan changes are handled by an administrator; online clinic plan purchases are not available yet.",
+    "buckets": {
+      "SCHEDULED": "Scheduled",
+      "WAITING": "Waiting",
+      "IN_CONSULTATION": "In consultation",
+      "COMPLETED": "Completed",
+      "NO_SHOW": "No-show",
+      "CANCELLED": "Cancelled"
+    },
+    "statuses": {
+      "OPEN": "Open",
+      "DONE": "Done",
+      "CANCELLED": "Cancelled"
+    },
+    "types": {
+      "CALL_CUSTOMER": "Call customer",
+      "FOLLOW_UP_LAB": "Follow up lab",
+      "CONFIRM_APPOINTMENT": "Confirm appointment",
+      "COLLECT_PAYMENT": "Collect payment",
+      "OTHER": "Other"
+    },
+    "notes": {
+      "title": "Customer notes",
+      "loading": "Loading notes…",
+      "empty": "No clinic notes yet.",
+      "shared": "Shared with the owner",
+      "internal": "Clinic only",
+      "remove": "Remove note",
+      "error": "Could not load or save notes. Your draft is preserved.",
+      "retry": "Reload notes",
+      "body": "New note",
+      "share": "Share this note with the owner",
+      "privacy": "Notes stay inside the clinic unless you explicitly select sharing. Do not use this for clinical records.",
+      "save": "Save note",
+      "confirm": "Remove this note?",
+      "keep": "Keep note"
     }
   }
 }
