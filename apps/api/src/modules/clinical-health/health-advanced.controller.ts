@@ -95,8 +95,8 @@ export class HealthAdvancedController {
 
   @Post("documents/:documentId/void")
   @RequirePetAccess("canEditHealth")
-  voidDocument(@Param("petId") petId: string, @Param("documentId") documentId: string, @Body() dto: VoidMedicalDocumentDto) {
-    return this.documents.voidDocument(petId, documentId, dto.reason);
+  voidDocument(@Param("petId") petId: string, @Param("documentId") documentId: string, @CurrentUser() user: SessionUser, @Body() dto: VoidMedicalDocumentDto) {
+    return this.documents.voidDocument(petId, documentId, dto.reason, user.id);
   }
 
   @Post("corrections")

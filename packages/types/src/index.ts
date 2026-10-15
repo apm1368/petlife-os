@@ -2840,6 +2840,11 @@ export interface AdminSearchResultDto {
   customers: AdminCustomerListItemDto[];
   orders: AdminOrderSummaryDto[];
   supportCases: SupportCaseSummaryDto[];
+  /**
+   * Which sections the caller's role may search (customers: customer.view, orders: commerce.view, supportCases:
+   * support.view). A section outside the role is always empty — "not allowed", not "no matches".
+   */
+  searched: { customers: boolean; orders: boolean; supportCases: boolean };
 }
 
 // ---------------------------------------------------------------------------
