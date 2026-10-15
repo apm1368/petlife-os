@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar, Button } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
@@ -31,12 +31,13 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const router = useRouter();
   const preview = useLocalPreview();
+  const commerce = /^\/(fa|en)\/shop(?:\/|$)/.test(usePathname() ?? "");
 
   // A signed-in member keeps the member frame on public discovery pages.
   if (!preview && status === "authenticated" && user) return <MemberFrame>{children}</MemberFrame>;
 
   return (
-    <div className="min-h-screen bg-surface-base">
+    <div className={`min-h-screen bg-surface-base ${commerce ? "public-shell--commerce" : ""}`}>
       <header className="public-site-header border-b border-border-subtle bg-surface-elevated px-4 py-3">
         <Link href={`/${locale}`} className="text-section-title text-text-primary">
           {t("appName")}

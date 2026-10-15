@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor, fireEvent } from "@testing-library/react";
+import { screen, waitFor, fireEvent, act } from "@testing-library/react";
 import type { ProductDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { commerceService } from "@/services/commerce.service";
@@ -84,4 +85,43 @@ describe("ProductDetailView", () => {
     expect(commerceService.setFavorite).toHaveBeenCalledWith("prod-1", true);
     expect(screen.getByRole("button", { name: "Remove from favorites" })).toBeTruthy();
   });
+  it("shows a failed favorite save and restores the previous state", async () => {
+    vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
+    vi.mocked(commerceService.setFavorite).mockRejectedValue(new Error("offline"));
+    renderWithIntl(<ProductDetailView productId="prod-1" />);
+    await screen.findByRole("heading", { name: DETAIL.title });
+    const button = screen.getByRole("button", { name: /save to favorites/i });
+    fireEvent.click(button);
+    expect((await screen.findByRole("alert")).textContent).toContain("Your saved products could not be updated");
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("keeps existing reviews and offers retry when more reviews fail", async () => {
+    vi.mocked(commerceService.getProductDetail).mockResolvedValue({ ...DETAIL, rating: { average: 5, count: 2 } });
+    vi.mocked(commerceService.listProductReviews).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce({ items: [{ ...DETAIL.reviews[0]!, id: "r2", body: "Second review" }], total: 2, page: 2, pageSize: 20 });
+    renderWithIntl(<ProductDetailView productId="prod-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: /more reviews/i }));
+    expect((await screen.findByRole("alert")).textContent).toContain("More reviews could not be loaded");
+    expect(screen.getByText("Luna loves it")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /more reviews/i }));
+    expect(await screen.findByText("Second review")).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("ignores a late detail response after navigating to another product", async () => {
+    let resolveOld!: (value: ProductDetailDto) => void;
+    vi.mocked(commerceService.getProductDetail).mockImplementationOnce(() => new Promise((resolve) => { resolveOld = resolve; })).mockResolvedValueOnce({ ...DETAIL, id: "prod-2", title: "New product" });
+    function Journey() {
+      const [id, setId] = useState("prod-1");
+      return <><button onClick={() => setId("prod-2")}>Next product</button><ProductDetailView productId={id} /></>;
+    }
+    renderWithIntl(<Journey />);
+    await waitFor(() => expect(commerceService.getProductDetail).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "Next product" }));
+    await screen.findByRole("heading", { name: "New product" });
+    await act(async () => { resolveOld(DETAIL); });
+    expect(screen.getByRole("heading", { name: "New product" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: DETAIL.title })).toBeNull();
+  });
+
 });

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-14",
+  "generated": "2026-10-15",
   "scope": "Static service consumer scan, excluding tests. Aliases, generic action dispatch and legacy wrappers require manual review; no automatic feature claims.",
   "routes": [
     {
@@ -1609,8 +1609,10 @@
       "service": "addressesService",
       "method": "update",
       "source": "services/addresses.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/commerce/CheckoutView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminAnimalSupportService",
@@ -3648,8 +3650,10 @@
       "service": "commerceService",
       "method": "clearCart",
       "source": "services/commerce.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/commerce/CartView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "commerceService",

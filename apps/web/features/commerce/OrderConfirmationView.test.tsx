@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import type { OrderDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { commerceService } from "@/services/commerce.service";
@@ -104,4 +104,12 @@ describe("OrderConfirmationView", () => {
     await waitFor(() => expect(screen.getByText("Seller is preparing your order")).toBeTruthy());
     expect(screen.queryByText(/courier/i)).toBeNull();
   });
+  it("offers recovery when order reads fail instead of implying confirmation", async () => {
+    vi.mocked(commerceService.getOrder).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce(order("order-1", "Pet Bazaar Tehran"));
+    renderWithIntl(<OrderConfirmationView orderIds={["order-1"]} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Retry" }));
+    expect(await screen.findByText("Pet Bazaar Tehran")).toBeTruthy();
+    expect(screen.getByText("Confirmed")).toBeTruthy();
+  });
+
 });

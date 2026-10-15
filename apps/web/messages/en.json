@@ -17,7 +17,8 @@
     "genericError": "Something went wrong. Please try again.",
     "navVet": "Vets",
     "navShop": "Shop",
-    "navLostPets": "Lost pets"
+    "navLostPets": "Lost pets",
+    "listSeparator": ", "
   },
   "auth": {
     "welcome": {
@@ -1314,6 +1315,15 @@
         "generic": "This installment plan wasn't approved.",
         "tryAnother": "Try another provider",
         "retry": "Try again"
+      },
+      "progress": {
+        "steps": {
+          "address": "Address",
+          "review": "Review",
+          "shipping": "Delivery",
+          "payment": "Payment"
+        },
+        "label": "Checkout steps"
       }
     },
     "confirmation": {
@@ -1623,6 +1633,41 @@
       "empty": "No favorites yet",
       "emptyHint": "Tap the heart on a product to save it here.",
       "browse": "Browse products"
+    },
+    "design": {
+      "navLabel": "Your pet shop",
+      "shop": "Shop",
+      "orders": "My orders",
+      "repeat": "Repeat delivery",
+      "favorites": "Saved products",
+      "cart": "Shopping cart",
+      "browse": "Explore all products",
+      "filters": "Find their next favourite",
+      "filterHint": "Choose what suits your companion.",
+      "allProducts": "All products",
+      "applyFilters": "Show products",
+      "repeatTitle": "A little care, on repeat.",
+      "repeatDescription": "Plan the next delivery of an eligible product. You stay in control of every order.",
+      "repeatCta": "Explore repeat delivery",
+      "viewProduct": "View product",
+      "summary": "Order summary",
+      "cartStep": "Shopping cart",
+      "checkoutStep": "Checkout details",
+      "completeStep": "Order status",
+      "journey": "Purchase progress",
+      "categoryFailed": "Categories could not be loaded. You can still search the catalog.",
+      "loadFailed": "We couldn’t load this information. Please try again.",
+      "favoriteFailed": "Your saved products could not be updated. Please try again.",
+      "reviewsFailed": "More reviews could not be loaded. Please try again.",
+      "shopCredit": "Shop hero: AI-generated photorealistic concept by OpenAI; cropped and re-encoded. Not a real shop or product photograph.",
+      "clearCart": "Clear cart",
+      "clearTitle": "Clear your shopping cart?",
+      "clearHint": "All items in this cart will be removed.",
+      "clearConfirm": "Yes, clear cart",
+      "keepCart": "Keep items",
+      "editAddress": "Edit selected address",
+      "defaultAddress": "Household default address",
+      "editOptionalHint": "When editing, blank optional fields keep their existing values."
     }
   },
   "seller": {

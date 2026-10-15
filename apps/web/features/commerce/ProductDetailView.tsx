@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useStickyTop } from "@/features/shared/use-sticky-top";
@@ -11,6 +11,7 @@ import { commerceService } from "@/services/commerce.service";
 import { ApiError } from "@/lib/api/client";
 import { buildLoginUrl } from "@/lib/auth/return-to";
 import { formatNumber, PriceBlock, ProductImage, RatingInline, StarRow, StockBadge } from "./commerce-ui";
+import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
@@ -33,11 +34,13 @@ const MAX_LINE_QUANTITY = 20;
  */
 export function ProductDetailView({ productId }: { productId: string }) {
   const t = useTranslations("commerce.detail");
+  const design = useTranslations("commerce.design");
   const tCompat = useTranslations("commerce.compatibility");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
   const { activePet } = useActivePet();
 
+  const loadId = useRef(0);
   const [product, setProduct] = useState<ProductDetailDto | null>(null);
   const [error, setError] = useState<"notFound" | "failed" | null>(null);
   const [variantId, setVariantId] = useState<string | null>(null);
@@ -48,16 +51,29 @@ export function ProductDetailView({ productId }: { productId: string }) {
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const [favoriteBusy, setFavoriteBusy] = useState(false);
+  const [favoriteError, setFavoriteError] = useState(false);
+  const [reviewError, setReviewError] = useState(false);
+  const [reviewsBusy, setReviewsBusy] = useState(false);
   const [favorited, setFavorited] = useState(false);
   const [reviews, setReviews] = useState<ProductReviewDto[]>([]);
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewsTotal, setReviewsTotal] = useState(0);
 
   async function load() {
+    const request = ++loadId.current;
+    setAdded(false);
+    setAddError(null);
+    setFavoriteError(false);
+    setReviewError(false);
+    setFavoriteBusy(false);
+    setReviewsBusy(false);
+    setIsAdding(false);
     setError(null);
     setProduct(null);
     try {
       const detail = await commerceService.getProductDetail(productId, activePet?.id);
+      if (request !== loadId.current) return;
       setProduct(detail);
       const defaultOffer = detail.offers.find((o) => o.id === detail.defaultOfferId) ?? null;
       const initialVariant = defaultOffer?.productVariantId ?? detail.variants.find((v) => v.isActive)?.id ?? detail.variants[0]?.id ?? null;
@@ -70,12 +86,14 @@ export function ProductDetailView({ productId }: { productId: string }) {
       setQuantity(1);
       setImageIndex(0);
     } catch (err) {
+      if (request !== loadId.current) return;
       setError(err instanceof ApiError && err.status === 404 ? "notFound" : "failed");
     }
   }
 
   useEffect(() => {
     void load();
+    return () => { loadId.current += 1; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, activePet?.id]);
 
@@ -113,36 +131,55 @@ export function ProductDetailView({ productId }: { productId: string }) {
 
   async function addToCart() {
     if (!selectedOffer) return;
+    const request = loadId.current;
     setIsAdding(true);
     setAddError(null);
     try {
       await commerceService.addCartItem(selectedOffer.id, quantity, activePet?.id ?? null);
-      setAdded(true);
+      if (request === loadId.current) setAdded(true);
     } catch (err) {
-      if (requireLogin(err)) return;
+      if (request !== loadId.current || requireLogin(err)) return;
       setAddError(err instanceof ApiError && err.status < 500 ? err.message : t("addFailed"));
     } finally {
-      setIsAdding(false);
+      if (request === loadId.current) setIsAdding(false);
     }
   }
 
   async function toggleFavorite() {
+    if (favoriteBusy) return;
+    const request = loadId.current;
+    setFavoriteBusy(true);
+    setFavoriteError(false);
     const next = !favorited;
     setFavorited(next);
     try {
       await commerceService.setFavorite(productId, next);
     } catch (err) {
+      if (request !== loadId.current) return;
       setFavorited(!next);
-      requireLogin(err);
+      if (!requireLogin(err)) setFavoriteError(true);
+    } finally {
+      if (request === loadId.current) setFavoriteBusy(false);
     }
   }
 
   async function loadMoreReviews() {
-    const next = reviewPage + 1;
-    const page = await commerceService.listProductReviews(productId, next);
-    setReviews((current) => [...current, ...page.items.filter((r) => !current.some((c) => c.id === r.id))]);
-    setReviewPage(next);
-    setReviewsTotal(page.total);
+    if (reviewsBusy) return;
+    const request = loadId.current;
+    setReviewsBusy(true);
+    setReviewError(false);
+    try {
+      const next = reviewPage + 1;
+      const page = await commerceService.listProductReviews(productId, next);
+      if (request !== loadId.current) return;
+      setReviews((current) => [...current, ...page.items.filter((r) => !current.some((c) => c.id === r.id))]);
+      setReviewPage(next);
+      setReviewsTotal(page.total);
+    } catch {
+      if (request === loadId.current) setReviewError(true);
+    } finally {
+      if (request === loadId.current) setReviewsBusy(false);
+    }
   }
 
   if (error === "notFound") return <ErrorRecovery title={t("notFound")} message={t("notFoundHint")} retryLabel={t("backToShop")} onRetry={() => router.push(`/${locale}/shop/products`)} />;
@@ -165,7 +202,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
   ].filter(Boolean) as string[];
 
   return (
-    <div className="flex flex-col gap-10 pb-24 lg:pb-0">
+    <CommercePage className="commerce-detail">
       <nav aria-label={t("breadcrumb")} className="flex flex-wrap items-center gap-1 text-metadata text-text-secondary">
         <button type="button" className="hover:text-text-primary" onClick={() => router.push(`/${locale}/shop`)}>
           {t("shop")}
@@ -206,7 +243,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
                 )}
               </div>
             </div>
-            <button type="button" onClick={toggleFavorite} aria-pressed={favorited} aria-label={favorited ? t("unfavorite") : t("favorite")} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-subtle hover:border-border-strong">
+            <button type="button" onClick={toggleFavorite} disabled={favoriteBusy} aria-pressed={favorited} aria-label={favorited ? t("unfavorite") : t("favorite")} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-subtle hover:border-border-strong">
               <Heart size={20} aria-hidden="true" className={favorited ? "fill-current text-state-urgent" : "text-text-secondary"} />
             </button>
           </div>
@@ -290,6 +327,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
             </div>
           ) : null}
 
+          {favoriteError ? <p role="alert" className="text-metadata text-state-urgent">{design("favoriteFailed")}</p> : null}
           {addError ? (
             <p role="alert" className="text-metadata text-state-urgent">
               {addError}
@@ -387,8 +425,9 @@ export function ProductDetailView({ productId }: { productId: string }) {
             ))}
           </ul>
         )}
+        {reviewError ? <p role="alert" className="text-metadata text-state-urgent">{design("reviewsFailed")}</p> : null}
         {reviews.length < reviewsTotal ? (
-          <Button variant="secondary" onClick={loadMoreReviews}>
+          <Button variant="secondary" onClick={loadMoreReviews} isLoading={reviewsBusy}>
             {t("moreReviews")}
           </Button>
         ) : null}
@@ -406,6 +445,6 @@ export function ProductDetailView({ productId }: { productId: string }) {
           </div>
         </section>
       ) : null}
-    </div>
+    </CommercePage>
   );
 }

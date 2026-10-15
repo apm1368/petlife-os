@@ -7,7 +7,10 @@ import { Button, EmptyState, ErrorRecovery, Search, Select, Sheet, SlidersHorizo
 import type { ProductCategoryDto, ProductSearchResultDto } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { commerceService, type ProductSort, type SearchProductsInput } from "@/services/commerce.service";
+import { toAsciiDigits } from "@petlife/validation";
+import { localizeDigits } from "@/lib/date/jalali";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
 import { formatNumber } from "./commerce-ui";
 
@@ -61,6 +64,8 @@ export function ProductResultsView() {
   const [data, setData] = useState<ProductSearchResultDto | null>(null);
   const [categories, setCategories] = useState<ProductCategoryDto[]>([]);
   const [error, setError] = useState(false);
+  const design = useTranslations("commerce.design");
+  const [categoryFailed, setCategoryFailed] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [query, setQuery] = useState(filters.search ?? "");
   const [retry, setRetry] = useState(0);
@@ -68,8 +73,11 @@ export function ProductResultsView() {
   useEffect(() => setQuery(filters.search ?? ""), [filters.search]);
 
   useEffect(() => {
-    void commerceService.listCategories().then(setCategories).catch(() => setCategories([]));
-  }, []);
+    let cancelled = false;
+    setCategoryFailed(false);
+    void commerceService.listCategories().then((items) => { if (!cancelled) setCategories(items); }).catch(() => { if (!cancelled) setCategoryFailed(true); });
+    return () => { cancelled = true; };
+  }, [retry]);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,8 +120,14 @@ export function ProductResultsView() {
   const currentCategory = categories.find((c) => c.id === filters.category);
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
+  const searchForm = (className: string) => <form role="search" className={className} onSubmit={(e) => { e.preventDefault(); update({ search: query.trim() || undefined }); }}>
+    <label className="commerce-search"><Search size={18} aria-hidden="true" /><span className="sr-only">{t("searchLabel")}</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("searchPlaceholder")} /></label>
+    <Button type="submit">{t("searchButton")}</Button>
+  </form>;
+
   const filterPanel = data ? (
-    <div className="flex flex-col gap-4">
+    <div className="commerce-filter-fields">
+      <Select label={t("categories")} value={filters.category ?? ""} onChange={(e) => update({ category: e.target.value || undefined })} options={[{ value: "", label: t("allCategories") }, ...categories.map((c) => ({ value: c.id, label: c.name }))]} />
       <Select
         label={t("filters.species")}
         value={filters.species ?? ""}
@@ -184,24 +198,10 @@ export function ProductResultsView() {
   ) : null;
 
   return (
-    <div className="flex flex-col gap-5">
+    <CommercePage className="commerce-results">
       <div className="flex flex-col gap-3">
         <h1 className="text-page-title text-text-primary">{currentCategory?.name ?? (filters.search ? t("searchTitle", { query: filters.search }) : t("title"))}</h1>
-        <form
-          role="search"
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            update({ search: query.trim() || undefined });
-          }}
-        >
-          <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-md border border-border-strong bg-surface-elevated px-3">
-            <Search size={18} aria-hidden="true" className="shrink-0 text-text-secondary" />
-            <span className="sr-only">{t("searchLabel")}</span>
-            <input className="h-full w-full min-w-0 bg-transparent text-body text-text-primary outline-none" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("searchPlaceholder")} />
-          </label>
-          <Button type="submit">{t("searchButton")}</Button>
-        </form>
+        {searchForm("commerce-results__mobile-search")}
         {topCategories.length ? (
           <nav aria-label={t("categories")} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             <CategoryChip label={t("allCategories")} active={!filters.category} onClick={() => update({ category: undefined })} />
@@ -212,8 +212,9 @@ export function ProductResultsView() {
         ) : null}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-        <aside className="hidden lg:block" aria-label={t("filters.title")}>
+      <div className="shop-layout">
+        <aside className="commerce-sidebar commerce-results__sidebar" aria-label={t("filters.title")}><h2>{t("filters.title")}</h2>{searchForm("commerce-filter-search")}
+          {categoryFailed ? <p role="alert">{design("categoryFailed")}</p> : null}
           {filterPanel ?? <Skeleton className="h-80 w-full" />}
         </aside>
 
@@ -234,7 +235,7 @@ export function ProductResultsView() {
             </div>
           </div>
 
-          {error ? <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={() => setRetry((n) => n + 1)} /> : null}
+          {error ? <ErrorRecovery title={t("title")} message={design("loadFailed")} retryLabel={t("retry")} onRetry={() => setRetry((n) => n + 1)} /> : null}
           {!error && !data ? (
             <div className="product-grid" aria-label={t("loading")}>
               {Array.from({ length: 8 }, (_, i) => (
@@ -278,7 +279,7 @@ export function ProductResultsView() {
           <Button onClick={() => setSheetOpen(false)}>{data ? t("filters.showResults", { count: data.total }) : t("filters.close")}</Button>
         </div>
       </Sheet>
-    </div>
+    </CommercePage>
   );
 }
 
@@ -306,10 +307,11 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
 
 /** Customers think in Toman; the API filters in IRR (×10). Persian digits are accepted. */
 function PriceInput({ label, value, onCommit }: { label: string; value: number | undefined; onCommit: (rial: string | undefined) => void }) {
+  const locale = useLocale() as "fa" | "en";
   const [draft, setDraft] = useState(value ? String(Math.round(value / 10)) : "");
   useEffect(() => setDraft(value ? String(Math.round(value / 10)) : ""), [value]);
   const commit = () => {
-    const digits = draft.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[^\d]/g, "");
+    const digits = toAsciiDigits(draft).replace(/[^\d]/g, "");
     const next = digits ? String(Number(digits) * 10) : undefined;
     if (next !== (value ? String(value) : undefined)) onCommit(next);
   };
@@ -319,7 +321,8 @@ function PriceInput({ label, value, onCommit }: { label: string; value: number |
       <input
         inputMode="numeric"
         className="h-11 w-full min-w-0 rounded-md border border-border-strong bg-surface-elevated px-3 text-body text-text-primary"
-        value={draft}
+        value={localizeDigits(draft, locale)}
+        dir="ltr"
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {

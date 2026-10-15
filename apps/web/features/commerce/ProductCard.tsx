@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { StatusLabel } from "@petlife/ui";
 import type { ProductSummaryDto } from "@petlife/types";
+import { CommerceArrow } from "./CommercePage";
 import { PriceBlock, ProductImage, RatingInline, StockBadge } from "./commerce-ui";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
@@ -23,14 +24,15 @@ const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "n
 export function ProductCard({ product, onClick }: { product: ProductSummaryDto; onClick: () => void }) {
   const t = useTranslations("commerce.productCard");
   const tCompat = useTranslations("commerce.compatibility");
+  const design = useTranslations("commerce.design");
   const offer = product.bestOffer;
 
   return (
-    <button type="button" onClick={onClick} className="group flex h-full w-full flex-col overflow-hidden rounded-lg border border-border-subtle bg-surface-elevated text-start transition hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
-      <ProductImage src={product.imageUrl} alt={product.title} className="aspect-square w-full" />
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
+    <button type="button" onClick={onClick} className="commerce-product">
+      <div className="commerce-product__photo"><ProductImage src={product.imageUrl} alt={product.title} className="aspect-square w-full" /></div>
+      <div className="commerce-product__body">
         {product.brand ? <p className="text-metadata text-text-secondary">{product.brand.name}</p> : null}
-        <p className="line-clamp-2 text-body font-medium text-text-primary">{product.title}</p>
+        <p className="commerce-product__title">{product.title}</p>
         {product.variantTitle ? <p className="text-metadata text-text-secondary">{product.variantTitle}</p> : null}
         <RatingInline rating={product.rating} />
         <div className="mt-auto flex flex-col gap-1.5 pt-1">
@@ -46,6 +48,7 @@ export function ProductCard({ product, onClick }: { product: ProductSummaryDto; 
             ) : null}
           </div>
         </div>
+        <span className="commerce-product__action"><span>{design("viewProduct")}</span><span className="commerce-product__arrow"><CommerceArrow /></span></span>
       </div>
     </button>
   );

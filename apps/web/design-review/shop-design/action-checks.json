@@ -1,0 +1,486 @@
+{
+  "controlledApi": true,
+  "actions": [
+    "Shop sidebar filters and sort update the real results URL",
+    "Failed favorite save is visible and does not silently succeed",
+    "Add to cart sends selected offer, quantity and current pet to existing API",
+    "Clear cart requires confirmation; failure keeps the cart and shows recovery",
+    "Cart reaches the existing address selection checkout"
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/shop/categories",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "8"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "onPromotion": [
+          "true"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "4"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/categories",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "8"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "onPromotion": [
+          "true"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "4"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/households",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/unread-count",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/categories",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "8"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "onPromotion": [
+          "true"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "4"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/unread-count",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/categories",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "8"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "onPromotion": [
+          "true"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "4"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/households/h1/pets",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/households/h1/active-pet",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/categories",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "petId": [
+          "pet-1"
+        ],
+        "species": [
+          "DOG"
+        ],
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "8"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "petId": [
+          "pet-1"
+        ],
+        "species": [
+          "DOG"
+        ],
+        "onPromotion": [
+          "true"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "sort": [
+          "RECOMMENDED"
+        ],
+        "pageSize": [
+          "4"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/pets/pet-1/access",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/categories",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "search": [
+          "sensitive food"
+        ],
+        "category": [
+          "cat-0"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "page": [
+          "1"
+        ],
+        "petId": [
+          "pet-1"
+        ],
+        "pageSize": [
+          "24"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/categories",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "search": [
+          "sensitive food"
+        ],
+        "category": [
+          "cat-0"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "page": [
+          "1"
+        ],
+        "petId": [
+          "pet-1"
+        ],
+        "pageSize": [
+          "24"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products",
+      "query": {
+        "search": [
+          "sensitive food"
+        ],
+        "category": [
+          "cat-0"
+        ],
+        "inStock": [
+          "true"
+        ],
+        "sort": [
+          "PRICE_ASC"
+        ],
+        "page": [
+          "1"
+        ],
+        "petId": [
+          "pet-1"
+        ],
+        "pageSize": [
+          "24"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products/p0",
+      "query": {
+        "petId": [
+          "pet-1"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/shop/products/p0",
+      "query": {
+        "petId": [
+          "pet-1"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "PUT",
+      "path": "/shop/products/p0/favorite",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/cart/items",
+      "query": {},
+      "body": "{\"offerId\":\"offer-0\",\"quantity\":1,\"targetPetId\":\"pet-1\"}"
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/auth/session",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/households",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/households/h1/pets",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/households/h1/active-pet",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/unread-count",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/cart",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/pets/pet-1/access",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/unread-count",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/cart",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/pets/pet-1/access",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "DELETE",
+      "path": "/cart",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/cart",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/addresses",
+      "query": {
+        "householdId": [
+          "h1"
+        ]
+      },
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/cart",
+      "query": {},
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/addresses",
+      "query": {
+        "householdId": [
+          "h1"
+        ]
+      },
+      "body": null
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { randomId } from "@/lib/id/random-id";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, Input, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import {
   DeliveryMethod,
   type CartDto,
@@ -23,6 +23,7 @@ import { addressesService } from "@/services/addresses.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { CommercePage } from "./CommercePage";
 import { Stepper } from "@/features/shared/Stepper";
 import { formatCount } from "@/lib/number/format-number";
 import { localizeDigits } from "@/lib/date/jalali";
@@ -61,14 +62,17 @@ function toLatinDigits(value: string): string {
  */
 export function CheckoutView() {
   const t = useTranslations("commerce.checkout");
+  const design = useTranslations("commerce.design");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
   const progress = (current: number) => (
-    <Stepper steps={locale === "fa" ? ["نشانی", "بازبینی", "ارسال", "پرداخت"] : ["Address", "Review", "Delivery", "Payment"]} current={current} label={locale === "fa" ? "مراحل تسویه" : "Checkout steps"} />
+    <Stepper steps={[t("progress.steps.address"), t("progress.steps.review"), t("progress.steps.shipping"), t("progress.steps.payment")]} current={current} label={t("progress.label")} />
   );
   const { householdId } = useActivePet();
 
+  const [initialFailed, setInitialFailed] = useState(false);
+  const [initialRetry, setInitialRetry] = useState(0);
   const [step, setStep] = useState<Step>("address");
   const [cart, setCart] = useState<CartDto | null>(null);
   const [addresses, setAddresses] = useState<CustomerAddressDto[] | null>(null);
@@ -80,6 +84,8 @@ export function CheckoutView() {
   const [paymentIntentIdempotencyKey, setPaymentIntentIdempotencyKey] = useState(() => randomId());
   const [payIdempotencyKey, setPayIdempotencyKey] = useState(() => randomId());
   const [newAddress, setNewAddress] = useState({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [defaultAddress, setDefaultAddress] = useState(false);
   const [addressFormOpen, setAddressFormOpen] = useState(false);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [isCreatingAddress, setIsCreatingAddress] = useState(false);
@@ -93,33 +99,48 @@ export function CheckoutView() {
   const [plans, setPlans] = useState<FinancingPlanOptionDto[] | null>(null);
 
   useEffect(() => {
-    void commerceService.getCart().then(setCart);
-    if (householdId)
-      void addressesService.list(householdId).then((list) => {
-        setAddresses(list);
-        // The household default is preselected; the customer can still pick another.
-        setAddressId((current) => current ?? list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? null);
-        setAddressFormOpen(list.length === 0);
-      });
-  }, [householdId]);
+    let cancelled = false;
+    setInitialFailed(false);
+    setAddresses(null);
+    setCart(null);
+    void Promise.all([commerceService.getCart(), householdId ? addressesService.list(householdId) : Promise.resolve([])]).then(([nextCart, list]) => {
+      if (cancelled) return;
+      setCart(nextCart);
+      setAddresses(list);
+      setAddressId((current) => list.some((a) => a.id === current) ? current : list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? null);
+      setAddressFormOpen(list.length === 0);
+    }).catch(() => { if (!cancelled) setInitialFailed(true); });
+    return () => { cancelled = true; };
+  }, [householdId, initialRetry]);
+
+  function openAddressForm(address?: CustomerAddressDto) {
+    setEditingAddressId(address?.id ?? null);
+    setDefaultAddress(address?.isDefault ?? false);
+    setNewAddress({ recipient: address?.recipient ?? "", phone: address?.phone ?? "", addressLine: address?.addressLine ?? "", city: address?.city ?? "", postalCode: address?.postalCode ?? "", countryCode: address?.countryCode ?? "IR" });
+    setAddressError(null);
+    setAddressFormOpen(true);
+  }
 
   async function createAddress() {
     if (!householdId) return;
     setIsCreatingAddress(true);
     setAddressError(null);
     try {
-      const address = await addressesService.create({
-        householdId,
+      const fields = {
         addressLine: newAddress.addressLine.trim(),
         city: newAddress.city.trim(),
         countryCode: newAddress.countryCode,
         recipient: newAddress.recipient.trim() || undefined,
         phone: newAddress.phone.trim() || undefined,
         postalCode: toLatinDigits(newAddress.postalCode) || undefined,
-      });
-      setAddresses((prev) => [address, ...(prev ?? []).map((a) => (address.isDefault ? { ...a, isDefault: false } : a))]);
+        isDefault: defaultAddress || editingAddressId ? defaultAddress : undefined,
+      };
+      const address = editingAddressId ? await addressesService.update(editingAddressId, fields) : await addressesService.create({ householdId, ...fields });
+      setAddresses((prev) => [address, ...(prev ?? []).filter((a) => a.id !== address.id).map((a) => (address.isDefault ? { ...a, isDefault: false } : a))]);
       setAddressId(address.id);
       setAddressFormOpen(false);
+      setEditingAddressId(null);
+      setDefaultAddress(false);
       setNewAddress({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
     } catch (err) {
       setAddressError(err instanceof ApiError && err.status < 500 ? err.message : t("address.saveFailed"));
@@ -325,15 +346,17 @@ export function CheckoutView() {
     void enterMethodStep();
   }
 
+  if (initialFailed) return <CommercePage><ErrorRecovery title={t("address.title")} message={design("loadFailed")} retryLabel={tCommon("retry")} onRetry={() => setInitialRetry((n) => n + 1)} /></CommercePage>;
+
   if (!cart || (householdId && !addresses)) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   // Once delivery is chosen the checkout carries the real totals; before that the cart is the summary.
   const priced = checkout && (step === "method" || step === "payment" || step.startsWith("financing-"));
   const frame = (body: ReactNode) => (
-    <div className="flow-layout">
+    <CommercePage className="commerce-checkout"><div className="flow-layout">
       <div className="flow-main">{body}</div>
       <CheckoutSummary cart={cart} checkout={priced ? checkout : null} />
-    </div>
+    </div></CommercePage>
   );
 
   if (step === "address") {
@@ -357,7 +380,7 @@ export function CheckoutView() {
                   <p className="text-body font-medium text-text-primary">{address.label ?? address.recipient ?? address.city}</p>
                   {address.isDefault ? <StatusLabel tone="neutral">{t("address.default")}</StatusLabel> : null}
                 </div>
-                <p className="text-metadata text-text-secondary">{[address.city, address.addressLine].filter(Boolean).join(locale === "fa" ? "، " : ", ")}</p>
+                <p className="text-metadata text-text-secondary">{[address.city, address.addressLine].filter(Boolean).join(tCommon("listSeparator"))}</p>
                 {address.postalCode || address.recipient ? (
                   <p className="text-metadata text-text-secondary">{[address.recipient, address.postalCode ? t("address.postalCodeValue", { code: localizeDigits(address.postalCode, locale) }) : null].filter(Boolean).join(" · ")}</p>
                 ) : null}
@@ -367,21 +390,24 @@ export function CheckoutView() {
         </div>
 
         {householdId && !addressFormOpen ? (
-          <Button variant="ghost" onClick={() => setAddressFormOpen(true)}>
-            {t("address.addNew")}
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="ghost" onClick={() => openAddressForm()}>{t("address.addNew")}</Button>
+            {addresses?.some((a) => a.id === addressId) ? <Button variant="secondary" onClick={() => openAddressForm(addresses.find((a) => a.id === addressId))}>{design("editAddress")}</Button> : null}
+          </div>
         ) : null}
 
         {householdId && addressFormOpen ? (
           <ContextSurface className="flex flex-col gap-3">
-            <p className="text-section-title text-text-primary">{t("address.addNew")}</p>
+            <p className="text-section-title text-text-primary">{editingAddressId ? design("editAddress") : t("address.addNew")}</p>
+            {editingAddressId ? <p className="text-metadata text-text-secondary">{design("editOptionalHint")}</p> : null}
             <div className="grid gap-3 sm:grid-cols-2">
               <Input label={t("address.recipient")} value={newAddress.recipient} autoComplete="name" onChange={(e) => setNewAddress({ ...newAddress, recipient: e.target.value })} />
-              <Input label={t("address.phone")} value={newAddress.phone} inputMode="tel" autoComplete="tel" onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })} />
+              <Input label={t("address.phone")} value={newAddress.phone} dir="ltr" inputMode="tel" autoComplete="tel" onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })} />
               <Input label={t("address.city")} value={newAddress.city} autoComplete="address-level2" onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })} />
               <Input
                 label={t("address.postalCode")}
-                value={newAddress.postalCode}
+                value={localizeDigits(newAddress.postalCode, locale)}
+                dir="ltr"
                 inputMode="numeric"
                 autoComplete="postal-code"
                 hint={t("address.postalCodeHint")}
@@ -390,6 +416,7 @@ export function CheckoutView() {
               />
             </div>
             <Input label={t("address.addressLine")} value={newAddress.addressLine} autoComplete="street-address" onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })} />
+            <label className="commerce-toggle"><span>{design("defaultAddress")}</span><input type="checkbox" checked={defaultAddress} onChange={(e) => setDefaultAddress(e.target.checked)} /></label>
             {addressError ? (
               <p role="alert" className="text-metadata text-state-urgent">
                 {addressError}
@@ -416,7 +443,7 @@ export function CheckoutView() {
 
         <p className="text-metadata text-text-secondary">{t("delivery.quotesNext")}</p>
 
-        <Button variant="primary" disabled={!addressId} onClick={() => createCheckout(false)}>
+        <Button variant="primary" disabled={!addressId || addressFormOpen || isCreatingAddress} onClick={() => createCheckout(false)}>
           {tCommon("continue")}
         </Button>
       </div>

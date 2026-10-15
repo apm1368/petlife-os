@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { OrderDetailDto } from "@petlife/types";
+import { CommercePage } from "./CommercePage";
+import { Stepper } from "@/features/shared/Stepper";
+import { formatNumber } from "./commerce-ui";
 import { fulfillmentTone } from "./fulfillment-tone";
 import { commerceService } from "@/services/commerce.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
@@ -17,20 +20,31 @@ import { formatCurrency } from "@/lib/currency/format-currency";
  */
 export function OrderConfirmationView({ orderIds }: { orderIds: string[] }) {
   const t = useTranslations("commerce.confirmation");
+  const design = useTranslations("commerce.design");
   const tCommon = useTranslations("common");
   const tFulfillment = useTranslations("commerce.statusLabels.fulfillment");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const orderKey = orderIds.join(",");
   const [orders, setOrders] = useState<OrderDetailDto[] | null>(null);
 
   useEffect(() => {
-    void Promise.all(orderIds.map((id) => commerceService.getOrder(id))).then(setOrders);
-  }, [orderIds]);
+    let cancelled = false;
+    setError(false);
+    setOrders(null);
+    void Promise.all(orderKey.split(",").filter(Boolean).map((id) => commerceService.getOrder(id))).then((items) => { if (!cancelled) setOrders(items); }).catch(() => { if (!cancelled) setError(true); });
+    return () => { cancelled = true; };
+  }, [orderKey, retry]);
+
+  if (error) return <CommercePage><ErrorRecovery title={t("title")} message={design("loadFailed")} retryLabel={tCommon("retry")} onRetry={() => setRetry((n) => n + 1)} /></CommercePage>;
 
   if (!orders) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
-    <div className="flex flex-col gap-5">
+    <CommercePage className="commerce-confirmation">
+      <Stepper steps={[design("cartStep"), design("checkoutStep"), design("completeStep")]} current={2} label={design("journey")} />
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
       <p className="text-body text-text-secondary">{t("subtitle", { count: orders.length })}</p>
 
@@ -45,7 +59,7 @@ export function OrderConfirmationView({ orderIds }: { orderIds: string[] }) {
           {order.items.map((item) => (
             <div key={item.id} className="flex items-center justify-between gap-3">
               <span className="text-metadata text-text-secondary">
-                {item.productTitleSnapshot} × {item.quantity}
+                {item.productTitleSnapshot} × {formatNumber(item.quantity, locale)}
               </span>
               <span className="text-metadata text-text-primary">{formatCurrency(item.totalPrice, locale)}</span>
             </div>
@@ -71,6 +85,6 @@ export function OrderConfirmationView({ orderIds }: { orderIds: string[] }) {
           {t("continueShopping")}
         </Button>
       </div>
-    </div>
+    </CommercePage>
   );
 }
