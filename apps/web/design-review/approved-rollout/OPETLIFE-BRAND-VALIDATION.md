@@ -18,3 +18,5 @@
 | ادمین | [۳۹۰](opetlife-brand-screenshots/before-admin-fa-390-light.webp) · [۱۴۴۰](opetlife-brand-screenshots/before-admin-fa-1440-light.webp) | [۳۹۰](opetlife-brand-screenshots/admin-fa-390-light.webp) · [۱۴۴۰](opetlife-brand-screenshots/admin-fa-1440-light.webp) |
 
 تصاویر انگلیسی و فارسی تیره نیز در همان پوشه‌اند. اسکریپت `browser-opetlife-brand.py` وجود و بارگذاری واقعی نماد، نام صفحه، آیکون‌های مرورگر، حالت روشن/تیره، خطای مرورگر و اسکرول افقی را بررسی می‌کند. نتایج در `opetlife-brand-screenshots/checks.json` ثبت می‌شوند. وضعیت نهایی ادغام/انتشار در Issue #4 و مرجع موجود `docs/ops/stabilization-remaining.fa.md` ثبت می‌شود.
+
+پس از ادغام آخرین تثبیت و PR #35، تعارض دو فایل ترجمه با حفظ کلیدهای تاریخ/راهنمای مدارک و نام جدید حل شد. ۱۶ آزمون کلیدی دوباره موفق شدند و هر ۲۴ تصویر/بررسی بعد روی کد ترکیبی `eff51909d88c8738ff4fa9c31086432a3da8455a` مجدداً ثبت شدند؛ metadata در `capture-source.json` است. تغییر سن و توضیح مدارک متعلق به PR #35 است و به تغییر برند نسبت داده نمی‌شود. CI فقط روی head نهایی این PR قابل استناد است.
