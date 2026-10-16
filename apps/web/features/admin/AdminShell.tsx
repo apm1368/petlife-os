@@ -45,6 +45,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/content/placements", labelKey: "nav.contentPlacements", permission: "content.view" },
   { href: "/subscriptions", labelKey: "nav.subscriptions", permission: "subscription.view" },
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
+  { href: "/settings", labelKey: "nav.settings", permission: "settings.view" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];
 
@@ -58,7 +59,7 @@ const NAV_GROUPS: { key: string; fa: string; en: string; hrefs: string[] }[] = [
   { key: "network", fa: "شبکه و بازار", en: "Network", hrefs: ["/providers", "/services", "/sellers", "/commerce", "/travel", "/insurance", "/places"] },
   { key: "finance", fa: "مالی", en: "Finance", hrefs: ["/transactions", "/seller-finance", "/reconciliation", "/subscriptions"] },
   { key: "content", fa: "محتوا", en: "Content", hrefs: ["/content", "/content/new", "/content/categories", "/content/tags", "/content/media", "/content/placements"] },
-  { key: "system", fa: "سیستم", en: "System", hrefs: ["/audit"] },
+  { key: "system", fa: "سیستم", en: "System", hrefs: ["/settings", "/audit"] },
 ];
 
 /**

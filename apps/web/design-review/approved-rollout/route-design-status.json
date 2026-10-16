@@ -18,7 +18,8 @@
     {
       "file": "app/[locale]/(admin)/admin/animal-support/donations/page.tsx",
       "route": "[locale]/admin/animal-support/donations",
-      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/needs/[id]/page.tsx",
@@ -33,7 +34,8 @@
     {
       "file": "app/[locale]/(admin)/admin/animal-support/organizations/[id]/page.tsx",
       "route": "[locale]/admin/animal-support/organizations/[id]",
-      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/organizations/page.tsx",
@@ -1635,6 +1637,36 @@
       "file": "app/[locale]/page.tsx",
       "route": "[locale]",
       "visualStatus": "LIVE_APPROVED_LANDING_UNCHANGED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/campaigns/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/campaigns/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/campaigns/page.tsx",
+      "route": "[locale]/admin/animal-support/campaigns",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/rescue-cases/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/rescue-cases/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/rescue-cases/page.tsx",
+      "route": "[locale]/admin/animal-support/rescue-cases",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/settings/page.tsx",
+      "route": "[locale]/admin/settings",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #31: registry/history/editor fixtures, settings-screenshots checks; no live settings mutation. Member announcement separately verified on profile/activity."
     }
   ]
 }

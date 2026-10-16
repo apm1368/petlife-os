@@ -28,6 +28,7 @@ import {
   PostSupportCampaignUpdateDto,
   RecordDonationPayoutDto,
   RefundDonationDto,
+  RegisterRescueEvidenceDto,
   RequestAnimalSupportMediaUploadDto,
   SetAnimalSupportListedDto,
   SetAnimalSupportVerificationStatusDto,
@@ -135,6 +136,12 @@ export class AdminAnimalSupportController {
   @RequireAdminPermission("animalSupport.manage")
   requestEvidenceUpload(@Param("rescueCaseId") rescueCaseId: string, @Body() dto: RequestAnimalSupportMediaUploadDto) {
     return this.rescueCases.requestEvidenceUpload(rescueCaseId, dto.contentType, dto.fileSizeBytes);
+  }
+
+  @Post("rescue-cases/:rescueCaseId/evidence")
+  @RequireAdminPermission("animalSupport.manage")
+  registerRescueEvidence(@Param("rescueCaseId") rescueCaseId: string, @Body() dto: RegisterRescueEvidenceDto, @CurrentAdmin() admin: ResolvedAdminContext) {
+    return this.rescueCases.registerEvidence(admin, rescueCaseId, dto.evidenceObjectKeys);
   }
 
   // -- Campaigns -------------------------------------------------------------

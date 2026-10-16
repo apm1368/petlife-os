@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
+import { useAdminStore } from "@/stores/admin-store";
 import { ApiError } from "@/lib/api/client";
 import { adminAnimalSupportService } from "@/services/admin-animal-support.service";
 import { AdminAnimalSupportOverviewView, AdminDonationsView, AdminLostPetDetailView, AdminReportsView } from "./AdminAnimalSupportViews";
@@ -12,7 +13,7 @@ vi.mock("@/services/admin-animal-support.service", () => ({
 const svc = vi.mocked(adminAnimalSupportService);
 
 describe("Admin animal support console", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); useAdminStore.setState({ context: { isAdmin: true, adminUserId: "a1", displayName: "Admin", role: null, permissions: ["animalSupport.view", "animalSupport.payout", "trust.view", "trust.manage", "customer.pii.reveal"] }, status: "ready" }); });
 
   it("overview shows live counts and a permission message instead of a crash", async () => {
     svc.overview.mockResolvedValueOnce({ needsAttention: { pendingListings: 3, orgsAwaitingReview: 1, openReports: 2, openTrustCases: 0 }, live: { liveListings: 5, verifiedOrgs: 2, openLostPetIncidents: 1 }, donationsLast30Days: { count: 4, amountIrr: 20_000_000, refunded: 1 } });
@@ -60,4 +61,15 @@ describe("Admin animal support console", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Escalate" }).at(-1)!);
     await waitFor(() => expect(svc.escalateReport).toHaveBeenCalledWith("r1", "Likely fraud"));
   });
+});
+
+
+it("read-only trust viewers never receive location reveal or moderation controls", async () => {
+  useAdminStore.setState({ context: { isAdmin: true, adminUserId: "reader", displayName: "Reader", role: null, permissions: ["trust.view"] }, status: "ready" });
+  svc.getLostPet.mockResolvedValue({ id: "i1", pet: { id: "p1", name: "Cookie", species: "DOG" }, status: "OPEN", publicArea: "Park", description: "Lost", publicNotes: null, contactPreference: "IN_APP_MESSAGE", photoUrl: null, lastSeenAt: null, exactLocationRecorded: true, createdAt: "2026-10-16T00:00:00Z", foundAt: null });
+  renderWithIntl(<AdminLostPetDetailView incidentId="i1" />, "en");
+  expect(await screen.findByText("Recorded (masked)")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Reveal exact location" })).toBeNull();
+  expect(screen.queryByRole("button", { name: /Close report/ })).toBeNull();
+  expect(screen.queryByText("This report is closed.")).toBeNull();
 });

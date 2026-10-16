@@ -1,0 +1,170 @@
+[
+  {
+    "page": "rescues",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "rescue-detail",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaigns",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaign-detail",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "organization",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "donations",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "rescues",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "rescue-detail",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaigns",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaign-detail",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "organization",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "donations",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "rescues",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "rescue-detail",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaigns",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaign-detail",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "organization",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "donations",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "rescues",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "rescue-detail",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaigns",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "campaign-detail",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "organization",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "donations",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  }
+]
