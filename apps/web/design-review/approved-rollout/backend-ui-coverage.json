@@ -1,11 +1,11 @@
 {
   "generated": "2026-10-16",
-  "baseCommit": "376c876aeef8366394754f2c0ed5aa8ef5f26388",
+  "baseCommit": "ce6c887218a8415cd451e85ef4c9c446afe79a99",
   "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
   "counts": {
     "SYSTEM_ENDPOINT_REVIEW_NOT_A_SCREEN": 7,
-    "STATIC_UI_CHAIN_FOUND": 790,
-    "NO_EXACT_CLIENT_MATCH_REVIEW": 249,
+    "STATIC_UI_CHAIN_FOUND": 796,
+    "NO_EXACT_CLIENT_MATCH_REVIEW": 243,
     "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 34
   },
   "unresolvedDecorators": [],
@@ -4218,8 +4218,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 32,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "list",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 36,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -4229,8 +4239,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 36,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "changes",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 41,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PUT",
@@ -4240,8 +4260,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 40,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "propose",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 44,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -4251,8 +4281,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 44,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "review",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 46,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -4262,8 +4302,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 48,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "cancel",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 50,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -14783,8 +14833,18 @@
       "source": "apps/api/src/modules/platform-settings/platform-settings.controller.ts",
       "line": 9,
       "group": "modules/platform-settings/platform-settings.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "platformSettingsService",
+          "method": "publicSettings",
+          "source": "apps/web/services/platform-settings.service.ts",
+          "line": 6,
+          "consumers": [
+            "apps/web/features/app-shell/PlatformAnnouncement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",

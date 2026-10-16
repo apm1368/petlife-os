@@ -1,5 +1,7 @@
 # تنظیمات واقعی سامانه و اعلان عمومی
 
+پس از ادغام PR #30، شاخه با origin/stabilization/wave-1 در ace9496 ادغام شد؛ ترجمه‌های هر دو قابلیت حفظ شدند.
+
 مبنا هنگام ایجاد شاخه: `9f2048d8afa4da4b66e1a291b31d0998ac1cc8df` از origin/stabilization/wave-1. این تغییر از پنج قرارداد موجود ادمین و GET /settings/public استفاده می‌کند؛ endpoint یا migration جدید ندارد.
 
 - صفحه /[locale]/admin/settings هشت کلید واقعی registry، مقدار جاری، منشأ و درخواست‌های معلق را نشان می‌دهد. view/manage/approve جدا هستند؛ منو نیز settings.view می‌خواهد.
