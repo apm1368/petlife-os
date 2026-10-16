@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,7 @@ export function SellerDashboardView() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
+        <Link className="block underline" href={`/${locale}/seller/verification`}>{t("verificationLink")}</Link>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {tiles.map((tile) => (

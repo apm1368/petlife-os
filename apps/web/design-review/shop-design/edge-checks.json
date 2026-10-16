@@ -1,0 +1,20 @@
+[
+  {
+    "locale": "fa",
+    "guestBrowse": true,
+    "mobileFilters": true,
+    "PersianPriceToIRR": true,
+    "errorDistinctFromEmptyAndRetryWorks": true,
+    "warmPaletteLightDarkDistinct": true,
+    "overflow": false
+  },
+  {
+    "locale": "en",
+    "guestBrowse": true,
+    "mobileFilters": true,
+    "PersianPriceToIRR": true,
+    "errorDistinctFromEmptyAndRetryWorks": true,
+    "warmPaletteLightDarkDistinct": true,
+    "overflow": false
+  }
+]

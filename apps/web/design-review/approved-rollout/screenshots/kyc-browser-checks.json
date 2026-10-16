@@ -1,0 +1,114 @@
+[
+  {
+    "page": "kyc-queue",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-review",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-provider",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-seller",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-queue",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-review",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-provider",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-seller",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-queue",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-review",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-provider",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-seller",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-queue",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-review",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-provider",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "kyc-seller",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  }
+]

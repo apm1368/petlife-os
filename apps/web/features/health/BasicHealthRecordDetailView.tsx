@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { BasicHealthRecordEditor } from "./BasicHealthRecordEditor";
 import { useLocale } from "next-intl";
 import { ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { AllergyDto, ConditionDto, MedicationDto } from "@petlife/types";
@@ -12,6 +14,7 @@ type Kind = "condition" | "allergy" | "medication";
 type RecordValue = ConditionDto | AllergyDto | MedicationDto;
 
 export function BasicHealthRecordDetailView({ petId, recordId, kind }: { petId: string; recordId: string; kind: Kind }) {
+  const router = useRouter();
   const locale = useLocale() as "fa" | "en"; const fa = locale === "fa";
   const [record, setRecord] = useState<RecordValue | null>(null); const [error, setError] = useState(false);
   async function load() { setError(false); try { if (kind === "condition") setRecord(await healthService.getCondition(petId, recordId)); else if (kind === "allergy") setRecord(await healthService.getAllergy(petId, recordId)); else setRecord(await healthService.getMedication(petId, recordId)); } catch { setError(true); } }
@@ -24,6 +27,7 @@ export function BasicHealthRecordDetailView({ petId, recordId, kind }: { petId: 
     <header className="border-b border-border-subtle pb-6"><Link href={"/" + locale + "/pets/" + petId + "/health/" + plural(kind)} className="text-sm font-bold text-brand-natural">{fa ? "بازگشت به فهرست" : "Back to list"}</Link><div className="mt-5 flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.14em] text-text-secondary">{model.eyebrow}</p><h1 className="mt-2 text-page-title text-text-primary">{model.title}</h1></div><StatusLabel tone={model.tone}>{model.status}</StatusLabel></div></header>
     <dl className="grid grid-cols-1 border-y border-border-subtle sm:grid-cols-2"><Meta label={fa ? "منبع" : "Source"} value={sourceLabel(record.sourceType, fa)} /><Meta label={fa ? "تاریخ ثبت" : "Recorded"} value={formatDate(model.date, locale)} /></dl>
     <p className="border-s-4 border-s-brand-natural bg-surface-subtle px-4 py-3 text-sm leading-7 text-text-secondary">{record.sourceType === "OWNER" || record.sourceType === "HOUSEHOLD_MEMBER" ? (fa ? "این اطلاعات توسط مالک یا خانواده ثبت شده و جایگزین تشخیص ارائه‌دهنده نیست." : "This information was recorded by the owner or household and does not replace a provider diagnosis.") : (fa ? "این رکورد با منبع ارائه‌دهنده نمایش داده می‌شود و مالک نمی‌تواند حقیقت بالینی آن را بازنویسی کند." : "This record retains provider provenance and cannot be overwritten as owner-authored truth.")}</p>
+    <BasicHealthRecordEditor key={record.id} petId={petId} kind={kind} record={record} onSaved={() => void load()} onDeleted={() => router.push(`/${locale}/pets/${petId}/health/${plural(kind)}`)} />
     {model.fields.map((field) => <ContextSurface key={field.label}><h2 className="text-sm font-bold text-text-primary">{field.label}</h2><p className="mt-2 whitespace-pre-wrap text-body leading-8 text-text-secondary">{field.value}</p></ContextSurface>)}
   </article>;
 }

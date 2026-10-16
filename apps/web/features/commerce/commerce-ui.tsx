@@ -21,10 +21,10 @@ export function PriceBlock({ unitPrice, listUnitPrice, promotionName, size = "md
   return (
     <div className="flex flex-col gap-0.5">
       <div className="flex flex-wrap items-baseline gap-2">
-        <span className={`${priceClass} font-semibold text-text-primary`}>{formatCurrency(unitPrice, locale)}</span>
+        <span className={`${priceClass} font-semibold text-text-primary`}><bdi dir="ltr">{formatCurrency(unitPrice, locale)}</bdi></span>
         {discounted ? (
           <span className="text-metadata text-text-secondary line-through" aria-label={t("was", { price: formatCurrency(listUnitPrice!, locale) })}>
-            {formatCurrency(listUnitPrice!, locale)}
+            <bdi dir="ltr">{formatCurrency(listUnitPrice!, locale)}</bdi>
           </span>
         ) : null}
       </div>

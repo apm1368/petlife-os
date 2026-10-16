@@ -4,10 +4,18 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import type { CategoryDto } from "@petlife/types";
+import { useAdminStore } from "@/stores/admin-store";
 import { adminContentService } from "@/services/admin-content.service";
 
 /** Flat category CRUD — both locales edited on one screen (see AdminCategoryService's own doc comment for why this differs from the article editor's per-locale-tab approach). */
 export function AdminContentCategoriesView() {
+  const actionT = useTranslations("rollout.records");
+  const adminContext = useAdminStore((s) => s.context);
+  const permissions = adminContext?.permissions;
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const canCreate = permissions?.includes("content.create");
+  const canEdit = permissions?.includes("content.edit");
   const t = useTranslations("admin.content.categories");
   const [categories, setCategories] = useState<CategoryDto[] | null>(null);
   const [error, setError] = useState(false);
@@ -31,14 +39,18 @@ export function AdminContentCategoriesView() {
   }, []);
 
   async function create() {
+    if (busy || (editingId ? !canEdit : !canCreate)) return;
     setCreateError(null);
     if (!faName || !faSlug) {
       setCreateError(t("faRequired"));
       return;
     }
     const locales = [{ locale: "fa" as const, name: faName, slug: faSlug }, ...(enName && enSlug ? [{ locale: "en" as const, name: enName, slug: enSlug }] : [])];
+    setBusy(true);
     try {
-      await adminContentService.createCategory(locales);
+      if (editingId) await adminContentService.updateCategory(editingId, locales);
+      else await adminContentService.createCategory(locales);
+      setEditingId(null);
       setFaName("");
       setFaSlug("");
       setEnName("");
@@ -46,7 +58,7 @@ export function AdminContentCategoriesView() {
       await load();
     } catch {
       setCreateError(t("createFailed"));
-    }
+    } finally { setBusy(false); }
   }
 
   if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
@@ -55,7 +67,7 @@ export function AdminContentCategoriesView() {
     <div className="flex flex-col gap-4">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
 
-      <ContextSurface className="flex flex-col gap-2">
+      {(canCreate || editingId) ? <ContextSurface className="flex flex-col gap-2">
         <span className="text-section-title text-text-primary">{t("newCategory")}</span>
         <div className="flex flex-wrap gap-2">
           <Input label={t("faName")} value={faName} onChange={(e) => setFaName(e.target.value)} />
@@ -63,9 +75,9 @@ export function AdminContentCategoriesView() {
           <Input label={t("enName")} value={enName} onChange={(e) => setEnName(e.target.value)} />
           <Input label={t("enSlug")} value={enSlug} onChange={(e) => setEnSlug(e.target.value)} />
         </div>
-        {createError ? <span className="text-metadata text-state-urgent">{createError}</span> : null}
-        <Button onClick={create}>{t("create")}</Button>
-      </ContextSurface>
+        {createError ? <span role="alert" className="text-metadata text-state-urgent">{createError}</span> : null}
+        <div className="flex gap-3"><Button isLoading={busy} onClick={create}>{editingId ? actionT("save") : t("create")}</Button>{editingId ? <Button variant="secondary" onClick={() => { setEditingId(null); setFaName(""); setFaSlug(""); setEnName(""); setEnSlug(""); }}>{actionT("cancel")}</Button> : null}</div>
+      </ContextSurface> : null}
 
       {!categories ? (
         <Skeleton className="h-64 w-full" aria-label={t("loading")} />
@@ -79,6 +91,7 @@ export function AdminContentCategoriesView() {
                 {l.locale.toUpperCase()}: {l.name} (/{l.slug})
               </span>
             ))}
+            {canEdit ? <Button variant="secondary" size="sm" onClick={() => { setEditingId(c.id); const fa = c.locales.find((v) => v.locale === "fa"); const en = c.locales.find((v) => v.locale === "en"); setFaName(fa?.name ?? ""); setFaSlug(fa?.slug ?? ""); setEnName(en?.name ?? ""); setEnSlug(en?.slug ?? ""); }}>{actionT("edit")}</Button> : null}
           </ContextSurface>
         ))
       )}

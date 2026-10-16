@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Bone, EmptyState, ErrorRecovery, HeartPulse, PackageCheck, Repeat, Search, ShoppingBag, Skeleton, Sparkles } from "@petlife/ui";
+import { Bone, EmptyState, ErrorRecovery, HeartPulse, PackageCheck, Repeat, ShoppingBag, Skeleton, Sparkles } from "@petlife/ui";
 import type { ProductCategoryDto, ProductSummaryDto } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { commerceService } from "@/services/commerce.service";
-import { CinematicPageHero } from "@/features/experience/CinematicPageHero";
+import Image from "next/image";
+import Link from "next/link";
+import { CommercePage, CommerceArrow } from "./CommercePage";
+import { ShopSidebar } from "./ShopSidebar";
 import { ProductCard } from "./ProductCard";
 
 /** Icons are chosen from the category's own slug, never by list position. */
@@ -34,12 +37,14 @@ export function ShopHomeView() {
   const [deals, setDeals] = useState<ProductSummaryDto[] | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
-  const [query, setQuery] = useState("");
+  const design = useTranslations("commerce.design");
 
   useEffect(() => {
     let cancelled = false;
     setError(false);
     setPicks(null);
+    setDeals(null);
+    setCategories(null);
     const species = activePet?.species === "DOG" || activePet?.species === "CAT" ? activePet.species : undefined;
     void Promise.all([
       commerceService.listCategories(),
@@ -60,29 +65,20 @@ export function ShopHomeView() {
     };
   }, [activePet?.id, activePet?.species, retry]);
 
-  function submitSearch(event: React.FormEvent) {
-    event.preventDefault();
-    const q = query.trim();
-    router.push(`/${locale}/shop/products${q ? `?search=${encodeURIComponent(q)}` : ""}`);
-  }
-
   if (error) return <ErrorRecovery title={t("unavailable")} message="" retryLabel={t("retry")} onRetry={() => setRetry((value) => value + 1)} />;
 
   const topCategories = (categories ?? []).filter((c) => !c.parentId);
   const openProduct = (id: string) => router.push(`/${locale}/shop/products/${id}`);
 
   return (
-    <div className="experience-stack">
-      <CinematicPageHero image="/images/experience/shop-hero.png" eyebrow={t("eyebrow")} title={t("heroTitle")} description={t("heroDescription")}>
-        <form className="experience-search" onSubmit={submitSearch} role="search">
-          <label>
-            <Search size={20} aria-hidden="true" />
-            <span className="sr-only">{t("searchLabel")}</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} />
-          </label>
-          <button type="submit">{t("searchButton")}</button>
-        </form>
-      </CinematicPageHero>
+    <CommercePage className="shop-home">
+      <div className="shop-layout">
+      <ShopSidebar categories={topCategories} />
+      <div className="shop-content">
+      <section className="shop-hero">
+        <div className="shop-hero__copy"><p className="commerce-eyebrow">{t("eyebrow")}</p><h1>{t("heroTitle")}</h1><p>{t("heroDescription")}</p><Link className="commerce-cta" href={`/${locale}/shop/products`}>{design("browse")}<CommerceArrow /></Link></div>
+        <div className="shop-hero__photo"><Image src="/images/experience/shop-companions.webp" alt="" fill priority sizes="(max-width: 700px) 100vw, 650px" /></div>
+      </section>
 
       <section className="experience-section">
         <div className="experience-section__head">
@@ -94,12 +90,12 @@ export function ShopHomeView() {
         {categories === null ? (
           <Skeleton className="h-24 w-full" />
         ) : (
-          <div className="experience-grid experience-grid--compact">
+          <div className="shop-category-grid">
             {topCategories.map((category) => {
               const Icon = categoryIcon(category.slug);
               return (
-                <button key={category.id} type="button" className="experience-tile" onClick={() => router.push(`/${locale}/shop/products?category=${category.id}`)}>
-                  <span className="experience-tile__icon">
+                <button key={category.id} type="button" className="shop-category" onClick={() => router.push(`/${locale}/shop/products?category=${category.id}`)}>
+                  <span className="shop-category__icon">
                     <Icon size={23} aria-hidden="true" />
                   </span>
                   <div>
@@ -108,15 +104,6 @@ export function ShopHomeView() {
                 </button>
               );
             })}
-            <button type="button" className="experience-tile" onClick={() => router.push(`/${locale}/repeat-delivery`)}>
-              <span className="experience-tile__icon">
-                <Repeat size={23} aria-hidden="true" />
-              </span>
-              <div>
-                <h3>{t("repeatTitle")}</h3>
-                <p>{t("repeatHint")}</p>
-              </div>
-            </button>
           </div>
         )}
       </section>
@@ -166,6 +153,8 @@ export function ShopHomeView() {
           </div>
         )}
       </section>
-    </div>
+      <section className="shop-repeat"><Repeat size={38} aria-hidden="true" /><div><h2>{design("repeatTitle")}</h2><p>{design("repeatDescription")}</p></div><Link href={`/${locale}/repeat-delivery`}>{design("repeatCta")}<CommerceArrow /></Link></section>
+      </div></div>
+    </CommercePage>
   );
 }

@@ -1,0 +1,114 @@
+[
+  {
+    "page": "statements",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "statement",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurers",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurer",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "statements",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "statement",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurers",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurer",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "statements",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "statement",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurers",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurer",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "statements",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "statement",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurers",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "insurer",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  }
+]

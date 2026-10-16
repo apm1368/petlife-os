@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MarketplaceChannelAccountDto, MarketplaceListingDto, MarketplaceProvider } from "@petlife/types";
+import { ChannelSettings, CreateMarketplaceListing } from "./MarketplaceActions";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
@@ -24,6 +25,11 @@ export function SellerChannelsView() {
   const statusText = useStatusText();
   const fmt = useInstantFormat();
   const t = useTranslations("seller.channels");
+  const actions = useTranslations("rollout.marketplace");
+  const role = useSellerStore(s => s.context?.active?.role);
+  const canAdmin = !!role && ["OWNER", "ADMIN"].includes(role);
+  const canCatalog = !!role && ["OWNER", "ADMIN", "CATALOG_MANAGER"].includes(role);
+  const [actionError, setActionError] = useState(false);
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [channels, setChannels] = useState<MarketplaceChannelAccountDto[] | null>(null);
@@ -51,33 +57,36 @@ export function SellerChannelsView() {
 
   async function connect(provider: MarketplaceProvider) {
     if (!sellerId) return;
-    setBusyId(provider);
+    if (!canAdmin) return;
+    setActionError(false); setBusyId(provider);
     try {
       const account = await sellerOsService.connectChannel(sellerId, provider);
       setChannels((prev) => [...(prev ?? []).filter((c) => c.provider !== provider), account]);
-    } finally {
+    } catch { setActionError(true); } finally {
       setBusyId(null);
     }
   }
 
   async function syncListing(listingId: string) {
     if (!sellerId) return;
-    setBusyId(listingId);
+    if (!canCatalog) return;
+    setActionError(false); setBusyId(listingId);
     try {
-      const updated = await sellerOsService.syncMarketplaceListing(sellerId, listingId);
+      const updated = await (listings?.find(l => l.id === listingId)?.externalListingId ? sellerOsService.syncMarketplaceListing(sellerId, listingId) : sellerOsService.publishMarketplaceListing(sellerId, listingId));
       setListings((prev) => prev?.map((l) => (l.id === listingId ? updated : l)) ?? null);
-    } finally {
+    } catch { setActionError(true); } finally {
       setBusyId(null);
     }
   }
 
   async function reconcileListing(listingId: string) {
     if (!sellerId) return;
-    setBusyId(listingId);
+    if (!canCatalog) return;
+    setActionError(false); setBusyId(listingId);
     try {
       const result = await sellerOsService.reconcileMarketplaceListing(sellerId, listingId);
       setReconcileResult((prev) => ({ ...prev, [listingId]: result.discrepancyType ? t(`discrepancy.${result.discrepancyType}`) : t("noDiscrepancy") }));
-    } finally {
+    } catch { setActionError(true); } finally {
       setBusyId(null);
     }
   }
@@ -91,22 +100,25 @@ export function SellerChannelsView() {
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
 
+      {actionError ? <p role="alert">{actions("failed")}</p> : null}
+      {sellerId ? <CreateMarketplaceListing key={sellerId} sellerId={sellerId} channels={channels} onSaved={load} /> : null}
       <div>
         <h2 className="text-section-title text-text-primary">{t("connections")}</h2>
         <div className="mt-2 flex flex-col gap-2">
           {channels.map((channel) => (
-            <ContextSurface key={channel.id} className="flex items-center justify-between gap-3">
+            <ContextSurface key={channel.id} className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col">
                 <span className="text-body font-medium text-text-primary">{channel.provider}</span>
                 <span className="text-metadata text-text-secondary">
                   {channel.lastSuccessfulSyncAt ? t("lastSync", { when: fmt.dateTime(channel.lastSuccessfulSyncAt) }) : t("neverSynced")}
                 </span>
               </div>
+              {sellerId ? <ChannelSettings key={channel.updatedAt} sellerId={sellerId} channel={channel} onSaved={load} /> : null}
               <StatusLabel tone={channel.status === "CONNECTED" ? "success" : channel.status === "DEGRADED" || channel.status === "ERROR" ? "urgent" : "neutral"}>{statusText.label(channel.status, "marketplace")}</StatusLabel>
             </ContextSurface>
           ))}
-          {CONNECTABLE_PROVIDERS.filter((p) => !connectedProviders.has(p)).map((provider) => (
-            <ContextSurface key={provider} className="flex items-center justify-between gap-3">
+          {(canAdmin ? CONNECTABLE_PROVIDERS : []).filter((p) => !connectedProviders.has(p)).map((provider) => (
+            <ContextSurface key={provider} className="flex flex-wrap items-center justify-between gap-3">
               <span className="text-body text-text-primary">{provider}</span>
               <Button size="sm" variant="secondary" isLoading={busyId === provider} onClick={() => connect(provider)}>
                 {t("connect")}
@@ -124,7 +136,7 @@ export function SellerChannelsView() {
           <div className="mt-2 flex flex-col gap-2">
             {listings.map((listing) => (
               <ContextSurface key={listing.id} className="flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-body font-medium text-text-primary">{listing.provider}</span>
                   <div className="flex gap-1.5">
                     <StatusLabel tone="neutral">{statusText.label(listing.status, "marketplace")}</StatusLabel>
@@ -136,14 +148,15 @@ export function SellerChannelsView() {
                   <p className="text-metadata text-state-attention">{t("inventoryMismatch", { published: listing.publishedInventory, canonical: listing.canonicalAvailableQuantity })}</p>
                 ) : null}
                 {reconcileResult[listing.id] ? <p className="text-metadata text-text-secondary">{reconcileResult[listing.id]}</p> : null}
-                <div className="flex gap-2">
+                {canCatalog ? <div className="flex flex-wrap gap-2">
                   <Button size="sm" variant="secondary" isLoading={busyId === listing.id} onClick={() => syncListing(listing.id)}>
                     {listing.externalListingId ? t("resync") : t("publish")}
                   </Button>
                   <Button size="sm" variant="ghost" isLoading={busyId === listing.id} onClick={() => reconcileListing(listing.id)}>
                     {t("reconcile")}
                   </Button>
-                </div>
+                  {channels.find(c => c.id === listing.marketplaceChannelAccountId)?.capabilities.supportsListingPause ? <Button size="sm" variant="ghost" disabled={busyId === listing.id} onClick={async () => { if (!sellerId) return; setBusyId(listing.id); setActionError(false); try { await sellerOsService.deactivateMarketplaceListing(sellerId, listing.id); await load(); } catch { setActionError(true); } finally { setBusyId(null); } }}>{actions("deactivate")}</Button> : null}
+                </div> : null}
               </ContextSurface>
             ))}
           </div>

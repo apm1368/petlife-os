@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { SellerOsOfferDto } from "@petlife/types";
+import { CreateSellerOffer } from "./CreateSellerOffer";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
@@ -21,6 +22,8 @@ function toDraft(offer: SellerOsOfferDto): Draft {
 export function SellerOffersView() {
   const t = useTranslations("seller.offers");
   const locale = useLocale() as "fa" | "en";
+  const role = useSellerStore(s => s.context?.active?.role);
+  const canEdit = !!role && ["OWNER", "ADMIN", "CATALOG_MANAGER"].includes(role);
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [offers, setOffers] = useState<SellerOsOfferDto[] | null>(null);
@@ -49,7 +52,7 @@ export function SellerOffersView() {
   }, [sellerId]);
 
   async function save(offerId: string) {
-    if (!sellerId) return;
+    if (!sellerId || !canEdit) return;
     const draft = drafts[offerId];
     if (!draft) return;
     setSavingId(offerId);
@@ -76,6 +79,7 @@ export function SellerOffersView() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
+      {sellerId ? <CreateSellerOffer key={sellerId} sellerId={sellerId} onSaved={load} /> : null}
       {saveError ? (
         <p role="alert" className="text-metadata text-state-urgent">
           {saveError}
@@ -125,9 +129,9 @@ export function SellerOffersView() {
                   ]}
                   className="w-40"
                 />
-                <Button size="sm" isLoading={savingId === offer.id} disabled={!dirty || repeatInvalid} onClick={() => save(offer.id)}>
+                {canEdit ? <Button size="sm" isLoading={savingId === offer.id} disabled={!dirty || repeatInvalid} onClick={() => save(offer.id)}>
                   {t("save")}
-                </Button>
+                </Button> : null}
               </div>
 
               <fieldset className="flex flex-col gap-2 rounded-md border border-border-subtle p-3">

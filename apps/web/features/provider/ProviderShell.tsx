@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   // Handoff 24 — the clinical panel. Placed immediately after Home because a
   // vet's day starts at the whiteboard, not at the booking list.
   { href: "/clinical", labelKey: "nav.clinical" },
+  { href: "/clinic", labelKey: "nav.clinicWorkspace" },
   { href: "/patients", labelKey: "nav.patients" },
   { href: "/shared-records", labelKey: "nav.sharedRecords" },
   { href: "/bookings", labelKey: "nav.bookings" },
@@ -150,6 +151,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
         {notVerified ? (
           <div className="mt-2">
             <StatusLabel tone="attention">{t("notVerifiedBanner")}</StatusLabel>
+            <Link className="ms-3 underline" href={`/${locale}/provider/verification`}>{t("nav.verification")}</Link>
           </div>
         ) : null}
       </header>

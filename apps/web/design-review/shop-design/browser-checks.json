@@ -1,0 +1,170 @@
+[
+  {
+    "page": "shop",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "products",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "detail",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "cart",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "checkout",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "confirmation",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "shop",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "products",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "detail",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "cart",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "checkout",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "confirmation",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "shop",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "products",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "detail",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "cart",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "checkout",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "confirmation",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "shop",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "products",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "detail",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "cart",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "checkout",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "confirmation",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": []
+  }
+]

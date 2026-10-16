@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { EmptyState, ErrorRecovery, Heart, Skeleton } from "@petlife/ui";
 import type { ProductSummaryDto } from "@petlife/types";
 import { commerceService } from "@/services/commerce.service";
+import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
 
 /** Saved products, with live price and stock (never a cached copy). */
@@ -33,7 +34,7 @@ export function FavoritesView() {
   if (!items) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   return (
-    <div className="flex flex-col gap-5">
+    <CommercePage>
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
       {items.length === 0 ? (
         <EmptyState title={t("empty")} description={t("emptyHint")} icon={<Heart size={28} />} actionLabel={t("browse")} onAction={() => router.push(`/${locale}/shop/products`)} />
@@ -44,6 +45,6 @@ export function FavoritesView() {
           ))}
         </div>
       )}
-    </div>
+    </CommercePage>
   );
 }

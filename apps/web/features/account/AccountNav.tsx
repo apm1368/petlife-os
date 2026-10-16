@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 /** The canonical Account sections, in order. Membership lives here too, so the account area answers "what do I have?" in one place. */
@@ -22,6 +22,7 @@ export const ACCOUNT_SECTIONS = [
  */
 export function AccountNav() {
   const locale = useLocale();
+  const clinic=useTranslations("clinicCustomerExtras");
   const pathname = usePathname() ?? "";
   const base = `/${locale}/profile`;
   const onOverview = pathname === base || pathname === `${base}/`;
@@ -40,6 +41,7 @@ export function AccountNav() {
             </Link>
           );
         })}
+        <Link href={`${base}/clinic-notes`} aria-current={pathname===`${base}/clinic-notes`?"page":undefined}><span>{clinic("sharedNotesTitle")}</span><small>{clinic("navHint")}</small></Link>
       </nav>
       {!onOverview ? (
         <Link href={base} className="account-back">

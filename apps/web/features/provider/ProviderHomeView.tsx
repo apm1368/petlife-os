@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -44,6 +45,7 @@ export function ProviderHomeView() {
     <div className="flex flex-col gap-5">
       <div>
         <h1 className="text-page-title text-text-primary">{t("title")}</h1>
+        <Link className="block underline" href={`/${locale}/provider/verification`}>{t("verificationLink")}</Link>
         {overview.location ? (
           <p className="mt-1 text-body text-text-secondary">
             {overview.location.name ?? overview.location.city}

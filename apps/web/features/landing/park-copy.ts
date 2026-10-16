@@ -17,7 +17,7 @@ interface ParkCopy {
   brandTagline: string; partnerSignIn: string; partnerJoin: string;
   memberJoin: string; home: string; about: string; partners: string; photoCredits: string;
   services: Record<ParkDestinationKey, { title: string; hint: string }>;
-  creditsTitle: string; creditsBody: string; backdropCredit: string; processing: string; licence: string;
+  creditsTitle: string; creditsBody: string; backdropCredit: string; shopCredit: string; processing: string; licence: string;
 }
 export const parkCopy: Record<AppLocale, ParkCopy> = {
   fa: {
@@ -44,6 +44,7 @@ export const parkCopy: Record<AppLocale, ParkCopy> = {
       insurance: { title: "بیمه", hint: "آرامش خاطر بیشتر" },
     },
     creditsTitle: "پارک تارا و کوکی",
+    shopCredit: "تصویر اصلی فروشگاه: کانسپت عکس‌واقع‌گرای تولیدشده با هوش مصنوعی OpenAI؛ برش‌خورده و بازفشرده‌شده. تصویر فروشگاه یا محصول واقعی نیست.",
     backdropCredit: "پس‌زمینهٔ محو و گرم پنل کاربر نیز تصویر تولیدشده با هوش مصنوعی توسط OpenAI است و برای وب بازکدگذاری شده است؛ تصویر یک مکان واقعی نیست.",
     creditsBody: "این پارک یک تصویر مفهومی تولیدشده با هوش مصنوعی بر اساس طرح تأییدشده و تصاویر مرجع تارا، پدرام و کوکی است؛ عکس یک مکان واقعی یا مدرکی از وجود این غرفه‌ها نیست. تصاویر مرجع را صاحب پروژه برای همین طراحی ارائه کرده است.",
     processing: "برش و بازکدگذاری شده", licence: "مجوز و شرایط استفاده",
@@ -72,6 +73,7 @@ export const parkCopy: Record<AppLocale, ParkCopy> = {
       insurance: { title: "Insurance", hint: "More peace of mind" },
     },
     creditsTitle: "Tara and Cookie’s park",
+    shopCredit: "Shop hero: AI-generated photorealistic concept by OpenAI; cropped and re-encoded. Not a real shop or product photograph.",
     backdropCredit: "The warm blurred member-panel backdrop is also OpenAI AI-generated artwork, re-encoded for the web; it does not depict a real location.",
     creditsBody: "This park is AI-generated concept artwork based on the approved design and reference images of Tara, Pedram and Cookie. It is not a photograph of a real location or evidence that these pavilions exist. Reference images were supplied by the project owner for this design.",
     processing: "Cropped/re-encoded", licence: "Licence and usage terms",

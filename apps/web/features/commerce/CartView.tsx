@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, ShoppingBag, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, Dialog, EmptyState, ErrorRecovery, ShoppingBag, Skeleton, StatusLabel } from "@petlife/ui";
 import type { CartDto, CartLineDto, CartLineIssue } from "@petlife/types";
 import { commerceService } from "@/services/commerce.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
-import { formatNumber, PriceBlock } from "./commerce-ui";
+import { CommercePage } from "./CommercePage";
+import { Stepper } from "@/features/shared/Stepper";
+import { formatNumber, PriceBlock, ProductImage } from "./commerce-ui";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
   COMPATIBLE: "success",
@@ -31,6 +33,7 @@ const MAX_LINE_QUANTITY = 20;
  */
 export function CartView() {
   const t = useTranslations("commerce.cart");
+  const design = useTranslations("commerce.design");
   const tCompat = useTranslations("commerce.compatibility");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
@@ -39,6 +42,8 @@ export function CartView() {
   const [error, setError] = useState(false);
   const [busyLineId, setBusyLineId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [accepting, setAccepting] = useState(false);
 
   async function load() {
@@ -67,6 +72,20 @@ export function CartView() {
     }
   }
 
+  async function clearCart() {
+    setClearing(true);
+    setActionError(null);
+    try {
+      setCart(await commerceService.clearCart());
+      setClearOpen(false);
+    } catch {
+      setClearOpen(false);
+      setActionError(t("actionFailed"));
+    } finally {
+      setClearing(false);
+    }
+  }
+
   async function acceptPrices() {
     setAccepting(true);
     await run(null, () => commerceService.acceptCartPrices());
@@ -85,15 +104,19 @@ export function CartView() {
   const grossSubtotal = cart.subtotalAmount + cart.discountAmount;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-page-title text-text-primary">{t("title")}</h1>
+    <CommercePage className="commerce-cart">
+      <h1 className="text-page-title text-text-primary">{t("title")}</h1>
+      <Stepper steps={[design("cartStep"), design("checkoutStep"), design("completeStep")]} current={0} label={design("journey")} />
+      <div className="commerce-cart__toolbar"><Button variant="ghost" disabled={clearing || busyLineId !== null || accepting} onClick={() => setClearOpen(true)}>{design("clearCart")}</Button></div>
+      <Dialog open={clearOpen} onClose={() => { if (!clearing) setClearOpen(false); }} title={design("clearTitle")}><p>{design("clearHint")}</p><div className="mt-5 flex gap-3"><Button variant="secondary" disabled={clearing} onClick={() => setClearOpen(false)}>{design("keepCart")}</Button><Button isLoading={clearing} onClick={clearCart}>{design("clearConfirm")}</Button></div></Dialog>
+      <div className="commerce-cart__layout">
+      <div className="commerce-cart__main">
 
         {cart.hasSafetyConflict ? <StatusLabel tone="urgent">{t("safetyConflictBanner")}</StatusLabel> : null}
         {hasPriceChanges ? (
           <ContextSurface className="flex flex-col gap-2 border-state-attention">
             <p className="text-body text-text-primary">{t("pricesChangedBanner")}</p>
-            <Button variant="secondary" isLoading={accepting} onClick={acceptPrices}>
+            <Button variant="secondary" isLoading={accepting} disabled={clearing || busyLineId !== null} onClick={acceptPrices}>
               {t("acceptPrices")}
             </Button>
           </ContextSurface>
@@ -105,13 +128,13 @@ export function CartView() {
         ) : null}
 
         {cart.sellerGroups.map((group) => (
-          <ContextSurface key={group.sellerOrganization.id} className="flex flex-col gap-3">
+          <ContextSurface key={group.sellerOrganization.id} className="commerce-cart__seller flex flex-col gap-3">
             <p className="text-body font-medium text-text-primary">{t("soldBy", { seller: group.sellerOrganization.name })}</p>
             {group.lines.map((line) => (
               <CartLine
                 key={line.id}
                 line={line}
-                busy={busyLineId === line.id}
+                busy={clearing || busyLineId !== null || accepting}
                 onQuantity={(q) => run(line.id, () => commerceService.updateCartItem(line.id, q))}
                 onRemove={() => run(line.id, () => commerceService.removeCartItem(line.id))}
                 onOpen={() => router.push(`/${locale}/shop/products/${line.productId}`)}
@@ -126,7 +149,7 @@ export function CartView() {
         ))}
       </div>
 
-      <aside className="flex flex-col gap-3 lg:sticky lg:top-6 lg:self-start">
+      <aside className="commerce-cart__summary"><h2>{design("summary")}</h2>
         <ContextSurface className="flex flex-col gap-2">
           <Row label={t("itemsTotal", { count: cart.totalItems })} value={formatCurrency(grossSubtotal, locale)} />
           {cart.discountAmount > 0 ? <Row label={t("promotions")} value={`− ${formatCurrency(cart.discountAmount, locale)}`} tone="success" /> : null}
@@ -136,14 +159,14 @@ export function CartView() {
           </div>
         </ContextSurface>
         {cart.hasBlockingIssues ? <p className="text-metadata text-state-attention">{t("fixIssuesFirst")}</p> : null}
-        <Button variant="primary" disabled={cart.hasBlockingIssues} onClick={() => router.push(`/${locale}/checkout`)}>
+        <Button variant="primary" disabled={cart.hasBlockingIssues || clearing || busyLineId !== null || accepting} onClick={() => router.push(`/${locale}/checkout`)}>
           {t("proceedToCheckout")}
         </Button>
         <Button variant="ghost" onClick={() => router.push(`/${locale}/shop/products`)}>
           {t("continueShopping")}
         </Button>
       </aside>
-    </div>
+    </div></CommercePage>
   );
 }
 
@@ -154,12 +177,15 @@ function CartLine({ line, busy, onQuantity, onRemove, onOpen, compatibilityLabel
   const max = Math.min(MAX_LINE_QUANTITY, Math.max(line.quantity, line.sellerOffer.availableQuantity));
   const blocking = line.issues.filter((i) => BLOCKING.includes(i));
   return (
-    <div className="flex flex-col gap-2 border-t border-border-subtle pt-3 first:border-t-0 first:pt-0">
+    <div className="commerce-cart__line flex flex-col gap-2 border-t border-border-subtle first:border-t-0">
       <div className="flex items-start justify-between gap-3">
-        <button type="button" className="text-start" onClick={onOpen}>
+        <button type="button" className="flex min-w-0 items-start gap-3 text-start" onClick={onOpen}>
+          {line.imageUrl&&<ProductImage src={line.imageUrl} alt="" className="h-20 w-20 shrink-0 rounded-xl"/>}
+          <span className="min-w-0">
           <p className="text-body text-text-primary">{line.productTitle}</p>
           {line.variantTitle ? <p className="text-metadata text-text-secondary">{line.variantTitle}</p> : null}
           <p className="text-metadata text-text-secondary">{line.targetPetName ? t("forPet", { name: line.targetPetName }) : t("noTargetPet")}</p>
+          </span>
         </button>
         <Button variant="ghost" size="sm" onClick={onRemove} disabled={busy}>
           {t("remove")}
