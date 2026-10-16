@@ -110,4 +110,15 @@ describe("AdminShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "System" }));
     expect(screen.getByText("Audit")).toBeTruthy();
   });
+  it("offers read-only partner directories to customer viewers without verification permission", async () => {
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin:true, adminUserId:"a1", displayName:"Reader", role:"SUPPORT" as never, permissions:["customer.view"] as never } satisfies AdminSessionContextDto);
+    renderWithIntl(<AdminShell><div>read-only shell</div></AdminShell>);
+    await screen.findByText("read-only shell");
+    fireEvent.click(screen.getByRole("button",{name:"Network"}));
+    expect(screen.getByRole("link",{name:"Providers"}).getAttribute("href")).toBe("/en/admin/providers");
+    expect(screen.getByRole("link",{name:"Sellers"}).getAttribute("href")).toBe("/en/admin/sellers");
+    expect(screen.queryByRole("link",{name:"Services"})).toBeNull();
+  });
+
 });

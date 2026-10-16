@@ -2451,7 +2451,16 @@
       "verification": {
         "changeStatus": "Change verification status",
         "submit": "Update"
-      }
+      },
+      "forbidden": "You do not have permission to view partner organizations.",
+      "searchLabel": "Partner name",
+      "search": "Search",
+      "loadFailed": "Could not load partner organizations",
+      "resultCount": "{count} organizations",
+      "pagination": "Partner directory pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page}"
     },
     "transactions": {
       "title": "Transactions",

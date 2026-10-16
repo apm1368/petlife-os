@@ -16,7 +16,7 @@ import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 
 type SessionState = "loading" | "authenticated" | "unauthenticated";
 
-const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionName }[] = [
+const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionName | AdminPermissionName[] }[] = [
   { href: "", labelKey: "nav.dashboard" },
   { href: "/crm", labelKey: "nav.crm", permission: "customer.view" },
   { href: "/customer-affairs", labelKey: "nav.customerAffairs", permission: "support.view" },
@@ -27,13 +27,13 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/community", labelKey: "nav.communityReports", permission: "trust.view" },
   { href: "/animal-support", labelKey: "nav.animalSupport", permission: "animalSupport.view" },
   { href: "/lost-pets", labelKey: "nav.lostPets", permission: "trust.view" },
-  { href: "/providers", labelKey: "nav.providers", permission: "verification.manage" },
+  { href: "/providers", labelKey: "nav.providers", permission: ["verification.manage", "customer.view"] },
   { href: "/services", labelKey: "nav.services", permission: "services.view" },
   { href: "/commerce", labelKey: "nav.commerce", permission: "commerce.view" },
   { href: "/travel", labelKey: "nav.travel", permission: "travel.view" },
   { href: "/insurance", labelKey: "nav.insurance", permission: "insurance.applications.view" },
   { href: "/places", labelKey: "nav.places", permission: "places.view" },
-  { href: "/sellers", labelKey: "nav.sellers", permission: "verification.manage" },
+  { href: "/sellers", labelKey: "nav.sellers", permission: ["verification.manage", "customer.view"] },
   { href: "/transactions", labelKey: "nav.transactions", permission: "finance.view" },
   { href: "/seller-finance", labelKey: "nav.sellerFinance", permission: "sellerFinance.view" },
   { href: "/reconciliation", labelKey: "nav.reconciliation", permission: "sellerFinance.view" },
@@ -126,7 +126,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   }
 
   const permissions = new Set(context.permissions);
-  const visibleItems = NAV_ITEMS.filter((item) => !PREVIEW_ONLY_HREFS.has(item.href) && (!item.permission || permissions.has(item.permission)));
+  const visibleItems = NAV_ITEMS.filter((item) => !PREVIEW_ONLY_HREFS.has(item.href) && (!item.permission || (Array.isArray(item.permission) ? item.permission.some(permission => permissions.has(permission)) : permissions.has(item.permission))));
   const visible = new Map(visibleItems.map((item) => [item.href, item]));
   const fa = locale === "fa";
   const activeHref = visibleItems.map((i) => i.href).filter((h) => (h === "" ? pathname === `/${locale}/admin` : pathname.startsWith(`/${locale}/admin${h}`))).sort((a, b) => b.length - a.length)[0];
