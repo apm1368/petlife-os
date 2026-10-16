@@ -146,8 +146,8 @@ export function ReportLostPetView({ petId }: { petId: string }) {
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-1 font-medium text-text-primary">{t("report.contactPreferenceLabel")}</legend>
             {([
-              ["IN_APP_MESSAGE", t("report.contactPreference.inAppMessage"), fa ? "پیشنهادی: گزارش‌ها از طریق PET LIFE به شما می‌رسد و اطلاعات تماس شما دیده نمی‌شود." : "Recommended: reports reach you through PET LIFE; your contact details stay hidden."],
-              ["MASKED_CONTACT", t("report.contactPreference.maskedContact"), fa ? "گزارش‌دهنده از طریق PET LIFE با شما در ارتباط است؛ شماره نمایش داده نمی‌شود." : "Reporters reach you through PET LIFE; no number is shown."],
+              ["IN_APP_MESSAGE", t("report.contactPreference.inAppMessage"), fa ? "پیشنهادی: گزارش‌ها از طریق opetlife به شما می‌رسد و اطلاعات تماس شما دیده نمی‌شود." : "Recommended: reports reach you through opetlife; your contact details stay hidden."],
+              ["MASKED_CONTACT", t("report.contactPreference.maskedContact"), fa ? "گزارش‌دهنده از طریق opetlife با شما در ارتباط است؛ شماره نمایش داده نمی‌شود." : "Reporters reach you through opetlife; no number is shown."],
               ["PUBLIC_CONTACT", t("report.contactPreference.publicContact"), fa ? "یک خط تماس که خودتان می‌نویسید در صفحهٔ عمومی دیده می‌شود." : "A contact line you write yourself is shown on the public page."],
             ] as [Contact, string, string][]).map(([value, label, hint]) => (
               <label key={value} className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 text-sm ${contactPreference === value ? "border-brand-natural" : "border-border-subtle"}`}>
@@ -174,7 +174,7 @@ export function ReportLostPetView({ petId }: { petId: string }) {
               <div><dt className="inline text-text-secondary">{fa ? "عکس: " : "Photo: "}</dt><dd className="inline">{photo?.name ?? (fa ? "ندارد" : "None")}</dd></div>
               <div><dt className="inline text-text-secondary">{fa ? "توضیحات: " : "Description: "}</dt><dd className="inline">{description}</dd></div>
               {publicNotes.trim() ? <div><dt className="inline text-text-secondary">{fa ? "نکته: " : "Note: "}</dt><dd className="inline">{publicNotes}</dd></div> : null}
-              <div><dt className="inline text-text-secondary">{fa ? "تماس: " : "Contact: "}</dt><dd className="inline">{contactPreference === "PUBLIC_CONTACT" ? publicContactMode : fa ? "از طریق PET LIFE" : "Through PET LIFE"}</dd></div>
+              <div><dt className="inline text-text-secondary">{fa ? "تماس: " : "Contact: "}</dt><dd className="inline">{contactPreference === "PUBLIC_CONTACT" ? publicContactMode : fa ? "از طریق opetlife" : "Through opetlife"}</dd></div>
             </dl>
             <p className="rounded-md bg-surface-subtle p-3 text-text-secondary">{fa ? "مکان دقیق، یادداشت خصوصی، اعضای خانواده، پروندهٔ سلامت و اطلاعات تماس شما عمومی نمی‌شوند." : "The exact place, private notes, household members, health record and your contact details are never made public."}</p>
           </div>

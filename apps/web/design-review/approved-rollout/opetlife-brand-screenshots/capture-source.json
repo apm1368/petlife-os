@@ -1,0 +1,10 @@
+{
+  "beforeSource": "7685302ae59de14e8e4e7717ad0d4169dad65828",
+  "afterSource": "eff51909d88c8738ff4fa9c31086432a3da8455a",
+  "afterIncludesPR": 35,
+  "afterBrowserCases": 24,
+  "beforeBrowserCases": 8,
+  "browserExitCode": 0,
+  "readonly": true,
+  "data": "Controlled API fixtures; not live authenticated QA"
+}

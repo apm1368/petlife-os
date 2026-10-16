@@ -20,8 +20,8 @@ type RecordKind = "lab" | "imaging" | "referral" | "dental" | "nutrition" | "reh
 type RecordValue = LabResultDto | ImagingStudyDto | ReferralDto | DentalRecordDto | ClinicalNutritionPlanDto | RehabPlanDto;
 
 const copy = {
-  fa: { back: "بازگشت به فهرست", source: "منبع", provider: "ارائه‌دهنده", date: "تاریخ", status: "وضعیت", relatedVisit: "ویزیت مرتبط", unknown: "ثبت نشده", owner: "ثبت مالک/خانواده", clinical: "رکورد بالینی", loadError: "رکورد سلامت در دسترس نیست.", retry: "تلاش دوباره", loading: "در حال بارگذاری رکورد", noInterpretation: "پت‌لایف این نتیجه را تفسیر پزشکی نمی‌کند؛ فقط داده و پرچم ثبت‌شده توسط منبع نمایش داده می‌شود." },
-  en: { back: "Back to list", source: "Source", provider: "Provider", date: "Date", status: "Status", relatedVisit: "Related visit", unknown: "Not recorded", owner: "Owner/household record", clinical: "Clinical record", loadError: "The health record is unavailable.", retry: "Try again", loading: "Loading health record", noInterpretation: "PET LIFE does not medically interpret this result; only source data and source-provided flags are shown." },
+  fa: { back: "بازگشت به فهرست", source: "منبع", provider: "ارائه‌دهنده", date: "تاریخ", status: "وضعیت", relatedVisit: "ویزیت مرتبط", unknown: "ثبت نشده", owner: "ثبت مالک/خانواده", clinical: "رکورد بالینی", loadError: "رکورد سلامت در دسترس نیست.", retry: "تلاش دوباره", loading: "در حال بارگذاری رکورد", noInterpretation: "opetlife این نتیجه را تفسیر پزشکی نمی‌کند؛ فقط داده و پرچم ثبت‌شده توسط منبع نمایش داده می‌شود." },
+  en: { back: "Back to list", source: "Source", provider: "Provider", date: "Date", status: "Status", relatedVisit: "Related visit", unknown: "Not recorded", owner: "Owner/household record", clinical: "Clinical record", loadError: "The health record is unavailable.", retry: "Try again", loading: "Loading health record", noInterpretation: "opetlife does not medically interpret this result; only source data and source-provided flags are shown." },
 } as const;
 
 export function HealthRecordDetailView({ petId, recordId, kind }: { petId: string; recordId: string; kind: RecordKind }) {

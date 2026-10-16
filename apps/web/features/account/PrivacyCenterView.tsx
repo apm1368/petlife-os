@@ -170,7 +170,7 @@ export function PrivacyCenterView() {
                 <div>
                   <b>{kind === "TERMS" ? t("شرایط استفاده", "Terms of use") : t("سیاست حریم خصوصی", "Privacy policy")}</b>
                   <p>{c?.granted && c.grantedAt ? t(`پذیرفته‌شده در ${formatAccountDate(c.grantedAt, locale)}`, `Accepted on ${formatAccountDate(c.grantedAt, locale)}`) : c?.lastRecordedVersion ? t("نسخهٔ جدیدی منتشر شده که هنوز نپذیرفته‌اید.", "A newer version hasn't been accepted yet.") : t("پذیرش شما برای این نسخه ثبت نشده است.", "Your acceptance of this version isn't on record.")}</p>
-                  <p className="text-metadata text-text-secondary">{t("لازم برای استفاده از PET LIFE؛ برای توقف، درخواست حذف حساب بدهید.", "Required to use PET LIFE; to stop, request account deletion.")}</p>
+                  <p className="text-metadata text-text-secondary">{t("لازم برای استفاده از opetlife؛ برای توقف، درخواست حذف حساب بدهید.", "Required to use opetlife; to stop, request account deletion.")}</p>
                 </div>
                 {c?.granted ? <StatusLabel tone="success">{t("پذیرفته", "Accepted")}</StatusLabel> : <Button variant="secondary" size="sm" isLoading={busy === kind} onClick={() => run(kind, () => accountService.setConsent(kind, true))}>{t("پذیرش نسخهٔ فعلی", "Accept current version")}</Button>}
               </div>

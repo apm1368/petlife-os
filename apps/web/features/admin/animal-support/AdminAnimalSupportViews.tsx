@@ -483,7 +483,7 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
             </div>
           ))}
           {permissions.manage && <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_160px_auto] sm:items-end">
-            <Input label={t("ایمیل حساب PET LIFE", "PET LIFE account email")} dir="ltr" value={grantEmail} onChange={(e) => setGrantEmail(e.target.value)} />
+            <Input label={t("ایمیل حساب opetlife", "opetlife account email")} dir="ltr" value={grantEmail} onChange={(e) => setGrantEmail(e.target.value)} />
             <FilterField label={t("نقش", "Role")}>
               <SelectFilter value={grantRole} onChange={(v) => setGrantRole(v === "all" ? "COORDINATOR" : v)} options={Object.keys(ROLE).map((k) => ({ value: k, label: fa ? ROLE[k]![0] : ROLE[k]![1] }))} />
             </FilterField>

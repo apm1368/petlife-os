@@ -42,7 +42,7 @@ function RegisterFlow() {
     <PasswordInput label={locale === "fa" ? "تکرار رمز عبور" : "Confirm password"} autoComplete="new-password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} errorMessage={passwordConfirm && passwordConfirm !== password ? (locale === "fa" ? "رمزها یکسان نیستند." : "Passwords do not match.") : undefined} />
     <Input label={t("register.displayNameLabel")} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
     <Input label={t("register.emailLabel")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-    <label className="flex items-start gap-2 text-metadata text-text-secondary"><input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} /><span>{locale === "fa" ? "شرایط استفاده و سیاست حریم خصوصی PET LIFE را می‌پذیرم." : "I accept PET LIFE''s Terms and Privacy Policy."}</span></label>
+    <label className="flex items-start gap-2 text-metadata text-text-secondary"><input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} /><span>{locale === "fa" ? "شرایط استفاده و سیاست حریم خصوصی opetlife را می‌پذیرم." : "I accept opetlife''s Terms and Privacy Policy."}</span></label>
     <Button variant="primary" isLoading={isSubmitting} disabled={username.length < 3 || password.length < 8 || password !== passwordConfirm || !accepted} onClick={submit}>{t("register.submit")}</Button>
     <Link href={loginUrl} className="text-center text-metadata text-text-secondary underline">{t("register.haveAccount")}</Link>
   </div>;

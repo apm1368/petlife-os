@@ -90,7 +90,7 @@ export function HouseholdInvitationView({ token }: { token: string }) {
   if (!data) return <Skeleton className="h-72 w-full" aria-label={t("در حال بارگذاری", "Loading")} />;
 
   const inviter = data.inviter?.displayName || t("یکی از نزدیکانتان", "Someone you know");
-  const household = data.household.name || "PET LIFE";
+  const household = data.household.name || "opetlife";
 
   return (
     <div className="mx-auto max-w-2xl">

@@ -1,4 +1,5 @@
 "use client";
+import { Brand } from "@/features/brand/Brand";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
 import { useEffect, useState } from "react";
@@ -142,7 +143,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
     <div className="erp-shell">
       <header className="erp-bar">
         <div className="erp-bar__inner">
-          <Link href={`/${locale}/admin`} className="erp-brand"><span className="erp-brand__mark" aria-hidden="true">PL</span><span>{t("title")}</span></Link>
+          <Link href={`/${locale}/admin`} className="erp-brand"><Brand compact /><span>{t("title")}</span></Link>
           <nav className="erp-pills" aria-label={fa ? "ناوبری مدیریت" : "Admin navigation"} onMouseLeave={() => setOpenGroup(null)}>
             <Link href={`/${locale}/admin`} className="erp-pill" aria-current={activeHref === "" ? "page" : undefined}>{t("nav.dashboard")}</Link>
             {groups.map((g) => (

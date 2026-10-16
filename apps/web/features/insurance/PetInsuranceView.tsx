@@ -101,7 +101,7 @@ export function PetInsuranceView({ petId }: { petId: string }) {
                   <label className="flex items-start gap-3 rounded-md border border-border-subtle p-3 text-sm">
                     <input type="checkbox" className="mt-0.5 h-5 w-5" checked={!!consented[application.id]} onChange={(e) => setConsented({ ...consented, [application.id]: e.target.checked })} />
                     <span>
-                      {fa ? "موافقم PET LIFE این درخواست، اطلاعات تماس من و گونه، نژاد، سن و وزن حیوانم را برای بررسی با بیمه‌گر به اشتراک بگذارد. این یک بیمه‌نامه نیست؛ پوشش فقط در صورت صدور بیمه‌نامه توسط بیمه‌گر آغاز می‌شود." : consentText ?? "I agree that PET LIFE shares this application with the insurer for review. This is not an insurance policy."}
+                      {fa ? "موافقم opetlife این درخواست، اطلاعات تماس من و گونه، نژاد، سن و وزن حیوانم را برای بررسی با بیمه‌گر به اشتراک بگذارد. این یک بیمه‌نامه نیست؛ پوشش فقط در صورت صدور بیمه‌نامه توسط بیمه‌گر آغاز می‌شود." : consentText ?? "I agree that opetlife shares this application with the insurer for review. This is not an insurance policy."}
                       {fa && consentText ? <details className="mt-1 text-metadata text-text-secondary"><summary>{fa ? "متن ثبت‌شدهٔ رضایت" : "Recorded consent text"}</summary><span dir="ltr">{consentText}</span></details> : null}
                     </span>
                   </label>

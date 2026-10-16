@@ -269,7 +269,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
       {step === "pets" ? (
         session !== "authenticated" ? (
           <ContextSurface className="flex flex-col gap-3">
-            <p>{fa ? "برای انتخاب حیوان و رزرو، وارد حساب پت‌لایف شوید. انتخاب شما حفظ می‌شود." : "Sign in to choose your pet and book. Your selection is kept."}</p>
+            <p>{fa ? "برای انتخاب حیوان و رزرو، وارد حساب opetlife شوید. انتخاب شما حفظ می‌شود." : "Sign in to choose your pet and book. Your selection is kept."}</p>
             <Button onClick={() => requireSession()}>{fa ? "ورود و ادامه" : "Sign in and continue"}</Button>
           </ContextSurface>
         ) : !pets ? (

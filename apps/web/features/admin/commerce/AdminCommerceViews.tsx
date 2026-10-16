@@ -180,7 +180,7 @@ export function AdminCommerceOverviewView() {
         {!data && !error ? <Skeleton className="h-40 w-full" /> : null}
         {data ? (
           <>
-            <p className="mb-3 text-metadata text-text-secondary">{fa ? "فقط سفارش‌های پرداخت‌شده در پت‌لایف؛ سفارش‌های لغو یا بازپرداخت‌شده در فروش حساب نمی‌شوند." : "PET LIFE checkout orders only; cancelled or refunded orders are excluded from sales."}</p>
+            <p className="mb-3 text-metadata text-text-secondary">{fa ? "فقط سفارش‌های پرداخت‌شده در opetlife؛ سفارش‌های لغو یا بازپرداخت‌شده در فروش حساب نمی‌شوند." : "opetlife checkout orders only; cancelled or refunded orders are excluded from sales."}</p>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <Kpi label={fa ? "سفارش" : "Orders"} value={num(data.orderCount, lang)} />
               <Kpi label={fa ? "فروش" : "Gross sales"} value={formatCurrency(data.grossSales, lang)} tone="brand" />

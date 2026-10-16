@@ -51,11 +51,11 @@ const SECTION_HINT: Record<Section, string> = {
 };
 
 /**
- * امور مشتریان پت لایف — the customer-care operations console.
+ * امور مشتریان opetlife — the customer-care operations console.
  *
  * Three deliberate boundaries:
  *
- *  1. No business-line concept. PET LIFE is one product, so the lineId the
+ *  1. No business-line concept. opetlife is one product, so the lineId the
  *     reference prototype threaded through every filter and report is absent
  *     rather than defaulted to a value nobody can change.
  *
@@ -88,7 +88,7 @@ export function CustomerAffairsWorkspace() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-page-title text-text-primary">امور مشتریان پت لایف</h1>
+          <h1 className="text-page-title text-text-primary">امور مشتریان opetlife</h1>
           <p className="mt-0.5 text-metadata text-text-secondary">{SECTION_HINT[section]}</p>
         </div>
         <label className="flex items-center gap-2">

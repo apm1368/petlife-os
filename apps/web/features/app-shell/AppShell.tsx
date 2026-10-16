@@ -48,7 +48,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <LocalPreviewGate title="PET LIFE" live={<LiveAppShell>{children}</LiveAppShell>}>
+    <LocalPreviewGate title="opetlife" live={<LiveAppShell>{children}</LiveAppShell>}>
       {children}
     </LocalPreviewGate>
   );
