@@ -22,7 +22,7 @@ const useLang = () => {
 
 const LISTING_STATUS: Record<string, [string, string, "neutral" | "attention" | "success" | "higherConcern"]> = {
   DRAFT: ["پیش‌نویس", "Draft", "neutral"],
-  PENDING_REVIEW: ["در انتظار بررسی PET LIFE", "Awaiting PET LIFE review", "attention"],
+  PENDING_REVIEW: ["در انتظار بررسی opetlife", "Awaiting opetlife review", "attention"],
   PUBLISHED: ["منتشر شده", "Published", "success"],
   SUSPENDED: ["معلق", "Suspended", "higherConcern"],
   ARCHIVED: ["بایگانی", "Archived", "neutral"],
@@ -179,7 +179,7 @@ export function ProviderTravelListingEditor({ listingId }: { listingId: string }
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2"><StatusLabel tone={st[2]}>{fa ? st[0] : st[1]}</StatusLabel>{listing.isVerified ? <span className="text-metadata text-state-success">{fa ? "تأییدشده" : "Verified"}</span> : null}</div>
         <h1 className="text-page-title">{listing.title}</h1>
-        {listing.moderationNote && listing.status === "DRAFT" ? <p className="rounded-md bg-state-attention/10 p-3 text-sm text-state-attention">{fa ? "یادداشت بررسی PET LIFE: " : "PET LIFE review note: "}{listing.moderationNote}</p> : null}
+        {listing.moderationNote && listing.status === "DRAFT" ? <p className="rounded-md bg-state-attention/10 p-3 text-sm text-state-attention">{fa ? "یادداشت بررسی opetlife: " : "opetlife review note: "}{listing.moderationNote}</p> : null}
         <div className="flex flex-wrap gap-2">
           {listing.status === "DRAFT" ? <Button size="sm" disabled={missing.length > 0} isLoading={busy} onClick={() => void save(() => travelProviderService.submit(listing.id), fa ? "برای بررسی ارسال شد." : "Submitted for review.")}>{fa ? "ارسال برای بررسی" : "Submit for review"}</Button> : null}
           {listing.status === "PENDING_REVIEW" ? <Button size="sm" variant="secondary" isLoading={busy} onClick={() => void save(() => travelProviderService.withdraw(listing.id), fa ? "به پیش‌نویس برگشت." : "Back to draft.")}>{fa ? "بازگشت به پیش‌نویس" : "Withdraw to draft"}</Button> : null}
@@ -358,7 +358,7 @@ function PhotosTab({ listing, busy, save }: { listing: TravelListingDto; busy: b
         </ul>
       ) : <p className="text-sm text-text-secondary">{fa ? "هنوز تصویری اضافه نشده است." : "No photos yet."}</p>}
       <ContextSurface className="flex flex-col gap-3">
-        <p className="text-sm text-text-secondary">{fa ? "نشانی تصویری که در فضای ذخیره‌سازی PET LIFE بارگذاری شده است (https://…). تصاویر از منابع ناشناس پذیرفته نمی‌شوند." : "The address of an image uploaded to PET LIFE storage (https://…). Images from arbitrary sources are not accepted."}</p>
+        <p className="text-sm text-text-secondary">{fa ? "نشانی تصویری که در فضای ذخیره‌سازی opetlife بارگذاری شده است (https://…). تصاویر از منابع ناشناس پذیرفته نمی‌شوند." : "The address of an image uploaded to opetlife storage (https://…). Images from arbitrary sources are not accepted."}</p>
         <Input label={fa ? "نشانی تصویر" : "Image URL"} dir="ltr" value={url} onChange={(e) => setUrl(e.target.value.trim())} errorMessage={url && !valid ? (fa ? "نشانی معتبر نیست" : "Not a valid address") : undefined} />
         <Input dir="auto" label={fa ? "توضیح تصویر (برای دسترس‌پذیری)" : "Alt text (for accessibility)"} value={alt} maxLength={200} onChange={(e) => setAlt(e.target.value)} />
         <Button isLoading={busy} disabled={!valid} onClick={() => void save(async () => { const r = await travelProviderService.addMedia(listing.id, { url, alt: alt.trim() || undefined }); setUrl(""); setAlt(""); return r; })}>{fa ? "افزودن تصویر" : "Add photo"}</Button>
@@ -570,7 +570,7 @@ export function ProviderTravelReviewsView() {
       {rows === null ? <Skeleton className="h-40" /> : rows.length === 0 ? <EmptyState title={fa ? "هنوز نظری ثبت نشده" : "No reviews yet"} /> : (
         <ul className="flex flex-col gap-3">{rows.map((r) => (
           <li key={r.id} className="flex flex-col gap-2 rounded-md border border-border-subtle p-3 text-sm">
-            <p><span className="font-bold">{r.listingTitle}</span> · {"★".repeat(r.overall)}{"☆".repeat(5 - r.overall)} · {formatDay(r.createdAt.slice(0, 10), lang)}{r.status === "HIDDEN" ? (fa ? " · پنهان‌شده توسط PET LIFE" : " · hidden by PET LIFE") : ""}</p>
+            <p><span className="font-bold">{r.listingTitle}</span> · {"★".repeat(r.overall)}{"☆".repeat(5 - r.overall)} · {formatDay(r.createdAt.slice(0, 10), lang)}{r.status === "HIDDEN" ? (fa ? " · پنهان‌شده توسط opetlife" : " · hidden by opetlife") : ""}</p>
             {r.body ? <p>{r.body}</p> : null}
             {r.providerResponse ? <p className="rounded-md bg-surface-subtle p-2"><span className="font-bold">{fa ? "پاسخ شما: " : "Your response: "}</span>{r.providerResponse}</p> : (
               <div className="flex flex-col gap-2">

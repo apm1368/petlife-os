@@ -39,7 +39,7 @@ describe("SellerDashboardView", () => {
 
     await waitFor(() => expect(screen.getByText("2")).toBeTruthy());
     expect(screen.getByText("10")).toBeTruthy();
-    expect(screen.getByText("PET LIFE OS order")).toBeTruthy();
+    expect(screen.getByText("opetlife order")).toBeTruthy();
   });
 
   it("renders correctly in fa locale (RTL)", async () => {

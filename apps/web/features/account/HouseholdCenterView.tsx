@@ -349,8 +349,8 @@ function InviteDialog({ open, onClose, household, onSent }: { open: boolean; onC
       setPresets({});
       await onSent(
         result.delivery === "DELIVERED"
-          ? t("دعوت امن داخل PET LIFE برای او ارسال شد.", "A secure in-app invitation was delivered.")
-          : t("دعوت ذخیره شد، اما ارسال پیامک و ایمیل هنوز متصل نیست؛ از او بخواهید با همین ایمیل یا موبایل وارد PET LIFE شود تا دعوت را ببیند.", "Invitation saved, but SMS and email delivery isn't connected yet. Ask them to sign in to PET LIFE with this email or phone to see it."),
+          ? t("دعوت امن داخل opetlife برای او ارسال شد.", "A secure in-app invitation was delivered.")
+          : t("دعوت ذخیره شد، اما ارسال پیامک و ایمیل هنوز متصل نیست؛ از او بخواهید با همین ایمیل یا موبایل وارد opetlife شود تا دعوت را ببیند.", "Invitation saved, but SMS and email delivery isn't connected yet. Ask them to sign in to opetlife with this email or phone to see it."),
       );
     } catch (err) {
       setError(err instanceof ApiError && err.code === "ALREADY_HOUSEHOLD_MEMBER" ? t("این فرد همین حالا عضو خانواده است.", "This person is already in your household.") : apiErrorText(err, undefined, t("دعوت ارسال نشد.", "The invitation wasn't sent.")));

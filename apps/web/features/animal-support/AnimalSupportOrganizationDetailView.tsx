@@ -67,7 +67,7 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
         </div>
         {org.location ? <p className="text-metadata text-text-secondary">{org.location}</p> : null}
         {org.description ? <p className="text-body text-text-primary">{org.description}</p> : null}
-        <p className="text-metadata text-text-secondary">{fa ? "برای کمک از دکمه‌های «پیشنهاد کمک» یا «کمک مالی» استفاده کنید؛ هماهنگی از طریق PET LIFE انجام می‌شود و اطلاعات تماس شخصی کسی نمایش داده نمی‌شود." : "To help, use “Offer help” or “Donate”; coordination happens through PET LIFE and nobody's personal contact details are shown."}</p>
+        <p className="text-metadata text-text-secondary">{fa ? "برای کمک از دکمه‌های «پیشنهاد کمک» یا «کمک مالی» استفاده کنید؛ هماهنگی از طریق opetlife انجام می‌شود و اطلاعات تماس شخصی کسی نمایش داده نمی‌شود." : "To help, use “Offer help” or “Donate”; coordination happens through opetlife and nobody's personal contact details are shown."}</p>
         {org.contactEmail || org.contactPhone ? <p className="text-metadata text-text-secondary">{fa ? "تماس رسمی سازمان: " : "Official contact: "}<span dir="ltr">{[org.contactEmail, org.contactPhone].filter(Boolean).join(" · ")}</span></p> : null}
         <ReportContentPanel submit={(reason, details) => communityService.reportContent("ORGANIZATION", org.id, reason, details)} />
       </ContextSurface>

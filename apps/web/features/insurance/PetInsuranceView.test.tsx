@@ -5,7 +5,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { insuranceService } from "@/services/insurance.service";
 import { PetInsuranceView } from "./PetInsuranceView";
 
-vi.mock("@/services/insurance.service", () => ({ insuranceService: { listApplications: vi.fn(), submitApplication: vi.fn(), cancelApplication: vi.fn(), updateApplication: vi.fn(), consentText: vi.fn().mockResolvedValue({ text: "I agree that PET LIFE shares this application with the insurer." }) } }));
+vi.mock("@/services/insurance.service", () => ({ insuranceService: { listApplications: vi.fn(), submitApplication: vi.fn(), cancelApplication: vi.fn(), updateApplication: vi.fn(), consentText: vi.fn().mockResolvedValue({ text: "I agree that opetlife shares this application with the insurer." }) } }));
 
 function application(overrides: Partial<InsuranceApplicationDto> = {}): InsuranceApplicationDto {
   return {

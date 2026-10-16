@@ -1,5 +1,6 @@
+import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
-import { ArrowUp, PawPrint } from "@petlife/ui";
+import { ArrowUp } from "@petlife/ui";
 import type { AppLocale } from "@/lib/i18n/config";
 import { storyCopy } from "./story-copy";
 
@@ -8,7 +9,7 @@ export function ParkFooter({ locale }: { locale: AppLocale }) {
   return <footer className="park-footer" aria-label={c.footerLabel}>
     <div className="park-footer__main">
       <div className="park-footer__brand">
-        <Link href={`/${locale}`} className="park-brand"><span className="park-brand__mark"><PawPrint aria-hidden="true" size={28} /></span><bdi>PET LIFE OS</bdi></Link>
+        <Link href={`/${locale}`} className="park-brand"><Brand /></Link>
         <p>{c.footerDescription}</p>
         <Link href={`/${locale}#lp-main`} className="park-footer__back">{c.footerTop}<ArrowUp size={16} aria-hidden="true" /></Link>
       </div>

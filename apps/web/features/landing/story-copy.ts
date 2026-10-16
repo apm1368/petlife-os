@@ -5,7 +5,7 @@ const fa = {
   identityTitle: "یک هویت، برای تمام دنیای او",
   identityBody: "کوکی فقط یک نام در برنامه نیست. پرونده‌اش نقطهٔ شروع سلامت، مراقبت، نوبت‌ها و خاطره‌های اوست؛ اطلاعاتی که خودت ثبت می‌کنی و اختیارش را داری.",
   identityCta: "ساخت پروندهٔ همراه من", identityMore: "دیدن خدمات", cookie: "کوکی", example: "یک همراه واقعی، یک دنیای شخصی",
-  cookieAlt: "عکس واقعی کوکی، سگ کوچک طلایی، در جای خوابش", appAlt: "نمای نمونهٔ داشبورد PET LIFE OS", appExample: "نمای نمونهٔ برنامه",
+  cookieAlt: "عکس واقعی کوکی، سگ کوچک طلایی، در جای خوابش", appAlt: "نمای نمونهٔ داشبورد opetlife", appExample: "نمای نمونهٔ برنامه",
   identityFacts: ["مشخصات و هویت", "پروندهٔ سلامت", "برنامهٔ مراقبت", "خاطره‌های مشترک"],
   howEyebrow: "از آشنایی تا رسیدگی", howTitle: "یک مسیر روشن، برای خیال راحت‌تر",
   steps: [
@@ -46,7 +46,7 @@ const en: StoryCopy = {
   identityTitle: "One identity. Their whole world.",
   identityBody: "Cookie is more than a name in an app. Her record connects health, care, appointments and memories, built from the information you choose to add and share.",
   identityCta: "Create my pet’s record", identityMore: "Explore services", cookie: "Cookie", example: "A real companion. A world of their own.",
-  cookieAlt: "A real photograph of Cookie, a small golden dog, resting on her bed", appAlt: "Example PET LIFE OS dashboard", appExample: "App preview",
+  cookieAlt: "A real photograph of Cookie, a small golden dog, resting on her bed", appAlt: "Example opetlife dashboard", appExample: "App preview",
   identityFacts: ["Identity and details", "Health record", "Care planning", "Shared memories"],
   howEyebrow: "From getting acquainted to getting care", howTitle: "A clear path to more peace of mind",
   steps: [

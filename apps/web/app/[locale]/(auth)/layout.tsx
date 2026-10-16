@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
 import { LockKeyhole, ShieldCheck } from "@petlife/ui";
 import { notFound } from "next/navigation";
@@ -13,10 +14,10 @@ export default async function AuthLayout({ children, params }: { children: React
   if (!isAppLocale(locale)) notFound();
   const c = parkAuthCopy[locale];
   return <div className="auth-frame park-auth-page">
-    <aside className="auth-brand-panel" aria-label="PET LIFE OS">
+    <aside className="auth-brand-panel" aria-label="opetlife">
       <Image unoptimized src={parkCopy[locale].imageSrc} alt="" fill sizes="(max-width: 820px) 100vw, 50vw" priority />
       <div className="auth-brand-copy">
-        <Link href={`/${locale}`}><bdi>PET LIFE OS</bdi></Link>
+        <Link href={`/${locale}`}><Brand /></Link>
         <h2>{c.tagline}</h2><p>{c.description}</p>
         <div className="auth-trust-row"><span><ShieldCheck size={16} aria-hidden="true" />{c.privacy}</span><span><LockKeyhole size={16} aria-hidden="true" />{c.title}</span></div>
       </div>

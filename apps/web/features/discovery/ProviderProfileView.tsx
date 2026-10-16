@@ -98,7 +98,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
               {profile.verified ? <span className="pd-head__verified"><BadgeCheck size={16} aria-hidden="true" />{isVet ? (fa ? "هویت و پروانهٔ دامپزشکی تأییدشده" : "Identity and veterinary license verified") : fa ? "هویت و مجوز تأییدشده" : "Identity and license verified"}</span> : null}
               {place ? <span><MapPin size={15} aria-hidden="true" />{place}</span> : null}
               {ratingText ? <span><Star size={15} aria-hidden="true" className="pd-star" />{ratingText}</span> : <span>{fa ? "هنوز نظری ثبت نشده" : "No reviews yet"}</span>}
-              {profile.completedBookings ? <span>{fa ? `${formatCount(profile.completedBookings, "fa")} نوبت انجام‌شده در پت‌لایف` : `${profile.completedBookings} bookings completed on PET LIFE`}</span> : null}
+              {profile.completedBookings ? <span>{fa ? `${formatCount(profile.completedBookings, "fa")} نوبت انجام‌شده در opetlife` : `${profile.completedBookings} bookings completed on opetlife`}</span> : null}
             </p>
             {isVet && profile.specialties.length ? (
               <p className="pd-head__specialties"><span>{fa ? "تخصص‌ها:" : "Specialties:"}</span> {profile.specialties.join(sep)}</p>

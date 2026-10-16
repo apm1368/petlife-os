@@ -1,4 +1,5 @@
 "use client";
+import { Brand } from "@/features/brand/Brand";
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -12,7 +13,7 @@ export function PublicFooter() {
   return (
     <footer className="public-footer" aria-label={locale === "fa" ? "پیوندهای پایانی" : "Footer links"}>
       <div className="public-footer__brand">
-        <bdi className="font-semibold">PET LIFE OS</bdi>
+        <Brand />
         <span>{copy.demo}</span>
       </div>
       <ul>

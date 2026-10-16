@@ -55,7 +55,7 @@ export function NgoFrame({ children }: { children: (ctx: { role: NgoRole }) => R
   const gate = useNgoGate();
   if (gate.state === "loading") return <Skeleton className="h-64 w-full" />;
   if (gate.state === "signIn") return <EmptyState title={fa ? "برای ورود به پرتال سازمان وارد حساب شوید" : "Sign in to open the organization portal"} />;
-  if (gate.state === "none") return <EmptyState title={fa ? "شما عضو هیچ سازمان حمایت از حیوانات نیستید" : "You are not a member of an animal-support organization"} description={fa ? "مالک سازمان یا تیم PET LIFE می‌تواند شما را اضافه کند." : "The organization's owner or the PET LIFE team can add you."} />;
+  if (gate.state === "none") return <EmptyState title={fa ? "شما عضو هیچ سازمان حمایت از حیوانات نیستید" : "You are not a member of an animal-support organization"} description={fa ? "مالک سازمان یا تیم opetlife می‌تواند شما را اضافه کند." : "The organization's owner or the opetlife team can add you."} />;
   if (gate.state === "error" || !gate.role) return <ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message="" retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => void gate.reload()} />;
   const base = `/${lang}/ngo`;
   const items = [["", fa ? "نمای کلی" : "Overview"], ["/needs", fa ? "نیازها" : "Needs"], ["/offers", fa ? "پیشنهادها و داوطلبان" : "Offers & volunteers"], ["/donations", fa ? "کمک‌های مالی" : "Donations"], ["/team", fa ? "تیم" : "Team"], ["/verification", fa ? "احراز" : "Verification"], ["/settings", fa ? "تنظیمات" : "Settings"]] as const;
@@ -114,7 +114,7 @@ export function NgoOverviewView() {
                 <p className="font-bold">{fa ? "موجودی کمک‌های مالی (از دفتر کل)" : "Donation balance (from the ledger)"}</p>
                 <p>{fa ? "عمومی: " : "General: "}{formatCurrency(data.donations.generalAvailableIrr, lang)}</p>
                 <p>{fa ? "محدود به هدف: " : "Restricted: "}{formatCurrency(data.donations.restrictedAvailableIrr, lang)}</p>
-                <p className="text-metadata text-text-secondary">{fa ? "پرداخت به سازمان را تیم مالی PET LIFE انجام و ثبت می‌کند؛ این عدد قابل ویرایش نیست." : "Payouts are made and recorded by PET LIFE finance; this figure cannot be edited."}</p>
+                <p className="text-metadata text-text-secondary">{fa ? "پرداخت به سازمان را تیم مالی opetlife انجام و ثبت می‌کند؛ این عدد قابل ویرایش نیست." : "Payouts are made and recorded by opetlife finance; this figure cannot be edited."}</p>
               </div>
               <div className="rounded-md border border-border-subtle p-3 text-sm">
                 <p className="font-bold">{fa ? "وضعیت نیازها" : "Needs status"}</p>
@@ -288,7 +288,7 @@ export function NgoTeamView() {
           {myRole === "OWNER" ? (
             <div className="flex flex-col gap-2 rounded-md border border-border-subtle p-3">
               <h2 className="font-bold">{fa ? "افزودن عضو" : "Add a member"}</h2>
-              <p className="text-metadata text-text-secondary">{fa ? "فرد باید از قبل حساب PET LIFE داشته باشد." : "The person must already have a PET LIFE account."}</p>
+              <p className="text-metadata text-text-secondary">{fa ? "فرد باید از قبل حساب opetlife داشته باشد." : "The person must already have an opetlife account."}</p>
               <Input label={fa ? "ایمیل" : "E-mail"} dir="ltr" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <select aria-label={fa ? "نقش" : "Role"} value={role} onChange={(e) => setRole(e.target.value as NgoRole)} className="min-h-11 rounded-md border border-border-subtle bg-surface-base px-2">
                 {(Object.keys(ROLE) as NgoRole[]).map((r) => <option key={r} value={r}>{ROLE[r][fa ? 0 : 1]}</option>)}
@@ -339,8 +339,8 @@ export function NgoVerificationView() {
           <h1 className="text-page-title">{fa ? "احراز سازمان" : "Organization verification"}</h1>
           <StatusLabel tone={VERIFY[v.status]?.[2] ?? "neutral"}>{VERIFY[v.status]?.[fa ? 0 : 1] ?? v.status}</StatusLabel>
           {v.submittedAt ? <p className="text-sm text-text-secondary">{fa ? "ارسال: " : "Submitted: "}{formatDay(v.submittedAt.slice(0, 10), lang)} · {fa ? `${localizeDigits(v.documentCount, "fa")} مدرک` : `${v.documentCount} document(s)`}</p> : null}
-          {v.note ? <p className="rounded-md bg-state-attention/10 p-3 text-sm text-state-attention">{fa ? "یادداشت PET LIFE: " : "PET LIFE note: "}{v.note}</p> : null}
-          <p className="text-sm text-text-secondary">{fa ? "مدارک (مثلاً مجوز یا ثبت رسمی) خصوصی می‌مانند و فقط تیم PET LIFE برای بررسی آن‌ها را می‌بیند؛ هرگز در صفحهٔ عمومی نمایش داده نمی‌شوند." : "Documents (e.g. registration or permit) stay private and are seen only by the PET LIFE team for review; never on the public page."}</p>
+          {v.note ? <p className="rounded-md bg-state-attention/10 p-3 text-sm text-state-attention">{fa ? "یادداشت opetlife: " : "opetlife note: "}{v.note}</p> : null}
+          <p className="text-sm text-text-secondary">{fa ? "مدارک (مثلاً مجوز یا ثبت رسمی) خصوصی می‌مانند و فقط تیم opetlife برای بررسی آن‌ها را می‌بیند؛ هرگز در صفحهٔ عمومی نمایش داده نمی‌شوند." : "Documents (e.g. registration or permit) stay private and are seen only by the opetlife team for review; never on the public page."}</p>
           {v.canSubmit && role === "OWNER" ? (
             <div className="flex flex-col gap-2 rounded-md border border-border-subtle p-3">
               <FilePicker label={fa ? "مدارک (PDF یا تصویر، حداکثر ۱۰)" : "Documents (PDF or image, up to 10)"} multiple accept="application/pdf,image/jpeg,image/png" onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 10))} />
@@ -367,7 +367,7 @@ export function NgoSettingsView() {
       {({ role }) => !o ? <Skeleton className="h-32" /> : (
         <div className="flex max-w-2xl flex-col gap-3">
           <h1 className="text-page-title">{fa ? "مشخصات عمومی سازمان" : "Public profile"}</h1>
-          <p className="text-sm text-text-secondary">{fa ? "نام، نوع و وضعیت احراز را فقط تیم PET LIFE تغییر می‌دهد. اطلاعات تماس رسمی سازمان در صفحهٔ عمومی دیده می‌شود؛ شماره یا ایمیل شخصی ننویسید." : "Name, type and verification are changed only by PET LIFE. The organization's official contact appears publicly; don't use a personal number or e-mail."}</p>
+          <p className="text-sm text-text-secondary">{fa ? "نام، نوع و وضعیت احراز را فقط تیم opetlife تغییر می‌دهد. اطلاعات تماس رسمی سازمان در صفحهٔ عمومی دیده می‌شود؛ شماره یا ایمیل شخصی ننویسید." : "Name, type and verification are changed only by opetlife. The organization's official contact appears publicly; don't use a personal number or e-mail."}</p>
           <label className="flex flex-col gap-1 text-sm">{fa ? "دربارهٔ سازمان" : "About"}<textarea dir="auto" disabled={role !== "OWNER"} value={form.description} maxLength={4000} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-28 rounded-md border border-border-subtle bg-surface-base p-2" /></label>
           <Input dir="auto" label={fa ? "محدوده (شهر/منطقه)" : "Area (city/district)"} disabled={role !== "OWNER"} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
           <Input dir="ltr" label={fa ? "ایمیل رسمی" : "Official e-mail"} disabled={role !== "OWNER"} value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} />

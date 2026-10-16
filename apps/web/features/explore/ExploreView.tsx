@@ -23,7 +23,7 @@ export function ExploreView() {
     <div className="explore">
       <header className="page-intro">
         <h1>{fa ? "کاوش" : "Explore"}</h1>
-        <p>{fa ? "همهٔ بخش‌های پت‌لایف در یک جا." : "Everything in PET LIFE, in one place."}</p>
+        <p>{fa ? "همهٔ بخش‌های opetlife در یک جا." : "Everything in opetlife, in one place."}</p>
       </header>
 
       <nav aria-label={fa ? "میان‌برهای من" : "My shortcuts"} className="explore-mine">

@@ -89,7 +89,7 @@ export function SecurityCenterView() {
           <MethodRow
             icon="G"
             title="Google"
-            detail={google ? google.email ?? t("متصل", "Connected") : methods?.google ? t("با ورود از طریق Google به همین ایمیل متصل می‌شود.", "Links when you sign in with Google using this email.") : t("ورود با Google هنوز در PET LIFE فعال نیست.", "Google sign-in isn't available in PET LIFE yet.")}
+            detail={google ? google.email ?? t("متصل", "Connected") : methods?.google ? t("با ورود از طریق Google به همین ایمیل متصل می‌شود.", "Links when you sign in with Google using this email.") : t("ورود با Google هنوز در opetlife فعال نیست.", "Google sign-in isn't available in opetlife yet.")}
             ltr={Boolean(google?.email)}
             tone={google ? "success" : "neutral"}
             status={google ? t("متصل", "Connected") : methods?.google ? t("متصل نیست", "Not linked") : t("در دسترس نیست", "Unavailable")}

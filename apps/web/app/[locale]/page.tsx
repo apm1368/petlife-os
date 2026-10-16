@@ -13,7 +13,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   if (!isAppLocale(locale)) notFound();
-  return { title: `PET LIFE OS — ${landingCopy[locale].meta.title}`, description: landingCopy[locale].meta.description };
+  return { title: `opetlife — ${landingCopy[locale].meta.title}`, description: landingCopy[locale].meta.description };
 }
 
 export default async function RootPage({ params }: { params: Promise<{ locale: string }> }) {

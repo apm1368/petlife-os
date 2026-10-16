@@ -162,7 +162,7 @@ export function SettingsPanel() {
 
       {tab === "roles" ? (
         <Panel>
-          <PanelTitle title="نقش‌ها" hint="دسترسی واقعی از نقش‌های ادمین پت لایف می‌آید، نه از این صفحه" />
+          <PanelTitle title="نقش‌ها" hint="دسترسی واقعی از نقش‌های ادمین opetlife می‌آید، نه از این صفحه" />
           <TableWrap>
             <table className="w-full border-collapse">
               <thead>

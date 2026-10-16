@@ -21,11 +21,11 @@ async function fetchListing(id: string): Promise<TravelListingDetailDto | null> 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; id: string }> }): Promise<Metadata> {
   const { locale, id } = await params;
   const listing = await fetchListing(id);
-  if (!listing) return { title: "PET LIFE", robots: { index: false, follow: false } };
+  if (!listing) return { title: "opetlife", robots: { index: false, follow: false } };
   const fa = locale === "fa";
   const cover = listing.media[0]?.url ?? listing.imageUrls[0];
   return {
-    title: `${listing.title} — ${listing.city} | PET LIFE`,
+    title: `${listing.title} — ${listing.city} | opetlife`,
     description: listing.description.slice(0, 160),
     alternates: { canonical: `/${locale}/travel/stays/${id}`, languages: { fa: `/fa/travel/stays/${id}`, en: `/en/travel/stays/${id}` } },
     openGraph: { title: listing.title, description: listing.description.slice(0, 200), images: cover ? [cover] : undefined, locale: fa ? "fa_IR" : "en_US" },

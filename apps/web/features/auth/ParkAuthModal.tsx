@@ -1,4 +1,5 @@
 "use client";
+import { Brand } from "@/features/brand/Brand";
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -50,12 +51,12 @@ export function ParkAuthModal({ children, registration = false }: { children: Re
     }}>
     <h2 id={titleId} className="sr-only">{registration ? c.register : c.title}</h2>
     <div className="park-auth__grid">
-      <aside className="park-auth__scene" aria-label="PET LIFE OS">
+      <aside className="park-auth__scene" aria-label="opetlife">
         <Image unoptimized src={parkCopy[isAppLocale(locale) ? locale : "fa"].imageSrc} alt="" fill sizes="340px" />
         <div className="park-auth__scene-copy"><PawPrint size={27} aria-hidden="true" /><h3>{c.tagline}</h3><p>{c.description}</p></div>
       </aside>
       <div className="park-auth__panel">
-        <div className="park-auth__top"><bdi>PET LIFE OS</bdi><button type="button" onClick={dismiss} aria-label={c.close}><X size={21} aria-hidden="true" /></button></div>
+        <div className="park-auth__top"><Brand /><button type="button" onClick={dismiss} aria-label={c.close}><X size={21} aria-hidden="true" /></button></div>
         <div className="park-auth__flow">{children}</div>
         <p className="park-auth__privacy"><LockKeyhole size={14} aria-hidden="true" />{c.privacy}</p>
       </div>

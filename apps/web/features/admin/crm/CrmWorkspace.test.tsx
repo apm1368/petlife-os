@@ -11,14 +11,14 @@ describe("CrmWorkspace", () => {
   it("opens on the agent's desk and says plainly that the data is not real", () => {
     render(<CrmWorkspace />);
 
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("CRM پت لایف");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("CRM opetlife");
     expect(screen.getByText(/داده‌های این بخش نمونه و ساختگی است/)).toBeTruthy();
     expect(screen.getByText("لیدهای باز من")).toBeTruthy();
   });
 
   it("carries no business-line concept anywhere in the workspace", () => {
     const { container } = render(<CrmWorkspace />);
-    // The reference CRM threaded a lineId through every filter; PET LIFE is one
+    // The reference CRM threaded a lineId through every filter; opetlife is one
     // product, so the dimension should be absent rather than defaulted.
     expect(container.textContent).not.toContain("بیزنس لاین");
     expect(container.textContent).not.toContain("خط کسب‌وکار");

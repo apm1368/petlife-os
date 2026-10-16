@@ -84,7 +84,7 @@ export function PersonalSettingsView() {
 
   return (
     <div className="account-stack">
-      <AccountPageHeader eyebrow={t("شخصی", "PERSONAL")} title={t("اطلاعات و ترجیحات", "Profile & preferences")} description={t("نامی که دیگران در PET LIFE می‌بینند، راه‌های تماس تأییدشده و زبان و ظاهر حساب.", "The name others see in PET LIFE, your verified contact methods, and how the app looks and speaks.")} />
+      <AccountPageHeader eyebrow={t("شخصی", "PERSONAL")} title={t("اطلاعات و ترجیحات", "Profile & preferences")} description={t("نامی که دیگران در opetlife می‌بینند، راه‌های تماس تأییدشده و زبان و ظاهر حساب.", "The name others see in opetlife, your verified contact methods, and how the app looks and speaks.")} />
 
       <form
         className="account-form"

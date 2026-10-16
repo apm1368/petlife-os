@@ -138,7 +138,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
             <Link className="text-sm underline" href={`/${lang}/travel/search?city=${encodeURIComponent(place.city)}`}>{fa ? `اقامتگاه‌های دوستدار حیوانات در ${place.city}` : `Pet-friendly stays in ${place.city}`}</Link>
           </section>
           <section className="flex flex-col gap-2" aria-label={fa ? "گزارش اطلاعات نادرست" : "Report incorrect information"}>
-            {reportState === "sent" ? <p role="status" className="text-sm text-state-success">{fa ? "گزارش شما ثبت شد و تیم PET LIFE بررسی می‌کند." : "Thanks — the PET LIFE team will review your report."}</p> : null}
+            {reportState === "sent" ? <p role="status" className="text-sm text-state-success">{fa ? "گزارش شما ثبت شد و تیم opetlife بررسی می‌کند." : "Thanks — the opetlife team will review your report."}</p> : null}
             {reportState === "duplicate" ? <p role="alert" className="text-sm text-text-secondary">{fa ? "گزارش شما برای این مکان قبلاً ثبت شده و در حال بررسی است." : "You have already reported this place; it is being reviewed."}</p> : null}
             {reportState === "auth" ? <p role="alert" className="text-sm text-text-secondary">{fa ? "برای گزارش، وارد حساب شوید." : "Sign in to report."}</p> : null}
             {reportState === "error" ? <p role="alert" className="text-sm text-state-urgent">{fa ? "گزارش ثبت نشد." : "The report could not be sent."}</p> : null}

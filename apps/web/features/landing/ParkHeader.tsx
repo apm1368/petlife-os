@@ -1,8 +1,9 @@
 "use client";
+import { Brand } from "@/features/brand/Brand";
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, X, PawPrint, UserRound, Users } from "@petlife/ui";
+import { Menu, X, UserRound, Users } from "@petlife/ui";
 import type { AppLocale } from "@/lib/i18n/config";
 import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
@@ -27,9 +28,8 @@ export function ParkHeader({ locale }: { locale: AppLocale }) {
   return <header className="park-header" onKeyDown={event => { if (event.key === "Escape") { setOpen(false); menuButton.current?.focus(); } }}>
     <a href="#lp-main" className="park-skip">{base.actions.skip}</a>
     <div className="park-header__inner">
-      <Link className="park-brand" href={root} aria-label="PET LIFE OS">
-        <span className="park-brand__mark"><PawPrint size={29} aria-hidden="true" /></span>
-        <span><bdi>PET LIFE OS</bdi><small>{c.brandTagline}</small></span>
+      <Link className="park-brand" href={root} aria-label="opetlife">
+        <span><Brand /><small>{c.brandTagline}</small></span>
       </Link>
       <nav className="park-desktop-nav" aria-label={base.nav.label}>
         {links.map(link => <Link key={link.href} href={link.href} aria-current={link.href === root ? "page" : undefined}>{link.label}</Link>)}
