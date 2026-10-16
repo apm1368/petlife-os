@@ -31,7 +31,7 @@ export function LocalPreviewGate({ children, live, title, items = [] }: {
   return (
     <div className={preserveHome ? "min-h-screen bg-surface-base" : "workspace-preview min-h-screen bg-surface-base"}>
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
-        <Link href={`/${locale}`} className="text-section-title">PET LIFE OS · {title}</Link>
+        <Link href={`/${locale}`} className="text-section-title">opetlife · {title}</Link>
         <div className="flex items-center gap-2"><LocaleSwitcher /><ThemeToggle /></div>
       </header>
       {items.length === 0 && <ProductNavigation audience="consumer" />}

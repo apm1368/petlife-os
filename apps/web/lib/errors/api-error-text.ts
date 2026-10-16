@@ -18,7 +18,7 @@ const FA: Record<string, string> = {
   CLINICAL_RECORDING_NOT_AUTHORIZED: "اجازهٔ ثبت اطلاعات بالینی برای این حیوان را ندارید.",
   COMMUNITY_CONTENT_NOT_VISIBLE: "این مطلب دیگر نمایش داده نمی‌شود.",
   COMPATIBILITY_REVIEW_REQUIRED: "پیش از خرید برای این حیوان، این کالا را بررسی و تأیید کنید.",
-  CONSENT_REQUIRED: "پذیرش این توافق برای استفاده از پت‌لایف لازم است. برای توقف، حذف حساب را درخواست کنید.",
+  CONSENT_REQUIRED: "پذیرش این توافق برای استفاده از opetlife لازم است. برای توقف، حذف حساب را درخواست کنید.",
   CONTACT_UNAVAILABLE: "از این ایمیل یا شماره نمی‌توان برای حساب شما استفاده کرد.",
   CONTACT_UNCHANGED: "این همان راه ارتباطی تأییدشدهٔ فعلی شماست.",
   CURRENT_PASSWORD_INCORRECT: "رمز فعلی درست نیست.",

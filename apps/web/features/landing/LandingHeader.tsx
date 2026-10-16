@@ -1,4 +1,5 @@
 "use client";
+import { Brand } from "@/features/brand/Brand";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -42,11 +43,8 @@ export function LandingHeader({ locale, copy }: { locale: AppLocale; copy: Landi
     <header className="lp-header" data-scrolled={scrolled}>
       <a className="lp-skip" href="#lp-main">{copy.actions.skip}</a>
       <div className="lp-header__inner">
-        <Link href={`/${locale}`} className="lp-brand" aria-label="PET LIFE OS">
-          <span className="lp-brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 21c-4 0-7-2.6-7-5.6 0-2.5 2.2-4.4 4.2-5.6.9-.6 1.8-.9 2.8-.9s1.9.3 2.8.9c2 1.2 4.2 3.1 4.2 5.6 0 3-3 5.6-7 5.6Z" /><circle cx="5" cy="8" r="2.2" /><circle cx="9.3" cy="4.6" r="2.2" /><circle cx="14.7" cy="4.6" r="2.2" /><circle cx="19" cy="8" r="2.2" /></svg>
-          </span>
-          <bdi>PET LIFE OS</bdi>
+        <Link href={`/${locale}`} className="lp-brand" aria-label="opetlife">
+          <Brand />
         </Link>
         <nav aria-label={copy.nav.label} className="lp-nav">
           {copy.nav.items.map((item) => (

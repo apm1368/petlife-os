@@ -113,7 +113,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
           )}
         </ul>
       </nav>
-      <div id={panelId} ref={panel} className="mega" role="navigation" data-open={open} hidden={!open} onPointerEnter={hover(true)} aria-label={fa ? "بخش‌های پت‌لایف" : "PET LIFE destinations"}>
+      <div id={panelId} ref={panel} className="mega" role="navigation" data-open={open} hidden={!open} onPointerEnter={hover(true)} aria-label={fa ? "بخش‌های opetlife" : "opetlife destinations"}>
         <div className="mega__inner">
           {EXPLORE_GROUPS.map((group, gi) => (
             <section key={group.key} className="mega__group" style={{ ["--g" as string]: gi }} aria-labelledby={`${panelId}-${group.key}`}>
@@ -132,7 +132,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
           ))}
         </div>
         <div className="mega__foot">
-          <Link href={`/${locale}/explore`} onClick={close}>{fa ? "همهٔ بخش‌های پت‌لایف" : "Everything in PET LIFE"}<Forward size={16} aria-hidden="true" /></Link>
+          <Link href={`/${locale}/explore`} onClick={close}>{fa ? "همهٔ بخش‌های opetlife" : "Everything in opetlife"}<Forward size={16} aria-hidden="true" /></Link>
         </div>
       </div>
     </div>

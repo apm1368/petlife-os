@@ -11,7 +11,7 @@ describe("insurer portal", () => {
   it("tells non-members they have no insurer access", async () => {
     vi.mocked(insurerPortalService.me).mockRejectedValue(new ApiError({ code: "INSURER_ACCESS_DENIED", message: "x", requestId: "r" }, 403));
     renderWithIntl(<InsurerHomeView />, "en");
-    expect(await screen.findByText("You are not a member of an insurer on PET LIFE")).toBeTruthy();
+    expect(await screen.findByText("You are not a member of an insurer on opetlife")).toBeTruthy();
   });
 
   it("cannot approve before review starts, and needs a message to ask for information", async () => {

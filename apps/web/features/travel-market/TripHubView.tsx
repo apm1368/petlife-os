@@ -123,7 +123,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
             {hub.suggestions.requirementRules.length ? (
               <div className="flex flex-col gap-2 rounded-md border border-dashed border-border-strong p-3">
                 <h3 className="font-bold">{fa ? "الزامات پیشنهادی برای این مقصد" : "Suggested for this destination"}</h3>
-                <p className="text-metadata text-text-secondary">{fa ? "از کتابخانهٔ الزامات که تیم PET LIFE با ذکر منبع نگهداری می‌کند. پس از افزودن «لازم» ثبت می‌شوند و باید مدرکش را تهیه کنید." : "From the requirement library PET LIFE maintains with sources. Added rows start as “required” until you provide evidence."}</p>
+                <p className="text-metadata text-text-secondary">{fa ? "از کتابخانهٔ الزامات که تیم opetlife با ذکر منبع نگهداری می‌کند. پس از افزودن «لازم» ثبت می‌شوند و باید مدرکش را تهیه کنید." : "From the requirement library opetlife maintains with sources. Added rows start as “required” until you provide evidence."}</p>
                 {hub.suggestions.requirementRules.map((r) => (
                   <label key={r.id} className="flex items-start gap-3 text-sm">
                     <input type="checkbox" className="mt-1 h-5 w-5" checked={selected.includes(r.id)} onChange={() => setSelected(selected.includes(r.id) ? selected.filter((x) => x !== r.id) : [...selected, r.id])} />

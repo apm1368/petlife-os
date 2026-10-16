@@ -62,7 +62,7 @@ describe("member navigation", () => {
     fireEvent.keyDown(explore, { key: "ArrowDown" });
     expect(explore.getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByRole("link", { name: /سفر و اقامت/ }).getAttribute("href")).toBe("/fa/travel");
-    const destinations = screen.getByRole("navigation", { name: "بخش‌های پت‌لایف" });
+    const destinations = screen.getByRole("navigation", { name: "بخش‌های opetlife" });
     expect(document.activeElement).toBe(within(destinations).getAllByRole("link")[0]);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(explore.getAttribute("aria-expanded")).toBe("false");
@@ -73,7 +73,7 @@ describe("member navigation", () => {
     renderWithIntl(<><PrimaryNav /><button type="button">After navigation</button></>, "en");
     const explore = screen.getByRole("button", { name: "Explore" });
     fireEvent.keyDown(explore, { key: "ArrowDown" });
-    const menu = screen.getByRole("navigation", { name: "PET LIFE destinations" });
+    const menu = screen.getByRole("navigation", { name: "opetlife destinations" });
     act(() => within(menu).getAllByRole("link").at(-1)!.focus());
     expect(explore.getAttribute("aria-expanded")).toBe("true");
     const after = screen.getByRole("button", { name: "After navigation" });

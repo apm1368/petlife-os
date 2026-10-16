@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-15",
-  "baseCommit": "7208e85b0b623c88894dbd15032a6f4c661eab58",
+  "generated": "2026-10-16",
+  "baseCommit": "de37e5e1eb656b5bfc3ed2fb48900981c79c015a",
   "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
   "counts": {
     "SYSTEM_ENDPOINT_REVIEW_NOT_A_SCREEN": 7,
-    "STATIC_UI_CHAIN_FOUND": 771,
-    "NO_EXACT_CLIENT_MATCH_REVIEW": 267,
+    "STATIC_UI_CHAIN_FOUND": 796,
+    "NO_EXACT_CLIENT_MATCH_REVIEW": 243,
     "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 34
   },
   "unresolvedDecorators": [],
@@ -620,7 +620,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "overview",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 52,
+      "line": 53,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -628,7 +628,7 @@
           "service": "adminAnimalSupportService",
           "method": "overview",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 63,
+          "line": 213,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -641,7 +641,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "listDonations",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 58,
+      "line": 59,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -649,7 +649,7 @@
           "service": "adminAnimalSupportService",
           "method": "listDonations",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 79,
+          "line": 256,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -662,7 +662,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "listOrganizations",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 66,
+      "line": 67,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -670,9 +670,10 @@
           "service": "adminAnimalSupportService",
           "method": "listOrganizations",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 69,
+          "line": 225,
           "consumers": [
-            "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
+            "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx",
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
           ]
         }
       ]
@@ -683,7 +684,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "getOrganization",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 72,
+      "line": 73,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -691,7 +692,7 @@
           "service": "adminAnimalSupportService",
           "method": "getOrganization",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 70,
+          "line": 227,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -704,7 +705,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "createOrganization",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 78,
+      "line": 79,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -712,7 +713,7 @@
           "service": "adminAnimalSupportService",
           "method": "createOrganization",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 71,
+          "line": 229,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -725,10 +726,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "updateOrganization",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 84,
+      "line": 85,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "updateOrganization",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 143,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -736,7 +747,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "setVerificationStatus",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 90,
+      "line": 91,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -744,7 +755,7 @@
           "service": "adminAnimalSupportService",
           "method": "setVerification",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 72,
+          "line": 234,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -757,7 +768,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "setListed",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 96,
+      "line": 97,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -765,7 +776,7 @@
           "service": "adminAnimalSupportService",
           "method": "setListed",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 73,
+          "line": 239,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -778,10 +789,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "requestLogoUpload",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 102,
+      "line": 103,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "organizationLogoUpload",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 148,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -789,10 +810,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "listRescueCases",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 110,
+      "line": 111,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listRescueCases",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 153,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -800,10 +831,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "getRescueCase",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 116,
+      "line": 117,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "getRescueCase",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 154,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -811,10 +852,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "createRescueCase",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 122,
+      "line": 123,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "createRescueCase",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 156,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -822,10 +873,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "setRescueCaseStatus",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 128,
+      "line": 129,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "setRescueStatus",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 161,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -833,10 +894,41 @@
       "controller": "AdminAnimalSupportController",
       "handler": "requestEvidenceUpload",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 134,
+      "line": 135,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "rescueEvidenceUpload",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 171,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
+    },
+    {
+      "verb": "POST",
+      "path": "/admin/animal-support/rescue-cases/:param/evidence",
+      "controller": "AdminAnimalSupportController",
+      "handler": "registerRescueEvidence",
+      "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
+      "line": 141,
+      "group": "modules/admin/animal-support",
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "registerRescueEvidence",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 166,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -844,10 +936,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "listCampaigns",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 142,
+      "line": 149,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listCampaigns",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 181,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -855,10 +957,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "getCampaign",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 148,
+      "line": 155,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "getCampaign",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 182,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -866,10 +978,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "createCampaign",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 154,
+      "line": 161,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "createCampaign",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 184,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PATCH",
@@ -877,10 +999,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "setCampaignStatus",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 160,
+      "line": 167,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "setCampaignStatus",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 189,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -888,10 +1020,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "listCampaignUpdates",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 166,
+      "line": 173,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "listCampaignUpdates",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 194,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -899,10 +1041,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "postCampaignUpdate",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 172,
+      "line": 179,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "postCampaignUpdate",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 196,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -910,10 +1062,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "requestCampaignEvidenceUpload",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 178,
+      "line": 185,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "campaignEvidenceUpload",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 201,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -921,10 +1083,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "shareCampaignToCommunity",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 184,
+      "line": 191,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "shareCampaign",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 206,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -932,10 +1104,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "getFundBalance",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 192,
+      "line": 199,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "getFundBalance",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 210,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -943,10 +1125,20 @@
       "controller": "AdminAnimalSupportController",
       "handler": "recordPayout",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 198,
+      "line": 205,
       "group": "modules/admin/animal-support",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminAnimalSupportService",
+          "method": "recordPayout",
+          "source": "apps/web/services/admin-animal-support.service.ts",
+          "line": 212,
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -954,7 +1146,7 @@
       "controller": "AdminAnimalSupportController",
       "handler": "refundDonation",
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
-      "line": 204,
+      "line": 211,
       "group": "modules/admin/animal-support",
       "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
@@ -962,7 +1154,7 @@
           "service": "adminAnimalSupportService",
           "method": "refundDonation",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 80,
+          "line": 258,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -983,7 +1175,7 @@
           "service": "adminAnimalSupportService",
           "method": "listMembers",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 74,
+          "line": 244,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1004,7 +1196,7 @@
           "service": "adminAnimalSupportService",
           "method": "grantMember",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 75,
+          "line": 246,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1025,7 +1217,7 @@
           "service": "adminAnimalSupportService",
           "method": "revokeMember",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 76,
+          "line": 248,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1046,7 +1238,7 @@
           "service": "adminAnimalSupportService",
           "method": "openVerificationDocuments",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 77,
+          "line": 250,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1067,7 +1259,7 @@
           "service": "adminAnimalSupportService",
           "method": "listNeeds",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 65,
+          "line": 216,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1088,7 +1280,7 @@
           "service": "adminAnimalSupportService",
           "method": "getNeed",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 66,
+          "line": 217,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1109,7 +1301,7 @@
           "service": "adminAnimalSupportService",
           "method": "reviewNeed",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 67,
+          "line": 219,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1519,7 +1711,7 @@
           "service": "adminAnimalSupportService",
           "method": "listReports",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 87,
+          "line": 276,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1540,7 +1732,7 @@
           "service": "adminAnimalSupportService",
           "method": "escalateReport",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 88,
+          "line": 278,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -1561,7 +1753,7 @@
           "service": "adminAnimalSupportService",
           "method": "dismissReport",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 89,
+          "line": 283,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -3424,7 +3616,7 @@
           "service": "adminAnimalSupportService",
           "method": "listLostPets",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 82,
+          "line": 261,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -3445,7 +3637,7 @@
           "service": "adminAnimalSupportService",
           "method": "getLostPet",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 83,
+          "line": 262,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -3466,7 +3658,7 @@
           "service": "adminAnimalSupportService",
           "method": "revealLostPetLocation",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 84,
+          "line": 264,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -3487,7 +3679,7 @@
           "service": "adminAnimalSupportService",
           "method": "closeLostPet",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 85,
+          "line": 269,
           "consumers": [
             "apps/web/features/admin/animal-support/AdminAnimalSupportViews.tsx"
           ]
@@ -3531,7 +3723,7 @@
           "source": "apps/web/services/admin.service.ts",
           "line": 154,
           "consumers": [
-            "apps/web/features/admin/AdminProvidersView.tsx"
+            "apps/web/features/admin/AdminPartnerDirectory.tsx"
           ]
         }
       ]
@@ -3563,7 +3755,7 @@
           "source": "apps/web/services/admin.service.ts",
           "line": 156,
           "consumers": [
-            "apps/web/features/admin/AdminSellersView.tsx"
+            "apps/web/features/admin/AdminPartnerDirectory.tsx"
           ]
         }
       ]
@@ -4026,8 +4218,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 32,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "list",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 36,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -4037,8 +4239,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 36,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "changes",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 41,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "PUT",
@@ -4048,8 +4260,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 40,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "propose",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 44,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -4059,8 +4281,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 44,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "review",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 46,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "POST",
@@ -4070,8 +4302,18 @@
       "source": "apps/api/src/modules/admin/settings/admin-settings.controller.ts",
       "line": 48,
       "group": "modules/admin/settings",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "adminSettingsService",
+          "method": "cancel",
+          "source": "apps/web/services/admin-settings.service.ts",
+          "line": 50,
+          "consumers": [
+            "apps/web/features/admin/settings/AdminSettingsView.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -5227,7 +5469,7 @@
           "service": "adminAnimalSupportService",
           "method": "trustCaseContext",
           "source": "apps/web/services/admin-animal-support.service.ts",
-          "line": 91,
+          "line": 288,
           "consumers": [
             "apps/web/features/admin/AdminTrustCaseDetailView.tsx"
           ]
@@ -7235,7 +7477,7 @@
           "service": "clinicOsService",
           "method": "notes",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 70,
+          "line": 71,
           "consumers": [
             "apps/web/features/clinic/ClinicCustomerNotes.tsx"
           ]
@@ -7256,7 +7498,7 @@
           "service": "clinicOsService",
           "method": "addNote",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 74,
+          "line": 75,
           "consumers": [
             "apps/web/features/clinic/ClinicCustomerNotes.tsx"
           ]
@@ -7277,7 +7519,7 @@
           "service": "clinicOsService",
           "method": "removeNote",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 75,
+          "line": 76,
           "consumers": [
             "apps/web/features/clinic/ClinicCustomerNotes.tsx"
           ]
@@ -7403,7 +7645,7 @@
           "service": "clinicOsService",
           "method": "queue",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 91,
+          "line": 93,
           "consumers": [
             "apps/web/features/clinic/ClinicWorkspace.tsx"
           ]
@@ -7424,7 +7666,7 @@
           "service": "clinicOsService",
           "method": "assign",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 69,
+          "line": 70,
           "consumers": [
             "apps/web/features/clinic/ClinicAppointmentAssignment.tsx"
           ]
@@ -7445,7 +7687,7 @@
           "service": "clinicOsService",
           "method": "tasks",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 77,
+          "line": 79,
           "consumers": [
             "apps/web/features/clinic/ClinicWorkspace.tsx"
           ]
@@ -7466,7 +7708,7 @@
           "service": "clinicOsService",
           "method": "createTask",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 82,
+          "line": 84,
           "consumers": [
             "apps/web/features/clinic/ClinicWorkspace.tsx"
           ]
@@ -7487,7 +7729,7 @@
           "service": "clinicOsService",
           "method": "completeTask",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 83,
+          "line": 85,
           "consumers": [
             "apps/web/features/clinic/ClinicWorkspace.tsx"
           ]
@@ -7508,7 +7750,7 @@
           "service": "clinicOsService",
           "method": "cancelTask",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 84,
+          "line": 86,
           "consumers": [
             "apps/web/features/clinic/ClinicWorkspace.tsx"
           ]
@@ -7627,8 +7869,18 @@
       "source": "apps/api/src/modules/clinic-os/clinic-os.controller.ts",
       "line": 143,
       "group": "modules/clinic-os/clinic-os.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "clinicOsService",
+          "method": "plans",
+          "source": "apps/web/services/clinic-os.service.ts",
+          "line": 77,
+          "consumers": [
+            "apps/web/features/clinic/ClinicPlans.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",
@@ -7792,7 +8044,7 @@
           "service": "clinicOsService",
           "method": "subscription",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 76,
+          "line": 78,
           "consumers": [
             "apps/web/features/clinic/ClinicWorkspace.tsx"
           ]
@@ -7813,7 +8065,7 @@
           "service": "clinicOsService",
           "method": "customers",
           "source": "apps/web/services/clinic-os.service.ts",
-          "line": 85,
+          "line": 87,
           "consumers": [
             "apps/web/features/clinic/ClinicWorkspace.tsx"
           ]
@@ -13707,7 +13959,7 @@
           "service": "partnerVerificationService",
           "method": "queue",
           "source": "apps/web/services/partner-verification.service.ts",
-          "line": 15,
+          "line": 16,
           "consumers": [
             "apps/web/features/partner-verification/AdminVerificationView.tsx"
           ]
@@ -13728,7 +13980,7 @@
           "service": "partnerVerificationService",
           "method": "detail",
           "source": "apps/web/services/partner-verification.service.ts",
-          "line": 16,
+          "line": 17,
           "consumers": [
             "apps/web/features/partner-verification/AdminVerificationView.tsx"
           ]
@@ -13749,7 +14001,7 @@
           "service": "partnerVerificationService",
           "method": "transition",
           "source": "apps/web/services/partner-verification.service.ts",
-          "line": 17,
+          "line": 18,
           "consumers": [
             "apps/web/features/partner-verification/AdminVerificationView.tsx"
           ]
@@ -13770,7 +14022,7 @@
           "service": "partnerVerificationService",
           "method": "review",
           "source": "apps/web/services/partner-verification.service.ts",
-          "line": 18,
+          "line": 19,
           "consumers": [
             "apps/web/features/partner-verification/AdminVerificationView.tsx"
           ]
@@ -13791,7 +14043,7 @@
           "service": "partnerVerificationService",
           "method": "download",
           "source": "apps/web/services/partner-verification.service.ts",
-          "line": 19,
+          "line": 20,
           "consumers": [
             "apps/web/features/partner-verification/AdminVerificationView.tsx"
           ]
@@ -14581,8 +14833,18 @@
       "source": "apps/api/src/modules/platform-settings/platform-settings.controller.ts",
       "line": 9,
       "group": "modules/platform-settings/platform-settings.controller.ts",
-      "status": "NO_EXACT_CLIENT_MATCH_REVIEW",
-      "clients": []
+      "status": "STATIC_UI_CHAIN_FOUND",
+      "clients": [
+        {
+          "service": "platformSettingsService",
+          "method": "publicSettings",
+          "source": "apps/web/services/platform-settings.service.ts",
+          "line": 6,
+          "consumers": [
+            "apps/web/features/app-shell/PlatformAnnouncement.tsx"
+          ]
+        }
+      ]
     },
     {
       "verb": "GET",

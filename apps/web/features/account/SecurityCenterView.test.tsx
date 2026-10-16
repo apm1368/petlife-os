@@ -32,7 +32,7 @@ describe("SecurityCenterView", () => {
     expect(await screen.findByText("Chrome · Android")).toBeTruthy();
     expect(screen.getByText("Unknown device")).toBeTruthy();
     expect(screen.getByText("This device")).toBeTruthy();
-    expect(screen.getByText("Google sign-in isn't available in PET LIFE yet.")).toBeTruthy();
+    expect(screen.getByText("Google sign-in isn't available in opetlife yet.")).toBeTruthy();
     expect(screen.getByText("Signed in")).toBeTruthy();
     expect(screen.queryByText("No way to recover your account")).toBeNull();
   });

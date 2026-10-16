@@ -12,7 +12,7 @@ describe("Pet identity platform", () => {
   let app: INestApplication, db: PrismaService;
   const server = () => app.getHttpServer();
   const get = (a: Actor, u: string) => request(server()).get(u).set("Cookie", a.cookie);
-  const send = (m: "post" | "put", a: Actor, u: string) => request(server())[m](u).set("Cookie", a.cookie).set("x-csrf-token", a.csrf);
+  const send = (m: "post" | "put" | "patch", a: Actor, u: string) => request(server())[m](u).set("Cookie", a.cookie).set("x-csrf-token", a.csrf);
   const pub = (token: string) => request(server()).get(`/public/pet-cards/${token}`);
   let anon: { cookie: string; csrf: string };
 
@@ -39,6 +39,32 @@ describe("Pet identity platform", () => {
     anon = { csrf, cookie: `petlife_csrf=${csrf}` };
   });
   afterAll(async () => app.close());
+
+  it("creates a pet with unknown age and permits completing its birth date later", async () => {
+    const o = await actor("unknown-age-owner");
+    const hh = (await send("post", o, "/households").send({}).expect(201)).body;
+    const pet = (await send("post", o, `/households/${hh.id}/pets`).send({ name: "Unknown age", species: "CAT" }).expect(201)).body;
+    const stored = await db.pet.findUniqueOrThrow({ where: { id: pet.id } });
+    expect(stored.birthDate).toBeNull();
+    expect(stored.approximateAgeMonths).toBeNull();
+    await send("patch", o, `/pets/${pet.id}`).send({ birthDate: "2024-03-20" }).expect(200);
+    const updated = await db.pet.findUniqueOrThrow({ where: { id: pet.id } });
+    expect(updated.birthDate?.toISOString().slice(0, 10)).toBe("2024-03-20");
+  });
+
+  it("replaces an exact birth date with an explicit newborn age without retaining contradictory age fields", async () => {
+    const o = await actor("newborn-age-owner");
+    const hh = (await send("post", o, "/households").send({}).expect(201)).body;
+    const pet = (await send("post", o, `/households/${hh.id}/pets`).send({ name: "Newborn", species: "CAT", birthDate: "2024-03-20" }).expect(201)).body;
+    await send("patch", o, `/pets/${pet.id}`).send({ birthDate: null, approximateAgeMonths: 0 }).expect(200);
+    const approximate = await db.pet.findUniqueOrThrow({ where: { id: pet.id } });
+    expect(approximate.birthDate).toBeNull();
+    expect(approximate.approximateAgeMonths).toBe(0);
+    await send("patch", o, `/pets/${pet.id}`).send({ birthDate: "2026-10-01", approximateAgeMonths: null }).expect(200);
+    const exact = await db.pet.findUniqueOrThrow({ where: { id: pet.id } });
+    expect(exact.birthDate?.toISOString().slice(0, 10)).toBe("2026-10-01");
+    expect(exact.approximateAgeMonths).toBeNull();
+  });
 
   it("completeness returns a deterministic score and the next most useful fields", async () => {
     const { o, petId } = await owner();

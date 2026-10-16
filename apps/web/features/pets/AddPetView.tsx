@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Avatar, Bird, Button, Camera, Cat, Dog, Fish, Input, PawPrint, Rabbit, Rat, Turtle } from "@petlife/ui";
 import { NeuteredStatus, PetSex, PetSpecies, WeightUnit } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
@@ -43,7 +43,7 @@ const BREEDS: Partial<Record<PetSpecies, { fa: string[]; en: string[] }>> = {
 const COPY = {
   fa: {
     title: "افزودن حیوان",
-    intro: "سه قدم کوتاه؛ فقط قدم اول و سن الزامی است و بقیه را بعداً هم می‌توانید کامل کنید.",
+    intro: "سه قدم کوتاه؛ فقط قدم اول الزامی است و بقیه را بعداً هم می‌توانید کامل کنید.",
     steps: ["هویت", "جزئیات", "شناسنامهٔ سلامت"],
     stepsLabel: "مراحل افزودن حیوان",
     species: "نوع حیوان",
@@ -88,7 +88,7 @@ const COPY = {
   },
   en: {
     title: "Add a pet",
-    intro: "Three short steps — only the first step and an age are required; the rest can wait.",
+    intro: "Three short steps — only the first step is required; the rest can wait.",
     steps: ["Identity", "Details", "Health identity"],
     stepsLabel: "Add-a-pet steps",
     species: "Species",
@@ -144,6 +144,7 @@ export function AddPetView() {
   const router = useRouter();
   const locale = useLocale() === "en" ? "en" : "fa";
   const c = COPY[locale];
+  const tDate = useTranslations("birthDateField");
   const fa = locale === "fa";
   const householdId = usePetStore((s) => s.householdId);
   const upsertPet = usePetStore((s) => s.upsertPet);
@@ -178,7 +179,7 @@ export function AddPetView() {
   }, [photoPreview]);
 
   const approxMonths = (Number(toLatin(ageYears)) || 0) * 12 + (Number(toLatin(ageMonths)) || 0);
-  const hasAge = approximate ? approxMonths > 0 : Boolean(birthDate);
+  const hasAge = approximate ? ageYears.trim() !== "" || ageMonths.trim() !== "" : Boolean(birthDate);
   const breedOptions = useMemo(() => BREEDS[species]?.[locale] ?? [], [species, locale]);
 
   function choosePhoto(file: File | undefined) {
@@ -195,14 +196,12 @@ export function AddPetView() {
   function goNext() {
     setError(null);
     if (step === 0 && !name.trim()) return setError(c.needName);
-    if (step === 1 && !hasAge) return setError(c.needAge);
     setStep((s) => Math.min(2, s + 1));
   }
 
   async function submit() {
     setError(null);
     if (!name.trim()) return setError(c.needName);
-    if (!hasAge) return setError(c.needAge);
     if (!householdId) return setError(c.noHousehold);
     setIsSubmitting(true);
     try {
@@ -212,7 +211,7 @@ export function AddPetView() {
           name: name.trim(),
           species,
           ...(sex ? { sex } : {}),
-          ...(approximate ? { approximateAgeMonths: approxMonths } : { birthDate }),
+          ...(hasAge ? approximate ? { approximateAgeMonths: approxMonths } : { birthDate } : {}),
           ...(!breedUnknown && breed.trim() ? { breed: breed.trim() } : {}),
           ...(color.trim() ? { colorMarkings: color.trim() } : {}),
           ...(Number(toLatin(weight)) > 0 ? { latestWeightValue: Number(toLatin(weight)), latestWeightUnit: unit } : {}),
@@ -300,6 +299,7 @@ export function AddPetView() {
 
           {step === 1 ? (
             <div className="add-pet-wizard__step" key="details">
+              <p className="calm-note">{tDate("optionalAge")}</p>
               {approximate ? (
                 <div className="add-pet-age">
                   <Input label={c.years} inputMode="numeric" value={ageYears} onChange={(e) => setAgeYears(e.target.value.replace(/[^\d۰-۹]/g, "").slice(0, 2))} />
@@ -363,7 +363,7 @@ export function AddPetView() {
           <div className="add-pet-wizard__actions">
             {step > 0 ? <Button variant="ghost" onClick={() => { setError(null); setStep((s) => s - 1); }} disabled={isSubmitting}>{c.back}</Button> : <span />}
             <div>
-              {step === 2 ? null : step === 1 ? <Button variant="ghost" onClick={() => void submit()} disabled={isSubmitting || !hasAge}>{c.skipSave}</Button> : null}
+              {step === 2 ? null : step === 1 ? <Button variant="ghost" onClick={() => void submit()} disabled={isSubmitting}>{c.skipSave}</Button> : null}
               {step < 2 ? (
                 <Button variant="primary" onClick={goNext}>{c.next}</Button>
               ) : (

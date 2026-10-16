@@ -68,7 +68,7 @@ const copy = {
     unknownBreed: "نژاد ثبت نشده",
     unknownAge: "سن ثبت نشده",
     loading: "در حال آماده‌سازی برگه",
-    sourceNote: "اطلاعات سلامت از پرونده پت‌لایف است؛ نبودِ مورد یعنی ثبت نشده، نه تأیید نبودن.",
+    sourceNote: "اطلاعات سلامت از پرونده opetlife است؛ نبودِ مورد یعنی ثبت نشده، نه تأیید نبودن.",
   },
   en: {
     title: "Care sheet",
@@ -108,7 +108,7 @@ const copy = {
     unknownBreed: "Breed not recorded",
     unknownAge: "Age not recorded",
     loading: "Preparing the sheet",
-    sourceNote: "Health details come from the PET LIFE record; nothing listed means nothing recorded, not confirmed absence.",
+    sourceNote: "Health details come from the opetlife record; nothing listed means nothing recorded, not confirmed absence.",
   },
 } as const;
 

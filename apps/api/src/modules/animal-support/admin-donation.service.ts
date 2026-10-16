@@ -8,7 +8,7 @@ import { RefundsService } from "../commerce/refunds/refunds.service";
 import { DonationLedgerService } from "./donation-ledger.service";
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
-import { DonationInsufficientFundBalanceException, DonationNotFoundException } from "../../common/errors/api-exception";
+import { AnimalSupportOrganizationNotFoundException, DonationInsufficientFundBalanceException, DonationNotFoundException } from "../../common/errors/api-exception";
 import { toDonationFundBalanceDto } from "./animal-support-mapper";
 import type { RecordDonationPayoutDto } from "./dto/animal-support.dto";
 
@@ -87,6 +87,10 @@ export class AdminDonationService {
    */
   async recordPayout(admin: ResolvedAdminContext, organizationId: string, dto: RecordDonationPayoutDto): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
+      // Serialize payouts for this organization before reading its ledger balance.
+      // Two finance users must not both spend the same available funds.
+      const [organization] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "animal_support_organizations" WHERE "id" = ${organizationId}::uuid FOR UPDATE`;
+      if (!organization) throw new AnimalSupportOrganizationNotFoundException({ organizationId });
       const available = await this.donationLedger.getAvailableForFund(organizationId, dto.fundType, tx);
       if (dto.amountIrr > available) throw new DonationInsufficientFundBalanceException({ organizationId, fundType: dto.fundType, requestedIrr: dto.amountIrr, availableIrr: available });
 

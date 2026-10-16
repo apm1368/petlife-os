@@ -110,4 +110,29 @@ describe("AdminShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "System" }));
     expect(screen.getByText("Audit")).toBeTruthy();
   });
+  it("offers read-only partner directories to customer viewers without verification permission", async () => {
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin:true, adminUserId:"a1", displayName:"Reader", role:"SUPPORT" as never, permissions:["customer.view"] as never } satisfies AdminSessionContextDto);
+    renderWithIntl(<AdminShell><div>read-only shell</div></AdminShell>);
+    await screen.findByText("read-only shell");
+    fireEvent.click(screen.getByRole("button",{name:"Network"}));
+    expect(screen.getByRole("link",{name:"Providers"}).getAttribute("href")).toBe("/en/admin/providers");
+    expect(screen.getByRole("link",{name:"Sellers"}).getAttribute("href")).toBe("/en/admin/sellers");
+    expect(screen.queryByRole("link",{name:"Services"})).toBeNull();
+  });
+
+  it("offers settings with view permission without exposing other system tools", async () => {
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockResolvedValue({
+      isAdmin: true, adminUserId: "admin-viewer", displayName: "Settings reader",
+      role: "SUPPORT" as never, permissions: ["settings.view"] as never,
+    } satisfies AdminSessionContextDto);
+    renderWithIntl(<AdminShell><div>settings shell</div></AdminShell>);
+    await screen.findByText("settings shell");
+    fireEvent.click(screen.getByRole("button", { name: "System" }));
+    expect(screen.getByRole("link", { name: "Platform settings" }).getAttribute("href")).toBe("/en/admin/settings");
+    expect(screen.queryByText("Audit")).toBeNull();
+    expect(screen.queryByText("Admin users")).toBeNull();
+  });
+
 });

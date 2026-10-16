@@ -1,0 +1,218 @@
+[
+  {
+    "page": "landing",
+    "locale": "fa",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "password-login",
+    "locale": "fa",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "member",
+    "locale": "fa",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "admin",
+    "locale": "fa",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "landing",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "password-login",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "member",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "admin",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "landing",
+    "locale": "en",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "password-login",
+    "locale": "en",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "member",
+    "locale": "en",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "admin",
+    "locale": "en",
+    "width": 390,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "landing",
+    "locale": "en",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "password-login",
+    "locale": "en",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "member",
+    "locale": "en",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "admin",
+    "locale": "en",
+    "width": 1440,
+    "theme": "light",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "landing",
+    "locale": "fa",
+    "width": 390,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "password-login",
+    "locale": "fa",
+    "width": 390,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "member",
+    "locale": "fa",
+    "width": 390,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "admin",
+    "locale": "fa",
+    "width": 390,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "landing",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "password-login",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "member",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "admin",
+    "locale": "fa",
+    "width": 1440,
+    "theme": "dark",
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  }
+]

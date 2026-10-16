@@ -69,6 +69,5 @@ export class CreatePetDto {
   @Length(1, 64)
   microchipNumber?: string;
 
-  // birthDate OR approximateAgeMonths is required — enforced in PetsService, not here,
-  // since class-validator's cross-field validation reads awkwardly for an either/or rule.
+  // Unknown age is allowed; complete the birth date or approximate age later.
 }

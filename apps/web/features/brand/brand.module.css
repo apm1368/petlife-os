@@ -1,0 +1,21 @@
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  flex-shrink: 0;
+  color: inherit;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.symbol {
+  display: block;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+  padding: 0.15rem;
+  border-radius: 50%;
+  background: var(--campaign-paper, var(--surface-elevated));
+}

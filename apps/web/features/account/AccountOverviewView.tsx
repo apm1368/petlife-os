@@ -33,7 +33,7 @@ export function AccountOverviewView() {
         <StatusLabel tone={home ? "success" : "neutral"}>{home?.role === "OWNER" ? (locale === "fa" ? "مدیر" : "Organizer") : (locale === "fa" ? "عضو" : "Member")}</StatusLabel>
       </button>
       <button onClick={() => router.push(`/${locale}/subscription`)}>
-        <span><b>{locale === "fa" ? "عضویت PET LIFE Care" : "PET LIFE Care membership"}</b><small>{home?.subscription?.status ? statusLabel(home.subscription.status, locale === "en" ? "en" : "fa", "subscription") : (locale === "fa" ? "مشاهده طرح‌ها و مزایا" : "See plans and benefits")}</small></span><span aria-hidden className="dir-flip">←</span>
+        <span><b>{locale === "fa" ? "عضویت opetlife Care" : "opetlife Care membership"}</b><small>{home?.subscription?.status ? statusLabel(home.subscription.status, locale === "en" ? "en" : "fa", "subscription") : (locale === "fa" ? "مشاهده طرح‌ها و مزایا" : "See plans and benefits")}</small></span><span aria-hidden className="dir-flip">←</span>
       </button>
       <button onClick={() => router.push(`/${locale}/profile/activity`)}>
         <span><b>{locale === "fa" ? "فعالیت‌های اخیر" : "Recent activity"}</b><small>{locale === "fa" ? "ورودها و تغییرات مهم حساب" : "Sign-ins and important account changes"}</small></span><span aria-hidden className="dir-flip">←</span>

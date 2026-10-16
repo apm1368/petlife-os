@@ -18,7 +18,15 @@ export function generateStaticParams() {
 }
 
 export const metadata: Metadata = {
-  title: "PET LIFE OS",
+  title: "opetlife",
+  applicationName: "opetlife",
+  icons: {
+    icon: [
+      { url: "/brand/opetlife/04_app_icon_light.png", media: "(prefers-color-scheme: light)" },
+      { url: "/brand/opetlife/03_app_icon_dark.png", media: "(prefers-color-scheme: dark)" },
+    ],
+    apple: "/brand/opetlife/04_app_icon_light.png",
+  },
   description: "Your pet's life, in one place.",
 };
 

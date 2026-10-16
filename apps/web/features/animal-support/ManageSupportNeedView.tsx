@@ -102,7 +102,7 @@ export function ManageSupportNeedView({ listingId }: { listingId: string }) {
 
       <ContextSurface className="flex flex-col gap-3">
         <h2 className="text-section-title">{fa ? `پیشنهادهای کمک${pending ? ` (${localizeDigits(pending, "fa")} در انتظار)` : ""}` : `Help offers${pending ? ` (${pending} waiting)` : ""}`}</h2>
-        <p className="text-metadata text-text-secondary">{fa ? "اطلاعات تماس کمک‌کنندگان نمایش داده نمی‌شود؛ هماهنگی از طریق PET LIFE انجام می‌شود." : "Helpers' contact details are never shown; coordination stays in PET LIFE."}</p>
+        <p className="text-metadata text-text-secondary">{fa ? "اطلاعات تماس کمک‌کنندگان نمایش داده نمی‌شود؛ هماهنگی از طریق opetlife انجام می‌شود." : "Helpers' contact details are never shown; coordination stays in opetlife."}</p>
         <SupportOfferInbox offers={offers} busyId={busyId} onRespond={(offerId, status: HelpOfferStatus, quantity) => void run(offerId, () => supportNeedsService.respondToOffer(listing.id, offerId, quantity !== undefined ? { status, fulfilledQuantity: quantity } : { status }), fa ? "به‌روز شد." : "Updated.")} />
       </ContextSurface>
     </div>

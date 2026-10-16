@@ -1,4 +1,6 @@
 "use client";
+import { Brand } from "@/features/brand/Brand";
+import { PlatformAnnouncement } from "./PlatformAnnouncement";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -37,7 +39,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
       <header className="member-header">
         <div className="member-header__bar">
           <Link href={`/${locale}/home`} className="member-header__brand">
-            {t("appName")}
+            <Brand />
           </Link>
           <PrimaryNav canViewHealth={access?.canViewHealth === true} />
           <div className="member-header__tools">
@@ -62,7 +64,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <main id="member-main-content" tabIndex={-1} className="workspace-main motion-page">{children}</main>
+      <main id="member-main-content" tabIndex={-1} className="workspace-main motion-page"><PlatformAnnouncement />{children}</main>
       {glass ? <MemberGlassDock access={access} /> : null}
       <MobileTabBar canViewHealth={access?.canViewHealth === true} />
     </div>
