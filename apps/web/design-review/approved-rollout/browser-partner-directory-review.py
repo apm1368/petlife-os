@@ -11,7 +11,7 @@ def fixture(r):
  if r.request.method not in ['GET','OPTIONS']:raise AssertionError('Read-only visual fixture: '+path)
  if path=='/admin/me':data={'isAdmin':True,'adminUserId':'a1','displayName':'مدیر شبکه','role':'ADMIN','permissions':['verification.manage','customer.view']}
  elif path in ['/admin/providers','/admin/sellers']:
-  seller=path.endswith('sellers');data={'items':[{'id':'org1','name':'فروشگاه همراه' if seller else 'کلینیک مهر','type':'VET_CLINIC','status':'ACTIVE','verificationStatus':'VERIFIED','createdAt':'2026-10-16T00:00:00Z'}],'total':61,'page':1,'pageSize':30}
+  seller=path.endswith('sellers');data={'items':[{'id':'org1','name':'فروشگاه همراه' if seller else 'کلینیک مهر',**({'status':'ACTIVE'} if seller else {'type':'VET_CLINIC'}),'verificationStatus':'VERIFIED','createdAt':'2026-10-16T00:00:00Z'}],'total':61,'page':1,'pageSize':30}
  else:return original_mock(r)
  r.fulfill(status=200,content_type='application/json',body=json.dumps(data))
 results=[]
