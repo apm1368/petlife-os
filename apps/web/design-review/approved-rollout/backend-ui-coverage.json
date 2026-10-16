@@ -1,6 +1,6 @@
 {
   "generated": "2026-10-16",
-  "baseCommit": "ce6c887218a8415cd451e85ef4c9c446afe79a99",
+  "baseCommit": "de37e5e1eb656b5bfc3ed2fb48900981c79c015a",
   "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
   "counts": {
     "SYSTEM_ENDPOINT_REVIEW_NOT_A_SCREEN": 7,
@@ -3723,7 +3723,7 @@
           "source": "apps/web/services/admin.service.ts",
           "line": 154,
           "consumers": [
-            "apps/web/features/admin/AdminProvidersView.tsx"
+            "apps/web/features/admin/AdminPartnerDirectory.tsx"
           ]
         }
       ]
@@ -3755,7 +3755,7 @@
           "source": "apps/web/services/admin.service.ts",
           "line": 156,
           "consumers": [
-            "apps/web/features/admin/AdminSellersView.tsx"
+            "apps/web/features/admin/AdminPartnerDirectory.tsx"
           ]
         }
       ]

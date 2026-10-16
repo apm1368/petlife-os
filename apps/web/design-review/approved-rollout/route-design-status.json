@@ -230,7 +230,8 @@
     {
       "file": "app/[locale]/(admin)/admin/providers/page.tsx",
       "route": "[locale]/admin/providers",
-      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #32: actual paginated directory, GET-only controlled fa/en 390/1440 captures and genuine baseline images; no certification of partner360 operations."
     },
     {
       "file": "app/[locale]/(admin)/admin/reconciliation/page.tsx",
@@ -250,7 +251,8 @@
     {
       "file": "app/[locale]/(admin)/admin/sellers/page.tsx",
       "route": "[locale]/admin/sellers",
-      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #32: actual paginated directory, GET-only controlled fa/en 390/1440 captures and genuine baseline images; no certification of partner360 operations."
     },
     {
       "file": "app/[locale]/(admin)/admin/services/analytics/page.tsx",
