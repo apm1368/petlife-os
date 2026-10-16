@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-15",
+  "generated": "2026-10-16",
   "scope": "Static service consumer scan, excluding tests. Aliases, generic action dispatch and legacy wrappers require manual review; no automatic feature claims.",
   "routes": [
     {
@@ -9,6 +9,14 @@
     {
       "file": "app/[locale]/(admin)/admin/access/page.tsx",
       "route": "[locale]/admin/access"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/campaigns/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/campaigns/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/campaigns/page.tsx",
+      "route": "[locale]/admin/animal-support/campaigns"
     },
     {
       "file": "app/[locale]/(admin)/admin/animal-support/donations/page.tsx",
@@ -33,6 +41,14 @@
     {
       "file": "app/[locale]/(admin)/admin/animal-support/page.tsx",
       "route": "[locale]/admin/animal-support"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/rescue-cases/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/rescue-cases/[id]"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/rescue-cases/page.tsx",
+      "route": "[locale]/admin/animal-support/rescue-cases"
     },
     {
       "file": "app/[locale]/(admin)/admin/audit/page.tsx",
@@ -1540,6 +1556,168 @@
     },
     {
       "service": "adminAnimalSupportService",
+      "method": "updateOrganization",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "organizationLogoUpload",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "listRescueCases",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "getRescueCase",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "createRescueCase",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "setRescueStatus",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "registerRescueEvidence",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "rescueEvidenceUpload",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "listCampaigns",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "getCampaign",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "createCampaign",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "setCampaignStatus",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "listCampaignUpdates",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "postCampaignUpdate",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "campaignEvidenceUpload",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "shareCampaign",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "getFundBalance",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
+      "method": "recordPayout",
+      "source": "services/admin-animal-support.service.ts",
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminAnimalSupportService",
       "method": "overview",
       "source": "services/admin-animal-support.service.ts",
       "consumers": [
@@ -1579,7 +1757,8 @@
       "method": "listOrganizations",
       "source": "services/admin-animal-support.service.ts",
       "consumers": [
-        "features/admin/animal-support/AdminAnimalSupportViews.tsx"
+        "features/admin/animal-support/AdminAnimalSupportViews.tsx",
+        "features/admin/animal-support/AdminSupportOperations.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -3928,6 +4107,15 @@
       "source": "services/clinic-os.service.ts",
       "consumers": [
         "features/clinic/ClinicCustomerNotes.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "clinicOsService",
+      "method": "plans",
+      "source": "services/clinic-os.service.ts",
+      "consumers": [
+        "features/clinic/ClinicPlans.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
