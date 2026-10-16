@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import type { AnimalSupportOrganizationDto, CommunityReportDto, SupportNeedListingDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
@@ -11,6 +10,10 @@ import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { adminAnimalSupportService, type AdminAnimalSupportOverview, type AdminDonationRow, type AdminLostPetDetail, type AdminLostPetRow, type AdminNgoMember, type ReportTargetFilter, type RevealedLocation } from "@/services/admin-animal-support.service";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th, type Tone } from "../console-ui";
+
+import { AdminOrganizationFunds, AdminSupportOrganizationEditor } from "./AdminSupportOperations";
+import { useSupportPermissions } from "./use-support-permissions";
+import { AdminAnimalSupportNav } from "./AdminAnimalSupportNav";
 
 type Lang = "fa" | "en";
 const useLang = () => {
@@ -87,31 +90,7 @@ function reportTarget(report: CommunityReportDto): { label: [string, string]; hr
 
 // ---------------------------------------------------------------- shared pieces
 
-export function AdminAnimalSupportNav() {
-  const { lang, t } = useLang();
-  const pathname = usePathname() ?? "";
-  const items = [
-    { href: `/${lang}/admin/animal-support`, label: t("نمای کلی", "Overview"), exact: true },
-    { href: `/${lang}/admin/animal-support/needs`, label: t("درخواست‌های کمک", "Support requests") },
-    { href: `/${lang}/admin/animal-support/organizations`, label: t("سازمان‌ها", "Organizations") },
-    { href: `/${lang}/admin/animal-support/donations`, label: t("کمک‌های مالی", "Donations") },
-    { href: `/${lang}/admin/lost-pets`, label: t("حیوانات گم‌شده", "Lost pets") },
-    { href: `/${lang}/admin/community`, label: t("گزارش‌ها", "Reports") },
-    { href: `/${lang}/admin/trust`, label: t("پرونده‌های اعتماد و ایمنی", "Trust & safety cases") },
-  ];
-  return (
-    <nav aria-label={t("بخش حمایت از حیوانات", "Animal support section")} className="mb-4 flex gap-1 overflow-x-auto border-b border-border-subtle">
-      {items.map((item) => {
-        const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-        return (
-          <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`whitespace-nowrap px-3 py-2 text-sm ${active ? "border-b-2 border-brand-natural font-bold" : "text-text-secondary"}`}>
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}
+export { AdminAnimalSupportNav } from "./AdminAnimalSupportNav";
 
 function LoadState({ error, perm, onRetry }: { error: LoadError; perm: string; onRetry: () => void }) {
   const { t } = useLang();
@@ -253,7 +232,7 @@ export function AdminSupportNeedsView() {
       </FilterBar>
       {error ? <LoadState error={error} perm="trust.view" onRetry={load} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /> : (
         <Panel>
-          <TableWrap>
+          <TableWrap><table className="w-full border-collapse">
             <thead><tr><Th>{t("عنوان", "Title")}</Th><Th>{t("منتشرکننده", "Publisher")}</Th><Th>{t("شهر", "City")}</Th><Th>{t("وضعیت", "Status")}</Th><Th>{t("ثبت", "Created")}</Th></tr></thead>
             <tbody>
               {data.items.length === 0 ? <EmptyRow colSpan={5} label={t("موردی نیست", "Nothing here")} /> : data.items.map((need) => (
@@ -266,7 +245,7 @@ export function AdminSupportNeedsView() {
                 </tr>
               ))}
             </tbody>
-          </TableWrap>
+          </table></TableWrap>
           <Pager page={page} total={data.total} pageSize={25} onPage={setPage} />
         </Panel>
       )}
@@ -276,6 +255,7 @@ export function AdminSupportNeedsView() {
 
 export function AdminSupportNeedDetailView({ needId }: { needId: string }) {
   const { lang, t } = useLang();
+  const permissions = useSupportPermissions();
   const [need, setNeed] = useState<SupportNeedListingDto | null>(null);
   const [error, setError] = useState<LoadError>(null);
   const load = useCallback(async () => {
@@ -298,7 +278,7 @@ export function AdminSupportNeedDetailView({ needId }: { needId: string }) {
     PUBLISHED: ["PENDING_REVIEW", "REJECTED", "EXPIRED", "REMOVED"],
     REJECTED: ["PENDING_REVIEW"],
     REMOVED: ["DRAFT", "PENDING_REVIEW", "PUBLISHED", "PARTIALLY_FULFILLED", "PAUSED", "FULFILLED", "REJECTED", "EXPIRED"],
-  })[to]?.includes(need.status);
+  })[to]?.includes(need.status) && permissions.trustManage;
   return (
     <div>
       <AdminAnimalSupportNav />
@@ -335,6 +315,7 @@ export function AdminSupportNeedDetailView({ needId }: { needId: string }) {
 
 export function AdminOrganizationsView() {
   const { lang, fa, t } = useLang();
+  const permissions = useSupportPermissions();
   const [status, setStatus] = useState<string | "all">("all");
   const [page, setPage] = useState(1);
   const [data, setData] = useState<{ total: number; items: AnimalSupportOrganizationDto[] } | null>(null);
@@ -359,9 +340,9 @@ export function AdminOrganizationsView() {
       <AdminAnimalSupportNav />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{t("سازمان‌ها و پناهگاه‌ها", "Organizations & shelters")}</h1>
-        <Button size="sm" onClick={() => setCreating((v) => !v)}>{t("سازمان جدید", "New organization")}</Button>
+        {permissions.manage && <Button size="sm" onClick={() => setCreating((v) => !v)}>{t("سازمان جدید", "New organization")}</Button>}
       </div>
-      {creating ? (
+      {creating && permissions.manage ? (
         <Panel className="mb-4">
           <div className="grid gap-3 sm:grid-cols-[1fr_200px_auto] sm:items-end">
             <Input label={t("نام", "Name")} value={name} onChange={(e) => setName(e.target.value)} dir="auto" />
@@ -395,7 +376,7 @@ export function AdminOrganizationsView() {
       </FilterBar>
       {error ? <LoadState error={error} perm="animalSupport.view" onRetry={load} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /> : (
         <Panel>
-          <TableWrap>
+          <TableWrap><table className="w-full border-collapse">
             <thead><tr><Th>{t("نام", "Name")}</Th><Th>{t("نوع", "Type")}</Th><Th>{t("احراز", "Verification")}</Th><Th>{t("نمایش عمومی", "Public")}</Th><Th>{t("ثبت", "Created")}</Th></tr></thead>
             <tbody>
               {data.items.length === 0 ? <EmptyRow colSpan={5} label={t("موردی نیست", "Nothing here")} /> : data.items.map((org) => (
@@ -408,7 +389,7 @@ export function AdminOrganizationsView() {
                 </tr>
               ))}
             </tbody>
-          </TableWrap>
+          </table></TableWrap>
           <Pager page={page} total={data.total} pageSize={25} onPage={setPage} />
         </Panel>
       )}
@@ -418,6 +399,7 @@ export function AdminOrganizationsView() {
 
 export function AdminOrganizationDetailView({ organizationId }: { organizationId: string }) {
   const { lang, fa, t } = useLang();
+  const permissions = useSupportPermissions();
   const [org, setOrg] = useState<AnimalSupportOrganizationDto | null>(null);
   const [members, setMembers] = useState<AdminNgoMember[] | null>(null);
   const [error, setError] = useState<LoadError>(null);
@@ -429,7 +411,7 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [o, m] = await Promise.all([adminAnimalSupportService.getOrganization(organizationId), adminAnimalSupportService.listMembers(organizationId).catch(() => [])]);
+      const [o, m] = await Promise.all([adminAnimalSupportService.getOrganization(organizationId), adminAnimalSupportService.listMembers(organizationId)]);
       setOrg(o);
       setMembers(m);
     } catch (e) {
@@ -449,6 +431,7 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
       await load();
     } catch (e) {
       setNotice(errorMessage(e, t));
+      throw e;
     }
   };
   return (
@@ -460,8 +443,10 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
         <Tag tone={org.isPubliclyListed ? "success" : "neutral"}>{org.isPubliclyListed ? t("در فهرست عمومی", "Publicly listed") : t("خارج از فهرست", "Not listed")}</Tag>
       </div>
       {notice ? <p role="status" className="mb-3 text-metadata text-text-secondary">{notice}</p> : null}
+      {permissions.manage && <AdminSupportOrganizationEditor key={org.id} organization={org} onSaved={setOrg} />}
+      <AdminOrganizationFunds organizationId={organizationId} />
       <div className="grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">
-        <Panel>
+        {permissions.manage && <Panel>
           <PanelTitle title={t("احراز هویت", "Verification")} hint={t("یادداشت برای سازمان ارسال می‌شود.", "The note is sent to the organization.")} />
           <FilterField label={t("وضعیت جدید", "New status")}>
             <SelectFilter value={nextStatus} onChange={(v) => setNextStatus(v === "all" ? "VERIFIED" : v)} options={["UNDER_REVIEW", "NEEDS_INFORMATION", "VERIFIED", "REJECTED"].map((s) => ({ value: s, label: fa ? VERIFICATION[s]![0] : VERIFICATION[s]![1] }))} />
@@ -479,11 +464,11 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
             )) : null}
           </div>
           <div className="mt-4 border-t border-border-subtle pt-3">
-            <Button size="sm" variant="secondary" onClick={() => run(() => adminAnimalSupportService.setListed(org.id, !org.isPubliclyListed), org.isPubliclyListed ? t("از فهرست عمومی خارج شد.", "Removed from the public list.") : t("در فهرست عمومی قرار گرفت.", "Added to the public list."))}>
+            <Button size="sm" variant="secondary" onClick={() => void run(() => adminAnimalSupportService.setListed(org.id, !org.isPubliclyListed), org.isPubliclyListed ? t("از فهرست عمومی خارج شد.", "Removed from the public list.") : t("در فهرست عمومی قرار گرفت.", "Added to the public list.")).catch(() => undefined)}>
               {org.isPubliclyListed ? t("خارج کردن از فهرست عمومی", "Remove from public list") : t("افزودن به فهرست عمومی", "Add to public list")}
             </Button>
           </div>
-        </Panel>
+        </Panel>}
         <Panel>
           <PanelTitle title={t("اعضای سازمان", "Organization staff")} />
           {members.length === 0 ? <p className="text-metadata text-text-secondary">{t("هنوز عضوی ندارد.", "No staff yet.")}</p> : members.map((m) => (
@@ -491,17 +476,17 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
               <span className="min-w-0 text-metadata text-text-primary">{m.displayName ?? "—"} <span className="break-all text-text-secondary" dir="ltr">{m.email}</span></span>
               <span className="flex items-center gap-2">
                 <Tag tone={m.isActive ? "brand" : "neutral"}>{ROLE[m.role] ? t(ROLE[m.role]![0], ROLE[m.role]![1]) : m.role}{m.isActive ? "" : ` · ${t("غیرفعال", "inactive")}`}</Tag>
-                {m.isActive ? <Button size="sm" variant="ghost" onClick={() => run(() => adminAnimalSupportService.revokeMember(org.id, m.id), t("دسترسی عضو لغو شد.", "Staff access revoked."))}>{t("لغو", "Revoke")}</Button> : null}
+                {m.isActive && permissions.manage ? <Button size="sm" variant="ghost" onClick={() => void run(() => adminAnimalSupportService.revokeMember(org.id, m.id), t("دسترسی عضو لغو شد.", "Staff access revoked.")).catch(() => undefined)}>{t("لغو", "Revoke")}</Button> : null}
               </span>
             </div>
           ))}
-          <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_160px_auto] sm:items-end">
+          {permissions.manage && <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_160px_auto] sm:items-end">
             <Input label={t("ایمیل حساب PET LIFE", "PET LIFE account email")} dir="ltr" value={grantEmail} onChange={(e) => setGrantEmail(e.target.value)} />
             <FilterField label={t("نقش", "Role")}>
               <SelectFilter value={grantRole} onChange={(v) => setGrantRole(v === "all" ? "COORDINATOR" : v)} options={Object.keys(ROLE).map((k) => ({ value: k, label: fa ? ROLE[k]![0] : ROLE[k]![1] }))} />
             </FilterField>
-            <Button disabled={!grantEmail.includes("@")} onClick={() => run(async () => { await adminAnimalSupportService.grantMember(org.id, grantEmail.trim(), grantRole); setGrantEmail(""); }, t("عضو اضافه شد.", "Staff member added."))}>{t("افزودن", "Add")}</Button>
-          </div>
+            <Button disabled={!grantEmail.includes("@")} onClick={() => void run(async () => { await adminAnimalSupportService.grantMember(org.id, grantEmail.trim(), grantRole); setGrantEmail(""); }, t("عضو اضافه شد.", "Staff member added.")).catch(() => undefined)}>{t("افزودن", "Add")}</Button>
+          </div>}
         </Panel>
       </div>
     </div>
@@ -512,6 +497,7 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
 
 export function AdminDonationsView() {
   const { lang, fa, t } = useLang();
+  const permissions = useSupportPermissions();
   const [status, setStatus] = useState<string | "all">("SUCCEEDED");
   const [page, setPage] = useState(1);
   const [data, setData] = useState<{ total: number; items: AdminDonationRow[] } | null>(null);
@@ -541,7 +527,7 @@ export function AdminDonationsView() {
       </FilterBar>
       {error ? <LoadState error={error} perm="animalSupport.view" onRetry={load} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /> : (
         <Panel>
-          <TableWrap>
+          <TableWrap><table className="w-full border-collapse">
             <thead><tr><Th>{t("مبلغ", "Amount")}</Th><Th>{t("کارزار / سازمان", "Campaign / organization")}</Th><Th>{t("اهداکننده", "Donor")}</Th><Th>{t("وضعیت", "Status")}</Th><Th>{t("تاریخ", "Date")}</Th><Th>{""}</Th></tr></thead>
             <tbody>
               {data.items.length === 0 ? <EmptyRow colSpan={6} label={t("موردی نیست", "Nothing here")} /> : data.items.map((d) => (
@@ -551,11 +537,11 @@ export function AdminDonationsView() {
                   <Td>{d.donorName ?? t("حساب حذف‌شده", "Deleted account")}{d.publicDisplayName ? <span className="text-text-secondary"> · {t("نام عمومی", "public as")} {d.publicDisplayName}</span> : null}</Td>
                   <Td><StatusTag map={DONATION_STATUS} value={d.status} /></Td>
                   <Td>{day(d.succeededAt ?? d.createdAt, lang)}</Td>
-                  <Td>{d.status === "SUCCEEDED" ? <ReasonAction danger label={t("بازپرداخت", "Refund")} confirmLabel={t("بازپرداخت کامل", "Refund in full")} onRun={async (reason) => { await adminAnimalSupportService.refundDonation(d.id, reason); setNotice(t("بازپرداخت انجام شد.", "Refund completed.")); await load(); }} /> : null}</Td>
+                  <Td>{permissions.payout && d.status === "SUCCEEDED" ? <ReasonAction danger label={t("بازپرداخت", "Refund")} confirmLabel={t("بازپرداخت کامل", "Refund in full")} onRun={async (reason) => { await adminAnimalSupportService.refundDonation(d.id, reason); setNotice(t("بازپرداخت انجام شد.", "Refund completed.")); await load(); }} /> : null}</Td>
                 </tr>
               ))}
             </tbody>
-          </TableWrap>
+          </table></TableWrap>
           <Pager page={page} total={data.total} pageSize={25} onPage={setPage} />
         </Panel>
       )}
@@ -596,7 +582,7 @@ export function AdminLostPetsView() {
       </FilterBar>
       {error ? <LoadState error={error} perm="trust.view" onRetry={load} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /> : (
         <Panel>
-          <TableWrap>
+          <TableWrap><table className="w-full border-collapse">
             <thead><tr><Th>{t("حیوان", "Pet")}</Th><Th>{t("محدودهٔ عمومی", "Public area")}</Th><Th>{t("مشاهده‌ها", "Sightings")}</Th><Th>{t("وضعیت", "Status")}</Th><Th>{t("ثبت", "Reported")}</Th></tr></thead>
             <tbody>
               {data.items.length === 0 ? <EmptyRow colSpan={5} label={t("موردی نیست", "Nothing here")} /> : data.items.map((row) => (
@@ -609,7 +595,7 @@ export function AdminLostPetsView() {
                 </tr>
               ))}
             </tbody>
-          </TableWrap>
+          </table></TableWrap>
           <Pager page={page} total={data.total} pageSize={25} onPage={setPage} />
         </Panel>
       )}
@@ -619,6 +605,7 @@ export function AdminLostPetsView() {
 
 export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
   const { lang, t } = useLang();
+  const permissions = useSupportPermissions();
   const [row, setRow] = useState<AdminLostPetDetail | null>(null);
   const [revealed, setRevealed] = useState<RevealedLocation | null>(null);
   const [error, setError] = useState<LoadError>(null);
@@ -664,8 +651,8 @@ export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
         <Panel>
           <PanelTitle title={t("اقدام‌ها", "Actions")} />
           <div className="flex flex-col gap-2">
-            {row.exactLocationRecorded && !revealed ? <ReasonAction label={t("نمایش موقعیت دقیق", "Reveal exact location")} confirmLabel={t("نمایش", "Reveal")} hint={t("نیاز به مجوز دادهٔ شخصی", "Needs the personal-data permission")} onRun={async (reason) => setRevealed(await adminAnimalSupportService.revealLostPetLocation(row.id, reason))} /> : null}
-            {closable ? <ReasonAction danger label={t("بستن گزارش (گزارش نادرست یا سوءاستفاده)", "Close report (false or abusive)")} confirmLabel={t("بستن", "Close")} hint={t("وضعیت خود حیوان تغییر نمی‌کند.", "The pet's own status is not changed.")} onRun={async (reason) => { await adminAnimalSupportService.closeLostPet(row.id, reason); await load(); }} /> : <p className="text-metadata text-text-secondary">{t("این گزارش بسته است.", "This report is closed.")}</p>}
+            {permissions.reveal && row.exactLocationRecorded && !revealed ? <ReasonAction label={t("نمایش موقعیت دقیق", "Reveal exact location")} confirmLabel={t("نمایش", "Reveal")} hint={t("نیاز به مجوز دادهٔ شخصی", "Needs the personal-data permission")} onRun={async (reason) => setRevealed(await adminAnimalSupportService.revealLostPetLocation(row.id, reason))} /> : null}
+            {closable && permissions.trustManage ? <ReasonAction danger label={t("بستن گزارش (گزارش نادرست یا سوءاستفاده)", "Close report (false or abusive)")} confirmLabel={t("بستن", "Close")} hint={t("وضعیت خود حیوان تغییر نمی‌کند.", "The pet's own status is not changed.")} onRun={async (reason) => { await adminAnimalSupportService.closeLostPet(row.id, reason); await load(); }} /> : !closable ? <p className="text-metadata text-text-secondary">{t("این گزارش بسته است.", "This report is closed.")}</p> : null}
           </div>
         </Panel>
       </div>
@@ -677,6 +664,7 @@ export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
 
 export function AdminReportsView() {
   const { lang, fa, t } = useLang();
+  const permissions = useSupportPermissions();
   const [status, setStatus] = useState<string | "all">("OPEN");
   const [target, setTarget] = useState<ReportTargetFilter | "all">("all");
   const [page, setPage] = useState(1);
@@ -710,7 +698,7 @@ export function AdminReportsView() {
       </FilterBar>
       {error ? <LoadState error={error} perm="trust.view" onRetry={load} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /> : (
         <Panel>
-          <TableWrap>
+          <TableWrap><table className="w-full border-collapse">
             <thead><tr><Th>{t("مورد", "Item")}</Th><Th>{t("دلیل", "Reason")}</Th><Th>{t("توضیح گزارش‌دهنده", "Reporter's note")}</Th><Th>{t("وضعیت", "Status")}</Th><Th>{t("تاریخ", "Date")}</Th><Th>{""}</Th></tr></thead>
             <tbody>
               {data.items.length === 0 ? <EmptyRow colSpan={6} label={t("گزارشی نیست", "No reports")} /> : data.items.map((r) => {
@@ -723,7 +711,7 @@ export function AdminReportsView() {
                     <Td><StatusTag map={REPORT_STATUS} value={r.status} />{r.trustCaseId ? <> <Link className="text-metadata text-brand-natural underline" href={`/${lang}/admin/trust/${r.trustCaseId}`}>{t("پرونده", "Case")}</Link></> : null}</Td>
                     <Td>{day(r.createdAt, lang)}</Td>
                     <Td>
-                      {r.status === "OPEN" ? (
+                      {permissions.trustManage && r.status === "OPEN" ? (
                         <div className="flex min-w-[200px] flex-col gap-2">
                           <ReasonAction label={t("ارجاع به پرونده", "Escalate")} confirmLabel={t("ارجاع", "Escalate")} onRun={async (reason) => { const res = await adminAnimalSupportService.escalateReport(r.id, reason); setNotice(<Link className="underline" href={`/${lang}/admin/trust/${res.trustCaseId}`}>{t("گزارش ارجاع شد — مشاهدهٔ پرونده", "Escalated — open the case")}</Link>); await load(); }} />
                           <ReasonAction label={t("رد گزارش", "Dismiss")} confirmLabel={t("رد", "Dismiss")} minLength={0} onRun={async (reason) => { await adminAnimalSupportService.dismissReport(r.id, reason || undefined); await load(); }} />
@@ -734,7 +722,7 @@ export function AdminReportsView() {
                 );
               })}
             </tbody>
-          </TableWrap>
+          </table></TableWrap>
           <Pager page={page} total={data.total} pageSize={25} onPage={setPage} />
         </Panel>
       )}
