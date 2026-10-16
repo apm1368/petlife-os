@@ -72,6 +72,7 @@ export type AdminAuditAction =
   | "animal_support_organization.listed_changed"
   | "rescue_case.created"
   | "rescue_case.status_changed"
+  | "rescue_case.evidence_added"
   | "support_campaign.created"
   | "support_campaign.status_changed"
   | "support_campaign.update_posted"
