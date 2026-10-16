@@ -28,9 +28,6 @@ export const createHouseholdSchema = z.object({
 
 export const updateHouseholdSchema = createHouseholdSchema.partial();
 
-const birthOrApproxAge = (data: { birthDate?: string | null; approximateAgeMonths?: number | null }) =>
-  Boolean(data.birthDate) || typeof data.approximateAgeMonths === "number";
-
 export const createPetSchema = z
   .object({
     name: z.string().trim().min(1).max(80),
@@ -45,10 +42,6 @@ export const createPetSchema = z
     colorMarkings: z.string().trim().max(200).optional(),
     neuteredStatus: z.nativeEnum(NeuteredStatus).optional(),
     microchipNumber: z.string().trim().max(64).optional(),
-  })
-  .refine(birthOrApproxAge, {
-    message: "Either birthDate or approximateAgeMonths is required",
-    path: ["birthDate"],
   });
 
 export const updatePetSchema = z.object({

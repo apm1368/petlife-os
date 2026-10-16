@@ -123,7 +123,11 @@
       "title": "Birthday or approximate age",
       "birthDateLabel": "Birthday",
       "approxAgeLabel": "Approximate age (months)",
-      "useApprox": "I don't know the exact birthday"
+      "useApprox": "I don't know the exact birthday",
+      "useExact": "Enter exact birth date",
+      "optional": "If the birth date or age is unknown, skip this step and complete it later.",
+      "skip": "I don’t know yet; continue",
+      "saveFailed": "Could not save. Your entries are kept; please try again."
     },
     "personalization": {
       "title": "What are you interested in?",
@@ -2210,7 +2214,8 @@
         "communityReports": "User reports",
         "animalSupport": "Animal support",
         "lostPets": "Lost pets",
-        "settings": "Platform settings"
+        "settings": "Platform settings",
+        "verification": "Identity and documents"
       }
     },
     "common": {
@@ -5596,7 +5601,11 @@
     "requirementPending": "Awaiting review",
     "requirementMissing": "Valid evidence needed",
     "manualPolicyNotice": "This is opetlife’s internal policy and manual document review. No official identity or licence lookup is performed.",
-    "policyUnavailable": "The server has not supplied the evidence checklist. Organization approval is unavailable until the policy loads."
+    "policyUnavailable": "The server has not supplied the evidence checklist. Organization approval is unavailable until the policy loads.",
+    "simpleGuide": "Open each partner’s documents and review them, then approve, reject or request corrections with a reason. This is a manual review; official identity lookup is not connected.",
+    "rowPartner": "Partner details",
+    "rowDocuments": "Document status",
+    "rowReceived": "Submission time"
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "Clinic messages for your household",
@@ -5856,5 +5865,15 @@
     "reports": "Reports",
     "trust": "Trust & safety cases",
     "label": "Animal support section"
+  },
+  "birthDateField": {
+    "calendar": "Calendar",
+    "jalali": "Solar Hijri (Jalali)",
+    "gregorian": "Gregorian",
+    "hint": "Switching calendars keeps the same selected date.",
+    "optionalAge": "Birth date and age are optional. Continue if unknown and complete them later.",
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
   }
 }

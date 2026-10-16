@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PetLifecycleStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
+import { NotFoundApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { EntitlementService } from "../subscriptions/entitlement.service";
@@ -35,10 +35,6 @@ export class PetsService {
   ) {}
 
   async create(householdId: string, creatorUserId: string, dto: CreatePetDto) {
-    if (!dto.birthDate && dto.approximateAgeMonths === undefined) {
-      throw new ValidationApiException({ field: "birthDate", reason: "birthDate or approximateAgeMonths is required" });
-    }
-
     // spec: "limit checks must happen server-side" — checked before creation,
     // never blocking access to pets the household already has (over-limit
     // existing pets stay fully usable; only the NEXT create is refused).
