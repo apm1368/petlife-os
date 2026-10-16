@@ -1661,6 +1661,12 @@
       "route": "[locale]/admin/animal-support/rescue-cases",
       "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
       "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/settings/page.tsx",
+      "route": "[locale]/admin/settings",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #31: registry/history/editor fixtures, settings-screenshots checks; no live settings mutation. Member announcement separately verified on profile/activity."
     }
   ]
 }

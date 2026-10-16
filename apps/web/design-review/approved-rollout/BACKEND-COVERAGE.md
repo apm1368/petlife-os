@@ -27,7 +27,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/admin/pets | 0 | 0 | 3 | 0 |
 | modules/admin/places | 5 | 0 | 4 | 0 |
 | modules/admin/services | 7 | 0 | 2 | 0 |
-| modules/admin/settings | 0 | 0 | 5 | 0 |
+| modules/admin/settings | 5 | 0 | 0 | 0 |
 | modules/admin/subscriptions | 13 | 2 | 0 | 0 |
 | modules/admin/support | 8 | 0 | 14 | 0 |
 | modules/admin/system | 1 | 0 | 1 | 0 |
@@ -102,7 +102,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/places/place-reports.controller.ts | 1 | 0 | 0 | 0 |
 | modules/places/places.controller.ts | 3 | 0 | 0 | 0 |
 | modules/places/public-places.controller.ts | 3 | 0 | 0 | 0 |
-| modules/platform-settings/platform-settings.controller.ts | 0 | 0 | 1 | 0 |
+| modules/platform-settings/platform-settings.controller.ts | 1 | 0 | 0 | 0 |
 | modules/privacy-governance/privacy-governance.controller.ts | 0 | 0 | 3 | 0 |
 | modules/provider-os/provider-availability.controller.ts | 8 | 0 | 0 | 0 |
 | modules/provider-os/provider-bookings.controller.ts | 11 | 0 | 2 | 0 |

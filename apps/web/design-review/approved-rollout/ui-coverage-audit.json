@@ -235,6 +235,10 @@
       "route": "[locale]/admin/services/reviews"
     },
     {
+      "file": "app/[locale]/(admin)/admin/settings/page.tsx",
+      "route": "[locale]/admin/settings"
+    },
+    {
       "file": "app/[locale]/(admin)/admin/settlements/[id]/page.tsx",
       "route": "[locale]/admin/settlements/[id]"
     },
@@ -2766,6 +2770,51 @@
       "source": "services/admin-services.service.ts",
       "consumers": [
         "features/admin/services/AdminServicesViews.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminSettingsService",
+      "method": "list",
+      "source": "services/admin-settings.service.ts",
+      "consumers": [
+        "features/admin/settings/AdminSettingsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminSettingsService",
+      "method": "changes",
+      "source": "services/admin-settings.service.ts",
+      "consumers": [
+        "features/admin/settings/AdminSettingsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminSettingsService",
+      "method": "propose",
+      "source": "services/admin-settings.service.ts",
+      "consumers": [
+        "features/admin/settings/AdminSettingsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminSettingsService",
+      "method": "review",
+      "source": "services/admin-settings.service.ts",
+      "consumers": [
+        "features/admin/settings/AdminSettingsView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "adminSettingsService",
+      "method": "cancel",
+      "source": "services/admin-settings.service.ts",
+      "consumers": [
+        "features/admin/settings/AdminSettingsView.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -6531,6 +6580,15 @@
       "source": "services/places.service.ts",
       "consumers": [
         "features/admin/places/AdminPlacesView.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
+    },
+    {
+      "service": "platformSettingsService",
+      "method": "publicSettings",
+      "source": "services/platform-settings.service.ts",
+      "consumers": [
+        "features/app-shell/PlatformAnnouncement.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },

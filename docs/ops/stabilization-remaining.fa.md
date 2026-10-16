@@ -6,10 +6,11 @@
 
 | قابلیت | وضعیت | قرارداد / شاهد | تست و PR |
 |---|---|---|---|
-| پروندهٔ نجات ادمین | پیاده‌سازی و بررسی در شاخهٔ codex/stab-support-operations | فهرست، جزئیات، ساخت، تغییر وضعیت؛ endpoint جدید ثبت مدرک پس از upload با قفل و محدودیت همان پرونده | نتیجهٔ نهایی پس از بررسی ثبت می‌شود |
-| کمپین ادمین | پیاده‌سازی و بررسی همان شاخه | فهرست/جزئیات/ساخت/وضعیت/گزارش پیشرفت/مدرک/اشتراک در انجمن از APIهای موجود | تراکنش زنده اجرا نمی‌شود |
-| صندوق سازمان | پیاده‌سازی و بررسی همان شاخه | ماندهٔ دفتر کل، مجوز payout جدا، ثبت پرداخت انجام‌شده؛ قفل همزمانی بکند | انتقال بانکی بیرونی در این قابلیت وجود ندارد |
-| اطلاعات سازمان | پیاده‌سازی و بررسی همان شاخه | PATCH موجود؛ undefined حفظ، null پاک‌کردن متن اختیاری؛ رد نام null | تست قرارداد و UI |
+| پروندهٔ نجات ادمین | ادغام‌شده در تثبیت با PR #30 | فهرست، جزئیات، ساخت، تغییر وضعیت؛ endpoint جدید ثبت مدرک پس از upload با قفل و محدودیت همان پرونده | [PR #30](https://github.com/apm1368/petlife-os/pull/30)، CI کامل و ۱۸ تست UI پاس، ادغام ace9496 |
+| کمپین ادمین | ادغام‌شده با PR #30 | فهرست/جزئیات/ساخت/وضعیت/گزارش پیشرفت/مدرک/اشتراک در انجمن از APIهای موجود | تراکنش زنده اجرا نمی‌شود |
+| صندوق سازمان | ادغام‌شده با PR #30 | ماندهٔ دفتر کل، مجوز payout جدا، ثبت پرداخت انجام‌شده؛ قفل همزمانی بکند | انتقال بانکی بیرونی در این قابلیت وجود ندارد |
+| اطلاعات سازمان | ادغام‌شده با PR #30 | PATCH موجود؛ undefined حفظ، null پاک‌کردن متن اختیاری؛ رد نام null | تست قرارداد و UI |
+| تنظیمات ادمین و اعلان عمومی | پیاده‌سازی و بررسی PR #31 | پنج API موجود، مجوز جدا، تأیید دوم، نسخه‌بندی و مصرف اعلان عمومی | ۱۶ تست تنظیمات/منو/اعلان و ۲۲ تست پوسته پاس؛ CI head نهایی لازم است |
 | استعلام رسمی KYC | مسدود به سرویس بیرونی | جریان دستی مدارک موجود است، استعلام رسمی وجود ندارد | نیازمند سرویس/قرارداد واقعی |
 | پرداخت/پیامک/ارسال/بیمه/S3/HTTPS | آماده‌بودن واقعی تأیید نشده | docs/ops/external-readiness.md سابقه است و وضعیت فعلی باید مستقل خوانده شود | بدون کلید/قرارداد و تصمیم محصول، موفقیت جعل نمی‌شود |
 
@@ -32,7 +33,7 @@
 | `modules/admin/pets` | 3 | `GET /admin/pets`؛ `GET /admin/pets/:param`؛ `POST /admin/pets/:param/grants/:param/revoke` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/places` | 4 | `GET /admin/places/:param`؛ `POST /admin/places`؛ `PATCH /admin/places/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/services` | 2 | `POST /admin/provider-services/:param/deactivate`؛ `POST /admin/provider-services/:param/reactivate` | باز؛ بررسی دستی و تست قابلیت لازم است |
-| `modules/admin/settings` | 5 | `GET /admin/settings`؛ `GET /admin/settings/changes`؛ `PUT /admin/settings/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/settings` | 5 | پنج قرارداد موجود تنظیمات | رابط/تست/تصاویر PR #31؛ خارج از ادعای تکمیل همه صفحات |
 | `modules/admin/subscriptions` | 2 | `GET /admin/subscriptions/plans/:param`؛ `GET /admin/subscriptions/billing-attempts` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/support` | 14 | `GET /admin/support/:param/extras`؛ `PUT /admin/support/:param/tags`؛ `POST /admin/support/:param/links` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/system` | 1 | `GET /admin/system/integrations` | باز؛ بررسی دستی و تست قابلیت لازم است |
@@ -75,7 +76,7 @@
 | `modules/partner-verification/partner-verification.controllers.ts` | 10 | `GET /provider/verification`؛ `POST /provider/verification/uploads`؛ `POST /provider/verification/documents` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/pet-safety/pet-safety.controller.ts` | 15 | `GET /pets/:param/completeness`؛ `GET /pets/:param/emergency-info`؛ `PUT /pets/:param/emergency-info` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/place-suggestions/place-suggestions.controller.ts` | 6 | `POST /place-suggestions`؛ `POST /place-suggestions/changes`؛ `GET /place-suggestions/mine` | باز؛ بررسی دستی و تست قابلیت لازم است |
-| `modules/platform-settings/platform-settings.controller.ts` | 1 | `GET /settings/public` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/platform-settings/platform-settings.controller.ts` | 1 | `GET /settings/public` | مصرف اعلان اعضا در PR #31؛ GET زنده فقط اعلان را برگرداند |
 | `modules/privacy-governance/privacy-governance.controller.ts` | 3 | `GET /admin/privacy/deletion-requests`؛ `POST /admin/privacy/deletion-requests/:param/transition`؛ `GET /admin/release-gate` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/provider-os/provider-bookings.controller.ts` | 2 | `GET /provider/bookings/:param/ride`؛ `POST /provider/bookings/:param/ride-events` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/provider-os/provider-catalog.controller.ts` | 1 | `POST /provider/waitlist/:param/offer` | باز؛ بررسی دستی و تست قابلیت لازم است |
@@ -101,5 +102,5 @@
 - رسانهٔ دستهٔ محصول: API نوشتن دسته و قرارداد image/alt هنوز باید با کد فعلی تطبیق و در صورت نبود، با مجوز رسانه و migration افزودنی طراحی شود.
 - شروع چت از مقاله/مطلب: resolve مقصد بر اساس شناسهٔ محتوا باید سمت سرور باشد؛ authorUserId خصوصی عمومی نشود.
 - null/undefined در سایر PATCHها: فقط فیلدهای قابل پاک‌شدن با بررسی مدل و تست تغییر کنند؛ این PR معنای تمام PATCHهای مخزن را تغییر نمی‌دهد.
-- تنظیمات ادمین، ابزارهای همکاران، عملیات تخصصی بالینی و باقی گروه‌های جدول همچنان باز هستند. مستند قدیمیِ «clinic plans باز است» با وجود ClinicPlans.tsx و تست‌های فعلی باید اصلاح شود؛ وجود فایل به‌تنهایی تکمیل همهٔ طرح/تخصیص‌ها را ثابت نمی‌کند.
+- تنظیمات ادمین در PR #31 پیگیری شده است؛ ابزارهای همکاران، عملیات تخصصی بالینی و باقی گروه‌های جدول همچنان باز هستند. مستند قدیمیِ «clinic plans باز است» با وجود ClinicPlans.tsx و تست‌های فعلی باید اصلاح شود؛ وجود فایل به‌تنهایی تکمیل همهٔ طرح/تخصیص‌ها را ثابت نمی‌کند.
 - کوپن، نمودار رشد و trending قرارداد معتبر/تصمیم محصول می‌خواهند؛ افزودن ادعای ساختگی برای تطبیق تصویر مجاز نیست.
