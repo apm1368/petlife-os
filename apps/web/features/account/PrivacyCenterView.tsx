@@ -5,6 +5,7 @@ import { Button, ContextSurface, Dialog, ErrorRecovery, Input, Skeleton, StatusL
 import type { StatusTone } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
 import { accountService, type DeletionPreviewDto, type PrivacyCenterDto, type PrivacyRequestStatusValue, type SharingSummaryDto } from "@/services/account.service";
+import {ConsentHistory} from "./ConsentHistory";
 import { PasswordInput } from "@/features/auth/PasswordInput";
 import { AccountPageHeader } from "./AccountNav";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
@@ -152,6 +153,7 @@ export function PrivacyCenterView() {
       <AccountPageHeader eyebrow={t("مرکز حریم خصوصی", "PRIVACY CENTER")} title={t("داده‌ها، رضایت‌ها و اشتراک‌گذاری", "Data, consents & sharing")} description={t("ببینید چه چیزی ضروری است، چه چیزی انتخابی است، چه کسی حیوان‌هایتان را می‌بیند و چگونه داده‌هایتان را دریافت یا حذف کنید.", "See what's required and what's optional, who can see your pets, and how to get a copy of your data or delete it.")} />
       {notice ? <div className="account-notice" role="status">{notice}</div> : null}
 
+      <ConsentHistory />
       <section aria-labelledby="consents-title">
         <div className="account-section-title">
           <div>

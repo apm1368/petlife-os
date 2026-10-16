@@ -7,7 +7,7 @@ import { CartView } from "./CartView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/services/commerce.service", () => ({
-  commerceService: { getCart: vi.fn(), updateCartItem: vi.fn(), removeCartItem: vi.fn() },
+  commerceService: { getCart: vi.fn(), updateCartItem: vi.fn(), removeCartItem: vi.fn(), clearCart: vi.fn() },
 }));
 
 const SELLER_A = { id: "seller-a", name: "Pet Bazaar Tehran", verificationStatus: "VERIFIED" as never, status: "ACTIVE" as never, city: "Tehran" };
@@ -167,4 +167,23 @@ describe("CartView", () => {
 
     await waitFor(() => expect(commerceService.removeCartItem).toHaveBeenCalledWith("line-a"));
   });
+  it("requires confirmation before clearing the cart and preserves items on failure", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(MULTI_SELLER_CART);
+    vi.mocked(commerceService.clearCart).mockRejectedValueOnce(new Error("offline"));
+    renderWithIntl(<CartView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Clear cart" }));
+    expect(commerceService.clearCart).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Yes, clear cart" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
+    expect(screen.getByText(/Sold by Pet Bazaar Tehran/)).toBeTruthy();
+    expect(commerceService.clearCart).toHaveBeenCalledOnce();
+  });
+
+// The server, not the client, selects media belonging to the cart product/variant.
+it("uses the actual cart line photo when provided and leaves null lines without substitute photos",async()=>{
+ const cart=structuredClone(MULTI_SELLER_CART);cart.sellerGroups[0]!.lines[0]!.imageUrl="https://media.example.com/actual-cart-product.webp";
+ vi.mocked(commerceService.getCart).mockResolvedValueOnce(cart);const {container}=renderWithIntl(<CartView/>);
+ await waitFor(()=>expect(container.querySelectorAll("img").length).toBe(1));expect(container.querySelector("img")?.getAttribute("src")).toBe("https://media.example.com/actual-cart-product.webp");
+});
+
 });

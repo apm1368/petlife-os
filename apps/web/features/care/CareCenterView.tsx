@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, Skeleton } from "@petlife/ui";
 import { careRemindersService, type CareReminder, type ReminderInput } from "@/services/care-reminders.service";
 import { petsService } from "@/services/pets.service";
@@ -25,6 +25,7 @@ const RECENT_COMPLETED = 5;
 const TEHRAN = "+03:30"; // Iran has no DST.
 
 export function CareCenterView({ petId, itemId }: { petId: string; itemId?: string }) {
+  const suggestionsT = useTranslations("careSuggestions");
   const locale = useLocale(); const fa = locale === "fa"; const ix = fa ? 0 : 1;
   const [items, setItems] = useState<CareReminder[] | null>(null);
   const [canEdit, setCanEdit] = useState(false);
@@ -100,6 +101,7 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
         <ul className="care-rows">{rows.map(item => <CareRow key={item.id} item={item} {...rowProps}/>)}</ul>
       </section>
     ))}
+    <Link className="underline" href={`/${locale}/pets/${petId}/care/suggestions`}>{suggestionsT("title")}</Link>
     <details className="border-t border-border-subtle pt-5"><summary className="cursor-pointer text-section-title">{fa ? "دستورالعمل مراقبت روزمره" : "Daily care instructions"}</summary><div className="mt-5"><CareProfileView petId={petId}/></div></details>
   </div>;
 }

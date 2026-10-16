@@ -23,7 +23,7 @@ describe("ShopHomeView", () => {
     vi.mocked(commerceService.listCategories).mockResolvedValue([CATEGORY]);
     vi.mocked(commerceService.searchProducts).mockResolvedValue(searchResult([productSummary()]));
     renderWithIntl(<ShopHomeView />);
-    await waitFor(() => expect(screen.getByText("Food")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Food" })).toBeTruthy());
     await waitFor(() => expect(screen.getAllByText("Royal Canin Adult Dog Food").length).toBeGreaterThan(0));
     expect(screen.getByText("For Luna")).toBeTruthy();
     expect(commerceService.searchProducts).toHaveBeenCalledWith(expect.objectContaining({ petId: "pet-1", species: "DOG", sort: "RECOMMENDED" }));

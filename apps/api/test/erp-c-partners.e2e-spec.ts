@@ -35,7 +35,7 @@ describe("ERP-C partners", () => {
     return { owner, orgId: org.id };
   }
   const doc = (subjectType: "PROVIDER" | "SELLER", subjectId: string, status: "PENDING" | "ACCEPTED", expiresAt?: Date) =>
-    db.partnerVerificationDocument.create({ data: { subjectType, subjectId, kind: "LICENSE", objectKey: `partner-verification/${subjectType === "PROVIDER" ? "provider" : "seller"}/${subjectId}/${randomUUID()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 100, status, expiresAt, uploadedByUserId: randomUUID() } });
+    db.partnerVerificationDocument.create({ data: { subjectType, subjectId, kind: "IDENTITY", objectKey: `partner-verification/${subjectType === "PROVIDER" ? "provider" : "seller"}/${subjectId}/${randomUUID()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 100, status, expiresAt, uploadedByUserId: randomUUID() } });
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -57,8 +57,8 @@ describe("ERP-C partners", () => {
     expect(upload.key).toMatch(new RegExp(`^partner-verification/provider/${p.orgId}/`));
     // A key issued for another organisation can't be registered here (cross-org).
     const foreign = (await post(other.owner, "/provider/verification/uploads").send({ contentType: "application/pdf", fileSizeBytes: 1000 }).expect(201)).body.key;
-    expect((await post(p.owner, "/provider/verification/documents").send({ objectKey: foreign, kind: "LICENSE", contentType: "application/pdf", fileSizeBytes: 1000 }).expect(400)).body.error.details.reason).toBe("NOT_ISSUED_FOR_THIS_ORGANIZATION");
-    await post(p.owner, "/provider/verification/documents").send({ objectKey: upload.key, kind: "LICENSE", contentType: "application/pdf", fileSizeBytes: 1000, expiresAt: new Date(Date.now() + 400 * DAY).toISOString() }).expect(201);
+    expect((await post(p.owner, "/provider/verification/documents").send({ objectKey: foreign, kind: "IDENTITY", contentType: "application/pdf", fileSizeBytes: 1000 }).expect(400)).body.error.details.reason).toBe("NOT_ISSUED_FOR_THIS_ORGANIZATION");
+    await post(p.owner, "/provider/verification/documents").send({ objectKey: upload.key, kind: "IDENTITY", contentType: "application/pdf", fileSizeBytes: 1000, expiresAt: new Date(Date.now() + 400 * DAY).toISOString() }).expect(201);
     const submitted = (await post(p.owner, "/provider/verification/submit").expect(201)).body;
     expect(submitted).toMatchObject({ status: "SUBMITTED", lifecycle: "PENDING" });
     expect((await post(p.owner, "/provider/verification/submit").expect(400)).body.error.details.reason).toBe("NOT_SUBMITTABLE");
@@ -76,7 +76,7 @@ describe("ERP-C partners", () => {
 
     const detail = (await get(ops, `/admin/verification/provider/${p.orgId}`).expect(200)).body;
     const docId = detail.documents[0].id;
-    expect(detail.documents[0]).toMatchObject({ kind: "LICENSE", status: "PENDING", expiryState: "VALID" });
+    expect(detail.documents[0]).toMatchObject({ kind: "IDENTITY", status: "PENDING", expiryState: "VALID" });
     expect(JSON.stringify(detail)).not.toContain("partner-verification/"); // no raw storage path
     await post(ops, `/admin/verification/documents/${randomUUID()}/download`).send({ reason: "checking licence" }).expect(404);
     await post(ro, `/admin/verification/documents/${docId}/download`).send({ reason: "checking licence" }).expect(403);
@@ -91,7 +91,30 @@ describe("ERP-C partners", () => {
     // Legacy PATCH contract obeys the same rules.
     expect((await patch(ops, `/admin/providers/${p.orgId}/verification`).send({ status: "NOT_STARTED", reason: "jump back" }).expect(400)).body.error.details.reason).toBe("INVALID_TRANSITION");
     await patch(ops, `/admin/providers/${p.orgId}/verification`).send({ status: "SUSPENDED", reason: "complaints under review" }).expect(200);
-    await t("VERIFIED", ops).expect(201); // reinstating a previously verified partner
+    await t("VERIFIED", ops).expect(201); // reinstatement also has current accepted identity evidence
+  });
+
+  it("clinical approval and reinstatement require both identity and licence, including legacy PATCH", async () => {
+    const p = await provider("VET_CLINIC");
+    const ops = await actor("clinical verification", AdminRole.PARTNER_OPERATIONS);
+    const identity = await doc("PROVIDER", p.orgId, "PENDING");
+    const missing = await post(p.owner, "/provider/verification/submit").expect(400);
+    expect(missing.body.error.details).toMatchObject({ reason: "VERIFICATION_REQUIRED_DOCUMENTS_MISSING", missingKinds: ["LICENSE"] });
+    const licence = await db.partnerVerificationDocument.create({ data: { subjectType: "PROVIDER", subjectId: p.orgId, kind: "LICENSE", objectKey: `partner-verification/provider/${p.orgId}/${randomUUID()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 100, status: "PENDING", uploadedByUserId: p.owner.id } });
+    const pending = (await post(p.owner, "/provider/verification/submit").expect(201)).body;
+    expect(pending.policy).toMatchObject({ missingForSubmission: [], missingForApproval: ["IDENTITY", "LICENSE"], officialLookup: "NOT_CONNECTED" });
+    await post(ops, `/admin/verification/documents/${identity.id}/review`).send({ decision: "ACCEPTED" }).expect(201);
+    const approve = () => patch(ops, `/admin/providers/${p.orgId}/verification`).send({ status: "VERIFIED", reason: "Evidence reviewed" });
+    expect((await approve().expect(400)).body.error.details.missingKinds).toEqual(["LICENSE"]);
+    await post(ops, `/admin/verification/documents/${licence.id}/review`).send({ decision: "ACCEPTED" }).expect(201);
+    await approve().expect(200);
+    await patch(ops, `/admin/providers/${p.orgId}/verification`).send({ status: "SUSPENDED", reason: "Case reopened" }).expect(200);
+    await db.partnerVerificationDocument.update({ where: { id: licence.id }, data: { expiresAt: new Date(Date.now() - DAY) } });
+    expect((await approve().expect(400)).body.error.details.missingKinds).toEqual(["LICENSE"]);
+    const detail = (await get(ops, `/admin/verification/provider/${p.orgId}`).expect(200)).body;
+    expect(detail.allowedTransitions).not.toContain("VERIFIED");
+    expect(detail.policy.missingForApproval).toEqual(["LICENSE"]);
+    expect((await db.providerOrganization.findUniqueOrThrow({ where: { id: p.orgId } })).verificationStatus).toBe("SUSPENDED");
   });
 
   it("expiry: accepted evidence past expiry becomes EXPIRED (task, no suspension); 30-day alert once; lifecycle reflects it", async () => {

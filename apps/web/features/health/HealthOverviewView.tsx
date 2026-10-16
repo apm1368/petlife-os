@@ -21,6 +21,8 @@ const tone = (state: KnowledgeState) => state === KnowledgeState.KNOWN_NEGATIVE 
 
 export function HealthOverviewView({ petId }: { petId: string }) {
   const statusText = useStatusText();
+  const recordsT = useTranslations("rollout.records");
+  const depthT = useTranslations("healthDepth");
   const locale = useLocale() as "fa" | "en";
   const t = useTranslations("health");
   const c = copy[locale];
@@ -49,6 +51,7 @@ export function HealthOverviewView({ petId }: { petId: string }) {
         <span className="attention-banner__go">{c.open}<Forward size={16} aria-hidden="true" /></span>
       </Link>
     ) : <p className="calm-note">{t("setupStatus.COMPLETE")}</p>}
+    <nav className="flex flex-wrap gap-3"><Link className="btn-quiet" href={`${base}/activity`}>{depthT("title")}</Link><Link className="btn-quiet" href={`${base}/links`}>{depthT("sharesLink")}</Link></nav>
     <div className="health-overview__grid">
       <div className="health-overview__main">
         <section aria-labelledby="health-current"><h2 id="health-current" className="section-title">{c.current}</h2><div className="row-list">
@@ -57,6 +60,7 @@ export function HealthOverviewView({ petId }: { petId: string }) {
           <Row href={`${base}/medications`} label={c.medication} detail={nameList(names.medications, locale)}><StatusLabel tone="neutral">{summary.activeMedicationCount ? `${formatCount(summary.activeMedicationCount, locale)} ${c.active}` : c.none}</StatusLabel></Row>
           <Row href={`${base}/vaccination`} label={c.vaccination}><StatusLabel tone={statusText.tone(summary.vaccinationStatus, "vaccination")}>{statusText.label(summary.vaccinationStatus, "vaccination")}</StatusLabel></Row>
         </div></section>
+        <Link className="btn-quiet" href={`${base}/clinical`}>{recordsT("clinical")}</Link>
         <section aria-labelledby="health-records"><h2 id="health-records" className="section-title">{c.records}</h2><div className="index-list">{[["timeline",c.timeline],["visits",c.visits],["documents",c.documents],["labs",c.labs],["imaging",c.imaging],["referrals",c.referrals],["dental",c.dental],["nutrition",c.nutrition],["rehab",c.rehab],["observations",c.observations]].map(([path,label]) => <Link key={path} href={`${base}/${path}`}><span>{label}</span><Forward size={16} aria-hidden="true" /></Link>)}</div></section>
       </div>
       <aside className="health-overview__aside">

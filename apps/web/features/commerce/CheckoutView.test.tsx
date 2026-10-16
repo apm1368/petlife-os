@@ -28,7 +28,7 @@ vi.mock("@/services/commerce.service", () => ({
     authorizeFinancing: vi.fn(),
   },
 }));
-vi.mock("@/services/addresses.service", () => ({ addressesService: { list: vi.fn() } }));
+vi.mock("@/services/addresses.service", () => ({ addressesService: { update: vi.fn(), list: vi.fn() } }));
 
 const ADDRESS: CustomerAddressDto = {
   id: "address-1",
@@ -387,4 +387,28 @@ describe("CheckoutView", () => {
       expect.any(String),
     );
   });
+  it("recovers from an initial address read failure without a permanent loading state", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce([ADDRESS]);
+    renderWithIntl(<CheckoutView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Retry" }));
+    expect(await screen.findByRole("radio")).toBeTruthy();
+    expect(addressesService.list).toHaveBeenCalledTimes(2);
+  });
+
+  it("edits an existing address through PATCH and keeps the form on failure", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(addressesService.update).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce({ ...ADDRESS, city: "Karaj" });
+    renderWithIntl(<CheckoutView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Edit selected address" }));
+    fireEvent.change(screen.getByLabelText("City"), { target: { value: "Karaj" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save address" }));
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect((screen.getByLabelText("City") as HTMLInputElement).value).toBe("Karaj");
+    fireEvent.click(screen.getByRole("button", { name: "Save address" }));
+    await waitFor(() => expect(addressesService.update).toHaveBeenCalledWith(ADDRESS.id, expect.objectContaining({ city: "Karaj" })));
+    await waitFor(() => expect(screen.queryByLabelText("City")).toBeNull());
+  });
+
 });

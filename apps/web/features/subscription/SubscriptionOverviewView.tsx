@@ -12,6 +12,7 @@ import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { entitlementLabelKey } from "./entitlement-labels";
+import { SubscriptionChanges } from "./SubscriptionChanges";
 import { ConfirmActionDialog } from "@/features/account/ConfirmActionDialog";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 
@@ -217,6 +218,7 @@ export function SubscriptionOverviewView() {
         </aside>
       </div>
 
+      {householdId ? <SubscriptionChanges key={householdId} householdId={householdId} /> : null}
       {confirmCancel ? (
         <ConfirmActionDialog
           open

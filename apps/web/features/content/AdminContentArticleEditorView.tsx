@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
@@ -22,6 +23,7 @@ const LOCALES: ContentLocale[] = ["fa", "en"];
  * buttons/calls — never one combined "save and publish" action.
  */
 export function AdminContentArticleEditorView({ articleId }: { articleId: string | null }) {
+  const authorT = useTranslations("rollout.authors");
   const t = useTranslations("admin.content.editor");
   const router = useRouter();
   const uiLocale = useLocale() as "fa" | "en";
@@ -184,6 +186,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
         <span className="text-section-title text-text-primary">{t("sharedFieldsTitle")}</span>
         <div className="flex flex-wrap items-end gap-2">
           <Select label={t("category")} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} options={[{ value: "", label: t("none") }, ...categories.map((c) => ({ value: c.id, label: c.locales.find((l) => l.locale === uiLocale)?.name ?? c.locales[0]?.name ?? c.id }))]} />
+          <Link href={`/${uiLocale}/admin/content/authors`}>{authorT("manage")}</Link>
           <Select label={t("author")} value={authorId} onChange={(e) => setAuthorId(e.target.value)} options={[{ value: "", label: t("none") }, ...authors.map((a) => ({ value: a.id, label: a.name }))]} />
           {articleId ? (
             <Button variant="secondary" size="sm" onClick={updateShared}>

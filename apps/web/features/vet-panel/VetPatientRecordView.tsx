@@ -8,6 +8,8 @@ import type { ClinicalAlertSeverity, ProviderPatientRecordDto } from "@petlife/t
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { providerClinicalService } from "@/services/provider-clinical.service";
+import { usePetAccess } from "@/hooks/use-pet-access";
+import { ClinicalRecordActions } from "./ClinicalRecordActions";
 import { VitalsSparkline } from "./VitalsSparkline";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { useStatusText } from "@/lib/status/use-status-text";
@@ -37,6 +39,8 @@ function orDash(value: string | number | null | undefined): string {
  * range. Where a value was never recorded the page says so with a dash.
  */
 export function VetPatientRecordView({ petId, bookingId }: { petId: string; bookingId?: string }) {
+  const { access } = usePetAccess(petId);
+  const canWrite = access?.canRecordClinicalData === true;
   const statusText = useStatusText();
   const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.record");
@@ -120,15 +124,14 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                 <StatusLabel tone={ALERT_TONE[alert.severity]}>{t(`alertType.${alert.type}`)}</StatusLabel>
                 <span className="mt-1 text-body text-text-primary">{alert.message}</span>
               </div>
-              <Button
+              {canWrite ? <Button
                 variant="ghost"
                 onClick={async () => {
-                  await vetPanelService.resolveAlert(petId, alert.id);
-                  await load();
+                  try { await vetPanelService.resolveAlert(petId, alert.id); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                 }}
               >
                 {t("resolveAlert")}
-              </Button>
+              </Button> : null}
             </div>
           ))}
         </div>
@@ -137,7 +140,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-page-title text-text-primary">{record.pet.name}</h1>
-          <div className="flex flex-wrap gap-2">
+          {canWrite ? <div className="flex flex-wrap gap-2">
             <Button variant="primary" isLoading={isBusy} onClick={handleStartVisit}>
               {t("startVisit")}
             </Button>
@@ -150,7 +153,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                 {t("admit")}
               </Button>
             )}
-          </div>
+          </div> : null}
         </div>
         <p className="text-metadata text-text-secondary">
           {[t(`species.${record.pet.species}`), record.pet.breed, record.pet.sex ? t(`sex.${record.pet.sex}`) : null, record.pet.microchipNumber ? t("chip", { chip: record.pet.microchipNumber }) : null]
@@ -160,6 +163,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
         {record.owner ? <p className="text-metadata text-text-secondary">{t("owner", { name: record.owner.displayName ?? "—", phone: record.owner.phone ?? "—" })}</p> : null}
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
       </header>
+      <ClinicalRecordActions key={petId} petId={petId} problems={record.problems} onSaved={load} />
 
       <nav className="flex gap-1 overflow-x-auto border-b border-border-subtle pb-2">
         {(["summary", "problems", "vitals", "prescriptions", "visits", "financial"] as Tab[]).map((item) => (
@@ -310,14 +314,13 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                     .join(" · ")}
                 </span>
                 {p.isControlledSubstance ? <StatusLabel tone="attention">{t("controlledSubstance")}</StatusLabel> : null}
-                {p.status === "ACTIVE" ? (
+                {canWrite && p.status === "ACTIVE" ? (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {p.refillsDispensed < p.refillsAuthorized ? (
                       <Button
                         variant="secondary"
                         onClick={async () => {
-                          await vetPanelService.dispenseRefill(petId, p.id);
-                          await load();
+                          try { await vetPanelService.dispenseRefill(petId, p.id); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                         }}
                       >
                         {t("dispenseRefill")}
@@ -328,8 +331,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                       onClick={async () => {
                         const reason = window.prompt(t("cancelPrompt"));
                         if (!reason?.trim()) return;
-                        await vetPanelService.cancelPrescription(petId, p.id, reason.trim());
-                        await load();
+                        try { await vetPanelService.cancelPrescription(petId, p.id, reason.trim()); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                       }}
                     >
                       {t("cancelPrescription")}
@@ -377,13 +379,12 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                   <StatusLabel tone={estimate.status === "APPROVED" ? "success" : estimate.status === "DECLINED" ? "urgent" : "attention"}>{t(`estimateStatus.${estimate.status}`)}</StatusLabel>
                 </div>
                 <span className="text-metadata text-text-secondary">{t("estimateRange", { low: fmt.number(estimate.lowTotalIrr), high: fmt.number(estimate.highTotalIrr) })}</span>
-                {estimate.status === "DRAFT" ? (
+                {canWrite && estimate.status === "DRAFT" ? (
                   <Button
                     className="mt-1 self-start"
                     variant="secondary"
                     onClick={async () => {
-                      await vetPanelService.presentEstimate(petId, estimate.id);
-                      await load();
+                      try { await vetPanelService.presentEstimate(petId, estimate.id); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                     }}
                   >
                     {t("presentEstimate")}

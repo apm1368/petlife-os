@@ -1,24 +1,20 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { ContextSurface } from "@petlife/ui";
 import type { PublicArticleSummaryDto } from "@petlife/types";
+import "./editorial-design.css";
 
 export function PublicBlogArticleCard({ article }: { article: PublicArticleSummaryDto }) {
   const locale = useLocale() as "fa" | "en";
-  return (
-    <Link href={article.canonicalPath} className="block">
-      <ContextSurface className="flex flex-col gap-2">
-        {article.coverMediaAsset ? <img src={article.coverMediaAsset.url} alt={article.coverMediaAsset.altText ?? article.title} className="h-40 w-full rounded-md object-cover" /> : null}
-        {article.category ? <span className="text-metadata text-brand-natural">{article.category.name}</span> : null}
-        <span className="text-body font-medium text-text-primary">{article.title}</span>
-        {article.excerpt ? <p className="text-metadata text-text-secondary">{article.excerpt}</p> : null}
-        <div className="flex items-center justify-between gap-2 text-metadata text-text-secondary">
-          {article.author ? <span>{article.author.name}</span> : <span />}
-          <span>{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(article.publishedAt))}</span>
-        </div>
-      </ContextSurface>
-    </Link>
-  );
+  return <Link href={article.canonicalPath} className="editorial-card">
+    {article.coverMediaAsset ? <Image unoptimized width={900} height={600} src={article.coverMediaAsset.url} alt={article.coverMediaAsset.altText ?? article.title} className="editorial-card__image" /> : null}
+    <div className="editorial-card__body">
+      {article.category ? <span className="editorial-card__category">{article.category.name}</span> : null}
+      <span className="editorial-card__title">{article.title}</span>
+      {article.excerpt ? <p className="editorial-card__excerpt">{article.excerpt}</p> : null}
+      <div className="editorial-card__meta">{article.author ? <span>{article.author.name}</span> : <span />}<time dateTime={article.publishedAt}>{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(article.publishedAt))}</time></div>
+    </div>
+  </Link>;
 }

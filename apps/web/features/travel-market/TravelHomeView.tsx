@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CalendarDays, HeartPulse, MapPin, ShieldCheck, Skeleton } from "@petlife/ui";
 import type { TravelDestinationDto } from "@petlife/types";
 import { localizeDigits } from "@/lib/date/jalali";
@@ -16,6 +16,7 @@ import { TravelSearchForm } from "./TravelSearchForm";
  * property itself states about pets, and says so when it states nothing.
  */
 export function TravelHomeView() {
+  const externalT = useTranslations("externalTravel");
   const lang = useLocale() as "fa" | "en";
   const fa = lang === "fa";
   const session = useSessionStore((s) => s.status);
@@ -27,6 +28,7 @@ export function TravelHomeView() {
 
   return (
     <div className="flex w-full flex-col gap-10">
+      <Link className="underline" href={`/${lang}/travel/external`}>{externalT("title")}</Link>
       <section className="travel-hero">
       <header className="travel-hero__head">
         <p className="travel-hero__eyebrow">{fa ? "سفر با حیوان خانگی" : "Travel with your pet"}</p>

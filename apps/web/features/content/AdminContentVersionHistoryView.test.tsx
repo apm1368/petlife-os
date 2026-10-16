@@ -7,7 +7,7 @@ import { AdminContentVersionHistoryView } from "./AdminContentVersionHistoryView
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/services/admin-content.service", () => ({ adminContentService: { listVersions: vi.fn(), restoreVersion: vi.fn() } }));
+vi.mock("@/services/admin-content.service", () => ({ adminContentService: { listVersions: vi.fn(), restoreVersion: vi.fn(), getVersion: vi.fn() } }));
 
 function version(overrides: Partial<ContentVersionSummaryDto> = {}): ContentVersionSummaryDto {
   return {
@@ -67,6 +67,24 @@ describe("AdminContentVersionHistoryView", () => {
     renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
 
     await waitFor(() => expect(screen.getByText("Retry")).toBeTruthy());
+  });
+
+  it("shows a visible restore error without navigating away", async () => {
+    vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
+    vi.mocked(adminContentService.restoreVersion).mockRejectedValue(new Error("offline"));
+    renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
+    fireEvent.click(await screen.findByText("Restore"));
+    expect((await screen.findByRole("alert")).textContent).toContain("operation failed");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("inspects the server snapshot using the public rich text renderer", async () => {
+    vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
+    vi.mocked(adminContentService.getVersion).mockResolvedValue({...version(),snapshot:{title:"Original title",slug:"original",excerpt:"Original excerpt",body:[{type:"paragraph",content:[{text:"Original body"}]}],seoTitle:null,seoDescription:null}});
+    renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
+    fireEvent.click(await screen.findByText("Inspect version"));
+    expect(await screen.findByText("Original body")).toBeTruthy();
+    expect(adminContentService.getVersion).toHaveBeenCalledWith("version-1");
   });
 
   it("renders correctly in fa locale (RTL)", async () => {

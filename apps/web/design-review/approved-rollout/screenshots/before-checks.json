@@ -1,0 +1,62 @@
+[
+  {
+    "page": "clinic-list",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "clinic",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "blog",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "article",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "admin",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "clinic-list",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "clinic",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "blog",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "article",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "admin",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  }
+]

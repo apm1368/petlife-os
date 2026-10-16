@@ -33,7 +33,7 @@ export function Dialog({ open, onClose, title, children, className }: DialogProp
     <dialog
       ref={ref}
       onClose={onClose}
-      onCancel={onClose}
+      onCancel={(event) => { event.preventDefault(); onClose(); }}
       aria-labelledby={titleId}
       className={cn(
         "rounded-lg border border-border-subtle bg-surface-elevated p-6 text-text-primary shadow-xl backdrop:bg-surface-overlay",

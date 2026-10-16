@@ -140,6 +140,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
               <ContextSurface key={comment.id} className="flex flex-col gap-1">
                 <span className="text-metadata text-text-secondary">{comment.authorDisplayName}</span>
                 <p className="text-body text-text-primary">{comment.body}</p>
+                <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportComment(comment.id, reason, details)} />
               </ContextSurface>
             ))}
           </div>

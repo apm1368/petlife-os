@@ -8,7 +8,7 @@ import { PublicBlogArticleView } from "./PublicBlogArticleView";
 
 const replace = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push: vi.fn() }) }));
-vi.mock("@/services/blog.service", () => ({ blogService: { getArticle: vi.fn() } }));
+vi.mock("@/services/blog.service", () => ({ blogService: { getArticle: vi.fn(), listArticles: vi.fn() } }));
 
 function detail(overrides: Partial<PublicArticleDetailDto> = {}): PublicArticleDetailDto {
   return {
@@ -34,6 +34,7 @@ function detail(overrides: Partial<PublicArticleDetailDto> = {}): PublicArticleD
 describe("PublicBlogArticleView", () => {
   beforeEach(() => {
     vi.mocked(blogService.getArticle).mockReset();
+    vi.mocked(blogService.listArticles).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 5 });
   });
 
   it("renders title, author, published date, body, category, and tags", async () => {
@@ -60,12 +61,12 @@ describe("PublicBlogArticleView", () => {
     await waitFor(() => expect(screen.getByText(/^Updated/)).toBeTruthy());
   });
 
-  it("shows a not-found error state (identical for missing and unpublished) with a retry action", async () => {
+  it("distinguishes transport failure from a missing article and offers retry", async () => {
     vi.mocked(blogService.getArticle).mockRejectedValue(new Error("not found"));
 
     renderWithIntl(<PublicBlogArticleView slug="missing" />);
 
-    await waitFor(() => expect(screen.getByText("Article not found")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("The article could not be loaded.")).toBeTruthy());
     expect(screen.getByText("Try again")).toBeTruthy();
   });
 
