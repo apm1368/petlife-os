@@ -26,6 +26,6 @@
 | ویرایش | [ویرایش](settings-screenshots/settings-editor-fa-390.webp) | [ویرایش](settings-screenshots/settings-editor-fa-1440.webp) |
 | اعلان اعضا | [بعد](settings-screenshots/announcement-fa-390.webp) / [قبل](settings-screenshots/before-announcement-fa-390.webp) | [بعد](settings-screenshots/announcement-fa-1440.webp) / [قبل](settings-screenshots/before-announcement-fa-1440.webp) |
 
-نسخه‌های انگلیسی با en در نام فایل‌اند. صفحه تنظیمات در مبنا وجود نداشت؛ تصویر قبل ساختگی برای آن ایجاد نشده است. before-checks.json ناوبری واقعی مبنا را ثبت می‌کند. اجرای ناقصِ ثبت تصاویر روی loading شاهد موفق محسوب نمی‌شود؛ checks.json نهایی باید تمام هشت صحنه تنظیمات و چهار صحنه اعلان را بدون overflow یا page error تأیید کند.
+نسخه‌های انگلیسی با en در نام فایل‌اند. صفحه تنظیمات در مبنا وجود نداشت؛ تصویر قبل ساختگی برای آن ایجاد نشده است. before-checks.json ناوبری واقعی مبنا را ثبت می‌کند. اجرای ناقصِ ثبت تصاویر روی loading شاهد موفق محسوب نمی‌شود؛ checks.json نهایی هر هشت صحنه تنظیمات و چهار صحنه اعلان را بدون overflow یا page error تأیید کرد. چهار شاهد قبل نیز بدون خطا ثبت شدند. اسکرول پس از بازکردن ویرایشگر پیش از عکس به ابتدای صفحه برگردانده شد.
 
 این تغییر ادعای تکمیل سایر صفحات، اتصال سرویس بیرونی یا انتشار ندارد. ادغام نیازمند CI سبز همان head و انتشار نیازمند نتیجه Actions و SHA واقعی سرور است.
