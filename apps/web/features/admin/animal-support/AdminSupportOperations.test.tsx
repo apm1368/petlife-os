@@ -283,3 +283,12 @@ it("rescue evidence registration retries the acknowledged object without uploadi
   expect(svc.registerRescueEvidence).toHaveBeenCalledTimes(2);
   fetchMock.mockRestore();
 });
+
+
+it("formats server timestamps on the Tehran Jalali day with Persian digits", async () => {
+  permission("animalSupport.view"); svc.getRescueCase.mockResolvedValue({ ...rescue, createdAt: "2026-10-15T21:00:00Z" });
+  renderWithIntl(<AdminRescueDetail id="r1" />, "fa");
+  const day = new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "long", timeZone: "Asia/Tehran" }).format(new Date("2026-10-15T21:00:00Z"));
+  expect(await screen.findByText(day)).toBeTruthy();
+  expect(screen.queryByText(/NaN|undefined/)).toBeNull();
+});

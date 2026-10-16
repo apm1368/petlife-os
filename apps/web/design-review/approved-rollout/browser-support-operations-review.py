@@ -37,6 +37,7 @@ with sync_playwright() as p:
    page.on('pageerror',lambda e:errors.append(str(e)));page.route('http://localhost:4000/**',fixture)
    page.goto(f'{url}/{lang}/{route}',wait_until='networkidle',timeout=180000)
    expect(page.get_by_role('heading',name=fa if lang=='fa' else en,exact=True).first).to_be_visible(timeout=60000)
+   if not before:assert 'NaN' not in page.inner_text('body') and 'undefined' not in page.inner_text('body'), 'Invalid formatted value'
    page.evaluate('document.fonts.ready');page.screenshot(path='/tmp/petlife-support-review.png',full_page=True)
    Image.open('/tmp/petlife-support-review.png').save(out/f'{"before-" if before else ""}{key}-{lang}-{width}.webp',quality=85)
    result={'page':key,'locale':lang,'width':width,'overflow':page.evaluate('document.documentElement.scrollWidth>innerWidth'),'pageErrors':errors.copy()};results.append(result);print(json.dumps(result),flush=True)

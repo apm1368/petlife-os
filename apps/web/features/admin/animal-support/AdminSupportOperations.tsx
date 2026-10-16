@@ -17,7 +17,7 @@ import {
 } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
-import { formatDay } from "@/lib/date/jalali";
+import { formatDateLabel } from "@/lib/date/appointment-date";
 import { LocalDateTimeField } from "@/features/shared/date-picker/LocalDateTimeField";
 import {
   adminAnimalSupportService,
@@ -45,7 +45,7 @@ function useCopy() {
     t,
     locale,
     money: (v: number) => formatCurrency(v, locale),
-    date: (v: string | null) => (v ? formatDay(v, locale) : t("unknown")),
+    date: (v: string | null) => (v ? formatDateLabel(v, locale, "Asia/Tehran") : t("unknown")),
   };
 }
 

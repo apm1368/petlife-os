@@ -6,7 +6,8 @@ import { useLocale } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import type { AnimalSupportOrganizationDto, CommunityReportDto, SupportNeedListingDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
-import { formatDay, localizeDigits } from "@/lib/date/jalali";
+import { localizeDigits } from "@/lib/date/jalali";
+import { formatDateLabel } from "@/lib/date/appointment-date";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { adminAnimalSupportService, type AdminAnimalSupportOverview, type AdminDonationRow, type AdminLostPetDetail, type AdminLostPetRow, type AdminNgoMember, type ReportTargetFilter, type RevealedLocation } from "@/services/admin-animal-support.service";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th, type Tone } from "../console-ui";
@@ -22,7 +23,7 @@ const useLang = () => {
 };
 type LoadError = "forbidden" | "notFound" | "error" | null;
 const toError = (e: unknown): LoadError => (e instanceof ApiError ? (e.status === 403 ? "forbidden" : e.status === 404 ? "notFound" : "error") : "error");
-const day = (iso: string | null | undefined, lang: Lang) => (iso ? formatDay(iso, lang) : "—");
+const day = (iso: string | null | undefined, lang: Lang) => (iso ? formatDateLabel(iso, lang, "Asia/Tehran") : "—");
 const n = (value: number, lang: Lang) => localizeDigits(value.toLocaleString(lang === "fa" ? "fa-IR" : "en-US"), lang);
 const errorMessage = (e: unknown, t: (fa: string, en: string) => string) =>
   e instanceof ApiError && e.status === 403 ? t("این کار با نقش شما مجاز نیست.", "Your role isn't allowed to do this.") : e instanceof ApiError && e.status === 409 ? t("این تغییر از وضعیت فعلی مجاز نیست.", "That change isn't allowed from the current state.") : t("انجام نشد؛ دوباره تلاش کنید.", "That didn't work; try again.");
