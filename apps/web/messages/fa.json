@@ -2452,7 +2452,16 @@
       "verification": {
         "changeStatus": "تغییر وضعیت احراز هویت",
         "submit": "به‌روزرسانی"
-      }
+      },
+      "forbidden": "مجوز مشاهدهٔ سازمان‌های همکار را ندارید.",
+      "searchLabel": "نام همکار",
+      "search": "جست‌وجو",
+      "loadFailed": "دریافت فهرست همکاران ناموفق بود",
+      "resultCount": "{count} سازمان",
+      "pagination": "صفحه‌های فهرست همکاران",
+      "previous": "قبلی",
+      "next": "بعدی",
+      "page": "صفحهٔ {page}"
     },
     "transactions": {
       "title": "تراکنش‌ها",

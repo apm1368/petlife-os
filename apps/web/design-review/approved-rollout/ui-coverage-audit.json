@@ -3357,7 +3357,7 @@
       "method": "listProviders",
       "source": "services/admin.service.ts",
       "consumers": [
-        "features/admin/AdminProvidersView.tsx"
+        "features/admin/AdminPartnerDirectory.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },
@@ -3366,7 +3366,7 @@
       "method": "listSellers",
       "source": "services/admin.service.ts",
       "consumers": [
-        "features/admin/AdminSellersView.tsx"
+        "features/admin/AdminPartnerDirectory.tsx"
       ],
       "status": "UI_CONSUMER_FOUND"
     },

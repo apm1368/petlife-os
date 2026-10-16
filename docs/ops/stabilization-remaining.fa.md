@@ -10,7 +10,8 @@
 | کمپین ادمین | ادغام‌شده با PR #30 | فهرست/جزئیات/ساخت/وضعیت/گزارش پیشرفت/مدرک/اشتراک در انجمن از APIهای موجود | تراکنش زنده اجرا نمی‌شود |
 | صندوق سازمان | ادغام‌شده با PR #30 | ماندهٔ دفتر کل، مجوز payout جدا، ثبت پرداخت انجام‌شده؛ قفل همزمانی بکند | انتقال بانکی بیرونی در این قابلیت وجود ندارد |
 | اطلاعات سازمان | ادغام‌شده با PR #30 | PATCH موجود؛ undefined حفظ، null پاک‌کردن متن اختیاری؛ رد نام null | تست قرارداد و UI |
-| تنظیمات ادمین و اعلان عمومی | پیاده‌سازی و بررسی PR #31 | پنج API موجود، مجوز جدا، تأیید دوم، نسخه‌بندی و مصرف اعلان عمومی | ۱۶ تست تنظیمات/منو/اعلان و ۲۲ تست پوسته پاس؛ CI head نهایی لازم است |
+| تنظیمات ادمین و اعلان عمومی | ادغام‌شده در تثبیت با PR #31 | پنج API موجود، مجوز جدا، تأیید دوم، نسخه‌بندی و مصرف اعلان عمومی | ۱۶ تست تنظیمات/منو/اعلان، ۲۲ تست پوسته و CI کامل f1851de پاس؛ ادغام 64d59e5 |
+| فهرست همکاران | PR #32؛ بررسی نهایی | دو API فهرست موجود؛ صفحه‌بندی واقعی و مجوز خواندن مستقل | ۱۰ تست و ۸ تصویر نهایی + ۴ قبل پاس؛ نسخهٔ ترکیبی مجدداً بررسی می‌شود |
 | استعلام رسمی KYC | مسدود به سرویس بیرونی | جریان دستی مدارک موجود است، استعلام رسمی وجود ندارد | نیازمند سرویس/قرارداد واقعی |
 | پرداخت/پیامک/ارسال/بیمه/S3/HTTPS | آماده‌بودن واقعی تأیید نشده | docs/ops/external-readiness.md سابقه است و وضعیت فعلی باید مستقل خوانده شود | بدون کلید/قرارداد و تصمیم محصول، موفقیت جعل نمی‌شود |
 
@@ -22,7 +23,7 @@
 |---|---:|---|---|
 | `modules/account/account.controller.ts` | 1 | `GET /account/activity` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/activity/household-activity.controller.ts` | 1 | `GET /households/:param/activity` | باز؛ بررسی دستی و تست قابلیت لازم است |
-| `modules/admin/animal-support` | 1 | `POST /admin/animal-support/organizations/:param/logo-upload-url` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/animal-support` | 0 | upload لوگوی سازمان | در #30 به ویرایش سازمان متصل؛ ثبت پس از PUT موفق و مجوز manage |
 | `modules/admin/commerce` | 1 | `GET /admin/commerce/promotions/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/content` | 2 | `GET /admin/content/media/:param`؛ `GET /admin/content/placements` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/customer` | 4 | `GET /admin/customers/:param/overview`؛ `POST /admin/customers/:param/suspend`؛ `POST /admin/customers/:param/unsuspend` | باز؛ بررسی دستی و تست قابلیت لازم است |
@@ -33,7 +34,7 @@
 | `modules/admin/pets` | 3 | `GET /admin/pets`؛ `GET /admin/pets/:param`؛ `POST /admin/pets/:param/grants/:param/revoke` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/places` | 4 | `GET /admin/places/:param`؛ `POST /admin/places`؛ `PATCH /admin/places/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/services` | 2 | `POST /admin/provider-services/:param/deactivate`؛ `POST /admin/provider-services/:param/reactivate` | باز؛ بررسی دستی و تست قابلیت لازم است |
-| `modules/admin/settings` | 5 | پنج قرارداد موجود تنظیمات | رابط/تست/تصاویر PR #31؛ خارج از ادعای تکمیل همه صفحات |
+| `modules/admin/settings` | 0 | پنج قرارداد موجود تنظیمات | رابط/تست/تصاویر PR #31؛ خارج از ادعای تکمیل همه صفحات |
 | `modules/admin/subscriptions` | 2 | `GET /admin/subscriptions/plans/:param`؛ `GET /admin/subscriptions/billing-attempts` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/support` | 14 | `GET /admin/support/:param/extras`؛ `PUT /admin/support/:param/tags`؛ `POST /admin/support/:param/links` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/admin/system` | 1 | `GET /admin/system/integrations` | باز؛ بررسی دستی و تست قابلیت لازم است |
@@ -76,7 +77,7 @@
 | `modules/partner-verification/partner-verification.controllers.ts` | 10 | `GET /provider/verification`؛ `POST /provider/verification/uploads`؛ `POST /provider/verification/documents` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/pet-safety/pet-safety.controller.ts` | 15 | `GET /pets/:param/completeness`؛ `GET /pets/:param/emergency-info`؛ `PUT /pets/:param/emergency-info` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/place-suggestions/place-suggestions.controller.ts` | 6 | `POST /place-suggestions`؛ `POST /place-suggestions/changes`؛ `GET /place-suggestions/mine` | باز؛ بررسی دستی و تست قابلیت لازم است |
-| `modules/platform-settings/platform-settings.controller.ts` | 1 | `GET /settings/public` | مصرف اعلان اعضا در PR #31؛ GET زنده فقط اعلان را برگرداند |
+| `modules/platform-settings/platform-settings.controller.ts` | 0 | `GET /settings/public` | مصرف اعلان اعضا در PR #31؛ GET زنده فقط اعلان را برگرداند |
 | `modules/privacy-governance/privacy-governance.controller.ts` | 3 | `GET /admin/privacy/deletion-requests`؛ `POST /admin/privacy/deletion-requests/:param/transition`؛ `GET /admin/release-gate` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/provider-os/provider-bookings.controller.ts` | 2 | `GET /provider/bookings/:param/ride`؛ `POST /provider/bookings/:param/ride-events` | باز؛ بررسی دستی و تست قابلیت لازم است |
 | `modules/provider-os/provider-catalog.controller.ts` | 1 | `POST /provider/waitlist/:param/offer` | باز؛ بررسی دستی و تست قابلیت لازم است |
