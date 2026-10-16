@@ -44,6 +44,36 @@ describe("ERP-C partners", () => {
   });
   afterAll(async () => app.close());
 
+  it("partner directories filter and paginate real records for customer viewers without verification management", async () => {
+    const reader = await actor("directory-reader", AdminRole.SUPPORT);
+    const member = await actor("ordinary-member");
+    const permissions = (await get(reader, "/admin/me").expect(200)).body.permissions;
+    expect(permissions).toContain("customer.view");
+    expect(permissions).not.toContain("verification.manage");
+    for (const kind of ["providers", "sellers"] as const) {
+      const prefix = `directory-${randomUUID()}`;
+      const rows = Array.from({ length: 3 }, (_, index) => ({ name: `${prefix}-${index}`, createdAt: new Date(Date.now() - index * 1000) }));
+      if (kind === "providers") {
+        await db.providerOrganization.createMany({ data: rows.map(row => ({ ...row, type: "GROOMER" })) });
+        await db.providerOrganization.create({ data: { name: `unrelated-${randomUUID()}`, type: "GROOMER" } });
+      } else {
+        await db.sellerOrganization.createMany({ data: rows.map(row => ({ ...row, countryCode: "IR" })) });
+        await db.sellerOrganization.create({ data: { name: `unrelated-${randomUUID()}`, countryCode: "IR" } });
+      }
+      const path = `/admin/${kind}?q=${encodeURIComponent(prefix.toUpperCase())}&pageSize=2`;
+      const first = (await get(reader, `${path}&page=1`).expect(200)).body;
+      const second = (await get(reader, `${path}&page=2`).expect(200)).body;
+      expect(first).toMatchObject({ total: 3, page: 1, pageSize: 2 });
+      expect(first.items).toHaveLength(2);
+      expect(second).toMatchObject({ total: 3, page: 2, pageSize: 2 });
+      expect(second.items).toHaveLength(1);
+      expect(new Set([...first.items, ...second.items].map((row: { id: string }) => row.id)).size).toBe(3);
+      expect([...first.items, ...second.items].map((row: { name: string }) => row.name).sort()).toEqual(rows.map(row => row.name).sort());
+      await get(member, `/admin/${kind}`).expect(403);
+      await patch(reader, `/admin/${kind}/${first.items[0].id}/verification`).send({ status: "VERIFIED", reason: "Reader must not mutate" }).expect(403);
+    }
+  });
+
   it("partner submits evidence; staff review it under an explicit state machine; evidence required to verify; audited, notified, tasked", async () => {
     const p = await provider();
     const other = await provider();

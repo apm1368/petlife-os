@@ -230,6 +230,9 @@ describe("support operations", () => {
       }),
     );
     expect(await screen.findByText(/Outcome is uncertain/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Record completed payout" }));
+    expect(svc.recordPayout).toHaveBeenCalledTimes(1);
+    expect((screen.getByLabelText("Reason and payout reference") as HTMLInputElement).value).toBe("Bank receipt 567");
     expect(
       (screen.getByRole("button", { name: "Record completed payout" }) as HTMLButtonElement).disabled,
     ).toBe(true);

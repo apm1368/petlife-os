@@ -185,6 +185,26 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     expect(visible.body.verificationStatus).toBe("VERIFIED");
   });
 
+  it("API separates organization reading, management and finance permissions", async () => {
+    const manager = await setupAdmin(AdminRole.ADMIN);
+    const reader = await setupAdmin(AdminRole.OPERATIONS);
+    const finance = await setupAdmin(AdminRole.FINANCE);
+    const { organizationId, campaignId } = await setupVerifiedOrgWithActiveCampaign(manager, "RESTRICTED");
+    const { client: donor } = await setupHousehold();
+    await donor.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 500_000 }).expect(201);
+    const orgPath = `/admin/animal-support/organizations/${organizationId}`;
+    const payout = { amountIrr: 100_000, fundType: "RESTRICTED", reason: "Existing bank receipt, ledger record only" };
+    await reader.client.get(`${orgPath}/fund-balance`).expect(200);
+    await reader.client.patch(orgPath).send({ description: "Must not be written" }).expect(403);
+    await reader.client.post(`${orgPath}/payouts`).send(payout).expect(403);
+    await manager.client.post(`${orgPath}/payouts`).send(payout).expect(403);
+    await finance.client.patch(orgPath).send({ description: "Finance cannot edit" }).expect(403);
+    await donor.get(`${orgPath}/fund-balance`).expect(403);
+    await finance.client.post(`${orgPath}/payouts`).send(payout).expect(201);
+    expect((await reader.client.get(`${orgPath}/fund-balance`).expect(200)).body.restrictedAvailableIrr).toBe(400_000);
+    expect(await prisma.donationLedgerTransaction.count({ where: { organizationId, referenceType: "PAYOUT" } })).toBe(1);
+  });
+
   it("organization PATCH preserves omitted fields, explicitly clears nullable text and rejects null names", async () => {
     const admin = await setupAdmin(AdminRole.ADMIN);
     const created = await admin.client.post("/admin/animal-support/organizations").send({ type: "SHELTER", name: `Patch org ${unique()}`, description: "Original description", location: "Tehran", contactEmail: "shelter@example.test" }).expect(201);
@@ -204,7 +224,9 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const url = `/admin/animal-support/rescue-cases/${rescue.body.id}/evidence`;
     const target = await admin.client.post(`/admin/animal-support/rescue-cases/${rescue.body.id}/evidence-upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 10 }).expect(201);
     const key = target.body.key as string;
-    await admin.client.post(url).send({ evidenceObjectKeys: [key.replace(rescue.body.id as string, org.body.id as string)] }).expect(400);
+    const other = await admin.client.post(`/admin/animal-support/organizations/${org.body.id}/rescue-cases`).send({ title: "Other real rescue case", description: "Separate evidence scope" }).expect(201);
+    const foreignTarget = await admin.client.post(`/admin/animal-support/rescue-cases/${other.body.id}/evidence-upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 10 }).expect(201);
+    await admin.client.post(url).send({ evidenceObjectKeys: [foreignTarget.body.key] }).expect(400);
     await admin.client.post(url).send({ evidenceObjectKeys: [] }).expect(400);
     const registered = await admin.client.post(url).send({ evidenceObjectKeys: [key] }).expect(201);
     expect(registered.body.evidenceObjectKeys).toEqual([key]);
