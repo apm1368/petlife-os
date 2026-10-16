@@ -179,7 +179,7 @@ export function AddPetView() {
   }, [photoPreview]);
 
   const approxMonths = (Number(toLatin(ageYears)) || 0) * 12 + (Number(toLatin(ageMonths)) || 0);
-  const hasAge = approximate ? approxMonths > 0 : Boolean(birthDate);
+  const hasAge = approximate ? ageYears.trim() !== "" || ageMonths.trim() !== "" : Boolean(birthDate);
   const breedOptions = useMemo(() => BREEDS[species]?.[locale] ?? [], [species, locale]);
 
   function choosePhoto(file: File | undefined) {

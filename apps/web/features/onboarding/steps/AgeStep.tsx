@@ -33,7 +33,7 @@ export function AgeStep({ onNext }: { onNext: (petId: string) => void }) {
     try {
       const age = !skip ? useApprox ? { approximateAgeMonths: parsedMonths } : { birthDate } : {};
       const pet = draft.petId
-        ? skip ? await petsService.getById(draft.petId) : await petsService.update(draft.petId, age)
+        ? skip ? await petsService.getById(draft.petId) : await petsService.update(draft.petId, { ...age, ...(useApprox ? { birthDate: null } : { approximateAgeMonths: null }) })
         : await petsService.create(
           draft.householdId,
           { name: draft.name, species: draft.species, ...age },

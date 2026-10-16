@@ -39,5 +39,23 @@ describe("Onboarding birth date", () => {
     fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
     await waitFor(() => expect(onboardingService.updateProgress).toHaveBeenCalledTimes(2));
     expect(petsService.create).toHaveBeenCalledTimes(1);
+    expect(petsService.update).toHaveBeenCalledWith("pet1", { birthDate: "2024-03-20", approximateAgeMonths: null });
   });
+  it("clears the saved exact date when a progress retry switches to a newborn's approximate age", async () => {
+    vi.mocked(onboardingService.updateProgress).mockRejectedValueOnce(new Error("offline"));
+    vi.mocked(petsService.create).mockResolvedValue({ ...pet, birthDate: "2024-03-20" } as never);
+    renderWithIntl(<AgeStep onNext={vi.fn()} />, "fa");
+    fireEvent.change(screen.getByLabelText("سال"), { target: { value: "1403" } });
+    fireEvent.change(screen.getByLabelText("ماه"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("روز"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    await screen.findByRole("alert");
+    fireEvent.click(screen.getByRole("button", { name: "تاریخ تولد دقیق را نمی‌دانم" }));
+    fireEvent.change(screen.getByLabelText("سن تقریبی (ماه)"), { target: { value: "۰" } });
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    await waitFor(() => expect(onboardingService.updateProgress).toHaveBeenCalledTimes(2));
+    expect(petsService.create).toHaveBeenCalledTimes(1);
+    expect(petsService.update).toHaveBeenCalledWith("pet1", { birthDate: null, approximateAgeMonths: 0 });
+  });
+
 });

@@ -59,4 +59,15 @@ describe("AddPetView", () => {
     expect(vi.mocked(petsService.create).mock.calls[0]![1]).toEqual({ name: "Pistachio", species: "RABBIT", sex: "FEMALE", approximateAgeMonths: 27, breed: "Lop" });
     expect(petsService.createPhotoUploadUrl).not.toHaveBeenCalled();
   });
+  it("keeps an explicitly entered Persian zero-month age instead of treating it as unknown", async () => {
+    renderWithIntl(<AddPetView />, "fa");
+    fireEvent.change(screen.getByLabelText("نام"), { target: { value: "کوچولو" } });
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    fireEvent.click(screen.getByLabelText(/تاریخ دقیق را نمی‌دانم/));
+    fireEvent.change(screen.getByLabelText("ماه"), { target: { value: "۰" } });
+    fireEvent.click(screen.getByRole("button", { name: "رد کردن و ذخیره" }));
+    await waitFor(() => expect(petsService.create).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(petsService.create).mock.calls[0]![1]).toEqual({ name: "کوچولو", species: "DOG", approximateAgeMonths: 0 });
+  });
+
 });

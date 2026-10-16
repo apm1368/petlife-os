@@ -52,6 +52,20 @@ describe("Pet identity platform", () => {
     expect(updated.birthDate?.toISOString().slice(0, 10)).toBe("2024-03-20");
   });
 
+  it("replaces an exact birth date with an explicit newborn age without retaining contradictory age fields", async () => {
+    const o = await actor("newborn-age-owner");
+    const hh = (await send("post", o, "/households").send({}).expect(201)).body;
+    const pet = (await send("post", o, `/households/${hh.id}/pets`).send({ name: "Newborn", species: "CAT", birthDate: "2024-03-20" }).expect(201)).body;
+    await send("patch", o, `/pets/${pet.id}`).send({ birthDate: null, approximateAgeMonths: 0 }).expect(200);
+    const approximate = await db.pet.findUniqueOrThrow({ where: { id: pet.id } });
+    expect(approximate.birthDate).toBeNull();
+    expect(approximate.approximateAgeMonths).toBe(0);
+    await send("patch", o, `/pets/${pet.id}`).send({ birthDate: "2026-10-01", approximateAgeMonths: null }).expect(200);
+    const exact = await db.pet.findUniqueOrThrow({ where: { id: pet.id } });
+    expect(exact.birthDate?.toISOString().slice(0, 10)).toBe("2026-10-01");
+    expect(exact.approximateAgeMonths).toBeNull();
+  });
+
   it("completeness returns a deterministic score and the next most useful fields", async () => {
     const { o, petId } = await owner();
     const c = (await get(o, `/pets/${petId}/completeness`).expect(200)).body;
