@@ -1,0 +1,20 @@
+[
+  {
+    "stage": "cold-reentry",
+    "locale": "fa",
+    "width": 390,
+    "before": true,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 0
+  },
+  {
+    "stage": "cold-reentry",
+    "locale": "fa",
+    "width": 1440,
+    "before": true,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 0
+  }
+]

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PetLifecycleStatus } from "@prisma/client";
+import { OnboardingChapter, PetLifecycleStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -90,6 +90,13 @@ export class PetsService {
           { tx, aggregateType: "Pet", aggregateId: pet.id },
         );
       }
+
+      // Keep the first onboarding pet recoverable even if the client's subsequent
+      // progress write fails. Bind only this creator's matching active identity flow.
+      await tx.onboardingProgress.updateMany({
+        where: { userId: creatorUserId, householdId, petId: null, chapter: OnboardingChapter.PET_IDENTITY },
+        data: { petId: pet.id },
+      });
 
       await this.events.publish(
         "PetCreated",

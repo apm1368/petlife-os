@@ -1,6 +1,7 @@
 import type { INestApplication } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import request from "supertest";
+import { HouseholdRole, OnboardingChapter, OnboardingStatus } from "@prisma/client";
 import { createTestApp, extractCookie } from "./test-app";
 import { signSessionCookie } from "../src/common/session/session-cookie.util";
 import { PrismaService } from "../src/common/prisma/prisma.service";
@@ -64,6 +65,26 @@ describe("Pet identity platform", () => {
     const exact = await db.pet.findUniqueOrThrow({ where: { id: pet.id } });
     expect(exact.birthDate?.toISOString().slice(0, 10)).toBe("2026-10-01");
     expect(exact.approximateAgeMonths).toBeNull();
+  });
+
+  it("persists the onboarding pet id before any separate progress-write request", async () => {
+    const o = await actor("resumable-owner");
+    const hh = (await send("post", o, "/households").send({}).expect(201)).body;
+    await db.onboardingProgress.create({ data: { userId: o.id, householdId: hh.id, chapter: OnboardingChapter.PET_IDENTITY, step: "pet-name", status: OnboardingStatus.COMPLETED } });
+    const pet = (await send("post", o, `/households/${hh.id}/pets`).send({ name: "Resume me", species: "CAT" }).expect(201)).body;
+    // Simulate closing the browser before PUT /onboarding/progress: no second write.
+    const progress = (await get(o, "/onboarding").expect(200)).body;
+    expect(progress).toMatchObject({ householdId: hh.id, petId: pet.id, step: "pet-name", chapter: "PET_IDENTITY" });
+    expect(await db.pet.count({ where: { householdId: hh.id } })).toBe(1);
+  });
+
+  it("does not attach a creator's pet to another member's onboarding in the same household", async () => {
+    const creator = await actor("creator"), member = await actor("member");
+    const hh = (await send("post", creator, "/households").send({}).expect(201)).body;
+    await db.householdMember.create({ data: { userId: member.id, householdId: hh.id, role: HouseholdRole.FAMILY } });
+    await db.onboardingProgress.create({ data: { userId: member.id, householdId: hh.id, chapter: OnboardingChapter.PET_IDENTITY, step: "age", status: OnboardingStatus.IN_PROGRESS } });
+    await send("post", creator, `/households/${hh.id}/pets`).send({ name: "Creator pet", species: "CAT" }).expect(201);
+    expect((await get(member, "/onboarding").expect(200)).body.petId).toBeNull();
   });
 
   it("completeness returns a deterministic score and the next most useful fields", async () => {

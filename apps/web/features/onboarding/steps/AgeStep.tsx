@@ -37,7 +37,7 @@ export function AgeStep({ onNext }: { onNext: (petId: string) => void }) {
         : await petsService.create(
           draft.householdId,
           { name: draft.name, species: draft.species, ...age },
-          `onboarding-pet-${draft.householdId}-${draft.name}`,
+          `onboarding-pet-${draft.householdId}-${encodeURIComponent(draft.name)}`,
         );
       update({ petId: pet.id, birthDate: pet.birthDate, approximateAgeMonths: pet.approximateAgeMonths });
       await onboardingService.updateProgress({

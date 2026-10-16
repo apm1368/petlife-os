@@ -177,7 +177,8 @@
         "wet": "Wet food",
         "mixed": "Mixed"
       }
-    }
+    },
+    "resumeIdentity": "Complete the unsaved identity details to continue adding your pet. Birth date is still optional."
   },
   "home": {
     "title": "Today for {name}",

@@ -1,0 +1,10 @@
+{
+  "baseline": "98b61188fa86b77cbfbcc300356a3a0280f7cc3d",
+  "source": {
+    "apps/web/features/onboarding/OnboardingWizard.tsx": "32cf4afdfe59705e5480e13500740fc5af43049c1c57669c0a75d90c555a2a5f",
+    "apps/web/features/onboarding/steps/AgeStep.tsx": "3e68bb14cb68992c6f506da871e4fe0a64245e4d640a8062903356e563633ff7",
+    "apps/web/messages/fa.json": "3d91ded9cf9b8653eff1ecf044d62d38c2f2fac5daf635bd816a0757e6bc7610",
+    "apps/web/messages/en.json": "c78b6d415849388b6dd3c5b867facbc40553cfa8ad750cde00d628a9b03e0749"
+  },
+  "scope": "Controlled localhost responses, including simulated progress and pet creation. No live mutation."
+}
