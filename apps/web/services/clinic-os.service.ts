@@ -20,6 +20,7 @@ export interface ClinicCustomer {
     lastVisitAt: string | null;
 }
 export interface ClinicPlan {
+    prices?: {billingInterval:string;amount:number;currency:string}[];
     code: string;
     nameFa: string;
     nameEn: string;
@@ -73,6 +74,7 @@ export const clinicOsService = {
         visibleToOwner: boolean;
     }) => apiFetch<ClinicNote[]>(`/provider/clinic/customers/${householdId}/notes`, { method: "POST", body }),
     removeNote: (householdId: string, noteId: string) => apiFetch<ClinicNote[]>(`/provider/clinic/customers/${householdId}/notes/${noteId}`, { method: "DELETE" }),
+    plans: (signal?: AbortSignal) => apiFetch<ClinicPlan[]>("/provider/clinic/plans", { signal }),
     subscription: (signal?: AbortSignal) => apiFetch<ClinicSubscription>("/provider/clinic/subscription", { signal }),
     tasks: (status: string, signal?: AbortSignal) => apiFetch<ClinicTask[]>(`/provider/clinic/tasks?status=${encodeURIComponent(status)}`, { signal }),
     createTask: (body: {

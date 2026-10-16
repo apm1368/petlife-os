@@ -5470,8 +5470,8 @@
     "queueLimit": "Up to 200 providers and 200 sellers matching the filter; queue document counts may lag the expiry sweep.",
     "loadFailed": "The case could not be loaded.",
     "submitted": "Submitted for review on {date}",
-    "evidenceRule": "Initial approval requires at least one accepted, unexpired document. Profession-specific requirements are not defined by this contract.",
-    "reinstatementRule": "Reinstating a suspended organization is an exception to the initial evidence requirement in the current contract; review its documents and history before deciding.",
+    "evidenceRule": "Organization approval requires every mandatory document in the checklist to be accepted and unexpired.",
+    "reinstatementRule": "Reinstatement also requires all mandatory evidence to be accepted and valid; previous approval does not replace document review.",
     "openDocument": "Request document access",
     "acceptDocument": "Accept document",
     "rejectDocument": "Reject document",
@@ -5533,7 +5533,8 @@
       "APPROVED": "Approved",
       "REJECTED": "Rejected",
       "EXPIRED": "Accepted evidence expired",
-      "SUSPENDED": "Suspended"
+      "SUSPENDED": "Suspended",
+      "EVIDENCE_INCOMPLETE": "Evidence incomplete under the current policy"
     },
     "documentKinds": {
       "LICENSE": "Professional license",
@@ -5577,7 +5578,15 @@
       "MULTI_SERVICE_PROVIDER": "Multiple-service provider",
       "SELLER": "Seller"
     },
-    "otherBusiness": "Other organization"
+    "otherBusiness": "Other organization",
+    "requirementsTitle": "Evidence checklist",
+    "requirementsIntro": "Requirements come from the server for this organization and its actual services.",
+    "requirementProgress": "{accepted} of {total} documents accepted",
+    "requirementAccepted": "Accepted and valid",
+    "requirementPending": "Awaiting review",
+    "requirementMissing": "Valid evidence needed",
+    "manualPolicyNotice": "This is Pet Life’s internal policy and manual document review. No official identity or licence lookup is performed.",
+    "policyUnavailable": "The server has not supplied the evidence checklist. Organization approval is unavailable until the policy loads."
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "Clinic messages for your household",
@@ -5623,5 +5632,31 @@
     "resourceConflict": "This resource is already occupied in this time window.",
     "notAssignable": "The appointment state changed and it can no longer be assigned. Refresh the queue.",
     "assignFailed": "Assignment could not be saved; choices are preserved. Check the appointment state and your access."
+  },
+  "clinicPlans": {
+    "title": "Clinic workspace plans",
+    "intro": "Compare actual features and limits supplied by the server.",
+    "loading": "Loading plans…",
+    "error": "Could not load plans. This does not mean there are no plans.",
+    "retry": "Retry",
+    "empty": "There are currently no active plans to show.",
+    "current": "Current plan",
+    "unannounced": "Pricing has not been announced",
+    "included": "Included",
+    "excluded": "Not included",
+    "unlimited": "Unlimited",
+    "adminOnly": "Plan changes are handled by an administrator. Online clinic subscription purchases are not available yet.",
+    "intervals": {
+      "MONTHLY": "Monthly",
+      "YEARLY": "Yearly"
+    },
+    "features": {
+      "clinic_customers": "Customer management",
+      "clinic_reminders": "Reminders",
+      "clinic_bulk_reminders": "Bulk reminders",
+      "clinic_exports": "Data exports",
+      "clinic_staff": "Team members",
+      "clinic_branches": "Branches"
+    }
   }
 }

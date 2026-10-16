@@ -4,7 +4,8 @@ base=mock
 provider={'providerUserId':'pu1','providerOrganizationId':'org1','organizationName':'کلینیک همراه','organizationType':'VET_CLINIC','verificationStatus':'SUBMITTED','role':'OWNER'}
 seller={'sellerMembershipId':'sm1','sellerOrganizationId':'seller1','organizationName':'فروشگاه همراه','verificationStatus':'NEEDS_INFORMATION','role':'OWNER','sellerStatus':'ACTIVE'}
 document={'id':'doc1','kind':'LICENSE','status':'PENDING','mimeType':'application/pdf','fileSizeBytes':1024,'expiresAt':None,'expiryState':'NO_EXPIRY','reviewNote':None,'rejectionReason':None,'submittedAt':'2026-10-15T10:00:00Z','createdAt':'2026-10-15T10:00:00Z','reviewedAt':None,'reviewedByAdminId':None}
-state={'status':'SUBMITTED','lifecycle':'PENDING','submittedAt':'2026-10-15T10:00:00Z','note':None,'canSubmit':False,'documents':[document]}
+policy={'version':'2026-10-15.1','mode':'MANUAL_DOCUMENT_REVIEW','officialLookup':'NOT_CONNECTED','requiredDocumentKinds':['IDENTITY','LICENSE'],'missingForSubmission':['IDENTITY'],'missingForApproval':['IDENTITY','LICENSE']}
+state={'policy':policy,'status':'SUBMITTED','lifecycle':'PENDING','submittedAt':'2026-10-15T10:00:00Z','note':None,'canSubmit':False,'documents':[document]}
 detail={**state,'subjectType':'PROVIDER','id':'org1','name':'کلینیک همراه','kind':'VET_CLINIC','allowedTransitions':['UNDER_REVIEW','NEEDS_INFORMATION','REJECTED','VERIFIED']}
 def fixture(r):
  path=urlparse(r.request.url).path

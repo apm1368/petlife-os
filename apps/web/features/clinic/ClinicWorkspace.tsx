@@ -9,6 +9,7 @@ import {LocalDateTimeField} from "@/features/shared/date-picker/LocalDateTimeFie
 import {DateField} from "@/features/shared/date-picker/DateField";
 import { ClinicReminders, ClinicReminderComposer } from "./ClinicReminders";
 import { ClinicCampaigns } from "./ClinicCampaigns";
+import { ClinicPlans } from "./ClinicPlans";
 import { ClinicFinance } from "./ClinicFinance";
 import { ClinicContacts } from "./ClinicContacts";
 import { ClinicTeamManagement } from "./ClinicTeamManagement";
@@ -84,7 +85,7 @@ function ClinicWorkspaceContent() {
  {tab === "tags" && canCustomers && <ClinicTagsManager/>}
  {tab === "contacts" && <ClinicContacts canExport={subscription?.plan.entitlements.some(e => e.key === "clinic.exports" && e.enabled) ?? false}/>}
  {(tab === "staff" || tab === "branches") && <ClinicTeamManagement section={tab}/>}
- {tab === "plan" && subscription && <ContextSurface><h2 className="text-section-title">{locale === "fa" ? subscription.plan.nameFa : subscription.plan.nameEn}</h2><p>{locale === "fa" ? subscription.plan.descriptionFa : subscription.plan.descriptionEn}</p><p>{t("reminderUsage", { count: number(subscription.usage.remindersThisMonth) })}</p>{subscription.currentPeriodEndsAt && <p>{t("expires")} {timestamp(subscription.currentPeriodEndsAt)}</p>}<p>{t("planNote")}</p></ContextSurface>}
+ {tab === "plan" && <ClinicPlans currentCode={subscription?.plan.code}/>}{tab === "plan" && subscription && <ContextSurface><h2 className="text-section-title">{locale === "fa" ? subscription.plan.nameFa : subscription.plan.nameEn}</h2><p>{locale === "fa" ? subscription.plan.descriptionFa : subscription.plan.descriptionEn}</p><p>{t("reminderUsage", { count: number(subscription.usage.remindersThisMonth) })}</p>{subscription.currentPeriodEndsAt && <p>{t("expires")} {timestamp(subscription.currentPeriodEndsAt)}</p>}<p>{t("planNote")}</p></ContextSurface>}
  </>}
  </div>;
 }

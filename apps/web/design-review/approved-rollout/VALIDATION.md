@@ -29,3 +29,14 @@ Browser captures use controlled API fixtures. They are not live backend, role-co
 ## Delivery limits
 
 GitHub push authentication is unavailable in this environment. No PR, board update, merge or deployment has been performed. Local commits and exported bundles must not be described as published. Full API/UI completion remains unverified; static coverage candidates require manual disposition. Backend gaps are listed in BACKEND-HANDOFF.fa.md, while existing API frontend work is tracked separately in API-DISPOSITIONS.md.
+
+## KYC policy and clinic plan checkpoint (2026-10-16)
+
+Owner explicitly authorized backend KYC implementation. The previous protected-API statement applies to the earlier frontend checkpoint only. This checkpoint changes PartnerVerificationService and related tests, with no Prisma schema/migration or deploy/workflow changes.
+
+- Internal policy unit tests: 17 passed.
+- Relevant web suite (verification portals/admin/checklist + clinic plans/workspace): 18 passed / 5 files.
+- KYC browser: 16 fa/en × 390/1440 checks passed with controlled responses and updated checklist captures.
+- Root lint passed at the KYC-policy checkpoint; clinic plan additions subsequently passed relevant tests. No complete final lint/typecheck/full-suite pass is claimed for all later edits.
+- Native Prisma generation remains blocked by official binary/checksum HTTP 403. Official WASM DMMF and generator experiments did not produce a usable client; no fake declarations or checksum bypass was used. API integration tests and full API types remain unverified.
+- No database, migration, deployment or live upload was performed. Source changes are checkpointed separately before starting remaining support operations from the current main line.
