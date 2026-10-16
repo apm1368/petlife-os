@@ -5750,7 +5750,9 @@
       "contactPhone": "تلفن تماس"
     },
     "attachEvidence": "افزودن مدرک به پرونده",
-    "organizationLogo": "نشان عمومی سازمان (تصویر تا ۱۰ مگابایت)"
+    "organizationLogo": "نشان عمومی سازمان (تصویر تا ۱۰ مگابایت)",
+    "chooseFile": "انتخاب تصویر",
+    "noFile": "تصویری انتخاب نشده است"
   },
   "supportOpsNav": {
     "overview": "نمای کلی",

@@ -1,12 +1,12 @@
 {
   "generated": "2026-10-16",
-  "baseCommit": "9f2048d8afa4da4b66e1a291b31d0998ac1cc8df",
+  "baseCommit": "376c876aeef8366394754f2c0ed5aa8ef5f26388",
   "scope": "Static Nest controller decorators -> exact normalized HTTP verb/path in apiFetch service methods or inline UI calls -> direct UI references. Not runtime proof or a completed feature audit. Dynamic decorators, aliases, query-dependent suffixes and generic actions need manual review. System/webhook endpoints do not require customer screens. Parameter names are normalized; ambiguous matches must be reviewed.",
   "counts": {
     "SYSTEM_ENDPOINT_REVIEW_NOT_A_SCREEN": 7,
-    "STATIC_UI_CHAIN_FOUND": 789,
+    "STATIC_UI_CHAIN_FOUND": 790,
     "NO_EXACT_CLIENT_MATCH_REVIEW": 249,
-    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 35
+    "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW": 34
   },
   "unresolvedDecorators": [],
   "endpoints": [
@@ -791,14 +791,16 @@
       "source": "apps/api/src/modules/admin/animal-support/admin-animal-support.controller.ts",
       "line": 103,
       "group": "modules/admin/animal-support",
-      "status": "CLIENT_WITHOUT_DIRECT_UI_REFERENCE_REVIEW",
+      "status": "STATIC_UI_CHAIN_FOUND",
       "clients": [
         {
           "service": "adminAnimalSupportService",
           "method": "organizationLogoUpload",
           "source": "apps/web/services/admin-animal-support.service.ts",
           "line": 148,
-          "consumers": []
+          "consumers": [
+            "apps/web/features/admin/animal-support/AdminSupportOperations.tsx"
+          ]
         }
       ]
     },

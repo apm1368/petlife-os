@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ChangeEventHandler,
+  type ReactNode,
+} from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Input, Select, Skeleton } from "@petlife/ui";
 import {
@@ -687,11 +696,11 @@ function CampaignUpdateForm({
             onChange={(e) => setBody(e.target.value)}
           />
         </label>
-        <Input
+        <SupportImagePicker
           key={fileRevision}
-          type="file"
           label={t("publicEvidence")}
           accept="image/jpeg,image/png,image/webp"
+          file={file}
           onChange={(e) => {
             setFile(e.target.files?.[0] ?? null);
             setUploaded(null);
@@ -866,11 +875,11 @@ export function AdminSupportOrganizationEditor({
             onChange={(event) => setDraft((prev) => ({ ...prev, [field]: event.target.value }))}
           />
         ))}
-        <Input
+        <SupportImagePicker
           key={logoRevision}
-          type="file"
           label={t("organizationLogo")}
           accept="image/jpeg,image/png,image/webp"
+          file={logo}
           onChange={(event) => {
             setLogo(event.target.files?.[0] ?? null);
             setUploadedLogo(null);
@@ -933,10 +942,10 @@ function RescueEvidenceForm({ id, onSaved }: { id: string; onSaved: (row: Rescue
   return (
     <Panel>
       <PanelTitle title={t("attachEvidence")} />
-      <Input
+      <SupportImagePicker
         key={revision}
-        type="file"
         accept="image/jpeg,image/png,image/webp"
+        file={file}
         label={t("publicEvidence")}
         onChange={(event) => {
           setFile(event.target.files?.[0] ?? null);
@@ -970,5 +979,83 @@ function RescueEvidenceForm({ id, onSaved }: { id: string; onSaved: (row: Rescue
         }}
       />
     </Panel>
+  );
+}
+
+export function AdminSupportOrganizationInfo({
+  organization,
+}: {
+  organization: AnimalSupportOrganizationDto;
+}) {
+  const { t } = useCopy();
+  return (
+    <Panel>
+      <PanelTitle title={t("organization")} />
+      {organization.logoUrl && (
+        <Image
+          src={organization.logoUrl}
+          alt={organization.name}
+          width={80}
+          height={80}
+          unoptimized
+          className="mb-3 rounded-md object-cover"
+        />
+      )}
+      <p dir="auto" className="mb-3 whitespace-pre-wrap">
+        {organization.description ?? t("unknown")}
+      </p>
+      <DetailRow label={t("orgFields.location")}>{organization.location ?? t("unknown")}</DetailRow>
+      <DetailRow label={t("orgFields.contactEmail")}>
+        <bdi dir="ltr">{organization.contactEmail ?? t("unknown")}</bdi>
+      </DetailRow>
+      <DetailRow label={t("orgFields.contactPhone")}>
+        <bdi dir="ltr">{organization.contactPhone ?? t("unknown")}</bdi>
+      </DetailRow>
+    </Panel>
+  );
+}
+
+function SupportImagePicker({
+  label,
+  accept,
+  file,
+  onChange,
+}: {
+  label: string;
+  accept: string;
+  file: File | null;
+  onChange: ChangeEventHandler<HTMLInputElement>;
+}) {
+  const { t } = useCopy(),
+    id = useId(),
+    input = useRef<HTMLInputElement>(null);
+  return (
+    <div className="space-y-2">
+      <span id={id} className="block text-metadata">
+        {label}
+      </span>
+      <input
+        ref={input}
+        type="file"
+        accept={accept}
+        aria-label={label}
+        tabIndex={-1}
+        className="sr-only"
+        onChange={onChange}
+      />
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="secondary"
+          aria-describedby={id}
+          onClick={() => input.current?.click()}
+        >
+          {t("chooseFile")}
+        </Button>
+        <bdi dir="auto" className="min-w-0 break-all text-metadata text-text-secondary">
+          {file?.name ?? t("noFile")}
+        </bdi>
+      </div>
+    </div>
   );
 }

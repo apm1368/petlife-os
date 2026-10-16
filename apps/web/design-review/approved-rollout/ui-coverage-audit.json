@@ -1567,8 +1567,10 @@
       "service": "adminAnimalSupportService",
       "method": "organizationLogoUpload",
       "source": "services/admin-animal-support.service.ts",
-      "consumers": [],
-      "status": "REVIEW_REQUIRED_NOT_PROOF_OF_MISSING_UI"
+      "consumers": [
+        "features/admin/animal-support/AdminSupportOperations.tsx"
+      ],
+      "status": "UI_CONSUMER_FOUND"
     },
     {
       "service": "adminAnimalSupportService",

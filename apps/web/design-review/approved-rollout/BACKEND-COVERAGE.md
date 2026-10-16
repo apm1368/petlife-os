@@ -9,7 +9,7 @@ Generated from actual source controllers and client methods. Each endpoint and i
 | modules/activity/household-activity.controller.ts | 0 | 0 | 1 | 0 |
 | modules/addresses/addresses.controller.ts | 3 | 0 | 0 | 0 |
 | modules/admin/access | 8 | 0 | 0 | 0 |
-| modules/admin/animal-support | 32 | 1 | 0 | 0 |
+| modules/admin/animal-support | 33 | 0 | 0 | 0 |
 | modules/admin/audit | 1 | 0 | 0 | 0 |
 | modules/admin/auth | 1 | 0 | 0 | 0 |
 | modules/admin/commerce | 16 | 0 | 1 | 0 |

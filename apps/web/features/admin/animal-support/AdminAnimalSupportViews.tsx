@@ -12,7 +12,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { adminAnimalSupportService, type AdminAnimalSupportOverview, type AdminDonationRow, type AdminLostPetDetail, type AdminLostPetRow, type AdminNgoMember, type ReportTargetFilter, type RevealedLocation } from "@/services/admin-animal-support.service";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th, type Tone } from "../console-ui";
 
-import { AdminOrganizationFunds, AdminSupportOrganizationEditor } from "./AdminSupportOperations";
+import { AdminOrganizationFunds, AdminSupportOrganizationEditor, AdminSupportOrganizationInfo } from "./AdminSupportOperations";
 import { useSupportPermissions } from "./use-support-permissions";
 import { AdminAnimalSupportNav } from "./AdminAnimalSupportNav";
 
@@ -444,6 +444,7 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
         <Tag tone={org.isPubliclyListed ? "success" : "neutral"}>{org.isPubliclyListed ? t("در فهرست عمومی", "Publicly listed") : t("خارج از فهرست", "Not listed")}</Tag>
       </div>
       {notice ? <p role="status" className="mb-3 text-metadata text-text-secondary">{notice}</p> : null}
+      <AdminSupportOrganizationInfo organization={org} />
       {permissions.manage && <AdminSupportOrganizationEditor key={org.id} organization={org} onSaved={setOrg} />}
       <AdminOrganizationFunds organizationId={organizationId} />
       <div className="grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">

@@ -5750,7 +5750,9 @@
       "contactPhone": "Contact phone"
     },
     "attachEvidence": "Attach evidence to case",
-    "organizationLogo": "Public organization logo (image up to 10 MB)"
+    "organizationLogo": "Public organization logo (image up to 10 MB)",
+    "chooseFile": "Choose image",
+    "noFile": "No image selected"
   },
   "supportOpsNav": {
     "overview": "Overview",
