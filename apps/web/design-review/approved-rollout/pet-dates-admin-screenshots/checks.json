@@ -1,0 +1,98 @@
+[
+  {
+    "page": "birth-onboarding",
+    "locale": "fa",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-add-pet",
+    "locale": "fa",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "verification-queue",
+    "locale": "fa",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-onboarding",
+    "locale": "fa",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-add-pet",
+    "locale": "fa",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "verification-queue",
+    "locale": "fa",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-onboarding",
+    "locale": "en",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-add-pet",
+    "locale": "en",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "verification-queue",
+    "locale": "en",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-onboarding",
+    "locale": "en",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-add-pet",
+    "locale": "en",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "verification-queue",
+    "locale": "en",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": []
+  }
+]
