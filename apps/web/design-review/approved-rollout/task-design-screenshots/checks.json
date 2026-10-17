@@ -1,0 +1,234 @@
+{
+  "after-list": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "list",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "list",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "list",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "list",
+      "unexpectedConsoleErrors": []
+    }
+  ],
+  "after-create-error": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "create-error",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "create-error",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "create-error",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "create-error",
+      "unexpectedConsoleErrors": []
+    }
+  ],
+  "after-status-error": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "status-error",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "status-error",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "status-error",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "mode": "status-error",
+      "unexpectedConsoleErrors": []
+    }
+  ],
+  "after-empty": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "empty",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "empty",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "empty",
+      "unexpectedConsoleErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "mode": "empty",
+      "unexpectedConsoleErrors": []
+    }
+  ],
+  "before": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`."
+      ]
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `fa`."
+      ]
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`."
+      ]
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`.",
+        "IntlError: MISSING_MESSAGE: Could not resolve `admin.tasks.status.BLOCKED` in messages for locale `en`."
+      ]
+    }
+  ]
+}

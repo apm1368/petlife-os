@@ -40,3 +40,17 @@ Owner explicitly authorized backend KYC implementation. The previous protected-A
 - Root lint passed at the KYC-policy checkpoint; clinic plan additions subsequently passed relevant tests. No complete final lint/typecheck/full-suite pass is claimed for all later edits.
 - Native Prisma generation remains blocked by official binary/checksum HTTP 403. Official WASM DMMF and generator experiments did not produce a usable client; no fake declarations or checksum bypass was used. API integration tests and full API types remain unverified.
 - No database, migration, deployment or live upload was performed. Source changes are checkpointed separately before starting remaining support operations from the current main line.
+
+
+## اصلاح طراحی وظایف ادمین — ۱۷ اکتبر ۲۰۲۶
+
+مسیر `/[locale]/admin/tasks` با دادهٔ قرارداد موجود بازطراحی شد: عنوان و شرح خوانا، مسئول، مهلت با تقویم محلی، اولویت و منشأ کار. نقص قابل تکرار قبل: وضعیت BLOCKED در هر دو زبان ترجمه نداشت و خطای MISSING_MESSAGE می‌داد. اکنون «نیازمند رفع مانع» نمایش داده می‌شود. خطای ساخت پیش‌نویس را نگه می‌دارد؛ نتیجهٔ نامطمئن موفقیت اعلام نمی‌شود و «بررسی فهرست» صرفاً GET است.
+
+۱۲ آزمون در AdminTasksView و AdminShell، typecheck و lint (سه هشدار قبلی، صفر خطا) موفق. ۱۶ حالت Chromium بعد از اصلاح: فهرست، خالی، خطای ساخت و خطای تغییر وضعیت × فارسی/انگلیسی × ۳۹۰/۱۴۴۰. overflow، pageerror و console error غیرمنتظره صفر؛ پاسخ 503 عمداً در دو حالت خطا حفظ شده است. چهار تصویر قبل، خطای ترجمهٔ واقعی را ثبت می‌کنند.
+
+- [قبل فارسی ۳۹۰](task-design-screenshots/before-fa-390.webp) / [بعد](task-design-screenshots/after-list-fa-390.webp)
+- [قبل فارسی ۱۴۴۰](task-design-screenshots/before-fa-1440.webp) / [بعد](task-design-screenshots/after-list-fa-1440.webp)
+- [بعد انگلیسی ۳۹۰](task-design-screenshots/after-list-en-390.webp) / [۱۴۴۰](task-design-screenshots/after-list-en-1440.webp)
+- [شواهد ماشین‌خوان](task-design-screenshots/checks.json)، [هش منابع](task-design-screenshots/source-hashes.json)، [بازاجرای مرورگر](browser-admin-tasks.py)
+
+بازاجرا: سرور وب توسعه با NEXT_PUBLIC_LOCAL_PREVIEW=0 و NEXT_PUBLIC_API_ORIGIN=http://localhost:4000؛ سپس QA_REPO_ROOT، QA_WEB_ORIGIN و QA_EVIDENCE_DIR و QA_MODE=list/create-error/status-error/empty را به اسکریپت بدهید. همهٔ مقصدهای شبکه loopback هستند و API در مرورگر با DTO مصنوعی جایگزین می‌شود؛ این شاهد اتصال واقعی API، احراز هویت زنده یا بررسی همهٔ ادمین نیست. هیچ عملیات زنده انجام نشد. پوستهٔ مشترک ادمین در این بسته تغییر نکرد؛ تخصیص کار/کارهای من یا CRM جدید پیاده‌سازی نشده‌اند. schema، migration، workflow و مجوزها تغییر نکرده‌اند.

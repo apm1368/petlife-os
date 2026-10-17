@@ -2503,14 +2503,45 @@
         "OPEN": "Open",
         "IN_PROGRESS": "In progress",
         "DONE": "Done",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "BLOCKED": "Blocked"
       },
       "form": {
         "title": "Title",
         "description": "Description",
         "dueAt": "Due date",
         "submit": "Create"
-      }
+      },
+      "description": "See the assignee, deadline and status of recorded work in one place.",
+      "assignee": "Assignee",
+      "unassigned": "Not assigned yet",
+      "unnamedAssignee": "Staff member without a display name",
+      "noDueDate": "No deadline set",
+      "priority": "Priority",
+      "source": "Work type",
+      "notProvided": "Not recorded",
+      "changeStatus": "Change status",
+      "createFailed": "Task creation was not confirmed. Your title and description are kept; check the task list before trying again.",
+      "updateFailed": "The status change was not confirmed. Check the recorded status again.",
+      "priorities": {
+        "LOW": "Low",
+        "NORMAL": "Normal",
+        "HIGH": "High",
+        "URGENT": "Urgent"
+      },
+      "sources": {
+        "MANUAL": "Manual entry",
+        "TRAVEL_SOURCE": "Travel sources",
+        "PARTNER_VERIFICATION": "Partner document review",
+        "FINANCE_MISMATCH": "Financial discrepancy",
+        "HIGH_SEVERITY_REPORT": "High-severity report",
+        "PRIVACY_REQUEST": "Privacy request",
+        "FAILED_IMPORT": "Failed import",
+        "SUPPORT": "Support",
+        "CLINIC_FOLLOW_UP": "Clinic follow-up",
+        "DATA_QUALITY": "Data quality"
+      },
+      "checkList": "Check task list"
     },
     "audit": {
       "title": "Audit trail",

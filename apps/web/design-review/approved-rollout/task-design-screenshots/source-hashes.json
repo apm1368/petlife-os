@@ -1,0 +1,10 @@
+{
+  "base": "76a2d57d7fc846ae171770aaf17d094004a14a8e",
+  "files": {
+    "apps/web/features/admin/AdminTasksView.tsx": "177e67953009e229f902e41a874d03392513d6d701f44f4d39e7a4dbf2923f99",
+    "apps/web/features/admin/AdminTasksView.module.css": "6dfd48a8979f2065557c9de643abb46db8244469984a2c50e18cfacc8e667b0d",
+    "apps/web/features/admin/AdminTasksView.test.tsx": "326d5b0a52449f2bda23eb4a49c8aa813b63985628ef52709cef5c99ce1a0456",
+    "apps/web/messages/fa.json": "54a5f6420abc356073cd53710ae1005e446697191f336804aff0e57a2bc10455",
+    "apps/web/messages/en.json": "609b8f5a68478ee561a04a34b9fc6fe68e1d00ecff2d09ef34305b6d8b2036da"
+  }
+}
