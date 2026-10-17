@@ -1,8 +1,8 @@
 # PET LIFE — combined approved design rollout
 
-Branch: `codex/stab-approved-design-rollout`, rebased onto `f3bf064` from the latest fetched `origin/stabilization/wave-1`. Shop work is included in this branch; do not release the old shop-only bundle separately. No production deploy or merge has been performed.
+This document retains the original combined-rollout scope; the old `codex/stab-approved-design-rollout` branch is historical, not a development base. Current development is `stabilization/wave-1`; release is through PR to `main` and the existing Actions workflow. Use [the current operations record](../../../../docs/ops/stabilization-remaining.fa.md) and Issue #4 for separate code, CI, QA and deployment evidence.
 
-The owner authorized combining the approved page patterns for a single release. The member's personal tabs retain the glass frame; service, reservation, commerce, editorial and operations destinations use the warm plum/cream/copper vocabulary. Existing route guards and transaction engines remain in place. Protected admin navigation/CRM/customer-affairs are unchanged.
+The owner authorized combining the approved page patterns for a single release. The member's personal tabs retain the glass frame; service, reservation, commerce, editorial and operations destinations use the warm plum/cream/copper vocabulary. Existing route guards and transaction engines remain in place. The original rollout preserved admin navigation. Its later visual alignment is recorded in VALIDATION.md; preview-only CRM/customer-affairs remain hidden from live admins.
 
 | Area | Implementation / evidence |
 | --- | --- |
@@ -43,7 +43,9 @@ English equivalents replace `-fa-` with `-en-`. Browser JSON records horizontal 
 
 ## Publication gates
 
-Frozen install, lint, web typecheck, web tests and browser evidence are recorded in `VALIDATION.md`. Repository-wide typecheck remains blocked by the cloud's ungenerated Prisma Client. Do not weaken checks or fake generated types. GitHub write authentication is unavailable in this environment; local commits/bundle are a handoff, not an open PR or a deployment. The required base is `stabilization/wave-1`; owner/Claude handles merge and the final approved release to `main`.
+Frozen install, real Prisma generation, lint, typecheck, migrations, tests, API e2e and build are enforced by the existing CI workflow; assess the complete run for the exact PR head. Earlier cloud blockers involving missing Prisma generation and unavailable GitHub write access were historical and are not current evidence of a blocker. Changes go through topic PRs to `stabilization/wave-1`; publication is a separate PR to `main` and the existing deployment workflow. Required reviews and checks must not be bypassed.
+
+Browser evidence and its fixture/live limitations are recorded in [VALIDATION.md](VALIDATION.md). A passing build or rendered HTML is not deployment or hydration proof; verify the running SHA, readiness and independent live-browser JavaScript separately. Neither an approved pattern nor a shared shell certifies every internal page.
 
 ## Clinic workspace follow-up
 

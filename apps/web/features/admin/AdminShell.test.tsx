@@ -1,3 +1,5 @@
+import { NextIntlClientProvider } from "next-intl";
+import en from "@/messages/en.json";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { AdminSessionContextDto, UserDto } from "@petlife/types";
@@ -141,11 +143,17 @@ describe("AdminShell", () => {
     route.pathname = "/en/admin/providers/organization-1";
     vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
     vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: true, adminUserId: "reader", displayName: "Reader", role: "SUPPORT" as never, permissions: ["customer.view"] as never });
-    renderWithIntl(<AdminShell><div>provider content</div></AdminShell>);
+    const view = renderWithIntl(<AdminShell><div>provider content</div></AdminShell>);
     await screen.findByText("provider content");
     expect(screen.getByRole("button", { name: "Network" }).getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByRole("link", { name: "Providers" }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Network" }));
+    expect(screen.getByRole("button", { name: "Network" }).getAttribute("aria-expanded")).toBe("false");
+    route.pathname = "/en/admin/sellers/seller-1";
+    view.rerender(<NextIntlClientProvider locale="en" messages={en}><AdminShell><div>seller content</div></AdminShell></NextIntlClientProvider>);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Network" }).getAttribute("aria-expanded")).toBe("true"));
+    expect(screen.getByRole("link", { name: "Sellers" }).getAttribute("aria-current")).toBe("page");
   });
 
   it("keeps mobile navigation permission-filtered and closes after choosing a page", async () => {

@@ -94,6 +94,8 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const locale = useLocale();
 
+  useEffect(() => { setOpenGroup(null); }, [pathname]);
+
   useEffect(() => {
     let cancelled = false;
     authService
