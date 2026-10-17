@@ -1,6 +1,6 @@
 # مسیر دسترسی و انتشار Codex
 
-آخرین بررسی واقعی: ۲۰۲۶/۱۰/۱۶. این سند هیچ رمز، توکن یا کلید خصوصی ندارد. وضعیت آماده‌سازی محیط، دسترسی عملی و انتشار سه شاهد مستقل‌اند.
+آخرین به‌روزرسانی با تأیید زنده: 2026/10/17 03:30 UTC. این سند هیچ رمز، توکن یا کلید خصوصی ندارد. آماده‌سازی محیط، دسترسی عملی و انتشار شواهد مستقل‌اند.
 
 ## GitHub
 
@@ -45,3 +45,32 @@ Workflow موجود: `.github/workflows/deploy.yml`. کلید و احراز سر
 ## بررسی محلی
 
 نصب دقیق با pnpm 10.33.0 و frozen-lockfile انجام شد. به دلیل قابل‌نوشتن نبودن مسیر پیش‌فرض home، cache/store فقط به مسیرهای workspace منتقل شدند؛ secrets یا تنظیمات اتصال تغییر نکردند. Prisma Client واقعی 5.22.0 تولید شد؛ محدودیت دانلود در گزارش قدیمی برای این نشست برقرار نبود. تست یکپارچه باید از PostGIS/Redis محلی و پایگاه دادهٔ اختصاصی test استفاده کند؛ هیچ تستی به DB سرور وصل نشود.
+
+
+## شاهد انتشار جدید opetlife — #33
+
+- main قبلی `249c4f1480ad7d3807ba94c52ac228f6e168d90c`؛ کد تثبیت `98b61188fa86b77cbfbcc300356a3a0280f7cc3d`؛ commit انتشار و SHA گزارش‌شدهٔ API اجراشده `60f15ef52e5e3e3b9a6bc8ba6a99f30154d76671`.
+- [اجرای واقعی انتشار](https://github.com/apm1368/petlife-os/actions/runs/38966361292) کامل و موفق؛ deploymentId برابر `github-38966361292-1`. CI و موفقیت job deploy مستقل خوانده شدند؛ سپس health/version و ready به‌صورت GET تازه از سایت خوانده شدند. PostgreSQL/Redis up، وب fa/en پاسخ‌گو و دارایی‌های جدید اصلی با hash صحیح بودند.
+- [وب فعال](http://185.231.112.154/fa)، [افزودن پت](http://185.231.112.154/fa/pets/new)، [مدارک ادمین](http://185.231.112.154/fa/admin/verification). بررسی مسیر خصوصی بدون نشست فقط smoke پوسته/احراز هویت است؛ تست مالی یا mutation زنده اجرا نشد.
+- خواندن و نوشتن GitHub با SHA شاخه‌های واقعاً push‌شده و ادغام عادی PRهای #34–#37 و #33 تأیید شد. هیچ direct/force push به main یا تثبیت، تغییر کلید/حساب یا دسترسی Claude انجام نشد.
+- SSH مستقیم این نشست برقرار اعلام نمی‌شود؛ اجرای SSH موفق، متعلق به runner و secrets موجود workflow است. برای اتصال Codex، workflow یا امنیت سرور تغییر نکرد. HTTPS این IP نیز در نشست تأیید نشده است؛ موفقیت HTTP معادل SSH یا سرویس‌های بیرونی نیست.
+
+تنظیم fetch موجودِ اتصال قبلی تغییر داده نشد؛ برای به‌روزرسانی واقعی دو ref هدف از refspec صریح استفاده کنید:
+
+```bash
+git fetch origin refs/heads/main:refs/remotes/origin/main refs/heads/stabilization/wave-1:refs/remotes/origin/stabilization/wave-1
+git ls-remote origin refs/heads/main refs/heads/stabilization/wave-1
+```
+
+در این اجرا، `gh pr edit` روی PR متصل به Projects Classic خطای GraphQL داشت؛ عنوان/شرح با PATCH عادی REST همان PR به‌روز شد، بدون تغییر مجوز یا دورزدن بررسی. خطای موقت API 503 نیز خطای مانیتور بود و با نتیجهٔ واقعی CI اشتباه نشد. مرجع قابلیت‌های باز و تفکیک ادغام/CI/QA/انتشار: [stabilization-remaining.fa.md](stabilization-remaining.fa.md) و [Issue #4](https://github.com/apm1368/petlife-os/issues/4).
+
+
+## انتشار تکمیلی ثبت پت — #39
+
+این شاهد از انتشار #33 جدیدتر است. [اصلاح #38](https://github.com/apm1368/petlife-os/pull/38) با head `65f715c1825af327c026726134a8dcec910f8d65` و [CI کامل همان head](https://github.com/apm1368/petlife-os/actions/runs/38971160415) در تثبیت ادغام شد. بازگشت سرد به اطلاعات اولیهٔ ذخیره‌نشده برمی‌گردد؛ نام فارسی در هدر معتبر رمزگذاری می‌شود؛ شناسهٔ پت در تراکنش ساخت برای بازیابی پس از قطع ذخیرهٔ مرحله ثبت می‌شود.
+
+۱۱ تست وب، ۸ تست واقعی API ایزوله، typecheck و lint (سه هشدار قبلی) گذشتند. دو تصویر واقعی قبل و هشت تصویر بعد، فارسی/انگلیسی در ۳۹۰/۱۴۴۰، بدون overflow یا pageerror؛ هر جریان کنترل‌شده دقیقاً یک POST و رسیدن به مرحلهٔ عکس داشت. [جزئیات و تصاویر](../../apps/web/design-review/approved-rollout/ONBOARDING-RESUME-VALIDATION.md). این تست‌ها تضمین عمومی عدم تکرار همزمان همهٔ عملیات نیستند.
+
+کد تثبیت `218ddea14af50a04179840510bb3c7c01420ac9d`؛ [PR انتشار #39](https://github.com/apm1368/petlife-os/pull/39)؛ [CI دقیق PR](https://github.com/apm1368/petlife-os/actions/runs/38997352436) و [CI push](https://github.com/apm1368/petlife-os/actions/runs/38997338013) کامل و موفق. commit main و SHA واقعاً گزارش‌شدهٔ API `5c1fc12f6be05fbd638f89007d9623cf5e333e26`، deploymentId `github-38997939392-1`؛ [اجرای انتشار واقعی](https://github.com/apm1368/petlife-os/actions/runs/38997939392) موفق. PostgreSQL و Redis up و ۴۰ درخواست فقط‌خواندنی سلامت/وب/API/دارایی گذشتند؛ بررسی اضافهٔ JavaScript زنده تأیید نشد: مسیر /_next/static در پراکسی نشست HEAD=302 به آدرس داخلی و GET=503 از envoy می‌دهد؛ هیچ دورزدن شبکه انجام نشد. متای SHA وب dev است و شاهد SHA کامل وب نیست. تأیید بارگذاری دارایی‌ها از مرورگر مستقل QA باز می‌ماند؛ هیچ عملیات زندهٔ نوشتنی انجام نشد. HTML خصوصی ۲۰۰، QA احرازشدهٔ آن جریان محسوب نمی‌شود.
+
+Diff واقعی نسبت به انتشار قبلی فقط ۲۳ فایل اصلاح ثبت پت و شواهد آن است؛ migration/schema، workflow، lockfile و قابلیت محلی پیام کارت پت تغییر نکرده‌اند. هرگونه تغییر نهایی این دو سند، صرفاً گزارش در تثبیت است و SHA کد اجراشدهٔ بالا را تغییر نمی‌دهد. دسترسی و اتصال‌های Claude و ۳۰ فایل کار محلی حفظ شده‌اند. گروه‌های باز و محدودیت سرویس‌های بیرونی همچنان بازند.
