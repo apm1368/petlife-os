@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { MarketplaceProvider } from "@prisma/client";
 import type { AppEnv } from "../../../config/env";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
+import { devSimulationAllowed } from "../../../common/dev/dev-simulation";
 import { SellerAuthGuard } from "../../seller-os/auth/seller-auth.guard";
 import { CurrentSellerContext } from "../../seller-os/auth/current-seller-context.decorator";
 import type { ResolvedSellerContext } from "../../seller-os/auth/seller-context.types";
@@ -61,7 +62,7 @@ export class MarketplaceDevController {
   ) {}
 
   private assertDevSimulationAllowed(): void {
-    if (this.config.get("NODE_ENV", { infer: true }) === "production") throw new MarketplaceProviderDisabledException({ reason: "Dev simulation is never available in production" });
+    if (!devSimulationAllowed(this.config)) throw new MarketplaceProviderDisabledException({ reason: "Dev simulation is not enabled on this server" });
     if (!this.config.get("DEV_MARKETPLACE_ENABLED", { infer: true })) throw new MarketplaceProviderDisabledException({ provider: "DEV" });
   }
 

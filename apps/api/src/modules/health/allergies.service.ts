@@ -19,6 +19,12 @@ export class AllergiesService {
     return this.prisma.allergy.findMany({ where: { petId }, orderBy: { recordedAt: "asc" } });
   }
 
+  async get(petId: string, id: string) {
+    const allergy = await this.prisma.allergy.findUnique({ where: { id } });
+    if (!allergy || allergy.petId !== petId) throw new NotFoundApiException("Allergy");
+    return allergy;
+  }
+
   async create(petId: string, userId: string, dto: CreateAllergyDto) {
     return this.prisma.$transaction(async (tx) => {
       const allergy = await tx.allergy.create({

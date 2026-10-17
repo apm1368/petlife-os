@@ -5,8 +5,10 @@ import { StatusLabel } from "@petlife/ui";
 import type { RehabPlanDto } from "@petlife/types";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { HealthRecordListView } from "./HealthRecordListView";
+import { useStatusText } from "@/lib/status/use-status-text";
 
 export function HealthRehabView({ petId }: { petId: string }) {
+  const statusText = useStatusText();
   const t = useTranslations("healthAdvanced");
   return (
     <HealthRecordListView<RehabPlanDto>
@@ -19,7 +21,7 @@ export function HealthRehabView({ petId }: { petId: string }) {
         <>
           <div className="flex items-center justify-between">
             <span className="text-body text-text-primary">{plan.goal ?? plan.exercisesText}</span>
-            <StatusLabel tone={plan.status === "ACTIVE" ? "attention" : "neutral"}>{plan.status}</StatusLabel>
+            <StatusLabel tone={plan.status === "ACTIVE" ? "attention" : "neutral"}>{statusText.label(plan.status, "plan")}</StatusLabel>
           </div>
           <span className="text-metadata text-text-secondary">{t("rehab.sessionsLogged", { count: plan.sessions.length })}</span>
         </>

@@ -9,7 +9,7 @@ import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../.
  * Read-only Provider/Seller org lookups for the admin surface — how an
  * admin locates the organization behind a verification override or a
  * TrustCase(subjectType: PROVIDER | SELLER). Never mutates; verification
- * transitions live in AdminVerificationService, trust actions in
+ * transitions live in PartnerVerificationService (modules/partner-verification), trust actions in
  * TrustActionService.
  */
 @Injectable()

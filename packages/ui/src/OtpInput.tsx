@@ -1,5 +1,7 @@
 "use client";
 
+import { toAsciiDigits } from "@petlife/validation";
+
 import { useRef } from "react";
 import type { ClipboardEvent, KeyboardEvent } from "react";
 import { cn } from "./cn";
@@ -37,7 +39,7 @@ export function OtpInput({ length = 6, value, onChange, errorMessage, disabled }
   }
 
   function handlePaste(event: ClipboardEvent<HTMLInputElement>) {
-    const pasted = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
+    const pasted = toAsciiDigits(event.clipboardData.getData("text")).replace(/\D/g, "").slice(0, length);
     if (pasted) {
       event.preventDefault();
       onChange(pasted);
@@ -60,7 +62,7 @@ export function OtpInput({ length = 6, value, onChange, errorMessage, disabled }
             value={digit}
             disabled={disabled}
             aria-invalid={Boolean(errorMessage) || undefined}
-            onChange={(e) => setDigit(index, e.target.value.replace(/\D/g, "").slice(-1))}
+            onChange={(e) => setDigit(index, toAsciiDigits(e.target.value).replace(/\D/g, "").slice(-1))}
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             className={cn(

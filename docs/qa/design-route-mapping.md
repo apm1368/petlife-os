@@ -184,3 +184,37 @@ UNREVIEWED is deliberately not an acceptance grade. A–G classification require
 | /[locale]/seller/settings | seller | session; role/pet permissions per API | UNREVIEWED | Compare reference, exercise actions and states |
 | /[locale]/seller/team | seller | session; role/pet permissions per API | UNREVIEWED | Compare reference, exercise actions and states |
 | /[locale] | landing | public | EXCLUDED | Preserve appearance |
+
+## Batch 5 additions (grades per docs/qa/batch-5-travel.md)
+
+| Route | Area | Access | Grade | Notes |
+|---|---|---|---|---|
+| /[locale]/travel | travel | public | A | Travel discovery home — Batch 5 |
+| /[locale]/travel/search | travel | public (noindex) | A | Results, filters, sort, compare tray; map = honest unavailable state |
+| /[locale]/travel/stays/[id] | travel | public (indexed, JSON-LD) | A | Listing detail, pet policy, match, rates, price breakdown |
+| /[locale]/travel/compare | travel | public (noindex) | A | 2–3 stays side by side |
+| /[locale]/travel/book/[bookingId] | travel | session | A | Booking flow with hold, pet review, trip, review, payment |
+| /[locale]/travel/bookings/[id] | travel | session | A | Manage booking: cancel/refund, modify, review, documents, support |
+| /[locale]/travel/trips | travel | session | A | My Trips |
+| /[locale]/travel/trips/[tripId] | travel | session | A | Trip Hub + readiness |
+| /[locale]/travel/favorites | travel | session | A | Saved stays |
+| /[locale]/provider/travel | provider | provider member | A | Partner listings |
+| /[locale]/provider/travel/listings/[id] | provider | provider OWNER to edit | A | Listing editor (details, pet policy, rooms & rates, photos, calendar) |
+| /[locale]/provider/travel/bookings | provider | provider member | A | Partner bookings |
+| /[locale]/provider/travel/bookings/[id] | provider | provider member | A | Minimum pet data, shared documents, actions |
+| /[locale]/provider/travel/reviews | provider | provider member | A | One public response per review |
+| /[locale]/provider/travel/finance | provider | provider member | A | Real figures; payouts not automated |
+| /[locale]/admin/travel | admin | travel.view | A | Moderation queue |
+| /[locale]/admin/travel/listings/[id] | admin | travel.view / travel.manage | A | Moderation + verified badge, audited |
+| /[locale]/admin/travel/bookings | admin | travel.view | A |  |
+| /[locale]/admin/travel/bookings/[id] | admin | travel.view | A | Read-only operational view |
+| /[locale]/admin/travel/reviews | admin | travel.view / travel.manage | A |  |
+| /[locale]/admin/travel/requirements | admin | travel.requirements.manage | A | Requirement library with provenance |
+| /[locale]/admin/travel/partners | admin | travel.view | A |  |
+| /[locale]/admin/travel/analytics | admin | travel.view | A |  |
+| /[locale]/admin/insurance | admin | insurance.applications.view | A | Oversight only |
+| /[locale]/admin/places | admin | places.view / places.manage | A | Reports queue + directory |
+| /[locale]/insurer | insurer | insurer member | A | Insurer portal |
+| /[locale]/insurer/applications/[id] | insurer | insurer member (not VIEWER to decide) | A | Decisions mirror server transitions |
+
+Updated by Batch 5: `/[locale]/pets/[id]/insurance` (consent, needs-information) — A; `/[locale]/places/[placeId]` (pet facts, report) — A; `/[locale]/pets/[id]/travel/new` (Jalali picker) — B; `/[locale]/pets/[id]/travel/[tripId]` (Jalali dates, hub link) — B.

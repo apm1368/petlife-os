@@ -37,6 +37,7 @@ export function applicationStatusTone(status: InsuranceApplicationStatus): Statu
       return "neutral";
     case "SUBMITTED":
     case "UNDER_REVIEW":
+    case "NEEDS_INFORMATION":
       return "attention";
     case "DRAFT":
     default:

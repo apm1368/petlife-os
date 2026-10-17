@@ -67,7 +67,7 @@ export function AdminTasksView() {
           <span className="text-section-title text-text-primary">{t("createTitle")}</span>
           <Input label={t("form.title")} value={title} onChange={(e) => setTitle(e.target.value)} />
           <Input label={t("form.description")} value={description} onChange={(e) => setDescription(e.target.value)} />
-          <Button isLoading={creating} onClick={createTask}>
+          <Button disabled={!title.trim()} isLoading={creating} onClick={createTask}>
             {t("form.submit")}
           </Button>
         </ContextSurface>

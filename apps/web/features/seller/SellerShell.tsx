@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { href: "", labelKey: "nav.overview" },
   { href: "/orders", labelKey: "nav.orders" },
   { href: "/offers", labelKey: "nav.offers" },
+  { href: "/promotions", labelKey: "nav.promotions" },
   { href: "/inventory", labelKey: "nav.inventory" },
   { href: "/channels", labelKey: "nav.channels" },
   { href: "/finance", labelKey: "nav.finance" },

@@ -28,6 +28,8 @@ export interface SupportNeedFilters extends Record<string, string | number | boo
   city?: string;
   search?: string;
   organizationId?: string;
+  sort?: "RECENT" | "URGENT" | "CLOSING_SOON";
+  state?: "OPEN" | "RESOLVED" | "ALL";
 }
 
 export interface CreateSupportNeedInput {
@@ -45,9 +47,11 @@ export interface CreateSupportNeedInput {
   campaignId?: string;
   contactMode?: SupportNeedContactMode;
   animalType?: string;
+  /** ISO deadline; offers stop after it. */
+  expiresAt?: string;
 }
 
-export type UpdateSupportNeedInput = Partial<Omit<CreateSupportNeedInput, "organizationId" | "campaignId" | "contactMode">>;
+export type UpdateSupportNeedInput = Partial<Omit<CreateSupportNeedInput, "organizationId" | "campaignId" | "contactMode" | "expiresAt">> & { expiresAt?: string | null };
 
 export interface SupportNeedLocationDto {
   province: string;
@@ -60,6 +64,7 @@ export interface SupportNeedOfferSummaryDto {
   fulfilledQuantity: number;
   pendingOffers: number;
   acceptedOffers: number;
+  inProgressOffers: number;
   completedOffers: number;
 }
 
@@ -88,6 +93,8 @@ export const supportNeedsService = {
   submitForReview: (listingId: string) => apiFetch<SupportNeedListingDto>(`/animal-support/needs/${listingId}/submit`, { method: "POST" }),
   markFulfilled: (listingId: string) => apiFetch<SupportNeedListingDto>(`/animal-support/needs/${listingId}/fulfill`, { method: "POST" }),
   close: (listingId: string) => apiFetch<SupportNeedListingDto>(`/animal-support/needs/${listingId}/close`, { method: "POST" }),
+  pause: (listingId: string) => apiFetch<SupportNeedListingDto>(`/animal-support/needs/${listingId}/pause`, { method: "POST" }),
+  resume: (listingId: string) => apiFetch<SupportNeedListingDto>(`/animal-support/needs/${listingId}/resume`, { method: "POST" }),
 
   listMine: (input: { page?: number; pageSize?: number; status?: SupportNeedStatus } = {}) =>
     apiFetch<PaginatedDto<SupportNeedListingDto>>(`/animal-support/needs/mine${toQueryString(input)}`),
@@ -96,7 +103,7 @@ export const supportNeedsService = {
   requestImageUpload: (contentType: string, fileSizeBytes: number) =>
     apiFetch<UploadTargetDto>("/animal-support/needs/upload-url", { method: "POST", body: { contentType, fileSizeBytes } }),
 
-  offerHelp: (listingId: string, input: { message: string; helpType: SupportNeedCategory; quantity?: number }) =>
+  offerHelp: (listingId: string, input: { message: string; helpType: SupportNeedCategory; quantity?: number; timing?: string }) =>
     apiFetch<HelpOfferDto>(`/animal-support/needs/${listingId}/offers`, { method: "POST", body: input }),
   listOffers: (listingId: string) => apiFetch<HelpOfferDto[]>(`/animal-support/needs/${listingId}/offers`),
   listMyOffers: () => apiFetch<HelpOfferDto[]>("/animal-support/needs/mine/offers"),

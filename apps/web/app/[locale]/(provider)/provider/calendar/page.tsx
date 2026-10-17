@@ -1,5 +1,5 @@
-import { ProviderScheduleView } from "@/features/provider/ProviderScheduleView";
+import { ProviderCalendarView } from "@/features/provider/ProviderCalendarView";
 
-export default function ProviderSchedulePage() {
-  return <ProviderScheduleView />;
+export default function ProviderCalendarPage() {
+  return <ProviderCalendarView />;
 }

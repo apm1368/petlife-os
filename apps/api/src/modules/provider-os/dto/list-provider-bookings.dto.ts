@@ -1,5 +1,5 @@
 import { ServiceCategory } from "@prisma/client";
-import { IsBooleanString, IsEnum, IsOptional, IsUUID } from "class-validator";
+import { IsBooleanString, IsDateString, IsEnum, IsOptional, IsUUID } from "class-validator";
 
 export class ListProviderBookingsDto {
   @IsOptional()
@@ -29,4 +29,18 @@ export class ListProviderBookingsDto {
   @IsOptional()
   @IsUUID()
   providerUserId?: string;
+
+  /** Request-to-book queue awaiting a decision. */
+  @IsOptional()
+  @IsBooleanString()
+  requests?: string;
+
+  /** Calendar window (day/week/month views). */
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @IsOptional()
+  @IsDateString()
+  to?: string;
 }

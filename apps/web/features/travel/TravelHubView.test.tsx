@@ -58,6 +58,6 @@ describe("TravelHubView", () => {
 
     renderWithIntl(<TravelHubView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.getByText("Retry")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy());
   });
 });

@@ -85,6 +85,22 @@ Generated from apps/web/app page.tsx files on integration/local. [locale] is fa 
 | `/[locale]/seller` | Seller role | `apps/web/app/[locale]/(seller)/seller/page.tsx` |
 | `/[locale]/seller/settings` | Seller role | `apps/web/app/[locale]/(seller)/seller/settings/page.tsx` |
 | `/[locale]/seller/team` | Seller role | `apps/web/app/[locale]/(seller)/seller/team/page.tsx` |
+| `/[locale]/favorites` | Authenticated (noindex) | `apps/web/app/[locale]/(app)/favorites/page.tsx` |
+| `/[locale]/repeat-delivery` | Authenticated (noindex) | `apps/web/app/[locale]/(app)/repeat-delivery/page.tsx` |
+| `/[locale]/repeat-delivery/new` | Authenticated (noindex) | `apps/web/app/[locale]/(app)/repeat-delivery/new/page.tsx` |
+| `/[locale]/repeat-delivery/[id]` | Authenticated (noindex) | `apps/web/app/[locale]/(app)/repeat-delivery/[id]/page.tsx` |
+| `/[locale]/seller/promotions` | Seller role | `apps/web/app/[locale]/(seller)/seller/promotions/page.tsx` |
+| `/[locale]/admin/commerce` | Admin `commerce.view` | `apps/web/app/[locale]/(admin)/admin/commerce/page.tsx` |
+| `/[locale]/admin/commerce/orders` | Admin `commerce.view` | `apps/web/app/[locale]/(admin)/admin/commerce/orders/page.tsx` |
+| `/[locale]/admin/commerce/orders/[id]` | Admin `commerce.view` | `apps/web/app/[locale]/(admin)/admin/commerce/orders/[id]/page.tsx` |
+| `/[locale]/admin/commerce/refund-requests` | Admin `commerce.view`; decide `finance.refund.request` | `apps/web/app/[locale]/(admin)/admin/commerce/refund-requests/page.tsx` |
+| `/[locale]/admin/commerce/products` | Admin `commerce.view`; moderate `commerce.manage` | `apps/web/app/[locale]/(admin)/admin/commerce/products/page.tsx` |
+| `/[locale]/admin/commerce/reviews` | Admin `commerce.view`; moderate `commerce.manage` | `apps/web/app/[locale]/(admin)/admin/commerce/reviews/page.tsx` |
+| `/[locale]/admin/commerce/inventory` | Admin `commerce.view` | `apps/web/app/[locale]/(admin)/admin/commerce/inventory/page.tsx` |
+| `/[locale]/admin/commerce/sellers` | Admin `commerce.view` | `apps/web/app/[locale]/(admin)/admin/commerce/sellers/page.tsx` |
+| `/[locale]/admin/commerce/promotions` | Admin `commerce.view`; edit `promotions.manage` | `apps/web/app/[locale]/(admin)/admin/commerce/promotions/page.tsx` |
 | `/[locale]` | Public landing | `apps/web/app/[locale]/page.tsx` |
 
 `/` is handled by locale middleware. No standalone `/auth`, `/login`, `/explore`, `/health`, or `/vet` page exists. Login is `/[locale]/welcome` then `/[locale]/account`; health is `/[locale]/pets/[id]/health`; vet discovery is `/[locale]/vet/find`. `/[locale]/auth/complete` is the OAuth completion route. Booking routes in the public group use RequireAuth. Route existence is not proof of a working API or authorized role.
+
+`/robots.txt` (Batch 4) disallows every account, console and transaction path; the authenticated, seller, provider and admin layouts also emit `noindex, nofollow`.

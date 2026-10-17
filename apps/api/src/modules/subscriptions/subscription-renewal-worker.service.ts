@@ -1,9 +1,11 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { SubscriptionStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import type { AppEnv } from "../../config/env";
 import { SubscriptionBillingService } from "./subscription-billing.service";
+import { SubscriptionService } from "./subscription.service";
 
 /**
  * The honest "DEV/manual adapter" for renewal the spec asks for (spec: "if
@@ -29,14 +31,16 @@ export class SubscriptionRenewalWorkerService implements OnModuleInit, OnModuleD
   constructor(
     private readonly prisma: PrismaService,
     private readonly billing: SubscriptionBillingService,
+    private readonly subscriptions: SubscriptionService,
     private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
   onModuleInit(): void {
     if (process.env.NODE_ENV === "test") return;
     const intervalMs = this.config.get("SUBSCRIPTION_RENEWAL_WORKER_INTERVAL_MS", { infer: true });
+    registerWorker("subscription-renewal", intervalMs);
     this.timer = setInterval(() => {
-      this.processDueRenewals().catch((error) => this.logger.error("Subscription renewal worker tick failed", error instanceof Error ? error.stack : undefined));
+      trackWorker("subscription-renewal", intervalMs, () => this.processDueRenewals()).catch((error) => this.logger.error("Subscription renewal worker tick failed", error instanceof Error ? error.stack : undefined));
     }, intervalMs);
   }
 
@@ -57,6 +61,17 @@ export class SubscriptionRenewalWorkerService implements OnModuleInit, OnModuleD
     for (const row of due) {
       await this.billing.attemptRenewal(row.id).catch((error) => this.logger.error(`Renewal attempt failed for subscription ${row.id}`, error instanceof Error ? error.stack : undefined));
     }
-    return due.length;
+    // Trials and scheduled cancellations end on time too — without these passes a trial (or a
+    // cancelled membership) kept paid entitlements forever.
+    const now = new Date();
+    const endedTrials = await this.prisma.subscription.findMany({ where: { status: SubscriptionStatus.TRIALING, trialEndsAt: { lte: now } }, take: limit, select: { id: true } });
+    for (const row of endedTrials) {
+      await this.subscriptions.expireEndedTrial(row.id).catch((error) => this.logger.error(`Trial expiry failed for subscription ${row.id}`, error instanceof Error ? error.stack : undefined));
+    }
+    const dueCancellations = await this.prisma.subscription.findMany({ where: { status: SubscriptionStatus.CANCEL_AT_PERIOD_END, cancelEffectiveAt: { lte: now } }, take: limit, select: { id: true } });
+    for (const row of dueCancellations) {
+      await this.subscriptions.finalizeDueCancellation(row.id).catch((error) => this.logger.error(`Cancellation finalisation failed for subscription ${row.id}`, error instanceof Error ? error.stack : undefined));
+    }
+    return due.length + endedTrials.length + dueCancellations.length;
   }
 }

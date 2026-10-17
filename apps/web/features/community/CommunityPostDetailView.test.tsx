@@ -18,7 +18,8 @@ vi.mock("@/stores/session-store", () => ({
 function post(overrides: Partial<CommunityPostDto> = {}): CommunityPostDto {
   return {
     id: "post-1",
-    authorUserId: "user-1",
+    authorUserId: null,
+    isMine: false,
     authorDisplayName: "Sara",
     type: "GENERAL" as never,
     title: null,

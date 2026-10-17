@@ -66,17 +66,18 @@ export function Customer360View({ userId }: { userId: string }) {
         <span className="text-metadata text-text-secondary">{t("sections.contact")}</span>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-body text-text-primary">{revealed?.field === "email" ? revealed.value : data.user.emailMasked ?? "—"}</span>
-          <Button size="sm" variant="secondary" onClick={() => reveal("email")}>
+          <Button disabled={!reason.trim()} size="sm" variant="secondary" onClick={() => reveal("email")}>
             {t("reveal.email")}
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-body text-text-primary">{revealed?.field === "phone" ? revealed.value : data.user.phoneMasked ?? "—"}</span>
-          <Button size="sm" variant="secondary" onClick={() => reveal("phone")}>
+          <Button disabled={!reason.trim()} size="sm" variant="secondary" onClick={() => reveal("phone")}>
             {t("reveal.phone")}
           </Button>
         </div>
         <Input label={tCommon("reasonLabel")} placeholder={tCommon("reasonPlaceholder")} value={reason} onChange={(e) => setReason(e.target.value)} />
+        {!reason.trim() ? <p className="text-metadata text-text-secondary">{locale === "fa" ? "برای نمایش ایمیل یا شماره، دلیل دسترسی را بنویسید؛ این دلیل در گزارش ممیزی ثبت می‌شود." : "Enter a reason to reveal the email or phone; it is recorded in the audit log."}</p> : null}
       </ContextSurface>
 
       <ContextSurface className="flex flex-col gap-2">
@@ -155,7 +156,7 @@ export function Customer360View({ userId }: { userId: string }) {
         ))}
         <div className="flex gap-2">
           <Input label={t("addNote.placeholder")} placeholder={t("addNote.placeholder")} value={noteBody} onChange={(e) => setNoteBody(e.target.value)} className="flex-1" />
-          <Button onClick={addNote}>{t("addNote.submit")}</Button>
+          <Button disabled={!noteBody.trim()} onClick={addNote}>{t("addNote.submit")}</Button>
         </div>
       </ContextSurface>
 

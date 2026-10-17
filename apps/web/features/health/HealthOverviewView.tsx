@@ -1,118 +1,86 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { ContextSurface, ErrorRecovery, PriorityAction, Skeleton, StatusLabel } from "@petlife/ui";
-import type { HealthSummaryDto } from "@petlife/types";
-import { KnowledgeState } from "@petlife/types";
+import { ChevronLeft, ChevronRight, Skeleton, StatusLabel } from "@petlife/ui";
+import { SystemState } from "@/features/system/SystemState";
+import { KnowledgeState, type HealthOverviewDto, type HealthSummaryDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
+import { healthAdvancedService } from "@/services/health-advanced.service";
+import { useStatusText } from "@/lib/status/use-status-text";
+import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
+import { formatCount } from "@/lib/number/format-number";
 
-const KNOWLEDGE_TONE: Record<KnowledgeState, "success" | "neutral" | "attention"> = {
-  [KnowledgeState.KNOWN_PRESENT]: "neutral",
-  [KnowledgeState.KNOWN_NEGATIVE]: "success",
-  [KnowledgeState.UNKNOWN]: "attention",
-  [KnowledgeState.INCOMPLETE]: "attention",
-};
+const copy = {
+  fa: { title: "سلامت", subtitle: "یک نمای کامل از سابقه پزشکی، وضعیت فعلی و مراقبت‌های بعدی", attention: "نیازمند توجه", complete: "اطلاعات اصلی سلامت تکمیل است", current: "وضعیت فعلی", records: "پرونده پزشکی", care: "مراقبت و پیگیری", allergy: "آلرژی‌ها", condition: "بیماری‌ها", medication: "داروها", vaccination: "واکسیناسیون", active: "داروی فعال", none: "بدون داروی فعال", upcoming: "مراقبت پیش رو", overdue: "عقب‌افتاده", openPlan: "اقدام درمانی باز", recentVisits: "ویزیت‌های اخیر", recentDocuments: "اسناد اخیر", noVisit: "هنوز ویزیتی ثبت نشده", noDocument: "هنوز سندی ثبت نشده", timeline: "خط زمانی سلامت", documents: "اسناد پزشکی", labs: "آزمایش‌ها", imaging: "تصویربرداری", referrals: "ارجاع‌ها", dental: "دندان‌پزشکی", nutrition: "تغذیه", rehab: "توان‌بخشی", observations: "مشاهدات صاحب حیوان", visits: "ویزیت‌های بالینی", open: "مشاهده" },
+  en: { title: "Health", subtitle: "One complete view of medical history, current status, and what comes next", attention: "Needs attention", complete: "Core health information is complete", current: "Current status", records: "Medical record", care: "Care and follow-up", allergy: "Allergies", condition: "Conditions", medication: "Medications", vaccination: "Vaccination", active: "active", none: "No active medication", upcoming: "Upcoming care", overdue: "Overdue", openPlan: "Open care item", recentVisits: "Recent visits", recentDocuments: "Recent documents", noVisit: "No clinical visit recorded yet", noDocument: "No medical document recorded yet", timeline: "Health timeline", documents: "Medical documents", labs: "Labs", imaging: "Imaging", referrals: "Referrals", dental: "Dental", nutrition: "Nutrition", rehab: "Rehabilitation", observations: "Owner observations", visits: "Clinical visits", open: "View" },
+} as const;
 
-/**
- * Answers "what do we know right now?" — one hierarchy, not a grid of equal
- * metric cards: a single primary-attention block up top (mirroring Home's
- * ranking exactly, via the same HealthSummaryDto.primaryAttention), then a
- * secondary list of quick facts a reader can scan.
- */
+const tone = (state: KnowledgeState) => state === KnowledgeState.KNOWN_NEGATIVE ? "success" as const : state === KnowledgeState.KNOWN_PRESENT ? "neutral" as const : "attention" as const;
+
 export function HealthOverviewView({ petId }: { petId: string }) {
+  const statusText = useStatusText();
+  const recordsT = useTranslations("rollout.records");
+  const depthT = useTranslations("healthDepth");
+  const locale = useLocale() as "fa" | "en";
   const t = useTranslations("health");
-  const tCommon = useTranslations("common");
-  const router = useRouter();
-  const locale = useLocale();
-
-  const [summary, setSummary] = useState<HealthSummaryDto | null>(null);
+  const c = copy[locale];
+  const base = `/${locale}/pets/${petId}/health`;
+  const [data, setData] = useState<{ summary: HealthSummaryDto; overview: HealthOverviewDto; names: { allergies: string[]; conditions: string[]; medications: string[] }; care: CareReminder[] } | null>(null);
   const [error, setError] = useState(false);
-
-  async function load() {
-    setError(false);
-    try {
-      setSummary(await healthService.getSummary(petId));
-    } catch {
-      setError(true);
-    }
-  }
-
-  useEffect(() => {
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [petId]);
-
-  if (error) return <ErrorRecovery title={tCommon("loading")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
-  if (!summary) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
-
-  return (
-    <div className="flex flex-col gap-5">
-      <h1 className="text-page-title text-text-primary">{t("overview.title")}</h1>
-
-      {summary.primaryAttention ? (
-        <ContextSurface>
-          <PriorityAction
-            title={t(summary.primaryAttention.titleKey.replace("health.", ""))}
-            primaryLabel={tCommon("continue")}
-            onPrimary={() => {
-              if (summary.primaryAttention?.action === "VIEW_VACCINATION") router.push(`/${locale}/pets/${petId}/health/vaccination`);
-              else router.push(`/${locale}/pets/${petId}/health/allergies`);
-            }}
-          />
-        </ContextSurface>
-      ) : (
-        <ContextSurface>
-          <p className="text-body text-text-primary">{t("setupStatus.COMPLETE")}</p>
-        </ContextSurface>
-      )}
-
-      <ContextSurface className="flex flex-col gap-4">
-        <Row
-          label={t("overview.allergies")}
-          value={<StatusLabel tone={KNOWLEDGE_TONE[summary.allergyState]}>{t(`knowledgeState.${summary.allergyState}`)}</StatusLabel>}
-          onClick={() => router.push(`/${locale}/pets/${petId}/health/allergies`)}
-        />
-        <Row
-          label={t("overview.conditions")}
-          value={<StatusLabel tone={KNOWLEDGE_TONE[summary.conditionsState]}>{t(`knowledgeState.${summary.conditionsState}`)}</StatusLabel>}
-          onClick={() => router.push(`/${locale}/pets/${petId}/health/conditions`)}
-        />
-        <Row
-          label={t("overview.medications")}
-          value={
-            <StatusLabel tone={summary.activeMedicationCount > 0 ? "attention" : "neutral"}>
-              {summary.activeMedicationCount > 0
-                ? t("overview.activeMedications", { count: summary.activeMedicationCount })
-                : t("overview.noActiveMedications")}
-            </StatusLabel>
-          }
-          onClick={() => router.push(`/${locale}/pets/${petId}/health/medications`)}
-        />
-        <Row
-          label={t("overview.vaccination")}
-          value={
-            <StatusLabel tone={summary.vaccinationStatus === "UP_TO_DATE" ? "success" : "attention"}>
-              {t(`vaccinationStatus.${summary.vaccinationStatus}`)}
-            </StatusLabel>
-          }
-          onClick={() => router.push(`/${locale}/pets/${petId}/health/vaccination`)}
-        />
-      </ContextSurface>
-
-      <ContextSurface>
-        <Row label={t("overview.advancedHealth")} value={<StatusLabel tone="neutral">{"›"}</StatusLabel>} onClick={() => router.push(`/${locale}/pets/${petId}/health/advanced`)} />
-      </ContextSurface>
+  const load = useCallback(async () => { setError(false); try { const [summary, overview, allergies, conditions, medications, care] = await Promise.all([healthService.getSummary(petId), healthAdvancedService.getOverview(petId), healthService.listAllergies(petId).catch(() => []), healthService.listConditions(petId).catch(() => []), healthService.listMedications(petId).catch(() => []), careRemindersService.list(petId).catch(() => [])]); setData({ summary, overview, care, names: { allergies: allergies.filter((a) => a.status === "ACTIVE").map((a) => a.name), conditions: conditions.filter((x) => x.status === "ACTIVE").map((x) => x.name), medications: medications.filter((m) => m.status === "ACTIVE").map((m) => m.name) } }); } catch { setError(true); } }, [petId]);
+  useEffect(() => { void load(); }, [load]);
+  if (error) return <SystemState kind="GENERIC_RETRYABLE_ERROR" onRetry={load} />;
+  if (!data) return <Skeleton className="h-72 w-full" aria-label={c.title} />;
+  const { summary, overview, names, care } = data;
+  // The owner's care items count alongside provider care-plan items, as in the care center.
+  const careUpcoming = overview.upcomingCare.length + care.filter((i) => ["UPCOMING", "DUE", "SNOOZED"].includes(i.state)).length;
+  const careOverdue = overview.overdueCare.length + care.filter((i) => i.state === "OVERDUE").length;
+  const attention = summary.primaryAttention;
+  const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
+  return <div className="health-overview">
+    <header className="section-head">
+      <div><h1>{c.title}</h1><p>{c.subtitle}</p></div>
+      <Link className="btn-quiet" href={`${base}/share`}>{locale === "fa" ? "اشتراک با دامپزشک" : "Share with vet"}</Link>
+    </header>
+    {attention ? (
+      <Link className="attention-banner" href={attention.action === "VIEW_VACCINATION" ? `${base}/vaccination` : `${base}/allergies`}>
+        <span className="attention-banner__label">{c.attention}</span>
+        <strong>{t(attention.titleKey.replace("health.", ""))}</strong>
+        <span className="attention-banner__go">{c.open}<Forward size={16} aria-hidden="true" /></span>
+      </Link>
+    ) : <p className="calm-note">{t("setupStatus.COMPLETE")}</p>}
+    <nav className="flex flex-wrap gap-3"><Link className="btn-quiet" href={`${base}/activity`}>{depthT("title")}</Link><Link className="btn-quiet" href={`${base}/links`}>{depthT("sharesLink")}</Link></nav>
+    <div className="health-overview__grid">
+      <div className="health-overview__main">
+        <section aria-labelledby="health-current"><h2 id="health-current" className="section-title">{c.current}</h2><div className="row-list">
+          <Row href={`${base}/allergies`} label={c.allergy} detail={nameList(names.allergies, locale)}><StatusLabel tone={tone(summary.allergyState)}>{t(`knowledgeState.${summary.allergyState}`)}</StatusLabel></Row>
+          <Row href={`${base}/conditions`} label={c.condition} detail={nameList(names.conditions, locale)}><StatusLabel tone={tone(summary.conditionsState)}>{t(`knowledgeState.${summary.conditionsState}`)}</StatusLabel></Row>
+          <Row href={`${base}/medications`} label={c.medication} detail={nameList(names.medications, locale)}><StatusLabel tone="neutral">{summary.activeMedicationCount ? `${formatCount(summary.activeMedicationCount, locale)} ${c.active}` : c.none}</StatusLabel></Row>
+          <Row href={`${base}/vaccination`} label={c.vaccination}><StatusLabel tone={statusText.tone(summary.vaccinationStatus, "vaccination")}>{statusText.label(summary.vaccinationStatus, "vaccination")}</StatusLabel></Row>
+        </div></section>
+        <Link className="btn-quiet" href={`${base}/clinical`}>{recordsT("clinical")}</Link>
+        <section aria-labelledby="health-records"><h2 id="health-records" className="section-title">{c.records}</h2><div className="index-list">{[["timeline",c.timeline],["visits",c.visits],["documents",c.documents],["labs",c.labs],["imaging",c.imaging],["referrals",c.referrals],["dental",c.dental],["nutrition",c.nutrition],["rehab",c.rehab],["observations",c.observations]].map(([path,label]) => <Link key={path} href={`${base}/${path}`}><span>{label}</span><Forward size={16} aria-hidden="true" /></Link>)}</div></section>
+      </div>
+      <aside className="health-overview__aside">
+        <section aria-labelledby="health-care"><h2 id="health-care" className="section-title">{c.care}</h2><div className="stat-row">
+          <Stat label={c.upcoming} value={careUpcoming} />
+          <Stat label={c.overdue} value={careOverdue} attention={careOverdue > 0} />
+          <Stat label={c.openPlan} value={overview.unresolvedCarePlanItemsCount} attention={overview.unresolvedCarePlanItemsCount > 0} />
+        </div></section>
+        <section aria-labelledby="health-visits"><h2 id="health-visits" className="section-title">{c.recentVisits}</h2>{overview.recentVisits.length ? <div className="row-list">{overview.recentVisits.slice(0,3).map(v => <Link key={v.id} href={`${base}/visits/${v.id}`} className="row-list__item"><span>{v.providerOrganizationName}</span><Forward size={16} aria-hidden="true" /></Link>)}</div> : <p className="empty-line">{c.noVisit}</p>}</section>
+        <section aria-labelledby="health-docs"><h2 id="health-docs" className="section-title">{c.recentDocuments}</h2>{overview.recentDocuments.length ? <div className="row-list">{overview.recentDocuments.slice(0,3).map(d => <Link key={d.id} href={`${base}/documents/${d.id}`} className="row-list__item"><span>{d.title}</span><Forward size={16} aria-hidden="true" /></Link>)}</div> : <p className="empty-line">{c.noDocument}</p>}</section>
+      </aside>
     </div>
-  );
+  </div>;
 }
 
-function Row({ label, value, onClick }: { label: string; value: React.ReactNode; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} className="flex items-center justify-between text-start">
-      <span className="text-body text-text-primary">{label}</span>
-      {value}
-    </button>
-  );
+function Row({ href, label, detail, children }: { href: string; label: string; detail?: string | null; children: ReactNode }) { return <Link href={href} className="row-list__item"><span className="flex min-w-0 flex-col gap-0.5"><span>{label}</span>{detail ? <span className="health-overview__names">{detail}</span> : null}</span>{children}</Link>; }
+/** What is on record, by name (clinical names are shown exactly as recorded): two names, then a count. */
+function nameList(items: string[], locale: "fa" | "en"): string | null {
+  if (!items.length) return null;
+  const shown = items.slice(0, 2).join(locale === "fa" ? "، " : ", ");
+  return items.length > 2 ? `${shown} ${locale === "fa" ? `و ${formatCount(items.length - 2, locale)} مورد دیگر` : `and ${items.length - 2} more`}` : shown;
 }
+function Stat({ label, value, attention=false }: { label: string; value: number; attention?: boolean }) { const locale = useLocale(); return <div className={attention ? "stat stat--attention" : "stat"}><strong>{formatCount(value, locale)}</strong><span>{label}</span></div>; }

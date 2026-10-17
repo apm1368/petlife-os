@@ -29,7 +29,9 @@ export class ProvidersService {
   ) {}
 
   async searchVets(query: SearchVetsDto): Promise<ProviderSummaryDto[]> {
-    const verifiedOnly = query.verifiedOnly !== "false";
+    // Public discovery never advertises an unverified provider (it cannot be booked). The legacy
+    // `verifiedOnly=false` query flag is accepted for compatibility but no longer widens results.
+    const verifiedOnly = true;
 
     const where: Prisma.ProviderOrganizationWhereInput = {
       type: { in: VET_PROVIDER_TYPES },
@@ -61,7 +63,7 @@ export class ProvidersService {
       where: { id: providerId },
       include: { locations: true, services: true },
     });
-    if (!org || !VET_PROVIDER_TYPES.includes(org.type)) throw new NotFoundApiException("Provider");
+    if (!org || !VET_PROVIDER_TYPES.includes(org.type) || org.verificationStatus !== PrismaVerificationStatus.VERIFIED) throw new NotFoundApiException("Provider");
 
     if (viewerId) {
       await this.events.publish("ProviderViewed", { providerId, viewerId }, { aggregateType: "ProviderOrganization", aggregateId: providerId });
@@ -78,7 +80,7 @@ export class ProvidersService {
       logoUrl: org.logoUrl,
       websiteUrl: org.websiteUrl,
       locations: org.locations.map(toLocationDto),
-      services: org.services.filter((s) => s.isActive && s.category === ServiceCategory.VET).map(toServiceDto),
+      services: org.services.filter((s) => s.isActive && s.category === ServiceCategory.VET).map((service) => toServiceDto(service)),
     };
   }
 
@@ -90,7 +92,7 @@ export class ProvidersService {
     if (query.petId) {
       const pet = await this.petAccess.findAccessiblePet(query.petId, viewerId);
       if (pet) {
-        petCompatible = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : true;
+        petCompatible = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : false;
       }
     }
 
@@ -131,7 +133,7 @@ export class ProvidersService {
       description: org.description,
       logoUrl: org.logoUrl,
       locations: locations.map(toLocationDto),
-      services: services.map(toServiceDto),
+      services: services.map((service) => toServiceDto(service)),
       nextAvailableSlotStart,
     };
   }

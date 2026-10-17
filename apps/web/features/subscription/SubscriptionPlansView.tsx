@@ -10,6 +10,7 @@ import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { entitlementLabelKey } from "./entitlement-labels";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * Plan comparison (spec: "must not visually hide Free"). FREE is rendered
@@ -53,7 +54,7 @@ export function SubscriptionPlansView() {
       await action();
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(err instanceof ApiError && err.status === 403 ? t("ownerOnly") : apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setBusyPlanId(null);
     }
@@ -69,7 +70,7 @@ export function SubscriptionPlansView() {
       <h1 className="text-page-title text-text-primary">{t("plansTitle")}</h1>
 
       <div className="flex gap-2 overflow-x-auto border-b border-border-subtle pb-2" aria-label={t("durationLabel")}>
-        {(["MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"] as const).map((value) => <Button key={value} size="sm" variant={interval === SubscriptionBillingInterval[value] ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval[value])}>
+        {(["MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"] as const).map((value) => <Button key={value} size="sm" aria-pressed={interval === SubscriptionBillingInterval[value]} variant={interval === SubscriptionBillingInterval[value] ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval[value])}>
           {t(`interval.${value === "MONTHLY" ? "monthly" : value === "QUARTERLY" ? "quarterly" : value === "SEMI_ANNUAL" ? "semiAnnual" : "annual"}`)}
         </Button>)}
       </div>
@@ -95,7 +96,7 @@ export function SubscriptionPlansView() {
                 {plan.entitlements.map((entitlement) => (
                   <li key={entitlement.key} className="text-metadata text-text-secondary">
                     {entitlementLabelKey(entitlement.key) ? t(entitlementLabelKey(entitlement.key)!) : entitlement.key}:{" "}
-                    {entitlement.type === "BOOLEAN" ? (entitlement.boolValue ? t("included") : t("notIncluded")) : entitlement.limitValue === null ? t("unlimited") : entitlement.limitValue}
+                    {entitlement.type === "BOOLEAN" ? (entitlement.boolValue ? t("included") : t("notIncluded")) : entitlement.limitValue === null ? t("unlimited") : entitlement.limitValue.toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}
                   </li>
                 ))}
               </ul>

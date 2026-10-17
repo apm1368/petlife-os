@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { PublicPlacesReadService } from "./public-places-read.service";
 import { PetFriendlyPlaceFavoriteService } from "./pet-friendly-place-favorite.service";
+import { PlaceReportsController } from "./place-reports.controller";
 import { PlacesController } from "./places.controller";
 import { PublicPlacesController } from "./public-places.controller";
 
@@ -20,7 +21,7 @@ import { PublicPlacesController } from "./public-places.controller";
   // registered first would swallow "/places/favorites" requests (placeId
   // would just be "favorites"). Same "literal before wildcard" rule already
   // used within a single controller (see TravelController's own ordering).
-  controllers: [PlacesController, PublicPlacesController],
+  controllers: [PlacesController, PublicPlacesController, PlaceReportsController],
   providers: [PublicPlacesReadService, PetFriendlyPlaceFavoriteService],
   exports: [PublicPlacesReadService, PetFriendlyPlaceFavoriteService],
 })

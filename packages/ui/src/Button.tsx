@@ -15,7 +15,7 @@ export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children">
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-brand-natural text-text-inverse hover:bg-brand-natural-strong",
+  primary: "bg-brand-solid text-on-brand hover:bg-brand-solid-strong",
   secondary: "bg-surface-elevated text-text-primary border border-border-strong hover:bg-surface-subtle",
   ghost: "bg-transparent text-text-primary hover:bg-surface-subtle",
   danger: "bg-state-urgent text-text-inverse hover:opacity-90",

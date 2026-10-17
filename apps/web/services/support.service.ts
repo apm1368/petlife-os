@@ -7,7 +7,7 @@ export interface CreateMySupportCaseInput {
   category: SupportCaseCategory;
   householdId?: string;
   petId?: string;
-  relatedEntityType?: "ORDER" | "BOOKING";
+  relatedEntityType?: "ORDER" | "BOOKING" | "TRIP" | "INSURANCE_APPLICATION" | "TRAVEL_BOOKING";
   relatedEntityId?: string;
 }
 

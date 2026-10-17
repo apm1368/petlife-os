@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { PatientVitalsDto, VitalsTrendsDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { clinicalOwnerService } from "@/services/vet-panel.service";
 import { VitalsSparkline } from "@/features/vet-panel/VitalsSparkline";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * The owner's view of measurements taken at the clinic (Handoff 24) — the
@@ -19,6 +20,7 @@ import { VitalsSparkline } from "@/features/vet-panel/VitalsSparkline";
  * recorded, and what it means is a conversation with their vet.
  */
 export function HealthVitalsView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("healthAdvanced.vitals");
   const tCommon = useTranslations("common");
 
@@ -33,7 +35,7 @@ export function HealthVitalsView({ petId }: { petId: string }) {
       setRecords(rows);
       setTrends(trendRows);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     }
   }
 
@@ -65,7 +67,7 @@ export function HealthVitalsView({ petId }: { petId: string }) {
         records.map((record) => (
           <ContextSurface key={record.id} className="flex flex-col gap-1">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="text-body text-text-primary">{new Date(record.recordedAt).toLocaleString()}</span>
+              <span className="text-body text-text-primary">{fmt.dateTime(record.recordedAt)}</span>
               <span className="text-metadata text-text-secondary">{record.source.providerOrganizationName ?? "—"}</span>
             </div>
             <span className="text-body text-text-secondary">

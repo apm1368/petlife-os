@@ -302,12 +302,16 @@ describe("Travel + Insurance + Pet-Friendly Places (Handoff 19)", () => {
     const application = await client.post(`/pets/${petId}/insurance-applications`).send({ productId }).expect(201);
     expect(application.body.status).toBe("DRAFT");
 
-    const submitted = await client.post(`/pets/${petId}/insurance-applications/${application.body.id}/submit`).send({}).expect(200);
+    // Batch 5: submitting requires the applicant's explicit consent to share data with the insurer.
+    const noConsent = await client.post(`/pets/${petId}/insurance-applications/${application.body.id}/submit`).send({}).expect(400);
+    expect(noConsent.body.error.details.reason).toBe("CONSENT_REQUIRED");
+    const submitted = await client.post(`/pets/${petId}/insurance-applications/${application.body.id}/submit`).send({ consent: true }).expect(200);
+    expect(submitted.body.consentAt).toBeTruthy();
     expect(submitted.body.status).toBe("SUBMITTED");
     expect(["APPROVED", "DECLINED"]).not.toContain(submitted.body.status);
 
     // Submitting twice is not an allowed transition.
-    await client.post(`/pets/${petId}/insurance-applications/${application.body.id}/submit`).send({}).expect(409);
+    await client.post(`/pets/${petId}/insurance-applications/${application.body.id}/submit`).send({ consent: true }).expect(409);
 
     const stillNotDecided = await prisma.insuranceApplication.findUniqueOrThrow({ where: { id: application.body.id } });
     expect(stillNotDecided.status).toBe("SUBMITTED");
@@ -391,6 +395,6 @@ describe("Travel + Insurance + Pet-Friendly Places (Handoff 19)", () => {
 
     const application = await client.post(`/pets/${petId}/insurance-applications`).send({ productId }).expect(201);
     await otherClient.get(`/pets/${petId}/insurance-applications/${application.body.id}`).expect(403);
-    await otherClient.post(`/pets/${petId}/insurance-applications/${application.body.id}/submit`).send({}).expect(403);
+    await otherClient.post(`/pets/${petId}/insurance-applications/${application.body.id}/submit`).send({ consent: true }).expect(403);
   });
 });

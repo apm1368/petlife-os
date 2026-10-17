@@ -1,3 +1,6 @@
+import { NgoVolunteersController, PublicSupportEngagementController, SupportEngagementController } from "./support-engagement.controller";
+import { SupportMilestoneService } from "./support-milestone.service";
+import { SupportEngagementService } from "./support-engagement.service";
 import { Module } from "@nestjs/common";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { LedgerModule } from "../commerce/ledger/ledger.module";
@@ -9,6 +12,13 @@ import { PublicAnimalSupportController } from "./public-animal-support.controlle
 import { DonationController } from "./donation.controller";
 import { SupportNeedService } from "./support-need.service";
 import { SupportNeedController } from "./support-need.controller";
+import { SupportNeedExpiryWorker } from "./support-need-expiry.worker";
+import { AnimalSupportOrgAccessService } from "./animal-support-org-access.service";
+import { NgoPortalService } from "./ngo-portal.service";
+import { NgoPortalController } from "./ngo-portal.controller";
+import { NgoAuthGuard } from "./ngo-auth.guard";
+import { SupportNeedNotificationListener } from "./support-need-notification.listener";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 /**
  * The public/consumer half of the Handoff 18 Animal Support domain —
@@ -29,9 +39,9 @@ import { SupportNeedController } from "./support-need.controller";
  * reuse SubscriptionsModule already established for H16 billing.
  */
 @Module({
-  imports: [PaymentsModule, LedgerModule, StorageModule],
-  controllers: [PublicAnimalSupportController, DonationController, SupportNeedController],
-  providers: [PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService],
-  exports: [DonationLedgerService],
+  imports: [PaymentsModule, LedgerModule, StorageModule, NotificationsModule],
+  controllers: [PublicSupportEngagementController, SupportEngagementController, NgoVolunteersController, PublicAnimalSupportController, DonationController, SupportNeedController, NgoPortalController],
+  providers: [SupportEngagementService, SupportMilestoneService, PublicAnimalSupportReadService, DonationLedgerService, DonationService, SupportNeedService, SupportNeedExpiryWorker, SupportNeedNotificationListener, AnimalSupportOrgAccessService, NgoPortalService, NgoAuthGuard],
+  exports: [DonationLedgerService, SupportNeedService, AnimalSupportOrgAccessService],
 })
 export class AnimalSupportModule {}

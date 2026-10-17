@@ -1,3 +1,4 @@
+import { assertObjectKeyUnder } from "../../common/storage-keys/object-key.validator";
 import { Injectable } from "@nestjs/common";
 import { Prisma, RescueCaseStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -40,7 +41,7 @@ export class RescueCaseService {
       this.prisma.rescueCase.findMany({ where, include: CASE_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.rescueCase.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toRescueCaseDto), total, page, pageSize);
+    return toPaginatedDto(rows.map((r) => toRescueCaseDto(r)), total, page, pageSize);
   }
 
   async adminGet(id: string) {
@@ -107,5 +108,21 @@ export class RescueCaseService {
   async requestEvidenceUpload(id: string, contentType: string, fileSizeBytes: number) {
     await this.getRawOrThrow(id);
     return this.storage.createAnimalSupportEvidenceUploadTarget(id, contentType, fileSizeBytes);
+  }
+
+  async registerEvidence(admin: ResolvedAdminContext, id: string, keys: string[]) {
+    // Upload targets are scoped to the case; registering another case's object
+    // must never silently republish its evidence here.
+    keys.forEach(key => assertObjectKeyUnder(key, "animal-support-evidence", id));
+    const row = await this.prisma.$transaction(async tx => {
+      const [locked] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "rescue_cases" WHERE "id" = ${id}::uuid FOR UPDATE`;
+      if (!locked) throw new RescueCaseNotFoundException({ rescueCaseId: id });
+      const current = await tx.rescueCase.findUniqueOrThrow({ where: { id } });
+      const evidenceObjectKeys = [...new Set([...current.evidenceObjectKeys, ...keys])];
+      const updated = await tx.rescueCase.update({ where: { id }, data: { evidenceObjectKeys }, include: CASE_INCLUDE });
+      await this.audit.record({ adminUserId: admin.adminUserId, action: "rescue_case.evidence_added", entityType: "RescueCase", entityId: id, afterSummary: { addedCount: evidenceObjectKeys.length - current.evidenceObjectKeys.length }, tx });
+      return updated;
+    });
+    return toRescueCaseDto(row);
   }
 }

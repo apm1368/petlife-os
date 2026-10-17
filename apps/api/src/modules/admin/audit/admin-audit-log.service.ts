@@ -73,6 +73,23 @@ export class AdminAuditLogService {
   }
 
   /** The unfiltered audit feed (spec: "/admin/audit") — still paginated, never an unbounded dump. */
+  /** ERP-A audit explorer: any combination of actor, entity type/id, action (exact or "prefix.") and date range. Read-only. */
+  async search(query: PaginationQueryDto & { entityType?: string; entityId?: string; adminUserId?: string; action?: string; from?: string; to?: string }) {
+    const { page, pageSize, skip, take } = resolvePagination(query);
+    const where: Prisma.AdminAuditLogWhereInput = {
+      ...(query.entityType ? { entityType: query.entityType } : {}),
+      ...(query.entityId ? { entityId: query.entityId } : {}),
+      ...(query.adminUserId ? { adminUserId: query.adminUserId } : {}),
+      ...(query.action ? (query.action.endsWith(".") ? { action: { startsWith: query.action } } : { action: query.action }) : {}),
+      ...(query.from || query.to ? { createdAt: { ...(query.from ? { gte: new Date(query.from) } : {}), ...(query.to ? { lte: new Date(query.to) } : {}) } } : {}),
+    };
+    const [rows, total] = await Promise.all([
+      this.prisma.adminAuditLog.findMany({ where, include: { adminUser: { include: { user: true } } }, orderBy: { createdAt: "desc" }, skip, take }),
+      this.prisma.adminAuditLog.count({ where }),
+    ]);
+    return toPaginatedDto(rows.map(toAuditLogDto), total, page, pageSize);
+  }
+
   async listRecent(query: PaginationQueryDto) {
     const { page, pageSize, skip, take } = resolvePagination(query);
     const [rows, total] = await Promise.all([

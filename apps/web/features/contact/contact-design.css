@@ -1,0 +1,20 @@
+.contact-scene{position:relative;isolation:isolate;min-height:900px;border-radius:30px;overflow:hidden;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:32px;color:var(--campaign-inverse);background:var(--campaign-plum)}
+.contact-scene__image{object-fit:cover;object-position:center;z-index:-2}
+.contact-scene__shade{position:absolute;inset:0;z-index:-1;background:color-mix(in srgb,var(--campaign-plum) 52%,transparent)}
+.contact-scene__heading{text-align:center;max-width:680px}
+.contact-scene__heading>p:first-child{font-size:.8rem;letter-spacing:.08em}
+.contact-scene__heading h1{font-size:clamp(2rem,4vw,3.8rem);line-height:1.6;margin-block:14px;color:var(--campaign-inverse)}
+.contact-scene__heading>p:last-child{line-height:2;font-size:1rem}
+.contact-glass{--text-primary:var(--campaign-inverse);--text-secondary:var(--campaign-inverse);--surface-elevated:color-mix(in srgb,var(--campaign-plum) 40%,transparent);--border-strong:color-mix(in srgb,var(--campaign-cream) 65%,transparent);--border-subtle:color-mix(in srgb,var(--campaign-cream) 32%,transparent);width:min(100%,660px);padding:38px;border:1px solid var(--border-subtle);border-radius:26px;background:var(--surface-elevated);backdrop-filter:blur(22px)}
+.contact-glass form{display:flex;flex-direction:column;gap:24px}
+.contact-glass form>label{display:flex;flex-direction:column;gap:12px;font-size:.9rem}
+.contact-glass :is(input,textarea){background:color-mix(in srgb,var(--campaign-plum) 35%,transparent);border:1px solid var(--border-strong);border-radius:12px;padding:14px;color:var(--campaign-inverse);width:100%}
+.contact-glass form>p{font-size:.85rem;line-height:1.9}
+.contact-glass button{background:var(--campaign-cream);color:var(--campaign-plum);border-radius:12px;min-height:50px;font-weight:800}
+.contact-glass__identity{font-weight:800}
+.contact-glass__hint{opacity:.9}
+.contact-success{display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center;min-height:280px;justify-content:center}
+.contact-success h2{font-size:1.6rem}
+.contact-success a,.contact-scene__support{text-decoration:underline;text-underline-offset:6px;min-height:44px}
+@media(max-width:650px){.contact-scene{min-height:800px;padding:34px 16px;border-radius:22px;gap:24px}.contact-glass{padding:24px 20px}.contact-scene__image{object-position:45% center}.contact-scene__heading h1{font-size:2.1rem}}
+@media(prefers-reduced-transparency:reduce){.contact-glass{background:var(--campaign-plum)}}

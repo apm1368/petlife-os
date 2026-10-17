@@ -22,7 +22,7 @@ describe("SellerOrdersView", () => {
     });
   });
 
-  it("shows a marketplace order and a PET LIFE OS order with distinct source labels", async () => {
+  it("shows a marketplace order and an opetlife order with distinct source labels", async () => {
     vi.mocked(sellerOsService.listOrders).mockResolvedValue(
       page([
         { orderId: "order-1", source: "TOROB" as never, externalOrderId: "TOROB-123", status: "CONFIRMED" as never, paymentSource: "MARKETPLACE_COLLECTED" as never, fulfillmentStatus: null, itemCount: 1, totalAmount: 300_000, currency: "IRR", createdAt: "2026-01-01T00:00:00.000Z" },
@@ -33,7 +33,7 @@ describe("SellerOrdersView", () => {
     renderWithIntl(<SellerOrdersView />);
 
     await waitFor(() => expect(screen.getByText("TOROB")).toBeTruthy());
-    expect(screen.getByText("PET LIFE OS")).toBeTruthy();
+    expect(screen.getByText("opetlife")).toBeTruthy();
     expect(screen.getByText("TOROB-123", { exact: false })).toBeTruthy();
   });
 

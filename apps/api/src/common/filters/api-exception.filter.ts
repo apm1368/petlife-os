@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
 import type { Response } from "express";
 import type { ApiErrorBody } from "@petlife/types";
+import { Prisma } from "@prisma/client";
 import { ApiException } from "../errors/api-exception";
 import type { RequestWithId } from "../middleware/request-id.middleware";
 
@@ -40,6 +41,23 @@ export class ApiExceptionFilter implements ExceptionFilter {
       } else {
         message = exception.message;
       }
+    } else if (exception instanceof Prisma.PrismaClientKnownRequestError && exception.code === "P2023") {
+      // A malformed id reached a uuid column (route without ParseUUIDPipe): the client's input, never a 500.
+      status = HttpStatus.BAD_REQUEST;
+      code = "VALIDATION_ERROR";
+      message = "The request did not pass validation.";
+      details = { reason: "INVALID_ID" };
+    } else if (exception instanceof Prisma.PrismaClientKnownRequestError && exception.code === "P2025") {
+      // update/delete on a row that doesn't exist (or no longer does).
+      status = HttpStatus.NOT_FOUND;
+      code = "NOT_FOUND";
+      message = "Resource not found.";
+    } else if (isClientHttpError(exception)) {
+      // Raised by the body parser before any handler runs (body too large, malformed JSON): the
+      // client's fault, so its own 4xx — not a 500 that pages someone.
+      status = exception.status;
+      code = httpStatusToCode(status);
+      message = status === HttpStatus.PAYLOAD_TOO_LARGE ? "The request body is too large." : "The request body could not be read.";
     } else {
       this.logger.error(exception instanceof Error ? exception.stack : String(exception), undefined, { requestId });
     }
@@ -56,8 +74,15 @@ export class ApiExceptionFilter implements ExceptionFilter {
   }
 }
 
+function isClientHttpError(exception: unknown): exception is { status: number } {
+  const e = exception as { status?: unknown; expose?: unknown } | null;
+  return !!e && typeof e.status === "number" && e.status >= 400 && e.status < 500 && e.expose === true;
+}
+
 function httpStatusToCode(status: HttpStatus): string {
   switch (status) {
+    case HttpStatus.PAYLOAD_TOO_LARGE:
+      return "PAYLOAD_TOO_LARGE";
     case HttpStatus.BAD_REQUEST:
       return "VALIDATION_ERROR";
     case HttpStatus.UNAUTHORIZED:

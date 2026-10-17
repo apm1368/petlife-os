@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
@@ -72,44 +72,56 @@ export class SupportNeedController {
   // -- Single listing ----------------------------------------------------------
 
   @Get(":listingId")
-  getPublic(@Param("listingId") listingId: string) {
+  getPublic(@Param("listingId", ParseUUIDPipe) listingId: string) {
     return this.needs.getPublic(listingId);
   }
 
   /** Coarse fulfillment progress — counts only, never helper identities. */
   @Get(":listingId/summary")
-  getSummary(@Param("listingId") listingId: string) {
+  getSummary(@Param("listingId", ParseUUIDPipe) listingId: string) {
     return this.needs.getPublicOfferSummary(listingId);
   }
 
   /** The publisher's own view, which additionally carries the moderation note. */
   @Get(":listingId/manage")
   @UseGuards(SessionAuthGuard)
-  getMine(@Param("listingId") listingId: string, @CurrentUser() user: SessionUser) {
+  getMine(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser) {
     return this.needs.getMine(listingId, user.id);
   }
 
   @Patch(":listingId")
   @UseGuards(SessionAuthGuard)
-  update(@Param("listingId") listingId: string, @CurrentUser() user: SessionUser, @Body() dto: UpdateSupportNeedListingDto) {
+  update(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser, @Body() dto: UpdateSupportNeedListingDto) {
     return this.needs.update(listingId, user.id, dto);
   }
 
   @Post(":listingId/submit")
   @UseGuards(SessionAuthGuard)
-  submitForReview(@Param("listingId") listingId: string, @CurrentUser() user: SessionUser) {
+  submitForReview(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser) {
     return this.needs.submitForReview(listingId, user.id);
   }
 
   @Post(":listingId/fulfill")
   @UseGuards(SessionAuthGuard)
-  markFulfilled(@Param("listingId") listingId: string, @CurrentUser() user: SessionUser) {
+  markFulfilled(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser) {
     return this.needs.markFulfilled(listingId, user.id);
+  }
+
+  @Post(":listingId/pause")
+  @UseGuards(SessionAuthGuard)
+  pause(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser) {
+    return this.needs.pause(listingId, user.id);
+  }
+
+  @Post(":listingId/resume")
+  @UseGuards(SessionAuthGuard)
+  resume(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser) {
+    return this.needs.resume(listingId, user.id);
   }
 
   @Post(":listingId/close")
   @UseGuards(SessionAuthGuard)
-  close(@Param("listingId") listingId: string, @CurrentUser() user: SessionUser) {
+  close(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser) {
     return this.needs.close(listingId, user.id);
   }
 
@@ -117,22 +129,22 @@ export class SupportNeedController {
 
   @Post(":listingId/offers")
   @UseGuards(SessionAuthGuard)
-  offerHelp(@Param("listingId") listingId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateHelpOfferDto) {
+  offerHelp(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateHelpOfferDto) {
     return this.needs.createHelpOffer(listingId, user.id, dto);
   }
 
   /** The publisher's inbox for this listing. */
   @Get(":listingId/offers")
   @UseGuards(SessionAuthGuard)
-  listOffers(@Param("listingId") listingId: string, @CurrentUser() user: SessionUser) {
+  listOffers(@Param("listingId", ParseUUIDPipe) listingId: string, @CurrentUser() user: SessionUser) {
     return this.needs.listHelpOffers(listingId, user.id);
   }
 
   @Patch(":listingId/offers/:offerId")
   @UseGuards(SessionAuthGuard)
   respondToOffer(
-    @Param("listingId") listingId: string,
-    @Param("offerId") offerId: string,
+    @Param("listingId", ParseUUIDPipe) listingId: string,
+    @Param("offerId", ParseUUIDPipe) offerId: string,
     @CurrentUser() user: SessionUser,
     @Body() dto: RespondToHelpOfferDto,
   ) {

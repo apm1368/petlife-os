@@ -16,6 +16,13 @@ export interface PaginatedDto<T> {
 export enum PetSpecies {
   DOG = "DOG",
   CAT = "CAT",
+  BIRD = "BIRD",
+  RABBIT = "RABBIT",
+  /** Hamsters, guinea pigs, rats, mice, chinchillas. */
+  RODENT = "RODENT",
+  FISH = "FISH",
+  REPTILE = "REPTILE",
+  OTHER = "OTHER",
 }
 
 export enum PetLifecycleStatus {
@@ -235,6 +242,10 @@ export interface UserDto {
   id: string;
   email: string | null;
   phone: string | null;
+  /** Batch 8 — true only when the contact was proven by an OTP code or a Google-verified email. Present on GET/PATCH /me; the lightweight session payload omits it. */
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  hasPassword?: boolean;
   displayName: string;
   avatarUrl: string | null;
   locale: Locale;
@@ -283,6 +294,38 @@ export interface HomeResponseDto {
   activePet: PetDto | null;
   primaryAction: HomeActionDto;
   secondaryActions: HomeActionDto[];
+}
+
+export type PetOverviewSeverity = "INFORMATIONAL" | "ATTENTION" | "CONCERN" | "URGENT" | "EMERGENCY";
+
+export interface PetOverviewAttentionDto {
+  id: string;
+  severity: PetOverviewSeverity;
+  title: string;
+  dueAt: string | null;
+  href: string;
+}
+
+export interface PetOverviewEventDto {
+  id: string;
+  type: "VISIT" | "LAB" | "DOCUMENT" | "CARE" | "BOOKING" | "MEMORY";
+  title: string;
+  occurredAt: string;
+  sourceType: SourceType | null;
+  providerName: string | null;
+  href: string;
+  status: string | null;
+}
+
+/** Bounded, permission-aware Pet Overview read model. */
+export interface PetOverviewDto {
+  pet: PetDto;
+  householdName: string | null;
+  attention: PetOverviewAttentionDto[];
+  upcoming: PetOverviewEventDto[];
+  recentHealth: PetOverviewEventDto[];
+  recentActivity: PetOverviewEventDto[];
+  recentMemory: { id: string; title: string | null; occurredAt: string; type: string } | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -440,6 +483,7 @@ export enum ServiceCategory {
   SITTING = "SITTING",
   BOARDING = "BOARDING",
   PET_TAXI = "PET_TAXI",
+  OTHER = "OTHER",
 }
 
 /** Where a booked service actually happens — see ProviderServiceDto.locationMode. */
@@ -478,6 +522,13 @@ export enum ProviderServiceType {
   PET_SITTING = "PET_SITTING",
   BOARDING_STAY = "BOARDING_STAY",
   PET_TAXI_RIDE = "PET_TAXI_RIDE",
+  LAB_TEST = "LAB_TEST",
+  IMAGING_STUDY = "IMAGING_STUDY",
+  DENTAL_CARE = "DENTAL_CARE",
+  REHAB_SESSION = "REHAB_SESSION",
+  NUTRITION_CONSULT = "NUTRITION_CONSULT",
+  HOME_VISIT = "HOME_VISIT",
+  OTHER_SERVICE = "OTHER_SERVICE",
 }
 
 /**
@@ -491,6 +542,11 @@ export enum ProviderServiceType {
 export enum BookingStatus {
   HOLD = "HOLD",
   PENDING_CONFIRMATION = "PENDING_CONFIRMATION",
+  REQUESTED = "REQUESTED",
+  AWAITING_PAYMENT = "AWAITING_PAYMENT",
+  REJECTED = "REJECTED",
+  EXPIRED = "EXPIRED",
+  RESCHEDULED = "RESCHEDULED",
   CONFIRMED = "CONFIRMED",
   CHECKED_IN = "CHECKED_IN",
   IN_PROGRESS = "IN_PROGRESS",
@@ -540,6 +596,7 @@ export enum CareCalendarEventType {
   SITTING = "SITTING",
   BOARDING = "BOARDING",
   PET_TAXI = "PET_TAXI",
+  OTHER_SERVICE = "OTHER_SERVICE",
 }
 
 /** BookingSeries recurrence is intentionally minimal — a flat "repeat weekly N times" shape, no custom interval picker. */
@@ -628,6 +685,49 @@ export interface ProviderServiceDto {
   requiresHealthBasics: boolean;
   locationMode: LocationMode;
   isActive: boolean;
+  /** Batch 3 booking policy. */
+  bookingMode: BookingMode;
+  paymentMode: BookingPaymentMode;
+  depositAmount: number | null;
+  cancellationPolicy: string | null;
+  freeCancellationHours: number;
+  lateCancellationRefundPercent: number;
+  preparationNotes: string | null;
+  maxPetsPerBooking: number;
+  requiredResourceType: string | null;
+  variants: ProviderServiceVariantDto[];
+}
+
+export enum BookingMode {
+  INSTANT = "INSTANT",
+  REQUEST = "REQUEST",
+}
+
+export enum BookingPaymentMode {
+  NONE = "NONE",
+  PAY_AT_PROVIDER = "PAY_AT_PROVIDER",
+  FULL_PREPAYMENT = "FULL_PREPAYMENT",
+  DEPOSIT = "DEPOSIT",
+}
+
+export interface ProviderServiceVariantDto {
+  id: string;
+  serviceId: string;
+  name: string;
+  description: string | null;
+  priceAmount: number | null;
+  durationMinutes: number;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface BookingStatusEventDto {
+  id: string;
+  fromStatus: BookingStatus | null;
+  toStatus: BookingStatus;
+  actorType: "USER" | "PROVIDER" | "SYSTEM" | "ADMIN";
+  reason: string | null;
+  createdAt: string;
 }
 
 export interface CustomerAddressDto {
@@ -643,6 +743,9 @@ export interface CustomerAddressDto {
   latitude: number | null;
   longitude: number | null;
   instructions: string | null;
+  /** Batch 4 — Iranian 10-digit postal code, when known. */
+  postalCode?: string | null;
+  isDefault?: boolean;
 }
 
 /** A single (provider, service) discovery result row — one provider can appear multiple times, once per matching service. */
@@ -716,6 +819,8 @@ export interface BookingHoldDto {
   slotStart: string;
   slotEnd: string;
   timezone: string;
+  variantId: string | null;
+  additionalPetIds: string[];
 }
 
 /** Renamed from BookingHealthAccessSummaryDto — see PetAccessScopePreset. */
@@ -760,6 +865,8 @@ export interface BookingDto {
   completedByProviderUserId: string | null;
   /** The deliberately small owner-visible summary (e.g. "Luna's grooming was completed.") — distinct from internal-only provider notes. */
   completionNote: string | null;
+  /** For NO_SHOW: OWNER (member missed it, marked by the provider) or PROVIDER (reported by the member). */
+  noShowParty?: "OWNER" | "PROVIDER" | null;
   createdAt: string;
   updatedAt: string;
   provider: ProviderSummaryDto | null;
@@ -769,6 +876,47 @@ export interface BookingDto {
   dropoffAddress: CustomerAddressDto | null;
   bookingSeriesId: string | null;
   petAccess: BookingPetAccessSummaryDto | null;
+  /** Batch 3 snapshots and lifecycle. */
+  bookingNumber: string | null;
+  variantId: string | null;
+  variantName: string | null;
+  serviceName: string | null;
+  bookingMode: BookingMode;
+  paymentMode: BookingPaymentMode;
+  priceAmount: number | null;
+  discountAmount: number;
+  depositAmount: number | null;
+  currency: string | null;
+  durationMinutes: number | null;
+  cancellationPolicy: string | null;
+  freeCancellationHours: number | null;
+  lateCancellationRefundPercent: number | null;
+  preparation: string | null;
+  requestExpiresAt: string | null;
+  rejectedReason: string | null;
+  rescheduledFromBookingId: string | null;
+  rescheduledToBookingId: string | null;
+  additionalPetIds: string[];
+  timeline: BookingStatusEventDto[];
+  review: { id: string; rating: number } | null;
+  /** Owner-visible aftercare instructions written by the provider at completion. */
+  aftercareInstructions?: string | null;
+  /** The answered intake form (only on GET /bookings/:id). */
+  intake?: { formVersion: number; answers: { key: string; label: string; type: string; value: string | boolean | string[] | null }[] } | null;
+  /** Pet taxi only: the route and fare as copied when the booking was made (null for other services). */
+  transportRoute?: {
+    pickupAddressText: string;
+    dropoffAddressText: string;
+    distanceMeters: number | null;
+    distanceSource: "MAP_PROVIDER" | "STRAIGHT_LINE_DEMO" | "UNAVAILABLE";
+    estimatedFareIrr: number | null;
+    distancePricingApplied: boolean;
+    requirements?: string[];
+    pickupContact?: { name: string | null; phone: string } | null;
+  } | null;
+  /** Pet taxi only: provider-reported progress (no GPS). */
+  rideTimeline?: { type: "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "DROPPED_OFF"; occurredAt: string; note: string | null }[];
+  cancellationReasonCode?: string | null;
 }
 
 export interface CareCalendarEventDto {
@@ -857,6 +1005,12 @@ export interface ProviderBookingSummaryDto {
   bookingStatus: BookingStatus;
   paymentStatus: PaymentStatus;
   providerUserId: string | null;
+  /** Batch 3 */
+  bookingNumber: string | null;
+  variantName: string | null;
+  requestExpiresAt: string | null;
+  resourceId: string | null;
+  paymentMode: BookingPaymentMode;
 }
 
 /**
@@ -885,6 +1039,7 @@ export interface ProviderBookingDetailDto {
     completedAt: string | null;
     completedByProviderUserId: string | null;
     completionNote: string | null;
+    noShowParty?: "OWNER" | "PROVIDER" | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -1274,6 +1429,56 @@ export interface SellerOfferDto {
   status: SellerOfferStatus;
   /** onHand - reserved, computed server-side, never a stored column. */
   availableQuantity: number;
+  /** Batch 4 — server-computed price after the single best active promotion. */
+  effectiveUnitPrice: number;
+  unitDiscount: number;
+  promotion: AppliedPromotionDto | null;
+  stockState: StockState;
+  repeatDeliveryEligible: boolean;
+  repeatIntervalsDays: number[];
+}
+
+export type StockState = "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
+
+export interface AppliedPromotionDto {
+  id: string;
+  name: string;
+  endsAt: string | null;
+}
+
+export interface RatingSummaryDto {
+  average: number | null;
+  count: number;
+}
+
+export interface ProductMediaDto {
+  id: string;
+  url: string;
+  alt: string | null;
+  variantId: string | null;
+}
+
+export interface ProductReviewDto {
+  id: string;
+  rating: number;
+  body: string | null;
+  authorName: string;
+  variantTitle: string | null;
+  verifiedPurchase: true;
+  createdAt: string;
+}
+
+export interface ProductSearchResultDto {
+  items: ProductSummaryDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  facets: {
+    brands: { id: string; name: string; count: number }[];
+    sellers: { id: string; name: string; count: number }[];
+    attributes: { key: string; values: string[] }[];
+    priceRange: { min: number; max: number } | null;
+  };
 }
 
 /** One (product, variant) discovery/listing row — the cheapest ACTIVE offer is `bestOffer`; every ACTIVE offer is in `offers`. */
@@ -1286,8 +1491,14 @@ export interface ProductSummaryDto {
   variantId: string;
   variantTitle: string | null;
   bestOffer: SellerOfferDto | null;
-  /** Only present when the request carried a petId. */
+  /** Only present when the request carried a petId the caller may see. */
   compatibility: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  imageUrl: string | null;
+  stockState: StockState;
+  rating: RatingSummaryDto;
+  supportsDog: boolean;
+  supportsCat: boolean;
 }
 
 export interface ProductDetailDto {
@@ -1302,6 +1513,21 @@ export interface ProductDetailDto {
   /** All ACTIVE offers across all variants, for the offer-selection step. */
   offers: SellerOfferDto[];
   compatibility: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  media: ProductMediaDto[];
+  specifications: { label: string; value: string }[];
+  /** Deterministic default: available → lowest price the customer pays → offer id. */
+  defaultOfferId: string | null;
+  rating: RatingSummaryDto;
+  reviews: ProductReviewDto[];
+  related: ProductSummaryDto[];
+  favorited: boolean;
+  supportsDog: boolean;
+  supportsCat: boolean;
+  minAgeMonths: number | null;
+  maxAgeMonths: number | null;
+  minWeightKg: number | null;
+  maxWeightKg: number | null;
 }
 
 export interface CartLineDto {
@@ -1309,6 +1535,8 @@ export interface CartLineDto {
   sellerOffer: SellerOfferDto;
   productId: string;
   productTitle: string;
+  /** The line's own variant image if it has one, else the product's first image (ProductMedia.url), else null. */
+  imageUrl: string | null;
   variantTitle: string | null;
   variantSku: string;
   targetPetId: string | null;
@@ -1320,7 +1548,15 @@ export interface CartLineDto {
   currency: string;
   lineTotal: number;
   compatibility: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  listUnitPrice: number;
+  unitDiscount: number;
+  promotionName: string | null;
+  promotionId: string | null;
+  issues: CartLineIssue[];
 }
+
+export type CartLineIssue = "OFFER_UNAVAILABLE" | "SELLER_UNAVAILABLE" | "OUT_OF_STOCK" | "LOW_STOCK" | "QUANTITY_EXCEEDS_STOCK" | "PRICE_CHANGED" | "PROMOTION_EXPIRED";
 
 export interface CartSellerGroupDto {
   sellerOrganization: SellerOrganizationSummaryDto;
@@ -1336,6 +1572,9 @@ export interface CartDto {
   subtotalAmount: number;
   currency: string;
   hasSafetyConflict: boolean;
+  /** Batch 4: sum of per-line promotion discounts already included in subtotalAmount. */
+  discountAmount: number;
+  hasBlockingIssues: boolean;
 }
 
 export interface CheckoutValidationIssueDto {
@@ -1391,6 +1630,11 @@ export interface OrderItemDto {
   totalPrice: number;
   targetPetId: string | null;
   compatibilitySnapshot: ProductCompatibilityDto | null;
+  /** Batch 4 */
+  listUnitPrice: number | null;
+  unitDiscount: number;
+  promotionName: string | null;
+  reviewId: string | null;
 }
 
 /**
@@ -1416,6 +1660,11 @@ export interface OrderSummaryDto {
   currency: string;
   createdAt: string;
   confirmedAt: string | null;
+  /** Batch 4 */
+  orderNumber: string;
+  cancelledAt: string | null;
+  /** Up to three item titles, for a recognisable list row. */
+  previewTitles: string[];
 }
 
 export interface OrderDetailDto {
@@ -1438,6 +1687,14 @@ export interface OrderDetailDto {
   createdAt: string;
   updatedAt: string;
   confirmedAt: string | null;
+  /** Batch 4 */
+  orderNumber: string;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  timeline: { toStatus: string; fromStatus: string | null; actorType: string; reason: string | null; createdAt: string }[];
+  refundRequests: { id: string; status: string; reason: string; requestedAmount: number; decisionReason: string | null; createdAt: string }[];
+  canCancel: boolean;
+  canRequestRefund: boolean;
 }
 
 /** Minimal internal payment-ops view (spec section 45) — reachable only by the checkout's own owner (no real admin/support role exists yet; see README Known limitations). */
@@ -1818,6 +2075,7 @@ export interface InventoryMovementDto {
 /** Seller-OS view of one SellerOffer — richer than the consumer-facing SellerOfferDto (includes inventory + marketplace sync summary the shopper never needs to see). */
 export interface SellerOsOfferDto {
   id: string;
+  productId: string;
   productVariantId: string;
   productTitle: string;
   variantTitle: string | null;
@@ -1832,6 +2090,9 @@ export interface SellerOsOfferDto {
   marketplaceSyncErrorCount: number;
   createdAt: string;
   updatedAt: string;
+  /** Batch 4 */
+  repeatDeliveryEligible: boolean;
+  repeatIntervalsDays: number[];
 }
 
 export interface MarketplaceProviderCapabilitiesDto {
@@ -2044,6 +2305,8 @@ export interface NotificationDto {
   deepLink: string | null;
   entityType: string | null;
   entityId: string | null;
+  /** Member-facing group (HEALTH, CARE, BOOKING, ORDER, TRAVEL, COMMUNITY, SUPPORT, CLINIC, SUBSCRIPTION, SECURITY, OTHER). */
+  group?: string;
   createdAt: string;
   readAt: string | null;
   dismissedAt: string | null;
@@ -2071,6 +2334,12 @@ export interface NotificationQuietHoursDto {
 export interface NotificationPreferencesDto {
   preferences: NotificationPreferenceDto[];
   quietHours: NotificationQuietHoursDto;
+  /** Batch 8 — categories that can't be switched off (e.g. security). */
+  requiredCategories?: NotificationCategory[];
+  /** Batch 8 — marketing messages are only sent while marketing consent (Privacy Center) is granted. */
+  marketingConsentGranted?: boolean;
+  /** Batch 8 — honest delivery state per channel: LIVE (really delivered), SANDBOX (simulated, not delivered), NOT_CONFIGURED. */
+  channels?: Array<{ channel: NotificationChannel; delivery: "LIVE" | "SANDBOX" | "NOT_CONFIGURED" }>;
 }
 
 export interface UpdateNotificationPreferencesDto {
@@ -2092,6 +2361,11 @@ export enum AdminRole {
   CONTENT = "CONTENT",
   VERIFICATION = "VERIFICATION",
   READ_ONLY = "READ_ONLY",
+  EDITOR = "EDITOR",
+  PARTNER_OPERATIONS = "PARTNER_OPERATIONS",
+  CLINIC_OPERATIONS = "CLINIC_OPERATIONS",
+  COMMERCE_OPERATIONS = "COMMERCE_OPERATIONS",
+  ANALYTICS = "ANALYTICS",
 }
 
 export enum AdminMembershipStatus {
@@ -2155,6 +2429,7 @@ export enum InternalNoteEntityType {
 export enum AdminTaskStatus {
   OPEN = "OPEN",
   IN_PROGRESS = "IN_PROGRESS",
+  BLOCKED = "BLOCKED",
   DONE = "DONE",
   CANCELLED = "CANCELLED",
 }
@@ -2196,6 +2471,9 @@ export enum TrustSubjectType {
   REVIEW = "REVIEW",
   COMMUNITY_CONTENT = "COMMUNITY_CONTENT",
   PET_INCIDENT = "PET_INCIDENT",
+  SUPPORT_NEED = "SUPPORT_NEED",
+  LOST_PET_SIGHTING = "LOST_PET_SIGHTING",
+  ANIMAL_SUPPORT_ORGANIZATION = "ANIMAL_SUPPORT_ORGANIZATION",
 }
 
 export enum TrustCaseSeverity {
@@ -2293,6 +2571,11 @@ export interface SupportCaseSummaryDto {
   updatedAt: string;
   resolvedAt: string | null;
   closedAt: string | null;
+  /** ERP-F SLA + tagging (optional for older consumers). */
+  tags?: string[];
+  firstAssignedAt?: string | null;
+  firstResponseAt?: string | null;
+  reopenCount?: number;
 }
 
 export interface SupportCaseDetailDto extends SupportCaseSummaryDto {
@@ -2378,7 +2661,11 @@ export interface AdminTaskDto {
   priority: AdminPriority;
   relatedEntityType: string | null;
   relatedEntityId: string | null;
-  createdByAdmin: AdminActorSummaryDto;
+  /** Null when the platform raised the task itself (see `source`). */
+  createdByAdmin: AdminActorSummaryDto | null;
+  /** ERP: MANUAL | TRAVEL_SOURCE | PARTNER_VERIFICATION | FINANCE_MISMATCH | HIGH_SEVERITY_REPORT | PRIVACY_REQUEST | FAILED_IMPORT | SUPPORT | CLINIC_FOLLOW_UP | DATA_QUALITY */
+  source?: string;
+  team?: string | null;
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -2417,6 +2704,8 @@ export interface TrustActionDto {
   actionType: TrustActionType;
   reason: string;
   performedByAdmin: AdminActorSummaryDto;
+  /** Batch 6 — what the action changed on its subject ({ before, after }), used by RESTORE and shown in the case history. */
+  effectSummary: { before: Record<string, unknown>; after: Record<string, unknown>; restoredByActionId?: string } | null;
   createdAt: string;
   appeal: AppealDto | null;
 }
@@ -2488,6 +2777,8 @@ export interface AdminCustomerListItemDto {
   emailMasked: string | null;
   phoneMasked: string | null;
   createdAt: string;
+  /** ERP-B: platform suspension state. */
+  accountStatus?: "ACTIVE" | "SUSPENDED";
 }
 
 export interface AdminPetSummaryDto {
@@ -2551,6 +2842,11 @@ export interface AdminSearchResultDto {
   customers: AdminCustomerListItemDto[];
   orders: AdminOrderSummaryDto[];
   supportCases: SupportCaseSummaryDto[];
+  /**
+   * Which sections the caller's role may search (customers: customer.view, orders: commerce.view, supportCases:
+   * support.view). A section outside the role is always empty — "not allowed", not "no matches".
+   */
+  searched: { customers: boolean; orders: boolean; supportCases: boolean };
 }
 
 // ---------------------------------------------------------------------------
@@ -2679,7 +2975,31 @@ export type AdminPermissionName =
   | "insurance.view"
   | "insurance.manage"
   | "places.view"
-  | "places.manage";
+  | "places.manage"
+  | "services.view"
+  | "services.manage"
+  | "commerce.view"
+  | "commerce.manage"
+  | "promotions.manage"
+  | "travel.view"
+  | "travel.manage"
+  | "travel.requirements.manage"
+  | "insurance.applications.view"
+  | "access.view"
+  | "settings.view"
+  | "settings.manage"
+  | "settings.approve"
+  | "system.view"
+  | "analytics.view"
+  | "customer.account.manage"
+  | "customer.sessions.revoke"
+  | "pet.access.manage"
+  | "finance.reconcile"
+  | "travel.source.view"
+  | "travel.source.manage"
+  | "travel.sync.run"
+  | "travel.listing.manage"
+  | "travel.override.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
 export interface AdminSessionContextDto {
@@ -3123,6 +3443,8 @@ export interface PublicArticleSummaryDto {
   tags: PublicTagDto[];
   publishedAt: string;
   updatedAt: string;
+  /** Server-derived (200 words/minute, minimum 1). */
+  estimatedReadingMinutes?: number;
 }
 
 export interface PublicArticleDetailDto extends PublicArticleSummaryDto {
@@ -3351,6 +3673,8 @@ export interface SubscriptionDto {
   expiredAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 8 — SANDBOX when membership payments are simulated (no real money moves and nothing renews automatically). Set on the member-facing GET only. */
+  billingMode?: "SANDBOX" | "LIVE";
 }
 
 export interface ResolvedEntitlementDto {
@@ -3860,6 +4184,8 @@ export interface HealthTimelineEntryDto {
   /** The id of the underlying record, and which endpoint/type it belongs to — lets the UI deep-link into the full record. */
   recordId: string;
   recordType: HealthTimelineEntryType;
+  /** When the record was entered (occurredAt is when it happened). */
+  recordedAt?: string | null;
 }
 
 /** spec: "if a score cannot be responsibly calculated, do not show one" — there is deliberately no numeric health score field anywhere in this DTO. */
@@ -3931,12 +4257,17 @@ export enum LostPetSightingStatus {
 /** The household/owner view — includes privateNotes and every field. Never returned to an anonymous caller. */
 export interface LostPetIncidentDto {
   id: string;
+  /** The pet's ID-tag share card exposed with this incident (owner view only; the token is never in this payload). */
+  identityCardId?: string | null;
   petId: string;
   petName: string;
   petSpecies: PetSpecies;
   petPhotoUrl: string | null;
   householdId: string;
   status: LostPetIncidentStatus;
+  /** Batch 6 — the owner-chosen approximate area; the only location shown publicly. */
+  publicArea: string | null;
+  /** Private to the household/operators. */
   lastKnownLocation: string | null;
   lastKnownLatitude: number | null;
   lastKnownLongitude: number | null;
@@ -3971,12 +4302,10 @@ export interface LostPetIncidentPublicDto {
   petBreed: string | null;
   petColorMarkings: string | null;
   petApproximateAgeMonths: number | null;
-  primaryPhotoObjectKey: string | null;
   primaryPhotoUrl: string | null;
   status: LostPetIncidentStatus;
-  lastKnownLocation: string | null;
-  lastKnownLatitude: number | null;
-  lastKnownLongitude: number | null;
+  /** Batch 6 — approximate area only; exact location and coordinates are never public. */
+  approximateArea: string | null;
   lastSeenAt: string | null;
   publicNotes: string | null;
   publicContactMode: string | null;
@@ -4074,6 +4403,8 @@ export enum SupportNeedStatus {
   DRAFT = "DRAFT",
   PENDING_REVIEW = "PENDING_REVIEW",
   PUBLISHED = "PUBLISHED",
+  PARTIALLY_FULFILLED = "PARTIALLY_FULFILLED",
+  PAUSED = "PAUSED",
   FULFILLED = "FULFILLED",
   CLOSED = "CLOSED",
   EXPIRED = "EXPIRED",
@@ -4090,6 +4421,7 @@ export enum SupportNeedContactMode {
 export enum HelpOfferStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
+  IN_PROGRESS = "IN_PROGRESS",
   DECLINED = "DECLINED",
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
@@ -4124,6 +4456,8 @@ export interface SupportNeedListingDto {
   imageObjectKeys: string[];
   imageUrls: string[];
   neededQuantity: number | null;
+  /** Cash target (IRR) for a need that accepts money; null when it has none. */
+  targetAmountIrr: number | null;
   fulfilledQuantity: number;
   quantityUnit: string | null;
   /** Money never lives on the listing — it flows through this campaign's ledger. */
@@ -4146,6 +4480,8 @@ export interface HelpOfferDto {
   message: string;
   helpType: SupportNeedCategory;
   quantity: number | null;
+  /** Batch 6 — when the helper can deliver. */
+  timing: string | null;
   status: HelpOfferStatus;
   fulfilledQuantity: number | null;
   respondedAt: string | null;
@@ -4289,6 +4625,11 @@ export enum CommunityReportReason {
   MISINFORMATION = "MISINFORMATION",
   INAPPROPRIATE = "INAPPROPRIATE",
   OTHER = "OTHER",
+  SCAM = "SCAM",
+  HARASSMENT = "HARASSMENT",
+  PERSONAL_INFORMATION = "PERSONAL_INFORMATION",
+  ANIMAL_WELFARE = "ANIMAL_WELFARE",
+  DANGEROUS_CONTENT = "DANGEROUS_CONTENT",
 }
 
 export enum CommunityReportStatus {
@@ -4300,7 +4641,6 @@ export enum CommunityReportStatus {
 
 /** A public-safe pet reference only — never a channel into the pet's private health/household data (spec: "A post referring to a pet should use an explicit public-safe pet representation"). */
 export interface CommunityPostPetRefDto {
-  id: string;
   name: string;
   species: PetSpecies;
   photoUrl: string | null;
@@ -4308,7 +4648,9 @@ export interface CommunityPostPetRefDto {
 
 export interface CommunityPostDto {
   id: string;
-  authorUserId: string;
+  /** Only set for the viewer's own content (Batch 6 privacy). */
+  authorUserId: string | null;
+  isMine: boolean;
   authorDisplayName: string;
   type: CommunityPostType;
   title: string | null;
@@ -4327,15 +4669,28 @@ export interface CommunityPostDto {
   /** Only present when the request is authenticated — the caller's own reaction, if any. */
   viewerReaction: CommunityReactionType | null;
   createdAt: string;
+  /** Topic tags (fixed vocabulary). */
+  topics?: string[];
+  /** The first topic (canonical taxonomy), or null. */
+  primaryTopic?: string | null;
+  /** Optional region/province — never an address or coordinates. */
+  region?: string | null;
+  /** Optional city for the local feed. */
+  city?: string | null;
 }
 
 export interface CommunityCommentDto {
   id: string;
   postId: string;
-  authorUserId: string;
+  authorUserId: string | null;
+  isMine: boolean;
   authorDisplayName: string;
   body: string;
   status: CommunityContentStatus;
+  /** Set on replies (one level). */
+  parentCommentId?: string | null;
+  /** Published replies, on top-level comments from the comments list. */
+  replies?: CommunityCommentDto[];
   createdAt: string;
 }
 
@@ -4343,6 +4698,12 @@ export interface CommunityReportDto {
   id: string;
   postId: string | null;
   commentId: string | null;
+  supportNeedListingId: string | null;
+  lostPetIncidentId: string | null;
+  lostPetSightingId: string | null;
+  organizationId: string | null;
+  chatMessageId: string | null;
+  providerReviewId: string | null;
   reason: CommunityReportReason;
   details: string | null;
   status: CommunityReportStatus;
@@ -4610,6 +4971,7 @@ export interface InsuranceEligibilityResultDto {
 
 /** APPROVED/DECLINED exist for a future real insurer integration — no service ever sets either today (spec: "do not simulate underwriting approval"). */
 export enum InsuranceApplicationStatus {
+  NEEDS_INFORMATION = "NEEDS_INFORMATION",
   DRAFT = "DRAFT",
   SUBMITTED = "SUBMITTED",
   UNDER_REVIEW = "UNDER_REVIEW",
@@ -4634,6 +4996,11 @@ export interface InsuranceApplicationDto {
   decidedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  consentAt?: string | null;
+  insurerMessage?: string | null;
+  externalReference?: string | null;
+  timeline?: { toStatus: string; fromStatus: string | null; actorType: string; note: string | null; createdAt: string }[];
 }
 
 export enum PetFriendlyPlaceCategory {
@@ -4679,6 +5046,20 @@ export interface PetFriendlyPlaceDto {
   isPubliclyListed: boolean;
   isFavorited: boolean;
   createdAt: string;
+  /** Batch 5 — null means the place has not stated it. */
+  leashRequired?: boolean | null;
+  waterAvailable?: boolean | null;
+  petArea?: boolean | null;
+  shadeAvailable?: boolean | null;
+  fencedArea?: boolean | null;
+  wasteBins?: boolean | null;
+  smallDogArea?: boolean | null;
+  parkingAvailable?: boolean | null;
+  /** IRR; 0 = free, null = unknown. */
+  entryFeeIrr?: number | null;
+  petFriendlyLevel?: "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null;
+  openingHours?: { day: number; open: string; close: string }[] | null;
+  province?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -4691,6 +5072,11 @@ export interface PetFriendlyPlaceDto {
 // ---------------------------------------------------------------------------
 
 export enum TravelListingType {
+  HOTEL = "HOTEL",
+  ECO_LODGE = "ECO_LODGE",
+  GUESTHOUSE = "GUESTHOUSE",
+  RESORT = "RESORT",
+  PET_HOTEL = "PET_HOTEL",
   PET_FRIENDLY_HOTEL = "PET_FRIENDLY_HOTEL",
   VILLA = "VILLA",
   APARTMENT = "APARTMENT",
@@ -4759,6 +5145,13 @@ export interface TravelInventoryUnitDto {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  bedInfo: string | null;
+  sizeSqm: number | null;
+  amenities: string[];
+  maxPets: number | null;
+  petNotes: string | null;
+  ratePlans: TravelRatePlanDto[];
 }
 
 export interface TravelListingDto {
@@ -4788,6 +5181,14 @@ export interface TravelListingDto {
   fromPriceIrr: number | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  province: string | null;
+  checkInFrom: string | null;
+  checkOutUntil: string | null;
+  houseRules: string | null;
+  media: TravelMediaDto[];
+  rating: TravelRatingSummaryDto;
+  moderationNote: string | null;
 }
 
 /**
@@ -4823,9 +5224,19 @@ export interface TravelQuoteDto {
   petFeeAmountIrr: number;
   depositAmountIrr: number;
   totalAmountIrr: number;
+  /** Batch 5 */
+  ratePlanId: string | null;
+  discountAmountIrr: number;
+  payNowAmountIrr: number;
+  payLaterAmountIrr: number;
+  nightly: { date: string; priceIrr: number }[];
+  petPolicyMatch: PetPolicyMatchDto | null;
 }
 
 export enum TravelBookingStatus {
+  HELD = "HELD",
+  NO_SHOW = "NO_SHOW",
+  MODIFIED = "MODIFIED",
   DRAFT = "DRAFT",
   AWAITING_PROVIDER = "AWAITING_PROVIDER",
   AWAITING_PAYMENT = "AWAITING_PAYMENT",
@@ -4850,6 +5261,8 @@ export interface TravelBookingDto {
   listingId: string;
   listingTitle: string;
   listingType: TravelListingType;
+  /** Batch 5: how the property takes bookings (request vs instant) — for honest copy before submit. */
+  bookingMode: TravelBookingMode;
   listingCity: string;
   unitId: string;
   unitName: string;
@@ -4877,6 +5290,27 @@ export interface TravelBookingDto {
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Batch 5 */
+  ratePlanId: string | null;
+  ratePlan: TravelRatePlanSnapshotDto | null;
+  petPolicySnapshot: TravelPetPolicyDto | null;
+  priceBreakdown: TravelPriceBreakdownDto | null;
+  discountAmountIrr: number;
+  payNowAmountIrr: number;
+  paymentStatus: TravelPaymentStatus;
+  holdExpiresAt: string | null;
+  requestExpiresAt: string | null;
+  refundAmountIrr: number;
+  cancelReason: string | null;
+  cancelledBy: string | null;
+  listingCoverUrl: string | null;
+  timeline: TravelBookingEventDto[];
+  canCancel: boolean;
+  canModify: boolean;
+  canReview: boolean;
+  reviewId: string | null;
+  refundPreviewIrr: number | null;
+  documentShares: TravelDocumentShareDto[];
 }
 
 /**
@@ -5313,4 +5747,437 @@ export interface ProviderPatientRecordDto {
   carePlans: CarePlanDto[];
   estimates: ClinicalEstimateDto[];
   hospitalizations: HospitalizationDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Batch 4 — Promotions, Admin Commerce, Repeat Delivery
+// ---------------------------------------------------------------------------
+
+export type PromotionDiscountTypeName = "PERCENT" | "FIXED";
+export type PromotionScopeName = "ALL" | "CATEGORY" | "PRODUCT" | "SELLER" | "SERVICE";
+export type PromotionStatusName = "DRAFT" | "ACTIVE" | "PAUSED" | "ENDED";
+
+export interface PromotionDto {
+  id: string;
+  name: string;
+  description: string | null;
+  discountType: PromotionDiscountTypeName;
+  value: number;
+  maxDiscountAmount: number | null;
+  scope: PromotionScopeName;
+  categoryIds: string[];
+  productIds: string[];
+  sellerOrganizationIds: string[];
+  startsAt: string;
+  endsAt: string | null;
+  status: PromotionStatusName;
+  fundedBy: "PLATFORM" | "SELLER";
+  ownerSellerOrganizationId: string | null;
+  usageLimit: number | null;
+  usageCount: number;
+  /** Derived: ACTIVE and inside its window right now. */
+  isLive: boolean;
+  redemptionCount: number;
+  discountGivenAmount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PromotionInput {
+  name: string;
+  description?: string | null;
+  discountType: PromotionDiscountTypeName;
+  value: number;
+  maxDiscountAmount?: number | null;
+  scope: PromotionScopeName;
+  categoryIds?: string[];
+  productIds?: string[];
+  sellerOrganizationIds?: string[];
+  startsAt: string;
+  endsAt?: string | null;
+  usageLimit?: number | null;
+}
+
+export interface AdminCommerceOrderRowDto {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  fulfillmentStatus: FulfillmentStatus | null;
+  sellerOrganization: { id: string; name: string };
+  customerName: string;
+  itemCount: number;
+  totalAmount: number;
+  discountAmount: number;
+  currency: string;
+  hasOpenRefundRequest: boolean;
+  cancelledAt: string | null;
+  createdAt: string;
+}
+
+export interface AdminCommerceOrderDetailDto extends AdminCommerceOrderRowDto {
+  subtotalAmount: number;
+  deliveryAmount: number;
+  items: OrderItemDto[];
+  timeline: OrderDetailDto["timeline"];
+  refunds: RefundDto[];
+  refundRequests: AdminRefundRequestDto[];
+  fulfillment: FulfillmentDto | null;
+  shippingCity: string | null;
+  cancelReason: string | null;
+  checkoutId: string | null;
+}
+
+export interface AdminRefundRequestDto {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  customerName: string;
+  sellerName: string;
+  status: "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "WITHDRAWN";
+  reason: string;
+  description: string | null;
+  requestedAmount: number;
+  orderItemIds: string[];
+  decisionReason: string | null;
+  adminRefundApprovalId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProductRowDto {
+  id: string;
+  title: string;
+  status: ProductStatus;
+  categoryName: string;
+  brandName: string | null;
+  variantCount: number;
+  activeOfferCount: number;
+  sellerCount: number;
+  rating: RatingSummaryDto;
+  hasMedia: boolean;
+  createdAt: string;
+}
+
+export interface AdminProductReviewRowDto {
+  id: string;
+  productId: string;
+  productTitle: string;
+  rating: number;
+  body: string | null;
+  authorName: string;
+  status: "PUBLISHED" | "HIDDEN";
+  hiddenReason: string | null;
+  createdAt: string;
+}
+
+export interface AdminInventoryRowDto {
+  sellerOfferId: string;
+  productId: string;
+  productTitle: string;
+  variantTitle: string | null;
+  sku: string;
+  sellerOrganization: { id: string; name: string };
+  onHand: number;
+  reserved: number;
+  available: number;
+  offerStatus: string;
+}
+
+export interface AdminSellerRowDto {
+  id: string;
+  name: string;
+  verificationStatus: string;
+  status: string;
+  activeOfferCount: number;
+  orderCount30d: number;
+  grossSales30d: number;
+  openRefundRequests: number;
+}
+
+export interface AdminCommerceAnalyticsDto {
+  days: number;
+  orderCount: number;
+  grossSales: number;
+  discountGiven: number;
+  averageOrderValue: number | null;
+  cancelledCount: number;
+  refundedCount: number;
+  refundRequestCount: number;
+  repeatDeliveryActive: number;
+  byDay: { date: string; orders: number; grossSales: number }[];
+  topProducts: { productId: string; title: string; units: number; grossSales: number }[];
+}
+
+export type RepeatDeliveryStatusName = "ACTIVE" | "PAUSED" | "CANCELLED";
+
+export interface RepeatDeliveryDto {
+  id: string;
+  status: RepeatDeliveryStatusName;
+  product: { id: string; title: string; imageUrl: string | null };
+  variantTitle: string | null;
+  sellerOrganization: SellerOrganizationSummaryDto;
+  sellerOfferId: string;
+  quantity: number;
+  intervalDays: number;
+  allowedIntervalsDays: number[];
+  nextCycleAt: string;
+  addressId: string | null;
+  addressLabel: string | null;
+  acceptedUnitPrice: number;
+  /** Live, server-computed price and availability for the next cycle. */
+  currentUnitPrice: number | null;
+  priceChanged: boolean;
+  available: boolean;
+  lastOrderId: string | null;
+  events: { type: string; note: string | null; createdAt: string }[];
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Batch 5 — Travel marketplace completion
+// ---------------------------------------------------------------------------
+
+export type TravelCancellationTypeName = "FREE_UNTIL" | "PARTIAL" | "NON_REFUNDABLE";
+export type TravelPaymentTimingName = "PAY_NOW" | "DEPOSIT" | "PAY_AT_PROPERTY";
+export type TravelPaymentStatus = "NOT_REQUIRED" | "AWAITING" | "PAID" | "FAILED" | "REFUND_PENDING" | "REFUNDED" | "PARTIALLY_REFUNDED" | "PAY_AT_PROPERTY";
+
+export interface TravelMediaDto {
+  id: string;
+  url: string;
+  alt: string | null;
+  unitId: string | null;
+}
+
+export interface TravelRatingSummaryDto {
+  average: number | null;
+  count: number;
+  petFriendliness: number | null;
+  cleanliness: number | null;
+  location: number | null;
+}
+
+export interface TravelRatePlanDto {
+  id: string;
+  unitId: string;
+  name: string;
+  priceModifierPercent: number;
+  cancellationType: TravelCancellationTypeName;
+  freeCancellationDays: number | null;
+  lateRefundPercent: number | null;
+  paymentTiming: TravelPaymentTimingName;
+  depositPercent: number | null;
+  includesBreakfast: boolean;
+  includedItems: string[];
+  minNights: number | null;
+  activeFrom: string | null;
+  activeUntil: string | null;
+  isActive: boolean;
+}
+
+export type TravelRatePlanSnapshotDto = Omit<TravelRatePlanDto, "isActive" | "activeFrom" | "activeUntil" | "unitId">;
+
+export interface TravelPriceBreakdownDto {
+  nightly: { date: string; priceIrr: number }[];
+  staySubtotalIrr: number;
+  rateAdjustmentIrr: number;
+  petFeeIrr: number;
+  petDepositIrr: number;
+  discountIrr: number;
+  totalIrr: number;
+  payNowIrr: number;
+  payLaterIrr: number;
+}
+
+export type PetPolicyMatchOutcome = "MATCH" | "POTENTIAL_CONFLICT" | "MORE_INFO_NEEDED";
+
+export interface PetPolicyMatchDto {
+  outcome: PetPolicyMatchOutcome;
+  reasons: { petId: string | null; petName: string | null; code: string; detail?: Record<string, unknown> }[];
+}
+
+export interface TravelBookingEventDto {
+  fromStatus: string | null;
+  toStatus: string;
+  actorType: string;
+  reason: string | null;
+  createdAt: string;
+}
+
+export interface TravelDocumentShareDto {
+  id: string;
+  medicalDocumentId: string;
+  title: string;
+  documentType: string;
+  purpose: string;
+  expiresAt: string;
+  revokedAt: string | null;
+  isActive: boolean;
+}
+
+export interface TravelSearchResultItemDto {
+  id: string;
+  title: string;
+  type: TravelListingType;
+  city: string;
+  province: string | null;
+  country: string;
+  coverUrl: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  isVerified: boolean;
+  bookingMode: TravelBookingMode;
+  rating: TravelRatingSummaryDto;
+  petPolicySummary: { dogsAllowed: boolean; catsAllowed: boolean; maxPets: number | null; maxWeightKg: number | null; petFeeIrr: number | null; stated: boolean };
+  /** Present only when dates were given: the cheapest bookable unit + rate for the whole stay. */
+  stay: { unitId: string; ratePlanId: string | null; nights: number; totalIrr: number; petFeeIrr: number; freeCancellation: boolean } | null;
+  fromNightlyIrr: number | null;
+  freeCancellationAvailable: boolean;
+  distanceKm: number | null;
+  petMatch: PetPolicyMatchOutcome | null;
+  amenities: string[];
+  favorited: boolean;
+}
+
+export interface TravelSearchResultDto {
+  items: TravelSearchResultItemDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  facets: { types: { type: TravelListingType; count: number }[]; amenities: { key: string; count: number }[]; priceRange: { min: number; max: number } | null };
+  mapAvailable: boolean;
+}
+
+export interface TravelDestinationDto {
+  country: string;
+  province: string | null;
+  city: string;
+  listingCount: number;
+}
+
+export interface TravelReviewDto {
+  id: string;
+  overall: number;
+  petFriendliness: number | null;
+  cleanliness: number | null;
+  location: number | null;
+  accuracy?: number | null;
+  body: string | null;
+  authorName: string;
+  stayMonth: string;
+  providerResponse: string | null;
+  createdAt: string;
+}
+
+export interface TravelListingDetailDto extends TravelListingDto {
+  reviews: TravelReviewDto[];
+  favorited: boolean;
+  nearbyPlaces: { id: string; name: string; category: string; distanceKm: number }[];
+  nearbyVets: { id: string; name: string; city: string; distanceKm: number | null }[];
+  mapAvailable: boolean;
+}
+
+export interface TripHubDto {
+  trip: TripDto;
+  petName: string;
+  petSpecies: string;
+  phase: "PLANNING" | "UPCOMING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  bookings: TravelBookingDto[];
+  readiness: TripReadinessSummaryDto;
+  /** Per requirement: whether evidence is on file. Derived from structured fields only (never document contents). */
+  documentStates: Record<string, "FOUND" | "MISSING" | "EXPIRING" | "EXPIRED" | "UNKNOWN">;
+  documents: { id: string; title: string; documentType: string; linkedRequirementIds: string[] }[];
+  insuranceApplications: { id: string; productName: string; providerName: string; status: InsuranceApplicationStatus; submittedAt: string | null }[];
+  nearbyPlaces: { id: string; name: string; category: string; city: string }[];
+  favoritePlaces: { id: string; name: string; category: string; city: string }[];
+  nearbyVets: { id: string; name: string; city: string }[];
+  activity: { type: string; label: string; at: string; link: string | null }[];
+  suggestions: { requirementRules: TravelRequirementRuleDto[] };
+}
+
+export interface TripListItemDto {
+  id: string;
+  petId: string;
+  petName: string;
+  destinationCity: string | null;
+  destinationCountry: string;
+  departAt: string;
+  returnAt: string | null;
+  status: TripStatus;
+  phase: TripHubDto["phase"];
+  bookingCount: number;
+  readyCount: number;
+  requirementCount: number;
+}
+
+export interface TravelRequirementRuleDto {
+  id: string;
+  country: string;
+  city: string | null;
+  requirementType: TravelRequirementType;
+  title: string;
+  description: string;
+  species: string[];
+  source: string;
+  sourceUrl: string | null;
+  verifiedAt: string;
+  validUntil: string | null;
+  status: "ACTIVE" | "NEEDS_REVIEW" | "RETIRED";
+  isStale: boolean;
+}
+
+export interface TravelProviderFinanceDto {
+  from: string;
+  to: string;
+  bookingCount: number;
+  bookedValueIrr: number;
+  paidOnlineIrr: number;
+  refundedIrr: number;
+  netCollectedIrr: number;
+  payAtPropertyIrr: number;
+  rows: { bookingId: string; reference: string; checkIn: string; status: TravelBookingStatus; totalIrr: number; paidIrr: number; refundedIrr: number }[];
+  settlementNote: string;
+}
+
+export interface TravelProviderCalendarDto {
+  unitId: string;
+  unitName: string;
+  quantity: number;
+  days: { date: string; remaining: number; booked: number; isBlocked: boolean; priceIrr: number; bookings: { id: string; reference: string; status: TravelBookingStatus }[] }[];
+}
+
+export interface AdminTravelAnalyticsDto {
+  days: number;
+  bookingCount: number;
+  confirmedCount: number;
+  cancelledCount: number;
+  bookedValueIrr: number;
+  paidValueIrr: number;
+  refundedIrr: number;
+  cancellationRate: number | null;
+  averageNights: number | null;
+  averageRating: number | null;
+  reviewCount: number;
+  topDestinations: { city: string; bookings: number }[];
+  topProviders: { organizationId: string; name: string; bookings: number; bookedValueIrr: number }[];
+  settlementNote: string;
+}
+
+export interface InsurerApplicationRowDto {
+  id: string;
+  productName: string;
+  status: InsuranceApplicationStatus;
+  eligibilityStatus: InsuranceEligibilityStatus;
+  petSpecies: string;
+  petAgeMonths: number | null;
+  petBreed: string | null;
+  submittedAt: string | null;
+  updatedAt: string;
+}
+
+export interface InsurerApplicationDetailDto extends InsurerApplicationRowDto {
+  notes: string | null;
+  insurerMessage: string | null;
+  externalReference: string | null;
+  consentAt: string | null;
+  timeline: { toStatus: string; fromStatus: string | null; actorType: string; note: string | null; createdAt: string }[];
 }

@@ -127,6 +127,123 @@ function apiDependency(pageDomain) {
   return map[pageDomain] || "Domain API";
 }
 
+/**
+ * Batch 2 (Pet Profile + Health + Care + Share With Vet) routes. Function A needs actions, permissions,
+ * state handling and runtime verified; Visual A needs the canonical pattern checked responsive in fa RTL and en LTR.
+ * Grades here are raised only from recorded evidence (e2e suites + live staging QA), never from build success alone.
+ */
+function isBatch2(route) {
+  return /\/pets\/:id(\/health|\/care|$)/.test(route) || route.endsWith("/care-calendar") || route.includes("/provider/shared-records");
+}
+/** Batch 3 (Services + Vet + Discovery + Booking + provider/admin operations). Same evidence rule as Batch 2. */
+function isBatch3(route) {
+  return (
+    /\/:locale\/(services|vet|providers|bookings)(\/|$)/.test(route) ||
+    /\/provider\/(bookings|calendar|services|team|waitlist|reviews|analytics|availability)(\/|$)/.test(route) ||
+    route.includes("/admin/services")
+  );
+}
+const BATCH3_GRADE = {
+  function: "B",
+  visual: "B",
+  blockers: "Batch 3: API lifecycle + security e2e green (batch3-booking 21 tests), web tests green, live since 2026-09-27. Public pages QA'd live fa/en desktop/mobile; authenticated customer/provider pages QA'd fa/en desktop/mobile on the isolated preview (QA seed, no live data) with no overflow/console errors. Native date inputs now show the Jalali reading (full Jalali picker still open). Real payment gateway credentials BLOCKED_EXTERNAL (sandbox only); map provider not configured.",
+};
+
+const BATCH2_GRADE = {
+  function: "B",
+  visual: "B",
+  blockers: "Batch 2: API security matrix green (batch2-care-share, batch2-security-matrix, clinical-health), live since 2026-09-27. Authenticated pet overview/health/care/calendar QA'd fa RTL + en LTR, desktop 1440 + mobile 390, on the isolated preview with the Batch 2 QA seed: no overflow, no stuck skeletons, no console errors.",
+};
+
+/** Batch 4 (Commerce: discovery, PDP, cart, checkout, orders, repeat delivery, seller + admin commerce). */
+function isBatch4(route) {
+  return (
+    /\/:locale\/(shop|cart|checkout|orders|repeat-delivery|favorites)(\/|$)/.test(route) ||
+    /\/seller\/(orders|offers|promotions|inventory)(\/|$)/.test(route) ||
+    route.includes("/admin/commerce")
+  );
+}
+const BATCH4_GRADE = {
+  function: "B",
+  visual: "B",
+  blockers: "Batch 4: batch4-commerce e2e (22: tampering, IDOR, seller isolation, RBAC, inventory/refund races, repeat delivery) + full API suite + web tests green; browser purchase → sandbox payment → cancel/refund verified on the isolated preview; fa/en desktop/mobile QA clean for customer, seller and admin pages. Live online payment BLOCKED_EXTERNAL (sandbox only); courier adapters are stubs without credentials; live QA after deploy recorded in docs/qa/batch-4-commerce.md.",
+};
+
+/**
+ * Batch 8 (Account, Security, Privacy, Household access, Notifications, Membership, system states).
+ * Per-route grades from recorded evidence (docs/qa/batch-8-account.md): batch8-account e2e (23), web
+ * tests, isolated preview QA fa RTL + en LTR at 1440/1024/768/430/390/360 (no overflow, no stuck
+ * skeleton) and axe WCAG 2.1 A/AA with 0 violations on the eight canonical account pages.
+ */
+const BATCH8_GRADES = {
+  "/:locale/profile": ["A", "A"],
+  "/:locale/profile/personal": ["A", "A"],
+  "/:locale/profile/household": ["A", "A"],
+  "/:locale/profile/membership": ["A", "A"],
+  "/:locale/subscription": ["A", "A"],
+  "/:locale/profile/notifications": ["A", "A"],
+  "/:locale/notifications/preferences": ["A", "A"],
+  "/:locale/profile/security": ["A", "A"],
+  "/:locale/profile/privacy": ["A", "A"],
+  "/:locale/profile/activity": ["A", "A"],
+  "/:locale/invitations/:token": ["A", "B"],
+  "/:locale/profile/household/pets/:petId/access": ["B", "B"],
+  "/:locale/profile/household/pets/:petId/lifecycle": ["B", "C"],
+  "/:locale/subscription/plans": ["B", "B"],
+  "/:locale/:...rest": ["A", "A"],
+};
+const BATCH8_BLOCKERS =
+  "Batch 8: batch8-account e2e (profile/contact verification, pre-takeover guard, OTP single use, household roles/removal/last owner, invitation states, temporary/expired/revoked grants, sessions/revoke-all, security notices, reset-link single use, consents, sharing, export build/download/expiry, deletion re-auth/blockers/cancel, honoured notification prefs, owner-only membership, activity, IDOR/CSRF/returnTo) + web tests green; preview QA fa/en at six widths and axe clean. Live: OTP/SMS/email delivery and payments are sandbox (BLOCKED_EXTERNAL); deletion processing waits for a published retention policy; no pet-transfer flow.";
+/**
+ * Batch 6 (Lost Pet, Animal Support, Donations, NGO/Shelter, Community, Trust & Safety, admin console).
+ * Evidence (docs/qa/batch-6-animal-support.md): batch6-animal-support e2e (35) + web tests; isolated preview
+ * with seed-batch6. Visual A = fa at 1440/1024/768/430/390/360 AND en checked (no overflow, no stuck
+ * skeleton, axe WCAG 2.1 A/AA clean at 1440/390). Visual B = fa+en at 1440/390 only, or fa only.
+ * Routes with no browser evidence this batch keep B/C.
+ */
+const BATCH6_GRADES = {
+  "/:locale/lost-pets/:incidentId": ["A", "A"],
+  "/:locale/animal-support/needs": ["A", "A"],
+  "/:locale/animal-support/needs/:listingId": ["A", "A"],
+  "/:locale/animal-support/organizations/:organizationId": ["A", "A"],
+  "/:locale/community": ["A", "A"],
+  "/:locale/admin/community": ["A", "A"],
+  "/:locale/lost-pets": ["A", "B"],
+  "/:locale/pets/:id/lost/report": ["A", "B"],
+  "/:locale/pets/:id/lost/:incidentId": ["A", "B"],
+  "/:locale/animal-support/needs/new": ["A", "B"],
+  "/:locale/animal-support/needs/:listingId/manage": ["A", "B"],
+  "/:locale/animal-support/needs/mine": ["A", "B"],
+  "/:locale/animal-support/my-help": ["A", "B"],
+  "/:locale/animal-support/campaigns": ["B", "B"],
+  "/:locale/animal-support/campaigns/:campaignId": ["A", "B"],
+  "/:locale/donations/:id": ["A", "B"],
+  "/:locale/community/posts/:postId": ["A", "B"],
+  "/:locale/community/new": ["A", "B"],
+  "/:locale/ngo": ["A", "B"],
+  "/:locale/ngo/needs": ["A", "B"],
+  "/:locale/ngo/offers": ["A", "B"],
+  "/:locale/ngo/donations": ["A", "B"],
+  "/:locale/ngo/team": ["A", "B"],
+  "/:locale/ngo/verification": ["A", "B"],
+  "/:locale/admin/animal-support": ["A", "B"],
+  "/:locale/admin/animal-support/needs": ["A", "B"],
+  "/:locale/admin/animal-support/needs/:id": ["A", "B"],
+  "/:locale/admin/animal-support/organizations": ["A", "B"],
+  "/:locale/admin/animal-support/organizations/:id": ["A", "B"],
+  "/:locale/admin/animal-support/donations": ["A", "B"],
+  "/:locale/admin/lost-pets": ["A", "B"],
+  "/:locale/admin/lost-pets/:id": ["A", "B"],
+  "/:locale/admin/trust/:id": ["A", "B"],
+};
+const BATCH6_BLOCKERS =
+  "Batch 6: batch6-animal-support e2e (location/contact privacy, lost-pet lifecycle, offers and fulfilment, expiry, donations incl. ledger/idempotency/refund, NGO roles and isolation, community privacy and reports, trust & safety effects and restore, admin console, forged-id sweep, deep links) + web tests; isolated preview QA with seed-batch6 (fa/en, axe clean). Live: payments sandbox only (BLOCKED_EXTERNAL); SMS delivery not configured; no map provider (approximate area text).";
+
+function batch8Grade(route) {
+  if (BATCH6_GRADES[route]) return BATCH6_GRADES[route];
+  return BATCH8_GRADES[route];
+}
+
 function status(route, pageDomain, hasTest) {
   if (pageDomain === "AI" || pageDomain === "CRM" || pageDomain === "Customer Affairs") return "C";
   if (pageDomain === "Checkout") return "E";
@@ -259,8 +376,8 @@ const rows = walk(appRoot)
       domain: pageDomain,
       authRequirement: authRequirement(route, routeActor),
       designReference: referenceAvailable(pageDomain),
-      functionStatus: status(route, pageDomain, hasTest),
-      visualStatus: visualStatus(route, pageDomain),
+      functionStatus: batch8Grade(route) ? batch8Grade(route)[0] : isBatch4(route) ? BATCH4_GRADE.function : isBatch3(route) ? BATCH3_GRADE.function : isBatch2(route) ? BATCH2_GRADE.function : status(route, pageDomain, hasTest),
+      visualStatus: batch8Grade(route) ? batch8Grade(route)[1] : isBatch4(route) ? BATCH4_GRADE.visual : isBatch3(route) ? BATCH3_GRADE.visual : isBatch2(route) ? BATCH2_GRADE.visual : visualStatus(route, pageDomain),
       backendApiDependency: apiDependency(pageDomain),
       missingFunctionality: missingFunctionality(route, pageDomain),
       missingStates: missingStates(route, pageDomain),
@@ -268,7 +385,7 @@ const rows = walk(appRoot)
       partnerCounterpart: counterpart(pageDomain, "partner"),
       priority: priority(route, pageDomain),
       estimatedEffort: effort(route, pageDomain),
-      blockers: blockers(route, pageDomain),
+      blockers: BATCH6_GRADES[route] ? BATCH6_BLOCKERS : batch8Grade(route) ? BATCH8_BLOCKERS : isBatch4(route) ? BATCH4_GRADE.blockers : isBatch3(route) ? BATCH3_GRADE.blockers : isBatch2(route) ? BATCH2_GRADE.blockers : blockers(route, pageDomain),
       sourceFile: path.relative(root, file).replaceAll(path.sep, "/"),
     };
   })

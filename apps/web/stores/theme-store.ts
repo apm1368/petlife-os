@@ -8,7 +8,7 @@ interface ThemeState {
 
 const STORAGE_KEY = "petlife-theme";
 
-function applyThemeToDocument(theme: ThemePreference) {
+export function applyThemeToDocument(theme: ThemePreference) {
   if (typeof document === "undefined") return;
   if (theme === "SYSTEM") {
     document.documentElement.removeAttribute("data-theme");

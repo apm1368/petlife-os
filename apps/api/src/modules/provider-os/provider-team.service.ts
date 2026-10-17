@@ -10,7 +10,7 @@ export class ProviderTeamService {
 
   async list(ctx: ResolvedProviderContext): Promise<ProviderTeamMemberDto[]> {
     const members = await this.prisma.providerUser.findMany({
-      where: { providerOrganizationId: ctx.organizationId },
+      where: { providerOrganizationId: ctx.organizationId, removedAt: null },
       include: { user: true },
       orderBy: { createdAt: "asc" },
     });

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ProviderServiceDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
+import { ProviderResourcesSection, ProviderServiceSettings } from "./ProviderServiceSettings";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 /**
  * Minimal service admin (spec sections 24-25) — editable fields only, no
@@ -21,6 +23,9 @@ export function ProviderServicesView() {
   const [draft, setDraft] = useState<{ name: string; priceAmount: string; durationMinutes: string }>({ name: "", priceAmount: "", durationMinutes: "" });
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
+  const [locationId, setLocationId] = useState<string | null>(null);
+  const fa = useLocale() === "fa";
 
   async function load() {
     setError(false);
@@ -33,6 +38,7 @@ export function ProviderServicesView() {
 
   useEffect(() => {
     void load();
+    void providerOsService.getOverview().then((o) => setLocationId(o.location?.id ?? null)).catch(() => setLocationId(null));
   }, []);
 
   function startEdit(service: ProviderServiceDto) {
@@ -46,7 +52,7 @@ export function ProviderServicesView() {
       const updated = await providerOsService.updateService(service.id, { isActive: !service.isActive });
       setServices((prev) => prev?.map((s) => (s.id === service.id ? updated : s)) ?? null);
     } catch (err) {
-      setSaveError(err instanceof ApiError ? err.message : t("saveFailed"));
+      setSaveError(apiErrorText(err, (fa ? "fa" : "en"), t("saveFailed")));
     }
   }
 
@@ -62,7 +68,7 @@ export function ProviderServicesView() {
       setServices((prev) => prev?.map((s) => (s.id === service.id ? updated : s)) ?? null);
       setEditingId(null);
     } catch (err) {
-      setSaveError(err instanceof ApiError && err.code === "PROVIDER_ACCESS_DENIED" ? t("ownerOnly") : err instanceof ApiError ? err.message : t("saveFailed"));
+      setSaveError(err instanceof ApiError && err.code === "PROVIDER_ACCESS_DENIED" ? t("ownerOnly") : apiErrorText(err, (fa ? "fa" : "en"), t("saveFailed")));
     } finally {
       setIsSaving(false);
     }
@@ -121,11 +127,18 @@ export function ProviderServicesView() {
                 <Button variant="ghost" size="sm" onClick={() => toggleActive(service)}>
                   {t(service.isActive ? "disable" : "enable")}
                 </Button>
+                <Button variant="ghost" size="sm" aria-expanded={settingsId === service.id} onClick={() => setSettingsId(settingsId === service.id ? null : service.id)}>
+                  {fa ? "قوانین و گزینه‌ها" : "Policy & options"}
+                </Button>
               </div>
             )}
+            {settingsId === service.id ? (
+              <ProviderServiceSettings service={service} onSaved={(updated) => setServices((prev) => prev?.map((s) => (s.id === updated.id ? updated : s)) ?? null)} />
+            ) : null}
           </ContextSurface>
         ))}
       </div>
+      <ProviderResourcesSection locationId={locationId} />
     </div>
   );
 }

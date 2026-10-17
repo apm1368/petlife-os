@@ -49,16 +49,21 @@ import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { DevPaymentGateway } from "../src/modules/commerce/payments/dev-payment-gateway.service";
 import { FulfillmentTransitionService } from "../src/modules/commerce/logistics/fulfillment-transition.service";
+import { normalizeIranianPhone } from "../src/common/phone/phone-normalizer";
 
 interface Cookies {
   session?: string;
   csrf?: string;
 }
 
+/** The identifier exactly as the API stores, logs and rate-limits it (phones in E.164). */
+const canonicalIdentifier = (identifier: string) => (identifier.includes("@") ? identifier.trim().toLowerCase() : normalizeIranianPhone(identifier)?.e164 ?? identifier);
+
 /** Extracts the code the DevOtpProvider logs instead of sending an SMS/email. */
 function captureOtpCode(logSpy: jest.SpyInstance, identifier: string): string {
+  const logged = canonicalIdentifier(identifier);
   const call = logSpy.mock.calls.find(
-    (args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(identifier),
+    (args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(logged),
   );
   if (!call) throw new Error(`No OTP log found for ${identifier}`);
   const match = /code=(\d+)/.exec(call[0] as string);
@@ -1128,6 +1133,25 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(denied.body.error.code).toBe("PET_ACCESS_DENIED");
     });
 
+    it("Batch 2: a VET booking without an explicit owner health choice grants operational recording only, never health reading", async () => {
+      const { client, petId } = await setupOwnerWithPet();
+      const { organization, location, service, vetUser } = await seedVerifiedClinic();
+      const slot = await firstAvailableSlot(client, organization.id, location.id, service.id);
+      const hold = await client
+        .post("/booking-holds")
+        .send({ petId, providerId: organization.id, locationId: location.id, serviceId: service.id, slotStart: slot.startAt })
+        .expect(201);
+      await client.post("/bookings").send({ holdId: hold.body.holdId, petId }).expect(201);
+
+      const grant = await prisma.petAccessGrant.findFirstOrThrow({ where: { petId, userId: vetUser.id, source: PetAccessSource.TEMPORARY } });
+      expect(grant).toMatchObject({ canViewHealth: false, canEditHealth: false, canRecordClinicalData: true, reason: "VET_BOOKING" });
+      const vetClient = authedRequest(app, await signUp(app, logSpy, vetUser.email!));
+      await vetClient.get(`/pets/${petId}/health/summary`).expect(403);
+      // Legacy booking rows that carried health flags before consent was recorded are still not honored for reading.
+      await prisma.petAccessGrant.update({ where: { id: grant.id }, data: { canViewHealth: true } });
+      await vetClient.get(`/pets/${petId}/health/summary`).expect(403);
+    });
+
     it("gates the vet's temporary access at canViewHealth/canEditHealth exactly — view works, edit does not", async () => {
       const { client, petId } = await setupOwnerWithPet();
       const { organization, location, service, vetUser } = await seedVerifiedClinic();
@@ -1524,14 +1548,10 @@ describe("PET LIFE OS critical paths (e2e)", () => {
         .send({ householdId, addressLine: "42 Home St.", city: "Testville", countryCode: "US" })
         .expect(201);
 
-      const customerSlot2 = await firstAvailableServiceSlot(client, atCustomer.service.id);
-      const customerHold2 = await client
-        .post("/booking-holds")
-        .send({ petId, providerId: atCustomer.organization.id, locationId: atCustomer.location.id, serviceId: atCustomer.service.id, slotStart: customerSlot2.startAt })
-        .expect(201);
+      // A missing address is correctable: the same hold is still valid and confirms once an address is given.
       const withAddress = await client
         .post("/bookings")
-        .send({ holdId: customerHold2.body.holdId, petId, customerAddressId: address.body.id })
+        .send({ holdId: customerHold.body.holdId, petId, customerAddressId: address.body.id })
         .expect(201);
       expect(withAddress.body.customerAddress.id).toBe(address.body.id);
     });
@@ -1813,12 +1833,14 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const staffDenied = await staffProvider.patch(`/provider/services/${org.service.id}`).send({ isActive: false }).expect(403);
       expect(staffDenied.body.error.code).toBe("PROVIDER_ACCESS_DENIED");
 
+      const slot = await firstAvailableServiceSlot(owner, org.service.id);
       await provider.patch(`/provider/services/${org.service.id}`).send({ isActive: false }).expect(200);
 
       const stillThere = await prisma.booking.findUnique({ where: { id: booking.id } });
       expect(stillThere?.bookingStatus).toBe("CONFIRMED");
 
-      const slot = await firstAvailableServiceSlot(owner, org.service.id);
+      // Batch 3: a disabled service no longer advertises availability at all.
+      await owner.get(`/provider-services/${org.service.id}/availability?from=${new Date().toISOString()}&to=${new Date(Date.now() + 86400000).toISOString()}`).expect(404);
       const denied = await owner
         .post("/booking-holds")
         .send({ petId, providerId: org.organization.id, locationId: org.location.id, serviceId: org.service.id, slotStart: slot.startAt })
@@ -1961,8 +1983,12 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const offer = await seedOffer(unverifiedSeller.id, variant.id, 100_000, 10);
 
       const results = await client.get(`/shop/products?search=${encodeURIComponent(product.title)}`).expect(200);
-      const found = results.body.find((p: { id: string }) => p.id === product.id);
-      expect(found.bestOffer).toBeNull();
+      // Batch 4: search is paginated ({ items, total, facets }) and lists only products with a buyable offer,
+      // so a product whose only offer is unverified is not surfaced at all; its detail page shows no offer either.
+      const found = results.body.items.find((p: { id: string }) => p.id === product.id);
+      expect(found).toBeUndefined();
+      const detail = await client.get(`/shop/products/${product.id}`).expect(200);
+      expect(detail.body.offers).toHaveLength(0);
 
       const denied = await client.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(400);
       expect(denied.body.error.code).toBe("OFFER_NOT_AVAILABLE");
@@ -2086,7 +2112,13 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const seller = await seedSeller();
       const offer = await seedOffer(seller.id, variant.id, 100_000, 2);
 
-      await client.post("/cart/items").send({ offerId: offer.id, quantity: 5 }).expect(201);
+      // Batch 4: the cart already refuses more than the available stock...
+      const tooMany = await client.post("/cart/items").send({ offerId: offer.id, quantity: 5 }).expect(400);
+      expect(tooMany.body.error.details.reason).toBe("INSUFFICIENT_INVENTORY");
+
+      // ...and checkout still re-validates when stock drops after the item was added.
+      await client.post("/cart/items").send({ offerId: offer.id, quantity: 2 }).expect(201);
+      await prisma.inventoryItem.update({ where: { sellerOfferId: offer.id }, data: { onHand: 1 } });
       const denied = await client.post("/checkout").send({}).expect(400);
       expect(denied.body.error.details.reason).toBe("INSUFFICIENT_INVENTORY");
     });
@@ -4224,6 +4256,10 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const denied = await support.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "n/a" }).expect(403);
       expect(denied.body.error.details.reason).toBe("INSUFFICIENT_PERMISSION");
 
+      // ERP-C: VERIFIED needs accepted evidence — without it the same request is refused.
+      const noEvidence = await verification.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "Documents checked" }).expect(400);
+      expect(noEvidence.body.error.details.reason).toBe("VERIFICATION_EVIDENCE_REQUIRED");
+      await prisma.partnerVerificationDocument.create({ data: { subjectType: "SELLER", subjectId: seller.id, kind: "IDENTITY", objectKey: `partner-verification/seller/${seller.id}/${unique()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 10, status: "ACCEPTED", uploadedByUserId: seller.id } });
       const allowed = await verification.client.patch(`/admin/sellers/${seller.id}/verification`).send({ status: SellerVerificationStatus.VERIFIED, reason: "Documents checked" }).expect(200);
       expect(allowed.body.verificationStatus).toBe(SellerVerificationStatus.VERIFIED);
     });

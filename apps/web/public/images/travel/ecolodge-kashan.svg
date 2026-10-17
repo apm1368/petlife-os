@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Illustration">
+<rect width="800" height="600" fill="#f5e6d3"/>
+<circle cx="660" cy="120" r="56" fill="#d9a05b" opacity=".9"/>
+<path d="M0 470 Q200 400 400 450 T800 430 V600 H0Z" fill="#a8683b" opacity=".25"/>
+<rect x="210" y="250" width="380" height="230" rx="18" fill="#fff"/>
+<path d="M190 262 L400 130 L610 262Z" fill="#a8683b"/>
+<rect x="260" y="300" width="70" height="70" rx="8" fill="#d9a05b"/>
+<rect x="470" y="300" width="70" height="70" rx="8" fill="#d9a05b"/>
+<rect x="365" y="370" width="70" height="110" rx="8" fill="#a8683b"/>
+<ellipse cx="560" cy="505" rx="46" ry="10" fill="#000" opacity=".08"/>
+<path d="M520 470 q10-40 40-40 q30 0 36 26 l14 -18 l6 20 q10 16 -4 30 h-80z" fill="#6b4b3a"/>
+<circle cx="604" cy="446" r="4" fill="#fff"/>
+<text x="400" y="570" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#a8683b">PET LIFE · QA illustration</text>
+</svg>

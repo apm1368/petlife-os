@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { RehabPlanDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { NotFoundApiException } from "../../common/errors/api-exception";
+import { ProviderAccessDeniedException, NotFoundApiException } from "../../common/errors/api-exception";
 import { REHAB_PLAN_INCLUDE, toRehabPlanDto } from "./clinical-health-mapper";
 import { assertVisitBelongsToPet } from "./clinical-link.util";
 import type { CreateRehabPlanDto, CreateRehabSessionDto } from "./dto/rehab.dto";
@@ -35,9 +35,16 @@ export class RehabService {
     return rows.map(toRehabPlanDto);
   }
 
-  async addSession(petId: string, rehabPlanId: string, dto: CreateRehabSessionDto): Promise<RehabPlanDto> {
+  async get(petId: string, rehabPlanId: string): Promise<RehabPlanDto> {
+    const row = await this.prisma.rehabPlan.findUnique({ where: { id: rehabPlanId }, include: REHAB_PLAN_INCLUDE });
+    if (!row || row.petId !== petId) throw new NotFoundApiException("Rehab plan");
+    return toRehabPlanDto(row);
+  }
+
+  async addSession(ctx: ResolvedProviderContext, petId: string, rehabPlanId: string, dto: CreateRehabSessionDto): Promise<RehabPlanDto> {
     const plan = await this.prisma.rehabPlan.findUnique({ where: { id: rehabPlanId } });
     if (!plan || plan.petId !== petId) throw new NotFoundApiException("Rehab plan");
+    if (plan.providerOrganizationId !== ctx.organizationId) throw new ProviderAccessDeniedException({ reason: "NOT_OWNING_ORGANIZATION" });
 
     await this.prisma.rehabSession.create({
       data: { rehabPlanId, sessionDate: new Date(dto.sessionDate), observation: dto.observation, progressNotes: dto.progressNotes },

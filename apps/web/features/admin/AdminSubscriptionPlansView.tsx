@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { SubscriptionPlanDto } from "@petlife/types";
 import { SubscriptionBillingInterval } from "@petlife/types";
+import { useAdminStore } from "@/stores/admin-store";
+import { PlanMaintenance } from "./PlanMaintenance";
 import { adminSubscriptionService } from "@/services/admin-subscription.service";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
@@ -13,6 +15,8 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 /** Admin plan/price catalog (spec: "Admin -> Subscriptions -> Plans/Prices"). Plans are few and admin-managed — a plain list, no pagination, matching every other admin catalog view in this codebase (AdminCustomersView, AdminAuditView). */
 export function AdminSubscriptionPlansView() {
   const t = useTranslations("admin.subscriptions");
+  const adminContext = useAdminStore(s => s.context);
+  const canManage = adminContext?.permissions.includes("subscription.plan.manage") ?? false;
   const tCommon = useTranslations("admin.common");
   const locale = useLocale();
   const router = useRouter();
@@ -45,7 +49,7 @@ export function AdminSubscriptionPlansView() {
   }, [load]);
 
   async function createPlan() {
-    if (!code.trim() || !nameFa.trim() || !nameEn.trim()) return;
+    if (!canManage || !code.trim() || !nameFa.trim() || !nameEn.trim()) return;
     setFormError(null);
     setBusy(true);
     try {
@@ -69,6 +73,7 @@ export function AdminSubscriptionPlansView() {
   }
 
   async function addPrice(planId: string) {
+    if (!canManage) return;
     const amount = Number(priceAmounts[planId]);
     if (!amount || amount <= 0) return;
     setFormError(null);
@@ -95,7 +100,7 @@ export function AdminSubscriptionPlansView() {
 
       {formError ? <p className="text-body text-state-urgent">{formError}</p> : null}
 
-      <ContextSurface className="flex flex-wrap items-end gap-2">
+      {canManage ? <ContextSurface className="flex flex-wrap items-end gap-2">
         <Input label={t("form.code")} value={code} onChange={(e) => setCode(e.target.value)} className="min-w-32" />
         <Input label={t("form.nameFa")} value={nameFa} onChange={(e) => setNameFa(e.target.value)} className="min-w-32" />
         <Input label={t("form.nameEn")} value={nameEn} onChange={(e) => setNameEn(e.target.value)} className="min-w-32" />
@@ -104,7 +109,7 @@ export function AdminSubscriptionPlansView() {
         <Button isLoading={busy} onClick={createPlan}>
           {t("form.createPlan")}
         </Button>
-      </ContextSurface>
+      </ContextSurface> : null}
 
       {plans.map((plan) => (
         <ContextSurface key={plan.id} className="flex flex-col gap-2">
@@ -121,7 +126,7 @@ export function AdminSubscriptionPlansView() {
               </span>
             ))}
           </div>
-          {!plan.isFree ? (
+          {canManage && !plan.isFree ? (
             <div className="flex items-end gap-2">
               <Input
                 label={t("form.newMonthlyPrice")}
@@ -134,6 +139,7 @@ export function AdminSubscriptionPlansView() {
               </Button>
             </div>
           ) : null}
+          <PlanMaintenance key={plan.updatedAt} plan={plan} onSaved={load} />
         </ContextSurface>
       ))}
     </div>

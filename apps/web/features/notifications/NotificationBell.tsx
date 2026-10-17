@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { IconButton } from "@petlife/ui";
 import { useNotificationBootstrap } from "@/hooks/use-notification-bootstrap";
 import { useNotificationStore } from "@/stores/notification-store";
+import { formatCount } from "@/lib/number/format-number";
 
 /** Header bell (spec: "bell/icon, unread badge") — links to the full notification center rather than a dropdown panel, keeping this component small and avoiding popover-positioning complexity for a first pass. */
 export function NotificationBell() {
@@ -17,7 +18,7 @@ export function NotificationBell() {
   return (
     <div className="relative">
       <IconButton
-        label={unreadCount > 0 ? t("bellLabelUnread", { count: unreadCount }) : t("bellLabel")}
+        label={unreadCount > 0 ? t("bellLabelUnread", { count: formatCount(unreadCount, locale) }) : t("bellLabel")}
         onClick={() => router.push(`/${locale}/notifications`)}
         icon={
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -31,7 +32,7 @@ export function NotificationBell() {
           aria-hidden="true"
           className="pointer-events-none absolute end-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-state-urgent px-1 text-[10px] font-medium leading-none text-text-inverse"
         >
-          {unreadCount > 99 ? "99+" : unreadCount}
+          {unreadCount > 99 ? formatCount(99, locale) + "+" : formatCount(unreadCount, locale)}
         </span>
       ) : null}
     </div>

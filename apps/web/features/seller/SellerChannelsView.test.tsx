@@ -84,7 +84,7 @@ describe("SellerChannelsView", () => {
     renderWithIntl(<SellerChannelsView />);
 
     await waitFor(() => expect(screen.getByText("Provider temporarily unavailable")).toBeTruthy());
-    expect(screen.getByText(/differs from PET LIFE OS stock/)).toBeTruthy();
+    expect(screen.getByText(/differs from opetlife stock/)).toBeTruthy();
   });
 
   it("offers to connect an unconnected provider", async () => {

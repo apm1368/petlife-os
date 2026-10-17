@@ -53,6 +53,13 @@ export class OtpRateLimitedException extends ApiException {
   }
 }
 
+/** Per-identifier sign-in budget exhausted (password attempts) — same response whether or not the account exists. */
+export class AuthRateLimitedException extends ApiException {
+  constructor(retryAfterSeconds: number) {
+    super("AUTH_RATE_LIMITED", "Too many attempts. Please try again later.", HttpStatus.TOO_MANY_REQUESTS, { retryAfterSeconds });
+  }
+}
+
 export class ValidationApiException extends ApiException {
   constructor(details: Record<string, unknown>) {
     super("VALIDATION_ERROR", "The request did not pass validation.", HttpStatus.BAD_REQUEST, details);
@@ -90,6 +97,13 @@ export class ProviderNotVerifiedException extends ApiException {
 export class ServiceNotAvailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("SERVICE_NOT_AVAILABLE", "This service is not currently available.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+/** G13: an at-home service whose area doesn't include the booking address's city. */
+export class ServiceLocationNotSupportedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SERVICE_LOCATION_NOT_SUPPORTED", "This provider does not serve this address for the selected service.", HttpStatus.BAD_REQUEST, { reason: "LOCATION_NOT_SUPPORTED", ...details });
   }
 }
 
@@ -148,6 +162,13 @@ export class ProviderAccessDeniedException extends ApiException {
 export class ProviderOrgNotVerifiedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PROVIDER_NOT_VERIFIED", "Your organization must be verified before taking this action.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+/** Community chat — one of the two members has blocked the other: no new conversation or message. */
+export class ChatBlockedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CHAT_BLOCKED", "You can't message this member.", HttpStatus.FORBIDDEN, details);
   }
 }
 
@@ -279,6 +300,12 @@ export class PaymentPendingException extends ApiException {
   }
 }
 
+export class PaymentInProgressException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_IN_PROGRESS", "This payment is already being processed.", HttpStatus.CONFLICT, details);
+  }
+}
+
 export class PaymentAlreadyCompletedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PAYMENT_ALREADY_COMPLETED", "This checkout has already been paid.", HttpStatus.CONFLICT, details);
@@ -288,6 +315,24 @@ export class PaymentAlreadyCompletedException extends ApiException {
 export class OrderNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("ORDER_NOT_FOUND", "Order not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class OrderNotCancellableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("ORDER_NOT_CANCELLABLE", "This order can no longer be cancelled — it has already been handed to the courier.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class RefundRequestNotAllowedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFUND_REQUEST_NOT_ALLOWED", "A refund request is not available for this order right now.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class RefundRequestNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REFUND_REQUEST_NOT_FOUND", "Refund request not found.", HttpStatus.NOT_FOUND, details);
   }
 }
 
@@ -378,6 +423,18 @@ export class InventoryChangedAfterPaymentException extends ApiException {
 export class PaymentOrderConfirmationIssueException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PAYMENT_ORDER_CONFIRMATION_ISSUE", "Payment succeeded but the order could not be confirmed automatically.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ForeignUploadKeyException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_UPLOAD_KEY", "This file wasn't uploaded for this item. Upload it again.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class PaymentIntentNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("PAYMENT_INTENT_NOT_FOUND", "Payment not found.", HttpStatus.NOT_FOUND, details);
   }
 }
 
@@ -1073,6 +1130,13 @@ export class SubscriptionEntitlementLimitExceededException extends ApiException 
   }
 }
 
+/** A plan feature (BOOLEAN entitlement) the household's current plan does not include. `details.key` names it so the UI can point at the plans that do. */
+export class SubscriptionFeatureNotIncludedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUBSCRIPTION_FEATURE_NOT_INCLUDED", "This feature is not included in the current plan.", HttpStatus.CONFLICT, details);
+  }
+}
+
 export class SubscriptionBillingAttemptNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("SUBSCRIPTION_BILLING_ATTEMPT_NOT_FOUND", "Billing attempt not found.", HttpStatus.NOT_FOUND, details);
@@ -1307,6 +1371,12 @@ export class InvalidSupportNeedTransitionException extends ApiException {
 export class SupportNeedListingNotEditableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("SUPPORT_NEED_LISTING_NOT_EDITABLE", "This listing can no longer be edited.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class SupportNeedDeadlineInvalidException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_NEED_DEADLINE_INVALID", "The deadline must be in the future and at most 180 days away.", HttpStatus.BAD_REQUEST, details);
   }
 }
 
@@ -1582,5 +1652,162 @@ export class DischargeSummaryAlreadyIssuedException extends ApiException {
 export class ProviderClinicalAlertNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("PROVIDER_CLINICAL_ALERT_NOT_FOUND", "Alert not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class DuplicateReportException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DUPLICATE_REPORT", "You have already reported this and it is being reviewed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ReportLimitReachedException extends ApiException {
+  constructor() {
+    super("REPORT_LIMIT_REACHED", "You have sent many reports today. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS);
+  }
+}
+
+export class ReportNotOpenException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REPORT_NOT_OPEN", "Only open reports can be escalated or dismissed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TrustActionNotApplicableException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_ACTION_NOT_APPLICABLE", "This action can't be applied to the subject in its current state.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class TrustSubjectNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("TRUST_SUBJECT_NOT_FOUND", "The subject of this case no longer exists.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+export class ContactUnavailableException extends ApiException {
+  constructor() {
+    super("CONTACT_UNAVAILABLE", "This email or phone number can't be used for your account.", HttpStatus.CONFLICT);
+  }
+}
+
+export class ContactUnchangedException extends ApiException {
+  constructor() {
+    super("CONTACT_UNCHANGED", "This is already your verified contact.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class LastHouseholdOwnerException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("LAST_HOUSEHOLD_OWNER", "A household must keep at least one owner. Make another member an owner first.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class AlreadyHouseholdMemberException extends ApiException {
+  constructor() {
+    super("ALREADY_HOUSEHOLD_MEMBER", "This person is already a member of your household.", HttpStatus.CONFLICT);
+  }
+}
+
+export class ConsentRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CONSENT_REQUIRED", "This agreement is required to use PET LIFE. To stop, request account deletion instead.", HttpStatus.BAD_REQUEST, details);
+  }
+}
+
+export class ExportLimitReachedException extends ApiException {
+  constructor() {
+    super("EXPORT_LIMIT_REACHED", "You've requested several exports today. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS);
+  }
+}
+
+export class DeletionBlockedException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("DELETION_BLOCKED", "Some things need to be resolved before your account can be deleted.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ReauthenticationRequiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("REAUTHENTICATION_REQUIRED", "Confirm it's you with your password or the code we sent.", HttpStatus.UNAUTHORIZED, details);
+  }
+}
+
+/** Batch 8 — invitation token states, told to whoever holds the (secret) token; household details stay behind the invitee check. */
+export class InvitationExpiredException extends ApiException {
+  constructor() {
+    super("INVITATION_EXPIRED", "This invitation has expired. Ask for a new one.", HttpStatus.GONE);
+  }
+}
+
+export class InvitationAlreadyUsedException extends ApiException {
+  constructor() {
+    super("INVITATION_ALREADY_USED", "This invitation has already been answered.", HttpStatus.CONFLICT);
+  }
+}
+
+export class InvitationRevokedException extends ApiException {
+  constructor() {
+    super("INVITATION_REVOKED", "This invitation was cancelled by the household.", HttpStatus.GONE);
+  }
+}
+
+export class InvitationNotForYouException extends ApiException {
+  constructor() {
+    super("INVITATION_NOT_FOR_YOU", "This invitation was sent to a different email or phone number.", HttpStatus.FORBIDDEN);
+  }
+}
+
+/** The user is already a member of this clinic (Clinic OS staff management). */
+export class ClinicStaffAlreadyMemberException extends ApiException {
+  constructor() {
+    super("CLINIC_STAFF_ALREADY_MEMBER", "This person is already on the clinic's team.", HttpStatus.CONFLICT);
+  }
+}
+
+/** Clinic OS invitations / removal. `details.reason` says exactly why. */
+export class ClinicInvitationConflictException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("CLINIC_INVITATION_CONFLICT", "This invitation can't be used in its current state.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ClinicMemberNotRemovableException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("CLINIC_MEMBER_NOT_REMOVABLE", "This team member can't be removed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+export class ClinicBranchInUseException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("CLINIC_BRANCH_IN_USE", "This branch is still in use and can't be removed.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** A block between two members stops comments and replies between them (either direction). */
+export class CommunityInteractionBlockedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_INTERACTION_BLOCKED", "You can't interact with this member.", HttpStatus.FORBIDDEN, details);
+  }
+}
+
+/** ERP-A: an access-control change that would break a governance rule (last SUPER_ADMIN, changing your own role, granting above your own reach). */
+export class AdminGovernanceRuleException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("ADMIN_GOVERNANCE_RULE", "This change is not allowed by the admin governance rules.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** ERP-A: a setting change based on a version that is no longer current, or a review of a change that is no longer pending. */
+export class SettingChangeConflictException extends ApiException {
+  constructor(details: Record<string, unknown>) {
+    super("SETTING_CHANGE_CONFLICT", "This setting changed in the meantime. Reload and try again.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** ERP-B: the account was suspended by platform staff — sign-in is refused (existing sessions simply stop resolving). */
+export class AccountSuspendedException extends ApiException {
+  constructor() {
+    super("ACCOUNT_SUSPENDED", "This account is suspended. Please contact support.", HttpStatus.FORBIDDEN);
   }
 }

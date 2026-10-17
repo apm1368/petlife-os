@@ -5,7 +5,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { providerOsService } from "@/services/provider-os.service";
 import { ProviderServicesView } from "./ProviderServicesView";
 
-vi.mock("@/services/provider-os.service", () => ({ providerOsService: { listServices: vi.fn(), updateService: vi.fn() } }));
+vi.mock("@/services/provider-os.service", () => ({ providerOsService: { listServices: vi.fn(), updateService: vi.fn(), getOverview: vi.fn().mockResolvedValue({ location: null }), listResources: vi.fn().mockResolvedValue([]) } }));
 
 const SERVICE: ProviderServiceDto = {
   id: "svc-1",
@@ -27,7 +27,7 @@ const SERVICE: ProviderServiceDto = {
   requiresCareProfile: false,
   requiresHealthBasics: false,
   locationMode: "AT_PROVIDER" as never,
-  isActive: true,
+  isActive: true, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, depositAmount: null, cancellationPolicy: null, freeCancellationHours: 24, lateCancellationRefundPercent: 0, preparationNotes: null, maxPetsPerBooking: 1, requiredResourceType: null, variants: [],
 };
 
 describe("ProviderServicesView", () => {

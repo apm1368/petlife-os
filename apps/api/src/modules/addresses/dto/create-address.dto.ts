@@ -1,4 +1,5 @@
-import { IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length } from "class-validator";
+import { PartialType, OmitType } from "@nestjs/mapped-types";
+import { IsBoolean, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Matches } from "class-validator";
 
 export class CreateAddressDto {
   @IsUUID()
@@ -48,4 +49,14 @@ export class CreateAddressDto {
   @IsString()
   @Length(1, 500)
   instructions?: string;
+
+  @IsOptional()
+  @Matches(/^[0-9]{10}$/, { message: "postalCode must be exactly 10 digits" })
+  postalCode?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isDefault?: boolean;
 }
+
+export class UpdateAddressDto extends PartialType(OmitType(CreateAddressDto, ["householdId"] as const)) {}

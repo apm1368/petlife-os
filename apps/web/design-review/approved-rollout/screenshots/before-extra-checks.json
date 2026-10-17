@@ -1,0 +1,38 @@
+[
+  {
+    "page": "booking",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "support-board",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "taxi-list",
+    "width": 390,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "booking",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "support-board",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  },
+  {
+    "page": "taxi-list",
+    "width": 1440,
+    "baseline": "a5a672d",
+    "overflow": false
+  }
+]

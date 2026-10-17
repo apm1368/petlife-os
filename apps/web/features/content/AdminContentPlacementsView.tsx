@@ -109,7 +109,7 @@ export function AdminContentPlacementsView() {
 
       <div className="flex flex-wrap gap-2">
         {PLACEMENT_KEYS.map((k) => (
-          <Button key={k} size="sm" variant={key === k ? "primary" : "secondary"} onClick={() => setKey(k)}>
+          <Button key={k} size="sm" aria-pressed={key === k} variant={key === k ? "primary" : "secondary"} onClick={() => setKey(k)}>
             {t(`key.${k}`)}
           </Button>
         ))}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
+import { randomId } from "@/lib/id/random-id";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import {
   DeliveryMethod,
   type CartDto,
@@ -21,6 +22,12 @@ import { commerceService } from "@/services/commerce.service";
 import { addressesService } from "@/services/addresses.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
+import { CommercePage } from "./CommercePage";
+import { Stepper } from "@/features/shared/Stepper";
+import { formatCount } from "@/lib/number/format-number";
+import { localizeDigits } from "@/lib/date/jalali";
+import { isolate } from "@/lib/text/bidi";
 
 type Step =
   | "address"
@@ -39,6 +46,10 @@ type Step =
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 
+function toLatinDigits(value: string): string {
+  return value.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/\s/g, "");
+}
+
 /**
  * Checkout (spec sections 56-59, Handoff 07 sections 11-16, 36-43) — one
  * route, internal steps. Address/Delivery -> Review -> Method (Online
@@ -51,46 +62,88 @@ const IS_DEV = process.env.NODE_ENV !== "production";
  */
 export function CheckoutView() {
   const t = useTranslations("commerce.checkout");
+  const design = useTranslations("commerce.design");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const locale = useLocale() as "fa" | "en";
+  const progress = (current: number) => (
+    <Stepper steps={[t("progress.steps.address"), t("progress.steps.review"), t("progress.steps.shipping"), t("progress.steps.payment")]} current={current} label={t("progress.label")} />
+  );
   const { householdId } = useActivePet();
 
+  const [initialFailed, setInitialFailed] = useState(false);
+  const [initialRetry, setInitialRetry] = useState(0);
   const [step, setStep] = useState<Step>("address");
   const [cart, setCart] = useState<CartDto | null>(null);
   const [addresses, setAddresses] = useState<CustomerAddressDto[] | null>(null);
   const [addressId, setAddressId] = useState<string | null>(null);
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>(DeliveryMethod.STANDARD);
   const [checkout, setCheckout] = useState<CheckoutDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [failureMessage, setFailureMessage] = useState<string | null>(null);
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
-  const [paymentIntentIdempotencyKey, setPaymentIntentIdempotencyKey] = useState(() => crypto.randomUUID());
-  const [payIdempotencyKey, setPayIdempotencyKey] = useState(() => crypto.randomUUID());
-  const [newAddress, setNewAddress] = useState({ addressLine: "", city: "", countryCode: "" });
+  const [idempotencyKey] = useState(() => randomId());
+  const [paymentIntentIdempotencyKey, setPaymentIntentIdempotencyKey] = useState(() => randomId());
+  const [payIdempotencyKey, setPayIdempotencyKey] = useState(() => randomId());
+  const [newAddress, setNewAddress] = useState({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [defaultAddress, setDefaultAddress] = useState(false);
+  const [addressFormOpen, setAddressFormOpen] = useState(false);
+  const [addressError, setAddressError] = useState<string | null>(null);
   const [isCreatingAddress, setIsCreatingAddress] = useState(false);
 
   const [shippingOptions, setShippingOptions] = useState<SellerShippingOptionsDto[] | null>(null);
   const [shippingQuoteSelectingId, setShippingQuoteSelectingId] = useState<string | null>(null);
   const [paymentOptions, setPaymentOptions] = useState<PaymentMethodOptionDto[] | null>(null);
   const [financingIntent, setFinancingIntent] = useState<FinancingIntentDto | null>(null);
-  const [financingIdempotencyKey, setFinancingIdempotencyKey] = useState(() => crypto.randomUUID());
-  const [authorizeIdempotencyKey, setAuthorizeIdempotencyKey] = useState(() => crypto.randomUUID());
+  const [financingIdempotencyKey, setFinancingIdempotencyKey] = useState(() => randomId());
+  const [authorizeIdempotencyKey, setAuthorizeIdempotencyKey] = useState(() => randomId());
   const [plans, setPlans] = useState<FinancingPlanOptionDto[] | null>(null);
 
   useEffect(() => {
-    void commerceService.getCart().then(setCart);
-    if (householdId) void addressesService.list(householdId).then(setAddresses);
-  }, [householdId]);
+    let cancelled = false;
+    setInitialFailed(false);
+    setAddresses(null);
+    setCart(null);
+    void Promise.all([commerceService.getCart(), householdId ? addressesService.list(householdId) : Promise.resolve([])]).then(([nextCart, list]) => {
+      if (cancelled) return;
+      setCart(nextCart);
+      setAddresses(list);
+      setAddressId((current) => list.some((a) => a.id === current) ? current : list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? null);
+      setAddressFormOpen(list.length === 0);
+    }).catch(() => { if (!cancelled) setInitialFailed(true); });
+    return () => { cancelled = true; };
+  }, [householdId, initialRetry]);
+
+  function openAddressForm(address?: CustomerAddressDto) {
+    setEditingAddressId(address?.id ?? null);
+    setDefaultAddress(address?.isDefault ?? false);
+    setNewAddress({ recipient: address?.recipient ?? "", phone: address?.phone ?? "", addressLine: address?.addressLine ?? "", city: address?.city ?? "", postalCode: address?.postalCode ?? "", countryCode: address?.countryCode ?? "IR" });
+    setAddressError(null);
+    setAddressFormOpen(true);
+  }
 
   async function createAddress() {
     if (!householdId) return;
     setIsCreatingAddress(true);
+    setAddressError(null);
     try {
-      const address = await addressesService.create({ householdId, ...newAddress });
-      setAddresses((prev) => [address, ...(prev ?? [])]);
+      const fields = {
+        addressLine: newAddress.addressLine.trim(),
+        city: newAddress.city.trim(),
+        countryCode: newAddress.countryCode,
+        recipient: newAddress.recipient.trim() || undefined,
+        phone: newAddress.phone.trim() || undefined,
+        postalCode: toLatinDigits(newAddress.postalCode) || undefined,
+        isDefault: defaultAddress || editingAddressId ? defaultAddress : undefined,
+      };
+      const address = editingAddressId ? await addressesService.update(editingAddressId, fields) : await addressesService.create({ householdId, ...fields });
+      setAddresses((prev) => [address, ...(prev ?? []).filter((a) => a.id !== address.id).map((a) => (address.isDefault ? { ...a, isDefault: false } : a))]);
       setAddressId(address.id);
-      setNewAddress({ addressLine: "", city: "", countryCode: "" });
+      setAddressFormOpen(false);
+      setEditingAddressId(null);
+      setDefaultAddress(false);
+      setNewAddress({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
+    } catch (err) {
+      setAddressError(err instanceof ApiError && err.status < 500 ? err.message : t("address.saveFailed"));
     } finally {
       setIsCreatingAddress(false);
     }
@@ -100,7 +153,7 @@ export function CheckoutView() {
     setError(null);
     setStep("submitting");
     try {
-      const result = await commerceService.createCheckout({ addressId: addressId ?? undefined, deliveryMethod, acknowledgeSafetyConflict }, idempotencyKey);
+      const result = await commerceService.createCheckout({ addressId: addressId ?? undefined, deliveryMethod: DeliveryMethod.STANDARD, acknowledgeSafetyConflict }, idempotencyKey);
       setCheckout(result);
       setStep("review");
     } catch (err) {
@@ -112,7 +165,7 @@ export function CheckoutView() {
         router.push(`/${locale}/cart`);
         return;
       }
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("address");
     }
   }
@@ -125,7 +178,7 @@ export function CheckoutView() {
       setShippingOptions(options);
       setStep("shipping");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("review");
     }
   }
@@ -139,7 +192,7 @@ export function CheckoutView() {
       setShippingOptions(options);
       setCheckout(updatedCheckout);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
     } finally {
       setShippingQuoteSelectingId(null);
     }
@@ -152,7 +205,7 @@ export function CheckoutView() {
       const options = await commerceService.refreshShippingOptions(checkout.id);
       setShippingOptions(options);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
     }
   }
 
@@ -164,7 +217,7 @@ export function CheckoutView() {
       setPaymentOptions(options);
       setStep("method");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("review");
     }
   }
@@ -176,7 +229,7 @@ export function CheckoutView() {
       await commerceService.createPaymentIntent(checkout.id, provider, paymentIntentIdempotencyKey);
       setStep("payment");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("method");
     }
   }
@@ -195,7 +248,7 @@ export function CheckoutView() {
         await loadPlans(intent.id);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("method");
     }
   }
@@ -215,7 +268,7 @@ export function CheckoutView() {
       setFinancingIntent(updated);
       setStep("financing-authorize");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("createFailed"));
+      setError(apiErrorText(err, locale, t("createFailed")));
       setStep("financing-plans");
     }
   }
@@ -236,20 +289,20 @@ export function CheckoutView() {
         setStep("financing-declined");
       }
     } catch (err) {
-      setFailureMessage(err instanceof ApiError ? err.message : t("financingDeclined.generic"));
+      setFailureMessage(apiErrorText(err, locale, t("financingDeclined.generic")));
       setStep("financing-declined");
     }
   }
 
   function retryFinancingAuthorization() {
-    setAuthorizeIdempotencyKey(crypto.randomUUID());
+    setAuthorizeIdempotencyKey(randomId());
     setStep("financing-authorize");
   }
 
   function backToMethodChoice() {
     setFinancingIntent(null);
     setPlans(null);
-    setFinancingIdempotencyKey(crypto.randomUUID());
+    setFinancingIdempotencyKey(randomId());
     void enterMethodStep();
   }
 
@@ -269,7 +322,7 @@ export function CheckoutView() {
         setStep("failed");
       }
     } catch (err) {
-      setFailureMessage(err instanceof ApiError ? err.message : t("paymentFailed.generic"));
+      setFailureMessage(apiErrorText(err, locale, t("paymentFailed.generic")));
       setStep("failed");
     }
   }
@@ -284,20 +337,32 @@ export function CheckoutView() {
   }
 
   function retryPayment() {
-    setPayIdempotencyKey(crypto.randomUUID());
+    setPayIdempotencyKey(randomId());
     setStep("payment");
   }
 
   function switchToInstallments() {
-    setPaymentIntentIdempotencyKey(crypto.randomUUID());
+    setPaymentIntentIdempotencyKey(randomId());
     void enterMethodStep();
   }
 
+  if (initialFailed) return <CommercePage><ErrorRecovery title={t("address.title")} message={design("loadFailed")} retryLabel={tCommon("retry")} onRetry={() => setInitialRetry((n) => n + 1)} /></CommercePage>;
+
   if (!cart || (householdId && !addresses)) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
+  // Once delivery is chosen the checkout carries the real totals; before that the cart is the summary.
+  const priced = checkout && (step === "method" || step === "payment" || step.startsWith("financing-"));
+  const frame = (body: ReactNode) => (
+    <CommercePage className="commerce-checkout"><div className="flow-layout">
+      <div className="flow-main">{body}</div>
+      <CheckoutSummary cart={cart} checkout={priced ? checkout : null} />
+    </div></CommercePage>
+  );
+
   if (step === "address") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(0)}
         <h1 className="text-page-title text-text-primary">{t("address.title")}</h1>
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
@@ -305,69 +370,80 @@ export function CheckoutView() {
           </p>
         ) : null}
 
-        <div className="flex flex-col gap-2">
+        {!householdId ? <p className="text-body text-text-secondary">{t("address.noHousehold")}</p> : null}
+
+        <div className="flex flex-col gap-2" role="radiogroup" aria-label={t("address.title")}>
           {(addresses ?? []).map((address) => (
-            <button key={address.id} type="button" className="w-full text-start" onClick={() => setAddressId(address.id)}>
-              <ContextSurface className={addressId === address.id ? "border-brand-mint" : ""}>
-                <p className="text-body text-text-primary">{address.addressLine}</p>
-                <p className="text-metadata text-text-secondary">{address.city}</p>
+            <button key={address.id} type="button" role="radio" aria-checked={addressId === address.id} className="w-full text-start" onClick={() => setAddressId(address.id)}>
+              <ContextSurface className={`flex flex-col gap-0.5 ${addressId === address.id ? "border-brand-natural" : ""}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-body font-medium text-text-primary">{address.label ?? address.recipient ?? address.city}</p>
+                  {address.isDefault ? <StatusLabel tone="neutral">{t("address.default")}</StatusLabel> : null}
+                </div>
+                <p className="text-metadata text-text-secondary">{[address.city, address.addressLine].filter(Boolean).join(tCommon("listSeparator"))}</p>
+                {address.postalCode || address.recipient ? (
+                  <p className="text-metadata text-text-secondary">{[address.recipient, address.postalCode ? t("address.postalCodeValue", { code: localizeDigits(address.postalCode, locale) }) : null].filter(Boolean).join(" · ")}</p>
+                ) : null}
               </ContextSurface>
             </button>
           ))}
         </div>
 
-        <ContextSurface className="flex flex-col gap-2">
-          <p className="text-metadata text-text-secondary">{t("address.addNew")}</p>
-          <input
-            aria-label={t("address.addressLine")}
-            placeholder={t("address.addressLine")}
-            value={newAddress.addressLine}
-            onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })}
-            className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary"
-          />
-          <input
-            aria-label={t("address.city")}
-            placeholder={t("address.city")}
-            value={newAddress.city}
-            onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-            className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary"
-          />
-          <input
-            aria-label={t("address.countryCode")}
-            placeholder={t("address.countryCode")}
-            value={newAddress.countryCode}
-            onChange={(e) => setNewAddress({ ...newAddress, countryCode: e.target.value })}
-            className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary"
-          />
-          <Button
-            variant="secondary"
-            isLoading={isCreatingAddress}
-            onClick={createAddress}
-            disabled={!newAddress.addressLine || !newAddress.city || !newAddress.countryCode}
-          >
-            {t("address.save")}
-          </Button>
-        </ContextSurface>
-
-        <div>
-          <p className="mb-2 text-section-title text-text-primary">{t("delivery.title")}</p>
-          <div className="flex gap-2">
-            {Object.values(DeliveryMethod).map((method) => (
-              <button
-                key={method}
-                type="button"
-                onClick={() => setDeliveryMethod(method)}
-                className={`rounded-md border px-3 py-2 text-metadata ${
-                  method === deliveryMethod ? "border-brand-mint bg-brand-mint/10 text-text-primary" : "border-border-subtle text-text-secondary"
-                }`}
-              >
-                {t(`delivery.method.${method}`)}
-              </button>
-            ))}
+        {householdId && !addressFormOpen ? (
+          <div className="flex flex-wrap gap-3">
+            <Button variant="ghost" onClick={() => openAddressForm()}>{t("address.addNew")}</Button>
+            {addresses?.some((a) => a.id === addressId) ? <Button variant="secondary" onClick={() => openAddressForm(addresses.find((a) => a.id === addressId))}>{design("editAddress")}</Button> : null}
           </div>
-        </div>
+        ) : null}
 
-        <Button variant="primary" disabled={!addressId} onClick={() => createCheckout(false)}>
+        {householdId && addressFormOpen ? (
+          <ContextSurface className="flex flex-col gap-3">
+            <p className="text-section-title text-text-primary">{editingAddressId ? design("editAddress") : t("address.addNew")}</p>
+            {editingAddressId ? <p className="text-metadata text-text-secondary">{design("editOptionalHint")}</p> : null}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input label={t("address.recipient")} value={newAddress.recipient} autoComplete="name" onChange={(e) => setNewAddress({ ...newAddress, recipient: e.target.value })} />
+              <Input label={t("address.phone")} value={newAddress.phone} dir="ltr" inputMode="tel" autoComplete="tel" onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })} />
+              <Input label={t("address.city")} value={newAddress.city} autoComplete="address-level2" onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })} />
+              <Input
+                label={t("address.postalCode")}
+                value={localizeDigits(newAddress.postalCode, locale)}
+                dir="ltr"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                hint={t("address.postalCodeHint")}
+                errorMessage={newAddress.postalCode && !/^\d{10}$/.test(toLatinDigits(newAddress.postalCode)) ? t("address.postalCodeInvalid") : undefined}
+                onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
+              />
+            </div>
+            <Input label={t("address.addressLine")} value={newAddress.addressLine} autoComplete="street-address" onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })} />
+            <label className="commerce-toggle"><span>{design("defaultAddress")}</span><input type="checkbox" checked={defaultAddress} onChange={(e) => setDefaultAddress(e.target.checked)} /></label>
+            {addressError ? (
+              <p role="alert" className="text-metadata text-state-urgent">
+                {addressError}
+              </p>
+            ) : null}
+            <div className="flex gap-2">
+              {(addresses ?? []).length ? (
+                <Button variant="ghost" onClick={() => setAddressFormOpen(false)}>
+                  {tCommon("back")}
+                </Button>
+              ) : null}
+              <Button
+                variant="secondary"
+                className="flex-1"
+                isLoading={isCreatingAddress}
+                onClick={createAddress}
+                disabled={!newAddress.addressLine.trim() || !newAddress.city.trim() || (Boolean(newAddress.postalCode) && !/^\d{10}$/.test(toLatinDigits(newAddress.postalCode)))}
+              >
+                {t("address.save")}
+              </Button>
+            </div>
+          </ContextSurface>
+        ) : null}
+
+        <p className="text-metadata text-text-secondary">{t("delivery.quotesNext")}</p>
+
+        <Button variant="primary" disabled={!addressId || addressFormOpen || isCreatingAddress} onClick={() => createCheckout(false)}>
           {tCommon("continue")}
         </Button>
       </div>
@@ -375,8 +451,9 @@ export function CheckoutView() {
   }
 
   if (step === "safety-ack") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(1)}
         <h1 className="text-page-title text-text-primary">{t("safetyAck.title")}</h1>
         <ContextSurface className="flex flex-col gap-2">
           <StatusLabel tone="urgent">{t("safetyAck.warning")}</StatusLabel>
@@ -399,8 +476,9 @@ export function CheckoutView() {
   }
 
   if (step === "review") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(1)}
         <h1 className="text-page-title text-text-primary">{t("review.title")}</h1>
 
         {checkout.validationIssues.map((issue) => (
@@ -425,6 +503,7 @@ export function CheckoutView() {
 
         <ContextSurface className="flex flex-col gap-2">
           <Row label={t("review.subtotal")} value={formatCurrency(checkout.subtotalAmount, locale)} />
+          {checkout.discountAmount > 0 ? <Row label={t("review.discount")} value={`− ${formatCurrency(checkout.discountAmount, locale)}`} /> : null}
           <Row label={t("review.delivery")} value={formatCurrency(checkout.deliveryAmount, locale)} />
           <Row label={t("review.total")} value={formatCurrency(checkout.totalAmount, locale)} />
         </ContextSurface>
@@ -442,8 +521,9 @@ export function CheckoutView() {
   }
 
   if (step === "shipping") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(2)}
         <h1 className="text-page-title text-text-primary">{t("shipping.title")}</h1>
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
@@ -503,8 +583,9 @@ export function CheckoutView() {
   if (step === "method") {
     const onlineOptions = (paymentOptions ?? []).filter((o) => o.methodType === "ONLINE_PAYMENT");
     const installmentOptions = (paymentOptions ?? []).filter((o) => o.methodType === "INSTALLMENTS");
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("method.title")}</h1>
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
@@ -547,8 +628,9 @@ export function CheckoutView() {
   }
 
   if (step === "payment") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("payment.title")}</h1>
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("payment.amountDue")}</span>
@@ -585,8 +667,9 @@ export function CheckoutView() {
 
   if (step === "financing-eligibility") {
     const eligibility = financingIntent?.eligibility;
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("financingEligibility.title")}</h1>
         <ContextSurface className="flex flex-col gap-2">
           <StatusLabel tone={eligibility === "ELIGIBLE" ? "success" : eligibility === "NOT_ELIGIBLE" ? "urgent" : "neutral"}>
@@ -609,8 +692,9 @@ export function CheckoutView() {
   }
 
   if (step === "financing-plans") {
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("financingPlans.title")}</h1>
         <div className="flex flex-col gap-2">
           {(plans ?? []).map((plan) => (
@@ -640,8 +724,9 @@ export function CheckoutView() {
 
   if (step === "financing-authorize") {
     const plan = financingIntent?.selectedPlan;
-    return (
+    return frame(
       <div className="flex flex-col gap-5">
+        {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("financingAuthorize.title")}</h1>
         <ContextSurface className="flex flex-col gap-2">
           <p className="text-metadata text-text-secondary">{t("financingAuthorize.redirectNotice", { provider: financingIntent ? t(`method.provider.${financingIntent.provider}`) : "" })}</p>
@@ -751,5 +836,44 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-metadata text-text-secondary">{label}</span>
       <span className="text-body text-text-primary">{value}</span>
     </div>
+  );
+}
+
+function CheckoutSummary({ cart, checkout }: { cart: CartDto; checkout: CheckoutDto | null }) {
+  const t = useTranslations("commerce.checkout.summary");
+  const tCart = useTranslations("commerce.cart");
+  const tOrder = useTranslations("commerce.orderDetail");
+  const locale = useLocale() as "fa" | "en";
+  const lines = cart.sellerGroups.flatMap((g) => g.lines);
+  return (
+    <aside className="flow-summary" aria-label={t("title")}>
+      <h2>{t("title")}</h2>
+      <ul className="checkout-summary__lines">
+        {lines.map((line) => (
+          <li key={line.id}>
+            <span>
+              {isolate(line.productTitle)}
+              {line.quantity > 1 ? ` × ${formatCount(line.quantity, locale)}` : ""}
+            </span>
+            <span>{formatCurrency(line.lineTotal, locale)}</span>
+          </li>
+        ))}
+      </ul>
+      {checkout ? (
+        <dl>
+          <div><dt>{tOrder("subtotal")}</dt><dd>{formatCurrency(checkout.subtotalAmount, locale)}</dd></div>
+          {checkout.discountAmount > 0 ? <div><dt>{tOrder("discount")}</dt><dd>− {formatCurrency(checkout.discountAmount, locale)}</dd></div> : null}
+          <div><dt>{tOrder("delivery")}</dt><dd>{formatCurrency(checkout.deliveryAmount, locale)}</dd></div>
+          <div className="flow-summary__total"><dt>{tOrder("total")}</dt><dd>{formatCurrency(checkout.totalAmount, locale)}</dd></div>
+        </dl>
+      ) : (
+        <dl>
+          <div><dt>{tCart("itemsTotal", { count: cart.totalItems })}</dt><dd>{formatCurrency(cart.subtotalAmount + cart.discountAmount, locale)}</dd></div>
+          {cart.discountAmount > 0 ? <div><dt>{tCart("promotions")}</dt><dd>− {formatCurrency(cart.discountAmount, locale)}</dd></div> : null}
+          <div><dt>{tCart("delivery")}</dt><dd className="is-note">{t("deliveryNext")}</dd></div>
+          <div className="flow-summary__total"><dt>{tCart("subtotal")}</dt><dd>{formatCurrency(cart.subtotalAmount, locale)}</dd></div>
+        </dl>
+      )}
+    </aside>
   );
 }

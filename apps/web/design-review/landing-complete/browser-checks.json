@@ -1,0 +1,46 @@
+[
+  {
+    "locale": "fa",
+    "width": 1440,
+    "horizontalOverflow": false,
+    "loginModal": true,
+    "passwordStepRetainsLanding": true,
+    "closeAfterMultipleSteps": true,
+    "registrationModal": true,
+    "escape": true,
+    "errors": []
+  },
+  {
+    "locale": "fa",
+    "width": 390,
+    "horizontalOverflow": false,
+    "loginModal": true,
+    "passwordStepRetainsLanding": true,
+    "closeAfterMultipleSteps": true,
+    "registrationModal": true,
+    "escape": true,
+    "errors": []
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "horizontalOverflow": false,
+    "loginModal": true,
+    "passwordStepRetainsLanding": true,
+    "closeAfterMultipleSteps": true,
+    "registrationModal": true,
+    "escape": true,
+    "errors": []
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "horizontalOverflow": false,
+    "loginModal": true,
+    "passwordStepRetainsLanding": true,
+    "closeAfterMultipleSteps": true,
+    "registrationModal": true,
+    "escape": true,
+    "errors": []
+  }
+]

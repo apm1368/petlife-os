@@ -1,0 +1,40 @@
+/* Approved personal glass shell. Every descendant keeps the same semantic palette. */
+.member-shell--glass {
+  --text-primary:var(--campaign-cream); --text-secondary:color-mix(in srgb,var(--campaign-cream) 90%,transparent); --text-muted:color-mix(in srgb,var(--campaign-cream) 82%,transparent);
+  --surface-base:color-mix(in srgb,var(--campaign-plum) 82%,transparent); --surface-page:var(--surface-base); --surface-subtle:color-mix(in srgb,var(--campaign-paper) 12%,transparent); --surface-sunken:color-mix(in srgb,var(--campaign-plum) 45%,transparent); --surface-elevated:color-mix(in srgb,var(--campaign-plum) 44%,transparent); --surface-raised:var(--surface-elevated);
+  --border-subtle:color-mix(in srgb,var(--campaign-cream) 25%,transparent); --border-default:var(--border-subtle); --border-strong:color-mix(in srgb,var(--campaign-cream) 45%,transparent); --brand-natural:var(--campaign-cream); --brand-primary:var(--campaign-cream); --brand-solid:var(--campaign-cream); --brand-solid-strong:var(--campaign-paper); --on-brand:var(--campaign-plum); --brand-tint:color-mix(in srgb,var(--campaign-paper) 15%,transparent); --focus-ring:var(--campaign-cream);
+  position:relative; isolation:isolate; min-height:100dvh; color:var(--text-primary); background:var(--campaign-plum) url('/images/landing/member-glass-backdrop.webp') center / cover scroll;
+}
+.member-shell--glass::before { content:""; position:fixed; inset:0; z-index:-1; background:color-mix(in srgb,var(--campaign-plum) 36%,transparent); pointer-events:none; }
+.member-shell--glass .member-header { background:color-mix(in srgb,var(--campaign-plum) 45%,transparent); backdrop-filter:blur(24px); }
+.member-shell--glass .workspace-main { padding:32px clamp(20px,3vw,48px) 56px; padding-inline-start:110px; }
+.member-shell--glass .member-home { gap:28px; }
+.member-shell--glass .member-home__layout { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.member-shell--glass .member-home__main,.member-shell--glass .member-home__side { display:contents; }
+.member-shell--glass .member-home__main,.member-shell--glass .member-home__side { gap:24px; padding:0; border:0; }
+.member-shell--glass .member-home__card,.member-shell--glass .member-home__welcome,.member-shell--glass .member-home__welcome-account { border:1px solid var(--border-subtle); border-radius:26px; padding:24px; background:var(--surface-elevated); backdrop-filter:blur(22px); }
+.member-shell--glass .member-home__card-head { padding:0 0 14px; }
+.member-shell--glass .member-home__explore { color:var(--text-primary); }
+.member-shell--glass .member-home__next { background:var(--surface-subtle); }
+.member-shell--glass .member-home__attention .member-home__calm { background:transparent; }
+.member-shell--glass :is(input,select,textarea) { color:var(--text-primary); }
+.member-shell--glass select option { color:var(--campaign-cream); background:var(--campaign-plum); }
+.member-shell--glass .member-tabbar { background:color-mix(in srgb,var(--campaign-plum) 90%,transparent); backdrop-filter:blur(20px); }
+.glass-dock { position:fixed; z-index:20; inset-inline-start:20px; top:135px; display:flex; flex-direction:column; gap:8px; padding:10px; background:var(--surface-elevated); backdrop-filter:blur(22px); border:1px solid var(--border-subtle); border-radius:28px; }
+.glass-dock a { display:grid; place-items:center; width:46px; height:46px; border-radius:50%; color:var(--text-primary); }
+.glass-dock a[aria-current="page"] { background:var(--campaign-cream); color:var(--campaign-plum); }
+.glass-dock a:hover { outline:1px solid var(--border-strong); }
+.glass-dock a:focus-visible { outline:3px solid var(--focus-ring); outline-offset:3px; }
+.glass-dock span { position:absolute; clip-path:inset(50%); width:1px; height:1px; overflow:hidden; }
+.member-shell--service { --surface-base:var(--campaign-cream); --surface-elevated:var(--campaign-paper); --surface-subtle:var(--campaign-plum-tint); --text-primary:var(--campaign-ink); --text-secondary:var(--campaign-text); --brand-natural:var(--campaign-plum); --brand-solid:var(--campaign-plum); --brand-solid-strong:var(--campaign-plum-strong); --on-brand:var(--campaign-inverse); --focus-ring:var(--campaign-copper); background:var(--campaign-cream); }
+@media(max-width:1023px) { .glass-dock { display:none; }.member-shell--glass .workspace-main { padding:24px 20px 100px; } }
+@media(max-width:650px) { .member-shell--glass .workspace-main { padding:20px 16px 100px; }.member-shell--glass .member-home__layout { grid-template-columns:minmax(0,1fr); }.member-shell--glass .member-home__card { padding:20px; border-radius:22px; } }
+@media(prefers-reduced-transparency:reduce) { .member-shell--glass { --surface-elevated:var(--campaign-plum); } }
+.member-shell--glass { --surface-identity:var(--surface-elevated); --text-on-identity:var(--text-primary); --text-on-identity-muted:var(--text-secondary); }
+.member-shell--glass .pet-hero { background:var(--surface-elevated); border:1px solid var(--border-subtle); border-radius:26px; backdrop-filter:blur(24px); }
+.member-shell--glass .pet-hero::after { display:none; }
+.member-shell--glass .pet-tabs { background:var(--surface-sunken); backdrop-filter:blur(22px); border-radius:18px; }
+.member-shell--glass .pet-overview__aside { background:var(--surface-elevated); border:1px solid var(--border-subtle); backdrop-filter:blur(22px); }
+:root[data-theme="dark"] .member-shell--glass { --surface-elevated:color-mix(in srgb,var(--campaign-plum) 66%,transparent); --surface-sunken:color-mix(in srgb,var(--campaign-plum) 62%,transparent); }
+:root[data-theme="dark"] .member-shell--glass::before { background:color-mix(in srgb,var(--campaign-plum) 58%,transparent); }
+:root[data-theme="dark"] .member-shell--service { --surface-base:var(--campaign-plum); --surface-elevated:var(--campaign-plum-strong); --surface-subtle:var(--campaign-plum-strong); --text-primary:var(--campaign-cream); --text-secondary:color-mix(in srgb,var(--campaign-cream) 86%,transparent); --brand-natural:var(--campaign-cream); --brand-solid:var(--campaign-cream); --brand-solid-strong:var(--campaign-paper); --on-brand:var(--campaign-plum); background:var(--campaign-plum); }

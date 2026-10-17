@@ -1,3 +1,5 @@
+import { TrialEndingNotifier } from "./trial-ending.notifier";
+import { SubscriptionInsightService } from "./subscription-insight.service";
 import { Module } from "@nestjs/common";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { LedgerModule } from "../commerce/ledger/ledger.module";
@@ -21,7 +23,7 @@ import { SubscriptionController } from "./subscription.controller";
 @Module({
   imports: [PaymentsModule, LedgerModule, NotificationsModule],
   controllers: [SubscriptionController],
-  providers: [SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService, SubscriptionRenewalWorkerService, SubscriptionNotificationListener],
+  providers: [TrialEndingNotifier, SubscriptionInsightService, SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService, SubscriptionRenewalWorkerService, SubscriptionNotificationListener],
   exports: [SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService],
 })
 export class SubscriptionsModule {}

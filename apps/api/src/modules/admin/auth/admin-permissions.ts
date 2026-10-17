@@ -48,7 +48,38 @@ export type AdminPermission =
   | "insurance.view"
   | "insurance.manage"
   | "places.view"
-  | "places.manage";
+  | "places.manage"
+  | "services.view"
+  | "services.manage"
+  // Batch 4 — Admin Commerce
+  | "commerce.view"
+  | "commerce.manage"
+  | "promotions.manage"
+  // Batch 5 — Travel / insurance applications
+  | "travel.view"
+  | "travel.manage"
+  | "travel.requirements.manage"
+  | "insurance.applications.view"
+  // ERP-A — access control (read side; mutations stay admin.manage), settings registry, system/integration health
+  | "access.view"
+  | "settings.view"
+  | "settings.manage"
+  | "settings.approve"
+  | "system.view"
+  // ERP-J — aggregate analytics only (no row-level PII)
+  | "analytics.view"
+  // ERP-B — account suspension (trust/admin), session revocation (support can help a compromised member), pet access repair
+  | "customer.account.manage"
+  | "customer.sessions.revoke"
+  | "pet.access.manage"
+  // ERP-E — run reconciliation and close findings (never edits money)
+  | "finance.reconcile"
+  // TRAVEL-EXT — external pet-friendly stay sources
+  | "travel.source.view"
+  | "travel.source.manage"
+  | "travel.sync.run"
+  | "travel.listing.manage"
+  | "travel.override.manage";
 
 const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -89,6 +120,30 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   "insurance.manage",
   "places.view",
   "places.manage",
+  "services.view",
+  "services.manage",
+  "commerce.view",
+  "commerce.manage",
+  "promotions.manage",
+  "travel.view",
+  "travel.manage",
+  "travel.requirements.manage",
+  "insurance.applications.view",
+  "access.view",
+  "settings.view",
+  "settings.manage",
+  "settings.approve",
+  "system.view",
+  "analytics.view",
+  "customer.account.manage",
+  "customer.sessions.revoke",
+  "pet.access.manage",
+  "finance.reconcile",
+  "travel.source.view",
+  "travel.source.manage",
+  "travel.sync.run",
+  "travel.listing.manage",
+  "travel.override.manage",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -104,6 +159,14 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = [
   "animalSupport.view",
   "insurance.view",
   "places.view",
+  "services.view",
+  "commerce.view",
+  "travel.view",
+  "insurance.applications.view",
+  "settings.view",
+  "system.view",
+  "analytics.view",
+  "travel.source.view",
 ];
 
 /**
@@ -153,13 +216,38 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "insurance.manage",
     "places.view",
     "places.manage",
+    "services.view",
+    "services.manage",
+    "commerce.view",
+    "commerce.manage",
+    "promotions.manage",
+    "travel.view",
+    "travel.manage",
+    "travel.requirements.manage",
+    "insurance.applications.view",
+    // Can see who holds which role and propose settings; approving high-impact settings is SUPER_ADMIN-only.
+    "access.view",
+    "settings.view",
+    "settings.manage",
+    "system.view",
+    "analytics.view",
+    "customer.account.manage",
+    "customer.sessions.revoke",
+    "pet.access.manage",
+    "finance.reconcile",
+    "travel.source.view",
+    "travel.source.manage",
+    "travel.sync.run",
+    "travel.listing.manage",
+    "travel.override.manage",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
   // (needed for the H13 support context panel) but can never cancel, grant
   // a trial, or override an entitlement.
-  [AdminRole.SUPPORT]: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view"],
-  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage"],
+  [AdminRole.SUPPORT]: ["customer.view", "customer.sessions.revoke", "pet.access.manage", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view", "travel.view", "insurance.applications.view"],
+  // Review moderation is a trust action, so TRUST_SAFETY can hide provider reviews.
+  [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "customer.account.manage", "customer.sessions.revoke", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage", "commerce.view", "commerce.manage", "travel.view", "travel.manage"],
   // Payout execution ("settlement.pay") is FINANCE-only, mirroring
   // finance.refund.execute's own "ADMIN can approve, only FINANCE can move
   // real money" precedent exactly (spec: "do not give SUPPORT role
@@ -176,6 +264,7 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settlement.approve",
     "settlement.pay",
     "settlement.adjust",
+    "finance.reconcile",
     // spec: "FINANCE: appropriate billing visibility" — read-only; plan/price
     // management and subscription mutations stay ADMIN/SUPER_ADMIN-only.
     "subscription.view",
@@ -184,6 +273,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     // records an actual fund payout.
     "animalSupport.view",
     "animalSupport.payout",
+    // Refund-request review needs the order context.
+    "commerce.view",
   ],
   [AdminRole.OPERATIONS]: [
     "customer.view",
@@ -201,13 +292,27 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "insurance.manage",
     "places.view",
     "places.manage",
+    "services.view",
+    "services.manage",
+    "commerce.view",
+    "commerce.manage",
+    "travel.view",
+    "travel.manage",
+    "travel.requirements.manage",
+    "insurance.applications.view",
+    "settings.view",
+    "system.view",
+    "analytics.view",
+    "travel.source.view",
+    "travel.listing.manage",
   ],
   // Content moderation subjects (LISTING/REVIEW/COMMUNITY_CONTENT) are a
   // subset of TrustSubjectType — this phase does not further restrict
   // CONTENT to only those subject types at the permission-map level (see
   // README "Known limitations"); it is scoped to trust operations only,
   // never finance/verification/support-case management.
-  [AdminRole.CONTENT]: ["trust.view", "trust.manage", "task.manage"],
+  // Travel requirement curation is editorial work with sources, so CONTENT maintains the library.
+  [AdminRole.CONTENT]: ["trust.view", "trust.manage", "task.manage", "travel.view", "travel.requirements.manage"],
   [AdminRole.VERIFICATION]: ["customer.view", "verification.manage", "task.manage"],
   [AdminRole.READ_ONLY]: READ_ONLY_PERMISSIONS,
   // The Handoff 15 CMS editorial role — distinct from the pre-existing
@@ -219,6 +324,12 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   // "broad drafting, narrower execution" shape finance.refund.request
   // (broad) vs. finance.refund.execute (FINANCE-only) already established.
   [AdminRole.EDITOR]: ["content.view", "content.create", "content.edit", "content.media.manage"],
+  // ERP-A operational roles. Each is a narrow slice of existing permissions — none gets admin.manage,
+  // settings.approve, finance execution or entitlement overrides.
+  [AdminRole.PARTNER_OPERATIONS]: ["customer.view", "verification.manage", "services.view", "services.manage", "places.view", "task.manage", "support.view"],
+  [AdminRole.CLINIC_OPERATIONS]: ["customer.view", "services.view", "services.manage", "subscription.view", "verification.manage", "task.manage", "support.view"],
+  [AdminRole.COMMERCE_OPERATIONS]: ["customer.view", "commerce.view", "commerce.manage", "promotions.manage", "sellerFinance.view", "task.manage", "support.view"],
+  [AdminRole.ANALYTICS]: ["analytics.view"],
 };
 
 export function roleHasPermission(role: AdminRole, permission: AdminPermission): boolean {

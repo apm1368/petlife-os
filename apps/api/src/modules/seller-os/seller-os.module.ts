@@ -16,9 +16,12 @@ import { SellerInventoryService } from "./seller-inventory.service";
 import { SellerOrderController, SellerDashboardController } from "./seller-order.controller";
 import { SellerOrderService } from "./seller-order.service";
 import { SellerDashboardService } from "./seller-dashboard.service";
+import { SellerPromotionController } from "./seller-promotion.controller";
+import { PromotionsModule } from "../commerce/promotions/promotions.module";
+import { OrdersModule } from "../commerce/orders/orders.module";
 
 @Module({
-  imports: [InventoryModule, SellerFinanceModule],
+  imports: [InventoryModule, SellerFinanceModule, PromotionsModule, OrdersModule],
   controllers: [
     SellerContextController,
     SellerContextPreferenceController,
@@ -30,6 +33,7 @@ import { SellerDashboardService } from "./seller-dashboard.service";
     SellerDashboardController,
     SellerFinanceController,
     SellerSettlementReadController,
+    SellerPromotionController,
   ],
   providers: [SellerAccessService, SellerAuthGuard, SellerOrganizationService, SellerTeamService, SellerOfferService, SellerInventoryService, SellerOrderService, SellerDashboardService],
   exports: [SellerAccessService, SellerAuthGuard],

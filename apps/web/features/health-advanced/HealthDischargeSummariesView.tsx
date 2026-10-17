@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import type { DischargeSummaryDto } from "@petlife/types";
 import { clinicalOwnerService } from "@/services/vet-panel.service";
 import { HealthRecordListView } from "./HealthRecordListView";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 /**
  * The home-care instructions an owner actually acts on (Handoff 24). Only
@@ -16,6 +17,7 @@ import { HealthRecordListView } from "./HealthRecordListView";
  * the part that has to be findable in a hurry.
  */
 export function HealthDischargeSummariesView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("healthAdvanced.discharge");
 
   return (
@@ -29,7 +31,7 @@ export function HealthDischargeSummariesView({ petId }: { petId: string }) {
         <>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="text-section-title text-text-primary">{item.providerOrganizationName}</span>
-            <span className="text-metadata text-text-secondary">{item.issuedAt ? new Date(item.issuedAt).toLocaleString() : "—"}</span>
+            <span className="text-metadata text-text-secondary">{item.issuedAt ? fmt.dateTime(item.issuedAt) : "—"}</span>
           </div>
           {item.summaryText ? <p className="text-body text-text-primary">{item.summaryText}</p> : null}
           {item.homeCareInstructions ? (
@@ -43,7 +45,7 @@ export function HealthDischargeSummariesView({ petId }: { petId: string }) {
             </div>
           ) : null}
           {item.followUpAt || item.followUpInstructions ? (
-            <Section label={t("followUp")} value={[item.followUpAt ? new Date(item.followUpAt).toLocaleDateString() : null, item.followUpInstructions].filter(Boolean).join(" — ")} />
+            <Section label={t("followUp")} value={[item.followUpAt ? fmt.date(item.followUpAt) : null, item.followUpInstructions].filter(Boolean).join(" — ")} />
           ) : null}
         </>
       )}

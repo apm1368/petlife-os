@@ -1,3 +1,4 @@
+import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Prisma, SellerSettlementStatus, type SellerSettlementItem } from "@prisma/client";
@@ -104,10 +105,11 @@ export class AdminSellerSettlementService {
     private readonly config: ConfigService<AppEnv, true>,
     private readonly sellerLedger: SellerLedgerService,
     private readonly sellerAccounts: SellerFinancialAccountService,
+    private readonly settings: PlatformSettingsService,
   ) {}
 
   private threshold(): number {
-    return this.config.get("SETTLEMENT_APPROVAL_THRESHOLD_IRR", { infer: true });
+    return this.settings.getInt("commerce.settlementApprovalThresholdIrr");
   }
 
   async calculate(admin: ResolvedAdminContext, sellerOrganizationId: string, periodStart: Date, periodEnd: Date, requestId?: string): Promise<SellerSettlementDto> {
@@ -205,6 +207,7 @@ export class AdminSellerSettlementService {
       if (existing.status !== SellerSettlementStatus.CALCULATED) {
         throw new InvalidSellerSettlementTransitionException({ settlementId, from: existing.status, to: SellerSettlementStatus.APPROVED });
       }
+      if (existing.onHold) throw new InvalidSellerSettlementTransitionException({ settlementId, from: existing.status, to: SellerSettlementStatus.APPROVED, reason: "ON_HOLD" });
       if (existing.initiatedByAdminId === admin.adminUserId) throw new SellerSettlementSelfApprovalException({ settlementId });
 
       const row = await tx.sellerSettlement.update({
@@ -229,6 +232,7 @@ export class AdminSellerSettlementService {
       if (existing.status === SellerSettlementStatus.PAID) {
         return tx.sellerSettlement.findUniqueOrThrow({ where: { id: settlementId }, include: SETTLEMENT_INCLUDE });
       }
+      if (existing.onHold) throw new InvalidSellerSettlementTransitionException({ settlementId, from: existing.status, to: SellerSettlementStatus.PAID, reason: "ON_HOLD" });
       if (existing.netIrr >= this.threshold() && existing.status !== SellerSettlementStatus.APPROVED) {
         throw new SellerSettlementApprovalRequiredException({ settlementId, threshold: this.threshold() });
       }

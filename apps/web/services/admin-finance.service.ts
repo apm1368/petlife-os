@@ -58,8 +58,8 @@ export const adminFinanceService = {
     input: { marketplaceChannelAccountId: string; source: MarketplaceSettlementImportSource; periodStart: string; periodEnd: string; currency: string; lines: MarketplaceSettlementLineInput[] },
     idempotencyKey?: string,
   ) => apiFetch<MarketplaceSettlementStatementDto>("/admin/marketplace-settlements/import", { method: "POST", body: input, idempotencyKey }),
-  listMarketplaceStatements: (sellerOrganizationId?: string) => apiFetch<MarketplaceSettlementStatementDto[]>(`/admin/marketplace-settlements${toQueryString({ sellerOrganizationId })}`),
-  getMarketplaceStatement: (id: string) => apiFetch<MarketplaceSettlementStatementDto>(`/admin/marketplace-settlements/${id}`),
+  listMarketplaceStatements: (sellerOrganizationId?: string, signal?: AbortSignal) => apiFetch<MarketplaceSettlementStatementDto[]>(`/admin/marketplace-settlements${toQueryString({ sellerOrganizationId })}`, { signal }),
+  getMarketplaceStatement: (id: string, signal?: AbortSignal) => apiFetch<MarketplaceSettlementStatementDto>(`/admin/marketplace-settlements/${id}`, { signal }),
 
   listReconciliation: (status?: MarketplaceReconciliationStatus) => apiFetch<MarketplaceSettlementReconciliationResultDto[]>(`/admin/marketplace-reconciliation${toQueryString({ status })}`),
   getReconciliation: (id: string) => apiFetch<MarketplaceSettlementReconciliationResultDto>(`/admin/marketplace-reconciliation/${id}`),

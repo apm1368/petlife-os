@@ -13,8 +13,13 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
  * one. They are authenticated instead by their own signature/verification
  * mechanism (see WebhookSignatureVerifier / ShippingGateway.handleWebhook),
  * which the double-submit pattern isn't meant to replace.
+ *
+ * `/uploads/:token` is the local-storage stand-in for a presigned object-store PUT: it never reads
+ * the session — the single-use, short-lived, key- and size-bound token in Redis is the whole
+ * authorization — so there is nothing for a cross-site request to ride on. Browsers PUT the file
+ * there directly (no API client, no CSRF header), exactly as they would to a presigned S3 URL.
  */
-const CSRF_EXEMPT_PREFIXES = ["/payments/webhooks/", "/shipping/webhooks/"];
+const CSRF_EXEMPT_PREFIXES = ["/payments/webhooks/", "/shipping/webhooks/", "/uploads/"];
 
 @Injectable()
 export class CsrfGuard implements CanActivate {

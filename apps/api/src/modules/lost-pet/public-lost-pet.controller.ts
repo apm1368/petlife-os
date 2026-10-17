@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-auth.guard";
 import { OptionalCurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { LostPetIncidentService } from "./lost-pet-incident.service";
-import { RequestLostPetSightingPhotoUploadDto, SubmitLostPetSightingDto } from "./dto/lost-pet.dto";
+import { ListPublicLostPetsQueryDto, RequestLostPetSightingPhotoUploadDto, SubmitLostPetSightingDto } from "./dto/lost-pet.dto";
 
 /**
  * Public, anonymous-readable surface (spec: "share a lost-pet incident
@@ -19,25 +19,25 @@ export class PublicLostPetController {
   constructor(private readonly incidents: LostPetIncidentService) {}
 
   @Get()
-  list() {
-    return this.incidents.listPublic();
+  list(@Query() query: ListPublicLostPetsQueryDto) {
+    return this.incidents.listPublic(query);
   }
 
   @Get(":incidentId")
-  get(@Param("incidentId") incidentId: string) {
+  get(@Param("incidentId", ParseUUIDPipe) incidentId: string) {
     return this.incidents.getPublic(incidentId);
   }
 
   @Post(":incidentId/sightings/upload-url")
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  requestSightingPhotoUpload(@Param("incidentId") incidentId: string, @Body() dto: RequestLostPetSightingPhotoUploadDto) {
+  requestSightingPhotoUpload(@Param("incidentId", ParseUUIDPipe) incidentId: string, @Body() dto: RequestLostPetSightingPhotoUploadDto) {
     return this.incidents.requestSightingPhotoUpload(incidentId, dto.contentType, dto.fileSizeBytes);
   }
 
   @Post(":incidentId/sightings")
   @UseGuards(OptionalSessionAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  submitSighting(@Param("incidentId") incidentId: string, @OptionalCurrentUser() user: SessionUser | undefined, @Body() dto: SubmitLostPetSightingDto) {
+  submitSighting(@Param("incidentId", ParseUUIDPipe) incidentId: string, @OptionalCurrentUser() user: SessionUser | undefined, @Body() dto: SubmitLostPetSightingDto) {
     return this.incidents.submitSighting(incidentId, user?.id, dto);
   }
 }

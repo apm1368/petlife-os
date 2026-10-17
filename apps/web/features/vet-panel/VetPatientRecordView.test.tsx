@@ -3,9 +3,11 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { ClinicalAlertSeverity, ClinicalAlertType, PetSpecies, type ProviderPatientRecordDto } from "@petlife/types";
 import { vetPanelService } from "@/services/vet-panel.service";
+import { usePetAccess } from "@/hooks/use-pet-access";
 import { VetPatientRecordView } from "./VetPatientRecordView";
 
 const push = vi.fn();
+vi.mock("@/hooks/use-pet-access", () => ({ usePetAccess: vi.fn(() => ({ access: { canRecordClinicalData: true } })) }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/services/vet-panel.service", () => ({
   vetPanelService: { getPatientRecord: vi.fn(), resolveAlert: vi.fn(), admitPatient: vi.fn(), presentEstimate: vi.fn(), cancelPrescription: vi.fn(), dispenseRefill: vi.fn() },
@@ -143,4 +145,14 @@ describe("VetPatientRecordView", () => {
     await waitFor(() => expect(screen.getByText("Waiting for the owner's decision.")).toBeTruthy());
     expect(screen.queryByText("Approve")).toBeNull();
   });
+});
+
+it("keeps a read-only clinical grant free of write controls", async () => {
+ vi.mocked(usePetAccess).mockReturnValue({access:{canRecordClinicalData:false}} as never);
+ vi.mocked(vetPanelService.getPatientRecord).mockResolvedValue(record());
+ renderWithIntl(<VetPatientRecordView petId="pet-1"/>);
+ await screen.findByText("Luna");
+ expect(screen.queryByRole("button",{name:/start.*visit/i})).toBeNull();
+ expect(screen.queryByRole("button",{name:/admit/i})).toBeNull();
+ expect(screen.queryByText("Add to clinical record")).toBeNull();
 });

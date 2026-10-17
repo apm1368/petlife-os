@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
+import { routeExists } from "@/test/route-exists";
 import RootPage from "@/app/[locale]/page";
 import AuthPage from "@/app/[locale]/(auth)/auth/page";
-import { landingCopy } from "./copy";
-import { cameraAt, cameraStops, nearestStop, wheelProgress } from "./camera";
-import { consumeLandingIntent, rememberLandingIntent } from "./intent";
+import credits from "./photo-credits.json";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
@@ -15,84 +17,67 @@ vi.mock("next/navigation", () => ({
     throw new Error("NOT_FOUND");
   },
 }));
+
 beforeEach(() => {
   vi.clearAllMocks();
-  sessionStorage.clear();
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
-  );
-  vi.stubGlobal("requestAnimationFrame", (fn: FrameRequestCallback) => window.setTimeout(() => fn(0), 0));
-  vi.stubGlobal("cancelAnimationFrame", (id: number) => window.clearTimeout(id));
+  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ code: "UNAUTHENTICATED" }), { status: 401 })));
 });
-describe("Public spatial landing", () => {
-  it.each(["fa", "en"] as const)("renders %s without domain requests", async (locale) => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
-    const copy = landingCopy[locale];
+
+const PUBLIC = join(__dirname, "..", "..", "public");
+
+describe("Public landing", () => {
+  it.each(["fa", "en"] as const)("renders the %s landing with one h1, Cookie as the example and real photos only", async (locale) => {
     renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(copy.contexts[0]![1]);
-    expect(screen.getByRole("link", { name: copy.start }).getAttribute("href")).toBe(`/${locale}/auth`);
-    expect(document.querySelectorAll(".persistent-world")).toHaveLength(1);
-    expect(document.querySelectorAll(".context-copy")).toHaveLength(1);
-    expect(document.body.textContent).not.toMatch(/Luna|لونا/);
-    expect(fetchSpy).not.toHaveBeenCalled();
-    fetchSpy.mockRestore();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(document.body.textContent).toMatch(locale === "fa" ? /کوکی/ : /Cookie/);
+    const images = Array.from(document.querySelectorAll("img")).map((i) => i.getAttribute("src")!);
+    expect(images.length).toBeGreaterThan(6);
+    for (const src of images) {
+      expect(src, src).toMatch(/\.(webp|jpe?g|png)$/); // photographs, never vector illustrations
+      expect(existsSync(join(PUBLIC, src)), src).toBe(true);
+    }
+    // No invented promotions: no discount codes or percentages.
+    expect(document.body.textContent).not.toMatch(/٪ تخفیف|% off|code [A-Z]{4,}/i);
   });
-  it("changes camera context without routing; keyboard returns to overview", async () => {
-    renderWithIntl(await RootPage({ params: Promise.resolve({ locale: "en" }) }));
-    fireEvent.change(screen.getByRole("combobox", { name: landingCopy.en.destinations }), {
-      target: { value: "5" },
-    });
-    await waitFor(() =>
-      expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("shop"),
-    );
-    expect(push).not.toHaveBeenCalled();
-    const cta = screen.getByRole("link", { name: landingCopy.en.contexts[5]![3] });
-    cta.addEventListener("click", (event) => event.preventDefault());
-    fireEvent.click(cta);
-    expect(consumeLandingIntent("en")).toBe("/en/shop?landingPet=cookie&landingAction=shop");
-    fireEvent.keyDown(document.querySelector(".spatial-landing")!, { key: "Escape" });
-    await waitFor(() =>
-      expect(document.querySelector(".spatial-landing")?.getAttribute("data-state")).toBe("overview"),
-    );
+
+  it.each(["fa", "en"] as const)("every %s landing link is a real localized route (no dead CTA)", async (locale) => {
+    renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]"));
+    expect(links.length).toBeGreaterThan(25);
+    for (const link of links) {
+      const href = link.getAttribute("href")!;
+      const [path, fragment] = href.split("#");
+      // Same-document links must name a real section; localized route links
+      // still have to resolve to a shipped page, including when they carry a hash.
+      if (fragment) expect(document.getElementById(fragment), href).not.toBeNull();
+      if (!path) {
+        expect(fragment, href).toBeTruthy();
+        continue;
+      }
+      expect(path, `${link.textContent} → ${href}`).toMatch(/^\/(fa|en)(\/|$)/);
+      expect(routeExists(path), `${link.textContent} → ${href}`).toBe(true);
+    }
   });
-  it.each(["fa", "en"] as const)("preserves existing %s email/phone auth", (locale) => {
+
+  it("credits every third-party photo it publishes", () => {
+    for (const c of credits as { file: string; license: string; page: string }[]) {
+      expect(existsSync(join(PUBLIC, c.file)), c.file).toBe(true);
+      expect(c.license).toBeTruthy();
+      expect(c.page).toMatch(/^https:\/\/commons\.wikimedia\.org\//);
+    }
+  });
+
+  it.each(["fa", "en"] as const)("keeps phone-first auth and the email fallback for %s", (locale) => {
     renderWithIntl(<AuthPage />, locale);
     const buttons = screen.getAllByRole("button");
     fireEvent.click(buttons[0]!);
-    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
-    fireEvent.click(buttons[1]!);
     expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=phone`);
+    fireEvent.click(buttons[1]!);
+    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
   });
+
   it("rejects unsupported locales", async () => {
     await expect(RootPage({ params: Promise.resolve({ locale: "xx" }) })).rejects.toThrow("NOT_FOUND");
-  });
-});
-describe("Camera and intent boundaries", () => {
-  it("bounds progress and wheel deltas", () => {
-    expect(cameraAt(-10)).toEqual(cameraAt(0));
-    expect(cameraAt(10)).toEqual(cameraAt(1));
-    expect(nearestStop(100)).toBe(cameraStops.length - 1);
-    expect(wheelProgress(99999, 0)).toBeCloseTo(0.06);
-    expect(wheelProgress(-99999, 2)).toBeCloseTo(-0.06);
-    expect(nearestStop(wheelProgress(100, 0))).toBe(1);
-  });
-  it("consumes a local destination once and rejects prototype or external routes", () => {
-    rememberLandingIntent("vet");
-    expect(consumeLandingIntent("fa")).toBe("/fa/vet/find?landingPet=cookie&landingAction=vet");
-    expect(consumeLandingIntent("fa")).toBeNull();
-    for (const action of ["toString", "__proto__", "https://evil.example"]) {
-      rememberLandingIntent(action);
-      expect(consumeLandingIntent("fa")).toBeNull();
-    }
-  });
-  it("rejects stale or malformed saved intent", () => {
-    sessionStorage.setItem(
-      "petlife-landing-intent",
-      JSON.stringify({ action: "shop", pet: "cookie", at: Date.now() - 1800001 }),
-    );
-    expect(consumeLandingIntent("en")).toBeNull();
-    sessionStorage.setItem("petlife-landing-intent", "null");
-    expect(consumeLandingIntent("en")).toBeNull();
   });
 });

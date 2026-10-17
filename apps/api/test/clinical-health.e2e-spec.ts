@@ -158,11 +158,14 @@ describe("Advanced Health + Medical Documents + Clinical OS (Handoff 17)", () =>
     const ownerView = await client.get(`/pets/${petId}/health/documents/${doc.body.id}`).expect(200);
     expect(ownerView.body.source.providerOrganizationId).toBeTruthy();
 
-    // The owner has no document-edit endpoint that mutates a provider row in place —
-    // only void (retract) exists, and voiding still preserves the record rather than editing it.
-    const voided = await client.post(`/pets/${petId}/health/documents/${doc.body.id}/void`).send({ reason: "Testing retraction" }).expect(201);
-    expect(voided.body.voidedAt).toBeTruthy();
-    expect(voided.body.title).toBe("Discharge summary"); // original content untouched
+    // The owner has no endpoint that mutates or retracts a provider document: the household void path refuses a
+    // PROVIDER/CLINIC document (provenance rule) — disagreement goes through a correction (Flow C) — and the
+    // original stays exactly as the provider recorded it.
+    const refused = await client.post(`/pets/${petId}/health/documents/${doc.body.id}/void`).send({ reason: "Testing retraction" }).expect(403);
+    expect(refused.body.error.code).toBe("PROVIDER_RECORD_NOT_OWNER_EDITABLE");
+    const after = await client.get(`/pets/${petId}/health/documents/${doc.body.id}`).expect(200);
+    expect(after.body.voidedAt).toBeNull();
+    expect(after.body.title).toBe("Discharge summary"); // original content untouched
   });
 
   // -- Flow C: Owner Correction ------------------------------------------------

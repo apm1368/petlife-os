@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { normalizeIranPhone } from "@petlife/validation";
 import { Button, Input, OtpInput } from "@petlife/ui";
 import { PasswordInput } from "@/features/auth/PasswordInput";
 import { authService } from "@/services/auth.service";
@@ -47,7 +48,13 @@ function AccountFlow() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await authService.requestOtp(identifier);
+      const normalizedIdentifier = method === "phone" ? normalizeIranPhone(identifier) : identifier;
+      if (!normalizedIdentifier) {
+        setError(t("identifier.invalidPhone"));
+        return;
+      }
+      await authService.requestOtp(normalizedIdentifier);
+      setIdentifier(normalizedIdentifier);
       setStage("otp");
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
@@ -135,6 +142,9 @@ function AccountFlow() {
       <Button variant="ghost" disabled={cooldown > 0 || isSubmitting} onClick={sendCode}>
         {cooldown > 0 ? t("otp.resendIn", { seconds: cooldown }) : t("otp.resend")}
       </Button>
+      <Button variant="ghost" disabled={isSubmitting} onClick={() => { setStage("identifier"); setCode(""); setError(null); }}>
+        {locale === "fa" ? "تغییر ایمیل یا موبایل" : "Change email or phone"}
+      </Button>
     </div>
   );
 }
@@ -147,7 +157,7 @@ function mapError(err: unknown, t: ReturnType<typeof useTranslations<"auth">>): 
       return t("otp.rateLimited", { seconds });
     }
     if (err.code === "INVALID_CREDENTIALS") return t("password.invalidCredentials");
-    return err.message;
+    return t("welcome.googleAuthFailed");
   }
   return "Something went wrong. Please try again.";
 }

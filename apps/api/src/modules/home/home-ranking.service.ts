@@ -10,6 +10,7 @@ const BOOKING_LABEL_KEY_BY_CATEGORY: Record<ServiceCategory, string> = {
   [ServiceCategory.SITTING]: "home.action.viewBooking.sitting",
   [ServiceCategory.BOARDING]: "home.action.viewBooking.boarding",
   [ServiceCategory.PET_TAXI]: "home.action.viewBooking.petTaxi",
+  [ServiceCategory.OTHER]: "home.action.viewBooking.other",
 };
 
 /** canViewHealth-gated. When visible is false, vaccinationStatus/profileStatus must not be trusted — nothing is queried for them. */

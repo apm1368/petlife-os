@@ -8,8 +8,8 @@ import type { ProviderBookingSummaryDto } from "@petlife/types";
 import { providerOsService } from "@/services/provider-os.service";
 import { ProviderBookingRow } from "./ProviderBookingRow";
 
-type FilterKey = "today" | "upcoming" | "past" | "cancelled";
-const FILTERS: FilterKey[] = ["today", "upcoming", "past", "cancelled"];
+type FilterKey = "requests" | "today" | "upcoming" | "past" | "cancelled";
+const FILTERS: FilterKey[] = ["requests", "today", "upcoming", "past", "cancelled"];
 
 /** GET /provider/bookings with filters (spec sections 10-11) — provider only ever sees their own organization's bookings. */
 export function ProviderBookingsView() {

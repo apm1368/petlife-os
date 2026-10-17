@@ -1,3 +1,2 @@
-import { MemberProfileView } from "@/features/profile/MemberProfileView";
-
-export default function ProfilePage() { return <MemberProfileView />; }
+import { AccountOverviewView } from "@/features/account/AccountOverviewView";
+export default function ProfilePage(){return <AccountOverviewView/>}

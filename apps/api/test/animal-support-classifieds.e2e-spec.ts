@@ -254,8 +254,9 @@ describe("Animal Support classifieds (Handoff 22)", () => {
     const afterFull = await request(app.getHttpServer()).get(`/animal-support/needs/${listingId}/summary`).expect(200);
     expect(afterFull.body.fulfilledQuantity).toBe(5);
 
-    const fulfilled = await publisher.post(`/animal-support/needs/${listingId}/fulfill`).expect(201);
-    expect(fulfilled.body.status).toBe("FULFILLED");
+    // Batch 6: reaching the stated need marks the listing fulfilled by itself, so a manual "fulfill" has nothing left to do.
+    expect((await prisma.supportNeedListing.findUniqueOrThrow({ where: { id: listingId } })).status).toBe("FULFILLED");
+    await publisher.post(`/animal-support/needs/${listingId}/fulfill`).expect(409);
   });
 
   it("a helper cannot offer twice while an offer is open, cannot offer on their own listing, and only the publisher sees the offer inbox", async () => {
@@ -342,10 +343,14 @@ describe("Animal Support classifieds (Handoff 22)", () => {
   });
 
   it("a listing that accepts money points at an existing campaign rather than holding its own balance", async () => {
-    const publisher = await setupUser();
+    const identifier = `h22-staff-${unique()}@example.com`;
+    const publisher = authedRequest(app, await signUp(app, logSpy, identifier));
     const organization = await prisma.animalSupportOrganization.create({
       data: { type: "SHELTER", name: `H22 Shelter ${unique()}`, verificationStatus: "VERIFIED", isPubliclyListed: true },
     });
+    // Batch 6: publishing in an organization's name requires being its staff.
+    const staff = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
+    await prisma.animalSupportOrgMembership.create({ data: { organizationId: organization.id, userId: staff.id, role: "COORDINATOR" } });
     const campaign = await prisma.supportCampaign.create({
       data: { organizationId: organization.id, title: `H22 Campaign ${unique()}`, description: "Ongoing care costs", status: "ACTIVE" },
     });

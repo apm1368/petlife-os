@@ -27,6 +27,7 @@ export function toTrustActionDto(row: TrustActionWithRelations): TrustActionDto 
     actionType: row.actionType as never,
     reason: row.reason,
     performedByAdmin: { id: row.performedByAdmin.id, displayName: row.performedByAdmin.user.displayName, role: row.performedByAdmin.role as never },
+    effectSummary: (row.effectSummary as TrustActionDto["effectSummary"]) ?? null,
     createdAt: row.createdAt.toISOString(),
     appeal: row.appeal ? toAppealDto(row.appeal) : null,
   };

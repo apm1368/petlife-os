@@ -1,0 +1,111 @@
+/* The approved patterns share tokens and functional primitives, not a second application. */
+.design-root{min-height:100dvh}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]):not([data-pattern="admin"]):not([data-pattern="personal"]):not([data-pattern="auth"]){--surface-base:var(--campaign-cream);--surface-page:var(--campaign-cream);--surface-elevated:var(--campaign-paper);--surface-raised:var(--campaign-paper);--surface-subtle:var(--campaign-copper-tint);--surface-sunken:var(--campaign-copper-tint);--text-primary:var(--campaign-ink);--text-secondary:var(--campaign-text);--brand-natural:var(--campaign-plum);--brand-solid:var(--campaign-plum);--brand-solid-strong:var(--campaign-plum-strong);--on-brand:var(--campaign-inverse);--border-subtle:var(--campaign-line);--border-strong:var(--campaign-text);--focus-ring:var(--campaign-copper);background:var(--surface-base);color:var(--text-primary)}
+.design-root :is(.workspace-main,.public-experience-main){min-width:0}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]) :is(.workspace-main,.public-experience-main) :where(article,section,form,fieldset,aside){min-width:0;max-width:100%}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]) :is(.workspace-main,.public-experience-main) :where(input,select,textarea){max-width:100%;min-width:0}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]) :is(.workspace-main,.public-experience-main) :where(p,dd,td,h1,h2,h3){overflow-wrap:anywhere}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]) :is(.workspace-main,.public-experience-main) :where(button,a,input,textarea,select):focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]) :is(.workspace-main,.public-experience-main) .rounded-lg.border{border-radius:22px}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]) :is(.workspace-main,.public-experience-main) h1{letter-spacing:-.025em;font-weight:800;line-height:1.6}
+.design-root:not([data-pattern="landing"]):not([data-pattern="protected"]) :is(.workspace-main,.public-experience-main) :where(input:not([type="checkbox"]):not([type="radio"]),select,textarea){border-radius:12px;min-height:44px}
+.design-root :is(.workspace-main,.public-experience-main) :where(input[type="checkbox"],input[type="radio"]){accent-color:var(--brand-natural);min-width:18px;min-height:18px}
+.design-root :is(.workspace-main,.public-experience-main) :where(.split-section,.flow-main,.flow-summary){border-radius:24px;border-color:var(--border-subtle)}
+.design-root :is(.workspace-main,.public-experience-main) .split-section{padding:24px;background:var(--surface-elevated)}
+.design-root :is(.workspace-main,.public-experience-main) .flow-main{padding:28px;background:var(--surface-elevated);border:1px solid var(--border-subtle)}
+.design-root :is(.workspace-main,.public-experience-main) .flow-summary{background:var(--surface-elevated);padding:26px}
+.design-root .public-footer{background:var(--campaign-plum);color:var(--campaign-inverse);border:0;padding-block:34px;line-height:2}
+.design-root .public-footer a{color:var(--campaign-inverse)}
+.design-root :is(.experience-grid,.experience-section,.split-layout,.flow-layout){min-width:0}
+.design-root:not([data-pattern="landing"]) .experience-tile{border-radius:22px;background:var(--surface-elevated);border-color:var(--border-subtle);box-shadow:none}
+.design-root:not([data-pattern="landing"]) .experience-tile__icon{background:var(--campaign-copper-tint);color:var(--campaign-plum)}
+.design-root:not([data-pattern="landing"]) .experience-hero{background:var(--campaign-plum);box-shadow:none;border-radius:28px}
+.design-root:not([data-pattern="landing"]) .experience-hero__shade{background:color-mix(in srgb,var(--campaign-plum) 55%,transparent)}
+/* Clinic, service and taxi discovery retain all real URL filters. */
+.design-root .disc{display:flex;flex-direction:column;gap:28px;color:var(--text-primary)}
+.design-root .disc-head{padding:30px;border:1px solid var(--border-subtle);background:var(--surface-elevated);border-radius:26px}
+.design-root .disc-head h1{font-size:clamp(1.8rem,3vw,2.8rem);color:var(--brand-natural)}
+.design-root .disc-head__eyebrow{color:var(--campaign-copper)}
+.design-root .disc-search{border-radius:14px;background:var(--surface-base);border-color:var(--border-subtle)}
+.design-root .disc-cats{gap:10px;padding-bottom:8px}
+.design-root .disc-cats>a{border-radius:12px;border:1px solid var(--border-subtle);background:var(--surface-elevated);padding:12px 18px}
+.design-root .disc-cats>a[aria-current="page"]{background:var(--brand-solid);color:var(--on-brand)}
+.design-root .disc-layout{gap:28px;grid-template-columns:260px minmax(0,1fr)}
+.design-root .disc-rail{border-radius:24px;padding:24px 20px;border:1px solid var(--border-subtle);background:var(--surface-elevated)}
+.design-root .disc-list{display:flex;flex-direction:column;gap:18px}
+.design-root .disc-row{border:1px solid var(--border-subtle);border-radius:24px;background:var(--surface-elevated);padding:20px;gap:22px;box-shadow:0 8px 24px color-mix(in srgb,var(--campaign-plum) 4%,transparent)}
+.design-root .disc-row__media{border-radius:20px;overflow:hidden;background:var(--surface-subtle)}
+.design-root .disc-row h3{font-size:1.2rem;font-weight:800;color:var(--brand-natural)}
+.design-root .disc-row__link::after{border-radius:24px}
+.design-root .disc-row__cta{border-radius:12px;background:var(--brand-solid);color:var(--on-brand);padding:12px 22px}
+.design-root .disc-sort select{background:var(--surface-elevated);border-color:var(--border-subtle)}
+.design-root .pd{color:var(--text-primary)}
+.design-root .pd-head{border-radius:28px;background:var(--surface-elevated);border:1px solid var(--border-subtle);overflow:hidden}
+.design-root .pd-head__identity{padding:28px}
+.design-root .pd-head__text h1{font-size:clamp(1.75rem,3vw,2.7rem);color:var(--brand-natural)}
+.design-root .pd-head__logo{border-radius:22px;border-color:var(--border-subtle)}
+.design-root :is(.pd-section,.provider-book-panel,.pd-service){background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:24px}
+.design-root .pd-section{padding:26px}
+.design-root .provider-book-panel{padding:24px}
+.design-root .pd-anchors{background:var(--surface-base);border-color:var(--border-subtle);padding:12px 24px}
+.design-root .pd-service{padding:22px}
+.design-root .pd-team>li{border-radius:20px;background:var(--surface-base);border:1px solid var(--border-subtle)}
+.design-root .week-availability button{border-radius:12px}
+/* Every booking format retains its own slot/range/transport data and terms. */
+.design-root[data-pattern="reservation"] .flow-layout{gap:28px}
+.design-root[data-pattern="reservation"] .stepper{padding:12px 0 24px;border-bottom:1px solid var(--border-subtle)}
+.design-root[data-pattern="reservation"] .stepper__step--current .stepper__mark{background:var(--brand-solid);color:var(--on-brand)}
+.design-root[data-pattern="reservation"] .flow-main :is([role="radio"],[aria-pressed]){border-radius:16px}
+.design-root[data-pattern="reservation"] .flow-main [aria-checked="true"],.design-root[data-pattern="reservation"] .flow-main [aria-pressed="true"]{outline:2px solid var(--brand-natural);outline-offset:2px}
+/* Support uses a Divar-style board, never nightly hotel prices. */
+.design-root[data-pattern="classifieds"] .need-filters{padding:24px;border:1px solid var(--border-subtle);border-radius:22px;background:var(--surface-elevated);gap:18px}
+.design-root[data-pattern="classifieds"] .need-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;border:0}
+.design-root[data-pattern="classifieds"] .need-rows>li{border:0;min-width:0}
+.design-root[data-pattern="classifieds"] .need-row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:20px;padding:20px;background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:22px;height:100%}
+.design-root[data-pattern="classifieds"] .need-row__media{width:120px;height:120px;border-radius:18px;object-fit:cover}
+.design-root[data-pattern="classifieds"] .need-row__body{min-width:0}
+/* Personal tabs keep the already-approved glass frame, including forms and records. */
+.design-root[data-pattern="personal"] .member-shell--glass .workspace-main>.motion-page{background:transparent}
+.design-root[data-pattern="personal"] .member-shell--glass .workspace-main :is(.rounded-lg.border,.split-section,.flow-main){background:var(--surface-elevated);border-color:var(--border-subtle);backdrop-filter:blur(22px);border-radius:24px}
+.design-root[data-pattern="personal"] .member-shell--glass .workspace-main h1{color:var(--text-primary)}
+.design-root[data-pattern="personal"] .member-shell--glass .workspace-main :is(input,textarea,select){background:var(--surface-sunken);color:var(--text-primary)}
+/******** Role-specific operations: content only; protected admin navigation is untouched. ********/
+.design-root[data-pattern="admin"] .erp-main,.design-root[data-pattern="operations"] :is(main,.workspace-main){--surface-base:var(--campaign-cream);--surface-elevated:var(--campaign-paper);--surface-subtle:var(--campaign-copper-tint);--text-primary:var(--campaign-ink);--text-secondary:var(--campaign-text);--brand-natural:var(--campaign-plum);--brand-solid:var(--campaign-plum);--brand-solid-strong:var(--campaign-plum-strong);--on-brand:var(--campaign-inverse);--border-subtle:var(--campaign-line);--border-strong:var(--campaign-text);--focus-ring:var(--campaign-copper);background:var(--surface-base);color:var(--text-primary);border-radius:26px;padding:28px;min-width:0}
+.design-root[data-pattern="admin"] .erp-main{margin-block:24px;width:calc(100% - 40px)}
+.design-root[data-pattern="admin"] .erp-main :where(section,article,form,fieldset,aside,div){min-width:0}
+.design-root[data-pattern="admin"] .erp-main :is(h1,h2,h3){color:var(--brand-natural)}
+.design-root[data-pattern="admin"] .erp-main table,.design-root[data-pattern="operations"] main table{display:block;overflow-x:auto;max-width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border-subtle);border-radius:18px;background:var(--surface-elevated)}
+.design-root[data-pattern="admin"] .erp-main :is(th,td),.design-root[data-pattern="operations"] main :is(th,td){padding:14px 18px;border-bottom:1px solid var(--border-subtle);text-align:start;max-width:28ch;overflow-wrap:anywhere}
+.design-root[data-pattern="admin"] .erp-main th,.design-root[data-pattern="operations"] main th{background:var(--surface-subtle);font-size:.8rem}
+.design-root[data-pattern="admin"] .erp-main :is(input,select,textarea){background:var(--surface-elevated);color:var(--text-primary)}
+.design-root[data-pattern="admin"] .erp-main .rounded-lg.border{background:var(--surface-elevated);border-radius:22px}
+@media(max-width:1023px){.design-root .disc-layout{grid-template-columns:minmax(0,1fr)}.design-root .disc-rail{display:none}.design-root[data-pattern="classifieds"] .need-rows{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){.design-root:not([data-pattern="landing"]) .public-experience-main{padding:20px 16px 90px}.design-root .disc-head{padding:22px}.design-root .disc-row{padding:18px;gap:14px}.design-root .disc-row__media{width:82px;height:82px}.design-root .disc-row h3{font-size:1.05rem}.design-root .pd-head__identity{padding:20px}.design-root .pd-head__cover{min-height:180px}.design-root :is(.pd-section,.provider-book-panel,.pd-service){padding:20px}.design-root :is(.workspace-main,.public-experience-main) :is(.split-section,.flow-main,.flow-summary){padding:20px;border-radius:22px}.design-root[data-pattern="classifieds"] .need-filters{padding:18px}.design-root[data-pattern="classifieds"] .need-row{grid-template-columns:88px minmax(0,1fr);padding:16px;gap:16px}.design-root[data-pattern="classifieds"] .need-row__media{width:88px;height:100px}.design-root[data-pattern="admin"] .erp-main,.design-root[data-pattern="operations"] :is(main,.workspace-main){padding:20px 16px;border-radius:20px;max-width:100%;width:100%;margin-block:12px}.design-root[data-pattern="admin"] .erp-main [class*="min-w-"]{min-width:0}.design-root[data-pattern="admin"] .erp-main :is(th,td){padding:12px;max-width:24ch}.design-root .stepper__label{font-size:.65rem}}
+:root[data-theme="dark"] .design-root:not([data-pattern="landing"]):not([data-pattern="protected"]):not([data-pattern="personal"]):not([data-pattern="auth"]){--surface-base:var(--campaign-plum);--surface-elevated:var(--campaign-plum-strong);--surface-subtle:var(--campaign-plum-strong);--text-primary:var(--campaign-cream);--text-secondary:color-mix(in srgb,var(--campaign-cream) 85%,transparent);--brand-natural:var(--campaign-cream);--brand-solid:var(--campaign-cream);--on-brand:var(--campaign-plum);--border-subtle:color-mix(in srgb,var(--campaign-cream) 22%,transparent)}
+@media(prefers-reduced-motion:reduce){.design-root *{scroll-behavior:auto}}
+/* The same content vocabulary continues through all existing operational forms. */
+.design-root[data-pattern="operations"] main :is(section,article,form,fieldset,div){min-width:0}
+.design-root[data-pattern="operations"] main .rounded-lg.border{background:var(--surface-elevated);border-radius:22px}
+.design-root[data-pattern="operations"] main :is(input,select,textarea){max-width:100%;background:var(--surface-elevated);color:var(--text-primary)}
+.design-root[data-pattern="operations"] main :is(h1,h2,h3){color:var(--brand-natural)}
+.design-root :is(.disc-cats>a,.pd-service__book,.provider-book-panel__cta){color:var(--on-brand)}
+.design-root .disc-cats>a:not([aria-current="page"]){color:var(--text-secondary)}
+.design-root .disc-cats>a[aria-current="page"]::after{display:none}
+.design-root .pd-team>li{padding:18px}
+.design-root .disc-row__price{white-space:normal}
+.design-root[data-pattern="reservation"] .flow-layout{align-items:start}
+.design-root[data-pattern="reservation"] .flow-main>footer{gap:16px;border-radius:0 0 18px 18px}
+.design-root[data-pattern="reservation"] .flow-summary__total{background:var(--campaign-plum);color:var(--campaign-inverse);padding:20px;border-radius:16px}
+.design-root[data-pattern="reservation"] .flow-summary__total strong{color:var(--campaign-inverse)}
+@media(max-width:650px){
+ .design-root[data-pattern="admin"] .erp-main :where(header,.flex.justify-between,.flex.items-end),.design-root[data-pattern="operations"] main :where(header,.flex.justify-between,.flex.items-end){flex-wrap:wrap;gap:12px}
+ .design-root[data-pattern="admin"] .erp-main :where(input,textarea,select),.design-root[data-pattern="operations"] main :where(input,textarea,select){max-width:100%}
+ .design-root[data-pattern="admin"] .erp-main :where(.grid-cols-2,.grid-cols-3,.grid-cols-4),.design-root[data-pattern="operations"] main :where(.grid-cols-2,.grid-cols-3,.grid-cols-4){grid-template-columns:minmax(0,1fr)}
+ .design-root[data-pattern="admin"] .erp-main :where(p,dd,h1,h2,h3),.design-root[data-pattern="operations"] main :where(p,dd,h1,h2,h3){overflow-wrap:anywhere}
+ .design-root[data-pattern="reservation"] .flow-summary{position:static}
+}
+:root[data-theme="dark"] .design-root[data-pattern="admin"] .erp-main,:root[data-theme="dark"] .design-root[data-pattern="operations"] main{--surface-base:var(--campaign-plum);--surface-elevated:var(--campaign-plum-strong);--surface-subtle:var(--campaign-plum-strong);--text-primary:var(--campaign-cream);--text-secondary:color-mix(in srgb,var(--campaign-cream) 85%,transparent);--brand-natural:var(--campaign-cream);--brand-solid:var(--campaign-cream);--on-brand:var(--campaign-plum);--border-subtle:color-mix(in srgb,var(--campaign-cream) 22%,transparent)}
+/* Let the existing admin header tools wrap on small phones; navigation items are unchanged. */
+@media(max-width:650px){.design-root[data-pattern="admin"] .erp-bar__inner{flex-wrap:wrap;border-radius:24px;gap:8px}.design-root[data-pattern="admin"] .erp-bar__tools{flex-wrap:wrap;min-width:0;max-width:100%}}
+.design-root[data-pattern="admin"] .erp-shell{background:var(--campaign-cream)}
+:root[data-theme="dark"] .design-root[data-pattern="admin"] .erp-shell{background:var(--campaign-plum)}

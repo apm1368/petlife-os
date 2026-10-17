@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalEstimateDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { clinicalOwnerService } from "@/services/vet-panel.service";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const STATUS_TONE: Record<ClinicalEstimateDto["status"], "neutral" | "attention" | "success" | "urgent"> = {
   DRAFT: "neutral",
@@ -29,6 +30,7 @@ const STATUS_TONE: Record<ClinicalEstimateDto["status"], "neutral" | "attention"
  * behalf.
  */
 export function HealthEstimatesView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("healthAdvanced.estimates");
   const tCommon = useTranslations("common");
 
@@ -41,7 +43,7 @@ export function HealthEstimatesView({ petId }: { petId: string }) {
     try {
       setEstimates(await clinicalOwnerService.listEstimates(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     }
   }
 
@@ -62,7 +64,7 @@ export function HealthEstimatesView({ petId }: { petId: string }) {
       }
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setBusyId(null);
     }
@@ -88,8 +90,8 @@ export function HealthEstimatesView({ petId }: { petId: string }) {
             <p className="text-metadata text-text-secondary">{estimate.source.providerOrganizationName ?? "—"}</p>
 
             <div className="flex flex-col">
-              <span className="text-body text-text-primary">{t("range", { low: estimate.lowTotalIrr.toLocaleString(), high: estimate.highTotalIrr.toLocaleString() })}</span>
-              <span className="text-metadata text-text-secondary">{t("rangeToman", { low: Math.round(estimate.lowTotalIrr / 10).toLocaleString(), high: Math.round(estimate.highTotalIrr / 10).toLocaleString() })}</span>
+              <span className="text-body text-text-primary">{t("range", { low: fmt.number(estimate.lowTotalIrr), high: fmt.number(estimate.highTotalIrr) })}</span>
+              <span className="text-metadata text-text-secondary">{t("rangeToman", { low: fmt.number(Math.round(estimate.lowTotalIrr / 10)), high: fmt.number(Math.round(estimate.highTotalIrr / 10)) })}</span>
               <span className="mt-1 text-metadata text-text-secondary">{t("rangeExplainer")}</span>
             </div>
 
@@ -101,14 +103,14 @@ export function HealthEstimatesView({ petId }: { petId: string }) {
                     {line.quantity !== 1 ? ` × ${line.quantity}` : ""}
                   </span>
                   <span className="shrink-0 text-metadata text-text-secondary">
-                    {t("lineRange", { low: (line.unitLowIrr * line.quantity).toLocaleString(), high: (line.unitHighIrr * line.quantity).toLocaleString() })}
+                    {t("lineRange", { low: fmt.number((line.unitLowIrr * line.quantity)), high: fmt.number((line.unitHighIrr * line.quantity)) })}
                   </span>
                 </li>
               ))}
             </ul>
 
             {estimate.notes ? <p className="text-body text-text-secondary">{estimate.notes}</p> : null}
-            {estimate.validUntil ? <p className="text-metadata text-text-secondary">{t("validUntil", { date: new Date(estimate.validUntil).toLocaleDateString() })}</p> : null}
+            {estimate.validUntil ? <p className="text-metadata text-text-secondary">{t("validUntil", { date: fmt.date(estimate.validUntil) })}</p> : null}
             {estimate.declineReason ? <p className="text-metadata text-text-secondary">{t("declinedBecause", { reason: estimate.declineReason })}</p> : null}
 
             {estimate.status === "PRESENTED" ? (

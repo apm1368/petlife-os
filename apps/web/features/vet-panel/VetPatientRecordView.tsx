@@ -3,12 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ClinicalAlertSeverity, ProviderPatientRecordDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { providerClinicalService } from "@/services/provider-clinical.service";
+import { usePetAccess } from "@/hooks/use-pet-access";
+import { ClinicalRecordActions } from "./ClinicalRecordActions";
 import { VitalsSparkline } from "./VitalsSparkline";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { useStatusText } from "@/lib/status/use-status-text";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type Tab = "summary" | "problems" | "vitals" | "prescriptions" | "visits" | "financial";
 
@@ -33,7 +38,11 @@ function orDash(value: string | number | null | undefined): string {
  * score, no "stable" badge, no interpretation of a vital against a reference
  * range. Where a value was never recorded the page says so with a dash.
  */
-export function VetPatientRecordView({ petId }: { petId: string }) {
+export function VetPatientRecordView({ petId, bookingId }: { petId: string; bookingId?: string }) {
+  const { access } = usePetAccess(petId);
+  const canWrite = access?.canRecordClinicalData === true;
+  const statusText = useStatusText();
+  const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.record");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -41,15 +50,17 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
 
   const [record, setRecord] = useState<ProviderPatientRecordDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [tab, setTab] = useState<Tab>("summary");
   const [isBusy, setIsBusy] = useState(false);
 
   async function load() {
     setError(null);
+    setLoadError(null);
     try {
       setRecord(await vetPanelService.getPatientRecord(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -73,10 +84,11 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
     setIsBusy(true);
     setError(null);
     try {
-      const visit = await providerClinicalService.startVisit({ petId });
+      // Opened from a booking: the visit links to it; the API verifies it is this clinic's own VET booking.
+      const visit = await providerClinicalService.startVisit({ petId, bookingId });
       router.push(`/${locale}/provider/visits/${visit.id}?petId=${petId}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
       setIsBusy(false);
     }
   }
@@ -90,12 +102,12 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
       const admission = await vetPanelService.admitPatient({ petId, reasonForAdmission: reason.trim() });
       router.push(`/${locale}/provider/hospitalizations/${admission.id}?petId=${petId}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
       setIsBusy(false);
     }
   }
 
-  if (error && !record) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError && !record) return <LoadFailure error={loadError} onRetry={load} />;
   if (!record) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const openHospitalization = record.hospitalizations.find((h) => h.status === "ADMITTED");
@@ -112,15 +124,14 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
                 <StatusLabel tone={ALERT_TONE[alert.severity]}>{t(`alertType.${alert.type}`)}</StatusLabel>
                 <span className="mt-1 text-body text-text-primary">{alert.message}</span>
               </div>
-              <Button
+              {canWrite ? <Button
                 variant="ghost"
                 onClick={async () => {
-                  await vetPanelService.resolveAlert(petId, alert.id);
-                  await load();
+                  try { await vetPanelService.resolveAlert(petId, alert.id); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                 }}
               >
                 {t("resolveAlert")}
-              </Button>
+              </Button> : null}
             </div>
           ))}
         </div>
@@ -129,7 +140,7 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-page-title text-text-primary">{record.pet.name}</h1>
-          <div className="flex flex-wrap gap-2">
+          {canWrite ? <div className="flex flex-wrap gap-2">
             <Button variant="primary" isLoading={isBusy} onClick={handleStartVisit}>
               {t("startVisit")}
             </Button>
@@ -142,7 +153,7 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
                 {t("admit")}
               </Button>
             )}
-          </div>
+          </div> : null}
         </div>
         <p className="text-metadata text-text-secondary">
           {[t(`species.${record.pet.species}`), record.pet.breed, record.pet.sex ? t(`sex.${record.pet.sex}`) : null, record.pet.microchipNumber ? t("chip", { chip: record.pet.microchipNumber }) : null]
@@ -152,6 +163,7 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
         {record.owner ? <p className="text-metadata text-text-secondary">{t("owner", { name: record.owner.displayName ?? "—", phone: record.owner.phone ?? "—" })}</p> : null}
         {error ? <p className="text-body text-state-attention">{error}</p> : null}
       </header>
+      <ClinicalRecordActions key={petId} petId={petId} problems={record.problems} onSaved={load} />
 
       <nav className="flex gap-1 overflow-x-auto border-b border-border-subtle pb-2">
         {(["summary", "problems", "vitals", "prescriptions", "visits", "financial"] as Tab[]).map((item) => (
@@ -201,7 +213,7 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
             <h2 className="text-section-title text-text-primary">{t("latestVitals")}</h2>
             {record.latestVitals ? (
               <>
-                <p className="text-metadata text-text-secondary">{new Date(record.latestVitals.recordedAt).toLocaleString()}</p>
+                <p className="text-metadata text-text-secondary">{fmt.dateTime(record.latestVitals.recordedAt)}</p>
                 <dl className="grid grid-cols-2 gap-2">
                   <Measure label={t("weight")} value={record.latestVitals.weightValue !== null ? `${record.latestVitals.weightValue} ${record.latestVitals.weightUnit ?? ""}` : null} />
                   <Measure label={t("temperature")} value={record.latestVitals.temperatureC !== null ? `${record.latestVitals.temperatureC} °C` : null} />
@@ -241,7 +253,7 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
                   <StatusLabel tone={p.status === "RESOLVED" ? "success" : p.status === "RULED_OUT" ? "neutral" : "attention"}>{t(`problemStatus.${p.status}`)}</StatusLabel>
                 </div>
                 <span className="text-metadata text-text-secondary">
-                  {[p.bodySystem, p.onsetAt ? t("onset", { date: new Date(p.onsetAt).toLocaleDateString() }) : null, p.source.providerOrganizationName].filter(Boolean).join(" · ")}
+                  {[p.bodySystem, p.onsetAt ? t("onset", { date: fmt.date(p.onsetAt) }) : null, p.source.providerOrganizationName].filter(Boolean).join(" · ")}
                 </span>
                 {p.notes ? <p className="text-body text-text-secondary">{p.notes}</p> : null}
               </ContextSurface>
@@ -264,7 +276,7 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
           ) : (
             record.vitalsHistory.map((v) => (
               <ContextSurface key={v.id} className="flex flex-col gap-1">
-                <span className="text-metadata text-text-secondary">{new Date(v.recordedAt).toLocaleString()}</span>
+                <span className="text-metadata text-text-secondary">{fmt.dateTime(v.recordedAt)}</span>
                 <span className="text-body text-text-primary">
                   {[
                     v.weightValue !== null ? `${t("weight")}: ${v.weightValue} ${v.weightUnit ?? ""}` : null,
@@ -302,14 +314,13 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
                     .join(" · ")}
                 </span>
                 {p.isControlledSubstance ? <StatusLabel tone="attention">{t("controlledSubstance")}</StatusLabel> : null}
-                {p.status === "ACTIVE" ? (
+                {canWrite && p.status === "ACTIVE" ? (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {p.refillsDispensed < p.refillsAuthorized ? (
                       <Button
                         variant="secondary"
                         onClick={async () => {
-                          await vetPanelService.dispenseRefill(petId, p.id);
-                          await load();
+                          try { await vetPanelService.dispenseRefill(petId, p.id); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                         }}
                       >
                         {t("dispenseRefill")}
@@ -320,8 +331,7 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
                       onClick={async () => {
                         const reason = window.prompt(t("cancelPrompt"));
                         if (!reason?.trim()) return;
-                        await vetPanelService.cancelPrescription(petId, p.id, reason.trim());
-                        await load();
+                        try { await vetPanelService.cancelPrescription(petId, p.id, reason.trim()); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                       }}
                     >
                       {t("cancelPrescription")}
@@ -347,10 +357,10 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
                 className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface-elevated p-3 text-start hover:bg-surface-subtle"
               >
                 <div className="flex flex-col">
-                  <span className="text-body text-text-primary">{v.reasonForVisit ?? new Date(v.startedAt).toLocaleDateString()}</span>
+                  <span className="text-body text-text-primary">{v.reasonForVisit ?? fmt.date(v.startedAt)}</span>
                   <span className="text-metadata text-text-secondary">{v.providerOrganizationName}</span>
                 </div>
-                <StatusLabel tone="neutral">{v.status}</StatusLabel>
+                <StatusLabel tone="neutral">{statusText.label(v.status, "visit")}</StatusLabel>
               </button>
             ))
           )}
@@ -368,14 +378,13 @@ export function VetPatientRecordView({ petId }: { petId: string }) {
                   <span className="text-body text-text-primary">{estimate.title}</span>
                   <StatusLabel tone={estimate.status === "APPROVED" ? "success" : estimate.status === "DECLINED" ? "urgent" : "attention"}>{t(`estimateStatus.${estimate.status}`)}</StatusLabel>
                 </div>
-                <span className="text-metadata text-text-secondary">{t("estimateRange", { low: estimate.lowTotalIrr.toLocaleString(), high: estimate.highTotalIrr.toLocaleString() })}</span>
-                {estimate.status === "DRAFT" ? (
+                <span className="text-metadata text-text-secondary">{t("estimateRange", { low: fmt.number(estimate.lowTotalIrr), high: fmt.number(estimate.highTotalIrr) })}</span>
+                {canWrite && estimate.status === "DRAFT" ? (
                   <Button
                     className="mt-1 self-start"
                     variant="secondary"
                     onClick={async () => {
-                      await vetPanelService.presentEstimate(petId, estimate.id);
-                      await load();
+                      try { await vetPanelService.presentEstimate(petId, estimate.id); await load(); } catch (err) { setError(apiErrorText(err, locale, tCommon("genericError"))); }
                     }}
                   >
                     {t("presentEstimate")}

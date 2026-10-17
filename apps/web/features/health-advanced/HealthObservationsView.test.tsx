@@ -43,7 +43,8 @@ describe("HealthObservationsView", () => {
     renderWithIntl(<HealthObservationsView petId="pet-1" />);
 
     await waitFor(() => expect(screen.getByText("Ate less than usual today")).toBeTruthy());
-    expect(screen.getAllByText("APPETITE").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Appetite").length).toBeGreaterThan(0);
+    expect(screen.queryAllByText("APPETITE")).toHaveLength(0); // never the raw enum
     // No "diagnosis" field or label is ever attached to the recorded entry itself.
     expect(screen.queryByLabelText(/diagnosis/i)).toBeNull();
   });

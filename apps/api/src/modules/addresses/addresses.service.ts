@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import type { CustomerAddress } from "@prisma/client";
 import type { CustomerAddressDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { HouseholdAccessDeniedException } from "../../common/errors/api-exception";
-import type { CreateAddressDto } from "./dto/create-address.dto";
+import { HouseholdAccessDeniedException, NotFoundApiException } from "../../common/errors/api-exception";
+import type { CreateAddressDto, UpdateAddressDto } from "./dto/create-address.dto";
 
 function toDto(address: CustomerAddress): CustomerAddressDto {
   return {
@@ -19,15 +19,17 @@ function toDto(address: CustomerAddress): CustomerAddressDto {
     latitude: address.latitude,
     longitude: address.longitude,
     instructions: address.instructions,
+    postalCode: address.postalCode,
+    isDefault: address.isDefault,
   };
 }
 
 /**
- * Deliberately minimal per spec section 18 — create + list only. No update
- * or delete endpoint this phase: an address referenced by a Booking is
- * onDelete: Restrict (see schema.prisma), so a delete endpoint would need to
- * decide what happens to booking history referencing it, which is out of
- * scope for this handoff. See README Known limitations.
+ * Household address book. Create, list, edit and choose a default (Batch 4).
+ * Still no delete: an address referenced by a Booking or Order is
+ * onDelete: Restrict, and orders keep their own snapshot anyway. One default
+ * per household is guaranteed by a partial unique index; switching the
+ * default clears the old one in the same transaction.
  */
 @Injectable()
 export class AddressesService {
@@ -35,7 +37,24 @@ export class AddressesService {
 
   async create(userId: string, dto: CreateAddressDto): Promise<CustomerAddressDto> {
     await this.assertMember(userId, dto.householdId);
-    const address = await this.prisma.customerAddress.create({ data: dto });
+    const address = await this.prisma.$transaction(async (tx) => {
+      // The first address of a household becomes its default automatically.
+      const existing = await tx.customerAddress.count({ where: { householdId: dto.householdId } });
+      const isDefault = dto.isDefault ?? existing === 0;
+      if (isDefault) await tx.customerAddress.updateMany({ where: { householdId: dto.householdId, isDefault: true }, data: { isDefault: false } });
+      return tx.customerAddress.create({ data: { ...dto, isDefault } });
+    });
+    return toDto(address);
+  }
+
+  async update(userId: string, addressId: string, dto: UpdateAddressDto): Promise<CustomerAddressDto> {
+    const current = await this.prisma.customerAddress.findUnique({ where: { id: addressId } });
+    if (!current) throw new NotFoundApiException("Address", { addressId });
+    await this.assertMember(userId, current.householdId);
+    const address = await this.prisma.$transaction(async (tx) => {
+      if (dto.isDefault === true) await tx.customerAddress.updateMany({ where: { householdId: current.householdId, isDefault: true, id: { not: addressId } }, data: { isDefault: false } });
+      return tx.customerAddress.update({ where: { id: addressId }, data: dto });
+    });
     return toDto(address);
   }
 
@@ -43,7 +62,7 @@ export class AddressesService {
     await this.assertMember(userId, householdId);
     const addresses = await this.prisma.customerAddress.findMany({
       where: { householdId },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
     });
     return addresses.map(toDto);
   }

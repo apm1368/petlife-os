@@ -18,6 +18,8 @@ export const ENTITLEMENT_LABEL_KEY: Record<string, string> = {
   "health.documents.max": "entitlement.healthDocumentsMax",
   "health.observations.max": "entitlement.healthObservationsMax",
   "memories.entries.max": "entitlement.memoriesMax",
+  "care.reminders": "entitlement.careReminders",
+  "vet.share": "entitlement.vetShare",
 };
 
 /**

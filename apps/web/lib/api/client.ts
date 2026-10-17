@@ -37,6 +37,7 @@ export interface ApiFetchOptions {
   body?: unknown;
   idempotencyKey?: string;
   signal?: AbortSignal;
+  cache?: RequestCache;
 }
 
 async function send<T>(path: string, options: ApiFetchOptions): Promise<{ response: Response; payload: T | undefined }> {
@@ -56,6 +57,7 @@ async function send<T>(path: string, options: ApiFetchOptions): Promise<{ respon
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     signal: options.signal,
+    ...(options.cache ? { cache: options.cache } : {}),
   });
 
   const isJson = response.headers.get("content-type")?.includes("application/json");

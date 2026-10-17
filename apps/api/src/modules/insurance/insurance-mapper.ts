@@ -49,7 +49,11 @@ export function toInsuranceProductDto(row: ProductWithProvider): InsuranceProduc
   };
 }
 
-type ApplicationWithRelations = InsuranceApplication & { product: ProductWithProvider; pet: Pet };
+type ApplicationWithRelations = InsuranceApplication & {
+  product: ProductWithProvider;
+  pet: Pet;
+  events?: { fromStatus: string | null; toStatus: string; actorType: string; note: string | null; createdAt: Date }[];
+};
 
 export function toInsuranceApplicationDto(row: ApplicationWithRelations): InsuranceApplicationDto {
   return {
@@ -68,5 +72,9 @@ export function toInsuranceApplicationDto(row: ApplicationWithRelations): Insura
     decidedAt: row.decidedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    consentAt: row.consentAt?.toISOString() ?? null,
+    insurerMessage: row.insurerMessage,
+    externalReference: row.externalReference,
+    timeline: (row.events ?? []).map((e) => ({ fromStatus: e.fromStatus, toStatus: e.toStatus, actorType: e.actorType, note: e.note, createdAt: e.createdAt.toISOString() })),
   };
 }

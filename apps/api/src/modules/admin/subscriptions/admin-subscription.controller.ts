@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { ParseUUIDPipe, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
 import { RequireAdminPermission } from "../auth/require-admin-permission.decorator";
@@ -78,7 +78,7 @@ export class AdminSubscriptionController {
 
   @Get("households/:householdId")
   @RequireAdminPermission("subscription.view")
-  getHouseholdSubscription(@Param("householdId") householdId: string) {
+  getHouseholdSubscription(@Param("householdId", ParseUUIDPipe) householdId: string) {
     return this.subscriptions.getByHouseholdId(householdId);
   }
 

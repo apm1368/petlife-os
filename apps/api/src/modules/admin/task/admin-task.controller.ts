@@ -15,7 +15,7 @@ export class AdminTaskController {
   @Get()
   @RequireAdminPermission("task.manage")
   list(@Query() query: ListAdminTasksQueryDto) {
-    return this.tasks.list({ status: query.status, assigneeAdminId: query.assigneeAdminId }, query);
+    return this.tasks.list({ status: query.status, assigneeAdminId: query.assigneeAdminId, source: query.source, team: query.team }, query);
   }
 
   @Post()

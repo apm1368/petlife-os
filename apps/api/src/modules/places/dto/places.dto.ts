@@ -1,7 +1,24 @@
-import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Max, Min } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { PetFriendlyPlaceCategory, PetFriendlyPlaceStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
+
+export class OpeningHoursDto {
+  @IsInt() @Min(0) @Max(6) day!: number;
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/) open!: string;
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/) close!: string;
+}
+
+export class ReportPlaceDto {
+  @IsIn(["CLOSED_PERMANENTLY", "NOT_PET_FRIENDLY", "WRONG_LOCATION", "WRONG_DETAILS", "OTHER"]) reason!: string;
+  @IsOptional() @IsString() @Length(0, 1000) details?: string;
+}
+
+export class ResolvePlaceReportDto {
+  @IsIn(["RESOLVED", "DISMISSED"]) status!: "RESOLVED" | "DISMISSED";
+  @IsOptional() @IsString() @Length(0, 500) note?: string;
+}
 
 export class CreatePetFriendlyPlaceDto {
   @IsString()
@@ -57,6 +74,20 @@ export class CreatePetFriendlyPlaceDto {
   @IsString()
   @Length(0, 2000)
   petPolicy?: string;
+
+  /** Batch 5 — omit (or null) when the place has not stated it. */
+  @IsOptional() @IsBoolean() leashRequired?: boolean | null;
+  @IsOptional() @IsBoolean() waterAvailable?: boolean | null;
+  @IsOptional() @IsBoolean() petArea?: boolean | null;
+  @IsOptional() @IsBoolean() shadeAvailable?: boolean | null;
+  @IsOptional() @IsBoolean() fencedArea?: boolean | null;
+  @IsOptional() @IsBoolean() wasteBins?: boolean | null;
+  @IsOptional() @IsBoolean() smallDogArea?: boolean | null;
+  @IsOptional() @IsBoolean() parkingAvailable?: boolean | null;
+  @IsOptional() @IsInt() @Min(0) entryFeeIrr?: number | null;
+  @IsOptional() @IsIn(["FULL", "PARTIAL", "OUTDOOR_ONLY"]) petFriendlyLevel?: "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null;
+  @IsOptional() @IsString() @Length(0, 120) province?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(14) @ValidateNested({ each: true }) @Type(() => OpeningHoursDto) openingHours?: OpeningHoursDto[] | null;
 }
 
 export class UpdatePetFriendlyPlaceDto {
@@ -119,12 +150,27 @@ export class UpdatePetFriendlyPlaceDto {
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(20)
+  @IsObjectKeyFor(["pet-friendly-places"])
   imageObjectKeys?: string[];
 
   @IsOptional()
   @IsString()
   @Length(0, 300)
   verificationSource?: string;
+
+  /** Batch 5 — omit (or null) when the place has not stated it. */
+  @IsOptional() @IsBoolean() leashRequired?: boolean | null;
+  @IsOptional() @IsBoolean() waterAvailable?: boolean | null;
+  @IsOptional() @IsBoolean() petArea?: boolean | null;
+  @IsOptional() @IsBoolean() shadeAvailable?: boolean | null;
+  @IsOptional() @IsBoolean() fencedArea?: boolean | null;
+  @IsOptional() @IsBoolean() wasteBins?: boolean | null;
+  @IsOptional() @IsBoolean() smallDogArea?: boolean | null;
+  @IsOptional() @IsBoolean() parkingAvailable?: boolean | null;
+  @IsOptional() @IsInt() @Min(0) entryFeeIrr?: number | null;
+  @IsOptional() @IsIn(["FULL", "PARTIAL", "OUTDOOR_ONLY"]) petFriendlyLevel?: "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null;
+  @IsOptional() @IsString() @Length(0, 120) province?: string | null;
+  @IsOptional() @IsArray() @ArrayMaxSize(14) @ValidateNested({ each: true }) @Type(() => OpeningHoursDto) openingHours?: OpeningHoursDto[] | null;
 }
 
 export class SetPetFriendlyPlaceVerificationStatusDto {
@@ -147,6 +193,11 @@ export class RequestPetFriendlyPlaceImageUploadDto {
 }
 
 export class ListPetFriendlyPlacesQueryDto extends PaginationQueryDto {
+  /** Attribute filters: only places known to have a fenced area / small-dog area / free entry. */
+  @IsOptional() @IsIn(["true"]) fencedArea?: string;
+  @IsOptional() @IsIn(["true"]) smallDogArea?: string;
+  @IsOptional() @IsIn(["true"]) free?: string;
+
   @IsOptional()
   @IsString()
   country?: string;
@@ -190,4 +241,41 @@ export class NearbyPetFriendlyPlacesQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsEnum(PetSpecies)
   species?: PetSpecies;
+}
+
+export class SuggestPlaceDto {
+  @IsString() @Length(1, 200) name!: string;
+  @IsEnum(PetFriendlyPlaceCategory) category!: PetFriendlyPlaceCategory;
+  @IsString() @Length(1, 80) city!: string;
+  @IsOptional() @IsString() @MaxLength(300) address?: string;
+  @IsOptional() @IsLatitude() latitude?: number;
+  @IsOptional() @IsLongitude() longitude?: number;
+  @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+}
+
+/** Allowed fields of a CORRECTION — structured place attributes only, never coordinates, status or verification. */
+export class PlaceCorrectionChangesDto {
+  @IsOptional() @IsString() @Length(1, 200) name?: string;
+  @IsOptional() @IsString() @MaxLength(300) address?: string;
+  @IsOptional() @IsString() @MaxLength(1000) description?: string;
+  @IsOptional() @IsIn(["FULL", "PARTIAL", "OUTDOOR_ONLY"]) petFriendlyLevel?: string;
+  @IsOptional() @IsInt() @Min(0) entryFeeIrr?: number;
+  @IsOptional() @IsBoolean() leashRequired?: boolean;
+  @IsOptional() @IsBoolean() waterAvailable?: boolean;
+  @IsOptional() @IsBoolean() shadeAvailable?: boolean;
+  @IsOptional() @IsBoolean() fencedArea?: boolean;
+  @IsOptional() @IsBoolean() wasteBins?: boolean;
+  @IsOptional() @IsBoolean() smallDogArea?: boolean;
+  @IsOptional() @IsBoolean() parkingAvailable?: boolean;
+}
+
+export class SuggestPlaceChangeDto {
+  @IsIn(["CORRECTION", "CLOSURE_REPORT"]) kind!: "CORRECTION" | "CLOSURE_REPORT";
+  @IsUUID() placeId!: string;
+  @IsOptional() @ValidateNested() @Type(() => PlaceCorrectionChangesDto) changes?: PlaceCorrectionChangesDto;
+  @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+}
+
+export class ReviewPlaceSuggestionDto {
+  @IsOptional() @IsString() @MaxLength(500) note?: string;
 }

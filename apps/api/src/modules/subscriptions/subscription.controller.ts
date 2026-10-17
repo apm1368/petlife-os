@@ -1,6 +1,9 @@
-import { Body, Controller, Get, Headers, Param, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Headers, Param, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
+import { ValidationApiException } from "../../common/errors/api-exception";
+import { SubscriptionInsightService } from "./subscription-insight.service";
 import { SubscriptionBillingReason } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
+import { HouseholdOwnerGuard } from "../../common/auth/household-owner.guard";
 import { HouseholdMemberGuard } from "../../common/auth/household-member.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import { IdempotencyInterceptor } from "../../common/idempotency/idempotency.interceptor";
@@ -34,6 +37,7 @@ export class SubscriptionController {
     private readonly entitlements: EntitlementService,
     private readonly plans: SubscriptionPlanReadService,
     private readonly prisma: PrismaService,
+    private readonly insight: SubscriptionInsightService,
   ) {}
 
   @Get()
@@ -47,6 +51,19 @@ export class SubscriptionController {
     return resolveHouseholdCountry(this.prisma, householdId).then((countryCode) => this.plans.listForCountry(countryCode));
   }
 
+  /** Server-derived summary: status, plan, trial (with daysRemaining), renewalAt, usage vs limits. */
+  @Get("summary")
+  getSummary(@Param("householdId") householdId: string) {
+    return this.insight.summary(householdId);
+  }
+
+  /** What a move to ?planCode= would change. Read-only; a downgrade never deletes data. */
+  @Get("downgrade-preview")
+  downgradePreview(@Param("householdId") householdId: string, @Query("planCode") planCode: string) {
+    if (!planCode || !/^[A-Za-z0-9_-]{1,64}$/.test(planCode)) throw new ValidationApiException({ field: "planCode" });
+    return this.insight.downgradePreview(householdId, planCode);
+  }
+
   @Get("entitlements")
   getEntitlements(@Param("householdId") householdId: string) {
     return this.entitlements.resolveAll(householdId);
@@ -58,6 +75,7 @@ export class SubscriptionController {
   }
 
   @Get("billing-history")
+  @UseGuards(HouseholdOwnerGuard)
   getBillingHistory(@Param("householdId") householdId: string) {
     return this.subscriptions.getBillingHistory(householdId);
   }
@@ -69,34 +87,40 @@ export class SubscriptionController {
   }
 
   @Post("trial")
+  @UseGuards(HouseholdOwnerGuard)
   @UseInterceptors(IdempotencyInterceptor)
   startTrial(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser, @Body() dto: StartTrialDto) {
     return this.subscriptions.startTrial(householdId, dto.planId, user.id);
   }
 
   @Post("subscribe")
+  @UseGuards(HouseholdOwnerGuard)
   @UseInterceptors(IdempotencyInterceptor)
   subscribe(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser, @Body() dto: SubscribeDto, @Headers("idempotency-key") idempotencyKey?: string) {
     return this.billing.purchase(householdId, user.id, dto.planId, dto.billingInterval, SubscriptionBillingReason.INITIAL, idempotencyKey, dto.mode);
   }
 
   @Post("upgrade")
+  @UseGuards(HouseholdOwnerGuard)
   @UseInterceptors(IdempotencyInterceptor)
   upgrade(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser, @Body() dto: SubscribeDto, @Headers("idempotency-key") idempotencyKey?: string) {
     return this.billing.purchase(householdId, user.id, dto.planId, dto.billingInterval, SubscriptionBillingReason.UPGRADE, idempotencyKey, dto.mode);
   }
 
   @Post("downgrade")
+  @UseGuards(HouseholdOwnerGuard)
   scheduleDowngrade(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser, @Body() dto: ScheduleDowngradeDto) {
     return this.subscriptions.scheduleDowngrade(householdId, dto.planId, user.id);
   }
 
   @Post("cancel")
+  @UseGuards(HouseholdOwnerGuard)
   cancel(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser) {
     return this.subscriptions.cancelAtPeriodEnd(householdId, user.id);
   }
 
   @Post("resume")
+  @UseGuards(HouseholdOwnerGuard)
   resume(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser) {
     return this.subscriptions.resumeCancellation(householdId, user.id);
   }

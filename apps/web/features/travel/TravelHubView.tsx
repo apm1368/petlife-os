@@ -1,27 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/features/navigation/localized-link";
 import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { TripDto } from "@petlife/types";
 import { travelService } from "@/services/travel.service";
-import { ApiError } from "@/lib/api/client";
 import { tripStatusTone } from "./travel-status";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 
 export function TravelHubView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("travel");
   const tCommon = useTranslations("common");
 
   const [trips, setTrips] = useState<TripDto[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
     setError(null);
     try {
       setTrips(await travelService.list(petId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
@@ -30,7 +32,7 @@ export function TravelHubView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!trips) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -42,24 +44,31 @@ export function TravelHubView({ petId }: { petId: string }) {
         </Link>
       </div>
 
+      <Link href="/travel">
+        <ContextSurface className="flex items-center justify-between">
+          <span className="text-body text-text-primary">{t("hub.staysLink")}</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
+        </ContextSurface>
+      </Link>
+
       <Link href={`/pets/${petId}/travel/passport`}>
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.passportReadinessLink")}</span>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
         </ContextSurface>
       </Link>
 
       <Link href="/places">
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.placesLink")}</span>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
         </ContextSurface>
       </Link>
 
       <Link href="/insurance">
         <ContextSurface className="flex items-center justify-between">
           <span className="text-body text-text-primary">{t("hub.insuranceLink")}</span>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true" className="dir-flip-rtl">→</span>
         </ContextSurface>
       </Link>
 
@@ -76,7 +85,7 @@ export function TravelHubView({ petId }: { petId: string }) {
                   </span>
                   <StatusLabel tone={tripStatusTone(trip.status)}>{t(`status.${trip.status}`)}</StatusLabel>
                 </div>
-                <p className="text-metadata text-text-secondary">{new Date(trip.departAt).toLocaleDateString()}</p>
+                <p className="text-metadata text-text-secondary">{fmt.date(trip.departAt)}</p>
                 <p className="text-metadata text-text-secondary">{t("hub.requirementsCount", { count: trip.requirementsCount })}</p>
               </ContextSurface>
             </Link>

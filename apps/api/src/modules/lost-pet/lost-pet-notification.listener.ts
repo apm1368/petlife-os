@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
 import { NotificationCategory, NotificationPriority } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 
 /**
@@ -45,6 +46,7 @@ export class LostPetNotificationListener {
           petId,
           entityType: "LostPetIncident",
           entityId: incidentId,
+          deepLink: NotificationDeepLinks.lostIncident(petId, incidentId),
           domainEventId,
         }),
       ),

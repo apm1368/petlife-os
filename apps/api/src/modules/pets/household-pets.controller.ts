@@ -13,8 +13,8 @@ export class HouseholdPetsController {
   constructor(private readonly petsService: PetsService) {}
 
   @Get()
-  list(@Param("householdId") householdId: string) {
-    return this.petsService.listForHousehold(householdId);
+  list(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser) {
+    return this.petsService.listForHousehold(householdId, user.id);
   }
 
   @Post()

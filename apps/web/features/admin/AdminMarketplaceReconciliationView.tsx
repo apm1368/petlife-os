@@ -140,7 +140,7 @@ export function AdminMarketplaceReconciliationView() {
                 resolvingId === row.id ? (
                   <div className="flex items-end gap-2">
                     <Input label={t("notesLabel")} value={notes} onChange={(e) => setNotes(e.target.value)} className="flex-1" />
-                    <Button size="sm" onClick={() => resolve(row.id)}>{t("submitResolve")}</Button>
+                    <Button disabled={!notes.trim()} size="sm" onClick={() => resolve(row.id)}>{t("submitResolve")}</Button>
                   </div>
                 ) : (
                   <Button size="sm" variant="secondary" onClick={() => setResolvingId(row.id)}>

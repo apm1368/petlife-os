@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isAppLocale } from "@/lib/i18n/config";
-import { LandingPage } from "@/features/landing/LandingPage";
+import { HomeLanding } from "@/features/landing/HomeLanding";
+import "@/features/landing/park-landing.css";
+import "@/features/landing/park-story.css";
 import { landingCopy } from "@/features/landing/copy";
 
 export async function generateMetadata({
@@ -11,11 +13,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   if (!isAppLocale(locale)) notFound();
-  return { title: `PET LIFE OS — ${landingCopy[locale].title}`, description: landingCopy[locale].intro };
+  return { title: `opetlife — ${landingCopy[locale].meta.title}`, description: landingCopy[locale].meta.description };
 }
 
 export default async function RootPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isAppLocale(locale)) notFound();
-  return <LandingPage locale={locale} />;
+  return <HomeLanding locale={locale} />;
 }

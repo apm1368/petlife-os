@@ -19,6 +19,12 @@ export class MedicationsController {
     return this.medicationsService.list(petId);
   }
 
+  @Get(":id")
+  @RequirePetAccess("canViewHealth")
+  get(@Param("petId") petId: string, @Param("id") id: string) {
+    return this.medicationsService.get(petId, id);
+  }
+
   @Post()
   @RequirePetAccess("canEditHealth")
   create(@Param("petId") petId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateMedicationDto) {

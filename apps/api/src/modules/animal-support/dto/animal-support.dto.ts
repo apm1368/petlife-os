@@ -1,7 +1,8 @@
 import { Type } from "class-transformer";
-import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from "class-validator";
+import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, ValidateIf } from "class-validator";
 import { AnimalSupportOrgType, AnimalSupportVerificationStatus, CampaignFundType, RescueCaseStatus, SupportCampaignStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreateAnimalSupportOrganizationDto {
   @IsEnum(AnimalSupportOrgType)
@@ -36,17 +37,17 @@ export class CreateAnimalSupportOrganizationDto {
 }
 
 export class UpdateAnimalSupportOrganizationDto {
-  @IsOptional()
+  @ValidateIf((_object, value: unknown) => value !== undefined)
   @IsString()
   name?: string;
 
   @IsOptional()
   @IsString()
-  description?: string;
+  description?: string | null;
 
   @IsOptional()
   @IsString()
-  location?: string;
+  location?: string | null;
 
   @IsOptional()
   @Type(() => Number)
@@ -58,19 +59,21 @@ export class UpdateAnimalSupportOrganizationDto {
 
   @IsOptional()
   @IsString()
-  contactEmail?: string;
+  contactEmail?: string | null;
 
   @IsOptional()
   @IsString()
-  contactPhone?: string;
+  contactPhone?: string | null;
 
   @IsOptional()
   @IsString()
-  logoObjectKey?: string;
+  @IsObjectKeyFor(["animal-support-orgs"])
+  logoObjectKey?: string | null;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["animal-support-orgs"])
   imageObjectKeys?: string[];
 }
 
@@ -130,12 +133,22 @@ export class CreateRescueCaseDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["animal-support-evidence"])
   evidenceObjectKeys?: string[];
 }
 
 export class UpdateRescueCaseStatusDto {
   @IsEnum(RescueCaseStatus)
   status!: RescueCaseStatus;
+}
+
+export class RegisterRescueEvidenceDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(20)
+  @IsString({ each: true })
+  @IsObjectKeyFor(["animal-support-evidence"])
+  evidenceObjectKeys!: string[];
 }
 
 export class ListRescueCasesQueryDto extends PaginationQueryDto {
@@ -203,6 +216,7 @@ export class PostSupportCampaignUpdateDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["animal-support-evidence"])
   evidenceObjectKeys?: string[];
 }
 
@@ -231,6 +245,17 @@ export class CreateDonationDto {
   @IsOptional()
   @IsBoolean()
   showDonorPublicly?: boolean;
+
+  /** Batch 6 — required when showDonorPublicly; e.g. a first name or "A friend of the shelter". */
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  publicDisplayName?: string;
+
+  /** Batch 6 — the support need this donation is for (must be linked to this campaign). */
+  @IsOptional()
+  @IsUUID()
+  supportNeedListingId?: string;
 
   @IsOptional()
   @IsString()

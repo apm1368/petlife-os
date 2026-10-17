@@ -38,6 +38,15 @@ export const placesService = {
 
   // -- Authenticated favorites -------------------------------------------------
   listFavorites: () => apiFetch<PetFriendlyPlaceDto[]>(`/places/favorites`),
+  report: (placeId: string, input: { reason: string; details?: string }) => apiFetch<{ id: string }>(`/places/${placeId}/reports`, { method: "POST", body: input }),
+  adminReports: (status = "OPEN") => apiFetch<{ id: string; place: { id: string; name: string; city: string; category: string }; reason: string; details: string | null; status: string; createdAt: string }[]>(`/admin/places/reports?status=${status}`),
+  adminResolveReport: (reportId: string, status: "RESOLVED" | "DISMISSED", note?: string) => apiFetch<{ id: string; status: string }>(`/admin/places/reports/${reportId}/resolve`, { method: "POST", body: { status, note } }),
   addFavorite: (placeId: string) => apiFetch<PetFriendlyPlaceDto>(`/places/favorites/${placeId}`, { method: "POST" }),
   removeFavorite: (placeId: string) => apiFetch<void>(`/places/favorites/${placeId}`, { method: "DELETE" }),
+};
+
+export const adminPlacesService = {
+  list: (input: { page?: number; city?: string } = {}) => apiFetch<PaginatedDto<PetFriendlyPlaceDto>>(`/admin/places${toQueryString(input)}`),
+  setVerification: (placeId: string, status: "VERIFIED" | "UNVERIFIED" | "SUSPENDED") => apiFetch<PetFriendlyPlaceDto>(`/admin/places/${placeId}/verification`, { method: "POST", body: { status } }),
+  setListed: (placeId: string, isPubliclyListed: boolean) => apiFetch<PetFriendlyPlaceDto>(`/admin/places/${placeId}/listing`, { method: "POST", body: { isPubliclyListed } }),
 };

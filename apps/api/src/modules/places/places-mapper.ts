@@ -26,6 +26,18 @@ export function toPetFriendlyPlaceDto(row: PetFriendlyPlace, options: { distance
     status: row.status as unknown as PetFriendlyPlaceDto["status"],
     isPubliclyListed: row.isPubliclyListed,
     isFavorited: options.isFavorited ?? false,
+    leashRequired: row.leashRequired,
+    waterAvailable: row.waterAvailable,
+    petArea: row.petArea,
+    shadeAvailable: row.shadeAvailable,
+    fencedArea: row.fencedArea,
+    wasteBins: row.wasteBins,
+    smallDogArea: row.smallDogArea,
+    parkingAvailable: row.parkingAvailable,
+    entryFeeIrr: row.entryFeeIrr,
+    petFriendlyLevel: row.petFriendlyLevel as "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null,
+    openingHours: (row.openingHours as unknown as { day: number; open: string; close: string }[] | null) ?? null,
+    province: row.province,
     createdAt: row.createdAt.toISOString(),
   };
 }

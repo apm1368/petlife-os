@@ -7,7 +7,7 @@ import { CartView } from "./CartView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/services/commerce.service", () => ({
-  commerceService: { getCart: vi.fn(), updateCartItem: vi.fn(), removeCartItem: vi.fn() },
+  commerceService: { getCart: vi.fn(), updateCartItem: vi.fn(), removeCartItem: vi.fn(), clearCart: vi.fn() },
 }));
 
 const SELLER_A = { id: "seller-a", name: "Pet Bazaar Tehran", verificationStatus: "VERIFIED" as never, status: "ACTIVE" as never, city: "Tehran" };
@@ -23,6 +23,12 @@ function offer(sellerOrganization: typeof SELLER_A, priceAmount: number) {
     currency: "IRR",
     status: "ACTIVE" as never,
     availableQuantity: 10,
+    effectiveUnitPrice: priceAmount,
+    unitDiscount: 0,
+    promotion: null,
+    stockState: "IN_STOCK" as const,
+    repeatDeliveryEligible: false,
+    repeatIntervalsDays: [],
   };
 }
 
@@ -33,6 +39,8 @@ const MULTI_SELLER_CART: CartDto = {
   subtotalAmount: 2_440_000,
   currency: "IRR",
   hasSafetyConflict: false,
+  discountAmount: 0,
+  hasBlockingIssues: false,
   sellerGroups: [
     {
       sellerOrganization: SELLER_A,
@@ -42,6 +50,7 @@ const MULTI_SELLER_CART: CartDto = {
           id: "line-a",
           sellerOffer: offer(SELLER_A, 1_250_000),
           productId: "prod-1",
+          imageUrl: null,
           productTitle: "Royal Canin Adult Dog Food",
           variantTitle: "2kg",
           variantSku: "RC-DOG-2KG",
@@ -54,6 +63,11 @@ const MULTI_SELLER_CART: CartDto = {
           currency: "IRR",
           lineTotal: 1_250_000,
           compatibility: { status: "COMPATIBLE" as never, reasons: [] },
+          listUnitPrice: 1_250_000,
+          unitDiscount: 0,
+          promotionName: null,
+          promotionId: null,
+          issues: [],
         },
       ],
     },
@@ -65,6 +79,7 @@ const MULTI_SELLER_CART: CartDto = {
           id: "line-b",
           sellerOffer: offer(SELLER_B, 1_190_000),
           productId: "prod-2",
+          imageUrl: null,
           productTitle: "Grain-Free Training Treats",
           variantTitle: "200g",
           variantSku: "TREAT-200G",
@@ -77,6 +92,11 @@ const MULTI_SELLER_CART: CartDto = {
           currency: "IRR",
           lineTotal: 1_190_000,
           compatibility: null,
+          listUnitPrice: 1_190_000,
+          unitDiscount: 0,
+          promotionName: null,
+          promotionId: null,
+          issues: ["PRICE_CHANGED"],
         },
       ],
     },
@@ -95,8 +115,8 @@ describe("CartView", () => {
 
     renderWithIntl(<CartView />);
 
-    await waitFor(() => expect(screen.getByText("Pet Bazaar Tehran")).toBeTruthy());
-    expect(screen.getByText("Golestan Pet Supplies")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("Sold by Pet Bazaar Tehran")).toBeTruthy());
+    expect(screen.getByText("Sold by Golestan Pet Supplies")).toBeTruthy();
     expect(screen.getByText("Royal Canin Adult Dog Food")).toBeTruthy();
     expect(screen.getByText("Grain-Free Training Treats")).toBeTruthy();
   });
@@ -106,7 +126,7 @@ describe("CartView", () => {
 
     renderWithIntl(<CartView />);
 
-    await waitFor(() => expect(screen.getByText("Price updated since added")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Price changed")).toBeTruthy());
   });
 
   it("shows the target pet for a line, or a no-pet indicator", async () => {
@@ -147,4 +167,23 @@ describe("CartView", () => {
 
     await waitFor(() => expect(commerceService.removeCartItem).toHaveBeenCalledWith("line-a"));
   });
+  it("requires confirmation before clearing the cart and preserves items on failure", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(MULTI_SELLER_CART);
+    vi.mocked(commerceService.clearCart).mockRejectedValueOnce(new Error("offline"));
+    renderWithIntl(<CartView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Clear cart" }));
+    expect(commerceService.clearCart).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Yes, clear cart" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
+    expect(screen.getByText(/Sold by Pet Bazaar Tehran/)).toBeTruthy();
+    expect(commerceService.clearCart).toHaveBeenCalledOnce();
+  });
+
+// The server, not the client, selects media belonging to the cart product/variant.
+it("uses the actual cart line photo when provided and leaves null lines without substitute photos",async()=>{
+ const cart=structuredClone(MULTI_SELLER_CART);cart.sellerGroups[0]!.lines[0]!.imageUrl="https://media.example.com/actual-cart-product.webp";
+ vi.mocked(commerceService.getCart).mockResolvedValueOnce(cart);const {container}=renderWithIntl(<CartView/>);
+ await waitFor(()=>expect(container.querySelectorAll("img").length).toBe(1));expect(container.querySelector("img")?.getAttribute("src")).toBe("https://media.example.com/actual-cart-product.webp");
+});
+
 });

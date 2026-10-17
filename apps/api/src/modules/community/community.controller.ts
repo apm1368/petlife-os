@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { ParseUUIDPipe, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-auth.guard";
 import { CurrentUser, OptionalCurrentUser } from "../../common/auth/current-user.decorator";
@@ -55,8 +55,9 @@ export class CommunityController {
   }
 
   @Get("posts/:postId/comments")
-  listComments(@Param("postId") postId: string, @Query() query: PaginationQueryDto) {
-    return this.posts.listComments(postId, query);
+  @UseGuards(OptionalSessionAuthGuard)
+  listComments(@Param("postId") postId: string, @Query() query: PaginationQueryDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+    return this.posts.listComments(postId, query, user?.id);
   }
 
   @Post("posts/:postId/comments")
@@ -70,6 +71,24 @@ export class CommunityController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async setReaction(@Param("postId") postId: string, @CurrentUser() user: SessionUser, @Body() dto: SetCommunityReactionDto) {
     await this.posts.setReaction(postId, user.id, dto);
+  }
+
+  @Post("posts/:postId/save")
+  @UseGuards(SessionAuthGuard)
+  save(@Param("postId", ParseUUIDPipe) postId: string, @CurrentUser() user: SessionUser) {
+    return this.posts.setSaved(postId, user.id, true);
+  }
+
+  @Delete("posts/:postId/save")
+  @UseGuards(SessionAuthGuard)
+  unsave(@Param("postId", ParseUUIDPipe) postId: string, @CurrentUser() user: SessionUser) {
+    return this.posts.setSaved(postId, user.id, false);
+  }
+
+  @Get("saved-posts")
+  @UseGuards(SessionAuthGuard)
+  saved(@CurrentUser() user: SessionUser) {
+    return this.posts.savedPosts(user.id);
   }
 
   @Delete("posts/:postId/reactions")

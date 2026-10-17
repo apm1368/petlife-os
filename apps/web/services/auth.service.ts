@@ -22,7 +22,7 @@ export const authService = {
     apiFetch<{ user: UserDto }>("/auth/login/password", { method: "POST", body: { username, password } }),
 
   setOrChangePassword: (input: { currentPassword?: string; newPassword: string }) =>
-    apiFetch<{ ok: true }>("/auth/password", { method: "PUT", body: input }),
+    apiFetch<{ ok: true; otherSessionsSignedOut: number }>("/auth/password", { method: "PUT", body: input }),
 
   forgotPassword: (identifier: string) => apiFetch<{ ok: true }>("/auth/password/forgot", { method: "POST", body: { identifier } }),
 

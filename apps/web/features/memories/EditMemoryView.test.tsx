@@ -44,7 +44,7 @@ describe("EditMemoryView", () => {
     renderWithIntl(<EditMemoryView petId="pet-1" memoryId="memory-1" />);
 
     await waitFor(() => expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe("A quiet Sunday"));
-    expect((screen.getByLabelText("Date") as HTMLInputElement).value).toBe("2026-01-05");
+    expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain("5 January 2026");
     expect((screen.getByLabelText("Tags") as HTMLInputElement).value).toBe("funny-moment");
   });
 
@@ -61,7 +61,7 @@ describe("EditMemoryView", () => {
     await waitFor(() =>
       expect(memoriesService.update).toHaveBeenCalledWith("pet-1", "memory-1", expect.objectContaining({ tags: ["trip", "milestone"] })),
     );
-    expect(push).toHaveBeenCalledWith("/pets/pet-1/memories/memory-1");
+    expect(push).toHaveBeenCalledWith("/en/pets/pet-1/memories/memory-1");
   });
 
   it("clears an emptied title rather than persisting whitespace", async () => {

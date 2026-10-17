@@ -7,6 +7,13 @@ import { EntitlementService } from "../subscriptions/entitlement.service";
 import { PetMemoryNotFoundException } from "../../common/errors/api-exception";
 import { toPetMemoryDto } from "./memory-mapper";
 import type { CreatePetMemoryDto, ListPetMemoriesQueryDto, UpdatePetMemoryDto } from "./dto/memory.dto";
+import { assertObjectKeyUnder } from "../../common/storage-keys/object-key.validator";
+
+/** Media must be this pet's, uploaded with this memory's visibility (private media is served only through signed downloads). */
+function assertMemoryMedia(keys: string[] | undefined, petId: string, visibility: PetMemoryVisibility): void {
+  const prefix = visibility === PetMemoryVisibility.PUBLIC ? "pet-memories-public" : "pet-memories-private";
+  for (const key of keys ?? []) assertObjectKeyUnder(key, prefix, petId);
+}
 
 /**
  * spec: "Memories are strategically important... a core emotional layer,
@@ -41,6 +48,7 @@ export class PetMemoryService {
    */
   async create(petId: string, householdId: string, createdByUserId: string, dto: CreatePetMemoryDto) {
     await this.entitlements.assertWithinLimit(householdId, "memories.entries.max");
+    assertMemoryMedia(dto.mediaObjectKeys, petId, dto.visibility ?? PetMemoryVisibility.PRIVATE);
     const row = await this.prisma.$transaction(async (tx) => {
       const created = await tx.petMemory.create({
         data: {
@@ -85,7 +93,8 @@ export class PetMemoryService {
   }
 
   async update(petId: string, memoryId: string, dto: UpdatePetMemoryDto) {
-    await this.getRawOrThrow(petId, memoryId);
+    const existing = await this.getRawOrThrow(petId, memoryId);
+    assertMemoryMedia(dto.mediaObjectKeys, petId, existing.visibility);
     const updated = await this.prisma.petMemory.update({
       where: { id: memoryId },
       data: {
