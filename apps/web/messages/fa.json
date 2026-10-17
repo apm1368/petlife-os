@@ -2221,6 +2221,17 @@
         "lostPets": "حیوانات گم‌شده",
         "settings": "تنظیمات سامانه",
         "verification": "بررسی هویت و مدارک"
+      },
+      "navigation": "ناوبری مدیریت",
+      "openMenu": "باز کردن منو",
+      "closeMenu": "بستن منو",
+      "groups": {
+        "work": "کار روزانه",
+        "trust": "مشتریان و اعتماد",
+        "network": "شبکه و بازار",
+        "finance": "مالی",
+        "content": "محتوا",
+        "system": "سیستم"
       }
     },
     "common": {

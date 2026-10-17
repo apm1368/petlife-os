@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { AdminSessionContextDto, UserDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { authService } from "@/services/auth.service";
@@ -7,9 +7,10 @@ import { adminService } from "@/services/admin.service";
 import { useAdminStore } from "@/stores/admin-store";
 import { AdminShell } from "./AdminShell";
 
+const route = vi.hoisted(() => ({ pathname: "/en/admin" }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
-  usePathname: () => "/en/admin",
+  usePathname: () => route.pathname,
 }));
 vi.mock("@/services/auth.service", () => ({ authService: { getSession: vi.fn() } }));
 vi.mock("@/services/admin.service", () => ({ adminService: { getMe: vi.fn() } }));
@@ -18,6 +19,7 @@ const SESSION_USER: UserDto = { id: "u1", email: "admin@example.com", phone: nul
 
 describe("AdminShell", () => {
   beforeEach(() => {
+    route.pathname = "/en/admin";
     vi.mocked(authService.getSession).mockReset();
     vi.mocked(adminService.getMe).mockReset();
     useAdminStore.setState({ context: null, status: "idle" });
@@ -56,7 +58,7 @@ describe("AdminShell", () => {
     await waitFor(() => expect(screen.getByText("content")).toBeTruthy());
     // Items live in job groups (dropdown pills); open the one that holds support work.
     fireEvent.click(screen.getByRole("button", { name: "Customers & trust" }));
-    expect(screen.getByText("Support")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Support" })).toBeTruthy();
     expect(screen.getByText("Disputes")).toBeTruthy();
     // SUPPORT has neither finance.view nor audit.view — those groups and items must not render at all.
     expect(screen.queryByRole("button", { name: "Finance" })).toBeNull();
@@ -133,6 +135,32 @@ describe("AdminShell", () => {
     expect(screen.getByRole("link", { name: "Platform settings" }).getAttribute("href")).toBe("/en/admin/settings");
     expect(screen.queryByText("Audit")).toBeNull();
     expect(screen.queryByText("Admin users")).toBeNull();
+  });
+
+  it("expands the current route group and marks only its page as current", async () => {
+    route.pathname = "/en/admin/providers/organization-1";
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: true, adminUserId: "reader", displayName: "Reader", role: "SUPPORT" as never, permissions: ["customer.view"] as never });
+    renderWithIntl(<AdminShell><div>provider content</div></AdminShell>);
+    await screen.findByText("provider content");
+    expect(screen.getByRole("button", { name: "Network" }).getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("link", { name: "Providers" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBeNull();
+  });
+
+  it("keeps mobile navigation permission-filtered and closes after choosing a page", async () => {
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: true, adminUserId: "reader", displayName: "Reader", role: "SUPPORT" as never, permissions: ["customer.view"] as never });
+    renderWithIntl(<AdminShell><div>mobile content</div></AdminShell>);
+    await screen.findByText("mobile content");
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).queryByRole("link", { name: "Transactions" })).toBeNull();
+    expect(within(dialog).queryByRole("link", { name: "CRM" })).toBeNull();
+    const providerLink = within(dialog).getByRole("link", { name: "Providers" });
+    providerLink.addEventListener("click", event => event.preventDefault(), { once: true });
+    fireEvent.click(providerLink);
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
 });
