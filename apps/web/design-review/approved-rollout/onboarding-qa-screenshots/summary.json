@@ -1,0 +1,47 @@
+{
+  "live": {
+    "sha": "5c1fc12f6be05fbd638f89007d9623cf5e333e26",
+    "deploymentId": "github-38997939392-1",
+    "database": "up",
+    "redis": "up",
+    "browserVisits": 16,
+    "jsVerified": false,
+    "reason": "Supported proxy JS302/503; independent browser required; not proof of origin outage",
+    "writes": 0
+  },
+  "isolatedBrowser": {
+    "faultCasesPassed": 12,
+    "familyCasesPassed": 4,
+    "database": "real PostgreSQL/PostGIS",
+    "redis": "separate logical test DB",
+    "pageErrors": 0,
+    "horizontalOverflow": false
+  },
+  "webTests": {
+    "passed": 22,
+    "files": 4
+  },
+  "baselineAPI": {
+    "passed": 9,
+    "failed": 3
+  },
+  "concurrency": {
+    "requests": 6,
+    "baselinePets": 6,
+    "fixedPets": 1,
+    "scope": "Same user/household/key within bounded Redis lease/cache; not durable exactly-once"
+  },
+  "initialCI": {
+    "run": 39002153589,
+    "head": "b04a7ec220b93f1b082230cff84004c92858e107",
+    "passed": 771,
+    "failed": 1
+  },
+  "apiTests": {
+    "passed": 262,
+    "suites": 5,
+    "realMigrationsApplied": 88
+  },
+  "liveAuthenticatedTests": false,
+  "deployNewFixes": false
+}

@@ -32,13 +32,22 @@ export function AgeStep({ onNext }: { onNext: (petId: string) => void }) {
     setError(null);
     try {
       const age = !skip ? useApprox ? { approximateAgeMonths: parsedMonths } : { birthDate } : {};
-      const pet = draft.petId
+      let pet = draft.petId
         ? skip ? await petsService.getById(draft.petId) : await petsService.update(draft.petId, { ...age, ...(useApprox ? { birthDate: null } : { approximateAgeMonths: null }) })
         : await petsService.create(
           draft.householdId,
           { name: draft.name, species: draft.species, ...age },
           `onboarding-pet-${draft.householdId}-${encodeURIComponent(draft.name)}`,
         );
+      // A retry can replay an earlier create result after the user edits the age.
+      // Retain the recovered id before PATCH so an update failure cannot create another pet.
+      update({ petId: pet.id });
+      const ageDiffers = useApprox
+        ? pet.approximateAgeMonths !== parsedMonths || !!pet.birthDate
+        : pet.birthDate?.slice(0, 10) !== birthDate || pet.approximateAgeMonths != null;
+      if (!draft.petId && !skip && ageDiffers) {
+        pet = await petsService.update(pet.id, { ...age, ...(useApprox ? { birthDate: null } : { approximateAgeMonths: null }) });
+      }
       update({ petId: pet.id, birthDate: pet.birthDate, approximateAgeMonths: pet.approximateAgeMonths });
       await onboardingService.updateProgress({
         chapter: OnboardingChapter.PET_IDENTITY,

@@ -73,11 +73,23 @@ describe("Onboarding QA ownership and retries", () => {
   const two=(await send(a,`/households/${h.id}/pets`).send({name:"بدون کلید",species:"CAT"}).expect(201)).body;
   expect(two.id).not.toBe(one.id);expect(await db.pet.count({where:{householdId:h.id}})).toBe(2);
  });
- it("measures concurrent same-key requests without claiming global exactly-once semantics",async()=>{
+ it("keeps two authorized creators and their onboarding pet ids separate in one household",async()=>{
+  const owner=await actor(),member=await actor(),h=await hh(owner),key=randomUUID();
+  await db.householdMember.create({data:{householdId:h.id,userId:member.id,role:"FAMILY"}});
+  await db.onboardingProgress.createMany({data:[owner,member].map(a=>({userId:a.id,householdId:h.id,chapter:"PET_IDENTITY",step:"age",status:"IN_PROGRESS"}))});
+  const [one,two]=await Promise.all([
+   send(owner,`/households/${h.id}/pets`).set("Idempotency-Key",key).send({name:"Owner pet",species:"CAT"}),
+   send(member,`/households/${h.id}/pets`).set("Idempotency-Key",key).send({name:"Member pet",species:"CAT"})
+  ]);
+  expect(one.status).toBe(201);expect(two.status).toBe(201);expect(one.body.id).not.toBe(two.body.id);
+  expect(await db.onboardingProgress.findUnique({where:{userId:owner.id}})).toMatchObject({petId:one.body.id});
+  expect(await db.onboardingProgress.findUnique({where:{userId:member.id}})).toMatchObject({petId:two.body.id});
+ });
+ it("coalesces six concurrent same-key requests without opening duplicate pet transactions",async()=>{
   const a=await actor(),h=await hh(a),key=randomUUID();
   const responses=await Promise.all(Array.from({length:6},()=>send(a,`/households/${h.id}/pets`).set("Idempotency-Key",key).send({name:"همزمان",species:"CAT"})));
   const ids=new Set(responses.filter(r=>r.status===201).map(r=>r.body.id));const count=await db.pet.count({where:{householdId:h.id}});
-  expect(responses.every(r=>r.status===201)).toBe(true);expect(count).toBe(ids.size);
+  expect(responses.every(r=>r.status===201)).toBe(true);expect(count).toBe(ids.size);expect(count).toBe(1);expect(ids.size).toBe(1);
   console.info("QA_CONCURRENCY",JSON.stringify({requests:6,created:count,uniqueResponses:ids.size}));
  });
 });

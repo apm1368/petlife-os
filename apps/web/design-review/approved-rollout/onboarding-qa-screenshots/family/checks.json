@@ -1,0 +1,54 @@
+[
+  {
+    "locale": "fa",
+    "width": 390,
+    "clientNavigationPreservedDocument": true,
+    "sameHouseholdDraftPreserved": true,
+    "otherHouseholdDraftCleared": true,
+    "oldHouseholdPets": 0,
+    "newHouseholdPets": 1,
+    "petCreateRequests": 1,
+    "reactBoundElements": 521,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "clientNavigationPreservedDocument": true,
+    "sameHouseholdDraftPreserved": true,
+    "otherHouseholdDraftCleared": true,
+    "oldHouseholdPets": 0,
+    "newHouseholdPets": 1,
+    "petCreateRequests": 1,
+    "reactBoundElements": 521,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "clientNavigationPreservedDocument": true,
+    "sameHouseholdDraftPreserved": true,
+    "otherHouseholdDraftCleared": true,
+    "oldHouseholdPets": 0,
+    "newHouseholdPets": 1,
+    "petCreateRequests": 1,
+    "reactBoundElements": 521,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "clientNavigationPreservedDocument": true,
+    "sameHouseholdDraftPreserved": true,
+    "otherHouseholdDraftCleared": true,
+    "oldHouseholdPets": 0,
+    "newHouseholdPets": 1,
+    "petCreateRequests": 1,
+    "reactBoundElements": 521,
+    "overflow": false,
+    "pageErrors": []
+  }
+]

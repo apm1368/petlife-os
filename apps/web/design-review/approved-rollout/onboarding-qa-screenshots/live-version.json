@@ -1,0 +1,28 @@
+{
+  "version": {
+    "status": 200,
+    "body": {
+      "version": "0.1.0",
+      "sha": "5c1fc12f6be05fbd638f89007d9623cf5e333e26",
+      "buildTime": "2026-10-17T06:43:11+03:30",
+      "environment": "staging",
+      "deploymentId": "github-38997939392-1"
+    }
+  },
+  "ready": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "checks": {
+        "database": "up",
+        "redis": "up"
+      }
+    }
+  },
+  "deploy": {
+    "headSha": "5c1fc12f6be05fbd638f89007d9623cf5e333e26",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/apm1368/petlife-os/actions/runs/38997939392"
+  }
+}

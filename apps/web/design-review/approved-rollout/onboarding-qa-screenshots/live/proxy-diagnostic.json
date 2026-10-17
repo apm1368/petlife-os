@@ -1,0 +1,8 @@
+{
+  "resourceType": "script",
+  "method": "HEAD",
+  "followsRedirects": false,
+  "status": 302,
+  "server": "envoy",
+  "redirectsToPrivateAddress": true
+}
