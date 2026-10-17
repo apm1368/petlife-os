@@ -1,0 +1,82 @@
+[
+  {
+    "locale": "fa",
+    "width": 390,
+    "view": "page",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  },
+  {
+    "locale": "fa",
+    "width": 390,
+    "view": "navigation",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "view": "page",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "view": "navigation",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "view": "page",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "view": "navigation",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "view": "page",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "view": "navigation",
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "mutations": []
+  }
+]

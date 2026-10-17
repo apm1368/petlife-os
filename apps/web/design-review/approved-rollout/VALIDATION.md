@@ -1,5 +1,19 @@
 # Validation and release limits
 
+
+## تطبیق پوستهٔ واقعی ادمین با مرجع — ۱۷ اکتبر ۲۰۲۶
+
+پوستهٔ LiveAdminShell از نوار تیرهٔ افقی به منوی کناری با رنگ‌های campaign و سربرگ روشنِ مرجع admin.webp تبدیل شد. لوگوی تأییدشدهٔ opetlife، نام/نقش واقعی حساب، گروه‌های ترجمه‌شده و منوی موبایل حفظ شدند. مسیر فعال به‌صورت خودکار در گروه باز می‌شود؛ کنترل دسترسی همان فهرست مجوزهای موجود است و CRM نمایشی همچنان پنهان است. هیچ مسیر، API، مجوز یا نقش جدید ایجاد نشد.
+
+۷ تست ناوبری شامل کاربر فاقد دسترسی، مجوز خواندن مستقل، تغییر مسیر فعال و بسته‌شدن منوی موبایل؛ پس از یکپارچه‌سازی با #43، مجموع ۱۴ تست وظایف/پوسته گذشت. typecheck و lint موفق (سه هشدار قبلی). هشت حالت مرورگر قبل و هشت حالت بعد، fa/en × ۳۹۰/۱۴۴۰ × صفحه/منوی باز: بدون overflow، pageerror، console error یا پاسخ HTTP ناموفق؛ هیچ درخواست نوشتنی صادر نشد.
+
+- [قبل فارسی ۳۹۰](admin-shell-screenshots/before-page-fa-390.webp) / [بعد](admin-shell-screenshots/after-page-fa-390.webp)
+- [قبل فارسی ۱۴۴۰](admin-shell-screenshots/before-page-fa-1440.webp) / [بعد](admin-shell-screenshots/after-page-fa-1440.webp)
+- [انگلیسی ۳۹۰](admin-shell-screenshots/after-page-en-390.webp) / [۱۴۴۰](admin-shell-screenshots/after-page-en-1440.webp)
+- [منوی موبایل](admin-shell-screenshots/after-navigation-fa-390.webp)، [شواهد بعد](admin-shell-screenshots/after-checks.json)، [قبل](admin-shell-screenshots/before-checks.json)، [هش منابع](admin-shell-screenshots/source-hashes.json)
+
+بازاجرا با browser-admin-shell.py و متغیرهای QA_REPO_ROOT، QA_WEB_ORIGIN و QA_EVIDENCE_DIR روی سرور توسعه. API با DTO مصنوعی در مرورگر فقط loopback جایگزین می‌شود؛ این شاهد احراز هویت/API زنده یا پذیرش همهٔ صفحات داخلی نیست. داده‌های نمونه در تصاویر، دادهٔ سایت نیستند. اولین اجرای محلی با bind به 127.0.0.1 در rewrite داخلی localhost خطای اتصال داد؛ پس از اجرای سرور تست با hostname=localhost هشت حالت کامل گذشت. هیچ تغییر شبکه، workflow، امنیت سرور یا دسترسی Claude انجام نشد.
+
 Application code: `7208e85`, rebased onto `origin/stabilization/wave-1` at `f3bf0648761d665bb36f90f710eed2c14e1c0355`. Later commits contain documentation/review evidence and an AccountNav test update for the newly added clinic-notes link; application code is unchanged.
 
 | Check | Result |

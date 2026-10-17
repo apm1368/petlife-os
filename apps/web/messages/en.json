@@ -2221,6 +2221,17 @@
         "lostPets": "Lost pets",
         "settings": "Platform settings",
         "verification": "Identity and documents"
+      },
+      "navigation": "Admin navigation",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "groups": {
+        "work": "Daily work",
+        "trust": "Customers & trust",
+        "network": "Network",
+        "finance": "Finance",
+        "content": "Content",
+        "system": "System"
       }
     },
     "common": {
