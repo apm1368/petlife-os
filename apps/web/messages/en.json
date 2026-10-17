@@ -335,7 +335,11 @@
       "openTravel": "Plan a trip",
       "insuranceTeaser": "Pet insurance",
       "openInsurance": "Browse plans"
-    }
+    },
+    "listDescription": "Open each pet’s record or choose your household’s active companion.",
+    "emptyTitle": "No pets have been added to this household yet.",
+    "emptyDescription": "Add your first pet to see their identity and record here.",
+    "switchFailed": "Could not save the active pet. Your previous selection was kept; please try again."
   },
   "health": {
     "attention": {
