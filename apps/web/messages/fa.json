@@ -2503,14 +2503,45 @@
         "OPEN": "باز",
         "IN_PROGRESS": "در حال انجام",
         "DONE": "انجام‌شده",
-        "CANCELLED": "لغوشده"
+        "CANCELLED": "لغوشده",
+        "BLOCKED": "نیازمند رفع مانع"
       },
       "form": {
         "title": "عنوان",
         "description": "توضیحات",
         "dueAt": "مهلت انجام",
         "submit": "ایجاد"
-      }
+      },
+      "description": "مسئول، مهلت و وضعیت کارهای ثبت‌شده را یک‌جا ببینید.",
+      "assignee": "مسئول رسیدگی",
+      "unassigned": "هنوز تعیین نشده",
+      "unnamedAssignee": "کارشناس بدون نام نمایشی",
+      "noDueDate": "مهلت مشخص نشده",
+      "priority": "اولویت",
+      "source": "نوع کار",
+      "notProvided": "ثبت نشده",
+      "changeStatus": "تغییر وضعیت",
+      "createFailed": "ایجاد وظیفه تأیید نشد؛ عنوان و توضیحات شما حفظ شده است. پیش از تلاش دوباره، فهرست را بررسی کنید.",
+      "updateFailed": "تغییر وضعیت تأیید نشد؛ وضعیت ثبت‌شده را دوباره بررسی کنید.",
+      "priorities": {
+        "LOW": "کم",
+        "NORMAL": "عادی",
+        "HIGH": "بالا",
+        "URGENT": "فوری"
+      },
+      "sources": {
+        "MANUAL": "ثبت دستی",
+        "TRAVEL_SOURCE": "منابع سفر",
+        "PARTNER_VERIFICATION": "بررسی مدارک همکاران",
+        "FINANCE_MISMATCH": "مغایرت مالی",
+        "HIGH_SEVERITY_REPORT": "گزارش مهم",
+        "PRIVACY_REQUEST": "درخواست حریم خصوصی",
+        "FAILED_IMPORT": "ورود ناموفق اطلاعات",
+        "SUPPORT": "پشتیبانی",
+        "CLINIC_FOLLOW_UP": "پیگیری کلینیک",
+        "DATA_QUALITY": "کیفیت اطلاعات"
+      },
+      "checkList": "بررسی فهرست"
     },
     "audit": {
       "title": "گزارش رویدادها",
