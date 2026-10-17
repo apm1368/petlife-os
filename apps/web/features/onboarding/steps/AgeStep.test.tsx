@@ -26,6 +26,16 @@ describe("Onboarding birth date", () => {
     expect(vi.mocked(petsService.create).mock.calls[0]![1]).toEqual({ name: "Cookie", species: "CAT" });
     expect(onboardingService.updateProgress).toHaveBeenCalledWith(expect.objectContaining({ petId: "pet1", step: "age", status: "COMPLETED" }));
   });
+  it("encodes Persian names into a valid ASCII request header without changing the pet name", async () => {
+    useOnboardingStore.setState({ name: "کوکی" });
+    const next = vi.fn();
+    renderWithIntl(<AgeStep onNext={next} />, "fa");
+    fireEvent.click(screen.getByRole("button", { name: "فعلاً نمی‌دانم؛ ادامه" }));
+    await waitFor(() => expect(next).toHaveBeenCalledWith("pet1"));
+    const [, body, key] = vi.mocked(petsService.create).mock.calls[0]!;
+    expect(body.name).toBe("کوکی");
+    expect(new Headers({ "Idempotency-Key": key }).get("Idempotency-Key")).toBe(`onboarding-pet-h1-${encodeURIComponent("کوکی")}`);
+  });
   it("retains the date and retries progress without creating a second pet", async () => {
     vi.mocked(onboardingService.updateProgress).mockRejectedValueOnce(new Error("offline"));
     renderWithIntl(<AgeStep onNext={vi.fn()} />, "fa");

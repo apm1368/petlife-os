@@ -1,0 +1,74 @@
+[
+  {
+    "stage": "cold-reentry",
+    "locale": "fa",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 0
+  },
+  {
+    "stage": "after-unknown-age-skip",
+    "locale": "fa",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 1
+  },
+  {
+    "stage": "cold-reentry",
+    "locale": "fa",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 0
+  },
+  {
+    "stage": "after-unknown-age-skip",
+    "locale": "fa",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 1
+  },
+  {
+    "stage": "cold-reentry",
+    "locale": "en",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 0
+  },
+  {
+    "stage": "after-unknown-age-skip",
+    "locale": "en",
+    "width": 390,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 1
+  },
+  {
+    "stage": "cold-reentry",
+    "locale": "en",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 0
+  },
+  {
+    "stage": "after-unknown-age-skip",
+    "locale": "en",
+    "width": 1440,
+    "before": false,
+    "overflow": false,
+    "pageErrors": [],
+    "petCreates": 1
+  }
+]
