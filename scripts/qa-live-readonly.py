@@ -1,12 +1,14 @@
 """Read-only browser witness for the public opetlife deployment. No auth/data writes."""
 import hashlib
+import ipaddress
+from html.parser import HTMLParser
 import json
 import os
 import re
 import urllib.error
 import urllib.request
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from playwright.sync_api import sync_playwright, expect
 
 ORIGIN = 'http://185.231.112.154'
@@ -28,6 +30,90 @@ def safe_path(url):
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
+
+
+def redirect_metadata(base, location):
+    target = urljoin(base, location)
+    parsed = urlparse(target)
+    host = parsed.hostname or ''
+    try:
+        private = ipaddress.ip_address(host).is_private
+    except ValueError:
+        private = host in {'localhost', 'proxy'} or host.endswith(('.internal', '.local'))
+    return {'sameTarget': allowed('GET', target), 'privateLiteralOrLocalName': private, 'path': safe_path(target)}
+
+
+def install_http_guard(context, page, blocked):
+    # Native Chromium response interception also guards redirect hops; page.route only sees the first URL.
+    session = context.new_cdp_session(page)
+    def paused(event):
+        request_id = event['requestId']
+        req = event['request']
+        try:
+            response_stage = 'responseStatusCode' in event or 'responseErrorReason' in event
+            if not response_stage:
+                if not allowed(req['method'], req['url']):
+                    blocked.append({'method': req['method'], 'path': safe_path(req['url'])})
+                    session.send('Fetch.failRequest', {'requestId': request_id, 'errorReason': 'BlockedByClient'})
+                else:
+                    session.send('Fetch.continueRequest', {'requestId': request_id})
+                return
+            location = next((h['value'] for h in event.get('responseHeaders', []) if h['name'].lower() == 'location'), None)
+            if 300 <= event.get('responseStatusCode', 0) < 400 and location:
+                target = urljoin(req['url'], location)
+                if not allowed(req['method'], target):
+                    blocked.append({'method': req['method'], 'path': safe_path(req['url']), 'redirect': redirect_metadata(req['url'], location)})
+                    session.send('Fetch.failRequest', {'requestId': request_id, 'errorReason': 'BlockedByClient'})
+                    return
+            session.send('Fetch.continueResponse', {'requestId': request_id})
+        except Exception:
+            if not page.is_closed():
+                raise
+    session.on('Fetch.requestPaused', paused)
+    session.send('Fetch.enable', {'patterns': [{'urlPattern': '*', 'requestStage': 'Request'}, {'urlPattern': '*', 'requestStage': 'Response'}]})
+    return session
+
+
+class Assets(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.paths = []
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'script' and attrs.get('src'):
+            self.paths.append(attrs['src'])
+        if tag == 'link' and attrs.get('rel') == 'stylesheet' and attrs.get('href'):
+            self.paths.append(attrs['href'])
+
+
+def asset_preflight():
+    # No redirects are followed, including redirects returned by JS URLs.
+    opener = urllib.request.build_opener(NoRedirect())
+    with opener.open(ORIGIN + '/fa', timeout=20) as response:
+        parser = Assets()
+        parser.feed(response.read().decode('utf-8'))
+    result = {'proxyConfigured': bool(os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy')), 'httpClientTargetProxyBypass': urllib.request.proxy_bypass('185.231.112.154'), 'managedPolicySnapshotPresent': Path('/etc/codex/network-policy.json').exists(), 'githubActions': os.environ.get('GITHUB_ACTIONS') == 'true', 'assets': []}
+    for path in dict.fromkeys(parser.paths):
+        url = urljoin(ORIGIN, path)
+        assert allowed('GET', url), 'Asset points outside the permitted public target'
+        try:
+            response = opener.open(url, timeout=20)
+        except urllib.error.HTTPError as error:
+            response = error
+        with response:
+            status = response.getcode()
+            mime = response.headers.get('content-type', '')
+            server = response.headers.get('server', '').lower()
+            row = {'path': safe_path(url), 'status': status, 'mime': mime, 'serverClass': next((name for name in ['nginx', 'envoy', 'cloudflare', 'apache'] if name in server), 'other')}
+            location = response.headers.get('location')
+            if location:
+                row['redirect'] = redirect_metadata(url, location)
+        result['assets'].append(row)
+        (OUT / 'asset-preflight.json').write_text(json.dumps(result, indent=2))
+        valid = status == 200 and ('text/css' in mime if '.css' in path else 'javascript' in mime)
+        assert valid, 'Public JS/CSS preflight failed; redirect was not followed and browser cases are not passed'
+    assert result['assets'], 'No public assets found'
+    return result
 
 
 def health():
@@ -55,6 +141,8 @@ def console_record(message):
 
 report = {'expectedSha': EXPECTED_SHA, 'mutationsSent': 0, 'cases': []}
 (OUT / 'health-before.json').write_text(json.dumps(health(), indent=2))
+(OUT / 'checks.json').write_text(json.dumps(report, indent=2))
+asset_preflight()
 with sync_playwright() as p:
     options = {}
     if os.environ.get('HTTP_PROXY'):
@@ -73,25 +161,19 @@ with sync_playwright() as p:
                 page.on('requestfailed', lambda req: failed.append({'path': safe_path(req.url), 'type': req.resource_type, 'failure': req.failure}))
                 page.on('response', lambda response: responses.append({'path': safe_path(response.url), 'status': response.status, 'type': response.request.resource_type, 'mime': response.headers.get('content-type', '')}))
 
-                def route(request_route):
-                    request = request_route.request
-                    if not allowed(request.method, request.url):
-                        blocked.append({'method': request.method, 'path': safe_path(request.url)})
-                        request_route.abort()
-                    else:
-                        request_route.continue_()
-
-                page.route('**/*', route)
+                install_http_guard(context, page, blocked)
                 def reject_websocket(socket):
                     blocked.append({'method': 'WEBSOCKET', 'path': safe_path(socket.url)})
                     socket.close()
                 page.route_web_socket('**/*', reject_websocket)
-                row = {'page': name, 'locale': locale, 'width': width, 'failures': []}
+                row = {'page': name, 'locale': locale, 'width': width, 'stage': 'navigation', 'failures': []}
                 try:
                     response = page.goto(ORIGIN + '/' + locale + path, wait_until='networkidle', timeout=45000)
                     assert response is not None and response.status == 200, 'Page navigation was not HTTP 200'
+                    row['stage'] = 'hydration'
                     page.wait_for_function("() => [...document.querySelectorAll('*')].some(e => Object.keys(e).some(k => k.startsWith('__reactFiber') || k.startsWith('__reactProps')))", timeout=30000)
                     row['reactBoundElements'] = page.evaluate("() => [...document.querySelectorAll('*')].filter(e => Object.keys(e).some(k => k.startsWith('__reactFiber') || k.startsWith('__reactProps'))).length")
+                    row['stage'] = 'interaction'
                     if name == 'login':
                         field = page.locator('.auth-password-field').first
                         expect(field).to_be_visible()
@@ -123,7 +205,7 @@ with sync_playwright() as p:
                     row['failures'].append('Runtime/network error')
                 report['cases'].append(row)
                 (OUT / 'checks.json').write_text(json.dumps(report, indent=2))
-                print(json.dumps({'page': name, 'locale': locale, 'width': width, 'reactBoundElements': row.get('reactBoundElements', 0), 'failures': row['failures']}), flush=True)
+                print(json.dumps({'page': name, 'locale': locale, 'width': width, 'reactBoundElements': row.get('reactBoundElements'), 'failures': row['failures']}), flush=True)
                 context.close()
     browser.close()
 (OUT / 'health-after.json').write_text(json.dumps(health(), indent=2))
