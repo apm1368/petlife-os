@@ -1,0 +1,15 @@
+{
+  "base": "069cbfc467246f2e71ae3027410797769fb5fb20",
+  "beforeSource": "d9c7a6756e49fd56956c0615c4779e4823869f98",
+  "files": {
+    "apps/web/features/partner-verification/AdminVerificationView.tsx": "cef795f9ce9f057de1f187c7531e3bded9f18473a98797d9adeb33ecb054bed6",
+    "apps/web/features/partner-verification/AdminVerificationView.test.tsx": "d897174711e626f14b41e3861d7783cee5956d2cb16d903dd240419b64fb34dc",
+    "apps/web/features/partner-verification/VerificationDocumentList.tsx": "b806195c73b7d2a1989f59cad803a71cfbdbe5b2631f1ad5bf44630202f0b995",
+    "apps/web/features/partner-verification/VerificationQueueCard.tsx": "55265c29ad146849574767f0ae7bb8b194932751de6730e2096f938a5c8e9923",
+    "apps/web/features/partner-verification/VerificationPresentation.test.tsx": "3881c178c09ed5702cf86a339eb81e052d34024eb6830de5825989d0d5a516d7",
+    "apps/web/features/partner-verification/verification.module.css": "9f82d6540983a8ca3bd366ea3882b23bcc005d74070d85fd49ba07c5cbe8fda6",
+    "apps/web/messages/fa.json": "899dabbeee05bf80afe846222fd2eb83b99ccbd3777ad7e62653ecf57c5caf57",
+    "apps/web/messages/en.json": "99d08910682413931b3571bfb2490832b764514b21158dada1497aa633ae136f",
+    "apps/web/design-review/approved-rollout/browser-verification-design.py": "100409bfaea6561d5974a32c0fa4106a26a883a18e4847eb7f30ac91eabdb703"
+  }
+}

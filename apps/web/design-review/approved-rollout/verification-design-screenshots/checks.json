@@ -1,0 +1,1004 @@
+{
+  "before-normal": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 1
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 1
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 1
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0
+    }
+  ],
+  "before-save-error": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    }
+  ],
+  "after-normal": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "queue",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "detail",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "provider",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "seller",
+      "mode": "normal",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    }
+  ],
+  "after-empty": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "queue",
+      "mode": "empty",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "queue",
+      "mode": "empty",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "queue",
+      "mode": "empty",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "queue",
+      "mode": "empty",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    }
+  ],
+  "after-load-error": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "queue",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "detail",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "queue",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 1,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "detail",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "queue",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "detail",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "queue",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "detail",
+      "mode": "load-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [],
+      "caseReads": 2,
+      "manualRecheckReads": 0
+    }
+  ],
+  "after-save-error": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 3,
+      "manualRecheckReads": 1
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 3,
+      "manualRecheckReads": 1
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 3,
+      "manualRecheckReads": 1
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "detail",
+      "mode": "save-error",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+      ],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [
+        503
+      ],
+      "mutations": [
+        {
+          "path": "/admin/verification/documents/doc1/review",
+          "method": "POST"
+        }
+      ],
+      "caseReads": 3,
+      "manualRecheckReads": 1
+    }
+  ],
+  "after-forbidden": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "queue",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "view": "detail",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "queue",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "view": "detail",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "queue",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "detail",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "queue",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "view": "detail",
+      "mode": "forbidden",
+      "browserTimezone": "UTC",
+      "overflow": false,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "unexpectedConsoleErrors": [],
+      "httpErrors": [],
+      "mutations": [],
+      "caseReads": 0,
+      "manualRecheckReads": 0
+    }
+  ]
+}

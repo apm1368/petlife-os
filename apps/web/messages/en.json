@@ -5552,7 +5552,7 @@
     "keepExpiry": "Leaving this blank preserves the current expiry. Clearing an existing expiry is not supported by the contract.",
     "confirmReview": "I reviewed the case and the effect of this action.",
     "invalidExpiry": "Expiry must be a valid future time.",
-    "saveFailed": "The decision could not be saved. Recheck the case and documents.",
+    "saveFailed": "The result of this action was not confirmed. Your note is preserved. Reload the case status before trying again.",
     "waiting": "Saving…",
     "confirm": "Confirm and save",
     "cancel": "Cancel",
@@ -5652,7 +5652,31 @@
     "simpleGuide": "Open each partner’s documents and review them, then approve, reject or request corrections with a reason. This is a manual review; official identity lookup is not connected.",
     "rowPartner": "Partner details",
     "rowDocuments": "Document status",
-    "rowReceived": "Submission time"
+    "rowReceived": "Submission time",
+    "notRecorded": "Not recorded",
+    "uploadedLabel": "Upload time",
+    "fileLabel": "File type and size",
+    "expiryLabel": "Evidence validity",
+    "reviewedLabel": "Review time",
+    "notReviewed": "Not reviewed yet",
+    "rejectionLabel": "Reason for rejection",
+    "reviewNoteLabel": "Reviewer note",
+    "caseNoteLabel": "Case note",
+    "documentCountLabels": {
+      "pending": "Awaiting review",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "fileTypes": {
+      "pdf": "PDF document",
+      "jpeg": "JPEG image",
+      "png": "PNG image",
+      "webp": "WebP image",
+      "other": "File"
+    },
+    "recheckCase": "Reload case status",
+    "actionChanged": "The case or document has changed and this action is no longer available. Your note is preserved."
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "Clinic messages for your household",

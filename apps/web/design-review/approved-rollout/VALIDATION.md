@@ -1,6 +1,25 @@
 # Validation and release limits
 
 
+## خوانایی صف و مدارک همکاران — ۱۸ اکتبر ۲۰۲۶
+
+کارت صف، وضعیت پرونده و چهار شمار مستقل مدارک را با دادهٔ موجود API نشان می‌دهد؛ زمان ارسال ناموجود «ثبت نشده» است. دکمهٔ بررسی حداقل ۴۴ پیکسل ارتفاع دارد. فهرست مدارک در ادمین و پورتال‌های خدمات‌دهنده/فروشنده، نوع و حجم فایل، اعتبار، زمان بررسی و دلیل رد را با برچسب مشخص نشان می‌دهد. زمان‌های ISO با formatter موجود و منطقهٔ تهران نمایش داده می‌شوند: `2026-10-15T21:00:00Z` در مرورگر UTC قبلاً ۲۳ مهر، ساعت ۲۱ بود؛ اکنون ۲۴ مهر، ساعت ۰:۳۰ است.
+
+در قطع پاسخ تصمیم، نتیجه «تأیید نشده» است و توضیح باقی می‌ماند. دریافت دوبارهٔ وضعیت فقط GET است؛ اگر مدرک بررسی شده باشد، همان اقدام غیرفعال می‌شود. اگر هنوز منتظر باشد، تأیید صریح تازه لازم است. شکست GET هم توضیح را نگه می‌دارد و ارسال را باز نمی‌کند. این حفاظت رابط، تضمین عمومی exactly-once یا تغییر قرارداد سرور نیست.
+
+۲۰ تست در چهار فایل partner-verification، typecheck، lint (سه هشدار قبلی، صفر خطا) و برابری کلیدهای fa/en گذشتند. ۴۰ حالت مرورگر بعد: سالم ۱۶، خالی ۴، خطای دریافت ۸، قطع پاسخ تصمیم ۴، بدون مجوز ۸؛ ۲۰ تصویر قبل نیز ثبت شده‌اند. هیچ overflow، pageerror یا console error غیرمنتظره دیده نشد. پاسخ‌های 503 کنترل‌شده حذف نشده‌اند. در هر قطع پاسخ، دقیقاً یک POST در mock و یک GET دستی پس از آن ثبت شد؛ بدون مجوز، درخواست پرونده و عملیات نوشتنی صفر است.
+
+- [صف قبل، فارسی ۳۹۰](verification-design-screenshots/before-normal-queue-fa-390.webp) / [بعد](verification-design-screenshots/after-normal-queue-fa-390.webp)
+- [صف فارسی ۱۴۴۰](verification-design-screenshots/after-normal-queue-fa-1440.webp)، [انگلیسی ۳۹۰](verification-design-screenshots/after-normal-queue-en-390.webp) / [۱۴۴۰](verification-design-screenshots/after-normal-queue-en-1440.webp)
+- [پرونده فارسی ۳۹۰](verification-design-screenshots/after-normal-detail-fa-390.webp)، [حفظ توضیح پس از قطع پاسخ](verification-design-screenshots/after-save-error-detail-fa-390.webp)
+- [پنل خدمات‌دهنده](verification-design-screenshots/after-normal-provider-fa-390.webp)، [پنل فروشنده](verification-design-screenshots/after-normal-seller-fa-390.webp)
+- [مقایسه و ارزیابی بصری محدود همین بخش](design-qa.md)، [خروجی مرورگر](verification-design-screenshots/checks.json)، [هش منابع](verification-design-screenshots/source-hashes.json)، [بازاجرا](browser-verification-design.py)
+
+بازاجرا: سرور Next توسعه با NEXT_PUBLIC_LOCAL_PREVIEW=0 و NEXT_PUBLIC_API_ORIGIN=http://localhost:4000؛ متغیرهای QA_REPO_ROOT، QA_WEB_ORIGIN، QA_EVIDENCE_DIR و QA_MODE=normal/empty/load-error/save-error/forbidden را به اسکریپت بدهید. Chromium با timezone=UTC و density=1، viewportهای 390/1440 × 1000؛ تصاویر full-page هستند. ابتدا تکمیل بارگذاری shell احرازشده انتظار کشیده می‌شود؛ timeout اولین اجرای سردِ harness پیش از تکمیل shell، موفق حساب نشده است. این اندازه‌گیری performance نسخهٔ production نیست.
+
+API با DTO مصنوعی فقط روی loopback جایگزین شده؛ هیچ فایل خصوصی واقعی باز نشده و هیچ مدرک/تصمیم یا دادهٔ زنده ثبت نشده است. این بسته ادعای استعلام رسمی هویت، ارجاع کار به کارشناس، اتصال API زنده یا پذیرش همهٔ صفحات ندارد. مدل، migration، مجوز، workflow و مسیر انتشار تغییر نکرده‌اند. اصل تصویر «کوکی و دودی» در #45 با CI کامل در تثبیت `069cbfc467246f2e71ae3027410797769fb5fb20` ادغام شد؛ به صفحهٔ عمومی منتقل نشده است.
+
+
 ## تطبیق پوستهٔ واقعی ادمین با مرجع — ۱۷ اکتبر ۲۰۲۶
 
 پوستهٔ LiveAdminShell از نوار تیرهٔ افقی به منوی کناری با رنگ‌های campaign و سربرگ روشنِ مرجع admin.webp تبدیل شد. لوگوی تأییدشدهٔ opetlife، نام/نقش واقعی حساب، گروه‌های ترجمه‌شده و منوی موبایل حفظ شدند. مسیر فعال به‌صورت خودکار در گروه باز می‌شود؛ کنترل دسترسی همان فهرست مجوزهای موجود است و CRM نمایشی همچنان پنهان است. هیچ مسیر، API، مجوز یا نقش جدید ایجاد نشد.
