@@ -1,0 +1,201 @@
+[
+  {
+    "path": "/api/health/live",
+    "method": "GET",
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 15,
+    "bodySha256": "a29ee2b15c494311c52521766e44af56a3ad2248e7a8ab465e5206463c13d288",
+    "expectedStatus": true,
+    "body": {
+      "status": "ok"
+    }
+  },
+  {
+    "path": "/api/health/ready",
+    "method": "GET",
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 55,
+    "bodySha256": "211c0949b20064fdc9ff341197a321ad115bb0f09aedc87379becb01f112c60f",
+    "expectedStatus": true,
+    "body": {
+      "status": "ok",
+      "checks": {
+        "database": "up",
+        "redis": "up"
+      }
+    },
+    "dependenciesUp": true
+  },
+  {
+    "path": "/api/health/version",
+    "method": "GET",
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 170,
+    "bodySha256": "768e35788d9bcefac665dee118d43a7cbc7b83199a22fe64e2f45b05991b5112",
+    "expectedStatus": true,
+    "body": {
+      "version": "0.1.0",
+      "sha": "7c63f11bb572825d7771692f4e46d49e4b7b479d",
+      "buildTime": "2026-10-18T18:23:40+03:30",
+      "environment": "staging",
+      "deploymentId": "github-39138029992-1"
+    },
+    "shaMatches": true
+  },
+  {
+    "path": "/api/providers/vets",
+    "method": "GET",
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 26743,
+    "bodySha256": "ab10beedb57f21b326f1987bc9f90ac152ba2b106f8a381f89970b29fa6d476a",
+    "expectedStatus": true
+  },
+  {
+    "path": "/api/services/categories",
+    "method": "GET",
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 71,
+    "bodySha256": "b47570d6a070ed2ca1f63af02e9cddc35ba0b9d8dec19c54d2cba5a9f18bbe79",
+    "expectedStatus": true
+  },
+  {
+    "path": "/api/settings/public",
+    "method": "GET",
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 30,
+    "bodySha256": "0502767fe9f4b076ec8e6204b500a2f09cefa7f688cf365d0d4590be6770b3ad",
+    "expectedStatus": true
+  },
+  {
+    "path": "/api/admin/providers",
+    "method": "GET",
+    "status": 401,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 145,
+    "bodySha256": "b30aef0c25f057c3756dbc09666846b8922bb68c5c59724a095a81e04a261ecf",
+    "expectedStatus": true
+  },
+  {
+    "path": "/api/admin/subscriptions/households",
+    "method": "GET",
+    "status": 401,
+    "contentType": "application/json; charset=utf-8",
+    "bytes": 145,
+    "bodySha256": "5f1fa26dce688e25dbdb39c4d8c83d7cd40848a616ad3cc66d249cfba92e90dd",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 638742,
+    "bodySha256": "d18bef5ad62060b7059c6a77c491fdbc19e001077d21621cdcf7520ae254a16e",
+    "expectedStatus": true
+  },
+  {
+    "path": "/en",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 485082,
+    "bodySha256": "6a2d2fb6540033d63069d0ca58ecd81bd003b1598f525af93f2332a05ffe6c89",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa/account?method=password",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 581291,
+    "bodySha256": "35d8b5faaf53a41e48c159f0271befafd2891c8d745f027e65787580079fcda9",
+    "expectedStatus": true
+  },
+  {
+    "path": "/en/account?method=password",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 432531,
+    "bodySha256": "6e8fa8363169bcd7f7661e60dfaf15dedf813c212d49291e68174d267442f98c",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa/onboarding",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 577204,
+    "bodySha256": "7534d72132d8a92d3ff69ef6a4c73b7889ea571c0786b9d8d413aebe4bc8df7a",
+    "expectedStatus": true
+  },
+  {
+    "path": "/en/onboarding",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 428634,
+    "bodySha256": "adc019db7454b4a11629dcae5f38bc602aefe875401c474dae6dd762ac40f4f3",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa/pets/new",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 577718,
+    "bodySha256": "a2e191a701750ba18562ca0c08588e002474ead29d3a2c0c4790fdeee5db7390",
+    "expectedStatus": true
+  },
+  {
+    "path": "/en/pets/new",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 429148,
+    "bodySha256": "c6a085813411a46fb4f8a92bddd066ee60fa1c6e577f0531dba946f1cec8a873",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa/pets",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 577439,
+    "bodySha256": "ea01795592c67ec0733cf7bff99aa0e9f0f12fc214239a09d0a77661445cd12f",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa/admin/verification",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 577961,
+    "bodySha256": "ba2d04ab0ef4d67861c0e296e7b2bbff66817b741cd5f385d942a8aec86a4d6b",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa/admin/tasks",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 577448,
+    "bodySha256": "5ac00cbc82f553112fa87865ee6600301948ea0151f5c7c18fbd6ad062f5ee4c",
+    "expectedStatus": true
+  },
+  {
+    "path": "/fa/admin/subscriptions/households",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "bytes": 577862,
+    "bodySha256": "919c978efc4deb8a22e182b70e77b33742aae9528b8e59aae97a625eda4f5cb3",
+    "expectedStatus": true
+  }
+]
