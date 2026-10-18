@@ -1,0 +1,16 @@
+{
+  "version": {
+    "version": "0.1.0",
+    "sha": "3ba6fdfed343b4c9cb1413a2911f55490c7d01d9",
+    "buildTime": "2026-10-18T19:00:44+03:30",
+    "deploymentId": "github-39140816890-1",
+    "environment": "staging"
+  },
+  "ready": {
+    "status": "ok",
+    "checks": {
+      "database": true,
+      "redis": true
+    }
+  }
+}
