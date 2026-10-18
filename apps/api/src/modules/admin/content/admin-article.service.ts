@@ -3,6 +3,7 @@ import { ArticleLifecycleStatus, Locale, Prisma } from "@prisma/client";
 import type { AdminArticleDto, AdminArticleListItemDto, AdminArticleLocaleDto, PaginatedDto, RichTextDocument } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import {
+  AdminAccessDeniedException,
   ArticleLocaleNotFoundException,
   ArticleNotFoundException,
   DuplicateArticleSlugException,
@@ -13,6 +14,7 @@ import { CATEGORY_INCLUDE, CONTENT_AUTHOR_INCLUDE, MEDIA_ASSET_INCLUDE, TAG_INCL
 import { validateRichTextDocument } from "../../content/rich-text.util";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
+import { roleHasPermission } from "../auth/admin-permissions";
 import { AdminMediaService } from "./admin-media.service";
 
 /** Exactly the five transitions the spec enumerates — ARCHIVED is a deliberate terminal state this phase (see ArticleLifecycleStatus's own schema.prisma doc comment). */
@@ -227,7 +229,10 @@ export class AdminArticleService {
    * Upserts one locale's editorial content and snapshots it as a new
    * ContentVersion in the same transaction (spec: "every meaningful save...
    * should create a recoverable version"). Never changes `status` — editing
-   * and publishing are deliberately separate actions (spec). Row-locks the
+   * and publishing are deliberately separate actions (spec). The public site
+   * reads this same row, so saving a VISIBLE locale changes live content: that
+   * needs content.publish, not just content.edit (an editor works on DRAFT or
+   * HIDDEN locales and a publisher puts them live). Row-locks the
    * existing ArticleLocale (when one exists) before computing the next
    * version number, so two concurrent saves to the same article/locale can
    * never produce two versions with the same number.
@@ -238,7 +243,10 @@ export class AdminArticleService {
     if (!article) throw new ArticleNotFoundException({ articleId });
 
     const row = await this.prisma.$transaction(async (tx) => {
-      const [locked] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "content_article_locales" WHERE "articleId" = ${articleId}::uuid AND "locale" = ${locale}::"Locale" FOR UPDATE`;
+      const [locked] = await tx.$queryRaw<{ id: string; status: ArticleLifecycleStatus }[]>`SELECT "id", "status" FROM "content_article_locales" WHERE "articleId" = ${articleId}::uuid AND "locale" = ${locale}::"Locale" FOR UPDATE`;
+      if (locked?.status === ArticleLifecycleStatus.VISIBLE && !roleHasPermission(admin.role, "content.publish")) {
+        throw new AdminAccessDeniedException({ reason: "LIVE_EDIT_REQUIRES_CONTENT_PUBLISH", requiredPermission: "content.publish", articleId, locale });
+      }
       await this.assertSlugAvailable(locale, input.slug, locked?.id);
 
       let saved: ArticleLocaleWithRelations;

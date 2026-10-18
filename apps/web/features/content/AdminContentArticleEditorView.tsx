@@ -8,6 +8,7 @@ import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusL
 import { ArticleLifecycleStatus } from "@petlife/types";
 import type { AdminArticleDto, AdminArticleLocaleDto, CategoryDto, ContentAuthorDto, Locale as ContentLocale, RichTextDocument, TagDto } from "@petlife/types";
 import { adminContentService } from "@/services/admin-content.service";
+import { ApiError } from "@/lib/api/client";
 import { RichTextBlockEditor } from "./RichTextBlockEditor";
 import { RichTextRenderer } from "./RichTextRenderer";
 import { articleStatusTone } from "./content-tone";
@@ -47,6 +48,8 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
   const [changeNote, setChangeNote] = useState("");
   const [preview, setPreview] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [sharedError, setSharedError] = useState<string | null>(null);
+  const [transitionError, setTransitionError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState("");
   const [authorId, setAuthorId] = useState("");
   const [tagIds, setTagIds] = useState<string[]>([]);
@@ -126,15 +129,28 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
       const saved = await adminContentService.saveArticleLocale(articleId, activeLocale, input);
       setLocaleContent(saved);
       setChangeNote("");
-    } catch {
-      setSaveError(t("saveFailed"));
+    } catch (err) {
+      // The typed fields stay as they are, so nothing the editor wrote is lost on a failed save.
+      setSaveError(saveErrorMessage(err));
     }
+  }
+
+  function saveErrorMessage(err: unknown) {
+    if (err instanceof ApiError && err.code === "DUPLICATE_ARTICLE_SLUG") return t("saveFailed");
+    if (err instanceof ApiError && err.details?.reason === "LIVE_EDIT_REQUIRES_CONTENT_PUBLISH") return t("liveEditNeedsPublish");
+    if (err instanceof ApiError && err.status === 403) return t("saveForbidden");
+    return t("saveFailedKept");
   }
 
   async function updateShared() {
     if (!articleId) return;
-    const updated = await adminContentService.updateArticle(articleId, { authorId: authorId || null, categoryId: categoryId || null, tagIds });
-    setArticle(updated);
+    setSharedError(null);
+    try {
+      const updated = await adminContentService.updateArticle(articleId, { authorId: authorId || null, categoryId: categoryId || null, tagIds });
+      setArticle(updated);
+    } catch (err) {
+      setSharedError(err instanceof ApiError && err.status === 403 ? t("saveForbidden") : t("sharedSaveFailed"));
+    }
   }
 
   function toggleTag(tagId: string) {
@@ -144,9 +160,14 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
   async function transition(action: "publish" | "hide" | "archive") {
     if (!articleId) return;
     const fn = action === "publish" ? adminContentService.publishArticleLocale : action === "hide" ? adminContentService.hideArticleLocale : adminContentService.archiveArticleLocale;
-    const updated = await fn(articleId, activeLocale);
-    setLocaleContent(updated);
-    await loadShared();
+    setTransitionError(null);
+    try {
+      const updated = await fn(articleId, activeLocale);
+      setLocaleContent(updated);
+      await loadShared();
+    } catch (err) {
+      setTransitionError(err instanceof ApiError && err.status === 403 ? t("transitionForbidden") : t("transitionFailed"));
+    }
   }
 
   if (error && articleId) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={loadShared} />;
@@ -193,6 +214,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
               {t("saveSharedFields")}
             </Button>
           ) : null}
+          {sharedError ? <span role="alert" className="text-metadata text-state-urgent">{sharedError}</span> : null}
         </div>
         <div className="flex flex-wrap gap-2">
           {tags.map((tg) => {
@@ -237,8 +259,8 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
           )}
 
           <Input label={t("changeNote")} value={changeNote} onChange={(e) => setChangeNote(e.target.value)} />
-          {saveError ? <span className="text-metadata text-state-urgent">{saveError}</span> : null}
-          <Button onClick={save}>{t("save")}</Button>
+          {saveError ? <span role="alert" className="text-metadata text-state-urgent">{saveError}</span> : null}
+          <Button onClick={save}>{status === ArticleLifecycleStatus.VISIBLE ? t("saveLive") : t("save")}</Button>
 
           {articleId ? (
             <div className="flex flex-wrap gap-2 border-t border-border-subtle pt-3">
@@ -251,6 +273,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
               <Button variant="secondary" disabled={!canArchive} onClick={() => transition("archive")}>
                 {t("archive")}
               </Button>
+              {transitionError ? <span role="alert" className="text-metadata text-state-urgent">{transitionError}</span> : null}
             </div>
           ) : null}
         </ContextSurface>

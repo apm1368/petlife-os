@@ -4,6 +4,7 @@ import type { AdminArticleDto, AdminArticleLocaleDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { adminContentService } from "@/services/admin-content.service";
 import { AdminContentArticleEditorView } from "./AdminContentArticleEditorView";
+import { ApiError } from "@/lib/api/client";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/services/admin-content.service", () => ({
@@ -151,5 +152,49 @@ describe("AdminContentArticleEditorView", () => {
     renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
 
     await waitFor(() => expect(screen.getByText("Retry")).toBeTruthy());
+  });
+
+  describe("save, shared-field and status errors are explicit and keep what was typed", () => {
+    const apiError = (status: number, code: string, details?: Record<string, unknown>) => new ApiError({ code, message: code, details, requestId: "req-1" }, status);
+
+    it("an editor's save of a live article explains it needs a publisher, and the edited title stays", async () => {
+      vi.mocked(adminContentService.getArticle).mockResolvedValue(article({ locales: [{ locale: "fa" as never, status: "VISIBLE" as never, title: "منتشرشده", slug: "live-slug", updatedAt: "2026-01-02T00:00:00.000Z" }] }));
+      vi.mocked(adminContentService.getArticleLocale).mockResolvedValue(localeContent({ status: "VISIBLE" as never, title: "منتشرشده", slug: "live-slug" }));
+      vi.mocked(adminContentService.saveArticleLocale).mockReset().mockRejectedValue(apiError(403, "ADMIN_ACCESS_DENIED", { reason: "LIVE_EDIT_REQUIRES_CONTENT_PUBLISH" }));
+      renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
+      const title = await screen.findByDisplayValue("منتشرشده");
+      fireEvent.change(title, { target: { value: "عنوان ویرایش‌شده" } });
+      // On a live article the button says what it does: it changes the published text.
+      expect(screen.queryByRole("button", { name: "Save draft" })).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "Save and update the live article" }));
+      expect((await screen.findByRole("alert")).textContent).toContain("Only someone who can publish");
+      expect(screen.getByDisplayValue("عنوان ویرایش‌شده")).toBeTruthy();
+    });
+
+    it("a network/server failure says the edits are kept (not 'check the slug'); a duplicate slug still says check the slug", async () => {
+      vi.mocked(adminContentService.getArticle).mockResolvedValue(article());
+      vi.mocked(adminContentService.getArticleLocale).mockResolvedValue(localeContent());
+      vi.mocked(adminContentService.saveArticleLocale).mockReset().mockRejectedValueOnce(new Error("network")).mockRejectedValueOnce(apiError(409, "DUPLICATE_ARTICLE_SLUG"));
+      renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
+      await screen.findByDisplayValue("پیش‌نویس");
+      fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+      expect((await screen.findByRole("alert")).textContent).toContain("Your edits are still here");
+      fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+      await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("Check the slug"));
+      expect(screen.getByDisplayValue("پیش‌نویس")).toBeTruthy();
+    });
+
+    it("a failed shared-fields save and a failed publish are shown, not swallowed", async () => {
+      vi.mocked(adminContentService.getArticle).mockResolvedValue(article());
+      vi.mocked(adminContentService.getArticleLocale).mockResolvedValue(localeContent());
+      vi.mocked(adminContentService.updateArticle).mockReset().mockRejectedValue(new Error("network"));
+      vi.mocked(adminContentService.publishArticleLocale).mockRejectedValue(apiError(403, "ADMIN_ACCESS_DENIED"));
+      renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
+      await screen.findByDisplayValue("پیش‌نویس");
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
+      expect((await screen.findByRole("alert")).textContent).toContain("Could not save the category, author or tags");
+      fireEvent.click(screen.getByText("Publish"));
+      await waitFor(() => expect(screen.getAllByRole("alert").some((a) => a.textContent?.includes("permission to change this article's status"))).toBe(true));
+    });
   });
 });

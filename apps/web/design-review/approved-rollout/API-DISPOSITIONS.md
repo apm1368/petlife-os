@@ -56,3 +56,29 @@ This rollout completes the approved **shared page patterns and the listed featur
 ## Clinic continuation
 
 Clinic customer tags, open-appointment staff/resource assignment, and the member-facing explicitly shared clinic notes now have functional UI. Tag deletion is owner-only; assignment uses actual bookable staff and active named resources, preserves untouched fields and reports server conflicts. The customer-detail read is used to refresh actual tag assignments; this does not claim every field in its aggregate has a separate screen. The clinic plan catalog/admin assignment group remains a genuine frontend review item; current-plan usage is already visible and no clinic payment flow is fabricated.
+
+## Admin → API → site round-trips (2026-10-18)
+
+Static check on `stabilization/wave-1` `319650b`: every one of the 386 `apiFetch` calls in the web admin services resolves to an existing API route (method and path), including the legacy `PATCH /admin/{providers,sellers}/:id/verification` aliases in `partner-verification.controllers.ts`.
+
+Four flows were exercised end to end against the **real API and an isolated test database**, never the live site, in `apps/api/test/admin-site-roundtrip.e2e-spec.ts`. Each step re-reads the database and the public endpoint the page calls; a 2xx is not taken as proof.
+
+| Flow | Admin edit (role allowed) | View-only role | Public endpoint / page | Result |
+| --- | --- | --- | --- | --- |
+| Platform announcement | `PUT /admin/settings/platform.announcement` (ADMIN) | OPERATIONS: reads, 403 on edit | `GET /settings/public` → `PlatformAnnouncement` | Shown on a fresh read. A stale `baseVersion` gives 409 `SETTING_CHANGE_CONFLICT`, never a silent overwrite. |
+| Blog article | `PUT /admin/content/articles/:id/locales/:locale`, publish/hide | READ_ONLY: reads, 403 on edit | `GET /blog/articles/:slug` → blog article page | **Defect fixed.** EDITOR (`content.edit` without `content.publish`) could rewrite a VISIBLE article's live text. Editing a live locale now needs `content.publish` (403 `LIVE_EDIT_REQUIRES_CONTENT_PUBLISH`). The editor's path is: publisher hides it, editor edits, publisher publishes. A publisher's edit is live at once, with a version. |
+| Place | `PATCH /admin/places/:id` (OPERATIONS) | READ_ONLY: reads, 403 on edit | `GET /places/:id` → place page | Rename shown on a fresh read. |
+| Product | `PATCH /admin/commerce/products/:id/status` (COMMERCE_OPERATIONS) | FINANCE: reads, 403 on edit | `GET /shop/products/:id` → product page | INACTIVE → 404, ACTIVE → served again. |
+
+Admin article editor (`AdminContentArticleEditorView`), fixed defects:
+- Saving the shared fields (category/author/tags) and status changes (publish/hide/archive) used to fail silently, with an unhandled rejection. Both now show an explicit error.
+- The save error always said "check the slug". It now names the real cause: live edit needs a publisher, no permission, duplicate slug, or a generic failure.
+- Typed text is kept in every case.
+- On a live article the button says "Save and update the live article" instead of "Save draft".
+
+The settings, places and product-status admin views already showed save errors and kept the form.
+
+Still open:
+- Real-browser rendering (390/1440, fa/en) of these round-trips was not run on the VPS, which has no browser. It needs an isolated web build pointed at the test API.
+- The places admin screen has no rename/edit form, although `PATCH /admin/places/:id` exists. That is frontend work, not a new API.
+- A publisher's edit of a live article is immediately public. There is no draft-over-published version, which would need a schema change and a product decision.
