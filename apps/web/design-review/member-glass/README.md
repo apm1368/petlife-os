@@ -30,7 +30,7 @@ Personal pages used to change their visual surface when moving from home to pet/
 
 Proposed board #4 entry: `codex/stab-member-glass — PR pending — approved glass home + persistent personal shell; UI coverage ledger and Codex handoff attached; CI/QA required.`
 
-Publication is blocked on GitHub PR/API access and the required checks. This branch has not been merged or deployed. See the verification section in design-qa.md for exact outcomes.
+Historical checkpoint: the original glass-frame report was written before GitHub publication was available. That access blocker is no longer current; merged PRs and actual release evidence are tracked separately in Issue #4 and docs/ops/stabilization-remaining.fa.md. The historical screenshots are not a current deployment certificate.
 
 
 ## ادامهٔ طراحی فهرست پت‌ها — ۱۷ اکتبر
@@ -46,3 +46,15 @@ Publication is blocked on GitHub PR/API access and the required checks. This bra
 [خروجی مرورگر](pet-list-screenshots/checks.json) · [هش کد آزموده‌شده](pet-list-screenshots/source-hashes.json) · [ابزار بازتولید](browser-pet-list.py). برای بازتولید: Next روی 3030، `NEXT_PUBLIC_LOCAL_PREVIEW=0` و `NEXT_PUBLIC_API_ORIGIN=http://localhost:4000`؛ سپس QA_REPO_ROOT، QA_EVIDENCE_DIR، QA_STAGE=after و QA_MODE=clean/list/empty/error را به ابزار بدهید. تصویر before باید از worktree جدا روی مبنای بالا گرفته شود؛ برای بازتولید شاخهٔ دارای تغییر محلی را جابه‌جا نکنید.
 
 این شواهد، داده/API کنترل‌شدهٔ loopback هستند؛ ورود واقعی، نوشتن روی سایت زنده یا یکپارچگی تمام APIهای بک‌آفیس را تأیید نمی‌کنند. نتیجهٔ کامل CI و وضعیت ادغام فقط در PR و Issue #4 ثبت می‌شود؛ این بسته انتشار main ندارد.
+
+## ادامهٔ نمای پت — خطای مراقبت و پاسخ دیررس، ۱۸ اکتبر
+
+در `/[locale]/pets/[id]`، شکست GET مراقبت قبلاً به آرایهٔ خالی تبدیل می‌شد و پیام آرامش‌بخش «موردی یافت نشد» نمایش داده می‌شد. اکنون خطای جزئی روشن است، تاریخچهٔ در دسترس باقی می‌ماند و دکمهٔ تلاش دوباره فقط خواندن را تکرار می‌کند. فهرست پیش‌رو تا دریافت مراقبت کامل اعلام نمی‌شود. قاب شیشه‌ای، لوگو و مسیرهای موجود حفظ شده‌اند.
+
+داده/مجوز/مراقبتِ همان نمای پت به شناسهٔ مسیر وابسته شد؛ پاسخ دیررس درخواست قبلی دیگر نمی‌تواند درون این نما زیر لینک پت تازه قرار گیرد. `PetContextShell`، فایل‌های پیام کارت پت و ادمین تغییر نکرده‌اند؛ این اصلاح تضمین رفتار تمام پوسته‌ها و جریان‌های تعویض پت نیست.
+
+۶ تست تازه در `PetProfileView.test.tsx`، همراه ۱۲ تست موجود داشبورد و برچسب‌ها، موفق‌اند. پنج سناریو روی کد مبنا شکست می‌خوردند. تصاویر و JSON درخواست‌ها در `pet-overview-screenshots` و ابزار بازاجرا `browser-pet-overview.py` هستند؛ API مرورگر مصنوعی loopback است و هر mutation رد می‌شود. خطای 503 عمداً برای GET مراقبت/نمای کلی تزریق می‌شود؛ لغو اولیهٔ `/settings/public` توسط StrictMode فقط در صورت دریافت پاسخ 200 بعدی مجاز است و در JSON حفظ شده است. تصویرهای قبل یک بنر اعلان نامرتبطِ fixture قدیمی نیز دارند؛ اعلان خالی در fixture بعد با قرارداد واقعی `platform.announcement: null` تنظیم شده، نه با تغییر کد اعلان برنامه.
+
+برای بازاجرا، Next روی localhost:3036 و `QA_EVIDENCE_DIR=/tmp/pet-overview-qa QA_STAGE=after QA_MODE=care-error`؛ حالت‌های `recover`، `empty`، `no-care-permission` و `load-error` نیز اجرا شوند. اعداد/تاریخ موجود با formatterهای واقعی برنامه نمایش داده می‌شوند. نتیجهٔ CI/ادغام و انتشار از PR و Issue #4 مستقل خوانده شود؛ این تست‌ها ورود یا دادهٔ واقعی سایت زنده را تأیید نمی‌کنند.
+
+نتیجهٔ نهایی این ادامه: ۲۰ حالت بعد و چهار تصویر قبل، fa/en و ۳۹۰/۱۴۴۰، بدون overflow یا pageerror و با بارگذاری موفق دارایی‌های ثبت‌شدهٔ JS/CSS. لغو StrictMode و 503 کنترل‌شده در JSON باقی مانده‌اند و موفقیت جعلی جایگزین آن‌ها نشده است. typecheck، lint (سه هشدار قبلی) و برابری ۴۷۶۳ کلید fa/en موفق‌اند. API واقعی/DB، ورود زنده، عملکرد تمام پوستهٔ پت و سرویس‌های بیرونی در این بسته تأیید نشده‌اند.

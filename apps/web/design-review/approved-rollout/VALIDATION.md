@@ -92,3 +92,7 @@ Owner explicitly authorized backend KYC implementation. The previous protected-A
 ## اشتراک خانواده‌ها — ۱۸ اکتبر
 
 [اصلاح صفحه‌بندی، جداسازی پاسخ فیلتر و شواهد مرورگر](SUBSCRIPTION-LIST-VALIDATION.md). این نتیجه محدود به همین صفحه و fixture محلی است؛ CI، ادغام و انتشار مستقل‌اند.
+
+## نمای پت — ۱۸ اکتبر
+
+[حفظ قاب شیشه‌ای، خطای مراقبت و جداسازی پاسخ پت قبلی](../member-glass/README.md). تصاویر/JSON و ابزار بازاجرا در همان پوشهٔ member-glass ثبت می‌شوند؛ پوشش محدود به نمای پت و API مصنوعی loopback است.
