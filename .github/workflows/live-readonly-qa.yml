@@ -1,0 +1,47 @@
+name: Read-only live browser QA
+
+# Independent public-site witness; never deploys, connects over SSH or receives app secrets.
+on:
+  push:
+    branches: [codex/stab-live-browser-qa]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readonly-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: release
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated pinned browser tooling
+        run: |
+          python -m venv "$RUNNER_TEMP/opetlife-live-venv"
+          "$RUNNER_TEMP/opetlife-live-venv/bin/python" -m pip install --disable-pip-version-check playwright==1.62.0
+          "$RUNNER_TEMP/opetlife-live-venv/bin/python" -m playwright install --with-deps chromium
+      - name: Verify live SHA, assets, hydration and read-only interaction
+        env:
+          QA_EVIDENCE_DIR: ${{ runner.temp }}/opetlife-live-evidence
+        run: |
+          export EXPECTED_SHA="$(git -C release rev-parse HEAD)"
+          "$RUNNER_TEMP/opetlife-live-venv/bin/python" qa/scripts/qa-live-readonly.py
+      - name: Retain sanitized public evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opetlife-live-readonly-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/opetlife-live-evidence
+          if-no-files-found: warn
+          retention-days: 30
