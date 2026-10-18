@@ -1,0 +1,1886 @@
+[
+  {
+    "locale": "fa",
+    "width": 390,
+    "stage": "after",
+    "formRetained": true,
+    "photoErrorVisible": true,
+    "selectedPhotoCount": 0,
+    "uploadsBeforeExplicitRetry": 1,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "responses": [
+      {
+        "path": "/fa/pets/pet-1",
+        "status": 200,
+        "mime": "text/html; charset=utf-8"
+      },
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/pets",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/active-pet",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/images/landing/home/cookie.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/images/landing/member-glass-backdrop.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/brand/opetlife/02_symbol_only_transparent_approx.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/settings/public",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 503,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/fa/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/fa/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      }
+    ],
+    "failedRequests": [
+      {
+        "path": "/settings/public",
+        "error": "net::ERR_ABORTED",
+        "rsc": false
+      },
+      {
+        "path": "/fa/pets/pet-1",
+        "error": "net::ERR_ABORTED",
+        "rsc": true
+      }
+    ],
+    "assets": [
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "network": [
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/households"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/pets"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/active-pet"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      }
+    ],
+    "overflow": false,
+    "explicitRetryRecovered": true
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "stage": "after",
+    "formRetained": true,
+    "photoErrorVisible": true,
+    "selectedPhotoCount": 0,
+    "uploadsBeforeExplicitRetry": 1,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "responses": [
+      {
+        "path": "/fa/pets/pet-1",
+        "status": 200,
+        "mime": "text/html; charset=utf-8"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/pets",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/active-pet",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/images/landing/home/cookie.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/images/landing/member-glass-backdrop.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/brand/opetlife/02_symbol_only_transparent_approx.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/settings/public",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 503,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/fa/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/fa/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      }
+    ],
+    "failedRequests": [
+      {
+        "path": "/settings/public",
+        "error": "net::ERR_ABORTED",
+        "rsc": false
+      },
+      {
+        "path": "/fa/pets/pet-1",
+        "error": "net::ERR_ABORTED",
+        "rsc": true
+      }
+    ],
+    "assets": [
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "network": [
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/households"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/pets"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/active-pet"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      }
+    ],
+    "overflow": false,
+    "explicitRetryRecovered": true
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "stage": "after",
+    "formRetained": true,
+    "photoErrorVisible": true,
+    "selectedPhotoCount": 0,
+    "uploadsBeforeExplicitRetry": 1,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "responses": [
+      {
+        "path": "/en/pets/pet-1",
+        "status": 200,
+        "mime": "text/html; charset=utf-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/pets",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/active-pet",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/images/landing/home/cookie.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/images/landing/member-glass-backdrop.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/brand/opetlife/02_symbol_only_transparent_approx.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/settings/public",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 503,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/en/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/en/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      }
+    ],
+    "failedRequests": [
+      {
+        "path": "/settings/public",
+        "error": "net::ERR_ABORTED",
+        "rsc": false
+      },
+      {
+        "path": "/en/pets/pet-1",
+        "error": "net::ERR_ABORTED",
+        "rsc": true
+      }
+    ],
+    "assets": [
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "network": [
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/households"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/pets"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/active-pet"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      }
+    ],
+    "overflow": false,
+    "explicitRetryRecovered": true
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "stage": "after",
+    "formRetained": true,
+    "photoErrorVisible": true,
+    "selectedPhotoCount": 0,
+    "uploadsBeforeExplicitRetry": 1,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "responses": [
+      {
+        "path": "/en/pets/pet-1",
+        "status": 200,
+        "mime": "text/html; charset=utf-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/auth/session",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/pets",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/households/h1/active-pet",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/images/landing/home/cookie.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/images/landing/member-glass-backdrop.webp",
+        "status": 200,
+        "mime": "image/webp"
+      },
+      {
+        "path": "/brand/opetlife/02_symbol_only_transparent_approx.png",
+        "status": 200,
+        "mime": "image/png"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/notifications/unread-count",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/settings/public",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 503,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/photo-upload-url",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/__qa-upload",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/overview",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/access",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/pets/pet-1/care-items",
+        "status": 200,
+        "mime": "application/json"
+      },
+      {
+        "path": "/en/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/en/pets/pet-1",
+        "status": 200,
+        "mime": "text/x-component"
+      },
+      {
+        "path": "/brand/opetlife/04_app_icon_light.png",
+        "status": 200,
+        "mime": "image/png"
+      }
+    ],
+    "failedRequests": [
+      {
+        "path": "/settings/public",
+        "error": "net::ERR_ABORTED",
+        "rsc": false
+      },
+      {
+        "path": "/en/pets/pet-1",
+        "error": "net::ERR_ABORTED",
+        "rsc": true
+      }
+    ],
+    "assets": [
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(app)/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(app)/pets/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "network": [
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/auth/session"
+      },
+      {
+        "method": "GET",
+        "path": "/households"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/pets"
+      },
+      {
+        "method": "GET",
+        "path": "/households/h1/active-pet"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/unread-count"
+      },
+      {
+        "method": "GET",
+        "path": "/settings/public"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "POST",
+        "path": "/pets/pet-1/photo-upload-url"
+      },
+      {
+        "method": "PUT",
+        "path": "/__qa-upload"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/pet-1"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/overview"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/access"
+      },
+      {
+        "method": "GET",
+        "path": "/pets/pet-1/care-items"
+      }
+    ],
+    "overflow": false,
+    "explicitRetryRecovered": true
+  }
+]
