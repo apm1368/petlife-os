@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
-import { ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import {
   PetLifecycleStatus,
   type PetAccessFlags,
@@ -103,38 +103,53 @@ const copy = {
 export function PetProfileView({ petId }: { petId: string }) {
   const locale = useLocale() as "fa" | "en";
   const c = copy[locale];
+  const t = useTranslations("petOverview");
   const upsertPet = usePetStore((state) => state.upsertPet);
-  const [overview, setOverview] = useState<PetOverviewDto | null>(null);
-  const [access, setAccess] = useState<PetAccessFlags | null>(null);
-  const [error, setError] = useState(false);
+  const [snapshot, setSnapshot] = useState<{
+    petId: string;
+    overview: PetOverviewDto;
+    access: PetAccessFlags;
+    care: CareReminder[];
+    careError: boolean;
+  } | null>(null);
+  const [errorPetId, setErrorPetId] = useState<string | null>(null);
+  const [revision, setRevision] = useState(0);
+  const reload = () => setRevision((value) => value + 1);
   // The hero's "Edit details" link only changes the query on this same page, so the edit state must follow the URL.
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isEditing = searchParams.get("edit") === "identity";
   const setIsEditing = (on: boolean) => router.replace(on ? `${pathname}?edit=identity` : pathname, { scroll: false });
-  // The owner's care items (the care center's data) — read only when this person may see care.
-  const [care, setCare] = useState<CareReminder[]>([]);
-
-  async function load() {
-    setError(false);
-    try {
-      const [data, permissions] = await Promise.all([petsService.getOverview(petId), petsService.getMyAccess(petId)]);
-      setOverview(data);
-      setAccess(permissions);
-      setCare(permissions.canViewCareProfile ? await careRemindersService.list(petId).catch(() => []) : []);
-    } catch {
-      setError(true);
-    }
-  }
-
   useEffect(() => {
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [petId]);
+    let current = true;
+    setSnapshot(null);
+    setErrorPetId(null);
+    void (async () => {
+      try {
+        const [overview, access] = await Promise.all([petsService.getOverview(petId), petsService.getMyAccess(petId)]);
+        if (!current) return;
+        let care: CareReminder[] = [];
+        let careError = false;
+        if (access.canViewCareProfile) {
+          try {
+            care = await careRemindersService.list(petId);
+          } catch {
+            careError = true;
+          }
+        }
+        if (current) setSnapshot({ petId, overview, access, care, careError });
+      } catch {
+        if (current) setErrorPetId(petId);
+      }
+    })();
+    return () => { current = false; };
+  }, [petId, revision]);
 
-  if (error) return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={load} />;
-  if (!overview || !access) return <Skeleton className="h-96 w-full" aria-label={c.loading} />;
+  if (errorPetId === petId) return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={reload} />;
+  // The route may change before its effect runs: never render old records/permissions under new links.
+  if (!snapshot || snapshot.petId !== petId) return <Skeleton className="h-96 w-full" aria-label={c.loading} />;
+  const { overview, access, care, careError } = snapshot;
 
   const base = "/" + locale + "/pets/" + petId;
   const isMemorial = overview.pet.lifecycleStatus === PetLifecycleStatus.DECEASED || overview.pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
@@ -148,7 +163,7 @@ export function PetProfileView({ petId }: { petId: string }) {
         onSaved={(updated) => {
           upsertPet(updated);
           setIsEditing(false);
-          void load();
+          reload();
         }}
       />
     );
@@ -163,6 +178,12 @@ export function PetProfileView({ petId }: { petId: string }) {
     <div className="pet-overview">
       <h1 className="sr-only">{isMemorial ? c.memorialTitle : c.title}</h1>
       <div className="pet-overview__main">
+        {careError ? (
+          <div role="alert" className="grid gap-3 rounded-2xl border border-border-subtle bg-surface-subtle p-4">
+            <p className="text-body text-text-primary">{t("careUnavailable")}</p>
+            <Button variant="secondary" className="w-fit" onClick={reload}>{c.retry}</Button>
+          </div>
+        ) : null}
         {isMemorial ? (
           <section className="pet-overview__memorial">
             <h2>{c.memorialTitle}</h2>
@@ -173,8 +194,8 @@ export function PetProfileView({ petId }: { petId: string }) {
           <OverviewSection title={c.attention}>
             {attention.length === 0 ? (
               <div className="pet-overview__calm">
-                <p>{c.noAttention}</p>
-                <p>{c.noAttentionHint}</p>
+                <p>{careError ? t("careIncomplete") : c.noAttention}</p>
+                {!careError ? <p>{c.noAttentionHint}</p> : null}
               </div>
             ) : (
               <div className="divide-y divide-border-subtle border-y border-border-subtle">
@@ -185,7 +206,7 @@ export function PetProfileView({ petId }: { petId: string }) {
         ) : null}
         {!isMemorial ? (
           <OverviewSection title={c.upcoming}>
-            <EventList items={upcoming} empty={c.noUpcoming} base={base} locale={locale} showSource={false} compact />
+            <EventList items={upcoming} empty={careError ? t("careIncomplete") : c.noUpcoming} base={base} locale={locale} showSource={false} compact />
           </OverviewSection>
         ) : null}
         <OverviewSection title={c.recentHealth}>
