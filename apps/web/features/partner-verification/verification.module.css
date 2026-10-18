@@ -1,0 +1,29 @@
+.page,.documents,.list { display:grid; gap:24px; min-width:0; }
+.header { display:grid; gap:12px; }
+.header h1 { margin:0; }
+.header p,.intro p { color:var(--text-secondary); }
+.filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.filters > p { grid-column:1/-1; font-size:.875rem; color:var(--text-secondary); }
+.card { display:grid; gap:20px; padding:24px; min-width:0; }
+.cardHeader { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.cardHeader h2,.cardHeader h3 { margin:0; flex:1 1 220px; min-width:0; overflow-wrap:anywhere; }
+.cardHeader > span { flex-shrink:0; }
+.metadata { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin:0; }
+.metadata > div { min-width:0; display:grid; align-content:start; gap:6px; }
+.metadata dt { color:var(--text-secondary); font-size:.875rem; }
+.metadata dd { margin:0; overflow-wrap:anywhere; }
+.counts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0; padding-block:16px; border-block:1px solid var(--border-subtle); }
+.counts > div { display:grid; gap:8px; padding:12px; border-radius:12px; background:var(--surface-subtle); min-width:0; }
+.counts dt { font-size:.8rem; color:var(--text-secondary); }
+.counts dd { font-size:1.3rem; font-weight:750; margin:0; }
+.footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; }
+.footer p { margin:0; font-size:.875rem; color:var(--text-secondary); }
+.reviewLink { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:10px 18px; border-radius:12px; background:var(--brand-solid); color:var(--on-brand); text-decoration:none; font-weight:650; }
+.reviewLink:hover { background:var(--brand-solid-strong); }
+.reviewLink:focus-visible { outline:3px solid var(--focus-ring); outline-offset:3px; }
+.note { display:grid; gap:8px; padding:16px; border-inline-start:3px solid var(--border-strong); background:var(--surface-subtle); border-radius:8px; overflow-wrap:anywhere; }
+.note h4 { margin:0; font-weight:650; }
+.actions { padding-block-start:16px; border-top:1px solid var(--border-subtle); }
+.actions :is(button,a) { min-height:44px; height:auto; white-space:normal; overflow-wrap:anywhere; }
+@media(max-width:650px) { .filters { grid-template-columns:minmax(0,1fr); }.card { padding:20px; }.counts { grid-template-columns:repeat(2,minmax(0,1fr)); }.metadata { gap:16px; }.footer .reviewLink { width:100%; } }
+@media(max-width:340px) { .metadata { grid-template-columns:minmax(0,1fr); } }

@@ -335,7 +335,11 @@
       "openTravel": "برنامه‌ریزی سفر",
       "insuranceTeaser": "بیمه حیوان خانگی",
       "openInsurance": "مشاهده طرح‌ها"
-    }
+    },
+    "listDescription": "پروندهٔ هر پت را ببینید یا همراه فعال خانواده را انتخاب کنید.",
+    "emptyTitle": "هنوز پتی به خانواده اضافه نشده است.",
+    "emptyDescription": "با افزودن اولین پت، مشخصات و پروندهٔ او در اینجا نمایش داده می‌شود.",
+    "switchFailed": "انتخاب همراه ذخیره نشد؛ انتخاب قبلی حفظ شده است. دوباره تلاش کنید."
   },
   "health": {
     "attention": {
@@ -2217,6 +2221,17 @@
         "lostPets": "حیوانات گم‌شده",
         "settings": "تنظیمات سامانه",
         "verification": "بررسی هویت و مدارک"
+      },
+      "navigation": "ناوبری مدیریت",
+      "openMenu": "باز کردن منو",
+      "closeMenu": "بستن منو",
+      "groups": {
+        "work": "کار روزانه",
+        "trust": "مشتریان و اعتماد",
+        "network": "شبکه و بازار",
+        "finance": "مالی",
+        "content": "محتوا",
+        "system": "سیستم"
       }
     },
     "common": {
@@ -2499,14 +2514,45 @@
         "OPEN": "باز",
         "IN_PROGRESS": "در حال انجام",
         "DONE": "انجام‌شده",
-        "CANCELLED": "لغوشده"
+        "CANCELLED": "لغوشده",
+        "BLOCKED": "نیازمند رفع مانع"
       },
       "form": {
         "title": "عنوان",
         "description": "توضیحات",
         "dueAt": "مهلت انجام",
         "submit": "ایجاد"
-      }
+      },
+      "description": "مسئول، مهلت و وضعیت کارهای ثبت‌شده را یک‌جا ببینید.",
+      "assignee": "مسئول رسیدگی",
+      "unassigned": "هنوز تعیین نشده",
+      "unnamedAssignee": "کارشناس بدون نام نمایشی",
+      "noDueDate": "مهلت مشخص نشده",
+      "priority": "اولویت",
+      "source": "نوع کار",
+      "notProvided": "ثبت نشده",
+      "changeStatus": "تغییر وضعیت",
+      "createFailed": "ایجاد وظیفه تأیید نشد؛ عنوان و توضیحات شما حفظ شده است. پیش از تلاش دوباره، فهرست را بررسی کنید.",
+      "updateFailed": "تغییر وضعیت تأیید نشد؛ وضعیت ثبت‌شده را دوباره بررسی کنید.",
+      "priorities": {
+        "LOW": "کم",
+        "NORMAL": "عادی",
+        "HIGH": "بالا",
+        "URGENT": "فوری"
+      },
+      "sources": {
+        "MANUAL": "ثبت دستی",
+        "TRAVEL_SOURCE": "منابع سفر",
+        "PARTNER_VERIFICATION": "بررسی مدارک همکاران",
+        "FINANCE_MISMATCH": "مغایرت مالی",
+        "HIGH_SEVERITY_REPORT": "گزارش مهم",
+        "PRIVACY_REQUEST": "درخواست حریم خصوصی",
+        "FAILED_IMPORT": "ورود ناموفق اطلاعات",
+        "SUPPORT": "پشتیبانی",
+        "CLINIC_FOLLOW_UP": "پیگیری کلینیک",
+        "DATA_QUALITY": "کیفیت اطلاعات"
+      },
+      "checkList": "بررسی فهرست"
     },
     "audit": {
       "title": "گزارش رویدادها",
@@ -2770,6 +2816,7 @@
     "subscriptions": {
       "plansTitle": "پلن‌های اشتراک",
       "householdsTitle": "اشتراک خانواده‌ها",
+      "resultCount": "{count} اشتراک",
       "householdDetailTitle": "اشتراک خانواده",
       "filterByStatus": "وضعیت",
       "allStatuses": "همه وضعیت‌ها",
@@ -5506,7 +5553,7 @@
     "keepExpiry": "خالی گذاشتن این فیلد، انقضای فعلی مدرک را حفظ می‌کند. حذف انقضای موجود در قرارداد پشتیبانی نمی‌شود.",
     "confirmReview": "پرونده و اثر این اقدام را بررسی و تأیید می‌کنم.",
     "invalidExpiry": "زمان انقضا باید معتبر و در آینده باشد.",
-    "saveFailed": "ثبت تصمیم انجام نشد. وضعیت پرونده و مدارک را دوباره بررسی کنید.",
+    "saveFailed": "نتیجهٔ این اقدام تأیید نشد؛ توضیح شما حفظ شده است. پیش از تلاش دوباره، وضعیت پرونده را دریافت کنید.",
     "waiting": "در حال ثبت…",
     "confirm": "تأیید و ثبت",
     "cancel": "انصراف",
@@ -5606,7 +5653,31 @@
     "simpleGuide": "برای هر همکار ابتدا مدارک را باز کنید و بررسی کنید؛ سپس تأیید، رد یا درخواست اصلاح را با توضیح ثبت کنید. این بررسی دستی مدارک است و به سامانهٔ استعلام رسمی متصل نیست.",
     "rowPartner": "مشخصات همکار",
     "rowDocuments": "وضعیت مدارک",
-    "rowReceived": "زمان ارسال پرونده"
+    "rowReceived": "زمان ارسال پرونده",
+    "notRecorded": "ثبت نشده",
+    "uploadedLabel": "زمان بارگذاری",
+    "fileLabel": "نوع و حجم فایل",
+    "expiryLabel": "اعتبار مدرک",
+    "reviewedLabel": "زمان بررسی",
+    "notReviewed": "هنوز بررسی نشده",
+    "rejectionLabel": "دلیل رد مدرک",
+    "reviewNoteLabel": "توضیح کارشناس",
+    "caseNoteLabel": "توضیح پرونده",
+    "documentCountLabels": {
+      "pending": "منتظر بررسی",
+      "accepted": "پذیرفته‌شده",
+      "rejected": "ردشده",
+      "expired": "منقضی‌شده"
+    },
+    "fileTypes": {
+      "pdf": "سند PDF",
+      "jpeg": "تصویر JPEG",
+      "png": "تصویر PNG",
+      "webp": "تصویر WebP",
+      "other": "فایل"
+    },
+    "recheckCase": "دریافت وضعیت پرونده",
+    "actionChanged": "وضعیت پرونده یا مدرک تغییر کرده است و این اقدام دیگر در دسترس نیست. توضیح شما حفظ شده است."
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "پیام‌های کلینیک برای خانواده",

@@ -1,0 +1,11 @@
+{
+  "baseCommit": "befd02aeee567f7b074ea52af7e26b47b103bb1f",
+  "scope": "After captures are from this working tree; compare source SHA256 to the PR head. Controlled browser data, not live API validation.",
+  "files": {
+    "apps/web/features/pets/MyPetsView.tsx": "00397edcce6b79802dda9f878c4146ac4f20f3a7d8f7db84b03533483554cc9f",
+    "apps/web/features/pets/MyPetsView.module.css": "8c888b07587e903fb21d380b3e9ecb25a2042e12eb1c99e443e432d6f81bf000",
+    "apps/web/features/pets/MyPetsView.test.tsx": "a2ee9c19b958ee3a91731549811d16de765dbd67a8ca2e232db49e8d221fc6df",
+    "apps/web/messages/fa.json": "fea498c0465546586944b47e91e91e0ade1d26872a53a2a2a1d1ffb2fe86f348",
+    "apps/web/messages/en.json": "9f80f47e2053735525960f1e70dccc3b9a7ddfc209dfa12de4db51b984a522d4"
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "before": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": []
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": []
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": []
+    }
+  ],
+  "after-list": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "list",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failedHttp": [
+        {
+          "path": "/settings/public",
+          "status": 404
+        }
+      ],
+      "clippedButtons": [],
+      "headingClipped": false
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "list",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failedHttp": [
+        {
+          "path": "/settings/public",
+          "status": 404
+        }
+      ],
+      "clippedButtons": [],
+      "headingClipped": false
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "list",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failedHttp": [
+        {
+          "path": "/settings/public",
+          "status": 404
+        }
+      ],
+      "clippedButtons": [],
+      "headingClipped": false
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "list",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failedHttp": [
+        {
+          "path": "/settings/public",
+          "status": 404
+        }
+      ],
+      "clippedButtons": [],
+      "headingClipped": false
+    }
+  ],
+  "after-error": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "error"
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "error"
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "error"
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "error"
+    }
+  ],
+  "after-empty": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "empty"
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "empty"
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "empty"
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "empty"
+    }
+  ],
+  "after-clean": [
+    {
+      "locale": "fa",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "clean",
+      "consoleErrors": [],
+      "failedHttp": [],
+      "clippedButtons": [],
+      "headingClipped": false
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "clean",
+      "consoleErrors": [],
+      "failedHttp": [],
+      "clippedButtons": [],
+      "headingClipped": false
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "clean",
+      "consoleErrors": [],
+      "failedHttp": [],
+      "clippedButtons": [],
+      "headingClipped": false
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "overflow": false,
+      "pageErrors": [],
+      "mode": "clean",
+      "consoleErrors": [],
+      "failedHttp": [],
+      "clippedButtons": [],
+      "headingClipped": false
+    }
+  ]
+}

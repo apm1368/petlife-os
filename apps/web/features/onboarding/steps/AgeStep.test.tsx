@@ -13,9 +13,9 @@ describe("Onboarding birth date", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     useOnboardingStore.setState({ householdId: "h1", species: PetSpecies.CAT, name: "Cookie", petId: null, birthDate: null, approximateAgeMonths: null });
-    vi.mocked(petsService.create).mockResolvedValue(pet as never);
+    vi.mocked(petsService.create).mockImplementation(async (_householdId, input) => ({ ...pet, ...input }) as never);
     vi.mocked(petsService.getById).mockResolvedValue(pet as never);
-    vi.mocked(petsService.update).mockResolvedValue(pet as never);
+    vi.mocked(petsService.update).mockImplementation(async (_petId, input) => ({ ...pet, ...input }) as never);
     vi.mocked(onboardingService.updateProgress).mockResolvedValue({} as never);
   });
   it("skips an unknown age while still creating the pet required by subsequent steps", async () => {
@@ -66,6 +66,47 @@ describe("Onboarding birth date", () => {
     await waitFor(() => expect(onboardingService.updateProgress).toHaveBeenCalledTimes(2));
     expect(petsService.create).toHaveBeenCalledTimes(1);
     expect(petsService.update).toHaveBeenCalledWith("pet1", { birthDate: null, approximateAgeMonths: 0 });
+  });
+
+  it("applies the new age when a retry replays the original create response", async () => {
+    useOnboardingStore.setState({ approximateAgeMonths: 0 });
+    vi.mocked(petsService.create).mockResolvedValue({ ...pet, birthDate: "2024-03-20" } as never);
+    const next = vi.fn();
+    renderWithIntl(<AgeStep onNext={next} />, "fa");
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    await waitFor(() => expect(next).toHaveBeenCalledWith("pet1"));
+    expect(petsService.update).toHaveBeenCalledWith("pet1", { approximateAgeMonths: 0, birthDate: null });
+    expect(useOnboardingStore.getState()).toMatchObject({ petId: "pet1", birthDate: null, approximateAgeMonths: 0 });
+  });
+
+  it("keeps the recovered pet id and input if reconciling a cached age fails", async () => {
+    useOnboardingStore.setState({ approximateAgeMonths: 0 });
+    vi.mocked(petsService.create).mockResolvedValue({ ...pet, birthDate: "2024-03-20" } as never);
+    vi.mocked(petsService.update).mockRejectedValueOnce(new Error("offline"));
+    const next = vi.fn();
+    renderWithIntl(<AgeStep onNext={next} />, "fa");
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    await screen.findByText("ذخیره انجام نشد؛ اطلاعات شما حفظ شده است. دوباره تلاش کنید.");
+    expect(next).not.toHaveBeenCalled();
+    expect(useOnboardingStore.getState().petId).toBe("pet1");
+    expect((screen.getByLabelText("سن تقریبی (ماه)") as HTMLInputElement).value).toBe("0");
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    await waitFor(() => expect(next).toHaveBeenCalledWith("pet1"));
+    expect(petsService.create).toHaveBeenCalledTimes(1);
+    expect(petsService.update).toHaveBeenCalledTimes(2);
+  });
+
+  it("clears a cached approximate age when the retry now supplies a Jalali birth date", async () => {
+    vi.mocked(petsService.create).mockResolvedValue({ ...pet, approximateAgeMonths: 0 } as never);
+    const next = vi.fn();
+    renderWithIntl(<AgeStep onNext={next} />, "fa");
+    fireEvent.change(screen.getByLabelText("سال"), { target: { value: "1403" } });
+    fireEvent.change(screen.getByLabelText("ماه"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("روز"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    await waitFor(() => expect(next).toHaveBeenCalledWith("pet1"));
+    expect(petsService.update).toHaveBeenCalledWith("pet1", { birthDate: "2024-03-20", approximateAgeMonths: null });
+    expect(useOnboardingStore.getState()).toMatchObject({ birthDate: "2024-03-20", approximateAgeMonths: null });
   });
 
 });

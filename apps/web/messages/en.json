@@ -335,7 +335,11 @@
       "openTravel": "Plan a trip",
       "insuranceTeaser": "Pet insurance",
       "openInsurance": "Browse plans"
-    }
+    },
+    "listDescription": "Open each pet’s record or choose your household’s active companion.",
+    "emptyTitle": "No pets have been added to this household yet.",
+    "emptyDescription": "Add your first pet to see their identity and record here.",
+    "switchFailed": "Could not save the active pet. Your previous selection was kept; please try again."
   },
   "health": {
     "attention": {
@@ -2217,6 +2221,17 @@
         "lostPets": "Lost pets",
         "settings": "Platform settings",
         "verification": "Identity and documents"
+      },
+      "navigation": "Admin navigation",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "groups": {
+        "work": "Daily work",
+        "trust": "Customers & trust",
+        "network": "Network",
+        "finance": "Finance",
+        "content": "Content",
+        "system": "System"
       }
     },
     "common": {
@@ -2499,14 +2514,45 @@
         "OPEN": "Open",
         "IN_PROGRESS": "In progress",
         "DONE": "Done",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "BLOCKED": "Blocked"
       },
       "form": {
         "title": "Title",
         "description": "Description",
         "dueAt": "Due date",
         "submit": "Create"
-      }
+      },
+      "description": "See the assignee, deadline and status of recorded work in one place.",
+      "assignee": "Assignee",
+      "unassigned": "Not assigned yet",
+      "unnamedAssignee": "Staff member without a display name",
+      "noDueDate": "No deadline set",
+      "priority": "Priority",
+      "source": "Work type",
+      "notProvided": "Not recorded",
+      "changeStatus": "Change status",
+      "createFailed": "Task creation was not confirmed. Your title and description are kept; check the task list before trying again.",
+      "updateFailed": "The status change was not confirmed. Check the recorded status again.",
+      "priorities": {
+        "LOW": "Low",
+        "NORMAL": "Normal",
+        "HIGH": "High",
+        "URGENT": "Urgent"
+      },
+      "sources": {
+        "MANUAL": "Manual entry",
+        "TRAVEL_SOURCE": "Travel sources",
+        "PARTNER_VERIFICATION": "Partner document review",
+        "FINANCE_MISMATCH": "Financial discrepancy",
+        "HIGH_SEVERITY_REPORT": "High-severity report",
+        "PRIVACY_REQUEST": "Privacy request",
+        "FAILED_IMPORT": "Failed import",
+        "SUPPORT": "Support",
+        "CLINIC_FOLLOW_UP": "Clinic follow-up",
+        "DATA_QUALITY": "Data quality"
+      },
+      "checkList": "Check task list"
     },
     "audit": {
       "title": "Audit trail",
@@ -2770,6 +2816,7 @@
     "subscriptions": {
       "plansTitle": "Subscription Plans",
       "householdsTitle": "Household Subscriptions",
+      "resultCount": "{count} subscriptions",
       "householdDetailTitle": "Household Subscription",
       "filterByStatus": "Status",
       "allStatuses": "All statuses",
@@ -5506,7 +5553,7 @@
     "keepExpiry": "Leaving this blank preserves the current expiry. Clearing an existing expiry is not supported by the contract.",
     "confirmReview": "I reviewed the case and the effect of this action.",
     "invalidExpiry": "Expiry must be a valid future time.",
-    "saveFailed": "The decision could not be saved. Recheck the case and documents.",
+    "saveFailed": "The result of this action was not confirmed. Your note is preserved. Reload the case status before trying again.",
     "waiting": "Saving…",
     "confirm": "Confirm and save",
     "cancel": "Cancel",
@@ -5606,7 +5653,31 @@
     "simpleGuide": "Open each partner’s documents and review them, then approve, reject or request corrections with a reason. This is a manual review; official identity lookup is not connected.",
     "rowPartner": "Partner details",
     "rowDocuments": "Document status",
-    "rowReceived": "Submission time"
+    "rowReceived": "Submission time",
+    "notRecorded": "Not recorded",
+    "uploadedLabel": "Upload time",
+    "fileLabel": "File type and size",
+    "expiryLabel": "Evidence validity",
+    "reviewedLabel": "Review time",
+    "notReviewed": "Not reviewed yet",
+    "rejectionLabel": "Reason for rejection",
+    "reviewNoteLabel": "Reviewer note",
+    "caseNoteLabel": "Case note",
+    "documentCountLabels": {
+      "pending": "Awaiting review",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "fileTypes": {
+      "pdf": "PDF document",
+      "jpeg": "JPEG image",
+      "png": "PNG image",
+      "webp": "WebP image",
+      "other": "File"
+    },
+    "recheckCase": "Reload case status",
+    "actionChanged": "The case or document has changed and this action is no longer available. Your note is preserved."
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "Clinic messages for your household",

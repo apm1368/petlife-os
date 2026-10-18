@@ -1,5 +1,38 @@
 # Validation and release limits
 
+
+## خوانایی صف و مدارک همکاران — ۱۸ اکتبر ۲۰۲۶
+
+کارت صف، وضعیت پرونده و چهار شمار مستقل مدارک را با دادهٔ موجود API نشان می‌دهد؛ زمان ارسال ناموجود «ثبت نشده» است. دکمهٔ بررسی حداقل ۴۴ پیکسل ارتفاع دارد. فهرست مدارک در ادمین و پورتال‌های خدمات‌دهنده/فروشنده، نوع و حجم فایل، اعتبار، زمان بررسی و دلیل رد را با برچسب مشخص نشان می‌دهد. زمان‌های ISO با formatter موجود و منطقهٔ تهران نمایش داده می‌شوند: `2026-10-15T21:00:00Z` در مرورگر UTC قبلاً ۲۳ مهر، ساعت ۲۱ بود؛ اکنون ۲۴ مهر، ساعت ۰:۳۰ است.
+
+در قطع پاسخ تصمیم، نتیجه «تأیید نشده» است و توضیح باقی می‌ماند. دریافت دوبارهٔ وضعیت فقط GET است؛ اگر مدرک بررسی شده باشد، همان اقدام غیرفعال می‌شود. اگر هنوز منتظر باشد، تأیید صریح تازه لازم است. شکست GET هم توضیح را نگه می‌دارد و ارسال را باز نمی‌کند. این حفاظت رابط، تضمین عمومی exactly-once یا تغییر قرارداد سرور نیست.
+
+۲۰ تست در چهار فایل partner-verification، typecheck، lint (سه هشدار قبلی، صفر خطا) و برابری کلیدهای fa/en گذشتند. ۴۰ حالت مرورگر بعد: سالم ۱۶، خالی ۴، خطای دریافت ۸، قطع پاسخ تصمیم ۴، بدون مجوز ۸؛ ۲۰ تصویر قبل نیز ثبت شده‌اند. هیچ overflow، pageerror یا console error غیرمنتظره دیده نشد. پاسخ‌های 503 کنترل‌شده حذف نشده‌اند. در هر قطع پاسخ، دقیقاً یک POST در mock و یک GET دستی پس از آن ثبت شد؛ بدون مجوز، درخواست پرونده و عملیات نوشتنی صفر است.
+
+- [صف قبل، فارسی ۳۹۰](verification-design-screenshots/before-normal-queue-fa-390.webp) / [بعد](verification-design-screenshots/after-normal-queue-fa-390.webp)
+- [صف فارسی ۱۴۴۰](verification-design-screenshots/after-normal-queue-fa-1440.webp)، [انگلیسی ۳۹۰](verification-design-screenshots/after-normal-queue-en-390.webp) / [۱۴۴۰](verification-design-screenshots/after-normal-queue-en-1440.webp)
+- [پرونده فارسی ۳۹۰](verification-design-screenshots/after-normal-detail-fa-390.webp)، [حفظ توضیح پس از قطع پاسخ](verification-design-screenshots/after-save-error-detail-fa-390.webp)
+- [پنل خدمات‌دهنده](verification-design-screenshots/after-normal-provider-fa-390.webp)، [پنل فروشنده](verification-design-screenshots/after-normal-seller-fa-390.webp)
+- [مقایسه و ارزیابی بصری محدود همین بخش](design-qa.md)، [خروجی مرورگر](verification-design-screenshots/checks.json)، [هش منابع](verification-design-screenshots/source-hashes.json)، [بازاجرا](browser-verification-design.py)
+
+بازاجرا: سرور Next توسعه با NEXT_PUBLIC_LOCAL_PREVIEW=0 و NEXT_PUBLIC_API_ORIGIN=http://localhost:4000؛ متغیرهای QA_REPO_ROOT، QA_WEB_ORIGIN، QA_EVIDENCE_DIR و QA_MODE=normal/empty/load-error/save-error/forbidden را به اسکریپت بدهید. Chromium با timezone=UTC و density=1، viewportهای 390/1440 × 1000؛ تصاویر full-page هستند. ابتدا تکمیل بارگذاری shell احرازشده انتظار کشیده می‌شود؛ timeout اولین اجرای سردِ harness پیش از تکمیل shell، موفق حساب نشده است. این اندازه‌گیری performance نسخهٔ production نیست.
+
+API با DTO مصنوعی فقط روی loopback جایگزین شده؛ هیچ فایل خصوصی واقعی باز نشده و هیچ مدرک/تصمیم یا دادهٔ زنده ثبت نشده است. این بسته ادعای استعلام رسمی هویت، ارجاع کار به کارشناس، اتصال API زنده یا پذیرش همهٔ صفحات ندارد. مدل، migration، مجوز، workflow و مسیر انتشار تغییر نکرده‌اند. اصل تصویر «کوکی و دودی» در #45 با CI کامل در تثبیت `069cbfc467246f2e71ae3027410797769fb5fb20` ادغام شد؛ به صفحهٔ عمومی منتقل نشده است.
+
+
+## تطبیق پوستهٔ واقعی ادمین با مرجع — ۱۷ اکتبر ۲۰۲۶
+
+پوستهٔ LiveAdminShell از نوار تیرهٔ افقی به منوی کناری با رنگ‌های campaign و سربرگ روشنِ مرجع admin.webp تبدیل شد. لوگوی تأییدشدهٔ opetlife، نام/نقش واقعی حساب، گروه‌های ترجمه‌شده و منوی موبایل حفظ شدند. مسیر فعال به‌صورت خودکار در گروه باز می‌شود؛ کنترل دسترسی همان فهرست مجوزهای موجود است و CRM نمایشی همچنان پنهان است. هیچ مسیر، API، مجوز یا نقش جدید ایجاد نشد.
+
+۷ تست ناوبری شامل کاربر فاقد دسترسی، مجوز خواندن مستقل، تغییر مسیر فعال و بسته‌شدن منوی موبایل؛ پس از یکپارچه‌سازی با #43، مجموع ۱۴ تست وظایف/پوسته گذشت. typecheck و lint موفق (سه هشدار قبلی). هشت حالت مرورگر قبل و هشت حالت بعد، fa/en × ۳۹۰/۱۴۴۰ × صفحه/منوی باز: بدون overflow، pageerror، console error یا پاسخ HTTP ناموفق؛ هیچ درخواست نوشتنی صادر نشد.
+
+- [قبل فارسی ۳۹۰](admin-shell-screenshots/before-page-fa-390.webp) / [بعد](admin-shell-screenshots/after-page-fa-390.webp)
+- [قبل فارسی ۱۴۴۰](admin-shell-screenshots/before-page-fa-1440.webp) / [بعد](admin-shell-screenshots/after-page-fa-1440.webp)
+- [انگلیسی ۳۹۰](admin-shell-screenshots/after-page-en-390.webp) / [۱۴۴۰](admin-shell-screenshots/after-page-en-1440.webp)
+- [منوی موبایل](admin-shell-screenshots/after-navigation-fa-390.webp)، [شواهد بعد](admin-shell-screenshots/after-checks.json)، [قبل](admin-shell-screenshots/before-checks.json)، [هش منابع](admin-shell-screenshots/source-hashes.json)
+
+بازاجرا با browser-admin-shell.py و متغیرهای QA_REPO_ROOT، QA_WEB_ORIGIN و QA_EVIDENCE_DIR روی سرور توسعه. API با DTO مصنوعی در مرورگر فقط loopback جایگزین می‌شود؛ این شاهد احراز هویت/API زنده یا پذیرش همهٔ صفحات داخلی نیست. داده‌های نمونه در تصاویر، دادهٔ سایت نیستند. اولین اجرای محلی با bind به 127.0.0.1 در rewrite داخلی localhost خطای اتصال داد؛ پس از اجرای سرور تست با hostname=localhost هشت حالت کامل گذشت. هیچ تغییر شبکه، workflow، امنیت سرور یا دسترسی Claude انجام نشد.
+
 Application code: `7208e85`, rebased onto `origin/stabilization/wave-1` at `f3bf0648761d665bb36f90f710eed2c14e1c0355`. Later commits contain documentation/review evidence and an AccountNav test update for the newly added clinic-notes link; application code is unchanged.
 
 | Check | Result |
@@ -40,3 +73,22 @@ Owner explicitly authorized backend KYC implementation. The previous protected-A
 - Root lint passed at the KYC-policy checkpoint; clinic plan additions subsequently passed relevant tests. No complete final lint/typecheck/full-suite pass is claimed for all later edits.
 - Native Prisma generation remains blocked by official binary/checksum HTTP 403. Official WASM DMMF and generator experiments did not produce a usable client; no fake declarations or checksum bypass was used. API integration tests and full API types remain unverified.
 - No database, migration, deployment or live upload was performed. Source changes are checkpointed separately before starting remaining support operations from the current main line.
+
+
+## اصلاح طراحی وظایف ادمین — ۱۷ اکتبر ۲۰۲۶
+
+مسیر `/[locale]/admin/tasks` با دادهٔ قرارداد موجود بازطراحی شد: عنوان و شرح خوانا، مسئول، مهلت با تقویم محلی، اولویت و منشأ کار. نقص قابل تکرار قبل: وضعیت BLOCKED در هر دو زبان ترجمه نداشت و خطای MISSING_MESSAGE می‌داد. اکنون «نیازمند رفع مانع» نمایش داده می‌شود. خطای ساخت پیش‌نویس را نگه می‌دارد؛ نتیجهٔ نامطمئن موفقیت اعلام نمی‌شود و «بررسی فهرست» صرفاً GET است.
+
+۱۲ آزمون در AdminTasksView و AdminShell، typecheck و lint (سه هشدار قبلی، صفر خطا) موفق. ۱۶ حالت Chromium بعد از اصلاح: فهرست، خالی، خطای ساخت و خطای تغییر وضعیت × فارسی/انگلیسی × ۳۹۰/۱۴۴۰. overflow، pageerror و console error غیرمنتظره صفر؛ پاسخ 503 عمداً در دو حالت خطا حفظ شده است. چهار تصویر قبل، خطای ترجمهٔ واقعی را ثبت می‌کنند.
+
+- [قبل فارسی ۳۹۰](task-design-screenshots/before-fa-390.webp) / [بعد](task-design-screenshots/after-list-fa-390.webp)
+- [قبل فارسی ۱۴۴۰](task-design-screenshots/before-fa-1440.webp) / [بعد](task-design-screenshots/after-list-fa-1440.webp)
+- [بعد انگلیسی ۳۹۰](task-design-screenshots/after-list-en-390.webp) / [۱۴۴۰](task-design-screenshots/after-list-en-1440.webp)
+- [شواهد ماشین‌خوان](task-design-screenshots/checks.json)، [هش منابع](task-design-screenshots/source-hashes.json)، [بازاجرای مرورگر](browser-admin-tasks.py)
+
+بازاجرا: سرور وب توسعه با NEXT_PUBLIC_LOCAL_PREVIEW=0 و NEXT_PUBLIC_API_ORIGIN=http://localhost:4000؛ سپس QA_REPO_ROOT، QA_WEB_ORIGIN و QA_EVIDENCE_DIR و QA_MODE=list/create-error/status-error/empty را به اسکریپت بدهید. همهٔ مقصدهای شبکه loopback هستند و API در مرورگر با DTO مصنوعی جایگزین می‌شود؛ این شاهد اتصال واقعی API، احراز هویت زنده یا بررسی همهٔ ادمین نیست. هیچ عملیات زنده انجام نشد. پوستهٔ مشترک ادمین در این بسته تغییر نکرد؛ تخصیص کار/کارهای من یا CRM جدید پیاده‌سازی نشده‌اند. schema، migration، workflow و مجوزها تغییر نکرده‌اند.
+
+
+## اشتراک خانواده‌ها — ۱۸ اکتبر
+
+[اصلاح صفحه‌بندی، جداسازی پاسخ فیلتر و شواهد مرورگر](SUBSCRIPTION-LIST-VALIDATION.md). این نتیجه محدود به همین صفحه و fixture محلی است؛ CI، ادغام و انتشار مستقل‌اند.

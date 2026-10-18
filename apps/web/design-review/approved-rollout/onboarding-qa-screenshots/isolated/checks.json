@@ -1,0 +1,462 @@
+[
+  {
+    "locale": "fa",
+    "width": 390,
+    "fault": "lost-response",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": null,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/46a9a063-e090-4797-b266-ea5c7633b291/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "fa",
+    "width": 390,
+    "fault": "progress-failure",
+    "injected": [
+      "Progress request failed before write"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/da4e586e-3638-45d8-8d00-fba9d165c7f2/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/b7ebc109-33fc-410b-b232-3e5854b95477"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "fa",
+    "width": 390,
+    "fault": "cached-response-edit",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 2,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/74148931-48fb-4ea3-8641-bdaa894c3c3d/pets"
+      },
+      {
+        "method": "POST",
+        "path": "/households/74148931-48fb-4ea3-8641-bdaa894c3c3d/pets"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/5aba18c6-2d46-4d6d-84e6-6d6cad5cee98"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "fault": "lost-response",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": null,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/3b961186-e950-42a6-96d2-6cfaf335e5b7/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "fault": "progress-failure",
+    "injected": [
+      "Progress request failed before write"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/170ddacd-c487-4f78-a86b-2150fc77c34c/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/ee3954fe-082d-44b7-bc1d-e6223d3dc91d"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "fault": "cached-response-edit",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 2,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/2e18baf2-d64b-478e-bf50-e3d6b88c28fb/pets"
+      },
+      {
+        "method": "POST",
+        "path": "/households/2e18baf2-d64b-478e-bf50-e3d6b88c28fb/pets"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/fd17d341-954e-4c8b-b049-d86bdc505fac"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "fault": "lost-response",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": null,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/a23ccca4-8080-423b-b30f-268f92d2322e/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "fault": "progress-failure",
+    "injected": [
+      "Progress request failed before write"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/259a72cd-3e7a-4cd4-8484-29e37c116c4a/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/69d589cf-52ee-4b7c-8227-92510693d42a"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "fault": "cached-response-edit",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 2,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/070356aa-261e-43a6-99bd-620b4d9b1f43/pets"
+      },
+      {
+        "method": "POST",
+        "path": "/households/070356aa-261e-43a6-99bd-620b4d9b1f43/pets"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/41087335-554e-411d-86d0-64354834534a"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "fault": "lost-response",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": null,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/f1ed229c-cacc-42c4-a0c8-88882694c7e0/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "fault": "progress-failure",
+    "injected": [
+      "Progress request failed before write"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 1,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/f08a0947-73de-4a3a-a7ec-505b072d6632/pets"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/a2df8d2a-094f-43d0-aae2-7f968e546795"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "fault": "cached-response-edit",
+    "injected": [
+      "POST response dropped after real commit"
+    ],
+    "createdPets": 1,
+    "postPetRequests": 2,
+    "asciiIdempotencyHeader": true,
+    "persistedBirthDate": null,
+    "persistedApproximateAgeMonths": 0,
+    "pageErrors": [],
+    "overflow": false,
+    "mutations": [
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      },
+      {
+        "method": "POST",
+        "path": "/households/15494928-b809-4da5-8673-e09bfb1e9bd3/pets"
+      },
+      {
+        "method": "POST",
+        "path": "/households/15494928-b809-4da5-8673-e09bfb1e9bd3/pets"
+      },
+      {
+        "method": "PATCH",
+        "path": "/pets/c7a48bf4-faa3-48f1-8c44-f4b2b710027c"
+      },
+      {
+        "method": "PUT",
+        "path": "/onboarding/progress"
+      }
+    ]
+  }
+]
