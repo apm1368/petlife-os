@@ -2816,6 +2816,7 @@
     "subscriptions": {
       "plansTitle": "Subscription Plans",
       "householdsTitle": "Household Subscriptions",
+      "resultCount": "{count} subscriptions",
       "householdDetailTitle": "Household Subscription",
       "filterByStatus": "Status",
       "allStatuses": "All statuses",

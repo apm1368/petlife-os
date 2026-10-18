@@ -2816,6 +2816,7 @@
     "subscriptions": {
       "plansTitle": "پلن‌های اشتراک",
       "householdsTitle": "اشتراک خانواده‌ها",
+      "resultCount": "{count} اشتراک",
       "householdDetailTitle": "اشتراک خانواده",
       "filterByStatus": "وضعیت",
       "allStatuses": "همه وضعیت‌ها",

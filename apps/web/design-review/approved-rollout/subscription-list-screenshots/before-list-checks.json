@@ -1,0 +1,78 @@
+[
+  {
+    "locale": "fa",
+    "width": 390,
+    "mode": "list",
+    "overflow": false,
+    "pageErrors": [],
+    "requests": [
+      {
+        "pageSize": [
+          "50"
+        ]
+      },
+      {
+        "pageSize": [
+          "50"
+        ]
+      }
+    ]
+  },
+  {
+    "locale": "fa",
+    "width": 1440,
+    "mode": "list",
+    "overflow": false,
+    "pageErrors": [],
+    "requests": [
+      {
+        "pageSize": [
+          "50"
+        ]
+      },
+      {
+        "pageSize": [
+          "50"
+        ]
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 390,
+    "mode": "list",
+    "overflow": false,
+    "pageErrors": [],
+    "requests": [
+      {
+        "pageSize": [
+          "50"
+        ]
+      },
+      {
+        "pageSize": [
+          "50"
+        ]
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "mode": "list",
+    "overflow": false,
+    "pageErrors": [],
+    "requests": [
+      {
+        "pageSize": [
+          "50"
+        ]
+      },
+      {
+        "pageSize": [
+          "50"
+        ]
+      }
+    ]
+  }
+]

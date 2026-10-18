@@ -87,3 +87,8 @@ Owner explicitly authorized backend KYC implementation. The previous protected-A
 - [شواهد ماشین‌خوان](task-design-screenshots/checks.json)، [هش منابع](task-design-screenshots/source-hashes.json)، [بازاجرای مرورگر](browser-admin-tasks.py)
 
 بازاجرا: سرور وب توسعه با NEXT_PUBLIC_LOCAL_PREVIEW=0 و NEXT_PUBLIC_API_ORIGIN=http://localhost:4000؛ سپس QA_REPO_ROOT، QA_WEB_ORIGIN و QA_EVIDENCE_DIR و QA_MODE=list/create-error/status-error/empty را به اسکریپت بدهید. همهٔ مقصدهای شبکه loopback هستند و API در مرورگر با DTO مصنوعی جایگزین می‌شود؛ این شاهد اتصال واقعی API، احراز هویت زنده یا بررسی همهٔ ادمین نیست. هیچ عملیات زنده انجام نشد. پوستهٔ مشترک ادمین در این بسته تغییر نکرد؛ تخصیص کار/کارهای من یا CRM جدید پیاده‌سازی نشده‌اند. schema، migration، workflow و مجوزها تغییر نکرده‌اند.
+
+
+## اشتراک خانواده‌ها — ۱۸ اکتبر
+
+[اصلاح صفحه‌بندی، جداسازی پاسخ فیلتر و شواهد مرورگر](SUBSCRIPTION-LIST-VALIDATION.md). این نتیجه محدود به همین صفحه و fixture محلی است؛ CI، ادغام و انتشار مستقل‌اند.
