@@ -1,9 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import type { AdminArticleDto, AdminArticleLocaleDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { adminContentService } from "@/services/admin-content.service";
 import { AdminContentArticleEditorView } from "./AdminContentArticleEditorView";
+import { useAdminStore } from "@/stores/admin-store";
 import { ApiError } from "@/lib/api/client";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
@@ -59,6 +60,7 @@ function localeContent(overrides: Partial<AdminArticleLocaleDto> = {}): AdminArt
 
 describe("AdminContentArticleEditorView", () => {
   beforeEach(() => {
+    useAdminStore.setState({ status: "ready", context: { isAdmin: true, adminUserId: "test-admin", displayName: "Publisher", role: "ADMIN", permissions: ["content.view", "content.create", "content.edit", "content.publish", "content.archive"] } as never });
     vi.mocked(adminContentService.listCategories).mockReset().mockResolvedValue([]);
     vi.mocked(adminContentService.listAuthors).mockReset().mockResolvedValue([]);
     vi.mocked(adminContentService.listTags).mockReset().mockResolvedValue([]);
@@ -157,7 +159,7 @@ describe("AdminContentArticleEditorView", () => {
   describe("save, shared-field and status errors are explicit and keep what was typed", () => {
     const apiError = (status: number, code: string, details?: Record<string, unknown>) => new ApiError({ code, message: code, details, requestId: "req-1" }, status);
 
-    it("an editor's save of a live article explains it needs a publisher, and the edited title stays", async () => {
+    it("a server-side permission revocation rejects a live save while preserving the edited title", async () => {
       vi.mocked(adminContentService.getArticle).mockResolvedValue(article({ locales: [{ locale: "fa" as never, status: "VISIBLE" as never, title: "منتشرشده", slug: "live-slug", updatedAt: "2026-01-02T00:00:00.000Z" }] }));
       vi.mocked(adminContentService.getArticleLocale).mockResolvedValue(localeContent({ status: "VISIBLE" as never, title: "منتشرشده", slug: "live-slug" }));
       vi.mocked(adminContentService.saveArticleLocale).mockReset().mockRejectedValue(apiError(403, "ADMIN_ACCESS_DENIED", { reason: "LIVE_EDIT_REQUIRES_CONTENT_PUBLISH" }));
@@ -197,4 +199,47 @@ describe("AdminContentArticleEditorView", () => {
       await waitFor(() => expect(screen.getAllByRole("alert").some((a) => a.textContent?.includes("permission to change this article's status"))).toBe(true));
     });
   });
+
+  describe("locale read failures never become empty writable drafts", () => {
+    it("shows a read error and retries the GET instead of offering an empty save", async () => {
+      vi.mocked(adminContentService.getArticle).mockResolvedValue(article());
+      vi.mocked(adminContentService.getArticleLocale).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce(localeContent());
+      renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
+      const retry = await screen.findByRole("button", {name: "Retry"});
+      expect(screen.queryByRole("button", {name: "Save draft"})).toBeNull();
+      fireEvent.click(retry);
+      await screen.findByDisplayValue("پیش‌نویس");
+      expect(adminContentService.getArticleLocale).toHaveBeenCalledTimes(2);
+    });
+
+    it("still allows a genuinely missing locale to be created after a 404", async () => {
+      vi.mocked(adminContentService.getArticle).mockResolvedValue(article());
+      vi.mocked(adminContentService.getArticleLocale).mockRejectedValue(new ApiError({code: "NOT_FOUND", message: "not found", requestId: "qa"},404));
+      renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
+      await screen.findByRole("button", {name: "Save draft"});
+      expect(screen.queryByRole("button", {name: "Retry"})).toBeNull();
+      expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe("");
+    });
+
+    it("does not treat a forbidden locale read as a new empty locale", async () => {
+      vi.mocked(adminContentService.getArticle).mockResolvedValue(article());
+      vi.mocked(adminContentService.getArticleLocale).mockRejectedValue(new ApiError({code: "ADMIN_ACCESS_DENIED", message: "forbidden", requestId: "qa"},403));
+      renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
+      await screen.findByRole("button", {name: "Retry"});
+      expect(screen.queryByRole("button", {name: "Save draft"})).toBeNull();
+    });
+
+    it("ignores a late response for the previous locale", async () => {
+      let resolveFa!: (value: AdminArticleLocaleDto) => void;
+      vi.mocked(adminContentService.getArticle).mockResolvedValue(article());
+      vi.mocked(adminContentService.getArticleLocale).mockImplementation(async (_id, loc) => loc === "fa" ? new Promise<AdminArticleLocaleDto>(resolve => {resolveFa=resolve;}) : localeContent({locale: "en" as never,title: "English draft"}));
+      renderWithIntl(<AdminContentArticleEditorView articleId="article-1" />);
+      fireEvent.click(await screen.findByText(/^EN/));
+      await screen.findByDisplayValue("English draft");
+      await act(async () => resolveFa(localeContent()));
+      expect(screen.getByDisplayValue("English draft")).toBeTruthy();
+      expect(screen.queryByDisplayValue("پیش‌نویس")).toBeNull();
+    });
+  });
+
 });
