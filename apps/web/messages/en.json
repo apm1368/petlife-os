@@ -5954,5 +5954,9 @@
     "day": "Day",
     "month": "Month",
     "year": "Year"
+  },
+  "petOverview": {
+      "careUnavailable": "Care reminders could not be loaded. Other records are available; try again to retrieve the complete list.",
+      "careIncomplete": "Care items needing attention and upcoming care have not been fully retrieved."
   }
 }

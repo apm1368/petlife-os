@@ -1,0 +1,197 @@
+[
+  {
+    "path": "/_next/static/chunks/19887b5c-b5904139b98250c5.js",
+    "method": "GET",
+    "error": "TimeoutError"
+  },
+  {
+    "path": "/_next/static/chunks/9771-39ac5831eb385beb.js",
+    "method": "GET",
+    "error": "TimeoutError"
+  },
+  {
+    "path": "/_next/static/chunks/main-app-97f6aae8eb73eeef.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/8641-2c8ec2c0dd5fb775.js",
+    "method": "GET",
+    "status": 503,
+    "contentType": "text/plain",
+    "bytes": 95,
+    "redirectNotFollowed": false,
+    "bodySha256": "9deff96f9b5925fa5081257849ace321304b382d64cfb67d90a21a3c7cbf2925",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/9455-e0ba5e0365650cc5.js",
+    "method": "GET",
+    "error": "TimeoutError"
+  },
+  {
+    "path": "/_next/static/chunks/1439-db81282f597851d3.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/968-b81db195be153eac.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/1103-378d01344c87a6ba.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/3625-b0e5a7fba7612f92.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/4411-2fb447fdc70ee0e7.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/app/%5Blocale%5D/page-a10010d1fbe5c75d.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/app/%5Blocale%5D/(auth)/layout-c9b7d2bea8aa5964.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/9076-370205de27e096f2.js",
+    "method": "GET",
+    "error": "TimeoutError"
+  },
+  {
+    "path": "/_next/static/chunks/1561-595b5091db81c58e.js",
+    "method": "GET",
+    "error": "TimeoutError"
+  },
+  {
+    "path": "/_next/static/chunks/app/%5Blocale%5D/layout-2ee4d2ccb0bb88d5.js",
+    "method": "GET",
+    "status": 503,
+    "contentType": "text/plain",
+    "bytes": 95,
+    "redirectNotFollowed": false,
+    "bodySha256": "9deff96f9b5925fa5081257849ace321304b382d64cfb67d90a21a3c7cbf2925",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/app/%5Blocale%5D/not-found-12bd10b4739b4b80.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/chunks/webpack-645b3910ff068d28.js",
+    "method": "GET",
+    "status": 302,
+    "contentType": "",
+    "bytes": 303,
+    "redirectNotFollowed": true,
+    "bodySha256": "e2718a0a93ec902f3f125c4df7379d2ebd720f0617e0b11d8da8e1d2b0d339b3",
+    "validAsset": false
+  },
+  {
+    "path": "/_next/static/css/23e220c3cf4f1aa7.css",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/css; charset=UTF-8",
+    "bytes": 22394,
+    "redirectNotFollowed": false,
+    "bodySha256": "b502c9824074b06d8cca9e0646dae469bf638a6c324eb9fcd13e067e346809c3",
+    "validAsset": true
+  },
+  {
+    "path": "/_next/static/css/60242b0856445654.css",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/css; charset=UTF-8",
+    "bytes": 153160,
+    "redirectNotFollowed": false,
+    "bodySha256": "32f5b50db878edde4ab7c62f6ec1d2435a3b647fb76c6c80011838aa99d68000",
+    "validAsset": true
+  },
+  {
+    "path": "/_next/static/css/99c977d6a8258149.css",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/css; charset=UTF-8",
+    "bytes": 3838,
+    "redirectNotFollowed": false,
+    "bodySha256": "846b4bdcf6bc11cbeb3d48848614b483d0bb341c3b03668a167be1e19a0ffe4e",
+    "validAsset": true
+  },
+  {
+    "path": "/_next/static/css/6814695611ad5dbb.css",
+    "method": "GET",
+    "status": 200,
+    "contentType": "text/css; charset=UTF-8",
+    "bytes": 19376,
+    "redirectNotFollowed": false,
+    "bodySha256": "e3abd6eef18bbca994d6eb57855bd8ae3663a00ed84e6611160254adf769c3c3",
+    "validAsset": true
+  }
+]
