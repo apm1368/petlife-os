@@ -4,17 +4,29 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
-import type { ContentVersionDetailDto, ContentVersionSummaryDto, Locale as ContentLocale } from "@petlife/types";
+import { ArticleLifecycleStatus } from "@petlife/types";
+import type { AdminPermissionName, ContentVersionDetailDto, ContentVersionSummaryDto, Locale as ContentLocale } from "@petlife/types";
 import { RichTextRenderer } from "./RichTextRenderer";
 import { adminContentService } from "@/services/admin-content.service";
+import { useAdminStore } from "@/stores/admin-store";
 
 /** Version history for one (article, locale) — spec: "Admin should be able to inspect version history. Restore should create a NEW version." */
 export function AdminContentVersionHistoryView({ articleId, locale }: { articleId: string; locale: ContentLocale }) {
   const t = useTranslations("admin.content.versions");
+  const actions = useTranslations("rollout.records");
   const router = useRouter();
   const uiLocale = useLocale() as "fa" | "en";
+  const context = useAdminStore((state) => state.context);
+  const adminStatus = useAdminStore((state) => state.status);
+  const canRead = adminStatus === "ready" && context?.isAdmin === true && context.permissions.includes("content.view");
+  const permitted = (permission: AdminPermissionName) => canRead && context?.permissions.includes(permission) === true;
+  const canAct = (permission: AdminPermissionName) => {
+    const current = useAdminStore.getState();
+    return current.status === "ready" && current.context?.isAdmin === true && current.context.permissions.includes("content.view") && current.context.permissions.includes(permission);
+  };
 
   const [versions, setVersions] = useState<ContentVersionSummaryDto[] | null>(null);
+  const [currentStatus, setCurrentStatus] = useState<ArticleLifecycleStatus | null>(null);
   const [error, setError] = useState(false);
   const inspectionGeneration = useRef(Symbol());
   const [selected, setSelected] = useState<ContentVersionDetailDto | null>(null);
@@ -23,9 +35,15 @@ export function AdminContentVersionHistoryView({ articleId, locale }: { articleI
   const [restoring, setRestoring] = useState<string | null>(null);
 
   async function load() {
+    if (!canRead) return;
     setError(false);
     try {
-      setVersions(await adminContentService.listVersions(articleId, locale));
+      const [items, current] = await Promise.all([
+        adminContentService.listVersions(articleId, locale),
+        adminContentService.getArticleLocale(articleId, locale),
+      ]);
+      setVersions(items);
+      setCurrentStatus(current.status);
     } catch {
       setError(true);
     }
@@ -37,9 +55,10 @@ export function AdminContentVersionHistoryView({ articleId, locale }: { articleI
     void load();
     return () => { inspectionGeneration.current = Symbol(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [articleId, locale]);
+  }, [articleId, locale, canRead]);
 
   async function restore(versionId: string) {
+    if (!canAct("content.edit") || (currentStatus === ArticleLifecycleStatus.VISIBLE && !canAct("content.publish"))) return;
     setRestoring(versionId);
     setActionError(false);
     try {
@@ -61,9 +80,13 @@ export function AdminContentVersionHistoryView({ articleId, locale }: { articleI
     finally { if (generation === inspectionGeneration.current) setInspecting(null); }
   }
 
+  if (adminStatus === "idle" || adminStatus === "loading") return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
+  if (!canRead) return <EmptyState title={actions("noAccess")} />;
   if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
   if (!versions) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
   if (versions.length === 0) return <EmptyState title={t("empty")} />;
+
+  const canRestore = permitted("content.edit") && (currentStatus !== ArticleLifecycleStatus.VISIBLE || permitted("content.publish"));
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,9 +103,9 @@ export function AdminContentVersionHistoryView({ articleId, locale }: { articleI
             {v.changeNote ? <span className="text-metadata text-text-secondary">{v.changeNote}</span> : null}
           </div>
           <Button size="sm" variant="secondary" disabled={inspecting !== null} onClick={() => void inspect(v.id)}>{t("inspect")}</Button>
-          <Button size="sm" variant="secondary" disabled={restoring === v.id} onClick={() => restore(v.id)}>
+          {canRestore ? <Button size="sm" variant="secondary" disabled={restoring === v.id} onClick={() => restore(v.id)}>
             {t("restore")}
-          </Button>
+          </Button> : null}
         </ContextSurface>
       ))}
     </div>

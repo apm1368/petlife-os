@@ -2713,7 +2713,14 @@
           "VISIBLE": "Visible",
           "HIDDEN": "Hidden",
           "ARCHIVED": "Archived"
-        }
+        },
+        "liveEditNeedsPublish": "This article is live. Only someone who can publish may change live text — ask a publisher, or have it hidden first. Your edits are still here.",
+        "saveForbidden": "You don't have permission to save this. Your edits are still here.",
+        "saveFailedKept": "Could not save. Your edits are still here — try again.",
+        "sharedSaveFailed": "Could not save the category, author or tags. Your selection is still here — try again.",
+        "transitionForbidden": "You don't have permission to change this article's status.",
+        "transitionFailed": "The status couldn't be changed. Try again.",
+        "saveLive": "Save and update the live article"
       },
       "blockEditor": {
         "blockType": {
