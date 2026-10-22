@@ -2,7 +2,10 @@ import { Module } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { DevOtpProvider } from "./otp/dev-otp.provider";
+import { FarazOtpProvider } from "./otp/faraz-otp.provider";
 import { OTP_PROVIDER } from "./otp/otp-provider.interface";
+import { ConfigService } from "@nestjs/config";
+import type { AppEnv } from "../../config/env";
 import { AuthPasswordService } from "./password/auth-password.service";
 import { AuthPasswordResetService } from "./password/auth-password-reset.service";
 import { GoogleOAuthClient } from "./google/google-oauth.client";
@@ -16,7 +19,14 @@ import { ContactChangeService } from "./contact-change.service";
   controllers: [AuthController, AuthGoogleController, AuthGoogleDevController, ContactChangeController],
   providers: [
     AuthService,
-    { provide: OTP_PROVIDER, useClass: DevOtpProvider },
+    DevOtpProvider,
+    FarazOtpProvider,
+    {
+      provide: OTP_PROVIDER,
+      inject: [ConfigService, DevOtpProvider, FarazOtpProvider],
+      useFactory: (config: ConfigService<AppEnv, true>, dev: DevOtpProvider, faraz: FarazOtpProvider) =>
+        config.get("OTP_PROVIDER", { infer: true }) === "faraz" ? faraz : dev,
+    },
     AuthPasswordService,
     AuthPasswordResetService,
     GoogleOAuthClient,

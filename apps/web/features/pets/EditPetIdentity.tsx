@@ -109,8 +109,8 @@ export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDt
           updated = await petsService.update(pet.id, { photoUrl: target.publicUrl });
         } catch {
           setMessage(c.photoFailed);
-          setSaving(false);
-          onSaved(updated);
+          // onSaved closes the editor: keep the partial-save error and photo draft visible.
+          // A retry must be an explicit user action, never an automatic upload.
           return;
         }
       }

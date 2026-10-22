@@ -7,8 +7,8 @@
 | اتصال | وضعیت | شاهد | برای رسیدن به LIVE لازم است |
 |---|---|---|---|
 | MAPS | `NOT_IMPLEMENTED` | هیچ آداپتور نقشه یا مسیریابی در کد نیست. فاصله‌ی تاکسی `TRANSPORT_DISTANCE_MODE=unavailable` (پیش‌فرض) و قیمت `DISTANCE_UNAVAILABLE` / `NOT_CONFIGURED`؛ مکان‌ها فقط مختصات ذخیره می‌کنند. | انتخاب ارائه‌دهنده (مثلاً نشان) + کلید + آداپتور |
-| FARAZ SMS | `NOT_CONFIGURED` | آداپتور `faraz-sms.adapter.ts` پیاده شده ولی کلید و آدرس API روی سرور نیست؛ `MESSAGING_SANDBOX_MODE=sandbox` و پیامک‌ها از آداپتور dev شبیه‌سازی می‌شوند (کانال SMS = `SANDBOX`). | کلید Faraz، خط ارسال، `MESSAGING_SANDBOX_MODE=production` (اعتبارسنجی env بدون کلید اجازه نمی‌دهد) |
-| OTP ورود | `SANDBOX` | `OTP_PROVIDER=dev`: کد فقط در لاگ سرور است و به کاربر ارسال نمی‌شود (در پاسخ API هم نیست). ورود با OTP برای کاربر واقعی ممکن نیست. | وابسته به FARAZ SMS |
+| FARAZ SMS | `READY_FOR_CONFIGURATION` | کلاینت رسمی Pattern API با `Api-Key`، تبدیل امن `+98` به `09`، timeout و تفکیک خطای موقت/دائمی پیاده شده است. پاسخ موفق فقط `SENT` (پذیرفته/صف‌شده) ثبت می‌شود، نه تحویل ساختگی. | `FARAZ_SMS_API_KEY`، خط ارسال و UID پترن تأییدشده باید فقط در env سرور باشند. |
+| OTP ورود | `READY_FOR_CONFIGURATION` | `FarazOtpProvider` کد را هش‌شده و یک‌بارمصرف در Redis نگه می‌دارد و از پترن OTP رسمی ارسال می‌کند. `OTP_PROVIDER=faraz` بدون کلید، خط و UID پترن در startup رد می‌شود. | فعال‌شدن واقعی وابسته به env سرور و پترن تأییدشده است. |
 | EMAIL | `NOT_IMPLEMENTED` | کانال `EMAIL` فقط در enum هست؛ هیچ آداپتور یا SMTP در کد نیست. | ارائه‌دهنده‌ی ایمیل + آداپتور + قالب‌ها |
 | PAYMENT | `SANDBOX` | `PAYMENT_SANDBOX_MODE=sandbox`؛ درگاه `dev_simulated` شارژ را شبیه‌سازی می‌کند؛ درگاه استاندارد/Digipay/SnappPay کلید ندارند. از نسخه‌ی `8f712ec` وبهوک‌های بدون امضای sandbox روی سرور بسته‌اند (`DEV_SIMULATION_ENABLED` تنظیم نشده). | قرارداد درگاه + کلید + `PAYMENT_SANDBOX_MODE=production` |
 | SETTLEMENT | `NOT_IMPLEMENTED` | تسویه با کلینیک/فروشنده/ارائه‌دهنده ساخته نشده؛ PRODUCT_DECISION_REQUIRED (کمیسیون، دوره، بازپرداخت پس از تسویه، پیش‌پرداخت، تأیید حساب بانکی، مالیات). | تصمیم محصول و سپس پیاده‌سازی |
