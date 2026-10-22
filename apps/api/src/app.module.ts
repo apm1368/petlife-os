@@ -11,6 +11,7 @@ import { CsrfMiddleware } from "./common/csrf/csrf.middleware";
 import { CsrfGuard } from "./common/csrf/csrf.guard";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { RedisModule } from "./common/redis/redis.module";
+import { FarazSmsModule } from "./common/faraz/faraz-sms.module";
 import { SessionModule } from "./common/session/session.module";
 import { DomainEventsModule } from "./common/events/domain-events.module";
 import { validateEnv } from "./config/env";
@@ -91,6 +92,7 @@ import { PlacesModule } from "./modules/places/places.module";
     }),
     PrismaModule,
     RedisModule,
+    FarazSmsModule,
     RateLimitModule,
     SessionModule,
     DomainEventsModule,

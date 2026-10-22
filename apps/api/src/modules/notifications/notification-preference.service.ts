@@ -30,7 +30,7 @@ export class NotificationPreferenceService {
     return Boolean(latest?.grantedAt && !latest.revokedAt);
   }
 
-  /** Whether each channel actually reaches people today. SMS goes through the dev simulator unless Faraz is configured, and the Faraz adapter itself is not implemented yet. */
+  /** Whether each channel reaches people. SMS uses the selected dev or Faraz Pattern API adapter. */
   private channelDelivery(): NonNullable<NotificationPreferencesDto["channels"]> {
     const provider = this.config.get("MESSAGING_PROVIDER", { infer: true });
     return [
