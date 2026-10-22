@@ -11,6 +11,7 @@ import { BirthDateField } from "@/features/shared/date-picker/BirthDateField";
 import { Stepper } from "@/features/shared/Stepper";
 import { formatCount } from "@/lib/number/format-number";
 import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 import { isPlanError, PlanRequiredNote } from "@/features/subscription/PlanRequiredNote";
 import { SPECIES_LABELS } from "./pet-identity";
 
@@ -236,7 +237,9 @@ export function AddPetView() {
       router.push(`/${locale}/pets/${saved.id}`);
     } catch (e) {
       if (isPlanError(e)) setPlanError(e);
-      else setError(c.failed);
+      // The API names the field it rejected (a chip already on file, say); "try again" on its own
+      // sends the owner round a loop that can never succeed, so prefer the specific sentence.
+      else setError(apiErrorText(e, locale, c.failed));
       setIsSubmitting(false);
     }
   }
