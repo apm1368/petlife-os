@@ -143,8 +143,20 @@ healthy() {
 
 rollback() {
   trap - ERR
-  if [ "$api_origin_present" = true ]; then set_env_value apps/api/.env WEB_APP_ORIGIN "$old_api_origin"; else remove_env_value apps/api/.env WEB_APP_ORIGIN; fi
-  if [ "$web_api_origin_present" = true ]; then set_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN "$old_web_api_origin"; else remove_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN; fi
+  if [ "$api_origin_present" = true ]; then
+    set_env_value apps/api/.env WEB_APP_ORIGIN "$old_api_origin"
+    export WEB_APP_ORIGIN="$old_api_origin"
+  else
+    remove_env_value apps/api/.env WEB_APP_ORIGIN
+    unset WEB_APP_ORIGIN
+  fi
+  if [ "$web_api_origin_present" = true ]; then
+    set_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN "$old_web_api_origin"
+    export NEXT_PUBLIC_API_ORIGIN="$old_web_api_origin"
+  else
+    remove_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN
+    unset NEXT_PUBLIC_API_ORIGIN
+  fi
   if [ "$have_previous" != true ]; then
     echo "deploy: FAILED and no previous build to restore; origin settings were restored" >&2
     exit 1
@@ -165,6 +177,8 @@ trap rollback ERR
 
 set_env_value apps/api/.env WEB_APP_ORIGIN "$CANONICAL_ORIGIN"
 set_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN "$CANONICAL_ORIGIN/api"
+export WEB_APP_ORIGIN="$CANONICAL_ORIGIN"
+export NEXT_PUBLIC_API_ORIGIN="$CANONICAL_ORIGIN/api"
 
 log "building (one task at a time)"
 flock "$BUILD_LOCK" pnpm turbo run build --filter=@petlife/api --filter=@petlife/web --concurrency=1
