@@ -47,6 +47,7 @@ export const placesService = {
 
 export const adminPlacesService = {
   list: (input: { page?: number; city?: string } = {}) => apiFetch<PaginatedDto<PetFriendlyPlaceDto>>(`/admin/places${toQueryString(input)}`),
+  update: (placeId: string, input: { name?: string; city?: string }) => apiFetch<PetFriendlyPlaceDto>(`/admin/places/${placeId}`, { method: "PATCH", body: input }),
   setVerification: (placeId: string, status: "VERIFIED" | "UNVERIFIED" | "SUSPENDED") => apiFetch<PetFriendlyPlaceDto>(`/admin/places/${placeId}/verification`, { method: "POST", body: { status } }),
   setListed: (placeId: string, isPubliclyListed: boolean) => apiFetch<PetFriendlyPlaceDto>(`/admin/places/${placeId}/listing`, { method: "POST", body: { isPubliclyListed } }),
 };

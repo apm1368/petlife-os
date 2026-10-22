@@ -80,5 +80,5 @@ The settings, places and product-status admin views already showed save errors a
 
 Still open:
 - Real-browser rendering (390/1440, fa/en) of these round-trips was not run on the VPS, which has no browser. It needs an isolated web build pointed at the test API.
-- The places admin screen has no rename/edit form, although `PATCH /admin/places/:id` exists. That is frontend work, not a new API.
+- **Implemented:** the places admin screen now exposes an inline name editor backed by `PATCH /admin/places/:id`. It waits for `places.view`, shows writes only with `places.manage`, re-checks permission at click time, and keeps the draft on failure. Controlled browser evidence is linked from `VALIDATION.md`; authenticated live integration remains a release check.
 - A publisher's edit of a live article is immediately public. There is no draft-over-published version, which would need a schema change and a product decision.

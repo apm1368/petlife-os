@@ -1,5 +1,16 @@
 # Validation and release limits
 
+## ویرایش نام مکان در ادمین — ۲۲ اکتبر ۲۰۲۶
+
+صفحهٔ مکان‌های ادمین اکنون نام مکان را به‌صورت درون‌خطی با قرارداد موجود `PATCH /admin/places/:id` ویرایش می‌کند. بارگذاری تا مشخص‌شدن `places.view` آغاز نمی‌شود؛ کاربر فقط‌خواندنی هیچ کنترل نوشتن نمی‌بیند و ذخیره علاوه بر نمایش، هنگام کلیک نیز `places.manage` را بررسی می‌کند. نام خالی یا بیش از ۲۰۰ نویسه در مرورگر رد می‌شود و شکست ذخیره، متن تایپ‌شده را نگه می‌دارد. API، schema، migration، workflow، SMS و تنظیمات دامنه تغییر نکرده‌اند.
+
+چهار تست کامپوننت رفتار مجوز، قرارداد PATCH، بازخوانی پس از موفقیت و حفظ پیش‌نویس در شکست را پوشش می‌دهند. شواهد مرورگر کنترل‌شده شامل چهار تصویر قبل و هشت تصویر بعد در fa/en × ۳۹۰/۱۴۴۰ برای نقش مدیر و فقط‌خواندنی است؛ overflow، pageerror، console error و درخواست شکست‌خورده صفر بود و payload مدیر دقیقاً فقط شامل `name` است.
+
+- [قبل فارسی ۳۹۰](admin-places-rename-screenshots/before-manager-fa-390.webp) / [بعد مدیر](admin-places-rename-screenshots/after-manager-fa-390.webp) / [بعد فقط‌خواندنی](admin-places-rename-screenshots/after-readonly-fa-390.webp)
+- [بعد مدیر انگلیسی ۱۴۴۰](admin-places-rename-screenshots/after-manager-en-1440.webp)، [نتایج بعد](admin-places-rename-screenshots/after-checks.json)، [نتایج قبل](admin-places-rename-screenshots/before-checks.json)، [بازاجرا](browser-admin-places-rename.py)
+
+API و احراز هویت این شواهد fixture روی loopback هستند؛ بنابراین این بخش شاهد اتصال زنده یا استقرار production نیست. بازبینی بصری عمومی سایت نیز به‌دلیل redirect دارایی JS در origin فعلی همچنان gate مستقل انتشار است.
+
 
 ## خوانایی صف و مدارک همکاران — ۱۸ اکتبر ۲۰۲۶
 
