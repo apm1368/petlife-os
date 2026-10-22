@@ -14,13 +14,52 @@ DEPLOY_LOCK="/var/lock/petlife-deploy.lock"
 # compete for its 3.9 GB of RAM — the cause of the OOM-killed deploy of efd3be2.
 BUILD_LOCK="/var/lock/petlife-build.lock"
 SHA="$(git -C "$APP_DIR" rev-parse HEAD)"
+CANONICAL_ORIGIN="https://opetlife.ir"
 
 log() { echo "deploy[$(date -u +%H:%M:%S)]: $*"; }
+
+read_env_value() {
+  local file="$1" key="$2"
+  [ -f "$file" ] || return 1
+  grep -q "^${key}=" "$file" || return 1
+  sed -n "s/^${key}=//p" "$file" | tail -n 1
+}
+
+set_env_value() {
+  local file="$1" key="$2" value="$3" tmp
+  mkdir -p "$(dirname "$file")"
+  touch "$file"
+  tmp="$(mktemp "${file}.tmp.XXXXXX")"
+  awk -v key="$key" -v value="$value" '
+    BEGIN { found = 0 }
+    index($0, key "=") == 1 { if (!found) print key "=" value; found = 1; next }
+    { print }
+    END { if (!found) print key "=" value }
+  ' "$file" > "$tmp"
+  chmod 600 "$tmp"
+  mv "$tmp" "$file"
+}
+
+remove_env_value() {
+  local file="$1" key="$2" tmp
+  [ -f "$file" ] || return 0
+  tmp="$(mktemp "${file}.tmp.XXXXXX")"
+  awk -v key="$key" 'index($0, key "=") != 1 { print }' "$file" > "$tmp"
+  chmod 600 "$tmp"
+  mv "$tmp" "$file"
+}
 
 exec 9>"$DEPLOY_LOCK"
 flock -n 9 || { echo "deploy: another deploy holds $DEPLOY_LOCK" >&2; exit 1; }
 
 cd "$APP_DIR"
+
+api_origin_present=false
+web_api_origin_present=false
+old_api_origin=""
+old_web_api_origin=""
+if old_api_origin="$(read_env_value apps/api/.env WEB_APP_ORIGIN)"; then api_origin_present=true; fi
+if old_web_api_origin="$(read_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN)"; then web_api_origin_present=true; fi
 
 # Runtime secrets are never in git; keep them owner-only even if someone recreates them by hand.
 for env_file in apps/api/.env apps/web/.env; do
@@ -104,8 +143,22 @@ healthy() {
 
 rollback() {
   trap - ERR
+  if [ "$api_origin_present" = true ]; then
+    set_env_value apps/api/.env WEB_APP_ORIGIN "$old_api_origin"
+    export WEB_APP_ORIGIN="$old_api_origin"
+  else
+    remove_env_value apps/api/.env WEB_APP_ORIGIN
+    unset WEB_APP_ORIGIN
+  fi
+  if [ "$web_api_origin_present" = true ]; then
+    set_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN "$old_web_api_origin"
+    export NEXT_PUBLIC_API_ORIGIN="$old_web_api_origin"
+  else
+    remove_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN
+    unset NEXT_PUBLIC_API_ORIGIN
+  fi
   if [ "$have_previous" != true ]; then
-    echo "deploy: FAILED and no previous build to restore" >&2
+    echo "deploy: FAILED and no previous build to restore; origin settings were restored" >&2
     exit 1
   fi
   log "FAILED — restoring previous build ($(cut -c1-7 "$RELEASE_DIR/previous/sha"))"
@@ -122,6 +175,11 @@ rollback() {
 }
 trap rollback ERR
 
+set_env_value apps/api/.env WEB_APP_ORIGIN "$CANONICAL_ORIGIN"
+set_env_value apps/web/.env NEXT_PUBLIC_API_ORIGIN "$CANONICAL_ORIGIN/api"
+export WEB_APP_ORIGIN="$CANONICAL_ORIGIN"
+export NEXT_PUBLIC_API_ORIGIN="$CANONICAL_ORIGIN/api"
+
 log "building (one task at a time)"
 flock "$BUILD_LOCK" pnpm turbo run build --filter=@petlife/api --filter=@petlife/web --concurrency=1
 if [ ! -f apps/api/dist/main.js ] || [ ! -f apps/web/.next/BUILD_ID ]; then
@@ -133,6 +191,11 @@ fi
 # delete+start gap; it starts the apps when they are not registered yet.
 reload_apps
 healthy
+
+# HTTPS is applied only after the new same-origin build is healthy. The domain script restores nginx and any
+# firewall rule it added if certificate issuance or its HTTPS/API/JavaScript smoke check fails; this outer trap
+# then restores the previous application build and the two previous non-secret origin settings.
+"$APP_DIR/scripts/ops/configure-opetlife-domain.sh"
 
 trap - ERR
 echo "$SHA" > "$RELEASE_DIR/current-sha"
