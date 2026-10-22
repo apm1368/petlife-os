@@ -122,6 +122,21 @@ const FA: Record<string, string> = {
   NOT_FOUND: "این مورد پیدا نشد.",
 };
 
+/**
+ * A VALIDATION_ERROR names the field it rejected, and "the information is incomplete or incorrect"
+ * is useless when the form looks valid to the person filling it in. Where the reason is one a person
+ * can act on, say which field and why instead.
+ */
+const FA_VALIDATION_REASON: Record<string, string> = {
+  MICROCHIP_ALREADY_REGISTERED: "این شمارهٔ میکروچیپ قبلاً برای حیوان دیگری ثبت شده است. شماره را بررسی کنید یا این فیلد را خالی بگذارید.",
+};
+
+function validationReasonRule(err: ApiError): string | null {
+  if (err.code !== "VALIDATION_ERROR") return null;
+  const reason = err.details?.reason;
+  return typeof reason === "string" ? FA_VALIDATION_REASON[reason] ?? null : null;
+}
+
 function familyRule(code: string): string | null {
   if (code.endsWith("_NOT_FOUND")) return "این مورد پیدا نشد؛ ممکن است حذف شده باشد.";
   if (code.startsWith("INVALID_") && code.endsWith("_TRANSITION")) return "این کار در وضعیت فعلی ممکن نیست.";
@@ -139,7 +154,7 @@ export function apiErrorText(err: unknown, locale?: string, fallback?: string): 
   const fa = (locale ?? (typeof document === "undefined" ? "" : document.documentElement.lang)) === "fa";
   if (err instanceof ApiError) {
     if (!fa) return err.message || fallback || GENERIC.en;
-    return FA[err.code] ?? familyRule(err.code) ?? fallback ?? GENERIC.fa;
+    return validationReasonRule(err) ?? FA[err.code] ?? familyRule(err.code) ?? fallback ?? GENERIC.fa;
   }
   return fallback ?? (fa ? GENERIC.fa : GENERIC.en);
 }
