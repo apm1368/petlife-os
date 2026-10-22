@@ -8,7 +8,7 @@ import { useLocalPreview } from "./LocalPreviewGate";
 import { reviewRoutes } from "./routes";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
 
-const authRoutes = ["/welcome", "/register", "/account", "/account/forgot", "/account/reset", "/auth/complete"];
+const authRoutes = ["/welcome", "/register", "/account", "/account/forgot", "/account/reset"];
 
 /** Local-only navigation aid, not a role switcher or an authentication mechanism. */
 export function LocalReviewTools({ children }: { children: React.ReactNode }) {

@@ -1,4 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Throttle } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -7,15 +8,15 @@ import { SessionService, type SessionUser } from "../../common/session/session.s
 import { AuthService } from "./auth.service";
 import { RequestOtpDto } from "./dto/request-otp.dto";
 import { VerifyOtpDto } from "./dto/verify-otp.dto";
-import { RegisterDto } from "./dto/register.dto";
-import { LoginPasswordDto } from "./dto/login-password.dto";
+import { RegisterDto, RequestRegisterOtpDto } from "./dto/register.dto";
+import { LoginChallengeDto, LoginPasswordDto, LoginPhoneDto, LoginVerifyDto } from "./dto/login-password.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import type { AuthMethodsDto } from "./dto/get-auth-methods.dto";
 import { AuthPasswordService } from "./password/auth-password.service";
 import { AuthPasswordResetService } from "./password/auth-password-reset.service";
-import { GoogleOAuthClient } from "./google/google-oauth.client";
+import type { AppEnv } from "../../config/env";
 
 @Controller("auth")
 export class AuthController {
@@ -24,18 +25,28 @@ export class AuthController {
     private readonly sessions: SessionService,
     private readonly passwordAuth: AuthPasswordService,
     private readonly passwordReset: AuthPasswordResetService,
-    private readonly googleClient: GoogleOAuthClient,
+    private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
   @Get("methods")
   getMethods(): AuthMethodsDto {
-    return { google: this.googleClient.isEnabled(), phone: true, password: true };
+    return { phone: this.directOtpLoginEnabled(), password: true };
+  }
+
+  /** Code-only sign-in is a test fixture (see AuthService); on a real deployment the routes do not exist. */
+  private directOtpLoginEnabled(): boolean {
+    return this.config.get("AUTH_DIRECT_OTP_LOGIN_ENABLED", { infer: true }) && this.config.get("NODE_ENV", { infer: true }) !== "production";
+  }
+
+  private assertDirectOtpLogin(): void {
+    if (!this.directOtpLoginEnabled()) throw new NotFoundException();
   }
 
   @Post("request-otp")
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async requestOtp(@Body() dto: RequestOtpDto): Promise<{ ok: true }> {
+    this.assertDirectOtpLogin();
     await this.authService.requestOtp(dto.identifier);
     return { ok: true };
   }
@@ -44,11 +55,19 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async verifyOtp(@Body() dto: VerifyOtpDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    this.assertDirectOtpLogin();
     const user = await this.authService.verifyOtp(dto.identifier, dto.code, res, {
       userAgent: req.headers["user-agent"],
       ipAddress: req.ip,
     });
     return { user: toUserDto(user) };
+  }
+
+  @Post("register/request-otp")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  requestRegisterOtp(@Body() dto: RequestRegisterOtpDto) {
+    return this.passwordAuth.requestRegisterOtp(dto.username, dto.phone);
   }
 
   @Post("register")
@@ -62,8 +81,29 @@ export class AuthController {
   @Post("login/password")
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  async loginPassword(@Body() dto: LoginPasswordDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const user = await this.passwordAuth.login(dto, res, { userAgent: req.headers["user-agent"], ipAddress: req.ip });
+  loginPassword(@Body() dto: LoginPasswordDto) {
+    return this.passwordAuth.startLogin(dto);
+  }
+
+  @Post("login/phone")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  loginPhone(@Body() dto: LoginPhoneDto) {
+    return this.passwordAuth.setLoginPhone(dto.challengeId, dto.phone);
+  }
+
+  @Post("login/resend")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  loginResend(@Body() dto: LoginChallengeDto) {
+    return this.passwordAuth.resendLoginCode(dto.challengeId);
+  }
+
+  @Post("login/verify")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  async loginVerify(@Body() dto: LoginVerifyDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const user = await this.passwordAuth.completeLogin(dto.challengeId, dto.code, res, { userAgent: req.headers["user-agent"], ipAddress: req.ip });
     return { user: toUserDto(user) };
   }
 
@@ -90,7 +130,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async resetPassword(@Body() dto: ResetPasswordDto): Promise<{ ok: true }> {
-    await this.passwordReset.resetPassword(dto.token, dto.newPassword);
+    await this.passwordReset.resetPassword(dto.identifier, dto.code, dto.newPassword);
     return { ok: true };
   }
 

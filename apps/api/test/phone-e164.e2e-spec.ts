@@ -34,7 +34,7 @@ describe("Phone numbers are canonical E.164 everywhere", () => {
     return extractCookie((await request(server).get("/health/live")).headers["set-cookie"], "petlife_csrf")!;
   }
   async function resetOtpBudget(e164: string) {
-    await redis.del(`otp:cooldown:${e164}`, identifierRateLimitKey(IDENTIFIER_LIMITS.otpSend.bucket, e164));
+    await redis.del(`otp:cooldown:direct:${e164}`, identifierRateLimitKey(IDENTIFIER_LIMITS.otpSend.bucket, e164));
   }
   function lastOtp(e164: string): string {
     const calls = logSpy.mock.calls.filter((args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(`identifier=${e164} `));
@@ -68,12 +68,12 @@ describe("Phone numbers are canonical E.164 everywhere", () => {
     await resetOtpBudget(e164);
     const spellings = [`0${n}`, e164, persian(`0${n}`), `00${e164.slice(1)}`, n];
     for (const typed of spellings.slice(0, IDENTIFIER_LIMITS.otpSend.limit)) {
-      await redis.del(`otp:cooldown:${e164}`);
+      await redis.del(`otp:cooldown:direct:${e164}`);
       const token = await csrf();
       await request(server).post("/auth/request-otp").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ identifier: typed }).expect(200);
     }
     // Only the shared budget can refuse this one: the E.164 spelling was used once and its resend cooldown is cleared.
-    await redis.del(`otp:cooldown:${e164}`);
+    await redis.del(`otp:cooldown:direct:${e164}`);
     const token = await csrf();
     await request(server).post("/auth/request-otp").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ identifier: e164 }).expect(429);
   });

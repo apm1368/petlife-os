@@ -4,7 +4,7 @@ type Client = PrismaClient | Prisma.TransactionClient;
 
 /**
  * Batch 8 — records that `user` just proved control of their email or phone
- * (OTP code, or an email Google itself verified).
+ * (an OTP code).
  *
  * Pre-account-takeover guard: an email typed at password sign-up is never
  * proven. If someone registered with another person's address, the real

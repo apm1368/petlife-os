@@ -53,6 +53,20 @@ export class OtpRateLimitedException extends ApiException {
   }
 }
 
+/** The SMS provider rejected or never answered the send; the code was withdrawn so the person can retry at once. */
+export class OtpDeliveryFailedException extends ApiException {
+  constructor() {
+    super("OTP_DELIVERY_FAILED", "We couldn't send the verification code. Please try again in a moment.", HttpStatus.SERVICE_UNAVAILABLE);
+  }
+}
+
+/** FarazSMS rejected an admin request (pattern create/delete, test send) or could not be reached; its own messages are passed on. */
+export class SmsProviderException extends ApiException {
+  constructor(details: { httpStatus: number; messages: string[] }) {
+    super("SMS_PROVIDER_ERROR", details.messages[0] ?? "The SMS provider rejected the request.", HttpStatus.BAD_GATEWAY, details);
+  }
+}
+
 /** Per-identifier sign-in budget exhausted (password attempts) — same response whether or not the account exists. */
 export class AuthRateLimitedException extends ApiException {
   constructor(retryAfterSeconds: number) {
@@ -831,7 +845,7 @@ export class AdminRefundApprovalRequiredException extends ApiException {
   }
 }
 
-/// Authentication (Handoff 12) — Google OAuth, username/password.
+/// Authentication (Handoff 12) — username + password + SMS code.
 
 /** Deliberately identical message/code whether the username doesn't exist or the password is wrong — never lets a caller distinguish the two (enumeration resistance). */
 export class InvalidCredentialsException extends ApiException {
@@ -847,6 +861,27 @@ export class UsernameTakenException extends ApiException {
 }
 
 /** class-validator already rejects an obviously-too-short password at the DTO layer; this is for the rarer case a caller bypasses that (e.g. a future non-HTTP caller). */
+/** Raised only after the caller proved they own the number with a valid code, so it never lets anyone probe which numbers have accounts. */
+export class PhoneTakenException extends ApiException {
+  constructor() {
+    super("PHONE_TAKEN", "This mobile number is already linked to another account.", HttpStatus.CONFLICT);
+  }
+}
+
+/** The password step of a sign-in was never completed, has expired, or was already used. The person starts the sign-in again. */
+export class LoginChallengeInvalidException extends ApiException {
+  constructor() {
+    super("LOGIN_CHALLENGE_INVALID", "This sign-in has expired. Please enter your username and password again.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+/** The account has no verified mobile yet, so the sign-in must first be given a number to send the code to. */
+export class LoginPhoneRequiredException extends ApiException {
+  constructor() {
+    super("LOGIN_PHONE_REQUIRED", "Add a mobile number to receive your sign-in code.", HttpStatus.BAD_REQUEST);
+  }
+}
+
 export class WeakPasswordException extends ApiException {
   constructor() {
     super("WEAK_PASSWORD", "Password must be at least 8 characters.", HttpStatus.BAD_REQUEST);
@@ -856,34 +891,6 @@ export class WeakPasswordException extends ApiException {
 export class CurrentPasswordIncorrectException extends ApiException {
   constructor() {
     super("CURRENT_PASSWORD_INCORRECT", "Your current password is incorrect.", HttpStatus.BAD_REQUEST);
-  }
-}
-
-/** Thrown when GOOGLE_AUTH_ENABLED is false (or credentials are unset) — never a silent fake login. */
-export class GoogleAuthDisabledException extends ApiException {
-  constructor() {
-    super("GOOGLE_AUTH_DISABLED", "Google sign-in is not available right now.", HttpStatus.SERVICE_UNAVAILABLE);
-  }
-}
-
-/** Covers every real-flow failure mode: missing/mismatched state cookie, expired handshake, and (for the callback) a rejected/unverifiable id_token — deliberately one generic code so a caller can't probe which check failed. */
-export class GoogleAuthFailedException extends ApiException {
-  constructor() {
-    super("GOOGLE_AUTH_FAILED", "We couldn't complete Google sign-in. Please try again.", HttpStatus.BAD_REQUEST);
-  }
-}
-
-/** A verified Google/consumer identity that already resolves to a *different* existing User than the one implied by the request — never silently merged. */
-export class AccountLinkingConflictException extends ApiException {
-  constructor() {
-    super("ACCOUNT_LINKING_CONFLICT", "This account is already linked to a different sign-in method.", HttpStatus.CONFLICT);
-  }
-}
-
-/** Deliberately generic and only used for the token-*consumption* step (reset submission) — the token-*request* step (forgot-password) never reveals whether the identifier matched anything. */
-export class PasswordResetTokenInvalidException extends ApiException {
-  constructor() {
-    super("PASSWORD_RESET_TOKEN_INVALID", "This password reset link is invalid or has expired.", HttpStatus.BAD_REQUEST);
   }
 }
 

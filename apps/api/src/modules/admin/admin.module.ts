@@ -27,6 +27,8 @@ import { AdminSettingsService } from "./settings/admin-settings.service";
 import { AdminSettingsController } from "./settings/admin-settings.controller";
 import { AdminSystemService } from "./system/admin-system.service";
 import { AdminSystemController } from "./system/admin-system.controller";
+import { AdminSmsService } from "./sms/admin-sms.service";
+import { AdminSmsController } from "./sms/admin-sms.controller";
 import { BookingModule } from "../booking/booking.module";
 import { AdminServicesService } from "./services/admin-services.service";
 import { AdminServicesController } from "./services/admin-services.controller";
@@ -124,6 +126,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminAccessControlController,
     AdminSettingsController,
     AdminSystemController,
+    AdminSmsController,
     AdminNoteController,
     AdminCustomerController,
     AdminSearchController,
@@ -166,6 +169,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminAccessControlService,
     AdminSettingsService,
     AdminSystemService,
+    AdminSmsService,
     AdminServicesService,
     AdminLostPetService,
     AdminTravelService,

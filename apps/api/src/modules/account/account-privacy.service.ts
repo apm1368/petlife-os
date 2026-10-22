@@ -242,7 +242,7 @@ export class AccountPrivacyService {
   async sendDeletionCode(userId: string) {
     const contact = await this.codeContact(userId);
     if (!contact) throw new ReauthenticationRequiredException({ method: "password" });
-    await this.otp.sendOtp(contact);
+    await this.otp.sendOtp(contact, "privacy");
     return { sentTo: maskContact(contact) };
   }
 
@@ -280,7 +280,7 @@ export class AccountPrivacyService {
       const contact = await this.codeContact(userId);
       if (!contact) throw new ReauthenticationRequiredException({ method: "password" });
       try {
-        await this.otp.verifyOtp(contact, code);
+        await this.otp.verifyOtp(contact, code, "privacy");
         return;
       } catch {
         throw new ReauthenticationRequiredException({ method: "code" });

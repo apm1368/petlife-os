@@ -6,8 +6,9 @@ import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { ContactChangeService } from "./contact-change.service";
 
+/** Codes go out by SMS, so the mobile is the only contact that can be changed by proving ownership. */
 class RequestContactChangeDto {
-  @IsIn(["email", "phone"]) kind!: "email" | "phone";
+  @IsIn(["phone"]) kind!: "phone";
   @IsString() @Length(5, 320) value!: string;
 }
 

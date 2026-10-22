@@ -68,13 +68,14 @@ describe("Public landing", () => {
     }
   });
 
-  it.each(["fa", "en"] as const)("keeps phone-first auth and the email fallback for %s", (locale) => {
+  it.each(["fa", "en"] as const)("offers username sign-in and sign-up only for %s", (locale) => {
     renderWithIntl(<AuthPage />, locale);
     const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(2);
     fireEvent.click(buttons[0]!);
-    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=phone`);
+    expect(push).toHaveBeenLastCalledWith(`/${locale}/account`);
     fireEvent.click(buttons[1]!);
-    expect(push).toHaveBeenLastCalledWith(`/${locale}/account?method=email`);
+    expect(push).toHaveBeenLastCalledWith(`/${locale}/register`);
   });
 
   it("rejects unsupported locales", async () => {

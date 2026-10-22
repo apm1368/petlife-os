@@ -24,10 +24,18 @@ describe("validateEnv — security invariants", () => {
   });
 });
 
-describe("validateEnv — development Google sign-in simulation", () => {
-  it("is off unless explicitly enabled, even outside production", () => {
-    expect(validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv).GOOGLE_DEV_SIMULATE_ENABLED).toBe(false);
-    expect(validateEnv({ ...base, NODE_ENV: "development", GOOGLE_DEV_SIMULATE_ENABLED: "true" } as NodeJS.ProcessEnv).GOOGLE_DEV_SIMULATE_ENABLED).toBe(true);
+describe("validateEnv — FarazSMS OTP and direct OTP sign-in", () => {
+  it("requires the key, sender line and OTP pattern before the FarazSMS OTP provider can boot", () => {
+    expect(() => validateEnv({ ...base, NODE_ENV: "development", OTP_PROVIDER: "faraz", FARAZ_SMS_API_KEY: "k" } as NodeJS.ProcessEnv)).toThrow(/FARAZ_SMS_SENDER, FARAZ_SMS_OTP_PATTERN_CODE/);
+    const env = validateEnv({ ...base, NODE_ENV: "development", OTP_PROVIDER: "faraz", FARAZ_SMS_API_KEY: "k", FARAZ_SMS_SENDER: "9000", FARAZ_SMS_OTP_PATTERN_CODE: "abc" } as NodeJS.ProcessEnv);
+    expect(env.FARAZ_SMS_OTP_PATTERN_VAR).toBe("code");
+  });
+
+  it("keeps the code-only sign-in fixture off by default and refuses it in production", () => {
+    expect(validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv).AUTH_DIRECT_OTP_LOGIN_ENABLED).toBe(false);
+    expect(() =>
+      validateEnv({ ...base, NODE_ENV: "production", STORAGE_DRIVER: "s3", OTP_PROVIDER: "faraz", FARAZ_SMS_API_KEY: "k", FARAZ_SMS_SENDER: "9000", FARAZ_SMS_OTP_PATTERN_CODE: "abc", AUTH_DIRECT_OTP_LOGIN_ENABLED: "true" } as NodeJS.ProcessEnv),
+    ).toThrow(/AUTH_DIRECT_OTP_LOGIN_ENABLED/);
   });
 });
 

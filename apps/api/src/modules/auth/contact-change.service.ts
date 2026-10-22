@@ -28,13 +28,13 @@ export class ContactChangeService {
     const current = kind === "email" ? user.email : user.phone;
     const verified = kind === "email" ? user.emailVerifiedAt : user.phoneVerifiedAt;
     if (current === value && verified) throw new ContactUnchangedException();
-    await this.otp.sendOtp(value);
+    await this.otp.sendOtp(value, "contact");
     return { ok: true };
   }
 
   async confirm(userId: string, kind: "email" | "phone", rawValue: string, code: string) {
     const value = this.normalize(kind, rawValue);
-    await this.otp.verifyOtp(value, code);
+    await this.otp.verifyOtp(value, code, "contact");
     const before = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true } });
     try {
       const updated = await this.prisma.user.update({

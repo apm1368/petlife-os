@@ -1,36 +1,49 @@
 import type { UserDto } from "@petlife/types";
-import { apiFetch, API_BASE_URL } from "@/lib/api/client";
+import { apiFetch } from "@/lib/api/client";
 
 export interface AuthMethodsDto {
-  google: boolean;
   phone: boolean;
   password: boolean;
 }
 
+/** After the password step of sign-in: either a code was texted, or the account first needs a mobile. */
+export type LoginStartDto =
+  | { status: "OTP_REQUIRED"; challengeId: string; maskedPhone: string; resendAfterSeconds: number }
+  | { status: "PHONE_REQUIRED"; challengeId: string };
+
 export const authService = {
   getMethods: () => apiFetch<AuthMethodsDto>("/auth/methods"),
 
-  requestOtp: (identifier: string) => apiFetch<{ ok: true }>("/auth/request-otp", { method: "POST", body: { identifier } }),
+  /** Sign-up step 1: checks the username is free and texts a code to the mobile. */
+  requestRegisterOtp: (username: string, phone: string) =>
+    apiFetch<{ ok: true; maskedPhone: string; resendAfterSeconds: number }>("/auth/register/request-otp", { method: "POST", body: { username, phone } }),
 
-  verifyOtp: (identifier: string, code: string) =>
-    apiFetch<{ user: UserDto }>("/auth/verify-otp", { method: "POST", body: { identifier, code } }),
-
-  register: (input: { username: string; password: string; displayName?: string; email?: string }) =>
+  /** Sign-up step 2: creates the account with the texted code and signs in. */
+  register: (input: { username: string; password: string; phone: string; code: string; displayName?: string }) =>
     apiFetch<{ user: UserDto }>("/auth/register", { method: "POST", body: input }),
 
+  /** Sign-in step 1: checks the password; never signs in by itself. */
   loginPassword: (username: string, password: string) =>
-    apiFetch<{ user: UserDto }>("/auth/login/password", { method: "POST", body: { username, password } }),
+    apiFetch<LoginStartDto>("/auth/login/password", { method: "POST", body: { username, password } }),
+
+  /** For an account without a verified mobile: where the sign-in code should go. */
+  loginPhone: (challengeId: string, phone: string) =>
+    apiFetch<LoginStartDto>("/auth/login/phone", { method: "POST", body: { challengeId, phone } }),
+
+  loginResend: (challengeId: string) => apiFetch<LoginStartDto>("/auth/login/resend", { method: "POST", body: { challengeId } }),
+
+  /** Sign-in step 2: the texted code; issues the session. */
+  loginVerify: (challengeId: string, code: string) =>
+    apiFetch<{ user: UserDto }>("/auth/login/verify", { method: "POST", body: { challengeId, code } }),
 
   setOrChangePassword: (input: { currentPassword?: string; newPassword: string }) =>
     apiFetch<{ ok: true; otherSessionsSignedOut: number }>("/auth/password", { method: "PUT", body: input }),
 
-  forgotPassword: (identifier: string) => apiFetch<{ ok: true }>("/auth/password/forgot", { method: "POST", body: { identifier } }),
+  /** Texts a reset code to the account's verified mobile; answers the same whether or not the username exists. */
+  forgotPassword: (username: string) => apiFetch<{ ok: true }>("/auth/password/forgot", { method: "POST", body: { identifier: username } }),
 
-  resetPassword: (token: string, newPassword: string) =>
-    apiFetch<{ ok: true }>("/auth/password/reset", { method: "POST", body: { token, newPassword } }),
-
-  /** A full browser navigation, not a fetch — Google's OAuth flow only works as a real page redirect. */
-  googleLoginUrl: (returnTo: string) => `${API_BASE_URL}/auth/google?returnTo=${encodeURIComponent(returnTo)}`,
+  resetPassword: (input: { username: string; code: string; newPassword: string }) =>
+    apiFetch<{ ok: true }>("/auth/password/reset", { method: "POST", body: { identifier: input.username, code: input.code, newPassword: input.newPassword } }),
 
   logout: () => apiFetch<{ ok: true }>("/auth/logout", { method: "POST" }),
 

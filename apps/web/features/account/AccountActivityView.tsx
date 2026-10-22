@@ -45,7 +45,7 @@ const TITLES: Record<string, [string, string]> = {
   SubscriptionCancelReversed: ["عضویت ادامه یافت", "Membership resumed"],
 };
 
-const METHOD: Record<string, [string, string]> = { OTP: ["با کد یک‌بارمصرف", "with a one-time code"], PASSWORD: ["با رمز عبور", "with a password"], GOOGLE: ["با Google", "with Google"] };
+const METHOD: Record<string, [string, string]> = { OTP: ["با کد یک‌بارمصرف", "with a one-time code"], PASSWORD: ["با رمز عبور", "with a password"], GOOGLE: ["با Google (قدیمی)", "with Google (legacy)"] };
 const CONSENT: Record<string, [string, string]> = { TERMS: ["شرایط استفاده", "Terms of use"], PRIVACY: ["سیاست حریم خصوصی", "Privacy policy"], MARKETING: ["پیام‌های تبلیغاتی", "Marketing messages"] };
 
 /**

@@ -24,58 +24,71 @@
     "welcome": {
       "title": "Welcome to PET LIFE OS",
       "subtitle": "Everything about your pet's life, in one place.",
-      "continueWithEmail": "Continue with email",
-      "continueWithPhone": "Continue with phone",
-      "continueWithGoogle": "Continue with Google",
-      "continueWithUsername": "Continue with username",
-      "createAccount": "Create an account",
-      "googleAuthFailed": "We couldn't sign you in with Google. Please try another method."
+      "signIn": "Log in",
+      "createAccount": "Create an account"
+    },
+    "common": {
+      "genericError": "Something went wrong. Please try again.",
+      "smsDeliveryFailed": "We couldn't send the text message. Please try again in a moment.",
+      "phoneTaken": "This mobile number is already linked to another account.",
+      "challengeExpired": "This sign-in expired. Enter your username and password again."
     },
     "identifier": {
-      "emailLabel": "Email address",
       "invalidPhone": "Enter a valid Iranian mobile number.",
-      "phoneLabel": "Phone number",
+      "phoneLabel": "Mobile number",
       "sendCode": "Send code"
     },
     "otp": {
       "title": "Enter the code",
-      "subtitle": "We sent a 6-digit code to {identifier}",
+      "subtitle": "We texted a 6-digit code to {identifier}",
       "resend": "Resend code",
       "resendIn": "Resend in {seconds, number}s",
       "verify": "Verify",
       "invalid": "That code is incorrect or has expired.",
-      "rateLimited": "Too many attempts. Try again in {seconds, number}s."
+      "rateLimited": "Too many attempts. Try again in {seconds, number}s.",
+      "back": "Back"
     },
     "password": {
       "usernameLabel": "Username",
       "passwordLabel": "Password",
       "login": "Log in",
       "forgotPassword": "Forgot your password?",
-      "invalidCredentials": "The username or password you entered is incorrect."
+      "invalidCredentials": "The username or password you entered is incorrect.",
+      "noAccount": "No account yet? Create one",
+      "phoneRequiredTitle": "Add your mobile number",
+      "phoneRequiredBody": "Your account has no verified mobile yet. Sign-in codes are sent by text — enter the number to receive yours."
     },
     "register": {
       "title": "Create your account",
       "usernameLabel": "Username",
       "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
       "displayNameLabel": "Display name (optional)",
-      "emailLabel": "Email (optional)",
+      "phoneLabel": "Mobile number",
+      "phoneHint": "We'll text a code to confirm it. It's also where sign-in and password-reset codes go.",
+      "acceptTerms": "I accept PET LIFE's Terms and Privacy Policy.",
+      "sendCode": "Send verification code",
       "submit": "Create account",
       "usernameTaken": "This username is already taken.",
-      "haveAccount": "Already have an account? Log in"
+      "haveAccount": "Already have an account? Log in",
+      "failed": "Could not create your account. Check the details and try again."
     },
     "forgot": {
       "title": "Reset your password",
-      "identifierLabel": "Username or email",
-      "submit": "Send reset link",
-      "sent": "If an account matches, a reset link has been sent.",
-      "backToLogin": "Back to log in"
+      "identifierLabel": "Username",
+      "submit": "Text me a reset code",
+      "sent": "If this username has a verified mobile, we texted a reset code to it.",
+      "codeLabel": "Reset code",
+      "newPasswordLabel": "New password",
+      "reset": "Set new password",
+      "backToLogin": "Back to log in",
+      "failed": "Could not send your request. Please try again."
     },
     "reset": {
       "title": "Choose a new password",
-      "newPasswordLabel": "New password",
-      "submit": "Reset password",
-      "invalidToken": "This reset link is invalid or has expired.",
-      "success": "Your password has been reset. You can now log in."
+      "success": "Your password has been reset. You can now log in.",
+      "moved": "Password resets now use a code sent by text message."
     }
   },
   "onboarding": {
@@ -2209,7 +2222,8 @@
         "places": "Places",
         "communityReports": "User reports",
         "animalSupport": "Animal support",
-        "lostPets": "Lost pets"
+        "lostPets": "Lost pets",
+        "sms": "SMS & patterns"
       }
     },
     "common": {

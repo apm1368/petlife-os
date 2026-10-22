@@ -176,4 +176,37 @@ export const adminService = {
     apiFetch<PaginatedDto<AdminAuditLogDto>>(
       `/admin/audit${toQueryString({ entityType: input.entityType, entityId: input.entityId, adminUserId: input.adminUserId, page: input.page, pageSize: input.pageSize })}`,
     ),
+
+  // SMS (FarazSMS) — overview, pattern management, test send
+  smsOverview: () => apiFetch<AdminSmsOverviewDto>("/admin/sms/overview"),
+  smsPatterns: () => apiFetch<unknown>("/admin/sms/patterns"),
+  smsPattern: (code: string) => apiFetch<unknown>(`/admin/sms/patterns/${encodeURIComponent(code)}`),
+  createSmsPattern: (input: AdminSmsPatternInput) => apiFetch<{ result: unknown }>("/admin/sms/patterns", { method: "POST", body: input }),
+  deleteSmsPattern: (code: string) => apiFetch<{ ok: true }>(`/admin/sms/patterns/${encodeURIComponent(code)}`, { method: "DELETE" }),
+  testSmsPattern: (input: { code: string; recipient: string; attributes: Record<string, string> }) => apiFetch<{ requestId: string }>("/admin/sms/test", { method: "POST", body: input }),
 };
+
+export interface AdminSmsOverviewDto {
+  configured: boolean;
+  sender: string | null;
+  otpProvider: "dev" | "faraz";
+  otpPatternCode: string | null;
+  otpPatternVar: string;
+  messagingProvider: "dev" | "faraz";
+  messagingMode: "sandbox" | "production";
+  balance: { balanceAmount: number; balanceCount: number } | null;
+  balanceError: string | null;
+}
+
+export type AdminSmsPatternCategory = "otp" | "club" | "order" | "others";
+export type AdminSmsPatternVarType = "int" | "str" | "date";
+
+/** Mirrors FarazSMS "Create New Pattern": variables appear in the text as %name%. */
+export interface AdminSmsPatternInput {
+  text: string;
+  description?: string;
+  website: string;
+  shared: boolean;
+  category: AdminSmsPatternCategory;
+  vars: { var: string; length: number; type: AdminSmsPatternVarType }[];
+}

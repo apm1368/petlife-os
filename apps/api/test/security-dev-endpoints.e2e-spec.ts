@@ -2,10 +2,10 @@ import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import type * as TestAppModule from "./test-app";
 
-/** Development simulations (Google sign-in, dev notifications, unsigned sandbox webhooks) are unreachable unless explicitly enabled. */
+/** Development simulations (code-only sign-in, dev notifications, unsigned sandbox webhooks) are unreachable unless explicitly enabled. */
 describe("Security: development simulations are opt-in", () => {
   let app: INestApplication;
-  const previous = process.env.GOOGLE_DEV_SIMULATE_ENABLED;
+  const previous = process.env.AUTH_DIRECT_OTP_LOGIN_ENABLED;
   const previousSimulation = process.env.DEV_SIMULATION_ENABLED;
 
   let extractCookie: typeof TestAppModule.extractCookie;
@@ -14,7 +14,7 @@ describe("Security: development simulations are opt-in", () => {
 
   beforeAll(async () => {
     // Config is validated when AppModule is first imported, so the flag must be set before loading it.
-    process.env.GOOGLE_DEV_SIMULATE_ENABLED = "false";
+    process.env.AUTH_DIRECT_OTP_LOGIN_ENABLED = "false";
     process.env.DEV_SIMULATION_ENABLED = "false";
     let testApp!: typeof TestAppModule;
     await jest.isolateModulesAsync(async () => {
@@ -27,20 +27,19 @@ describe("Security: development simulations are opt-in", () => {
   });
 
   afterAll(async () => {
-    process.env.GOOGLE_DEV_SIMULATE_ENABLED = previous;
+    process.env.AUTH_DIRECT_OTP_LOGIN_ENABLED = previous;
     process.env.DEV_SIMULATION_ENABLED = previousSimulation;
     await app.close();
   });
 
-  it("refuses to issue a session when the flag is not set, outside production too", async () => {
+  it("serves no code-only sign-in when the flag is not set, outside production too", async () => {
     const csrf = extractCookie((await request(app.getHttpServer()).get("/health/live")).headers["set-cookie"], "petlife_csrf")!;
-    const res = await request(app.getHttpServer())
-      .post("/dev/auth/google/simulate")
-      .set("Cookie", `petlife_csrf=${csrf}`)
-      .set("x-csrf-token", csrf)
-      .send({ sub: "probe", email: "someone@example.com", emailVerified: true });
-    expect(res.status).toBeGreaterThanOrEqual(400);
-    expect(extractCookie(res.headers["set-cookie"], "petlife_session")).toBeUndefined();
+    for (const [path, body] of [["/auth/request-otp", { identifier: "09121234567" }], ["/auth/verify-otp", { identifier: "09121234567", code: "123456" }]] as const) {
+      const res = await request(app.getHttpServer()).post(path).set("Cookie", `petlife_csrf=${csrf}`).set("x-csrf-token", csrf).send(body);
+      expect(res.status).toBe(404);
+      expect(extractCookie(res.headers["set-cookie"], "petlife_session")).toBeUndefined();
+    }
+    expect((await request(app.getHttpServer()).get("/auth/methods")).body).toEqual({ phone: false, password: true });
   });
 
   it("refuses unsigned sandbox payment and shipping webhooks from anyone", async () => {

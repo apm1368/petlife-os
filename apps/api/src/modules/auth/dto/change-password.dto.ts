@@ -1,7 +1,7 @@
 import { IsOptional, IsString, MinLength } from "class-validator";
 
 export class ChangePasswordDto {
-  /** Omitted only when the account has never had a password (OTP-only / Google-only) — see AuthPasswordService.setOrChangePassword. */
+  /** Omitted only when the account has never had a password (e.g. created by code-only sign-in) — see AuthPasswordService.setOrChangePassword. */
   @IsOptional()
   @IsString()
   currentPassword?: string;

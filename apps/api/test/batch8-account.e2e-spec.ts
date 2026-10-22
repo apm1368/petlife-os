@@ -11,6 +11,7 @@ import { sanitizeReturnTo } from "../src/common/return-to/return-to.util";
 import { IDENTIFIER_LIMITS, identifierRateLimitKey } from "../src/common/rate-limit/identifier-rate-limiter.service";
 import { isPrivateUploadPath } from "../src/modules/storage/object-url.util";
 import { normalizeIranianPhone } from "../src/common/phone/phone-normalizer";
+import { hashPassword } from "../src/common/password/password-hash.util";
 
 interface Cookies {
   session?: string;
@@ -42,7 +43,7 @@ describe("Batch 8 — Account & security", () => {
   /** Tests reuse identifiers faster than the real resend cooldown and hourly send budget allow. */
   async function clearOtpCooldown(identifier: string) {
     const key = canonicalIdentifier(identifier);
-    await redis.del(`otp:cooldown:${key}`, identifierRateLimitKey(IDENTIFIER_LIMITS.otpSend.bucket, key));
+    await redis.del(...["direct", "register", "login", "reset", "contact", "privacy"].map((purpose) => `otp:cooldown:${purpose}:${key}`), identifierRateLimitKey(IDENTIFIER_LIMITS.otpSend.bucket, key));
   }
 
   afterAll(async () => {
@@ -58,8 +59,8 @@ describe("Batch 8 — Account & security", () => {
   const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const uniquePhone = () => `0912${Math.floor(1_000_000 + Math.random() * 8_999_999)}`;
 
-  function lastOtp(identifier: string): string {
-    const calls = logSpy.mock.calls.filter((args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(`identifier=${canonicalIdentifier(identifier)} `));
+  function lastOtp(identifier: string, purpose?: string): string {
+    const calls = logSpy.mock.calls.filter((args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(`identifier=${canonicalIdentifier(identifier)} `) && (!purpose || args[0].includes(`purpose=${purpose} `)));
     const call = calls[calls.length - 1];
     if (!call) throw new Error(`No OTP log found for ${identifier}`);
     return /code=(\d+)/.exec(call[0] as string)![1]!;
@@ -98,9 +99,12 @@ describe("Batch 8 — Account & security", () => {
     return { c, userId: row.id, email };
   }
 
-  async function register(username: string, password: string, email?: string) {
+  /** Sign-up: username + password, confirmed with the code texted to `phone`. */
+  async function register(username: string, password: string, phone = uniquePhone()) {
     const token = await csrf();
-    const res = await request(server).post("/auth/register").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ username, password, email }).expect(200);
+    const send = (url: string, body: object) => request(server).post(url).set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send(body);
+    await send("/auth/register/request-otp", { username, phone }).expect(200);
+    const res = await send("/auth/register", { username, password, phone, code: lastOtp(phone, "register") }).expect(200);
     return client({ session: extractCookie(res.headers["set-cookie"], "petlife_session"), csrf: token });
   }
 
@@ -158,12 +162,13 @@ describe("Batch 8 — Account & security", () => {
       expect(done.body).toMatchObject({ phone: canonicalIdentifier(phone), phoneVerified: true });
       expect(await prisma.domainEvent.count({ where: { type: "ContactChanged", aggregateId: u.userId } })).toBe(1);
 
-      // Asking for a code for someone else's email looks exactly like any other request (no account probing)…
-      const other = await user("b8-other");
-      await clearOtpCooldown(other.email);
-      await u.c.post("/me/contact/request").send({ kind: "email", value: other.email }).expect(200);
+      // Asking for a code for someone else's number looks exactly like any other request (no account probing)…
+      const otherPhone = uniquePhone();
+      await signIn(otherPhone);
+      await clearOtpCooldown(otherPhone);
+      await u.c.post("/me/contact/request").send({ kind: "phone", value: otherPhone }).expect(200);
       // …but it can never be attached to this account.
-      const clash = await u.c.post("/me/contact/confirm").send({ kind: "email", value: other.email, code: lastOtp(other.email) }).expect(409);
+      const clash = await u.c.post("/me/contact/confirm").send({ kind: "phone", value: otherPhone, code: lastOtp(otherPhone, "contact") }).expect(409);
       expect(clash.body.error.code).toBe("CONTACT_UNAVAILABLE");
       // A kind/value mismatch is rejected.
       await u.c.post("/me/contact/request").send({ kind: "phone", value: "someone@example.com" }).expect(409);
@@ -172,19 +177,17 @@ describe("Batch 8 — Account & security", () => {
       await request(server).post("/me/contact/request").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ kind: "phone", value: uniquePhone() }).expect(401);
     });
 
-    it("pre-account-takeover: proving an email that someone else typed at sign-up locks the stranger out", async () => {
+    it("pre-account-takeover: proving an email that someone else attached unverified locks the stranger out", async () => {
+      // Sign-up no longer takes an email; older rows can still carry one nobody proved.
       const victimEmail = `b8-victim-${unique()}@example.com`;
       const username = `squatter_${Date.now()}`;
-      const squatter = await register(username, "squatter-password-1", victimEmail);
-      await squatter.get("/me").expect(200);
-      expect((await prisma.user.findUniqueOrThrow({ where: { email: victimEmail } })).emailVerifiedAt).toBeNull();
+      await prisma.user.create({ data: { username, normalizedUsername: username.toLowerCase(), displayName: username, email: victimEmail, passwordHash: await hashPassword("squatter-password-1") } });
 
       // The real owner signs in with a code sent to their inbox.
       const victim = client(await signIn(victimEmail));
       const me = await victim.get("/me").expect(200);
       expect(me.body).toMatchObject({ emailVerified: true, hasPassword: false });
-      // The squatter's session and password no longer work.
-      await squatter.get("/me").expect(401);
+      // The squatter's password no longer works.
       await passwordLogin(username, "squatter-password-1").then((r) => expect(r.status).toBe(401));
       expect(await prisma.domainEvent.count({ where: { type: "UnverifiedCredentialsCleared", aggregateId: me.body.id } })).toBe(1);
     });
@@ -362,23 +365,20 @@ describe("Batch 8 — Account & security", () => {
       expect(prefs.body.preferences.find((p: { category: string; channel: string }) => p.category === "SECURITY" && p.channel === "IN_APP").enabled).toBe(true);
     });
 
-    it("password reset links are single-use, die when another is used, and don't reveal whether an account exists", async () => {
+    it("password reset codes are single-use, work once under a race, and don't reveal whether an account exists", async () => {
       const username = `b8reset_${Date.now()}`;
-      const email = `b8-reset-${unique()}@example.com`;
-      await register(username, "first-password-1", email);
+      const phone = uniquePhone();
+      await register(username, "first-password-1", phone);
       const token = await csrf();
       const forgot = (identifier: string) => request(server).post("/auth/password/forgot").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ identifier });
-      const known = await forgot(email).expect(200);
-      const unknown = await forgot(`nobody-${unique()}@example.com`).expect(200);
+      const known = await forgot(username).expect(200);
+      const unknown = await forgot(`nobody_${Date.now()}`).expect(200);
       expect(known.body).toEqual(unknown.body);
-      await forgot(username).expect(200);
-      const tokens = logSpy.mock.calls.map((c) => String(c[0])).filter((line) => line.includes("[DEV PASSWORD RESET]")).map((line) => /token=(\S+)/.exec(line)![1]!);
-      expect(tokens.length).toBeGreaterThanOrEqual(2);
-      const [first, second] = tokens.slice(-2);
-      const reset = (t: string, pw: string) => request(server).post("/auth/password/reset").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ token: t, newPassword: pw });
-      const race = await Promise.all([reset(second!, "second-password-2"), reset(second!, "second-password-3")]);
+      const code = lastOtp(phone, "reset");
+      const reset = (pw: string) => request(server).post("/auth/password/reset").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ identifier: username, code, newPassword: pw });
+      const race = await Promise.all([reset("second-password-2"), reset("second-password-3")]);
       expect(race.filter((r) => r.status === 200)).toHaveLength(1);
-      await reset(first!, "first-link-reused").expect(400);
+      await reset("code-reused-4").expect(400);
     });
   });
 
@@ -683,9 +683,6 @@ describe("Batch 8 — Account & security", () => {
         expect(sanitizeReturnTo(evil, "/welcome")).toBe("/welcome");
       }
       expect(sanitizeReturnTo("/fa/profile/security", "/welcome")).toBe("/fa/profile/security");
-      // The Google entry point is disabled in this environment and must not redirect anywhere at all.
-      const res = await request(server).get(`/auth/google?returnTo=${encodeURIComponent("https://evil.example")}`);
-      expect(res.headers.location ?? "").not.toContain("evil.example");
     });
   });
 

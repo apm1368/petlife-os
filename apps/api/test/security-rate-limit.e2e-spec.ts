@@ -7,6 +7,7 @@ import { PrismaService } from "../src/common/prisma/prisma.service";
 import { REDIS_CLIENT } from "../src/common/redis/redis.module";
 import { applyTrustProxy } from "../src/common/http/trust-proxy.util";
 import { normalizeIranianPhone } from "../src/common/phone/phone-normalizer";
+import { hashPassword } from "../src/common/password/password-hash.util";
 
 /**
  * Security finding G — effective rate limits. The general e2e suite skips the IP throttler; this spec
@@ -45,6 +46,11 @@ describe("Security: rate limiting (finding G)", () => {
   const post = (url: string, ip: string, body: object) =>
     request(app.getHttpServer()).post(url).set("X-Forwarded-For", ip).set("Cookie", `petlife_csrf=${csrf}`).set("x-csrf-token", csrf).send(body);
 
+  /** A password account with a verified mobile, created directly — these tests budget sign-in, not sign-up. */
+  async function account(username: string, password: string, mobile: string) {
+    return prisma.user.create({ data: { username, normalizedUsername: username.toLowerCase(), displayName: username, passwordHash: await hashPassword(password), phone: canonicalIdentifier(mobile), phoneVerifiedAt: new Date() } });
+  }
+
   it("keys the IP throttler on the real client behind the proxy, not on the proxy itself", async () => {
     const attacker = "203.0.113.10";
     for (let i = 0; i < 5; i++) await post("/auth/request-otp", attacker, { identifier: phone(10 + i) }).expect(200);
@@ -57,10 +63,10 @@ describe("Security: rate limiting (finding G)", () => {
   it("caps OTP sends per phone number across addresses (SMS bombing / code cycling)", async () => {
     const victim = phone(30);
     for (let i = 0; i < 5; i++) {
-      await redis.del(`otp:cooldown:${canonicalIdentifier(victim)}`); // the provider's 30s resend cooldown, elapsed
+      await redis.del(`otp:cooldown:direct:${canonicalIdentifier(victim)}`); // the provider's 30s resend cooldown, elapsed
       await post("/auth/request-otp", nextIp(), { identifier: victim }).expect(200);
     }
-    await redis.del(`otp:cooldown:${canonicalIdentifier(victim)}`);
+    await redis.del(`otp:cooldown:direct:${canonicalIdentifier(victim)}`);
     const sixth = await post("/auth/request-otp", nextIp(), { identifier: victim });
     expect(sixth.status).toBe(429);
     expect(sixth.body.error.code).toBe("OTP_RATE_LIMITED");
@@ -82,7 +88,7 @@ describe("Security: rate limiting (finding G)", () => {
   it("budgets failed password logins per username — identically for names that do not exist", async () => {
     const username = `rl_owner_${run}`;
     const password = `correct-horse-${run}`;
-    await post("/auth/register", nextIp(), { username, password }).expect(200);
+    await account(username, password, phone(50));
 
     for (let i = 0; i < 10; i++) await post("/auth/login/password", nextIp(), { username, password: `wrong-${i}-guess` }).expect(401);
     const real = await post("/auth/login/password", nextIp(), { username, password });
@@ -100,7 +106,7 @@ describe("Security: rate limiting (finding G)", () => {
   it("a successful sign-in clears the username's failure budget", async () => {
     const username = `rl_recover_${run}`;
     const password = `correct-horse-${run}`;
-    await post("/auth/register", nextIp(), { username, password }).expect(200);
+    await account(username, password, phone(60));
     for (let i = 0; i < 9; i++) await post("/auth/login/password", nextIp(), { username, password: `typo-${i}-guess` }).expect(401);
     await post("/auth/login/password", nextIp(), { username, password }).expect(200);
     for (let i = 0; i < 9; i++) await post("/auth/login/password", nextIp(), { username, password: `typo-again-${i}` }).expect(401);
@@ -109,13 +115,18 @@ describe("Security: rate limiting (finding G)", () => {
 
   it("caps password-reset requests per identifier while answering exactly as for an unknown account", async () => {
     const username = `rl_reset_${run}`;
-    await post("/auth/register", nextIp(), { username, password: `correct-horse-${run}` }).expect(200);
+    const mobile = phone(70);
+    await account(username, `correct-horse-${run}`, mobile);
+    const resetCooldown = `otp:cooldown:reset:${canonicalIdentifier(mobile)}`;
+    const sends: number[] = [];
     for (let i = 0; i < 5; i++) {
+      await redis.del(resetCooldown); // the provider's 30s resend cooldown, elapsed
       const res = await post("/auth/password/forgot", nextIp(), { identifier: username });
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ ok: true });
+      sends.push(await redis.exists(resetCooldown));
     }
-    const user = await prisma.user.findFirstOrThrow({ where: { username } });
-    expect(await prisma.passwordResetToken.count({ where: { userId: user.id } })).toBe(3);
+    // Only the first three requests in the hour text a code; the rest are silently dropped.
+    expect(sends).toEqual([1, 1, 1, 0, 0]);
   });
 });

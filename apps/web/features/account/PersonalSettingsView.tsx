@@ -123,7 +123,7 @@ export function PersonalSettingsView() {
           </div>
         </div>
         <div className="security-list">
-          {(["phone", "email"] as const).map((kind) => (
+          {(["phone"] as const).map((kind) => (
             <ContactRow
               key={kind}
               kind={kind}

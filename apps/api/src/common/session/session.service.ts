@@ -26,7 +26,7 @@ export class SessionService {
   private get ttlMs(): number { return this.config.get("SESSION_TTL_DAYS", { infer: true }) * 24 * 60 * 60 * 1000; }
 
   async issueSession(userId: string, res: Response, meta: { userAgent?: string; ipAddress?: string }): Promise<string> {
-    // Every sign-in path (password, OTP, Google, signup) ends here, so this is the one suspension check for logins.
+    // Every sign-in path (password + SMS code, signup) ends here, so this is the one suspension check for logins.
     const account = await this.prisma.user.findUnique({ where: { id: userId }, select: { accountStatus: true } });
     if (account?.accountStatus === UserAccountStatus.SUSPENDED) throw new AccountSuspendedException();
     const session = await this.prisma.session.create({ data: { userId, userAgent: meta.userAgent, ipAddress: meta.ipAddress, expiresAt: new Date(Date.now() + this.ttlMs) } });

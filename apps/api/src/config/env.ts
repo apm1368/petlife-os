@@ -16,9 +16,6 @@ const envSchema = z.object({
   /// nginx, so req.ip is the real client (per-IP throttling works) and a client talking to the API
   /// directly cannot spoof its address. "false" disables, a number trusts that many hops.
   TRUST_PROXY: z.string().default("loopback"),
-  /// The /dev/auth/google/simulate test endpoint signs in as any Google identity. It must be opted
-  /// into explicitly (the e2e suite does) and is never honoured in production, whatever the flag.
-  GOOGLE_DEV_SIMULATE_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
   /// Dev simulation surfaces — /dev/notifications/*, shipping and marketplace dev/simulate, and the
   /// unsigned sandbox payment/shipping webhooks — let a caller fabricate notifications, payment results
   /// and shipment states for anyone. Off unless explicitly enabled (local dev and the e2e suite do);
@@ -48,35 +45,20 @@ const envSchema = z.object({
 
   CSRF_SECRET: z.string().min(16),
 
-  OTP_PROVIDER: z.enum(["dev"]).default("dev"),
+  /// "dev" logs codes to the server console outside production and delivers nothing; "faraz" sends
+  /// them by SMS through an approved FarazSMS pattern (FARAZ_SMS_OTP_PATTERN_CODE).
+  OTP_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
   OTP_LENGTH: z.coerce.number().int().min(4).max(8).default(6),
   OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
   OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(30),
   OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 
-  /// Authentication (Handoff 12) — Google OAuth follows the exact same
-  /// "*_ENABLED flag, optional credentials, validated at startup" shape as
-  /// every other external provider in this codebase (Payment/Shipping/
-  /// Marketplace/Messaging). Unlike those, there is no sandbox mode: Google
-  /// sign-in is either off (GOOGLE_AUTH_ENABLED=false, the default — the
-  /// rest of the app keeps working, per spec) or genuinely configured with
-  /// real OAuth client credentials; there is no safe "simulate a real
-  /// Google login" sandbox the way DevPaymentGateway can safely simulate a
-  /// card charge, so dev/test coverage instead goes through the dedicated
-  /// dev-only /dev/auth/google/simulate endpoint (see AuthGoogleController).
-  /// z.coerce.boolean() would treat the *string* "false" as truthy (any
-  /// non-empty string coerces to true) — every other *_ENABLED flag in this
-  /// schema happens to only ever be set to "true" in .env, so that footgun
-  /// has never surfaced before now. This is the one flag actually set to
-  /// "false" in .env (Google is off by default), so it needs a real
-  /// string-literal parse instead.
-  GOOGLE_AUTH_ENABLED: z
-    .enum(["true", "false"])
-    .default("false")
-    .transform((value) => value === "true"),
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
-  GOOGLE_CALLBACK_URL: z.string().optional(),
+  /// Sign-up and sign-in are username + password + an SMS code. The legacy code-only sign-in
+  /// (/auth/request-otp + /auth/verify-otp, which creates accounts with no username or password) is
+  /// kept only for the e2e suite's fixtures: off unless enabled, and never honoured in production.
+  AUTH_DIRECT_OTP_LOGIN_ENABLED: flag(false),
+  /// How long a password-verified sign-in waits for its SMS code before it must start over.
+  AUTH_LOGIN_CHALLENGE_TTL_SECONDS: z.coerce.number().int().positive().default(600),
 
   /// Argon2id password hashing (see common/password/password-hash.util.ts).
   PASSWORD_MIN_LENGTH: z.coerce.number().int().min(8).default(8),
@@ -174,12 +156,15 @@ const envSchema = z.object({
   MESSAGING_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
   DEV_MESSAGING_ENABLED: flag(true),
   FARAZ_SMS_ENABLED: flag(true),
-  /// Optional and unused by the sandbox-stub adapter — present only so a
-  /// real integration has a place to read credentials from without a schema
-  /// change, and so startup validation can require them in "production" mode.
+  /// FarazSMS web service (https://docs.farazsms.com). The base URL defaults to the documented
+  /// production host; the API key comes from the FarazSMS panel; the sender is the line number SMS
+  /// go out from. The OTP pattern must be created and approved in FarazSMS (the admin "SMS patterns"
+  /// screen can create one) and declare one variable — named by FARAZ_SMS_OTP_PATTERN_VAR — for the code.
   FARAZ_SMS_BASE_URL: z.string().optional(),
   FARAZ_SMS_API_KEY: z.string().optional(),
   FARAZ_SMS_SENDER: z.string().optional(),
+  FARAZ_SMS_OTP_PATTERN_CODE: z.string().optional(),
+  FARAZ_SMS_OTP_PATTERN_VAR: z.string().default("code"),
   /// How many times a TRANSIENT delivery failure is retried before the
   /// delivery is marked FAILED for good (spec: "do not infinitely retry").
   NOTIFICATION_MAX_DELIVERY_ATTEMPTS: z.coerce.number().int().positive().default(3),
@@ -292,26 +277,9 @@ function validateMarketplaceConfig(env: AppEnv): void {
 function validateMessagingConfig(env: AppEnv): void {
   if (env.MESSAGING_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
-  if (env.FARAZ_SMS_ENABLED && !(env.FARAZ_SMS_BASE_URL && env.FARAZ_SMS_API_KEY)) missing.push("FARAZ_SMS_BASE_URL/FARAZ_SMS_API_KEY");
+  if (env.FARAZ_SMS_ENABLED && !(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER)) missing.push("FARAZ_SMS_API_KEY/FARAZ_SMS_SENDER");
   if (missing.length > 0) {
     throw new Error(`MESSAGING_SANDBOX_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
-  }
-}
-
-/// Handoff 12 — "Google may be unavailable locally, but the app must
-/// continue working" means GOOGLE_AUTH_ENABLED=false is always valid with
-/// zero credentials configured; enabling it without every required
-/// credential is the one case that fails startup, since a half-configured
-/// Google client would otherwise fail unpredictably on the first real login
-/// attempt instead of at boot.
-function validateGoogleAuthConfig(env: AppEnv): void {
-  if (!env.GOOGLE_AUTH_ENABLED) return;
-  const missing: string[] = [];
-  if (!env.GOOGLE_CLIENT_ID) missing.push("GOOGLE_CLIENT_ID");
-  if (!env.GOOGLE_CLIENT_SECRET) missing.push("GOOGLE_CLIENT_SECRET");
-  if (!env.GOOGLE_CALLBACK_URL) missing.push("GOOGLE_CALLBACK_URL");
-  if (missing.length > 0) {
-    throw new Error(`GOOGLE_AUTH_ENABLED=true requires all Google OAuth credentials. Missing: ${missing.join(", ")}`);
   }
 }
 
@@ -327,12 +295,20 @@ function validateStorageConfig(env: AppEnv): void {
   }
 }
 
-/// The only OTP provider is the development one (it prints codes to the server log outside
-/// production and delivers nothing). A production process must never start with it: sign-in would
-/// silently fail for every user. Fail at boot instead, exactly like the storage rule below.
+/// The dev OTP provider prints codes to the server log outside production and delivers nothing, so a
+/// production process must never start with it: sign-in would silently fail for every user. The
+/// FarazSMS provider needs its key, sender line and approved OTP pattern; a half-configured one would
+/// otherwise fail on the first sign-in instead of at boot.
 function validateOtpConfig(env: AppEnv): void {
   if (env.NODE_ENV === "production" && env.OTP_PROVIDER === "dev") {
     throw new Error('OTP_PROVIDER "dev" cannot run with NODE_ENV=production — configure a real OTP delivery provider.');
+  }
+  if (env.OTP_PROVIDER === "faraz") {
+    const missing = (["FARAZ_SMS_API_KEY", "FARAZ_SMS_SENDER", "FARAZ_SMS_OTP_PATTERN_CODE"] as const).filter((key) => !env[key]);
+    if (missing.length > 0) throw new Error(`OTP_PROVIDER=faraz requires: ${missing.join(", ")}`);
+  }
+  if (env.NODE_ENV === "production" && env.AUTH_DIRECT_OTP_LOGIN_ENABLED) {
+    throw new Error("AUTH_DIRECT_OTP_LOGIN_ENABLED is a test-only fixture and cannot run with NODE_ENV=production.");
   }
 }
 
@@ -342,7 +318,6 @@ export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   validateShippingConfig(env);
   validateMarketplaceConfig(env);
   validateMessagingConfig(env);
-  validateGoogleAuthConfig(env);
   validateOtpConfig(env);
   validateStorageConfig(env);
   return env;

@@ -1,8 +1,8 @@
 import { IsString, Length } from "class-validator";
 
 export class ForgotPasswordDto {
-  /** A username or an email — see classifyLoginIdentifier. */
+  /** The username; the code goes to that account's verified mobile. */
   @IsString()
-  @Length(3, 320)
+  @Length(3, 30)
   identifier!: string;
 }

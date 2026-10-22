@@ -2,7 +2,8 @@
 // AppModule/ConfigModule read process.env), so the e2e suite always targets
 // the dedicated test database instead of whatever `.env` points at locally.
 process.env.NODE_ENV = "test";
-process.env.GOOGLE_DEV_SIMULATE_ENABLED = process.env.GOOGLE_DEV_SIMULATE_ENABLED ?? "true";
+// Suites sign fixtures in with the code-only OTP route (a test-only path; see AuthService).
+process.env.AUTH_DIRECT_OTP_LOGIN_ENABLED = process.env.AUTH_DIRECT_OTP_LOGIN_ENABLED ?? "true";
 // The suites drive sandbox webhooks and dev/simulate routes; the canonical server leaves this off.
 process.env.DEV_SIMULATION_ENABLED = process.env.DEV_SIMULATION_ENABLED ?? "true";
 // Suites create households and assert FREE-plan limits; the welcome trial is opted into per test.

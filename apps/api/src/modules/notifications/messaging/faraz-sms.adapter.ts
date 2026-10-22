@@ -5,68 +5,47 @@ import type { AppEnv } from "../../../config/env";
 import type { MessageStatusResult, MessagingGateway, MessagingWebhookInput, MessagingWebhookResult, SendSmsInput, SendSmsResult } from "./messaging-gateway.interface";
 import { MESSAGING_PROVIDER_CAPABILITIES } from "./messaging-provider-registry";
 import { simulateSendSms } from "./messaging-simulation.util";
-
-const NOT_CONFIGURED_MESSAGE = "Faraz SMS production integration is not configured (no official merchant documentation/credentials available to this project).";
+import { FarazSmsClient, FarazSmsError } from "./faraz-sms.client";
 
 /**
- * ============================================================================
- * PROVIDER DOCUMENTATION SAFETY — Faraz SMS
- * ============================================================================
- * Official docs source:        UNKNOWN — no official Faraz SMS merchant/API
- *                               documentation or credentials were available
- *                               to this project at implementation time.
- * Auth mechanism:               UNKNOWN.
- * Sandbox availability:         UNKNOWN.
- * Required credentials:         UNKNOWN — `FARAZ_SMS_BASE_URL`/
- *                               `FARAZ_SMS_API_KEY`/`FARAZ_SMS_SENDER` are
- *                               reserved env vars for whenever real
- *                               credentials/docs become available; unused by
- *                               this adapter today.
- * Send request/response shape:  UNKNOWN.
- * Delivery status/webhook:      UNKNOWN — capabilities below mark
- *                               supportsDeliveryStatus/supportsWebhook as
- *                               false (see messaging-provider-registry.ts)
- *                               since this project could not confirm Faraz
- *                               exposes a reliable delivery-confirmation
- *                               callback or status-query endpoint;
- *                               `getMessageStatus`/`verifyWebhook` below
- *                               exist for interface completeness only and
- *                               are never relied on for a DELIVERED status.
- * Idempotency support:          UNKNOWN.
+ * FarazSMS notification transport (docs: https://docs.farazsms.com).
  *
- * Because none of the above is confirmed, this adapter does NOT call any
- * real Faraz endpoint, invent a request/response shape, guess an auth
- * header, or claim a production integration. `sendSms` below delegates to
- * the same generic, clearly-labeled simulation engine DevMessagingAdapter
- * uses (see messaging-simulation.util.ts) — this proves the
- * MessagingGateway/registry boundary genuinely supports a second SMS
- * provider without any Notification/domain-event code change, while never
- * presenting a simulated field/status name as a real Faraz API value.
- * Replacing this file's internals with a real HTTP client is the only
- * change a credentialed integration would need. If
- * `MESSAGING_SANDBOX_MODE=production` is set without real credentials
- * configured, every method below returns an explicit "not configured"
- * failure instead of silently falling back to simulation under a
- * production flag (mirrors Torob/Digikala/AloPeyk/SnappBox's own
- * `isProductionConfigured()` gate).
- * ============================================================================
+ * With MESSAGING_SANDBOX_MODE=production and credentials configured, notification bodies go out
+ * through FarazSMS's simple-send endpoint. FarazSMS moderates and queues free-text sends, so a
+ * successful call means "accepted", never "delivered" — capabilities keep DELIVERED unreachable.
+ * OTP codes never use this path: they go through a pre-approved pattern (see FarazOtpProvider).
+ *
+ * In sandbox mode the adapter delegates to the shared, clearly-labelled simulation engine, so no
+ * real SMS leaves the server from development or test.
  */
 @Injectable()
 export class FarazSmsAdapter implements MessagingGateway {
   readonly provider = MessagingProvider.FARAZ;
   readonly capabilities = MESSAGING_PROVIDER_CAPABILITIES[MessagingProvider.FARAZ];
 
-  constructor(private readonly config: ConfigService<AppEnv, true>) {}
+  constructor(
+    private readonly config: ConfigService<AppEnv, true>,
+    private readonly client: FarazSmsClient,
+  ) {}
 
-  private isProductionConfigured(): boolean {
-    return this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production" && !!this.config.get("FARAZ_SMS_BASE_URL", { infer: true }) && !!this.config.get("FARAZ_SMS_API_KEY", { infer: true });
+  private isProductionMode(): boolean {
+    return this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production";
   }
 
   async sendSms(input: SendSmsInput): Promise<SendSmsResult> {
-    if (this.isProductionConfigured()) {
-      return { status: "FAILED", failureKind: "PERMANENT", failureCode: "PROVIDER_NOT_IMPLEMENTED", failureMessage: NOT_CONFIGURED_MESSAGE };
+    if (!this.isProductionMode()) return simulateSendSms(input, "faraz");
+    if (!this.client.isConfigured()) {
+      return { status: "FAILED", failureKind: "PERMANENT", failureCode: "PROVIDER_NOT_CONFIGURED", failureMessage: "FarazSMS API key or sender line is not configured." };
     }
-    return simulateSendSms(input, "faraz");
+    try {
+      const providerMessageId = await this.client.sendSimple({ text: input.body, recipients: [input.destination] });
+      return { status: "SENT", providerMessageId: providerMessageId || undefined };
+    } catch (error) {
+      if (error instanceof FarazSmsError) {
+        return { status: "FAILED", failureKind: error.transient ? "TRANSIENT" : "PERMANENT", failureCode: error.httpStatus ? `FARAZ_HTTP_${error.httpStatus}` : "FARAZ_UNREACHABLE", failureMessage: error.message.slice(0, 500) };
+      }
+      throw error;
+    }
   }
 
   async getMessageStatus(_providerMessageId: string): Promise<MessageStatusResult> {
@@ -75,7 +54,7 @@ export class FarazSmsAdapter implements MessagingGateway {
   }
 
   async verifyWebhook(_input: MessagingWebhookInput): Promise<MessagingWebhookResult> {
-    // Never called (capabilities.supportsWebhook is false) — no confirmed Faraz webhook signature scheme exists to verify against.
+    // Never called (capabilities.supportsWebhook is false) — FarazSMS documents no signed delivery webhook.
     return { valid: false };
   }
 }
