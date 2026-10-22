@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { OnboardingChapter, PetLifecycleStatus } from "@prisma/client";
+import { OnboardingChapter, PetLifecycleStatus, Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { NotFoundApiException } from "../../common/errors/api-exception";
+import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { EntitlementService } from "../subscriptions/entitlement.service";
@@ -17,6 +17,24 @@ import type { UpdatePetDto } from "./dto/update-pet.dto";
  * never rejected, since a legacy/imported value that can't be confidently
  * normalized still needs to be stored.
  */
+/**
+ * `pets_microchip_normalized_key` is a partial unique index across every household, so a chip that
+ * is already on file anywhere rejects the write. Prisma surfaces that as P2002, and an uncaught one
+ * leaves the owner with a generic 500 ("an unexpected error occurred") on a form that is otherwise
+ * valid — nothing names the field, so "try again" can never succeed. Translate it into the ordinary
+ * field-level validation error the client already renders next to the microchip input.
+ */
+function rethrowDuplicateMicrochip(error: unknown): never {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002" &&
+    String((error.meta as { target?: unknown } | undefined)?.target ?? "").includes("microchip")
+  ) {
+    throw new ValidationApiException({ field: "microchipNumber", reason: "MICROCHIP_ALREADY_REGISTERED" });
+  }
+  throw error;
+}
+
 export function normalizeMicrochip(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const normalized = raw.trim().replace(/[\s\-.]/g, "").toUpperCase();
@@ -105,7 +123,7 @@ export class PetsService {
       );
 
       return pet;
-    });
+    }).catch(rethrowDuplicateMicrochip);
     // After commit: the household's first successful pet starts its welcome trial (decision 4). Best effort —
     // an already-used trial never fails the pet creation.
     await this.subscriptions.startWelcomeTrial(householdId, creatorUserId);
@@ -138,7 +156,7 @@ export class PetsService {
       });
       await this.events.publish("PetProfileUpdated", { petId: id }, { tx, aggregateType: "Pet", aggregateId: id });
       return pet;
-    });
+    }).catch(rethrowDuplicateMicrochip);
   }
 
   /**
