@@ -17,6 +17,16 @@ describe("validateEnv — security invariants", () => {
     expect(() => validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv)).not.toThrow();
   });
 
+  it("requires all server-side Faraz values when Faraz handles OTP", () => {
+    expect(() => validateEnv({ ...base, OTP_PROVIDER: "faraz" } as NodeJS.ProcessEnv)).toThrow(/FARAZ_SMS_API_KEY/);
+    expect(() => validateEnv({ ...base, OTP_PROVIDER: "faraz", FARAZ_SMS_API_KEY: "key", FARAZ_SMS_SENDER: "90008361", FARAZ_SMS_OTP_PATTERN_CODE: "otp-uid" } as NodeJS.ProcessEnv)).not.toThrow();
+  });
+
+  it("refuses a fake production messaging mode without the active Faraz pattern", () => {
+    expect(() => validateEnv({ ...base, MESSAGING_SANDBOX_MODE: "production" } as NodeJS.ProcessEnv)).toThrow(/MESSAGING_PROVIDER=faraz/);
+    expect(() => validateEnv({ ...base, MESSAGING_SANDBOX_MODE: "production", MESSAGING_PROVIDER: "faraz", FARAZ_SMS_API_KEY: "key", FARAZ_SMS_SENDER: "90008361", FARAZ_SMS_NOTIFICATION_PATTERN_CODE: "notice-uid" } as NodeJS.ProcessEnv)).not.toThrow();
+  });
+
   it("binds to loopback and trusts only the local proxy by default (finding G)", () => {
     const env = validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv);
     expect(env.HOST).toBe("127.0.0.1");

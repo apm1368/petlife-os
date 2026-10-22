@@ -48,7 +48,7 @@ const envSchema = z.object({
 
   CSRF_SECRET: z.string().min(16),
 
-  OTP_PROVIDER: z.enum(["dev"]).default("dev"),
+  OTP_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
   OTP_LENGTH: z.coerce.number().int().min(4).max(8).default(6),
   OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
   OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(30),
@@ -161,25 +161,20 @@ const envSchema = z.object({
   DIGIKALA_BASE_URL: z.string().optional(),
   DIGIKALA_API_KEY: z.string().optional(),
 
-  /// Messaging, Notifications & Preferences (Handoff 10) — same "sandbox is
-  /// always safe, production is validated" rule as PAYMENT_SANDBOX_MODE/
-  /// SHIPPING_MODE/MARKETPLACE_SANDBOX_MODE (see validateMessagingConfig
-  /// below): no official Faraz SMS merchant credentials exist for this
-  /// project (see README "Provider integration status"), so
-  /// MESSAGING_SANDBOX_MODE=production is rejected unless Faraz is enabled
-  /// with real credentials actually configured. MESSAGING_PROVIDER selects
-  /// which gateway NotificationDeliveryService sends SMS through by
-  /// default — "dev" locally/in tests, "faraz" once real credentials exist.
+  /// FarazSMS official Pattern API: https://docs.farazsms.com/service/post-ws-v1-sms-pattern
+  /// Secrets and panel-specific pattern UIDs stay in the server environment.
   MESSAGING_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
   MESSAGING_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
   DEV_MESSAGING_ENABLED: flag(true),
   FARAZ_SMS_ENABLED: flag(true),
-  /// Optional and unused by the sandbox-stub adapter — present only so a
-  /// real integration has a place to read credentials from without a schema
-  /// change, and so startup validation can require them in "production" mode.
-  FARAZ_SMS_BASE_URL: z.string().optional(),
-  FARAZ_SMS_API_KEY: z.string().optional(),
-  FARAZ_SMS_SENDER: z.string().optional(),
+  FARAZ_SMS_BASE_URL: z.string().url().default("https://api.iranpayamak.com"),
+  FARAZ_SMS_API_KEY: z.string().min(1).optional(),
+  FARAZ_SMS_SENDER: z.string().min(1).optional(),
+  FARAZ_SMS_OTP_PATTERN_CODE: z.string().min(1).optional(),
+  FARAZ_SMS_OTP_CODE_ATTRIBUTE: z.string().min(1).default("code"),
+  FARAZ_SMS_NOTIFICATION_PATTERN_CODE: z.string().min(1).optional(),
+  FARAZ_SMS_NOTIFICATION_BODY_ATTRIBUTE: z.string().min(1).default("message"),
+  FARAZ_SMS_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(5000),
   /// How many times a TRANSIENT delivery failure is retried before the
   /// delivery is marked FAILED for good (spec: "do not infinitely retry").
   NOTIFICATION_MAX_DELIVERY_ATTEMPTS: z.coerce.number().int().positive().default(3),
@@ -292,7 +287,9 @@ function validateMarketplaceConfig(env: AppEnv): void {
 function validateMessagingConfig(env: AppEnv): void {
   if (env.MESSAGING_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
-  if (env.FARAZ_SMS_ENABLED && !(env.FARAZ_SMS_BASE_URL && env.FARAZ_SMS_API_KEY)) missing.push("FARAZ_SMS_BASE_URL/FARAZ_SMS_API_KEY");
+  if (env.MESSAGING_PROVIDER !== "faraz") missing.push("MESSAGING_PROVIDER=faraz");
+  if (!env.FARAZ_SMS_ENABLED) missing.push("FARAZ_SMS_ENABLED=true");
+  if (!(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER && env.FARAZ_SMS_NOTIFICATION_PATTERN_CODE)) missing.push("FARAZ_SMS_API_KEY/FARAZ_SMS_SENDER/FARAZ_SMS_NOTIFICATION_PATTERN_CODE");
   if (missing.length > 0) {
     throw new Error(`MESSAGING_SANDBOX_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
   }
@@ -327,12 +324,12 @@ function validateStorageConfig(env: AppEnv): void {
   }
 }
 
-/// The only OTP provider is the development one (it prints codes to the server log outside
-/// production and delivers nothing). A production process must never start with it: sign-in would
-/// silently fail for every user. Fail at boot instead, exactly like the storage rule below.
 function validateOtpConfig(env: AppEnv): void {
   if (env.NODE_ENV === "production" && env.OTP_PROVIDER === "dev") {
     throw new Error('OTP_PROVIDER "dev" cannot run with NODE_ENV=production — configure a real OTP delivery provider.');
+  }
+  if (env.OTP_PROVIDER === "faraz" && !(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER && env.FARAZ_SMS_OTP_PATTERN_CODE)) {
+    throw new Error("OTP_PROVIDER=faraz requires FARAZ_SMS_API_KEY, FARAZ_SMS_SENDER and FARAZ_SMS_OTP_PATTERN_CODE.");
   }
 }
 

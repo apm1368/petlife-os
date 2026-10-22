@@ -25,9 +25,9 @@
 | مورد | وضعیت | شاهد |
 |---|---|---|
 | نقشه / مسافت | **NOT_CONFIGURED** (ارائه‌دهندهٔ نقشه `BLOCKED_EXTERNAL`) | `TRANSPORT_DISTANCE_MODE` تنظیم نشده، پس `UNAVAILABLE`. فقط حالت `straight_line_demo` برای QA وجود دارد |
-| پیامک فراز | **SANDBOX / BLOCKED_EXTERNAL** | `MESSAGING_PROVIDER=dev`، `MESSAGING_SANDBOX_MODE=sandbox`، کلیدهای فراز تنظیم نشده‌اند. adapter واقعی فراز پیاده نشده (`PROVIDER_NOT_IMPLEMENTED`). همهٔ تحویل‌های SMS روی سرور `SKIPPED` هستند و هیچ «ارسال موفق» ساختگی‌ای ثبت نشده |
-| ورود با کد یک‌بارمصرف (OTP) | **SANDBOX** | `OTP_PROVIDER=dev`؛ کد فقط در لاگ سرور چاپ می‌شود |
+| پیامک فراز | **READY_FOR_CONFIGURATION** | Pattern API واقعی پیاده شده؛ deploy فقط با وجود کلید، خط و UID پترن تأییدشده روی سرور آن را فعال می‌کند. `SENT` فقط پذیرش/صف را نشان می‌دهد |
+| ورود با کد یک‌بارمصرف (OTP) | **READY_FOR_CONFIGURATION** | provider واقعی Faraz پیاده شده و بدون کلید، خط و UID پترن در startup fail-closed است؛ وضعیت LIVE پس از deploy و preflight سرور ثبت می‌شود |
 | درگاه پرداخت | **SANDBOX** | `PAYMENT_SANDBOX_MODE=sandbox`؛ merchant id و کلید تنظیم نشده‌اند |
 | ذخیره‌سازی S3 / private | **NOT_CONFIGURED** | `STORAGE_DRIVER=local`؛ فایل‌ها روی دیسک سرور ذخیره می‌شوند و URLها امضاشده‌اند |
-| TLS | **NOT_CONFIGURED** (`BLOCKED_EXTERNAL`: دامنه لازم است) | nginx فقط روی پورت ۸۰ گوش می‌دهد و ۴۴۳ بسته است. کوکی‌ها فقط در `NODE_ENV=production` پرچم Secure می‌گیرند؛ روی این سرور پرچم ندارند، چون `development` است |
+| TLS | **READY_TO_DEPLOY** | تنظیم transactional Nginx/Let's Encrypt برای `opetlife.ir` و smoke test مستقیم HTML/API/JavaScript در release موجود است؛ نتیجهٔ LIVE پس از deploy ثبت می‌شود |
 | `NODE_ENV` سرور | `development` | سرور اصلی، سرور آزمایشی کانونی است. پیش از ورود کاربر واقعی باید `production` شود، همراه با OTP واقعی و TLS |

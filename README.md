@@ -2481,20 +2481,13 @@ and the notification services never reference a Faraz-specific concept
   (`messaging-simulation.util.ts`, no randomness in outcome, only opaque
   ids use `randomUUID()`), a simulated `DELIVERED` follow-up state for
   test determinism, and a dev-only webhook verifier.
-- **`FarazSmsAdapter`** carries the same "PROVIDER DOCUMENTATION SAFETY"
-  doc-comment discipline as every H07-H09 adapter — no official Faraz SMS
-  merchant/API documentation or credentials were available to this
-  project, so it does not call any real Faraz endpoint, invent a
-  request/response shape, or guess an auth header. `sendSms` delegates to
-  the same simulation engine `DevMessagingAdapter` uses when not
-  production-configured; `isProductionConfigured()` requires both
-  `MESSAGING_SANDBOX_MODE=production` and real `FARAZ_SMS_BASE_URL`/
-  `FARAZ_SMS_API_KEY` — without both, every method returns an explicit
-  `PROVIDER_NOT_IMPLEMENTED` failure rather than silently faking success.
-  `MESSAGING_PROVIDER_CAPABILITIES.FARAZ` marks `supportsDeliveryStatus`
-  and `supportsWebhook` as `false` — not because Faraz definitely lacks
-  them, but because this project could not confirm either, so the honest
-  default is "unconfirmed capability is treated as absent."
+- **`FarazSmsAdapter`** calls Faraz's documented Pattern API
+  (`POST https://api.iranpayamak.com/ws/v1/sms/pattern`) with the exact
+  case-sensitive `Api-Key` header. It converts canonical `+98` phones to
+  the required domestic `09…` form, uses bounded timeouts, classifies
+  throttling/server failures as transient, and never logs provider bodies
+  or credentials. The documented send-request id is stored, but acceptance
+  is only `SENT`; delivery is never fabricated as `DELIVERED`.
 
 ### Delivery state machine — `SENT` is never conflated with `DELIVERED`
 
@@ -4583,8 +4576,8 @@ Six independent reviews were run before any code changed, each producing file:li
 | Provider / capability | Status | Fails closed in production? | Known limitation |
 |---|---|---|---|
 | Google OAuth/OIDC | **NOT_CONFIGURED** by default (`GOOGLE_AUTH_ENABLED=false`); becomes **LIVE** once real `GOOGLE_CLIENT_ID`/`SECRET`/`CALLBACK_URL` are set | Yes — `assertEnabled()` throws explicitly rather than silently degrading | Real, complete implementation (real token exchange, JWKS verification, issuer/audience/nonce checks) — nothing to fix, only credentials to add |
-| Dev OTP (phone/email codes) | **NOT_IMPLEMENTED** — `OTP_PROVIDER` has only one possible value (`"dev"`) | Codes never logged in production (fixed this handoff); delivery still doesn't happen | No real SMS/email OTP delivery exists at all yet — every environment runs the dev path today |
-| Faraz SMS | **NOT_IMPLEMENTED** (no real HTTP client exists behind the adapter) | Yes — `isProductionConfigured()` returns an explicit `PROVIDER_NOT_IMPLEMENTED` failure, never a fake sent status | Reserved env vars (`FARAZ_SMS_BASE_URL`/`API_KEY`) exist for when a real integration is built |
+| Dev OTP (phone/email codes) | Development fallback (`OTP_PROVIDER=dev`) | Codes are never logged in production | Must not be selected for a production process |
+| Faraz SMS / OTP | **IMPLEMENTED; configuration-dependent** | Yes — startup requires the API key, sender line and approved pattern UID for every enabled production path | Pattern UIDs and matching attribute names must be provisioned in the Faraz panel/server env |
 | Payment — Standard Gateway | **NOT_CONFIGURED** (no merchant account/credentials exist for any real gateway) | Yes (fixed this handoff) — refuses a caller-supplied outcome and fails explicitly once `PAYMENT_SANDBOX_MODE=production` | Adapter shape (charge/status/refund/webhook-signature) is real; the network call behind it is not |
 | Payment — SnappPay (BNPL) | **NOT_IMPLEMENTED** (sandbox stub, no real credit/eligibility decision) | Yes (fixed this handoff) | Same gap as Standard Gateway — no real merchant integration |
 | Payment — DigiPay (BNPL) | **NOT_IMPLEMENTED** | Yes (fixed this handoff) | Same gap |
@@ -4598,11 +4591,11 @@ No provider in this table ever silently reports success without a real backing i
 
 ### Environment variable classification
 
-**REQUIRED_PRODUCTION** (already fail-fast validated by `config/env.ts`'s `validateEnv()`, no default): `DATABASE_URL`, `REDIS_URL`, `WEB_APP_ORIGIN`, `SESSION_SECRET` (min 16 chars), `CSRF_SECRET` (min 16 chars). Conditionally required the moment the matching flag is set: `GOOGLE_CLIENT_ID`/`SECRET`/`CALLBACK_URL` (if `GOOGLE_AUTH_ENABLED=true`), `STANDARD_GATEWAY_MERCHANT_ID`/`API_KEY`, `SNAPPAY_MERCHANT_ID`/`API_KEY`, `DIGIPAY_MERCHANT_ID`/`API_KEY` (if `PAYMENT_SANDBOX_MODE=production` and the provider is enabled), `ALOPEYK_API_BASE_URL`/`API_KEY`, `SNAPPBOX_API_BASE_URL`/`API_KEY` (if `SHIPPING_MODE=production`), `TOROB_BASE_URL`/`API_KEY`, `DIGIKALA_BASE_URL`/`API_KEY` (if `MARKETPLACE_SANDBOX_MODE=production`), `FARAZ_SMS_BASE_URL`/`API_KEY` (if `MESSAGING_SANDBOX_MODE=production`), `STORAGE_S3_*` (if `STORAGE_DRIVER=s3`, itself now required in production — see above), `NEXT_PUBLIC_API_ORIGIN` (frontend; `next.config.mjs` now fails the build if unset in a production build, since it is inlined at build time and would otherwise silently ship pointing at `localhost:4000`).
+**REQUIRED_PRODUCTION** (already fail-fast validated by `config/env.ts`'s `validateEnv()`, no default): `DATABASE_URL`, `REDIS_URL`, `WEB_APP_ORIGIN`, `SESSION_SECRET` (min 16 chars), `CSRF_SECRET` (min 16 chars). Conditionally required the moment the matching flag is set: `GOOGLE_CLIENT_ID`/`SECRET`/`CALLBACK_URL` (if `GOOGLE_AUTH_ENABLED=true`), `STANDARD_GATEWAY_MERCHANT_ID`/`API_KEY`, `SNAPPAY_MERCHANT_ID`/`API_KEY`, `DIGIPAY_MERCHANT_ID`/`API_KEY` (if `PAYMENT_SANDBOX_MODE=production` and the provider is enabled), `ALOPEYK_API_BASE_URL`/`API_KEY`, `SNAPPBOX_API_BASE_URL`/`API_KEY` (if `SHIPPING_MODE=production`), `TOROB_BASE_URL`/`API_KEY`, `DIGIKALA_BASE_URL`/`API_KEY` (if `MARKETPLACE_SANDBOX_MODE=production`), `FARAZ_SMS_API_KEY`/`SENDER`/matching approved pattern UID (if `OTP_PROVIDER=faraz` or `MESSAGING_SANDBOX_MODE=production`), `STORAGE_S3_*` (if `STORAGE_DRIVER=s3`, itself now required in production — see above), `NEXT_PUBLIC_API_ORIGIN` (frontend; `next.config.mjs` now fails the build if unset in a production build, since it is inlined at build time and would otherwise silently ship pointing at `localhost:4000`).
 
 **OPTIONAL_PRODUCTION** (sane, non-secret defaults; worst case is a wrong business-logic number, never an exposed secret): `PORT`, `SESSION_COOKIE_NAME`, `SESSION_TTL_DAYS`, `OTP_LENGTH`/`TTL_SECONDS`/`RESEND_COOLDOWN_SECONDS`/`MAX_ATTEMPTS`, `PASSWORD_MIN_LENGTH`/`RESET_TOKEN_TTL_MINUTES`, `STORAGE_LOCAL_DIR`, `BOOKING_HOLD_TTL_SECONDS`/`HEALTH_ACCESS_BUFFER_HOURS`, every `*_SANDBOX_MODE`/`SHIPPING_MODE` (default `"sandbox"`), every provider `*_ENABLED` toggle, `NOTIFICATION_MAX_DELIVERY_ATTEMPTS`/`WORKER_INTERVAL_MS`, `ADMIN_REFUND_APPROVAL_THRESHOLD_IRR`, `DEFAULT_PLATFORM_COMMISSION_BPS`, `SETTLEMENT_APPROVAL_THRESHOLD_IRR`, `CMS_MEDIA_MAX_SIZE_BYTES`, `SUBSCRIPTION_RENEWAL_WORKER_INTERVAL_MS`/`PAST_DUE_RETRY_DAYS`/`GRACE_PERIOD_DAYS`.
 
-**DEVELOPMENT_ONLY** (must never be relied on in production): `DEV_SHIPPING_ENABLED`, `DEV_MARKETPLACE_ENABLED`, `DEV_MESSAGING_ENABLED` (all default `true`, but are only reachable once their matching `*_MODE` is left at `"sandbox"`), `OTP_PROVIDER`/`MESSAGING_PROVIDER` (currently only ever `"dev"`/no real production value exists yet — see provider matrix above).
+**DEVELOPMENT_ONLY** (must never be relied on in production): `DEV_SHIPPING_ENABLED`, `DEV_MARKETPLACE_ENABLED`, `DEV_MESSAGING_ENABLED` and the `dev` values of `OTP_PROVIDER`/`MESSAGING_PROVIDER`. Their `faraz` values are real and fail closed unless the required server-only configuration exists.
 
 **TEST_ONLY**: `TEST_DATABASE_URL` (read only by `apps/api/test/jest-env-setup.js`, never by `main.ts`/`app.module.ts`); the hardcoded `"test-only-session-secret-not-for-prod"`/`"test-only-csrf-secret-not-for-prod"` fallback values live in that same test-only setup file and are unreachable from any production boot path (the real `SESSION_SECRET`/`CSRF_SECRET` schema entries have no default at all).
 
