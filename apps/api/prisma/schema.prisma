@@ -2006,6 +2006,7 @@ model ProviderService {
 
   supportsDog Boolean @default(true)
   supportsCat Boolean @default(true)
+  additionalSpecies PetSpecies[] @default([])
 
   /// At-home (AT_CUSTOMER/MOBILE) service area: cities served, matched against the booking address's city. Empty =
   /// no area restriction. No map provider is involved (G13).
@@ -2597,6 +2598,7 @@ model Product {
 
   supportsDog          Boolean  @default(true)
   supportsCat          Boolean  @default(true)
+  additionalSpecies    PetSpecies[] @default([])
   minAgeMonths         Int?
   maxAgeMonths         Int?
   minWeightKg          Decimal? @db.Decimal(6, 2)

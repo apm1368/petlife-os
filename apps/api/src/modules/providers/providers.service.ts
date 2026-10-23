@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ProviderType, ProviderVerificationStatus as PrismaVerificationStatus, ServiceCategory, type Prisma, type ProviderLocation, type ProviderOrganization, type ProviderService, type ProviderServiceType as PrismaServiceType } from "@prisma/client";
 import type { AvailabilityResponseDto, ProviderProfileDto, ProviderSummaryDto } from "@petlife/types";
-import { PetSpecies } from "@petlife/types";
+import { speciesFilter, supportedSpecies } from "../../common/species/catalog-species";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -43,8 +43,7 @@ export class ProvidersService {
           isActive: true,
           category: ServiceCategory.VET,
           ...(query.serviceType ? { type: query.serviceType as unknown as PrismaServiceType } : {}),
-          ...(query.species === PetSpecies.DOG ? { supportsDog: true } : {}),
-          ...(query.species === PetSpecies.CAT ? { supportsCat: true } : {}),
+          ...speciesFilter(query.species),
         },
       },
     };
@@ -92,7 +91,7 @@ export class ProvidersService {
     if (query.petId) {
       const pet = await this.petAccess.findAccessiblePet(query.petId, viewerId);
       if (pet) {
-        petCompatible = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : false;
+        petCompatible = supportedSpecies(service).includes(pet.species);
       }
     }
 
