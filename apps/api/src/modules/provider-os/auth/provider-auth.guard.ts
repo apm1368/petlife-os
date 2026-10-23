@@ -1,5 +1,6 @@
 import { Injectable, type CanActivate, type ExecutionContext } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { assertPartnerVerified, VERIFIED_PARTNER_KEY } from "../../../common/auth/require-verified-partner";
 import type { ProviderUserRole } from "@prisma/client";
 import { UnauthenticatedException, ProviderAccessDeniedException } from "../../../common/errors/api-exception";
 import { ProviderContextService } from "../provider-context.service";
@@ -32,6 +33,10 @@ export class ProviderAuthGuard implements CanActivate {
     const requiredRoles = this.reflector.get<ProviderUserRole[] | undefined>(PROVIDER_ROLE_KEY, context.getHandler());
     if (requiredRoles && requiredRoles.length > 0 && !requiredRoles.includes(resolved.role)) {
       throw new ProviderAccessDeniedException({ reason: "INSUFFICIENT_ROLE", requiredRoles, actualRole: resolved.role });
+    }
+
+    if (this.reflector.getAllAndOverride<boolean>(VERIFIED_PARTNER_KEY, [context.getHandler(), context.getClass()])) {
+      assertPartnerVerified(resolved.verificationStatus);
     }
 
     request.providerContext = resolved;

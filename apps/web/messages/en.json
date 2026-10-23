@@ -5517,6 +5517,7 @@
     }
   },
   "partnerVerification": {
+    "activationRequired": "Admin approval of your organization is required to manage services or create and activate offers. You can still follow up on verification and existing orders.",
     "adminTitle": "Partner verification queue",
     "adminIntro": "Private evidence, staff review and the organization decision; this flow does not automatically verify identity or professional licenses.",
     "portalTitle": "Organization verification and documents",

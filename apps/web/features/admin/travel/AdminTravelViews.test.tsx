@@ -1,14 +1,22 @@
 import { describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { ApiError } from "@/lib/api/client";
 import { adminTravelService } from "@/services/travel-marketplace.service";
-import { AdminTravelListingsView, AdminTravelRequirementsView } from "./AdminTravelViews";
+import { AdminTravelListingDetailView, AdminTravelListingsView, AdminTravelRequirementsView } from "./AdminTravelViews";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/fa/admin/travel" }));
-vi.mock("@/services/travel-marketplace.service", () => ({ adminTravelService: { listings: vi.fn(), rules: vi.fn() }, adminInsuranceOpsService: {} }));
+vi.mock("@/services/travel-marketplace.service", () => ({ adminTravelService: { listings: vi.fn(), listing: vi.fn(), moderate: vi.fn(), rules: vi.fn() }, adminInsuranceOpsService: {} }));
 
 describe("admin travel", () => {
+  it("explains an unverified host instead of incorrectly claiming the admin lacks permission", async () => {
+    vi.mocked(adminTravelService.listing).mockResolvedValue({ listing: { id: "l1", title: "Villa", status: "PENDING_REVIEW", city: "Karaj", petPolicy: null, units: [], media: [] }, organization: { name: "Host", verificationStatus: "UNDER_REVIEW" }, history: [] } as never);
+    vi.mocked(adminTravelService.moderate).mockRejectedValue(new ApiError({ code: "PARTNER_NOT_VERIFIED", message: "Partner verification is required for this action.", requestId: "r" }, 403));
+    renderWithIntl(<AdminTravelListingDetailView listingId="l1" />, "fa");
+    fireEvent.click(await screen.findByRole("button", { name: "تأیید و انتشار" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("توسط مدیر تأیید");
+    expect(screen.queryByText("دسترسی travel.manage لازم است.")).toBeNull();
+  });
   it("shows a permission state instead of data for admins without travel.view", async () => {
     vi.mocked(adminTravelService.listings).mockRejectedValue(new ApiError({ code: "FORBIDDEN", message: "x", requestId: "r" }, 403));
     renderWithIntl(<AdminTravelListingsView />, "en");

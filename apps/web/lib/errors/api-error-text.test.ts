@@ -6,6 +6,7 @@ const err = (code: string, message = "English API sentence.") => new ApiError({ 
 
 describe("apiErrorText", () => {
   it("Persian pages get a Persian sentence for the code — never the API's English", () => {
+    expect(apiErrorText(err("PARTNER_NOT_VERIFIED"), "fa")).toContain("توسط مدیر تأیید");
     expect(apiErrorText(err("SLOT_UNAVAILABLE"), "fa")).toBe("این زمان دیگر آزاد نیست. زمان دیگری انتخاب کنید.");
     expect(apiErrorText(err("SOMETHING_NOT_FOUND"), "fa")).toContain("پیدا نشد");
     expect(apiErrorText(err("INVALID_FOO_TRANSITION"), "fa")).toBe("این کار در وضعیت فعلی ممکن نیست.");
