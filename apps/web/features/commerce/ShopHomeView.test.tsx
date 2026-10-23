@@ -7,7 +7,8 @@ import { productSummary, searchResult } from "@/test/commerce-fixtures";
 import { ShopHomeView } from "./ShopHomeView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/hooks/use-active-pet", () => ({ useActivePet: () => ({ activePet: { id: "pet-1", name: "Luna", species: "DOG" } }) }));
+const activePet = vi.hoisted(() => ({ id: "pet-1", name: "Luna", species: "DOG" }));
+vi.mock("@/hooks/use-active-pet", () => ({ useActivePet: () => ({ activePet }) }));
 vi.mock("@/services/commerce.service", () => ({ commerceService: { listCategories: vi.fn(), searchProducts: vi.fn() } }));
 vi.mock("@/features/experience/CinematicPageHero", () => ({ CinematicPageHero: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
 
@@ -15,6 +16,7 @@ const CATEGORY: ProductCategoryDto = { id: "cat-1", parentId: null, name: "Food"
 
 describe("ShopHomeView", () => {
   beforeEach(() => {
+    activePet.species = "DOG";
     vi.mocked(commerceService.listCategories).mockReset();
     vi.mocked(commerceService.searchProducts).mockReset();
   });
@@ -27,6 +29,17 @@ describe("ShopHomeView", () => {
     await waitFor(() => expect(screen.getAllByText("Royal Canin Adult Dog Food").length).toBeGreaterThan(0));
     expect(screen.getByText("For Luna")).toBeTruthy();
     expect(commerceService.searchProducts).toHaveBeenCalledWith(expect.objectContaining({ petId: "pet-1", species: "DOG", sort: "RECOMMENDED" }));
+  });
+
+  it.each(["BIRD", "RABBIT", "RODENT", "FISH", "REPTILE", "OTHER"])("personalizes both product sections for %s", async (species) => {
+    activePet.species = species;
+    vi.mocked(commerceService.listCategories).mockResolvedValue([]);
+    vi.mocked(commerceService.searchProducts).mockResolvedValue(searchResult([]));
+    renderWithIntl(<ShopHomeView />);
+    await waitFor(() => expect(commerceService.searchProducts).toHaveBeenCalledTimes(2));
+    for (const [query] of vi.mocked(commerceService.searchProducts).mock.calls) {
+      expect(query).toMatchObject({ petId: "pet-1", species });
+    }
   });
 
   it("says the catalog is empty instead of inventing products", async () => {

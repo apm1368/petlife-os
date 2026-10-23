@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import type { ProductCategoryDto } from "@petlife/types";
+import { PetSpecies, type ProductCategoryDto } from "@petlife/types";
+import { speciesLabel } from "@/features/pets/pet-identity";
 import { Button, Search, Select } from "@petlife/ui";
 
 /** Shop-home discovery uses the same URL contract as the full results page. */
@@ -29,7 +30,7 @@ export function ShopSidebar({ categories }: { categories: ProductCategoryDto[] }
     }}>
       <label className="commerce-search"><Search size={18} aria-hidden="true" /><span className="sr-only">{f("searchLabel")}</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={f("searchPlaceholder")} /></label>
       <Select label={f("categories")} value={category} onChange={(e) => setCategory(e.target.value)} options={[{ value: "", label: f("allCategories") }, ...categories.map((c) => ({ value: c.id, label: c.name }))]} />
-      <Select label={f("filters.species")} value={species} onChange={(e) => setSpecies(e.target.value)} options={[{ value: "", label: f("filters.any") }, { value: "DOG", label: f("filters.dog") }, { value: "CAT", label: f("filters.cat") }]} />
+      <Select label={f("filters.species")} value={species} onChange={(e) => setSpecies(e.target.value)} options={[{ value: "", label: f("filters.any") }, ...Object.values(PetSpecies).map((value) => ({ value, label: speciesLabel({ species: value }, locale === "fa" ? "fa" : "en") }))]} />
       <label className="commerce-toggle"><span>{f("filters.inStock")}</span><input type="checkbox" checked={inStock} onChange={(e) => setInStock(e.target.checked)} /></label>
       <Button type="submit">{t("applyFilters")}</Button>
     </form>
