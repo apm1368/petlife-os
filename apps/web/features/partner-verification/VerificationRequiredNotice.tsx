@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ContextSurface } from "@petlife/ui";
+import { Button, ContextSurface } from "@petlife/ui";
 
 export function VerificationRequiredNotice({ seller = false }: { seller?: boolean }) {
   const locale = useLocale();
@@ -13,6 +13,9 @@ export function VerificationRequiredNotice({ seller = false }: { seller?: boolea
       <Link className="mt-3 inline-block underline" href={`/${locale}/${seller ? "seller" : "provider"}/verification`}>
         {t("portalTitle")}
       </Link>
+      <div className="mt-3">
+        <Button variant="secondary" onClick={() => window.location.reload()}>{t("refreshAccess")}</Button>
+      </div>
     </ContextSurface>
   );
 }

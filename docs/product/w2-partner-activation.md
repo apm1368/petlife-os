@@ -27,6 +27,6 @@ Existing `/admin/verification` queue and detail screens provide private evidence
 - Additive national-ID/business-license/Enamad kinds and profile fields, verified phone binding, required-evidence alternatives.
 - Insurer/NGO partner subject support and admin review of all new fields.
 - Gallery and any alternate publication paths; calendar UI is gated alongside its availability API, while existing booking reads and cancellation are intentionally preserved.
-- Browser context refresh after out-of-band admin decisions; API checks already read fresh state.
+- Automatic cross-tab context refresh is not implemented. The notice provides an explicit page reload to fetch new approval state; API checks already read fresh state.
 
 Every subsequent feature must include admin discovery, appropriate scoped read/write permissions, audited consequential mutations, and UI + API acceptance evidence. Administrative actions must preserve evidence requirements rather than becoming an unchecked override.

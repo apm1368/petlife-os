@@ -95,6 +95,7 @@ describe("ProviderShell", () => {
     } else {
       expect(screen.queryByText("content")).toBeNull();
       expect(screen.getByRole("link", { name: "Organization verification and documents" }).getAttribute("href")).toBe("/en/provider/verification");
+      expect(screen.getByRole("button", { name: "Reload page to check approval" })).toBeTruthy();
     }
   });
 });
