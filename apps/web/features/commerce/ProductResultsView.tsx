@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, EmptyState, ErrorRecovery, Search, Select, Sheet, SlidersHorizontal, Skeleton } from "@petlife/ui";
-import type { ProductCategoryDto, ProductSearchResultDto } from "@petlife/types";
+import { PetSpecies, type ProductCategoryDto, type ProductSearchResultDto } from "@petlife/types";
+import { speciesLabel } from "@/features/pets/pet-identity";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { commerceService, type ProductSort, type SearchProductsInput } from "@/services/commerce.service";
 import { toAsciiDigits } from "@petlife/validation";
@@ -134,8 +135,7 @@ export function ProductResultsView() {
         onChange={(e) => update({ species: e.target.value || undefined })}
         options={[
           { value: "", label: t("filters.any") },
-          { value: "DOG", label: t("filters.dog") },
-          { value: "CAT", label: t("filters.cat") },
+          ...Object.values(PetSpecies).map((value) => ({ value, label: speciesLabel({ species: value }, locale === "fa" ? "fa" : "en") })),
         ]}
       />
       {data.facets.brands.length ? (

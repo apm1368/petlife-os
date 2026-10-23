@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { speciesFilter, supportedSpecies } from "../../common/species/catalog-species";
 import { BookingStatus, LocationMode, Prisma, type ProviderLocation, type ProviderService, type ProviderServiceVariant } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../common/errors/api-exception";
@@ -44,7 +45,7 @@ export interface ProviderDiscoveryResultDto {
   nextAvailableAt: string | null;
   rating: ProviderRatingSummary;
   completedBookings: number;
-  petTypes: ("DOG" | "CAT")[];
+  petTypes: import("@prisma/client").PetSpecies[];
   homeVisit: boolean;
   /** Real ranking inputs, exposed so the UI and QA can explain an order. */
   rankingScore: number;
@@ -92,7 +93,7 @@ export class DiscoveryService {
       isActive: true,
       ...(query.category ? { category: query.category as never } : {}),
       ...(query.serviceType ? { type: query.serviceType as never } : {}),
-      ...(query.species === "DOG" ? { supportsDog: true } : query.species === "CAT" ? { supportsCat: true } : {}),
+      ...speciesFilter(query.species),
       ...(query.homeVisit ? { OR: [{ locationMode: { in: [LocationMode.AT_CUSTOMER, LocationMode.MOBILE] } }, { type: "HOME_VISIT" as never }] } : {}),
     };
     const orgs = await this.prisma.providerOrganization.findMany({
@@ -160,7 +161,7 @@ export class DiscoveryService {
         nextAvailableAt,
         rating,
         completedBookings,
-        petTypes: [...(services.some((s) => s.supportsDog) ? (["DOG"] as const) : []), ...(services.some((s) => s.supportsCat) ? (["CAT"] as const) : [])],
+        petTypes: [...new Set(services.flatMap(supportedSpecies))],
         homeVisit: services.some(isHomeVisit),
         rankingScore,
       });
@@ -251,7 +252,7 @@ export class DiscoveryService {
       rating,
       reviews,
       completedBookings,
-      petTypes: [...(org.services.some((s) => s.supportsDog) ? ["DOG"] : []), ...(org.services.some((s) => s.supportsCat) ? ["CAT"] : [])],
+      petTypes: [...new Set(org.services.flatMap(supportedSpecies))],
       homeVisit: org.services.some(isHomeVisit),
     };
   }

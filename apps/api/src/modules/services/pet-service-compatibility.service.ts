@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { supportedSpecies } from "../../common/species/catalog-species";
 import { SetupStatus, WeightUnit, type Pet, type ProviderService } from "@prisma/client";
 import { PetCompatibilityStatus, type PetCompatibilityDto, type PetCompatibilityReason } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -54,7 +55,7 @@ export class PetServiceCompatibilityService {
       if (rank[status] > rank[worst]) worst = status;
     };
 
-    const speciesSupported = pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : false; // services declare dog/cat support only; other species are never assumed
+    const speciesSupported = supportedSpecies(service).includes(pet.species);
     if (!speciesSupported) {
       reasons.push("SPECIES_UNSUPPORTED");
       escalate(PetCompatibilityStatus.NOT_SUPPORTED);

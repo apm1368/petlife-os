@@ -21,7 +21,7 @@ import {
   Min,
   MinLength,
 } from "class-validator";
-import { PaymentProvider, TravelBookingMode, TravelListingStatus, TravelListingType, TravelPricingMode } from "@prisma/client";
+import { PaymentProvider, PetSpecies, TravelBookingMode, TravelListingStatus, TravelListingType, TravelPricingMode } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
@@ -411,7 +411,7 @@ export class TravelSearchQueryDto {
   @IsOptional() @IsDateString() checkOut?: string;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(20) guests?: number;
   /** Anonymous pet shape (never a private pet id in a public URL). */
-  @IsOptional() @IsIn(["DOG", "CAT", "OTHER"]) species?: string;
+  @IsOptional() @IsEnum(PetSpecies) species?: PetSpecies;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(10) petCount?: number;
   @IsOptional() @Type(() => Number) @Min(0.5) @Max(120) petWeightKg?: number;
   @IsOptional() @Transform(toList) @IsArray() @ArrayMaxSize(5) @IsUUID("all", { each: true }) petIds?: string[];

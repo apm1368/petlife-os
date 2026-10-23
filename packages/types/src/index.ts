@@ -5,6 +5,12 @@
 export type Locale = "fa" | "en";
 export type ThemePreference = "SYSTEM" | "LIGHT" | "DARK";
 
+/** VALIDATION_ERROR.details for a pet chip already on file. */
+export interface PetMicrochipConflictDetails {
+  field: "microchipNumber";
+  reason: "MICROCHIP_ALREADY_REGISTERED";
+}
+
 /** Simple offset pagination envelope (Handoff 09) used by every Seller OS list endpoint — spec section 69-70: "avoid N+1 queries... never return an entire seller catalog in one unbounded response". */
 export interface PaginatedDto<T> {
   items: T[];
@@ -677,6 +683,8 @@ export interface ProviderServiceDto {
   currency: string | null;
   supportsDog: boolean;
   supportsCat: boolean;
+  /** Complete declared targeting; optional for clients talking to pre-W2 servers. */
+  supportedSpecies?: Array<`${PetSpecies}`>;
   minAgeMonths: number | null;
   maxAgeMonths: number | null;
   minWeightKg: number | null;
@@ -1499,6 +1507,7 @@ export interface ProductSummaryDto {
   rating: RatingSummaryDto;
   supportsDog: boolean;
   supportsCat: boolean;
+  supportedSpecies?: Array<`${PetSpecies}`>;
 }
 
 export interface ProductDetailDto {
@@ -1524,6 +1533,7 @@ export interface ProductDetailDto {
   favorited: boolean;
   supportsDog: boolean;
   supportsCat: boolean;
+  supportedSpecies?: Array<`${PetSpecies}`>;
   minAgeMonths: number | null;
   maxAgeMonths: number | null;
   minWeightKg: number | null;

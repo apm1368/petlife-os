@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { speciesFilter, supportedSpecies } from "../../../common/species/catalog-species";
 import { Prisma, ProductReviewStatus, ProductStatus, SellerOfferStatus, SellerStatus, SellerVerificationStatus, type Pet, type PetSpecies } from "@prisma/client";
 import type { ProductCategoryDto, ProductDetailDto, ProductSearchResultDto, ProductSummaryDto, RatingSummaryDto, SellerOfferDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -149,6 +150,7 @@ export class CatalogService {
       rating,
       supportsDog: product.supportsDog,
       supportsCat: product.supportsCat,
+      supportedSpecies: supportedSpecies(product),
     };
   }
 
@@ -163,7 +165,7 @@ export class CatalogService {
       ...(q
         ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { description: { contains: q, mode: "insensitive" } }, { brand: { name: { contains: q, mode: "insensitive" } } }, { category: { name: { contains: q, mode: "insensitive" } } }] }
         : {}),
-      ...(filter.species === "DOG" ? { supportsDog: true } : filter.species === "CAT" ? { supportsCat: true } : {}),
+      ...speciesFilter(filter.species),
     };
     const [products, pet] = await Promise.all([
       this.prisma.product.findMany({ where, include: PRODUCT_INCLUDE, orderBy: [{ createdAt: "desc" }, { id: "asc" }], take: MAX_CANDIDATES }),
@@ -318,6 +320,7 @@ export class CatalogService {
       favorited: Boolean(favorite),
       supportsDog: product.supportsDog,
       supportsCat: product.supportsCat,
+      supportedSpecies: supportedSpecies(product),
       minAgeMonths: product.minAgeMonths,
       maxAgeMonths: product.maxAgeMonths,
       minWeightKg: product.minWeightKg === null ? null : Number(product.minWeightKg),

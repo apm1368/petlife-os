@@ -1,4 +1,5 @@
 import type { ProviderLocation, ProviderService, ProviderServiceVariant } from "@prisma/client";
+import { supportedSpecies } from "../../common/species/catalog-species";
 import type { ProviderLocationDto, ProviderServiceDto, ProviderServiceVariantDto } from "@petlife/types";
 
 /**
@@ -51,6 +52,7 @@ export function toProviderServiceDto(service: ProviderService & { variants?: Pro
     currency: service.currency,
     supportsDog: service.supportsDog,
     supportsCat: service.supportsCat,
+    supportedSpecies: supportedSpecies(service),
     minAgeMonths: service.minAgeMonths,
     maxAgeMonths: service.maxAgeMonths,
     minWeightKg: service.minWeightKg ? Number(service.minWeightKg) : null,

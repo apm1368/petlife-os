@@ -11,6 +11,7 @@ import { BirthDateField } from "@/features/shared/date-picker/BirthDateField";
 import { Stepper } from "@/features/shared/Stepper";
 import { formatCount } from "@/lib/number/format-number";
 import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 import { isPlanError, PlanRequiredNote } from "@/features/subscription/PlanRequiredNote";
 import { SPECIES_LABELS } from "./pet-identity";
 
@@ -171,6 +172,8 @@ export function AddPetView() {
   const [neutered, setNeutered] = useState<NeuteredStatus | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [microchipError, setMicrochipError] = useState<string | undefined>();
   const [planError, setPlanError] = useState<ApiError | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -195,13 +198,15 @@ export function AddPetView() {
 
   function goNext() {
     setError(null);
-    if (step === 0 && !name.trim()) return setError(c.needName);
+    if (step === 0 && !name.trim()) return setNameError(c.needName);
     setStep((s) => Math.min(2, s + 1));
   }
 
   async function submit() {
+    if (isSubmitting) return;
     setError(null);
-    if (!name.trim()) return setError(c.needName);
+    setMicrochipError(undefined);
+    if (!name.trim()) { setStep(0); setNameError(c.needName); return; }
     if (!householdId) return setError(c.noHousehold);
     setIsSubmitting(true);
     try {
@@ -218,7 +223,7 @@ export function AddPetView() {
           ...(microchip.trim() ? { microchipNumber: toLatin(microchip.trim()) } : {}),
           ...(neutered ? { neuteredStatus: neutered } : {}),
         },
-        `add-pet-${householdId}-${name.trim()}-${Date.now()}`,
+        `add-pet-${householdId}-${encodeURIComponent(name.trim())}-${Date.now()}`,
       );
       let saved = pet;
       if (photo) {
@@ -236,7 +241,12 @@ export function AddPetView() {
       router.push(`/${locale}/pets/${saved.id}`);
     } catch (e) {
       if (isPlanError(e)) setPlanError(e);
-      else setError(c.failed);
+      // The API names the field it rejected (a chip already on file, say); "try again" on its own
+      // sends the owner round a loop that can never succeed, so prefer the specific sentence.
+      else if (e instanceof ApiError && e.code === "VALIDATION_ERROR" && e.details?.field === "microchipNumber") {
+        setStep(2);
+        setMicrochipError(apiErrorText(e, locale));
+      } else setError(apiErrorText(e, locale, c.failed));
       setIsSubmitting(false);
     }
   }
@@ -269,7 +279,7 @@ export function AddPetView() {
                   ))}
                 </div>
               </fieldset>
-              <Input label={c.name} value={name} onChange={(e) => setName(e.target.value)} maxLength={80} required />
+              <Input label={c.name} value={name} onChange={(e) => { setName(e.target.value); setNameError(undefined); }} errorMessage={nameError} maxLength={80} required />
               <div className="add-pet-photo">
                 <span className="add-pet-label">{c.photo}</span>
                 <div className="add-pet-photo__row">
@@ -343,7 +353,7 @@ export function AddPetView() {
                 </fieldset>
               </div>
               <div className="add-pet-field">
-                <Input label={c.microchip} inputMode="numeric" dir="ltr" value={microchip} onChange={(e) => setMicrochip(e.target.value.slice(0, 64))} />
+                <Input label={c.microchip} inputMode="numeric" dir="ltr" value={microchip} errorMessage={microchipError} onChange={(e) => { setMicrochip(e.target.value.slice(0, 64)); setMicrochipError(undefined); }} />
                 <p className="add-pet-hint">{c.microchipHint}</p>
               </div>
               <fieldset className="add-pet-segment">
@@ -363,9 +373,9 @@ export function AddPetView() {
           <div className="add-pet-wizard__actions">
             {step > 0 ? <Button variant="ghost" onClick={() => { setError(null); setStep((s) => s - 1); }} disabled={isSubmitting}>{c.back}</Button> : <span />}
             <div>
-              {step === 2 ? null : step === 1 ? <Button variant="ghost" onClick={() => void submit()} disabled={isSubmitting}>{c.skipSave}</Button> : null}
+              {step < 2 ? <Button variant="secondary" onClick={() => void submit()} disabled={isSubmitting}>{step === 0 ? c.save : c.skipSave}</Button> : null}
               {step < 2 ? (
-                <Button variant="primary" onClick={goNext}>{c.next}</Button>
+                <Button variant="primary" onClick={goNext} disabled={isSubmitting}>{c.next}</Button>
               ) : (
                 <Button variant="primary" isLoading={isSubmitting} onClick={() => void submit()}>{isSubmitting ? c.saving : c.save}</Button>
               )}

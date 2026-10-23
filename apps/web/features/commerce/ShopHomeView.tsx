@@ -45,7 +45,7 @@ export function ShopHomeView() {
     setPicks(null);
     setDeals(null);
     setCategories(null);
-    const species = activePet?.species === "DOG" || activePet?.species === "CAT" ? activePet.species : undefined;
+    const species = activePet?.species;
     void Promise.all([
       commerceService.listCategories(),
       commerceService.searchProducts({ petId: activePet?.id, species, sort: "RECOMMENDED", pageSize: 8 }),
