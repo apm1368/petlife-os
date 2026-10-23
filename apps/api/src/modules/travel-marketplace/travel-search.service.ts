@@ -116,6 +116,7 @@ export class TravelSearchService {
     const guests = q.guests ?? 1;
 
     const species = new Set(pets.map((p) => p.species));
+    const needsOtherSpecies = [...species].some((s) => s !== "DOG" && s !== "CAT");
     const where: Prisma.TravelListingWhereInput = {
       status: TravelListingStatus.PUBLISHED,
       isPubliclyListed: true,
@@ -129,11 +130,12 @@ export class TravelSearchService {
       ...(q.instantBooking ? { bookingMode: "INSTANT_BOOKING" } : {}),
       ...(q.amenities?.length ? { amenities: { hasEvery: q.amenities } } : {}),
       ...(q.q ? { OR: [{ title: { contains: q.q, mode: "insensitive" } }, { description: { contains: q.q, mode: "insensitive" } }, { city: { contains: q.q, mode: "insensitive" } }] } : {}),
-      ...(species.has("DOG") || species.has("CAT") || q.noPetFee
+      ...(species.size > 0 || q.noPetFee
         ? {
             petPolicy: {
               ...(species.has("DOG") ? { dogsAllowed: true } : {}),
               ...(species.has("CAT") ? { catsAllowed: true } : {}),
+              ...(needsOtherSpecies ? { otherAllowed: true } : {}),
               ...(q.noPetFee ? { OR: [{ petFeeIrr: null }, { petFeeIrr: 0 }] } : {}),
             },
           }

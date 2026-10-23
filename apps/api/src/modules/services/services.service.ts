@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ProviderVerificationStatus as PrismaVerificationStatus, ServiceCategory as PrismaServiceCategory } from "@prisma/client";
-import { PetSpecies, ServiceCategory, type ServiceDetailDto, type ServiceSearchResultDto } from "@petlife/types";
+import { ServiceCategory, type ServiceDetailDto, type ServiceSearchResultDto } from "@petlife/types";
+import { speciesFilter } from "../../common/species/catalog-species";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -53,8 +54,7 @@ export class ServicesService {
       where: {
         isActive: true,
         ...(query.category ? { category: query.category as unknown as PrismaServiceCategory } : {}),
-        ...(query.species === PetSpecies.DOG ? { supportsDog: true } : {}),
-        ...(query.species === PetSpecies.CAT ? { supportsCat: true } : {}),
+        ...speciesFilter(query.species),
         providerOrganization: {
           ...(verifiedOnly ? { verificationStatus: PrismaVerificationStatus.VERIFIED } : {}),
           ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),

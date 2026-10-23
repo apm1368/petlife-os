@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
-import { IsDateString, IsIn, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
+import { IsDateString, IsEnum, IsIn, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
+import { PetSpecies } from "@prisma/client";
 
 export const DISCOVERY_SORTS = ["RECOMMENDED", "EARLIEST", "NEAREST", "TOP_RATED", "LOWEST_PRICE"] as const;
 export type DiscoverySort = (typeof DISCOVERY_SORTS)[number];
@@ -12,7 +13,7 @@ export class DiscoverProvidersDto {
   @IsOptional() @IsString() @MaxLength(100) q?: string;
   @IsOptional() @IsString() @MaxLength(80) city?: string;
   @IsOptional() @IsString() @MaxLength(80) neighborhood?: string;
-  @IsOptional() @IsIn(["DOG", "CAT"]) species?: "DOG" | "CAT";
+  @IsOptional() @IsEnum(PetSpecies) species?: PetSpecies;
   @IsOptional() @IsIn(["true"]) homeVisit?: "true";
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) @Max(5) minRating?: number;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) maxPrice?: number;

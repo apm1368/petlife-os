@@ -1,4 +1,4 @@
-import { BookingMode, BookingPaymentMode, LocationMode, ProviderResourceType } from "@prisma/client";
+import { BookingMode, BookingPaymentMode, LocationMode, ProviderResourceType, PetSpecies } from "@prisma/client";
 import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min, ValidateIf } from "class-validator";
 
 /** Editable fields only (spec section 24) — category/type/organization/location are structural and never change via this endpoint. */
@@ -35,6 +35,13 @@ export class UpdateProviderServiceDto {
   @IsOptional()
   @IsBoolean()
   supportsCat?: boolean;
+
+  /** Additional species; dog/cat remain controlled by the legacy flags. */
+  @ValidateIf((_, value) => value !== undefined)
+  @IsArray()
+  @ArrayMaxSize(8)
+  @IsEnum(PetSpecies, { each: true })
+  additionalSpecies?: PetSpecies[];
 
   /** At-home service area (cities). Empty array = no area restriction. */
   @IsOptional()

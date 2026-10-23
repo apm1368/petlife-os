@@ -205,6 +205,13 @@ async function seedSubscriptions() {
  * example.
  */
 async function seedCommerce() {
+  for (const [slug, name] of [
+    ["species-dog", "سگ"], ["species-cat", "گربه"], ["species-bird", "پرنده"],
+    ["species-rabbit", "خرگوش"], ["species-rodent", "جوندگان"], ["species-fish", "ماهی"],
+    ["species-reptile", "خزنده"], ["species-other", "سایر حیوانات"],
+  ] as const) {
+    await prisma.productCategory.upsert({ where: { slug }, create: { slug, name }, update: { name } });
+  }
   const [royalCanin, petLifeBasics] = await Promise.all([
     prisma.brand.create({ data: { name: "Royal Canin", slug: "royal-canin" } }),
     prisma.brand.create({ data: { name: "PetLife Basics", slug: "petlife-basics" } }),

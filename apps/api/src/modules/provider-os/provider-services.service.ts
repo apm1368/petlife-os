@@ -70,6 +70,7 @@ export class ProviderServicesService {
         isActive: dto.isActive,
         supportsDog: dto.supportsDog,
         supportsCat: dto.supportsCat,
+        additionalSpecies: dto.additionalSpecies === undefined ? undefined : [...new Set(dto.additionalSpecies.filter((s) => s !== "DOG" && s !== "CAT"))],
         serviceAreaCities: dto.serviceAreaCities?.map((c) => c.trim()).filter(Boolean),
         travelSurchargeIrr: dto.travelSurchargeIrr === undefined ? undefined : dto.travelSurchargeIrr,
         minAgeMonths: dto.minAgeMonths === undefined ? undefined : dto.minAgeMonths,
