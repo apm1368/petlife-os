@@ -4,6 +4,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { usePetStore } from "@/stores/pet-store";
 import { petsService } from "@/services/pets.service";
 import { AddPetView } from "./AddPetView";
+import { ApiError } from "@/lib/api/client";
 
 const push = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -34,6 +35,26 @@ describe("minimal pet creation from the identity step", () => {
     expect(screen.getByRole("alert").textContent).toBe("نام حیوان را بنویسید.");
     expect(screen.getByLabelText("نام").getAttribute("aria-invalid")).toBe("true");
     expect(petsService.create).not.toHaveBeenCalled();
+  });
+
+  it("links a duplicate chip error to its field and allows clearing it before retry", async () => {
+    vi.mocked(petsService.create).mockRejectedValueOnce(new ApiError({
+      code: "VALIDATION_ERROR", message: "Invalid request", requestId: "test",
+      details: { field: "microchipNumber", reason: "MICROCHIP_ALREADY_REGISTERED" },
+    }, 400));
+    renderWithIntl(<AddPetView />, "fa");
+    fireEvent.change(screen.getByLabelText("نام"), { target: { value: "کوکی" } });
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
+    fireEvent.change(screen.getByLabelText("شمارهٔ میکروچیپ"), { target: { value: "12345" } });
+    fireEvent.click(screen.getByRole("button", { name: "ذخیرهٔ حیوان" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("قبلاً");
+    expect(screen.getByLabelText("شمارهٔ میکروچیپ").getAttribute("aria-invalid")).toBe("true");
+    expect(push).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("شمارهٔ میکروچیپ"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "ذخیرهٔ حیوان" }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/fa/pets/p1"));
+    expect(vi.mocked(petsService.create).mock.calls[1]![1]).toEqual({ name: "کوکی", species: "DOG" });
   });
 
   it("keeps the entered name visible and reports a failed save in Persian", async () => {

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { OnboardingChapter, PetLifecycleStatus, Prisma } from "@prisma/client";
+import type { PetMicrochipConflictDetails } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -10,13 +11,6 @@ import { SubscriptionService } from "../subscriptions/subscription.service";
 import type { CreatePetDto } from "./dto/create-pet.dto";
 import type { UpdatePetDto } from "./dto/update-pet.dto";
 
-/**
- * Normalization rule: strip whitespace and common separators (space, hyphen,
- * dot), upper-case the rest. Used only to detect duplicate chips reliably —
- * the raw value the owner/importer entered is always preserved verbatim and
- * never rejected, since a legacy/imported value that can't be confidently
- * normalized still needs to be stored.
- */
 /**
  * `pets_microchip_normalized_key` is a partial unique index across every household, so a chip that
  * is already on file anywhere rejects the write. Prisma surfaces that as P2002, and an uncaught one
@@ -30,11 +24,12 @@ function rethrowDuplicateMicrochip(error: unknown): never {
     error.code === "P2002" &&
     String((error.meta as { target?: unknown } | undefined)?.target ?? "").includes("microchip")
   ) {
-    throw new ValidationApiException({ field: "microchipNumber", reason: "MICROCHIP_ALREADY_REGISTERED" });
+    throw new ValidationApiException({ field: "microchipNumber", reason: "MICROCHIP_ALREADY_REGISTERED" } satisfies PetMicrochipConflictDetails);
   }
   throw error;
 }
 
+/** Strip separators for uniqueness checks, preserving the owner's raw value in microchipNumber. */
 export function normalizeMicrochip(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const normalized = raw.trim().replace(/[\s\-.]/g, "").toUpperCase();

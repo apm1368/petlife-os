@@ -173,6 +173,7 @@ export function AddPetView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | undefined>();
+  const [microchipError, setMicrochipError] = useState<string | undefined>();
   const [planError, setPlanError] = useState<ApiError | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -204,6 +205,7 @@ export function AddPetView() {
   async function submit() {
     if (isSubmitting) return;
     setError(null);
+    setMicrochipError(undefined);
     if (!name.trim()) { setStep(0); setNameError(c.needName); return; }
     if (!householdId) return setError(c.noHousehold);
     setIsSubmitting(true);
@@ -241,7 +243,10 @@ export function AddPetView() {
       if (isPlanError(e)) setPlanError(e);
       // The API names the field it rejected (a chip already on file, say); "try again" on its own
       // sends the owner round a loop that can never succeed, so prefer the specific sentence.
-      else setError(apiErrorText(e, locale, c.failed));
+      else if (e instanceof ApiError && e.code === "VALIDATION_ERROR" && e.details?.field === "microchipNumber") {
+        setStep(2);
+        setMicrochipError(apiErrorText(e, locale));
+      } else setError(apiErrorText(e, locale, c.failed));
       setIsSubmitting(false);
     }
   }
@@ -348,7 +353,7 @@ export function AddPetView() {
                 </fieldset>
               </div>
               <div className="add-pet-field">
-                <Input label={c.microchip} inputMode="numeric" dir="ltr" value={microchip} onChange={(e) => setMicrochip(e.target.value.slice(0, 64))} />
+                <Input label={c.microchip} inputMode="numeric" dir="ltr" value={microchip} errorMessage={microchipError} onChange={(e) => { setMicrochip(e.target.value.slice(0, 64)); setMicrochipError(undefined); }} />
                 <p className="add-pet-hint">{c.microchipHint}</p>
               </div>
               <fieldset className="add-pet-segment">
