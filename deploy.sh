@@ -18,11 +18,21 @@ CANONICAL_ORIGIN="https://opetlife.ir"
 
 log() { echo "deploy[$(date -u +%H:%M:%S)]: $*"; }
 
+# The value is returned the way the application reads it: dotenv strips one layer of matching
+# surrounding quotes, so `OTP_PROVIDER="dev"` is the string dev. rollback() exports what it reads
+# here, and PM2 bakes that into the process environment (process.env wins over the .env file) — so
+# returning the raw `"dev"` poisoned every later boot with a quoted enum the config schema rejects,
+# which is exactly how a failed deploy left the API crash-looping for 8027 restarts.
 read_env_value() {
-  local file="$1" key="$2"
+  local file="$1" key="$2" value
   [ -f "$file" ] || return 1
   grep -q "^${key}=" "$file" || return 1
-  sed -n "s/^${key}=//p" "$file" | tail -n 1
+  value="$(sed -n "s/^${key}=//p" "$file" | tail -n 1)"
+  case "$value" in
+    '"'*'"') value="${value#\"}"; value="${value%\"}" ;;
+    "'"*"'") value="${value#\'}"; value="${value%\'}" ;;
+  esac
+  printf '%s\n' "$value"
 }
 
 set_env_value() {
