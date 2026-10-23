@@ -7,6 +7,12 @@ const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 describe("ShopSidebar", () => {
+  it("offers all eight species in Persian", () => {
+    renderWithIntl(<ShopSidebar categories={[]} />, "fa");
+    for (const label of ["سگ", "گربه", "پرنده", "خرگوش", "جونده", "ماهی", "خزنده", "سایر"]) {
+      expect(screen.getByRole("option", { name: label })).toBeTruthy();
+    }
+  });
   it("carries selected discovery filters to the existing results URL", () => {
     renderWithIntl(<ShopSidebar categories={[{ id: "food", name: "Food", slug: "food", parentId: null, status: "ACTIVE" as never }]} />);
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "  sensitive food  " } });
