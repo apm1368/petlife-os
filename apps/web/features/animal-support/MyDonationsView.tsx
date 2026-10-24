@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { DonationHistoryItemDto, PaginatedDto } from "@petlife/types";
 import { animalSupportService } from "@/services/animal-support.service";
-import { ApiError } from "@/lib/api/client";
+import { formatCurrency } from "@/lib/currency/format-currency";
+import { LoadFailure } from "@/features/system/LoadFailure";
 
 function donationStatusTone(status: DonationHistoryItemDto["status"]): "success" | "urgent" | "neutral" | "attention" {
   switch (status) {
@@ -22,11 +24,12 @@ function donationStatusTone(status: DonationHistoryItemDto["status"]): "success"
 
 export function MyDonationsView() {
   const t = useTranslations("animalSupport");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
 
   const [page, setPage] = useState<PaginatedDto<DonationHistoryItemDto> | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function load(nextPage: number, append = false) {
     setError(null);
@@ -35,16 +38,16 @@ export function MyDonationsView() {
       setPage((prev) => (append && prev ? { ...data, items: [...prev.items, ...data.items] } : data));
       setPageNumber(nextPage);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
   }
 
   useEffect(() => {
     void load(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={() => load(1)} />;
+  if (error) return <LoadFailure error={error} onRetry={() => load(1)} />;
   if (!page) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -62,7 +65,8 @@ export function MyDonationsView() {
                 <StatusLabel tone={donationStatusTone(donation.status)}>{t(`donationStatus.${donation.status}`)}</StatusLabel>
               </div>
               <p className="text-metadata text-text-secondary">{donation.organizationName}</p>
-              <p className="text-body text-text-primary">{donation.amountIrr.toLocaleString()}</p>
+              <p className="text-body tabular-nums text-text-primary">{formatCurrency(donation.amountIrr, locale as "fa" | "en")}</p>
+              <Link className="w-fit text-sm underline" href={`/${locale}/donations/${donation.id}`}>{locale === "fa" ? "رسید" : "Receipt"}</Link>
             </ContextSurface>
           ))}
         </div>

@@ -21,6 +21,10 @@ export function toSupportCaseSummaryDto(row: SupportCaseWithRelations): SupportC
     updatedAt: row.updatedAt.toISOString(),
     resolvedAt: row.resolvedAt ? row.resolvedAt.toISOString() : null,
     closedAt: row.closedAt ? row.closedAt.toISOString() : null,
+    tags: row.tags,
+    firstAssignedAt: row.firstAssignedAt?.toISOString() ?? null,
+    firstResponseAt: row.firstResponseAt?.toISOString() ?? null,
+    reopenCount: row.reopenCount,
   };
 }
 

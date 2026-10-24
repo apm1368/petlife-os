@@ -3,12 +3,13 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { SubscriptionPlanDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { adminSubscriptionService } from "@/services/admin-subscription.service";
+import { useAdminStore } from "@/stores/admin-store";
 import { AdminSubscriptionPlansView } from "./AdminSubscriptionPlansView";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/services/admin-subscription.service", () => ({
-  adminSubscriptionService: { listPlans: vi.fn(), createPlan: vi.fn(), createPrice: vi.fn() },
+  adminSubscriptionService: { listPlans: vi.fn(), createPlan: vi.fn(), createPrice: vi.fn(), updatePlan: vi.fn(), upsertEntitlement: vi.fn(), updatePriceStatus: vi.fn() },
 }));
 
 const PLAN: SubscriptionPlanDto = {
@@ -31,6 +32,7 @@ const PLAN: SubscriptionPlanDto = {
 
 describe("AdminSubscriptionPlansView", () => {
   beforeEach(() => {
+    useAdminStore.setState({ context: { isAdmin: true, permissions: ["subscription.view", "subscription.plan.manage"] } as never });
     push.mockReset();
     vi.mocked(adminSubscriptionService.listPlans).mockReset().mockResolvedValue([PLAN]);
     vi.mocked(adminSubscriptionService.createPlan).mockReset();
@@ -73,4 +75,14 @@ describe("AdminSubscriptionPlansView", () => {
 
     await waitFor(() => expect(adminSubscriptionService.createPrice).toHaveBeenCalledWith("plan-plus", { countryCode: "IR", billingInterval: "MONTHLY", amount: 600000 }));
   });
+});
+
+it("hides all plan mutations for a read-only administrator", async () => {
+ useAdminStore.setState({context:{isAdmin:true,permissions:["subscription.view"]} as never});
+ vi.mocked(adminSubscriptionService.listPlans).mockResolvedValue([PLAN]);
+ renderWithIntl(<AdminSubscriptionPlansView/>);
+ await screen.findByText(/Plus/);
+ expect(screen.queryByRole("button",{name:"Create plan"})).toBeNull();
+ expect(screen.queryByRole("button",{name:"Add price"})).toBeNull();
+ expect(screen.queryByText("Maintain plan and entitlements")).toBeNull();
 });

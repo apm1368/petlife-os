@@ -1,5 +1,5 @@
 /**
- * Sample data for the PET LIFE Customer Affairs console (امور مشتریان).
+ * Sample data for the opetlife Customer Affairs console (امور مشتریان).
  *
  * IMPORTANT: every record here is invented for UI development. Nothing reads
  * from or writes to the API, and the console says so on screen, so a figure
@@ -99,7 +99,7 @@ export const CASE_KIND_LABEL: Record<CaseKind, string> = {
 };
 
 /**
- * The contact-reason tree, rewritten for what PET LIFE households actually
+ * The contact-reason tree, rewritten for what opetlife households actually
  * call about. Settings renders this same constant, so the taxonomy shown there
  * is genuinely the one the rest of the console filters by.
  */
@@ -152,7 +152,7 @@ export const CX_QUESTIONS: NonEmpty<{ key: string; label: string }> = [
   { key: "agent", label: "برخورد و دانش کارشناسان ما را چطور ارزیابی می‌کنید؟" },
   { key: "speed", label: "سرعت رسیدگی به درخواست‌ها و تیکت‌های شما چقدر رضایت‌بخش بود؟" },
   { key: "ease", label: "کار با اپلیکیشن و رزرو نوبت چقدر آسان بود؟" },
-  { key: "nps", label: "چقدر احتمال دارد پت لایف را به دوستانتان معرفی کنید؟" },
+  { key: "nps", label: "چقدر احتمال دارد opetlife را به دوستانتان معرفی کنید؟" },
 ];
 
 // --- Entities ---------------------------------------------------------------
@@ -418,10 +418,10 @@ export const CA_SURVEYS: NonEmpty<CaSurvey> = [
 ];
 
 export const SMS_PATTERNS: NonEmpty<SmsPattern> = [
-  { id: "SMS-01", title: "تشکر پس از نوبت", body: "{نام} عزیز، از اینکه نوبت {حیوان} را در پت لایف رزرو کردید سپاسگزاریم.", isDynamic: true, trigger: "after_booking", autoSend: true },
+  { id: "SMS-01", title: "تشکر پس از نوبت", body: "{نام} عزیز، از اینکه نوبت {حیوان} را در opetlife رزرو کردید سپاسگزاریم.", isDynamic: true, trigger: "after_booking", autoSend: true },
   { id: "SMS-02", title: "ثبت تیکت", body: "درخواست شما با شناسه {شناسه_تیکت} ثبت شد. کارشناس {کارشناس} پیگیر است.", isDynamic: true, trigger: "on_ticket", autoSend: true },
   { id: "SMS-03", title: "رفع تیکت", body: "{نام} عزیز، تیکت {شناسه_تیکت} حل شد. اگر همچنان مشکلی هست پاسخ دهید.", isDynamic: true, trigger: "after_resolve", autoSend: true },
-  { id: "SMS-04", title: "دعوت به نظرسنجی", body: "نظر شما درباره آخرین تماس با پت لایف برای ما مهم است.", isDynamic: false, trigger: "after_survey", autoSend: false },
+  { id: "SMS-04", title: "دعوت به نظرسنجی", body: "نظر شما درباره آخرین تماس با opetlife برای ما مهم است.", isDynamic: false, trigger: "after_survey", autoSend: false },
   { id: "SMS-05", title: "هشدار نقض مهلت", body: "{نام} عزیز، رسیدگی به تیکت {شناسه_تیکت} طول کشیده است. سرپرست پیگیر شد.", isDynamic: true, trigger: "on_sla_breach", autoSend: false },
 ];
 

@@ -34,7 +34,7 @@ export interface ListSupportCasesFilter {
 }
 
 /** Only entity kinds a consumer can currently link their own case to — the two contextual entry points the spec requires (Order Detail, Booking Detail). */
-export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING", "LOST_PET_INCIDENT", "TRIP", "INSURANCE_APPLICATION"] as const;
+export const USER_LINKABLE_RELATED_ENTITY_TYPES = ["ORDER", "BOOKING", "LOST_PET_INCIDENT", "TRIP", "INSURANCE_APPLICATION", "TRAVEL_BOOKING"] as const;
 export type UserLinkableRelatedEntityType = (typeof USER_LINKABLE_RELATED_ENTITY_TYPES)[number];
 
 export interface CreateSupportCaseAsUserInput {
@@ -187,6 +187,10 @@ export class SupportCaseService {
           summary: `${application.product.provider.name} — ${application.product.name} — ${application.status}`,
         };
       }
+    } else if (supportCase.relatedEntityType === "TRAVEL_BOOKING" && supportCase.relatedEntityId) {
+      // Batch 5 — reference/status/dates only; never pets' health or shared documents.
+      const stay = await this.prisma.travelBooking.findUnique({ where: { id: supportCase.relatedEntityId }, include: { listing: { select: { title: true } } } });
+      if (stay) relatedEntity = { type: "TRAVEL_BOOKING", id: stay.id, summary: `Stay ${stay.reference} — ${stay.listing.title} — ${stay.status} — ${stay.checkIn.toISOString().slice(0, 10)}` };
     } else if (supportCase.relatedEntityType && supportCase.relatedEntityId) {
       relatedEntity = { type: supportCase.relatedEntityType, id: supportCase.relatedEntityId, summary: supportCase.relatedEntityId };
     }
@@ -279,7 +283,8 @@ export class SupportCaseService {
       // deterministic final state") — the last commit wins, and there is no
       // business-validity constraint on *who* may hold the assignment (unlike
       // a status transition, any ACTIVE admin is always a valid assignee).
-      const row = await tx.supportCase.update({ where: { id: caseId }, data: { assignedAdminId: assigneeAdminId }, include: CASE_INCLUDE });
+      const firstAssigned = await tx.supportCase.findUniqueOrThrow({ where: { id: caseId }, select: { firstAssignedAt: true } });
+      const row = await tx.supportCase.update({ where: { id: caseId }, data: { assignedAdminId: assigneeAdminId, ...(firstAssigned.firstAssignedAt ? {} : { firstAssignedAt: new Date() }) }, include: CASE_INCLUDE });
       await this.events.publish("SupportCaseAssigned", { caseId, assigneeAdminId, previousAssigneeAdminId: existing.assignedAdminId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_case.assigned", entityType: "SUPPORT_CASE", entityId: caseId, afterSummary: { assigneeAdminId }, requestId, tx });
       return row;
@@ -304,6 +309,7 @@ export class SupportCaseService {
       const data: Prisma.SupportCaseUpdateInput = { status: to };
       if (to === SupportCaseStatus.RESOLVED && !current.resolvedAt) data.resolvedAt = new Date();
       if (to === SupportCaseStatus.CLOSED && !current.closedAt) data.closedAt = new Date();
+      if ((current.status === SupportCaseStatus.RESOLVED || current.status === SupportCaseStatus.CLOSED) && to === SupportCaseStatus.IN_PROGRESS) data.reopenCount = { increment: 1 };
 
       const row = await tx.supportCase.update({ where: { id: caseId }, data, include: CASE_INCLUDE });
 
@@ -417,6 +423,11 @@ export class SupportCaseService {
         const application = await this.prisma.insuranceApplication.findUnique({ where: { id: input.relatedEntityId } });
         if (!application) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
         const owns = application.applicantUserId === userId || (await this.petAccess.hasActiveAccess(application.petId, userId));
+        if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+      } else if (input.relatedEntityType === "TRAVEL_BOOKING") {
+        const stay = await this.prisma.travelBooking.findUnique({ where: { id: input.relatedEntityId }, select: { bookedByUserId: true, householdId: true } });
+        if (!stay) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
+        const owns = stay.bookedByUserId === userId || !!(await this.prisma.householdMember.findFirst({ where: { userId, householdId: stay.householdId }, select: { id: true } }));
         if (!owns) throw new SupportCaseInvalidReferenceException({ field: "relatedEntity" });
       } else {
         throw new SupportCaseInvalidReferenceException({ field: "relatedEntityType" });
@@ -553,7 +564,7 @@ export class SupportCaseService {
         throw new InvalidSupportCaseReopenException({ caseId, from: current.status });
       }
 
-      const row = await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.OPEN }, include: CASE_INCLUDE });
+      const row = await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.OPEN, reopenCount: { increment: 1 } }, include: CASE_INCLUDE });
 
       await this.events.publish("SupportCaseReopened", { caseId, from: current.status, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
       await this.events.publish("SupportCaseStatusChanged", { caseId, from: current.status, to: SupportCaseStatus.OPEN }, { tx, aggregateType: "SupportCase", aggregateId: caseId });

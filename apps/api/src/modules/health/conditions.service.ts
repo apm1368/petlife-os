@@ -19,6 +19,12 @@ export class ConditionsService {
     return this.prisma.condition.findMany({ where: { petId }, orderBy: { createdAt: "asc" } });
   }
 
+  async get(petId: string, id: string) {
+    const condition = await this.prisma.condition.findUnique({ where: { id } });
+    if (!condition || condition.petId !== petId) throw new NotFoundApiException("Condition");
+    return condition;
+  }
+
   async create(petId: string, userId: string, dto: CreateConditionDto) {
     return this.prisma.$transaction(async (tx) => {
       const condition = await tx.condition.create({

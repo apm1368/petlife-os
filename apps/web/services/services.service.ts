@@ -15,6 +15,7 @@ export interface GetServiceAvailabilityInput {
   to: string;
   petId?: string;
   providerUserId?: string;
+  variantId?: string;
 }
 
 function toQueryString(params: object): string {

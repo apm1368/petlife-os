@@ -1,4 +1,35 @@
+import { AdminInsuranceApplicationsController } from "./insurance/admin-insurance-applications.controller";
+import { AdminTravelController } from "./travel/admin-travel.controller";
+import { AdminTravelService } from "./travel/admin-travel.service";
+import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
+import { AdminCommerceController } from "./commerce/admin-commerce.controller";
+import { AdminCommerceService } from "./commerce/admin-commerce.service";
+import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { Module } from "@nestjs/common";
+import { SupportOpsService } from "./support/support-ops.service";
+import { AdminSupportOpsController, UserSupportAttachmentsController } from "./support/support-ops.controller";
+import { DisputeOutcomeService } from "./dispute/dispute-outcome.service";
+import { FinanceReconciliationService } from "./finance/finance-reconciliation.service";
+import { FinanceReconciliationWorker } from "./finance/finance-reconciliation.worker";
+import { PaymentTraceService } from "./finance/payment-trace.service";
+import { SettlementOpsService } from "./finance/settlement-ops.service";
+import { AdminFinanceOpsController } from "./finance/finance-ops.controller";
+import { AutomaticTaskListener } from "./task/automatic-task.listener";
+import { AdminPartner360Service } from "./partners/admin-partner360.service";
+import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
+import { AutomaticTaskService } from "./task/automatic-task.service";
+import { AdminPet360Service } from "./pets/admin-pet360.service";
+import { AdminPet360Controller } from "./pets/admin-pet360.controller";
+import { AdminCustomerOverviewService } from "./customer/admin-customer-overview.service";
+import { AdminAccessControlService } from "./access/admin-access-control.service";
+import { AdminAccessControlController } from "./access/admin-access-control.controller";
+import { AdminSettingsService } from "./settings/admin-settings.service";
+import { AdminSettingsController } from "./settings/admin-settings.controller";
+import { AdminSystemService } from "./system/admin-system.service";
+import { AdminSystemController } from "./system/admin-system.controller";
+import { BookingModule } from "../booking/booking.module";
+import { AdminServicesService } from "./services/admin-services.service";
+import { AdminServicesController } from "./services/admin-services.controller";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { RefundsModule } from "../commerce/refunds/refunds.module";
 import { PetAccessModule } from "../pet-access/pet-access.module";
@@ -19,10 +50,11 @@ import { SupportNotificationListener } from "./support/support-notification.list
 import { DisputeService } from "./dispute/dispute.service";
 import { DisputeController } from "./dispute/dispute.controller";
 import { TrustCaseService } from "./trust/trust-case.service";
+import { TrustCaseContextService } from "./trust/trust-case-context.service";
 import { TrustActionService } from "./trust/trust-action.service";
 import { TrustController } from "./trust/trust.controller";
-import { AdminVerificationService } from "./verification/admin-verification.service";
-import { AdminVerificationController } from "./verification/admin-verification.controller";
+import { TrustQueueController } from "./trust/trust-queue.controller";
+import { TrustQueueService } from "./trust/trust-queue.service";
 import { AdminTaskService } from "./task/admin-task.service";
 import { AdminTaskController } from "./task/admin-task.controller";
 import { AdminFinanceService } from "./finance/admin-finance.service";
@@ -60,12 +92,16 @@ import { AdminAnimalSupportController } from "./animal-support/admin-animal-supp
 import { CommunityModerationService } from "./community/community-moderation.service";
 import { AdminCommunityController } from "./community/admin-community.controller";
 import { SupportNeedModerationService } from "./animal-support/support-need-moderation.service";
+import { AdminAnimalSupportOpsService } from "./animal-support/admin-animal-support-ops.service";
 import { AdminSupportNeedController } from "./animal-support/admin-support-need.controller";
 import { InsuranceProviderService } from "../insurance/insurance-provider.service";
 import { InsuranceProductService } from "../insurance/insurance-product.service";
 import { AdminInsuranceController } from "./insurance/admin-insurance.controller";
 import { PetFriendlyPlaceService } from "../places/pet-friendly-place.service";
 import { AdminPlacesController } from "./places/admin-places.controller";
+import { AdminLostPetController } from "./lost-pet/admin-lost-pet.controller";
+import { AdminNgoMembersController } from "./animal-support/admin-ngo-members.controller";
+import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -77,16 +113,24 @@ import { AdminPlacesController } from "./places/admin-places.controller";
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule],
+  imports: [NotificationsModule, RefundsModule, PromotionsModule, TravelMarketplaceModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
   controllers: [
     AdminMeController,
+    AdminSupportOpsController,
+    UserSupportAttachmentsController,
+    AdminFinanceOpsController,
+    AdminPartner360Controller,
+    AdminPet360Controller,
+    AdminAccessControlController,
+    AdminSettingsController,
+    AdminSystemController,
     AdminNoteController,
     AdminCustomerController,
     AdminSearchController,
     SupportCaseController,
     DisputeController,
     TrustController,
-    AdminVerificationController,
+    TrustQueueController,
     AdminTaskController,
     AdminFinanceController,
     AdminOrgController,
@@ -100,8 +144,32 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminSupportNeedController,
     AdminInsuranceController,
     AdminPlacesController,
+    AdminServicesController,
+    AdminCommerceController,
+    AdminTravelController,
+    AdminInsuranceApplicationsController,
+    AdminLostPetController,
+    AdminNgoMembersController,
   ],
   providers: [
+    SupportOpsService,
+    DisputeOutcomeService,
+    FinanceReconciliationService,
+    FinanceReconciliationWorker,
+    PaymentTraceService,
+    SettlementOpsService,
+    AutomaticTaskListener,
+    AdminPartner360Service,
+    AutomaticTaskService,
+    AdminPet360Service,
+    AdminCustomerOverviewService,
+    AdminAccessControlService,
+    AdminSettingsService,
+    AdminSystemService,
+    AdminServicesService,
+    AdminLostPetService,
+    AdminTravelService,
+    AdminCommerceService,
     AdminAccessService,
     AdminAuthGuard,
     AdminAuditLogService,
@@ -111,8 +179,9 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     SupportNotificationListener,
     DisputeService,
     TrustCaseService,
+    TrustCaseContextService,
+    TrustQueueService,
     TrustActionService,
-    AdminVerificationService,
     AdminTaskService,
     AdminFinanceService,
     AdminRefundService,
@@ -137,11 +206,13 @@ import { AdminPlacesController } from "./places/admin-places.controller";
     AdminDonationService,
     CommunityModerationService,
     SupportNeedModerationService,
+    AdminAnimalSupportOpsService,
     InsuranceProviderService,
     InsuranceProductService,
     PetFriendlyPlaceService,
   ],
   exports: [
+    AutomaticTaskService,
     AdminAccessService,
     AdminAuthGuard,
     AdminAuditLogService,

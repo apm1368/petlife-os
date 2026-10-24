@@ -1,241 +1,282 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { Avatar, Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
-import type { BookingDto, HealthSummaryDto, CareProfileDto, PetDto } from "@petlife/types";
-import { PetLifecycleStatus } from "@petlife/types";
+import { Button, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import {
+  PetLifecycleStatus,
+  type PetAccessFlags,
+  type PetOverviewAttentionDto,
+  type PetOverviewDto,
+  type PetOverviewEventDto,
+} from "@petlife/types";
 import { petsService } from "@/services/pets.service";
-import { healthService } from "@/services/health.service";
-import { careProfileService } from "@/services/care-profile.service";
-import { bookingsService } from "@/services/bookings.service";
-import { formatDateTimeRange } from "@/lib/date/appointment-date";
 import { usePetStore } from "@/stores/pet-store";
+import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
+import { careTitle } from "@/features/care/care-labels";
+import { EditPetIdentity } from "./EditPetIdentity";
+import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone, collapseLabPanels, mergeCareIntoOverview } from "./overview-labels";
+
+const copy = {
+  fa: {
+    eyebrow: "پرونده یکپارچه",
+    title: "آنچه اکنون اهمیت دارد",
+    description: "مراقبت‌های ضروری، رویدادهای پیش‌رو و سابقه اخیر بر اساس اطلاعات واقعی ثبت‌شده.",
+    attention: "نیازمند توجه",
+    noAttention: "بر اساس داده‌های ثبت‌شده، مورد اقدام‌پذیری پیدا نشد.",
+    noAttentionHint: "این پیام به معنی تأیید کامل سلامت یا نبود اطلاعات ناشناخته نیست.",
+    upcoming: "پیش‌رو",
+    noUpcoming: "رویداد زمان‌داری برای آینده ثبت نشده است.",
+    recentHealth: "سلامت اخیر",
+    noHealth: "هنوز رویداد سلامت قابل نمایش ثبت نشده است.",
+    recentActivity: "فعالیت اخیر",
+    noActivity: "هنوز فعالیتی برای این حیوان ثبت نشده است.",
+    recentMemory: "آخرین خاطره",
+    noMemory: "هنوز خاطره‌ای ثبت نشده است.",
+    useful: "دسترسی سریع",
+    health: "مشاهده پرونده سلامت",
+    care: "مرکز مراقبت",
+    document: "بارگذاری سند پزشکی",
+    memory: "ثبت خاطره",
+    household: "خانواده",
+    editTitle: "ویرایش مشخصات",
+    name: "نام",
+    breed: "نژاد",
+    cancel: "انصراف",
+    save: "ذخیره تغییرات",
+    loadError: "نمای کلی پرونده بارگذاری نشد.",
+    retry: "تلاش دوباره",
+    loading: "در حال آماده‌سازی نمای کلی",
+    recordedData: "داده ثبت‌شده",
+    provider: "ارائه‌دهنده",
+    owner: "مالک/خانواده",
+    system: "سیستم",
+    incomplete: "پروفایل سلامت کامل نشده است.",
+    vaccinationOverdue: "موعد واکسیناسیون گذشته است.",
+    vaccinationDue: "موعد واکسیناسیون نزدیک است.",
+    memorialTitle: "داستان و سابقه زندگی",
+    memorialDescription: "سابقه سلامت محترمانه در دسترس می‌ماند و یادها در اولویت قرار می‌گیرند.",
+  },
+  en: {
+    eyebrow: "Unified pet record",
+    title: "What matters now",
+    description: "Actionable care, upcoming events, and recent history from real recorded information.",
+    attention: "Needs attention",
+    noAttention: "No actionable item was found in the recorded data.",
+    noAttentionHint: "This does not mean all health information is known or clinically normal.",
+    upcoming: "Upcoming",
+    noUpcoming: "No future dated event has been recorded.",
+    recentHealth: "Recent health",
+    noHealth: "No health event is available yet.",
+    recentActivity: "Recent activity",
+    noActivity: "No activity has been recorded for this pet yet.",
+    recentMemory: "Latest memory",
+    noMemory: "No memory has been recorded yet.",
+    useful: "Useful shortcuts",
+    health: "Open health record",
+    care: "Care center",
+    document: "Upload medical document",
+    memory: "Add memory",
+    household: "Household",
+    editTitle: "Edit identity",
+    name: "Name",
+    breed: "Breed",
+    cancel: "Cancel",
+    save: "Save changes",
+    loadError: "The pet overview could not be loaded.",
+    retry: "Try again",
+    loading: "Preparing pet overview",
+    recordedData: "Recorded data",
+    provider: "Provider",
+    owner: "Owner/household",
+    system: "System",
+    incomplete: "The health profile is incomplete.",
+    vaccinationOverdue: "Vaccination is overdue.",
+    vaccinationDue: "Vaccination is due soon.",
+    memorialTitle: "Life story and history",
+    memorialDescription: "Health history remains respectfully available while memories take priority.",
+  },
+} as const;
 
 export function PetProfileView({ petId }: { petId: string }) {
-  const t = useTranslations("pets.profile");
-  const tCommon = useTranslations("common");
-  const tHealth = useTranslations("health");
+  const locale = useLocale() as "fa" | "en";
+  const c = copy[locale];
+  const t = useTranslations("petOverview");
+  const upsertPet = usePetStore((state) => state.upsertPet);
+  const [snapshot, setSnapshot] = useState<{
+    petId: string;
+    overview: PetOverviewDto;
+    access: PetAccessFlags;
+    care: CareReminder[];
+    careError: boolean;
+  } | null>(null);
+  const [errorPetId, setErrorPetId] = useState<string | null>(null);
+  const [revision, setRevision] = useState(0);
+  const reload = () => setRevision((value) => value + 1);
+  // The hero's "Edit details" link only changes the query on this same page, so the edit state must follow the URL.
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const locale = useLocale();
-  const activePetId = usePetStore((s) => s.activePetId);
-  const upsertPet = usePetStore((s) => s.upsertPet);
-
-  const [pet, setPet] = useState<PetDto | null>(null);
-  const [error, setError] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState("");
-  const [breed, setBreed] = useState("");
-
-  const [healthSummary, setHealthSummary] = useState<HealthSummaryDto | null>(null);
-  const [careProfile, setCareProfile] = useState<CareProfileDto | null>(null);
-  const [upcomingBooking, setUpcomingBooking] = useState<BookingDto | null>(null);
-
-  async function load() {
-    setError(false);
-    try {
-      const data = await petsService.getById(petId);
-      setPet(data);
-      setName(data.name);
-      setBreed(data.breed ?? "");
-    } catch {
-      setError(true);
-    }
-  }
-
-  async function loadTeasers() {
-    // No health/care data leaks onto Pet Profile when the current grant doesn't include it.
-    setHealthSummary(null);
-    setCareProfile(null);
-    let access;
-    try {
-      access = await petsService.getMyAccess(petId);
-    } catch {
-      return;
-    }
-    if (access.canViewHealth) {
-      healthService.getSummary(petId).then(setHealthSummary).catch(() => undefined);
-    }
-    if (access.canViewCareProfile) {
-      careProfileService.get(petId).then(setCareProfile).catch(() => undefined);
-    }
-  }
-
-  async function loadUpcomingBooking() {
-    setUpcomingBooking(null);
-    try {
-      const bookings = await bookingsService.list({ upcoming: true, petId });
-      setUpcomingBooking(bookings[0] ?? null);
-    } catch {
-      // A booking teaser is a nice-to-have — never block the rest of the profile on it.
-    }
-  }
-
+  const pathname = usePathname();
+  const isEditing = searchParams.get("edit") === "identity";
+  const setIsEditing = (on: boolean) => router.replace(on ? `${pathname}?edit=identity` : pathname, { scroll: false });
   useEffect(() => {
-    void load();
-    void loadTeasers();
-    void loadUpcomingBooking();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [petId]);
+    let current = true;
+    setSnapshot(null);
+    setErrorPetId(null);
+    void (async () => {
+      try {
+        const [overview, access] = await Promise.all([petsService.getOverview(petId), petsService.getMyAccess(petId)]);
+        if (!current) return;
+        let care: CareReminder[] = [];
+        let careError = false;
+        if (access.canViewCareProfile) {
+          try {
+            care = await careRemindersService.list(petId);
+          } catch {
+            careError = true;
+          }
+        }
+        if (current) setSnapshot({ petId, overview, access, care, careError });
+      } catch {
+        if (current) setErrorPetId(petId);
+      }
+    })();
+    return () => { current = false; };
+  }, [petId, revision]);
 
-  async function saveIdentity() {
-    const updated = await petsService.update(petId, { name, breed: breed || null });
-    setPet(updated);
-    upsertPet(updated);
-    setIsEditing(false);
+  if (errorPetId === petId) return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={reload} />;
+  // The route may change before its effect runs: never render old records/permissions under new links.
+  if (!snapshot || snapshot.petId !== petId) return <Skeleton className="h-96 w-full" aria-label={c.loading} />;
+  const { overview, access, care, careError } = snapshot;
+
+  const base = "/" + locale + "/pets/" + petId;
+  const isMemorial = overview.pet.lifecycleStatus === PetLifecycleStatus.DECEASED || overview.pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
+
+  if (isEditing && access.canEditIdentity) {
+    return (
+      <EditPetIdentity
+        pet={overview.pet}
+        locale={locale}
+        onCancel={() => setIsEditing(false)}
+        onSaved={(updated) => {
+          upsertPet(updated);
+          setIsEditing(false);
+          reload();
+        }}
+      />
+    );
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
-  if (!pet) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
-
-  const isMemorial = pet.lifecycleStatus === PetLifecycleStatus.DECEASED || pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
-  const canReportLost = pet.lifecycleStatus === PetLifecycleStatus.ACTIVE || pet.lifecycleStatus === PetLifecycleStatus.LOST;
+  // Overdue / soon-due care belongs with "needs attention"; the next care items with "upcoming".
+  const merged = mergeCareIntoOverview(overview, care, (item) => careTitle(item, locale));
+  const attention = merged.attention;
+  const upcoming = merged.upcoming.slice(0, 5);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-4">
-        <Avatar src={pet.photoUrl} name={pet.name} size="lg" />
-        <div>
-          <h1 className="text-hero text-text-primary">{pet.name}</h1>
-          <p className="text-body text-text-secondary">{pet.breed ?? pet.species}</p>
-          <div className="mt-1 flex gap-2">
-            {pet.id === activePetId ? <StatusLabel tone="success">Active</StatusLabel> : null}
-            {pet.lifecycleStatus !== PetLifecycleStatus.ACTIVE ? (
-              <StatusLabel tone="attention">{pet.lifecycleStatus}</StatusLabel>
-            ) : null}
+    <div className="pet-overview">
+      <h1 className="sr-only">{isMemorial ? c.memorialTitle : c.title}</h1>
+      <div className="pet-overview__main">
+        {careError ? (
+          <div role="alert" className="grid gap-3 rounded-2xl border border-border-subtle bg-surface-subtle p-4">
+            <p className="text-body text-text-primary">{t("careUnavailable")}</p>
+            <Button variant="secondary" className="w-fit" onClick={reload}>{c.retry}</Button>
           </div>
-        </div>
+        ) : null}
+        {isMemorial ? (
+          <section className="pet-overview__memorial">
+            <h2>{c.memorialTitle}</h2>
+            <p>{c.memorialDescription}</p>
+          </section>
+        ) : null}
+        {!isMemorial ? (
+          <OverviewSection title={c.attention}>
+            {attention.length === 0 ? (
+              <div className="pet-overview__calm">
+                <p>{careError ? t("careIncomplete") : c.noAttention}</p>
+                {!careError ? <p>{c.noAttentionHint}</p> : null}
+              </div>
+            ) : (
+              <div className="divide-y divide-border-subtle border-y border-border-subtle">
+                {attention.map((item) => <AttentionRow key={item.id} item={item} base={base} locale={locale} />)}
+              </div>
+            )}
+          </OverviewSection>
+        ) : null}
+        {!isMemorial ? (
+          <OverviewSection title={c.upcoming}>
+            <EventList items={upcoming} empty={careError ? t("careIncomplete") : c.noUpcoming} base={base} locale={locale} showSource={false} compact />
+          </OverviewSection>
+        ) : null}
+        <OverviewSection title={c.recentHealth}>
+          <EventList items={collapseLabPanels(overview.recentHealth, locale)} empty={c.noHealth} base={base} locale={locale} compact />
+        </OverviewSection>
       </div>
 
-      <ContextSurface className="grid grid-cols-2 gap-4">
-        <Field label="Species" value={pet.species} />
-        <Field label="Age" value={formatAge(pet)} />
-        <Field label={t("weight")} value={pet.latestWeightValue ? `${pet.latestWeightValue} ${pet.latestWeightUnit}` : t("unknown")} />
-        <Field label="Status" value={pet.lifecycleStatus} />
-      </ContextSurface>
-
-      <ContextSurface>
-        {isEditing ? (
-          <div className="flex flex-col gap-3">
-            <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} />
-            <Input label="Breed" value={breed} onChange={(e) => setBreed(e.target.value)} />
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => setIsEditing(false)}>
-                {tCommon("cancel")}
-              </Button>
-              <Button variant="primary" onClick={saveIdentity}>
-                {tCommon("save")}
-              </Button>
-            </div>
+      <aside className="pet-overview__aside">
+        <OverviewSection title={c.useful}>
+          <div className="pet-overview__actions">
+            {access.canViewHealth ? <Shortcut href={base + "/health"} label={c.health} /> : null}
+            {access.canViewCareProfile ? <Shortcut href={base + "/care"} label={c.care} /> : null}
+            {access.canEditHealth ? <Shortcut href={base + "/health/advanced/documents"} label={c.document} /> : null}
+            <Shortcut href={base + "/memories/new"} label={c.memory} />
           </div>
-        ) : (
-          <Button variant="secondary" onClick={() => setIsEditing(true)}>
-            {t("editIdentity")}
-          </Button>
-        )}
-      </ContextSurface>
-
-      <ContextSurface className="flex items-center justify-between">
-        <span className="text-body text-text-primary">{isMemorial ? t("memoriesTeaserMemorial") : t("memoriesTeaser")}</span>
-        <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/memories`)}>
-          {t("openMemories")}
-        </Button>
-      </ContextSurface>
-
-      {canReportLost ? (
-        <ContextSurface className="flex items-center justify-between">
-          <span className="text-body text-text-primary">{t("lostPetTeaser")}</span>
-          <Button variant="ghost" onClick={() => router.push(`/${locale}/pets/${petId}/lost`)}>
-            {t("openLostPet")}
-          </Button>
-        </ContextSurface>
-      ) : null}
-
-      {healthSummary && !isMemorial ? (
-        <ContextSurface className="flex items-center justify-between">
-          <div>
-            <p className="text-body text-text-primary">{t("healthTeaser")}</p>
-            <StatusLabel tone={healthSummary.vaccinationStatus === "UP_TO_DATE" ? "success" : "attention"}>
-              {tHealth(`vaccinationStatus.${healthSummary.vaccinationStatus}`)}
-            </StatusLabel>
-          </div>
-          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/health`)}>
-            {t("openHealth")}
-          </Button>
-        </ContextSurface>
-      ) : null}
-
-      {careProfile && !isMemorial ? (
-        <ContextSurface className="flex items-center justify-between">
-          <div>
-            <p className="text-body text-text-primary">{t("careTeaser")}</p>
-            <StatusLabel tone={careProfile.status === "COMPLETE" ? "success" : "neutral"}>
-              {tHealth(`setupStatus.${careProfile.status}`)}
-            </StatusLabel>
-          </div>
-          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/care`)}>
-            {t("openCareProfile")}
-          </Button>
-        </ContextSurface>
-      ) : null}
-
-      {!isMemorial ? (
-        <ContextSurface className="flex items-center justify-between">
-          <span className="text-body text-text-primary">{t("travelTeaser")}</span>
-          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/travel`)}>
-            {t("openTravel")}
-          </Button>
-        </ContextSurface>
-      ) : null}
-
-      {!isMemorial ? (
-        <ContextSurface className="flex items-center justify-between">
-          <span className="text-body text-text-primary">{t("insuranceTeaser")}</span>
-          <Button variant="secondary" onClick={() => router.push(`/${locale}/pets/${petId}/insurance`)}>
-            {t("openInsurance")}
-          </Button>
-        </ContextSurface>
-      ) : null}
-
-      {upcomingBooking && !isMemorial ? (
-        <ContextSurface className="flex items-center justify-between">
-          <div>
-            <p className="text-body text-text-primary">{t(`upcomingServiceTeaser.${upcomingBooking.category}`)}</p>
-            <p className="text-metadata text-text-secondary">
-              {formatDateTimeRange(upcomingBooking.startAt, upcomingBooking.endAt, locale as "fa" | "en", upcomingBooking.timezone)}
-            </p>
-          </div>
-          <Button variant="secondary" onClick={() => router.push(`/${locale}/bookings/${upcomingBooking.id}`)}>
-            {t("viewBooking")}
-          </Button>
-        </ContextSurface>
-      ) : null}
-
-      <ContextSurface className="flex items-center justify-between">
-        <span className="text-body text-text-primary">{t("digitalId")}</span>
-        <StatusLabel tone="neutral">{t("digitalIdComingSoon")}</StatusLabel>
-      </ContextSurface>
+        </OverviewSection>
+        <OverviewSection title={c.recentActivity}>
+          <EventList items={collapseLabPanels(overview.recentActivity.filter((a) => a.type !== "MEMORY" && !overview.recentHealth.some((h) => h.type === a.type && h.id === a.id)), locale)} empty={c.noActivity} base={base} locale={locale} compact />
+        </OverviewSection>
+        <OverviewSection title={c.recentMemory}>
+          {overview.recentMemory ? (
+            <Link href={base + "/memories/" + overview.recentMemory.id} className="pet-overview__memory">
+              <p>{overview.recentMemory.title ?? formatOverviewDate(overview.recentMemory.occurredAt, locale)}</p>
+              <span>{formatOverviewDate(overview.recentMemory.occurredAt, locale)}</span>
+            </Link>
+          ) : <p className="text-sm text-text-secondary">{c.noMemory}</p>}
+        </OverviewSection>
+        {overview.householdName ? <p className="pet-overview__household">{c.household}: {overview.householdName}</p> : null}
+      </aside>
     </div>
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function OverviewSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return <section><h2 className="mb-4 text-section-title text-text-primary">{title}</h2>{children}</section>;
+}
+
+function AttentionRow({ item, base, locale }: { item: PetOverviewAttentionDto; base: string; locale: "fa" | "en" }) {
+  const label = attentionTitle(item.title, locale);
+  const tone = severityTone(item.severity);
   return (
-    <div>
-      <p className="text-metadata text-text-secondary">{label}</p>
-      <p className="text-body text-text-primary">{value}</p>
+    <Link href={base + item.href} className="grid min-h-20 grid-cols-[auto_1fr_auto] items-center gap-4 py-4">
+      <span className={"h-10 w-1 " + severityBarClass(item.severity)} aria-hidden="true" />
+      <div><p className="font-bold text-text-primary">{label}</p>{item.dueAt ? <p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.dueAt, locale)}</p> : null}</div>
+      {item.severity === "ATTENTION" ? null : <StatusLabel tone={tone}>{severityLabel(item.severity, locale)}</StatusLabel>}
+    </Link>
+  );
+}
+
+function EventList({ items, empty, base, locale, compact = false, showSource = true }: { items: PetOverviewEventDto[]; empty: string; base: string; locale: "fa" | "en"; compact?: boolean; showSource?: boolean }) {
+  if (items.length === 0) return <p className="border-y border-border-subtle py-5 text-sm text-text-secondary">{empty}</p>;
+  return (
+    <div className="divide-y divide-border-subtle border-y border-border-subtle">
+      {items.map((item) => {
+        const href = item.href.startsWith("/bookings/") ? "/" + locale + item.href : base + item.href;
+        return (
+          <Link key={item.type + "-" + item.id} href={href} className={"flex items-center justify-between gap-4 " + (compact ? "min-h-16 py-3" : "min-h-20 py-4")}>
+            <div className="min-w-0"><p className="truncate font-bold text-text-primary">{eventTitle(item.title, locale)}</p><p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.occurredAt, locale)}{item.providerName ? " · " + item.providerName : ""}</p></div>
+            {showSource ? <StatusLabel tone="neutral">{eventSourceLabel(item, locale)}</StatusLabel> : null}
+          </Link>
+        );
+      })}
     </div>
   );
 }
 
-function formatAge(pet: PetDto): string {
-  if (pet.birthDate) {
-    const months = Math.max(0, Math.floor((Date.now() - new Date(pet.birthDate).getTime()) / (30 * 24 * 60 * 60 * 1000)));
-    return `${Math.floor(months / 12)}y ${months % 12}m`;
-  }
-  if (pet.approximateAgeMonths !== null) {
-    return `~${Math.floor(pet.approximateAgeMonths / 12)}y ${pet.approximateAgeMonths % 12}m`;
-  }
-  return "Unknown";
+function Shortcut({ href, label }: { href: string; label: string }) {
+  return <Link href={href} className="pet-overview__action"><span>{label}</span><span aria-hidden="true" className="dir-flip">←</span></Link>;
 }
+
+
+
+

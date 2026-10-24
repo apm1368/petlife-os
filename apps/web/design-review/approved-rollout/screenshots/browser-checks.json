@@ -1,0 +1,194 @@
+[
+  {
+    "page": "clinic-list",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "clinic",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "blog",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "article",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "contact",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "service"
+  },
+  {
+    "page": "admin",
+    "locale": "fa",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "admin"
+  },
+  {
+    "page": "clinic-list",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "clinic",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "blog",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "article",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "contact",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "service"
+  },
+  {
+    "page": "admin",
+    "locale": "fa",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "admin"
+  },
+  {
+    "page": "clinic-list",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "clinic",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "blog",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "article",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "contact",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "service"
+  },
+  {
+    "page": "admin",
+    "locale": "en",
+    "width": 390,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "admin"
+  },
+  {
+    "page": "clinic-list",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "clinic",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "discovery"
+  },
+  {
+    "page": "blog",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "article",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "editorial"
+  },
+  {
+    "page": "contact",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "service"
+  },
+  {
+    "page": "admin",
+    "locale": "en",
+    "width": 1440,
+    "overflow": false,
+    "pageErrors": [],
+    "pattern": "admin"
+  }
+]

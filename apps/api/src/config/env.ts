@@ -1,7 +1,32 @@
 import { loadEnv, z } from "@petlife/config";
 
+/** A boolean env flag that reads "false"/"0" as false (z.coerce.boolean() would read the string "false" as true). */
+const flag = (fallback: boolean) =>
+  z
+    .enum(["true", "false", "1", "0"])
+    .default(fallback ? "true" : "false")
+    .transform((v) => v === "true" || v === "1");
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  /// Interface the API listens on. nginx reaches it on 127.0.0.1, so the default keeps the raw port
+  /// off the public internet (a direct hit would bypass the proxy's limits and headers).
+  HOST: z.string().default("127.0.0.1"),
+  /// Express "trust proxy": which peers may supply X-Forwarded-For. "loopback" trusts only the local
+  /// nginx, so req.ip is the real client (per-IP throttling works) and a client talking to the API
+  /// directly cannot spoof its address. "false" disables, a number trusts that many hops.
+  TRUST_PROXY: z.string().default("loopback"),
+  /// The /dev/auth/google/simulate test endpoint signs in as any Google identity. It must be opted
+  /// into explicitly (the e2e suite does) and is never honoured in production, whatever the flag.
+  GOOGLE_DEV_SIMULATE_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
+  /// Dev simulation surfaces — /dev/notifications/*, shipping and marketplace dev/simulate, and the
+  /// unsigned sandbox payment/shipping webhooks — let a caller fabricate notifications, payment results
+  /// and shipment states for anyone. Off unless explicitly enabled (local dev and the e2e suite do);
+  /// never honoured in production. The canonical public server must leave it unset.
+  DEV_SIMULATION_ENABLED: flag(false),
+  /// Set only after the owner/legal retention policy is approved (docs/product/data-retention-decisions.md). Until then
+  /// account deletions can't reach READY_FOR_EXECUTION, and execution itself does not exist.
+  RETENTION_POLICY_APPROVED: flag(false),
   PORT: z.coerce.number().int().positive().default(4000),
 
   // Immutable release metadata injected by CI/deploy. These values are
@@ -23,7 +48,7 @@ const envSchema = z.object({
 
   CSRF_SECRET: z.string().min(16),
 
-  OTP_PROVIDER: z.enum(["dev"]).default("dev"),
+  OTP_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
   OTP_LENGTH: z.coerce.number().int().min(4).max(8).default(6),
   OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
   OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(30),
@@ -84,9 +109,9 @@ const envSchema = z.object({
   /// documented, precisely to prevent ever calling a real endpoint that was
   /// never actually wired up.
   PAYMENT_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  STANDARD_GATEWAY_ENABLED: z.coerce.boolean().default(true),
-  SNAPPAY_ENABLED: z.coerce.boolean().default(true),
-  DIGIPAY_ENABLED: z.coerce.boolean().default(true),
+  STANDARD_GATEWAY_ENABLED: flag(true),
+  SNAPPAY_ENABLED: flag(true),
+  DIGIPAY_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapters — present only so a
   /// real integration has a place to read credentials from without a schema
   /// change, and so startup validation can require them in "production" mode.
@@ -104,9 +129,9 @@ const envSchema = z.object({
   /// status"), so SHIPPING_MODE=production is rejected unless every enabled
   /// real provider's credentials are actually configured.
   SHIPPING_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  DEV_SHIPPING_ENABLED: z.coerce.boolean().default(true),
-  ALOPEYK_ENABLED: z.coerce.boolean().default(true),
-  SNAPPBOX_ENABLED: z.coerce.boolean().default(true),
+  DEV_SHIPPING_ENABLED: flag(true),
+  ALOPEYK_ENABLED: flag(true),
+  SNAPPBOX_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapters — present only so a
   /// real integration has a place to read credentials from without a schema
   /// change, and so startup validation can require them in "production" mode.
@@ -125,9 +150,9 @@ const envSchema = z.object({
   /// MARKETPLACE_SANDBOX_MODE=production is rejected unless every enabled
   /// real provider's credentials are actually configured.
   MARKETPLACE_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  DEV_MARKETPLACE_ENABLED: z.coerce.boolean().default(true),
-  TOROB_ENABLED: z.coerce.boolean().default(true),
-  DIGIKALA_ENABLED: z.coerce.boolean().default(true),
+  DEV_MARKETPLACE_ENABLED: flag(true),
+  TOROB_ENABLED: flag(true),
+  DIGIKALA_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapters — present only so a
   /// real integration has a place to read credentials from without a schema
   /// change, and so startup validation can require them in "production" mode.
@@ -136,25 +161,20 @@ const envSchema = z.object({
   DIGIKALA_BASE_URL: z.string().optional(),
   DIGIKALA_API_KEY: z.string().optional(),
 
-  /// Messaging, Notifications & Preferences (Handoff 10) — same "sandbox is
-  /// always safe, production is validated" rule as PAYMENT_SANDBOX_MODE/
-  /// SHIPPING_MODE/MARKETPLACE_SANDBOX_MODE (see validateMessagingConfig
-  /// below): no official Faraz SMS merchant credentials exist for this
-  /// project (see README "Provider integration status"), so
-  /// MESSAGING_SANDBOX_MODE=production is rejected unless Faraz is enabled
-  /// with real credentials actually configured. MESSAGING_PROVIDER selects
-  /// which gateway NotificationDeliveryService sends SMS through by
-  /// default — "dev" locally/in tests, "faraz" once real credentials exist.
+  /// FarazSMS official Pattern API: https://docs.farazsms.com/service/post-ws-v1-sms-pattern
+  /// Secrets and panel-specific pattern UIDs stay in the server environment.
   MESSAGING_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
   MESSAGING_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
-  DEV_MESSAGING_ENABLED: z.coerce.boolean().default(true),
-  FARAZ_SMS_ENABLED: z.coerce.boolean().default(true),
-  /// Optional and unused by the sandbox-stub adapter — present only so a
-  /// real integration has a place to read credentials from without a schema
-  /// change, and so startup validation can require them in "production" mode.
-  FARAZ_SMS_BASE_URL: z.string().optional(),
-  FARAZ_SMS_API_KEY: z.string().optional(),
-  FARAZ_SMS_SENDER: z.string().optional(),
+  DEV_MESSAGING_ENABLED: flag(true),
+  FARAZ_SMS_ENABLED: flag(true),
+  FARAZ_SMS_BASE_URL: z.string().url().default("https://api.iranpayamak.com"),
+  FARAZ_SMS_API_KEY: z.string().min(1).optional(),
+  FARAZ_SMS_SENDER: z.string().min(1).optional(),
+  FARAZ_SMS_OTP_PATTERN_CODE: z.string().min(1).optional(),
+  FARAZ_SMS_OTP_CODE_ATTRIBUTE: z.string().min(1).default("code"),
+  FARAZ_SMS_NOTIFICATION_PATTERN_CODE: z.string().min(1).optional(),
+  FARAZ_SMS_NOTIFICATION_BODY_ATTRIBUTE: z.string().min(1).default("message"),
+  FARAZ_SMS_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(5000),
   /// How many times a TRANSIENT delivery failure is retried before the
   /// delivery is marked FAILED for good (spec: "do not infinitely retry").
   NOTIFICATION_MAX_DELIVERY_ATTEMPTS: z.coerce.number().int().positive().default(3),
@@ -205,6 +225,14 @@ const envSchema = z.object({
   /// PAST_DUE -> GRACE_PERIOD for this many further days (a final warning
   /// window, full access still retained) before EXPIRED.
   SUBSCRIPTION_GRACE_PERIOD_DAYS: z.coerce.number().int().positive().default(4),
+  /** Owner decision: every new household gets the full product free for its first week — a real trial of this plan code. Empty disables it. */
+  WELCOME_TRIAL_PLAN_CODE: z.string().default("premium"),
+  /**
+   * Pet-taxi distance. No map provider is integrated (BLOCKED_EXTERNAL), so the honest default is
+   * "unavailable": rides keep their fixed price. "straight_line_demo" is a QA-only, clearly labelled
+   * great-circle estimate for test servers — never a route distance.
+   */
+  TRANSPORT_DISTANCE_MODE: z.enum(["unavailable", "straight_line_demo"]).default("unavailable"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -259,7 +287,9 @@ function validateMarketplaceConfig(env: AppEnv): void {
 function validateMessagingConfig(env: AppEnv): void {
   if (env.MESSAGING_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
-  if (env.FARAZ_SMS_ENABLED && !(env.FARAZ_SMS_BASE_URL && env.FARAZ_SMS_API_KEY)) missing.push("FARAZ_SMS_BASE_URL/FARAZ_SMS_API_KEY");
+  if (env.MESSAGING_PROVIDER !== "faraz") missing.push("MESSAGING_PROVIDER=faraz");
+  if (!env.FARAZ_SMS_ENABLED) missing.push("FARAZ_SMS_ENABLED=true");
+  if (!(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER && env.FARAZ_SMS_NOTIFICATION_PATTERN_CODE)) missing.push("FARAZ_SMS_API_KEY/FARAZ_SMS_SENDER/FARAZ_SMS_NOTIFICATION_PATTERN_CODE");
   if (missing.length > 0) {
     throw new Error(`MESSAGING_SANDBOX_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
   }
@@ -294,6 +324,15 @@ function validateStorageConfig(env: AppEnv): void {
   }
 }
 
+function validateOtpConfig(env: AppEnv): void {
+  if (env.NODE_ENV === "production" && env.OTP_PROVIDER === "dev") {
+    throw new Error('OTP_PROVIDER "dev" cannot run with NODE_ENV=production — configure a real OTP delivery provider.');
+  }
+  if (env.OTP_PROVIDER === "faraz" && !(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER && env.FARAZ_SMS_OTP_PATTERN_CODE)) {
+    throw new Error("OTP_PROVIDER=faraz requires FARAZ_SMS_API_KEY, FARAZ_SMS_SENDER and FARAZ_SMS_OTP_PATTERN_CODE.");
+  }
+}
+
 export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   const env = loadEnv(envSchema, source);
   validatePaymentConfig(env);
@@ -301,6 +340,7 @@ export function validateEnv(source: NodeJS.ProcessEnv): AppEnv {
   validateMarketplaceConfig(env);
   validateMessagingConfig(env);
   validateGoogleAuthConfig(env);
+  validateOtpConfig(env);
   validateStorageConfig(env);
   return env;
 }

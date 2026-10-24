@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { cn } from "./cn";
 
 export interface AvatarProps {
@@ -14,19 +17,25 @@ const sizeClasses = {
 };
 
 function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
+  // Only words that start with a letter count ("سارا (QA)" → "س", not "س)").
+  const parts = name.trim().split(/\s+/).filter((part) => /^\p{L}/u.test(part));
   const [first, second] = parts;
-  return ((first?.[0] ?? "") + (second?.[0] ?? "")).toUpperCase() || (first?.[0]?.toUpperCase() ?? "?");
+  if (!first) return "?";
+  // Persian/Arabic script reads better as one letter; Latin names get two.
+  if (/^[\u0600-\u06FF]/.test(first)) return first[0]!;
+  return (first[0]! + (second?.[0] ?? "")).toUpperCase();
 }
 
 export function Avatar({ src, name, size = "md", className }: AvatarProps) {
-  if (src) {
+  // A missing or broken photo falls back to initials instead of a broken-image icon.
+  const [failed, setFailed] = useState<string | null>(null);
+  if (src && failed !== src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={name}
+        onError={() => setFailed(src)}
         className={cn("rounded-full object-cover", sizeClasses[size], className)}
       />
     );
@@ -36,7 +45,7 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
       role="img"
       aria-label={name}
       className={cn(
-        "flex items-center justify-center rounded-full bg-brand-natural font-semibold text-text-inverse",
+        "flex items-center justify-center rounded-full bg-brand-solid font-semibold text-on-brand",
         sizeClasses[size],
         className,
       )}

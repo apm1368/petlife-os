@@ -14,6 +14,7 @@ export class AdminAuditController {
   @Get()
   @RequireAdminPermission("audit.view")
   list(@Query() query: ListAuditQueryDto) {
+    if (query.action || query.from || query.to || (query.entityType && !query.entityId)) return this.auditLog.search(query);
     if (query.entityType && query.entityId) return this.auditLog.listForEntity(query.entityType, query.entityId, query);
     if (query.adminUserId) return this.auditLog.listForAdmin(query.adminUserId, query);
     return this.auditLog.listRecent(query);

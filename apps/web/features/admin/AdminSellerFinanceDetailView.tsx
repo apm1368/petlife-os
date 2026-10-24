@@ -98,7 +98,7 @@ export function AdminSellerFinanceDetailView({ sellerId }: { sellerId: string })
         <div className="flex flex-wrap items-end gap-2">
           <Input type="date" label={t("calculate.periodStart")} value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
           <Input type="date" label={t("calculate.periodEnd")} value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
-          <Button onClick={calculate}>{t("calculate.submit")}</Button>
+          <Button disabled={!periodStart.trim()} onClick={calculate}>{t("calculate.submit")}</Button>
         </div>
         {calculateError ? <span className="text-metadata text-state-urgent">{calculateError}</span> : null}
       </ContextSurface>

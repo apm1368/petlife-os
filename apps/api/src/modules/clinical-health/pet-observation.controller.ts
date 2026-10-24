@@ -35,4 +35,10 @@ export class PetObservationController {
   download(@Param("petId") petId: string, @Param("observationId") observationId: string) {
     return this.observations.getDownload(petId, observationId);
   }
+
+  @Get(":observationId")
+  @RequirePetAccess("canViewHealth")
+  get(@Param("petId") petId: string, @Param("observationId") observationId: string) {
+    return this.observations.get(petId, observationId);
+  }
 }

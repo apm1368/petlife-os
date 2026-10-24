@@ -1,0 +1,36 @@
+.editorial-index{display:flex;flex-direction:column;gap:32px}
+.editorial-heading{max-width:850px;padding-block:20px}
+.editorial-heading>p:first-child{color:var(--campaign-copper);font-size:.8rem;font-weight:700;letter-spacing:.08em}
+.editorial-heading h1{font-size:clamp(2rem,4vw,3.7rem);color:var(--brand-natural);line-height:1.5;margin-block:16px}
+.editorial-heading>p:last-child{font-size:1.05rem;line-height:2;color:var(--text-secondary)}
+.editorial-search{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border-subtle);border-radius:16px;background:var(--surface-elevated)}
+.editorial-search input{min-width:0;flex:1;background:transparent;padding:8px;color:var(--text-primary)}
+.editorial-topics{display:flex;flex-wrap:wrap;gap:10px}
+.editorial-topics a{min-height:42px;display:inline-flex;align-items:center;padding:8px 18px;border:1px solid var(--border-subtle);background:var(--surface-elevated);border-radius:30px;font-size:.85rem}
+.editorial-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.editorial-card{display:flex;flex-direction:column;height:100%;padding:12px;border:1px solid var(--border-subtle);border-radius:26px;background:var(--surface-elevated);overflow:hidden}
+.editorial-card__image{width:100%;aspect-ratio:1.45;object-fit:cover;border-radius:18px}
+.editorial-card__body{display:flex;flex-direction:column;gap:12px;padding:16px 10px 10px;flex:1}
+.editorial-card__title{font-size:1.2rem;font-weight:800;line-height:1.8;color:var(--brand-natural)}
+.editorial-card__meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);color:var(--text-secondary);font-size:.78rem}
+.editorial-card__category{color:var(--campaign-copper);font-size:.75rem;font-weight:700}
+.editorial-card__excerpt{font-size:.9rem;line-height:1.9;color:var(--text-secondary)}
+.editorial-grid>.editorial-card:first-child{grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:center;padding:20px}
+.editorial-grid>.editorial-card:first-child .editorial-card__image{aspect-ratio:1.5}
+.editorial-grid>.editorial-card:first-child .editorial-card__title{font-size:clamp(1.4rem,2.4vw,2.2rem)}
+.editorial-article{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:38px;align-items:start}
+.editorial-article__main{min-width:0;display:flex;flex-direction:column;gap:24px}
+.editorial-article__main>h1{font-size:clamp(1.8rem,3.2vw,3.2rem);line-height:1.6;color:var(--brand-natural)}
+.editorial-article__cover{width:100%;max-height:560px;object-fit:cover;border-radius:30px}
+.editorial-article__meta{display:flex;flex-wrap:wrap;gap:12px 20px;color:var(--text-secondary);font-size:.85rem;line-height:2}
+.editorial-article__meta>span{padding:6px 12px;border-radius:30px;background:var(--surface-elevated);border:1px solid var(--border-subtle)}
+.editorial-article__body{max-width:75ch;font-size:1.06rem;line-height:2.1}
+.editorial-article__body :is(h2,h3){margin-top:32px;color:var(--brand-natural);font-weight:800}
+.editorial-article__body img{max-width:100%;height:auto;border-radius:22px}
+.editorial-article__side{position:sticky;top:24px;display:flex;flex-direction:column;gap:28px;padding:24px;background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:24px}
+.editorial-article__side h2{font-size:1.05rem;font-weight:800;color:var(--brand-natural);margin-bottom:14px}
+.editorial-related{display:flex;flex-direction:column;gap:16px}
+.editorial-related a{display:flex;gap:12px;align-items:start;font-size:.85rem;line-height:1.8}
+.editorial-related img{width:72px;height:64px;object-fit:cover;border-radius:12px}
+@media(max-width:1023px){.editorial-article{grid-template-columns:minmax(0,1fr)}.editorial-article__side{position:static}.editorial-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.editorial-grid{grid-template-columns:minmax(0,1fr)}.editorial-grid>.editorial-card:first-child{display:flex;gap:0;padding:12px}.editorial-heading{padding-block:8px}.editorial-heading h1{font-size:2rem}.editorial-article{gap:26px}.editorial-article__main>h1{font-size:1.9rem}.editorial-article__cover{border-radius:22px}.editorial-search{gap:8px;padding:8px}.editorial-card__title{font-size:1.15rem}}

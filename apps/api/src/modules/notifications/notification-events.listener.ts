@@ -24,6 +24,16 @@ import { NotificationDeepLinks } from "./notification-deeplink.util";
  * to the original request (spec: "messaging failure should not roll back
  * the underlying business transaction").
  */
+interface BookingEventPayload {
+  bookingId: string;
+  customerUserId?: string;
+  petId?: string;
+  householdId?: string;
+  providerOrganizationId?: string;
+  providerUserId?: string | null;
+  cancelledBy?: "PROVIDER";
+}
+
 @Injectable()
 export class NotificationEventsListener {
   private readonly logger = new Logger(NotificationEventsListener.name);
@@ -42,9 +52,9 @@ export class NotificationEventsListener {
   }
 
   @OnEvent("ServiceBookingConfirmed")
-  onBookingConfirmed(payload: { bookingId: string }, domainEventId: string): Promise<void> {
+  onBookingConfirmed(payload: BookingEventPayload, domainEventId: string): Promise<void> {
     return this.safely("ServiceBookingConfirmed", async () => {
-      const booking = await this.prisma.booking.findUnique({ where: { id: payload.bookingId }, select: { userId: true } });
+      const booking = await this.bookingRecipients(payload);
       if (!booking) return;
       await this.orchestrator.notify({
         userId: booking.userId,
@@ -59,9 +69,9 @@ export class NotificationEventsListener {
   }
 
   @OnEvent("ServiceBookingCancelled")
-  onBookingCancelled(payload: { bookingId: string }, domainEventId: string): Promise<void> {
+  onBookingCancelled(payload: BookingEventPayload, domainEventId: string): Promise<void> {
     return this.safely("ServiceBookingCancelled", async () => {
-      const booking = await this.prisma.booking.findUnique({ where: { id: payload.bookingId }, select: { userId: true } });
+      const booking = await this.bookingRecipients(payload);
       if (!booking) return;
       await this.orchestrator.notify({
         userId: booking.userId,
@@ -72,6 +82,137 @@ export class NotificationEventsListener {
         entityId: payload.bookingId,
         domainEventId,
       });
+      if (payload.cancelledBy !== "PROVIDER") await this.notifyProviderStaff(payload, "provider.bookingCancelled", domainEventId);
+    });
+  }
+
+  /** Prefers the recipients carried on the event (the booking row may not be committed yet), falling back to a read. */
+  private async bookingRecipients(payload: BookingEventPayload): Promise<{ userId: string; petId: string; householdId: string; providerOrganizationId: string; providerUserId: string | null } | null> {
+    if (payload.customerUserId && payload.petId && payload.householdId && payload.providerOrganizationId) {
+      return { userId: payload.customerUserId, petId: payload.petId, householdId: payload.householdId, providerOrganizationId: payload.providerOrganizationId, providerUserId: payload.providerUserId ?? null };
+    }
+    const booking = await this.prisma.booking.findUnique({ where: { id: payload.bookingId }, select: { userId: true, petId: true, householdId: true, providerOrganizationId: true, providerUserId: true } });
+    return booking ? { ...booking } : null;
+  }
+
+  private async notifyCustomer(payload: BookingEventPayload, type: string, domainEventId: string): Promise<void> {
+    const bookingId = payload.bookingId;
+    const booking = await this.bookingRecipients(payload);
+    if (!booking) return;
+    await this.orchestrator.notify({
+      userId: booking.userId,
+      type,
+      category: NotificationCategory.BOOKING,
+      petId: booking.petId,
+      householdId: booking.householdId,
+      deepLink: NotificationDeepLinks.booking(bookingId),
+      entityType: "Booking",
+      entityId: bookingId,
+      domainEventId,
+    });
+  }
+
+  /** Provider-side alerts go to the assigned staff member, or every OWNER when nobody is assigned. */
+  private async notifyProviderStaff(payload: BookingEventPayload, type: string, domainEventId: string): Promise<void> {
+    const bookingId = payload.bookingId;
+    const booking = await this.bookingRecipients(payload);
+    if (!booking) return;
+    const assigned = booking.providerUserId ? await this.prisma.providerUser.findFirst({ where: { id: booking.providerUserId, removedAt: null }, select: { userId: true } }) : null;
+    const recipients = assigned
+      ? [assigned.userId]
+      : (await this.prisma.providerUser.findMany({ where: { providerOrganizationId: booking.providerOrganizationId, role: "OWNER", removedAt: null }, select: { userId: true } })).map((u) => u.userId);
+    for (const userId of new Set(recipients)) {
+      await this.orchestrator.notify({
+        userId,
+        type,
+        category: NotificationCategory.SERVICE,
+        deepLink: NotificationDeepLinks.providerBooking(bookingId),
+        entityType: "Booking",
+        entityId: bookingId,
+        domainEventId,
+      });
+    }
+  }
+
+  /** A completed booking is now reviewable — the customer is invited once (deduped on the domain event). */
+  @OnEvent("BookingCompleted")
+  onBookingCompleted(payload: BookingEventPayload, domainEventId: string): Promise<void> {
+    return this.safely("BookingCompleted", async () => {
+      await this.notifyCustomer(payload, "booking.review_invite", domainEventId);
+    });
+  }
+
+  @OnEvent("ServiceBookingRequested")
+  onBookingRequested(payload: BookingEventPayload, domainEventId: string): Promise<void> {
+    return this.safely("ServiceBookingRequested", async () => {
+      await this.notifyCustomer(payload, "booking.requested", domainEventId);
+      await this.notifyProviderStaff(payload, "provider.bookingRequest", domainEventId);
+    });
+  }
+
+  @OnEvent("ServiceBookingAwaitingPayment")
+  onAwaitingPayment(payload: BookingEventPayload, domainEventId: string): Promise<void> {
+    return this.safely("ServiceBookingAwaitingPayment", () => this.notifyCustomer(payload, "booking.awaitingPayment", domainEventId));
+  }
+
+  @OnEvent("ServiceBookingAccepted")
+  onAccepted(payload: BookingEventPayload & { awaitingPayment: boolean }, domainEventId: string): Promise<void> {
+    // A free acceptance also emits ServiceBookingConfirmed, which sends "booking.confirmed".
+    if (!payload.awaitingPayment) return Promise.resolve();
+    return this.safely("ServiceBookingAccepted", () => this.notifyCustomer(payload, "booking.awaitingPayment", domainEventId));
+  }
+
+  @OnEvent("ServiceBookingRejected")
+  onRejected(payload: BookingEventPayload, domainEventId: string): Promise<void> {
+    return this.safely("ServiceBookingRejected", () => this.notifyCustomer(payload, "booking.rejected", domainEventId));
+  }
+
+  @OnEvent("ServiceBookingExpired")
+  onExpired(payload: BookingEventPayload, domainEventId: string): Promise<void> {
+    return this.safely("ServiceBookingExpired", () => this.notifyCustomer(payload, "booking.expired", domainEventId));
+  }
+
+  @OnEvent("ServiceBookingRescheduled")
+  onRescheduled(payload: BookingEventPayload, domainEventId: string): Promise<void> {
+    return this.safely("ServiceBookingRescheduled", async () => {
+      await this.notifyCustomer(payload, "booking.rescheduled", domainEventId);
+      await this.notifyProviderStaff(payload, "booking.rescheduled", domainEventId);
+    });
+  }
+
+  @OnEvent("WaitlistSlotAvailable")
+  onWaitlistSlot(payload: { entryId: string; userId: string; providerOrganizationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("WaitlistSlotAvailable", async () => {
+      await this.orchestrator.notify({
+        userId: payload.userId,
+        type: "waitlist.slotAvailable",
+        category: NotificationCategory.BOOKING,
+        deepLink: NotificationDeepLinks.provider(payload.providerOrganizationId),
+        entityType: "BookingWaitlistEntry",
+        entityId: payload.entryId,
+        domainEventId,
+      });
+    });
+  }
+
+  @OnEvent("WaitlistOfferMade")
+  onWaitlistOffer(payload: { entryId: string; userId: string; providerOrganizationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("WaitlistOfferMade", async () => {
+      const org = await this.prisma.providerOrganization.findUnique({ where: { id: payload.providerOrganizationId }, select: { name: true } });
+      await this.orchestrator.notify({ userId: payload.userId, type: "waitlist.offer", category: NotificationCategory.BOOKING, deepLink: "/bookings", entityType: "BookingWaitlistEntry", entityId: payload.entryId, domainEventId, templateParams: { provider: org?.name ?? "" } });
+    });
+  }
+
+  @OnEvent("ServiceBookingProviderNoShowReported")
+  onProviderNoShow(payload: { bookingId: string; providerOrganizationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("ServiceBookingProviderNoShowReported", async () => {
+      const [booking, owners] = await Promise.all([
+        this.prisma.booking.findUnique({ where: { id: payload.bookingId }, select: { bookingNumber: true } }),
+        this.prisma.providerUser.findMany({ where: { providerOrganizationId: payload.providerOrganizationId, role: "OWNER", removedAt: null }, select: { userId: true } }),
+      ]);
+      for (const o of owners) {
+        await this.orchestrator.notify({ userId: o.userId, type: "provider.no_show_reported", category: NotificationCategory.BOOKING, deepLink: `/provider/bookings/${payload.bookingId}`, entityType: "Booking", entityId: payload.bookingId, domainEventId, templateParams: { bookingNumber: booking?.bookingNumber ?? "" } });
+      }
     });
   }
 
@@ -112,7 +253,7 @@ export class NotificationEventsListener {
         type: "payment.failed",
         category: NotificationCategory.PAYMENT,
         priority: NotificationPriority.HIGH,
-        deepLink: NotificationDeepLinks.checkout(payload.checkoutId),
+        deepLink: NotificationDeepLinks.cart(),
         entityType: "Checkout",
         entityId: payload.checkoutId,
         domainEventId,
@@ -121,10 +262,13 @@ export class NotificationEventsListener {
   }
 
   @OnEvent("RefundSucceeded")
-  onRefundSucceeded(payload: { refundId: string; orderId: string }, domainEventId: string): Promise<void> {
+  onRefundSucceeded(payload: { refundId: string; orderId: string | null }, domainEventId: string): Promise<void> {
     return this.safely("RefundSucceeded", async () => {
-      const order = await this.prisma.order.findUnique({ where: { id: payload.orderId }, select: { userId: true } });
-      if (!order?.userId) return;
+      // Refunds without an order (donations, subscriptions) are announced by their own domain listener.
+      if (!payload.orderId) return;
+      const order = await this.prisma.order.findUnique({ where: { id: payload.orderId }, select: { userId: true, cancelledAt: true } });
+      // A cancellation refund is already announced by "order.cancelled".
+      if (!order?.userId || order.cancelledAt) return;
       await this.orchestrator.notify({
         userId: order.userId,
         type: "refund.completed",
@@ -190,6 +334,69 @@ export class NotificationEventsListener {
         domainEventId,
       });
     }
+  }
+
+  // ---- Batch 4: commerce. Payload-only (events publish before commit). ----
+
+  @OnEvent("OrderCreated")
+  onOrderCreated(payload: { orderId: string; sellerOrganizationId: string; userId?: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderCreated", () =>
+      this.notifySellerAdmins(payload.sellerOrganizationId, "order.received", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId),
+    );
+  }
+
+  @OnEvent("OrderCancelled")
+  onOrderCancelled(payload: { orderId: string; userId: string; sellerOrganizationId: string; cancelledBy?: "CUSTOMER" | "SELLER" }, domainEventId: string): Promise<void> {
+    return this.safely("OrderCancelled", async () => {
+      await this.orchestrator.notify({
+        userId: payload.userId,
+        type: "order.cancelled",
+        category: NotificationCategory.COMMERCE,
+        deepLink: NotificationDeepLinks.order(payload.orderId),
+        entityType: "Order",
+        entityId: payload.orderId,
+        domainEventId,
+      });
+      if (payload.cancelledBy !== "SELLER") {
+        await this.notifySellerAdmins(payload.sellerOrganizationId, "order.cancelled_by_customer", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId);
+      }
+    });
+  }
+
+  @OnEvent("OrderRefundRequested")
+  onRefundRequested(payload: { orderId: string; sellerOrganizationId: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderRefundRequested", () =>
+      this.notifySellerAdmins(payload.sellerOrganizationId, "refund_request.received", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId),
+    );
+  }
+
+  @OnEvent("OrderRefundRequestApproved")
+  onRefundRequestApproved(payload: { orderId: string; userId: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderRefundRequestApproved", () => this.notifyOrderCustomer(payload.userId, payload.orderId, "refund_request.approved", domainEventId));
+  }
+
+  @OnEvent("OrderRefundRequestRejected")
+  onRefundRequestRejected(payload: { orderId: string; userId: string }, domainEventId: string): Promise<void> {
+    return this.safely("OrderRefundRequestRejected", () => this.notifyOrderCustomer(payload.userId, payload.orderId, "refund_request.rejected", domainEventId));
+  }
+
+  @OnEvent("RepeatDeliveryDue")
+  onRepeatDeliveryDue(payload: { scheduleId: string; userId: string }, domainEventId: string): Promise<void> {
+    return this.safely("RepeatDeliveryDue", async () => {
+      await this.orchestrator.notify({
+        userId: payload.userId,
+        type: "repeat_delivery.due",
+        category: NotificationCategory.COMMERCE,
+        deepLink: NotificationDeepLinks.repeatDelivery(payload.scheduleId),
+        entityType: "RepeatDeliverySchedule",
+        entityId: payload.scheduleId,
+        domainEventId,
+      });
+    });
+  }
+
+  private async notifyOrderCustomer(userId: string, orderId: string, type: string, domainEventId: string): Promise<void> {
+    await this.orchestrator.notify({ userId, type, category: NotificationCategory.COMMERCE, deepLink: NotificationDeepLinks.order(orderId), entityType: "Order", entityId: orderId, domainEventId });
   }
 
   @OnEvent("MarketplaceListingSyncFailed")

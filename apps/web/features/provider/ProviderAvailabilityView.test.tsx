@@ -10,6 +10,8 @@ vi.mock("@/services/provider-os.service", () => ({
     listAvailabilityRules: vi.fn(),
     listAvailabilityExceptions: vi.fn(),
     createAvailabilityRule: vi.fn(),
+    updateAvailabilityRule: vi.fn(),
+    updateAvailabilityException: vi.fn(),
     deleteAvailabilityRule: vi.fn(),
     createAvailabilityException: vi.fn(),
     deleteAvailabilityException: vi.fn(),
@@ -43,4 +45,17 @@ describe("ProviderAvailabilityView", () => {
 
     await waitFor(() => expect(providerOsService.createAvailabilityException).toHaveBeenLastCalledWith(expect.objectContaining({ acknowledgeConflict: true })));
   });
+});
+
+it("edits an existing rule without creating a duplicate", async () => {
+ vi.mocked(providerOsService.listAvailabilityRules).mockResolvedValue([{id:"r1",locationId:"loc1",dayOfWeek:1,startLocalTime:"09:00",endLocalTime:"17:00",timezone:"Asia/Tehran"}] as never);
+ vi.mocked(providerOsService.listAvailabilityExceptions).mockResolvedValue([]);
+ vi.mocked(providerOsService.updateAvailabilityRule).mockResolvedValue({} as never);
+ vi.mocked(providerOsService.createAvailabilityRule).mockClear();
+ renderWithIntl(<ProviderAvailabilityView/>);
+ fireEvent.click(await screen.findByRole("button",{name:"Edit"}));
+ fireEvent.change(screen.getByLabelText("End time"),{target:{value:"18:00"}});
+ fireEvent.click(screen.getByRole("button",{name:"Save changes"}));
+ await waitFor(()=>expect(providerOsService.updateAvailabilityRule).toHaveBeenCalledWith("r1",expect.objectContaining({endLocalTime:"18:00",timezone:"Asia/Tehran"})));
+ expect(providerOsService.createAvailabilityRule).not.toHaveBeenCalled();
 });

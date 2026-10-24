@@ -29,12 +29,16 @@ export const DEFAULT_FREE_PLAN_CODE = "free";
  * that coverage. Values match `seed.ts`'s own FREE plan, so seeding upgrades
  * this row in place without changing any household's effective limits.
  */
-export const DEFAULT_FREE_PLAN_ENTITLEMENTS: { key: string; type: SubscriptionEntitlementType; limitValue: number | null }[] = [
-  { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
-  { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
+export const DEFAULT_FREE_PLAN_ENTITLEMENTS: { key: string; type: SubscriptionEntitlementType; limitValue?: number | null; boolValue?: boolean }[] = [
+  // Membership is sold by features, never by how many pets a household has (owner decision, 2026-10).
+  { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+  { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 2 },
   { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 10 },
   { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 20 },
   { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
+  { key: "care.reminders", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+  { key: "vet.share", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+  { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
 ];
 
 /**

@@ -1,5 +1,6 @@
 import { IsArray, IsBooleanString, IsDateString, IsEnum, IsInt, IsNumberString, IsOptional, IsString, Min } from "class-validator";
 import { PetMemoryType, PetMemoryVisibility } from "@prisma/client";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreatePetMemoryDto {
   @IsEnum(PetMemoryType)
@@ -20,6 +21,7 @@ export class CreatePetMemoryDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["pet-memories-public", "pet-memories-private"])
   mediaObjectKeys?: string[];
 
   @IsOptional()
@@ -56,6 +58,7 @@ export class UpdatePetMemoryDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["pet-memories-public", "pet-memories-private"])
   mediaObjectKeys?: string[];
 
   @IsOptional()

@@ -1,3 +1,4 @@
+import { posix } from "node:path";
 /**
  * Reconstructs the same publicUrl shape StorageDriver.createUploadTarget()
  * hands back at upload time (`${STORAGE_PUBLIC_BASE_URL}/${key}`), so a
@@ -8,24 +9,72 @@
 const DEFAULT_STORAGE_PUBLIC_BASE_URL = "http://localhost:4000/uploads";
 
 /**
- * Every object-key prefix StorageService ever mints for content that must
- * never be reachable via a plain, permanent, unauthenticated URL (Handoff 20
- * release-critical privacy check). A mapper for one of these must instead
- * mint a per-request signed download (see MedicalDocumentService.getDownload,
- * PetObservationService.getDownload, PetMemoryService.getMediaDownload) —
- * resolveObjectUrl refuses to run rather than silently returning a public
- * URL for a private key, so a future mapper bug fails loudly instead of
- * leaking. Also used by main.ts to keep the local-dev static file mount from
- * ever serving one of these prefixes.
+ * The object-key prefixes StorageService mints for content that is public by design (a pet's photo, a
+ * public listing's images, CMS media…). Everything else is private: an allow-list, so a new uploader is
+ * private until someone deliberately adds its prefix here — the earlier deny-list silently left
+ * booking attachments, support attachments and partner verification documents publicly reachable.
+ * A private key must be read through a per-request signed download (see MedicalDocumentService.getDownload,
+ * PetObservationService.getDownload, PetMemoryService.getMediaDownload); resolveObjectUrl refuses to run
+ * for one rather than silently returning a public URL, so a mapper bug fails loudly instead of leaking.
+ * Also used by main.ts to keep the local-dev static file mount from ever serving a private key.
  */
-export const PRIVATE_OBJECT_KEY_PREFIXES = ["health-documents/", "pet-observations/", "pet-memories-private/"] as const;
+export const PUBLIC_OBJECT_KEY_PREFIXES = [
+  "pets/",
+  "cms/",
+  "lost-pet-photos/",
+  "lost-pet-sightings/",
+  "pet-memories-public/",
+  "animal-support-orgs/",
+  "insurance-providers/",
+  "pet-friendly-places/",
+  "animal-support-evidence/",
+  "community-media/",
+  "support-need-images/",
+  "travel-listing-images/",
+] as const;
+
+/** Private prefixes StorageService mints today — documentation and tests only; privacy is decided by PUBLIC_OBJECT_KEY_PREFIXES. */
+export const PRIVATE_OBJECT_KEY_PREFIXES = [
+  "health-documents/",
+  "pet-observations/",
+  "pet-memories-private/",
+  "account-exports/",
+  "animal-support-verification/",
+  "booking-attachments/",
+  "support-attachments/",
+  "partner-verification/",
+] as const;
+
+/** Repository-owned static assets (demo/QA media shipped with the web app) and absolute URLs are not object keys. */
+function isPassThrough(key: string): boolean {
+  return key.startsWith("/images/") || /^https?:\/\//i.test(key);
+}
 
 function isPrivateKey(key: string): boolean {
-  return PRIVATE_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
+  if (isPassThrough(key)) return false;
+  return !PUBLIC_OBJECT_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
+/**
+ * Whether a request path under the local static `/uploads` mount would reach a private key.
+ * The path is decoded and normalised first (dot segments, repeated slashes) so `./health-documents/…`
+ * or `%2e/…` can't slip past the prefix check while the static server still resolves them.
+ * Undecodable paths are treated as private (refused).
+ */
+export function isPrivateUploadPath(rawPath: string): boolean {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(rawPath);
+  } catch {
+    return true;
+  }
+  const normalized = posix.normalize(`/${decoded.replace(/\\/g, "/")}`).replace(/^\/+/, "");
+  return isPrivateKey(normalized);
 }
 
 export function resolveObjectUrl(key: string | null): string | null {
   if (!key) return null;
+  if (isPassThrough(key)) return key;
   if (isPrivateKey(key)) {
     throw new Error(`resolveObjectUrl() must never be called with a private object key (got "${key}") — mint a per-request signed download instead.`);
   }
@@ -33,6 +82,18 @@ export function resolveObjectUrl(key: string | null): string | null {
   return `${base}/${key}`;
 }
 
+/**
+ * For media galleries on list/detail payloads. A private key here is still a bug (and is logged as
+ * one), but it is dropped rather than thrown: one bad row must not turn a whole public feed into a
+ * 500 for every visitor. Keys are validated on write (IsObjectKeyFor), so this is a backstop.
+ */
 export function resolveObjectUrls(keys: string[]): string[] {
-  return keys.map((key) => resolveObjectUrl(key)).filter((url): url is string => url !== null);
+  return keys
+    .filter((key) => {
+      if (!isPrivateKey(key)) return true;
+      console.error(`resolveObjectUrls() dropped a private object key from a public payload: "${key.split("/")[0]}/…"`);
+      return false;
+    })
+    .map((key) => resolveObjectUrl(key))
+    .filter((url): url is string => url !== null);
 }

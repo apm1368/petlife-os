@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { ArticleLifecycleStatus } from "@petlife/types";
-import type { AdminArticleDto, AdminArticleLocaleDto, CategoryDto, ContentAuthorDto, Locale as ContentLocale, RichTextDocument, TagDto } from "@petlife/types";
+import type { AdminPermissionName, AdminArticleDto, AdminArticleLocaleDto, CategoryDto, ContentAuthorDto, Locale as ContentLocale, RichTextDocument, TagDto } from "@petlife/types";
 import { adminContentService } from "@/services/admin-content.service";
+import { useAdminStore } from "@/stores/admin-store";
+import { ApiError } from "@/lib/api/client";
 import { RichTextBlockEditor } from "./RichTextBlockEditor";
 import { RichTextRenderer } from "./RichTextRenderer";
 import { articleStatusTone } from "./content-tone";
@@ -22,7 +25,18 @@ const LOCALES: ContentLocale[] = ["fa", "en"];
  * buttons/calls — never one combined "save and publish" action.
  */
 export function AdminContentArticleEditorView({ articleId }: { articleId: string | null }) {
+  const authorT = useTranslations("rollout.authors");
   const t = useTranslations("admin.content.editor");
+  const actions = useTranslations("rollout.records");
+  const context = useAdminStore((state) => state.context);
+  const adminStatus = useAdminStore((state) => state.status);
+  const canRead = adminStatus === "ready" && context?.isAdmin === true && context.permissions.includes("content.view");
+  const permitted = (permission: AdminPermissionName) => canRead && context?.permissions.includes(permission) === true;
+  // Resolve again at click time so an old DOM handler cannot use revoked permissions.
+  const canAct = (permission: AdminPermissionName) => {
+    const current = useAdminStore.getState();
+    return current.status === "ready" && current.context?.isAdmin === true && current.context.permissions.includes("content.view") && current.context.permissions.includes(permission);
+  };
   const router = useRouter();
   const uiLocale = useLocale() as "fa" | "en";
 
@@ -35,6 +49,8 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
   const [activeLocale, setActiveLocale] = useState<ContentLocale>("fa");
   const [localeContent, setLocaleContent] = useState<AdminArticleLocaleDto | null>(null);
   const [localeLoading, setLocaleLoading] = useState(false);
+  const [localeLoadError, setLocaleLoadError] = useState(false);
+  const localeRequest = useRef(0);
 
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -45,11 +61,18 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
   const [changeNote, setChangeNote] = useState("");
   const [preview, setPreview] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [sharedError, setSharedError] = useState<string | null>(null);
+  const [transitionError, setTransitionError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState("");
   const [authorId, setAuthorId] = useState("");
   const [tagIds, setTagIds] = useState<string[]>([]);
 
+  const status = localeContent?.status;
+  const canSave = !localeLoadError && !localeLoading && (articleId ? permitted("content.edit") : permitted("content.create")) && (status !== ArticleLifecycleStatus.VISIBLE || permitted("content.publish"));
+  const canEditShared = articleId ? permitted("content.edit") : permitted("content.create");
+
   async function loadShared() {
+    if (!canRead) return;
     setError(false);
     try {
       const [cats, auths, tgs] = await Promise.all([adminContentService.listCategories(), adminContentService.listAuthors(), adminContentService.listTags()]);
@@ -71,10 +94,14 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
   useEffect(() => {
     void loadShared();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [articleId]);
+  }, [articleId, canRead]);
 
   async function loadLocale(loc: ContentLocale) {
+    if (!canRead) return;
+    const request = ++localeRequest.current;
+    setLocaleLoadError(false);
     if (!articleId) {
+      setLocaleLoading(false);
       setLocaleContent(null);
       setTitle("");
       setSlug("");
@@ -87,6 +114,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
     setLocaleLoading(true);
     try {
       const content = await adminContentService.getArticleLocale(articleId, loc);
+      if (request !== localeRequest.current) return;
       setLocaleContent(content);
       setTitle(content.title);
       setSlug(content.slug);
@@ -94,7 +122,13 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
       setBody(content.body);
       setSeoTitle(content.seoTitle ?? "");
       setSeoDescription(content.seoDescription ?? "");
-    } catch {
+    } catch (err) {
+      if (request !== localeRequest.current) return;
+      // Only an explicit 404 means this language has no content yet.
+      if (!(err instanceof ApiError && err.status === 404)) {
+        setLocaleLoadError(true);
+        return;
+      }
       setLocaleContent(null);
       setTitle("");
       setSlug("");
@@ -103,16 +137,18 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
       setSeoTitle("");
       setSeoDescription("");
     } finally {
-      setLocaleLoading(false);
+      if (request === localeRequest.current) setLocaleLoading(false);
     }
   }
 
   useEffect(() => {
     void loadLocale(activeLocale);
+    return () => { localeRequest.current += 1; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLocale, articleId]);
+  }, [activeLocale, articleId, canRead]);
 
   async function save() {
+    if (localeLoadError || localeLoading || !canAct(articleId ? "content.edit" : "content.create") || (status === ArticleLifecycleStatus.VISIBLE && !canAct("content.publish"))) return;
     setSaveError(null);
     const input = { title, slug, excerpt: excerpt || undefined, body, seoTitle: seoTitle || undefined, seoDescription: seoDescription || undefined, changeNote: changeNote || undefined };
     try {
@@ -124,33 +160,54 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
       const saved = await adminContentService.saveArticleLocale(articleId, activeLocale, input);
       setLocaleContent(saved);
       setChangeNote("");
-    } catch {
-      setSaveError(t("saveFailed"));
+    } catch (err) {
+      // The typed fields stay as they are, so nothing the editor wrote is lost on a failed save.
+      setSaveError(saveErrorMessage(err));
     }
   }
 
+  function saveErrorMessage(err: unknown) {
+    if (err instanceof ApiError && err.code === "DUPLICATE_ARTICLE_SLUG") return t("saveFailed");
+    if (err instanceof ApiError && err.details?.reason === "LIVE_EDIT_REQUIRES_CONTENT_PUBLISH") return t("liveEditNeedsPublish");
+    if (err instanceof ApiError && err.status === 403) return t("saveForbidden");
+    return t("saveFailedKept");
+  }
+
   async function updateShared() {
-    if (!articleId) return;
-    const updated = await adminContentService.updateArticle(articleId, { authorId: authorId || null, categoryId: categoryId || null, tagIds });
-    setArticle(updated);
+    if (!articleId || !canAct("content.edit")) return;
+    setSharedError(null);
+    try {
+      const updated = await adminContentService.updateArticle(articleId, { authorId: authorId || null, categoryId: categoryId || null, tagIds });
+      setArticle(updated);
+    } catch (err) {
+      setSharedError(err instanceof ApiError && err.status === 403 ? t("saveForbidden") : t("sharedSaveFailed"));
+    }
   }
 
   function toggleTag(tagId: string) {
+    if (!canAct(articleId ? "content.edit" : "content.create")) return;
     setTagIds((prev) => (prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]));
   }
 
   async function transition(action: "publish" | "hide" | "archive") {
-    if (!articleId) return;
+    if (!articleId || localeLoadError || localeLoading || !canAct(action === "archive" ? "content.archive" : "content.publish")) return;
     const fn = action === "publish" ? adminContentService.publishArticleLocale : action === "hide" ? adminContentService.hideArticleLocale : adminContentService.archiveArticleLocale;
-    const updated = await fn(articleId, activeLocale);
-    setLocaleContent(updated);
-    await loadShared();
+    setTransitionError(null);
+    try {
+      const updated = await fn(articleId, activeLocale);
+      setLocaleContent(updated);
+      await loadShared();
+    } catch (err) {
+      setTransitionError(err instanceof ApiError && err.status === 403 ? t("transitionForbidden") : t("transitionFailed"));
+    }
   }
+
+  if (adminStatus === "idle" || adminStatus === "loading") return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
+  if (!canRead || (!articleId && !permitted("content.create"))) return <EmptyState title={actions("noAccess")} />;
 
   if (error && articleId) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={loadShared} />;
   if (articleId && !article) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
-  const status = localeContent?.status;
   const canPublish = status === ArticleLifecycleStatus.DRAFT || status === ArticleLifecycleStatus.HIDDEN;
   const canHide = status === ArticleLifecycleStatus.VISIBLE;
   const canArchive = status === ArticleLifecycleStatus.DRAFT || status === ArticleLifecycleStatus.HIDDEN;
@@ -172,7 +229,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
           {LOCALES.map((l) => {
             const availability = article?.locales.find((al) => al.locale === l);
             return (
-              <Button key={l} variant={activeLocale === l ? "primary" : "secondary"} size="sm" onClick={() => setActiveLocale(l)}>
+              <Button key={l} aria-pressed={activeLocale === l} variant={activeLocale === l ? "primary" : "secondary"} size="sm" onClick={() => setActiveLocale(l)}>
                 {l.toUpperCase()} {availability ? `· ${t(`status.${availability.status}`)}` : `· ${t("notCreated")}`}
               </Button>
             );
@@ -183,20 +240,23 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-section-title text-text-primary">{t("sharedFieldsTitle")}</span>
         <div className="flex flex-wrap items-end gap-2">
-          <Select label={t("category")} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} options={[{ value: "", label: t("none") }, ...categories.map((c) => ({ value: c.id, label: c.locales.find((l) => l.locale === uiLocale)?.name ?? c.locales[0]?.name ?? c.id }))]} />
-          <Select label={t("author")} value={authorId} onChange={(e) => setAuthorId(e.target.value)} options={[{ value: "", label: t("none") }, ...authors.map((a) => ({ value: a.id, label: a.name }))]} />
-          {articleId ? (
+          <Select disabled={!canEditShared} label={t("category")} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} options={[{ value: "", label: t("none") }, ...categories.map((c) => ({ value: c.id, label: c.locales.find((l) => l.locale === uiLocale)?.name ?? c.locales[0]?.name ?? c.id }))]} />
+          {canEditShared ? <Link href={`/${uiLocale}/admin/content/authors`}>{authorT("manage")}</Link> : null}
+          <Select disabled={!canEditShared} label={t("author")} value={authorId} onChange={(e) => setAuthorId(e.target.value)} options={[{ value: "", label: t("none") }, ...authors.map((a) => ({ value: a.id, label: a.name }))]} />
+          {articleId && canEditShared ? (
             <Button variant="secondary" size="sm" onClick={updateShared}>
               {t("saveSharedFields")}
             </Button>
           ) : null}
+          {sharedError ? <span role="alert" className="text-metadata text-state-urgent">{sharedError}</span> : null}
         </div>
         <div className="flex flex-wrap gap-2">
           {tags.map((tg) => {
             const label = tg.locales.find((l) => l.locale === uiLocale)?.name ?? tg.locales[0]?.name ?? tg.id;
             const selected = tagIds.includes(tg.id);
+            if (!canEditShared) return selected ? <span key={tg.id}>{label}</span> : null;
             return (
-              <Button key={tg.id} type="button" size="sm" variant={selected ? "primary" : "secondary"} onClick={() => toggleTag(tg.id)}>
+              <Button key={tg.id} type="button" size="sm" aria-pressed={selected} variant={selected ? "primary" : "secondary"} onClick={() => toggleTag(tg.id)}>
                 {label}
               </Button>
             );
@@ -206,6 +266,8 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
 
       {localeLoading ? (
         <Skeleton className="h-64 w-full" aria-label={t("loading")} />
+      ) : localeLoadError ? (
+        <ErrorRecovery title={t("title")} message={actions("failed")} retryLabel={t("retry")} onRetry={() => void loadLocale(activeLocale)} />
       ) : (
         <ContextSurface className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
@@ -213,19 +275,19 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
             {status ? <StatusLabel tone={articleStatusTone(status)}>{t(`status.${status}`)}</StatusLabel> : null}
           </div>
 
-          <Input label={t("titleField")} value={title} onChange={(e) => setTitle(e.target.value)} />
-          <Input label={t("slug")} value={slug} onChange={(e) => setSlug(e.target.value)} />
-          <Input label={t("excerpt")} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} />
-          <Input label={t("seoTitle")} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} />
-          <Input label={t("seoDescription")} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} />
+          <Input readOnly={!canSave} label={t("titleField")} value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Input readOnly={!canSave} label={t("slug")} value={slug} onChange={(e) => setSlug(e.target.value)} />
+          <Input readOnly={!canSave} label={t("excerpt")} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} />
+          <Input readOnly={!canSave} label={t("seoTitle")} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} />
+          <Input readOnly={!canSave} label={t("seoDescription")} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} />
 
           <div className="flex items-center justify-between">
             <span className="text-metadata text-text-secondary">{t("body")}</span>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setPreview((p) => !p)}>
+            {canSave ? <Button type="button" variant="ghost" size="sm" onClick={() => setPreview((p) => !p)}>
               {preview ? t("editBody") : t("previewBody")}
-            </Button>
+            </Button> : null}
           </div>
-          {preview ? (
+          {preview || !canSave ? (
             <ContextSurface>
               <RichTextRenderer body={body} />
             </ContextSurface>
@@ -233,21 +295,22 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
             <RichTextBlockEditor value={body} onChange={setBody} />
           )}
 
-          <Input label={t("changeNote")} value={changeNote} onChange={(e) => setChangeNote(e.target.value)} />
-          {saveError ? <span className="text-metadata text-state-urgent">{saveError}</span> : null}
-          <Button onClick={save}>{t("save")}</Button>
+          <Input readOnly={!canSave} label={t("changeNote")} value={changeNote} onChange={(e) => setChangeNote(e.target.value)} />
+          {saveError ? <span role="alert" className="text-metadata text-state-urgent">{saveError}</span> : null}
+          {canSave ? <Button onClick={save}>{status === ArticleLifecycleStatus.VISIBLE ? t("saveLive") : t("save")}</Button> : null}
 
-          {articleId ? (
+          {articleId && (permitted("content.publish") || permitted("content.archive")) ? (
             <div className="flex flex-wrap gap-2 border-t border-border-subtle pt-3">
-              <Button disabled={!canPublish} onClick={() => transition("publish")}>
+              {permitted("content.publish") ? <><Button disabled={!canPublish} onClick={() => transition("publish")}>
                 {t("publish")}
               </Button>
               <Button variant="secondary" disabled={!canHide} onClick={() => transition("hide")}>
                 {t("hide")}
-              </Button>
-              <Button variant="secondary" disabled={!canArchive} onClick={() => transition("archive")}>
+              </Button></> : null}
+              {permitted("content.archive") ? <Button variant="secondary" disabled={!canArchive} onClick={() => transition("archive")}>
                 {t("archive")}
-              </Button>
+              </Button> : null}
+              {transitionError ? <span role="alert" className="text-metadata text-state-urgent">{transitionError}</span> : null}
             </div>
           ) : null}
         </ContextSurface>

@@ -1,7 +1,8 @@
 "use client";
+import { Brand } from "@/features/brand/Brand";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar, Button } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
@@ -11,6 +12,7 @@ import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavigation";
 import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 import { PublicFooter } from "./PublicFooter";
+import { MemberFrame } from "./MemberFrame";
 
 /**
  * The shell for public browsing surfaces (vet/service/shop discovery) —
@@ -30,12 +32,16 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const router = useRouter();
   const preview = useLocalPreview();
+  const warmSurface = /^\/(fa|en)\//.test(usePathname() ?? "");
+
+  // A signed-in member keeps the member frame on public discovery pages.
+  if (!preview && status === "authenticated" && user) return <MemberFrame>{children}</MemberFrame>;
 
   return (
-    <div className="min-h-screen bg-surface-base">
+    <div className={`min-h-screen bg-surface-base ${warmSurface ? "public-shell--commerce" : ""}`}>
       <header className="public-site-header border-b border-border-subtle bg-surface-elevated px-4 py-3">
         <Link href={`/${locale}`} className="text-section-title text-text-primary">
-          {t("appName")}
+          <Brand />
         </Link>
         <PublicPrimaryNavigation />
         <div className="public-header-actions flex items-center gap-2">

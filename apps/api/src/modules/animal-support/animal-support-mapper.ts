@@ -2,15 +2,16 @@ import type { AnimalSupportOrganization, DonationIntent, RescueCase, SupportCamp
 import type { AnimalSupportOrganizationDto, DonationFundBalanceDto, DonationHistoryItemDto, PublicDonationEntryDto, RescueCaseDto, SupportCampaignDto, SupportCampaignUpdateDto } from "@petlife/types";
 import { resolveObjectUrl, resolveObjectUrls } from "../storage/object-url.util";
 
-export function toAnimalSupportOrganizationDto(row: AnimalSupportOrganization): AnimalSupportOrganizationDto {
+/** Batch 6: `forPublic` drops exact coordinates (no public map needs them); the text location stays. */
+export function toAnimalSupportOrganizationDto(row: AnimalSupportOrganization, forPublic = false): AnimalSupportOrganizationDto {
   return {
     id: row.id,
     type: row.type as unknown as AnimalSupportOrganizationDto["type"],
     name: row.name,
     description: row.description,
     location: row.location,
-    latitude: row.latitude,
-    longitude: row.longitude,
+    latitude: forPublic ? null : row.latitude,
+    longitude: forPublic ? null : row.longitude,
     verificationStatus: row.verificationStatus as unknown as AnimalSupportOrganizationDto["verificationStatus"],
     contactEmail: row.contactEmail,
     contactPhone: row.contactPhone,
@@ -25,7 +26,8 @@ export function toAnimalSupportOrganizationDto(row: AnimalSupportOrganization): 
 
 type RescueCaseWithOrg = RescueCase & { organization: { name: string } };
 
-export function toRescueCaseDto(row: RescueCaseWithOrg): RescueCaseDto {
+/** Batch 6: `forPublic` drops exact coordinates — a rescue location can be where a vulnerable animal is. */
+export function toRescueCaseDto(row: RescueCaseWithOrg, forPublic = false): RescueCaseDto {
   return {
     id: row.id,
     organizationId: row.organizationId,
@@ -35,8 +37,8 @@ export function toRescueCaseDto(row: RescueCaseWithOrg): RescueCaseDto {
     animalType: row.animalType,
     status: row.status as unknown as RescueCaseDto["status"],
     location: row.location,
-    latitude: row.latitude,
-    longitude: row.longitude,
+    latitude: forPublic ? null : row.latitude,
+    longitude: forPublic ? null : row.longitude,
     estimatedNeedIrr: row.estimatedNeedIrr,
     evidenceObjectKeys: row.evidenceObjectKeys,
     evidenceUrls: resolveObjectUrls(row.evidenceObjectKeys),

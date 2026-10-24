@@ -3,6 +3,10 @@ import type { INestApplication } from "@nestjs/common";
 import { AdminMembershipStatus, AdminRole, PetLifecycleStatus } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
+import { AdminDonationService } from "../src/modules/animal-support/admin-donation.service";
+import { CampaignFundType } from "@prisma/client";
+import { DonationInsufficientFundBalanceException } from "../src/common/errors/api-exception";
+import type { ResolvedAdminContext } from "../src/modules/admin/auth/admin-context.types";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 
 interface Cookies {
@@ -181,6 +185,57 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     expect(visible.body.verificationStatus).toBe("VERIFIED");
   });
 
+  it("API separates organization reading, management and finance permissions", async () => {
+    const manager = await setupAdmin(AdminRole.ADMIN);
+    const reader = await setupAdmin(AdminRole.OPERATIONS);
+    const finance = await setupAdmin(AdminRole.FINANCE);
+    const { organizationId, campaignId } = await setupVerifiedOrgWithActiveCampaign(manager, "RESTRICTED");
+    const { client: donor } = await setupHousehold();
+    await donor.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 500_000 }).expect(201);
+    const orgPath = `/admin/animal-support/organizations/${organizationId}`;
+    const payout = { amountIrr: 100_000, fundType: "RESTRICTED", reason: "Existing bank receipt, ledger record only" };
+    await reader.client.get(`${orgPath}/fund-balance`).expect(200);
+    await reader.client.patch(orgPath).send({ description: "Must not be written" }).expect(403);
+    await reader.client.post(`${orgPath}/payouts`).send(payout).expect(403);
+    await manager.client.post(`${orgPath}/payouts`).send(payout).expect(403);
+    await finance.client.patch(orgPath).send({ description: "Finance cannot edit" }).expect(403);
+    await donor.get(`${orgPath}/fund-balance`).expect(403);
+    await finance.client.post(`${orgPath}/payouts`).send(payout).expect(201);
+    expect((await reader.client.get(`${orgPath}/fund-balance`).expect(200)).body.restrictedAvailableIrr).toBe(400_000);
+    expect(await prisma.donationLedgerTransaction.count({ where: { organizationId, referenceType: "PAYOUT" } })).toBe(1);
+  });
+
+  it("organization PATCH preserves omitted fields, explicitly clears nullable text and rejects null names", async () => {
+    const admin = await setupAdmin(AdminRole.ADMIN);
+    const created = await admin.client.post("/admin/animal-support/organizations").send({ type: "SHELTER", name: `Patch org ${unique()}`, description: "Original description", location: "Tehran", contactEmail: "shelter@example.test" }).expect(201);
+    const url = `/admin/animal-support/organizations/${created.body.id}`;
+    const updated = await admin.client.patch(url).send({ description: null }).expect(200);
+    expect(updated.body.description).toBeNull();
+    expect(updated.body.location).toBe("Tehran");
+    expect(updated.body.contactEmail).toBe("shelter@example.test");
+    await admin.client.patch(url).send({ name: null }).expect(400);
+    expect((await admin.client.get(url).expect(200)).body.name).toBe(created.body.name);
+  });
+
+  it("rescue evidence registration is case-scoped, deduplicated and permission protected", async () => {
+    const admin = await setupAdmin(AdminRole.ADMIN);
+    const org = await admin.client.post("/admin/animal-support/organizations").send({ type: "SHELTER", name: `Evidence org ${unique()}` }).expect(201);
+    const rescue = await admin.client.post(`/admin/animal-support/organizations/${org.body.id}/rescue-cases`).send({ title: "Rescue case", description: "Treatment" }).expect(201);
+    const url = `/admin/animal-support/rescue-cases/${rescue.body.id}/evidence`;
+    const target = await admin.client.post(`/admin/animal-support/rescue-cases/${rescue.body.id}/evidence-upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 10 }).expect(201);
+    const key = target.body.key as string;
+    const other = await admin.client.post(`/admin/animal-support/organizations/${org.body.id}/rescue-cases`).send({ title: "Other real rescue case", description: "Separate evidence scope" }).expect(201);
+    const foreignTarget = await admin.client.post(`/admin/animal-support/rescue-cases/${other.body.id}/evidence-upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 10 }).expect(201);
+    await admin.client.post(url).send({ evidenceObjectKeys: [foreignTarget.body.key] }).expect(400);
+    await admin.client.post(url).send({ evidenceObjectKeys: [] }).expect(400);
+    const registered = await admin.client.post(url).send({ evidenceObjectKeys: [key] }).expect(201);
+    expect(registered.body.evidenceObjectKeys).toEqual([key]);
+    const repeated = await admin.client.post(url).send({ evidenceObjectKeys: [key] }).expect(201);
+    expect(repeated.body.evidenceObjectKeys).toEqual([key]);
+    const consumer = await setupHousehold();
+    await consumer.client.post(url).send({ evidenceObjectKeys: [key] }).expect(403);
+  });
+
   // -- Flow G: Restricted Donation fund separation ---------------------------
 
   it("Flow G: a restricted donation posts only to the restricted fund, never the general fund", async () => {
@@ -193,6 +248,24 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const balance = await admin.client.get(`/admin/animal-support/organizations/${organizationId}/fund-balance`).expect(200);
     expect(balance.body.restrictedAvailableIrr).toBe(500_000);
     expect(balance.body.generalAvailableIrr).toBe(0);
+  });
+
+  it("concurrent payouts cannot consume the same organization fund twice", async () => {
+    const admin = await setupAdmin(AdminRole.ADMIN);
+    const { organizationId, campaignId } = await setupVerifiedOrgWithActiveCampaign(admin, "RESTRICTED");
+    const { client: donor } = await setupHousehold();
+    await donor.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 500_000 }).expect(201);
+    const membership = await prisma.adminUser.findUniqueOrThrow({ where: { userId: admin.userId } });
+    const context = { adminUserId: membership.id, userId: admin.userId } as ResolvedAdminContext;
+    const service = app.get(AdminDonationService);
+    const results = await Promise.allSettled([1, 2].map(() => service.recordPayout(context, organizationId, { amountIrr: 400_000, fundType: CampaignFundType.RESTRICTED, reason: "Recorded bank receipt" })));
+    expect(results.filter(result => result.status === "fulfilled")).toHaveLength(1);
+    const rejected = results.find(result => result.status === "rejected") as PromiseRejectedResult;
+    expect(rejected.reason).toBeInstanceOf(DonationInsufficientFundBalanceException);
+    const balance = await service.getFundBalance(organizationId);
+    expect(balance.restrictedAvailableIrr).toBe(100_000);
+    expect(balance.generalAvailableIrr).toBe(0);
+    expect(await prisma.donationLedgerTransaction.count({ where: { organizationId, referenceType: "PAYOUT" } })).toBe(1);
   });
 
   // -- Flow H: Duplicate Donation idempotency --------------------------------
@@ -220,11 +293,14 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client: publicDonorClient } = await setupHousehold();
 
     await anonDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 100_000 }).expect(201);
-    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true }).expect(201);
+    // Batch 6: showing publicly requires a donor-chosen name (the account name is never shown).
+    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true }).expect(400);
+    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true, publicDisplayName: "Sara" }).expect(201);
 
     const donors = await request(app.getHttpServer()).get(`/animal-support/campaigns/${campaignId}/donors`).expect(200);
     expect(donors.body).toHaveLength(1);
     expect(donors.body[0].amountIrr).toBe(200_000);
+    expect(donors.body[0].displayName).toBe("Sara");
   });
 
   // -- Flow J: Community Post --------------------------------------------------

@@ -78,7 +78,7 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
 
       <ContextSurface className="flex flex-wrap items-end gap-2">
         <Input label={tCommon("assigneeLabel")} value={assigneeAdminId} onChange={(e) => setAssigneeAdminId(e.target.value)} className="min-w-48 flex-1" />
-        <Button onClick={assign}>{tCommon("assign")}</Button>
+        <Button disabled={!assigneeAdminId.trim()} onClick={assign}>{tCommon("assign")}</Button>
       </ContextSurface>
 
       <ContextSurface className="flex flex-col gap-2">
@@ -90,7 +90,7 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
           </div>
         ))}
         <Input label={t("detail.evidencePlaceholder")} value={evidenceStatement} onChange={(e) => setEvidenceStatement(e.target.value)} />
-        <Button onClick={addEvidence}>{t("detail.addEvidence")}</Button>
+        <Button disabled={!evidenceStatement.trim()} onClick={addEvidence}>{t("detail.addEvidence")}</Button>
       </ContextSurface>
 
       <ContextSurface className="flex flex-col gap-2">
@@ -98,7 +98,7 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
         <Input label={t("detail.resolution")} value={resolutionSummary} onChange={(e) => setResolutionSummary(e.target.value)} />
         <div className="flex flex-wrap gap-2">
           {STATUSES.map((s) => (
-            <Button key={s} size="sm" variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
+            <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
               {t(`status.${s}`)}
             </Button>
           ))}

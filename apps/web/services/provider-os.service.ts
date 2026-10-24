@@ -6,6 +6,7 @@ import type {
   ProviderContextDto,
   ProviderOverviewDto,
   ProviderServiceDto,
+  ProviderServiceVariantDto,
   ProviderTeamMemberDto,
   BookingProviderNoteDto,
   AvailabilityExceptionType,
@@ -30,6 +31,73 @@ export interface ListProviderBookingsInput {
   category?: ServiceCategory;
   locationId?: string;
   providerUserId?: string;
+  /** Request-to-book queue. */
+  requests?: boolean;
+  /** Calendar window (ISO). */
+  from?: string;
+  to?: string;
+}
+
+export interface ProviderFollowUpInput {
+  type: "FOLLOW_UP" | "VACCINATION" | "MEDICATION" | "MONITORING" | "OTHER";
+  title: string;
+  detail?: string;
+  dueAt: string;
+}
+
+export interface ProviderResource {
+  id: string;
+  locationId: string;
+  name: string;
+  type: string;
+  isActive: boolean;
+}
+
+export interface ProviderStaffMember {
+  providerUserId: string;
+  displayName: string | null;
+  role: string;
+  displayTitle: string | null;
+  publicBio: string | null;
+  isBookable: boolean;
+  serviceIds: string[];
+}
+
+export interface ProviderWaitlistEntry {
+  id: string;
+  petName: string;
+  serviceId: string;
+  serviceName: string;
+  windowStart: string;
+  windowEnd: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface ProviderReviewRow {
+  id: string;
+  rating: number;
+  body: string | null;
+  authorName: string;
+  serviceName: string | null;
+  providerResponse: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface ProviderAnalytics {
+  periodDays: number;
+  totalBookings: number;
+  completed: number;
+  cancelled: number;
+  noShow: number;
+  completionRate: number | null;
+  revenue: number;
+  revenueCurrency: string | null;
+  reviewAverage: number | null;
+  reviewCount: number;
+  repeatClients: number;
+  topServices: { serviceId: string; name: string; completed: number }[];
 }
 
 export interface CreateAvailabilityRuleInput {
@@ -69,8 +137,31 @@ export const providerOsService = {
         category: input.category,
         locationId: input.locationId,
         providerUserId: input.providerUserId,
+        requests: input.requests ? "true" : undefined,
+        from: input.from,
+        to: input.to,
       })}`,
     ),
+  acceptBooking: (id: string) => apiFetch<ProviderBookingDetailDto>(`/provider/bookings/${id}/accept`, { method: "POST" }),
+  rejectBooking: (id: string, reason: string) => apiFetch<ProviderBookingDetailDto>(`/provider/bookings/${id}/reject`, { method: "POST", body: { reason } }),
+  markNoShow: (id: string) => apiFetch<ProviderBookingDetailDto>(`/provider/bookings/${id}/no-show`, { method: "POST" }),
+  completeWithFollowUps: (id: string, completionNote: string | undefined, followUps: ProviderFollowUpInput[]) =>
+    apiFetch<ProviderBookingDetailDto>(`/provider/bookings/${id}/complete`, { method: "POST", body: { completionNote, followUps: followUps.length ? followUps : undefined } }),
+  createVariant: (serviceId: string, input: { name: string; priceAmount: number | null; durationMinutes: number; description?: string }) =>
+    apiFetch<ProviderServiceVariantDto>(`/provider/services/${serviceId}/variants`, { method: "POST", body: input }),
+  updateVariant: (serviceId: string, variantId: string, patch: Partial<{ name: string; priceAmount: number | null; durationMinutes: number; isActive: boolean }>) =>
+    apiFetch<ProviderServiceVariantDto>(`/provider/services/${serviceId}/variants/${variantId}`, { method: "PATCH", body: patch }),
+  listResources: () => apiFetch<ProviderResource[]>("/provider/resources"),
+  createResource: (input: { locationId: string; name: string; type: string }) => apiFetch<ProviderResource>("/provider/resources", { method: "POST", body: input }),
+  updateResource: (id: string, patch: { name?: string; isActive?: boolean }) => apiFetch<ProviderResource>(`/provider/resources/${id}`, { method: "PATCH", body: patch }),
+  listStaff: () => apiFetch<ProviderStaffMember[]>("/provider/staff"),
+  setStaffServices: (providerUserId: string, serviceIds: string[]) => apiFetch<ProviderStaffMember>(`/provider/staff/${providerUserId}/services`, { method: "PUT", body: { serviceIds } }),
+  updateStaff: (providerUserId: string, patch: { publicBio?: string | null; isBookable?: boolean; displayTitle?: string | null }) =>
+    apiFetch<ProviderStaffMember>(`/provider/staff/${providerUserId}`, { method: "PATCH", body: patch }),
+  listWaitlist: () => apiFetch<ProviderWaitlistEntry[]>("/provider/waitlist"),
+  listReviews: () => apiFetch<ProviderReviewRow[]>("/provider/reviews"),
+  respondToReview: (reviewId: string, response: string) => apiFetch<ProviderReviewRow>(`/provider/reviews/${reviewId}/respond`, { method: "POST", body: { response } }),
+  analytics: (days = 30) => apiFetch<ProviderAnalytics>(`/provider/analytics?days=${days}`),
   getBooking: (id: string) => apiFetch<ProviderBookingDetailDto>(`/provider/bookings/${id}`),
   confirmBooking: (id: string) => apiFetch<ProviderBookingDetailDto>(`/provider/bookings/${id}/confirm`, { method: "POST" }),
   cancelBooking: (id: string, reason?: string) =>

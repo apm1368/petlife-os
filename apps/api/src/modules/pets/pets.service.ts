@@ -1,21 +1,35 @@
 import { Injectable } from "@nestjs/common";
-import { PetLifecycleStatus } from "@prisma/client";
+import { OnboardingChapter, PetLifecycleStatus, Prisma } from "@prisma/client";
+import type { PetMicrochipConflictDetails } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { EntitlementService } from "../subscriptions/entitlement.service";
 import { PetLifecycleService } from "./pet-lifecycle.service";
+import { SubscriptionService } from "../subscriptions/subscription.service";
 import type { CreatePetDto } from "./dto/create-pet.dto";
 import type { UpdatePetDto } from "./dto/update-pet.dto";
 
 /**
- * Normalization rule: strip whitespace and common separators (space, hyphen,
- * dot), upper-case the rest. Used only to detect duplicate chips reliably —
- * the raw value the owner/importer entered is always preserved verbatim and
- * never rejected, since a legacy/imported value that can't be confidently
- * normalized still needs to be stored.
+ * `pets_microchip_normalized_key` is a partial unique index across every household, so a chip that
+ * is already on file anywhere rejects the write. Prisma surfaces that as P2002, and an uncaught one
+ * leaves the owner with a generic 500 ("an unexpected error occurred") on a form that is otherwise
+ * valid — nothing names the field, so "try again" can never succeed. Translate it into the ordinary
+ * field-level validation error the client already renders next to the microchip input.
  */
+function rethrowDuplicateMicrochip(error: unknown): never {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002" &&
+    String((error.meta as { target?: unknown } | undefined)?.target ?? "").includes("microchip")
+  ) {
+    throw new ValidationApiException({ field: "microchipNumber", reason: "MICROCHIP_ALREADY_REGISTERED" } satisfies PetMicrochipConflictDetails);
+  }
+  throw error;
+}
+
+/** Strip separators for uniqueness checks, preserving the owner's raw value in microchipNumber. */
 export function normalizeMicrochip(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const normalized = raw.trim().replace(/[\s\-.]/g, "").toUpperCase();
@@ -30,13 +44,10 @@ export class PetsService {
     private readonly events: DomainEventsService,
     private readonly entitlements: EntitlementService,
     private readonly lifecycle: PetLifecycleService,
+    private readonly subscriptions: SubscriptionService,
   ) {}
 
   async create(householdId: string, creatorUserId: string, dto: CreatePetDto) {
-    if (!dto.birthDate && dto.approximateAgeMonths === undefined) {
-      throw new ValidationApiException({ field: "birthDate", reason: "birthDate or approximateAgeMonths is required" });
-    }
-
     // spec: "limit checks must happen server-side" — checked before creation,
     // never blocking access to pets the household already has (over-limit
     // existing pets stay fully usable; only the NEXT create is refused).
@@ -53,7 +64,7 @@ export class PetsService {
     // EntitlementService/UsageService (which read via a separate,
     // non-transactional connection and therefore only ever see committed
     // state) and does not serialize unrelated households against each other.
-    return this.prisma.$transaction(async (tx) => {
+    const created = await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${householdId})::bigint)`;
       await this.entitlements.assertWithinLimit(householdId, "pets.max");
 
@@ -76,7 +87,7 @@ export class PetsService {
         },
       });
 
-      await this.petAccess.applyHouseholdDefaults(pet.id, householdId, tx);
+      await this.petAccess.applyHouseholdDefaults(pet.id, householdId, creatorUserId, tx);
 
       const hasActivePet = await tx.activePetPreference.findUnique({
         where: { userId_householdId: { userId: creatorUserId, householdId } },
@@ -93,6 +104,13 @@ export class PetsService {
         );
       }
 
+      // Keep the first onboarding pet recoverable even if the client's subsequent
+      // progress write fails. Bind only this creator's matching active identity flow.
+      await tx.onboardingProgress.updateMany({
+        where: { userId: creatorUserId, householdId, petId: null, chapter: OnboardingChapter.PET_IDENTITY },
+        data: { petId: pet.id },
+      });
+
       await this.events.publish(
         "PetCreated",
         { petId: pet.id, householdId, creatorUserId },
@@ -100,7 +118,11 @@ export class PetsService {
       );
 
       return pet;
-    });
+    }).catch(rethrowDuplicateMicrochip);
+    // After commit: the household's first successful pet starts its welcome trial (decision 4). Best effort —
+    // an already-used trial never fails the pet creation.
+    await this.subscriptions.startWelcomeTrial(householdId, creatorUserId);
+    return created;
   }
 
   async getById(id: string) {
@@ -109,8 +131,11 @@ export class PetsService {
     return pet;
   }
 
-  async listForHousehold(householdId: string) {
-    return this.prisma.pet.findMany({ where: { householdId, deletedAt: null }, orderBy: { createdAt: "asc" } });
+  /** Household membership alone shows nothing: only pets the caller holds an active canViewIdentity grant for. */
+  async listForHousehold(householdId: string, userId: string) {
+    const pets = await this.prisma.pet.findMany({ where: { householdId, deletedAt: null }, orderBy: { createdAt: "asc" } });
+    const visible = await Promise.all(pets.map(async (pet) => (await this.petAccess.getEffectivePermissions(pet.id, userId))?.canViewIdentity === true));
+    return pets.filter((_, i) => visible[i]);
   }
 
   async update(id: string, dto: UpdatePetDto) {
@@ -126,7 +151,7 @@ export class PetsService {
       });
       await this.events.publish("PetProfileUpdated", { petId: id }, { tx, aggregateType: "Pet", aggregateId: id });
       return pet;
-    });
+    }).catch(rethrowDuplicateMicrochip);
   }
 
   /**

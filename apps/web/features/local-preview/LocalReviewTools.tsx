@@ -50,7 +50,7 @@ export function LocalReviewTools({ children }: { children: React.ReactNode }) {
           <div className="flex flex-col gap-1">
             {reviewRoutes.filter(path => !authRoutes.includes(path) && (group.prefix ? path === group.prefix || path.startsWith(`${group.prefix}/`) : !/^\/(admin|provider|seller)(\/|$)/.test(path))).map(path => (
               <Link key={path} href={`/${locale}${path}`} aria-current={relative === path ? "page" : undefined} className="rounded-lg px-2 py-2 text-metadata hover:bg-surface-subtle focus-visible:outline focus-visible:outline-2">
-                <bdi>{path || "PET LIFE OS"}</bdi>
+                <bdi>{path || "opetlife"}</bdi>
               </Link>
             ))}
           </div>

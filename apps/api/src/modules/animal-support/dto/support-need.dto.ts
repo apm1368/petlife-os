@@ -1,8 +1,14 @@
-import { IsArray, IsEnum, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from "class-validator";
+import { IsArray, IsEnum, IsIn, IsInt, IsISO8601, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength, ValidateIf } from "class-validator";
 import { HelpOfferStatus, SupportNeedCategory, SupportNeedContactMode, SupportNeedStatus, SupportNeedUrgency } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
 
 export class CreateSupportNeedListingDto {
+  /** Batch 6 — deadline after which the listing stops accepting offers (service caps it at 180 days). */
+  @IsOptional()
+  @IsISO8601()
+  expiresAt?: string;
+
   @IsString()
   @MinLength(3)
   @MaxLength(120)
@@ -44,12 +50,19 @@ export class CreateSupportNeedListingDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["support-need-images", "animal-support-orgs"])
   imageObjectKeys?: string[];
 
   @IsOptional()
   @IsInt()
   @Min(1)
   neededQuantity?: number;
+
+  /** Cash target in IRR — only meaningful with a campaignId (money goes to the campaign, restricted to this need). */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  targetAmountIrr?: number;
 
   @IsOptional()
   @IsString()
@@ -77,6 +90,12 @@ export class CreateSupportNeedListingDto {
 }
 
 export class UpdateSupportNeedListingDto {
+  /** null clears the deadline. */
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsISO8601()
+  expiresAt?: string | null;
+
   @IsOptional()
   @IsString()
   @MinLength(3)
@@ -112,12 +131,19 @@ export class UpdateSupportNeedListingDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsObjectKeyFor(["support-need-images", "animal-support-orgs"])
   imageObjectKeys?: string[];
 
   @IsOptional()
   @IsInt()
   @Min(1)
   neededQuantity?: number;
+
+  /** Cash target in IRR — only meaningful with a campaignId (money goes to the campaign, restricted to this need). */
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  targetAmountIrr?: number;
 
   @IsOptional()
   @IsString()
@@ -155,6 +181,16 @@ export class ListSupportNeedListingsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsUUID()
   organizationId?: string;
+
+  /** Batch 6 — only explicit data: newest, urgency, or nearest deadline. No distance sort (it would let anyone triangulate private coordinates). */
+  @IsOptional()
+  @IsIn(["RECENT", "URGENT", "CLOSING_SOON"])
+  sort?: "RECENT" | "URGENT" | "CLOSING_SOON";
+
+  /** OPEN (default: still accepting help) or RESOLVED (fulfilled). */
+  @IsOptional()
+  @IsIn(["OPEN", "RESOLVED", "ALL"])
+  state?: "OPEN" | "RESOLVED" | "ALL";
 }
 
 /** The publisher's own listings, filterable by status for the My Listings tabs. */
@@ -165,6 +201,12 @@ export class ListMySupportNeedListingsQueryDto extends PaginationQueryDto {
 }
 
 export class CreateHelpOfferDto {
+  /** Batch 6 — when the helper can deliver. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  timing?: string;
+
   @IsString()
   @MinLength(5)
   @MaxLength(1000)

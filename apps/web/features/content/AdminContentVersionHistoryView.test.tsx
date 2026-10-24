@@ -1,13 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import type { ContentVersionSummaryDto } from "@petlife/types";
+import type { AdminArticleLocaleDto, ContentVersionSummaryDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { adminContentService } from "@/services/admin-content.service";
 import { AdminContentVersionHistoryView } from "./AdminContentVersionHistoryView";
+import { useAdminStore } from "@/stores/admin-store";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/services/admin-content.service", () => ({ adminContentService: { listVersions: vi.fn(), restoreVersion: vi.fn() } }));
+vi.mock("@/services/admin-content.service", () => ({ adminContentService: { listVersions: vi.fn(), restoreVersion: vi.fn(), getVersion: vi.fn(), getArticleLocale: vi.fn() } }));
 
 function version(overrides: Partial<ContentVersionSummaryDto> = {}): ContentVersionSummaryDto {
   return {
@@ -22,10 +23,16 @@ function version(overrides: Partial<ContentVersionSummaryDto> = {}): ContentVers
   };
 }
 
+function localeContent(status: "DRAFT" | "VISIBLE" = "DRAFT"): AdminArticleLocaleDto {
+  return { articleId: "article-1", locale: "fa" as never, status: status as never, title: "Draft", slug: "draft", excerpt: null, body: [], seoTitle: null, seoDescription: null, publishedAt: null, lastEditedByAdmin: null, createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" };
+}
+
 describe("AdminContentVersionHistoryView", () => {
   beforeEach(() => {
+    useAdminStore.setState({ status: "ready", context: { isAdmin: true, adminUserId: "test-admin", displayName: "Editor", role: "EDITOR", permissions: ["content.view", "content.edit"] } as never });
     vi.mocked(adminContentService.listVersions).mockReset();
     vi.mocked(adminContentService.restoreVersion).mockReset();
+    vi.mocked(adminContentService.getArticleLocale).mockReset().mockResolvedValue(localeContent());
     push.mockReset();
   });
 
@@ -69,11 +76,59 @@ describe("AdminContentVersionHistoryView", () => {
     await waitFor(() => expect(screen.getByText("Retry")).toBeTruthy());
   });
 
+  it("shows a visible restore error without navigating away", async () => {
+    vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
+    vi.mocked(adminContentService.restoreVersion).mockRejectedValue(new Error("offline"));
+    renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
+    fireEvent.click(await screen.findByText("Restore"));
+    expect((await screen.findByRole("alert")).textContent).toContain("operation failed");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("inspects the server snapshot using the public rich text renderer", async () => {
+    vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
+    vi.mocked(adminContentService.getVersion).mockResolvedValue({...version(),snapshot:{title:"Original title",slug:"original",excerpt:"Original excerpt",body:[{type:"paragraph",content:[{text:"Original body"}]}],seoTitle:null,seoDescription:null}});
+    renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
+    fireEvent.click(await screen.findByText("Inspect version"));
+    expect(await screen.findByText("Original body")).toBeTruthy();
+    expect(adminContentService.getVersion).toHaveBeenCalledWith("version-1");
+  });
+
   it("renders correctly in fa locale (RTL)", async () => {
     vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
 
     renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />, "fa");
 
     await waitFor(() => expect(screen.getByText("تاریخچه نسخه‌ها")).toBeTruthy());
+  });
+
+  it("does not expose restore to a view-only user", async () => {
+    useAdminStore.setState({ status: "ready", context: { isAdmin: true, adminUserId: "reader", displayName: "Reader", role: "READ_ONLY", permissions: ["content.view"] } as never });
+    vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
+
+    renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
+
+    await screen.findByText("Version 1");
+    expect(screen.queryByText("Restore")).toBeNull();
+  });
+
+  it("requires publish permission before offering to restore over live content", async () => {
+    vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
+    vi.mocked(adminContentService.getArticleLocale).mockResolvedValue(localeContent("VISIBLE"));
+
+    renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
+
+    await screen.findByText("Version 1");
+    expect(screen.queryByText("Restore")).toBeNull();
+  });
+
+  it("allows a publisher to restore over live content", async () => {
+    useAdminStore.setState({ status: "ready", context: { isAdmin: true, adminUserId: "publisher", displayName: "Publisher", role: "ADMIN", permissions: ["content.view", "content.edit", "content.publish"] } as never });
+    vi.mocked(adminContentService.listVersions).mockResolvedValue([version()]);
+    vi.mocked(adminContentService.getArticleLocale).mockResolvedValue(localeContent("VISIBLE"));
+
+    renderWithIntl(<AdminContentVersionHistoryView articleId="article-1" locale="fa" />);
+
+    expect(await screen.findByText("Restore")).toBeTruthy();
   });
 });

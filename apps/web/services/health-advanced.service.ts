@@ -44,6 +44,7 @@ export const healthAdvancedService = {
   getTimeline: (petId: string) => apiFetch<HealthTimelineEntryDto[]>(`/pets/${petId}/health/timeline`),
 
   listDocuments: (petId: string) => apiFetch<MedicalDocumentDto[]>(`/pets/${petId}/health/documents`),
+  getDocument: (petId: string, documentId: string) => apiFetch<MedicalDocumentDto>(`/pets/${petId}/health/documents/${documentId}`),
   requestDocumentUpload: (petId: string, input: RequestDocumentUploadInput) =>
     apiFetch<{ uploadUrl: string; method: "PUT"; headers?: Record<string, string>; key: string }>(`/pets/${petId}/health/documents/upload-url`, { method: "POST", body: input }),
   createDocument: (petId: string, input: CreateDocumentInput) =>
@@ -58,11 +59,17 @@ export const healthAdvancedService = {
     apiFetch<MedicalRecordCorrectionDto>(`/pets/${petId}/health/corrections`, { method: "POST", body: input }),
 
   listLabs: (petId: string) => apiFetch<LabResultDto[]>(`/pets/${petId}/health/labs`),
+  getLab: (petId: string, labResultId: string) => apiFetch<LabResultDto>(`/pets/${petId}/health/labs/${labResultId}`),
   listImaging: (petId: string) => apiFetch<ImagingStudyDto[]>(`/pets/${petId}/health/imaging`),
+  getImaging: (petId: string, imagingStudyId: string) => apiFetch<ImagingStudyDto>(`/pets/${petId}/health/imaging/${imagingStudyId}`),
   listReferrals: (petId: string) => apiFetch<ReferralDto[]>(`/pets/${petId}/health/referrals`),
+  getReferral: (petId: string, referralId: string) => apiFetch<ReferralDto>(`/pets/${petId}/health/referrals/${referralId}`),
   listDental: (petId: string) => apiFetch<DentalRecordDto[]>(`/pets/${petId}/health/dental`),
+  getDental: (petId: string, recordId: string) => apiFetch<DentalRecordDto>(`/pets/${petId}/health/dental/${recordId}`),
   listNutrition: (petId: string) => apiFetch<ClinicalNutritionPlanDto[]>(`/pets/${petId}/health/nutrition`),
+  getNutrition: (petId: string, planId: string) => apiFetch<ClinicalNutritionPlanDto>(`/pets/${petId}/health/nutrition/${planId}`),
   listRehab: (petId: string) => apiFetch<RehabPlanDto[]>(`/pets/${petId}/health/rehab`),
+  getRehab: (petId: string, planId: string) => apiFetch<RehabPlanDto>(`/pets/${petId}/health/rehab/${planId}`),
 
   listVisits: (petId: string) => apiFetch<ClinicalVisitDto[]>(`/pets/${petId}/health/visits`),
   getVisit: (petId: string, visitId: string) => apiFetch<ClinicalVisitDetailDto>(`/pets/${petId}/health/visits/${visitId}`),

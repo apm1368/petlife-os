@@ -34,7 +34,7 @@ export interface CreateCommunityPostInput {
  * backend enforces it with SessionAuthGuard regardless.
  */
 export const communityService = {
-  listPosts: (input: { page?: number; pageSize?: number; type?: CommunityPostType; countryCode?: string } = {}) =>
+  listPosts: (input: { page?: number; pageSize?: number; type?: CommunityPostType; countryCode?: string; q?: string } = {}) =>
     apiFetch<PaginatedDto<CommunityPostDto>>(`/community/posts${toQueryString(input)}`),
   getPost: (postId: string) => apiFetch<CommunityPostDto>(`/community/posts/${postId}`),
   createPost: (input: CreateCommunityPostInput) => apiFetch<CommunityPostDto>(`/community/posts`, { method: "POST", body: input }),
@@ -47,5 +47,8 @@ export const communityService = {
   removeReaction: (postId: string) => apiFetch<void>(`/community/posts/${postId}/reactions`, { method: "DELETE" }),
 
   reportPost: (postId: string, reason: CommunityReportReason, details?: string) => apiFetch<CommunityReportDto>(`/community/posts/${postId}/report`, { method: "POST", body: { reason, details } }),
+  /** Batch 6 — reports on support listings, lost-pet pages, sightings and organizations share the community moderation queue. */
+  reportContent: (targetType: "SUPPORT_NEED" | "LOST_PET_INCIDENT" | "LOST_PET_SIGHTING" | "ORGANIZATION", targetId: string, reason: CommunityReportReason, details?: string) =>
+    apiFetch<CommunityReportDto>("/reports", { method: "POST", body: { targetType, targetId, reason, details } }),
   reportComment: (commentId: string, reason: CommunityReportReason, details?: string) => apiFetch<CommunityReportDto>(`/community/comments/${commentId}/report`, { method: "POST", body: { reason, details } }),
 };

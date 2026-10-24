@@ -1,11 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from "@nestjs/common";
+import type { PetAccessFlags } from "@petlife/types";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { PetAccessGuard } from "../../common/auth/pet-access.guard";
 import { RequirePetAccess } from "../../common/auth/require-pet-access.decorator";
-import { CurrentUser } from "../../common/auth/current-user.decorator";
+import { CurrentUser, type AuthedRequest } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { LostPetIncidentService } from "./lost-pet-incident.service";
-import { CloseLostPetIncidentDto, CreateLostPetIncidentDto, RequestLostPetPhotoUploadDto, ReviewLostPetSightingDto } from "./dto/lost-pet.dto";
+import { CloseLostPetIncidentDto, CreateLostPetIncidentDto, RequestLostPetPhotoUploadDto, ReviewLostPetSightingDto, SetIncidentIdentityCardDto } from "./dto/lost-pet.dto";
 
 /**
  * Household-authenticated Lost Pet surface. Authorization reuses
@@ -21,8 +22,15 @@ export class LostPetController {
 
   @Post()
   @RequirePetAccess("canEditIdentity")
-  open(@Param("petId") petId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateLostPetIncidentDto) {
-    return this.incidents.open(petId, user.id, dto);
+  open(@Param("petId") petId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateLostPetIncidentDto, @Req() req: AuthedRequest & { petAccess?: PetAccessFlags }) {
+    return this.incidents.open(petId, user.id, dto, req.petAccess?.canManageAccess === true);
+  }
+
+  /** Expose or hide the pet's ID-tag identity card with this open incident. */
+  @Post(":incidentId/identity-card")
+  @RequirePetAccess("canEditIdentity")
+  identityCard(@Param("petId") petId: string, @Param("incidentId") incidentId: string, @CurrentUser() user: SessionUser, @Body() dto: SetIncidentIdentityCardDto, @Req() req: AuthedRequest & { petAccess?: PetAccessFlags }) {
+    return this.incidents.setIdentityCard(petId, incidentId, user.id, dto.expose, req.petAccess?.canManageAccess === true);
   }
 
   @Get()

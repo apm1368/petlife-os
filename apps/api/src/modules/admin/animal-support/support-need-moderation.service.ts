@@ -39,6 +39,8 @@ const REVIEWABLE_FROM: Record<SupportNeedStatus, SupportNeedStatus[]> = {
   [SupportNeedStatus.DRAFT]: [SupportNeedStatus.REMOVED],
   [SupportNeedStatus.PENDING_REVIEW]: [SupportNeedStatus.PUBLISHED, SupportNeedStatus.REJECTED, SupportNeedStatus.REMOVED],
   [SupportNeedStatus.PUBLISHED]: [SupportNeedStatus.REMOVED, SupportNeedStatus.EXPIRED],
+  [SupportNeedStatus.PARTIALLY_FULFILLED]: [SupportNeedStatus.REMOVED, SupportNeedStatus.EXPIRED],
+  [SupportNeedStatus.PAUSED]: [SupportNeedStatus.REMOVED, SupportNeedStatus.EXPIRED],
   [SupportNeedStatus.FULFILLED]: [SupportNeedStatus.REMOVED],
   [SupportNeedStatus.REJECTED]: [SupportNeedStatus.PUBLISHED, SupportNeedStatus.REMOVED],
   [SupportNeedStatus.EXPIRED]: [SupportNeedStatus.PUBLISHED, SupportNeedStatus.REMOVED],
@@ -112,7 +114,7 @@ export class SupportNeedModerationService {
       });
       await this.events.publish(
         "SupportNeedListingModerated",
-        { listingId, from: existing.status, to: dto.status, adminUserId: admin.adminUserId },
+        { listingId, from: existing.status, to: dto.status, adminUserId: admin.adminUserId, firstPublication: dto.status === SupportNeedStatus.PUBLISHED && existing.publishedAt === null },
         { tx, aggregateType: "SupportNeedListing", aggregateId: listingId },
       );
       return updated;

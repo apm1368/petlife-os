@@ -26,6 +26,12 @@ export class MedicationsService {
     return this.prisma.medication.findMany({ where: { petId }, orderBy: { createdAt: "asc" } });
   }
 
+  async get(petId: string, id: string) {
+    const medication = await this.prisma.medication.findUnique({ where: { id } });
+    if (!medication || medication.petId !== petId) throw new NotFoundApiException("Medication");
+    return medication;
+  }
+
   async create(petId: string, userId: string, dto: CreateMedicationDto) {
     assertDateOrder(dto.startDate, dto.endDate);
 

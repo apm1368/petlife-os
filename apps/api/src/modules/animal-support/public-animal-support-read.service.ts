@@ -33,7 +33,7 @@ export class PublicAnimalSupportReadService {
       this.prisma.animalSupportOrganization.findMany({ where, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.animalSupportOrganization.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toAnimalSupportOrganizationDto), total, page, pageSize);
+    return toPaginatedDto(rows.map((r) => toAnimalSupportOrganizationDto(r, true)), total, page, pageSize);
   }
 
   async getOrganization(id: string) {
@@ -41,7 +41,7 @@ export class PublicAnimalSupportReadService {
       where: { id, verificationStatus: AnimalSupportVerificationStatus.VERIFIED, isPubliclyListed: true },
     });
     if (!row) throw new AnimalSupportOrganizationNotFoundException({ organizationId: id });
-    return toAnimalSupportOrganizationDto(row);
+    return toAnimalSupportOrganizationDto(row, true);
   }
 
   async listRescueCases(query: ListRescueCasesQueryDto) {
@@ -55,7 +55,7 @@ export class PublicAnimalSupportReadService {
       this.prisma.rescueCase.findMany({ where, include: CASE_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.rescueCase.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toRescueCaseDto), total, page, pageSize);
+    return toPaginatedDto(rows.map((r) => toRescueCaseDto(r, true)), total, page, pageSize);
   }
 
   async getRescueCase(id: string) {
@@ -64,7 +64,7 @@ export class PublicAnimalSupportReadService {
       include: CASE_INCLUDE,
     });
     if (!row) throw new RescueCaseNotFoundException({ rescueCaseId: id });
-    return toRescueCaseDto(row);
+    return toRescueCaseDto(row, true);
   }
 
   /** spec: "rescue campaigns... public where safe" — only ACTIVE campaigns belonging to a VERIFIED + listed organization; DRAFT/PAUSED/COMPLETED/CANCELLED never appear publicly. */

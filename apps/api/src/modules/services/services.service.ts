@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ProviderVerificationStatus as PrismaVerificationStatus, ServiceCategory as PrismaServiceCategory } from "@prisma/client";
-import { PetSpecies, ServiceCategory, type ServiceDetailDto, type ServiceSearchResultDto } from "@petlife/types";
+import { ServiceCategory, type ServiceDetailDto, type ServiceSearchResultDto } from "@petlife/types";
+import { speciesFilter } from "../../common/species/catalog-species";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -29,6 +30,8 @@ const ALL_CATEGORIES: ServiceCategory[] = [
  * different services from the same provider can have different pet
  * compatibility. No ranking complexity, same as ProvidersService.
  */
+const SERVICE_SEARCH_LIMIT = 100;
+
 @Injectable()
 export class ServicesService {
   constructor(
@@ -43,14 +46,15 @@ export class ServicesService {
   }
 
   async search(query: SearchServicesDto, viewerId?: string): Promise<ServiceSearchResultDto[]> {
-    const verifiedOnly = query.verifiedOnly !== "false";
+    // Public discovery never advertises an unverified provider (it cannot be booked). The legacy
+    // `verifiedOnly=false` query flag is accepted for compatibility but no longer widens results.
+    const verifiedOnly = true;
 
     const services = await this.prisma.providerService.findMany({
       where: {
         isActive: true,
         ...(query.category ? { category: query.category as unknown as PrismaServiceCategory } : {}),
-        ...(query.species === PetSpecies.DOG ? { supportsDog: true } : {}),
-        ...(query.species === PetSpecies.CAT ? { supportsCat: true } : {}),
+        ...speciesFilter(query.species),
         providerOrganization: {
           ...(verifiedOnly ? { verificationStatus: PrismaVerificationStatus.VERIFIED } : {}),
           ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
@@ -59,6 +63,9 @@ export class ServicesService {
       },
       include: { providerOrganization: true, location: true },
       orderBy: { name: "asc" },
+      // Each result computes its next free slot; an unbounded public search would do that for the
+      // whole catalogue on every request. Filters (category, city, species, name) narrow further.
+      take: SERVICE_SEARCH_LIMIT,
     });
 
     return Promise.all(
@@ -93,7 +100,8 @@ export class ServicesService {
       where: { id: serviceId },
       include: { providerOrganization: { include: { locations: true, services: true } } },
     });
-    if (!service) throw new NotFoundApiException("Service");
+    // Same visibility rule as availability/booking: inactive services and unverified or suspended providers are not public.
+    if (!service || !service.isActive || service.providerOrganization.verificationStatus !== "VERIFIED") throw new NotFoundApiException("Service");
 
     const compatibility = await this.compatibility.evaluateForViewer(query.petId, service, viewerId);
 
@@ -121,7 +129,7 @@ export class ServicesService {
         logoUrl: org.logoUrl,
         websiteUrl: org.websiteUrl,
         locations: org.locations.map(toProviderLocationDto),
-        services: org.services.filter((s) => s.isActive).map(toProviderServiceDto),
+        services: org.services.filter((s) => s.isActive).map((service) => toProviderServiceDto(service)),
       },
       service: toProviderServiceDto(service),
       locationOptions: service.locationId ? org.locations.filter((l) => l.id === service.locationId).map(toProviderLocationDto) : org.locations.map(toProviderLocationDto),
@@ -130,8 +138,8 @@ export class ServicesService {
   }
 
   async getServiceAvailability(serviceId: string, query: GetServiceAvailabilityDto, viewerId?: string) {
-    const service = await this.prisma.providerService.findUnique({ where: { id: serviceId } });
-    if (!service) throw new NotFoundApiException("Service");
+    const service = await this.prisma.providerService.findUnique({ where: { id: serviceId }, include: { providerOrganization: { select: { verificationStatus: true } } } });
+    if (!service || !service.isActive || service.providerOrganization.verificationStatus !== "VERIFIED") throw new NotFoundApiException("Service");
 
     const locationId = query.locationId ?? service.locationId;
     if (!locationId) throw new NotFoundApiException("Location");
@@ -145,6 +153,7 @@ export class ServicesService {
       locationId,
       serviceId,
       providerUserId: query.providerUserId,
+      variantId: query.variantId,
       from: new Date(query.from),
       to: new Date(query.to),
     });

@@ -28,7 +28,7 @@ const SECTION_HINT: Record<Section, string> = {
   desk: "کارها و پرونده‌های خودت",
   leads: "جذب کلینیک، پت‌شاپ، آرایشگاه و پانسیون",
   upgrades: "خانوارهایی که از پلن فعلی‌شان فراتر رفته‌اند",
-  households: "مشتری پت لایف یک خانوار است، نه یک نفر",
+  households: "مشتری opetlife یک خانوار است، نه یک نفر",
   tickets: "بار پشتیبانی روی هر رابطه",
   calls: "گزارش تماس‌ها و ارزیابی کیفیت",
   reports: "روند شش ماه گذشته و اثربخشی کانال‌ها",
@@ -36,11 +36,11 @@ const SECTION_HINT: Record<Section, string> = {
 };
 
 /**
- * CRM پت لایف — a sales and customer-success workspace inside the admin panel.
+ * CRM opetlife — a sales and customer-success workspace inside the admin panel.
  *
  * Two deliberate boundaries:
  *
- *  1. No business-line concept. PET LIFE is one product, so the `lineId`
+ *  1. No business-line concept. opetlife is one product, so the `lineId`
  *     dimension the reference CRM carried through every filter, report and
  *     permission check is simply absent rather than defaulted to a single
  *     value nobody can change.
@@ -81,7 +81,7 @@ export function CrmWorkspace() {
     <div dir="rtl" lang="fa" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-page-title text-text-primary">CRM پت لایف</h1>
+          <h1 className="text-page-title text-text-primary">CRM opetlife</h1>
           <p className="mt-0.5 text-metadata text-text-secondary">{SECTION_HINT[section]}</p>
         </div>
         <label className="flex items-center gap-2">

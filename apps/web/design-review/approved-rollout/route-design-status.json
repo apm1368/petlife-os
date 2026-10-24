@@ -1,0 +1,1674 @@
+{
+  "base": "f3bf064",
+  "branch": "codex/stab-approved-design-rollout",
+  "scope": "All existing routes receive their domain pattern through DesignRoot/MemberFrame. Applying a shared pattern is distinct from individually redesigning/testing a feature form. Protected lanes remain unchanged. Browser results use controlled API data, not a live server certification.",
+  "routes": [
+    {
+      "file": "app/[locale]/(admin)/admin/access/[id]/page.tsx",
+      "route": "[locale]/admin/access/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/access/page.tsx",
+      "route": "[locale]/admin/access",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/donations/page.tsx",
+      "route": "[locale]/admin/animal-support/donations",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/needs/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/needs/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/needs/page.tsx",
+      "route": "[locale]/admin/animal-support/needs",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/organizations/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/organizations/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/organizations/page.tsx",
+      "route": "[locale]/admin/animal-support/organizations",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/page.tsx",
+      "route": "[locale]/admin/animal-support",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/audit/page.tsx",
+      "route": "[locale]/admin/audit",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/inventory/page.tsx",
+      "route": "[locale]/admin/commerce/inventory",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/orders/[id]/page.tsx",
+      "route": "[locale]/admin/commerce/orders/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/orders/page.tsx",
+      "route": "[locale]/admin/commerce/orders",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/page.tsx",
+      "route": "[locale]/admin/commerce",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/products/page.tsx",
+      "route": "[locale]/admin/commerce/products",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/promotions/page.tsx",
+      "route": "[locale]/admin/commerce/promotions",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/refund-requests/page.tsx",
+      "route": "[locale]/admin/commerce/refund-requests",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/reviews/page.tsx",
+      "route": "[locale]/admin/commerce/reviews",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/commerce/sellers/page.tsx",
+      "route": "[locale]/admin/commerce/sellers",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/community/page.tsx",
+      "route": "[locale]/admin/community",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/[id]/page.tsx",
+      "route": "[locale]/admin/content/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/[id]/versions/page.tsx",
+      "route": "[locale]/admin/content/[id]/versions",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/authors/page.tsx",
+      "route": "[locale]/admin/content/authors",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/categories/page.tsx",
+      "route": "[locale]/admin/content/categories",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/media/page.tsx",
+      "route": "[locale]/admin/content/media",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/new/page.tsx",
+      "route": "[locale]/admin/content/new",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/page.tsx",
+      "route": "[locale]/admin/content",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/placements/page.tsx",
+      "route": "[locale]/admin/content/placements",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/content/tags/page.tsx",
+      "route": "[locale]/admin/content/tags",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/crm/page.tsx",
+      "route": "[locale]/admin/crm",
+      "visualStatus": "PROTECTED_LANE_UNCHANGED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/customer-affairs/page.tsx",
+      "route": "[locale]/admin/customer-affairs",
+      "visualStatus": "PROTECTED_LANE_UNCHANGED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/customers/[id]/page.tsx",
+      "route": "[locale]/admin/customers/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/customers/page.tsx",
+      "route": "[locale]/admin/customers",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/disputes/[id]/page.tsx",
+      "route": "[locale]/admin/disputes/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/disputes/page.tsx",
+      "route": "[locale]/admin/disputes",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/page.tsx",
+      "route": "[locale]/admin/insurance",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/[id]/page.tsx",
+      "route": "[locale]/admin/insurance/providers/[id]",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/[id]/products/page.tsx",
+      "route": "[locale]/admin/insurance/providers/[id]/products",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/insurance/providers/page.tsx",
+      "route": "[locale]/admin/insurance/providers",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/lost-pets/[id]/page.tsx",
+      "route": "[locale]/admin/lost-pets/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/lost-pets/page.tsx",
+      "route": "[locale]/admin/lost-pets",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/marketplace-statements/[id]/page.tsx",
+      "route": "[locale]/admin/marketplace-statements/[id]",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/marketplace-statements/page.tsx",
+      "route": "[locale]/admin/marketplace-statements",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/page.tsx",
+      "route": "[locale]/admin",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/places/page.tsx",
+      "route": "[locale]/admin/places",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/providers/page.tsx",
+      "route": "[locale]/admin/providers",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #32: actual paginated directory, GET-only controlled fa/en 390/1440 captures and genuine baseline images; no certification of partner360 operations."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/reconciliation/page.tsx",
+      "route": "[locale]/admin/reconciliation",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/seller-finance/[id]/page.tsx",
+      "route": "[locale]/admin/seller-finance/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/seller-finance/page.tsx",
+      "route": "[locale]/admin/seller-finance",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/sellers/page.tsx",
+      "route": "[locale]/admin/sellers",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #32: actual paginated directory, GET-only controlled fa/en 390/1440 captures and genuine baseline images; no certification of partner360 operations."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/services/analytics/page.tsx",
+      "route": "[locale]/admin/services/analytics",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/services/bookings/[id]/page.tsx",
+      "route": "[locale]/admin/services/bookings/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/services/catalog/page.tsx",
+      "route": "[locale]/admin/services/catalog",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/services/page.tsx",
+      "route": "[locale]/admin/services",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/services/reviews/page.tsx",
+      "route": "[locale]/admin/services/reviews",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/settlements/[id]/page.tsx",
+      "route": "[locale]/admin/settlements/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/subscriptions/households/[id]/page.tsx",
+      "route": "[locale]/admin/subscriptions/households/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/subscriptions/households/page.tsx",
+      "route": "[locale]/admin/subscriptions/households",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/subscriptions/page.tsx",
+      "route": "[locale]/admin/subscriptions",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/support/[caseId]/page.tsx",
+      "route": "[locale]/admin/support/[caseId]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/support/page.tsx",
+      "route": "[locale]/admin/support",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/tasks/page.tsx",
+      "route": "[locale]/admin/tasks",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/transactions/page.tsx",
+      "route": "[locale]/admin/transactions",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/analytics/page.tsx",
+      "route": "[locale]/admin/travel/analytics",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/bookings/[id]/page.tsx",
+      "route": "[locale]/admin/travel/bookings/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/bookings/page.tsx",
+      "route": "[locale]/admin/travel/bookings",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/canonical/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/canonical/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/listings/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/new/page.tsx",
+      "route": "[locale]/admin/travel/external/listings/new",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/listings/page.tsx",
+      "route": "[locale]/admin/travel/external/listings",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/matches/page.tsx",
+      "route": "[locale]/admin/travel/external/matches",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/page.tsx",
+      "route": "[locale]/admin/travel/external",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/reports/page.tsx",
+      "route": "[locale]/admin/travel/external/reports",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/runs/[id]/page.tsx",
+      "route": "[locale]/admin/travel/external/runs/[id]",
+      "visualStatus": "SHARED_DOMAIN_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/external/sources/[code]/page.tsx",
+      "route": "[locale]/admin/travel/external/sources/[code]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/listings/[id]/page.tsx",
+      "route": "[locale]/admin/travel/listings/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/page.tsx",
+      "route": "[locale]/admin/travel",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/partners/page.tsx",
+      "route": "[locale]/admin/travel/partners",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/requirements/page.tsx",
+      "route": "[locale]/admin/travel/requirements",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/travel/reviews/page.tsx",
+      "route": "[locale]/admin/travel/reviews",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/trust/[id]/page.tsx",
+      "route": "[locale]/admin/trust/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/trust/page.tsx",
+      "route": "[locale]/admin/trust",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/verification/[subject]/[id]/page.tsx",
+      "route": "[locale]/admin/verification/[subject]/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/verification/page.tsx",
+      "route": "[locale]/admin/verification",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(app)/ai/page.tsx",
+      "route": "[locale]/ai",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/bookings/[id]/page.tsx",
+      "route": "[locale]/bookings/[id]",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/bookings/page.tsx",
+      "route": "[locale]/bookings",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/care-calendar/page.tsx",
+      "route": "[locale]/care-calendar",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/cart/page.tsx",
+      "route": "[locale]/cart",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(app)/checkout/[id]/confirmation/page.tsx",
+      "route": "[locale]/checkout/[id]/confirmation",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(app)/checkout/[id]/ops/page.tsx",
+      "route": "[locale]/checkout/[id]/ops",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(app)/checkout/page.tsx",
+      "route": "[locale]/checkout",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(app)/clinic-invitations/page.tsx",
+      "route": "[locale]/clinic-invitations",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/community/messages/[id]/page.tsx",
+      "route": "[locale]/community/messages/[id]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/community/messages/page.tsx",
+      "route": "[locale]/community/messages",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/donations/[id]/page.tsx",
+      "route": "[locale]/donations/[id]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/donations/page.tsx",
+      "route": "[locale]/donations",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/explore/page.tsx",
+      "route": "[locale]/explore",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/favorites/page.tsx",
+      "route": "[locale]/favorites",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(app)/home/page.tsx",
+      "route": "[locale]/home",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/insurer/applications/[id]/page.tsx",
+      "route": "[locale]/insurer/applications/[id]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/insurer/page.tsx",
+      "route": "[locale]/insurer",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/invitations/[token]/page.tsx",
+      "route": "[locale]/invitations/[token]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/ngo/donations/page.tsx",
+      "route": "[locale]/ngo/donations",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/ngo/needs/page.tsx",
+      "route": "[locale]/ngo/needs",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/ngo/offers/page.tsx",
+      "route": "[locale]/ngo/offers",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/ngo/page.tsx",
+      "route": "[locale]/ngo",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/ngo/settings/page.tsx",
+      "route": "[locale]/ngo/settings",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/ngo/team/page.tsx",
+      "route": "[locale]/ngo/team",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/ngo/verification/page.tsx",
+      "route": "[locale]/ngo/verification",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/notifications/page.tsx",
+      "route": "[locale]/notifications",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/notifications/preferences/page.tsx",
+      "route": "[locale]/notifications/preferences",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/onboarding/page.tsx",
+      "route": "[locale]/onboarding",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/orders/[id]/page.tsx",
+      "route": "[locale]/orders/[id]",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(app)/orders/page.tsx",
+      "route": "[locale]/orders",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/care/[careItemId]/page.tsx",
+      "route": "[locale]/pets/[id]/care/[careItemId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/care/calendar/page.tsx",
+      "route": "[locale]/pets/[id]/care/calendar",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/care/page.tsx",
+      "route": "[locale]/pets/[id]/care",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/care/suggestions/page.tsx",
+      "route": "[locale]/pets/[id]/care/suggestions",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/care-sheet/page.tsx",
+      "route": "[locale]/pets/[id]/care-sheet",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/activity/page.tsx",
+      "route": "[locale]/pets/[id]/health/activity",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/dental/[recordId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/dental/[recordId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/dental/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/dental",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/discharge/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/discharge",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/documents/[documentId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/documents/[documentId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/documents/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/documents",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/estimates/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/estimates",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/imaging/[imagingStudyId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/imaging/[imagingStudyId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/imaging/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/imaging",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/labs/[labResultId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/labs/[labResultId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/labs/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/labs",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/nutrition/[planId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/nutrition/[planId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/nutrition/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/nutrition",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/observations/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/observations",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/referrals/[referralId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/referrals/[referralId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/referrals/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/referrals",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/rehab/[planId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/rehab/[planId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/rehab/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/rehab",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/timeline/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/timeline",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/visits/[visitId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/visits/[visitId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/visits/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/visits",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/advanced/vitals/page.tsx",
+      "route": "[locale]/pets/[id]/health/advanced/vitals",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/allergies/[allergyId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/allergies/[allergyId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/allergies/page.tsx",
+      "route": "[locale]/pets/[id]/health/allergies",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/clinical/page.tsx",
+      "route": "[locale]/pets/[id]/health/clinical",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/conditions/[conditionId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/conditions/[conditionId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/conditions/page.tsx",
+      "route": "[locale]/pets/[id]/health/conditions",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/dental/[recordId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/dental/[recordId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/dental/page.tsx",
+      "route": "[locale]/pets/[id]/health/dental",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/documents/[documentId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/documents/[documentId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/documents/page.tsx",
+      "route": "[locale]/pets/[id]/health/documents",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/imaging/[imagingStudyId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/imaging/[imagingStudyId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/imaging/page.tsx",
+      "route": "[locale]/pets/[id]/health/imaging",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/labs/[labResultId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/labs/[labResultId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/labs/page.tsx",
+      "route": "[locale]/pets/[id]/health/labs",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/links/page.tsx",
+      "route": "[locale]/pets/[id]/health/links",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/medications/[medicationId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/medications/[medicationId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/medications/page.tsx",
+      "route": "[locale]/pets/[id]/health/medications",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/nutrition/clinical/[planId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/nutrition/clinical/[planId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/nutrition/clinical/page.tsx",
+      "route": "[locale]/pets/[id]/health/nutrition/clinical",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/nutrition/page.tsx",
+      "route": "[locale]/pets/[id]/health/nutrition",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/observations/[observationId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/observations/[observationId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/observations/page.tsx",
+      "route": "[locale]/pets/[id]/health/observations",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/page.tsx",
+      "route": "[locale]/pets/[id]/health",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/referrals/[referralId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/referrals/[referralId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/referrals/page.tsx",
+      "route": "[locale]/pets/[id]/health/referrals",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/rehab/[planId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/rehab/[planId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/rehab/page.tsx",
+      "route": "[locale]/pets/[id]/health/rehab",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/share/page.tsx",
+      "route": "[locale]/pets/[id]/health/share",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/timeline/page.tsx",
+      "route": "[locale]/pets/[id]/health/timeline",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/vaccination/page.tsx",
+      "route": "[locale]/pets/[id]/health/vaccination",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/visits/[visitId]/page.tsx",
+      "route": "[locale]/pets/[id]/health/visits/[visitId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/health/visits/page.tsx",
+      "route": "[locale]/pets/[id]/health/visits",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/insurance/page.tsx",
+      "route": "[locale]/pets/[id]/insurance",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/life-timeline/page.tsx",
+      "route": "[locale]/pets/[id]/life-timeline",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/lost/[incidentId]/page.tsx",
+      "route": "[locale]/pets/[id]/lost/[incidentId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/lost/page.tsx",
+      "route": "[locale]/pets/[id]/lost",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/lost/report/page.tsx",
+      "route": "[locale]/pets/[id]/lost/report",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/memories/[memoryId]/edit/page.tsx",
+      "route": "[locale]/pets/[id]/memories/[memoryId]/edit",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/memories/[memoryId]/page.tsx",
+      "route": "[locale]/pets/[id]/memories/[memoryId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/memories/new/page.tsx",
+      "route": "[locale]/pets/[id]/memories/new",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/memories/page.tsx",
+      "route": "[locale]/pets/[id]/memories",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/page.tsx",
+      "route": "[locale]/pets/[id]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/travel/[tripId]/external-stays/page.tsx",
+      "route": "[locale]/pets/[id]/travel/[tripId]/external-stays",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/travel/[tripId]/page.tsx",
+      "route": "[locale]/pets/[id]/travel/[tripId]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/travel/new/page.tsx",
+      "route": "[locale]/pets/[id]/travel/new",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/travel/page.tsx",
+      "route": "[locale]/pets/[id]/travel",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/[id]/travel/passport/page.tsx",
+      "route": "[locale]/pets/[id]/travel/passport",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/active/page.tsx",
+      "route": "[locale]/pets/active",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/new/page.tsx",
+      "route": "[locale]/pets/new",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/pets/page.tsx",
+      "route": "[locale]/pets",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/places/favorites/page.tsx",
+      "route": "[locale]/places/favorites",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/activity/page.tsx",
+      "route": "[locale]/profile/activity",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/clinic-notes/page.tsx",
+      "route": "[locale]/profile/clinic-notes",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Read-only household-visible clinic notes; glass member frame preserved."
+    },
+    {
+      "file": "app/[locale]/(app)/profile/household/page.tsx",
+      "route": "[locale]/profile/household",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/household/pets/[petId]/access/page.tsx",
+      "route": "[locale]/profile/household/pets/[petId]/access",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/household/pets/[petId]/lifecycle/page.tsx",
+      "route": "[locale]/profile/household/pets/[petId]/lifecycle",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/membership/page.tsx",
+      "route": "[locale]/profile/membership",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/notifications/page.tsx",
+      "route": "[locale]/profile/notifications",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/page.tsx",
+      "route": "[locale]/profile",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/personal/page.tsx",
+      "route": "[locale]/profile/personal",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/privacy/page.tsx",
+      "route": "[locale]/profile/privacy",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/profile/security/page.tsx",
+      "route": "[locale]/profile/security",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/repeat-delivery/[id]/page.tsx",
+      "route": "[locale]/repeat-delivery/[id]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/repeat-delivery/new/page.tsx",
+      "route": "[locale]/repeat-delivery/new",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/repeat-delivery/page.tsx",
+      "route": "[locale]/repeat-delivery",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/subscription/page.tsx",
+      "route": "[locale]/subscription",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/subscription/plans/page.tsx",
+      "route": "[locale]/subscription/plans",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/support/new/page.tsx",
+      "route": "[locale]/support/new",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/support/page.tsx",
+      "route": "[locale]/support",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/support/tickets/[id]/page.tsx",
+      "route": "[locale]/support/tickets/[id]",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/support/tickets/page.tsx",
+      "route": "[locale]/support/tickets",
+      "visualStatus": "SHARED_GLASS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/travel/book/[bookingId]/page.tsx",
+      "route": "[locale]/travel/book/[bookingId]",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/travel/bookings/[id]/page.tsx",
+      "route": "[locale]/travel/bookings/[id]",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/travel/favorites/page.tsx",
+      "route": "[locale]/travel/favorites",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/travel/trips/[tripId]/page.tsx",
+      "route": "[locale]/travel/trips/[tripId]",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(app)/travel/trips/page.tsx",
+      "route": "[locale]/travel/trips",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(auth)/account/forgot/page.tsx",
+      "route": "[locale]/account/forgot",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(auth)/account/page.tsx",
+      "route": "[locale]/account",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(auth)/account/reset/page.tsx",
+      "route": "[locale]/account/reset",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(auth)/auth/complete/page.tsx",
+      "route": "[locale]/auth/complete",
+      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+    },
+    {
+      "file": "app/[locale]/(auth)/auth/page.tsx",
+      "route": "[locale]/auth",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(auth)/register/page.tsx",
+      "route": "[locale]/register",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(auth)/welcome/page.tsx",
+      "route": "[locale]/welcome",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/analytics/page.tsx",
+      "route": "[locale]/provider/analytics",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/availability/page.tsx",
+      "route": "[locale]/provider/availability",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/bookings/[id]/page.tsx",
+      "route": "[locale]/provider/bookings/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/bookings/page.tsx",
+      "route": "[locale]/provider/bookings",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/calendar/page.tsx",
+      "route": "[locale]/provider/calendar",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/clinic/page.tsx",
+      "route": "[locale]/provider/clinic",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Queue baseline plus team/branches/contacts/reminders/campaigns/finance controlled captures. Not live side-effect certification."
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/clinical/page.tsx",
+      "route": "[locale]/provider/clinical",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/hospitalizations/[hospitalizationId]/page.tsx",
+      "route": "[locale]/provider/hospitalizations/[hospitalizationId]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/page.tsx",
+      "route": "[locale]/provider",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/patients/[petId]/page.tsx",
+      "route": "[locale]/provider/patients/[petId]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/patients/page.tsx",
+      "route": "[locale]/provider/patients",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/reviews/page.tsx",
+      "route": "[locale]/provider/reviews",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/services/page.tsx",
+      "route": "[locale]/provider/services",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/shared-records/[petId]/[shareId]/page.tsx",
+      "route": "[locale]/provider/shared-records/[petId]/[shareId]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/shared-records/page.tsx",
+      "route": "[locale]/provider/shared-records",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/team/page.tsx",
+      "route": "[locale]/provider/team",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/travel/bookings/[id]/page.tsx",
+      "route": "[locale]/provider/travel/bookings/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/travel/bookings/page.tsx",
+      "route": "[locale]/provider/travel/bookings",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/travel/finance/page.tsx",
+      "route": "[locale]/provider/travel/finance",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/travel/listings/[id]/page.tsx",
+      "route": "[locale]/provider/travel/listings/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/travel/page.tsx",
+      "route": "[locale]/provider/travel",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/travel/reviews/page.tsx",
+      "route": "[locale]/provider/travel/reviews",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/verification/page.tsx",
+      "route": "[locale]/provider/verification",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/visits/[id]/page.tsx",
+      "route": "[locale]/provider/visits/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(provider)/provider/waitlist/page.tsx",
+      "route": "[locale]/provider/waitlist",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/campaigns/[campaignId]/page.tsx",
+      "route": "[locale]/animal-support/campaigns/[campaignId]",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/campaigns/page.tsx",
+      "route": "[locale]/animal-support/campaigns",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/my-help/page.tsx",
+      "route": "[locale]/animal-support/my-help",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/needs/[listingId]/manage/page.tsx",
+      "route": "[locale]/animal-support/needs/[listingId]/manage",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/needs/[listingId]/page.tsx",
+      "route": "[locale]/animal-support/needs/[listingId]",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/needs/mine/page.tsx",
+      "route": "[locale]/animal-support/needs/mine",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/needs/new/page.tsx",
+      "route": "[locale]/animal-support/needs/new",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/needs/page.tsx",
+      "route": "[locale]/animal-support/needs",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/organizations/[organizationId]/page.tsx",
+      "route": "[locale]/animal-support/organizations/[organizationId]",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/animal-support/page.tsx",
+      "route": "[locale]/animal-support",
+      "visualStatus": "CLASSIFIEDS_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/blog/[slug]/page.tsx",
+      "route": "[locale]/blog/[slug]",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(public)/blog/category/[slug]/page.tsx",
+      "route": "[locale]/blog/category/[slug]",
+      "visualStatus": "EDITORIAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/blog/page.tsx",
+      "route": "[locale]/blog",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(public)/blog/tag/[slug]/page.tsx",
+      "route": "[locale]/blog/tag/[slug]",
+      "visualStatus": "EDITORIAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/community/new/page.tsx",
+      "route": "[locale]/community/new",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/community/page.tsx",
+      "route": "[locale]/community",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/community/posts/[postId]/page.tsx",
+      "route": "[locale]/community/posts/[postId]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/contact/page.tsx",
+      "route": "[locale]/contact",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(public)/credits/page.tsx",
+      "route": "[locale]/credits",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/guides/[slug]/page.tsx",
+      "route": "[locale]/guides/[slug]",
+      "visualStatus": "EDITORIAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/guides/page.tsx",
+      "route": "[locale]/guides",
+      "visualStatus": "EDITORIAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/health-share/[token]/page.tsx",
+      "route": "[locale]/health-share/[token]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(public)/insurance/[productId]/page.tsx",
+      "route": "[locale]/insurance/[productId]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/insurance/compare/page.tsx",
+      "route": "[locale]/insurance/compare",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/insurance/page.tsx",
+      "route": "[locale]/insurance",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/lost-pets/[incidentId]/page.tsx",
+      "route": "[locale]/lost-pets/[incidentId]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/lost-pets/page.tsx",
+      "route": "[locale]/lost-pets",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/pet-card/[token]/page.tsx",
+      "route": "[locale]/pet-card/[token]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/places/[placeId]/page.tsx",
+      "route": "[locale]/places/[placeId]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/places/page.tsx",
+      "route": "[locale]/places",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/providers/[providerId]/book/page.tsx",
+      "route": "[locale]/providers/[providerId]/book",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(public)/providers/[providerId]/page.tsx",
+      "route": "[locale]/providers/[providerId]",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(public)/services/[category]/[serviceId]/book/page.tsx",
+      "route": "[locale]/services/[category]/[serviceId]/book",
+      "visualStatus": "DISCOVERY_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/services/[category]/page.tsx",
+      "route": "[locale]/services/[category]",
+      "visualStatus": "REPRESENTATIVE_ROUTE_BROWSER_VERIFIED_WITH_CONTROLLED_API_DATA"
+    },
+    {
+      "file": "app/[locale]/(public)/services/page.tsx",
+      "route": "[locale]/services",
+      "visualStatus": "DISCOVERY_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/services/search/page.tsx",
+      "route": "[locale]/services/search",
+      "visualStatus": "DISCOVERY_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/shop/page.tsx",
+      "route": "[locale]/shop",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(public)/shop/products/[id]/page.tsx",
+      "route": "[locale]/shop/products/[id]",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(public)/shop/products/page.tsx",
+      "route": "[locale]/shop/products",
+      "visualStatus": "COMMERCE_PATTERN_APPLIED_SEE_SHOP_EVIDENCE"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/compare/page.tsx",
+      "route": "[locale]/travel/compare",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/[id]/page.tsx",
+      "route": "[locale]/travel/external/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/favorites/page.tsx",
+      "route": "[locale]/travel/external/favorites",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(public)/travel/external/page.tsx",
+      "route": "[locale]/travel/external",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "Controlled authorized fixture, not production/live integration certification."
+    },
+    {
+      "file": "app/[locale]/(public)/travel/page.tsx",
+      "route": "[locale]/travel",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/search/page.tsx",
+      "route": "[locale]/travel/search",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/travel/stays/[id]/page.tsx",
+      "route": "[locale]/travel/stays/[id]",
+      "visualStatus": "RESERVATION_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/vet/[providerId]/book/page.tsx",
+      "route": "[locale]/vet/[providerId]/book",
+      "visualStatus": "DISCOVERY_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/vet/[providerId]/page.tsx",
+      "route": "[locale]/vet/[providerId]",
+      "visualStatus": "DISCOVERY_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(public)/vet/find/page.tsx",
+      "route": "[locale]/vet/find",
+      "visualStatus": "DISCOVERY_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/channels/page.tsx",
+      "route": "[locale]/seller/channels",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/finance/page.tsx",
+      "route": "[locale]/seller/finance",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/finance/settlements/[id]/page.tsx",
+      "route": "[locale]/seller/finance/settlements/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/finance/settlements/page.tsx",
+      "route": "[locale]/seller/finance/settlements",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/finance/transactions/page.tsx",
+      "route": "[locale]/seller/finance/transactions",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/inventory/page.tsx",
+      "route": "[locale]/seller/inventory",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/offers/page.tsx",
+      "route": "[locale]/seller/offers",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/orders/[id]/page.tsx",
+      "route": "[locale]/seller/orders/[id]",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/orders/page.tsx",
+      "route": "[locale]/seller/orders",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/page.tsx",
+      "route": "[locale]/seller",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/promotions/page.tsx",
+      "route": "[locale]/seller/promotions",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/settings/page.tsx",
+      "route": "[locale]/seller/settings",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/team/page.tsx",
+      "route": "[locale]/seller/team",
+      "visualStatus": "OPERATIONAL_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/(seller)/seller/verification/page.tsx",
+      "route": "[locale]/seller/verification",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "One authorized fixture per page; not certification of every entity or production role."
+    },
+    {
+      "file": "app/[locale]/@modal/(.)account/forgot/page.tsx",
+      "route": "[locale]/account/forgot",
+      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+    },
+    {
+      "file": "app/[locale]/@modal/(.)account/page.tsx",
+      "route": "[locale]/account",
+      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+    },
+    {
+      "file": "app/[locale]/@modal/(.)account/reset/page.tsx",
+      "route": "[locale]/account/reset",
+      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+    },
+    {
+      "file": "app/[locale]/@modal/(.)auth/page.tsx",
+      "route": "[locale]/auth",
+      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+    },
+    {
+      "file": "app/[locale]/@modal/(.)register/page.tsx",
+      "route": "[locale]/register",
+      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+    },
+    {
+      "file": "app/[locale]/@modal/(.)welcome/page.tsx",
+      "route": "[locale]/welcome",
+      "visualStatus": "EXISTING_APPROVED_AUTH_PRESERVED"
+    },
+    {
+      "file": "app/[locale]/@modal/[...rest]/page.tsx",
+      "route": "[locale]/[...rest]",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/@modal/page.tsx",
+      "route": "[locale]",
+      "visualStatus": "SHARED_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/[...rest]/page.tsx",
+      "route": "[locale]/[...rest]",
+      "visualStatus": "SHARED_SERVICE_PATTERN_APPLIED_NOT_INDIVIDUALLY_BROWSER_VERIFIED"
+    },
+    {
+      "file": "app/[locale]/page.tsx",
+      "route": "[locale]",
+      "visualStatus": "LIVE_APPROVED_LANDING_UNCHANGED"
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/campaigns/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/campaigns/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/campaigns/page.tsx",
+      "route": "[locale]/admin/animal-support/campaigns",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/rescue-cases/[id]/page.tsx",
+      "route": "[locale]/admin/animal-support/rescue-cases/[id]",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/animal-support/rescue-cases/page.tsx",
+      "route": "[locale]/admin/animal-support/rescue-cases",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #30: real route rendered with controlled read-only API responses. Support operations screenshots/checks retain fa/en 390/1440 evidence; no live financial or administrative write was performed."
+    },
+    {
+      "file": "app/[locale]/(admin)/admin/settings/page.tsx",
+      "route": "[locale]/admin/settings",
+      "visualStatus": "CONTROLLED_FA_EN_390_1440_BROWSER_VERIFIED",
+      "note": "PR #31: registry/history/editor fixtures, settings-screenshots checks; no live settings mutation. Member announcement separately verified on profile/activity."
+    }
+  ]
+}

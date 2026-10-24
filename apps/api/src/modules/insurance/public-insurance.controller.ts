@@ -1,3 +1,4 @@
+import { INSURANCE_CONSENT_TEXT } from "./insurance-application.service";
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import { PublicInsuranceReadService } from "./public-insurance-read.service";
 import { CompareInsuranceProductsQueryDto, ListInsuranceProductsQueryDto, ListInsuranceProvidersQueryDto } from "./dto/insurance.dto";
@@ -6,6 +7,12 @@ import { CompareInsuranceProductsQueryDto, ListInsuranceProductsQueryDto, ListIn
 @Controller("insurance")
 export class PublicInsuranceController {
   constructor(private readonly reads: PublicInsuranceReadService) {}
+
+  /** The exact consent text an applicant agrees to on submit. */
+  @Get("consent")
+  consent() {
+    return { text: INSURANCE_CONSENT_TEXT };
+  }
 
   @Get("providers")
   listProviders(@Query() query: ListInsuranceProvidersQueryDto) {

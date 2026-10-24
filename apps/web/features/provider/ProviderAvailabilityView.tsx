@@ -8,6 +8,7 @@ import type { ProviderAvailabilityExceptionDto, ProviderAvailabilityRuleDto } fr
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -20,6 +21,10 @@ const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
  */
 export function ProviderAvailabilityView() {
   const t = useTranslations("provider.availability");
+  const actions = useTranslations("rollout.records");
+  const [editingRule, setEditingRule] = useState<string | null>(null);
+  const [editingException, setEditingException] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const tDay = useTranslations("provider.availability.day");
   const locale = useLocale() as "fa" | "en";
 
@@ -66,16 +71,19 @@ export function ProviderAvailabilityView() {
       return;
     }
     try {
-      await providerOsService.createAvailabilityRule({ locationId, dayOfWeek: Number(dayOfWeek), startLocalTime, endLocalTime, timezone });
+      setBusy(true);
+      const input = { locationId, dayOfWeek: Number(dayOfWeek), startLocalTime, endLocalTime, timezone };
+      if (editingRule) await providerOsService.updateAvailabilityRule(editingRule, input);
+      else await providerOsService.createAvailabilityRule(input);
+      setEditingRule(null);
       await load();
     } catch (err) {
-      setRuleError(err instanceof ApiError ? err.message : t("rules.createFailed"));
-    }
+      setRuleError(apiErrorText(err, locale, t("rules.createFailed")));
+    } finally { setBusy(false); }
   }
 
   async function deleteRule(id: string) {
-    await providerOsService.deleteAvailabilityRule(id);
-    await load();
+    try { setBusy(true); await providerOsService.deleteAvailabilityRule(id); await load(); } catch (err) { setRuleError(apiErrorText(err, locale, t("rules.createFailed"))); } finally { setBusy(false); }
   }
 
   async function createException(acknowledgeConflict = false) {
@@ -86,14 +94,18 @@ export function ProviderAvailabilityView() {
       return;
     }
     try {
-      await providerOsService.createAvailabilityException({
+      setBusy(true);
+      const input = {
         locationId,
         startAt: new Date(exceptionStart).toISOString(),
         endAt: new Date(exceptionEnd).toISOString(),
         type: exceptionType,
         reason: exceptionReason || undefined,
         acknowledgeConflict,
-      });
+      };
+      if (editingException) await providerOsService.updateAvailabilityException(editingException, input);
+      else await providerOsService.createAvailabilityException(input);
+      setEditingException(null);
       setExceptionStart("");
       setExceptionEnd("");
       setExceptionReason("");
@@ -103,13 +115,12 @@ export function ProviderAvailabilityView() {
         setConflictWarning({ count: Number(err.details?.count ?? 0) });
         return;
       }
-      setExceptionError(err instanceof ApiError ? err.message : t("exceptions.createFailed"));
-    }
+      setExceptionError(apiErrorText(err, locale, t("exceptions.createFailed")));
+    } finally { setBusy(false); }
   }
 
   async function deleteException(id: string) {
-    await providerOsService.deleteAvailabilityException(id);
-    await load();
+    try { setBusy(true); await providerOsService.deleteAvailabilityException(id); await load(); } catch (err) { setExceptionError(apiErrorText(err, locale, t("exceptions.createFailed"))); } finally { setBusy(false); }
   }
 
   if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
@@ -123,11 +134,12 @@ export function ProviderAvailabilityView() {
         <h2 className="text-section-title text-text-primary">{t("rules.title")}</h2>
         {rules.length === 0 ? <p className="text-metadata text-text-secondary">{t("rules.empty")}</p> : null}
         {rules.map((rule) => (
-          <div key={rule.id} className="flex items-center justify-between gap-2 border-t border-border-subtle pt-2">
+          <div key={rule.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-2">
             <span className="text-body text-text-primary">
               {tDay(DAY_KEYS[rule.dayOfWeek])} {rule.startLocalTime}–{rule.endLocalTime} ({rule.timezone})
             </span>
-            <Button variant="ghost" size="sm" onClick={() => deleteRule(rule.id)}>
+            <Button variant="secondary" size="sm" disabled={busy} onClick={() => { setEditingRule(rule.id); setLocationId(rule.locationId); setDayOfWeek(String(rule.dayOfWeek)); setStartLocalTime(rule.startLocalTime); setEndLocalTime(rule.endLocalTime); setTimezone(rule.timezone); }}>{actions("edit")}</Button>
+            <Button variant="ghost" size="sm" disabled={busy} onClick={() => deleteRule(rule.id)}>
               {t("rules.delete")}
             </Button>
           </div>
@@ -146,8 +158,9 @@ export function ProviderAvailabilityView() {
           <Input label={t("rules.timezone")} value={timezone} onChange={(e) => setTimezone(e.target.value)} />
         </div>
         {ruleError ? <StatusLabel tone="attention">{ruleError}</StatusLabel> : null}
-        <Button variant="secondary" onClick={createRule}>
-          {t("rules.add")}
+        {editingRule ? <Button variant="ghost" onClick={() => setEditingRule(null)}>{actions("cancel")}</Button> : null}
+        <Button variant="secondary" isLoading={busy} onClick={createRule}>
+          {editingRule ? actions("save") : t("rules.add")}
         </Button>
       </ContextSurface>
 
@@ -155,7 +168,7 @@ export function ProviderAvailabilityView() {
         <h2 className="text-section-title text-text-primary">{t("exceptions.title")}</h2>
         {exceptions.length === 0 ? <p className="text-metadata text-text-secondary">{t("exceptions.empty")}</p> : null}
         {exceptions.map((exception) => (
-          <div key={exception.id} className="flex items-center justify-between gap-2 border-t border-border-subtle pt-2">
+          <div key={exception.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-2">
             <div>
               <StatusLabel tone={exception.type === "BLOCKED" ? "attention" : "success"}>{t(`exceptions.type.${exception.type}`)}</StatusLabel>
               <p className="mt-1 text-metadata text-text-secondary">
@@ -163,7 +176,8 @@ export function ProviderAvailabilityView() {
               </p>
               {exception.reason ? <p className="text-metadata text-text-secondary">{exception.reason}</p> : null}
             </div>
-            <Button variant="ghost" size="sm" onClick={() => deleteException(exception.id)}>
+            <Button variant="secondary" size="sm" disabled={busy} onClick={() => { const local = (v: string) => { const date = new Date(v); return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0,16); }; setEditingException(exception.id); setLocationId(exception.locationId); setExceptionStart(local(exception.startAt)); setExceptionEnd(local(exception.endAt)); setExceptionType(exception.type); setExceptionReason(exception.reason ?? ""); }}>{actions("edit")}</Button>
+            <Button variant="ghost" size="sm" disabled={busy} onClick={() => deleteException(exception.id)}>
               {t("exceptions.delete")}
             </Button>
           </div>
@@ -183,6 +197,7 @@ export function ProviderAvailabilityView() {
           />
           <Input label={t("exceptions.reason")} value={exceptionReason} onChange={(e) => setExceptionReason(e.target.value)} />
         </div>
+        {editingException ? <Button variant="ghost" onClick={() => { setEditingException(null); setConflictWarning(null); }}>{actions("cancel")}</Button> : null}
         {exceptionError ? <StatusLabel tone="attention">{exceptionError}</StatusLabel> : null}
 
         {conflictWarning ? (
@@ -198,8 +213,8 @@ export function ProviderAvailabilityView() {
             </div>
           </ContextSurface>
         ) : (
-          <Button variant="secondary" onClick={() => createException(false)}>
-            {t("exceptions.add")}
+          <Button variant="secondary" isLoading={busy} onClick={() => createException(false)}>
+            {editingException ? actions("save") : t("exceptions.add")}
           </Button>
         )}
       </ContextSurface>

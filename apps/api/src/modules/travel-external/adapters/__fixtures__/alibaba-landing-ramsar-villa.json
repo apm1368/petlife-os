@@ -1,0 +1,48 @@
+{
+ "_fixture": "Sanitized excerpt of the public, unauthenticated alibaba.ir landing JSON observed 2026-10-11 (GET /api/v1/accom/landing/landing-pages/path/ramsar-villa). Long-form content removed.",
+ "result": {
+  "availableSearch": {
+   "searchKey": "00000000-0000-0000-0000-000000000000",
+   "destination": "city-ramsar",
+   "from": "2026-10-13T11:15:00.751385+00:00",
+   "to": "2026-10-16T11:15:00.751385+00:00",
+   "adults": "1",
+   "availableSearchDetail": {
+    "destinationText": "رامسر"
+   }
+  },
+  "canonical": "ramsar-villa",
+  "pageAddress": "ramsar-villa",
+  "landingPageTitle": "اجاره ویلا در رامسر",
+  "hasSearchbox": true,
+  "redirectUrl": "",
+  "statusCode": 200,
+  "minPrice": 50000000.0,
+  "accommodationFilters": {
+   "scores": [
+    ""
+   ],
+   "types": [
+    "villa"
+   ],
+   "locations": [
+    ""
+   ],
+   "priceRangeTypes": [
+    ""
+   ],
+   "priceRange": null,
+   "amenities": [
+    ""
+   ],
+   "leaseTypes": [
+    ""
+   ],
+   "areas": [
+    ""
+   ]
+  }
+ },
+ "success": true,
+ "unauthorizedRequest": false
+}

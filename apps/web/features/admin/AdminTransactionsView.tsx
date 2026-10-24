@@ -50,7 +50,7 @@ export function AdminTransactionsView() {
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
       <div className="flex items-end gap-2">
         <Input label={t("orderIdPlaceholder")} value={orderId} onChange={(e) => setOrderId(e.target.value)} className="flex-1" />
-        <Button onClick={lookup}>{t("lookup")}</Button>
+        <Button disabled={!orderId.trim()} onClick={lookup}>{t("lookup")}</Button>
       </div>
 
       {error ? <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={lookup} /> : null}

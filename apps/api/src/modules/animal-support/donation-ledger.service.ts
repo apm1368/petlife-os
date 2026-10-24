@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Injectable } from "@nestjs/common";
 import { CampaignFundType, DonationLedgerAccountCode, LedgerEntryDirection, Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -26,8 +27,10 @@ export class DonationLedgerService {
   async getOrCreateAccount(organizationId: string, code: DonationLedgerAccountCode, currency: string, client: QueryClient = this.prisma): Promise<string> {
     const existing = await client.donationLedgerAccount.findUnique({ where: { organizationId_code: { organizationId, code } } });
     if (existing) return existing.id;
-    const created = await client.donationLedgerAccount.create({ data: { organizationId, code, currency } });
-    return created.id;
+    // Race-safe inside the caller's transaction: two first donations to the same organisation at once must not abort
+    // one of them on the unique (organizationId, code) — ON CONFLICT DO NOTHING keeps the transaction alive.
+    await client.$executeRaw`INSERT INTO "donation_ledger_accounts" ("id", "organizationId", "code", "currency") VALUES (${randomUUID()}::uuid, ${organizationId}::uuid, ${code}::"DonationLedgerAccountCode", ${currency}) ON CONFLICT ("organizationId", "code") DO NOTHING`;
+    return (await client.donationLedgerAccount.findUniqueOrThrow({ where: { organizationId_code: { organizationId, code } } })).id;
   }
 
   async recordBalanced(

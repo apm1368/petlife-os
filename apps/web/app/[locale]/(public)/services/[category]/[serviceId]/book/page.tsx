@@ -1,11 +1,7 @@
-import { ServiceBookingWizard } from "@/features/services/ServiceBookingWizard";
-import { RequireAuth } from "@/features/auth/RequireAuth";
+import { LegacyServiceBookingRedirect } from "@/features/booking-flow/LegacyServiceBookingRedirect";
 
+/** Older links pointed at the per-service wizard; the canonical flow lives under the provider. */
 export default async function ServiceBookingPage({ params }: { params: Promise<{ serviceId: string }> }) {
   const { serviceId } = await params;
-  return (
-    <RequireAuth>
-      <ServiceBookingWizard serviceId={serviceId} />
-    </RequireAuth>
-  );
+  return <LegacyServiceBookingRedirect serviceId={serviceId} />;
 }

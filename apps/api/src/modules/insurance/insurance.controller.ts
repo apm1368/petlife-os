@@ -5,7 +5,7 @@ import { RequirePetAccess } from "../../common/auth/require-pet-access.decorator
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { InsuranceApplicationService } from "./insurance-application.service";
-import { CreateInsuranceApplicationDto, UpdateInsuranceApplicationDto } from "./dto/insurance.dto";
+import { CreateInsuranceApplicationDto, SubmitInsuranceApplicationDto, UpdateInsuranceApplicationDto } from "./dto/insurance.dto";
 
 /** Household-authenticated insurance application/lead + eligibility surface for a pet. Saved applications and eligibility checks are private — never exposed on the public browse/compare surface. */
 @Controller("pets/:petId/insurance-applications")
@@ -46,14 +46,14 @@ export class InsuranceController {
   @Post(":applicationId/submit")
   @HttpCode(HttpStatus.OK)
   @RequirePetAccess("canEditIdentity")
-  submit(@Param("petId") petId: string, @Param("applicationId") applicationId: string) {
-    return this.applications.submit(petId, applicationId);
+  submit(@Param("petId") petId: string, @Param("applicationId") applicationId: string, @CurrentUser() user: SessionUser, @Body() dto: SubmitInsuranceApplicationDto) {
+    return this.applications.submit(petId, applicationId, user.id, dto.consent);
   }
 
   @Post(":applicationId/cancel")
   @HttpCode(HttpStatus.OK)
   @RequirePetAccess("canEditIdentity")
-  cancel(@Param("petId") petId: string, @Param("applicationId") applicationId: string) {
-    return this.applications.cancel(petId, applicationId);
+  cancel(@Param("petId") petId: string, @Param("applicationId") applicationId: string, @CurrentUser() user: SessionUser) {
+    return this.applications.cancel(petId, applicationId, user.id);
   }
 }

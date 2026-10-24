@@ -35,9 +35,40 @@ enum HouseholdRole {
   FAMILY
 }
 
+enum HouseholdInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum PrivacyRequestStatus {
+  PENDING
+  PROCESSING
+  READY
+  COMPLETED
+  CANCELLED
+  FAILED
+  /// Batch 8 — an export whose download window closed; its file has been deleted.
+  EXPIRED
+}
+
+enum ConsentKind {
+  TERMS
+  PRIVACY
+  MARKETING
+}
+
 enum PetSpecies {
   DOG
   CAT
+  BIRD
+  RABBIT
+  RODENT
+  FISH
+  REPTILE
+  OTHER
 }
 
 enum PetSex {
@@ -225,6 +256,8 @@ enum HealthSeverity {
 /// categories (e.g. a clinic that also grooms), and each ProviderService
 /// carries its own `category` rather than inferring one from the org's type.
 enum ProviderType {
+  /// Batch 5: accommodation / travel supply partner.
+  TRAVEL_ACCOMMODATION
   VET_CLINIC
   VET_HOSPITAL
   VETERINARIAN
@@ -250,6 +283,7 @@ enum ServiceCategory {
   SITTING
   BOARDING
   PET_TAXI
+  OTHER
 }
 
 /// Where a booked service actually happens. AT_PROVIDER needs no address
@@ -300,6 +334,14 @@ enum ProviderServiceType {
   PET_SITTING
   BOARDING_STAY
   PET_TAXI_RIDE
+  /// Batch 3 clinical sub-services — still category VET; specialty, not a parallel taxonomy.
+  LAB_TEST
+  IMAGING_STUDY
+  DENTAL_CARE
+  REHAB_SESSION
+  NUTRITION_CONSULT
+  HOME_VISIT
+  OTHER_SERVICE
 }
 
 enum AvailabilityExceptionType {
@@ -318,6 +360,14 @@ enum AvailabilityExceptionType {
 enum BookingStatus {
   HOLD
   PENDING_CONFIRMATION
+  /// Batch 3: request-to-book awaiting provider review; expires at requestExpiresAt.
+  REQUESTED
+  /// Batch 3: accepted/instant booking whose online payment or deposit is not yet paid.
+  AWAITING_PAYMENT
+  REJECTED
+  EXPIRED
+  /// Batch 3: superseded by the booking whose rescheduledFromBookingId points here.
+  RESCHEDULED
   CONFIRMED
   CHECKED_IN
   IN_PROGRESS
@@ -375,6 +425,54 @@ enum CareCalendarEventType {
   SITTING
   BOARDING
   PET_TAXI
+  OTHER_SERVICE
+}
+
+// ---------------------------------------------------------------------------
+// Batch 3 — Services + Booking completion
+// ---------------------------------------------------------------------------
+enum BookingMode {
+  INSTANT
+  REQUEST
+}
+
+/// Only modes the payment stack can honor. PAY_AT_PROVIDER and NONE never create a PaymentIntent.
+enum BookingPaymentMode {
+  NONE
+  PAY_AT_PROVIDER
+  FULL_PREPAYMENT
+  DEPOSIT
+}
+
+enum BookingActorType {
+  USER
+  PROVIDER
+  SYSTEM
+  ADMIN
+}
+
+enum ProviderResourceType {
+  EXAM_ROOM
+  GROOMING_STATION
+  IMAGING_DEVICE
+  VEHICLE
+  TRAINING_ROOM
+  OTHER
+}
+
+enum WaitlistStatus {
+  ACTIVE
+  NOTIFIED
+  /// The provider offered a concrete slot; it expires at offerExpiresAt.
+  OFFERED
+  BOOKED
+  CANCELLED
+  EXPIRED
+}
+
+enum ProviderReviewStatus {
+  PUBLISHED
+  HIDDEN
 }
 
 enum CareCalendarEventStatus {
@@ -987,22 +1085,35 @@ enum ShippingQuoteStatus {
 /// no multi-column CHECK syntax, so it is not representable here. Application-layer
 /// validation in AuthService remains, but this is no longer the only guarantee.
 model User {
-  id                 String          @id @default(uuid()) @db.Uuid
-  email              String?         @unique
-  phone              String?         @unique
+  id                 String            @id @default(uuid()) @db.Uuid
+  email              String?           @unique
+  phone              String?           @unique
   /// Case-preserved as entered; uniqueness is enforced on normalizedUsername
   /// (lowercased) so "Sarah" and "sarah" can never collide.
   username           String?
-  normalizedUsername String?         @unique
+  normalizedUsername String?           @unique
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
   passwordHash       String?
+  /// Batch 8 — when each contact was proven (OTP code or a Google-verified email). A contact
+  /// set any other way (e.g. typed at password sign-up) stays unverified and is never trusted
+  /// for account linking.
+  emailVerifiedAt    DateTime?
+  phoneVerifiedAt    DateTime?
   displayName        String
   avatarUrl          String?
-  locale             Locale          @default(fa)
-  themePreference    ThemePreference @default(SYSTEM)
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  locale             Locale            @default(fa)
+  themePreference    ThemePreference   @default(SYSTEM)
+  /// ERP-B: platform-level account suspension by staff (trust/admin). A suspended account can't sign in and its
+  /// sessions stop resolving; nothing is deleted. Reason is internal (never shown on member-facing APIs).
+  accountStatus      UserAccountStatus @default(ACTIVE)
+  /// Decision 4: set (atomically, once) when this user starts their one lifetime trial; never cleared.
+  welcomeTrialConsumedAt DateTime?
+  suspendedAt        DateTime?
+  suspendedReason    String?
+  suspendedByAdminId String?           @db.Uuid
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   authIdentities          AuthIdentity[]
   passwordResetTokens     PasswordResetToken[]
@@ -1025,13 +1136,29 @@ model User {
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
   notificationQuietHours  NotificationQuietHours?
+  consents                UserConsent[]
+  dataExportRequests      DataExportRequest[]
+  accountDeletionRequests AccountDeletionRequest[]
+  acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
 
-  adminUser             AdminUser?
-  supportCasesRequested SupportCase[]
-  supportMessages       SupportMessage[]
-  disputesRaised        Dispute[]
-  disputeEvidence       DisputeEvidence[]
-  appeals               Appeal[]
+  adminUser                 AdminUser?
+  supportCasesRequested     SupportCase[]
+  supportMessages           SupportMessage[]
+  disputesRaised            Dispute[]
+  disputeEvidence           DisputeEvidence[]
+  appeals                   Appeal[]
+  BookingWaitlistEntry      BookingWaitlistEntry[]
+  ProviderReview            ProviderReview[]
+  ProviderFavorite          ProviderFavorite[]
+  ProductReview             ProductReview[]
+  ProductFavorite           ProductFavorite[]
+  OrderRefundRequest        OrderRefundRequest[]
+  RepeatDeliverySchedule    RepeatDeliverySchedule[]
+  chatParticipations        ChatParticipant[]        @relation("ChatParticipations")
+  chatMessagesSent          ChatMessage[]            @relation("ChatMessagesSent")
+  blocksMade                UserBlock[]              @relation("BlocksMade")
+  blocksReceived            UserBlock[]              @relation("BlocksReceived")
+  clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
 
   @@map("users")
 }
@@ -1083,14 +1210,16 @@ model PasswordResetToken {
 
 /// Server-side session record backing the HTTP-only session cookie. The cookie carries only the id.
 model Session {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userAgent String?
-  ipAddress String?
-  expiresAt DateTime
-  rotatedAt DateTime @default(now())
-  createdAt DateTime @default(now())
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ipAddress  String?
+  expiresAt  DateTime
+  rotatedAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
 
   @@index([userId])
   @@map("sessions")
@@ -1102,6 +1231,8 @@ model Household {
   city        String?
   region      String?
   countryCode String?
+  /// Decision 4: set (atomically, once) when this household starts its one lifetime trial; never cleared.
+  welcomeTrialConsumedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -1131,7 +1262,10 @@ model Household {
   insuranceApplications InsuranceApplication[]
   travelBookings        TravelBooking[]
 
-  clinicalEstimates ClinicalEstimate[]
+  clinicalEstimates      ClinicalEstimate[]
+  invitations            HouseholdInvitation[]
+  BookingWaitlistEntry   BookingWaitlistEntry[]
+  RepeatDeliverySchedule RepeatDeliverySchedule[]
 
   @@map("households")
 }
@@ -1150,14 +1284,98 @@ model HouseholdMember {
   @@map("household_members")
 }
 
+model HouseholdInvitation {
+  id               String                    @id @default(uuid()) @db.Uuid
+  householdId      String                    @db.Uuid
+  household        Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  contact          String
+  tokenHash        String                    @unique
+  status           HouseholdInvitationStatus @default(PENDING)
+  invitedByUserId  String                    @db.Uuid
+  acceptedByUserId String?                   @db.Uuid
+  acceptedBy       User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+  initialAccess    Json
+  expiresAt        DateTime
+  acceptedAt       DateTime?
+  declinedAt       DateTime?
+  cancelledAt      DateTime?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+
+  @@index([householdId, status])
+  @@index([contact, status])
+  @@map("household_invitations")
+}
+
+model UserConsent {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String      @db.Uuid
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      ConsentKind
+  version   String
+  grantedAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([userId, kind, version])
+  @@index([userId, kind])
+  @@map("user_consents")
+}
+
+model DataExportRequest {
+  id               String               @id @default(uuid()) @db.Uuid
+  userId           String               @db.Uuid
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           PrivacyRequestStatus @default(PENDING)
+  scope            Json
+  requestedAt      DateTime             @default(now())
+  readyAt          DateTime?
+  expiresAt        DateTime?
+  completedAt      DateTime?
+  failureCode      String?
+  /// Batch 8 — the generated file in the private `account-exports/` space; only ever reached through a short-lived signed download.
+  fileObjectKey    String?
+  fileSizeBytes    Int?
+  downloadCount    Int                  @default(0)
+  lastDownloadedAt DateTime?
+
+  @@index([userId, requestedAt])
+  @@index([status, expiresAt])
+  @@map("data_export_requests")
+}
+
+model AccountDeletionRequest {
+  id             String               @id @default(uuid()) @db.Uuid
+  userId         String               @db.Uuid
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status         PrivacyRequestStatus @default(PENDING)
+  reason         String?
+  requestedAt    DateTime             @default(now())
+  cancelledAt    DateTime?
+  completedAt    DateTime?
+  /// Batch 8 — the consequence preview (households, pets, open obligations) the person saw and confirmed when requesting.
+  impactSnapshot Json?
+
+  /// G19 deletion lifecycle (execution stays disabled until a retention policy is approved). `status` is kept for
+  /// older clients: CANCELLED/COMPLETED mirror it, every other state reads as PENDING there.
+  state          AccountDeletionState @default(REQUESTED)
+  stateChangedAt DateTime             @default(now())
+  stateNote      String?
+
+  @@index([userId, requestedAt])
+  @@map("account_deletion_requests")
+}
+
 // ---------------------------------------------------------------------------
 // Pet identity
 // ---------------------------------------------------------------------------
 
 model Pet {
-  id          String    @id @default(uuid()) @db.Uuid
-  householdId String    @db.Uuid
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  careReminders CareReminder[]
+  id            String         @id @default(uuid()) @db.Uuid
+  householdId   String         @db.Uuid
+  household     Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
   name    String
   species PetSpecies
@@ -1251,10 +1469,17 @@ model Pet {
   clinicalEstimates      ClinicalEstimate[]
   dischargeSummaries     DischargeSummary[]
   providerClinicalAlerts ProviderClinicalAlert[]
+  clinicReminders        ClinicReminder[]
+  emergencyInfo          PetEmergencyInfo?
+  shareCards             PetShareCard[]
 
   trips                 Trip[]
   insuranceApplications InsuranceApplication[]
   travelBookingPets     TravelBookingPet[]
+  BookingPet            BookingPet[]
+  BookingWaitlistEntry  BookingWaitlistEntry[]
+  healthShareLinks      HealthShareLink[]
+  careSuggestions       CareSuggestion[]
 
   @@index([householdId])
   @@map("pets")
@@ -1275,11 +1500,14 @@ model Pet {
 /// Replaces the old one-row-per-(pet,user) `pet_access` table (schema_hardening
 /// migration); deliberately has NO @@unique([petId, userId]).
 model PetAccessGrant {
-  id     String @id @default(uuid()) @db.Uuid
-  petId  String @db.Uuid
-  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
-  userId String @db.Uuid
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  healthScopes             String[] @default([])
+  selectedDocumentIds      String[] @default([]) @db.Uuid
+  sharedWithProviderUserId String?  @db.Uuid
+  id                       String   @id @default(uuid()) @db.Uuid
+  petId                    String   @db.Uuid
+  pet                      Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  userId                   String   @db.Uuid
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   canViewIdentity       Boolean @default(true)
   canEditIdentity       Boolean @default(false)
@@ -1601,10 +1829,13 @@ model CareProfile {
 // ---------------------------------------------------------------------------
 
 model ProviderOrganization {
-  id                 String                     @id @default(uuid()) @db.Uuid
-  name               String
-  type               ProviderType
-  verificationStatus ProviderVerificationStatus @default(NOT_STARTED)
+  id                      String                     @id @default(uuid()) @db.Uuid
+  name                    String
+  type                    ProviderType
+  verificationStatus      ProviderVerificationStatus @default(NOT_STARTED)
+  /// ERP-C: partner-side submission time and the last admin note the partner may see (request for info / rejection).
+  verificationSubmittedAt DateTime?
+  verificationNote        String?
 
   phone       String?
   email       String?
@@ -1612,8 +1843,21 @@ model ProviderOrganization {
   logoUrl     String?
   websiteUrl  String?
 
+  /// Batch 3 public profile. Media are repository/storage-owned paths, never hotlinks.
+  coverImageUrl String?
+  galleryUrls   String[] @default([])
+  specialties   String[] @default([])
+  policiesText  String?
+  /// [{ question, answer }] authored by the provider.
+  faqs          Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  resources ProviderResource[]
+  reviews   ProviderReview[]
+  favorites ProviderFavorite[]
+  waitlist  BookingWaitlistEntry[]
 
   locations              ProviderLocation[]
   providerUsers          ProviderUser[]
@@ -1648,6 +1892,15 @@ model ProviderOrganization {
 
   travelListings TravelListing[]
 
+  clinicSubscription ClinicSubscription?
+  clinicReminders    ClinicReminder[]
+  clinicInvitations  ClinicInvitation[]
+  clinicNotes        ClinicCustomerNote[]
+  clinicTags         ClinicCustomerTag[]
+  clinicTasks        ClinicTask[]
+  clinicCampaigns    ClinicCampaign[]
+  clinicContacts     ClinicImportedContact[]
+
   @@index([verificationStatus])
   @@map("provider_organizations")
 }
@@ -1676,6 +1929,7 @@ model ProviderLocation {
   availabilityRules      ProviderAvailabilityRule[]
   availabilityExceptions ProviderAvailabilityException[]
   bookings               Booking[]
+  resources              ProviderResource[]
 
   @@index([providerOrganizationId])
   @@index([city])
@@ -1691,8 +1945,17 @@ model ProviderUser {
   providerOrganizationId String               @db.Uuid
   providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
 
-  role         ProviderUserRole @default(VET)
-  displayTitle String?
+  role                    ProviderUserRole      @default(VET)
+  displayTitle            String?
+  /// Clinic OS — a removed member keeps this row (their clinical records still reference it) but has no access:
+  /// every membership query filters `removedAt: null`. Plain audit reference, no FK.
+  removedAt               DateTime?
+  removedByProviderUserId String?               @db.Uuid
+  /// Public, provider-authored bio. HR/private staff data never lives on this model.
+  publicBio               String?
+  /// Staff can exist without being bookable (e.g. reception).
+  isBookable              Boolean               @default(true)
+  qualifiedServices       ProviderUserService[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1743,6 +2006,14 @@ model ProviderService {
 
   supportsDog Boolean @default(true)
   supportsCat Boolean @default(true)
+  additionalSpecies PetSpecies[] @default([])
+
+  /// At-home (AT_CUSTOMER/MOBILE) service area: cities served, matched against the booking address's city. Empty =
+  /// no area restriction. No map provider is involved (G13).
+  serviceAreaCities  String[] @default([])
+  /// Provider-configured travel surcharge for at-home visits (IRR). Shown to members; not yet added to online
+  /// charges — that needs a product decision on how surcharges are paid.
+  travelSurchargeIrr Int?
 
   /// Compatibility bounds (Handoff 04) — nullable means "no restriction on
   /// this axis". Weight is stored normalized to kg (rather than the spec's
@@ -1767,12 +2038,30 @@ model ProviderService {
 
   isActive Boolean @default(true)
 
+  /// Batch 3 booking policy — snapshotted onto each booking at confirmation.
+  bookingMode                   BookingMode           @default(INSTANT)
+  paymentMode                   BookingPaymentMode    @default(PAY_AT_PROVIDER)
+  depositAmount                 Decimal?              @db.Decimal(12, 2)
+  cancellationPolicy            String?
+  freeCancellationHours         Int                   @default(24)
+  lateCancellationRefundPercent Int                   @default(0)
+  preparationNotes              String?
+  maxPetsPerBooking             Int                   @default(1)
+  requiredResourceType          ProviderResourceType?
+  requestTtlHours               Int                   @default(24)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  variants          ProviderServiceVariant[]
+  qualifiedStaff    ProviderUserService[]
+  waitlist          BookingWaitlistEntry[]
   availabilityRules ProviderAvailabilityRule[]
   bookings          Booking[]
   bookingSeries     BookingSeries[]
+  /// Pet taxi only — distance pricing for this service (inactive until a provider turns it on).
+  transportPricing  ServiceTransportPricing?
+  intakeForms       ServiceIntakeForm[]
 
   @@index([providerOrganizationId])
   @@index([type])
@@ -1846,9 +2135,13 @@ model ProviderAvailabilityException {
 /// this phase has no delete endpoint for addresses at all (create + list
 /// only — see README Known limitations).
 model CustomerAddress {
-  id          String    @id @default(uuid()) @db.Uuid
-  householdId String    @db.Uuid
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  id               String                   @id @default(uuid()) @db.Uuid
+  /// Batch 4: Iranian 10-digit postal code (couriers require it) and the household default.
+  postalCode       String?
+  isDefault        Boolean                  @default(false)
+  repeatDeliveries RepeatDeliverySchedule[]
+  householdId      String                   @db.Uuid
+  household        Household                @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
   label        String?
   recipient    String?
@@ -1962,13 +2255,44 @@ model Booking {
   timezone String
 
   bookingStatus BookingStatus @default(CONFIRMED)
+  /// For NO_SHOW: who did not show up (OWNER = the member, marked by the provider; PROVIDER = reported by the member).
+  noShowParty   NoShowParty?
   paymentStatus PaymentStatus @default(NOT_REQUIRED)
+
+  /// Batch 3 snapshots — later provider edits never rewrite a confirmed booking.
+  bookingNumber                 String?                 @unique
+  variantId                     String?                 @db.Uuid
+  variant                       ProviderServiceVariant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  resourceId                    String?                 @db.Uuid
+  resource                      ProviderResource?       @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  bookingMode                   BookingMode             @default(INSTANT)
+  paymentMode                   BookingPaymentMode      @default(PAY_AT_PROVIDER)
+  priceAmount                   Decimal?                @db.Decimal(12, 2)
+  discountAmount                Decimal                 @default(0) @db.Decimal(12, 2)
+  depositAmount                 Decimal?                @db.Decimal(12, 2)
+  currency                      String?
+  durationMinutes               Int?
+  serviceNameSnapshot           String?
+  variantNameSnapshot           String?
+  cancellationPolicySnapshot    String?
+  freeCancellationHours         Int?
+  lateCancellationRefundPercent Int?
+  preparationSnapshot           String?
+  requestExpiresAt              DateTime?
+  respondedAt                   DateTime?
+  rejectedReason                String?
+  rescheduledFromBookingId      String?                 @unique @db.Uuid
+  rescheduledFrom               Booking?                @relation("BookingReschedule", fields: [rescheduledFromBookingId], references: [id], onDelete: Restrict)
+  rescheduledTo                 Booking?                @relation("BookingReschedule")
+  paymentIntentId               String?                 @db.Uuid
 
   reasonForVisit String?
   ownerNotes     String?
 
-  cancelledAt     DateTime?
-  cancelledReason String?
+  cancelledAt            DateTime?
+  cancelledReason        String?
+  /// Structured reason (see booking-cancellation.util): OWNER_* by the member, PROVIDER_* by the provider, SYSTEM_* by jobs.
+  cancellationReasonCode String?
 
   /// Handoff 05: set only by the Provider OS's POST .../complete transition
   /// (IN_PROGRESS -> COMPLETED). `completedByProviderUserId` is a plain UUID
@@ -1981,15 +2305,28 @@ model Booking {
   completedAt               DateTime?
   completedByProviderUserId String?   @db.Uuid
   completionNote            String?
+  /// Owner-visible care instructions written at completion (longer than completionNote).
+  aftercareInstructions     String?
+  /// The intake form version answered at booking time, and the answers (validated against it).
+  intakeFormId              String?   @db.Uuid
+  intakeAnswers             Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  petAccess     BookingPetAccess?
-  providerNotes BookingProviderNote[]
+  petAccess       BookingPetAccess?
+  providerNotes   BookingProviderNote[]
+  attachments     BookingAttachment[]
+  rideEvents      BookingRideEvent[]
+  additionalPets  BookingPet[]
+  statusEvents    BookingStatusEvent[]
+  review          ProviderReview?
+  waitlistMatches BookingWaitlistEntry[]
 
   clinicalVisits     ClinicalVisit[]
   referralsFulfilled Referral[]
+  /// Pet taxi only — immutable route and fare snapshot taken when the booking is made.
+  transportRoute     BookingTransportRoute?
 
   @@index([petId])
   @@index([householdId])
@@ -2116,14 +2453,16 @@ model CareCalendarEvent {
 /// SellerOffers (see ShopService); a seller under review or suspended stays
 /// fully readable for admin/history purposes, just never discoverable.
 model SellerOrganization {
-  id                 String                   @id @default(uuid()) @db.Uuid
-  name               String
-  verificationStatus SellerVerificationStatus @default(NOT_STARTED)
-  status             SellerStatus             @default(ACTIVE)
-  countryCode        String
-  city               String?
-  logoUrl            String?
-  description        String?
+  id                      String                   @id @default(uuid()) @db.Uuid
+  name                    String
+  verificationStatus      SellerVerificationStatus @default(NOT_STARTED)
+  verificationSubmittedAt DateTime?
+  verificationNote        String?
+  status                  SellerStatus             @default(ACTIVE)
+  countryCode             String
+  city                    String?
+  logoUrl                 String?
+  description             String?
 
   /// Handoff 09 (spec section 3) — all additive/optional so every existing
   /// SellerOrganization row remains valid without a data backfill.
@@ -2242,11 +2581,16 @@ model ProductCategory {
 /// (e.g. not a speciesCompatibility array) so the two compatibility engines
 /// stay easy to compare and maintain side by side.
 model Product {
-  id         String          @id @default(uuid()) @db.Uuid
-  brandId    String?         @db.Uuid
-  brand      Brand?          @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  categoryId String          @db.Uuid
-  category   ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  id             String            @id @default(uuid()) @db.Uuid
+  /// Batch 4: structured specs [{ label, value }] supplied by manufacturer/seller — never medical claims.
+  specifications Json?
+  media          ProductMedia[]
+  reviews        ProductReview[]
+  favorites      ProductFavorite[]
+  brandId        String?           @db.Uuid
+  brand          Brand?            @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  categoryId     String            @db.Uuid
+  category       ProductCategory   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   title       String
   slug        String  @unique
@@ -2254,6 +2598,7 @@ model Product {
 
   supportsDog          Boolean  @default(true)
   supportsCat          Boolean  @default(true)
+  additionalSpecies    PetSpecies[] @default([])
   minAgeMonths         Int?
   maxAgeMonths         Int?
   minWeightKg          Decimal? @db.Decimal(6, 2)
@@ -2288,9 +2633,12 @@ model Product {
 /// that Json, per the spec's explicit "avoid dumping all variant identity
 /// into free JSON" instruction.
 model ProductVariant {
-  id        String  @id @default(uuid()) @db.Uuid
-  productId String  @db.Uuid
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  id               String                   @id @default(uuid()) @db.Uuid
+  media            ProductMedia[]
+  reviews          ProductReview[]
+  repeatDeliveries RepeatDeliverySchedule[]
+  productId        String                   @db.Uuid
+  product          Product                  @relation(fields: [productId], references: [id], onDelete: Restrict)
 
   sku     String  @unique
   barcode String?
@@ -2316,11 +2664,16 @@ model ProductVariant {
 /// One Variant may have multiple Offers from different sellers (spec
 /// section 8) — price/inventory live here, never on Product/Variant.
 model SellerOffer {
-  id                   String             @id @default(uuid()) @db.Uuid
-  sellerOrganizationId String             @db.Uuid
-  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
-  productVariantId     String             @db.Uuid
-  productVariant       ProductVariant     @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  id                     String                   @id @default(uuid()) @db.Uuid
+  /// Batch 4: seller explicitly opts a consumable offer into Repeat Delivery (never inferred).
+  repeatDeliveryEligible Boolean                  @default(false)
+  /// Intervals in days the customer may choose for this offer (e.g. [14, 28, 42]).
+  repeatIntervalsDays    Int[]                    @default([])
+  repeatDeliveries       RepeatDeliverySchedule[]
+  sellerOrganizationId   String                   @db.Uuid
+  sellerOrganization     SellerOrganization       @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  productVariantId       String                   @db.Uuid
+  productVariant         ProductVariant           @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
 
   /// Integer IRR (Rial), never a fractional/floating amount — see README
   /// "IRR/Toman behavior". The UI divides by 10 to render Toman for display.
@@ -2407,13 +2760,15 @@ model Cart {
 /// offer coexist — CartService.addItem() finds-or-increments explicitly
 /// instead, sidestepping that quirk entirely (see README Known limitations).
 model CartLine {
-  id            String      @id @default(uuid()) @db.Uuid
-  cartId        String      @db.Uuid
-  cart          Cart        @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  sellerOfferId String      @db.Uuid
-  sellerOffer   SellerOffer @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
-  targetPetId   String?     @db.Uuid
-  targetPet     Pet?        @relation(fields: [targetPetId], references: [id], onDelete: SetNull)
+  id                  String      @id @default(uuid()) @db.Uuid
+  /// Batch 4: promotion that produced unitPriceSnapshot, so an ended promotion is reported as such.
+  promotionIdSnapshot String?     @db.Uuid
+  cartId              String      @db.Uuid
+  cart                Cart        @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  sellerOfferId       String      @db.Uuid
+  sellerOffer         SellerOffer @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+  targetPetId         String?     @db.Uuid
+  targetPet           Pet?        @relation(fields: [targetPetId], references: [id], onDelete: SetNull)
 
   quantity Int
 
@@ -2455,13 +2810,15 @@ model Checkout {
 
   status CheckoutStatus @default(DRAFT)
 
-  subtotalAmount Int     @default(0)
-  deliveryAmount Int     @default(0)
-  discountAmount Int     @default(0)
-  totalAmount    Int     @default(0)
-  currency       String  @default("IRR")
+  subtotalAmount      Int     @default(0)
+  deliveryAmount      Int     @default(0)
+  discountAmount      Int     @default(0)
+  totalAmount         Int     @default(0)
+  currency            String  @default("IRR")
   /// Placeholder only (spec section 46) — no promotion/campaign engine exists to validate this against.
-  promotionCode  String?
+  promotionCode       String?
+  /// Batch 4: the priced lines (CartLineDto[]) frozen when the checkout was created. Orders are built from this, never from the mutable cart, so the order always equals what was charged.
+  pricedLinesSnapshot Json?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -2516,7 +2873,14 @@ model InventoryReservation {
 /// change (spec section 31's snapshot principle, applied to the address
 /// too).
 model Order {
-  id                   String             @id @default(uuid()) @db.Uuid
+  id                   String                   @id @default(uuid()) @db.Uuid
+  /// Batch 4: cancellation facts and append-only status timeline.
+  cancelledAt          DateTime?
+  cancelReason         String?
+  cancelledBy          String?
+  statusEvents         OrderStatusEvent[]
+  refundRequests       OrderRefundRequest[]
+  repeatDeliveryCycles RepeatDeliverySchedule[] @relation("RepeatDeliveryLastOrder")
   /// Nullable as of Handoff 09 (spec section 25/27) — a marketplace-origin
   /// Order (see the `marketplaceOrder` relation below) never had a PET LIFE
   /// OS Checkout or a registered buyer User; both stay required/non-null for
@@ -2524,14 +2888,14 @@ model Order {
   /// that ever sets them. `@@unique([checkoutId, sellerOrganizationId])`
   /// below still holds: Postgres treats each NULL as distinct, so many
   /// marketplace Orders for the same seller coexist freely under it.
-  checkoutId           String?            @db.Uuid
-  checkout             Checkout?          @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
-  sellerOrganizationId String             @db.Uuid
-  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
-  userId               String?            @db.Uuid
-  user                 User?              @relation(fields: [userId], references: [id], onDelete: Restrict)
-  householdId          String?            @db.Uuid
-  household            Household?         @relation(fields: [householdId], references: [id], onDelete: SetNull)
+  checkoutId           String?                  @db.Uuid
+  checkout             Checkout?                @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  sellerOrganizationId String                   @db.Uuid
+  sellerOrganization   SellerOrganization       @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  userId               String?                  @db.Uuid
+  user                 User?                    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  householdId          String?                  @db.Uuid
+  household            Household?               @relation(fields: [householdId], references: [id], onDelete: SetNull)
 
   status OrderStatus @default(PENDING)
 
@@ -2579,6 +2943,12 @@ model Order {
 /// own compatibility metadata must never rewrite order history.
 model OrderItem {
   id               String         @id @default(uuid()) @db.Uuid
+  /// Batch 4: price facts frozen at commit — list price, applied promotion and per-unit discount.
+  listUnitPrice    Int?
+  unitDiscount     Int            @default(0)
+  promotionId      String?        @db.Uuid
+  promotionName    String?
+  review           ProductReview?
   orderId          String         @db.Uuid
   order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId        String         @db.Uuid
@@ -3092,11 +3462,16 @@ model SellerSettlement {
   /// settlement's own history.
   payoutMethodType String?
 
-  createdAt    DateTime  @default(now())
-  approvedAt   DateTime?
-  paidAt       DateTime?
-  reconciledAt DateTime?
-  cancelledAt  DateTime?
+  createdAt     DateTime  @default(now())
+  approvedAt    DateTime?
+  paidAt        DateTime?
+  reconciledAt  DateTime?
+  /// ERP-E: staff hold — a held settlement can't be approved or paid until released. Never changes amounts.
+  onHold        Boolean   @default(false)
+  holdReason    String?
+  heldAt        DateTime?
+  heldByAdminId String?   @db.Uuid
+  cancelledAt   DateTime?
 
   items        SellerSettlementItem[]
   transactions SellerLedgerTransaction[]
@@ -3926,6 +4301,10 @@ enum AdminRole {
   VERIFICATION
   READ_ONLY
   EDITOR
+  PARTNER_OPERATIONS
+  CLINIC_OPERATIONS
+  COMMERCE_OPERATIONS
+  ANALYTICS
 }
 
 enum AdminMembershipStatus {
@@ -3993,6 +4372,7 @@ enum InternalNoteEntityType {
 enum AdminTaskStatus {
   OPEN
   IN_PROGRESS
+  BLOCKED
   DONE
   CANCELLED
 }
@@ -4043,6 +4423,10 @@ enum TrustSubjectType {
   REVIEW
   COMMUNITY_CONTENT
   PET_INCIDENT
+  /// Batch 6
+  SUPPORT_NEED
+  LOST_PET_SIGHTING
+  ANIMAL_SUPPORT_ORGANIZATION
 }
 
 enum TrustCaseSeverity {
@@ -4075,6 +4459,8 @@ enum AppealStatus {
   UPHELD
   OVERTURNED
   PARTIALLY_OVERTURNED
+  /// The appellant took it back before a decision.
+  WITHDRAWN
 }
 
 /// Two-person control foundation for high-risk refunds (spec: "refund above
@@ -4179,6 +4565,10 @@ model SupportCase {
   /// First-response-time and resolution-time are computed on read from
   /// these plus createdAt/resolvedAt.
   firstResponseAt    DateTime?
+  /// ERP-F: first time the case got an assignee, how often it was reopened, and free-form staff tags.
+  firstAssignedAt    DateTime?
+  reopenCount        Int       @default(0)
+  tags               String[]  @default([])
   lastUserMessageAt  DateTime?
   lastAdminMessageAt DateTime?
 
@@ -4244,8 +4634,13 @@ model AdminTask {
   relatedEntityType String?
   relatedEntityId   String?
 
-  createdByAdminId String    @db.Uuid
-  createdByAdmin   AdminUser @relation("CreatedTasks", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  /// Null for tasks the platform raised itself (source != MANUAL).
+  createdByAdminId String?         @db.Uuid
+  createdByAdmin   AdminUser?      @relation("CreatedTasks", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  /// ERP: where the task came from, which team owns it, and an idempotency key for rule-generated tasks.
+  source           AdminTaskSource @default(MANUAL)
+  team             String?
+  dedupeKey        String?         @unique
 
   completedAt DateTime?
   createdAt   DateTime  @default(now())
@@ -4273,6 +4668,8 @@ model Dispute {
   assignedAdmin   AdminUser? @relation("AssignedDisputes", fields: [assignedAdminId], references: [id], onDelete: SetNull)
 
   resolutionSummary String?
+  /// ERP-F: the refund approval opened through AdminRefundService when the outcome is a refund (never a direct money write).
+  refundApprovalId  String? @db.Uuid
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -4347,8 +4744,12 @@ model TrustAction {
   trustCaseId String    @db.Uuid
   trustCase   TrustCase @relation(fields: [trustCaseId], references: [id], onDelete: Cascade)
 
-  actionType TrustActionType
-  reason     String
+  actionType    TrustActionType
+  reason        String
+  /// Batch 6 — what the action actually changed on its subject
+  /// ({ before, after, ... }), so RESTORE can put back exactly the prior state
+  /// instead of a guessed default. Null when the action had no operational effect.
+  effectSummary Json?
 
   performedByAdminId String    @db.Uuid
   performedByAdmin   AdminUser @relation(fields: [performedByAdminId], references: [id], onDelete: Restrict)
@@ -4461,6 +4862,46 @@ model AdminAuditLog {
 /// attemptCount, lastError) make this row usable as a real transactional
 /// outbox later — a poller can pick up unprocessed rows, retry with backoff,
 /// and record failures — without any schema change when that poller is built.
+/// Reminder scheduling is separate from clinical source truth and booking state.
+model CareReminder {
+  id                String    @id @default(uuid()) @db.Uuid
+  petId             String    @db.Uuid
+  pet               Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
+  createdByUserId   String    @db.Uuid
+  title             String
+  type              String
+  source            String    @default("USER_CREATED")
+  sourceId          String?   @db.Uuid
+  originalDueAt     DateTime
+  dueAt             DateTime
+  snoozedUntil      DateTime?
+  state             String    @default("UPCOMING")
+  recurrence        String    @default("ONCE")
+  intervalDays      Int?
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  notifiedAt        DateTime?
+  version           Int       @default(0)
+  parentId          String?   @db.Uuid
+  /// Shared care: who should do it (a member with care-edit access) and who actually did it.
+  assignedToUserId  String?   @db.Uuid
+  completedByUserId String?   @db.Uuid
+  skippedAt         DateTime?
+  /// recurrence WEEKDAYS: 0=Sunday … 6=Saturday, in Asia/Tehran.
+  weekdays          Int[]     @default([])
+  /// Series end: no occurrence after untilDate, and no more than maxOccurrences in total.
+  untilDate         DateTime?
+  maxOccurrences    Int?
+  occurrenceIndex   Int       @default(1)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([parentId, originalDueAt])
+  @@index([petId, dueAt])
+  @@index([state, dueAt])
+  @@map("care_reminders")
+}
+
 model DomainEvent {
   id            String    @id @default(uuid()) @db.Uuid
   type          String
@@ -5447,11 +5888,12 @@ enum CarePlanStatus {
 }
 
 model MedicalDocument {
-  id          String    @id @default(uuid()) @db.Uuid
-  petId       String    @db.Uuid
-  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
-  householdId String    @db.Uuid
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  id           String                       @id @default(uuid()) @db.Uuid
+  travelShares TravelBookingDocumentShare[]
+  petId        String                       @db.Uuid
+  pet          Pet                          @relation(fields: [petId], references: [id], onDelete: Restrict)
+  householdId  String                       @db.Uuid
+  household    Household                    @relation(fields: [householdId], references: [id], onDelete: Restrict)
 
   documentType MedicalDocumentType
   title        String
@@ -6075,6 +6517,10 @@ model LostPetIncident {
 
   status LostPetIncidentStatus @default(OPEN)
 
+  /// Batch 6 — the ONLY location shown publicly: an owner-chosen approximate
+  /// area (neighbourhood / main street). lastKnownLocation and the
+  /// coordinates below are private to the household and operators.
+  publicArea         String?
   lastKnownLocation  String?
   lastKnownLatitude  Float?
   lastKnownLongitude Float?
@@ -6093,6 +6539,9 @@ model LostPetIncident {
   /// owner-approved masked value (e.g. a partial phone), never the
   /// household's real phone/email column.
   publicContactMode String?
+
+  /// The owner's ID-tag card exposed alongside this incident (owner-visible link only; the token is never public here).
+  identityCardId String? @db.Uuid
 
   createdByUserId String   @db.Uuid
   createdAt       DateTime @default(now())
@@ -6153,6 +6602,31 @@ model LostPetSighting {
 // the organization's behalf pending payout, i.e. a liability, not income.
 // ---------------------------------------------------------------------------
 
+/// Batch 6 — staff roles inside an NGO / shelter / rescue organization (same membership pattern
+/// as InsurerMembership). OWNER manages team, profile and verification; COORDINATOR runs needs,
+/// offers and volunteers; VIEWER reads.
+enum AnimalSupportOrgRole {
+  OWNER
+  COORDINATOR
+  VIEWER
+}
+
+model AnimalSupportOrgMembership {
+  id             String                    @id @default(uuid()) @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Actor reference (no relation), same convention as InsurerMembership.userId.
+  userId         String                    @db.Uuid
+  role           AnimalSupportOrgRole      @default(COORDINATOR)
+  isActive       Boolean                   @default(true)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("animal_support_org_memberships")
+}
+
 enum AnimalSupportOrgType {
   NGO
   SHELTER
@@ -6197,6 +6671,15 @@ model AnimalSupportOrganization {
   donationLedgerTransactions DonationLedgerTransaction[]
   donationTransactions       DonationTransaction[]
   supportNeedListings        SupportNeedListing[]
+  memberships                AnimalSupportOrgMembership[]
+  followers                  AnimalSupportOrgFollow[]
+  volunteerInterests         VolunteerInterest[]
+
+  /// Batch 6 — organization-submitted verification: when submitted, the reviewer's note back to
+  /// the organization, and private document keys (never public; admins read them via signed URLs).
+  verificationSubmittedAt  DateTime?
+  verificationNote         String?
+  verificationDocumentKeys String[]  @default([])
 
   @@map("animal_support_organizations")
 }
@@ -6344,6 +6827,10 @@ enum SupportNeedStatus {
   DRAFT
   PENDING_REVIEW
   PUBLISHED
+  /// Batch 6 — publicly visible, still accepting offers, some quantity already fulfilled.
+  PARTIALLY_FULFILLED
+  /// Batch 6 — publisher paused new offers; detail stays reachable, not listed in search.
+  PAUSED
   FULFILLED
   CLOSED
   EXPIRED
@@ -6395,6 +6882,9 @@ model SupportNeedListing {
   /// fulfilledQuantity is only ever advanced through
   /// SupportNeedService.recordFulfillment, never written directly by a client.
   neededQuantity    Int?
+  /// Optional cash target in IRR for a need that accepts money (via its campaign). The listing never
+  /// holds a balance: raised = SUCCEEDED DonationIntents restricted to this listing (ledger-backed).
+  targetAmountIrr   Int?
   fulfilledQuantity Int     @default(0)
   quantityUnit      String?
 
@@ -6415,11 +6905,16 @@ model SupportNeedListing {
   fulfilledAt       DateTime?
   closedAt          DateTime?
   expiresAt         DateTime?
+  /// Batch 6 — set once the "expiring soon" reminder was sent to the publisher.
+  expiryWarnedAt    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  helpOffers HelpOffer[]
+  helpOffers       HelpOffer[]
+  updates          SupportNeedUpdate[]
+  savedBy          SupportNeedBookmark[]
+  milestoneRecords SupportNeedMilestone[]
 
   @@index([status, publishedAt])
   @@index([category])
@@ -6432,6 +6927,8 @@ model SupportNeedListing {
 enum HelpOfferStatus {
   PENDING
   ACCEPTED
+  /// Batch 6 — the helper and publisher are coordinating the handover.
+  IN_PROGRESS
   DECLINED
   COMPLETED
   CANCELLED
@@ -6452,6 +6949,8 @@ model HelpOffer {
   /// listing's own category (someone answering a FOOD need may offer
   /// TRANSPORT to deliver it).
   helpType SupportNeedCategory
+  /// Batch 6 — when the helper can deliver (free text, e.g. "weekday evenings").
+  timing   String?
   quantity Int?
 
   status HelpOfferStatus @default(PENDING)
@@ -6497,11 +6996,17 @@ model DonationIntent {
   /// doc-comment on SupportCampaign above.
   fundType  CampaignFundType
 
-  status            DonationStatus @default(PENDING)
+  status               DonationStatus @default(PENDING)
   /// Donor consented to being shown as themselves rather than "Anonymous"
   /// on the public campaign page — defaults to false (spec: "Do not expose
   /// donor identities publicly unless explicit consent exists").
-  showDonorPublicly Boolean        @default(false)
+  showDonorPublicly    Boolean        @default(false)
+  /// Batch 6 — the name the donor chose to be shown as (only when showDonorPublicly).
+  /// The account's own display name is never used publicly.
+  publicDisplayName    String?
+  /// Batch 6 — optional support need this (restricted) donation is for; validated
+  /// against the need's linked campaign at donation time.
+  supportNeedListingId String?        @db.Uuid
 
   /// The internal shell Checkout this donation's PaymentIntent hangs off —
   /// required because PaymentIntent.checkoutId is a non-nullable FK.
@@ -6518,6 +7023,7 @@ model DonationIntent {
   transaction DonationTransaction?
 
   @@index([campaignId])
+  @@index([supportNeedListingId])
   @@map("donation_intents")
 }
 
@@ -6674,6 +7180,13 @@ model CommunityPost {
   comments  CommunityComment[]
   reactions CommunityReaction[]
   reports   CommunityReport[]
+  savedBy   CommunityPostBookmark[]
+  /// Topic tags from a fixed vocabulary (DOGS, CATS, HEALTH, TRAINING, LOST_PETS, TRAVEL, ADOPTION, NUTRITION, OTHER).
+  topics    String[]                @default([])
+  /// Optional city for local community — never a precise location.
+  city      String?
+  /// Optional region/province (G17) — never an address or coordinates.
+  region    String?
 
   @@index([authorUserId])
   @@index([status])
@@ -6690,9 +7203,14 @@ model CommunityComment {
   status       CommunityContentStatus @default(PUBLISHED)
   createdAt    DateTime               @default(now())
 
-  reports CommunityReport[]
+  reports         CommunityReport[]
+  /// One level of replies: a reply's parent is always a top-level comment.
+  parentCommentId String?            @db.Uuid
+  parent          CommunityComment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         CommunityComment[] @relation("CommentReplies")
 
   @@index([postId])
+  @@index([parentCommentId])
   @@map("community_comments")
 }
 
@@ -6724,6 +7242,12 @@ enum CommunityReportReason {
   MISINFORMATION
   INAPPROPRIATE
   OTHER
+  /// Batch 6
+  SCAM
+  HARASSMENT
+  PERSONAL_INFORMATION
+  ANIMAL_WELFARE
+  DANGEROUS_CONTENT
 }
 
 enum CommunityReportStatus {
@@ -6734,22 +7258,43 @@ enum CommunityReportStatus {
 }
 
 model CommunityReport {
-  id             String                @id @default(uuid()) @db.Uuid
-  postId         String?               @db.Uuid
-  post           CommunityPost?        @relation(fields: [postId], references: [id], onDelete: Restrict)
-  commentId      String?               @db.Uuid
-  comment        CommunityComment?     @relation(fields: [commentId], references: [id], onDelete: Restrict)
-  reporterUserId String                @db.Uuid
-  reason         CommunityReportReason
-  details        String?
-  status         CommunityReportStatus @default(OPEN)
+  id                   String                @id @default(uuid()) @db.Uuid
+  postId               String?               @db.Uuid
+  post                 CommunityPost?        @relation(fields: [postId], references: [id], onDelete: Restrict)
+  commentId            String?               @db.Uuid
+  comment              CommunityComment?     @relation(fields: [commentId], references: [id], onDelete: Restrict)
+  /// Batch 6 — the same user report queue also covers animal-support needs, lost-pet incidents,
+  /// sightings and organizations (plain ids, TrustCase-style); exactly one target is set.
+  supportNeedListingId String?               @db.Uuid
+  lostPetIncidentId    String?               @db.Uuid
+  lostPetSightingId    String?               @db.Uuid
+  organizationId       String?               @db.Uuid
+  /// Community chat — a reported private message (only a participant may report it).
+  chatMessageId        String?               @db.Uuid
+  /// G18: a published provider review (or its provider reply) reported as abusive or fake.
+  providerReviewId     String?               @db.Uuid
+  reporterUserId       String                @db.Uuid
+  reason               CommunityReportReason
+  details              String?
+  status               CommunityReportStatus @default(OPEN)
   /// Set once a moderator escalates this report into the existing Trust &
   /// Safety queue (TrustCase.subjectType = COMMUNITY_CONTENT).
-  trustCaseId    String?               @db.Uuid
-  createdAt      DateTime              @default(now())
+  trustCaseId          String?               @db.Uuid
+  /// ERP-G: who in Trust & Safety is working this report (claimed from the unified queue).
+  assignedAdminId      String?               @db.Uuid
+  assignedAt           DateTime?
+  createdAt            DateTime              @default(now())
 
+  @@index([providerReviewId])
+  @@index([status, createdAt])
   @@index([postId])
   @@index([commentId])
+  @@index([supportNeedListingId])
+  @@index([lostPetIncidentId])
+  @@index([lostPetSightingId])
+  @@index([organizationId])
+  @@index([chatMessageId])
+  @@index([reporterUserId])
   @@map("community_reports")
 }
 
@@ -6903,6 +7448,9 @@ model Trip {
 
   requirements   TravelRequirement[]
   travelBookings TravelBooking[]
+  checklistItems TripChecklistItem[]
+  participants   TripParticipant[]
+  documentLinks  TripDocumentLink[]
 
   @@index([householdId])
   @@index([petId])
@@ -6982,6 +7530,7 @@ enum InsuranceVerificationStatus {
 
 model InsuranceProvider {
   id               String                      @id @default(uuid()) @db.Uuid
+  memberships      InsurerMembership[]
   name             String
   description      String?
   logoObjectKey    String?
@@ -7077,6 +7626,8 @@ enum InsuranceEligibilityStatus {
 /// no service in this handoff ever transitions an application into either
 /// state (spec: "do not simulate underwriting approval").
 enum InsuranceApplicationStatus {
+  /// Batch 5: the insurer asked the applicant for more information.
+  NEEDS_INFORMATION
   DRAFT
   SUBMITTED
   UNDER_REVIEW
@@ -7086,15 +7637,21 @@ enum InsuranceApplicationStatus {
 }
 
 model InsuranceApplication {
-  id              String           @id @default(uuid()) @db.Uuid
-  productId       String           @db.Uuid
-  product         InsuranceProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
-  householdId     String           @db.Uuid
-  household       Household        @relation(fields: [householdId], references: [id], onDelete: Restrict)
-  petId           String           @db.Uuid
-  pet             Pet              @relation(fields: [petId], references: [id], onDelete: Restrict)
+  id                String                      @id @default(uuid()) @db.Uuid
+  /// Batch 5
+  consentAt         DateTime?
+  consentText       String?
+  insurerMessage    String?
+  externalReference String?
+  events            InsuranceApplicationEvent[]
+  productId         String                      @db.Uuid
+  product           InsuranceProduct            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  householdId       String                      @db.Uuid
+  household         Household                   @relation(fields: [householdId], references: [id], onDelete: Restrict)
+  petId             String                      @db.Uuid
+  pet               Pet                         @relation(fields: [petId], references: [id], onDelete: Restrict)
   /// Plain UUID, no FK — same actor-reference convention as Trip.createdByUserId.
-  applicantUserId String           @db.Uuid
+  applicantUserId   String                      @db.Uuid
 
   status            InsuranceApplicationStatus @default(DRAFT)
   /// A snapshot of EligibilityService's own live computation at submission
@@ -7134,10 +7691,27 @@ enum PetFriendlyPlaceStatus {
 }
 
 model PetFriendlyPlace {
-  id          String                   @id @default(uuid()) @db.Uuid
-  name        String
-  category    PetFriendlyPlaceCategory
-  description String?
+  id               String                   @id @default(uuid()) @db.Uuid
+  /// Batch 5 — null means "not stated", never "no".
+  leashRequired    Boolean?
+  waterAvailable   Boolean?
+  petArea          Boolean?
+  /// Structured attributes (null = unknown; never inferred).
+  shadeAvailable   Boolean?
+  fencedArea       Boolean?
+  wasteBins        Boolean?
+  smallDogArea     Boolean?
+  parkingAvailable Boolean?
+  /// Entry fee in IRR; 0 = free, null = unknown.
+  entryFeeIrr      Int?
+  /// FULL (pets welcome everywhere), PARTIAL (some areas), OUTDOOR_ONLY.
+  petFriendlyLevel String?
+  openingHours     Json?
+  province         String?
+  reports          PlaceReport[]
+  name             String
+  category         PetFriendlyPlaceCategory
+  description      String?
 
   country String
   city    String
@@ -7200,6 +7774,11 @@ model PetFriendlyPlaceFavorite {
 // ---------------------------------------------------------------------------
 
 enum TravelListingType {
+  HOTEL
+  ECO_LODGE
+  GUESTHOUSE
+  RESORT
+  PET_HOTEL
   PET_FRIENDLY_HOTEL
   VILLA
   APARTMENT
@@ -7236,9 +7815,21 @@ enum TravelListingStatus {
 }
 
 model TravelListing {
-  id             String               @id @default(uuid()) @db.Uuid
-  organizationId String               @db.Uuid
-  organization   ProviderOrganization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  id                String                  @id @default(uuid()) @db.Uuid
+  /// Batch 5
+  province          String?
+  checkInFrom       String?
+  checkOutUntil     String?
+  houseRules        String?
+  submittedAt       DateTime?
+  reviewedAt        DateTime?
+  reviewedByAdminId String?                 @db.Uuid
+  moderationNote    String?
+  media             TravelMedia[]
+  reviews           TravelReview[]
+  favorites         TravelListingFavorite[]
+  organizationId    String                  @db.Uuid
+  organization      ProviderOrganization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
 
   type        TravelListingType
   title       String
@@ -7321,9 +7912,17 @@ model TravelPetPolicy {
 /// interchangeable stock (e.g. 3 identical rooms) without needing a row per
 /// physical unit.
 model TravelInventoryUnit {
-  id        String        @id @default(uuid()) @db.Uuid
-  listingId String        @db.Uuid
-  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  id        String           @id @default(uuid()) @db.Uuid
+  /// Batch 5
+  bedInfo   String?
+  sizeSqm   Int?
+  amenities String[]         @default([])
+  maxPets   Int?
+  petNotes  String?
+  ratePlans TravelRatePlan[]
+  media     TravelMedia[]
+  listingId String           @db.Uuid
+  listing   TravelListing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   name         String
   description  String?
@@ -7368,6 +7967,11 @@ model TravelAvailability {
 }
 
 enum TravelBookingStatus {
+  /// Batch 5: bounded inventory hold while the traveller completes the booking flow.
+  HELD
+  NO_SHOW
+  /// Batch 5: replaced by a successor booking (date/unit change).
+  MODIFIED
   DRAFT
   AWAITING_PROVIDER
   AWAITING_PAYMENT
@@ -7381,11 +7985,31 @@ enum TravelBookingStatus {
 }
 
 model TravelBooking {
-  id        String              @id @default(uuid()) @db.Uuid
-  listingId String              @db.Uuid
-  listing   TravelListing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
-  unitId    String              @db.Uuid
-  unit      TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  id                     String                       @id @default(uuid()) @db.Uuid
+  /// Batch 5 — rate, snapshots, holds, payment, cancellation, modification.
+  ratePlanId             String?                      @db.Uuid
+  ratePlan               TravelRatePlan?              @relation(fields: [ratePlanId], references: [id], onDelete: SetNull)
+  ratePlanSnapshot       Json?
+  petPolicySnapshot      Json?
+  priceBreakdownSnapshot Json?
+  discountAmountIrr      Int                          @default(0)
+  payNowAmountIrr        Int                          @default(0)
+  holdExpiresAt          DateTime?
+  requestExpiresAt       DateTime?
+  paymentIntentId        String?                      @db.Uuid
+  paymentStatus          String                       @default("NOT_REQUIRED")
+  refundAmountIrr        Int                          @default(0)
+  cancelReason           String?
+  cancelledBy            String?
+  noShowAt               DateTime?
+  modifiedFromBookingId  String?                      @unique @db.Uuid
+  statusEvents           TravelBookingEvent[]
+  review                 TravelReview?
+  documentShares         TravelBookingDocumentShare[]
+  listingId              String                       @db.Uuid
+  listing                TravelListing                @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  unitId                 String                       @db.Uuid
+  unit                   TravelInventoryUnit          @relation(fields: [unitId], references: [id], onDelete: Restrict)
 
   /// Human-facing reference, shown on the booking and in support threads.
   reference String @unique
@@ -8031,4 +8655,2273 @@ model ProviderClinicalAlert {
   @@index([petId, resolvedAt])
   @@index([providerOrganizationId])
   @@map("provider_clinical_alerts")
+}
+
+// ---------------------------------------------------------------------------
+// Batch 3 — Services + Booking completion models
+// ---------------------------------------------------------------------------
+
+/// A priced/timed option of one service (size, duration, visit kind). Variant price/duration override the service's.
+model ProviderServiceVariant {
+  id              String                 @id @default(uuid()) @db.Uuid
+  serviceId       String                 @db.Uuid
+  service         ProviderService        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  priceAmount     Decimal?               @db.Decimal(12, 2)
+  durationMinutes Int
+  sortOrder       Int                    @default(0)
+  isActive        Boolean                @default(true)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  bookings        Booking[]
+  waitlist        BookingWaitlistEntry[]
+
+  @@index([serviceId])
+  @@map("provider_service_variants")
+}
+
+/// Which staff may deliver which service. A service with no rows here accepts any bookable staff (legacy behavior).
+model ProviderUserService {
+  providerUserId String          @db.Uuid
+  providerUser   ProviderUser    @relation(fields: [providerUserId], references: [id], onDelete: Cascade)
+  serviceId      String          @db.Uuid
+  service        ProviderService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  createdAt      DateTime        @default(now())
+
+  @@id([providerUserId, serviceId])
+  @@index([serviceId])
+  @@map("provider_user_services")
+}
+
+model ProviderResource {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  locationId             String               @db.Uuid
+  location               ProviderLocation     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  name                   String
+  type                   ProviderResourceType
+  isActive               Boolean              @default(true)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  bookings               Booking[]
+
+  @@index([providerOrganizationId, locationId, type])
+  @@map("provider_resources")
+}
+
+/// Extra pets on a multi-pet booking; Booking.petId stays the primary pet.
+model BookingPet {
+  bookingId String  @db.Uuid
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  petId     String  @db.Uuid
+  pet       Pet     @relation(fields: [petId], references: [id], onDelete: Restrict)
+
+  @@id([bookingId, petId])
+  @@index([petId])
+  @@map("booking_pets")
+}
+
+/// Append-only booking timeline. Every status transition writes exactly one row.
+model BookingStatusEvent {
+  id         String           @id @default(uuid()) @db.Uuid
+  bookingId  String           @db.Uuid
+  booking    Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus BookingStatus?
+  toStatus   BookingStatus
+  actorType  BookingActorType
+  actorId    String?          @db.Uuid
+  reason     String?
+  createdAt  DateTime         @default(now())
+
+  @@index([bookingId, createdAt])
+  @@map("booking_status_events")
+}
+
+/// First-come waitlist. Notified when capacity opens; never auto-booked or auto-charged.
+model BookingWaitlistEntry {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  householdId            String                  @db.Uuid
+  household              Household               @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId                 String                  @db.Uuid
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId                  String                  @db.Uuid
+  pet                    Pet                     @relation(fields: [petId], references: [id], onDelete: Cascade)
+  providerOrganizationId String                  @db.Uuid
+  providerOrganization   ProviderOrganization    @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  serviceId              String                  @db.Uuid
+  service                ProviderService         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  variantId              String?                 @db.Uuid
+  variant                ProviderServiceVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  windowStart            DateTime
+  windowEnd              DateTime
+  status                 WaitlistStatus          @default(ACTIVE)
+  notifiedAt             DateTime?
+  /// A concrete slot offered by the provider (G13); accepting creates a normal booking hold.
+  offerStartAt           DateTime?
+  offerProviderUserId    String?                 @db.Uuid
+  offerExpiresAt         DateTime?
+  offeredByUserId        String?                 @db.Uuid
+  bookedBookingId        String?                 @db.Uuid
+  bookedBooking          Booking?                @relation(fields: [bookedBookingId], references: [id], onDelete: SetNull)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  @@index([providerOrganizationId, serviceId, status, createdAt])
+  @@index([userId, status])
+  @@map("booking_waitlist_entries")
+}
+
+/// One review per completed booking, by the booking's customer only.
+model ProviderReview {
+  id                     String               @id @default(uuid()) @db.Uuid
+  bookingId              String               @unique @db.Uuid
+  booking                Booking              @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  userId                 String               @db.Uuid
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rating                 Int
+  body                   String?
+  status                 ProviderReviewStatus @default(PUBLISHED)
+  hiddenReason           String?
+  /// Optional structured dimensions (1–5) — given by the reviewer, never derived from text.
+  quality                Int?
+  communication          Int?
+  timeliness             Int?
+  providerResponse       String?
+  respondedAt            DateTime?
+  respondedByUserId      String?              @db.Uuid
+  /// Set when the single reply is edited; earlier text is kept in the ProviderReviewResponded event payload.
+  responseEditedAt       DateTime?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@index([providerOrganizationId, status, createdAt])
+  @@map("provider_reviews")
+}
+
+model ProviderFavorite {
+  userId                 String               @db.Uuid
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  createdAt              DateTime             @default(now())
+
+  @@id([userId, providerOrganizationId])
+  @@map("provider_favorites")
+}
+
+// ---------------------------------------------------------------------------
+// Batch 4 — Commerce completion
+// ---------------------------------------------------------------------------
+
+model ProductMedia {
+  id        String          @id @default(uuid()) @db.Uuid
+  productId String          @db.Uuid
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?         @db.Uuid
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  /// Repository-owned or storage-owned path; never a third-party hotlink.
+  url       String
+  alt       String?
+  sortOrder Int             @default(0)
+  createdAt DateTime        @default(now())
+
+  @@index([productId, sortOrder])
+  @@map("product_media")
+}
+
+enum PromotionDiscountType {
+  PERCENT
+  FIXED
+}
+
+enum PromotionScope {
+  ALL
+  CATEGORY
+  PRODUCT
+  SELLER
+  SERVICE
+}
+
+enum PromotionStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum PromotionFundedBy {
+  PLATFORM
+  SELLER
+}
+
+/// The one promotion engine for products (and, later, services). Automatic, non-stacking: the single
+/// best eligible promotion applies per line. No codes, no fake strike-through prices.
+model Promotion {
+  id                        String                @id @default(uuid()) @db.Uuid
+  name                      String
+  description               String?
+  discountType              PromotionDiscountType
+  /// PERCENT: 1..90; FIXED: IRR per unit.
+  value                     Int
+  maxDiscountAmount         Int?
+  scope                     PromotionScope
+  categoryIds               String[]              @default([]) @db.Uuid
+  productIds                String[]              @default([]) @db.Uuid
+  sellerOrganizationIds     String[]              @default([]) @db.Uuid
+  serviceIds                String[]              @default([]) @db.Uuid
+  startsAt                  DateTime
+  endsAt                    DateTime?
+  status                    PromotionStatus       @default(DRAFT)
+  fundedBy                  PromotionFundedBy     @default(PLATFORM)
+  /// Seller-created promotions only ever apply to that seller's own offers.
+  ownerSellerOrganizationId String?               @db.Uuid
+  usageLimit                Int?
+  usageCount                Int                   @default(0)
+  createdByUserId           String                @db.Uuid
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  redemptions               PromotionRedemption[]
+
+  @@index([status, startsAt, endsAt])
+  @@map("promotions")
+}
+
+model PromotionRedemption {
+  id          String    @id @default(uuid()) @db.Uuid
+  promotionId String    @db.Uuid
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Restrict)
+  orderId     String    @db.Uuid
+  orderItemId String    @unique @db.Uuid
+  userId      String?   @db.Uuid
+  amount      Int
+  createdAt   DateTime  @default(now())
+
+  @@index([promotionId])
+  @@map("promotion_redemptions")
+}
+
+enum ProductReviewStatus {
+  PUBLISHED
+  HIDDEN
+}
+
+/// One review per delivered order item, by the order's own customer.
+model ProductReview {
+  id               String              @id @default(uuid()) @db.Uuid
+  orderItemId      String              @unique @db.Uuid
+  orderItem        OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  productId        String              @db.Uuid
+  product          Product             @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productVariantId String              @db.Uuid
+  productVariant   ProductVariant      @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  userId           String              @db.Uuid
+  user             User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rating           Int
+  body             String?
+  status           ProductReviewStatus @default(PUBLISHED)
+  hiddenReason     String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([productId, status, createdAt])
+  @@map("product_reviews")
+}
+
+model ProductFavorite {
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String   @db.Uuid
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId])
+  @@map("product_favorites")
+}
+
+/// Append-only order timeline; one row per real status change.
+model OrderStatusEvent {
+  id         String       @id @default(uuid()) @db.Uuid
+  orderId    String       @db.Uuid
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  actorType  String
+  actorId    String?      @db.Uuid
+  reason     String?
+  createdAt  DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+  @@map("order_status_events")
+}
+
+enum OrderRefundRequestStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+/// Customer refund/return request after dispatch. Never executes money by itself: an admin approval
+/// (AdminRefundApproval) and FINANCE execution move funds through the existing refund pipeline.
+model OrderRefundRequest {
+  id                    String                   @id @default(uuid()) @db.Uuid
+  orderId               String                   @db.Uuid
+  order                 Order                    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  userId                String                   @db.Uuid
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orderItemIds          String[]                 @default([]) @db.Uuid
+  reason                String
+  description           String?
+  requestedAmount       Int
+  status                OrderRefundRequestStatus @default(PENDING_REVIEW)
+  decisionReason        String?
+  decidedByAdminId      String?                  @db.Uuid
+  adminRefundApprovalId String?                  @unique @db.Uuid
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  @@index([status, createdAt])
+  @@index([orderId])
+  @@map("order_refund_requests")
+}
+
+enum RepeatDeliveryStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+/// Repeat Delivery (not PET LIFE Care membership). No stored card, no merchant-initiated charge:
+/// each cycle is revalidated, the customer is reminded and confirms/pays a normal checkout.
+model RepeatDeliverySchedule {
+  id                String                @id @default(uuid()) @db.Uuid
+  userId            String                @db.Uuid
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdId       String                @db.Uuid
+  household         Household             @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  productVariantId  String                @db.Uuid
+  productVariant    ProductVariant        @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  sellerOfferId     String                @db.Uuid
+  sellerOffer       SellerOffer           @relation(fields: [sellerOfferId], references: [id], onDelete: Restrict)
+  quantity          Int
+  intervalDays      Int
+  nextCycleAt       DateTime
+  addressId         String?               @db.Uuid
+  address           CustomerAddress?      @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  status            RepeatDeliveryStatus  @default(ACTIVE)
+  /// Price the customer last accepted; a different current price requires explicit confirmation.
+  acceptedUnitPrice Int
+  reminderSentAt    DateTime?
+  lastOrderId       String?               @db.Uuid
+  lastOrder         Order?                @relation("RepeatDeliveryLastOrder", fields: [lastOrderId], references: [id], onDelete: SetNull)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  events            RepeatDeliveryEvent[]
+
+  @@index([status, nextCycleAt])
+  @@index([userId])
+  @@map("repeat_delivery_schedules")
+}
+
+model RepeatDeliveryEvent {
+  id         String                 @id @default(uuid()) @db.Uuid
+  scheduleId String                 @db.Uuid
+  schedule   RepeatDeliverySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  type       String
+  data       Json?
+  actorId    String?                @db.Uuid
+  createdAt  DateTime               @default(now())
+
+  @@index([scheduleId, createdAt])
+  @@map("repeat_delivery_events")
+}
+
+// ===========================================================================
+// Batch 5 — Travel marketplace completion, insurer portal, requirement library
+// ===========================================================================
+
+enum TravelCancellationType {
+  FREE_UNTIL
+  PARTIAL
+  NON_REFUNDABLE
+}
+
+enum TravelPaymentTiming {
+  PAY_NOW
+  DEPOSIT
+  PAY_AT_PROPERTY
+}
+
+/// One way to sell a unit: its own price rule, cancellation terms and payment timing.
+model TravelRatePlan {
+  id     String              @id @default(uuid()) @db.Uuid
+  unitId String              @db.Uuid
+  unit   TravelInventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  name                 String
+  /// Applied to the unit's nightly price (base or per-date override); e.g. -10 for non-refundable.
+  priceModifierPercent Int                    @default(0)
+  cancellationType     TravelCancellationType @default(FREE_UNTIL)
+  freeCancellationDays Int?
+  lateRefundPercent    Int?
+  paymentTiming        TravelPaymentTiming    @default(PAY_NOW)
+  depositPercent       Int?
+  includesBreakfast    Boolean                @default(false)
+  includedItems        String[]               @default([])
+  minNights            Int?
+  activeFrom           DateTime?
+  activeUntil          DateTime?
+  isActive             Boolean                @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings TravelBooking[]
+
+  @@index([unitId])
+  @@map("travel_rate_plans")
+}
+
+model TravelMedia {
+  id        String               @id @default(uuid()) @db.Uuid
+  listingId String               @db.Uuid
+  listing   TravelListing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  unitId    String?              @db.Uuid
+  unit      TravelInventoryUnit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  /// Repository-owned path or storage-owned URL; never a third-party hotlink.
+  url       String
+  alt       String?
+  sortOrder Int                  @default(0)
+  createdAt DateTime             @default(now())
+
+  @@index([listingId, sortOrder])
+  @@map("travel_media")
+}
+
+model TravelBookingEvent {
+  id         String               @id @default(uuid()) @db.Uuid
+  bookingId  String               @db.Uuid
+  booking    TravelBooking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus TravelBookingStatus?
+  toStatus   TravelBookingStatus
+  actorType  String
+  actorId    String?              @db.Uuid
+  reason     String?
+  createdAt  DateTime             @default(now())
+
+  @@index([bookingId, createdAt])
+  @@map("travel_booking_events")
+}
+
+enum TravelReviewStatus {
+  PUBLISHED
+  HIDDEN
+}
+
+model TravelReview {
+  id               String             @id @default(uuid()) @db.Uuid
+  bookingId        String             @unique @db.Uuid
+  booking          TravelBooking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  listingId        String             @db.Uuid
+  listing          TravelListing      @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  userId           String             @db.Uuid
+  overall          Int
+  petFriendliness  Int?
+  cleanliness      Int?
+  accuracy         Int?
+  location         Int?
+  body             String?
+  status           TravelReviewStatus @default(PUBLISHED)
+  hiddenReason     String?
+  providerResponse String?
+  respondedAt      DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([listingId, status, createdAt])
+  @@map("travel_reviews")
+}
+
+model TravelListingFavorite {
+  userId    String        @db.Uuid
+  listingId String        @db.Uuid
+  listing   TravelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@id([userId, listingId])
+  @@map("travel_listing_favorites")
+}
+
+/// The traveller explicitly shares one document with the accommodation for one booking.
+/// The provider reads it only through a short-lived signed URL while this grant is live.
+model TravelBookingDocumentShare {
+  id                String          @id @default(uuid()) @db.Uuid
+  bookingId         String          @db.Uuid
+  booking           TravelBooking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  medicalDocumentId String          @db.Uuid
+  medicalDocument   MedicalDocument @relation(fields: [medicalDocumentId], references: [id], onDelete: Restrict)
+  sharedByUserId    String          @db.Uuid
+  purpose           String
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  createdAt         DateTime        @default(now())
+
+  @@unique([bookingId, medicalDocumentId])
+  @@map("travel_booking_document_shares")
+}
+
+enum TravelRequirementRuleStatus {
+  ACTIVE
+  NEEDS_REVIEW
+  RETIRED
+}
+
+/// Admin-curated requirement library by jurisdiction. A trip suggestion copies the rule's
+/// provenance (source, sourceUrl, verifiedAt, validUntil); stale rules are never presented as current.
+model TravelRequirementRule {
+  id               String                      @id @default(uuid()) @db.Uuid
+  country          String
+  city             String?
+  requirementType  TravelRequirementType
+  title            String
+  description      String
+  species          PetSpecies[]                @default([])
+  source           String
+  sourceUrl        String?
+  verifiedAt       DateTime
+  validUntil       DateTime?
+  status           TravelRequirementRuleStatus @default(ACTIVE)
+  updatedByAdminId String?                     @db.Uuid
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  @@index([country, status])
+  @@map("travel_requirement_rules")
+}
+
+enum InsurerRole {
+  OWNER
+  UNDERWRITING
+  VIEWER
+}
+
+model InsurerMembership {
+  id         String            @id @default(uuid()) @db.Uuid
+  providerId String            @db.Uuid
+  provider   InsuranceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  userId     String            @db.Uuid
+  role       InsurerRole       @default(UNDERWRITING)
+  isActive   Boolean           @default(true)
+  createdAt  DateTime          @default(now())
+
+  @@unique([providerId, userId])
+  @@index([userId])
+  @@map("insurer_memberships")
+}
+
+model InsuranceApplicationEvent {
+  id            String                      @id @default(uuid()) @db.Uuid
+  applicationId String                      @db.Uuid
+  application   InsuranceApplication        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fromStatus    InsuranceApplicationStatus?
+  toStatus      InsuranceApplicationStatus
+  actorType     String
+  actorId       String?                     @db.Uuid
+  note          String?
+  createdAt     DateTime                    @default(now())
+
+  @@index([applicationId, createdAt])
+  @@map("insurance_application_events")
+}
+
+enum PlaceReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model PlaceReport {
+  id                String            @id @default(uuid()) @db.Uuid
+  placeId           String            @db.Uuid
+  place             PetFriendlyPlace  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  userId            String            @db.Uuid
+  reason            String
+  details           String?
+  status            PlaceReportStatus @default(OPEN)
+  resolvedByAdminId String?           @db.Uuid
+  /// ERP-G: claimed from the unified Trust & Safety queue.
+  assignedAdminId   String?           @db.Uuid
+  assignedAt        DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([status, createdAt])
+  @@map("place_reports")
+}
+
+/// Where a pet-taxi distance came from. UNAVAILABLE is the honest state while no map provider is
+/// configured (BLOCKED_EXTERNAL); STRAIGHT_LINE_DEMO is a labelled QA-only estimate, never a route.
+enum TransportDistanceSource {
+  MAP_PROVIDER
+  STRAIGHT_LINE_DEMO
+  UNAVAILABLE
+}
+
+/// Distance pricing for one pet-taxi service. All money is integer IRR. Inactive by default: until a
+/// provider activates it, the service keeps its fixed price — no commercial rate is ever implied.
+model ServiceTransportPricing {
+  id                   String          @id @default(uuid()) @db.Uuid
+  providerServiceId    String          @unique @db.Uuid
+  providerService      ProviderService @relation(fields: [providerServiceId], references: [id], onDelete: Cascade)
+  baseFareIrr          Int
+  perKmRateIrr         Int
+  serviceAdjustmentIrr Int             @default(0)
+  minimumFareIrr       Int?
+  isActive             Boolean         @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("service_transport_pricing")
+}
+
+/// The route and fare of a pet-taxi booking as they were when it was made. Addresses are copied, not
+/// referenced, so editing a saved address later never rewrites a past or upcoming ride.
+model BookingTransportRoute {
+  id        String  @id @default(uuid()) @db.Uuid
+  bookingId String  @unique @db.Uuid
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  pickupAddressText  String
+  pickupLat          Float?
+  pickupLng          Float?
+  dropoffAddressText String
+  dropoffLat         Float?
+  dropoffLng         Float?
+
+  distanceMeters Int?
+  distanceSource TransportDistanceSource
+
+  /// Pricing snapshot; all null when the service was priced at its fixed amount.
+  baseFareIrr            Int?
+  perKmRateIrr           Int?
+  serviceAdjustmentIrr   Int?
+  minimumFareIrr         Int?
+  estimatedFareIrr       Int?
+  distancePricingApplied Boolean @default(false)
+
+  /// Structured ride needs: CRATE_REQUIRED, LARGE_PET, MEDICAL_TRANSPORT, MULTIPLE_PETS, ASSISTANT_REQUIRED.
+  requirements       String[] @default([])
+  /// Someone else hands the pet over at pickup — only with the member's explicit confirmation of their consent.
+  pickupContactName  String?
+  pickupContactPhone String?
+
+  createdAt DateTime @default(now())
+
+  @@map("booking_transport_routes")
+}
+
+/// Community chat (v1): one private 1:1 conversation per pair of members. See docs/product/community-chat-architecture.md.
+model ChatConversation {
+  id            String    @id @default(uuid()) @db.Uuid
+  /// "<smaller userId>:<larger userId>" — makes the 1:1 conversation unique per pair.
+  pairKey       String    @unique
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+
+  @@index([lastMessageAt])
+  @@map("chat_conversations")
+}
+
+model ChatParticipant {
+  conversationId String           @db.Uuid
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String           @db.Uuid
+  user           User             @relation("ChatParticipations", fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt       DateTime         @default(now())
+  lastReadAt     DateTime?
+  /// Per-member conversation controls (never affect the other member):
+  /// archivedAt — out of the main inbox (listed under archived) until a new incoming message;
+  /// mutedUntil — no notifications until then (unread counts unchanged);
+  /// hiddenAt + clearedAt — "delete for me": hidden from every list, and messages up to clearedAt are hidden
+  /// for this member only; a new incoming message brings the conversation back (old messages stay hidden).
+  archivedAt     DateTime?
+  mutedUntil     DateTime?
+  hiddenAt       DateTime?
+  clearedAt      DateTime?
+
+  @@id([conversationId, userId])
+  @@index([userId])
+  @@map("chat_participants")
+}
+
+model ChatMessage {
+  id             String                 @id @default(uuid()) @db.Uuid
+  conversationId String                 @db.Uuid
+  conversation   ChatConversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderUserId   String                 @db.Uuid
+  sender         User                   @relation("ChatMessagesSent", fields: [senderUserId], references: [id], onDelete: Cascade)
+  body           String
+  /// PUBLISHED, or HIDDEN/REMOVED after moderation (then never returned to clients).
+  status         CommunityContentStatus @default(PUBLISHED)
+  createdAt      DateTime               @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderUserId, createdAt])
+  @@map("chat_messages")
+}
+
+/// A member's block on another member: no new conversation or message between them, either direction.
+model UserBlock {
+  blockerUserId String   @db.Uuid
+  blocker       User     @relation("BlocksMade", fields: [blockerUserId], references: [id], onDelete: Cascade)
+  blockedUserId String   @db.Uuid
+  blocked       User     @relation("BlocksReceived", fields: [blockedUserId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@id([blockerUserId, blockedUserId])
+  @@index([blockedUserId])
+  @@map("user_blocks")
+}
+
+// ---------------------------------------------------------------------------
+// Clinic OS — B2B subscription context (deliberately separate from the
+// household Subscription tables: a clinic plan can never be bought by, or
+// resolved for, a household, and vice versa). See
+// docs/product/clinic-os-architecture.md.
+// ---------------------------------------------------------------------------
+
+enum ClinicPlanStatus {
+  ACTIVE
+  INACTIVE
+}
+
+/// CLINIC_BASIC / CLINIC_GROWTH / CLINIC_PRO. Entitlements are rows, never `code` checks.
+model ClinicPlan {
+  id            String           @id @default(uuid()) @db.Uuid
+  code          String           @unique
+  nameFa        String
+  nameEn        String
+  descriptionFa String?
+  descriptionEn String?
+  status        ClinicPlanStatus @default(ACTIVE)
+  sortOrder     Int              @default(0)
+  /// The plan every clinic resolves to before anything is assigned (exactly one, service-enforced).
+  isDefault     Boolean          @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entitlements  ClinicPlanEntitlement[]
+  prices        ClinicPlanPrice[]
+  subscriptions ClinicSubscription[]
+
+  @@map("clinic_plans")
+}
+
+model ClinicPlanEntitlement {
+  id         String                      @id @default(uuid()) @db.Uuid
+  planId     String                      @db.Uuid
+  plan       ClinicPlan                  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  key        String
+  type       SubscriptionEntitlementType
+  boolValue  Boolean?
+  /// LIMIT with null = unlimited.
+  limitValue Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([planId, key])
+  @@map("clinic_plan_entitlements")
+}
+
+/// Integer IRR, append-only like SubscriptionPlanPrice. Nothing is seeded until the owner sets clinic pricing.
+model ClinicPlanPrice {
+  id              String                      @id @default(uuid()) @db.Uuid
+  planId          String                      @db.Uuid
+  plan            ClinicPlan                  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  billingInterval SubscriptionBillingInterval
+  amount          Int
+  currency        String                      @default("IRR")
+  status          SubscriptionPlanPriceStatus @default(ACTIVE)
+  effectiveFrom   DateTime                    @default(now())
+  effectiveTo     DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([planId, billingInterval, status])
+  @@map("clinic_plan_prices")
+}
+
+/// One evolving row per clinic organisation; history lives in ClinicSubscriptionChange.
+model ClinicSubscription {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @unique @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  planId                 String               @db.Uuid
+  plan                   ClinicPlan           @relation(fields: [planId], references: [id], onDelete: Restrict)
+  status                 SubscriptionStatus   @default(ACTIVE)
+  /// Null = open-ended (default plan, or an admin assignment without an end date).
+  currentPeriodEndsAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  changes ClinicSubscriptionChange[]
+
+  @@map("clinic_subscriptions")
+}
+
+model ClinicSubscriptionChange {
+  id               String                 @id @default(uuid()) @db.Uuid
+  subscriptionId   String                 @db.Uuid
+  subscription     ClinicSubscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  type             SubscriptionChangeType
+  fromPlanCode     String?
+  toPlanCode       String
+  /// Plain audit references (no FK), like PetAccessGrant.grantedByUserId.
+  actorAdminUserId String?                @db.Uuid
+  reason           String?
+  createdAt        DateTime               @default(now())
+
+  @@index([subscriptionId, createdAt])
+  @@map("clinic_subscription_changes")
+}
+
+enum ClinicReminderKind {
+  VACCINATION
+  CHECKUP
+  MEDICATION
+  FOLLOW_UP
+  MESSAGE
+}
+
+enum ClinicReminderStatus {
+  SCHEDULED
+  SENT
+  CANCELLED
+  /// No owner could be notified (e.g. the household has no owner member left).
+  FAILED
+}
+
+/// A clinic-to-owner reminder or message for one of the clinic's own patients. Delivery is always the
+/// NotificationOrchestrator (in-app + whatever channel MessagingGateway really has) — never a direct SMS.
+model ClinicReminder {
+  id                      String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId  String               @db.Uuid
+  providerOrganization    ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  petId                   String               @db.Uuid
+  pet                     Pet                  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdByProviderUserId String               @db.Uuid
+  kind                    ClinicReminderKind
+  title                   String
+  note                    String?
+  dueAt                   DateTime
+  status                  ClinicReminderStatus @default(SCHEDULED)
+  sentAt                  DateTime?
+  recipientCount          Int                  @default(0)
+  cancelledAt             DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, dueAt])
+  @@index([providerOrganizationId, dueAt])
+  @@index([petId])
+  @@map("clinic_reminders")
+}
+
+enum ClinicInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  REVOKED
+}
+
+/// Joining a clinic is the invitee's choice: an owner invites an existing account, the invitee accepts or
+/// declines from their own session, and only an accepted invitation creates the ProviderUser row. A PENDING
+/// invitation reserves a seat under `clinic.staff.max`. Expiry is evaluated on read (expiresAt), not by a worker.
+model ClinicInvitation {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  providerOrganizationId  String                 @db.Uuid
+  providerOrganization    ProviderOrganization   @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  invitedUserId           String                 @db.Uuid
+  invitedUser             User                   @relation("ClinicInvitationsReceived", fields: [invitedUserId], references: [id], onDelete: Cascade)
+  role                    ProviderUserRole
+  displayTitle            String?
+  status                  ClinicInvitationStatus @default(PENDING)
+  invitedByProviderUserId String                 @db.Uuid
+  expiresAt               DateTime
+  respondedAt             DateTime?
+  acceptedProviderUserId  String?                @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerOrganizationId, status])
+  @@index([invitedUserId, status])
+  @@map("clinic_invitations")
+}
+
+// ---------------------------------------------------------------------------
+// Pet safety: emergency info, owner-controlled share cards (emergency / QR ID)
+// ---------------------------------------------------------------------------
+
+/// Owner-entered emergency facts. Never inferred. Read by household members with identity access and, through a
+/// share card or an EMERGENCY_SNAPSHOT care-handoff scope, by people the owner explicitly chose.
+model PetEmergencyInfo {
+  id              String   @id @default(uuid()) @db.Uuid
+  petId           String   @unique @db.Uuid
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  contactName     String?
+  contactPhone    String?
+  contactRelation String?
+  bloodType       String?
+  criticalNotes   String?
+  updatedByUserId String   @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("pet_emergency_info")
+}
+
+enum PetShareCardKind {
+  /// Short-lived: identity + allergies/active conditions/active medications + emergency contact.
+  EMERGENCY
+  /// QR-ready identification for a tag/collar: identity + optional contact, never health. No expiry by default.
+  ID_TAG
+}
+
+/// A revocable public link for one pet. Only a SHA-256 of the token is stored; the raw token is shown once (create
+/// or rotate). At most one active card per (pet, kind) — creating a new one revokes the previous.
+model PetShareCard {
+  id               String             @id @default(uuid()) @db.Uuid
+  petId            String             @db.Uuid
+  pet              Pet                @relation(fields: [petId], references: [id], onDelete: Cascade)
+  kind             PetShareCardKind
+  tokenHash        String             @unique
+  tokenHint        String
+  includeContact   Boolean            @default(true)
+  /// Owner-selected public fields (PetCardField values). The pet's name is always shown; nothing else is unless listed.
+  visibleFields    String[]           @default([])
+  /// How a finder reaches the owner. IN_APP (default) never shows a phone; PHONE/BOTH need phoneConsentAt.
+  contactMode      PetCardContactMode @default(IN_APP)
+  phoneConsentAt   DateTime?
+  expiresAt        DateTime?
+  revokedAt        DateTime?
+  /// Set when the card was replaced by a rotation (status ROTATED rather than REVOKED).
+  replacedByCardId String?            @db.Uuid
+  createdByUserId  String             @db.Uuid
+  lastAccessedAt   DateTime?
+  accessCount      Int                @default(0)
+  createdAt        DateTime           @default(now())
+
+  contactMessages PetCardContactMessage[]
+
+  @@index([petId, kind])
+  @@map("pet_share_cards")
+}
+
+enum PetCardContactMode {
+  IN_APP
+  PHONE
+  BOTH
+}
+
+/// A finder's message to the owner through a public card (IN_APP/BOTH). The finder never sees the owner's identity;
+/// the owner sees only what the finder chose to leave.
+model PetCardContactMessage {
+  id            String       @id @default(uuid()) @db.Uuid
+  cardId        String       @db.Uuid
+  card          PetShareCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  petId         String       @db.Uuid
+  message       String
+  finderContact String?
+  senderUserId  String?      @db.Uuid
+  readAt        DateTime?
+  createdAt     DateTime     @default(now())
+
+  @@index([petId, createdAt])
+  @@map("pet_card_contact_messages")
+}
+
+// ---------------------------------------------------------------------------
+// Services: versioned intake forms and booking attachments
+// ---------------------------------------------------------------------------
+
+/// Structured questions a provider asks at booking time. Every edit is a new version; a booking keeps the version
+/// it answered. Questions are plain data (no HTML), validated by service-intake.util.
+model ServiceIntakeForm {
+  id                      String          @id @default(uuid()) @db.Uuid
+  providerServiceId       String          @db.Uuid
+  providerService         ProviderService @relation(fields: [providerServiceId], references: [id], onDelete: Cascade)
+  version                 Int
+  questions               Json
+  isActive                Boolean         @default(true)
+  createdByProviderUserId String          @db.Uuid
+  createdAt               DateTime        @default(now())
+
+  @@unique([providerServiceId, version])
+  @@map("service_intake_forms")
+}
+
+enum BookingAttachmentSide {
+  OWNER
+  PROVIDER
+}
+
+/// A private file on a booking — the owner's photo/document for the provider, or the provider's document for the
+/// owner. Stored under booking-attachments/<bookingId>/…, downloaded only through a short-lived signed URL.
+model BookingAttachment {
+  id               String                @id @default(uuid()) @db.Uuid
+  bookingId        String                @db.Uuid
+  booking          Booking               @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  side             BookingAttachmentSide
+  uploadedByUserId String                @db.Uuid
+  objectKey        String                @unique
+  mimeType         String
+  sizeBytes        Int
+  title            String?
+  removedAt        DateTime?
+  createdAt        DateTime              @default(now())
+
+  @@index([bookingId])
+  @@map("booking_attachments")
+}
+
+/// Pet taxi operational progress reported by the provider (no GPS). Append-only and strictly forward.
+enum RideEventType {
+  DRIVER_ASSIGNED
+  ARRIVING
+  PICKED_UP
+  DROPPED_OFF
+}
+
+model BookingRideEvent {
+  id                  String        @id @default(uuid()) @db.Uuid
+  bookingId           String        @db.Uuid
+  booking             Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  type                RideEventType
+  actorProviderUserId String        @db.Uuid
+  note                String?
+  occurredAt          DateTime      @default(now())
+
+  @@unique([bookingId, type])
+  @@index([bookingId, occurredAt])
+  @@map("booking_ride_events")
+}
+
+// ---------------------------------------------------------------------------
+// Clinic OS operations: CRM notes/tags, internal tasks, reminder campaigns, imported contacts
+// ---------------------------------------------------------------------------
+
+/// Clinic-local note on a customer household. Never shown to the owner unless `visibleToOwner`.
+model ClinicCustomerNote {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  householdId            String               @db.Uuid
+  authorProviderUserId   String               @db.Uuid
+  body                   String
+  visibleToOwner         Boolean              @default(false)
+  removedAt              DateTime?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@index([providerOrganizationId, householdId])
+  @@map("clinic_customer_notes")
+}
+
+/// Clinic-defined label (VIP, follow-up, payment follow-up, …). Clinic-local only.
+model ClinicCustomerTag {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  providerOrganizationId String                        @db.Uuid
+  providerOrganization   ProviderOrganization          @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  name                   String
+  createdAt              DateTime                      @default(now())
+  assignments            ClinicCustomerTagAssignment[]
+
+  @@unique([providerOrganizationId, name])
+  @@map("clinic_customer_tags")
+}
+
+model ClinicCustomerTagAssignment {
+  tagId       String            @db.Uuid
+  tag         ClinicCustomerTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  householdId String            @db.Uuid
+  createdAt   DateTime          @default(now())
+
+  @@id([tagId, householdId])
+  @@index([householdId])
+  @@map("clinic_customer_tag_assignments")
+}
+
+enum ClinicTaskType {
+  CALL_CUSTOMER
+  FOLLOW_UP_LAB
+  CONFIRM_APPOINTMENT
+  COLLECT_PAYMENT
+  OTHER
+}
+
+enum ClinicTaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+/// Clinic-internal to-do. Never visible outside the clinic.
+model ClinicTask {
+  id                        String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId    String               @db.Uuid
+  providerOrganization      ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  type                      ClinicTaskType
+  title                     String
+  status                    ClinicTaskStatus     @default(OPEN)
+  dueAt                     DateTime?
+  assigneeProviderUserId    String?              @db.Uuid
+  householdId               String?              @db.Uuid
+  bookingId                 String?              @db.Uuid
+  createdByProviderUserId   String               @db.Uuid
+  completedByProviderUserId String?              @db.Uuid
+  completedAt               DateTime?
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+
+  @@index([providerOrganizationId, status, dueAt])
+  @@map("clinic_tasks")
+}
+
+enum ClinicCampaignSegment {
+  APPOINTMENTS_TOMORROW
+  VACCINES_DUE
+  FOLLOW_UP_DUE
+}
+
+/// One confirmed bulk send. (organisation, segment, dayKey) is unique, so the same campaign can't go out twice a day.
+model ClinicCampaign {
+  id                      String                @id @default(uuid()) @db.Uuid
+  providerOrganizationId  String                @db.Uuid
+  providerOrganization    ProviderOrganization  @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  segment                 ClinicCampaignSegment
+  dayKey                  String
+  title                   String
+  recipientCount          Int
+  createdByProviderUserId String                @db.Uuid
+  createdAt               DateTime              @default(now())
+
+  @@unique([providerOrganizationId, segment, dayKey])
+  @@map("clinic_campaigns")
+}
+
+/// A contact the clinic imported from its own records (CSV). Clinic-local, never linked or merged with a PET LIFE
+/// account automatically.
+model ClinicImportedContact {
+  id                     String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId String               @db.Uuid
+  providerOrganization   ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  name                   String
+  phone                  String?
+  email                  String?
+  petName                String?
+  species                String?
+  notes                  String?
+  importBatchId          String               @db.Uuid
+  createdAt              DateTime             @default(now())
+
+  @@index([providerOrganizationId])
+  @@map("clinic_imported_contacts")
+}
+
+// ---------------------------------------------------------------------------
+// Places suggestions, trip checklist/participants, insurance claim preparation
+// ---------------------------------------------------------------------------
+
+enum PlaceSuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A member suggests a new pet-friendly place. Nothing becomes public until an admin approves it; approval creates
+/// an UNVERIFIED, unlisted place the admin can then complete and list.
+model PlaceSuggestion {
+  id                String                   @id @default(uuid()) @db.Uuid
+  userId            String                   @db.Uuid
+  /// NEW_PLACE (default), CORRECTION (proposedChanges for placeId) or CLOSURE_REPORT (placeId). Moderated either way.
+  kind              PlaceSuggestionKind      @default(NEW_PLACE)
+  placeId           String?                  @db.Uuid
+  proposedChanges   Json?
+  name              String
+  category          PetFriendlyPlaceCategory
+  city              String
+  address           String?
+  latitude          Float?
+  longitude         Float?
+  notes             String?
+  status            PlaceSuggestionStatus    @default(PENDING)
+  reviewedByAdminId String?                  @db.Uuid
+  reviewNote        String?
+  createdPlaceId    String?                  @db.Uuid
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@map("place_suggestions")
+}
+
+/// The member's own packing/preparation list for a trip (documents stay in TravelRequirement).
+model TripChecklistItem {
+  id        String             @id @default(uuid()) @db.Uuid
+  tripId    String             @db.Uuid
+  trip      Trip               @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  label     String
+  category  String             @default("OTHER")
+  done      Boolean            @default(false)
+  /// TODO / DONE / NOT_REQUIRED; `done` mirrors state === DONE for older clients.
+  state     TripChecklistState @default(TODO)
+  doneAt    DateTime?
+  sortOrder Int                @default(0)
+  createdAt DateTime           @default(now())
+
+  @@index([tripId])
+  @@map("trip_checklist_items")
+}
+
+enum TripChecklistState {
+  TODO
+  DONE
+  NOT_REQUIRED
+}
+
+/// A trip references existing medical documents (never a copy of the file). The document must belong to one of the
+/// trip's pets and stays under its own access rules.
+model TripDocumentLink {
+  tripId         String   @db.Uuid
+  trip           Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  documentId     String   @db.Uuid
+  linkedByUserId String   @db.Uuid
+  createdAt      DateTime @default(now())
+
+  @@id([tripId, documentId])
+  @@map("trip_document_links")
+}
+
+/// Extra pets and household members on a trip (the trip's own petId stays the primary pet).
+model TripParticipant {
+  id        String   @id @default(uuid()) @db.Uuid
+  tripId    String   @db.Uuid
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  petId     String?  @db.Uuid
+  userId    String?  @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@unique([tripId, petId])
+  @@unique([tripId, userId])
+  @@map("trip_participants")
+}
+
+enum ClaimPrepStatus {
+  DRAFT
+  READY
+}
+
+/// A folder the owner assembles for a future insurance claim. Nothing is ever sent to an insurer from here.
+model InsuranceClaimPrep {
+  id              String                   @id @default(uuid()) @db.Uuid
+  petId           String                   @db.Uuid
+  householdId     String                   @db.Uuid
+  createdByUserId String                   @db.Uuid
+  title           String
+  incidentDate    DateTime?                @db.Date
+  notes           String?
+  status          ClaimPrepStatus          @default(DRAFT)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  items           InsuranceClaimPrepItem[]
+
+  @@index([petId])
+  @@map("insurance_claim_preps")
+}
+
+model InsuranceClaimPrepItem {
+  id          String             @id @default(uuid()) @db.Uuid
+  claimPrepId String             @db.Uuid
+  claimPrep   InsuranceClaimPrep @relation(fields: [claimPrepId], references: [id], onDelete: Cascade)
+  /// MEDICAL_DOCUMENT or BOOKING — always of the same pet.
+  kind        String
+  refId       String             @db.Uuid
+  createdAt   DateTime           @default(now())
+
+  @@unique([claimPrepId, kind, refId])
+  @@map("insurance_claim_prep_items")
+}
+
+// ---------------------------------------------------------------------------
+// Animal support depth: need updates, follows, saved needs, volunteer interest
+// ---------------------------------------------------------------------------
+
+/// A progress note on one need, posted by whoever manages the listing.
+model SupportNeedUpdate {
+  id              String             @id @default(uuid()) @db.Uuid
+  listingId       String             @db.Uuid
+  listing         SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  authorUserId    String             @db.Uuid
+  body            String
+  /// Images uploaded through the support-need upload flow (object keys, never external URLs). At most 4.
+  mediaObjectKeys String[]           @default([])
+  removedAt       DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @default(now()) @updatedAt
+
+  @@index([listingId, createdAt])
+  @@map("support_need_updates")
+}
+
+/// A milestone a need actually reached, recorded once (unique per need + key) when the real state crossed it.
+/// FUNDING_25/50/75/100 from succeeded donations vs the target, ITEM_RECEIVED from a completed help offer,
+/// NEED_COMPLETED when the need is FULFILLED. Never invented, never emitted twice.
+model SupportNeedMilestone {
+  id        String             @id @default(uuid()) @db.Uuid
+  listingId String             @db.Uuid
+  listing   SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  key       String
+  reachedAt DateTime           @default(now())
+
+  @@unique([listingId, key])
+  @@map("support_need_milestones")
+}
+
+model AnimalSupportOrgFollow {
+  userId         String                    @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime                  @default(now())
+
+  @@id([userId, organizationId])
+  @@index([organizationId])
+  @@map("animal_support_org_follows")
+}
+
+model SupportNeedBookmark {
+  userId    String             @db.Uuid
+  listingId String             @db.Uuid
+  listing   SupportNeedListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime           @default(now())
+
+  @@id([userId, listingId])
+  @@map("support_need_bookmarks")
+}
+
+enum VolunteerInterestStatus {
+  INTERESTED
+  CONTACTED
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+  /// Legacy (before G16): closed by the organisation without an outcome.
+  CLOSED
+}
+
+/// Non-financial help a member offers an organisation (interest only — no scheduling). Contact details are shared
+/// with the organisation only when the member opts in.
+model VolunteerInterest {
+  id             String                    @id @default(uuid()) @db.Uuid
+  userId         String                    @db.Uuid
+  organizationId String                    @db.Uuid
+  organization   AnimalSupportOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  kinds          String[]
+  city           String
+  availability   String?
+  note           String?
+  shareContact   Boolean                   @default(false)
+  status         VolunteerInterestStatus   @default(INTERESTED)
+  /// The need this interest was raised from, if any (the interest itself is per organisation).
+  listingId      String?                   @db.Uuid
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, status])
+  @@map("volunteer_interests")
+}
+
+model CommunityPostBookmark {
+  userId    String        @db.Uuid
+  postId    String        @db.Uuid
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@id([userId, postId])
+  @@map("community_post_bookmarks")
+}
+
+/// "Was this helpful?" — one answer per member per article; never shown as public comments.
+model ArticleFeedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  articleId String   @db.Uuid
+  userId    String   @db.Uuid
+  helpful   Boolean
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([articleId, userId])
+  @@index([articleId])
+  @@map("article_feedback")
+}
+
+/// Per-group delivery cadence the member chose. Stored only: no digest is sent until an email/digest channel
+/// exists (BLOCKED_EXTERNAL), and in-app delivery keeps its own on/off preference.
+model NotificationDigestPreference {
+  userId    String   @db.Uuid
+  group     String
+  mode      String   @default("INSTANT")
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, group])
+  @@map("notification_digest_preferences")
+}
+
+/// What a member recently looked at among public catalogue items (never health, documents, chat or account pages).
+model RecentlyViewed {
+  userId     String   @db.Uuid
+  entityType String
+  entityId   String   @db.Uuid
+  viewedAt   DateTime @default(now())
+
+  @@id([userId, entityType, entityId])
+  @@index([userId, viewedAt])
+  @@map("recently_viewed")
+}
+
+// ---------------------------------------------------------------------------
+// G12 — explicit, short-lived health shares and clinic care suggestions
+// ---------------------------------------------------------------------------
+
+/// An owner-created, time-boxed medical share (separate from the public pet card). Only a SHA-256 of the token is
+/// stored; the owner chooses sections and individual recent records; every read is logged.
+model HealthShareLink {
+  id               String    @id @default(uuid()) @db.Uuid
+  petId            String    @db.Uuid
+  pet              Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  tokenHash        String    @unique
+  tokenHint        String
+  label            String?
+  /// HealthShareSection values.
+  sections         String[]  @default([])
+  labResultIds     String[]  @default([])
+  clinicalVisitIds String[]  @default([])
+  imagingStudyIds  String[]  @default([])
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdByUserId  String    @db.Uuid
+  createdAt        DateTime  @default(now())
+
+  accesses HealthShareAccess[]
+
+  @@index([petId, createdAt])
+  @@map("health_share_links")
+}
+
+/// One public read of a health share (no raw IP: a salted hash plus a short user-agent label).
+model HealthShareAccess {
+  id         String          @id @default(uuid()) @db.Uuid
+  linkId     String          @db.Uuid
+  link       HealthShareLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  accessedAt DateTime        @default(now())
+  ipHash     String?
+  userAgent  String?
+
+  @@index([linkId, accessedAt])
+  @@map("health_share_accesses")
+}
+
+enum CareSuggestionStatus {
+  PENDING
+  ACCEPTED
+  DISMISSED
+}
+
+/// A care instruction a clinic attaches to a completed visit or booking. It never becomes a reminder by itself: the
+/// owner accepts (creating a normal CareReminder) or dismisses it.
+model CareSuggestion {
+  id                      String               @id @default(uuid()) @db.Uuid
+  petId                   String               @db.Uuid
+  pet                     Pet                  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  providerOrganizationId  String               @db.Uuid
+  createdByProviderUserId String?              @db.Uuid
+  clinicalVisitId         String?              @db.Uuid
+  bookingId               String?              @db.Uuid
+  title                   String
+  type                    String
+  notes                   String?
+  suggestedDueAt          DateTime
+  recurrence              String?
+  intervalDays            Int?
+  status                  CareSuggestionStatus @default(PENDING)
+  decidedByUserId         String?              @db.Uuid
+  decidedAt               DateTime?
+  careReminderId          String?              @db.Uuid
+  createdAt               DateTime             @default(now())
+
+  @@index([petId, status])
+  @@map("care_suggestions")
+}
+
+enum NoShowParty {
+  OWNER
+  PROVIDER
+}
+
+enum PlaceSuggestionKind {
+  NEW_PLACE
+  CORRECTION
+  CLOSURE_REPORT
+}
+
+enum AccountDeletionState {
+  REQUESTED
+  CANCELLED
+  PENDING_RETENTION
+  READY_FOR_EXECUTION
+  COMPLETED
+}
+
+/// ERP-A: runtime overrides for the explicit, code-defined settings registry (src/modules/platform-settings/setting-
+/// definitions.ts). A key absent here means "use the registry default / env value". Secrets never live here.
+model PlatformSetting {
+  key              String   @id
+  value            Json
+  version          Int      @default(1)
+  updatedByAdminId String?  @db.Uuid
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
+
+  @@map("platform_settings")
+}
+
+enum PlatformSettingChangeStatus {
+  PENDING
+  APPLIED
+  REJECTED
+  CANCELLED
+  SUPERSEDED
+}
+
+/// Every change to a setting, applied or not. High-impact keys stay PENDING until a different admin with
+/// settings.approve applies them; harmless keys are recorded already APPLIED.
+model PlatformSettingChange {
+  id                 String                      @id @default(uuid()) @db.Uuid
+  key                String
+  previousValue      Json?
+  proposedValue      Json
+  baseVersion        Int
+  status             PlatformSettingChangeStatus
+  reason             String
+  requestedByAdminId String                      @db.Uuid
+  reviewedByAdminId  String?                     @db.Uuid
+  reviewNote         String?
+  createdAt          DateTime                    @default(now())
+  reviewedAt         DateTime?
+
+  @@index([key, createdAt])
+  @@index([status])
+  @@map("platform_setting_changes")
+}
+
+enum UserAccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum PartnerSubjectType {
+  PROVIDER
+  SELLER
+}
+
+enum PartnerDocumentKind {
+  LICENSE
+  IDENTITY
+  BUSINESS_REGISTRATION
+  BANK_INFO
+  OTHER
+}
+
+enum PartnerDocumentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+/// ERP-C: evidence a provider or seller uploads for verification. Files are private (partner-verification/…) and only
+/// staff read them through signed, audited downloads. BANK_INFO holds a document about the account, never card data.
+model PartnerVerificationDocument {
+  id                String                @id @default(uuid()) @db.Uuid
+  subjectType       PartnerSubjectType
+  subjectId         String                @db.Uuid
+  kind              PartnerDocumentKind
+  objectKey         String                @unique
+  mimeType          String
+  fileSizeBytes     Int
+  status            PartnerDocumentStatus @default(PENDING)
+  expiresAt         DateTime?
+  reviewNote        String?
+  uploadedByUserId  String                @db.Uuid
+  reviewedByAdminId String?               @db.Uuid
+  reviewedAt        DateTime?
+  /// Set once the 30-day expiry alert task was created, so the worker never repeats it.
+  expiryAlertedAt   DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@index([subjectType, subjectId])
+  @@index([status, expiresAt])
+  @@map("partner_verification_documents")
+}
+
+/// ERP-C: a staff override of one clinic (B2B) entitlement for one organisation — applied on top of the plan in
+/// ClinicEntitlementService.resolve. No payment is ever created for it.
+model ClinicEntitlementOverride {
+  id                     String    @id @default(uuid()) @db.Uuid
+  providerOrganizationId String    @db.Uuid
+  key                    String
+  boolValue              Boolean?
+  limitValue             Int?
+  /// LIMIT override with null limitValue = unlimited.
+  unlimited              Boolean   @default(false)
+  reason                 String
+  createdByAdminId       String    @db.Uuid
+  expiresAt              DateTime?
+  active                 Boolean   @default(true)
+  revokedAt              DateTime?
+  revokedByAdminId       String?   @db.Uuid
+  createdAt              DateTime  @default(now())
+
+  @@index([providerOrganizationId, active])
+  @@map("clinic_entitlement_overrides")
+}
+
+enum AdminTaskSource {
+  MANUAL
+  TRAVEL_SOURCE
+  PARTNER_VERIFICATION
+  FINANCE_MISMATCH
+  HIGH_SEVERITY_REPORT
+  PRIVACY_REQUEST
+  FAILED_IMPORT
+  SUPPORT
+  CLINIC_FOLLOW_UP
+  DATA_QUALITY
+}
+
+enum ReconciliationCheck {
+  INTENT_TRANSACTION
+  TRANSACTION_LEDGER
+  REFUND_ORIGINAL
+  BOOKING_CAPTURE
+  ORDER_CAPTURE
+  DONATION_LEDGER
+  SETTLEMENT_LEDGER
+  LEDGER_BALANCE
+}
+
+enum ReconciliationOutcome {
+  MISMATCH
+  MISSING
+  DUPLICATE
+}
+
+enum ReconciliationFindingStatus {
+  OPEN
+  RESOLVED
+  CLEARED
+}
+
+/// ERP-E: one row per (check, entity) that failed reconciliation. Re-runs refresh lastSeenAt; a finding that stops
+/// failing becomes CLEARED automatically, a human closes it as RESOLVED with a note. Nothing here ever edits money.
+model FinanceReconciliationFinding {
+  id                String                      @id @default(uuid()) @db.Uuid
+  check             ReconciliationCheck
+  entityType        String
+  entityId          String
+  outcome           ReconciliationOutcome
+  detail            Json
+  status            ReconciliationFindingStatus @default(OPEN)
+  firstDetectedAt   DateTime                    @default(now())
+  lastSeenAt        DateTime                    @default(now())
+  resolvedAt        DateTime?
+  resolvedByAdminId String?                     @db.Uuid
+  resolution        String?
+  resolutionNote    String?
+  taskDedupeKey     String?
+
+  @@unique([check, entityType, entityId])
+  @@index([status, check])
+  @@map("finance_reconciliation_findings")
+}
+
+enum SupportLinkEntityType {
+  BOOKING
+  TRAVEL_BOOKING
+  ORDER
+  PAYMENT_INTENT
+  REFUND
+  PROVIDER
+  SELLER
+  PET
+  HOUSEHOLD
+}
+
+/// ERP-F: extra entities a support case concerns (beyond requester/household/pet), validated to exist when linked.
+model SupportCaseLink {
+  id               String                @id @default(uuid()) @db.Uuid
+  supportCaseId    String                @db.Uuid
+  entityType       SupportLinkEntityType
+  entityId         String                @db.Uuid
+  createdByAdminId String                @db.Uuid
+  createdAt        DateTime              @default(now())
+
+  @@unique([supportCaseId, entityType, entityId])
+  @@index([entityType, entityId])
+  @@map("support_case_links")
+}
+
+enum SupportAttachmentVisibility {
+  INTERNAL
+  SHARED
+}
+
+/// ERP-F: private files on a support case. INTERNAL = staff only; SHARED = visible to the requester too (anything the
+/// requester uploads is SHARED). Read only through short-lived signed downloads.
+model SupportCaseAttachment {
+  id                String                      @id @default(uuid()) @db.Uuid
+  supportCaseId     String                      @db.Uuid
+  objectKey         String                      @unique
+  mimeType          String
+  fileSizeBytes     Int
+  visibility        SupportAttachmentVisibility
+  uploadedByUserId  String?                     @db.Uuid
+  uploadedByAdminId String?                     @db.Uuid
+  createdAt         DateTime                    @default(now())
+
+  @@index([supportCaseId])
+  @@map("support_case_attachments")
+}
+
+// ---------------------------------------------------------------------------
+// TRAVEL-EXT-1 — external pet-friendly stay discovery (source-attributed, never PET LIFE inventory)
+// ---------------------------------------------------------------------------
+
+enum ExternalSourceMode {
+  AUTOMATED
+  MANUAL
+  DISABLED
+}
+
+/// Whether a compliant automated retrieval path exists for the source (evidence in `discoveryNotes`).
+enum ExternalAutomationStatus {
+  SUPPORTED
+  NOT_SUPPORTED
+  BLOCKED_EXTERNAL
+}
+
+/// How the data reaches us. Unofficial public web endpoints may break any time and are never a partnership.
+enum ExternalSourceType {
+  SCRAPED_PUBLIC_WEB
+  UNOFFICIAL_PUBLIC_WEB_ENDPOINT
+  PARTNER_API
+  AUTHORIZED_FEED
+  MANUAL_ENTRY
+}
+
+/// Whether unauthenticated public access to the source's data has been verified. TOOL_PERMISSION_BLOCKED = our own
+/// development tooling could not run the verification probe (not a source block).
+enum ExternalSourceAccessStatus {
+  UNVERIFIED
+  VERIFIED_PUBLIC
+  TOOL_PERMISSION_BLOCKED
+  BLOCKED_BY_SOURCE
+}
+
+enum PetPolicyStatus {
+  CONFIRMED_ALLOWED
+  CONFIRMED_NOT_ALLOWED
+  AMBIGUOUS
+  UNKNOWN
+}
+
+enum PetPolicyAuthority {
+  SOURCE_OBSERVATION
+  ADMIN_CONFIRMED
+}
+
+enum ExternalPriceType {
+  EXACT
+  FROM_PRICE
+  UNKNOWN
+}
+
+enum ExternalSyncTrigger {
+  SCHEDULED
+  MANUAL
+  RETRY
+}
+
+enum ExternalSourceHealth {
+  HEALTHY
+  DEGRADED
+  BLOCKED
+  DISABLED
+}
+
+enum ExternalImagePolicy {
+  NO_IMAGES
+  REMOTE_REFERENCE
+  CACHE_PERMITTED
+}
+
+model ExternalTravelSource {
+  id                    String                     @id @default(uuid()) @db.Uuid
+  code                  String                     @unique
+  nameFa                String
+  nameEn                String
+  /// Hosts outbound links and fetchers may use (exact host or subdomain). Anything else is rejected.
+  allowedHosts          String[]
+  mode                  ExternalSourceMode         @default(DISABLED)
+  automationStatus      ExternalAutomationStatus   @default(NOT_SUPPORTED)
+  health                ExternalSourceHealth       @default(DISABLED)
+  healthReason          String?
+  discoveryNotes        Json?
+  syncIntervalMinutes   Int                        @default(1440)
+  priceTtlMinutes       Int                        @default(360)
+  metadataTtlMinutes    Int                        @default(2880)
+  imagePolicy           ExternalImagePolicy        @default(NO_IMAGES)
+  maxRequestsPerRun     Int                        @default(50)
+  timeoutMs             Int                        @default(10000)
+  retryCount            Int                        @default(2)
+  cityScopes            String[]                   @default([])
+  autoPublish           Boolean                    @default(false)
+  /// Affiliate readiness only — inactive until a real agreement exists.
+  affiliateId           String?
+  trackingTemplate      String?
+  campaignCode          String?
+  affiliateActive       Boolean                    @default(false)
+  consecutiveFailures   Int                        @default(0)
+  circuitOpenUntil      DateTime?
+  lastRunAt             DateTime?
+  lastSuccessAt         DateTime?
+  lastFailureAt         DateTime?
+  lastErrorCategory     String?
+  sourceType            ExternalSourceType         @default(SCRAPED_PUBLIC_WEB)
+  accessStatus          ExternalSourceAccessStatus @default(UNVERIFIED)
+  /// Polite pacing: one request at a time, a random pause in [min, max] ms between requests.
+  requestDelayMinMs     Int                        @default(1500)
+  requestDelayMaxMs     Int                        @default(3000)
+  priceFreshHours       Int                        @default(24)
+  priceAgingHours       Int                        @default(72)
+  /// Consecutive complete, healthy runs a listing may be missing before STALE / REMOVED_FROM_SOURCE.
+  staleAfterMissedRuns  Int                        @default(2)
+  removeAfterMissedRuns Int                        @default(4)
+  /// A run finding fewer than this share of the recent baseline is a PARSER_ANOMALY (no lifecycle changes applied).
+  anomalyDropRatio      Float                      @default(0.3)
+  rawRetentionDays      Int                        @default(7)
+  robotsCheckedAt       DateTime?
+  robotsResult          String?
+  termsCheckedAt        DateTime?
+  termsUrl              String?
+  lastRunStatus         ExternalSyncStatus?
+  lastError             String?
+  lastListingsSeen      Int?
+  lastDurationMs        Int?
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+
+  stays ExternalStay[]
+  runs  ExternalSyncRun[]
+
+  @@map("external_travel_sources")
+}
+
+enum ExternalStayStatus {
+  DISCOVERED
+  ACTIVE
+  STALE
+  SOURCE_REMOVED
+  HIDDEN
+}
+
+enum ExternalPublishState {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
+enum PetEvidenceType {
+  SOURCE_FILTER
+  SOURCE_AMENITY
+  SOURCE_POLICY_TEXT
+  AUTHORIZED_FEED
+}
+
+enum ExternalEntryMode {
+  MANUAL
+  AUTOMATED
+}
+
+/// One listing on one source. Unique per (source, sourceListingId). Fields are source-observed; staff corrections
+/// live in `overrides` as {field: {sourceValue, overrideValue, adminUserId, at}} and never overwrite source values.
+model ExternalStay {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  sourceId                 String                  @db.Uuid
+  source                   ExternalTravelSource    @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  sourceListingId          String
+  sourceUrl                String
+  title                    String
+  city                     String
+  province                 String?
+  area                     String?
+  stayType                 String?
+  latitude                 Float?
+  longitude                Float?
+  capacity                 Int?
+  bedrooms                 Int?
+  beds                     Int?
+  /// Mirrors the effective pet policy == CONFIRMED_ALLOWED (admin truth first, then source observation).
+  petFriendly              Boolean                 @default(false)
+  /// Latest source-observed pet policy. Missing data is UNKNOWN, never "not allowed".
+  petPolicyStatus          PetPolicyStatus         @default(UNKNOWN)
+  /// Staff-reviewed truth; takes precedence over the source observation, which is still kept and tracked.
+  adminPetPolicyStatus     PetPolicyStatus?
+  adminPetPolicyNote       String?
+  adminPetPolicyById       String?                 @db.Uuid
+  adminPetPolicyAt         DateTime?
+  petEvidenceType          PetEvidenceType?
+  petEvidenceText          String?
+  petEvidenceObservedAt    DateTime?
+  /// Normalized pet policy; each key is a value or "UNKNOWN" (dogs, cats, maxPets, sizeLimit, indoor, extraFeeIrr, approvalRequired).
+  petPolicy                Json
+  petPolicySummary         String?
+  rating                   Float?
+  reviewCount              Int?
+  instantBooking           Boolean?
+  descriptionSummary       String?
+  country                  String?
+  addressText              String?
+  amenities                String[]                @default([])
+  sourceType               ExternalSourceType      @default(MANUAL_ENTRY)
+  firstSeenAt              DateTime?
+  lastSeenAt               DateTime?
+  lastChangedAt            DateTime?
+  missedRuns               Int                     @default(0)
+  rawFingerprint           String?
+  normalizedFingerprint    String?
+  canonicalAccommodationId String?                 @db.Uuid
+  canonicalAccommodation   CanonicalAccommodation? @relation(fields: [canonicalAccommodationId], references: [id], onDelete: SetNull)
+  status                   ExternalStayStatus      @default(ACTIVE)
+  publishState             ExternalPublishState    @default(DRAFT)
+  entryMode                ExternalEntryMode
+  createdByAdminId         String?                 @db.Uuid
+  overrides                Json?
+  lastSourceUpdateAt       DateTime?
+  lastCheckedAt            DateTime
+  lastSuccessfulSyncAt     DateTime?
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+
+  prices       ExternalStayPriceSnapshot[]
+  images       ExternalStayImage[]
+  changes      ExternalStayChange[]
+  clicks       OutboundTravelClick[]
+  favorites    ExternalStayFavorite[]
+  trips        TripExternalStay[]
+  observations ExternalStayObservation[]
+  petEvidence  ExternalPetPolicyEvidence[]
+
+  @@unique([sourceId, sourceListingId])
+  @@index([petPolicyStatus])
+  @@index([city, status, publishState])
+  @@map("external_stays")
+}
+
+enum ExternalAvailability {
+  UNKNOWN
+  SOURCE_REPORTED_AVAILABLE
+  SOURCE_REPORTED_UNAVAILABLE
+}
+
+enum ExternalPriceBasis {
+  TOTAL_STAY
+  PER_NIGHT
+}
+
+enum ExternalObservedBy {
+  ADAPTER
+  ADMIN
+}
+
+/// A source price observed for one search context (dates + guests). Never PET LIFE's money; never shown without
+/// `observedAt`, and treated as stale after `expiresAt`. Unchanged repeats bump `lastConfirmedAt` instead of a new row.
+model ExternalStayPriceSnapshot {
+  id                String               @id @default(uuid()) @db.Uuid
+  stayId            String               @db.Uuid
+  stay              ExternalStay         @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  /// Null only for a FROM_PRICE seen without a date context.
+  checkIn           DateTime?            @db.Date
+  checkOut          DateTime?            @db.Date
+  guests            Int
+  pets              Int?
+  priceIrr          Int?
+  oldPriceIrr       Int?
+  discountPercent   Int?
+  priceBasis        ExternalPriceBasis
+  availability      ExternalAvailability @default(UNKNOWN)
+  observedAt        DateTime
+  lastConfirmedAt   DateTime
+  expiresAt         DateTime
+  observedBy        ExternalObservedBy
+  observedByAdminId String?              @db.Uuid
+  contentHash       String
+  priceType         ExternalPriceType    @default(EXACT)
+  currency          String               @default("IRR")
+  runId             String?              @db.Uuid
+
+  @@index([stayId, checkIn, checkOut, guests, observedAt])
+  @@map("external_stay_price_snapshots")
+}
+
+/// A reference to a source image — never downloaded into our storage unless the source's policy permits caching.
+model ExternalStayImage {
+  id             String       @id @default(uuid()) @db.Uuid
+  stayId         String       @db.Uuid
+  stay           ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  sourceImageUrl String
+  position       Int
+  lastVerifiedAt DateTime
+
+  @@unique([stayId, position])
+  @@map("external_stay_images")
+}
+
+enum ExternalSyncKind {
+  DISCOVERY
+  FULL
+  LISTING
+  PRICE
+}
+
+enum ExternalSyncStatus {
+  STARTED
+  SUCCEEDED
+  PARTIAL
+  FAILED
+  CANCELLED
+  ABANDONED
+}
+
+model ExternalSyncRun {
+  id                 String               @id @default(uuid()) @db.Uuid
+  sourceId           String               @db.Uuid
+  source             ExternalTravelSource @relation(fields: [sourceId], references: [id], onDelete: Restrict)
+  kind               ExternalSyncKind
+  status             ExternalSyncStatus   @default(STARTED)
+  startedAt          DateTime             @default(now())
+  finishedAt         DateTime?
+  itemsScanned       Int                  @default(0)
+  created            Int                  @default(0)
+  updated            Int                  @default(0)
+  unchanged          Int                  @default(0)
+  failed             Int                  @default(0)
+  errorCategories    Json?
+  triggeredByAdminId String?              @db.Uuid
+  trigger            ExternalSyncTrigger  @default(MANUAL)
+  pagesRequested     Int                  @default(0)
+  listingsDiscovered Int                  @default(0)
+  removed            Int                  @default(0)
+  staleMarked        Int                  @default(0)
+  durationMs         Int?
+  /// The discovered count fell far below the recent baseline: lifecycle changes were withheld.
+  anomaly            Boolean              @default(false)
+  /// Up to 50 individual failures: [{ externalId?, category, message }].
+  errors             Json?
+
+  @@index([sourceId, startedAt])
+  @@map("external_sync_runs")
+}
+
+enum ExternalChangeKind {
+  CREATED
+  FIELD_CHANGED
+  STALE
+  REAPPEARED
+  PET_POLICY_CONFLICT
+  PET_POLICY_REVIEWED
+  PRICE_CHANGED
+  PET_POLICY_CHANGED
+  SOURCE_REMOVED
+  IMAGE_CHANGED
+  UNAVAILABLE
+  URL_CHANGED
+  HIDDEN
+  UNHIDDEN
+  OVERRIDE_SET
+}
+
+model ExternalStayChange {
+  id        String             @id @default(uuid()) @db.Uuid
+  stayId    String             @db.Uuid
+  stay      ExternalStay       @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  kind      ExternalChangeKind
+  detail    Json
+  field     String?
+  oldValue  Json?
+  newValue  Json?
+  runId     String?            @db.Uuid
+  createdAt DateTime           @default(now())
+
+  @@index([stayId, createdAt])
+  @@index([createdAt, kind])
+  @@map("external_stay_changes")
+}
+
+enum ExternalMatchStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Cross-source "same physical place?" candidates. Never merged automatically; approval groups them (offers stay separate).
+model ExternalStayMatchCandidate {
+  id                String              @id @default(uuid()) @db.Uuid
+  stayAId           String              @db.Uuid
+  stayBId           String              @db.Uuid
+  score             Float
+  signals           Json
+  status            ExternalMatchStatus @default(PENDING)
+  reviewedByAdminId String?             @db.Uuid
+  reviewedAt        DateTime?
+  createdAt         DateTime            @default(now())
+
+  @@unique([stayAId, stayBId])
+  @@map("external_stay_match_candidates")
+}
+
+/// A user left PET LIFE for the source. No booking/payment is implied; conversion stays UNKNOWN.
+model OutboundTravelClick {
+  id            String       @id @default(uuid()) @db.Uuid
+  stayId        String       @db.Uuid
+  stay          ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  sourceCode    String
+  userId        String?      @db.Uuid
+  searchContext Json?
+  createdAt     DateTime     @default(now())
+
+  @@index([stayId, createdAt])
+  @@map("outbound_travel_clicks")
+}
+
+model ExternalStayFavorite {
+  userId    String       @db.Uuid
+  stayId    String       @db.Uuid
+  stay      ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@id([userId, stayId])
+  @@map("external_stay_favorites")
+}
+
+/// A stay the owner plans to book on the source for a PET LIFE trip. Never a confirmed reservation.
+model TripExternalStay {
+  id              String       @id @default(uuid()) @db.Uuid
+  tripId          String       @db.Uuid
+  stayId          String       @db.Uuid
+  stay            ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  priceSnapshotId String?      @db.Uuid
+  state           String       @default("PLANNED_EXTERNAL_STAY")
+  addedByUserId   String       @db.Uuid
+  createdAt       DateTime     @default(now())
+
+  @@unique([tripId, stayId])
+  @@map("trip_external_stays")
+}
+
+/// One physical place, possibly listed on several sources (Jabama, Alibaba, a direct feed…). Created only when staff
+/// approve a duplicate candidate — never by automatic merging.
+model CanonicalAccommodation {
+  id               String         @id @default(uuid()) @db.Uuid
+  title            String
+  city             String
+  province         String?
+  latitude         Float?
+  longitude        Float?
+  createdByAdminId String?        @db.Uuid
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  listings         ExternalStay[]
+
+  @@map("canonical_accommodations")
+}
+
+/// A source observation of one listing whose content differed from the previous one. Normalized state is kept; the
+/// size-limited raw excerpt is cleared after the source's rawRetentionDays.
+model ExternalStayObservation {
+  id                    String       @id @default(uuid()) @db.Uuid
+  stayId                String       @db.Uuid
+  stay                  ExternalStay @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  runId                 String?      @db.Uuid
+  sourceListingId       String
+  sourceUrl             String
+  observedAt            DateTime     @default(now())
+  rawFingerprint        String
+  normalizedFingerprint String
+  normalized            Json
+  rawExcerpt            Json?
+
+  @@index([stayId, observedAt])
+  @@index([observedAt])
+  @@map("external_stay_observations")
+}
+
+/// Every pet-policy claim with its evidence (short excerpt only). A new row when the claim changes; repeats bump lastConfirmedAt.
+model ExternalPetPolicyEvidence {
+  id                 String             @id @default(uuid()) @db.Uuid
+  stayId             String             @db.Uuid
+  stay               ExternalStay       @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  runId              String?            @db.Uuid
+  status             PetPolicyStatus
+  authority          PetPolicyAuthority
+  dogsAllowed        Boolean?
+  catsAllowed        Boolean?
+  otherPetsAllowed   Boolean?
+  maxPets            Int?
+  maxWeightKg        Float?
+  petFeeIrr          Int?
+  depositIrr         Int?
+  restrictions       String?
+  allowedAreas       String?
+  notes              String?
+  evidenceSource     String?
+  evidenceUrl        String?
+  evidenceText       String?
+  evidencePath       String?
+  evidenceObservedAt DateTime
+  lastConfirmedAt    DateTime
+  fingerprint        String
+  adminUserId        String?            @db.Uuid
+  createdAt          DateTime           @default(now())
+
+  @@index([stayId, createdAt])
+  @@index([status, createdAt])
+  @@map("external_pet_policy_evidence")
 }

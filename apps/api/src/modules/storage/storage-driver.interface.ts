@@ -27,11 +27,21 @@ export interface DownloadTarget {
  * nothing above this boundary should know which one is active.
  */
 export interface StorageDriver {
-  createUploadTarget(key: string, contentType: string): Promise<UploadTarget>;
+  /** `maxBytes`: the size the client declared when asking for the target; the upload is refused beyond it. */
+  createUploadTarget(key: string, contentType: string, maxBytes?: number): Promise<UploadTarget>;
   /**
    * Handoff 17: mints a short-TTL signed GET for a key in the PRIVATE
    * object space. Distinct from `createUploadTarget`'s `publicUrl` — a
    * private key is never reachable at a stable, permanent URL.
    */
-  createDownloadTarget(key: string): Promise<DownloadTarget>;
+  createDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget>;
+  /** Batch 8 — server-generated private files (account exports). Never exposed as an upload target. */
+  putObject(key: string, body: Buffer, contentType: string): Promise<void>;
+  deleteObject(key: string): Promise<void>;
+}
+
+/** Served as an attachment with this name/type instead of inline. */
+export interface DownloadOptions {
+  filename?: string;
+  contentType?: string;
 }

@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
+import { RequireVerifiedPartner } from "../../common/auth/require-verified-partner";
 import { ProviderAuthGuard } from "./auth/provider-auth.guard";
 import { CurrentProviderContext } from "./auth/current-provider-context.decorator";
 import type { ResolvedProviderContext } from "./auth/provider-context.types";
@@ -8,6 +9,7 @@ import { CreateAvailabilityRuleDto, UpdateAvailabilityRuleDto } from "./dto/avai
 import { CreateAvailabilityExceptionDto, UpdateAvailabilityExceptionDto } from "./dto/availability-exception.dto";
 
 @Controller("provider/availability")
+@RequireVerifiedPartner()
 @UseGuards(SessionAuthGuard, ProviderAuthGuard)
 export class ProviderAvailabilityController {
   constructor(private readonly availability: ProviderAvailabilityService) {}

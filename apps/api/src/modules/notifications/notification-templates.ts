@@ -39,6 +39,46 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "نوبت شما لغو شد", body: "نوبت شما لغو شد.", smsBody: "نوبت شما در پت‌لایف لغو شد." },
     en: { title: "Your booking was cancelled", body: "Your booking was cancelled.", smsBody: "Your PET LIFE OS booking was cancelled." },
   },
+  "booking.requested": {
+    fa: { title: "درخواست نوبت ثبت شد", body: "درخواست شما برای ارائه‌دهنده ارسال شد و تا زمان پاسخ، قطعی نیست.", smsBody: "درخواست نوبت شما در پت‌لایف ثبت شد و منتظر تأیید است." },
+    en: { title: "Booking request sent", body: "Your request was sent to the provider. It is not confirmed until they accept.", smsBody: "Your PET LIFE OS booking request is awaiting the provider." },
+  },
+  "booking.awaitingPayment": {
+    fa: { title: "برای قطعی شدن نوبت، پرداخت را کامل کنید", body: "نوبت شما تا پایان مهلت پرداخت نگه داشته می‌شود.", smsBody: "برای قطعی شدن نوبت پت‌لایف، پرداخت را کامل کنید." },
+    en: { title: "Complete payment to confirm", body: "Your appointment is held until the payment window ends.", smsBody: "Complete payment to confirm your PET LIFE OS booking." },
+  },
+  "booking.rejected": {
+    fa: { title: "درخواست نوبت پذیرفته نشد", body: "ارائه‌دهنده امکان پذیرش این درخواست را نداشت. می‌توانید زمان دیگری انتخاب کنید.", smsBody: "درخواست نوبت شما در پت‌لایف پذیرفته نشد." },
+    en: { title: "Booking request declined", body: "The provider could not accept this request. You can choose another time.", smsBody: "Your PET LIFE OS booking request was declined." },
+  },
+  "booking.expired": {
+    fa: { title: "مهلت نوبت به پایان رسید", body: "این نوبت چون در مهلت تعیین‌شده تأیید یا پرداخت نشد، آزاد شد.", smsBody: "مهلت نوبت شما در پت‌لایف به پایان رسید." },
+    en: { title: "Booking expired", body: "This booking was released because it was not accepted or paid in time.", smsBody: "Your PET LIFE OS booking expired." },
+  },
+  "booking.rescheduled": {
+    fa: { title: "زمان نوبت تغییر کرد", body: "نوبت شما به زمان جدید منتقل شد.", smsBody: "زمان نوبت شما در پت‌لایف تغییر کرد." },
+    en: { title: "Booking rescheduled", body: "Your appointment moved to its new time.", smsBody: "Your PET LIFE OS booking was rescheduled." },
+  },
+  "provider.bookingRequest": {
+    fa: { title: "درخواست نوبت جدید", body: "یک درخواست نوبت جدید منتظر بررسی شماست.", smsBody: "درخواست نوبت جدیدی در پت‌لایف منتظر بررسی است." },
+    en: { title: "New booking request", body: "A new booking request is waiting for your review.", smsBody: "A new PET LIFE OS booking request awaits your review." },
+  },
+  "provider.bookingCancelled": {
+    fa: { title: "نوبت لغو شد", body: "یکی از نوبت‌های شما توسط مشتری لغو شد.", smsBody: "یکی از نوبت‌های شما در پت‌لایف لغو شد." },
+    en: { title: "Booking cancelled", body: "A customer cancelled one of your bookings.", smsBody: "A PET LIFE OS booking was cancelled." },
+  },
+  "waitlist.offer": {
+    fa: { title: "زمانی برای شما پیشنهاد شد", body: "{{provider}} زمانی از لیست انتظار به شما پیشنهاد داد. تا پیش از انقضا آن را بپذیرید." },
+    en: { title: "A time was offered to you", body: "{{provider}} offered you a time from the waitlist. Accept it before it expires." },
+  },
+  "provider.no_show_reported": {
+    fa: { title: "گزارش عدم حضور ارائه‌دهنده", body: "مشتری گزارش داده که نوبت {{bookingNumber}} انجام نشد چون ارائه‌دهنده حاضر نبود." },
+    en: { title: "Provider no-show reported", body: "A customer reported that booking {{bookingNumber}} did not happen because the provider was absent." },
+  },
+  "waitlist.slotAvailable": {
+    fa: { title: "زمانی در لیست انتظار آزاد شد", body: "زمانی که منتظرش بودید آزاد شد. برای رزرو اقدام کنید؛ این زمان برای شما نگه داشته نشده است.", smsBody: "در لیست انتظار پت‌لایف، زمانی آزاد شد." },
+    en: { title: "A waitlisted time opened", body: "A time you were waiting for opened up. Book it soon — it is not held for you.", smsBody: "A PET LIFE OS waitlisted time opened." },
+  },
   "payment.succeeded": {
     fa: { title: "پرداخت با موفقیت انجام شد", body: "پرداخت شما با موفقیت ثبت شد.", smsBody: "پرداخت شما در پت‌لایف با موفقیت انجام شد." },
     en: { title: "Payment successful", body: "Your payment was completed successfully.", smsBody: "Your PET LIFE OS payment was successful." },
@@ -50,6 +90,90 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "refund.completed": {
     fa: { title: "بازگشت وجه انجام شد", body: "مبلغ سفارش شما بازگردانده شد.", smsBody: "بازگشت وجه سفارش شما در پت‌لایف انجام شد." },
     en: { title: "Refund completed", body: "Your order's amount has been refunded.", smsBody: "Your PET LIFE OS refund was completed." },
+  },
+  "order.received": {
+    fa: { title: "سفارش جدید دریافت شد", body: "یک سفارش پرداخت‌شده جدید برای آماده‌سازی دارید.", smsBody: "یک سفارش جدید در پت‌لایف برای شما ثبت شد." },
+    en: { title: "New order received", body: "You have a new paid order to prepare.", smsBody: "You received a new PET LIFE OS order." },
+  },
+  "order.cancelled": {
+    fa: { title: "سفارش لغو شد", body: "سفارش شما لغو شد و مبلغ آن بازگردانده شد.", smsBody: "سفارش شما در پت‌لایف لغو و مبلغ آن بازگردانده شد." },
+    en: { title: "Order cancelled", body: "Your order was cancelled and its amount refunded.", smsBody: "Your PET LIFE OS order was cancelled and refunded." },
+  },
+  "order.cancelled_by_customer": {
+    fa: { title: "مشتری سفارش را لغو کرد", body: "یک سفارش پیش از ارسال توسط مشتری لغو شد. آن را ارسال نکنید.", smsBody: "یک سفارش در پت‌لایف توسط مشتری لغو شد؛ ارسال نکنید." },
+    en: { title: "Customer cancelled an order", body: "An order was cancelled by the customer before dispatch. Do not ship it.", smsBody: "A PET LIFE OS order was cancelled by the customer — do not ship it." },
+  },
+  "refund_request.received": {
+    fa: { title: "درخواست بازگشت وجه ثبت شد", body: "مشتری برای یکی از سفارش‌های شما درخواست بازگشت وجه ثبت کرد. تیم پت‌لایف آن را بررسی می‌کند." },
+    en: { title: "Refund request opened", body: "A customer opened a refund request on one of your orders. PET LIFE will review it." },
+  },
+  "refund_request.approved": {
+    fa: { title: "درخواست بازگشت وجه تأیید شد", body: "درخواست شما تأیید شد و برای پرداخت به واحد مالی ارسال شد.", smsBody: "درخواست بازگشت وجه شما در پت‌لایف تأیید شد." },
+    en: { title: "Refund request approved", body: "Your request was approved and sent to finance for payment.", smsBody: "Your PET LIFE OS refund request was approved." },
+  },
+  "refund_request.rejected": {
+    fa: { title: "درخواست بازگشت وجه رد شد", body: "درخواست بازگشت وجه شما رد شد. دلیل را در جزئیات سفارش ببینید." },
+    en: { title: "Refund request declined", body: "Your refund request was declined. See the order for the reason." },
+  },
+  "repeat_delivery.due": {
+    fa: { title: "زمان ارسال دوره‌ای نزدیک است", body: "سفارش دوره‌ای بعدی شما نزدیک است. قیمت و موجودی را بررسی و سفارش را تأیید کنید.", smsBody: "زمان سفارش دوره‌ای شما در پت‌لایف رسیده است؛ برای تأیید وارد شوید." },
+    en: { title: "Your repeat delivery is due", body: "Your next repeat delivery is coming up. Check the price and stock, then confirm the order.", smsBody: "Your PET LIFE OS repeat delivery is due — open the app to confirm." },
+  },
+  "travel.booking_request_received": {
+    fa: { title: "درخواست رزرو جدید", body: "یک درخواست رزرو اقامت برای بررسی دارید." },
+    en: { title: "New booking request", body: "You have a new stay request to review." },
+  },
+  "travel.booking_requested": {
+    fa: { title: "درخواست رزرو ارسال شد", body: "درخواست شما برای میزبان ارسال شد. پاسخ او را اطلاع می‌دهیم." },
+    en: { title: "Booking request sent", body: "Your request was sent to the host. We'll let you know when they answer." },
+  },
+  "travel.payment_required": {
+    fa: { title: "پرداخت رزرو لازم است", body: "برای قطعی شدن رزرو، پرداخت را در مهلت تعیین‌شده انجام دهید." },
+    en: { title: "Payment needed", body: "Complete the payment within the window to confirm your stay." },
+  },
+  "travel.booking_confirmed": {
+    fa: { title: "رزرو شما قطعی شد", body: "رزرو اقامت شما تأیید شد. جزئیات و آمادگی سفر را ببینید." },
+    en: { title: "Your stay is confirmed", body: "Your stay is confirmed. See the details and trip readiness." },
+  },
+  "travel.booking_confirmed_provider": {
+    fa: { title: "رزرو قطعی شد", body: "یک رزرو اقامت قطعی شد." },
+    en: { title: "Booking confirmed", body: "A stay was confirmed." },
+  },
+  "travel.booking_rejected": {
+    fa: { title: "درخواست رزرو پذیرفته نشد", body: "میزبان نتوانست درخواست شما را بپذیرد. تاریخ‌ها آزاد شد." },
+    en: { title: "Request declined", body: "The host could not accept your request. The dates were released." },
+  },
+  "travel.booking_expired": {
+    fa: { title: "رزرو منقضی شد", body: "مهلت این رزرو به پایان رسید و تاریخ‌ها آزاد شد." },
+    en: { title: "Booking expired", body: "This booking's window ended and the dates were released." },
+  },
+  "travel.booking_cancelled_by_provider": {
+    fa: { title: "میزبان رزرو را لغو کرد", body: "رزرو شما توسط میزبان لغو شد و مبلغ پرداختی کامل بازگردانده می‌شود." },
+    en: { title: "Host cancelled your stay", body: "The host cancelled your stay; anything you paid is refunded in full." },
+  },
+  "travel.booking_cancelled_by_traveler": {
+    fa: { title: "مهمان رزرو را لغو کرد", body: "یک رزرو توسط مهمان لغو شد و تاریخ‌ها آزاد شد." },
+    en: { title: "Guest cancelled", body: "A guest cancelled a stay; the dates were released." },
+  },
+  "travel.booking_changed": {
+    fa: { title: "تاریخ رزرو تغییر کرد", body: "مهمان تاریخ یک رزرو را تغییر داد." },
+    en: { title: "Booking dates changed", body: "A guest changed a booking's dates." },
+  },
+  "travel.listing_published": {
+    fa: { title: "اقامتگاه شما منتشر شد", body: "اقامتگاه شما بررسی و منتشر شد." },
+    en: { title: "Listing published", body: "Your listing was reviewed and published." },
+  },
+  "travel.listing_draft": {
+    fa: { title: "اصلاح اقامتگاه لازم است", body: "تیم پت‌لایف درخواست اصلاح داده است. توضیحات را ببینید." },
+    en: { title: "Changes requested", body: "PET LIFE asked for changes to your listing. See the note." },
+  },
+  "travel.listing_suspended": {
+    fa: { title: "اقامتگاه شما متوقف شد", body: "اقامتگاه شما از نمایش عمومی خارج شد. توضیحات را ببینید." },
+    en: { title: "Listing suspended", body: "Your listing was taken off public view. See the note." },
+  },
+  "insurance.application_needs_information": {
+    fa: { title: "بیمه‌گر اطلاعات بیشتری خواسته است", body: "برای ادامه بررسی درخواست بیمه، اطلاعات خواسته‌شده را تکمیل کنید." },
+    en: { title: "The insurer needs more information", body: "Add the requested information so the insurer can continue reviewing your application." },
   },
   "shipment.delivered": {
     fa: { title: "سفارش شما تحویل داده شد", body: "سفارش شما با موفقیت تحویل داده شد.", smsBody: "سفارش شما در پت‌لایف تحویل داده شد." },
@@ -85,6 +209,35 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "درخواست پشتیبانی شما حل شد", body: "درخواست پشتیبانی {{caseNumber}} به عنوان حل‌شده علامت‌گذاری شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف حل شد." },
     en: { title: "Your support case was resolved", body: "Support case {{caseNumber}} was marked resolved.", smsBody: "Your PET LIFE OS support case was resolved." },
   },
+  "household.invited": {
+    fa: { title: "دعوت به خانواده PET LIFE", body: "{{inviterName}} شما را برای همکاری در مراقبت از حیوان‌ها دعوت کرده است.", smsBody: "یک دعوت خانوادگی جدید در PET LIFE دارید." },
+    en: { title: "PET LIFE household invitation", body: "{{inviterName}} invited you to collaborate on pet care.", smsBody: "You have a new PET LIFE household invitation." },
+  },
+  "household.member_removed": {
+    fa: { title: "دسترسی خانوادگی شما پایان یافت", body: "مدیر خانواده شما را از خانواده حذف کرد؛ دسترسی شما به حیوان‌های آن خانواده قطع شد." },
+    en: { title: "Your household access ended", body: "A household owner removed you; your access to that household's pets has ended." },
+  },
+  // Batch 8 — security messages (SECURITY category is never suppressible).
+  "security.new_sign_in": {
+    fa: { title: "ورود تازه به حساب شما", body: "یک ورود تازه با {{device}} ثبت شد. اگر شما نبودید، از بخش امنیت نشست را قطع و رمز را تغییر دهید." },
+    en: { title: "New sign-in to your account", body: "A new sign-in from {{device}} was recorded. If it wasn't you, end that session in Security and change your password." },
+  },
+  "security.password_changed": {
+    fa: { title: "رمز عبور شما تغییر کرد", body: "رمز عبور حساب شما تغییر کرد و سایر دستگاه‌ها خارج شدند. اگر شما نبودید، فوراً رمز را بازیابی کنید." },
+    en: { title: "Your password was changed", body: "Your account password changed and other devices were signed out. If this wasn't you, reset your password now." },
+  },
+  "security.contact_changed": {
+    fa: { title: "راه تماس حساب تغییر کرد", body: "{{contactKind}} حساب شما تغییر کرد. اگر شما نبودید، با پشتیبانی تماس بگیرید." },
+    en: { title: "Account contact changed", body: "The {{contactKind}} on your account changed. If this wasn't you, contact support." },
+  },
+  "security.sessions_revoked": {
+    fa: { title: "از سایر دستگاه‌ها خارج شدید", body: "{{count}} نشست فعال دیگر به درخواست شما پایان یافت." },
+    en: { title: "Signed out of other devices", body: "{{count}} other active session(s) were ended at your request." },
+  },
+  "security.unverified_credentials_cleared": {
+    fa: { title: "حساب شما ایمن شد", body: "ایمیل شما تأیید شد و رمز عبوری که قبلاً بدون تأیید این ایمیل ثبت شده بود حذف شد. در صورت نیاز رمز تازه بسازید." },
+    en: { title: "Your account was secured", body: "Your email is now verified, and a password that had been set without proving this email was removed. Set a new one if you need it." },
+  },
   /** Handoff 13 — fires when a case moves to WAITING_ON_USER (the requester's own simplified status label is "Waiting"). */
   "support.more_info_requested": {
     fa: { title: "نیاز به اطلاعات بیشتر برای درخواست شما", body: "برای پیگیری درخواست پشتیبانی {{caseNumber}}، به اطلاعات بیشتری از شما نیاز داریم.", smsBody: "برای درخواست پشتیبانی شما در پت‌لایف به اطلاعات بیشتری نیاز است." },
@@ -114,6 +267,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "subscription.started": {
     fa: { title: "اشتراک شما فعال شد", body: "اشتراک {{planName}} برای خانواده شما فعال شد." },
     en: { title: "Your subscription is active", body: "Your household is now on the {{planName}} plan." },
+  },
+  "subscription.trial_ending": {
+    fa: { title: "دوره‌ی آزمایشی رو به پایان است", body: "دوره‌ی آزمایشی {{planName}} تا {{days}} روز دیگر تمام می‌شود." },
+    en: { title: "Your trial is ending", body: "Your {{planName}} trial ends in {{days}} day(s)." },
   },
   "subscription.trial_started": {
     fa: { title: "دوره آزمایشی شما شروع شد", body: "دوره آزمایشی {{planName}} برای خانواده شما فعال شد." },
@@ -226,6 +383,194 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "lost_pet.reunited": {
     fa: { title: "بازگشت به خانواده", body: "{{petName}} با خانواده دوباره یکی شد!", smsBody: "خبر خوب! {{petName}} با خانواده دوباره یکی شد." },
     en: { title: "Reunited!", body: "{{petName}} has been reunited with the household!", smsBody: "Good news — {{petName}} has been reunited with your household." },
+  },
+  "community.comment_reply": {
+    fa: { title: "پاسخ تازه", body: "کسی به نظر شما پاسخ داد." },
+    en: { title: "New reply", body: "Someone replied to your comment." },
+  },
+  "community.post_comment": {
+    fa: { title: "نظر تازه", body: "کسی زیر پست شما نظر گذاشت." },
+    en: { title: "New comment", body: "Someone commented on your post." },
+  },
+  "community.chat_message": {
+    fa: { title: "پیام تازه", body: "{{sender}} برایتان پیام فرستاد." },
+    en: { title: "New message", body: "{{sender}} sent you a message." },
+  },
+  "clinic.reminder": {
+    fa: { title: "یادآور از {{clinic}}", body: "{{petName}}: {{title}}" },
+    en: { title: "Reminder from {{clinic}}", body: "{{petName}}: {{title}}" },
+  },
+  "clinic.staff_invited": {
+    fa: { title: "دعوت به تیم {{clinic}}", body: "{{clinic}} شما را به‌عنوان {{role}} دعوت کرده است. دعوت را بپذیرید یا رد کنید." },
+    en: { title: "Invitation to join {{clinic}}", body: "{{clinic}} invited you to join as {{role}}. Accept or decline the invitation." },
+  },
+  "clinic.invitation_accepted": {
+    fa: { title: "دعوت پذیرفته شد", body: "{{name}} به تیم کلینیک پیوست." },
+    en: { title: "Invitation accepted", body: "{{name}} joined the clinic team." },
+  },
+  "clinic.invitation_declined": {
+    fa: { title: "دعوت رد شد", body: "{{name}} دعوت پیوستن به تیم را رد کرد." },
+    en: { title: "Invitation declined", body: "{{name}} declined the invitation to join the team." },
+  },
+  "clinic.staff_removed": {
+    fa: { title: "عضویت در {{clinic}} پایان یافت", body: "دسترسی شما به پنل {{clinic}} برداشته شد." },
+    en: { title: "Your access to {{clinic}} ended", body: "You no longer have access to {{clinic}}'s panel." },
+  },
+  "clinic.appointment_assigned": {
+    fa: { title: "نوبت به شما سپرده شد", body: "یک نوبت {{service}} به شما تخصیص داده شد." },
+    en: { title: "Appointment assigned to you", body: "A {{service}} appointment was assigned to you." },
+  },
+  "travel.trip_approaching": {
+    fa: { title: "سفر {{petName}} نزدیک است", body: "سفر به {{destination}} چند روز دیگر است؛ {{open}} مورد از چک‌لیست باز مانده." },
+    en: { title: "{{petName}}'s trip is coming up", body: "The trip to {{destination}} is in a few days; {{open}} checklist item(s) still open." },
+  },
+  "booking.review_invite": {
+    fa: { title: "خدمت انجام شد", body: "تجربه‌تان را با یک امتیاز و چند کلمه ثبت کنید." },
+    en: { title: "Your booking is complete", body: "Share how it went with a rating and a few words." },
+  },
+  "booking.ride_arriving": {
+    fa: { title: "راننده در راه است", body: "{{provider}} به محل سوار شدن نزدیک می‌شود." },
+    en: { title: "Your ride is arriving", body: "{{provider}} is arriving at the pickup point." },
+  },
+  "booking.ride_picked_up": {
+    fa: { title: "پت سوار شد", body: "{{provider}} پت شما را سوار کرد." },
+    en: { title: "Pet picked up", body: "{{provider}} picked up your pet." },
+  },
+  "booking.ride_dropped_off": {
+    fa: { title: "پت به مقصد رسید", body: "{{provider}} پت شما را به مقصد رساند." },
+    en: { title: "Pet dropped off", body: "{{provider}} dropped your pet off." },
+  },
+  "booking.provider_document": {
+    fa: { title: "مدرک تازه از {{provider}}", body: "{{provider}} یک فایل به نوبت شما اضافه کرد." },
+    en: { title: "New document from {{provider}}", body: "{{provider}} added a file to your booking." },
+  },
+  "care.assigned": {
+    fa: { title: "کار مراقبتی برای شما", body: "{{title}} برای {{petName}} به شما سپرده شد." },
+    en: { title: "Care task for you", body: "{{title}} for {{petName}} was assigned to you." },
+  },
+  "animal_support.new_need": {
+    fa: { title: "نیاز تازه از سازمانی که دنبال می‌کنید", body: "«{{title}}» منتشر شد." },
+    en: { title: "A new need from an organisation you follow", body: "“{{title}}” was published." },
+  },
+  "animal_support.milestone": {
+    fa: { title: "پیشرفت «{{title}}»", body: "این نیاز به مرحله‌ی تازه‌ای رسید." },
+    en: { title: "Progress on “{{title}}”", body: "This need reached a new milestone." },
+  },
+  "animal_support.volunteer_status": {
+    fa: { title: "داوطلبی شما در {{organization}}", body: "وضعیت داوطلبی شما به‌روز شد." },
+    en: { title: "Your volunteering with {{organization}}", body: "Your volunteer status was updated." },
+  },
+  "care.suggestion_received": {
+    fa: { title: "پیشنهاد مراقبت از {{clinic}}", body: "{{clinic}} برای {{petName}} برنامه‌ی مراقبت پیشنهاد کرد. برای ساختن یادآور تأیید کنید." },
+    en: { title: "Care suggested by {{clinic}}", body: "{{clinic}} suggested care for {{petName}}. Confirm to create the reminder." },
+  },
+  "pet.card_contact_message": {
+    fa: { title: "پیامی درباره‌ی {{petName}}", body: "کسی از طریق کارت شناسایی {{petName}} برای شما پیام گذاشت." },
+    en: { title: "A message about {{petName}}", body: "Someone left you a message through {{petName}}'s ID card." },
+  },
+  "pet.care_handoff_granted": {
+    fa: { title: "سپردن مراقبت {{petName}}", body: "دسترسی موقت مراقبت از {{petName}} به شما داده شد." },
+    en: { title: "Care of {{petName}} handed to you", body: "You were given temporary care access to {{petName}}." },
+  },
+  "clinic.message": {
+    fa: { title: "پیام از {{clinic}}", body: "درباره‌ی {{petName}}: {{title}}" },
+    en: { title: "Message from {{clinic}}", body: "About {{petName}}: {{title}}" },
+  },
+  "animal_support.need_update": {
+    fa: { title: "خبر تازه از «{{title}}»", body: "یک به‌روزرسانی برای نیازی که دنبال می‌کنید منتشر شد." },
+    en: { title: "Update on “{{title}}”", body: "There's a new update on a need you follow." },
+  },
+  "animal_support.volunteer_interest": {
+    fa: { title: "داوطلب تازه", body: "کسی برای کمک داوطلبانه به {{organization}} اعلام آمادگی کرد." },
+    en: { title: "New volunteer", body: "Someone offered to volunteer with {{organization}}." },
+  },
+  "animal_support.offer_received": {
+    fa: { title: "پیشنهاد کمک تازه", body: "برای «{{title}}» یک پیشنهاد کمک رسید. آن را بررسی کنید." },
+    en: { title: "New help offer", body: "Someone offered help for “{{title}}”. Review the offer." },
+  },
+  "animal_support.offer_accepted": {
+    fa: { title: "پیشنهاد شما پذیرفته شد", body: "پیشنهاد کمک شما برای «{{title}}» پذیرفته شد. هماهنگی را ادامه دهید." },
+    en: { title: "Your offer was accepted", body: "Your help offer for “{{title}}” was accepted. Continue coordinating." },
+  },
+  "animal_support.offer_declined": {
+    fa: { title: "پاسخ به پیشنهاد شما", body: "برای «{{title}}» فعلاً از پیشنهاد شما استفاده نمی‌شود. از همراهی‌تان سپاسگزاریم." },
+    en: { title: "Update on your offer", body: "Your offer for “{{title}}” won't be used for now. Thank you for offering." },
+  },
+  "animal_support.offer_in_progress": {
+    fa: { title: "هماهنگی شروع شد", body: "کمک شما برای «{{title}}» در حال انجام است." },
+    en: { title: "Handover in progress", body: "Your help for “{{title}}” is now in progress." },
+  },
+  "animal_support.offer_completed": {
+    fa: { title: "کمک شما ثبت شد", body: "کمک شما برای «{{title}}» انجام‌شده ثبت شد. سپاس!" },
+    en: { title: "Your help was recorded", body: "Your help for “{{title}}” was marked complete. Thank you!" },
+  },
+  "animal_support.offer_cancelled": {
+    fa: { title: "پیشنهاد لغو شد", body: "یک پیشنهاد کمک برای «{{title}}» توسط کمک‌کننده لغو شد." },
+    en: { title: "Offer cancelled", body: "A helper cancelled their offer for “{{title}}”." },
+  },
+  "animal_support.offer_cancelled_by_publisher": {
+    fa: { title: "پیشنهاد لغو شد", body: "هماهنگی کمک شما برای «{{title}}» لغو شد." },
+    en: { title: "Offer cancelled", body: "Coordination of your help for “{{title}}” was cancelled." },
+  },
+  "animal_support.partially_fulfilled": {
+    fa: { title: "بخشی از نیاز تأمین شد", body: "بخشی از «{{title}}» تأمین شد و درخواست همچنان باز است." },
+    en: { title: "Partly fulfilled", body: "Part of “{{title}}” has been fulfilled; the request stays open." },
+  },
+  "animal_support.fulfilled": {
+    fa: { title: "نیاز تأمین شد", body: "«{{title}}» کامل تأمین شد و دیگر پیشنهاد جدید نمی‌پذیرد." },
+    en: { title: "Need fulfilled", body: "“{{title}}” is fully fulfilled and no longer takes new offers." },
+  },
+  "animal_support.expired": {
+    fa: { title: "مهلت درخواست تمام شد", body: "مهلت «{{title}}» تمام شد و دیگر پیشنهاد جدید نمی‌پذیرد." },
+    en: { title: "Request expired", body: "“{{title}}” reached its deadline and no longer takes new offers." },
+  },
+  "animal_support.expiring_soon": {
+    fa: { title: "مهلت نزدیک است", body: "مهلت «{{title}}» تا سه روز دیگر تمام می‌شود. در صورت نیاز آن را تمدید کنید." },
+    en: { title: "Deadline approaching", body: "“{{title}}” ends within three days. Extend it if it's still needed." },
+  },
+  "animal_support.listing_published": {
+    fa: { title: "درخواست منتشر شد", body: "«{{title}}» بررسی و منتشر شد." },
+    en: { title: "Request published", body: "“{{title}}” was reviewed and published." },
+  },
+  "animal_support.listing_rejected": {
+    fa: { title: "درخواست نیاز به اصلاح دارد", body: "«{{title}}» منتشر نشد؛ یادداشت بررسی را ببینید و دوباره ارسال کنید." },
+    en: { title: "Request needs changes", body: "“{{title}}” wasn't published; see the review note and resubmit." },
+  },
+  "animal_support.donation_refunded": {
+    fa: { title: "کمک مالی شما بازپرداخت شد", body: "کمک مالی شما برای «{{title}}» به شما بازگردانده شد. جزئیات در رسید است." },
+    en: { title: "Your donation was refunded", body: "Your donation to “{{title}}” was refunded to you. Details are on the receipt." },
+  },
+  "animal_support.donation_received": {
+    fa: { title: "کمک مالی شما ثبت شد", body: "کمک مالی شما برای «{{title}}» ثبت شد. رسید را ببینید." },
+    en: { title: "Your donation was recorded", body: "Your donation to “{{title}}” was recorded. See your receipt." },
+  },
+  "animal_support.org_donation_received": {
+    fa: { title: "کمک مالی تازه", body: "یک کمک مالی برای «{{title}}» ثبت شد." },
+    en: { title: "New donation", body: "A donation was recorded for “{{title}}”." },
+  },
+  "partner.verification_updated": {
+    fa: { title: "وضعیت احراز هویت کسب‌وکار", body: "وضعیت احراز «{{title}}» به «{{status}}» تغییر کرد. جزئیات را ببینید." },
+    en: { title: "Verification update", body: "The verification of “{{title}}” is now {{status}}. See the details." },
+  },
+  "partner.document_expiring": {
+    fa: { title: "مدرک احراز رو به انقضا", body: "یکی از مدارک احراز «{{title}}» تا {{days}} روز دیگر منقضی می‌شود. لطفاً نسخه‌ی جدید را بارگذاری کنید." },
+    en: { title: "Verification document expiring", body: "A verification document for “{{title}}” expires in {{days}} days. Please upload a new one." },
+  },
+  "ngo.verification_updated": {
+    fa: { title: "وضعیت احراز سازمان", body: "وضعیت احراز «{{title}}» به‌روز شد. جزئیات را ببینید." },
+    en: { title: "Verification update", body: "The verification status of “{{title}}” changed. See the details." },
+  },
+  "ngo.suspended": {
+    fa: { title: "نمایش عمومی سازمان متوقف شد", body: "«{{title}}» پس از بررسی گزارش‌ها موقتاً از نمایش عمومی خارج شد و درخواست‌های فعال آن متوقف شدند." },
+    en: { title: "Organization paused", body: "“{{title}}” was taken out of public view after a report review, and its live requests were paused." },
+  },
+  "ngo.reinstated": {
+    fa: { title: "سازمان دوباره نمایش داده می‌شود", body: "«{{title}}» دوباره به‌صورت عمومی نمایش داده می‌شود." },
+    en: { title: "Organization reinstated", body: "“{{title}}” is publicly listed again." },
+  },
+  "animal_support.listing_removed": {
+    fa: { title: "درخواست حذف شد", body: "«{{title}}» توسط تیم PET LIFE از نمایش عمومی خارج شد." },
+    en: { title: "Request removed", body: "“{{title}}” was removed from public view by the PET LIFE team." },
   },
 
   // Handoff 19: Insurance application status — deliberately just

@@ -1,0 +1,7 @@
+{
+  "partnerReturnToPreserved": true,
+  "passwordErrorVisible": true,
+  "registrationErrorVisible": true,
+  "directAuthAndRefresh": true,
+  "api": "Controlled responses; no live authentication or real account creation"
+}

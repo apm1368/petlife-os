@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ErrorRecovery, Skeleton } from "@petlife/ui";
 import { onboardingService } from "@/services/onboarding.service";
 import { petsService } from "@/services/pets.service";
@@ -43,6 +43,8 @@ function OnboardingWizardInner() {
   const [step, setStep] = useState<Step | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [recoveredIdentity, setRecoveredIdentity] = useState(false);
+  const t = useTranslations("onboarding");
   const update = useOnboardingStore((s) => s.update);
   const router = useRouter();
   const locale = useLocale();
@@ -61,6 +63,8 @@ function OnboardingWizardInner() {
         return;
       }
 
+      const previousDraft = useOnboardingStore.getState();
+      if (previousDraft.householdId !== progress.householdId) previousDraft.reset();
       if (progress.householdId) update({ householdId: progress.householdId });
       if (progress.petId) {
         const pet = await petsService.getById(progress.petId);
@@ -80,7 +84,18 @@ function OnboardingWizardInner() {
       const resumeStep = STEP_ORDER.includes(progress.step as Step) ? (progress.step as Step) : "household";
       // Resume at the step AFTER the last completed one, unless it was skipped mid-way.
       const index = STEP_ORDER.indexOf(resumeStep);
-      const next = progress.status === "IN_PROGRESS" ? resumeStep : (STEP_ORDER[index + 1] ?? "ready");
+      const requested = progress.status === "IN_PROGRESS" ? resumeStep : (STEP_ORDER[index + 1] ?? "ready");
+      let next = requested;
+      const draft = useOnboardingStore.getState();
+      // The server checkpoint has no unsaved species/name. Repair cold re-entry before
+      // rendering a step whose action would otherwise silently return without those fields.
+      if (STEP_ORDER.indexOf(next) > 0 && !draft.householdId) next = "household";
+      else if (!draft.petId) {
+        if (STEP_ORDER.indexOf(next) >= STEP_ORDER.indexOf("pet-name") && !draft.species) next = "species";
+        else if (STEP_ORDER.indexOf(next) >= STEP_ORDER.indexOf("age") && !draft.name.trim()) next = "pet-name";
+        else if (STEP_ORDER.indexOf(next) > STEP_ORDER.indexOf("age")) next = "age";
+      }
+      setRecoveredIdentity(next !== requested);
       setStep(next);
     }
 
@@ -92,12 +107,13 @@ function OnboardingWizardInner() {
   }, [attempt]);
 
   function goTo(next: Step) {
+    setRecoveredIdentity(false);
     setStep(next);
   }
 
   if (loadError) return <ErrorRecovery title={locale === "fa" ? "اتصال به اطلاعات راه‌اندازی برقرار نشد" : "Could not load onboarding"} message="" retryLabel={locale === "fa" ? "تلاش دوباره" : "Retry"} onRetry={() => { setLoadError(false); setAttempt((value) => value + 1); }} />;
   if (!step) {
-    return <Skeleton className="h-64 w-full" aria-label="Loading onboarding" />;
+    return <Skeleton className="h-64 w-full" aria-label={locale==="fa"?"در حال آماده‌سازی":"Loading"} />;
   }
 
   function renderStep() {
@@ -158,12 +174,13 @@ function OnboardingWizardInner() {
   const current = STEP_ORDER.indexOf(step);
   const groups = locale === "fa" ? ["خانواده", "آشنایی با حیوان", "سلامت و مراقبت", "آماده‌اید"] : ["Household", "Meet your pet", "Health & care", "Ready"];
   const activeGroup = current === 0 ? 0 : current < 7 ? 1 : current < 13 ? 2 : 3;
-  return <div className="onboarding-layout"><aside><p className="text-metadata text-text-secondary">{locale === "fa" ? "به خانواده پت‌لایف خوش آمدید" : "Welcome to the PET LIFE family"}</p><ol className="mt-6 space-y-4">{groups.map((label, index) => <li key={label} aria-current={index === activeGroup ? "step" : undefined} className="flex items-center gap-3 text-body"><span className="onboarding-step-number">{new Intl.NumberFormat(locale).format(index + 1)}</span>{label}</li>)}</ol><p className="mt-8 text-metadata text-text-secondary" role="status">{locale === "fa" ? "مرحله" : "Step"} {new Intl.NumberFormat(locale).format(current + 1)} / {new Intl.NumberFormat(locale).format(STEP_ORDER.length)}</p><progress className="mt-3 w-full accent-brand-natural" value={current + 1} max={STEP_ORDER.length} aria-label={locale === "fa" ? "پیشرفت راه‌اندازی" : "Onboarding progress"} /></aside><section className="min-w-0">{renderStep()}</section></div>;
+  return <div className="onboarding-layout"><aside><p className="text-metadata text-text-secondary">{locale === "fa" ? "به خانواده opetlife خوش آمدید" : "Welcome to the opetlife family"}</p><ol className="mt-6 space-y-4">{groups.map((label, index) => <li key={label} aria-current={index === activeGroup ? "step" : undefined} className="flex items-center gap-3 text-body"><span className="onboarding-step-number">{new Intl.NumberFormat(locale).format(index + 1)}</span>{label}</li>)}</ol><p className="mt-8 text-metadata text-text-secondary" role="status">{locale === "fa" ? "مرحله" : "Step"} {new Intl.NumberFormat(locale).format(current + 1)} / {new Intl.NumberFormat(locale).format(STEP_ORDER.length)}</p><progress className="mt-3 w-full accent-brand-natural" value={current + 1} max={STEP_ORDER.length} aria-label={locale === "fa" ? "پیشرفت راه‌اندازی" : "Onboarding progress"} /></aside><section className="min-w-0">{recoveredIdentity && <p className="calm-note mb-5" role="status">{t("resumeIdentity")}</p>}{renderStep()}</section></div>;
 }
 
 export function OnboardingWizard() {
+  const locale = useLocale();
   return (
-    <Suspense fallback={<Skeleton className="h-64 w-full" aria-label="Loading onboarding" />}>
+    <Suspense fallback={<Skeleton className="h-64 w-full" aria-label={locale==="fa"?"در حال آماده‌سازی":"Loading"} />}>
       <OnboardingWizardInner />
     </Suspense>
   );

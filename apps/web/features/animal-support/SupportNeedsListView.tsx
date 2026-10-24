@@ -1,13 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import Link from "@/features/navigation/localized-link";
+import { useLocale, useTranslations } from "next-intl";
+import { Bone, Button, CarFront, ContextSurface, EmptyState, HandHeart, House, Input, PackageCheck, Pill, Receipt, Select, Skeleton, StatusLabel, Stethoscope, Users } from "@petlife/ui";
 import { SupportNeedCategory, SupportNeedUrgency } from "@petlife/types";
 import type { SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService, type SupportNeedLocationDto } from "@/services/support-needs.service";
-import { ApiError } from "@/lib/api/client";
+import { formatDay, localizeDigits } from "@/lib/date/jalali";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { AnimalSupportNav } from "./AnimalSupportNav";
+
+const NEED_ICON: Record<SupportNeedCategory, typeof HandHeart> = {
+  FOOD: Bone, MEDICINE: Pill, VETERINARY_CARE: Stethoscope, TEMPORARY_HOME: House, FOSTER: House, TRANSPORT: CarFront,
+  VOLUNTEER: Users, EQUIPMENT: PackageCheck, FINANCIAL: Receipt, SHELTER_SUPPLIES: PackageCheck, OTHER: HandHeart,
+};
 
 const CATEGORIES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -50,9 +57,15 @@ export function SupportNeedsListView() {
   const [category, setCategory] = useState<SupportNeedCategory | "">("");
   const [urgency, setUrgency] = useState<SupportNeedUrgency | "">("");
   const [city, setCity] = useState("");
+  const [sort, setSort] = useState<"URGENT" | "RECENT" | "CLOSING_SOON">("URGENT");
+  const [needState, setNeedState] = useState<"OPEN" | "RESOLVED">("OPEN");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const locale = useLocale() as "fa" | "en";
+  const fa = locale === "fa";
   const [listings, setListings] = useState<SupportNeedListingDto[] | null>(null);
   const [locations, setLocations] = useState<SupportNeedLocationDto[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   // `tCommon` is deliberately not a dependency: next-intl hands back a fresh
   // function each render, which would make this refetch in a loop.
@@ -64,14 +77,18 @@ export function SupportNeedsListView() {
         category: category || undefined,
         urgency: urgency || undefined,
         city: city || undefined,
-        pageSize: 50,
+        sort,
+        state: needState,
+        page,
+        pageSize: 20,
       });
       setListings(result.items);
+      setTotal(result.total);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, urgency, city]);
+     
+  }, [search, category, urgency, city, sort, needState, page]);
 
   useEffect(() => {
     void load();
@@ -85,7 +102,7 @@ export function SupportNeedsListView() {
       .catch(() => setLocations([]));
   }, []);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <LoadFailure error={error} onRetry={load} />;
 
   const cities = Array.from(new Set(locations.map((l) => l.city))).sort();
 
@@ -101,9 +118,15 @@ export function SupportNeedsListView() {
         </Link>
       </div>
 
-      <ContextSurface className="flex flex-col gap-3">
+      <AnimalSupportNav />
+      <div role="tablist" aria-label={fa ? "وضعیت" : "State"} className="flex gap-2">
+        {([["OPEN", fa ? "نیازهای باز" : "Open needs"], ["RESOLVED", fa ? "تأمین‌شده" : "Fulfilled"]] as const).map(([value, label]) => (
+          <button key={value} role="tab" aria-selected={needState === value} onClick={() => { setNeedState(value); setPage(1); }} className={`min-h-11 rounded-full px-4 text-sm ${needState === value ? "bg-surface-subtle font-bold text-text-primary" : "text-text-secondary"}`}>{label}</button>
+        ))}
+      </div>
+
+      <div className="need-filters">
         <Input label={t("list.searchLabel")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("list.searchPlaceholder")} />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Select
             label={t("list.categoryLabel")}
             value={category}
@@ -122,8 +145,17 @@ export function SupportNeedsListView() {
             onChange={(e) => setCity(e.target.value)}
             options={[{ value: "", label: t("list.allCities") }, ...cities.map((value) => ({ value, label: value }))]}
           />
-        </div>
-      </ContextSurface>
+        <Select
+          label={fa ? "مرتب‌سازی" : "Sort"}
+          value={sort}
+          onChange={(e) => { setSort(e.target.value as typeof sort); setPage(1); }}
+          options={[
+            { value: "URGENT", label: fa ? "فوری‌ترین" : "Most urgent" },
+            { value: "RECENT", label: fa ? "تازه‌ترین" : "Most recent" },
+            { value: "CLOSING_SOON", label: fa ? "نزدیک‌ترین مهلت" : "Closing soon" },
+          ]}
+        />
+      </div>
 
       {!listings ? (
         <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />
@@ -140,50 +172,64 @@ export function SupportNeedsListView() {
                 </Button>
               ))}
             </div>
-            <Link href="/animal-support/needs/new" className="text-body text-brand-mint underline">
+            <Link href="/animal-support/needs/new" className="text-body text-brand-mint-strong underline">
               {t("list.publish")}
             </Link>
           </ContextSurface>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {listings.map((listing) => (
-            <Link key={listing.id} href={`/animal-support/needs/${listing.id}`}>
-              <ContextSurface className="flex items-start gap-3">
-                {listing.imageUrls[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={listing.imageUrls[0]} alt={listing.title} className="h-20 w-20 shrink-0 rounded-md object-cover" />
-                ) : (
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-md bg-surface-muted">
-                    <span className="text-metadata text-text-secondary">{t(`category.${listing.category}`)}</span>
-                  </div>
-                )}
-                <div className="flex min-w-0 flex-col gap-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-body text-text-primary">{listing.title}</span>
-                    {listing.urgency !== SupportNeedUrgency.NORMAL ? (
-                      <StatusLabel tone={URGENCY_TONE[listing.urgency]}>{t(`urgency.${listing.urgency}`)}</StatusLabel>
+        <ul className="need-rows">
+          {listings.map((listing) => {
+            const Icon = NEED_ICON[listing.category] ?? HandHeart;
+            const pct = listing.neededQuantity ? Math.min(100, Math.round((listing.fulfilledQuantity / listing.neededQuantity) * 100)) : null;
+            return (
+              <li key={listing.id}>
+                <Link href={`/animal-support/needs/${listing.id}`} className="need-row">
+                  {listing.imageUrls[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={listing.imageUrls[0]} alt="" className="need-row__media" loading="lazy" />
+                  ) : (
+                    <span className="need-row__media need-row__media--icon" aria-hidden="true"><Icon size={22} /></span>
+                  )}
+                  <span className="need-row__body">
+                    <span className="need-row__title">
+                      <span>{listing.title}</span>
+                      {listing.urgency !== SupportNeedUrgency.NORMAL ? <StatusLabel tone={URGENCY_TONE[listing.urgency]}>{t(`urgency.${listing.urgency}`)}</StatusLabel> : null}
+                      {listing.organizationVerified ? <StatusLabel tone="success">{t("list.verifiedOrganization")}</StatusLabel> : null}
+                    </span>
+                    <span className="need-row__meta">
+                      {t(`category.${listing.category}`)} · {listing.city}{listing.neighborhood ? `، ${listing.neighborhood}` : ""} · {formatDay((listing.publishedAt ?? listing.createdAt).slice(0, 10), locale)}{listing.expiresAt ? ` · ${fa ? "مهلت" : "until"} ${formatDay(listing.expiresAt.slice(0, 10), locale, { year: false })}` : ""}
+                    </span>
+                    {pct !== null ? (
+                      <span className="need-row__progress">
+                        <span className="need-row__bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={fa ? "میزان تأمین" : "Fulfilled"}><span style={{ width: `${pct}%` }} /></span>
+                        <span>{t("list.progress", { fulfilled: localizeDigits(listing.fulfilledQuantity, locale), needed: localizeDigits(listing.neededQuantity!, locale), unit: listing.quantityUnit ?? "" })}</span>
+                      </span>
                     ) : null}
-                    {listing.organizationVerified ? <StatusLabel tone="success">{t("list.verifiedOrganization")}</StatusLabel> : null}
-                  </div>
-                  <p className="text-metadata text-text-secondary">
-                    {t(`category.${listing.category}`)} · {listing.city} · {new Date(listing.createdAt).toLocaleDateString()}
-                  </p>
-                  {listing.neededQuantity !== null ? (
-                    <p className="text-metadata text-text-secondary">
-                      {t("list.progress", { fulfilled: listing.fulfilledQuantity, needed: listing.neededQuantity, unit: listing.quantityUnit ?? "" })}
-                    </p>
-                  ) : null}
-                </div>
-              </ContextSurface>
-            </Link>
-          ))}
-        </div>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       )}
 
-      <Link href="/animal-support/needs/mine" className="text-body text-brand-mint underline">
-        {t("list.myListings")}
-      </Link>
+      {total > 20 ? (
+        <nav aria-label={fa ? "صفحه‌ها" : "Pages"} className="flex items-center justify-center gap-3">
+          <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>{fa ? "قبلی" : "Previous"}</Button>
+          <span className="text-sm text-text-secondary">{localizeDigits(page, locale)} / {localizeDigits(Math.ceil(total / 20), locale)}</span>
+          <Button variant="secondary" size="sm" disabled={page * 20 >= total} onClick={() => setPage(page + 1)}>{fa ? "بعدی" : "Next"}</Button>
+        </nav>
+      ) : null}
+
+      <div className="flex flex-wrap gap-4">
+        <Link href="/animal-support/needs/mine" className="text-body text-brand-mint-strong underline">
+          {t("list.myListings")}
+        </Link>
+        <Link href={`/${locale}/animal-support/my-help`} className="text-body text-brand-mint-strong underline">
+          {fa ? "کمک‌های من" : "My help"}
+        </Link>
+      </div>
     </div>
   );
 }

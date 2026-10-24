@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import type { AdminSubscriptionSummaryDto, PaginatedDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { adminSubscriptionService } from "@/services/admin-subscription.service";
@@ -57,5 +57,44 @@ describe("AdminSubscriptionHouseholdsView", () => {
     fireEvent.change(screen.getByLabelText("Status"), { target: { value: "PAST_DUE" } });
 
     await waitFor(() => expect(adminSubscriptionService.listHouseholdSubscriptions).toHaveBeenCalledWith(expect.objectContaining({ status: "PAST_DUE" })));
+  });
+});
+
+describe("subscription pagination and filter isolation", () => {
+  beforeEach(() => vi.mocked(adminSubscriptionService.listHouseholdSubscriptions).mockReset());
+
+  it("reads the next API page and resets pagination when the status changes", async () => {
+    vi.mocked(adminSubscriptionService.listHouseholdSubscriptions).mockImplementation(async ({ page: current = 1 } = {}) => ({ ...page([ROW]), total: 51, page: current }));
+    renderWithIntl(<AdminSubscriptionHouseholdsView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    await waitFor(() => expect(adminSubscriptionService.listHouseholdSubscriptions).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 })));
+    await waitFor(() => expect((screen.getByRole("button", { name: "Next" }) as HTMLButtonElement).disabled).toBe(true));
+    fireEvent.change(screen.getByLabelText("Status"), { target: { value: "ACTIVE" } });
+    await waitFor(() => expect(adminSubscriptionService.listHouseholdSubscriptions).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, status: "ACTIVE" })));
+  });
+
+  it("ignores an older response arriving after the selected filter", async () => {
+    let resolveOld!: (value: PaginatedDto<AdminSubscriptionSummaryDto>) => void;
+    vi.mocked(adminSubscriptionService.listHouseholdSubscriptions)
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveOld = resolve; }))
+      .mockResolvedValueOnce(page([{ ...ROW, household: { id: "new", name: "Filtered household" } }]));
+    renderWithIntl(<AdminSubscriptionHouseholdsView />);
+    fireEvent.change(screen.getByLabelText("Status"), { target: { value: "ACTIVE" } });
+    await screen.findByText("Filtered household");
+    await act(async () => { resolveOld(page([ROW])); });
+    await waitFor(() => expect(screen.queryByText("Rahimi Family")).toBeNull());
+    expect(screen.getByText("Filtered household")).toBeTruthy();
+  });
+
+  it("hides stale rows after a failed filter request and retries the same filter", async () => {
+    vi.mocked(adminSubscriptionService.listHouseholdSubscriptions).mockResolvedValueOnce(page([ROW])).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce(page([]));
+    renderWithIntl(<AdminSubscriptionHouseholdsView />);
+    await screen.findByText("Rahimi Family");
+    fireEvent.change(screen.getByLabelText("Status"), { target: { value: "EXPIRED" } });
+    fireEvent.click(await screen.findByRole("button", { name: "Retry" }));
+    await screen.findByText("Nothing here yet.");
+    expect(screen.queryByText("Rahimi Family")).toBeNull();
+    expect(adminSubscriptionService.listHouseholdSubscriptions).toHaveBeenLastCalledWith({ status: "EXPIRED", page: 1, pageSize: 50 });
+    expect((screen.getByLabelText("Status") as HTMLSelectElement).value).toBe("EXPIRED");
   });
 });

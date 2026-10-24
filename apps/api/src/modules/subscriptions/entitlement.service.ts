@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { SubscriptionEntitlementType } from "@prisma/client";
 import type { ResolvedEntitlementDto, SubscriptionUsageItemDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { SubscriptionEntitlementLimitExceededException } from "../../common/errors/api-exception";
+import { SubscriptionEntitlementLimitExceededException, SubscriptionFeatureNotIncludedException } from "../../common/errors/api-exception";
 import { PAID_ACCESS_STATUSES, SubscriptionService } from "./subscription.service";
 import { SubscriptionPlanReadService } from "./subscription-plan-read.service";
 import { UsageService } from "./usage.service";
@@ -92,6 +92,11 @@ export class EntitlementService {
    * in `details` so the UI can render the precise message the spec's own
    * worked example shows, never a generic failure.
    */
+  /** For a BOOLEAN plan feature: throws SUBSCRIPTION_FEATURE_NOT_INCLUDED unless the plan (or an override) grants it. */
+  async assertFeature(householdId: string, key: string): Promise<void> {
+    if (!(await this.has(householdId, key))) throw new SubscriptionFeatureNotIncludedException({ key });
+  }
+
   async assertWithinLimit(householdId: string, key: string): Promise<void> {
     const item = await this.getUsageItem(householdId, key);
     if (item.limit !== null && item.used >= item.limit) {

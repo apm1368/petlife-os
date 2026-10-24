@@ -8,11 +8,12 @@ import { HouseholdPetsController } from "./household-pets.controller";
 import { PetLifecycleService } from "./pet-lifecycle.service";
 import { PetsController } from "./pets.controller";
 import { PetsService } from "./pets.service";
+import { PetOverviewService } from "./pet-overview.service";
 
 @Module({
   imports: [PetAccessModule, StorageModule, SubscriptionsModule],
   controllers: [HouseholdPetsController, PetsController, ActivePetController],
-  providers: [PetsService, ActivePetService, PetLifecycleService],
+  providers: [PetsService, ActivePetService, PetLifecycleService, PetOverviewService],
   exports: [PetsService, ActivePetService, PetLifecycleService],
 })
 export class PetsModule {}

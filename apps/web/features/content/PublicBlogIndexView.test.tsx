@@ -92,4 +92,15 @@ describe("PublicBlogIndexView", () => {
 
     await waitFor(() => expect(screen.getByText("وبلاگ")).toBeTruthy());
   });
+
+  it("the blog index leaves guides out; the guides section asks for guides only", async () => {
+    vi.mocked(blogService.listArticles).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 12 });
+    vi.mocked(blogService.listCategories).mockResolvedValue([CATEGORY, { ...CATEGORY, id: "g", slug: "guides", name: "Guides" }]);
+    renderWithIntl(<PublicBlogIndexView />);
+    await waitFor(() => expect(blogService.listArticles).toHaveBeenCalledWith("en", expect.objectContaining({ excludeCategorySlug: "guides" })));
+    await waitFor(() => expect(screen.queryByRole("link", { name: "Guides" })).toBeNull());
+    vi.mocked(blogService.listArticles).mockClear();
+    renderWithIntl(<PublicBlogIndexView section="guides" />);
+    await waitFor(() => expect(blogService.listArticles).toHaveBeenCalledWith("en", expect.objectContaining({ categorySlug: "guides" })));
+  });
 });

@@ -5,8 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { PaginatedDto, ProviderPatientSummaryDto } from "@petlife/types";
-import { ApiError } from "@/lib/api/client";
 import { vetPanelService } from "@/services/vet-panel.service";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const PAGE_SIZE = 20;
 
@@ -22,6 +23,7 @@ const PAGE_SIZE = 20;
  * disabling the row would leave the vet guessing why their patient vanished.
  */
 export function VetPatientRegistryView() {
+  const fmt = useInstantFormat();
   const t = useTranslations("vetPanel.registry");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -39,7 +41,7 @@ export function VetPatientRegistryView() {
     try {
       setResult(await vetPanelService.listPatients({ q: submittedQuery || undefined, hospitalizedOnly: hospitalizedOnly || undefined, page, pageSize: PAGE_SIZE }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     }
   }
 
@@ -108,7 +110,7 @@ export function VetPatientRegistryView() {
                   <StatusLabel tone={patient.highestActiveAlertSeverity === "CRITICAL" ? "emergency" : "attention"}>{t("alerts", { count: patient.activeAlertCount })}</StatusLabel>
                 ) : null}
                 {/* "Never seen here" is stated, not left blank — an empty date could read as "no visits needed". */}
-                <StatusLabel tone="neutral">{patient.lastVisitAt ? t("lastVisit", { date: new Date(patient.lastVisitAt).toLocaleDateString() }) : t("noVisitsYet")}</StatusLabel>
+                <StatusLabel tone="neutral">{patient.lastVisitAt ? t("lastVisit", { date: fmt.date(patient.lastVisitAt) }) : t("noVisitsYet")}</StatusLabel>
               </div>
             </button>
           ))}

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import { DocumentTooLargeException, UnsupportedDocumentTypeException } from "../../common/errors/api-exception";
-import { DownloadTarget, STORAGE_DRIVER, type StorageDriver, type UploadTarget } from "./storage-driver.interface";
+import { type DownloadOptions, DownloadTarget, STORAGE_DRIVER, type StorageDriver, type UploadTarget } from "./storage-driver.interface";
 
 /** Handoff 17: allow-listed MIME types for a medical document — a narrow, explicit set, never "anything the client sends". */
 const HEALTH_DOCUMENT_MIME_EXTENSIONS: Record<string, string> = {
@@ -84,7 +84,17 @@ export class StorageService {
     }
     // randomUUID() as the filename — never the client-supplied original name — sidesteps path traversal / unsafe-filename concerns entirely.
     const key = `health-documents/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
+  /** A private file on a booking (owner ↔ provider). Same file types and size cap as medical documents. */
+  async createBookingAttachmentUploadTarget(bookingId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    const key = `booking-attachments/${bookingId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -96,7 +106,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: OBSERVATION_MEDIA_MAX_BYTES });
     }
     const key = `pet-observations/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -106,8 +116,19 @@ export class StorageService {
    * underlying record before calling this — this method performs no
    * authorization of its own, it only knows how to sign a URL.
    */
-  async createPrivateDownloadTarget(key: string): Promise<DownloadTarget> {
-    return this.driver.createDownloadTarget(key);
+  async createPrivateDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget> {
+    return this.driver.createDownloadTarget(key, options);
+  }
+
+  /** Batch 8 — writes a server-generated account export into the private `account-exports/` space. */
+  async putAccountExport(userId: string, requestId: string, body: Buffer): Promise<string> {
+    const key = `account-exports/${userId}/${requestId}-${randomUUID()}.json`;
+    await this.driver.putObject(key, body, "application/json");
+    return key;
+  }
+
+  async deletePrivateObject(key: string): Promise<void> {
+    await this.driver.deleteObject(key);
   }
 
   /** A completely separate key namespace (`cms/media/...`) from `pets/...` — spec: "strongly separate CMS media authorization from private pet documents." CMS media is meant to be public (blog images), so this uses the same plain-public-URL delivery `createPetPhotoUploadTarget` already established, never a signed-read scheme this codebase has no other precedent for. Returns `key` alongside the target (unlike the pet-photo variant) since the CMS confirm step needs it verbatim, not reconstructed from the URL. */
@@ -132,7 +153,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: LOST_PET_PHOTO_MAX_BYTES });
     }
     const key = `lost-pet-photos/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -144,7 +165,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: LOST_PET_PHOTO_MAX_BYTES });
     }
     const key = `lost-pet-sightings/${incidentId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -164,7 +185,7 @@ export class StorageService {
     }
     const prefix = visibility === "PUBLIC" ? "pet-memories-public" : "pet-memories-private";
     const key = `${prefix}/${petId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -176,7 +197,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: ANIMAL_SUPPORT_MEDIA_MAX_BYTES });
     }
     const key = `animal-support-orgs/${organizationId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -188,7 +209,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
     }
     const key = `insurance-providers/${providerId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -200,7 +221,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
     }
     const key = `pet-friendly-places/${placeId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -212,7 +233,43 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: ANIMAL_SUPPORT_MEDIA_MAX_BYTES });
     }
     const key = `animal-support-evidence/${aggregateId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
+  /** Batch 6: an NGO's verification documents — private (same allow-list and limits as medical documents); only admins read them, through signed download targets. */
+  async createOrgVerificationDocumentUploadTarget(organizationId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    }
+    const key = `animal-support-verification/${organizationId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
+  /** ERP-F: a support-case attachment — private, same allow-list and limits as medical documents; read only via signed downloads after a case-access check. */
+  async createSupportAttachmentUploadTarget(caseId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    }
+    const key = `support-attachments/${caseId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
+  /** ERP-C: a provider's or seller's verification evidence — private, same allow-list and limits as medical documents; staff read it only through signed, audited downloads. */
+  async createPartnerVerificationUploadTarget(subject: "provider" | "seller", subjectId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    }
+    const key = `partner-verification/${subject}/${subjectId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -224,7 +281,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
     }
     const key = `community-media/${userId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -241,7 +298,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
     }
     const key = `support-need-images/${userId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
@@ -257,7 +314,7 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: MEMORY_MEDIA_MAX_BYTES });
     }
     const key = `travel-listing-images/${organizationId}/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 }

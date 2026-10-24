@@ -1,5 +1,8 @@
 import { BadRequestException, Body, Controller, Get, Headers, Param, Post, Query } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { PaymentProvider } from "@prisma/client";
+import type { AppEnv } from "../../../config/env";
+import { devSimulationAllowed } from "../../../common/dev/dev-simulation";
 import { PaymentsService } from "../payments/payments.service";
 import { PaymentGatewayRegistry } from "../payments/payment-gateway-registry.service";
 import { ProviderEventsService, hashPayload } from "../payments/provider-events.service";
@@ -40,11 +43,15 @@ export class PaymentWebhooksController {
     private readonly financing: FinancingService,
     private readonly financingProviders: FinancingProviderRegistry,
     private readonly providerEvents: ProviderEventsService,
+    private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
   @Post("webhooks/:provider")
   async handleWebhook(@Param("provider") providerSlug: string, @Body() dto: PaymentWebhookDto, @Headers("x-webhook-signature") signature?: string) {
     const provider = resolveProviderSlug(providerSlug);
+    // Sandbox verifiers accept unsigned bodies, so on a server that is not an explicit dev-simulation server a
+    // sandbox webhook could mark anyone's pending payment as paid. Real (production-mode) gateways verify signatures.
+    if (this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) !== "production" && !devSimulationAllowed(this.config)) throw new WebhookSignatureInvalidException({ provider: providerSlug, reason: "SANDBOX_WEBHOOKS_DISABLED" });
     const isFinancing = Boolean(dto.financingIntentId);
 
     const verifier = isFinancing ? this.financingProviders.resolve(provider) : this.paymentGateways.resolve(provider);

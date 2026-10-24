@@ -1,3 +1,4 @@
+import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NotificationChannel, NotificationDeliveryStatus } from "@prisma/client";
@@ -36,8 +37,9 @@ export class NotificationDeliveryWorkerService implements OnModuleInit, OnModule
   onModuleInit(): void {
     if (process.env.NODE_ENV === "test") return;
     const intervalMs = this.config.get("NOTIFICATION_WORKER_INTERVAL_MS", { infer: true });
+    registerWorker("notification-delivery", intervalMs);
     this.timer = setInterval(() => {
-      this.processDueDeliveries().catch((error) => this.logger.error("Notification delivery worker tick failed", error instanceof Error ? error.stack : undefined));
+      trackWorker("notification-delivery", intervalMs, () => this.processDueDeliveries()).catch((error) => this.logger.error("Notification delivery worker tick failed", error instanceof Error ? error.stack : undefined));
     }, intervalMs);
   }
 

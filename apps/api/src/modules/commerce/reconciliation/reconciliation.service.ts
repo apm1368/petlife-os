@@ -7,6 +7,9 @@ import { PaymentGatewayRegistry } from "../payments/payment-gateway-registry.ser
 import { PaymentsService } from "../payments/payments.service";
 import { FinancingProviderRegistry } from "../financing/financing-provider-registry.service";
 import { FinancingService } from "../financing/financing.service";
+import { FinancingIntentNotFoundException, PaymentIntentNotFoundException } from "../../../common/errors/api-exception";
+
+const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 
 function toDto(log: ReconciliationLog): ReconciliationLogDto {
   return {
@@ -42,6 +45,17 @@ export class ReconciliationService {
     private readonly financingProviders: FinancingProviderRegistry,
     private readonly financing: FinancingService,
   ) {}
+
+  /** The caller must own the checkout the intent pays for; anything else is indistinguishable from a missing id. */
+  async assertOwnsPaymentIntent(intentId: string, userId: string): Promise<void> {
+    const owned = isUuid(intentId) ? await this.prisma.paymentIntent.findFirst({ where: { id: intentId, checkout: { userId } }, select: { id: true } }) : null;
+    if (!owned) throw new PaymentIntentNotFoundException({ paymentIntentId: intentId });
+  }
+
+  async assertOwnsFinancingIntent(intentId: string, userId: string): Promise<void> {
+    const owned = isUuid(intentId) ? await this.prisma.financingIntent.findFirst({ where: { id: intentId, checkout: { userId } }, select: { id: true } }) : null;
+    if (!owned) throw new FinancingIntentNotFoundException({ financingIntentId: intentId });
+  }
 
   async reconcilePaymentIntent(intentId: string): Promise<ReconciliationLogDto> {
     const intent = await this.prisma.paymentIntent.findUniqueOrThrow({ where: { id: intentId } });

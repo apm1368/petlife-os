@@ -16,6 +16,7 @@ function incident(overrides: Partial<LostPetIncidentDto> = {}): LostPetIncidentD
     petPhotoUrl: null,
     householdId: "household-1",
     status: "OPEN" as never,
+    publicArea: null,
     lastKnownLocation: "Central Park",
     lastKnownLatitude: null,
     lastKnownLongitude: null,
@@ -65,6 +66,6 @@ describe("LostPetIncidentListView", () => {
 
     renderWithIntl(<LostPetIncidentListView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.getByText("Retry")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy());
   });
 });

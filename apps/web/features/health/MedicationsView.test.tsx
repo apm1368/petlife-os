@@ -33,26 +33,26 @@ describe("MedicationsView RTL mixed content", () => {
     vi.mocked(healthService.listMedications).mockReset();
   });
 
-  it("renders a Latin drug name and dosage untouched, isolated with dir=auto, inside a Persian (RTL) page", async () => {
+  it("keeps the Latin drug name and unit, isolated with dir=auto, and shows the dosage in Persian digits on a Persian page", async () => {
     vi.mocked(healthService.listMedications).mockResolvedValue([MEDICATION]);
 
     const { container } = renderWithIntl(<MedicationsView petId="pet-1" />, "fa");
 
     const nameLine = await waitFor(() => {
-      const el = container.querySelector('p[dir="auto"]');
+      const el = container.querySelector('a[dir="auto"]');
       if (!el) throw new Error("not rendered yet");
       return el;
     });
 
-    expect(nameLine.textContent).toBe("Apoquel — 16 mg");
+    expect(nameLine.textContent).toBe("Apoquel — ۱۶ mg");
   });
 
-  it("renders the identical mixed-content name/dosage line regardless of surrounding page direction", async () => {
+  it("keeps the name, value and unit identical across locales — only the digit shapes follow the page language", async () => {
     vi.mocked(healthService.listMedications).mockResolvedValue([MEDICATION]);
 
     const { container: enContainer, unmount } = renderWithIntl(<MedicationsView petId="pet-1" />, "en");
     const enLine = await waitFor(() => {
-      const el = enContainer.querySelector('p[dir="auto"]');
+      const el = enContainer.querySelector('a[dir="auto"]');
       if (!el) throw new Error("not rendered yet");
       return el;
     });
@@ -61,10 +61,10 @@ describe("MedicationsView RTL mixed content", () => {
 
     const { container: faContainer } = renderWithIntl(<MedicationsView petId="pet-1" />, "fa");
     const faLine = await waitFor(() => {
-      const el = faContainer.querySelector('p[dir="auto"]');
+      const el = faContainer.querySelector('a[dir="auto"]');
       if (!el) throw new Error("not rendered yet");
       return el;
     });
-    expect(faLine.textContent).toBe("Apoquel — 16 mg");
+    expect(faLine.textContent).toBe("Apoquel — ۱۶ mg");
   });
 });

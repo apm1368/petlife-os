@@ -1,56 +1,24 @@
 import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetAccessSource, type Pet, type Prisma } from "@prisma/client";
 import type { PetAccessFlags } from "@petlife/types";
+import { DomainEventsService } from "../../common/events/domain-events.service";
+import { HouseholdAccessDeniedException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 const OWNER_PRESET: PetAccessFlags = {
-  canViewIdentity: true,
-  canEditIdentity: true,
-  canViewHealth: true,
-  canEditHealth: true,
-  canBookCare: true,
-  canViewCareProfile: true,
-  canEditCareProfile: true,
-  canViewLocation: true,
-  canManageAccess: true,
-  canRecordClinicalData: false,
+  canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true,
+  canViewCareProfile: true, canEditCareProfile: true, canViewLocation: true, canManageAccess: true, canRecordClinicalData: false,
 };
-
-const FAMILY_PRESET: PetAccessFlags = {
-  canViewIdentity: true,
-  canEditIdentity: false,
-  canViewHealth: true,
-  canEditHealth: false,
-  canBookCare: true,
-  canViewCareProfile: true,
-  canEditCareProfile: false,
-  canViewLocation: true,
-  canManageAccess: false,
-  canRecordClinicalData: false,
+const CREATOR_IDENTITY_PRESET: PetAccessFlags = {
+  canViewIdentity: true, canEditIdentity: true, canViewHealth: false, canEditHealth: false, canBookCare: false,
+  canViewCareProfile: false, canEditCareProfile: false, canViewLocation: false, canManageAccess: false, canRecordClinicalData: false,
 };
-
 const NO_ACCESS_PRESET: PetAccessFlags = {
-  canViewIdentity: false,
-  canEditIdentity: false,
-  canViewHealth: false,
-  canEditHealth: false,
-  canBookCare: false,
-  canViewCareProfile: false,
-  canEditCareProfile: false,
-  canViewLocation: false,
-  canManageAccess: false,
-  canRecordClinicalData: false,
+  canViewIdentity: false, canEditIdentity: false, canViewHealth: false, canEditHealth: false, canBookCare: false,
+  canViewCareProfile: false, canEditCareProfile: false, canViewLocation: false, canManageAccess: false, canRecordClinicalData: false,
 };
-
 const FLAG_KEYS = Object.keys(NO_ACCESS_PRESET) as (keyof PetAccessFlags)[];
-
-type Grant = {
-  startsAt: Date | null;
-  expiresAt: Date | null;
-  revokedAt: Date | null;
-} & PetAccessFlags;
-
-/** A DB-level query client — either the default PrismaService or a $transaction callback's tx. */
+type Grant = { startsAt: Date | null; expiresAt: Date | null; revokedAt: Date | null } & PetAccessFlags;
 type QueryClient = PrismaService | Prisma.TransactionClient;
 
 function isGrantActive(grant: Pick<Grant, "startsAt" | "expiresAt" | "revokedAt">, now: Date): boolean {
@@ -60,73 +28,72 @@ function isGrantActive(grant: Pick<Grant, "startsAt" | "expiresAt" | "revokedAt"
   return true;
 }
 
-/**
- * HouseholdMember.role is only a preset applied when a HOUSEHOLD-sourced
- * grant is created — PetAccessGrant rows are the actual authorization
- * source of truth from then on. A user may hold multiple simultaneous,
- * independent grants for the same pet (household + a temporary vet grant,
- * for example); effective authorization is the boolean OR of every
- * currently active, non-revoked grant's flags. See getEffectivePermissions.
- */
+/** Reasons the system writes for its own grants; they change how a grant is read, so clients can't set them. */
+function isSystemReason(reason: string): boolean {
+  return reason === "EXPLICIT_VET_SHARE" || reason.endsWith("_BOOKING");
+}
+
+function assertWithinActorExpiry(expiresAt: Date | null, actorExpiry: Date | null) {
+  if (!actorExpiry) return;
+  if (!expiresAt || expiresAt > actorExpiry) {
+    throw new ValidationApiException({ field: "expiresAt", reason: "Access you grant cannot outlast your own access.", maxExpiresAt: actorExpiry.toISOString() });
+  }
+}
+
 @Injectable()
 export class PetAccessService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly events?: DomainEventsService) {}
 
   /**
-   * Ensures every current household member has an active HOUSEHOLD-sourced
-   * grant for this pet. Idempotent: a member who already has one active
-   * HOUSEHOLD grant is skipped rather than accumulating duplicates — grants
-   * have no unique constraint, so nothing else would stop that.
+   * Automatic grants for a newly created pet. Only household OWNERs get access automatically (the full owner
+   * preset); membership alone never implies seeing health, location, documents or managing care — an owner
+   * shares those explicitly. A FAMILY member who created the pet themselves gets identity only (see and edit
+   * the pet's profile), so they are not locked out of what they just added.
    */
-  async applyHouseholdDefaults(petId: string, householdId: string, client: QueryClient = this.prisma): Promise<void> {
+  async applyHouseholdDefaults(petId: string, householdId: string, creatorUserId: string, client: QueryClient = this.prisma): Promise<void> {
     const members = await client.householdMember.findMany({ where: { householdId } });
-    if (members.length === 0) return;
-
-    const existingHouseholdGrants = await client.petAccessGrant.findMany({
-      where: { petId, userId: { in: members.map((m) => m.userId) }, source: PetAccessSource.HOUSEHOLD },
-    });
+    const recipients = members
+      .map((member) => member.role === HouseholdRole.OWNER ? { userId: member.userId, flags: OWNER_PRESET } : member.userId === creatorUserId ? { userId: member.userId, flags: CREATOR_IDENTITY_PRESET } : null)
+      .filter((r): r is { userId: string; flags: PetAccessFlags } => r !== null);
+    if (!recipients.length) return;
+    const existing = await client.petAccessGrant.findMany({ where: { petId, userId: { in: recipients.map((r) => r.userId) }, source: PetAccessSource.HOUSEHOLD } });
     const now = new Date();
-    const membersWithActiveGrant = new Set(
-      existingHouseholdGrants.filter((g) => isGrantActive(g, now)).map((g) => g.userId),
-    );
-
-    const toCreate = members.filter((member) => !membersWithActiveGrant.has(member.userId));
-    if (toCreate.length === 0) return;
-
-    await client.petAccessGrant.createMany({
-      data: toCreate.map((member) => ({
-        petId,
-        userId: member.userId,
-        source: PetAccessSource.HOUSEHOLD,
-        ...(member.role === HouseholdRole.OWNER ? OWNER_PRESET : FAMILY_PRESET),
-      })),
-    });
+    const activeUsers = new Set(existing.filter((grant) => isGrantActive(grant, now)).map((grant) => grant.userId));
+    const missing = recipients.filter((r) => !activeUsers.has(r.userId));
+    if (!missing.length) return;
+    await client.petAccessGrant.createMany({ data: missing.map((r) => ({ petId, userId: r.userId, source: PetAccessSource.HOUSEHOLD, ...r.flags })) });
   }
 
-  /**
-   * The effective-authorization algorithm: fetch every grant for (petId,
-   * userId), keep only those currently active (not revoked, within their
-   * start/expiry window), and OR their flags together. Returns null when
-   * there is no active grant at all — callers use that to distinguish "no
-   * access whatsoever" from "access, but missing one specific capability".
-   */
-  async getEffectivePermissions(
-    petId: string,
-    userId: string,
-    client: QueryClient = this.prisma,
-  ): Promise<PetAccessFlags | null> {
+  async getEffectivePermissions(petId: string, userId: string, client: QueryClient = this.prisma): Promise<PetAccessFlags | null> {
     const grants = await client.petAccessGrant.findMany({ where: { petId, userId } });
-    const now = new Date();
-    const active = grants.filter((grant) => isGrantActive(grant, now));
-    if (active.length === 0) return null;
-
+    // Granular vet shares are usable only through the scope-enforcing read API.
+    const active = grants.filter((grant) => grant.reason !== "EXPLICIT_VET_SHARE" && isGrantActive(grant, new Date()));
+    if (!active.length) return null;
     return active.reduce<PetAccessFlags>((union, grant) => {
       const next = { ...union };
       for (const key of FLAG_KEYS) {
-        next[key] = union[key] || grant[key];
+        // Booking grants without recorded owner consent (including all pre-consent legacy rows) never read or
+        // edit health; clinical recording for the visit window stays operational.
+        const bookingHealth = grant.reason?.endsWith("_BOOKING") && (key === "canViewHealth" || key === "canEditHealth");
+        next[key] = union[key] || (!bookingHealth && grant[key]);
       }
       return next;
     }, NO_ACCESS_PRESET);
+  }
+
+  /**
+   * Who may read or act on a household's booking besides its booker: a member of that household who can book care
+   * for the pet through their own household or owner-given grant. Temporary grants (a sitter's window) and
+   * system grants (a provider's booking access, a vet share) never qualify — a provider must not read the pet's
+   * other bookings, intake answers or attachments through the access its own booking gave it.
+   */
+  async canActOnBooking(booking: { userId: string; petId: string; householdId: string }, userId: string): Promise<boolean> {
+    if (booking.userId === userId) return true;
+    const member = await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId: booking.householdId, userId } } });
+    if (!member) return false;
+    const now = new Date();
+    const grants = await this.prisma.petAccessGrant.findMany({ where: { petId: booking.petId, userId, canBookCare: true, source: { in: [PetAccessSource.HOUSEHOLD, PetAccessSource.MANUAL] } } });
+    return grants.some((grant) => isGrantActive(grant, now) && !(grant.reason && isSystemReason(grant.reason)));
   }
 
   async hasActiveAccess(petId: string, userId: string, client: QueryClient = this.prisma): Promise<boolean> {
@@ -134,21 +101,110 @@ export class PetAccessService {
   }
 
   /**
-   * Resolve a pet only after proving that the caller holds an active grant.
-   * Public discovery endpoints use this instead of loading an arbitrary
-   * query-string pet id first. Returning null for anonymous callers,
-   * nonexistent pets, and unrelated users keeps those cases deliberately
-   * indistinguishable and prevents pet-existence/identity disclosure.
+   * Batch 8 — why someone who once had access no longer does, so the product
+   * can say "your access expired" / "was revoked" instead of a generic error.
+   * Only ever describes the caller's own grants; a stranger gets null.
    */
+  async describeLapse(petId: string, userId: string): Promise<{ reason: "EXPIRED" | "REVOKED" | "NOT_STARTED"; at: string } | null> {
+    const grants = await this.prisma.petAccessGrant.findMany({ where: { petId, userId }, orderBy: { updatedAt: "desc" }, take: 20 });
+    const now = new Date();
+    const upcoming = grants.find((g) => !g.revokedAt && g.startsAt && g.startsAt > now);
+    if (upcoming) return { reason: "NOT_STARTED", at: upcoming.startsAt!.toISOString() };
+    const ended = grants
+      .map((g) => (g.revokedAt ? { reason: "REVOKED" as const, at: g.revokedAt } : g.expiresAt && g.expiresAt <= now ? { reason: "EXPIRED" as const, at: g.expiresAt } : null))
+      .filter((x): x is { reason: "EXPIRED" | "REVOKED"; at: Date } => x !== null)
+      .sort((a, b) => b.at.getTime() - a.at.getTime())[0];
+    return ended ? { reason: ended.reason, at: ended.at.toISOString() } : null;
+  }
+
   async findAccessiblePet(petId: string | undefined, userId: string | undefined, client: QueryClient = this.prisma): Promise<Pet | null> {
-    if (!petId || !userId) return null;
-    const permissions = await this.getEffectivePermissions(petId, userId, client);
-    if (!permissions) return null;
+    if (!petId || !userId || !(await this.getEffectivePermissions(petId, userId, client))) return null;
     return client.pet.findUnique({ where: { id: petId } });
   }
 
-  async listForPet(petId: string) {
-    return this.prisma.petAccessGrant.findMany({ where: { petId } });
+  async listForPet(petId: string) { return this.prisma.petAccessGrant.findMany({ where: { petId } }); }
+
+  async listManagedForPet(petId: string) {
+    const grants = await this.prisma.petAccessGrant.findMany({
+      where: { petId },
+      include: { user: { select: { id: true, displayName: true, avatarUrl: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    const now = new Date();
+    return grants.map((grant) => ({ ...grant, active: isGrantActive(grant, now) }));
+  }
+
+  async createGrant(
+    petId: string,
+    targetUserId: string,
+    actorUserId: string,
+    flags: PetAccessFlags,
+    timing: { startsAt?: string; expiresAt?: string; reason?: string },
+  ) {
+    const pet = await this.prisma.pet.findUnique({ where: { id: petId } });
+    if (!pet) throw new NotFoundApiException("Pet");
+    const member = await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId: pet.householdId, userId: targetUserId } } });
+    if (!member) throw new HouseholdAccessDeniedException();
+    if (member.role === HouseholdRole.OWNER) throw new ValidationApiException({ field: "userId", reason: "Owner access cannot be replaced." });
+    if (targetUserId === actorUserId) throw new ValidationApiException({ field: "userId", reason: "You cannot grant access to yourself." });
+    if (timing.reason && isSystemReason(timing.reason)) throw new ValidationApiException({ field: "reason", reason: "This reason is reserved for system grants." });
+    const actorExpiry = await this.assertNoEscalation(petId, actorUserId, flags);
+    const startsAt = timing.startsAt ? new Date(timing.startsAt) : null;
+    const expiresAt = timing.expiresAt ? new Date(timing.expiresAt) : null;
+    if (startsAt && expiresAt && startsAt >= expiresAt) throw new ValidationApiException({ field: "expiresAt", reason: "Expiry must be after start." });
+    assertWithinActorExpiry(expiresAt, actorExpiry);
+    const grant = await this.prisma.petAccessGrant.create({
+      data: { petId, userId: targetUserId, ...flags, startsAt, expiresAt, reason: timing.reason, source: expiresAt ? PetAccessSource.TEMPORARY : PetAccessSource.MANUAL, grantedByUserId: actorUserId },
+    });
+    await this.events?.publish("PetAccessGranted", { petId, grantId: grant.id, actorUserId, targetUserId, expiresAt }, { aggregateType: "Pet", aggregateId: petId });
+    return grant;
+  }
+
+  async updateGrant(petId: string, grantId: string, actorUserId: string, input: Partial<PetAccessFlags> & { startsAt?: string; expiresAt?: string; reason?: string }) {
+    const grant = await this.prisma.petAccessGrant.findFirst({ where: { id: grantId, petId, revokedAt: null } });
+    if (!grant) throw new NotFoundApiException("Access grant");
+    const targetMembership = await this.prisma.householdMember.findFirst({ where: { userId: grant.userId, household: { pets: { some: { id: petId } } } }, select: { role: true } });
+    if (targetMembership?.role === HouseholdRole.OWNER) throw new ValidationApiException({ field: "grantId", reason: "Owner access cannot be changed." });
+    if (grant.userId === actorUserId) throw new ValidationApiException({ field: "grantId", reason: "You cannot change your own access." });
+    const { startsAt, expiresAt, reason, ...partialFlags } = input;
+    // A grant's reason carries meaning (booking grants never read health, vet shares only work through the
+    // scoped API), so it is fixed at creation; re-sending the same value is accepted.
+    if (reason !== undefined && reason !== grant.reason) throw new ValidationApiException({ field: "reason", reason: "A grant's reason cannot be changed." });
+    const nextFlags = Object.fromEntries(FLAG_KEYS.map((key) => [key, partialFlags[key] ?? grant[key]])) as unknown as PetAccessFlags;
+    const actorExpiry = await this.assertNoEscalation(petId, actorUserId, nextFlags);
+    const nextStart = startsAt ? new Date(startsAt) : grant.startsAt;
+    const nextExpiry = expiresAt ? new Date(expiresAt) : grant.expiresAt;
+    if (nextStart && nextExpiry && nextStart >= nextExpiry) throw new ValidationApiException({ field: "expiresAt", reason: "Expiry must be after start." });
+    assertWithinActorExpiry(nextExpiry, actorExpiry);
+    const updated = await this.prisma.petAccessGrant.update({ where: { id: grantId }, data: { ...partialFlags, startsAt: nextStart, expiresAt: nextExpiry } });
+    await this.events?.publish("PetAccessChanged", { petId, grantId, actorUserId, targetUserId: grant.userId }, { aggregateType: "Pet", aggregateId: petId });
+    return updated;
+  }
+
+  async revokeGrant(petId: string, grantId: string, actorUserId: string) {
+    const grant = await this.prisma.petAccessGrant.findFirst({ where: { id: grantId, petId, revokedAt: null }, include: { user: { select: { householdMemberships: { where: { household: { pets: { some: { id: petId } } } }, select: { role: true } } } } } });
+    if (!grant) throw new NotFoundApiException("Access grant");
+    if (grant.user.householdMemberships.some((membership) => membership.role === HouseholdRole.OWNER)) throw new ValidationApiException({ field: "grantId", reason: "Owner access cannot be revoked." });
+    await this.prisma.petAccessGrant.update({ where: { id: grantId }, data: { revokedAt: new Date(), revokedByUserId: actorUserId } });
+    await this.events?.publish("PetAccessRevoked", { petId, grantId, actorUserId, targetUserId: grant.userId }, { aggregateType: "Pet", aggregateId: petId });
+    return { ok: true };
+  }
+
+  /**
+   * The actor may only hand out permissions they hold, and never for longer than their own ability to manage
+   * access lasts. Returns that limit: null when the actor's manage access does not expire.
+   */
+  private async assertNoEscalation(petId: string, actorUserId: string, requested: PetAccessFlags): Promise<Date | null> {
+    const actor = await this.getEffectivePermissions(petId, actorUserId);
+    if (!actor?.canManageAccess) throw new HouseholdAccessDeniedException();
+    for (const key of FLAG_KEYS) {
+      if (requested[key] && !actor[key]) throw new ValidationApiException({ field: key, reason: "Cannot grant a permission you do not hold." });
+    }
+    const now = new Date();
+    const managing = (await this.prisma.petAccessGrant.findMany({ where: { petId, userId: actorUserId, canManageAccess: true } }))
+      .filter((grant) => grant.reason !== "EXPLICIT_VET_SHARE" && isGrantActive(grant, now));
+    if (managing.some((grant) => grant.expiresAt === null)) return null;
+    return new Date(Math.max(...managing.map((grant) => grant.expiresAt!.getTime())));
   }
 }
 

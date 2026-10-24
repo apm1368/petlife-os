@@ -12,7 +12,7 @@ export function toProviderBookingSummaryDto(booking: ProviderBookingRow): Provid
     petSpecies: booking.pet.species as unknown as ProviderBookingSummaryDto["petSpecies"],
     ownerDisplayName: booking.user.displayName,
     category: booking.category as unknown as ProviderBookingSummaryDto["category"],
-    serviceName: booking.providerService.name,
+    serviceName: booking.serviceNameSnapshot ?? booking.providerService.name,
     startAt: booking.startAt.toISOString(),
     endAt: booking.endAt.toISOString(),
     timezone: booking.timezone,
@@ -20,6 +20,11 @@ export function toProviderBookingSummaryDto(booking: ProviderBookingRow): Provid
     bookingStatus: booking.bookingStatus as unknown as ProviderBookingSummaryDto["bookingStatus"],
     paymentStatus: booking.paymentStatus as unknown as ProviderBookingSummaryDto["paymentStatus"],
     providerUserId: booking.providerUserId,
+    bookingNumber: booking.bookingNumber,
+    variantName: booking.variantNameSnapshot,
+    requestExpiresAt: booking.requestExpiresAt?.toISOString() ?? null,
+    resourceId: booking.resourceId,
+    paymentMode: booking.paymentMode as unknown as ProviderBookingSummaryDto["paymentMode"],
   };
 }
 

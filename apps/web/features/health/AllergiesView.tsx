@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { AllergySeverity, type AllergyDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
@@ -9,6 +10,7 @@ import { healthService } from "@/services/health.service";
 export function AllergiesView({ petId }: { petId: string }) {
   const t = useTranslations("health.allergies");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [allergies, setAllergies] = useState<AllergyDto[] | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState("");
@@ -89,7 +91,7 @@ export function AllergiesView({ petId }: { petId: string }) {
       {allergies.map((allergy) => (
         <ContextSurface key={allergy.id} className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-body text-text-primary">{allergy.name}</p>
+            <Link href={`/${locale}/pets/${petId}/health/allergies/${allergy.id}`} className="text-body text-text-primary underline-offset-4 hover:underline">{allergy.name}</Link>
             {allergy.reaction ? <p className="text-metadata text-text-secondary">{allergy.reaction}</p> : null}
             <p className="text-metadata text-text-secondary">{t("source")}: {allergy.sourceType}</p>
           </div>

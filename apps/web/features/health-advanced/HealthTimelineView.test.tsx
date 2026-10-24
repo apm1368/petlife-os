@@ -48,8 +48,9 @@ describe("HealthTimelineView", () => {
     renderWithIntl(<HealthTimelineView petId="pet-1" />);
 
     await waitFor(() => expect(screen.getByText("Bloodwork recorded")).toBeTruthy());
-    expect(screen.getByText("PROVIDER")).toBeTruthy();
-    expect(screen.getByText("OWNER")).toBeTruthy();
+    expect(screen.getByText("Provider")).toBeTruthy();
+    expect(screen.getByText("Owner")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/\b(PROVIDER|OWNER)\b/);
     expect(screen.getByText("Happy Paws Clinic")).toBeTruthy();
     expect(screen.getByText("Owner noted reduced appetite")).toBeTruthy();
   });

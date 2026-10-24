@@ -1,0 +1,50 @@
+[
+  {
+    "page": "birth-onboarding",
+    "locale": "fa",
+    "width": 390,
+    "before": true,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-add-pet",
+    "locale": "fa",
+    "width": 390,
+    "before": true,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "verification-queue",
+    "locale": "fa",
+    "width": 390,
+    "before": true,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-onboarding",
+    "locale": "fa",
+    "width": 1440,
+    "before": true,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "birth-add-pet",
+    "locale": "fa",
+    "width": 1440,
+    "before": true,
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "page": "verification-queue",
+    "locale": "fa",
+    "width": 1440,
+    "before": true,
+    "overflow": false,
+    "pageErrors": []
+  }
+]

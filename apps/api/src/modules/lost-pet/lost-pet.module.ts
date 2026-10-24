@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { PetSafetyModule } from "../pet-safety/pet-safety.module";
 import { PetAccessModule } from "../pet-access/pet-access.module";
 import { PetsModule } from "../pets/pets.module";
 import { StorageModule } from "../storage/storage.module";
@@ -10,7 +11,7 @@ import { LostPetController } from "./lost-pet.controller";
 import { PublicLostPetController } from "./public-lost-pet.controller";
 
 @Module({
-  imports: [PetAccessModule, StorageModule, PetsModule, NotificationsModule, CommunityModule],
+  imports: [PetAccessModule, StorageModule, PetsModule, NotificationsModule, CommunityModule, PetSafetyModule],
   controllers: [LostPetController, PublicLostPetController],
   providers: [LostPetIncidentService, LostPetNotificationListener],
   exports: [LostPetIncidentService],

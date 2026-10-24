@@ -31,7 +31,7 @@ export class ProviderPatientRegistryService {
     const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
     const now = new Date();
 
-    const providerUserIds = (await this.prisma.providerUser.findMany({ where: { providerOrganizationId: ctx.organizationId }, select: { userId: true } })).map((p) => p.userId);
+    const providerUserIds = (await this.prisma.providerUser.findMany({ where: { providerOrganizationId: ctx.organizationId, removedAt: null }, select: { userId: true } })).map((p) => p.userId);
 
     const caseloadFilter: Prisma.PetWhereInput = {
       OR: [

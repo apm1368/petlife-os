@@ -10,6 +10,7 @@ import type { AuthedRequest } from "../../common/auth/current-user.decorator";
 import { UpdatePetDto } from "./dto/update-pet.dto";
 import { PetsService } from "./pets.service";
 import { StorageService } from "../storage/storage.service";
+import { PetOverviewService } from "./pet-overview.service";
 
 class CreateUploadUrlDto {
   @IsIn(["image/jpeg", "image/png"])
@@ -28,12 +29,19 @@ export class PetsController {
   constructor(
     private readonly petsService: PetsService,
     private readonly storageService: StorageService,
+    private readonly petOverviewService: PetOverviewService,
   ) {}
 
   @Get(":id")
   @RequirePetAccess("canViewIdentity")
   getById(@Param("id") id: string) {
     return this.petsService.getById(id);
+  }
+
+  @Get(":id/overview")
+  @RequirePetAccess("canViewIdentity")
+  getOverview(@Param("id") id: string, @Req() req: AuthedRequest & { petAccess?: PetAccessFlags }) {
+    return this.petOverviewService.get(id, req.petAccess!);
   }
 
   /**

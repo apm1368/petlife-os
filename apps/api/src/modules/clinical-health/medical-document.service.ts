@@ -3,10 +3,12 @@ import { SourceType } from "@prisma/client";
 import type { MedicalDocumentDownloadDto, MedicalDocumentDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { MedicalDocumentNotFoundException, NotFoundApiException } from "../../common/errors/api-exception";
+import { MedicalDocumentNotFoundException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { EntitlementService } from "../subscriptions/entitlement.service";
 import { StorageService } from "../storage/storage.service";
 import type { UploadTarget } from "../storage/storage-driver.interface";
+import { assertOwnerEditable } from "../health/provenance.util";
+import { assertObjectKeyUnder } from "../../common/storage-keys/object-key.validator";
 import { MEDICAL_DOCUMENT_INCLUDE, toMedicalDocumentDto } from "./clinical-health-mapper";
 import type { CreateMedicalDocumentDto, RequestMedicalDocumentUploadDto } from "./dto/medical-document.dto";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
@@ -48,6 +50,7 @@ export class MedicalDocumentService {
       await this.entitlements.assertWithinLimit(pet.householdId, "health.documents.max");
     }
 
+    assertObjectKeyUnder(dto.key, "health-documents", petId);
     const row = await this.prisma.$transaction(async (tx) => {
       const created = await tx.medicalDocument.create({
         data: {
@@ -111,21 +114,24 @@ export class MedicalDocumentService {
   }
 
   /**
-   * The only way to retract a document — never a hard delete (spec:
-   * "provider-originated clinical records must not be silently
-   * overwritten"). Applies equally to owner-uploaded documents: a mistaken
-   * upload is voided, not erased, preserving the audit trail.
+   * The only way to retract a document — never a hard delete, never touching the stored file (spec:
+   * "provider-originated clinical records must not be silently overwritten"). This is the household path
+   * (canEditHealth): it may void the household's own uploads, with a reason, recorded with its actor. A
+   * PROVIDER/CLINIC document can't be voided from the household side — the family files a
+   * MedicalRecordCorrection instead (Handoff 17 provenance rule). A document is voided once.
    */
-  async voidDocument(petId: string, documentId: string, reason: string): Promise<MedicalDocumentDto> {
+  async voidDocument(petId: string, documentId: string, reason: string, actorUserId: string): Promise<MedicalDocumentDto> {
     const existing = await this.get(petId, documentId);
+    assertOwnerEditable(existing.sourceType);
     const row = await this.prisma.$transaction(async (tx) => {
-      const updated = await tx.medicalDocument.update({
-        where: { id: existing.id },
-        data: { voidedAt: new Date(), voidedReason: reason },
-        include: MEDICAL_DOCUMENT_INCLUDE,
-      });
-      await this.events.publish("MedicalDocumentVoided", { petId, documentId }, { tx, aggregateType: "Pet", aggregateId: petId });
-      return updated;
+      const done = await tx.medicalDocument.updateMany({ where: { id: existing.id, voidedAt: null }, data: { voidedAt: new Date(), voidedReason: reason } });
+      if (done.count !== 1) throw new ValidationApiException({ field: "documentId", reason: "ALREADY_VOIDED" });
+      await this.events.publish(
+        "MedicalDocumentVoided",
+        { petId, documentId, sourceType: existing.sourceType, actorUserId, reason },
+        { tx, aggregateType: "Pet", aggregateId: petId },
+      );
+      return tx.medicalDocument.findUniqueOrThrow({ where: { id: existing.id }, include: MEDICAL_DOCUMENT_INCLUDE });
     });
     return toMedicalDocumentDto(row);
   }

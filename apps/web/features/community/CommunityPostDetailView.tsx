@@ -3,21 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton } from "@petlife/ui";
-import { CommunityReactionType, CommunityReportReason } from "@petlife/types";
+import { Button, ContextSurface, EmptyState, Input, Skeleton } from "@petlife/ui";
+import { CommunityReactionType } from "@petlife/types";
 import type { CommunityCommentDto, CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { useSessionStore } from "@/stores/session-store";
+import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const REACTIONS: CommunityReactionType[] = [CommunityReactionType.LIKE, CommunityReactionType.LOVE, CommunityReactionType.HELPFUL];
-const REPORT_REASONS: CommunityReportReason[] = [
-  CommunityReportReason.SPAM,
-  CommunityReportReason.ABUSE,
-  CommunityReportReason.MISINFORMATION,
-  CommunityReportReason.INAPPROPRIATE,
-  CommunityReportReason.OTHER,
-];
 
 export function CommunityPostDetailView({ postId }: { postId: string }) {
   const t = useTranslations("community");
@@ -28,25 +23,21 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
 
   const [post, setPost] = useState<CommunityPostDto | null>(null);
   const [comments, setComments] = useState<PaginatedDto<CommunityCommentDto> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   const [commentBody, setCommentBody] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
-  const [isReportOpen, setIsReportOpen] = useState(false);
-  const [reportReason, setReportReason] = useState<CommunityReportReason>(CommunityReportReason.SPAM);
-  const [reportDetails, setReportDetails] = useState("");
-  const [reportSubmitted, setReportSubmitted] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   async function load() {
-    setError(null);
+    setLoadError(null);
     try {
       const [postData, commentsData] = await Promise.all([communityService.getPost(postId), communityService.listComments(postId, { pageSize: 50 })]);
       setPost(postData);
       setComments(commentsData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -75,7 +66,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
       }
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsReacting(false);
     }
@@ -90,24 +81,13 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
       setCommentBody("");
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setActionError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsCommenting(false);
     }
   }
 
-  async function handleReport(): Promise<void> {
-    if (!requireLogin()) return;
-    setActionError(null);
-    try {
-      await communityService.reportPost(postId, reportReason, reportDetails.trim() || undefined);
-      setReportSubmitted(true);
-    } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : tCommon("genericError"));
-    }
-  }
-
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!post || !comments) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -130,35 +110,13 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
 
         <div className="flex flex-wrap items-center gap-2 pt-2">
           {REACTIONS.map((type) => (
-            <Button key={type} variant={post.viewerReaction === type ? "primary" : "secondary"} size="sm" isLoading={isReacting} onClick={() => handleReact(type)}>
+            <Button key={type} aria-pressed={post.viewerReaction === type} variant={post.viewerReaction === type ? "primary" : "secondary"} size="sm" isLoading={isReacting} onClick={() => handleReact(type)}>
               {t(`reaction.${type}`)} {post.reactionCount > 0 ? `(${post.reactionCount})` : ""}
             </Button>
           ))}
-          <Button variant="ghost" size="sm" onClick={() => setIsReportOpen((v) => !v)}>
-            {t("post.report")}
-          </Button>
         </div>
 
-        {isReportOpen ? (
-          <div className="flex flex-col gap-3 border-t border-border-subtle pt-3">
-            {reportSubmitted ? (
-              <p className="text-body text-state-success">{t("post.reportSuccess")}</p>
-            ) : (
-              <>
-                <Select
-                  label={t("post.reportReasonLabel")}
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value as CommunityReportReason)}
-                  options={REPORT_REASONS.map((value) => ({ value, label: t(`reportReason.${value}`) }))}
-                />
-                <Input label={t("post.reportDetailsLabel")} hint={tCommon("optional")} value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} />
-                <Button variant="secondary" onClick={handleReport}>
-                  {t("post.reportSubmit")}
-                </Button>
-              </>
-            )}
-          </div>
-        ) : null}
+        <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportPost(postId, reason, details)} />
 
         {actionError ? <p className="text-body text-state-urgent">{actionError}</p> : null}
       </ContextSurface>
@@ -182,6 +140,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
               <ContextSurface key={comment.id} className="flex flex-col gap-1">
                 <span className="text-metadata text-text-secondary">{comment.authorDisplayName}</span>
                 <p className="text-body text-text-primary">{comment.body}</p>
+                <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportComment(comment.id, reason, details)} />
               </ContextSurface>
             ))}
           </div>

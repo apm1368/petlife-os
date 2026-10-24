@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsBoolean, IsEnum, IsInt, IsOptional, IsPositive, IsString, IsUUID, Min } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsPositive, IsString, IsUUID, Max, Min } from "class-validator";
 import { SellerOfferStatus } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 
@@ -39,6 +39,19 @@ export class CreateSellerOfferDto {
   @IsInt()
   @Min(0)
   initialOnHand?: number;
+
+  /** Batch 4 — repeat delivery participation; intervals are 7..180 days. */
+  @IsOptional()
+  @IsBoolean()
+  repeatDeliveryEligible?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @IsInt({ each: true })
+  @Min(7, { each: true })
+  @Max(180, { each: true })
+  repeatIntervalsDays?: number[];
 }
 
 export class UpdateSellerOfferDto {
@@ -59,4 +72,17 @@ export class UpdateSellerOfferDto {
   @IsOptional()
   @IsEnum(SellerOfferStatus)
   status?: SellerOfferStatus;
+
+  /** Batch 4 — repeat delivery participation; intervals are 7..180 days. */
+  @IsOptional()
+  @IsBoolean()
+  repeatDeliveryEligible?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @IsInt({ each: true })
+  @Min(7, { each: true })
+  @Max(180, { each: true })
+  repeatIntervalsDays?: number[];
 }

@@ -1,17 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import Link from "@/features/navigation/localized-link";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import { HelpOfferStatus, SupportNeedStatus } from "@petlife/types";
 import type { HelpOfferDto, SupportNeedListingDto } from "@petlife/types";
 import { supportNeedsService } from "@/services/support-needs.service";
 import { ApiError } from "@/lib/api/client";
+import { formatDay, localizeDigits } from "@/lib/date/jalali";
+import { SupportOfferInbox } from "./SupportOfferInbox";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const TABS: (SupportNeedStatus | "ALL")[] = [
   "ALL",
   SupportNeedStatus.PUBLISHED,
+  SupportNeedStatus.PARTIALLY_FULFILLED,
+  SupportNeedStatus.PAUSED,
   SupportNeedStatus.PENDING_REVIEW,
   SupportNeedStatus.FULFILLED,
   SupportNeedStatus.REJECTED,
@@ -22,6 +28,8 @@ const STATUS_TONE: Record<SupportNeedStatus, "neutral" | "success" | "attention"
   [SupportNeedStatus.DRAFT]: "neutral",
   [SupportNeedStatus.PENDING_REVIEW]: "attention",
   [SupportNeedStatus.PUBLISHED]: "success",
+  [SupportNeedStatus.PARTIALLY_FULFILLED]: "success",
+  [SupportNeedStatus.PAUSED]: "neutral",
   [SupportNeedStatus.FULFILLED]: "success",
   [SupportNeedStatus.CLOSED]: "neutral",
   [SupportNeedStatus.EXPIRED]: "neutral",
@@ -32,12 +40,14 @@ const STATUS_TONE: Record<SupportNeedStatus, "neutral" | "success" | "attention"
 /** The publisher's own board: their listings across every status, plus the offers people have made. */
 export function MySupportNeedsView() {
   const t = useTranslations("supportNeeds");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
 
   const [tab, setTab] = useState<SupportNeedStatus | "ALL">("ALL");
   const [listings, setListings] = useState<SupportNeedListingDto[] | null>(null);
   const [offersByListing, setOffersByListing] = useState<Record<string, HelpOfferDto[]>>({});
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [needsSignIn, setNeedsSignIn] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -45,15 +55,16 @@ export function MySupportNeedsView() {
   // translator identity each render, which would refetch in a loop.
   const load = useCallback(async () => {
     setError(null);
+    setLoadError(null);
     setNeedsSignIn(false);
     try {
       const result = await supportNeedsService.listMine({ status: tab === "ALL" ? undefined : tab, pageSize: 50 });
       setListings(result.items);
     } catch (err) {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) setNeedsSignIn(true);
-      else setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      else setLoadError(err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [tab]);
 
   useEffect(() => {
@@ -73,32 +84,34 @@ export function MySupportNeedsView() {
       const offers = await supportNeedsService.listOffers(listingId);
       setOffersByListing((current) => ({ ...current, [listingId]: offers }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     }
   }
 
-  async function respond(listingId: string, offerId: string, status: HelpOfferStatus): Promise<void> {
+  async function respond(listingId: string, offerId: string, status: HelpOfferStatus, fulfilledQuantity?: number): Promise<void> {
     setBusyId(offerId);
     try {
-      await supportNeedsService.respondToOffer(listingId, offerId, { status });
+      await supportNeedsService.respondToOffer(listingId, offerId, fulfilledQuantity !== undefined ? { status, fulfilledQuantity } : { status });
       const offers = await supportNeedsService.listOffers(listingId);
       setOffersByListing((current) => ({ ...current, [listingId]: offers }));
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setBusyId(null);
     }
   }
 
-  async function act(listingId: string, action: "fulfill" | "close"): Promise<void> {
+  async function act(listingId: string, action: "fulfill" | "close" | "pause" | "resume"): Promise<void> {
     setBusyId(listingId);
     try {
       if (action === "fulfill") await supportNeedsService.markFulfilled(listingId);
+      else if (action === "pause") await supportNeedsService.pause(listingId);
+      else if (action === "resume") await supportNeedsService.resume(listingId);
       else await supportNeedsService.close(listingId);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setBusyId(null);
     }
@@ -109,17 +122,18 @@ export function MySupportNeedsView() {
       <div className="flex flex-col gap-3">
         <h1 className="text-page-title text-text-primary">{t("mine.title")}</h1>
         <p className="text-body text-text-secondary">{t("mine.signInPrompt")}</p>
-        <Link href={`/login?returnTo=${encodeURIComponent("/animal-support/needs/mine")}`} className="text-body text-brand-mint underline">
+        <Link href={`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/animal-support/needs/mine`)}`} className="text-body text-brand-mint-strong underline">
           {tCommon("logIn")}
         </Link>
       </div>
     );
   }
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
 
   return (
     <div className="flex flex-col gap-5">
+      {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{t("mine.title")}</h1>
         <Link href="/animal-support/needs/new">
@@ -152,7 +166,7 @@ export function MySupportNeedsView() {
                   <StatusLabel tone={STATUS_TONE[listing.status]}>{t(`status.${listing.status}`)}</StatusLabel>
                 </div>
                 <p className="text-metadata text-text-secondary">
-                  {t(`category.${listing.category}`)} · {listing.city} · {new Date(listing.createdAt).toLocaleDateString()}
+                  {t(`category.${listing.category}`)} · {listing.city} · {formatDay(listing.createdAt.slice(0, 10), locale as "fa" | "en")}{listing.neededQuantity !== null ? ` · ${localizeDigits(listing.fulfilledQuantity, locale as "fa" | "en")}/${localizeDigits(listing.neededQuantity, locale as "fa" | "en")}` : ""}
                 </p>
                 {listing.reviewNote ? <p className="text-metadata text-state-urgent">{t("mine.reviewNote", { note: listing.reviewNote })}</p> : null}
 
@@ -160,7 +174,14 @@ export function MySupportNeedsView() {
                   <Button variant="ghost" onClick={() => toggleOffers(listing.id)}>
                     {offers ? t("mine.hideOffers") : t("mine.viewOffers")}
                   </Button>
-                  {listing.status === SupportNeedStatus.PUBLISHED ? (
+                  <Link href={`/${locale}/animal-support/needs/${listing.id}/manage`} className="inline-flex min-h-11 items-center rounded-full px-3 text-sm text-brand-natural underline">{locale === "fa" ? "مدیریت" : "Manage"}</Link>
+                  {listing.status === SupportNeedStatus.PUBLISHED || listing.status === SupportNeedStatus.PARTIALLY_FULFILLED ? (
+                    <Button variant="ghost" isLoading={busyId === listing.id} onClick={() => act(listing.id, "pause")}>{locale === "fa" ? "توقف موقت" : "Pause"}</Button>
+                  ) : null}
+                  {listing.status === SupportNeedStatus.PAUSED ? (
+                    <Button variant="ghost" isLoading={busyId === listing.id} onClick={() => act(listing.id, "resume")}>{locale === "fa" ? "ادامهٔ انتشار" : "Resume"}</Button>
+                  ) : null}
+                  {listing.status === SupportNeedStatus.PUBLISHED || listing.status === SupportNeedStatus.PARTIALLY_FULFILLED ? (
                     <Button variant="ghost" isLoading={busyId === listing.id} onClick={() => act(listing.id, "fulfill")}>
                       {t("mine.markFulfilled")}
                     </Button>
@@ -172,50 +193,14 @@ export function MySupportNeedsView() {
                   ) : null}
                 </div>
 
-                {offers ? (
-                  offers.length === 0 ? (
-                    <p className="text-metadata text-text-secondary">{t("mine.noOffers")}</p>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      {offers.map((offer) => (
-                        <div key={offer.id} className="flex flex-col gap-1 border-t border-border-subtle pt-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <StatusLabel tone={offer.status === HelpOfferStatus.COMPLETED ? "success" : offer.status === HelpOfferStatus.PENDING ? "attention" : "neutral"}>
-                              {t(`offerStatus.${offer.status}`)}
-                            </StatusLabel>
-                            <span className="text-metadata text-text-secondary">{t(`category.${offer.helpType}`)}</span>
-                            {offer.quantity !== null ? <span className="text-metadata text-text-secondary">×{offer.quantity}</span> : null}
-                          </div>
-                          <p className="text-body text-text-primary">{offer.message}</p>
-                          {offer.status === HelpOfferStatus.PENDING ? (
-                            <div className="flex flex-wrap gap-2">
-                              <Button variant="secondary" isLoading={busyId === offer.id} onClick={() => respond(listing.id, offer.id, HelpOfferStatus.ACCEPTED)}>
-                                {t("mine.acceptOffer")}
-                              </Button>
-                              <Button variant="ghost" isLoading={busyId === offer.id} onClick={() => respond(listing.id, offer.id, HelpOfferStatus.DECLINED)}>
-                                {t("mine.declineOffer")}
-                              </Button>
-                            </div>
-                          ) : null}
-                          {offer.status === HelpOfferStatus.ACCEPTED ? (
-                            <div>
-                              <Button variant="secondary" isLoading={busyId === offer.id} onClick={() => respond(listing.id, offer.id, HelpOfferStatus.COMPLETED)}>
-                                {t("mine.completeOffer")}
-                              </Button>
-                            </div>
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                  )
-                ) : null}
+                {offers ? <SupportOfferInbox offers={offers} busyId={busyId} onRespond={(offerId, status, quantity) => void respond(listing.id, offerId, status, quantity)} /> : null}
               </ContextSurface>
             );
           })}
         </div>
       )}
 
-      <Link href="/animal-support/needs" className="text-body text-brand-mint underline">
+      <Link href="/animal-support/needs" className="text-body text-brand-mint-strong underline">
         {t("detail.backToBoard")}
       </Link>
     </div>

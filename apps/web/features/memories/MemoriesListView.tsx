@@ -1,15 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton } from "@petlife/ui";
+import Link from "@/features/navigation/localized-link";
+import { useLocale, useTranslations } from "next-intl";
+import { Button, EmptyState, Input, Select, Skeleton } from "@petlife/ui";
 import type { PetDto, PetMemoryDto } from "@petlife/types";
 import { PetLifecycleStatus } from "@petlife/types";
 import { memoriesService } from "@/services/memories.service";
 import { petsService } from "@/services/pets.service";
-import { ApiError } from "@/lib/api/client";
 import { MemoryMediaThumb } from "./MemoryMediaThumb";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
+import { calendarFromIso, localizeDigits, monthName } from "@/lib/date/jalali";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type ViewMode = "JOURNAL" | "GALLERY";
 
@@ -26,12 +29,15 @@ type ViewMode = "JOURNAL" | "GALLERY";
  * endpoint rather than fetching everything and filtering client-side.
  */
 export function MemoriesListView({ petId }: { petId: string }) {
+  const fmt = useInstantFormat();
   const t = useTranslations("memories");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
 
   const [pet, setPet] = useState<PetDto | null>(null);
   const [memories, setMemories] = useState<PetMemoryDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   const [search, setSearch] = useState("");
   const [tag, setTag] = useState("");
@@ -45,6 +51,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
   // each render and make the effect below refetch forever.
   const load = useCallback(async () => {
     setError(null);
+    setLoadError(null);
     try {
       const [petData, memoriesData] = await Promise.all([
         petsService.getById(petId),
@@ -59,9 +66,9 @@ export function MemoriesListView({ petId }: { petId: string }) {
       // The archive view shows only archived entries; the default view already excludes them server-side.
       setMemories(showArchived ? memoriesData.filter((m) => m.archivedAt !== null) : memoriesData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [petId, search, tag, year, showArchived]);
 
   useEffect(() => {
@@ -74,7 +81,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
       await memoriesService.restore(petId, memoryId);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setRestoringId(null);
     }
@@ -89,94 +96,102 @@ export function MemoriesListView({ petId }: { petId: string }) {
     return Array.from(years).sort((a, b) => b - a);
   }, [memories, year]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!pet || !memories) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const isMemorial = pet.lifecycleStatus === PetLifecycleStatus.DECEASED || pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
   const hasFilters = search.trim() !== "" || tag !== "" || year !== "";
 
+  const hasMedia = (m: PetMemoryDto) => m.mediaObjectKeys.length > 0 || m.mediaUrls.length > 0;
+  const system = locale === "fa" ? "jalali" : "gregorian";
+  const dayParts = (iso: string) => {
+    const tehranDay = new Date(new Date(iso).getTime() + 3.5 * 3_600_000).toISOString().slice(0, 10);
+    const c = calendarFromIso(system, tehranDay);
+    return { day: localizeDigits(c.day, locale === "fa" ? "fa" : "en"), month: monthName(system, c.month, locale === "fa" ? "fa" : "en") };
+  };
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="mem">
+      {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
+      <header className="mem-head">
         <div>
-          <h1 className="text-page-title text-text-primary">{isMemorial ? t("list.memorialTitle", { name: pet.name }) : t("list.title", { name: pet.name })}</h1>
-          {isMemorial ? <p className="text-body text-text-secondary">{t("list.memorialSubtitle")}</p> : null}
+          <h1 className="pl-title">{isMemorial ? t("list.memorialTitle", { name: pet.name }) : t("list.title", { name: pet.name })}</h1>
+          {isMemorial ? <p className="mem-head__sub">{t("list.memorialSubtitle")}</p> : null}
         </div>
         <Link href={`/pets/${petId}/memories/new`}>
           <Button variant="primary">{t("list.addMemory")}</Button>
         </Link>
-      </div>
+      </header>
 
-      <ContextSurface className="flex flex-col gap-3">
+      <div className="mem-filters">
         <Input label={t("list.searchLabel")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("list.searchPlaceholder")} />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Select
-            label={t("list.tagLabel")}
-            value={tag}
-            onChange={(e) => setTag(e.target.value)}
-            options={[{ value: "", label: t("list.allTags") }, ...tagOptions.map((value) => ({ value, label: value }))]}
-          />
-          <Select
-            label={t("list.yearLabel")}
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            options={[{ value: "", label: t("list.allYears") }, ...yearOptions.map((value) => ({ value: String(value), label: String(value) }))]}
-          />
+        <Select
+          label={t("list.tagLabel")}
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          options={[{ value: "", label: t("list.allTags") }, ...tagOptions.map((value) => ({ value, label: value }))]}
+        />
+        <Select
+          label={t("list.yearLabel")}
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          options={[{ value: "", label: t("list.allYears") }, ...yearOptions.map((value) => ({ value: String(value), label: locale === "fa" ? `${localizeDigits(value, "fa")} میلادی` : String(value) }))]}
+        />
+        <div className="mem-views" role="group" aria-label={t("list.viewJournal") + " / " + t("list.viewGallery")}>
+          <button type="button" aria-pressed={viewMode === "JOURNAL" && !showArchived} onClick={() => { setViewMode("JOURNAL"); setShowArchived(false); }}>{t("list.viewJournal")}</button>
+          <button type="button" aria-pressed={viewMode === "GALLERY" && !showArchived} onClick={() => { setViewMode("GALLERY"); setShowArchived(false); }}>{t("list.viewGallery")}</button>
+          <button type="button" aria-pressed={showArchived} onClick={() => setShowArchived((v) => !v)}>{t("list.showArchived")}</button>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant={viewMode === "JOURNAL" ? "secondary" : "ghost"} onClick={() => setViewMode("JOURNAL")}>
-            {t("list.viewJournal")}
-          </Button>
-          <Button variant={viewMode === "GALLERY" ? "secondary" : "ghost"} onClick={() => setViewMode("GALLERY")}>
-            {t("list.viewGallery")}
-          </Button>
-          <Button variant={showArchived ? "secondary" : "ghost"} onClick={() => setShowArchived((v) => !v)}>
-            {showArchived ? t("list.hideArchived") : t("list.showArchived")}
-          </Button>
-        </div>
-      </ContextSurface>
+      </div>
 
       {memories.length === 0 ? (
         <EmptyState title={showArchived ? t("list.emptyArchived") : hasFilters ? t("list.emptyFiltered") : t("list.empty")} />
-      ) : viewMode === "GALLERY" ? (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+      ) : viewMode === "GALLERY" && !showArchived ? (
+        <ul className="mem-gallery">
           {memories.map((memory) => (
-            <Link key={memory.id} href={`/pets/${petId}/memories/${memory.id}`} className="block">
-              <MemoryMediaThumb petId={petId} memory={memory} className="h-32 w-full rounded-md object-cover" />
-            </Link>
+            <li key={memory.id}>
+              <Link href={`/pets/${petId}/memories/${memory.id}`} className="mem-gallery__item">
+                {hasMedia(memory) ? (
+                  <MemoryMediaThumb petId={petId} memory={memory} className="mem-gallery__img" />
+                ) : (
+                  <span className="mem-gallery__text"><strong>{memory.title ?? fmt.date(memory.occurredAt)}</strong><span>{fmt.date(memory.occurredAt)}</span></span>
+                )}
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
-        <div className="flex flex-col gap-4">
-          {groupByYear(memories).map(([groupYear, entries]) => (
-            <section key={groupYear} className="flex flex-col gap-2">
-              <h2 className="text-section-title text-text-secondary">{groupYear}</h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mem-journal">
+          {groupByYear(memories, locale === "fa").map(([groupYear, entries]) => (
+            <section key={groupYear} className="mem-year" aria-labelledby={`mem-year-${groupYear}`}>
+              <h2 id={`mem-year-${groupYear}`} className="mem-year__title">{localizeDigits(groupYear, locale === "fa" ? "fa" : "en")}</h2>
+              <ol className="mem-timeline">
                 {entries.map((memory) => {
-                  const displayTitle = memory.title ?? new Date(memory.occurredAt).toLocaleDateString();
+                  const displayTitle = memory.title ?? fmt.date(memory.occurredAt);
+                  const d = dayParts(memory.occurredAt);
                   return (
-                    <ContextSurface key={memory.id} className="flex flex-col gap-2">
-                      <Link href={`/pets/${petId}/memories/${memory.id}`} className="flex flex-col gap-2">
-                        <MemoryMediaThumb petId={petId} memory={memory} className="h-32 w-full rounded-md object-cover" />
-                        <span className="text-body text-text-primary">{displayTitle}</span>
-                        <p className="text-metadata text-text-secondary">{new Date(memory.occurredAt).toLocaleDateString()}</p>
-                        {memory.tags.length > 0 ? <p className="text-metadata text-text-secondary">{memory.tags.join(" · ")}</p> : null}
+                    <li key={memory.id} className="mem-entry">
+                      <span className="mem-entry__date" aria-hidden="true"><strong>{d.day}</strong><span>{d.month}</span></span>
+                      <Link href={`/pets/${petId}/memories/${memory.id}`} className="mem-entry__body">
+                        <span className="mem-entry__title">{displayTitle}</span>
+                        <span className="mem-entry__meta">{fmt.date(memory.occurredAt)}{memory.tags.length > 0 ? ` · ${memory.tags.join(" · ")}` : ""}</span>
                       </Link>
+                      {hasMedia(memory) ? <MemoryMediaThumb petId={petId} memory={memory} className="mem-entry__img" /> : null}
                       {memory.archivedAt ? (
                         <Button variant="ghost" isLoading={restoringId === memory.id} onClick={() => handleRestore(memory.id)}>
                           {t("list.restore")}
                         </Button>
                       ) : null}
-                    </ContextSurface>
+                    </li>
                   );
                 })}
-              </div>
+              </ol>
             </section>
           ))}
         </div>
       )}
 
-      <Link href={`/pets/${petId}/life-timeline`} className="text-body text-brand-mint underline">
+      <Link href={`/pets/${petId}/life-timeline`} className="mem-life-link">
         {t("list.viewLifeTimeline")}
       </Link>
     </div>
@@ -184,10 +199,12 @@ export function MemoriesListView({ petId }: { petId: string }) {
 }
 
 /** The list arrives already sorted newest-first, so grouping preserves that order without re-sorting. */
-function groupByYear(memories: PetMemoryDto[]): [number, PetMemoryDto[]][] {
+/** Groups by the year in the UI calendar — Jalali on Persian pages, Gregorian on English ones. */
+function groupByYear(memories: PetMemoryDto[], fa: boolean): [number, PetMemoryDto[]][] {
   const groups = new Map<number, PetMemoryDto[]>();
   for (const memory of memories) {
-    const entryYear = new Date(memory.occurredAt).getFullYear();
+    const tehranDay = new Date(new Date(memory.occurredAt).getTime() + 3.5 * 3_600_000).toISOString().slice(0, 10);
+    const entryYear = fa ? calendarFromIso("jalali", tehranDay).year : new Date(memory.occurredAt).getFullYear();
     const existing = groups.get(entryYear);
     if (existing) existing.push(memory);
     else groups.set(entryYear, [memory]);

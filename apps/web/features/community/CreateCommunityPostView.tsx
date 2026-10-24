@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { CommunityPostType } from "@petlife/types";
 import { communityService } from "@/services/community.service";
-import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
+import { FilePicker } from "@/features/shared/FilePicker";
 
 const POST_TYPES: CommunityPostType[] = [CommunityPostType.GENERAL, CommunityPostType.QUESTION, CommunityPostType.LOCAL, CommunityPostType.RESCUE, CommunityPostType.ADOPTION, CommunityPostType.MEMORY];
 
@@ -37,7 +38,7 @@ export function CreateCommunityPostView() {
       const post = await communityService.createPost({ type, title: title.trim() || undefined, body: body.trim(), mediaObjectKeys: mediaObjectKeys.length > 0 ? mediaObjectKeys : undefined });
       router.push(`/community/posts/${post.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setError(apiErrorText(err, undefined, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }
@@ -56,10 +57,7 @@ export function CreateCommunityPostView() {
         />
         <Input label={t("newPost.titleLabel")} hint={tCommon("optional")} value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input label={t("newPost.bodyLabel")} value={body} onChange={(e) => setBody(e.target.value)} />
-        <div className="flex flex-col gap-1.5">
-          <span className="text-metadata text-text-secondary">{t("newPost.mediaLabel")}</span>
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="text-body text-text-primary" />
-        </div>
+        <FilePicker ref={fileInputRef} label={t("newPost.mediaLabel")} accept="image/jpeg,image/png,image/webp" />
         {error ? <p className="text-body text-state-urgent">{error}</p> : null}
         <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit} disabled={!body.trim()}>
           {t("newPost.submit")}

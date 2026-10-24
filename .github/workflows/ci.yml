@@ -1,9 +1,10 @@
 name: CI
 
+# main runs CI through deploy.yml (workflow_call) before deploying; a separate push trigger here would run it twice.
 on:
   workflow_call:
   push:
-    branches: [main, master, integration/local]
+    branches: [stabilization/wave-1]
   pull_request:
 
 env:

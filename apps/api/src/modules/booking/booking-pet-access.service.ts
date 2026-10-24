@@ -107,6 +107,8 @@ export const DEFAULT_SCOPE_PRESET_BY_CATEGORY: Record<ServiceCategory, PetAccess
   [ServiceCategory.SITTING]: PetAccessScopePreset.SITTING_BASIC,
   [ServiceCategory.BOARDING]: PetAccessScopePreset.BOARDING_BASIC,
   [ServiceCategory.PET_TAXI]: PetAccessScopePreset.TAXI_BASIC,
+  // Least privilege for uncategorized services: identity only, no health or care profile.
+  [ServiceCategory.OTHER]: PetAccessScopePreset.MINIMAL_VET_CONTEXT,
 };
 
 /** Renamed from BookingHealthAccessService (Handoff 03) now that booking-time access spans every service category. */
@@ -131,15 +133,19 @@ export class BookingPetAccessService {
     providerUserId: string | undefined,
     scopePreset: PetAccessScopePreset,
     tx: Prisma.TransactionClient,
+    ownerChoseScope = false,
   ): Promise<void> {
     if (!providerUserId) return; // No specific provider staff assigned yet — nothing to grant access to.
 
     const bufferHours = this.config.get("BOOKING_HEALTH_ACCESS_BUFFER_HOURS", { infer: true });
     const expiresAt = new Date(booking.endAt.getTime() + bufferHours * 60 * 60 * 1000);
     const flags = SCOPE_PRESET_FLAGS[scopePreset];
+    // A booking alone never opens the medical record: health reading requires the owner to have
+    // explicitly chosen a health scope in the booking flow (a category default is not consent).
+    const healthConsented = ownerChoseScope && flags.canViewHealth;
     const canViewLocation = booking.locationMode !== LocationMode.AT_PROVIDER;
 
-    const providerUser = await tx.providerUser.findUnique({ where: { id: providerUserId } });
+    const providerUser = await tx.providerUser.findFirst({ where: { id: providerUserId, removedAt: null } });
     if (!providerUser) return;
 
     const grant = await tx.petAccessGrant.create({
@@ -148,8 +154,8 @@ export class BookingPetAccessService {
         userId: providerUser.userId,
         canViewIdentity: flags.canViewIdentity,
         canEditIdentity: false,
-        canViewHealth: flags.canViewHealth,
-        canEditHealth: flags.canEditHealth,
+        canViewHealth: healthConsented,
+        canEditHealth: false,
         canBookCare: false,
         canViewCareProfile: flags.canViewCareProfile,
         canEditCareProfile: flags.canEditCareProfile,
@@ -158,9 +164,11 @@ export class BookingPetAccessService {
         // Handoff 17: only a VET-category visit produces clinical records —
         // a groomer/trainer/walker/sitter/boarding/taxi booking never grants
         // authority to author a ClinicalVisit/MedicalDocument/LabResult/etc.
+        // Operational authority only: the vet may author new records for this visit window,
+        // which does not by itself allow reading prior history.
         canRecordClinicalData: booking.category === ServiceCategory.VET,
         source: PetAccessSource.TEMPORARY,
-        reason: `${booking.category}_BOOKING`,
+        reason: healthConsented ? `${booking.category}_BOOKING_HEALTH_CONSENT` : `${booking.category}_BOOKING`,
         startsAt: new Date(),
         expiresAt,
         grantedByUserId: booking.userId,

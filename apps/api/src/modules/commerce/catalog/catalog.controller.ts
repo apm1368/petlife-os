@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards } from "@nestjs/common";
 import { OptionalSessionAuthGuard } from "../../../common/auth/optional-session-auth.guard";
 import { OptionalCurrentUser } from "../../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../../common/session/session.service";
@@ -18,16 +18,17 @@ export class CatalogController {
 
   @Get("shop/products")
   search(@Query() query: SearchProductsDto, @OptionalCurrentUser() user: SessionUser | undefined) {
-    return this.catalog.search(user?.id, query);
+    const { attr, ...rest } = query;
+    return this.catalog.search(user?.id, { ...rest, attributes: attr });
   }
 
   @Get("shop/products/:id")
-  getDetail(@Param("id") id: string, @Query() query: GetProductDetailDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+  getDetail(@Param("id", ParseUUIDPipe) id: string, @Query() query: GetProductDetailDto, @OptionalCurrentUser() user: SessionUser | undefined) {
     return this.catalog.getDetail(user?.id, id, query.petId);
   }
 
   @Get("shop/products/:id/offers")
-  getOffers(@Param("id") id: string) {
+  getOffers(@Param("id", ParseUUIDPipe) id: string) {
     return this.catalog.getOffers(id);
   }
 }

@@ -1,0 +1,24 @@
+"use client";
+import {useEffect,useRef,useState} from "react";
+import {useLocale,useTranslations} from "next-intl";
+import Link from "next/link";
+import {Button,ContextSurface,Dialog,Select} from "@petlife/ui";
+import {LocalDateTimeField} from "@/features/shared/date-picker/LocalDateTimeField";
+import {usePetAccess} from "@/hooks/use-pet-access";
+import {healthDepthService,type CareSuggestion} from "@/services/health-depth.service";
+export function CareSuggestionsView({petId}:{petId:string}){return <CareSuggestionsContent key={petId} petId={petId}/>}
+function CareSuggestionsContent({petId}:{petId:string}){
+ const t=useTranslations("careSuggestions"),locale=useLocale();const {access,error:accessError,retry:retryAccess}=usePetAccess(petId);
+ const [status,setStatus]=useState("PENDING"),[rows,setRows]=useState<CareSuggestion[]>([]),[loading,setLoading]=useState(true),[failed,setFailed]=useState(false),[revision,setRevision]=useState(0),[busy,setBusy]=useState(false),[saveFailed,setSaveFailed]=useState(false),[saved,setSaved]=useState(false);
+ const [decision,setDecision]=useState<{item:CareSuggestion;type:"accept"|"dismiss"}|null>(null),[dueAt,setDueAt]=useState("");
+ const alive=useRef(true);useEffect(()=>{alive.current=true;return()=>{alive.current=false}},[]);
+ useEffect(()=>{if(!access?.canViewCareProfile)return;const controller=new AbortController();setLoading(true);setFailed(false);healthDepthService.suggestions(petId,status,controller.signal).then(result=>{if(!controller.signal.aborted)setRows(result)}).catch(()=>{if(!controller.signal.aborted)setFailed(true)}).finally(()=>{if(!controller.signal.aborted)setLoading(false)});return()=>controller.abort()},[petId,status,revision,access?.canViewCareProfile]);
+ async function decide(){if(!decision||!access?.canEditCareProfile||busy)return;setBusy(true);setSaveFailed(false);setSaved(false);try{if(decision.type==="accept")await healthDepthService.acceptSuggestion(petId,decision.item.id,dueAt?{dueAt:new Date(dueAt).toISOString()}:{});else await healthDepthService.dismissSuggestion(petId,decision.item.id);if(alive.current){setDecision(null);setSaved(true);setRevision(v=>v+1)}}catch{if(alive.current)setSaveFailed(true)}finally{if(alive.current)setBusy(false)}}
+ const date=(value:string)=>new Intl.DateTimeFormat(locale==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value));
+ if(accessError)return <div><p role="alert">{t("accessFailed")}</p><Button onClick={retryAccess}>{t("retry")}</Button></div>;if(!access)return <p role="status">{t("loading")}</p>;if(!access.canViewCareProfile)return <p>{t("forbidden")}</p>;
+ return <div className="space-y-5"><header><h1 className="text-page-title">{t("title")}</h1><p>{t("intro")}</p></header><p>{t("listLimit")}</p>{saved&&<p role="status">{t("saved")}</p>}
+ <Select label={t("filter")} value={status} onChange={e=>setStatus(e.target.value)} options={["PENDING","ACCEPTED","DISMISSED"].map(value=>({value,label:t(`statuses.${value}`)}))}/>
+ {failed?<div><p role="alert">{t("loadFailed")}</p><Button onClick={()=>setRevision(v=>v+1)}>{t("retry")}</Button></div>:loading?<p role="status">{t("loading")}</p>:rows.length===0?<p>{t("empty")}</p>:rows.map(row=><ContextSurface key={row.id} className="space-y-3"><h2 className="text-section-title">{row.title}</h2>{row.organization&&<p>{row.organization.name}</p>}<p>{t(`statuses.${row.status}`)}</p><p>{t("suggestedDate",{date:date(row.suggestedDueAt)})}</p>{row.notes&&<p className="whitespace-pre-wrap break-words">{row.notes}</p>}{row.status==="ACCEPTED"&&row.careReminderId&&<Link className="underline" href={`/${locale}/pets/${petId}/care/${encodeURIComponent(row.careReminderId)}`}>{t("openReminders")}</Link>}{row.status==="PENDING"&&access.canEditCareProfile&&<div className="flex flex-wrap gap-3"><Button disabled={busy} onClick={()=>{setDecision({item:row,type:"accept"});setDueAt("");setSaveFailed(false)}}>{t("accept")}</Button><Button disabled={busy} variant="secondary" onClick={()=>{setDecision({item:row,type:"dismiss"});setSaveFailed(false)}}>{t("dismiss")}</Button></div>}</ContextSurface>)}
+ <Dialog open={decision!==null} title={t(decision?.type==="accept"?"confirmAccept":"confirmDismiss")} onClose={()=>{if(!busy)setDecision(null)}}><p>{decision?.item.title}</p><p className="mt-2">{t(decision?.type==="accept"?"acceptHelp":"dismissHelp")}</p>{decision?.type==="accept"&&<LocalDateTimeField className="mt-3" label={t("overrideDate")} value={dueAt} onChange={setDueAt}/>}<p>{decision&&t("suggestedDate",{date:date(decision.item.suggestedDueAt)})}</p>{saveFailed&&<p role="alert">{t("saveFailed")}</p>}<div className="mt-4 flex gap-3"><Button disabled={busy} onClick={()=>void decide()}>{t("confirm")}</Button><Button disabled={busy} variant="secondary" onClick={()=>setDecision(null)}>{t("cancel")}</Button></div></Dialog>
+ </div>
+}

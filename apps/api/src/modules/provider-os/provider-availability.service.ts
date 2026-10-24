@@ -46,7 +46,7 @@ export class ProviderAvailabilityService {
 
   private async assertProviderUserInOrg(ctx: ResolvedProviderContext, providerUserId: string | null | undefined) {
     if (!providerUserId) return;
-    const providerUser = await this.prisma.providerUser.findUnique({ where: { id: providerUserId } });
+    const providerUser = await this.prisma.providerUser.findFirst({ where: { id: providerUserId, removedAt: null } });
     if (!providerUser || providerUser.providerOrganizationId !== ctx.organizationId) throw new NotFoundApiException("Provider user");
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import type { OrderDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { commerceService } from "@/services/commerce.service";
@@ -37,11 +37,22 @@ function order(id: string, sellerName: string): OrderDetailDto {
         totalPrice: 500_000,
         targetPetId: null,
         compatibilitySnapshot: null,
+        listUnitPrice: null,
+        unitDiscount: 0,
+        promotionName: null,
+        reviewId: null,
       },
     ],
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     confirmedAt: "2026-01-01T00:00:05.000Z",
+    orderNumber: "PL-1A2B3C4D",
+    cancelledAt: null,
+    cancelReason: null,
+    timeline: [],
+    refundRequests: [],
+    canCancel: false,
+    canRequestRefund: false,
   };
 }
 
@@ -93,4 +104,12 @@ describe("OrderConfirmationView", () => {
     await waitFor(() => expect(screen.getByText("Seller is preparing your order")).toBeTruthy());
     expect(screen.queryByText(/courier/i)).toBeNull();
   });
+  it("offers recovery when order reads fail instead of implying confirmation", async () => {
+    vi.mocked(commerceService.getOrder).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce(order("order-1", "Pet Bazaar Tehran"));
+    renderWithIntl(<OrderConfirmationView orderIds={["order-1"]} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Retry" }));
+    expect(await screen.findByText("Pet Bazaar Tehran")).toBeTruthy();
+    expect(screen.getByText("Confirmed")).toBeTruthy();
+  });
+
 });

@@ -1,0 +1,11 @@
+{
+  "base": "21fa7ae060dad1efccbdfcd4063b254682704848",
+  "beforeShellBase": "76a2d57d7fc846ae171770aaf17d094004a14a8e",
+  "files": {
+    "apps/web/features/admin/AdminShell.tsx": "3d8e7d029346958d580e7767f3e9a2a2ae45c1ddd7694e7bf338f1c1bc000799",
+    "apps/web/features/admin/AdminShell.module.css": "650df0d743adc06ab735eb3e4861b169acad56bec100a286503b450d92e4f510",
+    "apps/web/features/admin/AdminShell.test.tsx": "439955c33c8f93c9552f38b94a3dee54a917b5182ebac64158f29fe2e833b61a",
+    "apps/web/messages/fa.json": "1d48ac4c7a8f0e4f2e1f1c384216dda0177d1c22927bd39e4c7813d36cdfe6ce",
+    "apps/web/messages/en.json": "3e5b7f7182d6138dab6c0074e709601cbb4f288b79e48a6f6ae45c73290a9480"
+  }
+}

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../../common/session/session.service";
@@ -21,13 +21,18 @@ export class CartController {
   }
 
   @Patch("items/:id")
-  updateItem(@CurrentUser() user: SessionUser, @Param("id") id: string, @Body() dto: UpdateCartItemDto) {
+  updateItem(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: UpdateCartItemDto) {
     return this.cart.updateItem(user.id, id, dto);
   }
 
   @Delete("items/:id")
-  removeItem(@CurrentUser() user: SessionUser, @Param("id") id: string) {
+  removeItem(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
     return this.cart.removeItem(user.id, id);
+  }
+
+  @Post("accept-prices")
+  acceptPrices(@CurrentUser() user: SessionUser) {
+    return this.cart.acceptCurrentPrices(user.id);
   }
 
   @Delete()

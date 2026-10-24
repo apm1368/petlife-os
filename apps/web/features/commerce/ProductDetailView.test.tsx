@@ -1,78 +1,127 @@
+import { useState } from "react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor, fireEvent } from "@testing-library/react";
+import { screen, waitFor, fireEvent, act } from "@testing-library/react";
 import type { ProductDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { commerceService } from "@/services/commerce.service";
+import { offer, productDetail, SELLER_A, SELLER_B } from "@/test/commerce-fixtures";
 import { ProductDetailView } from "./ProductDetailView";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+const push = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/hooks/use-active-pet", () => ({ useActivePet: () => ({ activePet: { id: "pet-1", name: "Luna" } }) }));
 vi.mock("@/services/commerce.service", () => ({
-  commerceService: { getProductDetail: vi.fn(), addCartItem: vi.fn() },
+  commerceService: { getProductDetail: vi.fn(), addCartItem: vi.fn(), setFavorite: vi.fn(), listProductReviews: vi.fn() },
 }));
 
-const SELLER_A = { id: "seller-a", name: "Pet Bazaar Tehran", verificationStatus: "VERIFIED" as never, status: "ACTIVE" as never, city: "Tehran" };
-const SELLER_B = { id: "seller-b", name: "Golestan Pet Supplies", verificationStatus: "VERIFIED" as never, status: "ACTIVE" as never, city: "Karaj" };
-
-const DETAIL: ProductDetailDto = {
-  id: "prod-1",
-  title: "Royal Canin Adult Dog Food",
-  slug: "royal-canin-adult-dog-food",
-  description: "Complete nutrition for adult dogs.",
-  brand: { id: "brand-1", name: "Royal Canin", slug: "royal-canin", logoUrl: null, status: "ACTIVE" as never },
-  category: { id: "cat-1", parentId: null, name: "Food", slug: "food", status: "ACTIVE" as never },
-  status: "ACTIVE" as never,
+const DETAIL: ProductDetailDto = productDetail({
   variants: [
     { id: "variant-2kg", productId: "prod-1", sku: "RC-DOG-2KG", barcode: null, title: "2kg", attributes: null, weightValue: 2, weightUnit: "KG" as never, isActive: true },
     { id: "variant-5kg", productId: "prod-1", sku: "RC-DOG-5KG", barcode: null, title: "5kg", attributes: null, weightValue: 5, weightUnit: "KG" as never, isActive: true },
   ],
   offers: [
-    { id: "offer-2kg-a", sellerOrganization: SELLER_A, productVariantId: "variant-2kg", priceAmount: 1_250_000, compareAtAmount: null, currency: "IRR", status: "ACTIVE" as never, availableQuantity: 8 },
-    { id: "offer-2kg-b", sellerOrganization: SELLER_B, productVariantId: "variant-2kg", priceAmount: 1_190_000, compareAtAmount: null, currency: "IRR", status: "ACTIVE" as never, availableQuantity: 0 },
-    { id: "offer-5kg-a", sellerOrganization: SELLER_A, productVariantId: "variant-5kg", priceAmount: 2_600_000, compareAtAmount: null, currency: "IRR", status: "ACTIVE" as never, availableQuantity: 3 },
+    offer({ id: "offer-2kg-a", sellerOrganization: SELLER_A, productVariantId: "variant-2kg", priceAmount: 1_250_000, availableQuantity: 8, repeatDeliveryEligible: true, repeatIntervalsDays: [30] }),
+    offer({ id: "offer-2kg-b", sellerOrganization: SELLER_B, productVariantId: "variant-2kg", priceAmount: 1_190_000, availableQuantity: 0 }),
+    offer({ id: "offer-5kg-a", sellerOrganization: SELLER_A, productVariantId: "variant-5kg", priceAmount: 2_600_000, availableQuantity: 3 }),
   ],
+  defaultOfferId: "offer-2kg-a",
   compatibility: { status: "COMPATIBLE" as never, reasons: [] },
-};
+  reviews: [{ id: "r1", rating: 5, body: "Luna loves it", authorName: "Sara", variantTitle: "2kg", verifiedPurchase: true, createdAt: "2026-09-01T00:00:00.000Z" }],
+  rating: { average: 5, count: 1 },
+});
 
 describe("ProductDetailView", () => {
   beforeEach(() => {
+    push.mockReset();
     vi.mocked(commerceService.getProductDetail).mockReset();
     vi.mocked(commerceService.addCartItem).mockReset();
+    vi.mocked(commerceService.setFavorite).mockReset();
   });
 
-  it("shows compatibility above the add-to-cart action and offers scoped to the selected variant", async () => {
+  it("shows compatibility, every offer for the variant with honest stock, and verified reviews", async () => {
     vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
-
     renderWithIntl(<ProductDetailView productId="prod-1" />);
-
-    await waitFor(() => expect(screen.getByText("Royal Canin Adult Dog Food")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Royal Canin Adult Dog Food" })).toBeTruthy());
     expect(screen.getByText("Compatible")).toBeTruthy();
-    expect(screen.getByText("Pet Bazaar Tehran")).toBeTruthy();
+    expect(screen.getAllByText("Pet Bazaar Tehran").length).toBeGreaterThan(0);
     expect(screen.getByText("Golestan Pet Supplies")).toBeTruthy();
-    expect(screen.getByText("Out of stock")).toBeTruthy();
+    expect(screen.getAllByText("Out of stock").length).toBeGreaterThan(0);
+    expect(screen.getByText("Luna loves it")).toBeTruthy();
+    expect(screen.getByText("Verified purchase")).toBeTruthy();
   });
 
-  it("re-scopes the offer list when a different variant is selected", async () => {
-    vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
-
-    renderWithIntl(<ProductDetailView productId="prod-1" />);
-    await waitFor(() => expect(screen.getByText("Royal Canin Adult Dog Food")).toBeTruthy());
-
-    fireEvent.click(screen.getByText("5kg"));
-
-    await waitFor(() => expect(screen.queryByText("Golestan Pet Supplies")).toBeNull());
-    expect(screen.getByText("Pet Bazaar Tehran")).toBeTruthy();
-  });
-
-  it("adds the selected offer and quantity to the cart, targeting the active pet", async () => {
+  it("the default offer is the server's choice (available), not the cheapest out-of-stock one", async () => {
     vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
     vi.mocked(commerceService.addCartItem).mockResolvedValue({} as never);
-
     renderWithIntl(<ProductDetailView productId="prod-1" />);
-    await waitFor(() => expect(screen.getByText("Royal Canin Adult Dog Food")).toBeTruthy());
-
+    await screen.findByRole("heading", { name: "Royal Canin Adult Dog Food" });
     fireEvent.click(screen.getByText("Add to cart"));
-
     await waitFor(() => expect(commerceService.addCartItem).toHaveBeenCalledWith("offer-2kg-a", 1, "pet-1"));
   });
+
+  it("re-scopes offers when another variant is selected", async () => {
+    vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
+    renderWithIntl(<ProductDetailView productId="prod-1" />);
+    await screen.findByRole("heading", { name: "Royal Canin Adult Dog Food" });
+    fireEvent.click(screen.getByText("5kg"));
+    await waitFor(() => expect(screen.queryByText("Golestan Pet Supplies")).toBeNull());
+  });
+
+  it("offers repeat delivery only for an eligible offer and never promises autopay", async () => {
+    vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
+    renderWithIntl(<ProductDetailView productId="prod-1" />);
+    await screen.findByRole("heading", { name: "Royal Canin Adult Dog Food" });
+    expect(screen.getByText(/nothing is charged automatically/)).toBeTruthy();
+    fireEvent.click(screen.getByText("Set up repeat delivery"));
+    expect(push).toHaveBeenCalledWith("/en/repeat-delivery/new?productId=prod-1&offerId=offer-2kg-a&quantity=1");
+  });
+
+  it("toggles favorite optimistically", async () => {
+    vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
+    vi.mocked(commerceService.setFavorite).mockResolvedValue({ productId: "prod-1", favorited: true });
+    renderWithIntl(<ProductDetailView productId="prod-1" />);
+    await screen.findByRole("heading", { name: "Royal Canin Adult Dog Food" });
+    fireEvent.click(screen.getByRole("button", { name: "Save to favorites" }));
+    expect(commerceService.setFavorite).toHaveBeenCalledWith("prod-1", true);
+    expect(screen.getByRole("button", { name: "Remove from favorites" })).toBeTruthy();
+  });
+  it("shows a failed favorite save and restores the previous state", async () => {
+    vi.mocked(commerceService.getProductDetail).mockResolvedValue(DETAIL);
+    vi.mocked(commerceService.setFavorite).mockRejectedValue(new Error("offline"));
+    renderWithIntl(<ProductDetailView productId="prod-1" />);
+    await screen.findByRole("heading", { name: DETAIL.title });
+    const button = screen.getByRole("button", { name: /save to favorites/i });
+    fireEvent.click(button);
+    expect((await screen.findByRole("alert")).textContent).toContain("Your saved products could not be updated");
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("keeps existing reviews and offers retry when more reviews fail", async () => {
+    vi.mocked(commerceService.getProductDetail).mockResolvedValue({ ...DETAIL, rating: { average: 5, count: 2 } });
+    vi.mocked(commerceService.listProductReviews).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce({ items: [{ ...DETAIL.reviews[0]!, id: "r2", body: "Second review" }], total: 2, page: 2, pageSize: 20 });
+    renderWithIntl(<ProductDetailView productId="prod-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: /more reviews/i }));
+    expect((await screen.findByRole("alert")).textContent).toContain("More reviews could not be loaded");
+    expect(screen.getByText("Luna loves it")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /more reviews/i }));
+    expect(await screen.findByText("Second review")).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("ignores a late detail response after navigating to another product", async () => {
+    let resolveOld!: (value: ProductDetailDto) => void;
+    vi.mocked(commerceService.getProductDetail).mockImplementationOnce(() => new Promise((resolve) => { resolveOld = resolve; })).mockResolvedValueOnce({ ...DETAIL, id: "prod-2", title: "New product" });
+    function Journey() {
+      const [id, setId] = useState("prod-1");
+      return <><button onClick={() => setId("prod-2")}>Next product</button><ProductDetailView productId={id} /></>;
+    }
+    renderWithIntl(<Journey />);
+    await waitFor(() => expect(commerceService.getProductDetail).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "Next product" }));
+    await screen.findByRole("heading", { name: "New product" });
+    await act(async () => { resolveOld(DETAIL); });
+    expect(screen.getByRole("heading", { name: "New product" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: DETAIL.title })).toBeNull();
+  });
+
 });

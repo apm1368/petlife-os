@@ -1,0 +1,8 @@
+{
+  "nativeTabTrap": true,
+  "browserBackCloses": true,
+  "browserForwardReopens": true,
+  "backdropDismissal": true,
+  "successfulAuthRemovesOverlay": true,
+  "api": "Controlled success response and completed onboarding; domain data not provided"
+}

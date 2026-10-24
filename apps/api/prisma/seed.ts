@@ -1,4 +1,5 @@
 import { hashPassword } from "../src/common/password/password-hash.util";
+import { createHash } from "node:crypto";
 import {
   AdminMembershipStatus,
   AdminRole,
@@ -120,17 +121,19 @@ async function seedSubscriptions() {
     code: DEFAULT_FREE_PLAN_CODE,
     nameFa: "رایگان",
     nameEn: "Free",
-    descriptionFa: "شروع رایگان برای هر خانواده — همیشه رایگان.",
-    descriptionEn: "Every household's starting plan — free forever.",
+    descriptionFa: "پروفایل و پروندهٔ پایهٔ همهٔ حیوانات، بدون محدودیت تعداد. یادآورها و اشتراک با دامپزشک در پلن‌های پولی است.",
+    descriptionEn: "Profiles and a basic record for all your pets, with no pet limit. Reminders and vet sharing come with paid plans.",
     isFree: true,
     sortOrder: 0,
     entitlements: [
-      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 2 },
-      { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 3 },
-      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 2 },
       { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 10 },
       { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 20 },
       { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
+      { key: "care.reminders", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+      { key: "vet.share", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
     ],
   });
 
@@ -138,46 +141,48 @@ async function seedSubscriptions() {
     code: "plus",
     nameFa: "پلاس",
     nameEn: "Plus",
-    descriptionFa: "فضای بیشتر برای خانواده‌های چندحیوانی.",
-    descriptionEn: "More room for multi-pet households.",
+    descriptionFa: "یادآورهای مراقبت و تکرارشونده، اشتراک موقت پرونده با دامپزشک، ۶ عضو خانواده و فضای بیشتر برای اسناد و خاطره‌ها.",
+    descriptionEn: "Care and recurring reminders, time-limited vet sharing, 6 household members and more room for documents and memories.",
     isFree: false,
     sortOrder: 1,
     trialDays: 7,
     entitlements: [
-      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 5 },
+      { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 6 },
-      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
-      { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 50 },
-      { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
-      { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 500 },
+      { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 100 },
+      { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: 1000 },
+      { key: "care.reminders", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "vet.share", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: false },
     ],
   });
   await ensurePrice(plus.id, SubscriptionBillingInterval.MONTHLY, 990_000);
   await ensurePrice(plus.id, SubscriptionBillingInterval.QUARTERLY, 2_790_000);
-  await ensurePrice(plus.id, SubscriptionBillingInterval.SEMI_ANNUAL, 5_290_000);
   await ensurePrice(plus.id, SubscriptionBillingInterval.ANNUAL, 9_900_000);
 
   const premium = await upsertPlan({
     code: "premium",
     nameFa: "پرمیوم",
     nameEn: "Premium",
-    descriptionFa: "بدون محدودیت تعداد حیوان یا عضو خانواده.",
-    descriptionEn: "No limit on pets or household members.",
+    descriptionFa: "همهٔ امکانات مراقبت، بدون سقف اسناد، خاطره‌ها و اعضای خانواده، به‌اضافهٔ پشتیبانی ویژه.",
+    descriptionEn: "Everything in care, with no cap on documents, memories or household members, plus priority support.",
     isFree: false,
     sortOrder: 2,
     trialDays: 7,
     entitlements: [
       { key: "pets.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "household.members.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
-      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
       { key: "health.documents.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "health.observations.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
       { key: "memories.entries.max", type: SubscriptionEntitlementType.LIMIT, limitValue: null },
+      { key: "care.reminders", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "vet.share", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
+      { key: "premium.support", type: SubscriptionEntitlementType.BOOLEAN, boolValue: true },
     ],
   });
   await ensurePrice(premium.id, SubscriptionBillingInterval.MONTHLY, 1_990_000);
   await ensurePrice(premium.id, SubscriptionBillingInterval.QUARTERLY, 5_590_000);
-  await ensurePrice(premium.id, SubscriptionBillingInterval.SEMI_ANNUAL, 10_690_000);
   await ensurePrice(premium.id, SubscriptionBillingInterval.ANNUAL, 19_900_000);
 
   console.log(`Seeded subscription plans: free=${free.id} plus=${plus.id} premium=${premium.id}`);
@@ -200,6 +205,13 @@ async function seedSubscriptions() {
  * example.
  */
 async function seedCommerce() {
+  for (const [slug, name] of [
+    ["species-dog", "سگ"], ["species-cat", "گربه"], ["species-bird", "پرنده"],
+    ["species-rabbit", "خرگوش"], ["species-rodent", "جوندگان"], ["species-fish", "ماهی"],
+    ["species-reptile", "خزنده"], ["species-other", "سایر حیوانات"],
+  ] as const) {
+    await prisma.productCategory.upsert({ where: { slug }, create: { slug, name }, update: { name } });
+  }
   const [royalCanin, petLifeBasics] = await Promise.all([
     prisma.brand.create({ data: { name: "Royal Canin", slug: "royal-canin" } }),
     prisma.brand.create({ data: { name: "PetLife Basics", slug: "petlife-basics" } }),
@@ -784,6 +796,16 @@ async function main() {
   if (process.env.NODE_ENV === "production") {
     throw new Error("prisma/seed.ts must never run with NODE_ENV=production — it seeds demo/dev-only data, including a hardcoded demo account password.");
   }
+  // The canonical staging server holds real accounts in a database whose name does not end in "_test", and
+  // NODE_ENV there is not "production" — so the NODE_ENV check alone never protected it. Only throwaway
+  // *_test databases are seeded implicitly; any other target must be named explicitly.
+  const databaseName = new URL(process.env.DATABASE_URL ?? "postgresql://unset/").pathname.replace(/^\//, "");
+  if (!databaseName.endsWith("_test") && process.env.SEED_ALLOW_DATABASE !== databaseName) {
+    throw new Error(
+      `prisma/seed.ts refuses to seed database "${databaseName}": only *_test databases are seeded implicitly. ` +
+        `To seed it anyway (e.g. a local dev database), set SEED_ALLOW_DATABASE=${databaseName}.`,
+    );
+  }
 
   await seedSubscriptions();
 
@@ -1158,6 +1180,7 @@ async function main() {
   const { rootAdmin, financeAdmin } = await seedAdmin(sarah.id, sarah.displayName);
   await seedSellerFinance({ petBazaar, golestan, financeAdmin, rootAdmin });
   await seedDemoAccount();
+  await seedCanonicalAccountScenarios();
 }
 
 /**
@@ -1253,3 +1276,66 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+async function seedCanonicalAccountScenarios(): Promise<void> {
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  async function user(username: string, displayName: string) {
+    return prisma.user.upsert({
+      where: { normalizedUsername: username },
+      update: { displayName, email: `${username}@example.test` },
+      create: { username, normalizedUsername: username, email: `${username}@example.test`, passwordHash, displayName, locale: "fa" },
+    });
+  }
+  async function household(ownerId: string, name: string) {
+    const existing = await prisma.household.findFirst({ where: { name, members: { some: { userId: ownerId, role: "OWNER" } } } });
+    if (existing) return existing;
+    return prisma.household.create({ data: { name, city: "Tehran", countryCode: "IR", members: { create: { userId: ownerId, role: "OWNER" } } } });
+  }
+  async function pet(householdId: string, name: string, species: "DOG" | "CAT", photoUrl: string) {
+    const existing = await prisma.pet.findFirst({ where: { householdId, name } });
+    if (existing) return existing;
+    return prisma.pet.create({ data: { householdId, name, species, approximateAgeMonths: 30, photoUrl } });
+  }
+  async function grantOwner(petId: string, userId: string) {
+    const existing = await prisma.petAccessGrant.findFirst({ where: { petId, userId, source: "HOUSEHOLD", revokedAt: null } });
+    if (existing) return;
+    await prisma.petAccessGrant.create({ data: { petId, userId, source: "HOUSEHOLD", canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true, canViewCareProfile: true, canEditCareProfile: true, canViewLocation: true, canManageAccess: true } });
+  }
+
+  // Scenario 1: single owner + one pet.
+  const single = await user("qa-single-owner", "QA Single Owner");
+  const singleHome = await household(single.id, "QA Single Pet Home");
+  const cookie = await pet(singleHome.id, "Cookie QA", "DOG", "/images/landing/cookie-reference.jpg");
+  await grantOwner(cookie.id, single.id);
+
+  // Scenario 2: organizer + partner + two pets.
+  const organizer = await user("qa-household-owner", "QA Household Organizer");
+  const partner = await user("qa-household-partner", "QA Care Partner");
+  const guest = await user("qa-pending-guest", "QA Pending Guest");
+  const helper = await user("qa-limited-helper", "QA Limited Helper");
+  const temporary = await user("qa-temporary-helper", "QA Temporary Helper");
+  const sharedHome = await household(organizer.id, "QA Shared Pet Home");
+  for (const member of [partner, helper, temporary]) {
+    await prisma.householdMember.upsert({ where: { householdId_userId: { householdId: sharedHome.id, userId: member.id } }, update: {}, create: { householdId: sharedHome.id, userId: member.id, role: "FAMILY" } });
+  }
+  const milo = await pet(sharedHome.id, "Milo QA", "CAT", "/images/landing/pet-portrait.png");
+  const luna = await pet(sharedHome.id, "Luna QA", "DOG", "/images/landing/cookie-taxi.webp");
+  await grantOwner(milo.id, organizer.id); await grantOwner(luna.id, organizer.id);
+
+  // Scenario 3: pending invitation (token value never stored).
+  const inviteHash = createHash("sha256").update("qa-canonical-pending-invitation").digest("hex");
+  await prisma.householdInvitation.upsert({
+    where: { tokenHash: inviteHash },
+    update: { status: "PENDING", expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    create: { householdId: sharedHome.id, contact: guest.email!, tokenHash: inviteHash, invitedByUserId: organizer.id, initialAccess: [{ petId: milo.id, preset: "VIEW_ONLY" }], expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+  });
+
+  // Scenario 4: member with limited pet access.
+  const limited = await prisma.petAccessGrant.findFirst({ where: { petId: milo.id, userId: helper.id, reason: "QA_LIMITED_ACCESS", revokedAt: null } });
+  if (!limited) await prisma.petAccessGrant.create({ data: { petId: milo.id, userId: helper.id, source: "MANUAL", reason: "QA_LIMITED_ACCESS", grantedByUserId: organizer.id, canViewIdentity: true, canViewCareProfile: true } });
+
+  // Scenario 5: temporary access expiring soon.
+  const expiring = await prisma.petAccessGrant.findFirst({ where: { petId: luna.id, userId: temporary.id, reason: "QA_EXPIRING_SOON", revokedAt: null } });
+  if (!expiring) await prisma.petAccessGrant.create({ data: { petId: luna.id, userId: temporary.id, source: "TEMPORARY", reason: "QA_EXPIRING_SOON", grantedByUserId: organizer.id, canViewIdentity: true, canViewHealth: true, canViewCareProfile: true, expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000) } });
+
+  console.log("Seeded five canonical account/household QA scenarios.");
+}

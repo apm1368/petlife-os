@@ -1,5 +1,6 @@
 "use client";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
+import { VerificationRequiredNotice } from "@/features/partner-verification/VerificationRequiredNotice";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -20,12 +21,18 @@ const NAV_ITEMS = [
   // Handoff 24 — the clinical panel. Placed immediately after Home because a
   // vet's day starts at the whiteboard, not at the booking list.
   { href: "/clinical", labelKey: "nav.clinical" },
+  { href: "/clinic", labelKey: "nav.clinicWorkspace" },
   { href: "/patients", labelKey: "nav.patients" },
+  { href: "/shared-records", labelKey: "nav.sharedRecords" },
   { href: "/bookings", labelKey: "nav.bookings" },
+  { href: "/waitlist", labelKey: "nav.waitlist" },
   { href: "/calendar", labelKey: "nav.schedule" },
   { href: "/availability", labelKey: "nav.availability" },
   { href: "/services", labelKey: "nav.services" },
   { href: "/team", labelKey: "nav.team" },
+  { href: "/reviews", labelKey: "nav.reviews" },
+  { href: "/analytics", labelKey: "nav.analytics" },
+  { href: "/travel", labelKey: "nav.travel" },
 ] as const;
 
 /**
@@ -121,6 +128,10 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
 
   const active = context.active;
   const notVerified = active.verificationStatus !== "VERIFIED";
+  const verificationRequired = notVerified && ["services", "availability", "calendar"].some((section) => {
+    const prefix = `/${locale}/provider/${section}`;
+    return pathname === prefix || pathname.startsWith(`${prefix}/`);
+  });
 
   return (
     <div className={pathname === `/${locale}/provider` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
@@ -145,6 +156,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
         {notVerified ? (
           <div className="mt-2">
             <StatusLabel tone="attention">{t("notVerifiedBanner")}</StatusLabel>
+            <Link className="ms-3 underline" href={`/${locale}/provider/verification`}>{t("nav.verification")}</Link>
           </div>
         ) : null}
       </header>
@@ -169,7 +181,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <main className={pathname === `/${locale}/provider` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{children}</main>
+      <main className={pathname === `/${locale}/provider` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{verificationRequired ? <VerificationRequiredNotice /> : children}</main>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { supportedSpecies } from "../../../common/species/catalog-species";
 import { AllergyKnowledgeState, AllergyStatus, SetupStatus, WeightUnit, type Pet, type Product } from "@prisma/client";
 import { ProductCompatibilityStatus, type ProductCompatibilityDto, type ProductCompatibilityReason } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -67,7 +68,7 @@ export class ProductCompatibilityService {
       if (RANK[status] > RANK[worst]) worst = status;
     };
 
-    const speciesSupported = pet.species === "DOG" ? product.supportsDog : pet.species === "CAT" ? product.supportsCat : true;
+    const speciesSupported = supportedSpecies(product).includes(pet.species);
     if (!speciesSupported) {
       reasons.push("SPECIES_MISMATCH");
       escalate(ProductCompatibilityStatus.NOT_RECOMMENDED);

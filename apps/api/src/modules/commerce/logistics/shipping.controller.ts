@@ -41,11 +41,14 @@ function buildTimeline(fulfillment: FulfillmentDto | null, shipment: ShipmentDto
     timeline.push({ milestone: FulfillmentStatus.PICKUP_REQUESTED, reached: !!fulfillment.pickupRequestedAt, occurredAt: fulfillment.pickupRequestedAt });
   }
   timeline.push({ milestone: ShipmentStatus.ASSIGNED, reached: !!shipment && [ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED].includes(shipment.status), occurredAt: null });
-  timeline.push({ milestone: ShipmentStatus.PICKED_UP, reached: !!shipment?.actualPickupAt, occurredAt: shipment?.actualPickupAt ?? null });
+  timeline.push({ milestone: ShipmentStatus.PICKED_UP, reached: !!(shipment?.actualPickupAt ?? fulfillment?.pickedUpAt), occurredAt: shipment?.actualPickupAt ?? fulfillment?.pickedUpAt ?? null });
   timeline.push({ milestone: ShipmentStatus.IN_TRANSIT, reached: !!shipment && [ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED].includes(shipment.status), occurredAt: null });
   timeline.push({ milestone: ShipmentStatus.OUT_FOR_DELIVERY, reached: !!shipment && [ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED].includes(shipment.status), occurredAt: null });
-  timeline.push({ milestone: ShipmentStatus.DELIVERED, reached: !!shipment?.actualDeliveryAt, occurredAt: shipment?.actualDeliveryAt ?? null });
-  return timeline;
+  timeline.push({ milestone: ShipmentStatus.DELIVERED, reached: !!(shipment?.actualDeliveryAt ?? fulfillment?.deliveredAt), occurredAt: shipment?.actualDeliveryAt ?? fulfillment?.deliveredAt ?? null });
+  // Progress is monotonic: once a later milestone is reached, every earlier one was too
+  // (e.g. a seller-delivered order with no courier shipment record).
+  const lastReached = timeline.map((t) => t.reached).lastIndexOf(true);
+  return timeline.map((t, i) => (i <= lastReached ? { ...t, reached: true } : t));
 }
 
 /**
@@ -105,12 +108,8 @@ export class OrderLogisticsController {
     return { fulfillment: toFulfillmentDto(updated), shipment: toShipmentDto(shipment) };
   }
 
-  @Post(":orderId/fulfillment/cancel")
-  async cancelFulfillment(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
-    const fulfillment = await this.shipping.getFulfillmentForOrderAsSeller(user.id, orderId);
-    if (!fulfillment) return null;
-    return toFulfillmentDto(await this.shipping.cancelFulfillment(user.id, fulfillment.id));
-  }
+  // Batch 4: seller cancellation moved to POST seller-organizations/:sellerId/orders/:orderId/cancel,
+  // which always refunds the customer. Cancelling only the fulfillment left a paid order undelivered.
 
   @Post(":orderId/shipment/reconcile")
   async reconcileShipment(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {

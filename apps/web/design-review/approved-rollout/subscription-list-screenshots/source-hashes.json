@@ -1,0 +1,7 @@
+{
+  "apps/web/features/admin/AdminSubscriptionHouseholdsView.tsx": "e6e44e979690375fe7d7823b48492969d623c3c855d81b52109f2bdfb83d9a65",
+  "apps/web/features/admin/AdminSubscriptionHouseholdsView.test.tsx": "23288650e0d1610070a15e63a7edeaee7c61c77950c277906af27d8e63561da6",
+  "apps/web/messages/fa.json": "ac4ab28b9786c1c453a54c38ca327a16e0dc6bb5c68070fab4e96ea560d2478c",
+  "apps/web/messages/en.json": "c623b3ed10e5d2561fdb8c66094a37ac341f9e9461cc961f59c18ea109884e17",
+  "apps/web/design-review/approved-rollout/browser-subscription-list.py": "5d64e242362df12159f19a4af2199f12ce61f93e149a20878e46456ab2ad7420"
+}

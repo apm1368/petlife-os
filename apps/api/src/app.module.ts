@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { RateLimitModule } from "./common/rate-limit/rate-limit.module";
 import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
 import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor";
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware";
@@ -10,11 +11,13 @@ import { CsrfMiddleware } from "./common/csrf/csrf.middleware";
 import { CsrfGuard } from "./common/csrf/csrf.guard";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { RedisModule } from "./common/redis/redis.module";
+import { FarazSmsModule } from "./common/faraz/faraz-sms.module";
 import { SessionModule } from "./common/session/session.module";
 import { DomainEventsModule } from "./common/events/domain-events.module";
 import { validateEnv } from "./config/env";
 import { HealthModule } from "./health/health.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { AccountModule } from "./modules/account/account.module";
 import { UsersModule } from "./modules/users/users.module";
 import { HouseholdsModule } from "./modules/households/households.module";
 import { PetAccessModule } from "./modules/pet-access/pet-access.module";
@@ -28,11 +31,16 @@ import { CareProfileModule } from "./modules/care-profile/care-profile.module";
 import { ProvidersModule } from "./modules/providers/providers.module";
 import { BookingModule } from "./modules/booking/booking.module";
 import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module";
+import { CareReminderModule } from "./modules/care-reminders/care-reminder.module";
+import { DiscoveryModule } from "./modules/discovery/discovery.module";
+import { VetShareModule } from "./modules/vet-share/vet-share.module";
 import { ServicesModule } from "./modules/services/services.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
 import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
 import { SellerOsModule } from "./modules/seller-os/seller-os.module";
 import { CatalogModule } from "./modules/commerce/catalog/catalog.module";
+import { ProductEngagementModule } from "./modules/commerce/engagement/product-engagement.module";
+import { RepeatDeliveryModule } from "./modules/commerce/repeat-delivery/repeat-delivery.module";
 import { CartModule } from "./modules/commerce/cart/cart.module";
 import { CheckoutModule } from "./modules/commerce/checkout/checkout.module";
 import { PaymentsModule } from "./modules/commerce/payments/payments.module";
@@ -50,11 +58,24 @@ import { ContentModule } from "./modules/content/content.module";
 import { SubscriptionsModule } from "./modules/subscriptions/subscription.module";
 import { ClinicalHealthModule } from "./modules/clinical-health/clinical-health.module";
 import { VetPanelModule } from "./modules/vet-panel/vet-panel.module";
+import { ClinicOsModule } from "./modules/clinic-os/clinic-os.module";
+import { PetSafetyModule } from "./modules/pet-safety/pet-safety.module";
+import { ServiceIntakeModule } from "./modules/service-intake/service-intake.module";
+import { PlaceSuggestionsModule } from "./modules/place-suggestions/place-suggestions.module";
+import { ActivityModule } from "./modules/activity/activity.module";
+import { MemberTrustModule } from "./modules/member-trust/member-trust.module";
+import { HealthDepthModule } from "./modules/health-depth/health-depth.module";
+import { PrivacyGovernanceModule } from "./modules/privacy-governance/privacy-governance.module";
+import { PlatformSettingsModule } from "./modules/platform-settings/platform-settings.module";
+import { PartnerVerificationModule } from "./modules/partner-verification/partner-verification.module";
+import { TravelExternalModule } from "./modules/travel-external/travel-external.module";
+import { ConsumerHubModule } from "./modules/consumer-hub/consumer-hub.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
 import { AnimalSupportModule } from "./modules/animal-support/animal-support.module";
 import { CommunityModule } from "./modules/community/community.module";
 import { MemoriesModule } from "./modules/memories/memories.module";
 import { TravelModule } from "./modules/travel/travel.module";
+import { TravelMarketplaceModule } from "./modules/travel-marketplace/travel-marketplace.module";
 import { InsuranceModule } from "./modules/insurance/insurance.module";
 import { PlacesModule } from "./modules/places/places.module";
 
@@ -66,15 +87,18 @@ import { PlacesModule } from "./modules/places/places.module";
       throttlers: [{ ttl: 60_000, limit: 100 }],
       // The e2e suite creates many users in quick succession from the same
       // "IP" (supertest has no real network layer); production rate limits
-      // stay intact, only the test run bypasses them.
-      skipIf: () => process.env.NODE_ENV === "test",
+      // stay intact, only the test run bypasses them — except the rate-limit spec, which opts in.
+      skipIf: () => process.env.NODE_ENV === "test" && process.env.PETLIFE_TEST_THROTTLE !== "1",
     }),
     PrismaModule,
     RedisModule,
+    FarazSmsModule,
+    RateLimitModule,
     SessionModule,
     DomainEventsModule,
     HealthModule,
     AuthModule,
+    AccountModule,
     UsersModule,
     HouseholdsModule,
     PetAccessModule,
@@ -88,11 +112,16 @@ import { PlacesModule } from "./modules/places/places.module";
     ProvidersModule,
     BookingModule,
     CareCalendarModule,
+    CareReminderModule,
+    VetShareModule,
+    DiscoveryModule,
     ServicesModule,
     AddressesModule,
     ProviderOsModule,
     SellerOsModule,
     CatalogModule,
+    ProductEngagementModule,
+    RepeatDeliveryModule,
     CartModule,
     CheckoutModule,
     PaymentsModule,
@@ -109,12 +138,25 @@ import { PlacesModule } from "./modules/places/places.module";
     ContentModule,
     SubscriptionsModule,
     ClinicalHealthModule,
+    HealthDepthModule,
+    PrivacyGovernanceModule,
+    PlatformSettingsModule,
+    PartnerVerificationModule,
+    TravelExternalModule,
     VetPanelModule,
+    ClinicOsModule,
+    PetSafetyModule,
+    ServiceIntakeModule,
+    PlaceSuggestionsModule,
+    ActivityModule,
+    MemberTrustModule,
+    ConsumerHubModule,
     LostPetModule,
     AnimalSupportModule,
     CommunityModule,
     MemoriesModule,
     TravelModule,
+    TravelMarketplaceModule,
     InsuranceModule,
     PlacesModule,
   ],

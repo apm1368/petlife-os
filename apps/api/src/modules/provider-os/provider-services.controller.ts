@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, UseGuards } from "@nestjs/common";
 import { ProviderUserRole } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
+import { RequireVerifiedPartner } from "../../common/auth/require-verified-partner";
 import { ProviderAuthGuard } from "./auth/provider-auth.guard";
 import { RequireProviderRole } from "./auth/require-provider-role.decorator";
 import { CurrentProviderContext } from "./auth/current-provider-context.decorator";
@@ -9,6 +10,7 @@ import { ProviderServicesService } from "./provider-services.service";
 import { UpdateProviderServiceDto } from "./dto/update-provider-service.dto";
 
 @Controller("provider/services")
+@RequireVerifiedPartner()
 @UseGuards(SessionAuthGuard, ProviderAuthGuard)
 export class ProviderServicesController {
   constructor(private readonly services: ProviderServicesService) {}

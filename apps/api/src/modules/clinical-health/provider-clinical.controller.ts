@@ -121,8 +121,8 @@ export class ProviderClinicalController {
 
   @Post("imaging/:imagingStudyId/void")
   @RequirePetAccess("canRecordClinicalData")
-  voidImaging(@Param("imagingStudyId") imagingStudyId: string, @Body() dto: VoidImagingStudyDto) {
-    return this.imaging.voidStudy(dto.petId, imagingStudyId, dto.reason);
+  voidImaging(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("imagingStudyId") imagingStudyId: string, @Body() dto: VoidImagingStudyDto) {
+    return this.imaging.voidStudy(ctx, dto.petId, imagingStudyId, dto.reason);
   }
 
   @Post("referrals")
@@ -133,8 +133,8 @@ export class ProviderClinicalController {
 
   @Patch("referrals/:referralId/status")
   @RequirePetAccess("canRecordClinicalData")
-  updateReferralStatus(@Param("referralId") referralId: string, @Body() dto: UpdateReferralStatusDto) {
-    return this.referrals.updateStatus(dto.petId, referralId, dto.status as never);
+  updateReferralStatus(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("referralId") referralId: string, @Body() dto: UpdateReferralStatusDto) {
+    return this.referrals.updateStatus(ctx, dto.petId, referralId, dto.status as never);
   }
 
   @Post("dental-records")
@@ -157,8 +157,8 @@ export class ProviderClinicalController {
 
   @Post("patients/:petId/rehab-plans/:rehabPlanId/sessions")
   @RequirePetAccess("canRecordClinicalData")
-  addRehabSession(@Param("petId") petId: string, @Param("rehabPlanId") rehabPlanId: string, @Body() dto: CreateRehabSessionDto) {
-    return this.rehab.addSession(petId, rehabPlanId, dto);
+  addRehabSession(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("petId") petId: string, @Param("rehabPlanId") rehabPlanId: string, @Body() dto: CreateRehabSessionDto) {
+    return this.rehab.addSession(ctx, petId, rehabPlanId, dto);
   }
 
   @Post("care-plans")
@@ -169,14 +169,14 @@ export class ProviderClinicalController {
 
   @Post("patients/:petId/care-plans/:carePlanId/items")
   @RequirePetAccess("canRecordClinicalData")
-  addCarePlanItem(@Param("petId") petId: string, @Param("carePlanId") carePlanId: string, @Body() dto: CreateCarePlanItemDto) {
-    return this.carePlans.addItem(petId, carePlanId, dto);
+  addCarePlanItem(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("petId") petId: string, @Param("carePlanId") carePlanId: string, @Body() dto: CreateCarePlanItemDto) {
+    return this.carePlans.addItem(ctx, petId, carePlanId, dto);
   }
 
   @Patch("patients/:petId/care-plans/:carePlanId/items/:itemId/status")
   @RequirePetAccess("canRecordClinicalData")
-  updateCarePlanItemStatus(@Param("petId") petId: string, @Param("carePlanId") carePlanId: string, @Param("itemId") itemId: string, @Body() dto: UpdateCarePlanItemStatusDto) {
-    return this.carePlans.updateItemStatus(petId, carePlanId, itemId, dto);
+  updateCarePlanItemStatus(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("petId") petId: string, @Param("carePlanId") carePlanId: string, @Param("itemId") itemId: string, @Body() dto: UpdateCarePlanItemStatusDto) {
+    return this.carePlans.updateItemStatus(ctx, petId, carePlanId, itemId, dto);
   }
 
   @Post("patients/:petId/documents/upload-url")

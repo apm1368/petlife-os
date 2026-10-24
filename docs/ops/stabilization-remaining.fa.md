@@ -1,0 +1,251 @@
+# صف ادامهٔ تثبیت — وضعیت مبتنی بر کد
+
+مبنای فهرست تطبیق اولیه: `9f2048d8afa4da4b66e1a291b31d0998ac1cc8df`؛ شاهد انتشار بستهٔ جدید در بخش پایانی «انتشار #33» آمده است؛ این فهرست گزارش اجرای زندهٔ همهٔ صفحات نیست. مرجع هماهنگی [Issue #4](https://github.com/apm1368/petlife-os/issues/4).
+
+## قابلیت‌های این ادامه
+
+| قابلیت | وضعیت | قرارداد / شاهد | تست و PR |
+|---|---|---|---|
+| پروندهٔ نجات ادمین | ادغام‌شده در تثبیت با PR #30 | فهرست، جزئیات، ساخت، تغییر وضعیت؛ endpoint جدید ثبت مدرک پس از upload با قفل و محدودیت همان پرونده | [PR #30](https://github.com/apm1368/petlife-os/pull/30)، CI کامل و ۱۸ تست UI پاس، ادغام ace9496 |
+| کمپین ادمین | ادغام‌شده با PR #30 | فهرست/جزئیات/ساخت/وضعیت/گزارش پیشرفت/مدرک/اشتراک در انجمن از APIهای موجود | تراکنش زنده اجرا نمی‌شود |
+| صندوق سازمان | ادغام‌شده با PR #30 | ماندهٔ دفتر کل، مجوز payout جدا، ثبت پرداخت انجام‌شده؛ قفل همزمانی بکند | انتقال بانکی بیرونی در این قابلیت وجود ندارد |
+| اطلاعات سازمان | ادغام‌شده با PR #30 | PATCH موجود؛ undefined حفظ، null پاک‌کردن متن اختیاری؛ رد نام null | تست قرارداد و UI |
+| تنظیمات ادمین و اعلان عمومی | ادغام‌شده در تثبیت با PR #31 | پنج API موجود، مجوز جدا، تأیید دوم، نسخه‌بندی و مصرف اعلان عمومی | ۱۶ تست تنظیمات/منو/اعلان، ۲۲ تست پوسته و CI کامل f1851de پاس؛ ادغام 64d59e5 |
+| فهرست همکاران | ادغام‌شده در تثبیت با PR #32 | دو API فهرست موجود؛ صفحه‌بندی واقعی و مجوز خواندن مستقل؛ عملیات 360 خارج از این موضوع است | ادغام `7685302`؛ CI کامل head `c5dd8f3` سبز؛ ۲۰ تست ترکیبی و ۸ تصویر نهایی + ۴ قبل پاس |
+| استعلام رسمی KYC | مسدود به سرویس بیرونی | جریان دستی مدارک موجود است، استعلام رسمی وجود ندارد | نیازمند سرویس/قرارداد واقعی |
+| پرداخت/پیامک/ارسال/بیمه/S3/HTTPS | آماده‌بودن واقعی تأیید نشده | docs/ops/external-readiness.md سابقه است و وضعیت فعلی باید مستقل خوانده شود | بدون کلید/قرارداد و تصمیم محصول، موفقیت جعل نمی‌شود |
+
+## گروه‌های باز برای تطبیق دستی
+
+جدول از کنترلرهای واقعی و سرویس/مصرف‌کنندهٔ فعلی ساخته شده است. «نیازمند تطبیق» مساوی نبود API یا UI نیست؛ alias، aggregate و عملیات داخلی باید با کد تعیین تکلیف شوند. `STATIC_UI_CHAIN_FOUND` نیز گواه تکمیل یا مجوز صحیح نیست. افزودن دکمهٔ خالی برای کاهش عدد ممنوع است.
+
+| گروه | ردیف نیازمند تطبیق | قراردادهای نمونه | وضعیت / تست / PR |
+|---|---:|---|---|
+| `modules/account/account.controller.ts` | 1 | `GET /account/activity` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/activity/household-activity.controller.ts` | 1 | `GET /households/:param/activity` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/animal-support` | 0 | upload لوگوی سازمان | در #30 به ویرایش سازمان متصل؛ ثبت پس از PUT موفق و مجوز manage |
+| `modules/admin/commerce` | 1 | `GET /admin/commerce/promotions/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/content` | 2 | `GET /admin/content/media/:param`؛ `GET /admin/content/placements` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/customer` | 4 | `GET /admin/customers/:param/overview`؛ `POST /admin/customers/:param/suspend`؛ `POST /admin/customers/:param/unsuspend` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/finance` | 11 | `POST /admin/settlements/:param/adjustments`؛ `GET /admin/marketplace-reconciliation/:param`؛ `GET /admin/finance/trace` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/insurance` | 1 | `POST /admin/insurance/providers/:param/logo-upload-url` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/orgs` | 2 | `GET /admin/providers/:param`؛ `GET /admin/sellers/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/partners` | 8 | `GET /admin/providers/:param/overview`؛ `GET /admin/clinics`؛ `GET /admin/clinics/:param/operations` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/pets` | 3 | `GET /admin/pets`؛ `GET /admin/pets/:param`؛ `POST /admin/pets/:param/grants/:param/revoke` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/places` | 4 | `GET /admin/places/:param`؛ `POST /admin/places`؛ `PATCH /admin/places/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/services` | 2 | `POST /admin/provider-services/:param/deactivate`؛ `POST /admin/provider-services/:param/reactivate` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/settings` | 0 | پنج قرارداد موجود تنظیمات | رابط/تست/تصاویر PR #31؛ خارج از ادعای تکمیل همه صفحات |
+| `modules/admin/subscriptions` | 2 | `GET /admin/subscriptions/plans/:param`؛ `GET /admin/subscriptions/billing-attempts` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/support` | 14 | `GET /admin/support/:param/extras`؛ `PUT /admin/support/:param/tags`؛ `POST /admin/support/:param/links` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/system` | 1 | `GET /admin/system/integrations` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/admin/trust` | 3 | `POST /admin/trust/queue/claim`؛ `POST /admin/trust/queue/release`؛ `POST /admin/trust/queue/dismiss` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/animal-support/public-animal-support.controller.ts` | 1 | `GET /animal-support/rescue-cases/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/animal-support/support-engagement.controller.ts` | 16 | `GET /animal-support/needs/:param/updates`؛ `GET /animal-support/needs/:param/activity`؛ `GET /animal-support/needs/:param/milestones` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/auth/google` | 2 | `POST /dev/auth/google/simulate`؛ `GET /auth/google` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/booking/bookings.controller.ts` | 2 | `POST /bookings/:param/report-provider-no-show`؛ `GET /provider-services/:param/eligibility` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/booking/engagement.controller.ts` | 3 | `POST /waitlist/:param/accept-offer`؛ `POST /waitlist/:param/decline-offer`؛ `GET /providers/:param/reviews` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/booking/transport` | 1 | `GET /provider-services/:param/transport-quote` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/care-calendar/care-calendar.controller.ts` | 1 | `GET /care-calendar` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/care-reminders/care-reminder.controller.ts` | 8 | `GET /pets/:param/care-items`؛ `GET /pets/:param/care-items/history`؛ `GET /pets/:param/care-items/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/clinic-os/clinic-os.controller.ts` | 4 | `GET /provider/clinic/contacts`؛ `GET /admin/clinic-subscriptions/plans`؛ `GET /admin/clinic-subscriptions/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/clinical-health/pet-observation.controller.ts` | 1 | `GET /pets/:param/observations/:param/download` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/clinical-health/provider-clinical.controller.ts` | 15 | `GET /provider/patients/:param`؛ `GET /provider/patients/:param/visits`؛ `POST /provider/labs/:param/amend` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/catalog` | 1 | `GET /shop/products/:param/offers` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/checkout` | 3 | `POST /checkout/:param/revalidate`؛ `PATCH /checkout/:param`؛ `GET /checkout/:param/financing-intent/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/logistics` | 4 | `POST /shipping/dev/simulate/:param`؛ `GET /orders/:param/fulfillment`؛ `GET /orders/:param/shipment` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/marketplace` | 8 | `GET /seller-organizations/:param/channels/:param`؛ `POST /seller-organizations/:param/channels/:param/reconcile`؛ `POST /seller-organizations/:param/channels/:param/dev/simulate/order` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/orders` | 1 | `POST /orders/:param/refunds` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/reconciliation` | 2 | `POST /payments/reconcile/:param`؛ `POST /financing/reconcile/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/refunds` | 2 | `GET /orders/:param/refunds`؛ `GET /refunds/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/commerce/repeat-delivery` | 5 | `POST /repeat-deliveries/:param/skip`؛ `POST /repeat-deliveries/:param/pause`؛ `POST /repeat-deliveries/:param/resume` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/community/chat` | 9 | `POST /chat/conversations`؛ `GET /chat/conversations/:param/messages`؛ `POST /chat/conversations/:param/archive` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/community/community.controller.ts` | 3 | `POST /community/posts/:param/save`؛ `DELETE /community/posts/:param/save`؛ `GET /community/saved-posts` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/consumer-hub/consumer-hub.controller.ts` | 5 | `GET /search`؛ `GET /me/saved`؛ `GET /me/recently-viewed` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/content/public-blog.controller.ts` | 4 | `GET /blog/articles/:param/related`؛ `GET /blog/articles/:param/feedback`؛ `POST /blog/articles/:param/feedback` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/content/public-content-placement.controller.ts` | 1 | `GET /content/placements/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/health-depth/health-depth.controller.ts` | 1 | `GET /pets/:param/care-suggestions` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/home/home.controller.ts` | 1 | `GET /home` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/insurance/claim-prep.controller.ts` | 6 | `GET /pets/:param/claim-preps`؛ `POST /pets/:param/claim-preps`؛ `GET /pets/:param/claim-preps/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/insurance/insurance.controller.ts` | 1 | `GET /pets/:param/insurance-applications/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/insurance/public-insurance.controller.ts` | 2 | `GET /insurance/providers`؛ `GET /insurance/providers/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/lost-pet/lost-pet.controller.ts` | 1 | `POST /pets/:param/lost-incidents/:param/identity-card` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/member-trust/member-trust.controller.ts` | 4 | `GET /me/moderation-decisions`؛ `POST /me/moderation-decisions/:param/appeal`؛ `GET /me/appeals` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/memories/memory.controller.ts` | 1 | `GET /pets/:param/memories` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/notifications/notification-dev.controller.ts` | 3 | `POST /dev/notifications/simulate`؛ `POST /dev/notifications/deliveries/:param/force-attempt`؛ `POST /dev/notifications/deliveries/process-due` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/notifications/notification-preference.controller.ts` | 2 | `GET /notification-preferences/digest`؛ `PUT /notification-preferences/digest` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/notifications/notifications.controller.ts` | 3 | `GET /notifications/grouped`؛ `POST /notifications/read`؛ `POST /notifications/groups/read` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/partner-verification/partner-verification.controllers.ts` | 10 | `GET /provider/verification`؛ `POST /provider/verification/uploads`؛ `POST /provider/verification/documents` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/pet-safety/pet-safety.controller.ts` | 15 | `GET /pets/:param/completeness`؛ `GET /pets/:param/emergency-info`؛ `PUT /pets/:param/emergency-info` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/place-suggestions/place-suggestions.controller.ts` | 6 | `POST /place-suggestions`؛ `POST /place-suggestions/changes`؛ `GET /place-suggestions/mine` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/platform-settings/platform-settings.controller.ts` | 0 | `GET /settings/public` | مصرف اعلان اعضا در PR #31؛ GET زنده فقط اعلان را برگرداند |
+| `modules/privacy-governance/privacy-governance.controller.ts` | 3 | `GET /admin/privacy/deletion-requests`؛ `POST /admin/privacy/deletion-requests/:param/transition`؛ `GET /admin/release-gate` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/provider-os/provider-bookings.controller.ts` | 2 | `GET /provider/bookings/:param/ride`؛ `POST /provider/bookings/:param/ride-events` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/provider-os/provider-catalog.controller.ts` | 1 | `POST /provider/waitlist/:param/offer` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/providers/providers.controller.ts` | 3 | `GET /providers/vets`؛ `GET /providers/vets/:param`؛ `GET /providers/vets/:param/availability` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/seller-os/seller-context.controller.ts` | 1 | `GET /seller-organizations` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/seller-os/seller-offer.controller.ts` | 1 | `GET /seller-organizations/:param/offers/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/seller-os/seller-promotion.controller.ts` | 1 | `GET /seller-organizations/:param/promotions/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/service-intake/service-intake.controller.ts` | 13 | `GET /provider-services/:param/intake-form`؛ `GET /bookings/:param/attachments`؛ `POST /bookings/:param/attachments/upload-url` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/services/services.controller.ts` | 2 | `GET /services/categories`؛ `GET /providers/services` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/storage/downloads.controller.ts` | 1 | `GET /downloads/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/storage/uploads.controller.ts` | 1 | `PUT /uploads/:param` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/subscriptions/subscription.controller.ts` | 2 | `GET /households/:param/subscription/summary`؛ `GET /households/:param/subscription/downgrade-preview` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/travel-external/travel-external.controllers.ts` | 4 | `GET /travel/external/stays/:param/out`؛ `POST /admin/travel/external/sources/:param/probe`؛ `POST /admin/travel/external/matches/:param/approve` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/travel-marketplace/travel-provider.controller.ts` | 1 | `POST /provider/travel/listings/:param/archive` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/travel/travel.controller.ts` | 1 | `GET /pets/:param/trips/:param/requirements` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/travel/trip-extras.controller.ts` | 13 | `GET /pets/:param/trips/:param/preparation`؛ `POST /pets/:param/trips/:param/reminder-proposals/apply`؛ `GET /pets/:param/trips/:param/checklist` | باز؛ بررسی دستی و تست قابلیت لازم است |
+| `modules/vet-panel/vet-panel.controller.ts` | 9 | `PATCH /provider/clinical/note-templates/:param`؛ `GET /provider/clinical/patients/:param/vitals/trends`؛ `GET /provider/clinical/patients/:param/problems` | باز؛ بررسی دستی و تست قابلیت لازم است |
+
+جزئیات endpoint، کنترلر، محل منبع و مصرف‌کننده در `apps/web/design-review/approved-rollout/backend-ui-coverage.json` و مسیرهای app در `ui-coverage-audit.json` ثبت شده‌اند. وضعیت تصویری مسیرها در `route-design-status.json` است؛ اعمال پوستهٔ مشترک جای بررسی تک‌تک آن‌ها را نمی‌گیرد.
+
+## موارد واقعی نیازمند ادامه
+
+- رسانهٔ دستهٔ محصول: API نوشتن دسته و قرارداد image/alt هنوز باید با کد فعلی تطبیق و در صورت نبود، با مجوز رسانه و migration افزودنی طراحی شود.
+- شروع چت از مقاله/مطلب: resolve مقصد بر اساس شناسهٔ محتوا باید سمت سرور باشد؛ authorUserId خصوصی عمومی نشود.
+- null/undefined در سایر PATCHها: فقط فیلدهای قابل پاک‌شدن با بررسی مدل و تست تغییر کنند؛ این PR معنای تمام PATCHهای مخزن را تغییر نمی‌دهد.
+- تنظیمات ادمین در PR #31 پیگیری شده است؛ ابزارهای همکاران، عملیات تخصصی بالینی و باقی گروه‌های جدول همچنان باز هستند. مستند قدیمیِ «clinic plans باز است» با وجود ClinicPlans.tsx و تست‌های فعلی باید اصلاح شود؛ وجود فایل به‌تنهایی تکمیل همهٔ طرح/تخصیص‌ها را ثابت نمی‌کند.
+- کوپن، نمودار رشد و trending قرارداد معتبر/تصمیم محصول می‌خواهند؛ افزودن ادعای ساختگی برای تطبیق تصویر مجاز نیست.
+
+
+## بررسی مجدد بستهٔ انتشار — ۲۰۲۶/۱۰/۱۶
+
+این checkpoint چهار وضعیت مستقل دارد؛ هیچ‌کدام جای دیگری نیست:
+
+| وضعیت | شاهد |
+|---|---|
+| ادغام توسعه | #30 در `ace9496`، #31 در `64d59e5` و #32 در `7685302` به stabilization/wave-1 ادغام شده‌اند. |
+| CI بسته | [اجرای PR در head 7685302](https://github.com/apm1368/petlife-os/actions/runs/38926646115) و [اجرای push همان head](https://github.com/apm1368/petlife-os/actions/runs/38926605791) کامل و سبز بودند؛ پس از اصلاح این سند و تقویت تست‌ها، CI head تازه دوباره لازم است. |
+| QA | ۴۱ تست رابطِ مرتبط و ۲۳ تست API در دو suite کامل روی PostGIS/Redis اختصاصی محلی پاس شدند. پس از افزودن تست صریح تفکیک نقش API، هر **۲۴ تست API در دو suite کامل، بدون skipped** پاس شد؛ پس از تقویت آزمون کلیک مجدد در پاسخ نامطمئن نیز هر **۱۳ تست فایل عملیات حمایت** پاس شد. هر **۷ تست suite ERP-C** نیز با رکوردهای واقعی DB پاس شد، شامل فیلتر و صفحه‌بندی دو فهرست و نقش SUPPORT دارای customer.view و فاقد verification.manage؛ در مجموع ۳۱ تست API در سه suite کامل پاس، بدون skipped. تصاویر کنترل‌شده و آزمون خودکار جای تأیید مستقل QA انسانی یا آزمون همهٔ نقش‌ها روی سایت نیستند؛ چنین تأییدی دریافت نشده است. |
+| انتشار | [PR #33](https://github.com/apm1368/petlife-os/pull/33) از stabilization/wave-1 به main؛ در زمان این checkpoint هنوز باز است. main و پاسخ زنده health/version هر دو `249c4f1480ad7d3807ba94c52ac228f6e168d90c` بودند؛ database و redis up. نتیجه نهایی باید با job واقعی deploy و SHA سرور مستقل ثبت شود. |
+
+Diff واقعی main…stabilization در head `7685302`: **۱۱۰ فایل، ۴۹۸۷ خط افزوده و ۳۴۵ خط حذف‌شده**؛ شامل عملیات حمایت، تنظیمات/اعلان، فهرست همکاران و تست/مستند/تصاویر مربوط است. Prisma schema، migrationها، lockfile و workflowها تغییر نکرده‌اند. مسیرهای PublicPetCardView، pet-safety.service، PetContextShell و card-messages محلی در diff انتشار نیستند. فایل‌های آن worktree با manifest محلیِ hash محتوا برای تطبیق پس از کار نگهداری می‌شوند؛ محتوا یا شناسهٔ ورود مالک در این سند ثبت نمی‌شود.
+
+شواهد مورد انتظار برای آزمون ایزوله:
+
+- UI مجوز view/manage/payout را جدا می‌کند؛ آزمون API نقش OPERATIONS فقط‌خواندنی، ADMIN مدیر سازمان بدون payout و FINANCE دارای payout بدون مدیریت سازمان را صریح کنترل می‌کند.
+- رقابت دو payout برای یک موجودی با قفل ردیف سازمان، دقیقاً یک ثبت موفق و یک خطای کمبود موجودی ایجاد می‌کند؛ صندوق عمومی/محدود مخلوط نمی‌شوند.
+- UI تنها ثبتِ پرداخت قبلاً انجام‌شده را عرضه می‌کند؛ backend این endpoint فقط دفتر کل و audit می‌نویسد و انتقال بانکی انجام نمی‌دهد.
+- پس از پاسخ مالی نامطمئن، ارسال همان فرم قفل می‌شود؛ کلیک مجدد API را دوباره فراخوانی نمی‌کند و پیش‌نویس محفوظ است. **این تضمین، یکتایی سراسری رسید بانکی در دستگاه/نشست دیگر نیست**؛ قرارداد payout فعلی کلید idempotency عمومی ندارد. تطبیق رسید پیش از ثبت دوباره همچنان لازم است و تضمین سراسری باید در قرارداد جدا تکمیل شود.
+- کلید مدرک متعلق به پروندهٔ دیگر رد و ثبت کلید تکراری در همان پرونده deduplicate می‌شود.
+- PENDING حساس تا تأیید فرد مجاز دوم مقدار جاری را عوض نمی‌کند؛ self-approval سمت API رد می‌شود و UI آن را عرضه نمی‌کند.
+- خطای ذخیره پیش‌نویس را حفظ می‌کند؛ جست‌وجو/صفحه‌بندی همکاران از API موجود و مطابق مجوز خواندن انجام می‌شود.
+
+این بررسی روی سایت پرداخت، پیام یا تنظیمی ایجاد نمی‌کند. دسترسی‌های کاربران/Claude و کلیدها تغییر نمی‌کنند. docs/project/ در این مبنا وجود ندارد؛ مرجع همین سند و Issue #4 است و مستند وضعیت موازی ساخته نشده است.
+
+
+## انتشار #33 — شاهد مستقل ادغام، CI، QA و اجرای واقعی
+
+نسخهٔ کد تثبیت: `98b61188fa86b77cbfbcc300356a3a0280f7cc3d`. [PR انتشار #33](https://github.com/apm1368/petlife-os/pull/33) با commit اصلی `60f15ef52e5e3e3b9a6bc8ba6a99f30154d76671` ادغام شد. درخت commit اصلی با درخت بررسی‌شدهٔ merge برابر است. [Deploy to VPS](https://github.com/apm1368/petlife-os/actions/runs/38966361292) شامل CI قابل فراخوانی، job واقعی SSH و smoke موجود موفق شد؛ `/api/health/version` نیز همین SHA و شناسهٔ `github-38966361292-1` را از فرایند اجراشده گزارش کرد.
+
+| موضوع | ادغام در تثبیت | CI همان head | QA / حدود شاهد | انتشار |
+|---|---|---|---|---|
+| عملیات حمایت، پرونده/کمپین/صندوق/سازمان | #30، `ace9496` | [کامل و موفق](https://github.com/apm1368/petlife-os/actions/runs/38922042406) | UI و API ایزوله؛ تفکیک مجوز، قفل موجودی، مدرک همان پرونده و جلوگیری از تکرار UI | در بستهٔ #33، SHA بالا |
+| تنظیمات و اعلان اعضا | #31، `64d59e5` | [کامل و موفق](https://github.com/apm1368/petlife-os/actions/runs/38924124991) | PENDING از اعمال‌شده جدا؛ تأیید مدیر دوم؛ self-approval ممنوع | همان بسته |
+| فهرست همکاران | #32، `7685302` | [کامل و موفق](https://github.com/apm1368/petlife-os/actions/runs/38925690576) | جست‌وجو/صفحه‌بندی API واقعی و خواندن مستقل؛ رابط 360 کامل اعلام نمی‌شود | همان بسته |
+| اصلاح وضعیت و شواهد تکمیلی | #34، `86f911e`؛ commit مستند `a532bfc` | [کامل و موفق](https://github.com/apm1368/petlife-os/actions/runs/38931336761) | شکست‌های محلی قبلی پنهان نشده‌اند؛ جزئیات در PR | همان بسته |
+| تاریخ تولد و وضوح فارسی مدارک | #35، `0d31f40` | [کامل و موفق](https://github.com/apm1368/petlife-os/actions/runs/38961128958) | شمسی/میلادی، سن نامعلوم، حفظ پیش‌نویس؛ تصاویر fa/en در 390/1440 | همان بسته |
+| سن صفر و جایگزینی تاریخ در تلاش مجدد | #37، `00bb30b` | [کامل و موفق](https://github.com/apm1368/petlife-os/actions/runs/38963197534) | ۸ تست وب و ۶ تست API واقعی ایزوله؛ فیلد سن قبلی پاک می‌شود | همان بسته |
+| برند opetlife | #36، `98b6118`؛ head نهایی `b02da07` | [کامل و موفق](https://github.com/apm1368/petlife-os/actions/runs/38963821164) | ۱۳ PNG اصلی، ۳۲ بررسی مرورگر؛ ۸ آزمون صفحهٔ اصلی پس از اصلاح مسیر raster بدون تغییر پاس شدند | همان بسته |
+
+CI مستقل خود بستهٔ تثبیت، نه صرفاً PRهای موضوعی: [اجرای PR](https://github.com/apm1368/petlife-os/actions/runs/38964996368) و [اجرای push](https://github.com/apm1368/petlife-os/actions/runs/38964990124) هر دو روی `98b61188fa86b77cbfbcc300356a3a0280f7cc3d` کامل و موفق شدند. خطای گذرای 503 در خواندن وضعیت GitHub با دریافت مجدد نتیجه تشخیص داده شد؛ اجرای ناقص موفق محسوب نشد.
+
+Diff واقعی main قبلی تا merge: ۲۶۲ فایل، ۶۱۷۶ اضافه/۵۷۷ حذف متنی و ۱۱۹ فایل تصویری. schema، migration، lockfile، workflow، کد پیام کارت پت، پوستهٔ PetContextShell و اسکریپت ساخت دسترسی مالک تغییر نکردند. `docs/project/` در مرجع کد وجود ندارد؛ مرجع موازی ایجاد نشده است.
+
+تأیید اجرای زنده فقط GET بود: health/version و ready، وب فارسی/انگلیسی مسیرهای حمایت ادمین، تنظیمات، فهرست همکاران، فعالیت، onboarding، افزودن پت و بررسی مدارک؛ APIهای خصوصی برای درخواست بی‌نشست 401/403 دادند؛ اعلان عمومی فقط کلید عمومی داشت؛ صفحهٔ اصلی نام opetlife و سه فایل اصلی نماد/آیکون با hash صحیح سرو کرد. PostgreSQL و Redis هر دو up بودند. پاسخ ۲۰۰ برای HTML به‌تنهایی اثبات کارکرد جریان خصوصی نیست؛ QA زندهٔ احرازشده یا تأیید انسانی مستقل دریافت نشده است.
+
+محدودیت‌های باقی‌مانده: گروه‌های تطبیق دستیِ بالا بازند؛ استعلام رسمی هویت و آمادگی واقعی سرویس‌های بیرونی تأیید نشده‌اند. ثبت پرداخت، ثبت یک پرداخت قبلاً انجام‌شده است؛ قرارداد dedup سراسری رسید بانکی بین دستگاه‌ها وجود ندارد و تطبیق دستی رسید لازم است. تکرار UI پس از پاسخ نامطمئن مسدود است. پرداخت، پیام یا تنظیم واقعی برای آزمون تغییر نکرد.
+
+کار محلی پیام کارت عمومی پت و صندوق پیام، مطابق دستور مالک خارج از بسته ماند؛ ۳۰ فایل با همان بایت‌ها و همان مجموعهٔ مسیرها حفظ شدند. کلیدها، حساب‌ها، اتصال‌ها و نشست‌های Claude تغییر داده نشدند. داشتن پوسته یا اسکن ایستا هیچ قابلیت دیگری را کامل اعلام نمی‌کند.
+
+
+## انتشار تکمیلی ثبت پت — #39
+
+این شاهد از انتشار #33 جدیدتر است. [اصلاح #38](https://github.com/apm1368/petlife-os/pull/38) با head `65f715c1825af327c026726134a8dcec910f8d65` و [CI کامل همان head](https://github.com/apm1368/petlife-os/actions/runs/38971160415) در تثبیت ادغام شد. بازگشت سرد به اطلاعات اولیهٔ ذخیره‌نشده برمی‌گردد؛ نام فارسی در هدر معتبر رمزگذاری می‌شود؛ شناسهٔ پت در تراکنش ساخت برای بازیابی پس از قطع ذخیرهٔ مرحله ثبت می‌شود.
+
+۱۱ تست وب، ۸ تست واقعی API ایزوله، typecheck و lint (سه هشدار قبلی) گذشتند. دو تصویر واقعی قبل و هشت تصویر بعد، فارسی/انگلیسی در ۳۹۰/۱۴۴۰، بدون overflow یا pageerror؛ هر جریان کنترل‌شده دقیقاً یک POST و رسیدن به مرحلهٔ عکس داشت. [جزئیات و تصاویر](../../apps/web/design-review/approved-rollout/ONBOARDING-RESUME-VALIDATION.md). این تست‌ها تضمین عمومی عدم تکرار همزمان همهٔ عملیات نیستند.
+
+کد تثبیت `218ddea14af50a04179840510bb3c7c01420ac9d`؛ [PR انتشار #39](https://github.com/apm1368/petlife-os/pull/39)؛ [CI دقیق PR](https://github.com/apm1368/petlife-os/actions/runs/38997352436) و [CI push](https://github.com/apm1368/petlife-os/actions/runs/38997338013) کامل و موفق. commit main و SHA واقعاً گزارش‌شدهٔ API `5c1fc12f6be05fbd638f89007d9623cf5e333e26`، deploymentId `github-38997939392-1`؛ [اجرای انتشار واقعی](https://github.com/apm1368/petlife-os/actions/runs/38997939392) موفق. PostgreSQL و Redis up و ۴۰ درخواست فقط‌خواندنی سلامت/وب/API/دارایی گذشتند؛ بررسی اضافهٔ JavaScript زنده تأیید نشد: مسیر /_next/static در پراکسی نشست HEAD=302 به آدرس داخلی و GET=503 از envoy می‌دهد؛ هیچ دورزدن شبکه انجام نشد. متای SHA وب dev است و شاهد SHA کامل وب نیست. تأیید بارگذاری دارایی‌ها از مرورگر مستقل QA باز می‌ماند؛ هیچ عملیات زندهٔ نوشتنی انجام نشد. HTML خصوصی ۲۰۰، QA احرازشدهٔ آن جریان محسوب نمی‌شود.
+
+Diff واقعی نسبت به انتشار قبلی فقط ۲۳ فایل اصلاح ثبت پت و شواهد آن است؛ migration/schema، workflow، lockfile و قابلیت محلی پیام کارت پت تغییر نکرده‌اند. هرگونه تغییر نهایی این دو سند، صرفاً گزارش در تثبیت است و SHA کد اجراشدهٔ بالا را تغییر نمی‌دهد. دسترسی و اتصال‌های Claude و ۳۰ فایل کار محلی حفظ شده‌اند. گروه‌های باز و محدودیت سرویس‌های بیرونی همچنان بازند.
+
+
+## QA پس از انتشار #39 — ۱۷ اکتبر
+
+مبنای آغاز: main=`5c1fc12f6be05fbd638f89007d9623cf5e333e26`، تثبیت=`fb784f4bc01f4144a1a5ff68fdd538ba8a774ba5`؛ اختلاف صرفاً دو سند بود. GET واقعی نسخه/ready همان SHA، deploymentId=`github-38997939392-1` و PostgreSQL/Redis up را تأیید کرد؛ [Actions همان SHA](https://github.com/apm1368/petlife-os/actions/runs/38997939392) موفق است.
+
+| محور | وضعیت مستقل | شاهد / اقدام |
+|---|---|---|
+| کد | نقص‌های ارجاع، دامنه/همزمانی cache و حفظ سنِ ویرایش‌شده با API واقعی بازتولید و اصلاح ارائه شد | [PR #41](https://github.com/apm1368/petlife-os/pull/41)، شاخهٔ تازه codex/stab-onboarding-qa از مبنای تثبیت بالا؛ بدون migration/workflow |
+| CI | فقط نتیجهٔ کامل همان head نهایی معتبر است | checks در PR #41 و checkpoint نهایی Issue #4؛ اجرای قدیمی یا جزئی به معنی موفقیت نیست |
+| مرورگر زنده | تأیید کامل **مسدود** | ۱۶ بازدید fa/en × 390/1440 × خانه/ورود/onboarding/افزودن؛ CSS=200، JS=302/503 از پراکسی envoy، hydration صفر؛ نیازمند مرورگر مستقل QA، نه تغییر امنیت سرور |
+| ثبت پت ایزوله | ۱۶ جریان مرورگر با API/DB واقعی موفق | قطع پاسخ بعد از commit، شکست progress، بازیابی همان پت، نام فارسی/هدر ASCII، شمسی/میلادی، سن نامعلوم/صفر، حفظ تاریخ و پاک‌شدن فیلد سن قبلی؛ ۲۲ تست وب؛ ۱۲ جریان خطا و چهار جریان حفظ/پاک‌شدن پیش‌نویس خانواده |
+| اجرای گستردهٔ API | نتیجهٔ محیط تازه در سند شواهد ثبت می‌شود | ۲۶۲/۲۶۲ در پنج suite روی DB تازه و ۸۸ migration موجود موفق؛ timeoutهای اجراهای قبلی مخفی یا با افزایش timeout سبز نشده‌اند |
+| یکتایی همزمان | lease محدود اصلاح شد؛ تضمین پایدار **باز** | baseline شش پت؛ پس از اصلاح شش درخواست یک کلید → یک پت در pool پنج‌اتصالی؛ ۴۸ تست موفق. شکست CI اولیه پنهان نشده؛ حذف cache/پایان lease/کلید متفاوت تضمین ندارد |
+| انتشار اصلاح جدید | **در این مرحله انجام نمی‌شود** | main و نسخهٔ فعال تغییر نمی‌کنند؛ حضور اصلاح در تثبیت معادل انتشار نیست. پس از ادغام #41، اختلاف تثبیت با main دیگر فقط دو سند نخواهد بود |
+
+[شواهد، تصاویر، خروجی شبکه و فایل:خط](../../apps/web/design-review/approved-rollout/ONBOARDING-RESUME-VALIDATION.md). هیچ حساب زنده‌ای برای آزمون وارد نشد و هیچ پت، پیام، پرداخت، تنظیم یا دادهٔ آزمایشی روی سایت ایجاد نشد. روابط قبلیِ دادهٔ سرور هم پاکسازی نشدند. کار محلی پیام کارت پت (۳۰ فایل)، شاخهٔ قبلی و همهٔ دسترسی‌ها/نشست‌های Claude حفظ شدند؛ هیچ stash/reset/clean یا push مستقیم/force به main/تثبیت انجام نشد. سایر صف‌های تطبیق و سرویس‌های بیرونی همچنان بازند.
+
+
+## ادامهٔ اجرای طراحی — پوستهٔ مشترک ادمین
+
+منوی کناری آلوئی و سربرگ روشن با لوگوی opetlife جایگزین نوار افقی قبلی شدند؛ گروه‌ها از ترجمهٔ fa/en خوانده می‌شوند، مسیر فعال مشخص است و منوی موبایل همچنان فقط مسیرهای مجاز حساب را نشان می‌دهد. ۷ تست ناوبری، typecheck، lint و هشت حالت مرورگر بعد همراه هشت تصویر قبل موفق‌اند. [تصاویر، بازاجرا و محدودیت](../../apps/web/design-review/approved-rollout/VALIDATION.md). این تغییر صرفاً پوسته است؛ تکمیل عملکرد همهٔ صفحات ادمین یا APIهای بک‌آفیس اعلام نمی‌شود. وضعیت ادغام/CI در PR همین شاخه و Issue #4 مستقل ثبت می‌شود؛ انتشار جدید انجام نشده است.
+
+
+## ادامهٔ اجرای طراحی — فهرست پت‌ها
+
+بنا بر درخواست تازهٔ مالک، کار از تهیهٔ فهرست به اجرای طراحی برگشت؛ ورودی یک‌بارهٔ کاتالوگ، CRM جدید و قابلیت‌های اضافه فعلاً اجرا نمی‌شوند. اصلاح این بخش: `/[locale]/pets`، کارت شیشه‌ای منطبق با قاب مصوب، رفع تداخل عنوان/افزودن و بریدگی متن کنترل در موبایل، حالت خالی و خطای ذخیرهٔ انتخاب پت با حفظ انتخاب قبلی. API تازه یا تغییر مدل/مجوز وارد این بسته نشده است.
+
+۲۳ تست هدفمند، typecheck، lint و برابری کلیدهای fa/en موفق؛ ۱۶ حالت مرورگر بعد و چهار تصویر قبل موجود است. [جزئیات و تصاویر](../../apps/web/design-review/member-glass/README.md). وضعیت CI/ادغام از PR همین شاخه و checkpoint Issue #4 خوانده شود. موفقیت این صفحه، پذیرش همهٔ صفحات یا تطبیق کامل APIهای بک‌آفیس نیست. main و نسخهٔ زندهٔ قبلی تغییر نمی‌کنند؛ انتشار از QA/CI مستقل است.
+
+
+## ادامهٔ اجرای طراحی — وظایف ادمین
+
+ردیف‌های `/[locale]/admin/tasks` با مسئول، مهلت شمسی/میلادی محلی، اولویت و منشأ موجود در API خواناتر شدند؛ ترجمهٔ گمشدهٔ BLOCKED اصلاح شد. خطای ساخت پیش‌نویس را نگه می‌دارد و بررسی نتیجه فقط خواندنی است؛ هیچ تکرار خودکار عملیات نوشتنی اضافه نشده است. ۱۲ تست مرتبط، typecheck، lint و ۱۶ حالت مرورگر ایزوله موفق؛ چهار تصویر قبل موجود است. [شواهد و محدودیت دقیق](../../apps/web/design-review/approved-rollout/VALIDATION.md).
+
+این بسته اصلاح محتوا/طراحی همین صفحه است؛ تخصیص وظیفه، کارپوشهٔ شخصی، تکمیل همهٔ صفحات ادمین یا تأیید API واقعی محسوب نمی‌شود. CI و ادغام در PR همان head و Issue #4 مستقل پیگیری می‌شوند؛ main و نسخهٔ زنده در این مرحله تغییر نمی‌کنند. کار محلی پیام کارت پت و دسترسی‌های Claude خارج از بسته و محفوظ‌اند.
+
+
+## ادامهٔ طراحی صف و مدارک همکاران — ۱۸ اکتبر
+
+مبنا main=`5c1fc12f6be05fbd638f89007d9623cf5e333e26`، تثبیت پس از ادغام تصویر مرجع #45=`069cbfc467246f2e71ae3027410797769fb5fb20`. کار محلی قبلیِ همین موضوع حفظ و روی همان شاخه ادامه یافت؛ هیچ stash/reset/clean یا تعویض شاخهٔ دارای تغییر انجام نشد.
+
+کد: ردیف خواناتر صف، شمار مستقل مدارک، دکمهٔ بررسی موبایل، برچسب دلیل رد و مشخصات فایل، زمان تهران با تقویم محلی؛ توضیح تصمیم نامطمئن حفظ و بررسی دوباره فقط GET است. درخواست تازهٔ تصمیم به دریافت وضعیت و تأیید صریح نیاز دارد و اقدام قدیمی روی مدرک بررسی‌شده بسته می‌شود. API/مدل/مجوز جدید ایجاد نشده است.
+
+QA محلی: ۲۰ تست مرتبط، typecheck، lint (سه هشدار قبلی)، برابری کلیدهای دو زبان و ۴۰ حالت Chromium پس از اصلاح موفق؛ ۲۰ تصویر قبل موجود است. [شواهد، بازاجرا و محدودیت‌ها](../../apps/web/design-review/approved-rollout/VALIDATION.md). دادهٔ API در این مرورگر مصنوعی loopback است؛ این نتیجه اثبات API زنده، استعلام رسمی یا تکمیل تمام ادمین نیست.
+
+CI و ادغام: از PR همان head نهایی و checkpoint Issue #4 مستقل خوانده شود. انتشار: در این بسته انجام نمی‌شود؛ main تغییر نمی‌کند و JavaScript زنده همچنان نیازمند شاهد مستقل QA است. کار محلی پیام کارت پت و تمام دسترسی‌های Claude خارج از این بسته‌اند.
+
+## ادامهٔ اجرا — اشتراک خانواده‌ها، ۱۸ اکتبر
+
+مسیر `/[locale]/admin/subscriptions/households`: رابط قبلی با وجود API صفحه‌بندی‌شده، فقط ۵۰ مورد نخست را نشان می‌داد. صفحه‌بندی واقعی، بازگشت به صفحهٔ اول پس از تغییر وضعیت و کنارگذاشتن پاسخ درخواست قدیمی اضافه شد. هنگام بارگذاری یا شکست فیلتر، ردیف‌های وضعیت قبلی نمایش داده نمی‌شوند؛ تلاش مجدد همان فیلتر را می‌خواند. کارت‌ها برای نام بلند و نمایش ۳۹۰ پیکسل اصلاح شدند. شمار اشتراک‌ها با عدد محلی نمایش داده می‌شود.
+
+ده تست فهرست/جزئیات اشتراک موفق؛ سه سناریوی افزوده پیش از اصلاح شکست می‌خوردند. API، مجوز، پرداخت، migration و workflow تغییر نکرده‌اند. [شواهد و محدودیت](../../apps/web/design-review/approved-rollout/SUBSCRIPTION-LIST-VALIDATION.md). CI و ادغام از PR همین شاخه و Issue #4 خوانده شود؛ این بسته انتشار جدید انجام نمی‌دهد. کار محلی پیام کارت پت و دسترسی‌های Claude حفظ شده‌اند. پذیرش این صفحه، تکمیل کل پروژه یا تأیید JavaScript نسخهٔ زنده نیست.
+
+## اولویت تازهٔ مالک و ادامهٔ نمای پت — ۱۸ اکتبر
+
+بازطراحی تازهٔ ادمین متوقف است؛ مأموریت پیشنهادی Claude، اتصال واقعی ادمین به API/بک‌آفیس و نمایش نتیجهٔ تغییرات در سایت است. Codex طراحی و حالت‌های واقعی صفحات سمت کاربر و انتشار بسته‌های آماده را ادامه می‌دهد. ارتباط خودکار با چت دیگر فرض نمی‌شود؛ فایل‌های مشترک و کار فعال در Issue #4 بررسی و ثبت می‌شوند.
+
+انتشار آماده: #48 تثبیت آزموده‌شده `319650b5ddc8ddde2f0581823a630356930aee2b` را عادی به main `7c63f11bb572825d7771692f4e46d49e4b7b479d` برد؛ [CI دقیق PR](https://github.com/apm1368/petlife-os/actions/runs/39137394272) کامل و موفق. [workflow انتشار موجود](https://github.com/apm1368/petlife-os/actions/runs/39138029992) موفق شد؛ GET واقعی health/version همان SHA main و deploymentId=`github-39138029992-1` را با database/redis up تأیید کرد. شاهد جدیدتر انتشار #50 در ادامه آمده است. بسته migration/schema/workflow/lockfile جدید ندارد؛ ۳۰ فایل محلی پیام کارت پت خارج از بسته‌اند.
+
+ادامهٔ جداگانهٔ سمت کاربر: `PetProfileView` شکست مراقبت را خالی اعلام نمی‌کند و پاسخ قبلیِ داده/مجوز/مراقبت پس از تغییر petId درون همان نما نمایش داده نمی‌شود. ۱۸ تست مرتبط موفق و شواهد مرورگر در [مرجع موجود member-glass](../../apps/web/design-review/member-glass/README.md) هستند. پوستهٔ مصوب حفظ شده؛ API، مدل، migration، ادمین و PetContextShell/پیام کارت پت تغییر نکرده‌اند. CI، ادغام و انتشار این ادامه از #48 جدا هستند.
+
+## نتیجهٔ اجرای انتشار و QA — ۱۸ اکتبر
+
+#49 پس از [CI کامل head](https://github.com/apm1368/petlife-os/actions/runs/39138363126) عادی در تثبیت `e2a811412e51bc9cda725d5810aa206956fa3e41` ادغام شد. [PR انتشار #50](https://github.com/apm1368/petlife-os/pull/50) با [CI PR](https://github.com/apm1368/petlife-os/actions/runs/39139191453) و [CI push](https://github.com/apm1368/petlife-os/actions/runs/39139157711)، هر دو کامل و موفق، عادی به main رفت. main و API واقعاً اجراشده اکنون `3ba6fdfed343b4c9cb1413a2911f55490c7d01d9` هستند؛ [job واقعی deploy](https://github.com/apm1368/petlife-os/actions/runs/39140816890) موفق و deploymentId=`github-39140816890-1`، PostgreSQL/Redis up. درخت انتشار با تثبیت آزموده‌شده تطبیق داده شد؛ سبزشدن CI به‌تنهایی شاهد انتشار حساب نشد.
+
+در هر یک از انتشارهای #48 و #50، ۲۰ GET وب/API با پاسخ مورد انتظار و ۲۲ GET دارایی جدا ثبت شدند. API خصوصی بی‌نشست 401 و صفحات خصوصی فقط پوستهٔ HTML بودند؛ QA احرازشده اعلام نمی‌شود. مرورگر محلیِ ۱۶ حالت بعد از #48، fa/en و ۳۹۰/۱۴۴۰، hydration صفر داشت و دارایی‌ها از مسیر پراکسی محدود ماندند؛ این شاهد خرابی قطعی origin نیست. بررسی مستقل و مثبت‌محور در PR #52 باید status/MIME، hydration و تعامل بدون ارسال فرم را واقعاً تأیید کند؛ نتیجه پیش از پایان آزمون موفق اعلام نمی‌شود.
+
+تفکیک کار ادمین: PR #51 Claude چهار round-trip واقعی API/DB را گزارش کرده و CI آن سبز است؛ اما بازبینی React روی head `db5827e7bd6eda18ee6e09c5ba0df0953012baf4`، نمایش کنترل ذخیره/انتشار برای READ_ONLY و EDITOR فاقد publish را بازتولید کرد (سه تست منفی شکست، حالت مجاز ناشر موفق). [بازخورد قابل بازتولید](https://github.com/apm1368/petlife-os/pull/51#issuecomment-6251987206) در همان PR است؛ کد فعال Claude تغییر نکرد و PR #51 توسط Codex ادغام/منتشر نشده است. این نقصِ UI به معنی عبور از guard سرور نیست؛ کنترل API همان PR نقش نامجاز را رد می‌کند. QA مرورگر ادمین و رابط ویرایش نام مکان همچنان بازند؛ پیش‌نویس روی نسخهٔ منتشرشدهٔ مقاله نیز قرارداد جداگانهٔ محصول/مدل می‌خواهد.
+
+۳۰ فایل کار محلی پیام کارت پت خارج از این بسته‌ها هستند. وضعیت ادغام، CI، QA و انتشار مستقل ثبت شده‌اند؛ تکمیل همهٔ صفحات و APIهای بک‌آفیس اعلام نمی‌شود.
+
+شاهد مرورگر PR #52: [اجرای نخست](https://github.com/apm1368/petlife-os/actions/runs/39142311828) هر ۱۶ حالت را ناموفق ثبت کرد؛ CSS=200، JS=302 و مرحلهٔ مثبت hydration/تعامل تکمیل نشد. این نتیجه سبز یا تکمیل فرانت محسوب نمی‌شود. ابزار، برای تشخیص علت و جلوگیری از پیگیری مقصد ناامن، پیش‌بررسی HTTP بدون redirect و کنترل بومی Chromium در هر hop دارد؛ معیارهای ۱۶ حالت، status/MIME، hydration مثبت و خطاهای runtime حذف یا ضعیف نشده‌اند. شواهد در مرجع QA موجود و Issue #4 هستند.
+
+
+تشخیص تکمیلی [39144388468](https://github.com/apm1368/petlife-os/actions/runs/39144388468) نیز **ناموفق** است: runner متغیر HTTP proxy تنظیم‌شده نداشت؛ چهار CSS با MIME صحیح 200 و نخستین JS با 302 به مقصد خصوصی/خارج از هدف برگشت. redirect دنبال نشد. پیش‌نیاز شکست خورد و صفر سناریوی مرورگر اجرا شد؛ این قبولی نیست. CI معمول همان head `84044d0` [موفق](https://github.com/apm1368/petlife-os/actions/runs/39144392602) است، اما QA زنده قرمز است و #52 ادغام نمی‌شود. نبود متغیر proxy علت origin را اثبات نمی‌کند. [دستور فقط‌خواندنی مقایسهٔ Next/Nginx/URL عمومی](https://github.com/apm1368/petlife-os/issues/4#issuecomment-6252251588) برای Claude با اتصال موجود ارسال شد. [گزارش اپراتور از VPS](https://github.com/apm1368/petlife-os/issues/4#issuecomment-6252381568) دریافت شد: هر ۱۸ JS از Next مستقیم، Nginx محلی و IP عمومی از داخل VPS، بدون دنبال‌کردن redirect، پاسخ 200 داشتند. این شاهد گزارش‌شدهٔ اپراتور است؛ دستور معادل خودش اجرا شده و JSON دستور پیشنهادی ارائه نشده است. سلامت مسیرهای بررسی‌شدهٔ داخل VPS پشتیبانی می‌شود، اما محل دقیق اختلاف بیرونی و hydration در مرورگر کاربر همچنان تأیید نشده‌اند. تغییر برنامه یا Nginx بر پایهٔ حدس انجام نمی‌شود. هیچ اتصال/تنظیم/سرویس سرور برای این تشخیص تغییر نکرد.
+
+## ادامهٔ محلی Codex، ۱۹ اکتبر — GitHub مسدود
+
+مالک ادامهٔ کار معطل Claude را به Codex سپرد. روی cached PR #51 در db5827e، کنترل‌های مقاله به مجوزهای مستقل view/create/edit/publish/archive متصل شدند؛ پیش‌نویس پس از خطای ذخیره یا کاهش مجوز باقی می‌ماند. شکست GET زبان دیگر فرم خالی قابل ذخیره نیست: تنها 404 به‌معنای زبان ساخته‌نشده است و پاسخ دیررس زبان قبلی کنار گذاشته می‌شود. API، guard سرور، schema، workflow یا حساب/اتصال Claude تغییر نکرده‌اند.
+
+۵۲ تست محلی محتوا، typecheck و lint فایل‌های اصلاح موفق؛ ۱۶ حالت مرورگر مجوز و چهار حالت خطای خواندن/چهار بازیابی با fixture loopback، همراه تصاویر قبل در مرجع VALIDATION موجودند. این شواهد، CI تازه یا API/DB واقعی/ورود زنده نیستند. API GitHub در تلاش تازه 401 و fetch ناموفق است؛ وضعیت فعلی PRهای #51/#55 و SHAهای ریموت قابل تأیید نیست. patch محلی آماده است و پیش از هر PR باید با آخرین تثبیت و head واقعی #51 تطبیق داده شود. ادغام یا انتشار این اصلاحات انجام نشده؛ ۳۰ فایل محلی کارت پت حفظ شده‌اند.

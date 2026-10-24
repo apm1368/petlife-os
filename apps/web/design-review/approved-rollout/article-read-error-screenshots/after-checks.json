@@ -1,0 +1,410 @@
+[
+  {
+    "stage": "after",
+    "locale": "fa",
+    "width": 390,
+    "errorSeparatedFromEmpty": true,
+    "retryRecovered": true,
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      },
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "failedRequests": [],
+    "assets": [
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(admin)/admin/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/content/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "reads": [
+      "/admin/me",
+      "/auth/session",
+      "/admin/me",
+      "/auth/session",
+      "/admin/trust/queue/summary",
+      "/admin/trust/queue/summary",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1/locales/fa"
+    ],
+    "blockedMutations": []
+  },
+  {
+    "stage": "after",
+    "locale": "fa",
+    "width": 1440,
+    "errorSeparatedFromEmpty": true,
+    "retryRecovered": true,
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      },
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "failedRequests": [],
+    "assets": [
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(admin)/admin/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/content/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "reads": [
+      "/admin/me",
+      "/auth/session",
+      "/admin/me",
+      "/auth/session",
+      "/admin/trust/queue/summary",
+      "/admin/trust/queue/summary",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1/locales/fa"
+    ],
+    "blockedMutations": []
+  },
+  {
+    "stage": "after",
+    "locale": "en",
+    "width": 390,
+    "errorSeparatedFromEmpty": true,
+    "retryRecovered": true,
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      },
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "failedRequests": [],
+    "assets": [
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(admin)/admin/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/content/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "reads": [
+      "/admin/me",
+      "/auth/session",
+      "/admin/me",
+      "/auth/session",
+      "/admin/trust/queue/summary",
+      "/admin/trust/queue/summary",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1/locales/fa"
+    ],
+    "blockedMutations": []
+  },
+  {
+    "stage": "after",
+    "locale": "en",
+    "width": 1440,
+    "errorSeparatedFromEmpty": true,
+    "retryRecovered": true,
+    "overflow": false,
+    "pageErrors": [],
+    "consoleErrors": [
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      },
+      {
+        "digest": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650",
+        "expected503": true
+      }
+    ],
+    "failedRequests": [],
+    "assets": [
+      {
+        "path": "/_next/static/media/365bfb1295ab08df-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/6c596dfcddeca1e9-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/media/82cf369361351810-s.p.woff2",
+        "status": 200,
+        "mime": "font/woff2"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/css/app/%5Blocale%5D/(admin)/admin/layout.css",
+        "status": 200,
+        "mime": "text/css; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/webpack.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/content/%5Bid%5D/page.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/main-app.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/not-found.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      },
+      {
+        "path": "/_next/static/chunks/app/%5Blocale%5D/(admin)/admin/layout.js",
+        "status": 200,
+        "mime": "application/javascript; charset=UTF-8"
+      }
+    ],
+    "reads": [
+      "/admin/me",
+      "/auth/session",
+      "/admin/me",
+      "/auth/session",
+      "/admin/trust/queue/summary",
+      "/admin/trust/queue/summary",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/categories",
+      "/admin/content/authors",
+      "/admin/content/tags",
+      "/admin/content/articles/article-1/locales/fa",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1",
+      "/admin/content/articles/article-1/locales/fa"
+    ],
+    "blockedMutations": []
+  }
+]

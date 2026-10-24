@@ -62,6 +62,7 @@ describe("AdvancedHealthOverviewView", () => {
 
     renderWithIntl(<AdvancedHealthOverviewView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.getByText("Something went wrong. Please try again.")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy());
+    expect(screen.getByRole("heading", { name: "Something went wrong" })).toBeTruthy();
   });
 });

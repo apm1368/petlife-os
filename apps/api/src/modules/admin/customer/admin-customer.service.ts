@@ -1,3 +1,4 @@
+import { roleHasPermission } from "../auth/admin-permissions";
 import { Injectable } from "@nestjs/common";
 import type { Prisma } from "@prisma/client";
 import type {
@@ -21,13 +22,14 @@ import { toDisputeDto } from "../dispute/dispute.mapper";
 
 const RECENT_LIMIT = 10;
 
-function toListItem(user: { id: string; displayName: string; email: string | null; phone: string | null; createdAt: Date }): AdminCustomerListItemDto {
+function toListItem(user: { id: string; displayName: string; email: string | null; phone: string | null; createdAt: Date; accountStatus?: "ACTIVE" | "SUSPENDED" }): AdminCustomerListItemDto {
   return {
     id: user.id,
     displayName: user.displayName,
     emailMasked: user.email ? maskEmail(user.email) : null,
     phoneMasked: user.phone ? maskPhone(user.phone) : null,
     createdAt: user.createdAt.toISOString(),
+    accountStatus: user.accountStatus,
   };
 }
 
@@ -66,27 +68,43 @@ export class AdminCustomerService {
     return toPaginatedDto(rows.map(toListItem), total, page, pageSize);
   }
 
-  async globalSearch(q: string): Promise<AdminSearchResultDto> {
-    if (!q) return { customers: [], orders: [], supportCases: [] };
+  /**
+   * Each section only for a role that may see it on its own screen: customers (name/email/phone) with
+   * customer.view, orders with commerce.view, support cases with support.view. The route admits either
+   * customer.view or support.view, so this — not a hidden link in the web app — is what keeps a support-only
+   * role from receiving customer contact data or order details.
+   */
+  async globalSearch(q: string, admin: ResolvedAdminContext): Promise<AdminSearchResultDto> {
+    const searched = {
+      customers: roleHasPermission(admin.role, "customer.view"),
+      orders: roleHasPermission(admin.role, "commerce.view"),
+      supportCases: roleHasPermission(admin.role, "support.view"),
+    };
+    if (!q) return { customers: [], orders: [], supportCases: [], searched };
     // Order.id is a Postgres UUID column — no partial/prefix match is
     // possible there, so an order only ever matches on an exact id.
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q);
     const [users, orders, cases] = await Promise.all([
-      this.prisma.user.findMany({
-        where: { OR: [{ displayName: { contains: q, mode: "insensitive" } }, { email: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }] },
-        take: 10,
-      }),
-      isUuid ? this.prisma.order.findMany({ where: { id: q }, take: 10 }) : Promise.resolve([]),
-      this.prisma.supportCase.findMany({
-        where: { OR: [{ caseNumber: { contains: q, mode: "insensitive" } }, { subject: { contains: q, mode: "insensitive" } }] },
-        include: { assignedAdmin: { include: { user: true } }, requesterUser: true },
-        take: 10,
-      }),
+      searched.customers
+        ? this.prisma.user.findMany({
+            where: { OR: [{ displayName: { contains: q, mode: "insensitive" } }, { email: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }] },
+            take: 10,
+          })
+        : Promise.resolve([]),
+      searched.orders && isUuid ? this.prisma.order.findMany({ where: { id: q }, take: 10 }) : Promise.resolve([]),
+      searched.supportCases
+        ? this.prisma.supportCase.findMany({
+            where: { OR: [{ caseNumber: { contains: q, mode: "insensitive" } }, { subject: { contains: q, mode: "insensitive" } }] },
+            include: { assignedAdmin: { include: { user: true } }, requesterUser: true },
+            take: 10,
+          })
+        : Promise.resolve([]),
     ]);
     return {
       customers: users.map(toListItem),
       orders: orders.map(toOrderSummary),
       supportCases: cases.map(toSupportCaseSummaryDto),
+      searched,
     };
   }
 

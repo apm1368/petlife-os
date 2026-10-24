@@ -24,6 +24,9 @@ const OFFER: SellerOsOfferDto = {
   marketplaceSyncErrorCount: 0,
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",
+  repeatDeliveryEligible: false,
+  repeatIntervalsDays: [],
+  productId: "prod-1",
 };
 
 function page(items: SellerOsOfferDto[]): PaginatedDto<SellerOsOfferDto> {
@@ -50,6 +53,16 @@ describe("SellerOffersView", () => {
     expect(screen.getByText("1 sync error(s)")).toBeTruthy();
   });
 
+  it("keeps existing offers visible but directs an unverified seller to verification", async () => {
+    const context = useSellerStore.getState().context!;
+    useSellerStore.setState({ context: { ...context, active: { ...context.active!, verificationStatus: "UNDER_REVIEW" as never } } });
+    vi.mocked(sellerOsService.listOffers).mockResolvedValue(page([OFFER]));
+    renderWithIntl(<SellerOffersView />);
+    await waitFor(() => expect(screen.getByText("Grain-Free Treats")).toBeTruthy());
+    expect(screen.getByRole("link", { name: "Organization verification and documents" }).getAttribute("href")).toBe("/en/seller/verification");
+    expect(screen.queryByText("Search catalog")).toBeNull();
+  });
+
   it("saves a price change explicitly, never auto-saving", async () => {
     vi.mocked(sellerOsService.listOffers).mockResolvedValue(page([OFFER]));
     vi.mocked(sellerOsService.updateOffer).mockResolvedValue({ ...OFFER, priceAmount: 650_000 });
@@ -65,6 +78,6 @@ describe("SellerOffersView", () => {
     expect(saveButton.disabled).toBe(false);
 
     fireEvent.click(saveButton);
-    await waitFor(() => expect(sellerOsService.updateOffer).toHaveBeenCalledWith("seller-1", "offer-1", { priceAmount: 650_000, status: "ACTIVE" }));
+    await waitFor(() => expect(sellerOsService.updateOffer).toHaveBeenCalledWith("seller-1", "offer-1", { priceAmount: 650_000, status: "ACTIVE", repeatDeliveryEligible: false, repeatIntervalsDays: [] }));
   });
 });

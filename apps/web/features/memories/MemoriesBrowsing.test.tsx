@@ -113,11 +113,13 @@ describe("MemoriesListView browsing (Handoff 21)", () => {
     await waitFor(() => expect(memoriesService.restore).toHaveBeenCalledWith("pet-1", "memory-1"));
   });
 
-  it("renders a placeholder instead of a broken image when a memory has no photo", async () => {
+  it("never shows a broken or empty image for a memory without a photo — the entry is text-first", async () => {
     vi.mocked(memoriesService.list).mockResolvedValue([memory()]);
-    renderWithIntl(<MemoriesListView petId="pet-1" />);
+    const { container } = renderWithIntl(<MemoriesListView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.getAllByText("No photo").length).toBeGreaterThan(0));
+    await waitFor(() => expect(container.querySelector(".mem-entry")).not.toBeNull());
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector(".mem-entry__date")).not.toBeNull();
     expect(memoriesService.getMediaDownload).not.toHaveBeenCalled();
   });
 

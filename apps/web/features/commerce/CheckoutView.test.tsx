@@ -28,7 +28,7 @@ vi.mock("@/services/commerce.service", () => ({
     authorizeFinancing: vi.fn(),
   },
 }));
-vi.mock("@/services/addresses.service", () => ({ addressesService: { list: vi.fn() } }));
+vi.mock("@/services/addresses.service", () => ({ addressesService: { update: vi.fn(), list: vi.fn() } }));
 
 const ADDRESS: CustomerAddressDto = {
   id: "address-1",
@@ -45,7 +45,7 @@ const ADDRESS: CustomerAddressDto = {
   instructions: null,
 };
 
-const EMPTY_CART: CartDto = { id: "cart-1", status: "ACTIVE" as never, totalItems: 1, subtotalAmount: 100, currency: "IRR", hasSafetyConflict: false, sellerGroups: [] };
+const EMPTY_CART: CartDto = { id: "cart-1", status: "ACTIVE" as never, totalItems: 1, subtotalAmount: 100, currency: "IRR", hasSafetyConflict: false, sellerGroups: [], discountAmount: 0, hasBlockingIssues: false };
 
 const SHIPPING_OPTIONS = [
   {
@@ -76,6 +76,7 @@ const CHECKOUT: CheckoutDto = {
           id: "line-a",
           sellerOffer: {} as never,
           productId: "prod-1",
+          imageUrl: null,
           productTitle: "Royal Canin Adult Dog Food",
           variantTitle: "2kg",
           variantSku: "RC-DOG-2KG",
@@ -88,6 +89,11 @@ const CHECKOUT: CheckoutDto = {
           currency: "IRR",
           lineTotal: 1_250_000,
           compatibility: null,
+          listUnitPrice: 1_250_000,
+          unitDiscount: 0,
+          promotionName: null,
+          promotionId: null,
+          issues: [],
         },
       ],
     },
@@ -121,8 +127,8 @@ async function advanceToPayment() {
 
   renderWithIntl(<CheckoutView />);
 
-  await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-  fireEvent.click(screen.getByText("12 Valiasr St."));
+  await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+  fireEvent.click(screen.getByText(/12 Valiasr St\./));
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -134,7 +140,7 @@ async function advanceToPayment() {
   await waitFor(() => expect(screen.getByText("How would you like to pay?")).toBeTruthy());
   fireEvent.click(screen.getByText("Pay online"));
 
-  await waitFor(() => expect(screen.getByText("Payment")).toBeTruthy());
+  await waitFor(() => expect(screen.getByRole("heading", { name: "Payment" })).toBeTruthy());
 }
 
 async function advanceToInstallmentPlans() {
@@ -184,8 +190,8 @@ async function advanceToInstallmentPlans() {
 
   renderWithIntl(<CheckoutView />);
 
-  await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-  fireEvent.click(screen.getByText("12 Valiasr St."));
+  await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+  fireEvent.click(screen.getByText(/12 Valiasr St\./));
   fireEvent.click(screen.getByText("Continue"));
 
   await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -266,7 +272,7 @@ describe("CheckoutView", () => {
 
     fireEvent.click(screen.getByText("Try again"));
 
-    await waitFor(() => expect(screen.getByText("Payment")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Payment" })).toBeTruthy());
   });
 
   it("walks the BNPL flow to APPROVED and routes to the confirmation page", async () => {
@@ -308,8 +314,8 @@ describe("CheckoutView", () => {
     vi.mocked(commerceService.getCheckout).mockResolvedValue({ ...CHECKOUT, deliveryAmount: 350_000, totalAmount: 1_600_000 });
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -330,8 +336,8 @@ describe("CheckoutView", () => {
     vi.mocked(commerceService.refreshShippingOptions).mockResolvedValue(SHIPPING_OPTIONS);
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -350,8 +356,8 @@ describe("CheckoutView", () => {
     vi.mocked(commerceService.getShippingOptions).mockResolvedValue([{ sellerOrganization: SHIPPING_OPTIONS[0]!.sellerOrganization, quotes: [] }]);
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Review your order")).toBeTruthy());
@@ -368,8 +374,8 @@ describe("CheckoutView", () => {
       .mockResolvedValueOnce(CHECKOUT);
 
     renderWithIntl(<CheckoutView />);
-    await waitFor(() => expect(screen.getByText("12 Valiasr St.")).toBeTruthy());
-    fireEvent.click(screen.getByText("12 Valiasr St."));
+    await waitFor(() => expect(screen.getByText(/12 Valiasr St\./)).toBeTruthy());
+    fireEvent.click(screen.getByText(/12 Valiasr St\./));
     fireEvent.click(screen.getByText("Continue"));
 
     await waitFor(() => expect(screen.getByText("Potential safety conflict")).toBeTruthy());
@@ -381,4 +387,28 @@ describe("CheckoutView", () => {
       expect.any(String),
     );
   });
+  it("recovers from an initial address read failure without a permanent loading state", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce([ADDRESS]);
+    renderWithIntl(<CheckoutView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Retry" }));
+    expect(await screen.findByRole("radio")).toBeTruthy();
+    expect(addressesService.list).toHaveBeenCalledTimes(2);
+  });
+
+  it("edits an existing address through PATCH and keeps the form on failure", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(addressesService.update).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce({ ...ADDRESS, city: "Karaj" });
+    renderWithIntl(<CheckoutView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Edit selected address" }));
+    fireEvent.change(screen.getByLabelText("City"), { target: { value: "Karaj" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save address" }));
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect((screen.getByLabelText("City") as HTMLInputElement).value).toBe("Karaj");
+    fireEvent.click(screen.getByRole("button", { name: "Save address" }));
+    await waitFor(() => expect(addressesService.update).toHaveBeenCalledWith(ADDRESS.id, expect.objectContaining({ city: "Karaj" })));
+    await waitFor(() => expect(screen.queryByLabelText("City")).toBeNull());
+  });
+
 });

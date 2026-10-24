@@ -1,13 +1,16 @@
 name: Deploy to VPS
 
+# Deploys only from main (feature branch → PR → CI → main → deploy). A manual run is accepted only for main.
 on:
   push:
-    branches: [main, master, integration/local]
+    branches: [main]
   workflow_dispatch:
 
+# Never cancel a deploy in flight: a cancelled run can stop between migrate and build and leave the server
+# half-deployed. A newer push waits for the running deploy instead.
 concurrency:
   group: deploy-vps
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   ci:
@@ -15,6 +18,7 @@ jobs:
 
   deploy:
     needs: ci
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy over SSH
@@ -32,7 +36,9 @@ jobs:
             git remote set-url origin ssh://git@ssh.github.com:443/apm1368/petlife-os.git
             export GIT_SSH_COMMAND="ssh -p 443 -i /root/.ssh/petlife_github_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
             git fetch --prune origin
-            git checkout -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
+            # -f: the next line hard-resets anyway; without it a local edit (e.g. a hot-applied docker-compose.yml
+            # identical to the one in main) makes checkout abort and the deploy never starts.
+            git checkout -f -B main origin/main
             git reset --hard "${{ github.sha }}"
             export BUILD_SHA='${{ github.sha }}'
             export BUILD_TIME='${{ github.event.head_commit.timestamp }}'

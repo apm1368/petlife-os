@@ -6,6 +6,7 @@ import { toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { OrderNotFoundException } from "../../common/errors/api-exception";
 import { toFulfillmentDto } from "../commerce/logistics/logistics-dto.mapper";
 import { toSellerSummaryDto } from "../commerce/commerce-dto.mapper";
+import { orderNumberOf } from "../commerce/orders/orders.service";
 import type { ResolvedSellerContext } from "./auth/seller-context.types";
 
 const ORDER_WITH_MARKETPLACE_INCLUDE = {
@@ -79,10 +80,12 @@ export class SellerOrderService {
 
   async getById(ctx: ResolvedSellerContext, orderId: string): Promise<OrderDetailDto & { source: SellerOrderSummaryDto["source"]; externalOrderId: string | null; paymentSource: SellerOrderSummaryDto["paymentSource"] }> {
     const order = await this.loadOwned(ctx, orderId);
-    const [items, fulfillment, sellerOrganization] = await Promise.all([
+    const [items, fulfillment, sellerOrganization, statusEvents, refundRequests] = await Promise.all([
       this.prisma.orderItem.findMany({ where: { orderId } }),
       this.prisma.fulfillment.findUnique({ where: { orderId_sequenceNumber: { orderId, sequenceNumber: 1 } } }),
       this.prisma.sellerOrganization.findUniqueOrThrow({ where: { id: order.sellerOrganizationId } }),
+      this.prisma.orderStatusEvent.findMany({ where: { orderId }, orderBy: { createdAt: "asc" } }),
+      this.prisma.orderRefundRequest.findMany({ where: { orderId }, orderBy: { createdAt: "desc" } }),
     ]);
 
     return {
@@ -112,10 +115,22 @@ export class SellerOrderService {
         totalPrice: item.totalPrice,
         targetPetId: item.targetPetId,
         compatibilitySnapshot: null,
+        listUnitPrice: item.listUnitPrice,
+        unitDiscount: item.unitDiscount,
+        promotionName: item.promotionName,
+        reviewId: null,
       })),
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
       confirmedAt: order.confirmedAt?.toISOString() ?? null,
+      orderNumber: orderNumberOf(order.id),
+      cancelledAt: order.cancelledAt?.toISOString() ?? null,
+      cancelReason: order.cancelReason,
+      timeline: statusEvents.map((e) => ({ toStatus: e.toStatus, fromStatus: e.fromStatus, actorType: e.actorType, reason: e.reason, createdAt: e.createdAt.toISOString() })),
+      refundRequests: refundRequests.map((r) => ({ id: r.id, status: r.status, reason: r.reason, requestedAmount: r.requestedAmount, decisionReason: r.decisionReason, createdAt: r.createdAt.toISOString() })),
+      // Customer self-service flags; a seller never cancels on the customer's behalf here.
+      canCancel: false,
+      canRequestRefund: false,
       source: order.marketplaceOrder ? (order.marketplaceOrder.provider as unknown as SellerOrderSummaryDto["source"]) : null,
       externalOrderId: order.marketplaceOrder?.externalOrderId ?? null,
       paymentSource: order.marketplaceOrder ? (order.marketplaceOrder.paymentSource as unknown as SellerOrderSummaryDto["paymentSource"]) : ("PETLIFE_PAYMENT" as SellerOrderSummaryDto["paymentSource"]),

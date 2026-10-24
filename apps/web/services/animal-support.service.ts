@@ -15,6 +15,24 @@ export interface DonationOutcome {
   status: DonationStatus;
 }
 
+export interface DonationReceiptDto {
+  id: string;
+  reference: string;
+  status: DonationStatus;
+  amountIrr: number;
+  currency: string;
+  fundType: "GENERAL" | "RESTRICTED";
+  campaign: { id: string; title: string };
+  organization: { id: string; name: string };
+  supportNeed: { id: string; title: string } | null;
+  showDonorPublicly: boolean;
+  publicDisplayName: string | null;
+  createdAt: string;
+  succeededAt: string | null;
+  failedAt: string | null;
+  refundedAt: string | null;
+}
+
 /** Public directory + authenticated donate/history surface (Handoff 18) — mirrors blogService's own public-read shape/conventions. */
 export const animalSupportService = {
   listOrganizations: (input: { page?: number; pageSize?: number; q?: string } = {}) => apiFetch<PaginatedDto<AnimalSupportOrganizationDto>>(`/animal-support/organizations${toQueryString(input)}`),
@@ -28,7 +46,9 @@ export const animalSupportService = {
   listCampaignUpdates: (campaignId: string) => apiFetch<SupportCampaignUpdateDto[]>(`/animal-support/campaigns/${campaignId}/updates`),
   listCampaignDonors: (campaignId: string, limit = 50) => apiFetch<PublicDonationEntryDto[]>(`/animal-support/campaigns/${campaignId}/donors${toQueryString({ limit })}`),
 
-  donate: (campaignId: string, input: { amountIrr: number; showDonorPublicly?: boolean; idempotencyKey?: string }) =>
+  donate: (campaignId: string, input: { amountIrr: number; showDonorPublicly?: boolean; publicDisplayName?: string; supportNeedListingId?: string; idempotencyKey?: string }) =>
     apiFetch<DonationOutcome>(`/animal-support/campaigns/${campaignId}/donate`, { method: "POST", body: input }),
+  getReceipt: (donationIntentId: string) => apiFetch<DonationReceiptDto>(`/me/donations/${donationIntentId}`),
+  paymentEnvironment: () => apiFetch<{ mode: "sandbox" | "production"; onlinePaymentAvailable: boolean }>("/payments/environment"),
   listMyDonations: (input: { page?: number; pageSize?: number } = {}) => apiFetch<PaginatedDto<DonationHistoryItemDto>>(`/me/donations${toQueryString(input)}`),
 };

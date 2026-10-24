@@ -19,6 +19,12 @@ export class ConditionsController {
     return this.conditionsService.list(petId);
   }
 
+  @Get(":id")
+  @RequirePetAccess("canViewHealth")
+  get(@Param("petId") petId: string, @Param("id") id: string) {
+    return this.conditionsService.get(petId, id);
+  }
+
   @Post()
   @RequirePetAccess("canEditHealth")
   create(@Param("petId") petId: string, @CurrentUser() user: SessionUser, @Body() dto: CreateConditionDto) {

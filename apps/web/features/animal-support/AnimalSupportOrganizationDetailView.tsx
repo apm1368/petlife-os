@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
-import type { AnimalSupportOrganizationDto, PaginatedDto, RescueCaseDto, SupportCampaignDto } from "@petlife/types";
+import Link from "@/features/navigation/localized-link";
+import { useLocale, useTranslations } from "next-intl";
+import { ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
+import { supportNeedsService } from "@/services/support-needs.service";
+import { localizeDigits } from "@/lib/date/jalali";
+import type { AnimalSupportOrganizationDto, PaginatedDto, RescueCaseDto, SupportCampaignDto, SupportNeedListingDto } from "@petlife/types";
 import { animalSupportService } from "@/services/animal-support.service";
-import { ApiError } from "@/lib/api/client";
+import { LoadFailure } from "@/features/system/LoadFailure";
+import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
+import { communityService } from "@/services/community.service";
 import { CampaignProgressBar } from "./CampaignProgressBar";
 
 export function AnimalSupportOrganizationDetailView({ organizationId }: { organizationId: string }) {
@@ -16,10 +20,18 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
   const [org, setOrg] = useState<AnimalSupportOrganizationDto | null>(null);
   const [campaigns, setCampaigns] = useState<PaginatedDto<SupportCampaignDto> | null>(null);
   const [rescueCases, setRescueCases] = useState<PaginatedDto<RescueCaseDto> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const locale = useLocale() as "fa" | "en";
+  const fa = locale === "fa";
+  const [openNeeds, setOpenNeeds] = useState<SupportNeedListingDto[] | null>(null);
+  const [resolvedCount, setResolvedCount] = useState(0);
+  useEffect(() => {
+    supportNeedsService.list({ organizationId, state: "OPEN", pageSize: 10 }).then((r) => setOpenNeeds(r.items)).catch(() => setOpenNeeds([]));
+    supportNeedsService.list({ organizationId, state: "RESOLVED", pageSize: 1 }).then((r) => setResolvedCount(r.total)).catch(() => setResolvedCount(0));
+  }, [organizationId]);
 
   async function load() {
-    setError(null);
+    setLoadError(null);
     try {
       const [orgData, campaignData, rescueCaseData] = await Promise.all([
         animalSupportService.getOrganization(organizationId),
@@ -30,7 +42,7 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
       setCampaigns(campaignData);
       setRescueCases(rescueCaseData);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : tCommon("genericError"));
+      setLoadError(err);
     }
   }
 
@@ -39,7 +51,7 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
-  if (error) return <ErrorRecovery title={tCommon("loading")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
   if (!org || !campaigns || !rescueCases) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -55,7 +67,20 @@ export function AnimalSupportOrganizationDetailView({ organizationId }: { organi
         </div>
         {org.location ? <p className="text-metadata text-text-secondary">{org.location}</p> : null}
         {org.description ? <p className="text-body text-text-primary">{org.description}</p> : null}
+        <p className="text-metadata text-text-secondary">{fa ? "برای کمک از دکمه‌های «پیشنهاد کمک» یا «کمک مالی» استفاده کنید؛ هماهنگی از طریق opetlife انجام می‌شود و اطلاعات تماس شخصی کسی نمایش داده نمی‌شود." : "To help, use “Offer help” or “Donate”; coordination happens through opetlife and nobody's personal contact details are shown."}</p>
+        {org.contactEmail || org.contactPhone ? <p className="text-metadata text-text-secondary">{fa ? "تماس رسمی سازمان: " : "Official contact: "}<span dir="ltr">{[org.contactEmail, org.contactPhone].filter(Boolean).join(" · ")}</span></p> : null}
+        <ReportContentPanel submit={(reason, details) => communityService.reportContent("ORGANIZATION", org.id, reason, details)} />
       </ContextSurface>
+
+      <section aria-labelledby="org-needs" className="flex flex-col gap-2">
+        <h2 id="org-needs" className="text-section-title text-text-primary">{fa ? "نیازهای باز" : "Open needs"}</h2>
+        {openNeeds === null ? <Skeleton className="h-20" /> : openNeeds.length === 0 ? <p className="text-sm text-text-secondary">{fa ? "در حال حاضر نیاز بازی ثبت نشده است." : "No open needs right now."}</p> : (
+          <ul className="flex flex-col gap-2">{openNeeds.map((n) => (
+            <li key={n.id}><Link href={`/${locale}/animal-support/needs/${n.id}`} className="flex flex-col rounded-md border border-border-subtle p-3 hover:border-border-strong"><span className="font-bold">{n.title}</span><span className="text-metadata text-text-secondary">{n.city}{n.neededQuantity !== null ? ` · ${localizeDigits(n.fulfilledQuantity, locale)}/${localizeDigits(n.neededQuantity, locale)}` : ""}</span></Link></li>
+          ))}</ul>
+        )}
+        {resolvedCount ? <p className="text-metadata text-text-secondary">{fa ? `${localizeDigits(resolvedCount, "fa")} نیاز با کمک مردم تأمین شده است.` : `${resolvedCount} need(s) met with the community's help.`}</p> : null}
+      </section>
 
       <div>
         <h2 className="text-section-title text-text-primary">{t("orgDetail.campaignsTitle")}</h2>

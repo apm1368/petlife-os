@@ -48,7 +48,7 @@ export function SexStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => 
         {options.map((option) => (
           <Button
             key={option.value}
-            variant={selected === option.value ? "primary" : "secondary"}
+            aria-pressed={selected === option.value} variant={selected === option.value ? "primary" : "secondary"}
             className="flex-1"
             onClick={() => setSelected(option.value)}
           >
