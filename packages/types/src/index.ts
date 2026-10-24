@@ -6191,3 +6191,4 @@ export interface InsurerApplicationDetailDto extends InsurerApplicationRowDto {
   consentAt: string | null;
   timeline: { toStatus: string; fromStatus: string | null; actorType: string; note: string | null; createdAt: string }[];
 }
+export type { PartnerVerificationProfileInput, PartnerVerificationProfileDto } from "./partner-verification";
