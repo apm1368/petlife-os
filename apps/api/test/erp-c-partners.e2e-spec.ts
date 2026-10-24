@@ -1,7 +1,7 @@
 import type { INestApplication } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import request from "supertest";
-import { AdminMembershipStatus, AdminRole } from "@prisma/client";
+import { AdminMembershipStatus, AdminRole, ProviderVerificationStatus } from "@prisma/client";
 import { createTestApp, extractCookie } from "./test-app";
 import { signSessionCookie } from "../src/common/session/session-cookie.util";
 import { PrismaService } from "../src/common/prisma/prisma.service";
@@ -43,6 +43,43 @@ describe("ERP-C partners", () => {
     db = app.get(PrismaService);
   });
   afterAll(async () => app.close());
+
+  it.each(Object.values(ProviderVerificationStatus).filter((status) => status !== "VERIFIED"))("blocks provider catalog and availability in %s without blocking verification", async (status) => {
+    const p = await provider();
+    await db.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: status } });
+    for (const path of ["/provider/services", "/provider/availability/rules", "/provider/availability/exceptions"]) {
+      expect((await get(p.owner, path).expect(403)).body.error).toMatchObject({ code: "PARTNER_NOT_VERIFIED", details: { verificationStatus: status } });
+    }
+    await post(p.owner, `/provider/services/${randomUUID()}/variants`).send({}).expect(403);
+    await patch(p.owner, `/provider/services/${randomUUID()}/variants/${randomUUID()}`).send({}).expect(403);
+    await get(p.owner, "/provider/verification").expect(200);
+  });
+
+  it("seller creation and activation require approval while pausing and verification remain accessible", async () => {
+    const owner = await actor("seller-owner");
+    const org = await db.sellerOrganization.create({ data: { name: `W2 ${tag()}`, countryCode: "IR", status: "ACTIVE", verificationStatus: "NOT_STARTED" } });
+    await db.sellerMembership.create({ data: { sellerOrganizationId: org.id, userId: owner.id, role: "OWNER", status: "ACTIVE", acceptedAt: new Date() } });
+    const category = await db.productCategory.create({ data: { name: "W2", slug: `w2-${tag()}` } });
+    const product = await db.product.create({ data: { categoryId: category.id, title: "W2", slug: `w2-${tag()}` } });
+    const variant = await db.productVariant.create({ data: { productId: product.id, sku: `W2-${tag()}`, title: "W2" } });
+    const path = `/seller-organizations/${org.id}`;
+    const payload = { productVariantId: variant.id, priceAmount: 100000 };
+    expect((await post(owner, `${path}/offers`).send(payload).expect(403)).body.error.code).toBe("PARTNER_NOT_VERIFIED");
+    expect(await db.sellerOffer.count({ where: { sellerOrganizationId: org.id } })).toBe(0);
+    await get(owner, `${path}/verification`).expect(200);
+    await db.sellerOrganization.update({ where: { id: org.id }, data: { verificationStatus: "VERIFIED" } });
+    const offer = (await post(owner, `${path}/offers`).send(payload).expect(201)).body;
+    await db.sellerOrganization.update({ where: { id: org.id }, data: { verificationStatus: "SUSPENDED" } });
+    await patch(owner, `${path}/offers/${offer.id}`).send({ status: "PAUSED" }).expect(200);
+    expect((await patch(owner, `${path}/offers/${offer.id}`).send({ status: "ACTIVE" }).expect(403)).body.error.code).toBe("PARTNER_NOT_VERIFIED");
+    expect((await db.sellerOffer.findUniqueOrThrow({ where: { id: offer.id } })).status).toBe("PAUSED");
+    const commerce = await actor("commerce-ops", AdminRole.COMMERCE_OPERATIONS);
+    // Admin moderation only releases to PAUSED, never directly to ACTIVE.
+    await post(commerce, `/admin/commerce/offers/${offer.id}/status`).send({ status: "ACTIVE", reason: "Try to reinstate" }).expect(400);
+    await db.sellerOrganization.update({ where: { id: org.id }, data: { verificationStatus: "VERIFIED" } });
+    await patch(owner, `${path}/offers/${offer.id}`).send({ status: "ACTIVE" }).expect(200);
+    await get(owner, `${path}/offers`).expect(200);
+  });
 
   it("partner directories filter and paginate real records for customer viewers without verification management", async () => {
     const reader = await actor("directory-reader", AdminRole.SUPPORT);
@@ -100,6 +137,7 @@ describe("ERP-C partners", () => {
     await t("UNDER_REVIEW", ro).expect(403);
     expect((await t("VERIFIED").expect(400)).body.error.details.reason).toBe("VERIFICATION_EVIDENCE_REQUIRED");
     await t("UNDER_REVIEW").expect(201);
+    await get(p.owner, "/provider/services").expect(403);
     expect((await t("UNDER_REVIEW").expect(400)).body.error.details.reason).toBe("UNCHANGED");
     expect((await t("SUBMITTED").expect(400)).body.error.details.reason).toBe("INVALID_TRANSITION");
     expect((await t("NEEDS_INFORMATION").expect(400)).body.error.details).toMatchObject({ field: "reason", reason: "REQUIRED" });
@@ -115,13 +153,17 @@ describe("ERP-C partners", () => {
     await post(ops, `/admin/verification/documents/${docId}/review`).send({ decision: "ACCEPTED" }).expect(201);
     expect((await post(ops, `/admin/verification/documents/${docId}/review`).send({ decision: "ACCEPTED" }).expect(400)).body.error.details.reason).toBe("NOT_PENDING");
     await t("VERIFIED").expect(201);
+    await get(p.owner, "/provider/services").expect(200);
+    await get(p.owner, "/provider/availability/rules").expect(200);
     expect((await get(p.owner, "/provider/verification").expect(200)).body.lifecycle).toBe("APPROVED");
     expect(await db.notification.count({ where: { userId: p.owner.id, type: "partner.verification_updated" } })).toBe(2);
     expect(await db.adminAuditLog.count({ where: { entityId: p.orgId, action: { in: ["verification.status_changed", "verification.document_reviewed", "verification.document_opened"] } } })).toBe(4);
     // Legacy PATCH contract obeys the same rules.
     expect((await patch(ops, `/admin/providers/${p.orgId}/verification`).send({ status: "NOT_STARTED", reason: "jump back" }).expect(400)).body.error.details.reason).toBe("INVALID_TRANSITION");
     await patch(ops, `/admin/providers/${p.orgId}/verification`).send({ status: "SUSPENDED", reason: "complaints under review" }).expect(200);
+    await get(p.owner, "/provider/services").expect(403);
     await t("VERIFIED", ops).expect(201); // reinstatement also has current accepted identity evidence
+    await get(p.owner, "/provider/services").expect(200);
   });
 
   it("clinical approval and reinstatement require both identity and licence, including legacy PATCH", async () => {

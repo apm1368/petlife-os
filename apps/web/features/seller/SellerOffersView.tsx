@@ -9,6 +9,8 @@ import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
+import { VerificationRequiredNotice } from "@/features/partner-verification/VerificationRequiredNotice";
 
 const REPEAT_INTERVALS = [7, 14, 30, 45, 60, 90];
 
@@ -23,6 +25,7 @@ export function SellerOffersView() {
   const t = useTranslations("seller.offers");
   const locale = useLocale() as "fa" | "en";
   const role = useSellerStore(s => s.context?.active?.role);
+  const verified = useSellerStore(s => s.context?.active?.verificationStatus === "VERIFIED");
   const canEdit = !!role && ["OWNER", "ADMIN", "CATALOG_MANAGER"].includes(role);
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
@@ -67,7 +70,7 @@ export function SellerOffersView() {
       setOffers((prev) => prev?.map((o) => (o.id === offerId ? updated : o)) ?? null);
       setDrafts((prev) => ({ ...prev, [offerId]: toDraft(updated) }));
     } catch (err) {
-      setSaveError(err instanceof ApiError && err.status < 500 ? err.message : t("saveFailed"));
+      setSaveError(err instanceof ApiError && err.status < 500 ? apiErrorText(err, locale, t("saveFailed")) : t("saveFailed"));
     } finally {
       setSavingId(null);
     }
@@ -79,7 +82,7 @@ export function SellerOffersView() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
-      {sellerId ? <CreateSellerOffer key={sellerId} sellerId={sellerId} onSaved={load} /> : null}
+      {!verified ? <VerificationRequiredNotice seller /> : sellerId ? <CreateSellerOffer key={sellerId} sellerId={sellerId} onSaved={load} /> : null}
       {saveError ? (
         <p role="alert" className="text-metadata text-state-urgent">
           {saveError}

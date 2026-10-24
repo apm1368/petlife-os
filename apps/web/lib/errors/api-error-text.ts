@@ -71,6 +71,7 @@ const FA: Record<string, string> = {
   PRODUCT_NOT_AVAILABLE: "این کالا فعلاً در دسترس نیست.",
   PROVIDER_ACCESS_DENIED: "به این بخش از پنل ارائه‌دهنده دسترسی ندارید.",
   PROVIDER_NOT_VERIFIED: "این ارائه‌دهنده هنوز تأیید نشده است.",
+  PARTNER_NOT_VERIFIED: "برای این اقدام، احراز هویت سازمان شما باید توسط مدیر تأیید شود.",
   PROVIDER_RECORD_NOT_OWNER_EDITABLE: "این مورد را ارائه‌دهنده ثبت کرده و مستقیماً قابل ویرایش نیست؛ درخواست اصلاح ثبت کنید.",
   REAUTHENTICATION_REQUIRED: "برای ادامه، با رمز عبور یا کد ارسالی هویت خود را تأیید کنید.",
   REFUND_FAILED: "بازپرداخت انجام نشد.",

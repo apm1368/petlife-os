@@ -1,5 +1,6 @@
 "use client";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
+import { VerificationRequiredNotice } from "@/features/partner-verification/VerificationRequiredNotice";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -127,6 +128,10 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
 
   const active = context.active;
   const notVerified = active.verificationStatus !== "VERIFIED";
+  const verificationRequired = notVerified && ["services", "availability", "calendar"].some((section) => {
+    const prefix = `/${locale}/provider/${section}`;
+    return pathname === prefix || pathname.startsWith(`${prefix}/`);
+  });
 
   return (
     <div className={pathname === `/${locale}/provider` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
@@ -176,7 +181,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <main className={pathname === `/${locale}/provider` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{children}</main>
+      <main className={pathname === `/${locale}/provider` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{verificationRequired ? <VerificationRequiredNotice /> : children}</main>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { SellerAccessDeniedException } from "../../common/errors/api-exception";
+import { assertPartnerVerified } from "../../common/auth/require-verified-partner";
 import { Injectable } from "@nestjs/common";
 import { MarketplaceListingSyncStatus, Prisma, SellerOfferStatus, type InventoryItem, type Product, type ProductVariant, type SellerOffer } from "@prisma/client";
 import type { PaginatedDto, SellerOsOfferDto } from "@petlife/types";
@@ -124,6 +125,7 @@ export class SellerOfferService {
 
   async create(ctx: ResolvedSellerContext, dto: CreateSellerOfferDto): Promise<SellerOsOfferDto> {
     this.sellerAccess.assertOperational(ctx.sellerStatus);
+    assertPartnerVerified(ctx.verificationStatus);
     assertRepeatConfig(dto.repeatDeliveryEligible ?? false, dto.repeatIntervalsDays ?? []);
 
     const created = await this.prisma.$transaction(async (tx) => {
@@ -151,6 +153,8 @@ export class SellerOfferService {
   async update(ctx: ResolvedSellerContext, offerId: string, dto: UpdateSellerOfferDto): Promise<SellerOsOfferDto> {
     this.sellerAccess.assertOperational(ctx.sellerStatus);
     const existing = await this.loadOwned(ctx, offerId);
+    // Keep pausing and maintenance available, but never activate an unverified seller.
+    if (dto.status === SellerOfferStatus.ACTIVE) assertPartnerVerified(ctx.verificationStatus);
     // SUSPENDED is a staff moderation state: a seller can neither set it nor lift it (POST /admin/commerce/offers/:id/status).
     if (dto.status !== undefined && dto.status !== existing.status && (existing.status === SellerOfferStatus.SUSPENDED || dto.status === SellerOfferStatus.SUSPENDED)) {
       throw new SellerAccessDeniedException({ reason: "OFFER_SUSPENDED_BY_STAFF", sellerOfferId: offerId });

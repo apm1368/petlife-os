@@ -7,15 +7,17 @@ import { providerOsService } from "@/services/provider-os.service";
 import { useProviderStore } from "@/stores/provider-store";
 import { ProviderShell } from "./ProviderShell";
 
+const route = vi.hoisted(() => ({ pathname: "/en/provider" }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
-  usePathname: () => "/en/provider",
+  usePathname: () => route.pathname,
 }));
 vi.mock("@/services/auth.service", () => ({ authService: { getSession: vi.fn() } }));
 vi.mock("@/services/provider-os.service", () => ({ providerOsService: { getContext: vi.fn(), setContext: vi.fn() } }));
 
 describe("ProviderShell", () => {
   beforeEach(() => {
+    route.pathname = "/en/provider";
     vi.mocked(authService.getSession).mockReset();
     vi.mocked(providerOsService.getContext).mockReset();
     useProviderStore.setState({ context: null, status: "idle" });
@@ -73,7 +75,8 @@ describe("ProviderShell", () => {
     expect(screen.getByText("content")).toBeTruthy();
   });
 
-  it("shows an operational-restriction banner when the organization is not verified", async () => {
+  it.each(["services", "availability", "calendar", "verification"])("restricts %s appropriately for an unverified organization", async (section) => {
+    route.pathname = `/en/provider/${section}`;
     vi.mocked(authService.getSession).mockResolvedValue({ user: { id: "u1", email: "new-provider@example.com", phone: null, displayName: "New Provider", avatarUrl: null, locale: "en", themePreference: "SYSTEM", createdAt: "", updatedAt: "" } });
     vi.mocked(providerOsService.getContext).mockResolvedValue({
       active: { providerUserId: "pu-1", providerOrganizationId: "org-1", organizationName: "New Org", organizationType: "GROOMER" as never, verificationStatus: "SUBMITTED" as never, role: "OWNER" as never },
@@ -87,5 +90,12 @@ describe("ProviderShell", () => {
     );
 
     await waitFor(() => expect(screen.getByText("This organization is not yet verified. Some actions are restricted.")).toBeTruthy());
+    if (section === "verification") {
+      expect(screen.getByText("content")).toBeTruthy();
+    } else {
+      expect(screen.queryByText("content")).toBeNull();
+      expect(screen.getByRole("link", { name: "Organization verification and documents" }).getAttribute("href")).toBe("/en/provider/verification");
+      expect(screen.getByRole("button", { name: "Reload page to check approval" })).toBeTruthy();
+    }
   });
 });

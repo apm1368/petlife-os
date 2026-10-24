@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
+import { assertPartnerVerified } from "../../../common/auth/require-verified-partner";
 import { Prisma, TravelBookingStatus, TravelListingStatus, TravelRequirementRuleStatus, TravelRequirementType, TravelReviewStatus, type PetSpecies } from "@prisma/client";
 import type { AdminTravelAnalyticsDto, TravelRequirementRuleDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -123,7 +124,7 @@ export class AdminTravelService {
    * REINSTATE (suspended → published). Every action is audited.
    */
   async moderate(admin: ResolvedAdminContext, id: string, action: "APPROVE" | "REQUEST_CORRECTION" | "SUSPEND" | "REINSTATE", note: string | undefined, requestId?: string) {
-    const row = await this.prisma.travelListing.findUnique({ where: { id }, include: { petPolicy: { select: { id: true } }, _count: { select: { units: true } } } });
+    const row = await this.prisma.travelListing.findUnique({ where: { id }, include: { organization: { select: { verificationStatus: true } }, petPolicy: { select: { id: true } }, _count: { select: { units: true } } } });
     if (!row) throw new NotFoundApiException("Listing", { id });
     const table: Record<string, { from: TravelListingStatus[]; to: TravelListingStatus; data: Prisma.TravelListingUpdateInput }> = {
       APPROVE: { from: [TravelListingStatus.PENDING_REVIEW], to: TravelListingStatus.PUBLISHED, data: { isPubliclyListed: true, moderationNote: null } },
@@ -133,6 +134,7 @@ export class AdminTravelService {
     };
     const rule = table[action]!;
     if (!rule.from.includes(row.status)) throw new TravelModerationException({ id, from: row.status, action });
+    if (rule.to === TravelListingStatus.PUBLISHED) assertPartnerVerified(row.organization.verificationStatus);
     if ((action === "REQUEST_CORRECTION" || action === "SUSPEND") && !note?.trim()) throw new ValidationApiException({ field: "note", reason: "REQUIRED" });
     // A listing without a stated pet policy or any unit is not publishable.
     if (action === "APPROVE" && (!row.petPolicy || row._count.units === 0)) throw new TravelModerationException({ id, reason: !row.petPolicy ? "PET_POLICY_MISSING" : "NO_UNITS" });

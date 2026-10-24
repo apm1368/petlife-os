@@ -517,6 +517,11 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
       expect((await p.c.get(`/provider/travel/listings/${id}`).expect(200)).body.moderationNote).toBe("Add your pet policy");
       await p.c.put(`/provider/travel/listings/${id}/pet-policy`).send({ dogsAllowed: true, maxPets: 3, petFeeIrr: 200_000 }).expect(200);
       await p.c.post(`/provider/travel/listings/${id}/submit`).expect(201);
+      await prisma.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: "UNDER_REVIEW" } });
+      const unverified = await ops.c.post(`/admin/travel/listings/${id}/moderate`).send({ action: "APPROVE" }).expect(403);
+      expect(unverified.body.error.code).toBe("PARTNER_NOT_VERIFIED");
+      expect((await prisma.travelListing.findUniqueOrThrow({ where: { id } })).status).toBe("PENDING_REVIEW");
+      await prisma.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: "VERIFIED" } });
       const approved = await ops.c.post(`/admin/travel/listings/${id}/moderate`).send({ action: "APPROVE" }).expect(201);
       expect(approved.body.listing.status).toBe("PUBLISHED");
       expect(await prisma.adminAuditLog.count({ where: { entityType: "TRAVEL_LISTING", entityId: id } })).toBe(2);
@@ -531,6 +536,11 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
       await t.c.post("/travel/bookings/hold").send({ listingId: id, unitId, ratePlanId: plan, checkIn: day(15), checkOut: day(17), petIds: t.petIds }).expect(409);
       await other.c.get(`/provider/travel/listings/${id}/calendar?from=${day(14)}&to=${day(17)}`).expect(403);
       expect((await p.c.get("/provider/travel/finance").expect(200)).body.settlementNote).toBe("PAYOUTS_NOT_AUTOMATED");
+      await ops.c.post(`/admin/travel/listings/${id}/moderate`).send({ action: "SUSPEND", note: "Review host eligibility" }).expect(201);
+      await prisma.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: "SUSPENDED" } });
+      expect((await ops.c.post(`/admin/travel/listings/${id}/moderate`).send({ action: "REINSTATE" }).expect(403)).body.error.code).toBe("PARTNER_NOT_VERIFIED");
+      await prisma.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: "VERIFIED" } });
+      await ops.c.post(`/admin/travel/listings/${id}/moderate`).send({ action: "REINSTATE" }).expect(201);
     });
 
     it("admin travel is permission-gated: editor none, support read-only, content curates requirements", async () => {
