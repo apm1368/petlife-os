@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import type { AdminTravelAnalyticsDto, TravelRequirementRuleDto, TravelRequirementType } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
+import { apiErrorText } from "@/lib/errors/api-error-text";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { adminInsuranceOpsService, adminTravelService, type AdminInsuranceApplicationRow, type AdminTravelBookingDetail, type AdminTravelBookingRow, type AdminTravelListingRow, type AdminTravelReviewRow, type RequirementRuleInput } from "@/services/travel-marketplace.service";
 import { bookingStatusLabel, cancellationSummary, listingTypeLabel, money, paymentStatusLabel, policyFacts, stayDates } from "@/features/travel-market/labels";
@@ -147,6 +148,10 @@ export function AdminTravelListingDetailView({ listingId }: { listingId: string 
       await load();
     } catch (e) {
       const reason = e instanceof ApiError ? (e.details?.reason as string | undefined) ?? e.code : "";
+      if (e instanceof ApiError && e.code === "PARTNER_NOT_VERIFIED") {
+        setMsg({ ok: false, text: apiErrorText(e, fa ? "fa" : "en") });
+        return;
+      }
       setMsg({ ok: false, text: reason === "PET_POLICY_MISSING" ? (fa ? "بدون قوانین حیوانات نمی‌توان منتشر کرد." : "Cannot publish without a pet policy.") : reason === "NO_UNITS" ? (fa ? "بدون اتاق نمی‌توان منتشر کرد." : "Cannot publish without rooms.") : e instanceof ApiError && e.status === 403 ? (fa ? "دسترسی travel.manage لازم است." : "travel.manage permission required.") : fa ? `انجام نشد (${reason}).` : `Failed (${reason}).` });
     } finally {
       setBusy(false);

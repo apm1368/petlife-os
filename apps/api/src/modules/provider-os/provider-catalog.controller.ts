@@ -3,6 +3,7 @@ import { ProviderUserRole } from "@prisma/client";
 import { Type } from "class-transformer";
 import { IsInt, IsOptional, Max, Min } from "class-validator";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
+import { RequireVerifiedPartner } from "../../common/auth/require-verified-partner";
 import { ProviderAuthGuard } from "./auth/provider-auth.guard";
 import { RequireProviderRole } from "./auth/require-provider-role.decorator";
 import { CurrentProviderContext } from "./auth/current-provider-context.decorator";
@@ -28,12 +29,14 @@ export class ProviderCatalogController {
   ) {}
 
   @Post("services/:serviceId/variants")
+  @RequireVerifiedPartner()
   @RequireProviderRole(ProviderUserRole.OWNER)
   createVariant(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("serviceId", ParseUUIDPipe) serviceId: string, @Body() dto: CreateServiceVariantDto) {
     return this.catalog.createVariant(ctx, serviceId, dto);
   }
 
   @Patch("services/:serviceId/variants/:variantId")
+  @RequireVerifiedPartner()
   @RequireProviderRole(ProviderUserRole.OWNER)
   updateVariant(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("serviceId", ParseUUIDPipe) serviceId: string, @Param("variantId", ParseUUIDPipe) variantId: string, @Body() dto: UpdateServiceVariantDto) {
     return this.catalog.updateVariant(ctx, serviceId, variantId, dto);
