@@ -44,6 +44,53 @@ describe("ERP-C partners", () => {
   });
   afterAll(async () => app.close());
 
+  it("records private identity details only with a server-verified mobile; review locks edits", async () => {
+    const p = await provider();
+    const payload = { firstName: "First", lastName: "Last", landline: "02112345678", websiteUrl: "https://example.com", enamadId: "enamad-test" };
+    expect((await post(p.owner, "/provider/verification/profile").send(payload).expect(400)).body.error.details.reason).toBe("VERIFIED_MOBILE_REQUIRED");
+    const phone = `+989${randomUUID().replace(/\D/g, "").padEnd(9, "0").slice(0, 9)}`;
+    await db.user.update({ where: { id: p.owner.id }, data: { phone, phoneVerifiedAt: new Date() } });
+    await post(p.owner, "/provider/verification/profile").send({ ...payload, mobile: "+989000000000" }).expect(400);
+    await post(p.owner, "/provider/verification/profile").send({ ...payload, websiteUrl: "javascript:alert(1)" }).expect(400);
+    const saved = (await post(p.owner, "/provider/verification/profile").send(payload).expect(201)).body;
+    expect(saved).toMatchObject({ ...payload, mobile: phone });
+    expect(saved.mobileVerifiedAt).toBeTruthy();
+    const staff = await actor("profile-reader");
+    await db.providerUser.create({ data: { providerOrganizationId: p.orgId, userId: staff.id, role: "STAFF" } });
+    await get(staff, "/provider/verification/profile").expect(403);
+    expect((await get(staff, "/provider/verification").expect(200)).body).not.toHaveProperty("profile");
+    await post(staff, "/provider/verification/profile").send(payload).expect(403);
+    const ops = await actor("profile-reviewer", AdminRole.PARTNER_OPERATIONS);
+    expect((await get(ops, `/admin/verification/provider/${p.orgId}`).expect(200)).body.profile).toMatchObject({ ...payload, mobile: phone });
+    const other = await provider();
+    expect((await get(other.owner, "/provider/verification/profile").expect(200)).body).not.toMatchObject({ mobile: phone });
+    for (const status of ["SUBMITTED", "UNDER_REVIEW", "VERIFIED", "SUSPENDED"] as const) {
+      await db.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: status } });
+      expect((await post(p.owner, "/provider/verification/profile").send({ ...payload, firstName: "Changed" }).expect(400)).body.error.details.reason).toBe("VERIFICATION_PROFILE_LOCKED");
+    }
+    expect((await get(p.owner, "/provider/verification/profile").expect(200)).body.firstName).toBe("First");
+  });
+
+  it.each(["NATIONAL_ID_CARD", "BUSINESS_LICENSE", "ENAMAD"])("accepts the additive %s evidence kind", async (kind) => {
+    const p = await provider();
+    const upload = (await post(p.owner, "/provider/verification/uploads").send({ contentType: "image/png", fileSizeBytes: 100 }).expect(201)).body;
+    const saved = await post(p.owner, "/provider/verification/documents").send({ objectKey: upload.key, kind, contentType: "image/png", fileSizeBytes: 100 }).expect(201);
+    expect(saved.body.documents[0].kind).toBe(kind);
+  });
+
+  it("limits seller identity profiles to managers of that seller", async () => {
+    const owner = await actor("profile-seller-owner");
+    const clerk = await actor("profile-seller-clerk");
+    const org = await db.sellerOrganization.create({ data: { name: `Profile ${tag()}`, countryCode: "IR", status: "ACTIVE" } });
+    await db.sellerMembership.createMany({ data: [{ sellerOrganizationId: org.id, userId: owner.id, role: "OWNER", status: "ACTIVE" }, { sellerOrganizationId: org.id, userId: clerk.id, role: "CATALOG_MANAGER", status: "ACTIVE" }] });
+    const path = `/seller-organizations/${org.id}/verification/profile`;
+    await get(clerk, path).expect(403);
+    await get(await actor("outside-seller"), path).expect(403);
+    await db.user.update({ where: { id: owner.id }, data: { phone: `+989${randomUUID().replace(/\D/g, "").padEnd(9, "0").slice(0, 9)}`, phoneVerifiedAt: new Date() } });
+    await post(owner, path).send({ firstName: "Seller", lastName: "Owner", landline: "02112345678" }).expect(201);
+    expect((await get(owner, path).expect(200)).body.firstName).toBe("Seller");
+  });
+
   it.each(Object.values(ProviderVerificationStatus).filter((status) => status !== "VERIFIED"))("blocks provider catalog and availability in %s without blocking verification", async (status) => {
     const p = await provider();
     await db.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: status } });

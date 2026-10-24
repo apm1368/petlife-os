@@ -1,5 +1,5 @@
 /** Persian titles for rule-generated admin tasks (the admin team works in fa); machine codes stay in source/description. */
-export const DOC_KIND_FA: Record<string, string> = { LICENSE: "مجوز", IDENTITY: "هویت", BUSINESS_REGISTRATION: "ثبت کسب‌وکار", BANK_INFO: "اطلاعات بانکی", OTHER: "سایر" };
+export const DOC_KIND_FA: Record<string, string> = { NATIONAL_ID_CARD: "کارت ملی", BUSINESS_LICENSE: "مجوز کسب‌وکار", ENAMAD: "اینماد", LICENSE: "مجوز", IDENTITY: "هویت", BUSINESS_REGISTRATION: "ثبت کسب‌وکار", BANK_INFO: "اطلاعات بانکی", OTHER: "سایر" };
 export const REPORT_REASON_FA: Record<string, string> = { ANIMAL_WELFARE: "رفاه حیوان", DANGEROUS_CONTENT: "محتوای خطرناک", HARASSMENT: "آزار", PERSONAL_INFORMATION: "اطلاعات شخصی", SCAM: "کلاهبرداری" };
 export const RECON_CHECK_FA: Record<string, string> = {
   INTENT_TRANSACTION: "پرداخت و تراکنش", TRANSACTION_LEDGER: "تراکنش و دفتر کل", REFUND_ORIGINAL: "بازپرداخت و پرداخت اصلی", BOOKING_CAPTURE: "رزرو و مبلغ دریافتی",

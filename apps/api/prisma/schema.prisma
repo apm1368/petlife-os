@@ -10251,11 +10251,34 @@ enum PartnerSubjectType {
 }
 
 enum PartnerDocumentKind {
+  NATIONAL_ID_CARD
+  BUSINESS_LICENSE
+  ENAMAD
   LICENSE
   IDENTITY
   BUSINESS_REGISTRATION
   BANK_INFO
   OTHER
+}
+
+/// Private applicant profile; mobile is copied only from an OTP-verified account.
+model PartnerVerificationProfile {
+  id                 String             @id @default(uuid()) @db.Uuid
+  subjectType        PartnerSubjectType
+  subjectId          String             @db.Uuid
+  firstName          String
+  lastName           String
+  landline           String
+  websiteUrl         String?
+  enamadId           String?
+  mobile             String
+  mobileVerifiedAt   DateTime
+  updatedByUserId    String             @db.Uuid
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([subjectType, subjectId])
+  @@map("partner_verification_profiles")
 }
 
 enum PartnerDocumentStatus {
