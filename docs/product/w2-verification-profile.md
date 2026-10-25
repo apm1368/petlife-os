@@ -1,5 +1,7 @@
 # W2-2 private applicant profile contract
 
+Follow-up: [versioned mandatory policy](w2-verification-policy.md) now enforces these fields for new submissions while preserving previously submitted cases.
+
 This additive slice introduces national-ID-card, business-license and Enamad document kinds, plus a private identity profile for existing PROVIDER and SELLER verification subjects.
 
 ## Endpoints and access

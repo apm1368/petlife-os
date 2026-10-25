@@ -12,3 +12,16 @@ export interface PartnerVerificationProfileDto extends PartnerVerificationProfil
   mobileVerifiedAt: string;
   updatedAt: string;
 }
+
+export type PartnerVerificationDocumentKind = "LICENSE" | "IDENTITY" | "BUSINESS_REGISTRATION" | "BANK_INFO" | "OTHER" | "NATIONAL_ID_CARD" | "BUSINESS_LICENSE" | "ENAMAD";
+export interface PartnerVerificationPolicyDto {
+  version: string;
+  mode: "MANUAL_DOCUMENT_REVIEW";
+  officialLookup: "NOT_CONNECTED";
+  requiredDocumentKinds: PartnerVerificationDocumentKind[];
+  missingForSubmission: PartnerVerificationDocumentKind[];
+  missingForApproval: PartnerVerificationDocumentKind[];
+  requiresBusinessEvidence?: boolean;
+  requiredProfileFields?: string[];
+  missingProfileFields?: string[];
+}

@@ -41,4 +41,30 @@ describe("partner verification evidence policy", () => {
   it("exposes an explicit version and never claims official verification", () => {
     expect(verificationPolicy("VET_CLINIC")).toMatchObject({ version: "2026-10-24.1", mode: "MANUAL_DOCUMENT_REVIEW", officialLookup: "NOT_CONNECTED" });
   });
+
+  describe("Wave 2 mandatory evidence", () => {
+    const profile = { firstName: "First", lastName: "Last", landline: "02112345678", mobile: "+989121234567", mobileVerifiedAt: new Date("2026-10-14") };
+    const national = { ...identity, kind: "NATIONAL_ID_CARD" as const };
+    const business = { ...identity, kind: "BUSINESS_LICENSE" as const };
+    it("requires profile, national ID and commercial evidence independently", () => {
+      const empty = evaluateVerificationPolicy("SELLER", [], now, false, { strict: true });
+      expect(empty.missingForSubmission).toEqual(["NATIONAL_ID_CARD", "BUSINESS_LICENSE"]);
+      expect(empty.missingProfileFields).toEqual(["firstName", "lastName", "landline", "mobile", "mobileVerifiedAt"]);
+      expect(evaluateVerificationPolicy("SELLER", [national, business], now, false, { strict: true, profile }).missingForApproval).toEqual([]);
+    });
+    it("accepts an Enamad ID or accepted evidence, but never treats pending evidence as approved", () => {
+      expect(evaluateVerificationPolicy("SELLER", [national], now, false, { strict: true, profile: { ...profile, enamadId: "12345" } }).missingForApproval).toEqual([]);
+      const pending = evaluateVerificationPolicy("SELLER", [national, { ...business, kind: "ENAMAD", status: "PENDING" }], now, false, { strict: true, profile });
+      expect(pending.missingForSubmission).toEqual([]);
+      expect(pending.missingForApproval).toEqual(["BUSINESS_LICENSE"]);
+    });
+    it("keeps professional licence separate and rejects stale mobile proof", () => {
+      const result = evaluateVerificationPolicy("VET_CLINIC", [national, business], now, false, { strict: true, profile: { ...profile, mobileVerifiedAt: null } });
+      expect(result.missingForApproval).toEqual(["LICENSE"]);
+      expect(result.missingProfileFields).toEqual(["mobileVerifiedAt"]);
+    });
+    it("does not accept legacy generic identity as a new national ID requirement", () => {
+      expect(evaluateVerificationPolicy("SELLER", [identity, business], now, false, { strict: true, profile }).missingForSubmission).toEqual(["NATIONAL_ID_CARD"]);
+    });
+  });
 });

@@ -11,4 +11,10 @@ describe("VerificationRequirements", () => {
   it("does not pretend the checklist is complete when an older server omits policy", () => {
     renderWithIntl(<VerificationRequirements />); expect(screen.getByRole("status").textContent).toContain("has not supplied"); expect(screen.queryByText("Accepted and valid")).toBeNull();
   });
+  it("shows the business-evidence alternative and missing contact proof in Persian", () => {
+    renderWithIntl(<VerificationRequirements policy={{ ...verificationDetail.policy!, requiredDocumentKinds: ["NATIONAL_ID_CARD", "BUSINESS_LICENSE"], missingForSubmission: [], missingForApproval: [], requiresBusinessEvidence: true, requiredProfileFields: ["mobileVerifiedAt"], missingProfileFields: ["mobileVerifiedAt"] }} />, "fa");
+    expect(screen.getByText("مجوز کسب‌وکار یا اینماد (شناسه یا مدرک)")).toBeTruthy();
+    expect(screen.getByText("اعتبار تأیید موبایل فعلی")).toBeTruthy();
+    expect(screen.getByText("برای ارسال پرونده الزامی است")).toBeTruthy();
+  });
 });
