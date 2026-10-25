@@ -2,6 +2,8 @@ import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from
 import { InternalNoteEntityType } from "@prisma/client";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
+import { RequireAdminVertical } from "../auth/require-admin-vertical.decorator";
+import { AdminVertical } from "@prisma/client";
 import { RequireAdminPermission } from "../auth/require-admin-permission.decorator";
 import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-context.types";
@@ -10,6 +12,7 @@ import { SupportCaseService } from "./support-case.service";
 import { AddInternalNoteDto, AssignSupportCaseDto, CreateSupportCaseDto, ListSupportCasesQueryDto, PostSupportMessageDto, TransitionSupportCaseDto } from "./dto/support-case.dto";
 
 @Controller("admin/support")
+@RequireAdminVertical(AdminVertical.SUPPORT)
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class SupportCaseController {
   constructor(

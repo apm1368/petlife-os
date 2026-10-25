@@ -4,7 +4,7 @@ import type { PrismaService } from "../../../common/prisma/prisma.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 describe("dashboard permission boundary", () => {
-  const actor = (role: AdminRole): ResolvedAdminContext => ({ adminUserId: "a", userId: "u", displayName: "A", status: AdminMembershipStatus.ACTIVE, role });
+  const actor = (role: AdminRole): ResolvedAdminContext => ({ adminUserId: "a", userId: "u", displayName: "A", status: AdminMembershipStatus.ACTIVE, role, serviceScopes: [] });
   const setup = () => {
     const db = { supportCase: { count: jest.fn().mockResolvedValue(12) }, dispute: { count: jest.fn().mockResolvedValue(3) }, trustCase: { count: jest.fn().mockResolvedValue(4) }, adminRefundApproval: { count: jest.fn().mockResolvedValue(9) }, adminTask: { count: jest.fn().mockResolvedValue(5) } };
     return { db, service: new AdminDashboardService(db as unknown as PrismaService) };

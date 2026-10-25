@@ -2376,6 +2376,26 @@ export enum AdminRole {
   CLINIC_OPERATIONS = "CLINIC_OPERATIONS",
   COMMERCE_OPERATIONS = "COMMERCE_OPERATIONS",
   ANALYTICS = "ANALYTICS",
+  CONTENT_ADMIN = "CONTENT_ADMIN",
+  SHOP_ADMIN = "SHOP_ADMIN",
+  SERVICE_ADMIN = "SERVICE_ADMIN",
+  SUPPORT_AGENT = "SUPPORT_AGENT",
+}
+
+/**
+ * The business verticals a scoped admin role is confined to. Permissions decide what an admin may
+ * do; a vertical decides whose rows they may do it to. An admin with no vertical restriction is
+ * represented by `serviceScopes: null` on the capabilities payload, never by an empty array — an
+ * empty array is a SERVICE_ADMIN whose scopes have not been configured, which reaches nothing.
+ */
+export enum AdminVertical {
+  CLINIC = "CLINIC",
+  GROOMING = "GROOMING",
+  ACCOMMODATION = "ACCOMMODATION",
+  INSURANCE = "INSURANCE",
+  SHOP = "SHOP",
+  CONTENT = "CONTENT",
+  SUPPORT = "SUPPORT",
 }
 
 export enum AdminMembershipStatus {
@@ -3025,6 +3045,8 @@ export interface AdminSessionContextDto {
 export interface AdminCapabilitiesDto {
   role: AdminRole;
   permissions: AdminPermissionName[];
+  /** The verticals this admin is confined to, or null when the role reaches every vertical. */
+  verticals: AdminVertical[] | null;
 }
 
 // ---------------------------------------------------------------------------

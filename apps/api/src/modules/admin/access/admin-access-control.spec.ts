@@ -4,7 +4,7 @@ import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 /** The last-SUPER_ADMIN invariant can't be exercised end-to-end on a shared test DB (other suites add SUPER_ADMINs), so it is pinned here. */
 describe("AdminAccessControlService governance", () => {
-  const actor: ResolvedAdminContext = { adminUserId: "actor", userId: "u-actor", displayName: "A", role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE };
+  const actor: ResolvedAdminContext = { adminUserId: "actor", userId: "u-actor", displayName: "A", role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE, serviceScopes: [] };
   function serviceWith(target: { id: string; role: AdminRole; status: AdminMembershipStatus }, activeSuperAdmins: number) {
     const tx = {
       $executeRaw: jest.fn(),

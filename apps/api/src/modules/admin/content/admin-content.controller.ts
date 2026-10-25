@@ -3,6 +3,8 @@ import { ContentPlacementKey, Locale } from "@prisma/client";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
+import { RequireAdminVertical } from "../auth/require-admin-vertical.decorator";
+import { AdminVertical } from "@prisma/client";
 import { RequireAdminPermission } from "../auth/require-admin-permission.decorator";
 import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-context.types";
@@ -29,6 +31,7 @@ import { ReplaceContentBlocksDto } from "./dto/admin-content-placement.dto";
  * create/edit (spec: "editing and publishing should be separate actions").
  */
 @Controller("admin/content")
+@RequireAdminVertical(AdminVertical.CONTENT)
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class AdminContentController {
   constructor(
