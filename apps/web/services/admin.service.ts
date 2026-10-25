@@ -1,4 +1,5 @@
 import type {
+  AdminCapabilitiesDto,
   AdminAuditLogDto,
   AdminCustomerListItemDto,
   AdminDashboardSummaryDto,
@@ -72,6 +73,7 @@ export const adminService = {
   getTrustQueueSummary: () => apiFetch<TrustQueueSummary>("/admin/trust/queue/summary"),
   getSystemHealth: () => apiFetch<SystemHealth>("/admin/system/health"),
   getMe: () => apiFetch<AdminSessionContextDto>("/admin/me"),
+  getCapabilities: () => apiFetch<AdminCapabilitiesDto>("/admin/me/capabilities"),
   getDashboard: () => apiFetch<AdminDashboardSummaryDto>("/admin/dashboard"),
   search: (q: string) => apiFetch<AdminSearchResultDto>(`/admin/search${toQueryString({ q })}`),
 
