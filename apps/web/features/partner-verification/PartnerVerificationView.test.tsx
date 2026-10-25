@@ -11,7 +11,7 @@ vi.mock("@/services/partner-verification.service",async original=>{const actual=
 function chooseFile(){fireEvent.change(screen.getByLabelText("Choose document file"),{target:{files:[new File(["private license"],"license.pdf",{type:"application/pdf"})]}});fireEvent.click(screen.getByRole("checkbox"));fireEvent.click(screen.getByRole("button",{name:"Upload and register document"}))}
 describe("PartnerVerificationView",()=>{
  it("refreshes the server submission checklist after identity details are saved",async()=>{
-  const profile={firstName:"First",lastName:"Last",landline:"02112345678",websiteUrl:null,enamadId:null,mobile:"+989121234567",mobileVerifiedAt:"2026-10-24T00:00:00Z",updatedAt:"2026-10-24T00:00:00Z"};
+  const profile={firstName:"First",lastName:"Last",landline:"02112345678",mobile:"+989121234567",mobileVerifiedAt:"2026-10-24T00:00:00Z",updatedAt:"2026-10-24T00:00:00Z"};
   vi.mocked(partnerVerificationService.saveProfile).mockResolvedValue(profile);
   renderWithIntl(<PartnerVerificationView/>);
   fireEvent.change(await screen.findByLabelText("First name"),{target:{value:"First"}});
