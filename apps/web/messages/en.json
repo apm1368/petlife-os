@@ -5517,7 +5517,11 @@
     }
   },
   "partnerVerification": {
+    "businessEvidenceRequirement": "Business license or Enamad (ID or evidence)",
+    "profileRequired": "Required before submission",
+    "profileRecorded": "Recorded for staff review",
     "profile": {
+      "mobileVerifiedAt": "Current mobile verification",
       "title": "Applicant identity and contact details", "firstName": "First name", "lastName": "Last name", "landline": "Landline", "websiteUrl": "Website (HTTPS, optional)", "enamadId": "Enamad ID (optional)", "mobile": "Verified mobile",
       "mobileHelp": "Your verified account mobile is recorded by the server when you save. Saving this profile does not approve the organization.",
       "empty": "No applicant profile has been recorded.", "loading": "Loading identity details…", "failed": "Could not save or load the identity details. Check the fields and retry.", "retry": "Retry", "save": "Save identity details", "saving": "Saving…", "saved": "Identity details saved.",

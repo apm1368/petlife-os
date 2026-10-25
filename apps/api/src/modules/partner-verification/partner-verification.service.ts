@@ -10,7 +10,7 @@ import { NotificationDeepLinks } from "../notifications/notification-deeplink.ut
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import { AutomaticTaskService } from "../admin/task/automatic-task.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
-import { evaluateVerificationPolicy, matchesVerificationEvidence } from "./verification-policy";
+import { evaluateVerificationPolicy, matchesVerificationEvidence, WAVE2_VERIFICATION_POLICY_VERSION } from "./verification-policy";
 import { DOC_KIND_FA } from "../admin/task/task-titles";
 
 /** Provider and seller verification share one status vocabulary (identical enums). */
@@ -69,11 +69,11 @@ export class PartnerVerificationService {
   // ------------------------------------------------------------------ shared reads
   private async org(s: Subject, db: Pick<PrismaService, "providerOrganization" | "sellerOrganization"> = this.prisma) {
     if (s.type === PartnerSubjectType.PROVIDER) {
-      const o = await db.providerOrganization.findUnique({ where: { id: s.id }, select: { id: true, name: true, type: true, verificationStatus: true, verificationSubmittedAt: true, verificationNote: true, services: { where: { category: "VET" }, select: { id: true }, take: 1 } } });
+      const o = await db.providerOrganization.findUnique({ where: { id: s.id }, select: { id: true, name: true, type: true, verificationStatus: true, verificationSubmittedAt: true, verificationNote: true, verificationPolicyVersion: true, services: { where: { category: "VET" }, select: { id: true }, take: 1 } } });
       if (!o) throw new NotFoundApiException("Provider organization");
       return { ...o, kind: o.type as string, offersVeterinaryServices: o.services.length > 0 };
     }
-    const o = await db.sellerOrganization.findUnique({ where: { id: s.id }, select: { id: true, name: true, verificationStatus: true, verificationSubmittedAt: true, verificationNote: true } });
+    const o = await db.sellerOrganization.findUnique({ where: { id: s.id }, select: { id: true, name: true, verificationStatus: true, verificationSubmittedAt: true, verificationNote: true, verificationPolicyVersion: true } });
     if (!o) throw new NotFoundApiException("Seller organization");
     return { ...o, verificationStatus: o.verificationStatus as unknown as Status, kind: "SELLER", offersVeterinaryServices: false };
   }
@@ -93,12 +93,20 @@ export class PartnerVerificationService {
     const [o, docs] = await Promise.all([this.org(s), this.prisma.partnerVerificationDocument.findMany({ where: { subjectType: s.type, subjectId: s.id }, orderBy: { createdAt: "desc" } })]);
     const now = new Date();
     const accepted = docs.filter((d) => d.status === PartnerDocumentStatus.ACCEPTED || d.status === PartnerDocumentStatus.EXPIRED);
-    const policy = evaluateVerificationPolicy(o.kind, docs, now, o.offersVeterinaryServices);
-    const valid = policy.missingForApproval.length === 0;
-    return { status: o.verificationStatus, lifecycle: lifecycleOf(o.verificationStatus, valid, accepted.some((d) => policy.requiredDocumentKinds.some(kind => matchesVerificationEvidence(kind, d.kind)) && d.expiresAt !== null)), submittedAt: iso(o.verificationSubmittedAt), note: o.verificationNote, policy, canSubmit: SUBMITTABLE.includes(o.verificationStatus) && policy.missingForSubmission.length === 0 && docs.some((d) => d.status === PartnerDocumentStatus.PENDING && (!d.expiresAt || d.expiresAt > now)), documents: docs.map((d) => this.docDto(d)) };
+    const policy = await this.evidencePolicy(s, o, docs, now, SUBMITTABLE.includes(o.verificationStatus) || o.verificationPolicyVersion !== null);
+    const valid = policy.missingForApproval.length === 0 && policy.missingProfileFields.length === 0;
+    return { status: o.verificationStatus, lifecycle: lifecycleOf(o.verificationStatus, valid, accepted.some((d) => policy.requiredDocumentKinds.some(kind => matchesVerificationEvidence(kind, d.kind)) && d.expiresAt !== null)), submittedAt: iso(o.verificationSubmittedAt), note: o.verificationNote, policy, canSubmit: SUBMITTABLE.includes(o.verificationStatus) && policy.missingForSubmission.length === 0 && policy.missingProfileFields.length === 0 && docs.some((d) => d.status === PartnerDocumentStatus.PENDING && (!d.expiresAt || d.expiresAt > now)), documents: docs.map((d) => this.docDto(d)) };
   }
 
   // ------------------------------------------------------------------ partner side
+  private async evidencePolicy(s: Subject, org: { kind: string; offersVeterinaryServices: boolean }, documents: Prisma.PartnerVerificationDocumentGetPayload<object>[], now: Date, strict: boolean, db: Pick<PrismaService, "partnerVerificationProfile" | "user"> = this.prisma) {
+    if (!strict) return evaluateVerificationPolicy(org.kind, documents, now, org.offersVeterinaryServices);
+    const profile = await db.partnerVerificationProfile.findUnique({ where: { subjectType_subjectId: { subjectType: s.type, subjectId: s.id } } });
+    const user = profile ? await db.user.findUnique({ where: { id: profile.updatedByUserId }, select: { phone: true, phoneVerifiedAt: true, accountStatus: true } }) : null;
+    const currentMobileProof = !!profile && !!user?.phoneVerifiedAt && user.phone === profile.mobile && user.accountStatus === "ACTIVE";
+    return evaluateVerificationPolicy(org.kind, documents, now, org.offersVeterinaryServices, { strict: true, profile: profile ? { ...profile, mobileVerifiedAt: currentMobileProof ? profile.mobileVerifiedAt : null } : null });
+  }
+
   async profile(s: Subject): Promise<PartnerVerificationProfileDto | null> {
     await this.org(s);
     const row = await this.prisma.partnerVerificationProfile.findUnique({ where: { subjectType_subjectId: { subjectType: s.type, subjectId: s.id } } });
@@ -155,17 +163,18 @@ export class PartnerVerificationService {
       const o = await this.org(s, tx);
       if (!SUBMITTABLE.includes(o.verificationStatus)) throw new ValidationApiException({ field: "status", reason: "NOT_SUBMITTABLE", status: o.verificationStatus });
       const documents = await tx.partnerVerificationDocument.findMany({ where: { subjectType: s.type, subjectId: s.id } });
-      const policy = evaluateVerificationPolicy(o.kind, documents, submittedAt, o.offersVeterinaryServices);
+      const policy = await this.evidencePolicy(s, o, documents, submittedAt, true, tx);
       if (policy.missingForSubmission.length) throw new ValidationApiException({ field: "documents", reason: "VERIFICATION_REQUIRED_DOCUMENTS_MISSING", missingKinds: policy.missingForSubmission, policyVersion: policy.version });
+      if (policy.missingProfileFields.length) throw new ValidationApiException({ field: "profile", reason: "VERIFICATION_PROFILE_REQUIRED", missingFields: policy.missingProfileFields, policyVersion: policy.version });
       if (!documents.some(d => d.status === PartnerDocumentStatus.PENDING && (!d.expiresAt || d.expiresAt > submittedAt))) throw new ValidationApiException({ field: "documents", reason: "DOCUMENT_REQUIRED" });
-      const data = { verificationStatus: VS.SUBMITTED, verificationSubmittedAt: submittedAt, verificationNote: null };
+      const data = { verificationStatus: VS.SUBMITTED, verificationSubmittedAt: submittedAt, verificationNote: null, verificationPolicyVersion: WAVE2_VERIFICATION_POLICY_VERSION };
       const done = s.type === PartnerSubjectType.PROVIDER
         ? await tx.providerOrganization.updateMany({ where: { id: s.id, verificationStatus: o.verificationStatus }, data })
         : await tx.sellerOrganization.updateMany({ where: { id: s.id, verificationStatus: o.verificationStatus as never }, data: data as never });
       if (!done.count) throw new ValidationApiException({ field: "status", reason: "CHANGED_CONCURRENTLY" });
       await this.events.publish("PartnerVerificationSubmitted", { subjectType: s.type, subjectId: s.id, actorUserId: userId, policyVersion: policy.version }, { tx, aggregateType: s.type === PartnerSubjectType.PROVIDER ? "ProviderOrganization" : "SellerOrganization", aggregateId: s.id });
       await this.tasks.raise({ dedupeKey: `verification-submitted:${s.type}:${s.id}:${submittedAt.toISOString()}`, title: `ارسال مدارک احراز: ${o.name}`, source: AdminTaskSource.PARTNER_VERIFICATION, team: "PARTNER_OPERATIONS", priority: AdminPriority.NORMAL, relatedEntityType: s.type === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION", relatedEntityId: s.id, dueAt: new Date(submittedAt.getTime() + 3 * 86400e3) }, tx);
-    });
+    }, { isolationLevel: "Serializable" });
     return this.status(s);
   }
 
@@ -191,7 +200,7 @@ export class PartnerVerificationService {
 
   async adminDetail(s: Subject) {
     const [o, st, profile] = await Promise.all([this.org(s), this.status(s), this.profile(s)]);
-    return { subjectType: s.type, id: o.id, name: o.name, kind: o.kind, ...st, profile, allowedTransitions: ADMIN_TRANSITIONS[o.verificationStatus].filter(to => to !== VS.VERIFIED || st.policy.missingForApproval.length === 0) };
+    return { subjectType: s.type, id: o.id, name: o.name, kind: o.kind, ...st, profile, allowedTransitions: ADMIN_TRANSITIONS[o.verificationStatus].filter(to => to !== VS.VERIFIED || (st.policy.missingForApproval.length === 0 && st.policy.missingProfileFields.length === 0)) };
   }
 
   async documentDownload(admin: ResolvedAdminContext, documentId: string, reason: string) {
@@ -229,9 +238,10 @@ export class PartnerVerificationService {
       let policyVersion: string | undefined;
       if (to === VS.VERIFIED) {
         const documents = await tx.partnerVerificationDocument.findMany({ where: { subjectType: s.type, subjectId: s.id } });
-        const policy = evaluateVerificationPolicy(o.kind, documents, new Date(), o.offersVeterinaryServices);
+        const policy = await this.evidencePolicy(s, o, documents, new Date(), o.verificationPolicyVersion !== null, tx);
         policyVersion = policy.version;
         if (policy.missingForApproval.length) throw new ValidationApiException({ field: "status", reason: "VERIFICATION_EVIDENCE_REQUIRED", missingKinds: policy.missingForApproval, policyVersion: policy.version });
+        if (policy.missingProfileFields.length) throw new ValidationApiException({ field: "profile", reason: "VERIFICATION_PROFILE_REQUIRED", missingFields: policy.missingProfileFields, policyVersion: policy.version });
       }
       const note = to === VS.NEEDS_INFORMATION || to === VS.REJECTED ? (reason ?? null) : to === VS.VERIFIED ? null : undefined;
       const data = { verificationStatus: to, ...(note !== undefined ? { verificationNote: note } : {}) };

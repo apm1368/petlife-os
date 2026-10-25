@@ -8,6 +8,12 @@ const state=vi.hoisted(()=>({permissions:["verification.manage"]}));
 vi.mock("@/stores/admin-store",()=>({useAdminStore:(select:(s:unknown)=>unknown)=>select({context:{permissions:state.permissions}})}));
 vi.mock("@/services/partner-verification.service",async original=>{const actual=await original<typeof import("@/services/partner-verification.service")>();return {...actual,partnerVerificationService:{queue:vi.fn(),detail:vi.fn(),review:vi.fn(),transition:vi.fn(),download:vi.fn()}}});
 describe("AdminVerificationView",()=>{
+ it("does not offer approval when documents pass but mobile proof is missing",async()=>{
+  vi.mocked(partnerVerificationService.detail).mockResolvedValue({...verificationDetail,documents:[{...verificationDocument,status:"ACCEPTED"}],allowedTransitions:["VERIFIED"],policy:{...verificationDetail.policy!,missingForApproval:[],missingProfileFields:["mobileVerifiedAt"]}});
+  renderWithIntl(<AdminVerificationView subject="PROVIDER" id="org1"/>);
+  await screen.findByRole("heading",{name:"Companion clinic"});
+  expect(screen.queryByRole("button",{name:"Approve organization"})).toBeNull();
+ });
  beforeEach(()=>{vi.resetAllMocks();state.permissions=["verification.manage"];vi.mocked(partnerVerificationService.detail).mockResolvedValue(verificationDetail)});
  it("shows Persian labels and actionable row details without exposing KYC jargon",async()=>{vi.mocked(partnerVerificationService.queue).mockResolvedValue([{subjectType:"PROVIDER",id:"org1",name:"کلینیک همراه",kind:"VET_CLINIC",status:"SUBMITTED",submittedAt:"2026-10-15T10:00:00Z",waitingHours:12,documents:{pending:1,accepted:2,rejected:0,expired:0}}]);renderWithIntl(<AdminVerificationView/>,"fa");await screen.findByRole("heading",{name:"کلینیک همراه"});expect(screen.getByRole("heading",{name:"بررسی هویت و مدارک همکاران"})).toBeTruthy();expect(screen.getByText("وضعیت مدارک")).toBeTruthy();expect(screen.getByText(/زمان ارسال پرونده/)).toBeTruthy();expect(screen.getByRole("link",{name:"بررسی پرونده و مدارک"}).getAttribute("href")).toBe("/fa/admin/verification/provider/org1");expect(document.body.textContent).not.toContain("KYC")});
  it("does not read a private verification case without permission",()=>{state.permissions=[];renderWithIntl(<AdminVerificationView subject="PROVIDER" id="org1"/>);expect(partnerVerificationService.detail).not.toHaveBeenCalled()});
