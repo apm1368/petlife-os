@@ -10,6 +10,16 @@ vi.mock("@/stores/seller-store",()=>({useSellerStore:(select:(s:unknown)=>unknow
 vi.mock("@/services/partner-verification.service",async original=>{const actual=await original<typeof import("@/services/partner-verification.service")>();return {...actual,partnerVerificationService:{status:vi.fn(),upload:vi.fn(),register:vi.fn(),submit:vi.fn(),profile:vi.fn(),saveProfile:vi.fn()}}});
 function chooseFile(){fireEvent.change(screen.getByLabelText("Choose document file"),{target:{files:[new File(["private license"],"license.pdf",{type:"application/pdf"})]}});fireEvent.click(screen.getByRole("checkbox"));fireEvent.click(screen.getByRole("button",{name:"Upload and register document"}))}
 describe("PartnerVerificationView",()=>{
+ it("refreshes the server submission checklist after identity details are saved",async()=>{
+  const profile={firstName:"First",lastName:"Last",landline:"02112345678",mobile:"+989121234567",mobileVerifiedAt:"2026-10-24T00:00:00Z",updatedAt:"2026-10-24T00:00:00Z"};
+  vi.mocked(partnerVerificationService.saveProfile).mockResolvedValue(profile);
+  renderWithIntl(<PartnerVerificationView/>);
+  fireEvent.change(await screen.findByLabelText("First name"),{target:{value:"First"}});
+  fireEvent.change(screen.getByLabelText("Last name"),{target:{value:"Last"}});
+  fireEvent.change(screen.getByLabelText("Landline"),{target:{value:"02112345678"}});
+  fireEvent.click(screen.getByRole("button",{name:"Save identity details"}));
+  await waitFor(()=>expect(partnerVerificationService.status).toHaveBeenCalledTimes(2));
+ });
  beforeEach(()=>{vi.resetAllMocks();vi.mocked(partnerVerificationService.profile).mockResolvedValue(null);state.role="OWNER";vi.mocked(partnerVerificationService.status).mockResolvedValue({...verificationDetail,status:"NOT_STARTED",lifecycle:"NOT_SUBMITTED",documents:[],canSubmit:false});vi.mocked(partnerVerificationService.upload).mockResolvedValue({uploadUrl:"https://example.com/signed-upload",key:"partner-verification/provider/org1/license.pdf",headers:{"Content-Type":"application/pdf"}})});
  it("does not expose uploads or submission to a staff reader",async()=>{state.role="STAFF";renderWithIntl(<PartnerVerificationView/>);await screen.findByText("Only an authorized organization manager can add documents or submit the case.");expect(screen.queryByLabelText("Choose document file")).toBeNull();expect(screen.queryByRole("button",{name:"Submit case for review"})).toBeNull()});
  it("does not register a document after a failed byte upload",async()=>{const fetch=vi.spyOn(globalThis,"fetch").mockResolvedValue({ok:false} as Response);renderWithIntl(<PartnerVerificationView/>);await screen.findByLabelText("Choose document file");chooseFile();await screen.findByText("File upload failed; the document was not registered.");expect(partnerVerificationService.register).not.toHaveBeenCalled();fetch.mockRestore()});

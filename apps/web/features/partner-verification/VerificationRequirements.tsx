@@ -18,10 +18,15 @@ export function VerificationRequirements({ policy }: Pick<VerificationState, "po
       {policy.requiredDocumentKinds.map(kind => {
         const ready = !policy.missingForApproval.includes(kind), uploaded = !policy.missingForSubmission.includes(kind);
         return <li key={kind} className="flex items-center justify-between gap-3 rounded-xl border border-current/20 p-4">
-          <span>{t(`documentKinds.${kind}`)}</span><span className="text-sm">{t(ready ? "requirementAccepted" : uploaded ? "requirementPending" : "requirementMissing")}</span>
+          <span>{t(kind === "BUSINESS_LICENSE" && policy.requiresBusinessEvidence ? "businessEvidenceRequirement" : `documentKinds.${kind}`)}</span><span className="text-sm">{t(ready ? "requirementAccepted" : uploaded ? "requirementPending" : "requirementMissing")}</span>
         </li>;
       })}
     </ul>
+    {policy.requiredProfileFields?.length ? <ul className="grid gap-3 sm:grid-cols-2">
+      {policy.requiredProfileFields.map(field => <li key={field} className="flex items-center justify-between gap-3 rounded-xl border border-current/20 p-4">
+        <span>{t(`profile.${field}`)}</span><span className="text-sm">{t(policy.missingProfileFields?.includes(field) ? "profileRequired" : "profileRecorded")}</span>
+      </li>)}
+    </ul> : null}
     <p className="text-sm text-text-secondary">{t("manualPolicyNotice")}</p>
   </ContextSurface>;
 }

@@ -33,6 +33,26 @@ describe("ERP-A access control, settings, system", () => {
   });
   afterAll(async () => app.close());
 
+  it("capabilities require an active admin and reflect role changes without a new session", async () => {
+    await get(null, "/admin/me/capabilities").expect(401);
+    await get(await actor("member"), "/admin/me/capabilities").expect(403);
+    const editor = await actor("editor", AdminRole.EDITOR);
+    const caps = (await get(editor, "/admin/me/capabilities").expect("Cache-Control", "no-store").expect(200)).body;
+    expect(caps).toEqual({ role: "EDITOR", permissions: ["content.view", "content.create", "content.edit", "content.media.manage"] });
+    await get(editor, "/admin/support/cases").expect(403);
+    expect((await get(editor, "/admin/dashboard").expect(200)).body).toEqual({ openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null });
+    await db.adminUser.update({ where: { id: editor.adminUserId }, data: { role: AdminRole.SUPPORT } });
+    const supportCaps = (await get(editor, "/admin/me/capabilities").expect(200)).body;
+    expect(supportCaps.role).toBe("SUPPORT");
+    expect(supportCaps.permissions).toContain("support.manage");
+    expect(supportCaps.permissions).not.toContain("content.edit");
+    const summary = (await get(editor, "/admin/dashboard").expect(200)).body;
+    expect(summary).toMatchObject({ openSupportCases: expect.any(Number), openDisputes: expect.any(Number), openTasks: expect.any(Number), pendingRefundApprovals: null, openTrustCases: null });
+    await db.adminUser.update({ where: { id: editor.adminUserId }, data: { status: AdminMembershipStatus.SUSPENDED } });
+    await get(editor, "/admin/me/capabilities").expect(403);
+    await get(editor, "/admin/dashboard").expect(403);
+  });
+
   it("access control: read for ADMIN, changes for SUPER_ADMIN only, self-change refused, suspension effective immediately, audited", async () => {
     const root = await actor("root", AdminRole.SUPER_ADMIN);
     const admin = await actor("admin", AdminRole.ADMIN);

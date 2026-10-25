@@ -37,12 +37,59 @@ describe("ERP-C partners", () => {
   const doc = (subjectType: "PROVIDER" | "SELLER", subjectId: string, status: "PENDING" | "ACCEPTED", expiresAt?: Date) =>
     db.partnerVerificationDocument.create({ data: { subjectType, subjectId, kind: "IDENTITY", objectKey: `partner-verification/${subjectType === "PROVIDER" ? "provider" : "seller"}/${subjectId}/${randomUUID()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 100, status, expiresAt, uploadedByUserId: randomUUID() } });
 
+  async function completeProfile(p: Awaited<ReturnType<typeof provider>>, enamadId = "test-enamad") {
+    await db.user.update({ where: { id: p.owner.id }, data: { phone: `+989${randomUUID().replace(/\D/g, "").padEnd(9, "0").slice(0, 9)}`, phoneVerifiedAt: new Date() } });
+    await post(p.owner, "/provider/verification/profile").send({ firstName: "Applicant", lastName: "Owner", landline: "02112345678", enamadId }).expect(201);
+  }
+
   beforeAll(async () => {
     app = await createTestApp();
     await app.listen(0);
     db = app.get(PrismaService);
   });
   afterAll(async () => app.close());
+
+  it.each(["PROVIDER", "SELLER"] as const)("enforces new %s submissions and rechecks mobile proof at admin approval", async (subjectType) => {
+    const owner = await actor("new-policy-owner");
+    const id = subjectType === "PROVIDER"
+      ? (await db.providerOrganization.create({ data: { name: `Strict ${tag()}`, type: "GROOMER" } })).id
+      : (await db.sellerOrganization.create({ data: { name: `Strict ${tag()}`, countryCode: "IR" } })).id;
+    if (subjectType === "PROVIDER") await db.providerUser.create({ data: { providerOrganizationId: id, userId: owner.id, role: "OWNER" } });
+    else await db.sellerMembership.create({ data: { sellerOrganizationId: id, userId: owner.id, role: "OWNER", status: "ACTIVE" } });
+    const portal = subjectType === "PROVIDER" ? "/provider/verification" : `/seller-organizations/${id}/verification`;
+    for (const kind of ["NATIONAL_ID_CARD", "BUSINESS_LICENSE"] as const) {
+      await db.partnerVerificationDocument.create({ data: { subjectType, subjectId: id, kind, objectKey: `partner-verification/${subjectType.toLowerCase()}/${id}/${randomUUID()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 100, status: "PENDING", uploadedByUserId: owner.id } });
+    }
+    expect((await post(owner, `${portal}/submit`).expect(400)).body.error.details.reason).toBe("VERIFICATION_PROFILE_REQUIRED");
+    const before = (await get(owner, portal).expect(200)).body;
+    expect(before.canSubmit).toBe(false);
+    expect(before.policy.missingProfileFields).toContain("mobileVerifiedAt");
+    await db.user.update({ where: { id: owner.id }, data: { phone: `+989${randomUUID().replace(/\D/g, "").padEnd(9, "0").slice(0, 9)}`, phoneVerifiedAt: new Date() } });
+    await post(owner, `${portal}/profile`).send({ firstName: "First", lastName: "Last", landline: "02112345678" }).expect(201);
+    const submitted = (await post(owner, `${portal}/submit`).expect(201)).body;
+    expect(submitted.policy.version).toBe("2026-10-25.1");
+    expect(submitted.policy.missingForApproval).toEqual(["NATIONAL_ID_CARD", "BUSINESS_LICENSE"]);
+    const ops = await actor("strict-reviewer", AdminRole.PARTNER_OPERATIONS);
+    for (const document of submitted.documents) await post(ops, `/admin/verification/documents/${document.id}/review`).send({ decision: "ACCEPTED" }).expect(201);
+    await db.user.update({ where: { id: owner.id }, data: { phoneVerifiedAt: null } });
+    const approve = () => post(ops, `/admin/verification/${subjectType}/${id}/transition`).send({ to: "VERIFIED", reason: "Reviewed case" });
+    expect((await approve().expect(400)).body.error.details.reason).toBe("VERIFICATION_PROFILE_REQUIRED");
+    expect((await get(ops, `/admin/verification/${subjectType}/${id}`).expect(200)).body.allowedTransitions).not.toContain("VERIFIED");
+    await db.user.update({ where: { id: owner.id }, data: { phoneVerifiedAt: new Date() } });
+    await approve().expect(201);
+  });
+
+  it("preserves the recorded legacy requirements of a previously submitted case", async () => {
+    const p = await provider();
+    await db.providerOrganization.update({ where: { id: p.orgId }, data: { verificationStatus: "UNDER_REVIEW" } });
+    await doc("PROVIDER", p.orgId, "ACCEPTED");
+    const ops = await actor("legacy-reviewer", AdminRole.PARTNER_OPERATIONS);
+    const detail = (await get(ops, `/admin/verification/PROVIDER/${p.orgId}`).expect(200)).body;
+    expect(detail.policy.requiredDocumentKinds).toEqual(["IDENTITY"]);
+    expect(detail.policy.missingProfileFields).toEqual([]);
+    await post(ops, `/admin/verification/PROVIDER/${p.orgId}/transition`).send({ to: "VERIFIED", reason: "Legacy evidence reviewed" }).expect(201);
+    expect((await db.providerOrganization.findUniqueOrThrow({ where: { id: p.orgId } })).verificationPolicyVersion).toBeNull();
+  });
 
   it("records private identity details only with a server-verified mobile; review locks edits", async () => {
     const p = await provider();
@@ -160,6 +207,7 @@ describe("ERP-C partners", () => {
 
   it("partner submits evidence; staff review it under an explicit state machine; evidence required to verify; audited, notified, tasked", async () => {
     const p = await provider();
+    await completeProfile(p);
     const other = await provider();
     const ops = await actor("ops", AdminRole.PARTNER_OPERATIONS);
     const ro = await actor("ro", AdminRole.READ_ONLY);
@@ -172,7 +220,7 @@ describe("ERP-C partners", () => {
     // A key issued for another organisation can't be registered here (cross-org).
     const foreign = (await post(other.owner, "/provider/verification/uploads").send({ contentType: "application/pdf", fileSizeBytes: 1000 }).expect(201)).body.key;
     expect((await post(p.owner, "/provider/verification/documents").send({ objectKey: foreign, kind: "IDENTITY", contentType: "application/pdf", fileSizeBytes: 1000 }).expect(400)).body.error.details.reason).toBe("NOT_ISSUED_FOR_THIS_ORGANIZATION");
-    await post(p.owner, "/provider/verification/documents").send({ objectKey: upload.key, kind: "IDENTITY", contentType: "application/pdf", fileSizeBytes: 1000, expiresAt: new Date(Date.now() + 400 * DAY).toISOString() }).expect(201);
+    await post(p.owner, "/provider/verification/documents").send({ objectKey: upload.key, kind: "NATIONAL_ID_CARD", contentType: "application/pdf", fileSizeBytes: 1000, expiresAt: new Date(Date.now() + 400 * DAY).toISOString() }).expect(201);
     const submitted = (await post(p.owner, "/provider/verification/submit").expect(201)).body;
     expect(submitted).toMatchObject({ status: "SUBMITTED", lifecycle: "PENDING" });
     expect((await post(p.owner, "/provider/verification/submit").expect(400)).body.error.details.reason).toBe("NOT_SUBMITTABLE");
@@ -191,7 +239,7 @@ describe("ERP-C partners", () => {
 
     const detail = (await get(ops, `/admin/verification/provider/${p.orgId}`).expect(200)).body;
     const docId = detail.documents[0].id;
-    expect(detail.documents[0]).toMatchObject({ kind: "IDENTITY", status: "PENDING", expiryState: "VALID" });
+    expect(detail.documents[0]).toMatchObject({ kind: "NATIONAL_ID_CARD", status: "PENDING", expiryState: "VALID" });
     expect(JSON.stringify(detail)).not.toContain("partner-verification/"); // no raw storage path
     await post(ops, `/admin/verification/documents/${randomUUID()}/download`).send({ reason: "checking licence" }).expect(404);
     await post(ro, `/admin/verification/documents/${docId}/download`).send({ reason: "checking licence" }).expect(403);
@@ -215,13 +263,15 @@ describe("ERP-C partners", () => {
 
   it("clinical approval and reinstatement require both identity and licence, including legacy PATCH", async () => {
     const p = await provider("VET_CLINIC");
+    await completeProfile(p);
     const ops = await actor("clinical verification", AdminRole.PARTNER_OPERATIONS);
     const identity = await doc("PROVIDER", p.orgId, "PENDING");
+    await db.partnerVerificationDocument.update({ where: { id: identity.id }, data: { kind: "NATIONAL_ID_CARD" } });
     const missing = await post(p.owner, "/provider/verification/submit").expect(400);
     expect(missing.body.error.details).toMatchObject({ reason: "VERIFICATION_REQUIRED_DOCUMENTS_MISSING", missingKinds: ["LICENSE"] });
     const licence = await db.partnerVerificationDocument.create({ data: { subjectType: "PROVIDER", subjectId: p.orgId, kind: "LICENSE", objectKey: `partner-verification/provider/${p.orgId}/${randomUUID()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 100, status: "PENDING", uploadedByUserId: p.owner.id } });
     const pending = (await post(p.owner, "/provider/verification/submit").expect(201)).body;
-    expect(pending.policy).toMatchObject({ missingForSubmission: [], missingForApproval: ["IDENTITY", "LICENSE"], officialLookup: "NOT_CONNECTED" });
+    expect(pending.policy).toMatchObject({ missingForSubmission: [], missingForApproval: ["NATIONAL_ID_CARD", "LICENSE"], officialLookup: "NOT_CONNECTED" });
     await post(ops, `/admin/verification/documents/${identity.id}/review`).send({ decision: "ACCEPTED" }).expect(201);
     const approve = () => patch(ops, `/admin/providers/${p.orgId}/verification`).send({ status: "VERIFIED", reason: "Evidence reviewed" });
     expect((await approve().expect(400)).body.error.details.missingKinds).toEqual(["LICENSE"]);

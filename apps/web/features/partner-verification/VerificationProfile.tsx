@@ -18,7 +18,7 @@ export function VerificationProfileSummary({ profile }: { profile?: PartnerVerif
   </ContextSurface>;
 }
 
-export function VerificationProfileForm({ sellerId, editable }: { sellerId?: string; editable: boolean }) {
+export function VerificationProfileForm({ sellerId, editable, onSaved }: { sellerId?: string; editable: boolean; onSaved?: () => void }) {
   const t = useTranslations("partnerVerification.profile");
   const [profile, setProfile] = useState<PartnerVerificationProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ export function VerificationProfileForm({ sellerId, editable }: { sellerId?: str
   if (loading) return <p role="status">{t("loading")}</p>;
   if (failed) return <div><p role="alert">{t("failed")}</p><Button onClick={() => setRevision(v => v + 1)}>{t("retry")}</Button></div>;
   if (!editable) return <VerificationProfileSummary profile={profile} />;
-  return <ProfileEditor key={`${sellerId || "provider"}-${revision}`} initial={profile} sellerId={sellerId} onSaved={setProfile} />;
+  return <ProfileEditor key={`${sellerId || "provider"}-${revision}`} initial={profile} sellerId={sellerId} onSaved={value => { setProfile(value); onSaved?.(); }} />;
 }
 
 function ProfileEditor({ initial, sellerId, onSaved }: { initial: PartnerVerificationProfileDto | null; sellerId?: string; onSaved: (profile: PartnerVerificationProfileDto) => void }) {

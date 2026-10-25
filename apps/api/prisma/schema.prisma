@@ -1836,6 +1836,8 @@ model ProviderOrganization {
   /// ERP-C: partner-side submission time and the last admin note the partner may see (request for info / rejection).
   verificationSubmittedAt DateTime?
   verificationNote        String?
+  /// Null retains the evidence policy of cases submitted before the Wave 2 rollout.
+  verificationPolicyVersion String?
 
   phone       String?
   email       String?
@@ -2458,6 +2460,7 @@ model SellerOrganization {
   verificationStatus      SellerVerificationStatus @default(NOT_STARTED)
   verificationSubmittedAt DateTime?
   verificationNote        String?
+  verificationPolicyVersion String?
   status                  SellerStatus             @default(ACTIVE)
   countryCode             String
   city                    String?
