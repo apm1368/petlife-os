@@ -276,6 +276,7 @@ export const DOMAIN_EVENT_TYPES = [
   "UserAccountSuspended",
   "UserAccountReinstated",
   "PartnerVerificationSubmitted",
+  "PartnerVerificationProfileUpdated",
   "PartnerVerificationDocumentExpired",
   "ClinicEntitlementOverridden",
   "SellerStatusChanged",

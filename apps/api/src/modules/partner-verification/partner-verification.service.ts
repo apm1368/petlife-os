@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import type { PartnerVerificationProfileDto, PartnerVerificationProfileInput } from "@petlife/types";
 import { AdminPriority, AdminTaskSource, NotificationCategory, PartnerDocumentKind, PartnerDocumentStatus, PartnerSubjectType, ProviderUserRole, ProviderVerificationStatus as VS, SellerMembershipRole, SellerMembershipStatus, type Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -9,7 +10,7 @@ import { NotificationDeepLinks } from "../notifications/notification-deeplink.ut
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import { AutomaticTaskService } from "../admin/task/automatic-task.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
-import { evaluateVerificationPolicy } from "./verification-policy";
+import { evaluateVerificationPolicy, matchesVerificationEvidence } from "./verification-policy";
 import { DOC_KIND_FA } from "../admin/task/task-titles";
 
 /** Provider and seller verification share one status vocabulary (identical enums). */
@@ -94,10 +95,45 @@ export class PartnerVerificationService {
     const accepted = docs.filter((d) => d.status === PartnerDocumentStatus.ACCEPTED || d.status === PartnerDocumentStatus.EXPIRED);
     const policy = evaluateVerificationPolicy(o.kind, docs, now, o.offersVeterinaryServices);
     const valid = policy.missingForApproval.length === 0;
-    return { status: o.verificationStatus, lifecycle: lifecycleOf(o.verificationStatus, valid, accepted.some((d) => policy.requiredDocumentKinds.includes(d.kind) && d.expiresAt !== null)), submittedAt: iso(o.verificationSubmittedAt), note: o.verificationNote, policy, canSubmit: SUBMITTABLE.includes(o.verificationStatus) && policy.missingForSubmission.length === 0 && docs.some((d) => d.status === PartnerDocumentStatus.PENDING && (!d.expiresAt || d.expiresAt > now)), documents: docs.map((d) => this.docDto(d)) };
+    return { status: o.verificationStatus, lifecycle: lifecycleOf(o.verificationStatus, valid, accepted.some((d) => policy.requiredDocumentKinds.some(kind => matchesVerificationEvidence(kind, d.kind)) && d.expiresAt !== null)), submittedAt: iso(o.verificationSubmittedAt), note: o.verificationNote, policy, canSubmit: SUBMITTABLE.includes(o.verificationStatus) && policy.missingForSubmission.length === 0 && docs.some((d) => d.status === PartnerDocumentStatus.PENDING && (!d.expiresAt || d.expiresAt > now)), documents: docs.map((d) => this.docDto(d)) };
   }
 
   // ------------------------------------------------------------------ partner side
+  async profile(s: Subject): Promise<PartnerVerificationProfileDto | null> {
+    await this.org(s);
+    const row = await this.prisma.partnerVerificationProfile.findUnique({ where: { subjectType_subjectId: { subjectType: s.type, subjectId: s.id } } });
+    if (!row) return null;
+    return {
+      firstName: row.firstName, lastName: row.lastName, landline: row.landline,
+      ...(row.websiteUrl ? { websiteUrl: row.websiteUrl } : {}),
+      ...(row.enamadId ? { enamadId: row.enamadId } : {}),
+      mobile: row.mobile, mobileVerifiedAt: row.mobileVerifiedAt.toISOString(), updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async saveProfile(s: Subject, userId: string, input: PartnerVerificationProfileInput) {
+    await this.prisma.$transaction(async (tx) => {
+      const o = await this.org(s, tx);
+      if (!SUBMITTABLE.includes(o.verificationStatus)) throw new ValidationApiException({ field: "status", reason: "VERIFICATION_PROFILE_LOCKED" });
+      const user = await tx.user.findUniqueOrThrow({ where: { id: userId }, select: { phone: true, phoneVerifiedAt: true } });
+      if (!user.phoneVerifiedAt || !user.phone || !/^\+[1-9]\d{7,14}$/.test(user.phone)) {
+        throw new ValidationApiException({ field: "mobile", reason: "VERIFIED_MOBILE_REQUIRED" });
+      }
+      const data = {
+        firstName: input.firstName.trim(), lastName: input.lastName.trim(), landline: input.landline.trim(),
+        websiteUrl: input.websiteUrl?.trim() || null, enamadId: input.enamadId?.trim() || null,
+        mobile: user.phone, mobileVerifiedAt: user.phoneVerifiedAt, updatedByUserId: userId,
+      };
+      await tx.partnerVerificationProfile.upsert({
+        where: { subjectType_subjectId: { subjectType: s.type, subjectId: s.id } },
+        create: { subjectType: s.type, subjectId: s.id, ...data }, update: data,
+      });
+      // No names, phone numbers or other profile contents in event payloads.
+      await this.events.publish("PartnerVerificationProfileUpdated", { subjectType: s.type, subjectId: s.id, actorUserId: userId }, { tx, aggregateType: "PartnerVerificationProfile", aggregateId: s.id });
+    }, { isolationLevel: "Serializable" });
+    return this.profile(s);
+  }
+
   requestUpload(s: Subject, contentType: string, fileSizeBytes: number) {
     return this.storage.createPartnerVerificationUploadTarget(s.type === PartnerSubjectType.PROVIDER ? "provider" : "seller", s.id, contentType, fileSizeBytes);
   }
@@ -154,8 +190,8 @@ export class PartnerVerificationService {
   }
 
   async adminDetail(s: Subject) {
-    const [o, st] = await Promise.all([this.org(s), this.status(s)]);
-    return { subjectType: s.type, id: o.id, name: o.name, kind: o.kind, ...st, allowedTransitions: ADMIN_TRANSITIONS[o.verificationStatus].filter(to => to !== VS.VERIFIED || st.policy.missingForApproval.length === 0) };
+    const [o, st, profile] = await Promise.all([this.org(s), this.status(s), this.profile(s)]);
+    return { subjectType: s.type, id: o.id, name: o.name, kind: o.kind, ...st, profile, allowedTransitions: ADMIN_TRANSITIONS[o.verificationStatus].filter(to => to !== VS.VERIFIED || st.policy.missingForApproval.length === 0) };
   }
 
   async documentDownload(admin: ResolvedAdminContext, documentId: string, reason: string) {
