@@ -6,6 +6,7 @@ import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { AdminGovernanceRuleException } from "../../common/errors/api-exception";
 import { ProviderAuthGuard } from "../provider-os/auth/provider-auth.guard";
+import { RequireProviderRole } from "../provider-os/auth/require-provider-role.decorator";
 import { CurrentProviderContext } from "../provider-os/auth/current-provider-context.decorator";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
 import { SellerAuthGuard } from "../seller-os/auth/seller-auth.guard";
@@ -17,6 +18,7 @@ import { RequireAdminPermission } from "../admin/auth/require-admin-permission.d
 import { CurrentAdmin } from "../admin/auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../admin/auth/admin-context.types";
 import { PartnerVerificationService } from "./partner-verification.service";
+import { SaveVerificationProfileDto } from "./verification-profile.dto";
 import { TransitionProviderVerificationDto, TransitionSellerVerificationDto } from "../admin/verification/dto/verification.dto";
 
 const MIME = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
@@ -57,6 +59,14 @@ export class ProviderVerificationController {
   @Get()
   status(@CurrentProviderContext() ctx: ResolvedProviderContext) { return this.verification.status(this.subject(ctx)); }
 
+  @Get("profile")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  profile(@CurrentProviderContext() ctx: ResolvedProviderContext) { this.owner(ctx); return this.verification.profile(this.subject(ctx)); }
+
+  @Post("profile")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  saveProfile(@CurrentProviderContext() ctx: ResolvedProviderContext, @CurrentUser() user: SessionUser, @Body() dto: SaveVerificationProfileDto) { this.owner(ctx); return this.verification.saveProfile(this.subject(ctx), user.id, dto); }
+
   @Post("uploads")
   upload(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: UploadDto) { this.owner(ctx); return this.verification.requestUpload(this.subject(ctx), dto.contentType, dto.fileSizeBytes); }
 
@@ -76,6 +86,14 @@ export class SellerVerificationController {
 
   @Get()
   status(@CurrentSellerContext() ctx: ResolvedSellerContext) { return this.verification.status(this.subject(ctx)); }
+
+  @Get("profile")
+  @RequireSellerRole(SellerMembershipRole.ADMIN)
+  profile(@CurrentSellerContext() ctx: ResolvedSellerContext) { return this.verification.profile(this.subject(ctx)); }
+
+  @Post("profile")
+  @RequireSellerRole(SellerMembershipRole.ADMIN)
+  saveProfile(@CurrentSellerContext() ctx: ResolvedSellerContext, @CurrentUser() user: SessionUser, @Body() dto: SaveVerificationProfileDto) { return this.verification.saveProfile(this.subject(ctx), user.id, dto); }
 
   @Post("uploads")
   @RequireSellerRole(SellerMembershipRole.ADMIN)

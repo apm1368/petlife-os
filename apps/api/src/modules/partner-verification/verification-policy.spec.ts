@@ -5,6 +5,13 @@ describe("partner verification evidence policy", () => {
   const identity = { kind: "IDENTITY" as const, status: "ACCEPTED", expiresAt: null };
   const license = { kind: "LICENSE" as const, status: "ACCEPTED", expiresAt: new Date("2027-01-01") };
 
+  it("accepts explicit national ID without treating commercial evidence as a professional licence", () => {
+    const national = { ...identity, kind: "NATIONAL_ID_CARD" as const };
+    expect(evaluateVerificationPolicy("VET_CLINIC", [national, license], now).missingForApproval).toEqual([]);
+    expect(evaluateVerificationPolicy("VET_CLINIC", [national, { ...license, kind: "BUSINESS_LICENSE" }], now).missingForApproval).toEqual(["LICENSE"]);
+    expect(evaluateVerificationPolicy("VET_CLINIC", [national, { ...license, kind: "ENAMAD" }], now).missingForApproval).toEqual(["LICENSE"]);
+  });
+
   it.each(["VET_CLINIC", "VET_HOSPITAL", "VETERINARIAN"])("requires identity and licence for %s", kind => {
     expect(evaluateVerificationPolicy(kind, [license], now).missingForApproval).toEqual(["IDENTITY"]);
     expect(evaluateVerificationPolicy(kind, [identity], now).missingForApproval).toEqual(["LICENSE"]);
@@ -32,6 +39,6 @@ describe("partner verification evidence policy", () => {
     expect(evaluateVerificationPolicy("VET_CLINIC", [identity, { ...license, status: "EXPIRED" }, license], now).missingForApproval).toEqual([]);
   });
   it("exposes an explicit version and never claims official verification", () => {
-    expect(verificationPolicy("VET_CLINIC")).toMatchObject({ version: "2026-10-15.1", mode: "MANUAL_DOCUMENT_REVIEW", officialLookup: "NOT_CONNECTED" });
+    expect(verificationPolicy("VET_CLINIC")).toMatchObject({ version: "2026-10-24.1", mode: "MANUAL_DOCUMENT_REVIEW", officialLookup: "NOT_CONNECTED" });
   });
 });
