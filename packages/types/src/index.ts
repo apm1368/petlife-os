@@ -2939,11 +2939,12 @@ export interface AdminSellerOrgSummaryDto {
 }
 
 export interface AdminDashboardSummaryDto {
-  openSupportCases: number;
-  openDisputes: number;
-  openTrustCases: number;
-  pendingRefundApprovals: number;
-  openTasks: number;
+  /** Null means access is not granted, never an empty queue. */
+  openSupportCases: number | null;
+  openDisputes: number | null;
+  openTrustCases: number | null;
+  pendingRefundApprovals: number | null;
+  openTasks: number | null;
 }
 
 /** The admin-domain mirror of AdminPermission (apps/api's own admin-permissions.ts) — kept as a plain string union here since the frontend only ever compares/display-filters against it, never re-derives access decisions (the backend is always the source of truth; hiding a nav item is a convenience, never a security boundary). */
@@ -3017,6 +3018,12 @@ export interface AdminSessionContextDto {
   adminUserId: string | null;
   displayName: string | null;
   role: AdminRole | null;
+  permissions: AdminPermissionName[];
+}
+
+/** Current server permissions, refreshed on every request; never grants access itself. */
+export interface AdminCapabilitiesDto {
+  role: AdminRole;
   permissions: AdminPermissionName[];
 }
 

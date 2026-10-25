@@ -60,8 +60,9 @@ export function AdminDashboardView() {
     {allowed("insurance.view") && <Link href="/admin/insurance/providers" className="underline">{t("insuranceProviders")}</Link>}
     {allowed("sellerFinance.view") && <Link href="/admin/marketplace-statements" className="underline">{t("marketplaceStatements")}</Link>}
     <div className="approved-admin__stats">{stats.map(({ key, value, href, permission, Icon }) => {
+      if (!allowed(permission) || value === null) return null;
       const content = <><span><Icon size={20} aria-hidden="true" />{t(key)}</span><strong>{formatCount(value, locale)}</strong></>;
-      return allowed(permission) ? <Link key={key} href={href} className="approved-admin__stat">{content}</Link> : <div key={key} className="approved-admin__stat">{content}</div>;
+      return <Link key={key} href={href} className="approved-admin__stat">{content}</Link>;
     })}</div>
     <div className="approved-admin__grid">
       {allowed("trust.view") ? <section className="approved-admin__panel"><header><h2>{t("queue")}</h2><Link href="/admin/trust">{t("all")}</Link></header>
