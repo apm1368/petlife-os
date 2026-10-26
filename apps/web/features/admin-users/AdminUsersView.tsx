@@ -10,6 +10,8 @@ import { ApiError } from "@/lib/api/client";
 import { adminUsersService } from "@/services/admin-users.service";
 
 const KINDS: AdminUserRoleKind[] = ["ADMIN_INTERNAL", "CUSTOMER", "CLINIC", "GROOMER", "HOST", "PROVIDER_OTHER", "SHOP", "INSURER", "NGO"];
+const PROFILE_TABS = ["profile", "households", "businesses", "orders", "requests", "tickets", "reviews", "audit"] as const;
+type ProfileTab = typeof PROFILE_TABS[number];
 type Result = { key: string; rows: AdminUserDirectoryRowDto[]; total: number; profile: AdminUserProfileDto | null; error?: "failed" | "forbidden" | "notFound" };
 
 export function AdminUsersView({ id }: { id?: string }) {
@@ -80,10 +82,7 @@ function Directory({ id }: { id?: string }) {
           {!id && <Link className="underline" href={`/${locale}/admin/users/${encodeURIComponent(user.id)}`}>{t("detail")}</Link>}
         </ContextSurface></li>)}
       </ul>}
-      {current.profile && <ContextSurface className="space-y-3">
-        <p>{t("households", { count: number(current.profile.householdCount) })}</p><p>{t("pets", { count: number(current.profile.petCount) })}</p>
-        <p>{t("profileNote")}</p><Link className="underline" href={`/${locale}/admin/customers/${encodeURIComponent(current.profile.user.id)}`}>{t("customer360")}</Link>
-      </ContextSurface>}
+      {current.profile && <ProfileDetails profile={current.profile} />}
       {!id && <nav className="flex flex-wrap items-center gap-3" aria-label={t("pagination")}>
         <Button disabled={filter.page <= 1} onClick={() => setFilter(value => ({ ...value, page: value.page - 1 }))}>{t("previous")}</Button>
         <span>{t("page", { page: number(filter.page) })}</span>
@@ -91,4 +90,27 @@ function Directory({ id }: { id?: string }) {
       </nav>}
     </>}
   </section>;
+}
+
+function ProfileDetails({ profile }: { profile: AdminUserProfileDto }) {
+  const t = useTranslations("adminUsers"), locale = useLocale();
+  const [tab, setTab] = useState<ProfileTab>("profile");
+  const households = profile.households ?? [], businesses = profile.businesses ?? [], orders = profile.orders ?? [], requests = profile.requests ?? [], tickets = profile.tickets ?? [], reviews = profile.reviews ?? [], auditTrail = profile.auditTrail ?? [];
+  const number = (value: number) => new Intl.NumberFormat(locale).format(value);
+  const date = (value: string) => new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  const empty = <p>{t("sectionEmpty")}</p>;
+  const reviewPage = (kind: string) => kind === "PRODUCT" ? "commerce/reviews" : kind === "TRAVEL" ? "travel/reviews" : "services/reviews";
+  return <div className="space-y-4">
+    <nav className="flex flex-wrap gap-2" aria-label={t("profileSections")}>{PROFILE_TABS.map(value => <Button key={value} variant={tab === value ? "primary" : "secondary"} aria-pressed={tab === value} onClick={() => setTab(value)}>{t(`tabs.${value}`)}</Button>)}</nav>
+    <ContextSurface className="space-y-4">
+      {tab === "profile" && <><h2 className="text-section-title">{t("tabs.profile")}</h2><p>{t("households", { count: number(profile.householdCount) })}</p><p>{t("pets", { count: number(profile.petCount) })}</p><Link className="underline" href={`/${locale}/admin/customers/${encodeURIComponent(profile.user.id)}`}>{t("customer360")}</Link></>}
+      {tab === "households" && <><h2 className="text-section-title">{t("tabs.households")}</h2>{households.length ? <ul className="space-y-3">{households.map(household => <li key={household.id} className="rounded-xl border border-current/20 p-3"><p className="font-medium">{household.name || t("unnamedHousehold")}</p><p>{t("householdSummary", { members: number(household.memberCount), pets: number(household.pets.length) })}</p>{household.city && <p>{household.city}</p>}<ul className="mt-2 flex flex-wrap gap-2">{household.pets.map(pet => <li key={pet.id} className="rounded-full border border-current/20 px-3 py-1">{pet.name} · {t.has(`species.${pet.species}`) ? t(`species.${pet.species}`) : t("otherSpecies")}</li>)}</ul></li>)}</ul> : empty}</>}
+      {tab === "businesses" && <><h2 className="text-section-title">{t("tabs.businesses")}</h2>{businesses.length ? <ul className="space-y-3">{businesses.map(business => <li key={`${business.kind}-${business.id}`} className="rounded-xl border border-current/20 p-3"><p className="font-medium">{business.name}</p><p>{t(`kinds.${business.kind}`)}</p><p>{t("verification", { status: business.verificationStatus && t.has(`statuses.${business.verificationStatus}`) ? t(`statuses.${business.verificationStatus}`) : t("otherStatus") })}</p></li>)}</ul> : empty}</>}
+      {tab === "orders" && <><h2 className="text-section-title">{t("tabs.orders")}</h2>{orders.length ? <ul className="space-y-3">{orders.map(order => <li key={order.id}><Link className="underline" href={`/${locale}/admin/commerce/orders/${order.id}`}>{t("orderItem", { amount: number(order.totalAmount), currency: order.currency === "IRR" ? t("irr") : t("otherCurrency"), date: date(order.createdAt) })}</Link></li>)}</ul> : empty}</>}
+      {tab === "requests" && <><h2 className="text-section-title">{t("tabs.requests")}</h2>{requests.length ? <ul className="space-y-3">{requests.map(request => <li key={request.id}><Link className="underline" href={`/${locale}/admin/services/bookings/${request.id}`}>{t("requestItem", { category: t.has(`requestCategories.${request.category}`) ? t(`requestCategories.${request.category}`) : t("otherRequest"), date: date(request.startAt) })}</Link></li>)}</ul> : empty}</>}
+      {tab === "tickets" && <><h2 className="text-section-title">{t("tabs.tickets")}</h2>{tickets.length ? <ul className="space-y-3">{tickets.map(ticket => <li key={ticket.id}><Link className="underline" href={`/${locale}/admin/support/${ticket.id}`}>{ticket.caseNumber} · {ticket.subject}</Link></li>)}</ul> : empty}</>}
+      {tab === "reviews" && <><h2 className="text-section-title">{t("tabs.reviews")}</h2>{reviews.length ? <ul className="space-y-3">{reviews.map(review => <li key={`${review.kind}-${review.id}`}><Link className="underline" href={`/${locale}/admin/${reviewPage(review.kind)}`}>{t("reviewItem", { kind: t(`reviewKinds.${review.kind}`), rating: number(review.rating), date: date(review.createdAt) })}</Link></li>)}</ul> : empty}</>}
+      {tab === "audit" && <><h2 className="text-section-title">{t("tabs.audit")}</h2>{auditTrail.length ? <ul className="space-y-3">{auditTrail.map(entry => <li key={entry.id} className="rounded-xl border border-current/20 p-3"><p>{locale === "en" ? <bdi dir="ltr">{entry.action}</bdi> : t("auditEntry")}</p><p>{t("auditActor", { name: entry.adminUser.displayName, date: date(entry.createdAt) })}</p>{entry.reason && <p>{entry.reason}</p>}</li>)}</ul> : empty}</>}
+    </ContextSurface>
+  </div>;
 }

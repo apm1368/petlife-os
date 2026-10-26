@@ -1,6 +1,6 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AdminUserDirectoryListDto, AdminUserDirectoryRowDto } from "@petlife/types";
+import { AdminRole, PetLifecycleStatus, PetSpecies, type AdminUserDirectoryListDto, type AdminUserDirectoryRowDto, type AdminUserProfileDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { useAdminStore } from "@/stores/admin-store";
 import { ApiError } from "@/lib/api/client";
@@ -10,6 +10,13 @@ import { AdminUsersView } from "./AdminUsersView";
 vi.mock("@/services/admin-users.service", () => ({ adminUsersService: { list: vi.fn(), detail: vi.fn() } }));
 const user: AdminUserDirectoryRowDto = { id: "user-1", displayName: "کاربر نمونه", emailMasked: "te***@example.com", phoneMasked: "+98912***1234", accountStatus: "ACTIVE", createdAt: "2026-10-01T10:00:00Z", lastActiveAt: null, roles: [{ kind: "CUSTOMER", role: "OWNER", business: null }, { kind: "CLINIC", role: "VET", business: { id: "clinic-1", name: "کلینیک همراه", verificationStatus: "VERIFIED" } }] };
 const list: AdminUserDirectoryListDto = { items: [user], total: 21, page: 1, pageSize: 20 };
+const profile: AdminUserProfileDto = {
+  user, householdCount: 1, petCount: 1,
+  households: [{ id: "house-1", name: "Sample home", city: "Tehran", memberCount: 2, pets: [{ id: "pet-1", name: "Rex", species: PetSpecies.DOG, lifecycleStatus: PetLifecycleStatus.ACTIVE }] }],
+  businesses: [{ id: "clinic-1", name: "Sample clinic", kind: "CLINIC", verificationStatus: "VERIFIED" }],
+  orders: [], requests: [{ id: "booking-1", category: "VET", bookingStatus: "CONFIRMED", startAt: "2026-10-20T10:00:00Z", petId: "pet-1" }], tickets: [], reviews: [],
+  auditTrail: [{ id: "audit-1", adminUser: { id: "admin-1", displayName: "Admin", role: AdminRole.ADMIN }, action: "customer.updated", entityType: "USER", entityId: "user-1", reason: "Verified profile", beforeSummary: null, afterSummary: null, requestId: null, createdAt: "2026-10-20T10:00:00Z" }],
+};
 const apiError = (status: number) => new ApiError({ code: "ERROR", message: "failed", requestId: "test" }, status);
 
 describe("admin users directory", () => {
@@ -17,7 +24,7 @@ describe("admin users directory", () => {
     vi.resetAllMocks();
     useAdminStore.setState({ context: { isAdmin: true, adminUserId: "admin", role: "ADMIN", permissions: ["customer.view"] } as never, status: "ready" });
     vi.mocked(adminUsersService.list).mockResolvedValue(list);
-    vi.mocked(adminUsersService.detail).mockResolvedValue({ user, householdCount: 2, petCount: 3 });
+    vi.mocked(adminUsersService.detail).mockResolvedValue(profile);
   });
   it("makes no private requests without permission", () => {
     useAdminStore.setState({ context: { isAdmin: true, permissions: [] } as never });
@@ -61,11 +68,18 @@ describe("admin users directory", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("permission");
     expect(screen.queryByText("No users match these filters.")).toBeNull();
   });
-  it("shows the available profile counts and links to the existing customer record", async () => {
+  it("renders the complete profile contract in navigable sections", async () => {
     renderWithIntl(<AdminUsersView id="user-1" />);
-    await screen.findByText("Households: 2");
-    expect(screen.getByText("Pets: 3")).toBeTruthy();
+    await screen.findByText("Households: 1");
+    expect(screen.getByText("Pets: 1")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Open customer record" }).getAttribute("href")).toBe("/en/admin/customers/user-1");
+    fireEvent.click(screen.getByRole("button", { name: "Households and pets" }));
+    expect(screen.getByText("Sample home")).toBeTruthy();
+    expect(screen.getByText(/Rex/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Requests" }));
+    expect(screen.getByRole("link", { name: /Veterinary/ }).getAttribute("href")).toBe("/en/admin/services/bookings/booking-1");
+    fireEvent.click(screen.getByRole("button", { name: "Audit trail" }));
+    expect(screen.getByText("customer.updated")).toBeTruthy();
     expect(adminUsersService.list).not.toHaveBeenCalled();
   });
   it("handles a missing user without rendering stale profile sections", async () => {
