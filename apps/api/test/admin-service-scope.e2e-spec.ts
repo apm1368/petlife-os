@@ -112,10 +112,16 @@ describe("Admin service vertical scoping (W2-4, row level)", () => {
     const groomingAdmin = await actor(AdminRole.SERVICE_ADMIN, [AdminVertical.GROOMING]);
     const clinicAnalytics = (await get(clinicAdmin, "/admin/services-analytics").expect(200)).body;
     const groomingAnalytics = (await get(groomingAdmin, "/admin/services-analytics").expect(200)).body;
-    expect(clinicAnalytics.byCategory.VET).toBeGreaterThanOrEqual(1);
-    expect(clinicAnalytics.byCategory.GROOMING).toBeUndefined();
-    expect(groomingAnalytics.byCategory.GROOMING).toBeGreaterThanOrEqual(1);
-    expect(groomingAnalytics.byCategory.VET).toBeUndefined();
+    const since = new Date(Date.now() - 30 * 86400_000);
+    const expected = async (types: ProviderType[]) => Object.fromEntries((await db.booking.groupBy({
+      by: ["category"],
+      where: { providerOrganization: { type: { in: types } }, createdAt: { gte: since } },
+      _count: { _all: true },
+    })).map((row) => [row.category, row._count._all]));
+    expect(clinicAnalytics.byCategory).toEqual(await expected([ProviderType.VET_CLINIC, ProviderType.VET_HOSPITAL, ProviderType.VETERINARIAN]));
+    expect(groomingAnalytics.byCategory).toEqual(await expected([ProviderType.GROOMER]));
+    expect(clinicAnalytics.totalBookings).toBe(Object.values(clinicAnalytics.byCategory as Record<string, number>).reduce((sum, count) => sum + count, 0));
+    expect(groomingAnalytics.totalBookings).toBe(Object.values(groomingAnalytics.byCategory as Record<string, number>).reduce((sum, count) => sum + count, 0));
   });
 
   it("a service admin whose verticals map to no provider type sees nothing (empty, not all)", async () => {
