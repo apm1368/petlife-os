@@ -5526,7 +5526,6 @@
     }
   },
   "adminAccess": {
-    "scopePending": "Service-scope assignment is not available in the current API. Existing service administrators can be viewed, but this role cannot be newly assigned here yet.",
     "title": "Admin access management",
     "details": "Admin access details",
     "intro": "Actual admin roles and memberships; every change requires a reason and is recorded in the server audit.",
@@ -5551,6 +5550,11 @@
     "selfHelp": "You cannot change or suspend your own membership here.",
     "lastSuperHelp": "At least one active super admin must remain; another active super admin is required before changing this membership.",
     "changeRole": "Change role",
+    "manageScopes": "Manage service scopes",
+    "serviceScopes": "Service scopes",
+    "scopesHelp": "Select every service area this administrator may view or change. The restriction applies immediately.",
+    "scopeRequired": "Select at least one service scope.",
+    "noServiceScopes": "No scope assigned — access is blocked",
     "suspend": "Suspend access",
     "reactivate": "Reactivate access",
     "effectivePermissions": "Membership permissions",
@@ -5563,6 +5567,7 @@
     "showPermissions": "Show role permissions",
     "permissionCodesHelp": "Exact permission codes are shown for technical review. Roles listed under each permission come from the server catalog.",
     "confirm": "Confirm access change",
+    "scopes": "Change service scopes",
     "actionHelp": "Access is granted to an account that already exists; this does not create a login account. Changes apply from the next request.",
     "email": "Existing account email",
     "reason": "Reason (at least 5 characters)",
@@ -5594,7 +5599,16 @@
       "ALREADY_ADMIN": "This account is already an admin; open its existing membership.",
       "SELF_CHANGE_FORBIDDEN": "You cannot change your own membership.",
       "LAST_SUPER_ADMIN": "The last active super admin cannot be changed.",
-      "PROTECTED_ROLE": "You cannot assign or change this protected role."
+      "PROTECTED_ROLE": "You cannot assign or change this protected role.",
+      "SERVICE_SCOPES_REQUIRED": "A service administrator must have at least one service scope.",
+      "INVALID_SERVICE_SCOPE": "One or more selected service scopes are invalid.",
+      "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Service scopes can only be assigned to a service administrator."
+    },
+    "verticals": {
+      "CLINIC": "Clinic and veterinary",
+      "GROOMING": "Grooming",
+      "ACCOMMODATION": "Accommodation and pet care",
+      "INSURANCE": "Insurance"
     },
     "statuses": {
       "ACTIVE": "Active",
