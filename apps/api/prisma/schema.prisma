@@ -1114,6 +1114,10 @@ model User {
   suspendedByAdminId String?           @db.Uuid
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+  /// W2-5: a coarse "last active" for the admin users directory, bumped from session resolution at
+  /// most once every 15 minutes per user (see SessionService.resolveUser). Never used for auth or
+  /// billing — updatedAt moves on every profile change, so it cannot answer "when were they last here".
+  lastActiveAt       DateTime?
 
   authIdentities          AuthIdentity[]
   passwordResetTokens     PasswordResetToken[]

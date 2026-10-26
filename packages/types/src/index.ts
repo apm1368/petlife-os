@@ -2864,6 +2864,81 @@ export interface Customer360Dto {
   activityTimeline: ActivityTimelineEntryDto[];
 }
 
+// ---------------------------------------------------------------------------
+// W2-5 — Unified users directory. One row per person, whatever hats they wear:
+// internal admin, customer, clinic/groomer/host staff, shop staff, insurer, NGO.
+// ---------------------------------------------------------------------------
+
+/** The kind of relationship a user has to the platform; a person may hold several at once. */
+export type AdminUserRoleKind =
+  | "ADMIN_INTERNAL"
+  | "CUSTOMER"
+  | "CLINIC"
+  | "GROOMER"
+  | "HOST"
+  | "PROVIDER_OTHER"
+  | "SHOP"
+  | "INSURER"
+  | "NGO";
+
+/** One hat the user wears. `business` is null for a plain customer (a household is not a business). */
+export interface AdminUserRoleDto {
+  kind: AdminUserRoleKind;
+  /** The role name within that context, e.g. "OWNER", "VET", "CATALOG_MANAGER", "SUPER_ADMIN". */
+  role: string;
+  business: {
+    id: string;
+    name: string;
+    /** The verification status of this business, when the source tracks one; null otherwise. */
+    verificationStatus: string | null;
+  } | null;
+}
+
+export interface AdminUserDirectoryRowDto {
+  id: string;
+  displayName: string;
+  emailMasked: string | null;
+  phoneMasked: string | null;
+  accountStatus: "ACTIVE" | "SUSPENDED";
+  createdAt: string;
+  /** Coarse last-seen stamp (W2-5), null for a user who has not resolved a session since it shipped. */
+  lastActiveAt: string | null;
+  roles: AdminUserRoleDto[];
+}
+
+export type AdminUserDirectoryListDto = PaginatedDto<AdminUserDirectoryRowDto>;
+
+export interface AdminUserBusinessDto {
+  id: string;
+  name: string;
+  kind: Exclude<AdminUserRoleKind, "ADMIN_INTERNAL" | "CUSTOMER">;
+  verificationStatus: string | null;
+}
+
+export interface AdminUserReviewSummaryDto {
+  id: string;
+  kind: "PROVIDER" | "PRODUCT" | "TRAVEL";
+  targetId: string;
+  rating: number;
+  status: string;
+  createdAt: string;
+}
+
+/** Full, bounded user profile for the directory detail tabs. Collections are newest-first and capped. */
+export interface AdminUserProfileDto {
+  user: AdminUserDirectoryRowDto;
+  households: AdminHouseholdSummaryDto[];
+  businesses: AdminUserBusinessDto[];
+  orders: AdminOrderSummaryDto[];
+  requests: AdminBookingSummaryDto[];
+  tickets: SupportCaseSummaryDto[];
+  reviews: AdminUserReviewSummaryDto[];
+  auditTrail: AdminAuditLogDto[];
+  /** Backward-compatible totals for compact consumers. */
+  householdCount: number;
+  petCount: number;
+}
+
 export interface AdminPiiRevealDto {
   field: "email" | "phone";
   value: string;
