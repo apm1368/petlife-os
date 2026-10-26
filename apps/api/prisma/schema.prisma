@@ -4308,6 +4308,27 @@ enum AdminRole {
   CLINIC_OPERATIONS
   COMMERCE_OPERATIONS
   ANALYTICS
+  /// Wave 2 scoped roles. Unlike the operational roles above, these are confined to one vertical:
+  /// the permission map narrows what they may do, and AdminVertical narrows which rows they may see.
+  /// SERVICE_ADMIN is the only role whose vertical is not implied by the role itself — it is read
+  /// from AdminUser.serviceScopes, so one SERVICE_ADMIN can run grooming while another runs clinics.
+  CONTENT_ADMIN
+  SHOP_ADMIN
+  SERVICE_ADMIN
+  SUPPORT_AGENT
+}
+
+/// The business verticals an admin's row-level access can be confined to. A role that is not
+/// scoped (SUPER_ADMIN, ADMIN, and the pre-Wave-2 operational roles) reaches every vertical, so
+/// adding a value here never widens an existing role.
+enum AdminVertical {
+  CLINIC
+  GROOMING
+  ACCOMMODATION
+  INSURANCE
+  SHOP
+  CONTENT
+  SUPPORT
 }
 
 enum AdminMembershipStatus {
@@ -4491,6 +4512,9 @@ model AdminUser {
   user   User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
   role   AdminRole
   status AdminMembershipStatus @default(ACTIVE)
+  /// Only read for SERVICE_ADMIN, whose vertical is not implied by its role. Empty for every other
+  /// role: an empty list never widens access, it just leaves the role's own verticals in charge.
+  serviceScopes AdminVertical[] @default([])
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

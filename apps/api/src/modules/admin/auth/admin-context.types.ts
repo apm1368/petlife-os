@@ -1,4 +1,4 @@
-import type { AdminMembershipStatus, AdminRole } from "@prisma/client";
+import type { AdminMembershipStatus, AdminRole, AdminVertical } from "@prisma/client";
 import type { AuthedRequest } from "../../../common/auth/current-user.decorator";
 
 /**
@@ -15,6 +15,8 @@ export interface ResolvedAdminContext {
   displayName: string;
   role: AdminRole;
   status: AdminMembershipStatus;
+  /// Only meaningful for a SERVICE_ADMIN; empty for every other role (see admin-verticals.ts).
+  serviceScopes: AdminVertical[];
 }
 
 export type AdminAuthedRequest = AuthedRequest & { adminContext?: ResolvedAdminContext };

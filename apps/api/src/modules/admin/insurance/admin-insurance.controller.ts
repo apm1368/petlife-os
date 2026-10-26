@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
+import { RequireAdminVertical } from "../auth/require-admin-vertical.decorator";
+import { AdminVertical } from "@prisma/client";
 import { RequireAdminPermission } from "../auth/require-admin-permission.decorator";
 import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
@@ -19,6 +21,7 @@ import {
 } from "../../insurance/dto/insurance.dto";
 
 @Controller("admin/insurance")
+@RequireAdminVertical(AdminVertical.INSURANCE)
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class AdminInsuranceController {
   constructor(

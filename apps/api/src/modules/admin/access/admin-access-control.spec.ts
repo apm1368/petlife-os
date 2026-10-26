@@ -1,10 +1,10 @@
-import { AdminMembershipStatus, AdminRole } from "@prisma/client";
+import { AdminMembershipStatus, AdminRole, AdminVertical } from "@prisma/client";
 import { AdminAccessControlService } from "./admin-access-control.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 /** The last-SUPER_ADMIN invariant can't be exercised end-to-end on a shared test DB (other suites add SUPER_ADMINs), so it is pinned here. */
 describe("AdminAccessControlService governance", () => {
-  const actor: ResolvedAdminContext = { adminUserId: "actor", userId: "u-actor", displayName: "A", role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE };
+  const actor: ResolvedAdminContext = { adminUserId: "actor", userId: "u-actor", displayName: "A", role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE, serviceScopes: [] };
   function serviceWith(target: { id: string; role: AdminRole; status: AdminMembershipStatus }, activeSuperAdmins: number) {
     const tx = {
       $executeRaw: jest.fn(),
@@ -27,5 +27,12 @@ describe("AdminAccessControlService governance", () => {
     await expect(svc.setStatus(actor, "actor", AdminMembershipStatus.SUSPENDED, "reason text")).rejects.toMatchObject({ details: { rule: "SELF_CHANGE_FORBIDDEN" } });
     const admin = { ...actor, adminUserId: "other", role: AdminRole.ADMIN };
     await expect(svc.changeRole(admin, "t", AdminRole.SUPER_ADMIN, "reason text")).rejects.toMatchObject({ details: { rule: "PROTECTED_ROLE" } });
+  });
+
+  it("requires service scopes for SERVICE_ADMIN and rejects scopes on every other role", async () => {
+    const { svc } = serviceWith({ id: "t", role: AdminRole.READ_ONLY, status: AdminMembershipStatus.ACTIVE }, 3);
+    await expect(svc.changeRole(actor, "t", AdminRole.SERVICE_ADMIN, "reason text")).rejects.toMatchObject({ details: { reason: "SERVICE_SCOPES_REQUIRED" } });
+    await expect(svc.changeRole(actor, "t", AdminRole.READ_ONLY, "reason text", [AdminVertical.CLINIC])).rejects.toMatchObject({ details: { reason: "SCOPES_ONLY_FOR_SERVICE_ADMIN" } });
+    await expect(svc.changeRole(actor, "t", AdminRole.SERVICE_ADMIN, "reason text", [AdminVertical.SHOP])).rejects.toMatchObject({ details: { reason: "INVALID_SERVICE_SCOPE" } });
   });
 });

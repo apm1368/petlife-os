@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { BookingStatus, Prisma, ProviderReviewStatus, WaitlistStatus } from "@prisma/client";
+import { BookingStatus, Prisma, ProviderReviewStatus, ProviderType, WaitlistStatus } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
-import { NotFoundApiException } from "../../../common/errors/api-exception";
+import { NotFoundApiException, AdminAccessDeniedException } from "../../../common/errors/api-exception";
 import { maskEmail } from "../../../common/pii/pii-mask.util";
 import { maskPhone } from "../../../common/phone/phone-normalizer";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
+import { allowedProviderTypes } from "../auth/admin-verticals";
 import { ProviderReviewsService } from "../../booking/provider-reviews.service";
 
 export interface AdminBookingListQuery {
@@ -30,9 +31,29 @@ export class AdminServicesService {
     private readonly reviews: ProviderReviewsService,
   ) {}
 
-  async listBookings(query: AdminBookingListQuery) {
+  /**
+   * The row-level scope filter for this caller: a relation predicate on the owning provider's type,
+   * or `{}` for an unscoped role. A scoped role whose verticals map to no provider type gets
+   * `type in []`, which Prisma resolves to no rows — so an empty scope denies everything here, it
+   * never falls back to "all". Applied to every list, count and aggregate on this surface.
+   */
+  private providerScope(admin: ResolvedAdminContext): { providerOrganization?: { type: { in: ProviderType[] } } } {
+    const types = allowedProviderTypes(admin);
+    return types === null ? {} : { providerOrganization: { type: { in: types } } };
+  }
+
+  /** Guards a single subject once its provider type is known: a scoped admin may not act across verticals. */
+  private assertTypeInScope(admin: ResolvedAdminContext, type: ProviderType): void {
+    const allowed = allowedProviderTypes(admin);
+    if (allowed !== null && !allowed.includes(type)) {
+      throw new AdminAccessDeniedException({ reason: "OUT_OF_VERTICAL_SCOPE", role: admin.role, providerType: type });
+    }
+  }
+
+  async listBookings(admin: ResolvedAdminContext, query: AdminBookingListQuery) {
     const page = Math.max(1, query.page ?? 1);
     const where: Prisma.BookingWhereInput = {
+      ...this.providerScope(admin),
       ...(query.status ? { bookingStatus: query.status } : {}),
       ...(query.providerId ? { providerOrganizationId: query.providerId } : {}),
       ...(query.from || query.to ? { startAt: { ...(query.from ? { gte: new Date(query.from) } : {}), ...(query.to ? { lt: new Date(query.to) } : {}) } } : {}),
@@ -67,13 +88,13 @@ export class AdminServicesService {
     };
   }
 
-  async getBooking(id: string) {
+  async getBooking(admin: ResolvedAdminContext, id: string) {
     const b = await this.prisma.booking.findUnique({
       where: { id },
       include: {
         pet: { select: { id: true, name: true, species: true } },
         user: { select: { id: true, displayName: true, email: true, phone: true } },
-        providerOrganization: { select: { id: true, name: true, verificationStatus: true } },
+        providerOrganization: { select: { id: true, name: true, type: true, verificationStatus: true } },
         providerLocation: { select: { name: true, city: true } },
         providerUser: { select: { id: true, displayTitle: true } },
         statusEvents: { orderBy: { createdAt: "asc" } },
@@ -84,6 +105,9 @@ export class AdminServicesService {
       },
     });
     if (!b) throw new NotFoundApiException("Booking");
+    // A scoped admin must not read a booking outside its vertical, even by direct id. 404 would leak
+    // whether the id exists; the surface already answers 403 for scope, so stay consistent with it.
+    this.assertTypeInScope(admin, b.providerOrganization.type);
     const [intent, refunds, supportCases, clinicalVisits] = await Promise.all([
       b.paymentIntentId ? this.prisma.paymentIntent.findUnique({ where: { id: b.paymentIntentId }, select: { id: true, amount: true, currency: true, status: true, provider: true } }) : null,
       b.paymentIntentId ? this.prisma.refund.findMany({ where: { paymentIntentId: b.paymentIntentId }, select: { id: true, amount: true, status: true, reason: true, createdAt: true } }) : [],
@@ -130,9 +154,11 @@ export class AdminServicesService {
     };
   }
 
-  async listServices(providerId?: string) {
+  async listServices(admin: ResolvedAdminContext, providerId?: string) {
     const rows = await this.prisma.providerService.findMany({
-      where: providerId ? { providerOrganizationId: providerId } : {},
+      // A caller-supplied providerId can only narrow within scope: it is ANDed with the type filter,
+      // never replaces it, so a cross-vertical id simply matches nothing rather than widening access.
+      where: { ...this.providerScope(admin), ...(providerId ? { providerOrganizationId: providerId } : {}) },
       include: { providerOrganization: { select: { name: true } }, variants: true, _count: { select: { bookings: true } } },
       orderBy: [{ providerOrganizationId: "asc" }, { name: "asc" }],
       take: 500,
@@ -155,8 +181,9 @@ export class AdminServicesService {
 
   async setServiceActive(admin: ResolvedAdminContext, serviceId: string, isActive: boolean, reason: string) {
     return this.prisma.$transaction(async (tx) => {
-      const before = await tx.providerService.findUnique({ where: { id: serviceId } });
+      const before = await tx.providerService.findUnique({ where: { id: serviceId }, include: { providerOrganization: { select: { type: true } } } });
       if (!before) throw new NotFoundApiException("Service");
+      this.assertTypeInScope(admin, before.providerOrganization.type);
       const after = await tx.providerService.update({ where: { id: serviceId }, data: { isActive } });
       await this.audit.record({
         adminUserId: admin.adminUserId,
@@ -172,9 +199,9 @@ export class AdminServicesService {
     });
   }
 
-  async listReviews(status?: ProviderReviewStatus) {
+  async listReviews(admin: ResolvedAdminContext, status?: ProviderReviewStatus) {
     const rows = await this.prisma.providerReview.findMany({
-      where: status ? { status } : {},
+      where: { ...this.providerScope(admin), ...(status ? { status } : {}) },
       include: { providerOrganization: { select: { name: true } }, booking: { select: { bookingNumber: true } } },
       orderBy: { createdAt: "desc" },
       take: 200,
@@ -183,14 +210,17 @@ export class AdminServicesService {
   }
 
   async hideReview(admin: ResolvedAdminContext, reviewId: string, reason: string) {
+    const existing = await this.prisma.providerReview.findUnique({ where: { id: reviewId }, select: { providerOrganization: { select: { type: true } } } });
+    if (!existing) throw new NotFoundApiException("ProviderReview");
+    this.assertTypeInScope(admin, existing.providerOrganization.type);
     const review = await this.reviews.hide(reviewId, reason, admin.userId);
     await this.audit.record({ adminUserId: admin.adminUserId, action: "provider_review.hidden", entityType: "ProviderReview", entityId: reviewId, reason, afterSummary: { status: "HIDDEN" } });
     return review;
   }
 
-  async listWaitlist(providerId?: string) {
+  async listWaitlist(admin: ResolvedAdminContext, providerId?: string) {
     const rows = await this.prisma.bookingWaitlistEntry.findMany({
-      where: { ...(providerId ? { providerOrganizationId: providerId } : {}), status: { in: [WaitlistStatus.ACTIVE, WaitlistStatus.NOTIFIED] } },
+      where: { ...this.providerScope(admin), ...(providerId ? { providerOrganizationId: providerId } : {}), status: { in: [WaitlistStatus.ACTIVE, WaitlistStatus.NOTIFIED] } },
       include: { providerOrganization: { select: { name: true } }, service: { select: { name: true } } },
       orderBy: { createdAt: "asc" },
       take: 500,
@@ -198,14 +228,15 @@ export class AdminServicesService {
     return rows.map((w) => ({ id: w.id, providerName: w.providerOrganization.name, serviceName: w.service.name, windowStart: w.windowStart.toISOString(), windowEnd: w.windowEnd.toISOString(), status: w.status, createdAt: w.createdAt.toISOString() }));
   }
 
-  /** Platform-level service analytics from real rows only. */
-  async analytics(days = 30) {
+  /** Service analytics from real rows only, counted within the caller's vertical scope. */
+  async analytics(admin: ResolvedAdminContext, days = 30) {
     const since = new Date(Date.now() - days * 86400_000);
+    const scope = this.providerScope(admin);
     const [byStatus, byCategory, reviews, waitlistActive] = await Promise.all([
-      this.prisma.booking.groupBy({ by: ["bookingStatus"], where: { createdAt: { gte: since } }, _count: { _all: true } }),
-      this.prisma.booking.groupBy({ by: ["category"], where: { createdAt: { gte: since } }, _count: { _all: true } }),
-      this.prisma.providerReview.aggregate({ where: { createdAt: { gte: since }, status: ProviderReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } }),
-      this.prisma.bookingWaitlistEntry.count({ where: { status: WaitlistStatus.ACTIVE } }),
+      this.prisma.booking.groupBy({ by: ["bookingStatus"], where: { ...scope, createdAt: { gte: since } }, _count: { _all: true } }),
+      this.prisma.booking.groupBy({ by: ["category"], where: { ...scope, createdAt: { gte: since } }, _count: { _all: true } }),
+      this.prisma.providerReview.aggregate({ where: { ...scope, createdAt: { gte: since }, status: ProviderReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } }),
+      this.prisma.bookingWaitlistEntry.count({ where: { ...scope, status: WaitlistStatus.ACTIVE } }),
     ]);
     const count = (status: BookingStatus) => byStatus.find((r) => r.bookingStatus === status)?._count._all ?? 0;
     const total = byStatus.reduce((sum, r) => sum + r._count._all, 0);
