@@ -80,7 +80,7 @@ export const adminService = {
   // Customer 360
   listCustomers: (q: string, input: AdminPaginationInput = {}) =>
     apiFetch<PaginatedDto<AdminCustomerListItemDto>>(`/admin/customers${toQueryString({ q, page: input.page, pageSize: input.pageSize })}`),
-  getCustomer360: (userId: string) => apiFetch<Customer360Dto>(`/admin/customers/${userId}`),
+  getCustomer360: (userId: string, signal?: AbortSignal) => apiFetch<Customer360Dto>(`/admin/customers/${encodeURIComponent(userId)}`, { signal, cache: "no-store" }),
   revealPii: (userId: string, field: "email" | "phone", reason: string) => apiFetch<AdminPiiRevealDto>(`/admin/customers/${userId}/reveal`, { method: "POST", body: { field, reason } }),
   addNote: (entityType: InternalNoteDto["entityType"], entityId: string, body: string) => apiFetch<InternalNoteDto>("/admin/notes", { method: "POST", body: { entityType, entityId, body } }),
 

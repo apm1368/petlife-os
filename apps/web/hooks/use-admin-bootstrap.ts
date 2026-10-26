@@ -7,15 +7,20 @@ import { useAdminStore } from "@/stores/admin-store";
 interface BootstrapState {
   isLoading: boolean;
   error: string | null;
+  retry: () => void;
 }
 
 /** Resolves the caller's admin identity once per Admin Shell mount — mirrors useSellerBootstrap/useProviderBootstrap exactly. GET /admin/me never throws for a non-admin session (see AdminMeController's own doc comment), so `error` here only ever reflects a real network/session failure. */
 export function useAdminBootstrap(): BootstrapState {
-  const [state, setState] = useState<BootstrapState>({ isLoading: true, error: null });
+  const [state, setState] = useState<Omit<BootstrapState, "retry">>({ isLoading: true, error: null });
+  const [revision, setRevision] = useState(0);
   const setContext = useAdminStore((s) => s.setContext);
+  const clearContext = useAdminStore((s) => s.clearContext);
 
   useEffect(() => {
     let cancelled = false;
+    clearContext();
+    setState({ isLoading: true, error: null });
     async function run() {
       try {
         const context = await adminService.getMe();
@@ -31,8 +36,7 @@ export function useAdminBootstrap(): BootstrapState {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setContext, clearContext, revision]);
 
-  return state;
+  return { ...state, retry: () => setRevision(value => value + 1) };
 }

@@ -2246,6 +2246,7 @@
   },
   "admin": {
     "shell": {
+      "accessLoadFailed": "Admin permissions could not be loaded. Retry to verify your current access.",
       "title": "opetlife Admin",
       "notAnAdmin": {
         "title": "No admin access",
@@ -2339,6 +2340,14 @@
       "view": "View 360"
     },
     "customer360": {
+      "forbidden": "You do not have permission to view this customer record.",
+      "loadFailed": "The customer record could not be loaded.",
+      "revealFailed": "Contact details could not be revealed. The masked value has been kept.",
+      "noteUncertain": "The note result was not confirmed. Your draft is preserved and resubmission is blocked on this page to avoid duplicates. Reload the recorded notes before taking further action.",
+      "noteSaved": "Internal note recorded.",
+      "reloadNotes": "Reload recorded notes",
+      "revealReasonHelp": "Enter a reason to reveal the email or phone; it is recorded in the audit log.",
+      "noBookings": "No recent bookings recorded.",
       "notFound": "Customer not found.",
       "sections": {
         "contact": "Contact",
