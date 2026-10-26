@@ -4,6 +4,8 @@ import { Transform, Type } from "class-transformer";
 import { IsBoolean, IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min } from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
+import { RequireAdminVertical } from "../auth/require-admin-vertical.decorator";
+import { AdminVertical } from "@prisma/client";
 import { RequireAdminPermission } from "../auth/require-admin-permission.decorator";
 import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-context.types";
@@ -71,6 +73,7 @@ function platformActor(admin: ResolvedAdminContext): PromotionActor {
 
 /** Admin Commerce (Batch 4) — see AdminCommerceService for the permission model. */
 @Controller("admin/commerce")
+@RequireAdminVertical(AdminVertical.SHOP)
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class AdminCommerceController {
   constructor(

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { AdminMembershipStatus, AdminRole, Prisma } from "@prisma/client";
+import { AdminMembershipStatus, AdminRole, AdminVertical, Prisma } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { AdminGovernanceRuleException, NotFoundApiException, ValidationApiException } from "../../../common/errors/api-exception";
@@ -7,6 +7,7 @@ import { resolvePagination, toPaginatedDto } from "../../../common/pagination/pa
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { ROLE_PERMISSIONS, type AdminPermission } from "../auth/admin-permissions";
+import { SERVICE_VERTICALS } from "../auth/admin-verticals";
 
 /** Roles whose holders may not be created, changed or suspended by anyone but a SUPER_ADMIN (all of access control is admin.manage = SUPER_ADMIN today; the rule is explicit so delegating admin.manage later can't escalate). */
 const PROTECTED_ROLES: AdminRole[] = [AdminRole.SUPER_ADMIN];
@@ -73,26 +74,38 @@ export class AdminAccessControlService {
   }
 
   /** Grant admin access to an existing member account (by email). Never creates a login. */
-  async grant(actor: ResolvedAdminContext, input: { email: string; role: AdminRole; reason: string }) {
+  async grant(actor: ResolvedAdminContext, input: { email: string; role: AdminRole; reason: string; serviceScopes?: AdminVertical[] }) {
     const user = await this.prisma.user.findFirst({ where: { email: { equals: input.email.trim(), mode: "insensitive" } }, select: { id: true } });
     if (!user) throw new NotFoundApiException("User");
     this.assertMayAssign(actor, input.role);
+    const serviceScopes = this.validScopes(input.role, input.serviceScopes ?? []);
     return this.mutate(actor, async (tx) => {
       const existing = await tx.adminUser.findUnique({ where: { userId: user.id } });
       if (existing) throw new AdminGovernanceRuleException({ rule: "ALREADY_ADMIN", adminUserId: existing.id });
-      const created = await tx.adminUser.create({ data: { userId: user.id, role: input.role } });
-      return { row: created, action: "admin_user.granted" as const, before: null, after: { role: created.role, status: created.status } };
+      const created = await tx.adminUser.create({ data: { userId: user.id, role: input.role, serviceScopes } });
+      return { row: created, action: "admin_user.granted" as const, before: null, after: { role: created.role, status: created.status, serviceScopes } };
     }, input.reason);
   }
 
-  async changeRole(actor: ResolvedAdminContext, adminUserId: string, role: AdminRole, reason: string) {
+  async changeRole(actor: ResolvedAdminContext, adminUserId: string, role: AdminRole, reason: string, requestedScopes?: AdminVertical[]) {
     this.assertMayAssign(actor, role);
+    const serviceScopes = this.validScopes(role, requestedScopes ?? []);
     return this.mutate(actor, async (tx) => {
       const row = await this.lockTarget(tx, actor, adminUserId);
       if (row.role === role) throw new ValidationApiException({ field: "role", reason: "UNCHANGED" });
       if (row.role === AdminRole.SUPER_ADMIN && row.status === AdminMembershipStatus.ACTIVE) await this.assertNotLastSuperAdmin(tx);
-      const updated = await tx.adminUser.update({ where: { id: row.id }, data: { role } });
-      return { row: updated, action: "admin_user.role_changed" as const, before: { role: row.role }, after: { role } };
+      const updated = await tx.adminUser.update({ where: { id: row.id }, data: { role, serviceScopes } });
+      return { row: updated, action: "admin_user.role_changed" as const, before: { role: row.role, serviceScopes: row.serviceScopes }, after: { role, serviceScopes } };
+    }, reason);
+  }
+
+  async changeScopes(actor: ResolvedAdminContext, adminUserId: string, requestedScopes: AdminVertical[], reason: string) {
+    return this.mutate(actor, async tx => {
+      const row = await this.lockTarget(tx, actor, adminUserId);
+      const serviceScopes = this.validScopes(row.role, requestedScopes);
+      if (serviceScopes.length === row.serviceScopes.length && serviceScopes.every(scope => row.serviceScopes.includes(scope))) throw new ValidationApiException({ field: "serviceScopes", reason: "UNCHANGED" });
+      const updated = await tx.adminUser.update({ where: { id: row.id }, data: { serviceScopes } });
+      return { row: updated, action: "admin_user.scopes_changed" as const, before: { role: row.role, serviceScopes: row.serviceScopes }, after: { role: row.role, serviceScopes } };
     }, reason);
   }
 
@@ -111,6 +124,18 @@ export class AdminAccessControlService {
     if (PROTECTED_ROLES.includes(role) && actor.role !== AdminRole.SUPER_ADMIN) throw new AdminGovernanceRuleException({ rule: "PROTECTED_ROLE", role });
   }
 
+  private validScopes(role: AdminRole, requested: AdminVertical[]): AdminVertical[] {
+    const unique = [...new Set(requested)];
+    if (role !== AdminRole.SERVICE_ADMIN) {
+      if (unique.length) throw new ValidationApiException({ field: "serviceScopes", reason: "SCOPES_ONLY_FOR_SERVICE_ADMIN" });
+      return [];
+    }
+    if (!unique.length) throw new ValidationApiException({ field: "serviceScopes", reason: "SERVICE_SCOPES_REQUIRED" });
+    const invalid = unique.filter(scope => !SERVICE_VERTICALS.includes(scope));
+    if (invalid.length) throw new ValidationApiException({ field: "serviceScopes", reason: "INVALID_SERVICE_SCOPE", invalid });
+    return unique;
+  }
+
   private async lockTarget(tx: Prisma.TransactionClient, actor: ResolvedAdminContext, adminUserId: string) {
     const row = await tx.adminUser.findUnique({ where: { id: adminUserId } });
     if (!row) throw new NotFoundApiException("AdminUser");
@@ -126,7 +151,7 @@ export class AdminAccessControlService {
 
   private async mutate(
     actor: ResolvedAdminContext,
-    change: (tx: Prisma.TransactionClient) => Promise<{ row: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus }; action: "admin_user.granted" | "admin_user.role_changed" | "admin_user.suspended" | "admin_user.reactivated"; before: Record<string, unknown> | null; after: Record<string, unknown> }>,
+    change: (tx: Prisma.TransactionClient) => Promise<{ row: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus; serviceScopes: AdminVertical[] }; action: "admin_user.granted" | "admin_user.role_changed" | "admin_user.scopes_changed" | "admin_user.suspended" | "admin_user.reactivated"; before: Record<string, unknown> | null; after: Record<string, unknown> }>,
     reason: string,
   ) {
     const result = await this.prisma.$transaction(async (tx) => {
@@ -140,7 +165,7 @@ export class AdminAccessControlService {
     return this.get(result.id);
   }
 
-  private toDto(r: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus; createdAt: Date; updatedAt: Date; lastActiveAt: Date | null; user: { displayName: string | null; email: string | null } }) {
-    return { id: r.id, userId: r.userId, displayName: r.user.displayName, emailMasked: maskEmail(r.user.email), role: r.role, status: r.status, createdAt: r.createdAt.toISOString(), updatedAt: r.updatedAt.toISOString(), lastActiveAt: r.lastActiveAt?.toISOString() ?? null };
+  private toDto(r: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus; serviceScopes: AdminVertical[]; createdAt: Date; updatedAt: Date; lastActiveAt: Date | null; user: { displayName: string | null; email: string | null } }) {
+    return { id: r.id, userId: r.userId, displayName: r.user.displayName, emailMasked: maskEmail(r.user.email), role: r.role, serviceScopes: r.serviceScopes, status: r.status, createdAt: r.createdAt.toISOString(), updatedAt: r.updatedAt.toISOString(), lastActiveAt: r.lastActiveAt?.toISOString() ?? null };
   }
 }

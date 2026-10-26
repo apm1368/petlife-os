@@ -7,6 +7,7 @@ import { AdminAuthGuard } from "./admin-auth.guard";
 import { CurrentAdmin } from "./current-admin.decorator";
 import type { ResolvedAdminContext } from "./admin-context.types";
 import { ROLE_PERMISSIONS } from "./admin-permissions";
+import { allowedVerticals } from "./admin-verticals";
 import type { AdminCapabilitiesDto } from "@petlife/types";
 
 /**
@@ -30,6 +31,10 @@ export class AdminMeController {
   @Header("Cache-Control", "no-store")
   @UseGuards(AdminAuthGuard)
   getCapabilities(@CurrentAdmin() admin: ResolvedAdminContext): AdminCapabilitiesDto {
-    return { role: admin.role as AdminCapabilitiesDto["role"], permissions: [...ROLE_PERMISSIONS[admin.role]] };
+    return {
+      role: admin.role as AdminCapabilitiesDto["role"],
+      permissions: [...ROLE_PERMISSIONS[admin.role]],
+      verticals: allowedVerticals(admin) as AdminCapabilitiesDto["verticals"],
+    };
   }
 }
