@@ -17,6 +17,7 @@ describe("Admin vertical scoping (W2-4)", () => {
   let app: INestApplication, db: PrismaService;
   const server = () => app.getHttpServer();
   const get = (a: Actor, u: string) => request(server()).get(u).set("Cookie", a.cookie);
+  const post = (a: Actor, u: string) => request(server()).post(u).set("Cookie", a.cookie).set("x-csrf-token", a.csrf);
 
   async function actor(role: AdminRole, serviceScopes: AdminVertical[] = []): Promise<Actor> {
     const user = await db.user.create({ data: { displayName: `w2-4 ${role}`, email: `w2-4-${randomUUID()}@example.com` } });
@@ -99,6 +100,29 @@ describe("Admin vertical scoping (W2-4)", () => {
 
     expect((await get(admin, ACCOMMODATION)).status).not.toBe(403);
     expect((await get(admin, "/admin/me/capabilities").expect(200)).body.verticals).toEqual([AdminVertical.ACCOMMODATION]);
+  });
+
+  it("manages service scopes only through audited admin APIs and applies them immediately", async () => {
+    const root = await actor(AdminRole.SUPER_ADMIN);
+    const scoped = await actor(AdminRole.SERVICE_ADMIN, [AdminVertical.CLINIC]);
+    const changed = (await post(root, `/admin/access/admins/${scoped.adminUserId}/scopes`).send({ serviceScopes: [AdminVertical.GROOMING], reason: "Move service administrator to grooming" }).expect(201)).body;
+    expect(changed.serviceScopes).toEqual([AdminVertical.GROOMING]);
+    expect((await get(scoped, "/admin/me/capabilities").expect(200)).body.verticals).toEqual([AdminVertical.GROOMING]);
+    expect((await db.adminAuditLog.findFirstOrThrow({ where: { entityId: scoped.adminUserId, action: "admin_user.scopes_changed" } })).reason).toBe("Move service administrator to grooming");
+    await post(root, `/admin/access/admins/${scoped.adminUserId}/scopes`).send({ serviceScopes: [], reason: "Invalid empty scope" }).expect(400);
+
+    const ordinary = await actor(AdminRole.ADMIN);
+    await post(root, `/admin/access/admins/${ordinary.adminUserId}/scopes`).send({ serviceScopes: [AdminVertical.CLINIC], reason: "Invalid scope on broad role" }).expect(400);
+  });
+
+  it("requires explicit valid scopes when changing a membership into SERVICE_ADMIN and clears them when leaving", async () => {
+    const root = await actor(AdminRole.SUPER_ADMIN);
+    const target = await actor(AdminRole.READ_ONLY);
+    await post(root, `/admin/access/admins/${target.adminUserId}/role`).send({ role: AdminRole.SERVICE_ADMIN, reason: "Missing scope assignment" }).expect(400);
+    const changed = (await post(root, `/admin/access/admins/${target.adminUserId}/role`).send({ role: AdminRole.SERVICE_ADMIN, serviceScopes: [AdminVertical.CLINIC], reason: "Assign clinic operations" }).expect(201)).body;
+    expect(changed).toMatchObject({ role: AdminRole.SERVICE_ADMIN, serviceScopes: [AdminVertical.CLINIC] });
+    const left = (await post(root, `/admin/access/admins/${target.adminUserId}/role`).send({ role: AdminRole.READ_ONLY, reason: "Return to read only" }).expect(201)).body;
+    expect(left).toMatchObject({ role: AdminRole.READ_ONLY, serviceScopes: [] });
   });
 
   it("still refuses a vertical the role's permissions do not cover", async () => {

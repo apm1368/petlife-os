@@ -38,19 +38,30 @@ describe("Admin service vertical scoping (W2-4, row level)", () => {
 
   async function provider(type: ProviderType, category: ServiceCategory, serviceType: ProviderServiceType) {
     const org = await db.providerOrganization.create({ data: { name: `${type}-${randomUUID().slice(0, 6)}`, type } });
-    const service = await db.providerService.create({ data: { providerOrganizationId: org.id, name: `svc-${randomUUID().slice(0, 6)}`, type: serviceType, category, durationMinutes: 30 } });
-    return { orgId: org.id, serviceId: service.id };
+    const location = await db.providerLocation.create({ data: { providerOrganizationId: org.id, addressLine: "Scope test", city: "Tehran", countryCode: "IR", timezone: "UTC" } });
+    const service = await db.providerService.create({ data: { providerOrganizationId: org.id, locationId: location.id, name: `svc-${randomUUID().slice(0, 6)}`, type: serviceType, category, locationMode: "AT_PROVIDER", durationMinutes: 30 } });
+    return { orgId: org.id, locationId: location.id, serviceId: service.id, category };
   }
 
-  let clinic: { orgId: string; serviceId: string };
-  let groomer: { orgId: string; serviceId: string };
+  type Fixture = { orgId: string; locationId: string; serviceId: string; category: ServiceCategory; bookingId: string; reviewId: string; waitlistId: string };
+  let clinic: Fixture;
+  let groomer: Fixture;
 
   beforeAll(async () => {
     app = await createTestApp();
     await app.listen(0);
     db = app.get(PrismaService);
-    clinic = await provider(ProviderType.VET_CLINIC, ServiceCategory.VET, ProviderServiceType.GENERAL_VET_VISIT);
-    groomer = await provider(ProviderType.GROOMER, ServiceCategory.GROOMING, ProviderServiceType.CONSULTATION);
+    const customer = await db.user.create({ data: { displayName: "scope customer", email: `scope-customer-${randomUUID()}@example.com` } });
+    const household = await db.household.create({ data: { name: "scope household", members: { create: { userId: customer.id, role: "OWNER" } } } });
+    const pet = await db.pet.create({ data: { householdId: household.id, name: "scope pet", species: "DOG" } });
+    const complete = async (base: Awaited<ReturnType<typeof provider>>): Promise<Fixture> => {
+      const booking = await db.booking.create({ data: { householdId: household.id, petId: pet.id, userId: customer.id, providerOrganizationId: base.orgId, providerLocationId: base.locationId, providerServiceId: base.serviceId, category: base.category, locationMode: "AT_PROVIDER", startAt: new Date(Date.now() - 3600_000), endAt: new Date(Date.now() - 1800_000), timezone: "UTC", bookingStatus: "COMPLETED" } });
+      const review = await db.providerReview.create({ data: { bookingId: booking.id, providerOrganizationId: base.orgId, userId: customer.id, rating: 4, body: `scope ${base.category}` } });
+      const waitlist = await db.bookingWaitlistEntry.create({ data: { householdId: household.id, userId: customer.id, petId: pet.id, providerOrganizationId: base.orgId, serviceId: base.serviceId, windowStart: new Date(Date.now() + 3600_000), windowEnd: new Date(Date.now() + 7200_000) } });
+      return { ...base, bookingId: booking.id, reviewId: review.id, waitlistId: waitlist.id };
+    };
+    clinic = await complete(await provider(ProviderType.VET_CLINIC, ServiceCategory.VET, ProviderServiceType.GENERAL_VET_VISIT));
+    groomer = await complete(await provider(ProviderType.GROOMER, ServiceCategory.GROOMING, ProviderServiceType.CONSULTATION));
   });
   afterAll(async () => app.close());
 
@@ -72,6 +83,39 @@ describe("Admin service vertical scoping (W2-4, row level)", () => {
     const ids = await idsIn(await actor(AdminRole.SERVICE_ADMIN, [AdminVertical.GROOMING]));
     expect(ids).toContain(groomer.serviceId);
     expect(ids).not.toContain(clinic.serviceId);
+  });
+
+  it("scopes booking lists and direct booking detail by provider type", async () => {
+    const grooming = await actor(AdminRole.SERVICE_ADMIN, [AdminVertical.GROOMING]);
+    const listed = (await get(grooming, "/admin/service-bookings").expect(200)).body.items.map((row: { id: string }) => row.id);
+    expect(listed).toContain(groomer.bookingId);
+    expect(listed).not.toContain(clinic.bookingId);
+    await get(grooming, `/admin/service-bookings/${groomer.bookingId}`).expect(200);
+    const denied = await get(grooming, `/admin/service-bookings/${clinic.bookingId}`).expect(403);
+    expect(denied.body.error.details.reason).toBe("OUT_OF_VERTICAL_SCOPE");
+  });
+
+  it("scopes review and waitlist lists and blocks a cross-vertical review mutation", async () => {
+    const clinicAdmin = await actor(AdminRole.SERVICE_ADMIN, [AdminVertical.CLINIC]);
+    const reviews = (await get(clinicAdmin, "/admin/provider-reviews").expect(200)).body.map((row: { id: string }) => row.id);
+    expect(reviews).toContain(clinic.reviewId);
+    expect(reviews).not.toContain(groomer.reviewId);
+    const waitlist = (await get(clinicAdmin, "/admin/service-waitlist").expect(200)).body.map((row: { id: string }) => row.id);
+    expect(waitlist).toContain(clinic.waitlistId);
+    expect(waitlist).not.toContain(groomer.waitlistId);
+    await post(clinicAdmin, `/admin/provider-reviews/${groomer.reviewId}/hide`).send({ reason: "Cross-vertical review mutation" }).expect(403);
+    expect((await db.providerReview.findUniqueOrThrow({ where: { id: groomer.reviewId } })).status).toBe("PUBLISHED");
+  });
+
+  it("computes analytics only from categories in the caller's provider scope", async () => {
+    const clinicAdmin = await actor(AdminRole.SERVICE_ADMIN, [AdminVertical.CLINIC]);
+    const groomingAdmin = await actor(AdminRole.SERVICE_ADMIN, [AdminVertical.GROOMING]);
+    const clinicAnalytics = (await get(clinicAdmin, "/admin/services-analytics").expect(200)).body;
+    const groomingAnalytics = (await get(groomingAdmin, "/admin/services-analytics").expect(200)).body;
+    expect(clinicAnalytics.byCategory.VET).toBeGreaterThanOrEqual(1);
+    expect(clinicAnalytics.byCategory.GROOMING).toBeUndefined();
+    expect(groomingAnalytics.byCategory.GROOMING).toBeGreaterThanOrEqual(1);
+    expect(groomingAnalytics.byCategory.VET).toBeUndefined();
   });
 
   it("a service admin whose verticals map to no provider type sees nothing (empty, not all)", async () => {

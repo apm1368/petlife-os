@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
-import { IsEmail, IsIn, IsOptional, IsString, Length } from "class-validator";
-import { AdminMembershipStatus, AdminRole } from "@prisma/client";
+import { ArrayUnique, IsArray, IsEmail, IsEnum, IsIn, IsOptional, IsString, Length } from "class-validator";
+import { AdminMembershipStatus, AdminRole, AdminVertical } from "@prisma/client";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
@@ -20,9 +20,14 @@ class ReasonDto {
 class GrantAdminDto extends ReasonDto {
   @IsEmail() email!: string;
   @IsIn(Object.values(AdminRole)) role!: AdminRole;
+  @IsOptional() @IsArray() @ArrayUnique() @IsEnum(AdminVertical, { each: true }) serviceScopes?: AdminVertical[];
 }
 class ChangeRoleDto extends ReasonDto {
   @IsIn(Object.values(AdminRole)) role!: AdminRole;
+  @IsOptional() @IsArray() @ArrayUnique() @IsEnum(AdminVertical, { each: true }) serviceScopes?: AdminVertical[];
+}
+class ChangeScopesDto extends ReasonDto {
+  @IsArray() @ArrayUnique() @IsEnum(AdminVertical, { each: true }) serviceScopes!: AdminVertical[];
 }
 
 /** Access Control: reading is access.view (ADMIN, SUPER_ADMIN); every change is admin.manage (SUPER_ADMIN only) and needs a reason. */
@@ -53,7 +58,11 @@ export class AdminAccessControlController {
 
   @Post("admins/:id/role")
   @RequireAdminPermission("admin.manage")
-  changeRole(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ChangeRoleDto) { return this.access.changeRole(admin, id, dto.role, dto.reason); }
+  changeRole(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ChangeRoleDto) { return this.access.changeRole(admin, id, dto.role, dto.reason, dto.serviceScopes); }
+
+  @Post("admins/:id/scopes")
+  @RequireAdminPermission("admin.manage")
+  changeScopes(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ChangeScopesDto) { return this.access.changeScopes(admin, id, dto.serviceScopes, dto.reason); }
 
   @Post("admins/:id/suspend")
   @RequireAdminPermission("admin.manage")

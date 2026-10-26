@@ -2559,6 +2559,7 @@ export interface AdminUserDto {
   displayName: string;
   emailMasked: string | null;
   role: AdminRole;
+  serviceScopes: AdminVertical[];
   status: AdminMembershipStatus;
   createdAt: string;
   lastActiveAt: string | null;
