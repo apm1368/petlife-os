@@ -88,6 +88,18 @@ describe("Admin users directory (W2-5)", () => {
 
     const hosts = (await get(root, "/admin/users?kind=HOST&pageSize=100").expect(200)).body;
     expect(hosts.items.some((r: { id: string }) => r.id === groomerUser)).toBe(false);
+
+    const insurerUser = await user(`Insurer ${randomUUID()}`);
+    const insurer = await db.insuranceProvider.create({ data: { name: "Safe Paws", country: "IR" } });
+    await db.insurerMembership.create({ data: { userId: insurerUser, providerId: insurer.id } });
+    const ngoUser = await user(`NGO ${randomUUID()}`);
+    const ngo = await db.animalSupportOrganization.create({ data: { name: "Kind Paws", type: "NGO" } });
+    await db.animalSupportOrgMembership.create({ data: { userId: ngoUser, organizationId: ngo.id } });
+
+    const insurers = (await get(root, "/admin/users?kind=INSURER&pageSize=100").expect(200)).body;
+    expect(insurers.items.some((r: { id: string }) => r.id === insurerUser)).toBe(true);
+    const ngos = (await get(root, "/admin/users?kind=NGO&pageSize=100").expect(200)).body;
+    expect(ngos.items.some((r: { id: string }) => r.id === ngoUser)).toBe(true);
   });
 
   it("searches by display name", async () => {
@@ -99,16 +111,25 @@ describe("Admin users directory (W2-5)", () => {
     expect(found.items[0].id).toBe(target);
   });
 
-  it("returns a profile with role aggregation and household/pet counts", async () => {
+  it("returns the complete bounded profile contract", async () => {
     const root = await actor(AdminRole.SUPER_ADMIN);
     const owner = await user(`Owner ${randomUUID()}`);
     const household = await db.household.create({ data: { name: "Family", city: "Tehran" } });
     await db.householdMember.create({ data: { householdId: household.id, userId: owner, role: HouseholdRole.OWNER } });
     await db.pet.create({ data: { householdId: household.id, name: "Rex", species: "DOG" } });
     await db.pet.create({ data: { householdId: household.id, name: "Mia", species: "CAT" } });
+    const clinic = await db.providerOrganization.create({ data: { name: "Profile Clinic", type: ProviderType.VET_CLINIC } });
+    await db.providerUser.create({ data: { userId: owner, providerOrganizationId: clinic.id, role: ProviderUserRole.VET } });
+    const rootAdmin = await db.adminUser.findUniqueOrThrow({ where: { userId: root.id } });
+    await db.adminAuditLog.create({ data: { adminUserId: rootAdmin.id, action: "profile.test", entityType: "USER", entityId: owner, reason: "Profile contract test" } });
 
     const profile = (await get(root, `/admin/users/${owner}`).expect(200)).body;
-    expect(profile.user.roles.map((r: { kind: string }) => r.kind)).toEqual(["CUSTOMER"]);
+    expect(profile.user.roles.map((r: { kind: string }) => r.kind).sort()).toEqual(["CLINIC", "CUSTOMER"]);
+    expect(profile.households[0]).toMatchObject({ id: household.id, memberCount: 1 });
+    expect(profile.households[0].pets.map((pet: { name: string }) => pet.name).sort()).toEqual(["Mia", "Rex"]);
+    expect(profile.businesses).toContainEqual(expect.objectContaining({ id: clinic.id, kind: "CLINIC", name: "Profile Clinic" }));
+    expect(profile).toEqual(expect.objectContaining({ orders: expect.any(Array), requests: expect.any(Array), tickets: expect.any(Array), reviews: expect.any(Array) }));
+    expect(profile.auditTrail[0]).toMatchObject({ action: "profile.test", reason: "Profile contract test" });
     expect(profile.householdCount).toBe(1);
     expect(profile.petCount).toBe(2);
   });

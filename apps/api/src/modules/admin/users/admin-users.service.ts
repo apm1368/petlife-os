@@ -3,7 +3,9 @@ import { Prisma, ProviderType } from "@prisma/client";
 import type {
   AdminUserDirectoryListDto,
   AdminUserDirectoryRowDto,
+  AdminUserBusinessDto,
   AdminUserProfileDto,
+  AdminUserReviewSummaryDto,
   AdminUserRoleDto,
   AdminUserRoleKind,
 } from "@petlife/types";
@@ -12,6 +14,7 @@ import { AdminCustomerNotFoundException } from "../../../common/errors/api-excep
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { maskPhone } from "../../../common/phone/phone-normalizer";
 import { maskEmail } from "../../../common/pii/pii-mask.util";
+import { AdminCustomerService } from "../customer/admin-customer.service";
 
 /** Which directory kind a provider organization reads as, from its ProviderType. */
 function providerKind(type: ProviderType): AdminUserRoleKind {
@@ -30,16 +33,16 @@ function providerKind(type: ProviderType): AdminUserRoleKind {
 }
 
 export type UserDirectoryFilter = PaginationQueryDto & { q?: string; kind?: AdminUserRoleKind };
+type DirectoryUser = { id: string; displayName: string; email: string | null; phone: string | null; accountStatus: string; createdAt: Date; lastActiveAt: Date | null };
 
 /**
  * W2-5. One row per person across every source of a platform relationship — internal admins,
  * customers (a household membership), provider staff (clinic / groomer / host / other), shop staff,
  * insurers and NGO members. A person who wears several hats is one row with several roles.
  *
- * The directory is deliberately a thin aggregation: it never re-derives the deep per-domain data the
- * Customer 360 (`/admin/customers/:id/overview`) already composes. Paginating lives on `User`, and the
- * six membership sources are read only for the one page of user ids — so one list call is a count, a
- * user page, and six small `where userId in (…page…)` lookups, never a six-way join across the platform.
+ * The list remains a thin aggregation: pagination lives on `User`, and the six membership sources are
+ * read only for the current page. The detail endpoint composes the existing Customer 360 read model with
+ * every linked business, review and direct user audit entry, returning bounded collections for its tabs.
  *
  * Two of the six sources (insurer and NGO memberships) store `userId` without a Prisma relation, by the
  * same actor-reference convention they were written with, so they are queried by id list rather than
@@ -47,9 +50,12 @@ export type UserDirectoryFilter = PaginationQueryDto & { q?: string; kind?: Admi
  */
 @Injectable()
 export class AdminUsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly customers: AdminCustomerService,
+  ) {}
 
-  private row(user: { id: string; displayName: string; email: string | null; phone: string | null; accountStatus: string; createdAt: Date; lastActiveAt: Date | null }, roles: AdminUserRoleDto[]): AdminUserDirectoryRowDto {
+  private row(user: DirectoryUser, roles: AdminUserRoleDto[]): AdminUserDirectoryRowDto {
     return {
       id: user.id,
       displayName: user.displayName,
@@ -62,28 +68,52 @@ export class AdminUsersService {
     };
   }
 
-  /** The set of user ids that hold at least one relationship of `kind` — used only when a kind filter is applied. */
-  private async userIdsForKind(kind: AdminUserRoleKind): Promise<string[]> {
-    const distinct = <T extends { userId: string }>(rows: T[]) => [...new Set(rows.map((r) => r.userId))];
+  /** An EXISTS predicate keeps role filtering and pagination inside PostgreSQL instead of loading all member ids. */
+  private kindPredicate(kind: AdminUserRoleKind): Prisma.Sql {
     switch (kind) {
       case "ADMIN_INTERNAL":
-        return distinct(await this.prisma.adminUser.findMany({ select: { userId: true } }));
+        return Prisma.sql`EXISTS (SELECT 1 FROM admin_users m WHERE m."userId" = u.id)`;
       case "CUSTOMER":
-        return distinct(await this.prisma.householdMember.findMany({ select: { userId: true } }));
+        return Prisma.sql`EXISTS (SELECT 1 FROM household_members m WHERE m."userId" = u.id)`;
       case "SHOP":
-        return distinct(await this.prisma.sellerMembership.findMany({ where: { status: "ACTIVE" }, select: { userId: true } }));
+        return Prisma.sql`EXISTS (SELECT 1 FROM seller_memberships m WHERE m."userId" = u.id AND m.status::text = 'ACTIVE')`;
       case "INSURER":
-        return distinct(await this.prisma.insurerMembership.findMany({ where: { isActive: true }, select: { userId: true } }));
+        return Prisma.sql`EXISTS (SELECT 1 FROM insurer_memberships m WHERE m."userId" = u.id AND m."isActive" = true)`;
       case "NGO":
-        return distinct(await this.prisma.animalSupportOrgMembership.findMany({ where: { isActive: true }, select: { userId: true } }));
+        return Prisma.sql`EXISTS (SELECT 1 FROM animal_support_org_memberships m WHERE m."userId" = u.id AND m."isActive" = true)`;
       case "CLINIC":
       case "GROOMER":
       case "HOST":
       case "PROVIDER_OTHER": {
         const types = (Object.values(ProviderType) as ProviderType[]).filter((t) => providerKind(t) === kind);
-        return distinct(await this.prisma.providerUser.findMany({ where: { removedAt: null, providerOrganization: { type: { in: types } } }, select: { userId: true } }));
+        return Prisma.sql`EXISTS (
+          SELECT 1 FROM provider_users m
+          JOIN provider_organizations p ON p.id = m."providerOrganizationId"
+          WHERE m."userId" = u.id AND m."removedAt" IS NULL
+          AND p.type::text IN (${Prisma.join(types)})
+        )`;
       }
     }
+  }
+
+  private async filteredPage(kind: AdminUserRoleKind, q: string | undefined, skip: number, take: number): Promise<{ users: DirectoryUser[]; total: number }> {
+    const search = q
+      ? Prisma.sql`(u."displayName" ILIKE ${`%${q}%`} OR u.email ILIKE ${`%${q}%`} OR u.phone ILIKE ${`%${q}%`})`
+      : Prisma.sql`TRUE`;
+    const membership = this.kindPredicate(kind);
+    const [users, counts] = await Promise.all([
+      this.prisma.$queryRaw<DirectoryUser[]>(Prisma.sql`
+        SELECT u.id, u."displayName", u.email, u.phone, u."accountStatus", u."createdAt", u."lastActiveAt"
+        FROM users u
+        WHERE ${search} AND ${membership}
+        ORDER BY u."createdAt" DESC, u.id DESC
+        LIMIT ${take} OFFSET ${skip}
+      `),
+      this.prisma.$queryRaw<Array<{ total: bigint }>>(Prisma.sql`
+        SELECT COUNT(*)::bigint AS total FROM users u WHERE ${search} AND ${membership}
+      `),
+    ]);
+    return { users, total: Number(counts[0]?.total ?? 0) };
   }
 
   /** Every hat the given user ids wear, grouped by user id. One query per source, each scoped to the page. */
@@ -132,14 +162,16 @@ export class AdminUsersService {
         { phone: { contains: q } },
       ];
     }
-    if (filter.kind) {
-      where.id = { in: await this.userIdsForKind(filter.kind) };
-    }
-
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({ where, orderBy: { createdAt: "desc" }, skip, take, select: { id: true, displayName: true, email: true, phone: true, accountStatus: true, createdAt: true, lastActiveAt: true } }),
-      this.prisma.user.count({ where }),
-    ]);
+    const result = filter.kind
+      ? await this.filteredPage(filter.kind, q, skip, take)
+      : await (async () => {
+          const [users, total] = await Promise.all([
+            this.prisma.user.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip, take, select: { id: true, displayName: true, email: true, phone: true, accountStatus: true, createdAt: true, lastActiveAt: true } }),
+            this.prisma.user.count({ where }),
+          ]);
+          return { users, total };
+        })();
+    const { users, total } = result;
 
     const roles = await this.rolesByUser(users.map((u) => u.id));
     const items = users.map((u) => this.row(u, roles.get(u.id) ?? []));
@@ -150,16 +182,54 @@ export class AdminUsersService {
     const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true, displayName: true, email: true, phone: true, accountStatus: true, createdAt: true, lastActiveAt: true } });
     if (!user) throw new AdminCustomerNotFoundException({ userId });
 
-    const [roles, households, petCount] = await Promise.all([
+    const [roles, customer, providerReviews, productReviews, travelReviews, audit] = await Promise.all([
       this.rolesByUser([userId]),
-      this.prisma.householdMember.findMany({ where: { userId }, select: { householdId: true } }),
-      this.prisma.pet.count({ where: { household: { members: { some: { userId } } }, deletedAt: null } }),
+      this.customers.getCustomer360(userId),
+      this.prisma.providerReview.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, providerOrganizationId: true, rating: true, status: true, createdAt: true } }),
+      this.prisma.productReview.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, productId: true, rating: true, status: true, createdAt: true } }),
+      this.prisma.travelReview.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, listingId: true, overall: true, status: true, createdAt: true } }),
+      this.prisma.adminAuditLog.findMany({
+        where: { entityType: { in: ["USER", "User"] }, entityId: userId },
+        include: { adminUser: { include: { user: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      }),
     ]);
+    const userRoles = roles.get(userId) ?? [];
+    const businessMap = new Map<string, AdminUserBusinessDto>();
+    for (const role of userRoles) {
+      if (role.business && role.kind !== "ADMIN_INTERNAL" && role.kind !== "CUSTOMER") {
+        businessMap.set(`${role.kind}:${role.business.id}`, { ...role.business, kind: role.kind });
+      }
+    }
+    const reviews: AdminUserReviewSummaryDto[] = [
+      ...providerReviews.map((review) => ({ id: review.id, kind: "PROVIDER" as const, targetId: review.providerOrganizationId, rating: review.rating, status: review.status, createdAt: review.createdAt.toISOString() })),
+      ...productReviews.map((review) => ({ id: review.id, kind: "PRODUCT" as const, targetId: review.productId, rating: review.rating, status: review.status, createdAt: review.createdAt.toISOString() })),
+      ...travelReviews.map((review) => ({ id: review.id, kind: "TRAVEL" as const, targetId: review.listingId, rating: review.overall, status: review.status, createdAt: review.createdAt.toISOString() })),
+    ].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 20);
 
     return {
-      user: this.row(user, roles.get(userId) ?? []),
-      householdCount: new Set(households.map((h) => h.householdId)).size,
-      petCount,
+      user: this.row(user, userRoles),
+      households: customer.households,
+      businesses: [...businessMap.values()],
+      orders: customer.recentOrders,
+      requests: customer.recentBookings,
+      tickets: customer.supportCases,
+      reviews,
+      auditTrail: audit.map((entry) => ({
+        id: entry.id,
+        adminUser: { id: entry.adminUser.id, displayName: entry.adminUser.user.displayName, role: entry.adminUser.role as never },
+        action: entry.action,
+        entityType: entry.entityType,
+        entityId: entry.entityId,
+        reason: entry.reason,
+        beforeSummary: entry.beforeSummary as Record<string, unknown> | null,
+        afterSummary: entry.afterSummary as Record<string, unknown> | null,
+        requestId: entry.requestId,
+        createdAt: entry.createdAt.toISOString(),
+      })),
+      householdCount: customer.households.length,
+      petCount: customer.households.reduce((total, household) => total + household.pets.length, 0),
     };
   }
 }
