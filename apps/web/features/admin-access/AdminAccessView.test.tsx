@@ -9,6 +9,13 @@ vi.mock("@/services/admin-access.service",()=>({adminAccessService:{roles:vi.fn(
 const member:AdminMembership={id:"member1",userId:"user1",displayName:"Support colleague",emailMasked:"su***@example.com",role:"SUPPORT",status:"ACTIVE",createdAt:"2026-10-01T10:00:00Z",updatedAt:"2026-10-01T10:00:00Z",lastActiveAt:null,permissions:["support.view"]};
 const roles:AdminRoleDefinition[]=[{role:"SUPER_ADMIN",protected:true,permissions:["admin.manage"],activeMembers:1,suspendedMembers:0},{role:"READ_ONLY",protected:false,permissions:["access.view"],activeMembers:0,suspendedMembers:0},{role:"SUPPORT",protected:false,permissions:["support.view"],activeMembers:1,suspendedMembers:0}];
 describe("AdminAccessView",()=>{
+ it("labels new service roles but does not offer assignment without the scope-management contract",async()=>{
+  vi.mocked(adminAccessService.roles).mockResolvedValue([...roles,{role:"SERVICE_ADMIN",protected:false,permissions:["services.view"],activeMembers:0,suspendedMembers:0}]);
+  renderWithIntl(<AdminAccessView/>);
+  await screen.findByText(/Service-scope assignment is not available/);
+  fireEvent.click(screen.getByRole("button",{name:"Grant access to an existing account"}));
+  expect(within(screen.getByRole("dialog")).queryByRole("option",{name:"Scoped service administrator"})).toBeNull();
+ });
  beforeEach(()=>{vi.resetAllMocks();state.permissions=["access.view","admin.manage"];state.id="actor";vi.mocked(adminAccessService.roles).mockResolvedValue(roles);vi.mocked(adminAccessService.permissions).mockResolvedValue([]);vi.mocked(adminAccessService.list).mockResolvedValue({items:[member],total:1,page:1,pageSize:20});vi.mocked(adminAccessService.get).mockResolvedValue(member)});
  it("makes no access requests without permission",()=>{state.permissions=[];renderWithIntl(<AdminAccessView/>);expect(adminAccessService.list).not.toHaveBeenCalled();expect(adminAccessService.roles).not.toHaveBeenCalled()});
  it("hides membership mutations for a read-only viewer",async()=>{state.permissions=["access.view"];renderWithIntl(<AdminAccessView id="member1"/>);await screen.findByText("Support colleague");expect(screen.queryByRole("button",{name:"Change role"})).toBeNull();expect(screen.queryByRole("button",{name:"Suspend access"})).toBeNull()});

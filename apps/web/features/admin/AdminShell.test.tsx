@@ -61,6 +61,7 @@ describe("AdminShell", () => {
     // Items live in job groups (dropdown pills); open the one that holds support work.
     fireEvent.click(screen.getByRole("button", { name: "Customers & trust" }));
     expect(screen.getByRole("link", { name: "Support" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "All users" }).getAttribute("href")).toBe("/en/admin/users");
     expect(screen.getByText("Disputes")).toBeTruthy();
     // SUPPORT has neither finance.view nor audit.view — those groups and items must not render at all.
     expect(screen.queryByRole("button", { name: "Finance" })).toBeNull();

@@ -1,5 +1,5 @@
 import {apiFetch} from "@/lib/api/client";
-export type AdminRole="SUPER_ADMIN"|"ADMIN"|"SUPPORT"|"TRUST_SAFETY"|"FINANCE"|"OPERATIONS"|"CONTENT"|"VERIFICATION"|"READ_ONLY"|"EDITOR"|"PARTNER_OPERATIONS"|"CLINIC_OPERATIONS"|"COMMERCE_OPERATIONS"|"ANALYTICS";
+export type AdminRole="SUPER_ADMIN"|"ADMIN"|"SUPPORT"|"TRUST_SAFETY"|"FINANCE"|"OPERATIONS"|"CONTENT"|"VERIFICATION"|"READ_ONLY"|"EDITOR"|"PARTNER_OPERATIONS"|"CLINIC_OPERATIONS"|"COMMERCE_OPERATIONS"|"ANALYTICS"|"CONTENT_ADMIN"|"SHOP_ADMIN"|"SERVICE_ADMIN"|"SUPPORT_AGENT";
 export interface AdminMembership {id:string;userId:string;displayName:string|null;emailMasked:string|null;role:AdminRole;status:"ACTIVE"|"SUSPENDED";createdAt:string;updatedAt:string;lastActiveAt:string|null;permissions?:string[]}
 export interface AdminRoleDefinition {role:AdminRole;protected:boolean;permissions:string[];activeMembers:number;suspendedMembers:number}
 export interface AdminPermissionDefinition {permission:string;domain:string;roles:AdminRole[]}

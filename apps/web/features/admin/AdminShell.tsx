@@ -23,6 +23,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/crm", labelKey: "nav.crm", permission: "customer.view" },
   { href: "/customer-affairs", labelKey: "nav.customerAffairs", permission: "support.view" },
   { href: "/customers", labelKey: "nav.customers", permission: "customer.view" },
+  { href: "/users", labelKey: "nav.users", permission: "customer.view" },
   { href: "/support", labelKey: "nav.support", permission: "support.view" },
   { href: "/disputes", labelKey: "nav.disputes", permission: "dispute.view" },
   { href: "/trust", labelKey: "nav.trust", permission: "trust.view" },
@@ -58,7 +59,7 @@ const PREVIEW_ONLY_HREFS = new Set(["/crm", "/customer-affairs"]);
 /** ERP information architecture: the same items grouped by job — six groups instead of a flat link list. */
 const NAV_GROUPS: { key: string; hrefs: string[] }[] = [
   { key: "work", hrefs: ["/tasks", "/crm", "/customer-affairs"] },
-  { key: "trust", hrefs: ["/customers", "/support", "/disputes", "/trust", "/community", "/lost-pets", "/animal-support"] },
+  { key: "trust", hrefs: ["/users", "/customers", "/support", "/disputes", "/trust", "/community", "/lost-pets", "/animal-support"] },
   { key: "network", hrefs: ["/verification", "/providers", "/services", "/sellers", "/commerce", "/travel", "/insurance", "/places"] },
   { key: "finance", hrefs: ["/transactions", "/seller-finance", "/reconciliation", "/subscriptions"] },
   { key: "content", hrefs: ["/content", "/content/new", "/content/categories", "/content/tags", "/content/media", "/content/placements"] },
