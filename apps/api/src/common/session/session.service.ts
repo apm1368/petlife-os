@@ -48,7 +48,16 @@ export class SessionService {
       // already runs behind the >5min session gate; the extra per-user stamp is only written when it
       // is >15min stale, so an active session costs at most one tiny update per quarter hour.
       if (!session.user.lastActiveAt || Date.now() - session.user.lastActiveAt.getTime() > 15 * 60 * 1000) {
-        void this.prisma.user.update({ where: { id: session.user.id }, data: { lastActiveAt: new Date() } }).catch(() => undefined);
+        const now = new Date();
+        // Keep the freshness predicate in the write itself. Several active sessions may all have read
+        // the same stale User row, but only the first update may match after PostgreSQL locks/rechecks it.
+        void this.prisma.user.updateMany({
+          where: {
+            id: session.user.id,
+            OR: [{ lastActiveAt: null }, { lastActiveAt: { lt: new Date(now.getTime() - 15 * 60 * 1000) } }],
+          },
+          data: { lastActiveAt: now },
+        }).catch(() => undefined);
       }
     }
     return { id: session.user.id, email: session.user.email, phone: session.user.phone, displayName: session.user.displayName, locale: session.user.locale, themePreference: session.user.themePreference };

@@ -2887,14 +2887,33 @@ export interface AdminUserDirectoryRowDto {
 
 export type AdminUserDirectoryListDto = PaginatedDto<AdminUserDirectoryRowDto>;
 
-/**
- * The directory's own view of one user: identity, every hat, and the businesses behind them. The deep
- * per-domain tabs (households, pets, orders, requests, tickets, reviews, audit) stay in the existing
- * Customer 360 at GET /admin/customers/:id/overview — this never duplicates them.
- */
+export interface AdminUserBusinessDto {
+  id: string;
+  name: string;
+  kind: Exclude<AdminUserRoleKind, "ADMIN_INTERNAL" | "CUSTOMER">;
+  verificationStatus: string | null;
+}
+
+export interface AdminUserReviewSummaryDto {
+  id: string;
+  kind: "PROVIDER" | "PRODUCT" | "TRAVEL";
+  targetId: string;
+  rating: number;
+  status: string;
+  createdAt: string;
+}
+
+/** Full, bounded user profile for the directory detail tabs. Collections are newest-first and capped. */
 export interface AdminUserProfileDto {
   user: AdminUserDirectoryRowDto;
-  /** Quick counts so the directory detail can show scale without loading the full 360. */
+  households: AdminHouseholdSummaryDto[];
+  businesses: AdminUserBusinessDto[];
+  orders: AdminOrderSummaryDto[];
+  requests: AdminBookingSummaryDto[];
+  tickets: SupportCaseSummaryDto[];
+  reviews: AdminUserReviewSummaryDto[];
+  auditTrail: AdminAuditLogDto[];
+  /** Backward-compatible totals for compact consumers. */
   householdCount: number;
   petCount: number;
 }
