@@ -41,6 +41,8 @@ import { AdminMeController } from "./auth/admin-me.controller";
 import { AdminAuditLogService } from "./audit/admin-audit-log.service";
 import { AdminCustomerService } from "./customer/admin-customer.service";
 import { AdminCustomerController } from "./customer/admin-customer.controller";
+import { AdminUsersService } from "./users/admin-users.service";
+import { AdminUsersController } from "./users/admin-users.controller";
 import { AdminSearchController } from "./customer/admin-search.controller";
 import { InternalNoteService } from "./notes/internal-note.service";
 import { AdminNoteController } from "./notes/admin-note.controller";
@@ -126,6 +128,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminSystemController,
     AdminNoteController,
     AdminCustomerController,
+    AdminUsersController,
     AdminSearchController,
     SupportCaseController,
     DisputeController,
@@ -174,6 +177,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminAuthGuard,
     AdminAuditLogService,
     AdminCustomerService,
+    AdminUsersService,
     InternalNoteService,
     SupportCaseService,
     SupportNotificationListener,
