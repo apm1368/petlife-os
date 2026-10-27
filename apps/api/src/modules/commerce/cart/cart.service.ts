@@ -76,6 +76,7 @@ export class CartService {
     if (!offer) throw new NotFoundApiException("Offer");
     if (
       offer.status !== SellerOfferStatus.ACTIVE ||
+      (offer as any).moderationStatus !== "APPROVED" ||
       offer.sellerOrganization.verificationStatus !== SellerVerificationStatus.VERIFIED ||
       offer.sellerOrganization.status !== SellerStatus.ACTIVE
     ) {
@@ -230,7 +231,7 @@ export class CartService {
     }
     const available = Math.max(0, (offer.inventoryItem?.onHand ?? 0) - (offer.inventoryItem?.reserved ?? 0));
     const issues: CartLineIssue[] = [];
-    if (offer.status !== SellerOfferStatus.ACTIVE || product.status !== "ACTIVE" || !offer.productVariant.isActive) issues.push("OFFER_UNAVAILABLE");
+    if (offer.status !== SellerOfferStatus.ACTIVE || (offer as any).moderationStatus !== "APPROVED" || product.status !== "ACTIVE" || !offer.productVariant.isActive) issues.push("OFFER_UNAVAILABLE");
     if (offer.sellerOrganization.verificationStatus !== SellerVerificationStatus.VERIFIED || offer.sellerOrganization.status !== SellerStatus.ACTIVE) issues.push("SELLER_UNAVAILABLE");
     if (available === 0) issues.push("OUT_OF_STOCK");
     else if (line.quantity > available) issues.push("QUANTITY_EXCEEDS_STOCK");

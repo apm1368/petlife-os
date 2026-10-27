@@ -80,7 +80,7 @@ export class RepeatDeliveryService {
 
   async create(userId: string, input: CreateRepeatDeliveryInput): Promise<RepeatDeliveryDto> {
     const offer = await this.prisma.sellerOffer.findUnique({ where: { id: input.sellerOfferId }, include: { productVariant: { include: { product: true } }, sellerOrganization: true } });
-    if (!offer || offer.status !== SellerOfferStatus.ACTIVE || !this.sellerOpen(offer.sellerOrganization) || offer.productVariant.product.status !== ProductStatus.ACTIVE) {
+    if (!offer || offer.status !== SellerOfferStatus.ACTIVE || (offer as any).moderationStatus !== "APPROVED" || !this.sellerOpen(offer.sellerOrganization) || offer.productVariant.product.status !== ProductStatus.ACTIVE) {
       throw new NotFoundApiException("Offer", { sellerOfferId: input.sellerOfferId });
     }
     if (!offer.repeatDeliveryEligible) throw new RepeatDeliveryConflictException("REPEAT_DELIVERY_NOT_OFFERED", "This seller does not offer repeat delivery for this item.");

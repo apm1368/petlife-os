@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { OrderRefundRequestStatus, OrderStatus, Prisma, ProductModerationStatus, ProductReviewStatus, ProductStatus, RepeatDeliveryStatus, SellerOfferStatus, type FulfillmentStatus as PrismaFulfillmentStatus } from "@prisma/client";
+import { OrderRefundRequestStatus, OrderStatus, Prisma, ProductReviewStatus, ProductStatus, RepeatDeliveryStatus, SellerOfferStatus, type FulfillmentStatus as PrismaFulfillmentStatus } from "@prisma/client";
 import type {
   AdminCommerceAnalyticsDto,
   AdminCommerceOrderDetailDto,
@@ -296,126 +296,12 @@ export class AdminCommerceService {
     );
   }
 
-  }
-
-  async listProductsForModeration(query: { status?: ProductModerationStatus; q?: string; page?: number }): Promise<PaginatedDto<any>> {
-    const page = query.page ?? 1;
-    const where: Prisma.ProductWhereInput = {
-      ...(query.status ? { moderationStatus: query.status } : { moderationStatus: ProductModerationStatus.PENDING_REVIEW }),
-      ...(query.q ? { OR: [{ title: { contains: query.q, mode: "insensitive" } }, { variants: { some: { sku: { contains: query.q, mode: "insensitive" } } } }] } : {}),
-    };
-    const [rows, total] = await Promise.all([
-      this.prisma.product.findMany({
-        where,
-        include: {
-          category: { select: { name: true } },
-          brand: { select: { name: true } },
-          variants: { select: { id: true, sku: true, title: true, offers: { select: { status: true, sellerOrganizationId: true, sellerOrganization: { select: { name: true } } } } } },
-        },
-        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-        skip: (page - 1) * PAGE_SIZE,
-        take: PAGE_SIZE,
-      }),
-      this.prisma.product.count({ where }),
-    ]);
-    return toPaginatedDto(
-      rows.map((p) => {
-        const offers = p.variants.flatMap((v) => v.offers);
-        const sellers = [...new Set(offers.map((o) => o.sellerOrganization?.name).filter(Boolean))];
-        return {
-          id: p.id,
-          title: p.title,
-          slug: p.slug,
-          status: p.status,
-          moderationStatus: (p as any).moderationStatus,
-          moderationReason: (p as any).moderationReason,
-          moderatedAt: (p as any).moderatedAt?.toISOString() ?? null,
-          categoryName: p.category.name,
-          brandName: p.brand?.name ?? null,
-          variantCount: p.variants.length,
-          sellerNames: sellers,
-          createdAt: p.createdAt.toISOString(),
-          updatedAt: p.updatedAt.toISOString(),
-        };
-      }),
-      total,
-      page,
-      PAGE_SIZE,
-    );
-  }
-
-  async getProductForModeration(productId: string): Promise<any> {
-    const p = await this.prisma.product.findUnique({
-      where: { id: productId },
-      include: {
-        category: true,
-        brand: true,
-        media: true,
-        variants: { include: { offers: { include: { sellerOrganization: true } } } },
-      },
-    });
-    if (!p) throw new NotFoundApiException("Product", { productId });
-    return {
-      id: p.id,
-      title: p.title,
-      slug: p.slug,
-      description: p.description,
-      status: p.status,
-      moderationStatus: (p as any).moderationStatus,
-      moderationReason: (p as any).moderationReason,
-      moderatedAt: (p as any).moderatedAt?.toISOString() ?? null,
-      category: p.category,
-      brand: p.brand,
-      media: p.media,
-      variants: p.variants.map((v: any) => ({
-        id: v.id,
-        sku: v.sku,
-        title: v.title,
-        attributes: v.attributes,
-        weightValue: v.weightValue,
-        weightUnit: v.weightUnit,
-        offers: v.offers.map((o: any) => ({
-          id: o.id,
-          sellerOrganizationId: o.sellerOrganizationId,
-          sellerName: o.sellerOrganization?.name,
-          priceAmount: o.priceAmount,
-          currency: o.currency,
-          status: o.status,
-        })),
-      })),
-      specifications: (p as any).specifications,
-      allergenTags: p.allergenTags,
-      supportsDog: p.supportsDog,
-      supportsCat: p.supportsCat,
-      createdAt: p.createdAt.toISOString(),
-      updatedAt: p.updatedAt.toISOString(),
-    };
-  }
-
-  async decideProductModeration(admin: ResolvedAdminContext, productId: string, decision: ProductModerationStatus, reason: string, httpRequestId?: string): Promise<{ id: string; moderationStatus: string }> {
-    const before = await this.prisma.product.findUnique({ where: { id: productId }, select: { moderationStatus: true } });
+  async setProductStatus(admin: ResolvedAdminContext, productId: string, status: ProductStatus, reason: string, httpRequestId?: string): Promise<{ id: string; status: string }> {
+    const before = await this.prisma.product.findUnique({ where: { id: productId }, select: { status: true } });
     if (!before) throw new NotFoundApiException("Product", { productId });
-    const row = await this.prisma.product.update({
-      where: { id: productId },
-      data: {
-        moderationStatus: decision,
-        moderatedAt: new Date(),
-        moderatedByAdminId: admin.adminUserId,
-        moderationReason: reason.trim(),
-      },
-    });
-    await this.audit.record({
-      adminUserId: admin.adminUserId,
-      action: decision === ProductModerationStatus.APPROVED ? "product.moderation_approved" : "product.moderation_rejected",
-      entityType: "PRODUCT",
-      entityId: productId,
-      reason,
-      beforeSummary: { moderationStatus: (before as any).moderationStatus },
-      afterSummary: { moderationStatus: decision },
-      requestId: httpRequestId,
-    });
-    await this.events.publish(decision === ProductModerationStatus.APPROVED ? "ProductModerationApproved" : "ProductModerationRejected", { productId, adminUserId: admin.adminUserId }, { aggregateType: "Product", aggregateId: productId });
-    return { id: row.id, moderationStatus: (row as any).moderationStatus };
+    const row = await this.prisma.product.update({ where: { id: productId }, data: { status } });
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "product.status_changed", entityType: "PRODUCT", entityId: productId, reason, beforeSummary: { status: before.status }, afterSummary: { status }, requestId: httpRequestId });
+    return { id: row.id, status: row.status };
   }
 
   // ---------------------------------------------------------------- reviews

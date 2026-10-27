@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
-import { OrderRefundRequestStatus, OrderStatus, ProductModerationStatus, ProductReviewStatus, ProductStatus } from "@prisma/client";
+import { OrderRefundRequestStatus, OrderStatus, ProductReviewStatus, ProductStatus } from "@prisma/client";
 import { Transform, Type } from "class-transformer";
 import { IsBoolean, IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min } from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
@@ -59,13 +59,12 @@ class ReasonDto {
   @IsString() @Length(3, 500) reason!: string;
 }
 
-class ProductModerationQueryDto extends PageDto {
-  @IsOptional() @IsEnum(ProductModerationStatus) status?: ProductModerationStatus;
-  @IsOptional() @IsString() @MaxLength(100) q?: string;
+class ProductStatusDto extends ReasonDto {
+  @IsIn([ProductStatus.ACTIVE, ProductStatus.INACTIVE, ProductStatus.ARCHIVED]) status!: ProductStatus;
 }
 
-class ProductModerationDecisionDto extends ReasonDto {
-  @IsEnum(ProductModerationStatus) @IsIn([ProductModerationStatus.APPROVED, ProductModerationStatus.REJECTED]) decision!: ProductModerationStatus;
+class ReviewVisibilityDto extends ReasonDto {
+  @IsBoolean() hidden!: boolean;
 }
 
 function platformActor(admin: ResolvedAdminContext): PromotionActor {
@@ -122,24 +121,6 @@ export class AdminCommerceController {
   @RequireAdminPermission("commerce.manage")
   setProductStatus(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ProductStatusDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
     return this.commerce.setProductStatus(admin, id, dto.status, dto.reason, req.requestId);
-  }
-
-  @Get("products/moderation")
-  @RequireAdminPermission("commerce.view")
-  listProductsForModeration(@Query() query: ProductModerationQueryDto) {
-    return this.commerce.listProductsForModeration(query);
-  }
-
-  @Get("products/moderation/:id")
-  @RequireAdminPermission("commerce.view")
-  getProductForModeration(@Param("id", ParseUUIDPipe) id: string) {
-    return this.commerce.getProductForModeration(id);
-  }
-
-  @Post("products/moderation/:id/decision")
-  @RequireAdminPermission("commerce.manage")
-  decideProductModeration(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ProductModerationDecisionDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
-    return this.commerce.decideProductModeration(admin, id, dto.decision, dto.reason, req.requestId);
   }
 
   @Get("reviews")

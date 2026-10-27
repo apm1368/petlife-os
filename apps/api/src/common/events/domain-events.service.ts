@@ -119,6 +119,7 @@ export const DOMAIN_EVENT_TYPES = [
   "SellerMembershipDeactivated",
   "SellerContextChanged",
   "SellerOfferPriceChanged",
+  "SellerOfferSubmittedForModeration",
   "SellerOfferActivated",
   "SellerOfferDeactivated",
   "InventoryAdjusted",

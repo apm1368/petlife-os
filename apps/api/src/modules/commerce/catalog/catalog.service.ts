@@ -17,6 +17,7 @@ const OFFER_INCLUDE = {
 
 export const ACTIVE_OFFER_WHERE = {
   status: SellerOfferStatus.ACTIVE,
+  moderationStatus: "APPROVED" as any,
   sellerOrganization: { verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE },
 } satisfies Prisma.SellerOfferWhereInput;
 

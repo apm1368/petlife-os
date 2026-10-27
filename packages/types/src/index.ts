@@ -1119,11 +1119,17 @@ export enum SellerStatus {
   CLOSED = "CLOSED",
 }
 
-export enum ProductStatus {
-  DRAFT = "DRAFT",
+export enum SellerOfferStatus {
   ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  ARCHIVED = "ARCHIVED",
+  PAUSED = "PAUSED",
+  OUT_OF_STOCK = "OUT_OF_STOCK",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum SellerOfferModerationStatus {
+  PENDING_REVIEW = "PENDING_REVIEW",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }
 
 export enum ProductModerationStatus {
@@ -1137,16 +1143,16 @@ export enum ProductCategoryStatus {
   INACTIVE = "INACTIVE",
 }
 
+export enum ProductStatus {
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  ARCHIVED = "ARCHIVED",
+}
+
 export enum BrandStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
-}
-
-export enum SellerOfferStatus {
-  ACTIVE = "ACTIVE",
-  PAUSED = "PAUSED",
-  OUT_OF_STOCK = "OUT_OF_STOCK",
-  SUSPENDED = "SUSPENDED",
 }
 
 export enum CartStatus {
@@ -2102,14 +2108,25 @@ export interface SellerOsOfferDto {
   compareAtAmount: number | null;
   currency: string;
   status: SellerOfferStatus;
-  inventory: InventoryItemDto | null;
+  moderationStatus?: SellerOfferModerationStatus;
+  moderationReason?: string | null;
+  moderatedAt?: string | null;
+  inventory: SellerOsOfferInventoryDto | null;
   marketplaceListingCount: number;
   marketplaceSyncErrorCount: number;
   createdAt: string;
   updatedAt: string;
-  /** Batch 4 */
   repeatDeliveryEligible: boolean;
   repeatIntervalsDays: number[];
+}
+
+export interface SellerOsOfferInventoryDto {
+  id: string;
+  sellerOfferId: string;
+  onHand: number;
+  reserved: number;
+  available: number;
+  updatedAt: string;
 }
 
 export interface MarketplaceProviderCapabilitiesDto {

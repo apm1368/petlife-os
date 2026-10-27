@@ -2679,6 +2679,12 @@ model ProductVariant {
 
 /// One Variant may have multiple Offers from different sellers (spec
 /// section 8) — price/inventory live here, never on Product/Variant.
+enum SellerOfferModerationStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
 model SellerOffer {
   id                     String                   @id @default(uuid()) @db.Uuid
   /// Batch 4: seller explicitly opts a consumable offer into Repeat Delivery (never inferred).
@@ -2705,6 +2711,11 @@ model SellerOffer {
 
   status SellerOfferStatus @default(ACTIVE)
 
+  moderationStatus   SellerOfferModerationStatus @default(APPROVED)
+  moderatedAt        DateTime?
+  moderatedByAdminId String?                      @db.Uuid
+  moderationReason   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -2718,6 +2729,7 @@ model SellerOffer {
   @@unique([sellerOrganizationId, sellerSku])
   @@index([productVariantId])
   @@index([sellerOrganizationId])
+  @@index([moderationStatus])
   @@map("seller_offers")
 }
 
