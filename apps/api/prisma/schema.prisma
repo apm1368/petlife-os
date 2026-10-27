@@ -2625,6 +2625,11 @@ model Product {
 
   status ProductStatus @default(ACTIVE)
 
+  moderationStatus   ProductModerationStatus @default(APPROVED)
+  moderatedAt        DateTime?
+  moderatedByAdminId String?                  @db.Uuid
+  moderationReason   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -2633,6 +2638,7 @@ model Product {
 
   @@index([categoryId])
   @@index([status])
+  @@index([moderationStatus])
   @@map("products")
 }
 
@@ -8947,6 +8953,12 @@ enum ProductReviewStatus {
   REJECTED
   PUBLISHED
   HIDDEN
+}
+
+enum ProductModerationStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
 }
 
 /// One review per delivered order item, by the order's own customer.

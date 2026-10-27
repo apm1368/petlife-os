@@ -159,6 +159,7 @@ export class CatalogService {
     const q = filter.search?.trim();
     const where: Prisma.ProductWhereInput = {
       status: ProductStatus.ACTIVE,
+      moderationStatus: "APPROVED",
       variants: { some: { isActive: true, offers: { some: { ...ACTIVE_OFFER_WHERE, ...(filter.seller ? { sellerOrganizationId: filter.seller } : {}) } } } },
       ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
       ...(filter.brand ? { brandId: filter.brand } : {}),
@@ -263,6 +264,7 @@ export class CatalogService {
     const product = await this.prisma.product.findUnique({ where: { id: productId }, include: PRODUCT_INCLUDE });
     // Draft, inactive and archived products are not public.
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");
+    if ((product as any).moderationStatus && (product as any).moderationStatus !== "APPROVED") throw new NotFoundApiException("Product");
 
     const [pet, prices, ratings, reviews, favorite, relatedRows] = await Promise.all([
       this.visiblePet(userId, petId),
@@ -276,7 +278,7 @@ export class CatalogService {
       }),
       userId ? this.prisma.productFavorite.findUnique({ where: { userId_productId: { userId, productId } } }) : Promise.resolve(null),
       this.prisma.product.findMany({
-        where: { status: ProductStatus.ACTIVE, categoryId: product.categoryId, id: { not: product.id }, variants: { some: { isActive: true, offers: { some: ACTIVE_OFFER_WHERE } } } },
+        where: { status: ProductStatus.ACTIVE, moderationStatus: "APPROVED" as any, categoryId: product.categoryId, id: { not: product.id }, variants: { some: { isActive: true, offers: { some: ACTIVE_OFFER_WHERE } } } },
         include: PRODUCT_INCLUDE,
         orderBy: [{ createdAt: "desc" }, { id: "asc" }],
         take: 6,
@@ -332,7 +334,7 @@ export class CatalogService {
   /** Summaries for known ids (favorites, repeat delivery), in the given order; non-public products are skipped. */
   async summariesByIds(userId: string | undefined, productIds: string[]): Promise<ProductSummaryDto[]> {
     if (productIds.length === 0) return [];
-    const rows = await this.prisma.product.findMany({ where: { id: { in: productIds }, status: ProductStatus.ACTIVE }, include: PRODUCT_INCLUDE });
+    const rows = await this.prisma.product.findMany({ where: { id: { in: productIds }, status: ProductStatus.ACTIVE, moderationStatus: "APPROVED" as any }, include: PRODUCT_INCLUDE });
     const [prices, ratings] = await Promise.all([this.priceOffers(rows), this.ratings(rows.map((r) => r.id))]);
     const byId = new Map(rows.map((r) => [r.id, r]));
     const ordered = productIds.map((id) => byId.get(id)).filter((r): r is (typeof rows)[number] => Boolean(r));
@@ -342,6 +344,7 @@ export class CatalogService {
   async getOffers(productId: string): Promise<SellerOfferDto[]> {
     const product = await this.prisma.product.findUnique({ where: { id: productId }, include: PRODUCT_INCLUDE });
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");
+    if ((product as any).moderationStatus && (product as any).moderationStatus !== "APPROVED") throw new NotFoundApiException("Product");
     const prices = await this.priceOffers([product]);
     return product.variants.flatMap((v) => v.offers.map((o) => toSellerOfferDto(o, prices.get(o.id))));
   }

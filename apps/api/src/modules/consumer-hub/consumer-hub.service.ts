@@ -62,7 +62,7 @@ export class ConsumerHubService {
         ? this.prisma.providerService.findMany({ where: { isActive: true, name: like, providerOrganization: { verificationStatus: "VERIFIED" }, ...(city ? { location: { city } } : {}) }, select: { id: true, name: true, category: true, providerOrganizationId: true, providerOrganization: { select: { name: true } } }, take }).then((r) => r.map((s) => this.hit("SERVICE", s.id, { title: s.name, subtitle: s.providerOrganization.name, deepLink: `/providers/${s.providerOrganizationId}` }, { category: s.category })))
         : [],
       want("PRODUCT")
-        ? this.prisma.product.findMany({ where: { status: ProductStatus.ACTIVE, title: like }, select: { id: true, title: true }, take }).then((r) => r.map((p) => this.hit("PRODUCT", p.id, { title: p.title, subtitle: null, deepLink: `/shop/products/${p.id}` })))
+        ? this.prisma.product.findMany({ where: { status: ProductStatus.ACTIVE, moderationStatus: "APPROVED" as any, title: like }, select: { id: true, title: true }, take }).then((r) => r.map((p) => this.hit("PRODUCT", p.id, { title: p.title, subtitle: null, deepLink: `/shop/products/${p.id}` })))
         : [],
       want("TRAVEL_LISTING")
         ? this.prisma.travelListing.findMany({ where: { status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, title: like, ...(city ? { city } : {}) }, select: { id: true, title: true, city: true }, take }).then((r) => r.map((l) => this.hit("TRAVEL_LISTING", l.id, { title: l.title, subtitle: l.city, deepLink: `/travel/stays/${l.id}` })))
@@ -131,7 +131,7 @@ export class ConsumerHubService {
         return sv ? { title: sv.name, subtitle: sv.providerOrganization.name, deepLink: `/providers/${sv.providerOrganizationId}` } : null;
       }
       case "PRODUCT": {
-        const p = await this.prisma.product.findFirst({ where: { id, status: ProductStatus.ACTIVE }, select: { title: true } });
+        const p = await this.prisma.product.findFirst({ where: { id, status: ProductStatus.ACTIVE, moderationStatus: "APPROVED" as any }, select: { title: true } });
         return p ? { title: p.title, subtitle: null, deepLink: `/shop/products/${id}` } : null;
       }
       case "TRAVEL_LISTING": {

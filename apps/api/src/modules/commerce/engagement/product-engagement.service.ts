@@ -63,6 +63,7 @@ export class ProductEngagementService {
   async listReviews(productId: string, page = 1, pageSize = 10): Promise<PaginatedDto<ProductReviewDto>> {
     const product = await this.prisma.product.findUnique({ where: { id: productId }, select: { status: true } });
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");
+    if ((product as any).moderationStatus && (product as any).moderationStatus !== "APPROVED") throw new NotFoundApiException("Product");
     const size = Math.min(Math.max(pageSize, 1), 50);
     const where = { productId, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } };
     const [rows, total] = await Promise.all([
@@ -81,6 +82,7 @@ export class ProductEngagementService {
   async setFavorite(userId: string, productId: string, favorite: boolean): Promise<{ productId: string; favorited: boolean }> {
     const product = await this.prisma.product.findUnique({ where: { id: productId }, select: { status: true } });
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");
+    if ((product as any).moderationStatus && (product as any).moderationStatus !== "APPROVED") throw new NotFoundApiException("Product");
     if (favorite) {
       await this.prisma.productFavorite.upsert({ where: { userId_productId: { userId, productId } }, create: { userId, productId }, update: {} });
     } else {
@@ -90,7 +92,7 @@ export class ProductEngagementService {
   }
 
   async listFavorites(userId: string): Promise<ProductSummaryDto[]> {
-    const rows = await this.prisma.productFavorite.findMany({ where: { userId, product: { status: ProductStatus.ACTIVE } }, orderBy: { createdAt: "desc" }, take: 100, select: { productId: true } });
+    const rows = await this.prisma.productFavorite.findMany({ where: { userId, product: { status: ProductStatus.ACTIVE, moderationStatus: "APPROVED" as any } }, orderBy: { createdAt: "desc" }, take: 100, select: { productId: true } });
     return this.catalog.summariesByIds(userId, rows.map((r) => r.productId));
   }
 

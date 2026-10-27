@@ -45,10 +45,41 @@
     "irr": "IRR",
     "otherCurrency": "Recorded currency",
     "otherRequest": "Other service",
-    "tabs": { "profile": "Summary", "households": "Households and pets", "businesses": "Businesses", "orders": "Orders", "requests": "Requests", "tickets": "Tickets", "reviews": "Reviews", "audit": "Audit trail" },
-    "reviewKinds": { "PROVIDER": "Service review", "PRODUCT": "Product review", "TRAVEL": "Accommodation review" },
-    "species": { "DOG": "Dog", "CAT": "Cat", "BIRD": "Bird", "RABBIT": "Rabbit", "RODENT": "Rodent", "FISH": "Fish", "REPTILE": "Reptile", "OTHER": "Other" },
-    "requestCategories": { "VET": "Veterinary", "GROOMING": "Grooming", "TRAINING": "Training", "WALKING": "Walking", "SITTING": "Pet sitting", "BOARDING": "Boarding", "PET_TAXI": "Pet taxi", "OTHER": "Other service" },
+    "tabs": {
+      "profile": "Summary",
+      "households": "Households and pets",
+      "businesses": "Businesses",
+      "orders": "Orders",
+      "requests": "Requests",
+      "tickets": "Tickets",
+      "reviews": "Reviews",
+      "audit": "Audit trail"
+    },
+    "reviewKinds": {
+      "PROVIDER": "Service review",
+      "PRODUCT": "Product review",
+      "TRAVEL": "Accommodation review"
+    },
+    "species": {
+      "DOG": "Dog",
+      "CAT": "Cat",
+      "BIRD": "Bird",
+      "RABBIT": "Rabbit",
+      "RODENT": "Rodent",
+      "FISH": "Fish",
+      "REPTILE": "Reptile",
+      "OTHER": "Other"
+    },
+    "requestCategories": {
+      "VET": "Veterinary",
+      "GROOMING": "Grooming",
+      "TRAINING": "Training",
+      "WALKING": "Walking",
+      "SITTING": "Pet sitting",
+      "BOARDING": "Boarding",
+      "PET_TAXI": "Pet taxi",
+      "OTHER": "Other service"
+    },
     "pagination": "User list pages",
     "previous": "Previous",
     "next": "Next",
@@ -5642,10 +5673,23 @@
     "profileRecorded": "Recorded for staff review",
     "profile": {
       "mobileVerifiedAt": "Current mobile verification",
-      "title": "Applicant identity and contact details", "firstName": "First name", "lastName": "Last name", "landline": "Landline", "websiteUrl": "Website (HTTPS, optional)", "enamadId": "Enamad ID (optional)", "mobile": "Verified mobile",
+      "title": "Applicant identity and contact details",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "landline": "Landline",
+      "websiteUrl": "Website (HTTPS, optional)",
+      "enamadId": "Enamad ID (optional)",
+      "mobile": "Verified mobile",
       "mobileHelp": "Your verified account mobile is recorded by the server when you save. Saving this profile does not approve the organization.",
-      "empty": "No applicant profile has been recorded.", "loading": "Loading identity details…", "failed": "Could not save or load the identity details. Check the fields and retry.", "retry": "Retry", "save": "Save identity details", "saving": "Saving…", "saved": "Identity details saved.",
-      "phoneRequired": "First verify your mobile in account settings, then save this profile.", "locked": "This case is locked. Ask the reviewer to request updated information before editing."
+      "empty": "No applicant profile has been recorded.",
+      "loading": "Loading identity details…",
+      "failed": "Could not save or load the identity details. Check the fields and retry.",
+      "retry": "Retry",
+      "save": "Save identity details",
+      "saving": "Saving…",
+      "saved": "Identity details saved.",
+      "phoneRequired": "First verify your mobile in account settings, then save this profile.",
+      "locked": "This case is locked. Ask the reviewer to request updated information before editing."
     },
     "refreshAccess": "Reload page to check approval",
     "activationRequired": "Admin approval of your organization is required to manage services or create and activate offers. You can still follow up on verification and existing orders.",
@@ -5739,7 +5783,9 @@
       "EVIDENCE_INCOMPLETE": "Evidence incomplete under the current policy"
     },
     "documentKinds": {
-      "NATIONAL_ID_CARD": "National ID card", "BUSINESS_LICENSE": "Business license", "ENAMAD": "Enamad evidence",
+      "NATIONAL_ID_CARD": "National ID card",
+      "BUSINESS_LICENSE": "Business license",
+      "ENAMAD": "Enamad evidence",
       "LICENSE": "Professional license",
       "IDENTITY": "Identity document",
       "BUSINESS_REGISTRATION": "Business registration",
@@ -6089,7 +6135,34 @@
     "year": "Year"
   },
   "petOverview": {
-      "careUnavailable": "Care reminders could not be loaded. Other records are available; try again to retrieve the complete list.",
-      "careIncomplete": "Care items needing attention and upcoming care have not been fully retrieved."
+    "careUnavailable": "Care reminders could not be loaded. Other records are available; try again to retrieve the complete list.",
+    "careIncomplete": "Care items needing attention and upcoming care have not been fully retrieved."
+  },
+  "adminCommerce": {
+    "productModeration": {
+      "title": "Product moderation",
+      "subtitle": "Review and approve products before public listing",
+      "status": "Status",
+      "search": "Search",
+      "searchPlaceholder": "Product name or SKU",
+      "filter": "Filter",
+      "emptyTitle": "No items",
+      "emptyDescription": "No products to review in this status",
+      "product": "Product",
+      "sellers": "Sellers",
+      "createdAt": "Created",
+      "actions": "Actions",
+      "review": "Review",
+      "reason": "Reason",
+      "reasonPlaceholder": "Enter reason (min 3 for rejection)",
+      "approve": "Approve",
+      "reject": "Reject",
+      "close": "Close",
+      "statuses": {
+        "PENDING_REVIEW": "Pending review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      }
+    }
   }
 }

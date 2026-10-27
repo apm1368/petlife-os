@@ -1126,6 +1126,12 @@ export enum ProductStatus {
   ARCHIVED = "ARCHIVED",
 }
 
+export enum ProductModerationStatus {
+  PENDING_REVIEW = "PENDING_REVIEW",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
+
 export enum ProductCategoryStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
