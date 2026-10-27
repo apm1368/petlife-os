@@ -4,6 +4,9 @@ import { UnauthenticatedException, AdminAccessDeniedException } from "../../../c
 import { AdminAccessService } from "./admin-access.service";
 import { roleHasPermission, type AdminPermission } from "./admin-permissions";
 import { ADMIN_PERMISSION_KEY } from "./require-admin-permission.decorator";
+import { ADMIN_VERTICAL_KEY } from "./require-admin-vertical.decorator";
+import { allowedVerticals } from "./admin-verticals";
+import type { AdminVertical } from "@prisma/client";
 import type { AdminAuthedRequest } from "./admin-context.types";
 
 /**
@@ -35,6 +38,20 @@ export class AdminAuthGuard implements CanActivate {
       const satisfied = requiredPermissions.some((permission) => roleHasPermission(resolved.role, permission));
       if (!satisfied) {
         throw new AdminAccessDeniedException({ reason: "INSUFFICIENT_PERMISSION", requiredPermissions, role: resolved.role });
+      }
+    }
+
+    // Second axis: the permission says the role may do this kind of work, the vertical says whether
+    // these are its rows. A scoped role that passes the permission check still fails here when the
+    // route belongs to someone else's vertical, so narrowing the menu is never what protects a route.
+    // Read from the handler first, then the controller: a vertical is normally a property of the
+    // whole controller ("everything under /admin/commerce is the shop"), and a single handler may
+    // still override it.
+    const requiredVerticals = this.reflector.getAllAndOverride<AdminVertical[] | undefined>(ADMIN_VERTICAL_KEY, [context.getHandler(), context.getClass()]);
+    if (requiredVerticals && requiredVerticals.length > 0) {
+      const allowed = allowedVerticals(resolved);
+      if (allowed !== null && !requiredVerticals.some((vertical) => allowed.includes(vertical))) {
+        throw new AdminAccessDeniedException({ reason: "OUT_OF_VERTICAL_SCOPE", requiredVerticals, role: resolved.role, scopes: allowed });
       }
     }
 

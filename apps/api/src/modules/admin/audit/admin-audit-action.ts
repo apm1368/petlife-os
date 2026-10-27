@@ -96,6 +96,7 @@ export type AdminAuditAction =
   | "place_correction.approved"
   | "account_deletion.state_changed"
   | "admin_user.granted"
+  | "admin_user.scopes_changed"
   | "admin_user.role_changed"
   | "admin_user.suspended"
   | "admin_user.reactivated"

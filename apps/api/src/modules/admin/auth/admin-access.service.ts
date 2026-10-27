@@ -33,6 +33,7 @@ export class AdminAccessService {
       displayName: adminUser.user.displayName,
       role: adminUser.role,
       status: adminUser.status,
+      serviceScopes: adminUser.serviceScopes,
     };
   }
 

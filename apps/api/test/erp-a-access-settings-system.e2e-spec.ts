@@ -38,7 +38,9 @@ describe("ERP-A access control, settings, system", () => {
     await get(await actor("member"), "/admin/me/capabilities").expect(403);
     const editor = await actor("editor", AdminRole.EDITOR);
     const caps = (await get(editor, "/admin/me/capabilities").expect("Cache-Control", "no-store").expect(200)).body;
-    expect(caps).toEqual({ role: "EDITOR", permissions: ["content.view", "content.create", "content.edit", "content.media.manage"] });
+    // verticals is null for every unscoped role, EDITOR among them: the vertical axis confines only
+    // the Wave 2 scoped roles, so no pre-existing role lost reach when it was introduced.
+    expect(caps).toEqual({ role: "EDITOR", permissions: ["content.view", "content.create", "content.edit", "content.media.manage"], verticals: null });
     await get(editor, "/admin/support/cases").expect(403);
     expect((await get(editor, "/admin/dashboard").expect(200)).body).toEqual({ openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null });
     await db.adminUser.update({ where: { id: editor.adminUserId }, data: { role: AdminRole.SUPPORT } });

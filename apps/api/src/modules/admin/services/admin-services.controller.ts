@@ -41,20 +41,20 @@ export class AdminServicesController {
 
   @Get("service-bookings")
   @RequireAdminPermission("services.view")
-  listBookings(@Query() query: AdminBookingListQueryDto) {
-    return this.services.listBookings(query);
+  listBookings(@CurrentAdmin() admin: ResolvedAdminContext, @Query() query: AdminBookingListQueryDto) {
+    return this.services.listBookings(admin, query);
   }
 
   @Get("service-bookings/:id")
   @RequireAdminPermission("services.view")
-  getBooking(@Param("id", ParseUUIDPipe) id: string) {
-    return this.services.getBooking(id);
+  getBooking(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string) {
+    return this.services.getBooking(admin, id);
   }
 
   @Get("provider-services")
   @RequireAdminPermission("services.view")
-  listServices(@Query() query: ProviderFilterDto) {
-    return this.services.listServices(query.providerId);
+  listServices(@CurrentAdmin() admin: ResolvedAdminContext, @Query() query: ProviderFilterDto) {
+    return this.services.listServices(admin, query.providerId);
   }
 
   @Post("provider-services/:id/deactivate")
@@ -71,8 +71,8 @@ export class AdminServicesController {
 
   @Get("provider-reviews")
   @RequireAdminPermission("services.view")
-  listReviews(@Query() query: ReviewFilterDto) {
-    return this.services.listReviews(query.status);
+  listReviews(@CurrentAdmin() admin: ResolvedAdminContext, @Query() query: ReviewFilterDto) {
+    return this.services.listReviews(admin, query.status);
   }
 
   @Post("provider-reviews/:id/hide")
@@ -83,13 +83,13 @@ export class AdminServicesController {
 
   @Get("service-waitlist")
   @RequireAdminPermission("services.view")
-  waitlist(@Query() query: ProviderFilterDto) {
-    return this.services.listWaitlist(query.providerId);
+  waitlist(@CurrentAdmin() admin: ResolvedAdminContext, @Query() query: ProviderFilterDto) {
+    return this.services.listWaitlist(admin, query.providerId);
   }
 
   @Get("services-analytics")
   @RequireAdminPermission("services.view")
-  analytics(@Query() query: AnalyticsQueryDto) {
-    return this.services.analytics(query.days ?? 30);
+  analytics(@CurrentAdmin() admin: ResolvedAdminContext, @Query() query: AnalyticsQueryDto) {
+    return this.services.analytics(admin, query.days ?? 30);
   }
 }

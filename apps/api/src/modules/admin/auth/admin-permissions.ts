@@ -330,6 +330,21 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   [AdminRole.CLINIC_OPERATIONS]: ["customer.view", "services.view", "services.manage", "subscription.view", "verification.manage", "task.manage", "support.view"],
   [AdminRole.COMMERCE_OPERATIONS]: ["customer.view", "commerce.view", "commerce.manage", "promotions.manage", "sellerFinance.view", "task.manage", "support.view"],
   [AdminRole.ANALYTICS]: ["analytics.view"],
+  // Wave 2 scoped roles. Each is deliberately narrower than the operational role it resembles,
+  // because its reach is also confined to one vertical (see admin-verticals.ts) — permissions alone
+  // would still let a shop administrator read another vertical's rows through a shared endpoint.
+  // None of them gets admin.manage, settings.approve, finance execution or entitlement overrides.
+  //
+  // CONTENT_ADMIN is the publishing counterpart of EDITOR: EDITOR drafts, CONTENT_ADMIN also
+  // publishes and archives, keeping "editing and publishing are separate actions" intact one level up.
+  [AdminRole.CONTENT_ADMIN]: ["content.view", "content.create", "content.edit", "content.publish", "content.archive", "content.media.manage", "task.manage"],
+  [AdminRole.SHOP_ADMIN]: ["customer.view", "commerce.view", "commerce.manage", "promotions.manage", "sellerFinance.view", "task.manage"],
+  // The vertical, not the permission set, is what separates one SERVICE_ADMIN from another: both a
+  // grooming and a clinic administrator need services.manage, and serviceScopes decides whose rows.
+  [AdminRole.SERVICE_ADMIN]: ["customer.view", "services.view", "services.manage", "places.view", "travel.view", "travel.manage", "insurance.view", "insurance.applications.view", "task.manage"],
+  // Front-line support: reads a customer, works their cases and disputes, and can rescue a
+  // compromised account by revoking sessions — but never reveals PII or touches money.
+  [AdminRole.SUPPORT_AGENT]: ["customer.view", "support.view", "support.manage", "dispute.view", "task.manage", "customer.sessions.revoke"],
 };
 
 export function roleHasPermission(role: AdminRole, permission: AdminPermission): boolean {

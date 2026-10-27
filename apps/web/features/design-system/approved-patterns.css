@@ -109,3 +109,14 @@
 @media(max-width:650px){.design-root[data-pattern="admin"] .erp-bar__inner{flex-wrap:wrap;border-radius:24px;gap:8px}.design-root[data-pattern="admin"] .erp-bar__tools{flex-wrap:wrap;min-width:0;max-width:100%}}
 .design-root[data-pattern="admin"] .erp-shell{background:var(--campaign-cream)}
 :root[data-theme="dark"] .design-root[data-pattern="admin"] .erp-shell{background:var(--campaign-plum)}
+/* SYSTEM must follow OS dark mode just like the explicit dark preference. Admin-only scope. */
+@media (prefers-color-scheme: dark) {
+ :root:not([data-theme="light"]) .design-root[data-pattern="admin"],
+ :root:not([data-theme="light"]) .design-root[data-pattern="admin"] .erp-main {
+  --surface-base:var(--campaign-plum); --surface-elevated:var(--campaign-plum-strong); --surface-subtle:var(--campaign-plum-strong);
+  --text-primary:var(--campaign-cream); --text-secondary:color-mix(in srgb,var(--campaign-cream) 85%,transparent);
+  --brand-natural:var(--campaign-cream); --brand-solid:var(--campaign-cream); --brand-solid-strong:var(--campaign-paper);
+  --on-brand:var(--campaign-plum); --border-subtle:color-mix(in srgb,var(--campaign-cream) 22%,transparent);
+ }
+ :root:not([data-theme="light"]) .design-root[data-pattern="admin"] .erp-shell { background:var(--campaign-plum); }
+}
