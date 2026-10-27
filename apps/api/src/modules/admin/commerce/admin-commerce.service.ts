@@ -270,7 +270,7 @@ export class AdminCommerceService {
       }),
       this.prisma.product.count({ where }),
     ]);
-    const ratings = await this.prisma.productReview.groupBy({ by: ["productId"], where: { productId: { in: rows.map((r) => r.id) }, status: ProductReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } });
+    const ratings = await this.prisma.productReview.groupBy({ by: ["productId"], where: { productId: { in: rows.map((r) => r.id) }, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } }, _avg: { rating: true }, _count: { _all: true } });
     const rById = new Map(ratings.map((r) => [r.productId, r]));
     return toPaginatedDto(
       rows.map((p) => {
@@ -331,7 +331,7 @@ export class AdminCommerceService {
     if (!before) throw new NotFoundApiException("Review", { reviewId });
     const row = await this.prisma.productReview.update({
       where: { id: reviewId },
-      data: hidden ? { status: ProductReviewStatus.HIDDEN, hiddenReason: reason } : { status: ProductReviewStatus.PUBLISHED, hiddenReason: null },
+      data: hidden ? { status: ProductReviewStatus.HIDDEN, hiddenReason: reason } : { status: ProductReviewStatus.APPROVED, hiddenReason: null },
     });
     await this.audit.record({ adminUserId: admin.adminUserId, action: hidden ? "product_review.hidden" : "product_review.restored", entityType: "PRODUCT_REVIEW", entityId: reviewId, reason, beforeSummary: { status: before.status }, afterSummary: { status: row.status }, requestId: httpRequestId });
     if (hidden) await this.events.publish("ProductReviewHidden", { reviewId, productId: row.productId }, { aggregateType: "Product", aggregateId: row.productId });

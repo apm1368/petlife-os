@@ -432,6 +432,7 @@ export class TravelListingService {
   async respondToReview(organizationId: string, reviewId: string, response: string) {
     const review = await this.prisma.travelReview.findFirst({ where: { id: reviewId, listing: { organizationId } } });
     if (!review) throw new NotFoundApiException("Review", { reviewId });
+    if (!["PUBLISHED", "APPROVED"].includes(review.status)) throw new ValidationApiException({ field: "reviewId", reason: "REVIEW_NOT_PUBLISHED" });
     if (review.providerResponse) throw new ValidationApiException({ field: "response", reason: "ALREADY_RESPONDED" });
     await this.prisma.travelReview.update({ where: { id: reviewId }, data: { providerResponse: response.trim(), respondedAt: new Date() } });
     return { id: reviewId, providerResponse: response.trim() };

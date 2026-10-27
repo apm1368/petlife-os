@@ -434,7 +434,9 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       for (const step of ["check-in", "start", "complete"]) await post(c.owner, `/provider/bookings/${booking.id}/${step}`).send({ completionNote: "معاینه انجام شد" }).expect(201);
       await post(other, `/bookings/${booking.id}/review`).send({ rating: 1 }).expect(403);
       const review = await post(owner, `/bookings/${booking.id}/review`).send({ rating: 5, body: "دکتر بسیار دقیق و مهربان بود" }).expect(201);
+      expect(review.body.status).toBe("PENDING");
       await post(owner, `/bookings/${booking.id}/review`).send({ rating: 4 }).expect(400);
+      await db.providerReview.update({ where: { id: review.body.id }, data: { status: "APPROVED" } });
       await post(c.owner, `/provider/reviews/${review.body.id}/respond`).send({ response: "ممنون از اعتماد شما" }).expect(201);
       const pub = await request(server()).get(`/providers/${c.org.id}/reviews`).expect(200);
       expect(pub.body.summary).toMatchObject({ average: 5, count: 1, dimensions: { quality: null, communication: null, timeliness: null } });
@@ -552,7 +554,7 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
           const reviewer = await actor("reviewer");
           const hh = await household(reviewer);
           const b = await db.booking.create({ data: { householdId: hh.householdId, petId: hh.pets[0]!.id, userId: reviewer.id, providerOrganizationId: org.id, providerLocationId: loc.id, providerServiceId: svc.id, category: "VET", locationMode: "AT_PROVIDER", startAt: new Date(Date.now() - 7 * 86400_000), endAt: new Date(Date.now() - 7 * 86400_000 + 1800_000), timezone: "UTC", bookingStatus: "COMPLETED" } });
-          await db.providerReview.create({ data: { bookingId: b.id, providerOrganizationId: org.id, userId: reviewer.id, rating: opts.rating } });
+          await db.providerReview.create({ data: { bookingId: b.id, providerOrganizationId: org.id, userId: reviewer.id, rating: opts.rating, status: "PUBLISHED" } });
         }
         return org;
       };

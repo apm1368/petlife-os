@@ -570,14 +570,14 @@ export function ProviderTravelReviewsView() {
       {rows === null ? <Skeleton className="h-40" /> : rows.length === 0 ? <EmptyState title={fa ? "هنوز نظری ثبت نشده" : "No reviews yet"} /> : (
         <ul className="flex flex-col gap-3">{rows.map((r) => (
           <li key={r.id} className="flex flex-col gap-2 rounded-md border border-border-subtle p-3 text-sm">
-            <p><span className="font-bold">{r.listingTitle}</span> · {"★".repeat(r.overall)}{"☆".repeat(5 - r.overall)} · {formatDay(r.createdAt.slice(0, 10), lang)}{r.status === "HIDDEN" ? (fa ? " · پنهان‌شده توسط opetlife" : " · hidden by opetlife") : ""}</p>
+            <p><span className="font-bold">{r.listingTitle}</span> · {"★".repeat(r.overall)}{"☆".repeat(5 - r.overall)} · {formatDay(r.createdAt.slice(0, 10), lang)}{r.status === "PENDING" ? (fa ? " · در انتظار بررسی opetlife" : " · awaiting opetlife moderation") : r.status === "REJECTED" ? (fa ? " · ردشده" : " · rejected") : r.status === "HIDDEN" ? (fa ? " · پنهان‌شده توسط opetlife" : " · hidden by opetlife") : ""}</p>
             {r.body ? <p>{r.body}</p> : null}
-            {r.providerResponse ? <p className="rounded-md bg-surface-subtle p-2"><span className="font-bold">{fa ? "پاسخ شما: " : "Your response: "}</span>{r.providerResponse}</p> : (
+            {r.providerResponse ? <p className="rounded-md bg-surface-subtle p-2"><span className="font-bold">{fa ? "پاسخ شما: " : "Your response: "}</span>{r.providerResponse}</p> : ["APPROVED", "PUBLISHED"].includes(r.status) ? (
               <div className="flex flex-col gap-2">
                 <textarea dir="auto" aria-label={fa ? "پاسخ" : "Response"} maxLength={1000} value={drafts[r.id] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.id]: e.target.value })} className="min-h-16 rounded-md border border-border-subtle bg-surface-base p-2" />
                 <Button size="sm" className="w-fit" disabled={(drafts[r.id] ?? "").trim().length < 3} onClick={() => void travelProviderService.respond(r.id, drafts[r.id]!.trim()).then(load).catch(() => setMsg(fa ? "پاسخ ثبت نشد." : "Response not saved."))}>{fa ? "انتشار پاسخ" : "Publish response"}</Button>
               </div>
-            )}
+            ) : null}
           </li>
         ))}</ul>
       )}

@@ -235,7 +235,7 @@ export class AdminServicesService {
     const [byStatus, byCategory, reviews, waitlistActive] = await Promise.all([
       this.prisma.booking.groupBy({ by: ["bookingStatus"], where: { ...scope, createdAt: { gte: since } }, _count: { _all: true } }),
       this.prisma.booking.groupBy({ by: ["category"], where: { ...scope, createdAt: { gte: since } }, _count: { _all: true } }),
-      this.prisma.providerReview.aggregate({ where: { ...scope, createdAt: { gte: since }, status: ProviderReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } }),
+      this.prisma.providerReview.aggregate({ where: { ...scope, createdAt: { gte: since }, status: { in: [ProviderReviewStatus.PUBLISHED, ProviderReviewStatus.APPROVED] } }, _avg: { rating: true }, _count: { _all: true } }),
       this.prisma.bookingWaitlistEntry.count({ where: { ...scope, status: WaitlistStatus.ACTIVE } }),
     ]);
     const count = (status: BookingStatus) => byStatus.find((r) => r.bookingStatus === status)?._count._all ?? 0;

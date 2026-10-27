@@ -675,6 +675,7 @@ export class TravelBookingService {
         authorName: firstName(user?.displayName ?? null),
         stayMonth: toDateKey(row.checkIn).slice(0, 7),
         providerResponse: null,
+        status: review.status,
         createdAt: review.createdAt.toISOString(),
       };
     } catch (error) {
@@ -685,7 +686,7 @@ export class TravelBookingService {
 
   async listPublishedReviews(listingId: string, page = 1, pageSize = 10): Promise<PaginatedDto<TravelReviewDto>> {
     const size = Math.min(Math.max(pageSize, 1), 30);
-    const where = { listingId, status: TravelReviewStatus.PUBLISHED };
+    const where = { listingId, status: { in: [TravelReviewStatus.PUBLISHED, TravelReviewStatus.APPROVED] } };
     const [rows, total] = await Promise.all([
       this.prisma.travelReview.findMany({ where, include: { booking: { select: { checkIn: true } } }, orderBy: [{ createdAt: "desc" }, { id: "asc" }], skip: (Math.max(page, 1) - 1) * size, take: size }),
       this.prisma.travelReview.count({ where }),
@@ -704,6 +705,7 @@ export class TravelBookingService {
         authorName: nameById.get(r.userId) ?? "—",
         stayMonth: toDateKey(r.booking.checkIn).slice(0, 7),
         providerResponse: r.providerResponse,
+        status: r.status,
         createdAt: r.createdAt.toISOString(),
       })),
       total,

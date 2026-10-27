@@ -447,7 +447,9 @@ describe("Batch 4 — Commerce", () => {
       await cu.c.post(`/orders/${orderId}/items/${itemId}/review`).send({ rating: 6 }).expect(400);
       const review = await cu.c.post(`/orders/${orderId}/items/${itemId}/review`).send({ rating: 4, body: "My dog loves it" }).expect(201);
       expect(review.body.verifiedPurchase).toBe(true);
+      expect(review.body.status).toBe("PENDING");
       await cu.c.post(`/orders/${orderId}/items/${itemId}/review`).send({ rating: 1 }).expect(409);
+      await prisma.productReview.update({ where: { id: review.body.id }, data: { status: "APPROVED" } });
 
       const detail = await request(server).get(`/shop/products/${p.id}`).expect(200);
       expect(detail.body.rating).toEqual({ average: 4, count: 1 });

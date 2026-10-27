@@ -56,7 +56,7 @@ describe("Admin service vertical scoping (W2-4, row level)", () => {
     const pet = await db.pet.create({ data: { householdId: household.id, name: "scope pet", species: "DOG" } });
     const complete = async (base: Awaited<ReturnType<typeof provider>>): Promise<Fixture> => {
       const booking = await db.booking.create({ data: { householdId: household.id, petId: pet.id, userId: customer.id, providerOrganizationId: base.orgId, providerLocationId: base.locationId, providerServiceId: base.serviceId, category: base.category, locationMode: "AT_PROVIDER", startAt: new Date(Date.now() - 3600_000), endAt: new Date(Date.now() - 1800_000), timezone: "UTC", bookingStatus: "COMPLETED" } });
-      const review = await db.providerReview.create({ data: { bookingId: booking.id, providerOrganizationId: base.orgId, userId: customer.id, rating: 4, body: `scope ${base.category}` } });
+      const review = await db.providerReview.create({ data: { bookingId: booking.id, providerOrganizationId: base.orgId, userId: customer.id, rating: 4, body: `scope ${base.category}`, status: "PUBLISHED" } });
       const waitlist = await db.bookingWaitlistEntry.create({ data: { householdId: household.id, userId: customer.id, petId: pet.id, providerOrganizationId: base.orgId, serviceId: base.serviceId, windowStart: new Date(Date.now() + 3600_000), windowEnd: new Date(Date.now() + 7200_000) } });
       return { ...base, bookingId: booking.id, reviewId: review.id, waitlistId: waitlist.id };
     };

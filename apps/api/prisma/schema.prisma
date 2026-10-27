@@ -471,6 +471,9 @@ enum WaitlistStatus {
 }
 
 enum ProviderReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
   PUBLISHED
   HIDDEN
 }
@@ -8815,8 +8818,11 @@ model ProviderReview {
   user                   User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
   rating                 Int
   body                   String?
-  status                 ProviderReviewStatus @default(PUBLISHED)
+  status                 ProviderReviewStatus @default(PENDING)
   hiddenReason           String?
+  moderationLabels       String[]             @default([])
+  moderatedAt            DateTime?
+  moderatedByAdminId     String?              @db.Uuid
   /// Optional structured dimensions (1–5) — given by the reviewer, never derived from text.
   quality                Int?
   communication          Int?
@@ -8936,6 +8942,9 @@ model PromotionRedemption {
 }
 
 enum ProductReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
   PUBLISHED
   HIDDEN
 }
@@ -8953,8 +8962,11 @@ model ProductReview {
   user             User                @relation(fields: [userId], references: [id], onDelete: Restrict)
   rating           Int
   body             String?
-  status           ProductReviewStatus @default(PUBLISHED)
+  status           ProductReviewStatus @default(PENDING)
   hiddenReason     String?
+  moderationLabels String[]            @default([])
+  moderatedAt      DateTime?
+  moderatedByAdminId String?           @db.Uuid
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 
@@ -9149,6 +9161,9 @@ model TravelBookingEvent {
 }
 
 enum TravelReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
   PUBLISHED
   HIDDEN
 }
@@ -9166,8 +9181,11 @@ model TravelReview {
   accuracy         Int?
   location         Int?
   body             String?
-  status           TravelReviewStatus @default(PUBLISHED)
+  status           TravelReviewStatus @default(PENDING)
   hiddenReason     String?
+  moderationLabels String[]           @default([])
+  moderatedAt      DateTime?
+  moderatedByAdminId String?          @db.Uuid
   providerResponse String?
   respondedAt      DateTime?
   createdAt        DateTime           @default(now())

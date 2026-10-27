@@ -64,7 +64,7 @@ export class ProductEngagementService {
     const product = await this.prisma.product.findUnique({ where: { id: productId }, select: { status: true } });
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");
     const size = Math.min(Math.max(pageSize, 1), 50);
-    const where = { productId, status: ProductReviewStatus.PUBLISHED };
+    const where = { productId, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } };
     const [rows, total] = await Promise.all([
       this.prisma.productReview.findMany({
         where,
@@ -94,7 +94,7 @@ export class ProductEngagementService {
     return this.catalog.summariesByIds(userId, rows.map((r) => r.productId));
   }
 
-  private toDto(r: { id: string; rating: number; body: string | null; createdAt: Date; user: { displayName: string | null }; productVariant: { title: string | null } }): ProductReviewDto {
-    return { id: r.id, rating: r.rating, body: r.body, authorName: firstName(r.user.displayName), variantTitle: r.productVariant.title, verifiedPurchase: true, createdAt: r.createdAt.toISOString() };
+  private toDto(r: { id: string; rating: number; body: string | null; status: ProductReviewStatus; createdAt: Date; user: { displayName: string | null }; productVariant: { title: string | null } }): ProductReviewDto {
+    return { id: r.id, rating: r.rating, body: r.body, authorName: firstName(r.user.displayName), variantTitle: r.productVariant.title, verifiedPurchase: true, status: r.status, createdAt: r.createdAt.toISOString() };
   }
 }

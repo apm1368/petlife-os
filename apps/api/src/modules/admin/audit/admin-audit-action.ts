@@ -184,6 +184,8 @@ export type AdminAuditAction =
   | "travel_listing.verification_changed"
   | "travel_review.hidden"
   | "travel_review.restored"
+  | "review.approved"
+  | "review.rejected"
   | "travel_requirement_rule.created"
   | "travel_requirement_rule.updated"
   | "insurer_membership.granted"

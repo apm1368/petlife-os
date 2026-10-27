@@ -95,6 +95,8 @@ describe("Trust, reviews and consumer hub", () => {
     await send("post", customer, `/bookings/${booking.id}/review`).send({ rating: 4, quality: 6 }).expect(400);
     await send("post", customer, `/bookings/${booking.id}/review`).send({ rating: 4, timeliness: 0 }).expect(400);
     const review = (await send("post", customer, `/bookings/${booking.id}/review`).send({ rating: 4, quality: 5, communication: 4, timeliness: 3, body: "خوب بود" }).expect(201)).body;
+    expect(review.status).toBe("PENDING");
+    await db.providerReview.update({ where: { id: review.id }, data: { status: "APPROVED" } });
 
     const pub = (await request(server()).get(`/providers/${p.org.id}/reviews`).expect(200)).body;
     expect(pub.summary).toMatchObject({ count: 1, dimensions: { quality: 5, communication: 4, timeliness: 3 } });

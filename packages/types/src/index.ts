@@ -1473,6 +1473,7 @@ export interface ProductReviewDto {
   authorName: string;
   variantTitle: string | null;
   verifiedPurchase: true;
+  status: AdminReviewModerationStatus;
   createdAt: string;
 }
 
@@ -2923,6 +2924,29 @@ export interface AdminUserReviewSummaryDto {
   status: string;
   createdAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// W2-9 — Cross-vertical review moderation.
+// ---------------------------------------------------------------------------
+
+export type AdminReviewVertical = "SERVICE" | "PRODUCT" | "TRAVEL";
+export type AdminReviewModerationStatus = "PENDING" | "APPROVED" | "REJECTED" | "PUBLISHED" | "HIDDEN";
+
+export interface AdminReviewModerationRowDto {
+  id: string;
+  vertical: AdminReviewVertical;
+  status: AdminReviewModerationStatus;
+  rating: number;
+  body: string | null;
+  authorName: string;
+  target: { id: string; name: string };
+  labels: string[];
+  moderationReason: string | null;
+  createdAt: string;
+  moderatedAt: string | null;
+}
+
+export type AdminReviewModerationListDto = PaginatedDto<AdminReviewModerationRowDto>;
 
 /** Full, bounded user profile for the directory detail tabs. Collections are newest-first and capped. */
 export interface AdminUserProfileDto {
@@ -5980,7 +6004,7 @@ export interface AdminProductReviewRowDto {
   rating: number;
   body: string | null;
   authorName: string;
-  status: "PUBLISHED" | "HIDDEN";
+  status: AdminReviewModerationStatus;
   hiddenReason: string | null;
   createdAt: string;
 }
@@ -6180,6 +6204,7 @@ export interface TravelReviewDto {
   authorName: string;
   stayMonth: string;
   providerResponse: string | null;
+  status: AdminReviewModerationStatus;
   createdAt: string;
 }
 
