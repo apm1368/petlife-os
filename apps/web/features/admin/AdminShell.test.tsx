@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => route.pathname,
 }));
 vi.mock("@/services/auth.service", () => ({ authService: { getSession: vi.fn() } }));
-vi.mock("@/services/admin.service", () => ({ adminService: { getMe: vi.fn() } }));
+vi.mock("@/services/admin.service", () => ({ adminService: { getMe: vi.fn(), getTrustQueueSummary: vi.fn() } }));
 
 const SESSION_USER: UserDto = { id: "u1", email: "admin@example.com", phone: null, displayName: "An Admin", avatarUrl: null, locale: "en", themePreference: "SYSTEM", createdAt: "", updatedAt: "" };
 
@@ -24,7 +24,22 @@ describe("AdminShell", () => {
     route.pathname = "/en/admin";
     vi.mocked(authService.getSession).mockReset();
     vi.mocked(adminService.getMe).mockReset();
+    vi.mocked(adminService.getTrustQueueSummary).mockReset().mockResolvedValue({ total: 0 } as never);
     useAdminStore.setState({ context: null, status: "idle" });
+  });
+
+  it("clears old admin identity on bootstrap failure and retries without mounting protected content", async () => {
+    useAdminStore.setState({ context: { isAdmin: true, adminUserId: "old", role: "SUPER_ADMIN", permissions: ["customer.view"] } as never, status: "ready" });
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockRejectedValueOnce(new Error("offline")).mockResolvedValue({ isAdmin: false, adminUserId: null, role: null, displayName: null, permissions: [] });
+    renderWithIntl(<AdminShell><div>private content</div></AdminShell>);
+    await screen.findByRole("alert");
+    expect(screen.queryByText("private content")).toBeNull();
+    expect(screen.queryByText("No admin access")).toBeNull();
+    expect(useAdminStore.getState().context).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await screen.findByText("No admin access");
+    expect(adminService.getMe).toHaveBeenCalledTimes(2);
   });
 
   it("shows a clear message when the session has no admin access", async () => {
@@ -61,6 +76,8 @@ describe("AdminShell", () => {
     // Items live in job groups (dropdown pills); open the one that holds support work.
     fireEvent.click(screen.getByRole("button", { name: "Customers & trust" }));
     expect(screen.getByRole("link", { name: "Support" })).toBeTruthy();
+    expect(adminService.getTrustQueueSummary).not.toHaveBeenCalled();
+    expect(screen.getByRole("link", { name: "All users" }).getAttribute("href")).toBe("/en/admin/users");
     expect(screen.getByText("Disputes")).toBeTruthy();
     // SUPPORT has neither finance.view nor audit.view — those groups and items must not render at all.
     expect(screen.queryByRole("button", { name: "Finance" })).toBeNull();

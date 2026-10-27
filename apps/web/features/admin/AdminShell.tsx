@@ -23,6 +23,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/crm", labelKey: "nav.crm", permission: "customer.view" },
   { href: "/customer-affairs", labelKey: "nav.customerAffairs", permission: "support.view" },
   { href: "/customers", labelKey: "nav.customers", permission: "customer.view" },
+  { href: "/users", labelKey: "nav.users", permission: "customer.view" },
   { href: "/support", labelKey: "nav.support", permission: "support.view" },
   { href: "/disputes", labelKey: "nav.disputes", permission: "dispute.view" },
   { href: "/trust", labelKey: "nav.trust", permission: "trust.view" },
@@ -58,7 +59,7 @@ const PREVIEW_ONLY_HREFS = new Set(["/crm", "/customer-affairs"]);
 /** ERP information architecture: the same items grouped by job — six groups instead of a flat link list. */
 const NAV_GROUPS: { key: string; hrefs: string[] }[] = [
   { key: "work", hrefs: ["/tasks", "/crm", "/customer-affairs"] },
-  { key: "trust", hrefs: ["/customers", "/support", "/disputes", "/trust", "/community", "/lost-pets", "/animal-support"] },
+  { key: "trust", hrefs: ["/users", "/customers", "/support", "/disputes", "/trust", "/community", "/lost-pets", "/animal-support"] },
   { key: "network", hrefs: ["/verification", "/providers", "/services", "/sellers", "/commerce", "/travel", "/insurance", "/places"] },
   { key: "finance", hrefs: ["/transactions", "/seller-finance", "/reconciliation", "/subscriptions"] },
   { key: "content", hrefs: ["/content", "/content/new", "/content/categories", "/content/tags", "/content/media", "/content/placements"] },
@@ -81,13 +82,16 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [trustCount, setTrustCount] = useState<number | null>(null);
-  useEffect(() => {
-    // Live counter on the trust pill (ERP-G queue); silently absent without permission.
-    Promise.resolve().then(() => adminService.getTrustQueueSummary()).then((q) => setTrustCount(q.total)).catch(() => setTrustCount(null));
-  }, []);
-  const { isLoading } = useAdminBootstrap();
+  const { isLoading, error: bootstrapError, retry: retryBootstrap } = useAdminBootstrap();
   const context = useAdminStore((s) => s.context);
   const status = useAdminStore((s) => s.status);
+  const canViewTrust = !!context?.permissions.includes("trust.view");
+  useEffect(() => {
+    let cancelled = false;
+    setTrustCount(null);
+    if (canViewTrust) Promise.resolve().then(() => adminService.getTrustQueueSummary()).then(q => { if (!cancelled) setTrustCount(q.total); }).catch(() => { if (!cancelled) setTrustCount(null); });
+    return () => { cancelled = true; };
+  }, [canViewTrust]);
   const t = useTranslations("admin.shell");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -117,6 +121,15 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
         <Skeleton className="h-8 w-40" aria-label={tCommon("loading")} />
       </div>
     );
+  }
+
+  if (bootstrapError) {
+    return <div className="flex min-h-screen items-center justify-center bg-surface-base px-4">
+      <ContextSurface className="max-w-sm space-y-4 text-center">
+        <p role="alert">{t("accessLoadFailed")}</p>
+        <Button onClick={retryBootstrap}>{tCommon("retry")}</Button>
+      </ContextSurface>
+    </div>;
   }
 
   if (status === "not-an-admin" || !context?.isAdmin) {
