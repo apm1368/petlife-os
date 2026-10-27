@@ -139,16 +139,16 @@ export function ProviderReviewsView() {
         <ul className="divide-y divide-border-subtle">
           {data.map((r) => (
             <li key={r.id} className="flex flex-col gap-2 py-4">
-              <p className="text-sm"><span aria-label={fa ? `${r.rating} از ۵` : `${r.rating} of 5`}>{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span> · {r.authorName}{r.serviceName ? ` · ${r.serviceName}` : ""}{r.status === "HIDDEN" ? (fa ? " · پنهان‌شده توسط پشتیبانی" : " · hidden by support") : ""}</p>
+              <p className="text-sm"><span aria-label={fa ? `${r.rating} از ۵` : `${r.rating} of 5`}>{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span> · {r.authorName}{r.serviceName ? ` · ${r.serviceName}` : ""}{r.status === "PENDING" ? (fa ? " · در انتظار بررسی opetlife" : " · awaiting opetlife moderation") : r.status === "REJECTED" ? (fa ? " · ردشده" : " · rejected") : r.status === "HIDDEN" ? (fa ? " · پنهان‌شده توسط پشتیبانی" : " · hidden by support") : ""}</p>
               {r.body ? <p>{r.body}</p> : null}
               {r.providerResponse ? (
                 <p className="border-s-2 border-brand-natural ps-3 text-sm text-text-secondary">{r.providerResponse}</p>
-              ) : (
+              ) : ["APPROVED", "PUBLISHED"].includes(r.status) ? (
                 <div className="flex items-end gap-2">
                   <Input label={fa ? "پاسخ عمومی" : "Public response"} value={drafts[r.id] ?? ""} onChange={(e) => setDrafts({ ...drafts, [r.id]: e.target.value })} className="flex-1" />
                   <Button variant="secondary" size="sm" disabled={!drafts[r.id]?.trim()} onClick={() => void respond(r.id)}>{fa ? "ارسال" : "Send"}</Button>
                 </div>
-              )}
+              ) : null}
             </li>
           ))}
         </ul>

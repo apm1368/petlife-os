@@ -415,7 +415,9 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
       await t.c.post(`/travel/bookings/${b.id}/review`).send({ overall: 5 }).expect(409);
       await prisma.travelBooking.update({ where: { id: b.id }, data: { status: "COMPLETED", completedAt: new Date() } });
       const review = await t.c.post(`/travel/bookings/${b.id}/review`).send({ overall: 4, petFriendliness: 5, body: "Great for dogs" }).expect(201);
+      expect(review.body.status).toBe("PENDING");
       await t.c.post(`/travel/bookings/${b.id}/review`).send({ overall: 4 }).expect(409);
+      await prisma.travelReview.update({ where: { id: review.body.id }, data: { status: "APPROVED" } });
       expect((await request(server).get(`/travel/listings/${l.listingId}`).expect(200)).body.rating).toMatchObject({ average: 4, count: 1, petFriendliness: 5 });
       await p.c.post(`/provider/travel/reviews/${review.body.id}/response`).send({ response: "Thank you!" }).expect(201);
       await p.c.post(`/provider/travel/reviews/${review.body.id}/response`).send({ response: "Again" }).expect(400);

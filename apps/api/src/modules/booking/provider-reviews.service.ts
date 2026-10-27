@@ -47,7 +47,7 @@ function toDto(row: ReviewRow): ProviderReviewDto {
     body: row.body,
     authorName: firstName(row.user.displayName),
     serviceName: row.booking.serviceNameSnapshot,
-    providerResponse: row.status === ProviderReviewStatus.PUBLISHED ? row.providerResponse : null,
+    providerResponse: row.status === ProviderReviewStatus.PUBLISHED || row.status === ProviderReviewStatus.APPROVED ? row.providerResponse : null,
     respondedAt: row.respondedAt?.toISOString() ?? null,
     responseEditedAt: row.responseEditedAt?.toISOString() ?? null,
     quality: row.quality,
@@ -83,19 +83,19 @@ export class ProviderReviewsService {
   }
 
   async listPublic(providerOrganizationId: string, take = 20): Promise<ProviderReviewDto[]> {
-    const rows = await this.prisma.providerReview.findMany({ where: { providerOrganizationId, status: ProviderReviewStatus.PUBLISHED }, include: INCLUDE, orderBy: { createdAt: "desc" }, take: Math.min(take, 50) });
+    const rows = await this.prisma.providerReview.findMany({ where: { providerOrganizationId, status: { in: [ProviderReviewStatus.PUBLISHED, ProviderReviewStatus.APPROVED] } }, include: INCLUDE, orderBy: { createdAt: "desc" }, take: Math.min(take, 50) });
     return rows.map(toDto);
   }
 
   async summary(providerOrganizationId: string): Promise<ProviderRatingSummary> {
-    const agg = await this.prisma.providerReview.aggregate({ where: { providerOrganizationId, status: ProviderReviewStatus.PUBLISHED }, _avg: { rating: true, quality: true, communication: true, timeliness: true }, _count: { _all: true } });
+    const agg = await this.prisma.providerReview.aggregate({ where: { providerOrganizationId, status: { in: [ProviderReviewStatus.PUBLISHED, ProviderReviewStatus.APPROVED] } }, _avg: { rating: true, quality: true, communication: true, timeliness: true }, _count: { _all: true } });
     const r = (v: number | null) => (v === null ? null : Math.round(v * 10) / 10);
     return { average: r(agg._avg.rating), count: agg._count._all, dimensions: { quality: r(agg._avg.quality), communication: r(agg._avg.communication), timeliness: r(agg._avg.timeliness) } };
   }
 
   async summaries(providerOrganizationIds: string[]): Promise<Map<string, ProviderRatingSummary>> {
     if (!providerOrganizationIds.length) return new Map();
-    const rows = await this.prisma.providerReview.groupBy({ by: ["providerOrganizationId"], where: { providerOrganizationId: { in: providerOrganizationIds }, status: ProviderReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } });
+    const rows = await this.prisma.providerReview.groupBy({ by: ["providerOrganizationId"], where: { providerOrganizationId: { in: providerOrganizationIds }, status: { in: [ProviderReviewStatus.PUBLISHED, ProviderReviewStatus.APPROVED] } }, _avg: { rating: true }, _count: { _all: true } });
     return new Map(rows.map((r) => [r.providerOrganizationId, { average: r._avg.rating === null ? null : Math.round(r._avg.rating * 10) / 10, count: r._count._all }]));
   }
 
@@ -113,7 +113,7 @@ export class ProviderReviewsService {
     if (!text) throw new ValidationApiException({ field: "response" });
     const review = await this.prisma.providerReview.findFirst({ where: { id: reviewId, providerOrganizationId } });
     if (!review) throw new NotFoundApiException("Review");
-    if (review.status !== ProviderReviewStatus.PUBLISHED) throw new ValidationApiException({ field: "reviewId", reason: "REVIEW_NOT_PUBLISHED" });
+    if (review.status !== ProviderReviewStatus.PUBLISHED && review.status !== ProviderReviewStatus.APPROVED) throw new ValidationApiException({ field: "reviewId", reason: "REVIEW_NOT_PUBLISHED" });
     const now = new Date();
     const edit = review.providerResponse !== null;
     await this.prisma.providerReview.update({ where: { id: reviewId }, data: edit ? { providerResponse: text, responseEditedAt: now } : { providerResponse: text, respondedAt: now, respondedByUserId: actorUserId ?? null } });

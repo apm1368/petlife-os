@@ -111,7 +111,7 @@ export class CatalogService {
 
   async ratings(productIds: string[]): Promise<Map<string, RatingSummaryDto>> {
     if (!productIds.length) return new Map();
-    const rows = await this.prisma.productReview.groupBy({ by: ["productId"], where: { productId: { in: productIds }, status: ProductReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } });
+    const rows = await this.prisma.productReview.groupBy({ by: ["productId"], where: { productId: { in: productIds }, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } }, _avg: { rating: true }, _count: { _all: true } });
     return new Map(rows.map((r) => [r.productId, { average: r._avg.rating === null ? null : Math.round(r._avg.rating * 10) / 10, count: r._count._all }]));
   }
 
@@ -269,7 +269,7 @@ export class CatalogService {
       this.priceOffers([product]),
       this.ratings([product.id]),
       this.prisma.productReview.findMany({
-        where: { productId, status: ProductReviewStatus.PUBLISHED },
+        where: { productId, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } },
         include: { user: { select: { displayName: true } }, productVariant: { select: { title: true } } },
         orderBy: { createdAt: "desc" },
         take: 10,
@@ -314,6 +314,7 @@ export class CatalogService {
         authorName: (r.user.displayName ?? "").trim().split(/\s+/)[0] || "—",
         variantTitle: r.productVariant.title,
         verifiedPurchase: true as const,
+        status: r.status,
         createdAt: r.createdAt.toISOString(),
       })),
       related,

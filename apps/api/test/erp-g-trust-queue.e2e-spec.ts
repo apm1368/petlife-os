@@ -122,7 +122,7 @@ describe("ERP-G unified Trust & Safety queue", () => {
     const hh = await db.household.create({ data: { name: "h", members: { create: { userId: a.id, role: "OWNER" } } } });
     const pet = await db.pet.create({ data: { householdId: hh.id, name: "p", species: "DOG", approximateAgeMonths: 20 } });
     const bk = await db.booking.create({ data: { householdId: hh.id, petId: pet.id, userId: a.id, providerOrganizationId: org.id, providerLocationId: loc.id, providerServiceId: svc.id, category: "VET", locationMode: "AT_PROVIDER", startAt: new Date(Date.now() - 86400e3), endAt: new Date(Date.now() - 86000e3), timezone: "UTC", bookingStatus: "COMPLETED" } });
-    const review = await db.providerReview.create({ data: { bookingId: bk.id, providerOrganizationId: org.id, userId: a.id, rating: 1, body: "QA fake review" } });
+    const review = await db.providerReview.create({ data: { bookingId: bk.id, providerOrganizationId: org.id, userId: a.id, rating: 1, body: "QA fake review", status: "PUBLISHED" } });
     const rr = await db.communityReport.create({ data: { providerReviewId: review.id, reporterUserId: b.id, reason: "SCAM" } });
     expect((await queue(ts, "&subjectType=REVIEW")).items.find((i: { subjectId: string }) => i.subjectId === review.id)).toMatchObject({ severity: "HIGH" });
     const e2 = (await post(ts, `/admin/community/reports/${rr.id}/escalate`).send({ reason: "fake review" }).expect(201)).body;

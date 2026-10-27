@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { AnimalSupportVerificationStatus, CommunityReportStatus, LostPetIncidentStatus, Prisma, SupportNeedStatus } from "@prisma/client";
+import { AnimalSupportVerificationStatus, CommunityReportStatus, LostPetIncidentStatus, Prisma, ProviderReviewStatus, SupportNeedStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { DuplicateReportException, NotFoundApiException, ReportLimitReachedException, ValidationApiException } from "../../common/errors/api-exception";
@@ -82,7 +82,7 @@ export class CommunityReportService {
       data = { lostPetSightingId: targetId, reporterUserId, reason: dto.reason, details: dto.details };
     } else if (targetType === "PROVIDER_REVIEW") {
       // A published review (or the provider's reply on it); its own author can't report it.
-      const row = await this.prisma.providerReview.findFirst({ where: { id: targetId, status: "PUBLISHED" }, select: { userId: true } });
+      const row = await this.prisma.providerReview.findFirst({ where: { id: targetId, status: { in: [ProviderReviewStatus.PUBLISHED, ProviderReviewStatus.APPROVED] } }, select: { userId: true } });
       if (!row) throw new NotFoundApiException("ProviderReview");
       if (row.userId === reporterUserId) throw new ValidationApiException({ field: "targetId", reason: "CANNOT_REPORT_OWN_REVIEW" });
       data = { providerReviewId: targetId, reporterUserId, reason: dto.reason, details: dto.details };

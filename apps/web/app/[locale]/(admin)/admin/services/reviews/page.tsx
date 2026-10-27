@@ -1,5 +1,5 @@
-import { AdminProviderReviewsView } from "@/features/admin/services/AdminServicesViews";
+import { AdminReviewModerationView } from "@/features/admin-reviews/AdminReviewModerationView";
 
 export default function Page() {
-  return <AdminProviderReviewsView />;
+  return <AdminReviewModerationView initialVertical="SERVICE" />;
 }

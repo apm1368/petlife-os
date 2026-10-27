@@ -62,7 +62,7 @@ describe("Notifications, search and reviews depth", () => {
     const hh = await db.household.create({ data: { name: "h", members: { create: { userId: author.id, role: "OWNER" } } } });
     const pet = await db.pet.create({ data: { householdId: hh.id, name: "p", species: "DOG", approximateAgeMonths: 20 } });
     const b = await db.booking.create({ data: { householdId: hh.id, petId: pet.id, userId: author.id, providerOrganizationId: org.id, providerLocationId: loc.id, providerServiceId: svc.id, category: "VET", locationMode: "AT_PROVIDER", startAt: new Date(Date.now() - 86400e3), endAt: new Date(Date.now() - 86000e3), timezone: "UTC", bookingStatus: "COMPLETED" } });
-    const review = await db.providerReview.create({ data: { bookingId: b.id, providerOrganizationId: org.id, userId: author.id, rating: 1, body: "bad", providerResponse: "abusive reply" } });
+    const review = await db.providerReview.create({ data: { bookingId: b.id, providerOrganizationId: org.id, userId: author.id, rating: 1, body: "bad", providerResponse: "abusive reply", status: "PUBLISHED" } });
     const report = (a: Actor) => post(a, "/reports").send({ targetType: "PROVIDER_REVIEW", targetId: review.id, reason: "ABUSE", details: "the provider reply insults the customer" });
     expect((await report(author).expect(400)).body.error.details.reason).toBe("CANNOT_REPORT_OWN_REVIEW");
     await report(other).expect(201);

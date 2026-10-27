@@ -1573,13 +1573,13 @@
       },
       "review": {
         "write": "Write a review",
-        "done": "Thanks — you reviewed this item.",
+        "done": "Thanks — your review is awaiting moderation.",
         "rating": "Your rating",
         "stars": "{count, plural, one {# star} other {# stars}}",
         "body": "What did you and your pet think? (optional)",
         "cancel": "Cancel",
-        "submit": "Publish review",
-        "failed": "Couldn't publish your review."
+        "submit": "Submit for review",
+        "failed": "Couldn't submit your review."
       }
     },
     "statusLabels": {

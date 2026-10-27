@@ -87,7 +87,7 @@ export interface ProviderTravelReviewRow {
   cleanliness: number | null;
   location: number | null;
   body: string | null;
-  status: "PUBLISHED" | "HIDDEN";
+  status: "PENDING" | "APPROVED" | "REJECTED" | "PUBLISHED" | "HIDDEN";
   providerResponse: string | null;
   createdAt: string;
 }
@@ -264,7 +264,7 @@ export interface AdminTravelReviewRow {
   listingTitle: string;
   overall: number;
   body: string | null;
-  status: "PUBLISHED" | "HIDDEN";
+  status: "PENDING" | "APPROVED" | "REJECTED" | "PUBLISHED" | "HIDDEN";
   hiddenReason: string | null;
   providerResponse: string | null;
   createdAt: string;
