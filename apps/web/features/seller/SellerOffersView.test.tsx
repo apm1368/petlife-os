@@ -6,7 +6,9 @@ import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { SellerOffersView } from "./SellerOffersView";
 
-vi.mock("@/services/seller-os.service", () => ({ sellerOsService: { listOffers: vi.fn(), updateOffer: vi.fn() } }));
+vi.mock("@/services/seller-os.service", () => ({
+  sellerOsService: { listOffers: vi.fn(), updateOffer: vi.fn() },
+}));
 
 const OFFER: SellerOsOfferDto = {
   id: "offer-1",
@@ -19,7 +21,17 @@ const OFFER: SellerOsOfferDto = {
   compareAtAmount: null,
   currency: "IRR",
   status: "ACTIVE" as never,
-  inventory: { id: "inv-1", sellerOfferId: "offer-1", onHand: 10, reserved: 0, available: 10, updatedAt: "2026-01-01T00:00:00.000Z" },
+  moderationStatus: "APPROVED" as never,
+  moderationReason: null,
+  moderatedAt: null,
+  inventory: {
+    id: "inv-1",
+    sellerOfferId: "offer-1",
+    onHand: 10,
+    reserved: 0,
+    available: 10,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  },
   marketplaceListingCount: 0,
   marketplaceSyncErrorCount: 0,
   createdAt: "2026-01-01T00:00:00.000Z",
@@ -38,13 +50,25 @@ describe("SellerOffersView", () => {
     vi.mocked(sellerOsService.listOffers).mockReset();
     vi.mocked(sellerOsService.updateOffer).mockReset();
     useSellerStore.setState({
-      context: { active: { sellerMembershipId: "m-1", sellerOrganizationId: "seller-1", organizationName: "Pet Bazaar", verificationStatus: "VERIFIED" as never, sellerStatus: "ACTIVE" as never, role: "OWNER" as never }, memberships: [] },
+      context: {
+        active: {
+          sellerMembershipId: "m-1",
+          sellerOrganizationId: "seller-1",
+          organizationName: "Pet Bazaar",
+          verificationStatus: "VERIFIED" as never,
+          sellerStatus: "ACTIVE" as never,
+          role: "OWNER" as never,
+        },
+        memberships: [],
+      },
       status: "ready",
     });
   });
 
   it("shows an offer and a low-stock/sync-error indicator when applicable", async () => {
-    vi.mocked(sellerOsService.listOffers).mockResolvedValue(page([{ ...OFFER, inventory: { ...OFFER.inventory!, available: 2 }, marketplaceSyncErrorCount: 1 }]));
+    vi.mocked(sellerOsService.listOffers).mockResolvedValue(
+      page([{ ...OFFER, inventory: { ...OFFER.inventory!, available: 2 }, marketplaceSyncErrorCount: 1 }]),
+    );
 
     renderWithIntl(<SellerOffersView />);
 
@@ -55,11 +79,15 @@ describe("SellerOffersView", () => {
 
   it("keeps existing offers visible but directs an unverified seller to verification", async () => {
     const context = useSellerStore.getState().context!;
-    useSellerStore.setState({ context: { ...context, active: { ...context.active!, verificationStatus: "UNDER_REVIEW" as never } } });
+    useSellerStore.setState({
+      context: { ...context, active: { ...context.active!, verificationStatus: "UNDER_REVIEW" as never } },
+    });
     vi.mocked(sellerOsService.listOffers).mockResolvedValue(page([OFFER]));
     renderWithIntl(<SellerOffersView />);
     await waitFor(() => expect(screen.getByText("Grain-Free Treats")).toBeTruthy());
-    expect(screen.getByRole("link", { name: "Organization verification and documents" }).getAttribute("href")).toBe("/en/seller/verification");
+    expect(
+      screen.getByRole("link", { name: "Organization verification and documents" }).getAttribute("href"),
+    ).toBe("/en/seller/verification");
     expect(screen.queryByText("Search catalog")).toBeNull();
   });
 
@@ -78,6 +106,13 @@ describe("SellerOffersView", () => {
     expect(saveButton.disabled).toBe(false);
 
     fireEvent.click(saveButton);
-    await waitFor(() => expect(sellerOsService.updateOffer).toHaveBeenCalledWith("seller-1", "offer-1", { priceAmount: 650_000, status: "ACTIVE", repeatDeliveryEligible: false, repeatIntervalsDays: [] }));
+    await waitFor(() =>
+      expect(sellerOsService.updateOffer).toHaveBeenCalledWith("seller-1", "offer-1", {
+        priceAmount: 650_000,
+        status: "ACTIVE",
+        repeatDeliveryEligible: false,
+        repeatIntervalsDays: [],
+      }),
+    );
   });
 });

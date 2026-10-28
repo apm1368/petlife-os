@@ -1,9 +1,27 @@
 import { Injectable } from "@nestjs/common";
-import { CartStatus, Prisma, SellerOfferStatus, SellerStatus, SellerVerificationStatus } from "@prisma/client";
-import { ProductCompatibilityStatus, type CartDto, type CartLineDto, type CartLineIssue, type CartSellerGroupDto } from "@petlife/types";
+import {
+  CartStatus,
+  Prisma,
+  SellerOfferModerationStatus,
+  SellerOfferStatus,
+  SellerStatus,
+  SellerVerificationStatus,
+} from "@prisma/client";
+import {
+  ProductCompatibilityStatus,
+  type CartDto,
+  type CartLineDto,
+  type CartLineIssue,
+  type CartSellerGroupDto,
+} from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { NotFoundApiException, OfferNotAvailableException, PetAccessDeniedException, ValidationApiException } from "../../../common/errors/api-exception";
+import {
+  NotFoundApiException,
+  OfferNotAvailableException,
+  PetAccessDeniedException,
+  ValidationApiException,
+} from "../../../common/errors/api-exception";
 import { HouseholdsService } from "../../households/households.service";
 import { PetAccessService } from "../../pet-access/pet-access.service";
 import { LOW_STOCK_THRESHOLD, toSellerOfferDto } from "../commerce-dto.mapper";
@@ -44,16 +62,38 @@ export class CartService {
   /** Per-line business limit, independent of stock. */
   static readonly MAX_LINE_QUANTITY = 20;
 
-  private async priceOffer(offer: { id: string; priceAmount: number; sellerOrganizationId: string; productVariant: { product: { id: string; categoryId: string } } }): Promise<EffectivePrice> {
-    const prices = await this.pricing.price([{ offerId: offer.id, priceAmount: offer.priceAmount, sellerOrganizationId: offer.sellerOrganizationId, productId: offer.productVariant.product.id, categoryId: offer.productVariant.product.categoryId }]);
+  private async priceOffer(offer: {
+    id: string;
+    priceAmount: number;
+    sellerOrganizationId: string;
+    productVariant: { product: { id: string; categoryId: string } };
+  }): Promise<EffectivePrice> {
+    const prices = await this.pricing.price([
+      {
+        offerId: offer.id,
+        priceAmount: offer.priceAmount,
+        sellerOrganizationId: offer.sellerOrganizationId,
+        productId: offer.productVariant.product.id,
+        categoryId: offer.productVariant.product.categoryId,
+      },
+    ]);
     return prices.get(offer.id)!;
   }
 
   /** Quantity can never exceed what is actually available to sell right now, nor the per-line limit. */
-  private assertQuantity(quantity: number, offer: { inventoryItem: { onHand: number; reserved: number } | null }) {
+  private assertQuantity(
+    quantity: number,
+    offer: { inventoryItem: { onHand: number; reserved: number } | null },
+  ) {
     const available = Math.max(0, (offer.inventoryItem?.onHand ?? 0) - (offer.inventoryItem?.reserved ?? 0));
-    if (quantity > CartService.MAX_LINE_QUANTITY) throw new ValidationApiException({ field: "quantity", reason: "LINE_LIMIT", max: CartService.MAX_LINE_QUANTITY });
-    if (quantity > available) throw new ValidationApiException({ field: "quantity", reason: "INSUFFICIENT_INVENTORY", available });
+    if (quantity > CartService.MAX_LINE_QUANTITY)
+      throw new ValidationApiException({
+        field: "quantity",
+        reason: "LINE_LIMIT",
+        max: CartService.MAX_LINE_QUANTITY,
+      });
+    if (quantity > available)
+      throw new ValidationApiException({ field: "quantity", reason: "INSUFFICIENT_INVENTORY", available });
   }
 
   async getOrCreateActiveCart(userId: string) {
@@ -61,8 +101,14 @@ export class CartService {
     if (existing) return existing;
 
     const households = await this.households.listForUser(userId);
-    const created = await this.prisma.cart.create({ data: { userId, householdId: households[0]?.id ?? null } });
-    await this.events.publish("CartCreated", { cartId: created.id, userId }, { aggregateType: "Cart", aggregateId: created.id });
+    const created = await this.prisma.cart.create({
+      data: { userId, householdId: households[0]?.id ?? null },
+    });
+    await this.events.publish(
+      "CartCreated",
+      { cartId: created.id, userId },
+      { aggregateType: "Cart", aggregateId: created.id },
+    );
     return created;
   }
 
@@ -72,17 +118,25 @@ export class CartService {
   }
 
   async addItem(userId: string, dto: AddCartItemDto) {
-    const offer = await this.prisma.sellerOffer.findUnique({ where: { id: dto.offerId }, include: { sellerOrganization: true, inventoryItem: true, productVariant: { include: { product: true } } } });
+    const offer = await this.prisma.sellerOffer.findUnique({
+      where: { id: dto.offerId },
+      include: {
+        sellerOrganization: true,
+        inventoryItem: true,
+        productVariant: { include: { product: true } },
+      },
+    });
     if (!offer) throw new NotFoundApiException("Offer");
     if (
       offer.status !== SellerOfferStatus.ACTIVE ||
-      (offer as any).moderationStatus !== "APPROVED" ||
+      offer.moderationStatus !== SellerOfferModerationStatus.APPROVED ||
       offer.sellerOrganization.verificationStatus !== SellerVerificationStatus.VERIFIED ||
       offer.sellerOrganization.status !== SellerStatus.ACTIVE
     ) {
       throw new OfferNotAvailableException({ offerId: dto.offerId });
     }
-    if (offer.productVariant.product.status !== "ACTIVE" || !offer.productVariant.isActive) throw new OfferNotAvailableException({ offerId: dto.offerId });
+    if (offer.productVariant.product.status !== "ACTIVE" || !offer.productVariant.isActive)
+      throw new OfferNotAvailableException({ offerId: dto.offerId });
 
     if (dto.targetPetId) await this.assertPetAccessible(userId, dto.targetPetId);
 
@@ -97,9 +151,18 @@ export class CartService {
     if (existingLine) {
       await this.prisma.cartLine.update({
         where: { id: existingLine.id },
-        data: { quantity: existingLine.quantity + dto.quantity, unitPriceSnapshot: price.unitPrice, promotionIdSnapshot: price.promotion?.id ?? null, currency: offer.currency },
+        data: {
+          quantity: existingLine.quantity + dto.quantity,
+          unitPriceSnapshot: price.unitPrice,
+          promotionIdSnapshot: price.promotion?.id ?? null,
+          currency: offer.currency,
+        },
       });
-      await this.events.publish("CartItemUpdated", { cartId: cart.id, cartLineId: existingLine.id }, { aggregateType: "Cart", aggregateId: cart.id });
+      await this.events.publish(
+        "CartItemUpdated",
+        { cartId: cart.id, cartLineId: existingLine.id },
+        { aggregateType: "Cart", aggregateId: cart.id },
+      );
     } else {
       const created = await this.prisma.cartLine.create({
         data: {
@@ -112,7 +175,11 @@ export class CartService {
           currency: offer.currency,
         },
       });
-      await this.events.publish("CartItemAdded", { cartId: cart.id, cartLineId: created.id, offerId: dto.offerId }, { aggregateType: "Cart", aggregateId: cart.id });
+      await this.events.publish(
+        "CartItemAdded",
+        { cartId: cart.id, cartLineId: created.id, offerId: dto.offerId },
+        { aggregateType: "Cart", aggregateId: cart.id },
+      );
     }
 
     return this.getCart(userId);
@@ -120,19 +187,37 @@ export class CartService {
 
   async updateItem(userId: string, lineId: string, dto: UpdateCartItemDto) {
     const line = await this.loadOwnedLine(userId, lineId);
-    const offer = await this.prisma.sellerOffer.findUniqueOrThrow({ where: { id: line.sellerOfferId }, include: { inventoryItem: true, productVariant: { include: { product: true } } } });
+    const offer = await this.prisma.sellerOffer.findUniqueOrThrow({
+      where: { id: line.sellerOfferId },
+      include: { inventoryItem: true, productVariant: { include: { product: true } } },
+    });
     this.assertQuantity(dto.quantity, offer);
     // Changing quantity is an explicit customer action: re-accept the current price.
     const price = await this.priceOffer(offer);
-    await this.prisma.cartLine.update({ where: { id: line.id }, data: { quantity: dto.quantity, unitPriceSnapshot: price.unitPrice, promotionIdSnapshot: price.promotion?.id ?? null } });
-    await this.events.publish("CartItemUpdated", { cartId: line.cartId, cartLineId: line.id }, { aggregateType: "Cart", aggregateId: line.cartId });
+    await this.prisma.cartLine.update({
+      where: { id: line.id },
+      data: {
+        quantity: dto.quantity,
+        unitPriceSnapshot: price.unitPrice,
+        promotionIdSnapshot: price.promotion?.id ?? null,
+      },
+    });
+    await this.events.publish(
+      "CartItemUpdated",
+      { cartId: line.cartId, cartLineId: line.id },
+      { aggregateType: "Cart", aggregateId: line.cartId },
+    );
     return this.getCart(userId);
   }
 
   async removeItem(userId: string, lineId: string) {
     const line = await this.loadOwnedLine(userId, lineId);
     await this.prisma.cartLine.delete({ where: { id: line.id } });
-    await this.events.publish("CartItemRemoved", { cartId: line.cartId, cartLineId: line.id }, { aggregateType: "Cart", aggregateId: line.cartId });
+    await this.events.publish(
+      "CartItemRemoved",
+      { cartId: line.cartId, cartLineId: line.id },
+      { aggregateType: "Cart", aggregateId: line.cartId },
+    );
     return this.getCart(userId);
   }
 
@@ -142,7 +227,10 @@ export class CartService {
     return this.getCart(userId);
   }
 
-  private async loadOwnedLine(userId: string, lineId: string): Promise<{ id: string; cartId: string; sellerOfferId: string }> {
+  private async loadOwnedLine(
+    userId: string,
+    lineId: string,
+  ): Promise<{ id: string; cartId: string; sellerOfferId: string }> {
     const line = await this.prisma.cartLine.findUnique({ where: { id: lineId }, include: { cart: true } });
     if (!line || line.cart.userId !== userId) throw new NotFoundApiException("Cart item");
     return line;
@@ -155,16 +243,34 @@ export class CartService {
     });
 
     if (!cart) {
-      return { id: "", status: CartStatus.ACTIVE as unknown as CartDto["status"], sellerGroups: [], totalItems: 0, subtotalAmount: 0, currency: "IRR", hasSafetyConflict: false, discountAmount: 0, hasBlockingIssues: false };
+      return {
+        id: "",
+        status: CartStatus.ACTIVE as unknown as CartDto["status"],
+        sellerGroups: [],
+        totalItems: 0,
+        subtotalAmount: 0,
+        currency: "IRR",
+        hasSafetyConflict: false,
+        discountAmount: 0,
+        hasBlockingIssues: false,
+      };
     }
 
     const prices = await this.pricing.price(
-      cart.lines.map((l) => ({ offerId: l.sellerOffer.id, priceAmount: l.sellerOffer.priceAmount, sellerOrganizationId: l.sellerOffer.sellerOrganizationId, productId: l.sellerOffer.productVariant.product.id, categoryId: l.sellerOffer.productVariant.product.categoryId })),
+      cart.lines.map((l) => ({
+        offerId: l.sellerOffer.id,
+        priceAmount: l.sellerOffer.priceAmount,
+        sellerOrganizationId: l.sellerOffer.sellerOrganizationId,
+        productId: l.sellerOffer.productVariant.product.id,
+        categoryId: l.sellerOffer.productVariant.product.categoryId,
+      })),
     );
     const images = await this.lineImages(cart.lines);
     const lineDtos: (CartLineDto & { sellerOrgId: string })[] = [];
     for (const line of cart.lines) {
-      lineDtos.push(await this.toLineDto(line, userId, prices.get(line.sellerOffer.id)!, images.get(line.id) ?? null));
+      lineDtos.push(
+        await this.toLineDto(line, userId, prices.get(line.sellerOffer.id)!, images.get(line.id) ?? null),
+      );
     }
 
     const groupsByOrg = new Map<string, CartSellerGroupDto>();
@@ -174,16 +280,27 @@ export class CartService {
         existing.lines.push(lineDto);
         existing.subtotalAmount += lineDto.lineTotal;
       } else {
-        groupsByOrg.set(sellerOrgId, { sellerOrganization: lineDto.sellerOffer.sellerOrganization, lines: [lineDto], subtotalAmount: lineDto.lineTotal });
+        groupsByOrg.set(sellerOrgId, {
+          sellerOrganization: lineDto.sellerOffer.sellerOrganization,
+          lines: [lineDto],
+          subtotalAmount: lineDto.lineTotal,
+        });
       }
     }
 
     const sellerGroups = Array.from(groupsByOrg.values());
     const totalItems = lineDtos.reduce((sum, l) => sum + l.quantity, 0);
     const subtotalAmount = sellerGroups.reduce((sum, g) => sum + g.subtotalAmount, 0);
-    const hasSafetyConflict = lineDtos.some((l) => l.compatibility?.status === ProductCompatibilityStatus.POTENTIAL_SAFETY_CONFLICT);
+    const hasSafetyConflict = lineDtos.some(
+      (l) => l.compatibility?.status === ProductCompatibilityStatus.POTENTIAL_SAFETY_CONFLICT,
+    );
     const discountAmount = lineDtos.reduce((sum, l) => sum + l.unitDiscount * l.quantity, 0);
-    const blocking: CartLineIssue[] = ["OFFER_UNAVAILABLE", "SELLER_UNAVAILABLE", "OUT_OF_STOCK", "QUANTITY_EXCEEDS_STOCK"];
+    const blocking: CartLineIssue[] = [
+      "OFFER_UNAVAILABLE",
+      "SELLER_UNAVAILABLE",
+      "OUT_OF_STOCK",
+      "QUANTITY_EXCEEDS_STOCK",
+    ];
     const hasBlockingIssues = lineDtos.some((l) => l.issues.some((i) => blocking.includes(i)));
 
     return {
@@ -210,19 +327,31 @@ export class CartService {
   private async lineImages(lines: CartLineRow[]): Promise<Map<string, string>> {
     if (!lines.length) return new Map();
     const productIds = [...new Set(lines.map((l) => l.sellerOffer.productVariant.product.id))];
-    const media = await this.prisma.productMedia.findMany({ where: { productId: { in: productIds } }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], select: { productId: true, variantId: true, url: true } });
+    const media = await this.prisma.productMedia.findMany({
+      where: { productId: { in: productIds } },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select: { productId: true, variantId: true, url: true },
+    });
     const result = new Map<string, string>();
     for (const line of lines) {
       const variantId = line.sellerOffer.productVariant.id;
       const productId = line.sellerOffer.productVariant.product.id;
       const forProduct = media.filter((m) => m.productId === productId);
-      const url = forProduct.find((m) => m.variantId === variantId)?.url ?? forProduct.find((m) => !m.variantId)?.url ?? forProduct[0]?.url;
+      const url =
+        forProduct.find((m) => m.variantId === variantId)?.url ??
+        forProduct.find((m) => !m.variantId)?.url ??
+        forProduct[0]?.url;
       if (url) result.set(line.id, url);
     }
     return result;
   }
 
-  private async toLineDto(line: CartLineRow, userId: string, price: EffectivePrice, imageUrl: string | null): Promise<CartLineDto & { sellerOrgId: string }> {
+  private async toLineDto(
+    line: CartLineRow,
+    userId: string,
+    price: EffectivePrice,
+    imageUrl: string | null,
+  ): Promise<CartLineDto & { sellerOrgId: string }> {
     const offer = line.sellerOffer;
     const product = offer.productVariant.product;
     let compatibility = null;
@@ -231,13 +360,30 @@ export class CartService {
     }
     const available = Math.max(0, (offer.inventoryItem?.onHand ?? 0) - (offer.inventoryItem?.reserved ?? 0));
     const issues: CartLineIssue[] = [];
-    if (offer.status !== SellerOfferStatus.ACTIVE || (offer as any).moderationStatus !== "APPROVED" || product.status !== "ACTIVE" || !offer.productVariant.isActive) issues.push("OFFER_UNAVAILABLE");
-    if (offer.sellerOrganization.verificationStatus !== SellerVerificationStatus.VERIFIED || offer.sellerOrganization.status !== SellerStatus.ACTIVE) issues.push("SELLER_UNAVAILABLE");
+    if (
+      offer.status !== SellerOfferStatus.ACTIVE ||
+      offer.moderationStatus !== SellerOfferModerationStatus.APPROVED ||
+      product.status !== "ACTIVE" ||
+      !offer.productVariant.isActive
+    )
+      issues.push("OFFER_UNAVAILABLE");
+    if (
+      offer.sellerOrganization.verificationStatus !== SellerVerificationStatus.VERIFIED ||
+      offer.sellerOrganization.status !== SellerStatus.ACTIVE
+    )
+      issues.push("SELLER_UNAVAILABLE");
     if (available === 0) issues.push("OUT_OF_STOCK");
     else if (line.quantity > available) issues.push("QUANTITY_EXCEEDS_STOCK");
     else if (available <= LOW_STOCK_THRESHOLD) issues.push("LOW_STOCK");
     const priceChanged = price.unitPrice !== line.unitPriceSnapshot;
-    if (priceChanged) issues.push(line.promotionIdSnapshot && price.promotion?.id !== line.promotionIdSnapshot && price.unitPrice > line.unitPriceSnapshot ? "PROMOTION_EXPIRED" : "PRICE_CHANGED");
+    if (priceChanged)
+      issues.push(
+        line.promotionIdSnapshot &&
+          price.promotion?.id !== line.promotionIdSnapshot &&
+          price.unitPrice > line.unitPriceSnapshot
+          ? "PROMOTION_EXPIRED"
+          : "PRICE_CHANGED",
+      );
 
     return {
       id: line.id,
@@ -267,12 +413,26 @@ export class CartService {
 
   /** The customer explicitly accepts current prices after a change (never done silently). */
   async acceptCurrentPrices(userId: string) {
-    const cart = await this.prisma.cart.findFirst({ where: { userId, status: CartStatus.ACTIVE }, include: { lines: { include: CART_LINE_INCLUDE } } });
+    const cart = await this.prisma.cart.findFirst({
+      where: { userId, status: CartStatus.ACTIVE },
+      include: { lines: { include: CART_LINE_INCLUDE } },
+    });
     if (cart) {
-      const prices = await this.pricing.price(cart.lines.map((l) => ({ offerId: l.sellerOffer.id, priceAmount: l.sellerOffer.priceAmount, sellerOrganizationId: l.sellerOffer.sellerOrganizationId, productId: l.sellerOffer.productVariant.product.id, categoryId: l.sellerOffer.productVariant.product.categoryId })));
+      const prices = await this.pricing.price(
+        cart.lines.map((l) => ({
+          offerId: l.sellerOffer.id,
+          priceAmount: l.sellerOffer.priceAmount,
+          sellerOrganizationId: l.sellerOffer.sellerOrganizationId,
+          productId: l.sellerOffer.productVariant.product.id,
+          categoryId: l.sellerOffer.productVariant.product.categoryId,
+        })),
+      );
       for (const l of cart.lines) {
         const p = prices.get(l.sellerOffer.id)!;
-        await this.prisma.cartLine.update({ where: { id: l.id }, data: { unitPriceSnapshot: p.unitPrice, promotionIdSnapshot: p.promotion?.id ?? null } });
+        await this.prisma.cartLine.update({
+          where: { id: l.id },
+          data: { unitPriceSnapshot: p.unitPrice, promotionIdSnapshot: p.promotion?.id ?? null },
+        });
       }
     }
     return this.getCart(userId);
