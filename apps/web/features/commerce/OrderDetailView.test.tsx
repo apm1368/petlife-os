@@ -195,11 +195,11 @@ describe("OrderDetailView", () => {
 
     renderWithIntl(<OrderDetailView orderId="order-1" />);
     fireEvent.click(await screen.findByText("Write a review"));
-    const publish = screen.getByText("Publish review").closest("button")!;
-    expect(publish.disabled).toBe(true);
+    const submit = screen.getByText("Submit for review").closest("button")!;
+    expect(submit.disabled).toBe(true);
     fireEvent.click(screen.getByRole("radio", { name: "4 stars" }));
-    fireEvent.click(publish);
+    fireEvent.click(submit);
     await waitFor(() => expect(commerceService.reviewOrderItem).toHaveBeenCalledWith("order-1", "item-1", { rating: 4, body: undefined }));
-    expect(await screen.findByText("Thanks — you reviewed this item.")).toBeTruthy();
+    expect(await screen.findByText("Thanks — your review is awaiting moderation.")).toBeTruthy();
   });
 });

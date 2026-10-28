@@ -240,7 +240,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
           </fieldset>
           <textarea aria-label={fa ? "متن نظر" : "Review text"} className="min-h-24 rounded border border-border-subtle bg-surface-base p-2" maxLength={2000} value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder={fa ? "تجربه‌تان را بنویسید؛ اطلاعات شخصی یا پزشکی ننویسید." : "Describe your experience; avoid personal or medical details."} />
           {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
-          <Button isLoading={busy} onClick={() => void act(() => bookingsService.review(booking.id, rating, reviewText.trim() || undefined), fa ? "نظر شما منتشر شد." : "Your review was published.")}>{fa ? "انتشار نظر" : "Publish review"}</Button>
+          <Button isLoading={busy} onClick={() => void act(() => bookingsService.review(booking.id, rating, reviewText.trim() || undefined), fa ? "نظر شما ثبت شد و پس از بررسی منتشر می‌شود." : "Your review was submitted and will be published after moderation.")}>{fa ? "ثبت برای بررسی" : "Submit for review"}</Button>
         </div>
       </Dialog>
     </div>

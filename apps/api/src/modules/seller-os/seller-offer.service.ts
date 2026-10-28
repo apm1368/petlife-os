@@ -1,7 +1,16 @@
 import { SellerAccessDeniedException } from "../../common/errors/api-exception";
 import { assertPartnerVerified } from "../../common/auth/require-verified-partner";
 import { Injectable } from "@nestjs/common";
-import { MarketplaceListingSyncStatus, Prisma, SellerOfferStatus, type InventoryItem, type Product, type ProductVariant, type SellerOffer } from "@prisma/client";
+import {
+  MarketplaceListingSyncStatus,
+  Prisma,
+  SellerOfferModerationStatus,
+  SellerOfferStatus,
+  type InventoryItem,
+  type Product,
+  type ProductVariant,
+  type SellerOffer,
+} from "@prisma/client";
 import type { PaginatedDto, SellerOsOfferDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -9,7 +18,11 @@ import { toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { OfferNotAvailableException, ValidationApiException } from "../../common/errors/api-exception";
 import { SellerAccessService } from "./seller-access.service";
 import type { ResolvedSellerContext } from "./auth/seller-context.types";
-import type { CreateSellerOfferDto, ListSellerOffersQueryDto, UpdateSellerOfferDto } from "./dto/seller-offer.dto";
+import type {
+  CreateSellerOfferDto,
+  ListSellerOffersQueryDto,
+  UpdateSellerOfferDto,
+} from "./dto/seller-offer.dto";
 
 /** Below this available quantity, an offer is flagged "low stock" in the Seller OS UI (spec section 40-41) — a fixed, documented threshold, not per-seller configurable this phase. */
 export const LOW_STOCK_THRESHOLD = 5;
@@ -23,13 +36,21 @@ type OfferWithRelations = SellerOffer & {
 
 /** An offer open to repeat delivery must offer at least one interval for the customer to choose. */
 function assertRepeatConfig(eligible: boolean, intervals: number[]): void {
-  if (eligible && intervals.length === 0) throw new ValidationApiException({ field: "repeatIntervalsDays", reason: "REQUIRED_WHEN_REPEAT_ELIGIBLE" });
+  if (eligible && intervals.length === 0)
+    throw new ValidationApiException({
+      field: "repeatIntervalsDays",
+      reason: "REQUIRED_WHEN_REPEAT_ELIGIBLE",
+    });
 }
 
 function toDto(offer: OfferWithRelations): SellerOsOfferDto {
   const onHand = offer.inventoryItem?.onHand ?? 0;
   const reserved = offer.inventoryItem?.reserved ?? 0;
-  const syncErrorCount = offer.marketplaceListings.filter((l) => l.syncStatus === MarketplaceListingSyncStatus.FAILED || l.syncStatus === MarketplaceListingSyncStatus.DEGRADED).length;
+  const syncErrorCount = offer.marketplaceListings.filter(
+    (l) =>
+      l.syncStatus === MarketplaceListingSyncStatus.FAILED ||
+      l.syncStatus === MarketplaceListingSyncStatus.DEGRADED,
+  ).length;
 
   return {
     id: offer.id,
@@ -43,6 +64,9 @@ function toDto(offer: OfferWithRelations): SellerOsOfferDto {
     compareAtAmount: offer.compareAtAmount,
     currency: offer.currency,
     status: offer.status as unknown as SellerOsOfferDto["status"],
+    moderationStatus: offer.moderationStatus as SellerOsOfferDto["moderationStatus"],
+    moderationReason: offer.moderationReason,
+    moderatedAt: offer.moderatedAt?.toISOString() ?? null,
     inventory: offer.inventoryItem
       ? {
           id: offer.inventoryItem.id,
@@ -84,7 +108,10 @@ export class SellerOfferService {
     private readonly sellerAccess: SellerAccessService,
   ) {}
 
-  async list(ctx: ResolvedSellerContext, query: ListSellerOffersQueryDto): Promise<PaginatedDto<SellerOsOfferDto>> {
+  async list(
+    ctx: ResolvedSellerContext,
+    query: ListSellerOffersQueryDto,
+  ): Promise<PaginatedDto<SellerOsOfferDto>> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
 
@@ -103,19 +130,30 @@ export class SellerOfferService {
     };
 
     const [rows, total] = await Promise.all([
-      this.prisma.sellerOffer.findMany({ where, include: OFFER_INCLUDE, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+      this.prisma.sellerOffer.findMany({
+        where,
+        include: OFFER_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
       this.prisma.sellerOffer.count({ where }),
     ]);
 
     let items = rows.map(toDto);
-    if (query.lowStock) items = items.filter((o) => o.inventory && o.inventory.available <= LOW_STOCK_THRESHOLD);
+    if (query.lowStock)
+      items = items.filter((o) => o.inventory && o.inventory.available <= LOW_STOCK_THRESHOLD);
 
     return toPaginatedDto(items, total, page, pageSize);
   }
 
   private async loadOwned(ctx: ResolvedSellerContext, offerId: string): Promise<OfferWithRelations> {
-    const offer = await this.prisma.sellerOffer.findUnique({ where: { id: offerId }, include: OFFER_INCLUDE });
-    if (!offer || offer.sellerOrganizationId !== ctx.sellerOrganizationId) throw new OfferNotAvailableException({ offerId });
+    const offer = await this.prisma.sellerOffer.findUnique({
+      where: { id: offerId },
+      include: OFFER_INCLUDE,
+    });
+    if (!offer || offer.sellerOrganizationId !== ctx.sellerOrganizationId)
+      throw new OfferNotAvailableException({ offerId });
     return offer;
   }
 
@@ -137,29 +175,58 @@ export class SellerOfferService {
           compareAtAmount: dto.compareAtAmount,
           sellerSku: dto.sellerSku,
           status: SellerOfferStatus.ACTIVE,
+          moderationStatus: SellerOfferModerationStatus.PENDING_REVIEW,
+          moderationReason: null,
+          moderatedAt: null,
+          moderatedByAdminId: null,
           repeatDeliveryEligible: dto.repeatDeliveryEligible ?? false,
           repeatIntervalsDays: [...new Set(dto.repeatIntervalsDays ?? [])].sort((a, b) => a - b),
           inventoryItem: { create: { onHand: dto.initialOnHand ?? 0, reserved: 0 } },
         },
         include: OFFER_INCLUDE,
       });
-      await this.events.publish("SellerOfferActivated", { sellerOfferId: offer.id, sellerOrganizationId: ctx.sellerOrganizationId }, { tx, aggregateType: "SellerOffer", aggregateId: offer.id });
+      await this.events.publish(
+        "SellerOfferSubmittedForModeration",
+        { sellerOfferId: offer.id, sellerOrganizationId: ctx.sellerOrganizationId },
+        { tx, aggregateType: "SellerOffer", aggregateId: offer.id },
+      );
       return offer;
     });
 
     return toDto(created);
   }
 
-  async update(ctx: ResolvedSellerContext, offerId: string, dto: UpdateSellerOfferDto): Promise<SellerOsOfferDto> {
+  async update(
+    ctx: ResolvedSellerContext,
+    offerId: string,
+    dto: UpdateSellerOfferDto,
+  ): Promise<SellerOsOfferDto> {
     this.sellerAccess.assertOperational(ctx.sellerStatus);
     const existing = await this.loadOwned(ctx, offerId);
     // Keep pausing and maintenance available, but never activate an unverified seller.
     if (dto.status === SellerOfferStatus.ACTIVE) assertPartnerVerified(ctx.verificationStatus);
     // SUSPENDED is a staff moderation state: a seller can neither set it nor lift it (POST /admin/commerce/offers/:id/status).
-    if (dto.status !== undefined && dto.status !== existing.status && (existing.status === SellerOfferStatus.SUSPENDED || dto.status === SellerOfferStatus.SUSPENDED)) {
+    if (
+      dto.status !== undefined &&
+      dto.status !== existing.status &&
+      (existing.status === SellerOfferStatus.SUSPENDED || dto.status === SellerOfferStatus.SUSPENDED)
+    ) {
       throw new SellerAccessDeniedException({ reason: "OFFER_SUSPENDED_BY_STAFF", sellerOfferId: offerId });
     }
-    assertRepeatConfig(dto.repeatDeliveryEligible ?? existing.repeatDeliveryEligible, dto.repeatIntervalsDays ?? existing.repeatIntervalsDays);
+    assertRepeatConfig(
+      dto.repeatDeliveryEligible ?? existing.repeatDeliveryEligible,
+      dto.repeatIntervalsDays ?? existing.repeatIntervalsDays,
+    );
+
+    const significantChange =
+      (dto.priceAmount !== undefined && dto.priceAmount !== existing.priceAmount) ||
+      (dto.compareAtAmount !== undefined && dto.compareAtAmount !== existing.compareAtAmount) ||
+      (dto.sellerSku !== undefined && dto.sellerSku !== existing.sellerSku) ||
+      (dto.repeatDeliveryEligible !== undefined &&
+        dto.repeatDeliveryEligible !== existing.repeatDeliveryEligible) ||
+      (dto.repeatIntervalsDays !== undefined &&
+        JSON.stringify([...(dto.repeatIntervalsDays ?? [])].sort((a, b) => a - b)) !==
+          JSON.stringify([...existing.repeatIntervalsDays].sort((a, b) => a - b)));
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const offer = await tx.sellerOffer.update({
@@ -169,8 +236,20 @@ export class SellerOfferService {
           ...(dto.compareAtAmount !== undefined ? { compareAtAmount: dto.compareAtAmount } : {}),
           ...(dto.sellerSku !== undefined ? { sellerSku: dto.sellerSku } : {}),
           ...(dto.status !== undefined ? { status: dto.status } : {}),
-          ...(dto.repeatDeliveryEligible !== undefined ? { repeatDeliveryEligible: dto.repeatDeliveryEligible } : {}),
-          ...(dto.repeatIntervalsDays !== undefined ? { repeatIntervalsDays: [...new Set(dto.repeatIntervalsDays)].sort((a, b) => a - b) } : {}),
+          ...(dto.repeatDeliveryEligible !== undefined
+            ? { repeatDeliveryEligible: dto.repeatDeliveryEligible }
+            : {}),
+          ...(dto.repeatIntervalsDays !== undefined
+            ? { repeatIntervalsDays: [...new Set(dto.repeatIntervalsDays)].sort((a, b) => a - b) }
+            : {}),
+          ...(significantChange
+            ? {
+                moderationStatus: SellerOfferModerationStatus.PENDING_REVIEW,
+                moderationReason: null,
+                moderatedAt: null,
+                moderatedByAdminId: null,
+              }
+            : {}),
         },
         include: OFFER_INCLUDE,
       });
@@ -178,13 +257,35 @@ export class SellerOfferService {
       if (dto.priceAmount !== undefined && dto.priceAmount !== existing.priceAmount) {
         await this.events.publish(
           "SellerOfferPriceChanged",
-          { sellerOfferId: offerId, sellerOrganizationId: ctx.sellerOrganizationId, fromPriceAmount: existing.priceAmount, toPriceAmount: dto.priceAmount },
+          {
+            sellerOfferId: offerId,
+            sellerOrganizationId: ctx.sellerOrganizationId,
+            fromPriceAmount: existing.priceAmount,
+            toPriceAmount: dto.priceAmount,
+          },
+          { tx, aggregateType: "SellerOffer", aggregateId: offerId },
+        );
+      }
+      if (significantChange) {
+        await this.events.publish(
+          "SellerOfferSubmittedForModeration",
+          { sellerOfferId: offerId, sellerOrganizationId: ctx.sellerOrganizationId },
           { tx, aggregateType: "SellerOffer", aggregateId: offerId },
         );
       }
       if (dto.status !== undefined && dto.status !== existing.status) {
-        const eventType = dto.status === SellerOfferStatus.ACTIVE ? "SellerOfferActivated" : "SellerOfferDeactivated";
-        await this.events.publish(eventType, { sellerOfferId: offerId, sellerOrganizationId: ctx.sellerOrganizationId, status: dto.status }, { tx, aggregateType: "SellerOffer", aggregateId: offerId });
+        if (
+          dto.status !== SellerOfferStatus.ACTIVE ||
+          offer.moderationStatus === SellerOfferModerationStatus.APPROVED
+        ) {
+          const eventType =
+            dto.status === SellerOfferStatus.ACTIVE ? "SellerOfferActivated" : "SellerOfferDeactivated";
+          await this.events.publish(
+            eventType,
+            { sellerOfferId: offerId, sellerOrganizationId: ctx.sellerOrganizationId, status: dto.status },
+            { tx, aggregateType: "SellerOffer", aggregateId: offerId },
+          );
+        }
       }
 
       return offer;

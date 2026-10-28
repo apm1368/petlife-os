@@ -1,5 +1,5 @@
-import { AdminProductReviewsView } from "@/features/admin/commerce/AdminCommerceViews";
+import { AdminReviewModerationView } from "@/features/admin-reviews/AdminReviewModerationView";
 
 export default function Page() {
-  return <AdminProductReviewsView />;
+  return <AdminReviewModerationView initialVertical="PRODUCT" />;
 }

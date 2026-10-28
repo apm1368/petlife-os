@@ -52,7 +52,7 @@ export class TravelSearchService {
     if (listingIds.length === 0) return new Map();
     const rows = await this.prisma.travelReview.groupBy({
       by: ["listingId"],
-      where: { listingId: { in: listingIds }, status: TravelReviewStatus.PUBLISHED },
+      where: { listingId: { in: listingIds }, status: { in: [TravelReviewStatus.PUBLISHED, TravelReviewStatus.APPROVED] } },
       _avg: { overall: true, petFriendliness: true, cleanliness: true, location: true },
       _count: { _all: true },
     });

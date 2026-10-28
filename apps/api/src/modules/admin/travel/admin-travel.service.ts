@@ -232,7 +232,7 @@ export class AdminTravelService {
   async setReviewVisibility(admin: ResolvedAdminContext, id: string, hidden: boolean, reason: string, requestId?: string) {
     const row = await this.prisma.travelReview.findUnique({ where: { id } });
     if (!row) throw new NotFoundApiException("Review", { id });
-    await this.prisma.travelReview.update({ where: { id }, data: hidden ? { status: TravelReviewStatus.HIDDEN, hiddenReason: reason } : { status: TravelReviewStatus.PUBLISHED, hiddenReason: null } });
+    await this.prisma.travelReview.update({ where: { id }, data: hidden ? { status: TravelReviewStatus.HIDDEN, hiddenReason: reason } : { status: TravelReviewStatus.APPROVED, hiddenReason: null } });
     await this.audit.record({ adminUserId: admin.adminUserId, action: (hidden ? "travel_review.hidden" : "travel_review.restored") as never, entityType: "TRAVEL_REVIEW", entityId: id, reason, requestId });
     return { id, status: hidden ? "HIDDEN" : "PUBLISHED" };
   }
@@ -314,7 +314,7 @@ export class AdminTravelService {
     const confirmed = rows.filter((r) => confirmedStatuses.includes(r.status));
     const cancelled = rows.filter((r) => r.status === TravelBookingStatus.CANCELLED);
     const paidStatuses = ["PAID", "REFUNDED", "PARTIALLY_REFUNDED", "REFUND_PENDING"];
-    const reviews = await this.prisma.travelReview.aggregate({ where: { status: TravelReviewStatus.PUBLISHED, createdAt: { gte: since } }, _avg: { overall: true }, _count: { _all: true } });
+    const reviews = await this.prisma.travelReview.aggregate({ where: { status: { in: [TravelReviewStatus.PUBLISHED, TravelReviewStatus.APPROVED] }, createdAt: { gte: since } }, _avg: { overall: true }, _count: { _all: true } });
     const byCity = new Map<string, number>();
     const byOrg = new Map<string, { name: string; bookings: number; value: number }>();
     for (const r of confirmed) {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, ProviderReviewStatus } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ProviderAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { toProviderServiceVariantDto } from "../providers/provider-dto.mapper";
@@ -97,7 +97,7 @@ export class ProviderCatalogService {
       this.prisma.booking.groupBy({ by: ["bookingStatus"], where, _count: { _all: true } }),
       this.prisma.booking.findMany({ where: { ...where, bookingStatus: BookingStatus.COMPLETED }, select: { priceAmount: true, currency: true } }),
       this.prisma.booking.groupBy({ by: ["providerServiceId"], where: { ...where, bookingStatus: BookingStatus.COMPLETED }, _count: { _all: true }, orderBy: { _count: { providerServiceId: "desc" } }, take: 5 }),
-      this.prisma.providerReview.aggregate({ where: { providerOrganizationId: ctx.organizationId, status: "PUBLISHED" }, _avg: { rating: true }, _count: { _all: true } }),
+      this.prisma.providerReview.aggregate({ where: { providerOrganizationId: ctx.organizationId, status: { in: [ProviderReviewStatus.PUBLISHED, ProviderReviewStatus.APPROVED] } }, _avg: { rating: true }, _count: { _all: true } }),
       this.prisma.booking.groupBy({ by: ["householdId"], where: { ...where, bookingStatus: BookingStatus.COMPLETED }, _count: { _all: true } }),
     ]);
     const count = (s: BookingStatus) => byStatus.find((r) => r.bookingStatus === s)?._count._all ?? 0;

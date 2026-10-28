@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BookingStatus, DisputeStatus, PartnerDocumentStatus, PartnerSubjectType, Prisma, ProviderType, SellerOfferStatus, SellerStatus, SubscriptionEntitlementType, TrustCaseStatus } from "@prisma/client";
+import { BookingStatus, DisputeStatus, PartnerDocumentStatus, PartnerSubjectType, Prisma, ProductReviewStatus, ProviderReviewStatus, ProviderType, SellerOfferStatus, SellerStatus, SubscriptionEntitlementType, TrustCaseStatus } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { NotFoundApiException, ValidationApiException } from "../../../common/errors/api-exception";
@@ -68,7 +68,7 @@ export class AdminPartner360Service {
       this.prisma.providerAvailabilityRule.count({ where: { providerOrganizationId: id } }),
       this.prisma.booking.groupBy({ by: ["bookingStatus"], where: { providerOrganizationId: id }, _count: { _all: true } }),
       this.prisma.booking.groupBy({ by: ["bookingStatus"], where: { providerOrganizationId: id, startAt: { gte: since } }, _count: { _all: true } }),
-      this.prisma.providerReview.aggregate({ where: { providerOrganizationId: id, status: "PUBLISHED" }, _count: { _all: true }, _avg: { rating: true } }),
+      this.prisma.providerReview.aggregate({ where: { providerOrganizationId: id, status: { in: [ProviderReviewStatus.PUBLISHED, ProviderReviewStatus.APPROVED] } }, _count: { _all: true }, _avg: { rating: true } }),
       this.prisma.providerReview.count({ where: { providerOrganizationId: id, status: "HIDDEN" } }),
       this.prisma.dispute.groupBy({ by: ["status"], where: { subjectType: "PROVIDER", subjectId: id }, _count: { _all: true } }),
       this.prisma.trustCase.groupBy({ by: ["status"], where: { subjectType: "PROVIDER", subjectId: id }, _count: { _all: true } }),
@@ -221,7 +221,7 @@ export class AdminPartner360Service {
       this.prisma.order.groupBy({ by: ["status"], where: { items: { some: offerScope } }, _count: { _all: true } }),
       this.prisma.refund.groupBy({ by: ["status"], where: { order: { items: { some: offerScope } } }, _count: { _all: true }, _sum: { amount: true } }),
       this.prisma.sellerSettlement.groupBy({ by: ["status"], where: { sellerOrganizationId: id }, _count: { _all: true }, _sum: { netIrr: true } }),
-      this.prisma.productReview.aggregate({ where: { product: { variants: { some: { offers: { some: { sellerOrganizationId: id } } } } } }, _count: { _all: true }, _avg: { rating: true } }),
+      this.prisma.productReview.aggregate({ where: { product: { variants: { some: { offers: { some: { sellerOrganizationId: id } } } } }, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } }, _count: { _all: true }, _avg: { rating: true } }),
       this.prisma.dispute.groupBy({ by: ["status"], where: { subjectType: "SELLER", subjectId: id }, _count: { _all: true } }),
       this.prisma.trustCase.groupBy({ by: ["status"], where: { subjectType: "SELLER", subjectId: id }, _count: { _all: true } }),
       this.verificationSummary(PartnerSubjectType.SELLER, id),

@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
+import {
+  Button,
+  ContextSurface,
+  EmptyState,
+  ErrorRecovery,
+  Input,
+  Select,
+  Skeleton,
+  StatusLabel,
+} from "@petlife/ui";
 import type { SellerOsOfferDto } from "@petlife/types";
 import { CreateSellerOffer } from "./CreateSellerOffer";
 import { sellerOsService } from "@/services/seller-os.service";
@@ -14,18 +23,28 @@ import { VerificationRequiredNotice } from "@/features/partner-verification/Veri
 
 const REPEAT_INTERVALS = [7, 14, 30, 45, 60, 90];
 
-type Draft = { priceAmount: string; status: SellerOsOfferDto["status"]; repeatDeliveryEligible: boolean; repeatIntervalsDays: number[] };
+type Draft = {
+  priceAmount: string;
+  status: SellerOsOfferDto["status"];
+  repeatDeliveryEligible: boolean;
+  repeatIntervalsDays: number[];
+};
 
 function toDraft(offer: SellerOsOfferDto): Draft {
-  return { priceAmount: String(offer.priceAmount), status: offer.status, repeatDeliveryEligible: offer.repeatDeliveryEligible, repeatIntervalsDays: [...offer.repeatIntervalsDays] };
+  return {
+    priceAmount: String(offer.priceAmount),
+    status: offer.status,
+    repeatDeliveryEligible: offer.repeatDeliveryEligible,
+    repeatIntervalsDays: [...offer.repeatIntervalsDays],
+  };
 }
 
 /** Seller Offers (spec section 42) — price/status edits are explicit save actions, never silent auto-save; marketplace sync health is shown per offer, never hidden. */
 export function SellerOffersView() {
   const t = useTranslations("seller.offers");
   const locale = useLocale() as "fa" | "en";
-  const role = useSellerStore(s => s.context?.active?.role);
-  const verified = useSellerStore(s => s.context?.active?.verificationStatus === "VERIFIED");
+  const role = useSellerStore((s) => s.context?.active?.role);
+  const verified = useSellerStore((s) => s.context?.active?.verificationStatus === "VERIFIED");
   const canEdit = !!role && ["OWNER", "ADMIN", "CATALOG_MANAGER"].includes(role);
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
@@ -70,7 +89,11 @@ export function SellerOffersView() {
       setOffers((prev) => prev?.map((o) => (o.id === offerId ? updated : o)) ?? null);
       setDrafts((prev) => ({ ...prev, [offerId]: toDraft(updated) }));
     } catch (err) {
-      setSaveError(err instanceof ApiError && err.status < 500 ? apiErrorText(err, locale, t("saveFailed")) : t("saveFailed"));
+      setSaveError(
+        err instanceof ApiError && err.status < 500
+          ? apiErrorText(err, locale, t("saveFailed"))
+          : t("saveFailed"),
+      );
     } finally {
       setSavingId(null);
     }
@@ -82,7 +105,11 @@ export function SellerOffersView() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
-      {!verified ? <VerificationRequiredNotice seller /> : sellerId ? <CreateSellerOffer key={sellerId} sellerId={sellerId} onSaved={load} /> : null}
+      {!verified ? (
+        <VerificationRequiredNotice seller />
+      ) : sellerId ? (
+        <CreateSellerOffer key={sellerId} sellerId={sellerId} onSaved={load} />
+      ) : null}
       {saveError ? (
         <p role="alert" className="text-metadata text-state-urgent">
           {saveError}
@@ -108,23 +135,57 @@ export function SellerOffersView() {
                   <span className="text-metadata text-text-secondary">{offer.variantTitle ?? offer.sku}</span>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  {offer.inventory && offer.inventory.available <= 5 ? <StatusLabel tone="attention">{t("lowStock")}</StatusLabel> : null}
-                  {offer.marketplaceSyncErrorCount > 0 ? <StatusLabel tone="urgent">{t("syncErrors", { count: offer.marketplaceSyncErrorCount })}</StatusLabel> : null}
+                  <StatusLabel
+                    tone={
+                      offer.moderationStatus === "APPROVED"
+                        ? "success"
+                        : offer.moderationStatus === "REJECTED"
+                          ? "urgent"
+                          : "attention"
+                    }
+                  >
+                    {t(`moderation.${offer.moderationStatus}`)}
+                  </StatusLabel>
+                  {offer.inventory && offer.inventory.available <= 5 ? (
+                    <StatusLabel tone="attention">{t("lowStock")}</StatusLabel>
+                  ) : null}
+                  {offer.marketplaceSyncErrorCount > 0 ? (
+                    <StatusLabel tone="urgent">
+                      {t("syncErrors", { count: offer.marketplaceSyncErrorCount })}
+                    </StatusLabel>
+                  ) : null}
                 </div>
               </div>
+
+              {offer.moderationStatus === "PENDING_REVIEW" ? (
+                <p className="text-metadata text-state-attention">{t("moderation.pendingHelp")}</p>
+              ) : null}
+              {offer.moderationStatus === "REJECTED" ? (
+                <p role="status" className="text-metadata text-state-urgent">
+                  {t("moderation.rejectedHelp")}
+                  {offer.moderationReason ? `: ${offer.moderationReason}` : ""}
+                </p>
+              ) : null}
 
               <div className="flex flex-wrap items-end gap-3">
                 <Input
                   label={t("price")}
                   type="number"
                   value={draft.priceAmount}
-                  onChange={(e) => setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, priceAmount: e.target.value } }))}
+                  onChange={(e) =>
+                    setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, priceAmount: e.target.value } }))
+                  }
                   className="w-40"
                 />
                 <Select
                   label={t("status")}
                   value={draft.status}
-                  onChange={(e) => setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, status: e.target.value as SellerOsOfferDto["status"] } }))}
+                  onChange={(e) =>
+                    setDrafts((prev) => ({
+                      ...prev,
+                      [offer.id]: { ...draft, status: e.target.value as SellerOsOfferDto["status"] },
+                    }))
+                  }
                   options={[
                     { value: "ACTIVE", label: t("statusOptions.ACTIVE") },
                     { value: "PAUSED", label: t("statusOptions.PAUSED") },
@@ -132,9 +193,16 @@ export function SellerOffersView() {
                   ]}
                   className="w-40"
                 />
-                {canEdit ? <Button size="sm" isLoading={savingId === offer.id} disabled={!dirty || repeatInvalid} onClick={() => save(offer.id)}>
-                  {t("save")}
-                </Button> : null}
+                {canEdit ? (
+                  <Button
+                    size="sm"
+                    isLoading={savingId === offer.id}
+                    disabled={!dirty || repeatInvalid}
+                    onClick={() => save(offer.id)}
+                  >
+                    {t("save")}
+                  </Button>
+                ) : null}
               </div>
 
               <fieldset className="flex flex-col gap-2 rounded-md border border-border-subtle p-3">
@@ -142,7 +210,19 @@ export function SellerOffersView() {
                   <input
                     type="checkbox"
                     checked={draft.repeatDeliveryEligible}
-                    onChange={(e) => setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, repeatDeliveryEligible: e.target.checked, repeatIntervalsDays: e.target.checked && draft.repeatIntervalsDays.length === 0 ? [30] : draft.repeatIntervalsDays } }))}
+                    onChange={(e) =>
+                      setDrafts((prev) => ({
+                        ...prev,
+                        [offer.id]: {
+                          ...draft,
+                          repeatDeliveryEligible: e.target.checked,
+                          repeatIntervalsDays:
+                            e.target.checked && draft.repeatIntervalsDays.length === 0
+                              ? [30]
+                              : draft.repeatIntervalsDays,
+                        },
+                      }))
+                    }
                   />
                   {t("repeat.enable")}
                 </label>
@@ -155,20 +235,39 @@ export function SellerOffersView() {
                           key={days}
                           type="button"
                           aria-pressed={on}
-                          onClick={() => setDrafts((prev) => ({ ...prev, [offer.id]: { ...draft, repeatIntervalsDays: on ? draft.repeatIntervalsDays.filter((d) => d !== days) : [...draft.repeatIntervalsDays, days].sort((a, b) => a - b) } }))}
+                          onClick={() =>
+                            setDrafts((prev) => ({
+                              ...prev,
+                              [offer.id]: {
+                                ...draft,
+                                repeatIntervalsDays: on
+                                  ? draft.repeatIntervalsDays.filter((d) => d !== days)
+                                  : [...draft.repeatIntervalsDays, days].sort((a, b) => a - b),
+                              },
+                            }))
+                          }
                           className={`min-h-9 rounded-full border px-3 text-metadata ${on ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle text-text-secondary"}`}
                         >
-                          {t("repeat.everyDays", { days: days.toLocaleString(locale === "fa" ? "fa-IR" : "en-US") })}
+                          {t("repeat.everyDays", {
+                            days: days.toLocaleString(locale === "fa" ? "fa-IR" : "en-US"),
+                          })}
                         </button>
                       );
                     })}
                   </div>
                 ) : null}
-                {repeatInvalid ? <p className="text-metadata text-state-attention">{t("repeat.pickOne")}</p> : null}
+                {repeatInvalid ? (
+                  <p className="text-metadata text-state-attention">{t("repeat.pickOne")}</p>
+                ) : null}
               </fieldset>
 
               {offer.inventory ? (
-                <p className="text-metadata text-text-secondary">{t("available", { count: offer.inventory.available, currency: formatCurrency(offer.priceAmount, locale) })}</p>
+                <p className="text-metadata text-text-secondary">
+                  {t("available", {
+                    count: offer.inventory.available,
+                    currency: formatCurrency(offer.priceAmount, locale),
+                  })}
+                </p>
               ) : null}
             </ContextSurface>
           );

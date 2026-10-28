@@ -104,6 +104,8 @@ import { AdminPlacesController } from "./places/admin-places.controller";
 import { AdminLostPetController } from "./lost-pet/admin-lost-pet.controller";
 import { AdminNgoMembersController } from "./animal-support/admin-ngo-members.controller";
 import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
+import { AdminReviewModerationController } from "./reviews/admin-review-moderation.controller";
+import { AdminReviewModerationService } from "./reviews/admin-review-moderation.service";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -153,6 +155,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminInsuranceApplicationsController,
     AdminLostPetController,
     AdminNgoMembersController,
+    AdminReviewModerationController,
   ],
   providers: [
     SupportOpsService,
@@ -178,6 +181,7 @@ import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
     AdminAuditLogService,
     AdminCustomerService,
     AdminUsersService,
+    AdminReviewModerationService,
     InternalNoteService,
     SupportCaseService,
     SupportNotificationListener,

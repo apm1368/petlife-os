@@ -1,7 +1,24 @@
 import { Injectable } from "@nestjs/common";
 import { speciesFilter, supportedSpecies } from "../../../common/species/catalog-species";
-import { Prisma, ProductReviewStatus, ProductStatus, SellerOfferStatus, SellerStatus, SellerVerificationStatus, type Pet, type PetSpecies } from "@prisma/client";
-import type { ProductCategoryDto, ProductDetailDto, ProductSearchResultDto, ProductSummaryDto, RatingSummaryDto, SellerOfferDto } from "@petlife/types";
+import {
+  Prisma,
+  ProductReviewStatus,
+  ProductStatus,
+  SellerOfferModerationStatus,
+  SellerOfferStatus,
+  SellerStatus,
+  SellerVerificationStatus,
+  type Pet,
+  type PetSpecies,
+} from "@prisma/client";
+import type {
+  ProductCategoryDto,
+  ProductDetailDto,
+  ProductSearchResultDto,
+  ProductSummaryDto,
+  RatingSummaryDto,
+  SellerOfferDto,
+} from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../../common/errors/api-exception";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
@@ -17,6 +34,7 @@ const OFFER_INCLUDE = {
 
 export const ACTIVE_OFFER_WHERE = {
   status: SellerOfferStatus.ACTIVE,
+  moderationStatus: SellerOfferModerationStatus.APPROVED,
   sellerOrganization: { verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE },
 } satisfies Prisma.SellerOfferWhereInput;
 
@@ -82,7 +100,10 @@ export class CatalogService {
   ) {}
 
   async listCategories(): Promise<ProductCategoryDto[]> {
-    const categories = await this.prisma.productCategory.findMany({ where: { status: "ACTIVE" }, orderBy: { name: "asc" } });
+    const categories = await this.prisma.productCategory.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: { name: "asc" },
+    });
     return categories.map(toCategoryDto);
   }
 
@@ -95,9 +116,12 @@ export class CatalogService {
   }
 
   private async descendantCategoryIds(categoryId: string): Promise<string[]> {
-    const all = await this.prisma.productCategory.findMany({ where: { status: "ACTIVE" }, select: { id: true, parentId: true } });
+    const all = await this.prisma.productCategory.findMany({
+      where: { status: "ACTIVE" },
+      select: { id: true, parentId: true },
+    });
     const out = new Set([categoryId]);
-    for (let changed = true; changed; ) {
+    for (let changed = true; changed;) {
       changed = false;
       for (const c of all) {
         if (c.parentId && out.has(c.parentId) && !out.has(c.id)) {
@@ -111,27 +135,65 @@ export class CatalogService {
 
   async ratings(productIds: string[]): Promise<Map<string, RatingSummaryDto>> {
     if (!productIds.length) return new Map();
-    const rows = await this.prisma.productReview.groupBy({ by: ["productId"], where: { productId: { in: productIds }, status: ProductReviewStatus.PUBLISHED }, _avg: { rating: true }, _count: { _all: true } });
-    return new Map(rows.map((r) => [r.productId, { average: r._avg.rating === null ? null : Math.round(r._avg.rating * 10) / 10, count: r._count._all }]));
+    const rows = await this.prisma.productReview.groupBy({
+      by: ["productId"],
+      where: {
+        productId: { in: productIds },
+        status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] },
+      },
+      _avg: { rating: true },
+      _count: { _all: true },
+    });
+    return new Map(
+      rows.map((r) => [
+        r.productId,
+        {
+          average: r._avg.rating === null ? null : Math.round(r._avg.rating * 10) / 10,
+          count: r._count._all,
+        },
+      ]),
+    );
   }
 
   private priceOffers(products: ProductWithRelations[]): Promise<Map<string, EffectivePrice>> {
-    return this.pricing.price(products.flatMap((p) => p.variants.flatMap((v) => v.offers.map((o) => ({ offerId: o.id, priceAmount: o.priceAmount, sellerOrganizationId: o.sellerOrganizationId, productId: p.id, categoryId: p.categoryId })))));
+    return this.pricing.price(
+      products.flatMap((p) =>
+        p.variants.flatMap((v) =>
+          v.offers.map((o) => ({
+            offerId: o.id,
+            priceAmount: o.priceAmount,
+            sellerOrganizationId: o.sellerOrganizationId,
+            productId: p.id,
+            categoryId: p.categoryId,
+          })),
+        ),
+      ),
+    );
   }
 
   /** Default offer: available first, then the lowest price the customer actually pays, then offer id. */
-  private defaultOffer(product: ProductWithRelations, prices: Map<string, EffectivePrice>): { offer: OfferRow; variantId: string } | null {
+  private defaultOffer(
+    product: ProductWithRelations,
+    prices: Map<string, EffectivePrice>,
+  ): { offer: OfferRow; variantId: string } | null {
     const candidates = product.variants.flatMap((v) => v.offers.map((offer) => ({ offer, variantId: v.id })));
     candidates.sort(
       (a, b) =>
         Number(available(b.offer)) - Number(available(a.offer)) ||
-        (prices.get(a.offer.id)?.unitPrice ?? a.offer.priceAmount) - (prices.get(b.offer.id)?.unitPrice ?? b.offer.priceAmount) ||
+        (prices.get(a.offer.id)?.unitPrice ?? a.offer.priceAmount) -
+          (prices.get(b.offer.id)?.unitPrice ?? b.offer.priceAmount) ||
         a.offer.id.localeCompare(b.offer.id),
     );
     return candidates[0] ?? null;
   }
 
-  private async toSummary(product: ProductWithRelations, prices: Map<string, EffectivePrice>, rating: RatingSummaryDto, pet: Pet | null, userId: string | undefined): Promise<ProductSummaryDto> {
+  private async toSummary(
+    product: ProductWithRelations,
+    prices: Map<string, EffectivePrice>,
+    rating: RatingSummaryDto,
+    pet: Pet | null,
+    userId: string | undefined,
+  ): Promise<ProductSummaryDto> {
     const best = this.defaultOffer(product, prices);
     const bestOffer = best ? toSellerOfferDto(best.offer, prices.get(best.offer.id)) : null;
     const variant = product.variants.find((v) => v.id === best?.variantId) ?? product.variants[0];
@@ -159,26 +221,63 @@ export class CatalogService {
     const q = filter.search?.trim();
     const where: Prisma.ProductWhereInput = {
       status: ProductStatus.ACTIVE,
-      variants: { some: { isActive: true, offers: { some: { ...ACTIVE_OFFER_WHERE, ...(filter.seller ? { sellerOrganizationId: filter.seller } : {}) } } } },
+      variants: {
+        some: {
+          isActive: true,
+          offers: {
+            some: {
+              ...ACTIVE_OFFER_WHERE,
+              ...(filter.seller ? { sellerOrganizationId: filter.seller } : {}),
+            },
+          },
+        },
+      },
       ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
       ...(filter.brand ? { brandId: filter.brand } : {}),
       ...(q
-        ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { description: { contains: q, mode: "insensitive" } }, { brand: { name: { contains: q, mode: "insensitive" } } }, { category: { name: { contains: q, mode: "insensitive" } } }] }
+        ? {
+            OR: [
+              { title: { contains: q, mode: "insensitive" } },
+              { description: { contains: q, mode: "insensitive" } },
+              { brand: { name: { contains: q, mode: "insensitive" } } },
+              { category: { name: { contains: q, mode: "insensitive" } } },
+            ],
+          }
         : {}),
       ...speciesFilter(filter.species),
     };
     const [products, pet] = await Promise.all([
-      this.prisma.product.findMany({ where, include: PRODUCT_INCLUDE, orderBy: [{ createdAt: "desc" }, { id: "asc" }], take: MAX_CANDIDATES }),
+      this.prisma.product.findMany({
+        where,
+        include: PRODUCT_INCLUDE,
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+        take: MAX_CANDIDATES,
+      }),
       this.visiblePet(userId, filter.petId),
     ]);
-    const [prices, ratings] = await Promise.all([this.priceOffers(products), this.ratings(products.map((p) => p.id))]);
+    const [prices, ratings] = await Promise.all([
+      this.priceOffers(products),
+      this.ratings(products.map((p) => p.id)),
+    ]);
 
     const attributeFilter = Object.entries(filter.attributes ?? {}).filter(([, v]) => v);
-    type Row = { product: ProductWithRelations; price: number | null; available: boolean; promoted: boolean; rating: RatingSummaryDto };
+    type Row = {
+      product: ProductWithRelations;
+      price: number | null;
+      available: boolean;
+      promoted: boolean;
+      rating: RatingSummaryDto;
+    };
     let rows: Row[] = [];
     for (const product of products) {
-      const variants = attributeFilter.length ? product.variants.filter((v) => attributeFilter.every(([k, val]) => (v.attributes as Record<string, string> | null)?.[k] === val)) : product.variants;
-      const offers = variants.flatMap((v) => v.offers).filter((o) => !filter.seller || o.sellerOrganizationId === filter.seller);
+      const variants = attributeFilter.length
+        ? product.variants.filter((v) =>
+            attributeFilter.every(([k, val]) => (v.attributes as Record<string, string> | null)?.[k] === val),
+          )
+        : product.variants;
+      const offers = variants
+        .flatMap((v) => v.offers)
+        .filter((o) => !filter.seller || o.sellerOrganizationId === filter.seller);
       if (!offers.length) continue;
       const availableOffers = offers.filter(available);
       const priced = (availableOffers.length ? availableOffers : offers).map((o) => prices.get(o.id)!);
@@ -196,12 +295,23 @@ export class CatalogService {
     const sellerCounts = new Map<string, { id: string; name: string; count: number }>();
     const attributeValues = new Map<string, Set<string>>();
     for (const { product } of rows) {
-      if (product.brand) brandCounts.set(product.brand.id, { id: product.brand.id, name: product.brand.name, count: (brandCounts.get(product.brand.id)?.count ?? 0) + 1 });
-      const sellers = new Map(product.variants.flatMap((v) => v.offers.map((o) => [o.sellerOrganizationId, o.sellerOrganization.name] as const)));
-      for (const [id, name] of sellers) sellerCounts.set(id, { id, name, count: (sellerCounts.get(id)?.count ?? 0) + 1 });
+      if (product.brand)
+        brandCounts.set(product.brand.id, {
+          id: product.brand.id,
+          name: product.brand.name,
+          count: (brandCounts.get(product.brand.id)?.count ?? 0) + 1,
+        });
+      const sellers = new Map(
+        product.variants.flatMap((v) =>
+          v.offers.map((o) => [o.sellerOrganizationId, o.sellerOrganization.name] as const),
+        ),
+      );
+      for (const [id, name] of sellers)
+        sellerCounts.set(id, { id, name, count: (sellerCounts.get(id)?.count ?? 0) + 1 });
       for (const v of product.variants) {
         for (const [k, val] of Object.entries((v.attributes as Record<string, unknown> | null) ?? {})) {
-          if (typeof val === "string") attributeValues.set(k, (attributeValues.get(k) ?? new Set<string>()).add(val));
+          if (typeof val === "string")
+            attributeValues.set(k, (attributeValues.get(k) ?? new Set<string>()).add(val));
         }
       }
     }
@@ -213,12 +323,15 @@ export class CatalogService {
         (filter.maxPrice === undefined || (r.price !== null && r.price <= filter.maxPrice)) &&
         (!filter.inStock || r.available) &&
         (!filter.onPromotion || r.promoted) &&
-        (filter.minRating === undefined || (r.rating.average !== null && r.rating.average >= filter.minRating)),
+        (filter.minRating === undefined ||
+          (r.rating.average !== null && r.rating.average >= filter.minRating)),
     );
 
-    const bayes = (r: RatingSummaryDto) => (PRIOR_RATING * PRIOR_WEIGHT + (r.average ?? 0) * r.count) / (PRIOR_WEIGHT + r.count);
+    const bayes = (r: RatingSummaryDto) =>
+      (PRIOR_RATING * PRIOR_WEIGHT + (r.average ?? 0) * r.count) / (PRIOR_WEIGHT + r.count);
     const byId = (a: Row, b: Row) => a.product.id.localeCompare(b.product.id);
-    const nullsLast = (a: number | null, b: number | null) => (a === null ? (b === null ? 0 : 1) : b === null ? -1 : a - b);
+    const nullsLast = (a: number | null, b: number | null) =>
+      a === null ? (b === null ? 0 : 1) : b === null ? -1 : a - b;
     rows.sort((a, b) => {
       switch (filter.sort ?? "RECOMMENDED") {
         case "NEWEST":
@@ -226,9 +339,18 @@ export class CatalogService {
         case "PRICE_ASC":
           return nullsLast(a.price, b.price) || byId(a, b);
         case "PRICE_DESC":
-          return nullsLast(a.price === null ? null : -a.price, b.price === null ? null : -b.price) || byId(a, b);
+          return (
+            nullsLast(a.price === null ? null : -a.price, b.price === null ? null : -b.price) || byId(a, b)
+          );
         case "TOP_RATED":
-          return nullsLast(a.rating.average === null ? null : -a.rating.average, b.rating.average === null ? null : -b.rating.average) || b.rating.count - a.rating.count || byId(a, b);
+          return (
+            nullsLast(
+              a.rating.average === null ? null : -a.rating.average,
+              b.rating.average === null ? null : -b.rating.average,
+            ) ||
+            b.rating.count - a.rating.count ||
+            byId(a, b)
+          );
         default:
           return (
             Number(b.available) - Number(a.available) ||
@@ -244,7 +366,9 @@ export class CatalogService {
     const pageSize = Math.min(Math.max(filter.pageSize ?? 24, 1), 60);
     const page = Math.max(filter.page ?? 1, 1);
     const slice = rows.slice((page - 1) * pageSize, page * pageSize);
-    const items = await Promise.all(slice.map((r) => this.toSummary(r.product, prices, r.rating, pet, userId)));
+    const items = await Promise.all(
+      slice.map((r) => this.toSummary(r.product, prices, r.rating, pet, userId)),
+    );
     return {
       items,
       total: rows.length,
@@ -253,14 +377,19 @@ export class CatalogService {
       facets: {
         brands: [...brandCounts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
         sellers: [...sellerCounts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
-        attributes: [...attributeValues.entries()].map(([key, values]) => ({ key, values: [...values].sort() })).sort((a, b) => a.key.localeCompare(b.key)),
+        attributes: [...attributeValues.entries()]
+          .map(([key, values]) => ({ key, values: [...values].sort() }))
+          .sort((a, b) => a.key.localeCompare(b.key)),
         priceRange: pricesSeen.length ? { min: Math.min(...pricesSeen), max: Math.max(...pricesSeen) } : null,
       },
     };
   }
 
   async getDetail(userId: string | undefined, productId: string, petId?: string): Promise<ProductDetailDto> {
-    const product = await this.prisma.product.findUnique({ where: { id: productId }, include: PRODUCT_INCLUDE });
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: PRODUCT_INCLUDE,
+    });
     // Draft, inactive and archived products are not public.
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");
 
@@ -269,27 +398,43 @@ export class CatalogService {
       this.priceOffers([product]),
       this.ratings([product.id]),
       this.prisma.productReview.findMany({
-        where: { productId, status: ProductReviewStatus.PUBLISHED },
+        where: { productId, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } },
         include: { user: { select: { displayName: true } }, productVariant: { select: { title: true } } },
         orderBy: { createdAt: "desc" },
         take: 10,
       }),
-      userId ? this.prisma.productFavorite.findUnique({ where: { userId_productId: { userId, productId } } }) : Promise.resolve(null),
+      userId
+        ? this.prisma.productFavorite.findUnique({ where: { userId_productId: { userId, productId } } })
+        : Promise.resolve(null),
       this.prisma.product.findMany({
-        where: { status: ProductStatus.ACTIVE, categoryId: product.categoryId, id: { not: product.id }, variants: { some: { isActive: true, offers: { some: ACTIVE_OFFER_WHERE } } } },
+        where: {
+          status: ProductStatus.ACTIVE,
+          categoryId: product.categoryId,
+          id: { not: product.id },
+          variants: { some: { isActive: true, offers: { some: ACTIVE_OFFER_WHERE } } },
+        },
         include: PRODUCT_INCLUDE,
         orderBy: [{ createdAt: "desc" }, { id: "asc" }],
         take: 6,
       }),
     ]);
     const compatibility = pet ? await this.compatibility.evaluate(pet, product, userId) : null;
-    const [relatedPrices, relatedRatings] = await Promise.all([this.priceOffers(relatedRows), this.ratings(relatedRows.map((r) => r.id))]);
-    const related = await Promise.all(relatedRows.map((r) => this.toSummary(r, relatedPrices, relatedRatings.get(r.id) ?? EMPTY_RATING, null, userId)));
+    const [relatedPrices, relatedRatings] = await Promise.all([
+      this.priceOffers(relatedRows),
+      this.ratings(relatedRows.map((r) => r.id)),
+    ]);
+    const related = await Promise.all(
+      relatedRows.map((r) =>
+        this.toSummary(r, relatedPrices, relatedRatings.get(r.id) ?? EMPTY_RATING, null, userId),
+      ),
+    );
 
     await this.events.publish("ProductViewed", { productId, petId: pet?.id ?? null });
 
     const specs = Array.isArray(product.specifications)
-      ? (product.specifications as { label?: unknown; value?: unknown }[]).filter((s) => typeof s.label === "string" && typeof s.value === "string").map((s) => ({ label: s.label as string, value: s.value as string }))
+      ? (product.specifications as { label?: unknown; value?: unknown }[])
+          .filter((s) => typeof s.label === "string" && typeof s.value === "string")
+          .map((s) => ({ label: s.label as string, value: s.value as string }))
       : [];
     const def = this.defaultOffer(product, prices);
     return {
@@ -314,6 +459,7 @@ export class CatalogService {
         authorName: (r.user.displayName ?? "").trim().split(/\s+/)[0] || "—",
         variantTitle: r.productVariant.title,
         verifiedPurchase: true as const,
+        status: r.status,
         createdAt: r.createdAt.toISOString(),
       })),
       related,
@@ -331,15 +477,28 @@ export class CatalogService {
   /** Summaries for known ids (favorites, repeat delivery), in the given order; non-public products are skipped. */
   async summariesByIds(userId: string | undefined, productIds: string[]): Promise<ProductSummaryDto[]> {
     if (productIds.length === 0) return [];
-    const rows = await this.prisma.product.findMany({ where: { id: { in: productIds }, status: ProductStatus.ACTIVE }, include: PRODUCT_INCLUDE });
-    const [prices, ratings] = await Promise.all([this.priceOffers(rows), this.ratings(rows.map((r) => r.id))]);
+    const rows = await this.prisma.product.findMany({
+      where: { id: { in: productIds }, status: ProductStatus.ACTIVE },
+      include: PRODUCT_INCLUDE,
+    });
+    const [prices, ratings] = await Promise.all([
+      this.priceOffers(rows),
+      this.ratings(rows.map((r) => r.id)),
+    ]);
     const byId = new Map(rows.map((r) => [r.id, r]));
-    const ordered = productIds.map((id) => byId.get(id)).filter((r): r is (typeof rows)[number] => Boolean(r));
-    return Promise.all(ordered.map((r) => this.toSummary(r, prices, ratings.get(r.id) ?? EMPTY_RATING, null, userId)));
+    const ordered = productIds
+      .map((id) => byId.get(id))
+      .filter((r): r is (typeof rows)[number] => Boolean(r));
+    return Promise.all(
+      ordered.map((r) => this.toSummary(r, prices, ratings.get(r.id) ?? EMPTY_RATING, null, userId)),
+    );
   }
 
   async getOffers(productId: string): Promise<SellerOfferDto[]> {
-    const product = await this.prisma.product.findUnique({ where: { id: productId }, include: PRODUCT_INCLUDE });
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: PRODUCT_INCLUDE,
+    });
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");
     const prices = await this.priceOffers([product]);
     return product.variants.flatMap((v) => v.offers.map((o) => toSellerOfferDto(o, prices.get(o.id))));

@@ -1,5 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { CartStatus, CheckoutStatus, DeliveryMethod, FinancingIntentStatus, PaymentIntentStatus, PaymentMethodType, PaymentProvider, Prisma, SellerOfferStatus } from "@prisma/client";
+import {
+  CartStatus,
+  CheckoutStatus,
+  DeliveryMethod,
+  FinancingIntentStatus,
+  PaymentIntentStatus,
+  PaymentMethodType,
+  PaymentProvider,
+  Prisma,
+  SellerOfferModerationStatus,
+  SellerOfferStatus,
+} from "@prisma/client";
 import type {
   CartDto,
   CartLineDto,
@@ -59,7 +70,11 @@ function assertDeliveryMethodOffered(method: DeliveryMethod): void {
 }
 
 /** Gross (list) subtotal and promotion discount for a set of priced lines. `lineTotal` is already net of the discount. */
-export function pricedTotals(lines: CartLineDto[]): { subtotalAmount: number; discountAmount: number; netAmount: number } {
+export function pricedTotals(lines: CartLineDto[]): {
+  subtotalAmount: number;
+  discountAmount: number;
+  netAmount: number;
+} {
   let subtotalAmount = 0;
   let discountAmount = 0;
   let netAmount = 0;
@@ -78,7 +93,9 @@ function allLines(cart: Pick<CartDto, "sellerGroups">): CartLineDto[] {
 }
 
 /** Regroups frozen checkout lines by seller for display. */
-function snapshotAsCart(snapshot: CartLineDto[]): Pick<CartDto, "sellerGroups"> & { sellerGroups: CartDto["sellerGroups"] } {
+function snapshotAsCart(
+  snapshot: CartLineDto[],
+): Pick<CartDto, "sellerGroups"> & { sellerGroups: CartDto["sellerGroups"] } {
   // Snapshots priced before CartLineDto.imageUrl existed lack the field; the contract says null, never undefined.
   const lines = snapshot.map((line) => ({ ...line, imageUrl: line.imageUrl ?? null }));
   const groups = new Map<string, CartDto["sellerGroups"][number]>();
@@ -96,10 +113,21 @@ function computeValidationIssues(cart: Pick<CartDto, "sellerGroups">): CheckoutV
   const issues: CheckoutValidationIssueDto[] = [];
   for (const line of allLines(cart)) {
     if (line.priceChanged) {
-      issues.push({ code: "PRICE_CHANGED", cartLineId: line.id, message: `${line.productTitle}'s price changed since it was added to your cart.` });
+      issues.push({
+        code: "PRICE_CHANGED",
+        cartLineId: line.id,
+        message: `${line.productTitle}'s price changed since it was added to your cart.`,
+      });
     }
-    if (line.compatibility?.status === ProductCompatibilityStatus.NEEDS_REVIEW || line.compatibility?.status === ProductCompatibilityStatus.NOT_RECOMMENDED) {
-      issues.push({ code: "COMPATIBILITY_REVIEW_REQUIRED", cartLineId: line.id, message: `${line.productTitle} needs your review for this pet before purchase.` });
+    if (
+      line.compatibility?.status === ProductCompatibilityStatus.NEEDS_REVIEW ||
+      line.compatibility?.status === ProductCompatibilityStatus.NOT_RECOMMENDED
+    ) {
+      issues.push({
+        code: "COMPATIBILITY_REVIEW_REQUIRED",
+        cartLineId: line.id,
+        message: `${line.productTitle} needs your review for this pet before purchase.`,
+      });
     }
   }
   return issues;
@@ -140,8 +168,14 @@ export class CheckoutService {
   private async assertAddressOwned(userId: string, addressId: string): Promise<string> {
     const address = await this.prisma.customerAddress.findUnique({ where: { id: addressId } });
     if (!address) throw new ValidationApiException({ field: "addressId", reason: "Address not found" });
-    const membership = await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId: address.householdId, userId } } });
-    if (!membership) throw new ValidationApiException({ field: "addressId", reason: "Address does not belong to your household" });
+    const membership = await this.prisma.householdMember.findUnique({
+      where: { householdId_userId: { householdId: address.householdId, userId } },
+    });
+    if (!membership)
+      throw new ValidationApiException({
+        field: "addressId",
+        reason: "Address does not belong to your household",
+      });
     return address.householdId;
   }
 
@@ -153,15 +187,41 @@ export class CheckoutService {
     const deliveryMethod = dto.deliveryMethod ?? DeliveryMethod.STANDARD;
     assertDeliveryMethodOffered(deliveryMethod);
 
+    // Re-read moderation state at checkout time. A cart snapshot may have
+    // been created before an offer was edited and returned to review.
+    const currentOffers = await this.prisma.sellerOffer.findMany({
+      where: { id: { in: lines.map((line) => line.sellerOffer.id) } },
+      select: { id: true, moderationStatus: true },
+    });
+    const moderationByOffer = new Map(currentOffers.map((offer) => [offer.id, offer.moderationStatus]));
+
     for (const line of lines) {
-      if (line.sellerOffer.status !== SellerOfferStatus.ACTIVE) throw new OfferNotAvailableException({ cartLineId: line.id, offerId: line.sellerOffer.id });
-      if (line.sellerOffer.sellerOrganization.verificationStatus !== "VERIFIED" || line.sellerOffer.sellerOrganization.status !== "ACTIVE") {
-        throw new SellerNotAvailableException({ cartLineId: line.id, sellerOrganizationId: line.sellerOffer.sellerOrganization.id });
+      if (
+        line.sellerOffer.status !== SellerOfferStatus.ACTIVE ||
+        moderationByOffer.get(line.sellerOffer.id) !== SellerOfferModerationStatus.APPROVED
+      ) {
+        throw new OfferNotAvailableException({ cartLineId: line.id, offerId: line.sellerOffer.id });
+      }
+      if (
+        line.sellerOffer.sellerOrganization.verificationStatus !== "VERIFIED" ||
+        line.sellerOffer.sellerOrganization.status !== "ACTIVE"
+      ) {
+        throw new SellerNotAvailableException({
+          cartLineId: line.id,
+          sellerOrganizationId: line.sellerOffer.sellerOrganization.id,
+        });
       }
       if (line.quantity > line.sellerOffer.availableQuantity) {
-        throw new ValidationApiException({ field: "quantity", cartLineId: line.id, reason: "INSUFFICIENT_INVENTORY" });
+        throw new ValidationApiException({
+          field: "quantity",
+          cartLineId: line.id,
+          reason: "INSUFFICIENT_INVENTORY",
+        });
       }
-      if (line.compatibility?.status === ProductCompatibilityStatus.POTENTIAL_SAFETY_CONFLICT && !dto.acknowledgeSafetyConflict) {
+      if (
+        line.compatibility?.status === ProductCompatibilityStatus.POTENTIAL_SAFETY_CONFLICT &&
+        !dto.acknowledgeSafetyConflict
+      ) {
         throw new SafetyConflictException({ cartLineId: line.id, productId: line.productId });
       }
     }
@@ -199,7 +259,11 @@ export class CheckoutService {
         await this.reservations.reserve(tx, checkout.id, line.sellerOffer.id, line.quantity, expiresAt);
       }
 
-      await this.events.publish("CheckoutCreated", { checkoutId: checkout.id, userId, totalAmount }, { tx, aggregateType: "Checkout", aggregateId: checkout.id });
+      await this.events.publish(
+        "CheckoutCreated",
+        { checkoutId: checkout.id, userId, totalAmount },
+        { tx, aggregateType: "Checkout", aggregateId: checkout.id },
+      );
       return checkout.id;
     });
 
@@ -250,23 +314,45 @@ export class CheckoutService {
 
   /** Spec section 24: "if quote expires before payment: reject → refresh/reselect. Do not silently substitute another provider/price." — a checkout with a since-expired SELECTED quote must not proceed to payment on a now-stale amount. */
   private async assertNoExpiredSelectedShippingQuotes(checkoutId: string): Promise<void> {
-    const expiredSelected = await this.prisma.shippingQuote.findFirst({ where: { checkoutId, status: "SELECTED", expiresAt: { lte: new Date() } } });
+    const expiredSelected = await this.prisma.shippingQuote.findFirst({
+      where: { checkoutId, status: "SELECTED", expiresAt: { lte: new Date() } },
+    });
     if (expiredSelected) throw new ShippingQuoteExpiredException({ checkoutId, quoteId: expiredSelected.id });
   }
 
-  async createPaymentIntent(userId: string, id: string, provider: PaymentProvider = PaymentProvider.DEV_SIMULATED, idempotencyKey?: string) {
+  async createPaymentIntent(
+    userId: string,
+    id: string,
+    provider: PaymentProvider = PaymentProvider.DEV_SIMULATED,
+    idempotencyKey?: string,
+  ) {
     const checkout = await this.loadOwned(userId, id);
-    if (checkout.expiresAt && checkout.expiresAt < new Date()) throw new CheckoutExpiredException({ checkoutId: id });
+    if (checkout.expiresAt && checkout.expiresAt < new Date())
+      throw new CheckoutExpiredException({ checkoutId: id });
     await this.assertNoExpiredSelectedShippingQuotes(id);
-    if (checkout.status !== CheckoutStatus.READY_FOR_PAYMENT && checkout.status !== CheckoutStatus.PAYMENT_PENDING) {
-      throw new ValidationApiException({ field: "status", reason: "An address is required before a payment intent can be created" });
+    if (
+      checkout.status !== CheckoutStatus.READY_FOR_PAYMENT &&
+      checkout.status !== CheckoutStatus.PAYMENT_PENDING
+    ) {
+      throw new ValidationApiException({
+        field: "status",
+        reason: "An address is required before a payment intent can be created",
+      });
     }
     if (checkout.paymentMethodType === PaymentMethodType.INSTALLMENTS) {
       const activeFinancing = await this.financing.getLatestForCheckout(id);
-      const terminalFinancingFailures: FinancingIntentStatus[] = [FinancingIntentStatus.DECLINED, FinancingIntentStatus.CANCELLED, FinancingIntentStatus.EXPIRED];
+      const terminalFinancingFailures: FinancingIntentStatus[] = [
+        FinancingIntentStatus.DECLINED,
+        FinancingIntentStatus.CANCELLED,
+        FinancingIntentStatus.EXPIRED,
+      ];
       const isTerminalFailure = activeFinancing && terminalFinancingFailures.includes(activeFinancing.status);
       if (!isTerminalFailure) {
-        throw new ValidationApiException({ field: "paymentMethodType", reason: "This checkout has an active installment attempt — let it resolve before switching to online payment" });
+        throw new ValidationApiException({
+          field: "paymentMethodType",
+          reason:
+            "This checkout has an active installment attempt — let it resolve before switching to online payment",
+        });
       }
     }
 
@@ -277,16 +363,33 @@ export class CheckoutService {
     // failure (spec sections 40-41's declined/failed recovery UX explicitly
     // offers an alternate payment method on the very same checkout).
     if (checkout.paymentMethodType !== PaymentMethodType.ONLINE_PAYMENT) {
-      await this.prisma.checkout.update({ where: { id }, data: { paymentMethodType: PaymentMethodType.ONLINE_PAYMENT } });
+      await this.prisma.checkout.update({
+        where: { id },
+        data: { paymentMethodType: PaymentMethodType.ONLINE_PAYMENT },
+      });
     }
 
-    const intent = await this.payments.createIntent(checkout.id, checkout.totalAmount, checkout.currency, provider, idempotencyKey);
-    return { id: intent.id, checkoutId: intent.checkoutId, amount: intent.amount, currency: intent.currency, status: intent.status, provider: intent.provider };
+    const intent = await this.payments.createIntent(
+      checkout.id,
+      checkout.totalAmount,
+      checkout.currency,
+      provider,
+      idempotencyKey,
+    );
+    return {
+      id: intent.id,
+      checkoutId: intent.checkoutId,
+      amount: intent.amount,
+      currency: intent.currency,
+      status: intent.status,
+      provider: intent.provider,
+    };
   }
 
   async pay(userId: string, id: string, dto: PayCheckoutDto): Promise<PayCheckoutResultDto> {
     const checkout = await this.loadOwned(userId, id);
-    if (checkout.status === CheckoutStatus.CONFIRMED) throw new PaymentAlreadyCompletedException({ checkoutId: id });
+    if (checkout.status === CheckoutStatus.CONFIRMED)
+      throw new PaymentAlreadyCompletedException({ checkoutId: id });
 
     if (checkout.expiresAt && checkout.expiresAt < new Date()) {
       await this.prisma.$transaction(async (tx) => {
@@ -297,7 +400,11 @@ export class CheckoutService {
     }
 
     const intent = await this.payments.getIntent(id);
-    if (!intent) throw new ValidationApiException({ field: "paymentIntent", reason: "Create a payment intent before paying" });
+    if (!intent)
+      throw new ValidationApiException({
+        field: "paymentIntent",
+        reason: "Create a payment intent before paying",
+      });
 
     const outcome = await this.payments.charge(intent.id, dto.mode);
 
@@ -311,7 +418,13 @@ export class CheckoutService {
     // are never released, so the exact same checkout can be retried immediately without
     // losing its place in the stock queue — see README "Payment failure".
 
-    return { checkout: await this.toDto(userId, id), paymentStatus: outcome.status, failureCode: outcome.failureCode, failureMessage: outcome.failureMessage, orderIds };
+    return {
+      checkout: await this.toDto(userId, id),
+      paymentStatus: outcome.status,
+      failureCode: outcome.failureCode,
+      failureMessage: outcome.failureMessage,
+      orderIds,
+    };
   }
 
   /**
@@ -353,28 +466,56 @@ export class CheckoutService {
     const lines = checkout.pricedLinesSnapshot
       ? (checkout.pricedLinesSnapshot as unknown as CartLineDto[])
       : allLines(await this.cart.getCart(checkout.userId));
-    const address = checkout.addressId ? await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } }) : null;
-    const selectedQuotes = await this.prisma.shippingQuote.findMany({ where: { checkoutId, status: "SELECTED" } });
-    const deliveryAmountBySeller = selectedQuotes.length > 0 ? new Map(selectedQuotes.map((q) => [q.sellerOrgId, q.priceIrr])) : undefined;
+    const address = checkout.addressId
+      ? await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } })
+      : null;
+    const selectedQuotes = await this.prisma.shippingQuote.findMany({
+      where: { checkoutId, status: "SELECTED" },
+    });
+    const deliveryAmountBySeller =
+      selectedQuotes.length > 0 ? new Map(selectedQuotes.map((q) => [q.sellerOrgId, q.priceIrr])) : undefined;
 
     try {
       return await this.prisma.$transaction(async (tx) => {
         const lineAmount = pricedTotals(lines);
-        const deliveryTotal = deliveryAmountBySeller ? selectedQuotes.reduce((sum, q) => sum + q.priceIrr, 0) : checkout.deliveryAmount;
+        const deliveryTotal = deliveryAmountBySeller
+          ? selectedQuotes.reduce((sum, q) => sum + q.priceIrr, 0)
+          : checkout.deliveryAmount;
         const expectedTotal = lineAmount.netAmount + deliveryTotal;
         if (lines.length === 0 || expectedTotal !== checkout.totalAmount) {
-          throw new Error(`CHARGED_AMOUNT_MISMATCH: charged ${checkout.totalAmount}, order lines total ${expectedTotal}`);
+          throw new Error(
+            `CHARGED_AMOUNT_MISMATCH: charged ${checkout.totalAmount}, order lines total ${expectedTotal}`,
+          );
         }
         await this.reservations.consumeAllForCheckout(tx, checkoutId);
         const orderIds = await this.orders.createForCheckout(
           tx,
-          { id: checkout.id, userId: checkout.userId, householdId: checkout.householdId, deliveryAmount: checkout.deliveryAmount, discountAmount: checkout.discountAmount, currency: checkout.currency },
+          {
+            id: checkout.id,
+            userId: checkout.userId,
+            householdId: checkout.householdId,
+            deliveryAmount: checkout.deliveryAmount,
+            discountAmount: checkout.discountAmount,
+            currency: checkout.currency,
+          },
           lines,
           checkout.addressId,
-          address ? { addressLine: address.addressLine, city: address.city, region: address.region, countryCode: address.countryCode, recipient: address.recipient, phone: address.phone } : null,
+          address
+            ? {
+                addressLine: address.addressLine,
+                city: address.city,
+                region: address.region,
+                countryCode: address.countryCode,
+                recipient: address.recipient,
+                phone: address.phone,
+              }
+            : null,
           deliveryAmountBySeller,
         );
-        const createdOrders = await tx.order.findMany({ where: { id: { in: orderIds } }, select: { id: true, sellerOrganizationId: true } });
+        const createdOrders = await tx.order.findMany({
+          where: { id: { in: orderIds } },
+          select: { id: true, sellerOrganizationId: true },
+        });
         await this.logistics.createFulfillmentsForOrders(
           tx,
           checkoutId,
@@ -389,15 +530,31 @@ export class CheckoutService {
         for (const createdOrder of createdOrders) {
           await this.sellerFinance.attributeDirectSale(tx, createdOrder.id);
         }
-        await this.events.publish("CartConverted", { cartId: checkout.cartId, checkoutId }, { tx, aggregateType: "Cart", aggregateId: checkout.cartId });
+        await this.events.publish(
+          "CartConverted",
+          { cartId: checkout.cartId, checkoutId },
+          { tx, aggregateType: "Cart", aggregateId: checkout.cartId },
+        );
         return orderIds;
       });
     } catch (error) {
-      await this.prisma.checkout.update({ where: { id: checkoutId }, data: { status: CheckoutStatus.PAYMENT_SUCCEEDED_ORDER_ISSUE } });
+      await this.prisma.checkout.update({
+        where: { id: checkoutId },
+        data: { status: CheckoutStatus.PAYMENT_SUCCEEDED_ORDER_ISSUE },
+      });
       const message = error instanceof Error ? error.message : String(error);
-      await this.events.publish("PaymentReconciled", { checkoutId, action: "ORDER_CONFIRMATION_FAILED", error: message }, { aggregateType: "Checkout", aggregateId: checkoutId });
+      await this.events.publish(
+        "PaymentReconciled",
+        { checkoutId, action: "ORDER_CONFIRMATION_FAILED", error: message },
+        { aggregateType: "Checkout", aggregateId: checkoutId },
+      );
       try {
-        await this.refunds.refundForUnconfirmedCheckout(checkoutId, checkout.totalAmount, checkout.currency, `Order confirmation failed: ${message}`);
+        await this.refunds.refundForUnconfirmedCheckout(
+          checkoutId,
+          checkout.totalAmount,
+          checkout.currency,
+          `Order confirmation failed: ${message}`,
+        );
       } catch {
         // The refund attempt itself failing is the genuine "impossible to
         // safely recover automatically" case — the checkout stays in
@@ -413,56 +570,103 @@ export class CheckoutService {
     const options: PaymentMethodOptionDto[] = [];
     for (const gateway of this.paymentGateways.listEnabled()) {
       if (gateway.capabilities.supportsDirectPayment) {
-        options.push({ provider: gateway.provider as unknown as PaymentMethodOptionDto["provider"], methodType: "ONLINE_PAYMENT" as PaymentMethodOptionDto["methodType"], capabilities: gateway.capabilities });
+        options.push({
+          provider: gateway.provider as unknown as PaymentMethodOptionDto["provider"],
+          methodType: "ONLINE_PAYMENT" as PaymentMethodOptionDto["methodType"],
+          capabilities: gateway.capabilities,
+        });
       }
     }
     for (const provider of this.financingProviders.listEnabled()) {
       if (provider.capabilities.supportsInstallments) {
-        options.push({ provider: provider.provider as unknown as PaymentMethodOptionDto["provider"], methodType: "INSTALLMENTS" as PaymentMethodOptionDto["methodType"], capabilities: provider.capabilities });
+        options.push({
+          provider: provider.provider as unknown as PaymentMethodOptionDto["provider"],
+          methodType: "INSTALLMENTS" as PaymentMethodOptionDto["methodType"],
+          capabilities: provider.capabilities,
+        });
       }
     }
     return options;
   }
 
-  async createFinancingIntent(userId: string, id: string, provider: PaymentProvider): Promise<FinancingIntentDto> {
+  async createFinancingIntent(
+    userId: string,
+    id: string,
+    provider: PaymentProvider,
+  ): Promise<FinancingIntentDto> {
     const checkout = await this.loadOwned(userId, id);
-    if (checkout.expiresAt && checkout.expiresAt < new Date()) throw new CheckoutExpiredException({ checkoutId: id });
+    if (checkout.expiresAt && checkout.expiresAt < new Date())
+      throw new CheckoutExpiredException({ checkoutId: id });
     await this.assertNoExpiredSelectedShippingQuotes(id);
-    if (checkout.status !== CheckoutStatus.READY_FOR_PAYMENT && checkout.status !== CheckoutStatus.PAYMENT_PENDING) {
-      throw new ValidationApiException({ field: "status", reason: "An address is required before a financing intent can be created" });
+    if (
+      checkout.status !== CheckoutStatus.READY_FOR_PAYMENT &&
+      checkout.status !== CheckoutStatus.PAYMENT_PENDING
+    ) {
+      throw new ValidationApiException({
+        field: "status",
+        reason: "An address is required before a financing intent can be created",
+      });
     }
     if (checkout.paymentMethodType === PaymentMethodType.ONLINE_PAYMENT) {
       const activePayment = await this.payments.getIntent(id);
-      const terminalPaymentFailures: PaymentIntentStatus[] = [PaymentIntentStatus.FAILED, PaymentIntentStatus.CANCELLED];
+      const terminalPaymentFailures: PaymentIntentStatus[] = [
+        PaymentIntentStatus.FAILED,
+        PaymentIntentStatus.CANCELLED,
+      ];
       const isTerminalFailure = activePayment && terminalPaymentFailures.includes(activePayment.status);
       if (!isTerminalFailure) {
-        throw new ValidationApiException({ field: "paymentMethodType", reason: "This checkout has an active online payment attempt — let it resolve before switching to installments" });
+        throw new ValidationApiException({
+          field: "paymentMethodType",
+          reason:
+            "This checkout has an active online payment attempt — let it resolve before switching to installments",
+        });
       }
     }
     if (checkout.paymentMethodType !== PaymentMethodType.INSTALLMENTS) {
-      await this.prisma.checkout.update({ where: { id }, data: { paymentMethodType: PaymentMethodType.INSTALLMENTS } });
+      await this.prisma.checkout.update({
+        where: { id },
+        data: { paymentMethodType: PaymentMethodType.INSTALLMENTS },
+      });
     }
 
-    const intent = await this.financing.createIntent(checkout.id, checkout.totalAmount, checkout.currency, provider);
+    const intent = await this.financing.createIntent(
+      checkout.id,
+      checkout.totalAmount,
+      checkout.currency,
+      provider,
+    );
     return this.financing.toDto(intent);
   }
 
   private async loadOwnedFinancingIntent(userId: string, checkoutId: string, financingId: string) {
     await this.loadOwned(userId, checkoutId);
     const intent = await this.financing.getById(financingId);
-    if (intent.checkoutId !== checkoutId) throw new FinancingIntentNotFoundException({ financingIntentId: financingId });
-    if (intent.expiresAt && intent.expiresAt < new Date() && intent.status === FinancingIntentStatus.AUTHORIZATION_PENDING) {
+    if (intent.checkoutId !== checkoutId)
+      throw new FinancingIntentNotFoundException({ financingIntentId: financingId });
+    if (
+      intent.expiresAt &&
+      intent.expiresAt < new Date() &&
+      intent.status === FinancingIntentStatus.AUTHORIZATION_PENDING
+    ) {
       throw new FinancingExpiredException({ financingIntentId: financingId });
     }
     return intent;
   }
 
-  async getFinancingIntent(userId: string, checkoutId: string, financingId: string): Promise<FinancingIntentDto> {
+  async getFinancingIntent(
+    userId: string,
+    checkoutId: string,
+    financingId: string,
+  ): Promise<FinancingIntentDto> {
     const intent = await this.loadOwnedFinancingIntent(userId, checkoutId, financingId);
     return this.financing.toDto(intent);
   }
 
-  async checkFinancingEligibility(userId: string, checkoutId: string, financingId: string): Promise<{ status: FinancingEligibilityStatus }> {
+  async checkFinancingEligibility(
+    userId: string,
+    checkoutId: string,
+    financingId: string,
+  ): Promise<{ status: FinancingEligibilityStatus }> {
     await this.loadOwnedFinancingIntent(userId, checkoutId, financingId);
     const status = await this.financing.checkEligibility(financingId);
     return { status };
@@ -473,15 +677,26 @@ export class CheckoutService {
     return this.financing.getPlans(financingId);
   }
 
-  async selectFinancingPlan(userId: string, checkoutId: string, financingId: string, providerPlanId: string): Promise<FinancingIntentDto> {
+  async selectFinancingPlan(
+    userId: string,
+    checkoutId: string,
+    financingId: string,
+    providerPlanId: string,
+  ): Promise<FinancingIntentDto> {
     await this.loadOwnedFinancingIntent(userId, checkoutId, financingId);
     const intent = await this.financing.selectPlan(financingId, providerPlanId);
     return this.financing.toDto(intent);
   }
 
-  async authorizeFinancing(userId: string, checkoutId: string, financingId: string, mode?: "APPROVE" | "DECLINE" | "PENDING"): Promise<PayCheckoutResultDto> {
+  async authorizeFinancing(
+    userId: string,
+    checkoutId: string,
+    financingId: string,
+    mode?: "APPROVE" | "DECLINE" | "PENDING",
+  ): Promise<PayCheckoutResultDto> {
     const checkout = await this.loadOwned(userId, checkoutId);
-    if (checkout.status === CheckoutStatus.CONFIRMED) throw new PaymentAlreadyCompletedException({ checkoutId });
+    if (checkout.status === CheckoutStatus.CONFIRMED)
+      throw new PaymentAlreadyCompletedException({ checkoutId });
     await this.loadOwnedFinancingIntent(userId, checkoutId, financingId);
 
     const outcome = await this.financing.authorize(financingId, mode);
@@ -490,7 +705,10 @@ export class CheckoutService {
     if (outcome.status === "APPROVED") {
       orderIds = await this.finalizeSuccessfulPayment(checkoutId);
     } else if (outcome.status === "PENDING") {
-      await this.prisma.checkout.update({ where: { id: checkoutId }, data: { status: CheckoutStatus.PAYMENT_PENDING } });
+      await this.prisma.checkout.update({
+        where: { id: checkoutId },
+        data: { status: CheckoutStatus.PAYMENT_PENDING },
+      });
     }
     // DECLINED: checkout/cart/reservations are left fully untouched and
     // recoverable — an alternate payment method (a different provider, or
@@ -499,8 +717,15 @@ export class CheckoutService {
     // Return to Cart), returned as a normal result rather than an
     // exception, exactly mirroring how pay() reports a card FAILURE.
 
-    const paymentStatus = outcome.status === "APPROVED" ? "SUCCEEDED" : outcome.status === "DECLINED" ? "FAILED" : "PENDING";
-    return { checkout: await this.toDto(userId, checkoutId), paymentStatus, failureCode: outcome.failureCode, failureMessage: outcome.failureMessage, orderIds };
+    const paymentStatus =
+      outcome.status === "APPROVED" ? "SUCCEEDED" : outcome.status === "DECLINED" ? "FAILED" : "PENDING";
+    return {
+      checkout: await this.toDto(userId, checkoutId),
+      paymentStatus,
+      failureCode: outcome.failureCode,
+      failureMessage: outcome.failureMessage,
+      orderIds,
+    };
   }
 
   async getOpsView(userId: string, id: string): Promise<CheckoutOpsDto> {
@@ -508,17 +733,33 @@ export class CheckoutService {
     const checkoutDto = await this.toDto(userId, id);
 
     const [paymentIntents, financingIntentRows, refundRows] = await Promise.all([
-      this.prisma.paymentIntent.findMany({ where: { checkoutId: id }, include: { attempts: true, transactions: true }, orderBy: { createdAt: "asc" } }),
+      this.prisma.paymentIntent.findMany({
+        where: { checkoutId: id },
+        include: { attempts: true, transactions: true },
+        orderBy: { createdAt: "asc" },
+      }),
       this.prisma.financingIntent.findMany({ where: { checkoutId: id }, orderBy: { createdAt: "asc" } }),
-      this.prisma.refund.findMany({ where: { OR: [{ paymentIntentId: { not: null } }, { financingIntentId: { not: null } }] }, orderBy: { createdAt: "asc" } }),
+      this.prisma.refund.findMany({
+        where: { OR: [{ paymentIntentId: { not: null } }, { financingIntentId: { not: null } }] },
+        orderBy: { createdAt: "asc" },
+      }),
     ]);
 
     const paymentIntentIds = paymentIntents.map((i) => i.id);
     const financingIntentIds = financingIntentRows.map((i) => i.id);
-    const scopedRefunds = refundRows.filter((r) => (r.paymentIntentId && paymentIntentIds.includes(r.paymentIntentId)) || (r.financingIntentId && financingIntentIds.includes(r.financingIntentId)));
+    const scopedRefunds = refundRows.filter(
+      (r) =>
+        (r.paymentIntentId && paymentIntentIds.includes(r.paymentIntentId)) ||
+        (r.financingIntentId && financingIntentIds.includes(r.financingIntentId)),
+    );
 
     const providerEvents = await this.prisma.paymentProviderEvent.findMany({
-      where: { OR: [{ paymentIntentId: { in: paymentIntentIds } }, { financingIntentId: { in: financingIntentIds } }] },
+      where: {
+        OR: [
+          { paymentIntentId: { in: paymentIntentIds } },
+          { financingIntentId: { in: financingIntentIds } },
+        ],
+      },
       orderBy: { receivedAt: "asc" },
     });
     const reconciliationLogs = await this.prisma.reconciliationLog.findMany({
@@ -534,12 +775,37 @@ export class CheckoutService {
     // toDto() does above for the single-model CheckoutDto case.
     return {
       checkout: checkoutDto,
-      paymentIntents: paymentIntents.map((i) => ({ id: i.id, checkoutId: i.checkoutId, amount: i.amount, currency: i.currency, status: i.status, provider: i.provider })),
+      paymentIntents: paymentIntents.map((i) => ({
+        id: i.id,
+        checkoutId: i.checkoutId,
+        amount: i.amount,
+        currency: i.currency,
+        status: i.status,
+        provider: i.provider,
+      })),
       paymentAttempts: paymentIntents.flatMap((i) =>
-        i.attempts.map((a) => ({ id: a.id, paymentIntentId: a.paymentIntentId, provider: a.provider, providerReference: a.providerReference, status: a.status, failureCode: a.failureCode, failureMessage: a.failureMessage, createdAt: a.createdAt.toISOString(), completedAt: a.completedAt?.toISOString() ?? null })),
+        i.attempts.map((a) => ({
+          id: a.id,
+          paymentIntentId: a.paymentIntentId,
+          provider: a.provider,
+          providerReference: a.providerReference,
+          status: a.status,
+          failureCode: a.failureCode,
+          failureMessage: a.failureMessage,
+          createdAt: a.createdAt.toISOString(),
+          completedAt: a.completedAt?.toISOString() ?? null,
+        })),
       ),
       transactions: paymentIntents.flatMap((i) =>
-        i.transactions.map((t) => ({ id: t.id, paymentIntentId: t.paymentIntentId, type: t.type, amount: t.amount, currency: t.currency, status: t.status, createdAt: t.createdAt.toISOString() })),
+        i.transactions.map((t) => ({
+          id: t.id,
+          paymentIntentId: t.paymentIntentId,
+          type: t.type,
+          amount: t.amount,
+          currency: t.currency,
+          status: t.status,
+          createdAt: t.createdAt.toISOString(),
+        })),
       ),
       financingIntents,
       refunds: scopedRefunds.map((r) => ({
@@ -556,15 +822,36 @@ export class CheckoutService {
         updatedAt: r.updatedAt.toISOString(),
         completedAt: r.completedAt?.toISOString() ?? null,
       })),
-      providerEvents: providerEvents.map((e) => ({ id: e.id, provider: e.provider, providerEventId: e.providerEventId, eventType: e.eventType, status: e.status, receivedAt: e.receivedAt.toISOString(), processedAt: e.processedAt?.toISOString() ?? null, attemptCount: e.attemptCount, lastError: e.lastError })),
-      reconciliationLogs: reconciliationLogs.map((l) => ({ id: l.id, provider: l.provider, referenceType: l.referenceType, referenceId: l.referenceId, localStatus: l.localStatus, remoteStatus: l.remoteStatus, action: l.action, createdAt: l.createdAt.toISOString() })),
+      providerEvents: providerEvents.map((e) => ({
+        id: e.id,
+        provider: e.provider,
+        providerEventId: e.providerEventId,
+        eventType: e.eventType,
+        status: e.status,
+        receivedAt: e.receivedAt.toISOString(),
+        processedAt: e.processedAt?.toISOString() ?? null,
+        attemptCount: e.attemptCount,
+        lastError: e.lastError,
+      })),
+      reconciliationLogs: reconciliationLogs.map((l) => ({
+        id: l.id,
+        provider: l.provider,
+        referenceType: l.referenceType,
+        referenceId: l.referenceId,
+        localStatus: l.localStatus,
+        remoteStatus: l.remoteStatus,
+        action: l.action,
+        createdAt: l.createdAt.toISOString(),
+      })),
     } as unknown as CheckoutOpsDto;
   }
 
   private async toDto(userId: string, checkoutId: string): Promise<CheckoutDto> {
     const checkout = await this.prisma.checkout.findUniqueOrThrow({ where: { id: checkoutId } });
     // Show exactly what is being charged: the frozen lines, not the live cart.
-    const cartDto = checkout.pricedLinesSnapshot ? snapshotAsCart(checkout.pricedLinesSnapshot as unknown as CartLineDto[]) : await this.cart.getCart(userId);
+    const cartDto = checkout.pricedLinesSnapshot
+      ? snapshotAsCart(checkout.pricedLinesSnapshot as unknown as CartLineDto[])
+      : await this.cart.getCart(userId);
     return {
       id: checkout.id,
       status: checkout.status as unknown as CheckoutDto["status"],

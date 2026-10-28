@@ -26,7 +26,7 @@ const DETAIL: ProductDetailDto = productDetail({
   ],
   defaultOfferId: "offer-2kg-a",
   compatibility: { status: "COMPATIBLE" as never, reasons: [] },
-  reviews: [{ id: "r1", rating: 5, body: "Luna loves it", authorName: "Sara", variantTitle: "2kg", verifiedPurchase: true, createdAt: "2026-09-01T00:00:00.000Z" }],
+  reviews: [{ id: "r1", rating: 5, body: "Luna loves it", authorName: "Sara", variantTitle: "2kg", verifiedPurchase: true, status: "APPROVED", createdAt: "2026-09-01T00:00:00.000Z" }],
   rating: { average: 5, count: 1 },
 });
 
