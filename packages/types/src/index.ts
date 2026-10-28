@@ -910,7 +910,10 @@ export interface BookingDto {
   /** Owner-visible aftercare instructions written by the provider at completion. */
   aftercareInstructions?: string | null;
   /** The answered intake form (only on GET /bookings/:id). */
-  intake?: { formVersion: number; answers: { key: string; label: string; type: string; value: string | boolean | string[] | null }[] } | null;
+  intake?: {
+    formVersion: number;
+    answers: { key: string; label: string; type: string; value: string | boolean | string[] | null }[];
+  } | null;
   /** Pet taxi only: the route and fare as copied when the booking was made (null for other services). */
   transportRoute?: {
     pickupAddressText: string;
@@ -923,7 +926,11 @@ export interface BookingDto {
     pickupContact?: { name: string | null; phone: string } | null;
   } | null;
   /** Pet taxi only: provider-reported progress (no GPS). */
-  rideTimeline?: { type: "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "DROPPED_OFF"; occurredAt: string; note: string | null }[];
+  rideTimeline?: {
+    type: "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "DROPPED_OFF";
+    occurredAt: string;
+    note: string | null;
+  }[];
   cancellationReasonCode?: string | null;
 }
 
@@ -1119,11 +1126,17 @@ export enum SellerStatus {
   CLOSED = "CLOSED",
 }
 
-export enum ProductStatus {
-  DRAFT = "DRAFT",
+export enum SellerOfferStatus {
   ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  ARCHIVED = "ARCHIVED",
+  PAUSED = "PAUSED",
+  OUT_OF_STOCK = "OUT_OF_STOCK",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum SellerOfferModerationStatus {
+  PENDING_REVIEW = "PENDING_REVIEW",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }
 
 export enum ProductCategoryStatus {
@@ -1131,16 +1144,16 @@ export enum ProductCategoryStatus {
   INACTIVE = "INACTIVE",
 }
 
+export enum ProductStatus {
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  ARCHIVED = "ARCHIVED",
+}
+
 export enum BrandStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
-}
-
-export enum SellerOfferStatus {
-  ACTIVE = "ACTIVE",
-  PAUSED = "PAUSED",
-  OUT_OF_STOCK = "OUT_OF_STOCK",
-  SUSPENDED = "SUSPENDED",
 }
 
 export enum CartStatus {
@@ -1567,7 +1580,14 @@ export interface CartLineDto {
   issues: CartLineIssue[];
 }
 
-export type CartLineIssue = "OFFER_UNAVAILABLE" | "SELLER_UNAVAILABLE" | "OUT_OF_STOCK" | "LOW_STOCK" | "QUANTITY_EXCEEDS_STOCK" | "PRICE_CHANGED" | "PROMOTION_EXPIRED";
+export type CartLineIssue =
+  | "OFFER_UNAVAILABLE"
+  | "SELLER_UNAVAILABLE"
+  | "OUT_OF_STOCK"
+  | "LOW_STOCK"
+  | "QUANTITY_EXCEEDS_STOCK"
+  | "PRICE_CHANGED"
+  | "PROMOTION_EXPIRED";
 
 export interface CartSellerGroupDto {
   sellerOrganization: SellerOrganizationSummaryDto;
@@ -1702,8 +1722,21 @@ export interface OrderDetailDto {
   orderNumber: string;
   cancelledAt: string | null;
   cancelReason: string | null;
-  timeline: { toStatus: string; fromStatus: string | null; actorType: string; reason: string | null; createdAt: string }[];
-  refundRequests: { id: string; status: string; reason: string; requestedAmount: number; decisionReason: string | null; createdAt: string }[];
+  timeline: {
+    toStatus: string;
+    fromStatus: string | null;
+    actorType: string;
+    reason: string | null;
+    createdAt: string;
+  }[];
+  refundRequests: {
+    id: string;
+    status: string;
+    reason: string;
+    requestedAmount: number;
+    decisionReason: string | null;
+    createdAt: string;
+  }[];
   canCancel: boolean;
   canRequestRefund: boolean;
 }
@@ -2096,14 +2129,46 @@ export interface SellerOsOfferDto {
   compareAtAmount: number | null;
   currency: string;
   status: SellerOfferStatus;
-  inventory: InventoryItemDto | null;
+  moderationStatus: SellerOfferModerationStatus;
+  moderationReason: string | null;
+  moderatedAt: string | null;
+  inventory: SellerOsOfferInventoryDto | null;
   marketplaceListingCount: number;
   marketplaceSyncErrorCount: number;
   createdAt: string;
   updatedAt: string;
-  /** Batch 4 */
   repeatDeliveryEligible: boolean;
   repeatIntervalsDays: number[];
+}
+
+export interface SellerOsOfferInventoryDto {
+  id: string;
+  sellerOfferId: string;
+  onHand: number;
+  reserved: number;
+  available: number;
+  updatedAt: string;
+}
+
+/** Admin commerce queue row/detail for seller-offer publication moderation. */
+export interface AdminSellerOfferModerationDto {
+  id: string;
+  sellerOrganization: { id: string; name: string };
+  product: { id: string; title: string };
+  variant: { id: string; title: string | null; sku: string };
+  sellerSku: string | null;
+  priceAmount: number;
+  compareAtAmount: number | null;
+  currency: string;
+  status: SellerOfferStatus;
+  moderationStatus: SellerOfferModerationStatus;
+  moderationReason: string | null;
+  moderatedAt: string | null;
+  availableQuantity: number;
+  repeatDeliveryEligible: boolean;
+  repeatIntervalsDays: number[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MarketplaceProviderCapabilitiesDto {
@@ -2201,7 +2266,13 @@ export interface MarketplaceSyncAttemptDto {
 
 /** `discrepancyType: null` means the last check found no mismatch — canonical PET LIFE OS data is never overwritten either way (spec section 35-36). */
 export interface MarketplaceReconciliationResultDto {
-  discrepancyType: "INVENTORY_MISMATCH" | "PRICE_MISMATCH" | "LISTING_STATUS_MISMATCH" | "ORDER_STATUS_MISMATCH" | "UNKNOWN_PROVIDER_REFERENCE" | null;
+  discrepancyType:
+    | "INVENTORY_MISMATCH"
+    | "PRICE_MISMATCH"
+    | "LISTING_STATUS_MISMATCH"
+    | "ORDER_STATUS_MISMATCH"
+    | "UNKNOWN_PROVIDER_REFERENCE"
+    | null;
   canonicalValue: string | number | null;
   providerObservedValue: string | number | null;
   message: string;
@@ -2737,7 +2808,11 @@ export interface TrustActionDto {
   reason: string;
   performedByAdmin: AdminActorSummaryDto;
   /** Batch 6 — what the action changed on its subject ({ before, after }), used by RESTORE and shown in the case history. */
-  effectSummary: { before: Record<string, unknown>; after: Record<string, unknown>; restoredByActionId?: string } | null;
+  effectSummary: {
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    restoredByActionId?: string;
+  } | null;
   createdAt: string;
   appeal: AppealDto | null;
 }
@@ -4346,7 +4421,12 @@ export interface HealthOverviewDto {
 /** The coarse, permission-gated health summary the H13 support context panel shows — never the full clinical record. */
 export interface SupportHealthSummaryDto {
   openMedicalDocumentsCount: number;
-  recentClinicalVisit: { id: string; status: ClinicalVisitStatus; providerOrganizationName: string; startedAt: string } | null;
+  recentClinicalVisit: {
+    id: string;
+    status: ClinicalVisitStatus;
+    providerOrganizationName: string;
+    startedAt: string;
+  } | null;
   openReferralsCount: number;
 }
 
@@ -5139,7 +5219,13 @@ export interface InsuranceApplicationDto {
   consentAt?: string | null;
   insurerMessage?: string | null;
   externalReference?: string | null;
-  timeline?: { toStatus: string; fromStatus: string | null; actorType: string; note: string | null; createdAt: string }[];
+  timeline?: {
+    toStatus: string;
+    fromStatus: string | null;
+    actorType: string;
+    note: string | null;
+    createdAt: string;
+  }[];
 }
 
 export enum PetFriendlyPlaceCategory {
@@ -5871,10 +5957,20 @@ export interface ProviderPatientRecordDto {
     photoUrl: string | null;
   };
   owner: { displayName: string | null; phone: string | null } | null;
-  careProfile: { temperamentText: string | null; handlingSensitivityText: string | null; specialInstructionsText: string | null } | null;
+  careProfile: {
+    temperamentText: string | null;
+    handlingSensitivityText: string | null;
+    specialInstructionsText: string | null;
+  } | null;
   alerts: ProviderClinicalAlertDto[];
   allergies: { id: string; name: string; severity: string | null }[];
-  medications: { id: string; name: string; dosage: number | null; unit: string | null; frequencyText: string | null }[];
+  medications: {
+    id: string;
+    name: string;
+    dosage: number | null;
+    unit: string | null;
+    frequencyText: string | null;
+  }[];
   conditions: { id: string; name: string; notes: string | null }[];
   problems: ClinicalProblemDto[];
   prescriptions: PrescriptionDto[];
@@ -6078,7 +6174,15 @@ export interface RepeatDeliveryDto {
 
 export type TravelCancellationTypeName = "FREE_UNTIL" | "PARTIAL" | "NON_REFUNDABLE";
 export type TravelPaymentTimingName = "PAY_NOW" | "DEPOSIT" | "PAY_AT_PROPERTY";
-export type TravelPaymentStatus = "NOT_REQUIRED" | "AWAITING" | "PAID" | "FAILED" | "REFUND_PENDING" | "REFUNDED" | "PARTIALLY_REFUNDED" | "PAY_AT_PROPERTY";
+export type TravelPaymentStatus =
+  | "NOT_REQUIRED"
+  | "AWAITING"
+  | "PAID"
+  | "FAILED"
+  | "REFUND_PENDING"
+  | "REFUNDED"
+  | "PARTIALLY_REFUNDED"
+  | "PAY_AT_PROPERTY";
 
 export interface TravelMediaDto {
   id: string;
@@ -6113,7 +6217,10 @@ export interface TravelRatePlanDto {
   isActive: boolean;
 }
 
-export type TravelRatePlanSnapshotDto = Omit<TravelRatePlanDto, "isActive" | "activeFrom" | "activeUntil" | "unitId">;
+export type TravelRatePlanSnapshotDto = Omit<
+  TravelRatePlanDto,
+  "isActive" | "activeFrom" | "activeUntil" | "unitId"
+>;
 
 export interface TravelPriceBreakdownDto {
   nightly: { date: string; priceIrr: number }[];
@@ -6166,9 +6273,23 @@ export interface TravelSearchResultItemDto {
   isVerified: boolean;
   bookingMode: TravelBookingMode;
   rating: TravelRatingSummaryDto;
-  petPolicySummary: { dogsAllowed: boolean; catsAllowed: boolean; maxPets: number | null; maxWeightKg: number | null; petFeeIrr: number | null; stated: boolean };
+  petPolicySummary: {
+    dogsAllowed: boolean;
+    catsAllowed: boolean;
+    maxPets: number | null;
+    maxWeightKg: number | null;
+    petFeeIrr: number | null;
+    stated: boolean;
+  };
   /** Present only when dates were given: the cheapest bookable unit + rate for the whole stay. */
-  stay: { unitId: string; ratePlanId: string | null; nights: number; totalIrr: number; petFeeIrr: number; freeCancellation: boolean } | null;
+  stay: {
+    unitId: string;
+    ratePlanId: string | null;
+    nights: number;
+    totalIrr: number;
+    petFeeIrr: number;
+    freeCancellation: boolean;
+  } | null;
   fromNightlyIrr: number | null;
   freeCancellationAvailable: boolean;
   distanceKm: number | null;
@@ -6182,7 +6303,11 @@ export interface TravelSearchResultDto {
   total: number;
   page: number;
   pageSize: number;
-  facets: { types: { type: TravelListingType; count: number }[]; amenities: { key: string; count: number }[]; priceRange: { min: number; max: number } | null };
+  facets: {
+    types: { type: TravelListingType; count: number }[];
+    amenities: { key: string; count: number }[];
+    priceRange: { min: number; max: number } | null;
+  };
   mapAvailable: boolean;
 }
 
@@ -6226,7 +6351,13 @@ export interface TripHubDto {
   /** Per requirement: whether evidence is on file. Derived from structured fields only (never document contents). */
   documentStates: Record<string, "FOUND" | "MISSING" | "EXPIRING" | "EXPIRED" | "UNKNOWN">;
   documents: { id: string; title: string; documentType: string; linkedRequirementIds: string[] }[];
-  insuranceApplications: { id: string; productName: string; providerName: string; status: InsuranceApplicationStatus; submittedAt: string | null }[];
+  insuranceApplications: {
+    id: string;
+    productName: string;
+    providerName: string;
+    status: InsuranceApplicationStatus;
+    submittedAt: string | null;
+  }[];
   nearbyPlaces: { id: string; name: string; category: string; city: string }[];
   favoritePlaces: { id: string; name: string; category: string; city: string }[];
   nearbyVets: { id: string; name: string; city: string }[];
@@ -6274,7 +6405,15 @@ export interface TravelProviderFinanceDto {
   refundedIrr: number;
   netCollectedIrr: number;
   payAtPropertyIrr: number;
-  rows: { bookingId: string; reference: string; checkIn: string; status: TravelBookingStatus; totalIrr: number; paidIrr: number; refundedIrr: number }[];
+  rows: {
+    bookingId: string;
+    reference: string;
+    checkIn: string;
+    status: TravelBookingStatus;
+    totalIrr: number;
+    paidIrr: number;
+    refundedIrr: number;
+  }[];
   settlementNote: string;
 }
 
@@ -6282,7 +6421,14 @@ export interface TravelProviderCalendarDto {
   unitId: string;
   unitName: string;
   quantity: number;
-  days: { date: string; remaining: number; booked: number; isBlocked: boolean; priceIrr: number; bookings: { id: string; reference: string; status: TravelBookingStatus }[] }[];
+  days: {
+    date: string;
+    remaining: number;
+    booked: number;
+    isBlocked: boolean;
+    priceIrr: number;
+    bookings: { id: string; reference: string; status: TravelBookingStatus }[];
+  }[];
 }
 
 export interface AdminTravelAnalyticsDto {
@@ -6319,6 +6465,17 @@ export interface InsurerApplicationDetailDto extends InsurerApplicationRowDto {
   insurerMessage: string | null;
   externalReference: string | null;
   consentAt: string | null;
-  timeline: { toStatus: string; fromStatus: string | null; actorType: string; note: string | null; createdAt: string }[];
+  timeline: {
+    toStatus: string;
+    fromStatus: string | null;
+    actorType: string;
+    note: string | null;
+    createdAt: string;
+  }[];
 }
-export type { PartnerVerificationProfileInput, PartnerVerificationProfileDto, PartnerVerificationPolicyDto, PartnerVerificationDocumentKind } from "./partner-verification";
+export type {
+  PartnerVerificationProfileInput,
+  PartnerVerificationProfileDto,
+  PartnerVerificationPolicyDto,
+  PartnerVerificationDocumentKind,
+} from "./partner-verification";

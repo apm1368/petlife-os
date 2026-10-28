@@ -1,7 +1,37 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
-import { OrderRefundRequestStatus, OrderStatus, ProductReviewStatus, ProductStatus } from "@prisma/client";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
+import {
+  OrderRefundRequestStatus,
+  OrderStatus,
+  ProductReviewStatus,
+  ProductStatus,
+  SellerOfferModerationStatus,
+} from "@prisma/client";
 import { Transform, Type } from "class-transformer";
-import { IsBoolean, IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min } from "class-validator";
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+  Max,
+  MaxLength,
+  Min,
+} from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
 import { RequireAdminVertical } from "../auth/require-admin-vertical.decorator";
@@ -9,8 +39,16 @@ import { AdminVertical } from "@prisma/client";
 import { RequireAdminPermission } from "../auth/require-admin-permission.decorator";
 import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-context.types";
-import { PromotionManagementService, type PromotionActor } from "../../commerce/promotions/promotion-management.service";
-import { ListPromotionsQueryDto, PromotionInputDto, PromotionTransitionDto, UpdatePromotionDto } from "../../commerce/promotions/dto/promotion.dto";
+import {
+  PromotionManagementService,
+  type PromotionActor,
+} from "../../commerce/promotions/promotion-management.service";
+import {
+  ListPromotionsQueryDto,
+  PromotionInputDto,
+  PromotionTransitionDto,
+  UpdatePromotionDto,
+} from "../../commerce/promotions/dto/promotion.dto";
 import { AdminCommerceService } from "./admin-commerce.service";
 
 const toBool = ({ value }: { value: unknown }) => value === true || value === "true" || value === "1";
@@ -38,6 +76,11 @@ class ProductQueryDto extends PageDto {
   @IsOptional() @IsUUID() categoryId?: string;
 }
 
+class SellerOfferModerationQueryDto extends PageDto {
+  @IsOptional() @IsEnum(SellerOfferModerationStatus) status?: SellerOfferModerationStatus;
+  @IsOptional() @IsString() @MaxLength(100) q?: string;
+}
+
 class ReviewQueryDto extends PageDto {
   @IsOptional() @IsEnum(ProductReviewStatus) status?: ProductReviewStatus;
 }
@@ -57,6 +100,12 @@ class DecisionNoteDto {
 
 class ReasonDto {
   @IsString() @Length(3, 500) reason!: string;
+}
+
+class SellerOfferModerationDecisionDto extends ReasonDto {
+  @IsIn([SellerOfferModerationStatus.APPROVED, SellerOfferModerationStatus.REJECTED])
+  decision!: SellerOfferModerationStatus;
+  @IsDateString() expectedUpdatedAt!: string;
 }
 
 class ProductStatusDto extends ReasonDto {
@@ -101,13 +150,23 @@ export class AdminCommerceController {
 
   @Post("refund-requests/:id/approve")
   @RequireAdminPermission("finance.refund.request")
-  approveRefundRequest(@Param("id", ParseUUIDPipe) id: string, @Body() dto: DecisionNoteDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+  approveRefundRequest(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: DecisionNoteDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
     return this.commerce.approveRefundRequest(admin, id, dto.note, req.requestId);
   }
 
   @Post("refund-requests/:id/reject")
   @RequireAdminPermission("finance.refund.request")
-  rejectRefundRequest(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ReasonDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+  rejectRefundRequest(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: ReasonDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
     return this.commerce.rejectRefundRequest(admin, id, dto.reason, req.requestId);
   }
 
@@ -119,8 +178,43 @@ export class AdminCommerceController {
 
   @Patch("products/:id/status")
   @RequireAdminPermission("commerce.manage")
-  setProductStatus(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ProductStatusDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+  setProductStatus(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: ProductStatusDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
     return this.commerce.setProductStatus(admin, id, dto.status, dto.reason, req.requestId);
+  }
+
+  @Get("offers/moderation")
+  @RequireAdminPermission("commerce.view")
+  listSellerOffersForModeration(@Query() query: SellerOfferModerationQueryDto) {
+    return this.commerce.listSellerOffersForModeration(query);
+  }
+
+  @Get("offers/moderation/:id")
+  @RequireAdminPermission("commerce.view")
+  getSellerOfferForModeration(@Param("id", ParseUUIDPipe) id: string) {
+    return this.commerce.getSellerOfferForModeration(id);
+  }
+
+  @Post("offers/moderation/:id/decision")
+  @RequireAdminPermission("commerce.manage")
+  decideSellerOfferModeration(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: SellerOfferModerationDecisionDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.commerce.decideSellerOfferModeration(
+      admin,
+      id,
+      dto.decision,
+      dto.reason,
+      dto.expectedUpdatedAt,
+      req.requestId,
+    );
   }
 
   @Get("reviews")
@@ -131,7 +225,12 @@ export class AdminCommerceController {
 
   @Patch("reviews/:id/visibility")
   @RequireAdminPermission("commerce.manage")
-  setReviewVisibility(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ReviewVisibilityDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+  setReviewVisibility(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: ReviewVisibilityDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
     return this.commerce.setReviewVisibility(admin, id, dto.hidden, dto.reason, req.requestId);
   }
 
@@ -167,15 +266,30 @@ export class AdminCommerceController {
 
   @Post("promotions")
   @RequireAdminPermission("promotions.manage")
-  async createPromotion(@Body() dto: PromotionInputDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+  async createPromotion(
+    @Body() dto: PromotionInputDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
     const row = await this.promotions.create(platformActor(admin), dto);
-    await this.commerce.auditPromotion(admin, "created", row.id, { name: row.name, scope: row.scope, discountType: row.discountType, value: row.value }, req.requestId);
+    await this.commerce.auditPromotion(
+      admin,
+      "created",
+      row.id,
+      { name: row.name, scope: row.scope, discountType: row.discountType, value: row.value },
+      req.requestId,
+    );
     return row;
   }
 
   @Patch("promotions/:id")
   @RequireAdminPermission("promotions.manage")
-  async updatePromotion(@Param("id", ParseUUIDPipe) id: string, @Body() dto: UpdatePromotionDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+  async updatePromotion(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: UpdatePromotionDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
     const row = await this.promotions.update(platformActor(admin), id, dto);
     await this.commerce.auditPromotion(admin, "updated", id, { ...dto }, req.requestId);
     return row;
@@ -183,7 +297,12 @@ export class AdminCommerceController {
 
   @Post("promotions/:id/status")
   @RequireAdminPermission("promotions.manage")
-  async transitionPromotion(@Param("id", ParseUUIDPipe) id: string, @Body() dto: PromotionTransitionDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+  async transitionPromotion(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: PromotionTransitionDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
     const row = await this.promotions.transition(platformActor(admin), id, dto.status);
     await this.commerce.auditPromotion(admin, "status_changed", id, { status: row.status }, req.requestId);
     return row;

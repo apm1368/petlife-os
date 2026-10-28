@@ -171,6 +171,8 @@ export type AdminAuditAction =
   | "order_refund_request.approved"
   | "order_refund_request.rejected"
   | "product.status_changed"
+  | "seller_offer.moderation_approved"
+  | "seller_offer.moderation_rejected"
   | "product_review.hidden"
   | "product_review.restored"
   | "promotion.created"

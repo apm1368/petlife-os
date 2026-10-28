@@ -119,6 +119,9 @@ export const DOMAIN_EVENT_TYPES = [
   "SellerMembershipDeactivated",
   "SellerContextChanged",
   "SellerOfferPriceChanged",
+  "SellerOfferSubmittedForModeration",
+  "SellerOfferModerationApproved",
+  "SellerOfferModerationRejected",
   "SellerOfferActivated",
   "SellerOfferDeactivated",
   "InventoryAdjusted",
@@ -417,7 +420,11 @@ export class DomainEventsService {
     private readonly emitter: EventEmitter2,
   ) {}
 
-  async publish(type: DomainEventType, payload: Record<string, unknown>, options: PublishOptions = {}): Promise<void> {
+  async publish(
+    type: DomainEventType,
+    payload: Record<string, unknown>,
+    options: PublishOptions = {},
+  ): Promise<void> {
     const client = options.tx ?? this.prisma;
 
     const event = await client.domainEvent.create({
@@ -446,7 +453,10 @@ export class DomainEventsService {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to dispatch domain event ${type} (${event.id})`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to dispatch domain event ${type} (${event.id})`,
+        error instanceof Error ? error.stack : undefined,
+      );
       await client.domainEvent
         .update({
           where: { id: event.id },

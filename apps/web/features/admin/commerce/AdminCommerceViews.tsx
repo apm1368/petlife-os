@@ -5,12 +5,36 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { Button, Dialog, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
-import type { AdminCommerceAnalyticsDto, AdminCommerceOrderDetailDto, AdminCommerceOrderRowDto, AdminInventoryRowDto, AdminProductReviewRowDto, AdminProductRowDto, AdminRefundRequestDto, AdminSellerRowDto, PaginatedDto } from "@petlife/types";
+import type {
+  AdminCommerceAnalyticsDto,
+  AdminCommerceOrderDetailDto,
+  AdminCommerceOrderRowDto,
+  AdminInventoryRowDto,
+  AdminProductReviewRowDto,
+  AdminProductRowDto,
+  AdminRefundRequestDto,
+  AdminSellerRowDto,
+  PaginatedDto,
+} from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { adminCommerceService } from "@/services/admin-commerce.service";
 import { PromotionManager, type PromotionApi } from "@/features/commerce/PromotionManager";
-import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th } from "../console-ui";
+import {
+  DetailRow,
+  EmptyRow,
+  FilterBar,
+  FilterField,
+  Kpi,
+  Panel,
+  PanelTitle,
+  SelectFilter,
+  TableWrap,
+  Tag,
+  Td,
+  TextFilter,
+  Th,
+} from "../console-ui";
 
 type Lang = "fa" | "en";
 type LoadError = "forbidden" | "notFound" | "error" | null;
@@ -25,7 +49,10 @@ function num(value: number, lang: Lang) {
 }
 
 function when(value: string, lang: Lang) {
-  return new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 function errorOf(e: unknown): LoadError {
@@ -95,15 +122,24 @@ export function AdminCommerceNav() {
     { href: `${base}/orders`, fa: "سفارش‌ها", en: "Orders" },
     { href: `${base}/refund-requests`, fa: "درخواست‌های بازگشت وجه", en: "Refund requests" },
     { href: `${base}/products`, fa: "کالاها", en: "Products" },
+    { href: `${base}/product-moderation`, fa: "تأیید پیشنهادها", en: "Offer moderation" },
     { href: `${base}/reviews`, fa: "نظرات", en: "Reviews" },
     { href: `${base}/inventory`, fa: "موجودی", en: "Inventory" },
     { href: `${base}/sellers`, fa: "فروشندگان", en: "Sellers" },
     { href: `${base}/promotions`, fa: "تخفیف‌ها", en: "Promotions" },
   ];
   return (
-    <nav aria-label={fa ? "بخش فروشگاه" : "Commerce section"} className="mb-4 flex gap-1 overflow-x-auto border-b border-border-subtle">
+    <nav
+      aria-label={fa ? "بخش فروشگاه" : "Commerce section"}
+      className="mb-4 flex gap-1 overflow-x-auto border-b border-border-subtle"
+    >
       {items.map((i) => (
-        <Link key={i.href} href={i.href} aria-current={pathname === i.href ? "page" : undefined} className={`whitespace-nowrap px-3 py-2 text-sm ${pathname === i.href ? "border-b-2 border-brand-natural font-bold" : "text-text-secondary"}`}>
+        <Link
+          key={i.href}
+          href={i.href}
+          aria-current={pathname === i.href ? "page" : undefined}
+          className={`whitespace-nowrap px-3 py-2 text-sm ${pathname === i.href ? "border-b-2 border-brand-natural font-bold" : "text-text-secondary"}`}
+        >
           {fa ? i.fa : i.en}
         </Link>
       ))}
@@ -121,15 +157,40 @@ function Frame({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-function StateBlock({ error, permission, onRetry }: { error: LoadError; permission: string; onRetry: () => void }) {
+function StateBlock({
+  error,
+  permission,
+  onRetry,
+}: {
+  error: LoadError;
+  permission: string;
+  onRetry: () => void;
+}) {
   const { fa } = useLang();
-  if (error === "forbidden") return <EmptyState title={fa ? `دسترسی ${permission} لازم است` : `${permission} permission required`} />;
+  if (error === "forbidden")
+    return <EmptyState title={fa ? `دسترسی ${permission} لازم است` : `${permission} permission required`} />;
   if (error === "notFound") return <EmptyState title={fa ? "پیدا نشد" : "Not found"} />;
-  if (error) return <ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message="" retryLabel={fa ? "تلاش دوباره" : "Retry"} onRetry={onRetry} />;
+  if (error)
+    return (
+      <ErrorRecovery
+        title={fa ? "بارگیری نشد" : "Could not load"}
+        message=""
+        retryLabel={fa ? "تلاش دوباره" : "Retry"}
+        onRetry={onRetry}
+      />
+    );
   return null;
 }
 
-function Pager<T>({ data, page, onPage }: { data: PaginatedDto<T>; page: number; onPage: (p: number) => void }) {
+function Pager<T>({
+  data,
+  page,
+  onPage,
+}: {
+  data: PaginatedDto<T>;
+  page: number;
+  onPage: (p: number) => void;
+}) {
   const { lang, fa } = useLang();
   return (
     <div className="mt-3 flex items-center justify-between text-sm">
@@ -140,7 +201,12 @@ function Pager<T>({ data, page, onPage }: { data: PaginatedDto<T>; page: number;
         <Button size="sm" variant="ghost" disabled={page === 1} onClick={() => onPage(page - 1)}>
           {fa ? "قبلی" : "Previous"}
         </Button>
-        <Button size="sm" variant="ghost" disabled={page * data.pageSize >= data.total} onClick={() => onPage(page + 1)}>
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={page * data.pageSize >= data.total}
+          onClick={() => onPage(page + 1)}
+        >
           {fa ? "بعدی" : "Next"}
         </Button>
       </div>
@@ -173,36 +239,85 @@ export function AdminCommerceOverviewView() {
       <Panel>
         <FilterBar>
           <FilterField label={fa ? "بازه" : "Period"}>
-            <SelectFilter value={days} onChange={setDays} options={[{ value: "7", label: fa ? "۷ روز" : "7 days" }, { value: "30", label: fa ? "۳۰ روز" : "30 days" }, { value: "90", label: fa ? "۹۰ روز" : "90 days" }]} />
+            <SelectFilter
+              value={days}
+              onChange={setDays}
+              options={[
+                { value: "7", label: fa ? "۷ روز" : "7 days" },
+                { value: "30", label: fa ? "۳۰ روز" : "30 days" },
+                { value: "90", label: fa ? "۹۰ روز" : "90 days" },
+              ]}
+            />
           </FilterField>
         </FilterBar>
         <StateBlock error={error} permission="commerce.view" onRetry={load} />
         {!data && !error ? <Skeleton className="h-40 w-full" /> : null}
         {data ? (
           <>
-            <p className="mb-3 text-metadata text-text-secondary">{fa ? "فقط سفارش‌های پرداخت‌شده در opetlife؛ سفارش‌های لغو یا بازپرداخت‌شده در فروش حساب نمی‌شوند." : "opetlife checkout orders only; cancelled or refunded orders are excluded from sales."}</p>
+            <p className="mb-3 text-metadata text-text-secondary">
+              {fa
+                ? "فقط سفارش‌های پرداخت‌شده در opetlife؛ سفارش‌های لغو یا بازپرداخت‌شده در فروش حساب نمی‌شوند."
+                : "opetlife checkout orders only; cancelled or refunded orders are excluded from sales."}
+            </p>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <Kpi label={fa ? "سفارش" : "Orders"} value={num(data.orderCount, lang)} />
-              <Kpi label={fa ? "فروش" : "Gross sales"} value={formatCurrency(data.grossSales, lang)} tone="brand" />
-              <Kpi label={fa ? "میانگین سفارش" : "Average order"} value={data.averageOrderValue !== null ? formatCurrency(data.averageOrderValue, lang) : "—"} />
-              <Kpi label={fa ? "تخفیف داده‌شده" : "Discount given"} value={formatCurrency(data.discountGiven, lang)} />
-              <Kpi label={fa ? "لغوشده" : "Cancelled"} value={num(data.cancelledCount, lang)} tone={data.cancelledCount ? "attention" : "neutral"} />
-              <Kpi label={fa ? "بازپرداخت‌شده" : "Refunded"} value={num(data.refundedCount, lang)} tone={data.refundedCount ? "attention" : "neutral"} />
-              <Kpi label={fa ? "درخواست بازگشت وجه" : "Refund requests"} value={num(data.refundRequestCount, lang)} />
-              <Kpi label={fa ? "ارسال دوره‌ای فعال" : "Active repeat deliveries"} value={num(data.repeatDeliveryActive, lang)} />
+              <Kpi
+                label={fa ? "فروش" : "Gross sales"}
+                value={formatCurrency(data.grossSales, lang)}
+                tone="brand"
+              />
+              <Kpi
+                label={fa ? "میانگین سفارش" : "Average order"}
+                value={data.averageOrderValue !== null ? formatCurrency(data.averageOrderValue, lang) : "—"}
+              />
+              <Kpi
+                label={fa ? "تخفیف داده‌شده" : "Discount given"}
+                value={formatCurrency(data.discountGiven, lang)}
+              />
+              <Kpi
+                label={fa ? "لغوشده" : "Cancelled"}
+                value={num(data.cancelledCount, lang)}
+                tone={data.cancelledCount ? "attention" : "neutral"}
+              />
+              <Kpi
+                label={fa ? "بازپرداخت‌شده" : "Refunded"}
+                value={num(data.refundedCount, lang)}
+                tone={data.refundedCount ? "attention" : "neutral"}
+              />
+              <Kpi
+                label={fa ? "درخواست بازگشت وجه" : "Refund requests"}
+                value={num(data.refundRequestCount, lang)}
+              />
+              <Kpi
+                label={fa ? "ارسال دوره‌ای فعال" : "Active repeat deliveries"}
+                value={num(data.repeatDeliveryActive, lang)}
+              />
             </div>
             <div className="mt-5 grid gap-5 lg:grid-cols-2">
               <div className="min-w-0">
                 <PanelTitle title={fa ? "فروش روزانه" : "Daily sales"} />
                 {data.byDay.length === 0 ? (
-                  <p className="text-metadata text-text-secondary">{fa ? "در این بازه سفارشی ثبت نشده است." : "No orders in this period."}</p>
+                  <p className="text-metadata text-text-secondary">
+                    {fa ? "در این بازه سفارشی ثبت نشده است." : "No orders in this period."}
+                  </p>
                 ) : (
                   <ul className="flex flex-col gap-1">
                     {data.byDay.map((d) => (
-                      <li key={d.date} className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-2 text-metadata">
-                        <span className="text-text-secondary">{new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { month: "short", day: "numeric" }).format(new Date(d.date))}</span>
+                      <li
+                        key={d.date}
+                        className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-2 text-metadata"
+                      >
+                        <span className="text-text-secondary">
+                          {new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", {
+                            month: "short",
+                            day: "numeric",
+                          }).format(new Date(d.date))}
+                        </span>
                         <span className="block min-w-0" aria-hidden="true">
-                          <span className="block h-2 rounded-full bg-brand-solid" style={{ width: `${Math.max(2, (d.grossSales / maxDay) * 100)}%` }} />
+                          <span
+                            className="block h-2 rounded-full bg-brand-solid"
+                            style={{ width: `${Math.max(2, (d.grossSales / maxDay) * 100)}%` }}
+                          />
                         </span>
                         <span className="whitespace-nowrap">{formatCurrency(d.grossSales, lang)}</span>
                       </li>
@@ -259,7 +374,14 @@ export function AdminCommerceOrdersView() {
     setError(null);
     setData(null);
     try {
-      setData(await adminCommerceService.listOrders({ status: status === "all" ? undefined : status, q: q.trim() || undefined, refundRequested: refundRequested === "yes" || undefined, page }));
+      setData(
+        await adminCommerceService.listOrders({
+          status: status === "all" ? undefined : status,
+          q: q.trim() || undefined,
+          refundRequested: refundRequested === "yes" || undefined,
+          page,
+        }),
+      );
     } catch (e) {
       setError(errorOf(e));
     }
@@ -274,13 +396,40 @@ export function AdminCommerceOrdersView() {
       <Panel>
         <FilterBar>
           <FilterField label={fa ? "شماره سفارش" : "Order number"}>
-            <TextFilter value={q} placeholder="PL-…" onChange={(v) => { setQ(v); setPage(1); }} />
+            <TextFilter
+              value={q}
+              placeholder="PL-…"
+              onChange={(v) => {
+                setQ(v);
+                setPage(1);
+              }}
+            />
           </FilterField>
           <FilterField label={fa ? "وضعیت" : "Status"}>
-            <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: fa ? "همه" : "All" }, ...Object.keys(ORDER_STATUS).map((s) => ({ value: s, label: label(ORDER_STATUS, s, lang) }))]} />
+            <SelectFilter
+              value={status}
+              onChange={(v) => {
+                setStatus(v);
+                setPage(1);
+              }}
+              options={[
+                { value: "all", label: fa ? "همه" : "All" },
+                ...Object.keys(ORDER_STATUS).map((s) => ({ value: s, label: label(ORDER_STATUS, s, lang) })),
+              ]}
+            />
           </FilterField>
           <FilterField label={fa ? "درخواست بازگشت وجه باز" : "Open refund request"}>
-            <SelectFilter value={refundRequested} onChange={(v) => { setRefundRequested(v); setPage(1); }} options={[{ value: "all", label: fa ? "همه" : "All" }, { value: "yes", label: fa ? "دارد" : "Yes" }]} />
+            <SelectFilter
+              value={refundRequested}
+              onChange={(v) => {
+                setRefundRequested(v);
+                setPage(1);
+              }}
+              options={[
+                { value: "all", label: fa ? "همه" : "All" },
+                { value: "yes", label: fa ? "دارد" : "Yes" },
+              ]}
+            />
           </FilterField>
         </FilterBar>
         <StateBlock error={error} permission="commerce.view" onRetry={load} />
@@ -307,16 +456,36 @@ export function AdminCommerceOrdersView() {
                     data.items.map((o) => (
                       <tr key={o.id}>
                         <Td>
-                          <Link className="text-brand-natural" href={`/${lang}/admin/commerce/orders/${o.id}`} dir="ltr">
+                          <Link
+                            className="text-brand-natural"
+                            href={`/${lang}/admin/commerce/orders/${o.id}`}
+                            dir="ltr"
+                          >
                             {o.orderNumber}
                           </Link>
-                          {o.hasOpenRefundRequest ? <Tag tone="attention">{fa ? "درخواست بازگشت" : "Refund request"}</Tag> : null}
+                          {o.hasOpenRefundRequest ? (
+                            <Tag tone="attention">{fa ? "درخواست بازگشت" : "Refund request"}</Tag>
+                          ) : null}
                         </Td>
                         <Td>{when(o.createdAt, lang)}</Td>
                         <Td>{o.customerName}</Td>
                         <Td>{o.sellerOrganization.name}</Td>
                         <Td>
-                          <Tag tone={o.cancelledAt || o.status === "REFUNDED" ? "concern" : o.status === "CONFIRMED" ? "success" : "neutral"}>{o.cancelledAt ? (fa ? "لغو و بازپرداخت" : "Cancelled & refunded") : label(ORDER_STATUS, o.status, lang)}</Tag>
+                          <Tag
+                            tone={
+                              o.cancelledAt || o.status === "REFUNDED"
+                                ? "concern"
+                                : o.status === "CONFIRMED"
+                                  ? "success"
+                                  : "neutral"
+                            }
+                          >
+                            {o.cancelledAt
+                              ? fa
+                                ? "لغو و بازپرداخت"
+                                : "Cancelled & refunded"
+                              : label(ORDER_STATUS, o.status, lang)}
+                          </Tag>
                         </Td>
                         <Td>{label(FULFILLMENT, o.fulfillmentStatus, lang)}</Td>
                         <Td>{formatCurrency(o.totalAmount, lang)}</Td>
@@ -356,15 +525,31 @@ export function AdminCommerceOrderDetailView({ orderId }: { orderId: string }) {
         <div className="grid gap-4 lg:grid-cols-2">
           <Panel>
             <PanelTitle title={fa ? "خلاصه" : "Summary"} />
-            <DetailRow label={fa ? "وضعیت" : "Status"}>{o.cancelledAt ? (fa ? "لغو و بازپرداخت" : "Cancelled & refunded") : label(ORDER_STATUS, o.status, lang)}</DetailRow>
-            <DetailRow label={fa ? "ارسال" : "Fulfillment"}>{label(FULFILLMENT, o.fulfillmentStatus, lang)}</DetailRow>
+            <DetailRow label={fa ? "وضعیت" : "Status"}>
+              {o.cancelledAt
+                ? fa
+                  ? "لغو و بازپرداخت"
+                  : "Cancelled & refunded"
+                : label(ORDER_STATUS, o.status, lang)}
+            </DetailRow>
+            <DetailRow label={fa ? "ارسال" : "Fulfillment"}>
+              {label(FULFILLMENT, o.fulfillmentStatus, lang)}
+            </DetailRow>
             <DetailRow label={fa ? "مشتری" : "Customer"}>{o.customerName}</DetailRow>
             <DetailRow label={fa ? "شهر" : "City"}>{o.shippingCity ?? "—"}</DetailRow>
             <DetailRow label={fa ? "فروشنده" : "Seller"}>{o.sellerOrganization.name}</DetailRow>
             <DetailRow label={fa ? "ثبت" : "Placed"}>{when(o.createdAt, lang)}</DetailRow>
-            {o.cancelReason ? <DetailRow label={fa ? "دلیل لغو" : "Cancel reason"}>{o.cancelReason}</DetailRow> : null}
-            <DetailRow label={fa ? "جمع کالاها" : "Subtotal"}>{formatCurrency(o.subtotalAmount, lang)}</DetailRow>
-            {o.discountAmount ? <DetailRow label={fa ? "تخفیف" : "Discount"}>− {formatCurrency(o.discountAmount, lang)}</DetailRow> : null}
+            {o.cancelReason ? (
+              <DetailRow label={fa ? "دلیل لغو" : "Cancel reason"}>{o.cancelReason}</DetailRow>
+            ) : null}
+            <DetailRow label={fa ? "جمع کالاها" : "Subtotal"}>
+              {formatCurrency(o.subtotalAmount, lang)}
+            </DetailRow>
+            {o.discountAmount ? (
+              <DetailRow label={fa ? "تخفیف" : "Discount"}>
+                − {formatCurrency(o.discountAmount, lang)}
+              </DetailRow>
+            ) : null}
             <DetailRow label={fa ? "ارسال" : "Delivery"}>{formatCurrency(o.deliveryAmount, lang)}</DetailRow>
             <DetailRow label={fa ? "مبلغ کل" : "Total"}>{formatCurrency(o.totalAmount, lang)}</DetailRow>
           </Panel>
@@ -372,11 +557,16 @@ export function AdminCommerceOrderDetailView({ orderId }: { orderId: string }) {
             <PanelTitle title={fa ? "اقلام" : "Items"} />
             <ul className="flex flex-col gap-2">
               {o.items.map((i) => (
-                <li key={i.id} className="flex items-start justify-between gap-3 border-b border-border-subtle pb-2 text-sm last:border-b-0">
+                <li
+                  key={i.id}
+                  className="flex items-start justify-between gap-3 border-b border-border-subtle pb-2 text-sm last:border-b-0"
+                >
                   <span>
                     {i.productTitleSnapshot}
                     {i.variantTitleSnapshot ? ` · ${i.variantTitleSnapshot}` : ""} × {num(i.quantity, lang)}
-                    {i.promotionName ? <span className="block text-metadata text-state-success">{i.promotionName}</span> : null}
+                    {i.promotionName ? (
+                      <span className="block text-metadata text-state-success">{i.promotionName}</span>
+                    ) : null}
                   </span>
                   <span>{formatCurrency(i.totalPrice, lang)}</span>
                 </li>
@@ -389,8 +579,11 @@ export function AdminCommerceOrderDetailView({ orderId }: { orderId: string }) {
               {o.timeline.map((e, idx) => (
                 <li key={`${e.createdAt}-${idx}`} className="flex justify-between gap-3">
                   <span>
-                    {label(ORDER_STATUS, e.toStatus, lang)} <span className="text-text-secondary">· {e.actorType}</span>
-                    {e.reason ? <span className="block text-metadata text-text-secondary">{e.reason}</span> : null}
+                    {label(ORDER_STATUS, e.toStatus, lang)}{" "}
+                    <span className="text-text-secondary">· {e.actorType}</span>
+                    {e.reason ? (
+                      <span className="block text-metadata text-text-secondary">{e.reason}</span>
+                    ) : null}
                   </span>
                   <span className="text-text-secondary">{when(e.createdAt, lang)}</span>
                 </li>
@@ -399,9 +592,14 @@ export function AdminCommerceOrderDetailView({ orderId }: { orderId: string }) {
           </Panel>
           <Panel>
             <PanelTitle title={fa ? "بازپرداخت‌ها و درخواست‌ها" : "Refunds & requests"} />
-            {o.refundRequests.length === 0 && o.refunds.length === 0 ? <p className="text-metadata text-text-secondary">{fa ? "موردی نیست" : "None"}</p> : null}
+            {o.refundRequests.length === 0 && o.refunds.length === 0 ? (
+              <p className="text-metadata text-text-secondary">{fa ? "موردی نیست" : "None"}</p>
+            ) : null}
             {o.refundRequests.map((r) => (
-              <DetailRow key={r.id} label={`${label(REFUND_REASON, r.reason, lang)} · ${when(r.createdAt, lang)}`}>
+              <DetailRow
+                key={r.id}
+                label={`${label(REFUND_REASON, r.reason, lang)} · ${when(r.createdAt, lang)}`}
+              >
                 {label(REQUEST_STATUS, r.status, lang)}
               </DetailRow>
             ))}
@@ -425,7 +623,10 @@ export function AdminRefundRequestsView() {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<PaginatedDto<AdminRefundRequestDto> | null>(null);
   const [error, setError] = useState<LoadError>(null);
-  const [deciding, setDeciding] = useState<{ request: AdminRefundRequestDto; action: "approve" | "reject" } | null>(null);
+  const [deciding, setDeciding] = useState<{
+    request: AdminRefundRequestDto;
+    action: "approve" | "reject";
+  } | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -435,7 +636,12 @@ export function AdminRefundRequestsView() {
     setError(null);
     setData(null);
     try {
-      setData(await adminCommerceService.listRefundRequests({ status: status === "all" ? undefined : status, page }));
+      setData(
+        await adminCommerceService.listRefundRequests({
+          status: status === "all" ? undefined : status,
+          page,
+        }),
+      );
     } catch (e) {
       setError(errorOf(e));
     }
@@ -448,17 +654,36 @@ export function AdminRefundRequestsView() {
     setActionError(null);
     try {
       if (deciding.action === "approve") {
-        const approved = await adminCommerceService.approveRefundRequest(deciding.request.id, note.trim() || undefined);
-        setNotice(fa ? `تأیید شد؛ تأییدیه مالی ${approved.adminRefundApprovalId?.slice(0, 8)} برای پرداخت ساخته شد.` : `Approved; finance approval ${approved.adminRefundApprovalId?.slice(0, 8)} was opened for payout.`);
+        const approved = await adminCommerceService.approveRefundRequest(
+          deciding.request.id,
+          note.trim() || undefined,
+        );
+        setNotice(
+          fa
+            ? `تأیید شد؛ تأییدیه مالی ${approved.adminRefundApprovalId?.slice(0, 8)} برای پرداخت ساخته شد.`
+            : `Approved; finance approval ${approved.adminRefundApprovalId?.slice(0, 8)} was opened for payout.`,
+        );
       } else {
         await adminCommerceService.rejectRefundRequest(deciding.request.id, note.trim());
-        setNotice(fa ? "درخواست رد شد و به مشتری اطلاع داده شد." : "Request rejected; the customer was notified.");
+        setNotice(
+          fa ? "درخواست رد شد و به مشتری اطلاع داده شد." : "Request rejected; the customer was notified.",
+        );
       }
       setDeciding(null);
       setNote("");
       await load();
     } catch (e) {
-      setActionError(e instanceof ApiError && e.status === 403 ? (fa ? "دسترسی finance.refund.request لازم است" : "finance.refund.request permission required") : e instanceof ApiError ? e.message : fa ? "انجام نشد" : "Failed");
+      setActionError(
+        e instanceof ApiError && e.status === 403
+          ? fa
+            ? "دسترسی finance.refund.request لازم است"
+            : "finance.refund.request permission required"
+          : e instanceof ApiError
+            ? e.message
+            : fa
+              ? "انجام نشد"
+              : "Failed",
+      );
     } finally {
       setBusy(false);
     }
@@ -474,10 +699,27 @@ export function AdminRefundRequestsView() {
         </p>
         <FilterBar>
           <FilterField label={fa ? "وضعیت" : "Status"}>
-            <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: fa ? "همه" : "All" }, ...Object.keys(REQUEST_STATUS).map((s) => ({ value: s, label: label(REQUEST_STATUS, s, lang) }))]} />
+            <SelectFilter
+              value={status}
+              onChange={(v) => {
+                setStatus(v);
+                setPage(1);
+              }}
+              options={[
+                { value: "all", label: fa ? "همه" : "All" },
+                ...Object.keys(REQUEST_STATUS).map((s) => ({
+                  value: s,
+                  label: label(REQUEST_STATUS, s, lang),
+                })),
+              ]}
+            />
           </FilterField>
         </FilterBar>
-        {notice ? <p role="status" className="mb-3 rounded-md bg-surface-subtle p-2 text-sm">{notice}</p> : null}
+        {notice ? (
+          <p role="status" className="mb-3 rounded-md bg-surface-subtle p-2 text-sm">
+            {notice}
+          </p>
+        ) : null}
         <StateBlock error={error} permission="commerce.view" onRetry={load} />
         {!data && !error ? <Skeleton className="h-64 w-full" /> : null}
         {data ? (
@@ -501,10 +743,16 @@ export function AdminRefundRequestsView() {
                     data.items.map((r) => (
                       <tr key={r.id}>
                         <Td>
-                          <Link className="text-brand-natural" href={`/${lang}/admin/commerce/orders/${r.orderId}`} dir="ltr">
+                          <Link
+                            className="text-brand-natural"
+                            href={`/${lang}/admin/commerce/orders/${r.orderId}`}
+                            dir="ltr"
+                          >
                             {r.orderNumber}
                           </Link>
-                          <span className="block text-metadata text-text-secondary">{when(r.createdAt, lang)}</span>
+                          <span className="block text-metadata text-text-secondary">
+                            {when(r.createdAt, lang)}
+                          </span>
                         </Td>
                         <Td>
                           {r.customerName}
@@ -512,20 +760,53 @@ export function AdminRefundRequestsView() {
                         </Td>
                         <Td>
                           {label(REFUND_REASON, r.reason, lang)}
-                          {r.description ? <span className="block max-w-xs text-metadata text-text-secondary">{r.description}</span> : null}
+                          {r.description ? (
+                            <span className="block max-w-xs text-metadata text-text-secondary">
+                              {r.description}
+                            </span>
+                          ) : null}
                         </Td>
                         <Td>{formatCurrency(r.requestedAmount, lang)}</Td>
                         <Td>
-                          <Tag tone={r.status === "PENDING_REVIEW" ? "attention" : r.status === "APPROVED" ? "success" : "neutral"}>{label(REQUEST_STATUS, r.status, lang)}</Tag>
-                          {r.decisionReason ? <span className="block text-metadata text-text-secondary">{r.decisionReason}</span> : null}
+                          <Tag
+                            tone={
+                              r.status === "PENDING_REVIEW"
+                                ? "attention"
+                                : r.status === "APPROVED"
+                                  ? "success"
+                                  : "neutral"
+                            }
+                          >
+                            {label(REQUEST_STATUS, r.status, lang)}
+                          </Tag>
+                          {r.decisionReason ? (
+                            <span className="block text-metadata text-text-secondary">
+                              {r.decisionReason}
+                            </span>
+                          ) : null}
                         </Td>
                         <Td>
                           {r.status === "PENDING_REVIEW" ? (
                             <div className="flex gap-1">
-                              <Button size="sm" onClick={() => { setDeciding({ request: r, action: "approve" }); setNote(""); setActionError(null); }}>
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setDeciding({ request: r, action: "approve" });
+                                  setNote("");
+                                  setActionError(null);
+                                }}
+                              >
                                 {fa ? "تأیید" : "Approve"}
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={() => { setDeciding({ request: r, action: "reject" }); setNote(""); setActionError(null); }}>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setDeciding({ request: r, action: "reject" });
+                                  setNote("");
+                                  setActionError(null);
+                                }}
+                              >
                                 {fa ? "رد" : "Reject"}
                               </Button>
                             </div>
@@ -541,13 +822,56 @@ export function AdminRefundRequestsView() {
           </>
         ) : null}
       </Panel>
-      <Dialog open={Boolean(deciding)} onClose={() => setDeciding(null)} title={deciding?.action === "approve" ? (fa ? "تأیید درخواست" : "Approve request") : fa ? "رد درخواست" : "Reject request"}>
+      <Dialog
+        open={Boolean(deciding)}
+        onClose={() => setDeciding(null)}
+        title={
+          deciding?.action === "approve"
+            ? fa
+              ? "تأیید درخواست"
+              : "Approve request"
+            : fa
+              ? "رد درخواست"
+              : "Reject request"
+        }
+      >
         <div className="flex flex-col gap-3">
-          {deciding ? <p className="text-sm">{deciding.request.orderNumber} · {formatCurrency(deciding.request.requestedAmount, lang)}</p> : null}
-          <Input label={deciding?.action === "approve" ? (fa ? "یادداشت (اختیاری)" : "Note (optional)") : fa ? "دلیل رد (به مشتری نمایش داده می‌شود)" : "Reason (shown to the customer)"} value={note} onChange={(e) => setNote(e.target.value)} />
-          {actionError ? <p role="alert" className="text-metadata text-state-urgent">{actionError}</p> : null}
-          <Button isLoading={busy} disabled={deciding?.action === "reject" && note.trim().length < 3} variant={deciding?.action === "reject" ? "danger" : "primary"} onClick={decide}>
-            {deciding?.action === "approve" ? (fa ? "تأیید و ارسال به مالی" : "Approve and send to finance") : fa ? "رد درخواست" : "Reject request"}
+          {deciding ? (
+            <p className="text-sm">
+              {deciding.request.orderNumber} · {formatCurrency(deciding.request.requestedAmount, lang)}
+            </p>
+          ) : null}
+          <Input
+            label={
+              deciding?.action === "approve"
+                ? fa
+                  ? "یادداشت (اختیاری)"
+                  : "Note (optional)"
+                : fa
+                  ? "دلیل رد (به مشتری نمایش داده می‌شود)"
+                  : "Reason (shown to the customer)"
+            }
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          {actionError ? (
+            <p role="alert" className="text-metadata text-state-urgent">
+              {actionError}
+            </p>
+          ) : null}
+          <Button
+            isLoading={busy}
+            disabled={deciding?.action === "reject" && note.trim().length < 3}
+            variant={deciding?.action === "reject" ? "danger" : "primary"}
+            onClick={decide}
+          >
+            {deciding?.action === "approve"
+              ? fa
+                ? "تأیید و ارسال به مالی"
+                : "Approve and send to finance"
+              : fa
+                ? "رد درخواست"
+                : "Reject request"}
           </Button>
         </div>
       </Dialog>
@@ -573,7 +897,13 @@ export function AdminProductsView() {
     setError(null);
     setData(null);
     try {
-      setData(await adminCommerceService.listProducts({ status: status === "all" ? undefined : status, q: q.trim() || undefined, page }));
+      setData(
+        await adminCommerceService.listProducts({
+          status: status === "all" ? undefined : status,
+          q: q.trim() || undefined,
+          page,
+        }),
+      );
     } catch (e) {
       setError(errorOf(e));
     }
@@ -592,7 +922,15 @@ export function AdminProductsView() {
       setEditing(null);
       await load();
     } catch (e) {
-      setActionError(e instanceof ApiError && e.status === 403 ? (fa ? "دسترسی commerce.manage لازم است" : "commerce.manage permission required") : fa ? "انجام نشد" : "Failed");
+      setActionError(
+        e instanceof ApiError && e.status === 403
+          ? fa
+            ? "دسترسی commerce.manage لازم است"
+            : "commerce.manage permission required"
+          : fa
+            ? "انجام نشد"
+            : "Failed",
+      );
     } finally {
       setBusy(false);
     }
@@ -603,10 +941,29 @@ export function AdminProductsView() {
       <Panel>
         <FilterBar>
           <FilterField label={fa ? "جست‌وجو (نام یا SKU)" : "Search (title or SKU)"}>
-            <TextFilter value={q} onChange={(v) => { setQ(v); setPage(1); }} />
+            <TextFilter
+              value={q}
+              onChange={(v) => {
+                setQ(v);
+                setPage(1);
+              }}
+            />
           </FilterField>
           <FilterField label={fa ? "وضعیت" : "Status"}>
-            <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: fa ? "همه" : "All" }, ...Object.keys(PRODUCT_STATUS).map((s) => ({ value: s, label: label(PRODUCT_STATUS, s, lang) }))]} />
+            <SelectFilter
+              value={status}
+              onChange={(v) => {
+                setStatus(v);
+                setPage(1);
+              }}
+              options={[
+                { value: "all", label: fa ? "همه" : "All" },
+                ...Object.keys(PRODUCT_STATUS).map((s) => ({
+                  value: s,
+                  label: label(PRODUCT_STATUS, s, lang),
+                })),
+              ]}
+            />
           </FilterField>
         </FilterBar>
         <StateBlock error={error} permission="commerce.view" onRetry={load} />
@@ -636,19 +993,46 @@ export function AdminProductsView() {
                           <Link className="text-brand-natural" href={`/${lang}/shop/products/${p.id}`}>
                             {p.title}
                           </Link>
-                          {p.brandName ? <span className="block text-metadata text-text-secondary">{p.brandName}</span> : null}
+                          {p.brandName ? (
+                            <span className="block text-metadata text-text-secondary">{p.brandName}</span>
+                          ) : null}
                         </Td>
                         <Td>{p.categoryName}</Td>
                         <Td>
                           {num(p.activeOfferCount, lang)} / {num(p.sellerCount, lang)}
                         </Td>
-                        <Td>{p.rating.count ? `${p.rating.average?.toLocaleString(lang === "fa" ? "fa-IR" : "en-US")} (${num(p.rating.count, lang)})` : "—"}</Td>
-                        <Td>{p.hasMedia ? (fa ? "دارد" : "Yes") : <Tag tone="attention">{fa ? "ندارد" : "Missing"}</Tag>}</Td>
                         <Td>
-                          <Tag tone={p.status === "ACTIVE" ? "success" : "neutral"}>{label(PRODUCT_STATUS, p.status, lang)}</Tag>
+                          {p.rating.count
+                            ? `${p.rating.average?.toLocaleString(lang === "fa" ? "fa-IR" : "en-US")} (${num(p.rating.count, lang)})`
+                            : "—"}
                         </Td>
                         <Td>
-                          <Button size="sm" variant="ghost" onClick={() => { setEditing(p); setNextStatus(p.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"); setReason(""); setActionError(null); }}>
+                          {p.hasMedia ? (
+                            fa ? (
+                              "دارد"
+                            ) : (
+                              "Yes"
+                            )
+                          ) : (
+                            <Tag tone="attention">{fa ? "ندارد" : "Missing"}</Tag>
+                          )}
+                        </Td>
+                        <Td>
+                          <Tag tone={p.status === "ACTIVE" ? "success" : "neutral"}>
+                            {label(PRODUCT_STATUS, p.status, lang)}
+                          </Tag>
+                        </Td>
+                        <Td>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditing(p);
+                              setNextStatus(p.status === "ACTIVE" ? "INACTIVE" : "ACTIVE");
+                              setReason("");
+                              setActionError(null);
+                            }}
+                          >
                             {fa ? "تغییر وضعیت" : "Change status"}
                           </Button>
                         </Td>
@@ -666,7 +1050,11 @@ export function AdminProductsView() {
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-text-secondary">{fa ? "وضعیت جدید" : "New status"}</span>
-            <select className="h-11 rounded-md border border-border-strong bg-surface-elevated px-3" value={nextStatus} onChange={(e) => setNextStatus(e.target.value)}>
+            <select
+              className="h-11 rounded-md border border-border-strong bg-surface-elevated px-3"
+              value={nextStatus}
+              onChange={(e) => setNextStatus(e.target.value)}
+            >
               {["ACTIVE", "INACTIVE", "ARCHIVED"].map((s) => (
                 <option key={s} value={s}>
                   {label(PRODUCT_STATUS, s, lang)}
@@ -674,8 +1062,16 @@ export function AdminProductsView() {
               ))}
             </select>
           </label>
-          <Input label={fa ? "دلیل (در گزارش ممیزی ثبت می‌شود)" : "Reason (recorded in the audit log)"} value={reason} onChange={(e) => setReason(e.target.value)} />
-          {actionError ? <p role="alert" className="text-metadata text-state-urgent">{actionError}</p> : null}
+          <Input
+            label={fa ? "دلیل (در گزارش ممیزی ثبت می‌شود)" : "Reason (recorded in the audit log)"}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          {actionError ? (
+            <p role="alert" className="text-metadata text-state-urgent">
+              {actionError}
+            </p>
+          ) : null}
           <Button isLoading={busy} disabled={reason.trim().length < 3} onClick={save}>
             {fa ? "ذخیره" : "Save"}
           </Button>
@@ -701,7 +1097,9 @@ export function AdminProductReviewsView() {
     setError(null);
     setData(null);
     try {
-      setData(await adminCommerceService.listReviews({ status: status === "all" ? undefined : status, page }));
+      setData(
+        await adminCommerceService.listReviews({ status: status === "all" ? undefined : status, page }),
+      );
     } catch (e) {
       setError(errorOf(e));
     }
@@ -717,7 +1115,15 @@ export function AdminProductReviewsView() {
       setTarget(null);
       await load();
     } catch (e) {
-      setActionError(e instanceof ApiError && e.status === 403 ? (fa ? "دسترسی commerce.manage لازم است" : "commerce.manage permission required") : fa ? "انجام نشد" : "Failed");
+      setActionError(
+        e instanceof ApiError && e.status === 403
+          ? fa
+            ? "دسترسی commerce.manage لازم است"
+            : "commerce.manage permission required"
+          : fa
+            ? "انجام نشد"
+            : "Failed",
+      );
     } finally {
       setBusy(false);
     }
@@ -728,7 +1134,18 @@ export function AdminProductReviewsView() {
       <Panel>
         <FilterBar>
           <FilterField label={fa ? "وضعیت" : "Status"}>
-            <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: fa ? "همه" : "All" }, { value: "PUBLISHED", label: fa ? "منتشرشده" : "Published" }, { value: "HIDDEN", label: fa ? "پنهان" : "Hidden" }]} />
+            <SelectFilter
+              value={status}
+              onChange={(v) => {
+                setStatus(v);
+                setPage(1);
+              }}
+              options={[
+                { value: "all", label: fa ? "همه" : "All" },
+                { value: "PUBLISHED", label: fa ? "منتشرشده" : "Published" },
+                { value: "HIDDEN", label: fa ? "پنهان" : "Hidden" },
+              ]}
+            />
           </FilterField>
         </FilterBar>
         <StateBlock error={error} permission="commerce.view" onRetry={load} />
@@ -757,15 +1174,39 @@ export function AdminProductReviewsView() {
                         <Td>{"★".repeat(r.rating)}</Td>
                         <Td>
                           <span className="block max-w-sm">{r.body ?? "—"}</span>
-                          {r.hiddenReason ? <span className="block text-metadata text-text-secondary">{r.hiddenReason}</span> : null}
+                          {r.hiddenReason ? (
+                            <span className="block text-metadata text-text-secondary">{r.hiddenReason}</span>
+                          ) : null}
                         </Td>
                         <Td>{r.authorName}</Td>
                         <Td>
-                          <Tag tone={r.status === "PUBLISHED" ? "success" : "neutral"}>{r.status === "PUBLISHED" ? (fa ? "منتشرشده" : "Published") : fa ? "پنهان" : "Hidden"}</Tag>
+                          <Tag tone={r.status === "PUBLISHED" ? "success" : "neutral"}>
+                            {r.status === "PUBLISHED"
+                              ? fa
+                                ? "منتشرشده"
+                                : "Published"
+                              : fa
+                                ? "پنهان"
+                                : "Hidden"}
+                          </Tag>
                         </Td>
                         <Td>
-                          <Button size="sm" variant="ghost" onClick={() => { setTarget(r); setReason(""); setActionError(null); }}>
-                            {r.status === "PUBLISHED" ? (fa ? "پنهان کردن" : "Hide") : fa ? "بازگرداندن" : "Restore"}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setTarget(r);
+                              setReason("");
+                              setActionError(null);
+                            }}
+                          >
+                            {r.status === "PUBLISHED"
+                              ? fa
+                                ? "پنهان کردن"
+                                : "Hide"
+                              : fa
+                                ? "بازگرداندن"
+                                : "Restore"}
                           </Button>
                         </Td>
                       </tr>
@@ -778,10 +1219,30 @@ export function AdminProductReviewsView() {
           </>
         ) : null}
       </Panel>
-      <Dialog open={Boolean(target)} onClose={() => setTarget(null)} title={target?.status === "PUBLISHED" ? (fa ? "پنهان کردن نظر" : "Hide review") : fa ? "بازگرداندن نظر" : "Restore review"}>
+      <Dialog
+        open={Boolean(target)}
+        onClose={() => setTarget(null)}
+        title={
+          target?.status === "PUBLISHED"
+            ? fa
+              ? "پنهان کردن نظر"
+              : "Hide review"
+            : fa
+              ? "بازگرداندن نظر"
+              : "Restore review"
+        }
+      >
         <div className="flex flex-col gap-3">
-          <Input label={fa ? "دلیل (در گزارش ممیزی ثبت می‌شود)" : "Reason (recorded in the audit log)"} value={reason} onChange={(e) => setReason(e.target.value)} />
-          {actionError ? <p role="alert" className="text-metadata text-state-urgent">{actionError}</p> : null}
+          <Input
+            label={fa ? "دلیل (در گزارش ممیزی ثبت می‌شود)" : "Reason (recorded in the audit log)"}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          {actionError ? (
+            <p role="alert" className="text-metadata text-state-urgent">
+              {actionError}
+            </p>
+          ) : null}
           <Button isLoading={busy} disabled={reason.trim().length < 3} onClick={toggle}>
             {fa ? "تأیید" : "Confirm"}
           </Button>
@@ -813,10 +1274,24 @@ export function AdminInventoryView() {
   return (
     <Frame title={fa ? "موجودی" : "Inventory"}>
       <Panel>
-        <p className="mb-3 text-metadata text-text-secondary">{fa ? "فقط مشاهده؛ موجودی را فروشنده در پنل خود تنظیم می‌کند." : "Read-only; sellers adjust stock in their own console."}</p>
+        <p className="mb-3 text-metadata text-text-secondary">
+          {fa
+            ? "فقط مشاهده؛ موجودی را فروشنده در پنل خود تنظیم می‌کند."
+            : "Read-only; sellers adjust stock in their own console."}
+        </p>
         <FilterBar>
           <FilterField label={fa ? "نمایش" : "Show"}>
-            <SelectFilter value={lowStock} onChange={(v) => { setLowStock(v); setPage(1); }} options={[{ value: "yes", label: fa ? "کم‌موجود و ناموجود (≤۵)" : "Low and out of stock (≤5)" }, { value: "all", label: fa ? "همه پیشنهادهای فعال" : "All active offers" }]} />
+            <SelectFilter
+              value={lowStock}
+              onChange={(v) => {
+                setLowStock(v);
+                setPage(1);
+              }}
+              options={[
+                { value: "yes", label: fa ? "کم‌موجود و ناموجود (≤۵)" : "Low and out of stock (≤5)" },
+                { value: "all", label: fa ? "همه پیشنهادهای فعال" : "All active offers" },
+              ]}
+            />
           </FilterField>
         </FilterBar>
         <StateBlock error={error} permission="commerce.view" onRetry={load} />
@@ -843,7 +1318,9 @@ export function AdminInventoryView() {
                       <tr key={r.sellerOfferId}>
                         <Td>
                           {r.productTitle}
-                          {r.variantTitle ? <span className="block text-metadata text-text-secondary">{r.variantTitle}</span> : null}
+                          {r.variantTitle ? (
+                            <span className="block text-metadata text-text-secondary">{r.variantTitle}</span>
+                          ) : null}
                         </Td>
                         <Td>
                           <span dir="ltr">{r.sku}</span>
@@ -852,7 +1329,11 @@ export function AdminInventoryView() {
                         <Td>{num(r.onHand, lang)}</Td>
                         <Td>{num(r.reserved, lang)}</Td>
                         <Td>
-                          <Tag tone={r.available === 0 ? "urgent" : r.available <= 5 ? "attention" : "success"}>{num(r.available, lang)}</Tag>
+                          <Tag
+                            tone={r.available === 0 ? "urgent" : r.available <= 5 ? "attention" : "success"}
+                          >
+                            {num(r.available, lang)}
+                          </Tag>
                         </Td>
                       </tr>
                     ))
@@ -910,12 +1391,20 @@ export function AdminCommerceSellersView() {
                     <tr key={s.id}>
                       <Td>{s.name}</Td>
                       <Td>
-                        <Tag tone={s.verificationStatus === "VERIFIED" ? "success" : "attention"}>{s.verificationStatus}</Tag>
+                        <Tag tone={s.verificationStatus === "VERIFIED" ? "success" : "attention"}>
+                          {s.verificationStatus}
+                        </Tag>
                       </Td>
                       <Td>{num(s.activeOfferCount, lang)}</Td>
                       <Td>{num(s.orderCount30d, lang)}</Td>
                       <Td>{formatCurrency(s.grossSales30d, lang)}</Td>
-                      <Td>{s.openRefundRequests ? <Tag tone="attention">{num(s.openRefundRequests, lang)}</Tag> : "—"}</Td>
+                      <Td>
+                        {s.openRefundRequests ? (
+                          <Tag tone="attention">{num(s.openRefundRequests, lang)}</Tag>
+                        ) : (
+                          "—"
+                        )}
+                      </Td>
                     </tr>
                   ))
                 )}
@@ -936,7 +1425,11 @@ export function AdminPromotionsView() {
   useEffect(() => {
     void adminCommerceService
       .listSellers()
-      .then((rows) => setSellers(rows.filter((s) => s.verificationStatus === "VERIFIED").map((s) => ({ id: s.id, label: s.name }))))
+      .then((rows) =>
+        setSellers(
+          rows.filter((s) => s.verificationStatus === "VERIFIED").map((s) => ({ id: s.id, label: s.name })),
+        ),
+      )
       .catch(() => setSellers([]));
   }, []);
   const api = useMemo<PromotionApi>(
