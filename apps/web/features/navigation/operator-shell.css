@@ -1,0 +1,62 @@
+/* Shared operational header for provider and seller workspaces.
+   It intentionally uses the existing product mark and semantic tokens rather
+   than introducing a separate brand or a consumer-style card dashboard. */
+.operator-shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  border-bottom: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--surface-base) 94%, transparent);
+  backdrop-filter: saturate(1.15) blur(10px);
+}
+
+.operator-shell__header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 16px;
+}
+
+.operator-shell__brand {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--text-primary);
+}
+
+.operator-shell__brand img { width: 28px; height: 28px; }
+
+.operator-shell__header-inner > :nth-child(2) { min-width: 0; flex: 1; }
+.operator-shell__header-inner > :nth-child(3) { flex: none; }
+
+.operator-shell__nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 8px 16px;
+  background: var(--surface-base);
+}
+
+.operator-shell__nav a { border-radius: 8px; }
+.operator-shell__nav a[aria-current="page"] { font-weight: 700; }
+
+.operator-shell :is(a, button):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (min-width: 768px) {
+  .operator-shell__header-inner,
+  .operator-shell__nav { padding-inline: clamp(20px, 3vw, 40px); }
+}
+
+@media (max-width: 520px) {
+  .operator-shell__header-inner { gap: 8px; padding-inline: 12px; }
+  .operator-shell__header-inner > :nth-child(2) { font-size: .94em; }
+  .operator-shell__nav { padding-inline: 12px; }
+}

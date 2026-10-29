@@ -14,16 +14,18 @@
 .groupLinks .link { font-size:.84rem; }
 .count { margin-inline-start:auto; min-width:24px; padding:2px 6px; border-radius:20px; background:var(--campaign-paper); color:var(--campaign-plum); text-align:center; }
 .workspace { flex:1; min-width:0; }
-.header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; min-height:88px; padding:20px 28px; border-bottom:1px solid var(--border-subtle); background:var(--surface-base); }
+.header { position:sticky; top:0; z-index:30; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; min-height:72px; padding:14px 28px; border-bottom:1px solid var(--border-subtle); background:color-mix(in srgb,var(--surface-base) 94%,transparent); backdrop-filter:saturate(1.15) blur(10px); }
 .heading,.tools { display:flex; align-items:center; gap:12px; min-width:0; }
 .title { font-weight:750; color:var(--text-primary); font-size:1.25rem; }
 .tools select,.tools button { min-height:44px; }
 .user { display:grid; gap:3px; max-width:200px; overflow-wrap:anywhere; color:var(--text-primary); }
 .user small { color:var(--text-secondary); }
-.mobileMenu,.mobileBrand { display:none; }
+.mobileMenu { display:none; }
+.headerBrand { display:inline-flex; flex:none; align-items:center; min-height:44px; color:var(--text-primary); text-decoration:none; }
+.headerBrand :global(img) { width:28px; height:28px; }
 .main { padding:24px 28px 40px; }
 .sheetNavigation { display:grid; gap:20px; color:var(--text-primary); }
 .sheetNavigation p { font-size:.8rem; color:var(--text-secondary); padding-inline:16px; margin-bottom:4px; }
 .shell :is(a,button):focus-visible { outline:3px solid var(--campaign-copper); outline-offset:3px; }
-@media(max-width:1000px) { .sidebar { display:none; }.mobileMenu,.mobileBrand { display:inline-flex; }.header { padding:16px 20px; }.main { padding:20px 20px 32px; }.user { max-width:160px; } }
+@media(max-width:1000px) { .sidebar { display:none; }.mobileMenu { display:inline-flex; }.header { padding:12px 20px; }.main { padding:20px 20px 32px; }.user { max-width:160px; } }
 @media(max-width:550px) { .header { gap:12px; }.heading { flex:1 1 100%; }.tools { width:100%; justify-content:flex-start; flex-wrap:wrap; }.user { margin-inline-start:auto; max-width:180px; }.title { font-size:1.1rem; } }

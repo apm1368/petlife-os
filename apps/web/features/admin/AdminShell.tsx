@@ -180,7 +180,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
         <header className={styles.header}>
           <div className={styles.heading}>
             <span className={styles.mobileMenu}><IconButton label={t("openMenu")} onClick={() => setMenuOpen(true)} icon={<Menu size={20} aria-hidden="true" />} /></span>
-            <Link href={`/${locale}/admin`} className={styles.mobileBrand}><Brand compact /></Link>
+            <Link href={`/${locale}/admin`} className={styles.headerBrand} aria-label={t("title")}><Brand compact /></Link>
             <span className={styles.title}>{t("title")}</span>
           </div>
           <div className={styles.tools}>
