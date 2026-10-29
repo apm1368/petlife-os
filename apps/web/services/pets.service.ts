@@ -22,7 +22,7 @@ export const petsService = {
   update: (id: string, input: UpdatePetInput) => apiFetch<PetDto>(`/pets/${id}`, { method: "PATCH", body: input }),
   create: (householdId: string, input: CreatePetInput, idempotencyKey: string) =>
     apiFetch<PetDto>(`/households/${householdId}/pets`, { method: "POST", body: input, idempotencyKey }),
-  createPhotoUploadUrl: (petId: string, contentType: "image/jpeg" | "image/png") =>
+  createPhotoUploadUrl: (petId: string, contentType: "image/jpeg" | "image/png" | "image/webp") =>
     apiFetch<{ uploadUrl: string; method: "PUT"; publicUrl: string; headers?: Record<string, string> }>(
       `/pets/${petId}/photo-upload-url`, { method: "POST", body: { contentType } },
     ),

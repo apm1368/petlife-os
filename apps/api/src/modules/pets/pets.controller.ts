@@ -13,8 +13,8 @@ import { StorageService } from "../storage/storage.service";
 import { PetOverviewService } from "./pet-overview.service";
 
 class CreateUploadUrlDto {
-  @IsIn(["image/jpeg", "image/png"])
-  contentType!: "image/jpeg" | "image/png";
+  @IsIn(["image/jpeg", "image/png", "image/webp"])
+  contentType!: "image/jpeg" | "image/png" | "image/webp";
 }
 
 class PetLifecycleTransitionDto {

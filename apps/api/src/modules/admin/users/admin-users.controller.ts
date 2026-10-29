@@ -8,6 +8,13 @@ import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-con
 import { AdminUsersService } from "./admin-users.service";
 import { ListUsersQueryDto } from "./dto/list-users-query.dto";
 
+class SendUserMessageDto {
+  @IsString() @MinLength(3) @MaxLength(120) title!: string;
+  @IsString() @MinLength(3) @MaxLength(700) message!: string;
+  /** When false, write only the in-app message; default honours the recipient's SMS preferences. */
+  @IsOptional() @IsBoolean() attemptSms?: boolean;
+}
+
 /**
  * W2-5 unified users directory. Gated on `customer.view` — the existing "may look people up" grant,
  * held by SUPER_ADMIN, ADMIN, SUPPORT, VERIFICATION and the operational roles — so the directory
@@ -41,11 +48,4 @@ export class AdminUsersController {
   ) {
     return this.users.sendMessage(admin, id, dto, req.requestId);
   }
-}
-
-class SendUserMessageDto {
-  @IsString() @MinLength(3) @MaxLength(120) title!: string;
-  @IsString() @MinLength(3) @MaxLength(700) message!: string;
-  /** When false, write only the in-app message; default honours the recipient's SMS preferences. */
-  @IsOptional() @IsBoolean() attemptSms?: boolean;
 }
