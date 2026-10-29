@@ -1,0 +1,6 @@
+.frame{width:min(100%,1180px);margin-inline:auto}
+.frame :global(.community-composer),.frame :global(.community-post),.frame :global(.community-comments){background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:24px;padding:clamp(18px,3vw,28px)}
+.frame :global(.community-post__head){border-block-end:1px solid var(--border-subtle);padding-block-end:16px}
+.frame :global(.community-comment){border-block-start:1px solid var(--border-subtle);padding-block:16px}
+.frame :global(.community-post img){border-radius:18px}
+@media(max-width:640px){.frame :global(.community-composer),.frame :global(.community-post),.frame :global(.community-comments){border-radius:20px;padding:18px}}

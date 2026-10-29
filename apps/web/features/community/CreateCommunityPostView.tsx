@@ -8,6 +8,7 @@ import { CommunityPostType } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { FilePicker } from "@/features/shared/FilePicker";
+import { CommunityFrame } from "./CommunityFrame";
 
 const POST_TYPES: CommunityPostType[] = [CommunityPostType.GENERAL, CommunityPostType.QUESTION, CommunityPostType.LOCAL, CommunityPostType.RESCUE, CommunityPostType.ADOPTION, CommunityPostType.MEMORY];
 
@@ -45,10 +46,10 @@ export function CreateCommunityPostView() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <h1 className="text-page-title text-text-primary">{t("newPost.title")}</h1>
+    <CommunityFrame><div className="flex flex-col gap-5">
+      <header><h1 className="text-page-title text-text-primary">{t("newPost.title")}</h1></header>
 
-      <ContextSurface className="flex flex-col gap-4">
+      <ContextSurface className="community-composer flex flex-col gap-4">
         <Select
           label={t("newPost.typeLabel")}
           value={type}
@@ -63,6 +64,6 @@ export function CreateCommunityPostView() {
           {t("newPost.submit")}
         </Button>
       </ContextSurface>
-    </div>
+    </div></CommunityFrame>
   );
 }
