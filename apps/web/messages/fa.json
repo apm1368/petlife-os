@@ -5998,6 +5998,8 @@
     "reject": "رد درخواست",
     "names": {
       "platform_announcement": "اعلان عمومی سامانه",
+      "auth_googleEnabled": "فعال‌بودن ورود با گوگل",
+      "auth_otpEnabled": "فعال‌بودن ورود با رمز یک‌بارمصرف پیامکی",
       "booking_holdTtlSeconds": "زمان نگهداری نوبت (ثانیه)",
       "commerce_refundApprovalThresholdIrr": "آستانهٔ تأیید دوم بازپرداخت",
       "commerce_settlementApprovalThresholdIrr": "آستانهٔ تأیید دوم تسویه",

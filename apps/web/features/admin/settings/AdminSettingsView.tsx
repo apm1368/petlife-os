@@ -17,6 +17,8 @@ import { Panel, PanelTitle, DetailRow } from "../console-ui";
 
 const knownKeys = [
   "platform.announcement",
+  "auth.googleEnabled",
+  "auth.otpEnabled",
   "booking.holdTtlSeconds",
   "commerce.refundApprovalThresholdIrr",
   "commerce.settlementApprovalThresholdIrr",

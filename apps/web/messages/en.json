@@ -5998,6 +5998,8 @@
     "reject": "Reject change",
     "names": {
       "platform_announcement": "Public announcement",
+      "auth_googleEnabled": "Google sign-in availability",
+      "auth_otpEnabled": "Phone OTP availability",
       "booking_holdTtlSeconds": "Booking hold duration (seconds)",
       "commerce_refundApprovalThresholdIrr": "Refund second-approval threshold",
       "commerce_settlementApprovalThresholdIrr": "Settlement second-approval threshold",

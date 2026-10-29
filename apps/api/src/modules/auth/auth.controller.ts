@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -16,6 +16,7 @@ import type { AuthMethodsDto } from "./dto/get-auth-methods.dto";
 import { AuthPasswordService } from "./password/auth-password.service";
 import { AuthPasswordResetService } from "./password/auth-password-reset.service";
 import { GoogleOAuthClient } from "./google/google-oauth.client";
+import { PlatformSettingsService } from "../platform-settings/platform-settings.service";
 
 @Controller("auth")
 export class AuthController {
@@ -25,17 +26,27 @@ export class AuthController {
     private readonly passwordAuth: AuthPasswordService,
     private readonly passwordReset: AuthPasswordResetService,
     private readonly googleClient: GoogleOAuthClient,
+    private readonly settings: PlatformSettingsService,
   ) {}
 
   @Get("methods")
   getMethods(): AuthMethodsDto {
-    return { google: this.googleClient.isEnabled(), phone: true, password: true };
+    return { google: this.googleClient.isEnabled(), phone: this.otpEnabled(), password: true };
+  }
+
+  private otpEnabled(): boolean {
+    return this.settings.get<boolean>("auth.otpEnabled");
+  }
+
+  private assertOtpEnabled(): void {
+    if (!this.otpEnabled()) throw new NotFoundException();
   }
 
   @Post("request-otp")
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async requestOtp(@Body() dto: RequestOtpDto): Promise<{ ok: true }> {
+    this.assertOtpEnabled();
     await this.authService.requestOtp(dto.identifier);
     return { ok: true };
   }
@@ -44,6 +55,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async verifyOtp(@Body() dto: VerifyOtpDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    this.assertOtpEnabled();
     const user = await this.authService.verifyOtp(dto.identifier, dto.code, res, {
       userAgent: req.headers["user-agent"],
       ipAddress: req.ip,
