@@ -11,7 +11,7 @@ export interface ErrorRecoveryProps {
 /** Standard "something failed" surface. Never resets surrounding layout — caller renders this in place. */
 export function ErrorRecovery({ title, message, retryLabel, onRetry }: ErrorRecoveryProps) {
   return (
-    <div role="alert" className="flex flex-wrap items-center gap-3 rounded-md border border-border-subtle border-s-2 border-s-state-urgent bg-surface-elevated p-4">
+    <section role="alert" aria-live="assertive" className="flex flex-wrap items-center gap-3 border-y border-border-subtle border-s-2 border-s-state-urgent bg-surface-elevated px-4 py-5">
       <CircleAlert size={20} className="shrink-0 text-state-urgent" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <h3 className="text-cta text-text-primary">{title}</h3>
@@ -20,6 +20,6 @@ export function ErrorRecovery({ title, message, retryLabel, onRetry }: ErrorReco
       <Button variant="secondary" onClick={onRetry}>
         {retryLabel}
       </Button>
-    </div>
+    </section>
   );
 }
