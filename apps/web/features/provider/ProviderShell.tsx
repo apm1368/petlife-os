@@ -1,6 +1,8 @@
 "use client";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 import { VerificationRequiredNotice } from "@/features/partner-verification/VerificationRequiredNotice";
+import { Brand } from "@/features/brand/Brand";
+import "@/features/navigation/operator-shell.css";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -134,9 +136,10 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className={pathname === `/${locale}/provider` ? "min-h-screen bg-surface-base" : "workspace-shell min-h-screen bg-surface-base"}>
-      <header className="border-b border-border-subtle px-4 py-3">
-        <div className="flex items-center justify-between gap-3">
+    <div className="workspace-shell operator-shell min-h-screen bg-surface-base">
+      <header className="operator-shell__header">
+        <div className="operator-shell__header-inner">
+          <Link href={`/${locale}/home`} className="operator-shell__brand" aria-label="opetlife"><Brand compact /></Link>
           <div className="flex flex-col">
             <span className="text-section-title text-text-primary">{active.organizationName}</span>
             <span className="text-metadata text-text-secondary">
@@ -161,7 +164,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
         ) : null}
       </header>
 
-      <nav className="flex gap-1 overflow-x-auto border-b border-border-subtle px-4 py-2">
+      <nav className="operator-shell__nav" aria-label={t("nav.home")}>
         {NAV_ITEMS.map((item) => {
           const href = `/${locale}/provider${item.href}`;
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
