@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { Button } from "./Button";
 
 export interface EmptyStateProps {
@@ -10,11 +10,12 @@ export interface EmptyStateProps {
 }
 
 export function EmptyState({ title, description, actionLabel, onAction, icon }: EmptyStateProps) {
+  const titleId = useId();
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border-subtle p-8 text-center">
-      {icon ? <span aria-hidden className="text-text-disabled">{icon}</span> : null}
-      <div>
-        <h3 className="text-section-title text-text-primary">{title}</h3>
+    <section className="flex min-h-48 flex-col items-center justify-center gap-3 border-y border-border-subtle py-10 text-center" aria-labelledby={titleId}>
+      {icon ? <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-subtle text-text-secondary">{icon}</span> : null}
+      <div className="max-w-lg">
+        <h3 id={titleId} className="text-section-title text-text-primary">{title}</h3>
         {description ? <p className="mt-1 text-body text-text-secondary">{description}</p> : null}
       </div>
       {actionLabel && onAction ? (
@@ -22,6 +23,6 @@ export function EmptyState({ title, description, actionLabel, onAction, icon }: 
           {actionLabel}
         </Button>
       ) : null}
-    </div>
+    </section>
   );
 }
