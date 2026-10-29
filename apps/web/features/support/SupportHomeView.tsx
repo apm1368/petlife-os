@@ -7,6 +7,7 @@ import { Button, ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@p
 import type { SupportCaseUserSummaryDto } from "@petlife/types";
 import { supportService } from "@/services/support.service";
 import { supportStatusTone } from "./support-status-tone";
+import { SupportFrame } from "./SupportFrame";
 
 /**
  * Support Home (spec: "Profile -> Support"). A plain new-ticket CTA plus a
@@ -36,9 +37,12 @@ export function SupportHomeView() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-5">
-      <h1 className="text-page-title text-text-primary">{t("home.title")}</h1>
-      <p className="text-body text-text-secondary">{t("home.subtitle")}</p>
+    <SupportFrame>
+    <div className="support-workspace flex flex-col gap-5">
+      <header>
+        <h1 className="text-page-title text-text-primary">{t("home.title")}</h1>
+        <p className="mt-2 text-body text-text-secondary">{t("home.subtitle")}</p>
+      </header>
 
       <Button onClick={() => router.push(`/${locale}/support/new`)}>{t("home.createCta")}</Button>
 
@@ -54,7 +58,7 @@ export function SupportHomeView() {
       {!error && recent && recent.length === 0 ? <p className="text-metadata text-text-secondary">{t("home.noRecent")}</p> : null}
 
       {recent?.map((c) => (
-        <button key={c.id} type="button" className="w-full text-start" onClick={() => router.push(`/${locale}/support/tickets/${c.id}`)}>
+        <button key={c.id} type="button" className="support-case-row w-full text-start" onClick={() => router.push(`/${locale}/support/tickets/${c.id}`)}>
           <ContextSurface className="flex items-center justify-between gap-3 py-2.5">
             <div className="flex flex-col">
               <span className="text-body font-medium text-text-primary">{c.caseNumber}</span>
@@ -65,5 +69,6 @@ export function SupportHomeView() {
         </button>
       ))}
     </div>
+    </SupportFrame>
   );
 }

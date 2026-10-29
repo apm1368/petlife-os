@@ -7,6 +7,7 @@ import { Button, ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabe
 import type { SupportCaseUserSummaryDto } from "@petlife/types";
 import { supportService } from "@/services/support.service";
 import { supportStatusTone } from "./support-status-tone";
+import { SupportFrame } from "./SupportFrame";
 
 /** My Tickets — the full history of the requester's own SupportCases, open and closed alike (spec: "closed ticket history"). */
 export function MyTicketsView() {
@@ -35,18 +36,19 @@ export function MyTicketsView() {
   if (!cases) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
+    <SupportFrame>
+    <div className="support-workspace flex flex-col gap-4">
+      <header className="flex items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{t("tickets.title")}</h1>
         <Button size="sm" onClick={() => router.push(`/${locale}/support/new`)}>
           {t("home.createCta")}
         </Button>
-      </div>
+      </header>
 
       {cases.length === 0 ? <EmptyState title={t("tickets.empty")} actionLabel={t("home.createCta")} onAction={() => router.push(`/${locale}/support/new`)} /> : null}
 
       {cases.map((c) => (
-        <button key={c.id} type="button" className="w-full text-start" onClick={() => router.push(`/${locale}/support/tickets/${c.id}`)}>
+        <button key={c.id} type="button" className="support-case-row w-full text-start" onClick={() => router.push(`/${locale}/support/tickets/${c.id}`)}>
           <ContextSurface className="flex items-center justify-between gap-3 py-2.5">
             <div className="flex flex-col">
               <span className="text-body font-medium text-text-primary">{c.caseNumber}</span>
@@ -57,5 +59,6 @@ export function MyTicketsView() {
         </button>
       ))}
     </div>
+    </SupportFrame>
   );
 }

@@ -7,6 +7,7 @@ import { Button, ContextSurface, Select } from "@petlife/ui";
 import { SupportCaseCategory } from "@petlife/types";
 import { supportService } from "@/services/support.service";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { SupportFrame } from "./SupportFrame";
 
 /**
  * Create Ticket. Contextual entry points ("Get support" on Order/Booking
@@ -58,8 +59,9 @@ export function CreateTicketView() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-page-title text-text-primary">{t("create.title")}</h1>
+    <SupportFrame>
+    <div className="support-workspace flex flex-col gap-4">
+      <header><h1 className="text-page-title text-text-primary">{t("create.title")}</h1></header>
 
       <ContextSurface className="flex flex-col gap-3">
         {relatedEntityType ? <p className="text-metadata text-text-secondary">{t("create.linkedContext", { type: t(`relatedEntityType.${relatedEntityType}`) })}</p> : null}
@@ -101,5 +103,6 @@ export function CreateTicketView() {
         </Button>
       </ContextSurface>
     </div>
+    </SupportFrame>
   );
 }
