@@ -1,5 +1,9 @@
 # PET LIFE OS — Foundation
 
+> وضعیت اجرایی فعلی، مسیر انتشار، SHA نسخهٔ زنده، PRهای باز و قواعد ادامهٔ کار
+> در [docs/PROJECT-STATUS.md](docs/PROJECT-STATUS.md) نگهداری می‌شود. متن این
+> README تاریخچه و handoffهای بنیادین پروژه را مستند می‌کند.
+
 Coding Handoff 01: Foundation + Auth + Household + Pet Identity + Active Pet +
 Onboarding + Basic Home. This is the first production-shaped slice of PET LIFE
 OS — it proves **User → Household → Pet Identity → Active Pet → Personalized
