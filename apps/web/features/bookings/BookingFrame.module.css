@@ -1,0 +1,14 @@
+.frame { width:min(100%,1180px); margin-inline:auto; }
+.journey { width:min(100%,1240px); }
+
+/* Booking flows already expose their own real steps and summaries. The frame
+   only gives the page a stable editorial rhythm across desktop and mobile. */
+.frame :global(.flow-layout) { max-width:none; }
+.frame :global(.flow-main > header) { padding-block-end:4px; }
+.frame :global(.flow-summary) { border:1px solid var(--border-subtle); }
+.frame :global(ul.divide-y) { border-block:1px solid var(--border-subtle); }
+
+@media (max-width: 640px) {
+  .frame :global(.flow-main > header) { gap:12px; }
+  .frame :global(.flow-summary) { border-inline:0; }
+}

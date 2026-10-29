@@ -10,6 +10,7 @@ import { formatDateTimeRange } from "@/lib/date/appointment-date";
 import { bookingsService, type WaitlistEntry } from "@/services/bookings.service";
 import { householdsService } from "@/services/households.service";
 import { bookingStatusLabel, bookingStatusTone, categoryLabel } from "@/features/discovery/labels";
+import { BookingFrame } from "./BookingFrame";
 
 type Tab = "upcoming" | "requested" | "past" | "cancelled" | "waitlist";
 const TABS: { key: Tab; fa: string; en: string }[] = [
@@ -70,6 +71,7 @@ export function MyBookingsView() {
   }
 
   return (
+    <BookingFrame>
     <div className="flex flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{fa ? "نوبت‌های من" : "My bookings"}</h1>
@@ -149,5 +151,6 @@ export function MyBookingsView() {
         </ul>
       )}
     </div>
+    </BookingFrame>
   );
 }

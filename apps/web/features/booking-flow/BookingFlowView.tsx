@@ -20,6 +20,7 @@ import { DateField } from "@/features/shared/date-picker/DateField";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { BackLink } from "@/features/shared/BackLink";
 import { Stepper } from "@/features/shared/Stepper";
+import { BookingFrame } from "@/features/bookings/BookingFrame";
 import { formatDay } from "@/lib/date/jalali";
 
 type Step = "service" | "pets" | "time" | "details" | "review";
@@ -223,6 +224,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   };
 
   return (
+    <BookingFrame journey>
     <div className="flow-layout">
     <div className="flow-main">
       <header className="flex flex-col gap-3">
@@ -427,6 +429,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
       {service ? <p className="flow-summary__note">{service.cancellationPolicy ?? (fa ? `لغو رایگان تا ${service.freeCancellationHours.toLocaleString(locale)} ساعت قبل از نوبت.` : `Free cancellation up to ${service.freeCancellationHours} hours before.`)}</p> : null}
     </aside>
     </div>
+    </BookingFrame>
   );
 }
 
