@@ -1,0 +1,59 @@
+.page {
+  display: flex;
+  width: min(100%, 1240px);
+  margin-inline: auto;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 52px);
+  padding-block: clamp(4px, 1vw, 16px);
+}
+
+.page :global(.section-head),
+.page :global(.disc-head) {
+  position: relative;
+  padding-block-end: clamp(20px, 2.5vw, 30px);
+}
+
+.page :global(.section-head)::after,
+.page :global(.disc-head)::after {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -1px;
+  width: 72px;
+  height: 2px;
+  background: var(--brand-natural);
+  content: "";
+}
+
+.page :global(.filter-band) {
+  align-items: end;
+  border-block: 1px solid var(--border-subtle);
+  padding-block: 18px;
+}
+
+.page :global(.plan-row) {
+  gap: 20px 32px;
+  padding-block: 26px;
+}
+
+.page :global(.plan-row__side) {
+  align-self: start;
+}
+
+.page :global(.place-rows) { border-top-color: var(--border-subtle); }
+.page :global(.place-row) { min-height: 92px; padding-block: 20px; }
+
+.page :global(.travel-hero) {
+  border-radius: 0;
+  border-block: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.page :global(.feature-trio) { padding-block: 30px; }
+.page :global(.disc-cats) { border-bottom-color: var(--border-subtle); }
+
+@media (max-width: 640px) {
+  .page { gap: 28px; }
+  .page :global(.filter-band) { padding-block: 14px; }
+  .page :global(.plan-row) { padding-block: 20px; }
+  .page :global(.place-row) { min-height: 76px; padding-block: 14px; }
+  .page :global(.travel-hero) { margin-inline: -2px; padding: 24px; }
+}

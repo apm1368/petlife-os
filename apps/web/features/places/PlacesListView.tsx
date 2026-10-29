@@ -10,6 +10,7 @@ import { placesService } from "@/services/places.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation, formatDistanceKm } from "@/features/places/place-format";
+import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.PARK,
@@ -97,7 +98,7 @@ export function PlacesListView() {
   if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
 
   return (
-    <div className="flex flex-col gap-6">
+    <DiscoveryPage kind="places">
       {error ? <p role="alert" className="text-body text-state-urgent">{error}</p> : null}
       <header className="section-head">
         <div>
@@ -152,6 +153,6 @@ export function PlacesListView() {
           })}
         </ul>
       )}
-    </div>
+    </DiscoveryPage>
   );
 }

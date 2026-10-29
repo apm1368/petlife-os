@@ -7,6 +7,7 @@ import { BadgeCheck, CarFront, ChevronLeft, ChevronRight, Dog, Footprints, Gradu
 import { useState } from "react";
 import { ServiceCategory } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
+import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 
 const CATEGORIES = [
   { value: ServiceCategory.VET, fa: "دامپزشکی", en: "Veterinary", hintFa: "کلینیک، ویزیت در منزل و تخصص‌ها", hintEn: "Clinics, home visits and specialties", icon: Stethoscope },
@@ -31,7 +32,7 @@ export function ExploreServicesView() {
   const [text, setText] = useState("");
   const Go = fa ? ChevronLeft : ChevronRight;
   return (
-    <div className="disc">
+    <DiscoveryPage kind="services"><div className="disc">
       <header className="disc-head">
         <div className="disc-head__text">
           <p className="disc-head__eyebrow"><BadgeCheck size={16} aria-hidden="true" />{fa ? "متخصص‌های تأییدشده، یک‌جا" : "Verified professionals, in one place"}</p>
@@ -66,6 +67,6 @@ export function ExploreServicesView() {
           <Link href={`/${locale}/services/search`} className="svc-home__all">{fa ? "همهٔ خدمات" : "All services"}</Link>
         </p>
       </section>
-    </div>
+    </div></DiscoveryPage>
   );
 }
