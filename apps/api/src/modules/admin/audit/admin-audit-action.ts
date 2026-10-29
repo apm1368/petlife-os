@@ -8,6 +8,7 @@
  * an unrecognized string into the audit table.
  */
 export type AdminAuditAction =
+  | "user.message_sent"
   | "admin_user.created"
   | "admin_user.role_changed"
   | "admin_user.suspended"

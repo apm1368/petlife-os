@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, ProviderType } from "@prisma/client";
+import { NotificationCategory, Prisma, ProviderType } from "@prisma/client";
 import type {
   AdminUserDirectoryListDto,
   AdminUserDirectoryRowDto,
@@ -15,6 +15,9 @@ import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../.
 import { maskPhone } from "../../../common/phone/phone-normalizer";
 import { maskEmail } from "../../../common/pii/pii-mask.util";
 import { AdminCustomerService } from "../customer/admin-customer.service";
+import { NotificationOrchestratorService } from "../../notifications/notification-orchestrator.service";
+import { AdminAuditLogService } from "../audit/admin-audit-log.service";
+import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 /** Which directory kind a provider organization reads as, from its ProviderType. */
 function providerKind(type: ProviderType): AdminUserRoleKind {
@@ -53,6 +56,8 @@ export class AdminUsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly customers: AdminCustomerService,
+    private readonly notifications: NotificationOrchestratorService,
+    private readonly audit: AdminAuditLogService,
   ) {}
 
   private row(user: DirectoryUser, roles: AdminUserRoleDto[]): AdminUserDirectoryRowDto {
@@ -231,5 +236,41 @@ export class AdminUsersService {
       householdCount: customer.households.length,
       petCount: customer.households.reduce((total, household) => total + household.pets.length, 0),
     };
+  }
+
+  /** Staff messages deliberately share the same audited, preference-aware pipeline as all automated notices. */
+  async sendMessage(
+    admin: ResolvedAdminContext,
+    userId: string,
+    input: { title: string; message: string; attemptSms?: boolean },
+    requestId?: string,
+  ): Promise<{ notificationId: string; smsRequested: boolean }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    if (!user) throw new AdminCustomerNotFoundException({ userId });
+    const title = input.title.trim();
+    const message = input.message.trim();
+    const smsRequested = input.attemptSms !== false;
+    const { notification } = await this.notifications.notify({
+      userId,
+      type: "admin.message",
+      category: NotificationCategory.SYSTEM,
+      templateParams: { title, body: message, smsBody: message },
+      deepLink: "/notifications",
+      entityType: "USER",
+      entityId: userId,
+      actorType: "ADMIN",
+      actorId: admin.userId,
+      metadata: { source: "admin_user_message" },
+      attemptSms: smsRequested,
+    });
+    await this.audit.record({
+      adminUserId: admin.adminUserId,
+      action: "user.message_sent",
+      entityType: "USER",
+      entityId: userId,
+      afterSummary: { notificationId: notification.id, smsRequested },
+      requestId,
+    });
+    return { notificationId: notification.id, smsRequested };
   }
 }
