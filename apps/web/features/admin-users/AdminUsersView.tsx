@@ -65,23 +65,7 @@ function Directory({ id }: { id?: string }) {
     </ContextSurface>}
     {!current ? <p role="status">{t("loading")}</p> : current.error ? <div><p role="alert">{t(current.error)}</p>{current.error === "failed" && <Button onClick={() => setRetry(value => value + 1)}>{t("retry")}</Button>}</div> : <>
       {!id && <p role="status">{t("total", { count: number(current.total) })}</p>}
-      {current.rows.length === 0 ? <p>{t("empty")}</p> : <ul className={`grid min-w-0 gap-4 ${id ? "" : "xl:grid-cols-2"}`}>
-        {current.rows.map(user => <li key={user.id} className="min-w-0"><ContextSurface className="min-w-0 space-y-4 break-words">
-          <div><h2 className="text-section-title">{user.displayName || t("unnamed")}</h2><p>{statusName(user.accountStatus)}</p></div>
-          <dl className="grid gap-3 sm:grid-cols-2">
-            <div><dt>{t("email")}</dt><dd><bdi dir="ltr">{user.emailMasked || t("notRecorded")}</bdi></dd></div>
-            <div><dt>{t("phone")}</dt><dd><bdi dir="ltr">{user.phoneMasked || t("notRecorded")}</bdi></dd></div>
-            <div><dt>{t("created")}</dt><dd>{date(user.createdAt)}</dd></div>
-            <div><dt>{t("lastActive")}</dt><dd>{date(user.lastActiveAt)}</dd></div>
-          </dl>
-          <h3 className="font-medium">{t("relationships")}</h3>
-          {user.roles.length ? <ul className="space-y-2">{user.roles.map((role, index) => <li key={`${role.kind}-${role.business?.id ?? index}`} className="rounded-xl border border-current/20 p-3">
-            <p>{t(`kinds.${role.kind}`)} · {roleName(role.role)}</p>
-            {role.business && <><p>{t("business", { name: role.business.name })}</p><p className="text-sm">{t("verification", { status: statusName(role.business.verificationStatus) })}</p></>}
-          </li>)}</ul> : <p>{t("noRoles")}</p>}
-          {!id && <Link className="underline" href={`/${locale}/admin/users/${encodeURIComponent(user.id)}`}>{t("detail")}</Link>}
-        </ContextSurface></li>)}
-      </ul>}
+      {current.rows.length === 0 ? <p>{t("empty")}</p> : id ? <ContextSurface className="min-w-0 space-y-4 break-words">{current.rows.map(user => <div key={user.id}><h2 className="text-section-title">{user.displayName || t("unnamed")}</h2><p>{statusName(user.accountStatus)}</p><dl className="mt-4 grid gap-3 sm:grid-cols-2"><div><dt>{t("email")}</dt><dd><bdi dir="ltr">{user.emailMasked || t("notRecorded")}</bdi></dd></div><div><dt>{t("phone")}</dt><dd><bdi dir="ltr">{user.phoneMasked || t("notRecorded")}</bdi></dd></div><div><dt>{t("created")}</dt><dd>{date(user.createdAt)}</dd></div><div><dt>{t("lastActive")}</dt><dd>{date(user.lastActiveAt)}</dd></div></dl></div>)}</ContextSurface> : <ContextSurface className="overflow-x-auto"><table className="w-full min-w-[56rem] text-sm"><thead><tr className="border-b text-start text-text-secondary"><th className="p-3 font-medium">{t("title")}</th><th className="p-3 font-medium">{t("email")}</th><th className="p-3 font-medium">{t("phone")}</th><th className="p-3 font-medium">{t("relationships")}</th><th className="p-3 font-medium">{t("lastActive")}</th><th className="p-3 font-medium">{t("detail")}</th></tr></thead><tbody>{current.rows.map(user => <tr key={user.id} className="border-b last:border-0 align-top"><td className="p-3"><p className="font-medium">{user.displayName || t("unnamed")}</p><p>{statusName(user.accountStatus)}</p></td><td className="p-3"><bdi dir="ltr">{user.emailMasked || t("notRecorded")}</bdi></td><td className="p-3"><bdi dir="ltr">{user.phoneMasked || t("notRecorded")}</bdi></td><td className="p-3">{user.roles.length ? <ul className="space-y-1">{user.roles.map((role,index)=><li key={`${role.kind}-${role.business?.id??index}`}><span>{t(`kinds.${role.kind}`)} · {roleName(role.role)}</span>{role.business?<span className="block text-text-secondary">{t("business",{name:role.business.name})}</span>:null}</li>)}</ul> : t("noRoles")}</td><td className="p-3">{date(user.lastActiveAt)}</td><td className="p-3"><Link className="underline" href={`/${locale}/admin/users/${encodeURIComponent(user.id)}`}>{t("detail")}</Link></td></tr>)}</tbody></table></ContextSurface>}
       {current.profile && <ProfileDetails profile={current.profile} />}
       {!id && <nav className="flex flex-wrap items-center gap-3" aria-label={t("pagination")}>
         <Button disabled={filter.page <= 1} onClick={() => setFilter(value => ({ ...value, page: value.page - 1 }))}>{t("previous")}</Button>
