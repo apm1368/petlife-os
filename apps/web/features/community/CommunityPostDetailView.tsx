@@ -11,6 +11,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { useSessionStore } from "@/stores/session-store";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { CommunityFrame } from "./CommunityFrame";
 
 const REACTIONS: CommunityReactionType[] = [CommunityReactionType.LIKE, CommunityReactionType.LOVE, CommunityReactionType.HELPFUL];
 
@@ -91,9 +92,9 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
   if (!post || !comments) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
-    <div className="flex flex-col gap-5">
-      <ContextSurface className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
+    <CommunityFrame><div className="flex flex-col gap-5">
+      <ContextSurface className="community-post flex flex-col gap-2">
+        <div className="community-post__head flex items-center justify-between">
           <span className="text-body text-text-primary">{post.authorDisplayName}</span>
           <span className="text-metadata text-text-secondary">{t(`postType.${post.type}`)}</span>
         </div>
@@ -121,7 +122,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
         {actionError ? <p className="text-body text-state-urgent">{actionError}</p> : null}
       </ContextSurface>
 
-      <div className="flex flex-col gap-3">
+      <div className="community-comments flex flex-col gap-3">
         <h2 className="text-section-title text-text-primary">{t("post.commentsTitle")}</h2>
         <div className="flex gap-2">
           <div className="flex-1">
@@ -137,7 +138,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
         ) : (
           <div className="flex flex-col gap-2">
             {comments.items.map((comment) => (
-              <ContextSurface key={comment.id} className="flex flex-col gap-1">
+              <ContextSurface key={comment.id} className="community-comment flex flex-col gap-1">
                 <span className="text-metadata text-text-secondary">{comment.authorDisplayName}</span>
                 <p className="text-body text-text-primary">{comment.body}</p>
                 <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportComment(comment.id, reason, details)} />
@@ -146,6 +147,6 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
           </div>
         )}
       </div>
-    </div>
+    </div></CommunityFrame>
   );
 }
