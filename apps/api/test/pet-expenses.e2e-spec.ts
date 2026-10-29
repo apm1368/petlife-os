@@ -114,6 +114,14 @@ describe("Pet expense tracker", () => {
     expect(await db.petExpense.count({ where: { id: created.body.id } })).toBe(0);
   });
 
+  it("lets an expense author or household owner change a manual row, but not another household member", async () => {
+    const created = await send("post", "OWNER", `/pets/${petId}/expenses`).send({ category: "MEDICATION", amountIrr: 90_000, spentOn: day(7, 1) }).expect(201);
+    await send("patch", "MEMBER", `/pets/${petId}/expenses/${created.body.id}`).send({ amountIrr: 1 }).expect(403);
+    await send("delete", "MEMBER", `/pets/${petId}/expenses/${created.body.id}`).expect(403);
+    expect((await db.petExpense.findUniqueOrThrow({ where: { id: created.body.id } })).amountIrr).toBe(90_000);
+    await send("delete", "OWNER", `/pets/${petId}/expenses/${created.body.id}`).expect(200);
+  });
+
   it("treats another pet's expense id, derived ids and garbage ids as not found", async () => {
     const foreign = await db.petExpense.create({ data: { petId: otherPetId, householdId: (await db.pet.findUniqueOrThrow({ where: { id: otherPetId } })).householdId, createdByUserId: actors.OTHER_HOUSEHOLD!.id, category: "VET", amountIrr: 50_000, spentOn: new Date(`${day(2, 2)}T00:00:00.000Z`) } });
     await send("patch", "OWNER", `/pets/${petId}/expenses/${foreign.id}`).send({ amountIrr: 1 }).expect(404);

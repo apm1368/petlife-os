@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BookingStatus, OrderStatus, PetExpenseCategory, ServiceCategory, type PetExpense } from "@prisma/client";
+import { BookingStatus, HouseholdRole, OrderStatus, PetExpenseCategory, ServiceCategory, type PetExpense } from "@prisma/client";
 import type { PetExpenseEntryDto, PetExpenseSource, PetExpensesDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
@@ -60,10 +60,10 @@ export class PetExpensesService {
     if (!pet) throw new NotFoundApiException("Pet");
     const member = await this.prisma.householdMember.findUnique({
       where: { householdId_userId: { householdId: pet.householdId, userId } },
-      select: { id: true },
+      select: { id: true, role: true },
     });
     if (!member) throw new PetAccessDeniedException({ petId, reason: "HOUSEHOLD_MEMBERS_ONLY" });
-    return pet;
+    return { pet, member };
   }
 
   private range(query: ListPetExpensesQueryDto): { from: Date; to: Date } {
@@ -76,7 +76,7 @@ export class PetExpensesService {
   }
 
   async list(petId: string, userId: string, query: ListPetExpensesQueryDto): Promise<PetExpensesDto> {
-    const pet = await this.householdPet(petId, userId);
+    const { pet } = await this.householdPet(petId, userId);
     const { from, to } = this.range(query);
     const toExclusive = new Date(to.getTime() + DAY_MS);
 
@@ -153,7 +153,7 @@ export class PetExpensesService {
   }
 
   async create(petId: string, userId: string, dto: CreatePetExpenseDto): Promise<PetExpenseEntryDto> {
-    const pet = await this.householdPet(petId, userId);
+    const { pet } = await this.householdPet(petId, userId);
     const row = await this.prisma.petExpense.create({
       data: {
         petId,
@@ -169,8 +169,8 @@ export class PetExpensesService {
   }
 
   async update(petId: string, expenseId: string, userId: string, dto: UpdatePetExpenseDto): Promise<PetExpenseEntryDto> {
-    await this.householdPet(petId, userId);
-    await this.owned(petId, expenseId);
+    const { member } = await this.householdPet(petId, userId);
+    await this.owned(petId, expenseId, userId, member.role);
     const row = await this.prisma.petExpense.update({
       where: { id: expenseId },
       data: {
@@ -184,17 +184,21 @@ export class PetExpensesService {
   }
 
   async remove(petId: string, expenseId: string, userId: string): Promise<{ deleted: true }> {
-    await this.householdPet(petId, userId);
-    await this.owned(petId, expenseId);
+    const { member } = await this.householdPet(petId, userId);
+    await this.owned(petId, expenseId, userId, member.role);
     await this.prisma.petExpense.delete({ where: { id: expenseId } });
     return { deleted: true };
   }
 
   /** The expense must belong to the pet in the URL — a forged id for another pet reads as not found. */
-  private async owned(petId: string, expenseId: string) {
+  /** Manual rows belong to their author; a household owner may also correct them. */
+  private async owned(petId: string, expenseId: string, userId: string, role: HouseholdRole) {
     if (!/^[0-9a-f-]{36}$/i.test(expenseId)) throw new NotFoundApiException("Expense");
-    const row = await this.prisma.petExpense.findFirst({ where: { id: expenseId, petId }, select: { id: true } });
+    const row = await this.prisma.petExpense.findFirst({ where: { id: expenseId, petId }, select: { id: true, createdByUserId: true } });
     if (!row) throw new NotFoundApiException("Expense");
+    if (row.createdByUserId !== userId && role !== HouseholdRole.OWNER) {
+      throw new PetAccessDeniedException({ petId, reason: "EXPENSE_WRITE_NOT_PERMITTED" });
+    }
   }
 
   private toEntry(row: PetExpense): PetExpenseEntryDto {
