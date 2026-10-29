@@ -11,6 +11,7 @@ import { providerOsService } from "@/services/provider-os.service";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { bookingStatusLabel, bookingStatusTone } from "@/features/discovery/labels";
 import type { ProviderFollowUpInput } from "@/services/provider-os.service";
+import { DateField } from "@/features/shared/date-picker/DateField";
 
 const ACCESS_TONE: Record<string, "success" | "attention" | "neutral"> = {
   GRANTED: "success",
@@ -222,7 +223,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
                     <option value="OTHER">{fa ? "سایر" : "Other"}</option>
                   </select>
                   <input aria-label={fa ? "عنوان" : "Title"} className="rounded border border-border-subtle bg-surface-base p-2" maxLength={200} value={f.title} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
-                  <input aria-label={fa ? "تاریخ" : "Date"} type="date" className="rounded border border-border-subtle bg-surface-base p-2" min={new Date(Date.now() + 86400_000).toISOString().slice(0, 10)} value={f.dueAt.slice(0, 10)} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, dueAt: e.target.value ? new Date(`${e.target.value}T06:30:00Z`).toISOString() : "" } : x)))} />
+                  <DateField label={fa ? "تاریخ" : "Date"} min={new Date(Date.now() + 86400_000).toISOString().slice(0, 10)} value={f.dueAt.slice(0, 10)} onChange={(date) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, dueAt: date ? new Date(`${date}T06:30:00Z`).toISOString() : "" } : x)))} />
                   <Button variant="ghost" size="sm" onClick={() => setFollowUps((prev) => prev.filter((_, j) => j !== i))}>{fa ? "حذف" : "Remove"}</Button>
                 </div>
               ))}

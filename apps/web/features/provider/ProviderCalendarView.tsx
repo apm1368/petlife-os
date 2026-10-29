@@ -8,6 +8,7 @@ import type { ProviderAvailabilityExceptionDto, ProviderBookingSummaryDto } from
 import { providerOsService, type ProviderStaffMember } from "@/services/provider-os.service";
 import { bookingStatusLabel } from "@/features/discovery/labels";
 import { DateReading } from "@/lib/date/date-reading";
+import { DateField } from "@/features/shared/date-picker/DateField";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 
 type View = "day" | "week" | "month";
@@ -209,7 +210,7 @@ export function ProviderCalendarView() {
       <Dialog open={blockOpen} onClose={() => setBlockOpen(false)} title={fa ? "مسدود کردن زمان" : "Block time"}>
         <div className="flex flex-col gap-3">
           <p className="text-sm text-text-secondary">{fa ? "در این بازه نوبت جدید قابل رزرو نیست. نوبت‌های قطعی موجود لغو نمی‌شوند." : "No new bookings can be made in this period. Existing confirmed bookings are not cancelled."}</p>
-          <Input label={fa ? "روز" : "Day"} type="date" value={block.date} onChange={(e) => setBlock({ ...block, date: e.target.value })} />
+          <DateField label={fa ? "روز" : "Day"} value={block.date} onChange={(date) => setBlock({ ...block, date })} />
           <DateReading value={block.date} />
           <div className="grid grid-cols-2 gap-2">
             <Input label={fa ? "از" : "From"} type="time" value={block.start} onChange={(e) => setBlock({ ...block, start: e.target.value })} />

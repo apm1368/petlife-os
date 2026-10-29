@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar, Button, ContextSurface, Dialog, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { HouseholdDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
@@ -52,6 +52,7 @@ function isActive(grant: { startsAt: string | null; expiresAt: string | null }, 
 export function HouseholdCenterView() {
   const { t, locale, num } = useAccountCopy();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const currentUserId = useSessionStore((s) => s.user?.id);
   const [households, setHouseholds] = useState<HouseholdDto[] | null>(null);
   const [selectedId, setSelectedId] = useState("");
@@ -92,6 +93,9 @@ export function HouseholdCenterView() {
   useEffect(() => {
     void loadDetail();
   }, [loadDetail]);
+  useEffect(() => {
+    if (searchParams.get("invite") === "1") setInviteOpen(true);
+  }, [searchParams]);
 
   const accessByMember = useMemo(() => {
     const map = new Map<string, { pets: string[]; temporary: number }>();

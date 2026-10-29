@@ -32,6 +32,9 @@ export function AccountOverviewView() {
         <span><b>{home?.name || (locale === "fa" ? "خانواده من" : "My household")}</b><small>{home ? `${formatCount(home._count.members, locale)} ${locale === "fa" ? "عضو" : "members"} · ${formatCount(home._count.pets, locale)} ${locale === "fa" ? "حیوان" : "pets"}` : (locale === "fa" ? "هنوز خانواده‌ای ثبت نشده" : "No household yet")}</small></span>
         <StatusLabel tone={home ? "success" : "neutral"}>{home?.role === "OWNER" ? (locale === "fa" ? "مدیر" : "Organizer") : (locale === "fa" ? "عضو" : "Member")}</StatusLabel>
       </button>
+      {home?.role === "OWNER" ? <button onClick={() => router.push(`/${locale}/profile/household?invite=1`)}>
+        <span><b>{locale === "fa" ? "دعوت به خانواده" : "Invite family"}</b><small>{locale === "fa" ? "عضو جدید را با دسترسی شفاف به حیوان‌ها اضافه کنید" : "Add a member with clear pet access"}</small></span><span aria-hidden className="dir-flip">←</span>
+      </button> : null}
       <button onClick={() => router.push(`/${locale}/subscription`)}>
         <span><b>{locale === "fa" ? "عضویت opetlife Care" : "opetlife Care membership"}</b><small>{home?.subscription?.status ? statusLabel(home.subscription.status, locale === "en" ? "en" : "fa", "subscription") : (locale === "fa" ? "مشاهده طرح‌ها و مزایا" : "See plans and benefits")}</small></span><span aria-hidden className="dir-flip">←</span>
       </button>
