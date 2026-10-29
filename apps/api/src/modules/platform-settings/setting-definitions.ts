@@ -1,6 +1,6 @@
 import type { AppEnv } from "../../config/env";
 
-export type SettingCategory = "platform" | "booking" | "commerce" | "support" | "content" | "notifications" | "privacy" | "country";
+export type SettingCategory = "platform" | "booking" | "commerce" | "support" | "content" | "notifications" | "privacy" | "country" | "auth";
 export type SettingType = "integer" | "boolean" | "localizedText";
 export type SettingScope = "PUBLIC" | "INTERNAL";
 
@@ -34,6 +34,24 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     maxLength: 280,
     fallback: () => null,
     description: "Site-wide notice shown to members (fa/en). Empty = no banner.",
+  },
+  {
+    key: "auth.googleEnabled",
+    category: "auth",
+    type: "boolean",
+    scope: "INTERNAL",
+    highImpact: true,
+    fallback: (env) => Boolean(env("GOOGLE_AUTH_ENABLED")),
+    description: "Whether Google sign-in is available. Google credentials stay in the server environment and are never stored here.",
+  },
+  {
+    key: "auth.otpEnabled",
+    category: "auth",
+    type: "boolean",
+    scope: "INTERNAL",
+    highImpact: true,
+    fallback: () => true,
+    description: "Whether phone OTP sign-in and verification is available. Delivery-provider credentials stay in the server environment.",
   },
   {
     key: "booking.holdTtlSeconds",

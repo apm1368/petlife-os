@@ -6473,6 +6473,70 @@ export interface InsurerApplicationDetailDto extends InsurerApplicationRowDto {
     createdAt: string;
   }[];
 }
+// ---------------------------------------------------------------------------
+// Pet expense tracker
+// ---------------------------------------------------------------------------
+
+export const PET_EXPENSE_CATEGORIES = [
+  "FOOD",
+  "VET",
+  "MEDICATION",
+  "GROOMING",
+  "TRAINING",
+  "BOARDING",
+  "SUPPLIES",
+  "INSURANCE",
+  "TRANSPORT",
+  "OTHER",
+] as const;
+export type PetExpenseCategory = (typeof PET_EXPENSE_CATEGORIES)[number];
+
+/** MANUAL rows are editable; BOOKING and SHOP rows are read live from the booking/order they came from. */
+export type PetExpenseSource = "MANUAL" | "BOOKING" | "SHOP";
+
+export interface PetExpenseEntryDto {
+  /** For MANUAL the PetExpense id; for BOOKING/SHOP the source record id, prefixed `booking:` / `order-item:`. */
+  id: string;
+  source: PetExpenseSource;
+  category: PetExpenseCategory;
+  amountIrr: number;
+  /** Calendar day, `yyyy-mm-dd`. */
+  spentOn: string;
+  note: string | null;
+  /** Booking service name or product title, so a derived row explains itself. */
+  label: string | null;
+  /** Where to open the source record (booking / order id) for BOOKING and SHOP rows. */
+  sourceRecordId: string | null;
+}
+
+export interface PetExpensesDto {
+  from: string;
+  to: string;
+  totalIrr: number;
+  byCategory: { category: PetExpenseCategory; amountIrr: number }[];
+  bySource: { source: PetExpenseSource; amountIrr: number }[];
+  entries: PetExpenseEntryDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Pet year in review
+// ---------------------------------------------------------------------------
+
+/**
+ * A derived recap of one period. A section is null when the reader may not see it (health without
+ * canViewHealth, care without canViewCareProfile, household-private services/trips for non-members),
+ * so the page can leave it out rather than show a misleading zero.
+ */
+export interface PetYearReviewDto {
+  from: string;
+  to: string;
+  memories: { total: number; photos: number; highlights: { id: string; title: string; occurredAt: string }[] };
+  care: { completed: number; topTypes: { type: string; count: number }[] } | null;
+  services: { completed: number; byCategory: { category: string; count: number }[] } | null;
+  trips: { count: number; destinations: string[] } | null;
+  health: { visits: number } | null;
+}
+
 export type {
   PartnerVerificationProfileInput,
   PartnerVerificationProfileDto,

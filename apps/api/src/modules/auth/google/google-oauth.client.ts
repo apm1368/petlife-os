@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { AppEnv } from "../../../config/env";
 import { GoogleAuthDisabledException, GoogleAuthFailedException } from "../../../common/errors/api-exception";
+import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import type { GoogleProfile } from "./google-profile.types";
 
 const GOOGLE_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -26,10 +27,14 @@ const GOOGLE_ISSUERS = new Set(["https://accounts.google.com", "accounts.google.
 export class GoogleOAuthClient {
   private jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
 
-  constructor(private readonly config: ConfigService<AppEnv, true>) {}
+  constructor(
+    private readonly config: ConfigService<AppEnv, true>,
+    private readonly settings: PlatformSettingsService,
+  ) {}
 
   isEnabled(): boolean {
     return (
+      this.settings.get<boolean>("auth.googleEnabled") &&
       this.config.get("GOOGLE_AUTH_ENABLED", { infer: true }) &&
       !!this.config.get("GOOGLE_CLIENT_ID", { infer: true }) &&
       !!this.config.get("GOOGLE_CLIENT_SECRET", { infer: true }) &&

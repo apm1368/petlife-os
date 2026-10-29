@@ -225,7 +225,7 @@ export function CareSheetView({ petId }: { petId: string }) {
         {health.state === "ok" ? (
           <div className="grid gap-4 sm:grid-cols-3">
             <List title={c.allergies} empty={c.noneRecorded} items={health.value.allergies.map((a) => [a.name, [a.severity ? c.severity[a.severity] : null, a.reaction ? `${c.reaction}: ${a.reaction}` : null].filter(Boolean).join(" · ")])} />
-            <List title={c.medications} empty={c.noneRecorded} items={health.value.medications.map((m) => [m.name, [m.dosage !== null ? `${m.dosage}${m.unit ? " " + m.unit : ""}` : null, m.frequencyText, m.instructions].filter(Boolean).join(" · ")])} />
+            <List title={c.medications} empty={c.noneRecorded} items={health.value.medications.map((m) => [m.name, [m.dosage !== null ? `${Number(m.dosage).toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}${m.unit ? " " + m.unit : ""}` : null, m.frequencyText, m.instructions].filter(Boolean).join(" · ")])} />
             <List title={c.conditions} empty={c.noneRecorded} items={health.value.conditions.map((x) => [x.name, x.notes ?? ""])} />
             <p className="text-xs text-text-secondary sm:col-span-3">{c.sourceNote}</p>
           </div>

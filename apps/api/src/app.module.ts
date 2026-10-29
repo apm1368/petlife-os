@@ -28,6 +28,8 @@ import { StorageModule } from "./modules/storage/storage.module";
 import { PetHealthModule } from "./modules/health/health.module";
 import { NutritionModule } from "./modules/nutrition/nutrition.module";
 import { CareProfileModule } from "./modules/care-profile/care-profile.module";
+import { PetExpensesModule } from "./modules/pet-expenses/pet-expenses.module";
+import { PetYearReviewModule } from "./modules/pet-year-review/pet-year-review.module";
 import { ProvidersModule } from "./modules/providers/providers.module";
 import { BookingModule } from "./modules/booking/booking.module";
 import { CareCalendarModule } from "./modules/care-calendar/care-calendar.module";
@@ -109,6 +111,8 @@ import { PlacesModule } from "./modules/places/places.module";
     PetHealthModule,
     NutritionModule,
     CareProfileModule,
+    PetExpensesModule,
+    PetYearReviewModule,
     ProvidersModule,
     BookingModule,
     CareCalendarModule,

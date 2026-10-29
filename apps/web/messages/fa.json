@@ -166,7 +166,9 @@
       "resendIn": "ارسال دوباره تا {seconds, number} ثانیه دیگر",
       "verify": "تأیید",
       "invalid": "این کد نادرست است یا منقضی شده.",
-      "rateLimited": "تلاش بیش از حد. {seconds, number} ثانیه دیگر دوباره امتحان کنید."
+      "rateLimited": "تلاش بیش از حد. {seconds, number} ثانیه دیگر دوباره امتحان کنید.",
+      "rateLimitedMinutes": "تلاش بیش از حد. حدود {minutes, number} دقیقه دیگر دوباره امتحان کنید.",
+      "genericError": "مشکلی پیش آمد. لطفاً دوباره تلاش کنید."
     },
     "password": {
       "usernameLabel": "نام کاربری",
@@ -1376,7 +1378,8 @@
         "eta": "تحویل تا حدود {hours, plural, one {# ساعت} other {# ساعت}} دیگر",
         "selected": "انتخاب شد",
         "unavailable": "در حال حاضر گزینه ارسالی موجود نیست",
-        "refresh": "به‌روزرسانی گزینه‌های ارسال"
+        "refresh": "به‌روزرسانی گزینه‌های ارسال",
+        "chooseFirst": "برای ادامه، روش ارسال را انتخاب کنید."
       },
       "payment": {
         "title": "پرداخت",
@@ -5998,6 +6001,8 @@
     "reject": "رد درخواست",
     "names": {
       "platform_announcement": "اعلان عمومی سامانه",
+      "auth_googleEnabled": "فعال‌بودن ورود با گوگل",
+      "auth_otpEnabled": "فعال‌بودن ورود با رمز یک‌بارمصرف پیامکی",
       "booking_holdTtlSeconds": "زمان نگهداری نوبت (ثانیه)",
       "commerce_refundApprovalThresholdIrr": "آستانهٔ تأیید دوم بازپرداخت",
       "commerce_settlementApprovalThresholdIrr": "آستانهٔ تأیید دوم تسویه",

@@ -166,7 +166,9 @@
       "resendIn": "Resend in {seconds, number}s",
       "verify": "Verify",
       "invalid": "That code is incorrect or has expired.",
-      "rateLimited": "Too many attempts. Try again in {seconds, number}s."
+      "rateLimited": "Too many attempts. Try again in {seconds, number}s.",
+      "rateLimitedMinutes": "Too many attempts. Try again in about {minutes, number} min.",
+      "genericError": "Something went wrong. Please try again."
     },
     "password": {
       "usernameLabel": "Username",
@@ -1376,7 +1378,8 @@
         "eta": "Arrives in about {hours, plural, one {# hour} other {# hours}}",
         "selected": "Selected",
         "unavailable": "No delivery options available right now",
-        "refresh": "Refresh delivery options"
+        "refresh": "Refresh delivery options",
+        "chooseFirst": "Choose a delivery option to continue."
       },
       "payment": {
         "title": "Payment",
@@ -5998,6 +6001,8 @@
     "reject": "Reject change",
     "names": {
       "platform_announcement": "Public announcement",
+      "auth_googleEnabled": "Google sign-in availability",
+      "auth_otpEnabled": "Phone OTP availability",
       "booking_holdTtlSeconds": "Booking hold duration (seconds)",
       "commerce_refundApprovalThresholdIrr": "Refund second-approval threshold",
       "commerce_settlementApprovalThresholdIrr": "Settlement second-approval threshold",

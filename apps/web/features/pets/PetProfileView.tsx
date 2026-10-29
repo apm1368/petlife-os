@@ -40,6 +40,8 @@ const copy = {
     care: "مرکز مراقبت",
     document: "بارگذاری سند پزشکی",
     memory: "ثبت خاطره",
+    yearReview: "مرور سال و تولد",
+    careSheet: "برگه مراقبت برای پرستار",
     household: "خانواده",
     editTitle: "ویرایش مشخصات",
     name: "نام",
@@ -79,6 +81,8 @@ const copy = {
     care: "Care center",
     document: "Upload medical document",
     memory: "Add memory",
+    yearReview: "Year in review & birthday",
+    careSheet: "Care sheet for a sitter",
     household: "Household",
     editTitle: "Edit identity",
     name: "Name",
@@ -221,6 +225,8 @@ export function PetProfileView({ petId }: { petId: string }) {
             {access.canViewCareProfile ? <Shortcut href={base + "/care"} label={c.care} /> : null}
             {access.canEditHealth ? <Shortcut href={base + "/health/advanced/documents"} label={c.document} /> : null}
             <Shortcut href={base + "/memories/new"} label={c.memory} />
+            <Shortcut href={base + "/year-review"} label={c.yearReview} />
+            {access.canViewCareProfile && !isMemorial ? <Shortcut href={base + "/care-sheet"} label={c.careSheet} /> : null}
           </div>
         </OverviewSection>
         <OverviewSection title={c.recentActivity}>

@@ -188,9 +188,11 @@ export function CheckoutView() {
     setShippingQuoteSelectingId(quoteId);
     setError(null);
     try {
-      const [options, updatedCheckout] = await Promise.all([commerceService.selectShippingQuote(checkout.id, quoteId), commerceService.getCheckout(checkout.id)]);
+      // Sequential on purpose: read the checkout only after the selection is saved, or the summary and the
+      // payment amount show the pre-delivery total while the server charges the new one.
+      const options = await commerceService.selectShippingQuote(checkout.id, quoteId);
       setShippingOptions(options);
-      setCheckout(updatedCheckout);
+      setCheckout(await commerceService.getCheckout(checkout.id));
     } catch (err) {
       setError(apiErrorText(err, locale, t("createFailed")));
     } finally {
@@ -204,6 +206,7 @@ export function CheckoutView() {
     try {
       const options = await commerceService.refreshShippingOptions(checkout.id);
       setShippingOptions(options);
+      setCheckout(await commerceService.getCheckout(checkout.id));
     } catch (err) {
       setError(apiErrorText(err, locale, t("createFailed")));
     }
@@ -521,6 +524,8 @@ export function CheckoutView() {
   }
 
   if (step === "shipping") {
+    // Without a chosen quote the order falls back to a zero delivery amount, so a seller that offers delivery options must have one picked.
+    const deliveryChosen = (shippingOptions ?? []).every((group) => group.quotes.length === 0 || group.quotes.some((q) => q.status === "SELECTED"));
     return frame(
       <div className="flex flex-col gap-5">
         {progress(2)}
@@ -572,10 +577,11 @@ export function CheckoutView() {
           <Button variant="ghost" onClick={() => setStep("review")}>
             {tCommon("back")}
           </Button>
-          <Button variant="primary" className="flex-1" onClick={enterMethodStep}>
+          <Button variant="primary" className="flex-1" onClick={enterMethodStep} disabled={!deliveryChosen}>
             {tCommon("continue")}
           </Button>
         </div>
+        {!deliveryChosen ? <p className="text-metadata text-text-secondary" role="status">{t("shipping.chooseFirst")}</p> : null}
       </div>
     );
   }
