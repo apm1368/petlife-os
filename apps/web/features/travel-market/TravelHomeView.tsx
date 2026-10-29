@@ -9,6 +9,7 @@ import { localizeDigits } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { useSessionStore } from "@/stores/session-store";
 import { TravelSearchForm } from "./TravelSearchForm";
+import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 
 /**
  * TRAVEL DISCOVERY PATTERN — home. Search first; destinations are real listing counts from the
@@ -27,7 +28,7 @@ export function TravelHomeView() {
   }, []);
 
   return (
-    <div className="flex w-full flex-col gap-10">
+    <DiscoveryPage kind="travel">
       <Link className="underline" href={`/${lang}/travel/external`}>{externalT("title")}</Link>
       <section className="travel-hero">
       <header className="travel-hero__head">
@@ -87,6 +88,6 @@ export function TravelHomeView() {
         <Link className="btn-quiet" href={`/${lang}/places`}><MapPin aria-hidden className="inline h-4 w-4" /> {fa ? "مکان‌های دوستدار حیوانات" : "Pet-friendly places"}</Link>
         <Link className="btn-quiet" href={`/${lang}/insurance`}>{fa ? "بیمهٔ حیوانات" : "Pet insurance"}</Link>
       </nav>
-    </div>
+    </DiscoveryPage>
   );
 }

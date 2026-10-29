@@ -13,6 +13,7 @@ import { categoryLabel, providerTypeLabel } from "./labels";
 import { formatCount } from "@/lib/number/format-number";
 import { formatDay } from "@/lib/date/jalali";
 import { DateField } from "@/features/shared/date-picker/DateField";
+import { DiscoveryPage } from "./DiscoveryPage";
 
 const SORTS: { value: DiscoverySort; fa: string; en: string }[] = [
   { value: "RECOMMENDED", fa: "پیشنهادی", en: "Recommended" },
@@ -225,7 +226,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
   const Go = fa ? ChevronLeft : ChevronRight;
 
   return (
-    <div className="disc">
+    <DiscoveryPage kind="services"><div className="disc">
       <header className="disc-head">
         <div className="disc-head__text">
           <p className="disc-head__eyebrow"><BadgeCheck size={16} aria-hidden="true" />{fa ? "فقط ارائه‌دهندگان تأییدشده" : "Verified providers only"}</p>
@@ -384,7 +385,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
           </div>
         </div>
       </Sheet>
-    </div>
+    </div></DiscoveryPage>
   );
 }
 

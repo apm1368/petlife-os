@@ -9,6 +9,7 @@ import type { InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
 import { verificationStatusTone } from "./insurance-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 import { formatCount } from "@/lib/number/format-number";
 import { formatCurrency } from "@/lib/currency/format-currency";
 
@@ -52,7 +53,7 @@ export function InsuranceListView() {
   if (!products) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   return (
-    <div className="flex flex-col gap-6">
+    <DiscoveryPage kind="insurance">
       <header className="section-head">
         <div>
           <h1>{t("list.title")}</h1>
@@ -105,6 +106,6 @@ export function InsuranceListView() {
           ))}
         </ul>
       )}
-    </div>
+    </DiscoveryPage>
   );
 }
