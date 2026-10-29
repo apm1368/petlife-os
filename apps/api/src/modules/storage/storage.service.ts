@@ -61,7 +61,16 @@ export class StorageService {
   constructor(@Inject(STORAGE_DRIVER) private readonly driver: StorageDriver) {}
 
   async createPetPhotoUploadTarget(petId: string, contentType: string): Promise<UploadTarget> {
-    const extension = contentType === "image/png" ? "png" : "jpg";
+    // Pet photos are public profile media. Keep the object suffix aligned with
+    // the validated MIME type so WebP uploads do not become misleading `.jpg`
+    // objects (some object stores/CDNs use the suffix in downstream tooling).
+    const extensionByContentType: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    };
+    const extension = extensionByContentType[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     const key = `pets/${petId}/${randomUUID()}.${extension}`;
     return this.driver.createUploadTarget(key, contentType);
   }
