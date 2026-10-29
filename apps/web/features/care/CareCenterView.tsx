@@ -14,6 +14,7 @@ import { DateField } from "@/features/shared/date-picker/DateField";
 import { ApiError } from "@/lib/api/client";
 import { isPlanError, PlanRequiredNote } from "@/features/subscription/PlanRequiredNote";
 import { TimeSelect } from "@/features/shared/date-picker/TimeSelect";
+import { HealthCareFrame } from "@/features/health/HealthCareFrame";
 
 const kinds = CARE_KINDS;
 const repeat: Record<string, [string, string]> = { ONCE:["یک‌بار","Once"], DAILY:["روزانه","Daily"], WEEKLY:["هفتگی","Weekly"], MONTHLY:["ماهانه","Monthly"], YEARLY:["سالانه","Yearly"], CUSTOM:["فاصله دلخواه (روز)","Custom interval (days)"] };
@@ -54,7 +55,7 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
   if (itemId) {
     const item = items[0]!;
     const open = !["COMPLETED","CANCELLED"].includes(item.state);
-    return <div className="flex flex-col gap-6">
+    return <HealthCareFrame><div className="flex flex-col gap-6">
       <header className="section-head"><div><h1>{careTitle(item, locale)}</h1><p>{petName} · {states[item.state]?.[ix] ?? item.state}</p></div><Link className="btn-quiet" href={`/${locale}/pets/${petId}/care`}>{fa ? "همهٔ مراقبت‌ها" : "All care"}</Link></header>
       {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
       {form ? <ReminderForm petId={petId} initial={form === "new" ? undefined : form} onClose={() => setForm(null)} onSaved={async () => { setForm(null); await load(); }} /> : null}
@@ -83,14 +84,14 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
           </section>
         </aside> : null}
       </div>
-    </div>;
+    </div></HealthCareFrame>;
   }
 
   const sections = filter === "ALL"
     ? AGENDA.map(state => ({ state, rows: items.filter(i => i.state === state).sort(state === "COMPLETED" ? byLatest : bySoonest).slice(0, state === "COMPLETED" ? RECENT_COMPLETED : undefined) })).filter(s => s.rows.length)
     : [{ state: filter, rows: items.filter(item => filter === "CUSTOM" ? item.type === "CUSTOM" : item.state === filter) }].filter(s => s.rows.length);
 
-  return <div className="flex flex-col gap-6">
+  return <HealthCareFrame><div className="flex flex-col gap-6">
     <header className="section-head"><div><h1>{fa ? "مرکز مراقبت" : "Care center"}</h1><p>{fa ? `یادآورها و پیگیری‌های ${petName}؛ زمان‌ها به وقت تهران` : `${petName}'s reminders and follow-ups; times shown in Tehran time`}</p></div><div className="flex flex-wrap items-center gap-2"><Link className="btn-quiet" href={`/${locale}/pets/${petId}/care/calendar`}>{fa ? "تقویم" : "Calendar"}</Link><Link className="btn-quiet" href={`/${locale}/pets/${petId}/care-sheet`}>{fa ? "برگه مراقبت برای پرستار" : "Care sheet for a sitter"}</Link><Link className="btn-quiet" href={`/${locale}/pets/${petId}?view=travel`}>{fa ? "آمادگی سفر" : "Travel readiness"}</Link>{canEdit ? <Button onClick={() => setForm("new")}>{fa ? "یادآور جدید" : "Create reminder"}</Button> : null}</div></header>
     <nav aria-label={fa ? "فیلتر مراقبت" : "Care filters"} className="care-filters">{[["ALL", ["همه", "All"] as [string, string]] as const, ...Object.entries(states)].map(([key, label]) => <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>{label[ix]}<span className="care-filters__count">{formatCount(count(key), locale)}</span></button>)}</nav>
     {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
@@ -103,7 +104,7 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
     ))}
     <Link className="underline" href={`/${locale}/pets/${petId}/care/suggestions`}>{suggestionsT("title")}</Link>
     <details className="border-t border-border-subtle pt-5"><summary className="cursor-pointer text-section-title">{fa ? "دستورالعمل مراقبت روزمره" : "Daily care instructions"}</summary><div className="mt-5"><CareProfileView petId={petId}/></div></details>
-  </div>;
+  </div></HealthCareFrame>;
 }
 
 type RowProps = { item: CareReminder; petId: string; locale: string; fa: boolean; ix: number; petName: string; canEdit: boolean; busy: boolean; format: (d: string) => string; onRun: (id: string, action: string, at?: string) => void; onEdit: (item: CareReminder) => void };

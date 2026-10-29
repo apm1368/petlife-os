@@ -1,0 +1,9 @@
+.frame { display:flex; width:min(100%,1180px); margin-inline:auto; flex-direction:column; gap:clamp(28px,4vw,48px); }
+.frame :global(.section-head) { position:relative; padding-block-end:28px; }
+.frame :global(.section-head)::after { position:absolute; inset-inline-start:0; bottom:-1px; width:72px; height:2px; background:var(--brand-natural); content:""; }
+.frame :global(.health-overview__grid) { margin-top:0; }
+.frame :global(.health-overview__aside) { border-inline-start:1px solid var(--border-subtle); padding-inline-start:clamp(20px,3vw,40px); }
+.frame :global(.care-rows), .frame :global(.cal-agenda-row) { border-color:var(--border-subtle); }
+.frame :global(.calendar-toolbar) { border-block:1px solid var(--border-subtle); padding-block:16px; }
+@media(max-width:1099px){.frame :global(.health-overview__aside){border-inline-start:0;padding-inline-start:0;border-top:1px solid var(--border-subtle);padding-top:28px}}
+@media(max-width:640px){.frame{gap:28px}.frame :global(.section-head){padding-block-end:20px}.frame :global(.calendar-toolbar){padding-block:12px}}
