@@ -11,6 +11,7 @@ import { healthAdvancedService } from "@/services/health-advanced.service";
 import { useStatusText } from "@/lib/status/use-status-text";
 import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
 import { formatCount } from "@/lib/number/format-number";
+import { HealthCareFrame } from "./HealthCareFrame";
 
 const copy = {
   fa: { title: "سلامت", subtitle: "یک نمای کامل از سابقه پزشکی، وضعیت فعلی و مراقبت‌های بعدی", attention: "نیازمند توجه", complete: "اطلاعات اصلی سلامت تکمیل است", current: "وضعیت فعلی", records: "پرونده پزشکی", care: "مراقبت و پیگیری", allergy: "آلرژی‌ها", condition: "بیماری‌ها", medication: "داروها", vaccination: "واکسیناسیون", active: "داروی فعال", none: "بدون داروی فعال", upcoming: "مراقبت پیش رو", overdue: "عقب‌افتاده", openPlan: "اقدام درمانی باز", recentVisits: "ویزیت‌های اخیر", recentDocuments: "اسناد اخیر", noVisit: "هنوز ویزیتی ثبت نشده", noDocument: "هنوز سندی ثبت نشده", timeline: "خط زمانی سلامت", documents: "اسناد پزشکی", labs: "آزمایش‌ها", imaging: "تصویربرداری", referrals: "ارجاع‌ها", dental: "دندان‌پزشکی", nutrition: "تغذیه", rehab: "توان‌بخشی", observations: "مشاهدات صاحب حیوان", visits: "ویزیت‌های بالینی", open: "مشاهده" },
@@ -39,7 +40,7 @@ export function HealthOverviewView({ petId }: { petId: string }) {
   const careOverdue = overview.overdueCare.length + care.filter((i) => i.state === "OVERDUE").length;
   const attention = summary.primaryAttention;
   const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
-  return <div className="health-overview">
+  return <HealthCareFrame><div className="health-overview">
     <header className="section-head">
       <div><h1>{c.title}</h1><p>{c.subtitle}</p></div>
       <Link className="btn-quiet" href={`${base}/share`}>{locale === "fa" ? "اشتراک با دامپزشک" : "Share with vet"}</Link>
@@ -73,7 +74,7 @@ export function HealthOverviewView({ petId }: { petId: string }) {
         <section aria-labelledby="health-docs"><h2 id="health-docs" className="section-title">{c.recentDocuments}</h2>{overview.recentDocuments.length ? <div className="row-list">{overview.recentDocuments.slice(0,3).map(d => <Link key={d.id} href={`${base}/documents/${d.id}`} className="row-list__item"><span>{d.title}</span><Forward size={16} aria-hidden="true" /></Link>)}</div> : <p className="empty-line">{c.noDocument}</p>}</section>
       </aside>
     </div>
-  </div>;
+  </div></HealthCareFrame>;
 }
 
 function Row({ href, label, detail, children }: { href: string; label: string; detail?: string | null; children: ReactNode }) { return <Link href={href} className="row-list__item"><span className="flex min-w-0 flex-col gap-0.5"><span>{label}</span>{detail ? <span className="health-overview__names">{detail}</span> : null}</span>{children}</Link>; }
