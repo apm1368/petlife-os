@@ -8,6 +8,7 @@ import { UserFacingSupportCaseStatus, type SupportCaseUserDetailDto } from "@pet
 import { supportService } from "@/services/support.service";
 import { supportStatusTone } from "./support-status-tone";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { SupportFrame } from "./SupportFrame";
 
 function formatDate(iso: string, locale: string) {
   return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
@@ -89,17 +90,18 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
   const canReopen = data.status === "RESOLVED" || data.status === "CLOSED";
 
   return (
-    <div className="flex flex-col gap-4">
+    <SupportFrame>
+    <div className="support-workspace support-workspace--detail flex flex-col gap-4">
       <Button variant="ghost" size="sm" onClick={() => router.push(`/${locale}/support/tickets`)}>
         {t("detail.backToList")}
       </Button>
 
-      <div className="flex items-center justify-between gap-3">
+      <header className="flex items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{t("detail.caseNumber", { number: data.caseNumber })}</h1>
         <StatusLabel tone={supportStatusTone(data.status)}>{t(`status.${data.status}`)}</StatusLabel>
-      </div>
+      </header>
 
-      <ol className="flex items-center gap-2" aria-label={t("detail.progress")}>
+      <ol className="support-progress flex items-center gap-2" aria-label={t("detail.progress")}>
         {STEPS.map((step, index) => (
           <li key={step} className="flex flex-1 items-center gap-2">
             <span
@@ -112,16 +114,16 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
       </ol>
       <p className="text-metadata text-text-secondary">{t(`status.${data.status}`)}</p>
 
-      <ContextSurface className="flex flex-col gap-1">
+      <ContextSurface className="support-case-summary flex flex-col gap-1">
         <span className="text-body font-medium text-text-primary">{data.subject}</span>
         <span className="text-body text-text-secondary">{data.description}</span>
       </ContextSurface>
 
-      <ContextSurface className="flex flex-col gap-2">
+      <ContextSurface className="support-thread flex flex-col gap-2">
         <span className="text-section-title text-text-primary">{t("detail.messages")}</span>
         {data.messages.length === 0 ? <p className="text-metadata text-text-secondary">{t("detail.noMessages")}</p> : null}
         {data.messages.map((m) => (
-          <div key={m.id} className="flex flex-col gap-0.5 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">
+          <div key={m.id} className="support-message flex flex-col gap-0.5 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">
             <span className="text-metadata text-text-secondary">
               {m.authorType === "USER" ? t("detail.you") : t("detail.support")} · {formatDate(m.createdAt, locale)}
             </span>
@@ -130,7 +132,7 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
         ))}
 
         {canReply ? (
-          <div className="flex flex-col gap-2">
+          <div className="support-composer flex flex-col gap-2">
             {sendError ? (
               <p role="alert" className="text-metadata text-state-urgent">
                 {sendError}
@@ -156,5 +158,6 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
         ) : null}
       </ContextSurface>
     </div>
+    </SupportFrame>
   );
 }
