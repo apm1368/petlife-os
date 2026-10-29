@@ -32,7 +32,7 @@ describe("Approved park landing", () => {
     }
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(parkCopy[locale].title);
     expect(screen.getByRole("img", { name: parkCopy[locale].imageAlt }).getAttribute("src")).toBe(
-      locale === "en" ? "/images/landing/tehran-park-en.webp" : "/images/landing/tehran-park.webp",
+      "/images/landing/tehran-park.webp",
     );
   });
 
