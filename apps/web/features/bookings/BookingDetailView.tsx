@@ -17,6 +17,7 @@ import { bookingStatusLabel, bookingStatusTone, paymentModeLabel, TIMELINE_ACTOR
 import { errorMessage } from "@/features/booking-flow/BookingFlowView";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { BackLink } from "@/features/shared/BackLink";
+import { BookingFrame } from "./BookingFrame";
 
 const CANCELLABLE = new Set(["PENDING_CONFIRMATION", "REQUESTED", "AWAITING_PAYMENT", "CONFIRMED"]);
 const RECURRING_CATEGORIES = new Set(["WALKING", "TRAINING", "GROOMING"]);
@@ -116,6 +117,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
   const rebookHref = `/${locale}/providers/${booking.providerOrganizationId}/book?serviceId=${booking.providerServiceId}${booking.variantId ? `&variantId=${booking.variantId}` : ""}`;
 
   return (
+    <BookingFrame>
     <div className="mx-auto flex max-w-3xl flex-col gap-5">
       {created ? (
         <ContextSurface className="border-brand-mint">
@@ -244,6 +246,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         </div>
       </Dialog>
     </div>
+    </BookingFrame>
   );
 }
 
