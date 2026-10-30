@@ -9,6 +9,7 @@ import type { AdminSellerFinanceSummaryDto, SellerAdjustmentDto, SellerSettlemen
 import { adminFinanceService } from "@/services/admin-finance.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { settlementTone } from "@/features/seller/settlement-tone";
+import { DateField } from "@/features/shared/date-picker/DateField";
 
 /**
  * Admin drill-in for one seller (spec: "inspect balance/settlement,
@@ -96,8 +97,8 @@ export function AdminSellerFinanceDetailView({ sellerId }: { sellerId: string })
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-section-title text-text-primary">{t("calculate.title")}</span>
         <div className="flex flex-wrap items-end gap-2">
-          <Input type="date" label={t("calculate.periodStart")} value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
-          <Input type="date" label={t("calculate.periodEnd")} value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
+          <DateField label={t("calculate.periodStart")} value={periodStart} onChange={setPeriodStart} />
+          <DateField label={t("calculate.periodEnd")} value={periodEnd} onChange={setPeriodEnd} />
           <Button disabled={!periodStart.trim()} onClick={calculate}>{t("calculate.submit")}</Button>
         </div>
         {calculateError ? <span className="text-metadata text-state-urgent">{calculateError}</span> : null}

@@ -5,7 +5,7 @@ import { householdsService } from "@/services/households.service";
 import type { HouseholdCollaborationDto } from "@/services/account.service";
 import { HouseholdCenterView } from "./HouseholdCenterView";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), useSearchParams: () => new URLSearchParams() }));
 let currentUserId = "u-owner";
 vi.mock("@/stores/session-store", () => ({ useSessionStore: (selector: (s: { user: { id: string } }) => unknown) => selector({ user: { id: currentUserId } }) }));
 vi.mock("@/services/households.service", () => ({

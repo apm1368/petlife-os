@@ -49,6 +49,7 @@ const NAV_ITEMS: { href: string; labelKey: string; permission?: AdminPermissionN
   { href: "/content/placements", labelKey: "nav.contentPlacements", permission: "content.view" },
   { href: "/subscriptions", labelKey: "nav.subscriptions", permission: "subscription.view" },
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
+  { href: "/access", labelKey: "nav.access", permission: "access.view" },
   { href: "/settings", labelKey: "nav.settings", permission: "settings.view" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];
@@ -63,7 +64,7 @@ const NAV_GROUPS: { key: string; hrefs: string[] }[] = [
   { key: "network", hrefs: ["/verification", "/providers", "/services", "/sellers", "/commerce", "/travel", "/insurance", "/places"] },
   { key: "finance", hrefs: ["/transactions", "/seller-finance", "/reconciliation", "/subscriptions"] },
   { key: "content", hrefs: ["/content", "/content/new", "/content/categories", "/content/tags", "/content/media", "/content/placements"] },
-  { key: "system", hrefs: ["/settings", "/audit"] },
+  { key: "system", hrefs: ["/access", "/settings", "/audit"] },
 ];
 
 const GROUP_ICONS = { work: ClipboardList, trust: Users, network: ShoppingBag, finance: Receipt, content: FileText, system: SlidersHorizontal };

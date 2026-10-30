@@ -7,6 +7,7 @@ import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skele
 import { SupportCaseCategory, type AdminPriority, type SupportCaseStatus, type SupportCaseSummaryDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
+import { DateField } from "@/features/shared/date-picker/DateField";
 
 const STATUSES: SupportCaseStatus[] = ["OPEN", "IN_PROGRESS", "WAITING_ON_USER", "WAITING_ON_INTERNAL", "RESOLVED", "CLOSED"] as SupportCaseStatus[];
 
@@ -133,8 +134,8 @@ export function AdminSupportQueueView() {
         <Button size="sm" variant="secondary" onClick={() => void load()}>
           {tCommon("search")}
         </Button>
-        <Input type="date" label={t("filter.createdFrom")} value={createdFrom} onChange={(e) => setCreatedFrom(e.target.value)} />
-        <Input type="date" label={t("filter.createdTo")} value={createdTo} onChange={(e) => setCreatedTo(e.target.value)} />
+        <DateField label={t("filter.createdFrom")} value={createdFrom} onChange={setCreatedFrom} />
+        <DateField label={t("filter.createdTo")} value={createdTo} onChange={setCreatedTo} />
       </div>
 
       {error ? <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} /> : null}

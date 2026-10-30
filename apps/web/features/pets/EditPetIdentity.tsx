@@ -13,7 +13,7 @@ const COPY = {
     choose: "انتخاب عکس",
     replace: "تغییر عکس",
     remove: "حذف عکس",
-    photoHint: "JPG یا PNG، حداکثر ۱۰ مگابایت.",
+    photoHint: "JPG، PNG یا WebP، حداکثر ۱۰ مگابایت.",
     tooBig: "حجم عکس بیشتر از ۱۰ مگابایت است.",
     name: "نام",
     sex: "جنسیت",
@@ -37,7 +37,7 @@ const COPY = {
     choose: "Choose a photo",
     replace: "Replace photo",
     remove: "Remove photo",
-    photoHint: "JPG or PNG, up to 10 MB.",
+    photoHint: "JPG, PNG or WebP, up to 10 MB.",
     tooBig: "The photo is larger than 10 MB.",
     name: "Name",
     sex: "Sex",
@@ -103,7 +103,8 @@ export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDt
       });
       if (photo) {
         try {
-          const target = await petsService.createPhotoUploadUrl(pet.id, photo.type === "image/png" ? "image/png" : "image/jpeg");
+          const contentType = photo.type === "image/png" || photo.type === "image/webp" ? photo.type : "image/jpeg";
+          const target = await petsService.createPhotoUploadUrl(pet.id, contentType);
           const put = await fetch(target.uploadUrl, { method: "PUT", body: photo, headers: target.headers });
           if (!put.ok) throw new Error(String(put.status));
           updated = await petsService.update(pet.id, { photoUrl: target.publicUrl });
@@ -132,7 +133,7 @@ export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDt
             {/* eslint-disable-next-line @next/next/no-img-element -- a local blob: preview of the chosen file, which next/image cannot load */}
             <span className="add-pet-photo__preview">{preview && !removePhoto ? <img src={preview} alt="" /> : name ? <Avatar name={name} size="lg" /> : <Camera size={26} aria-hidden="true" />}</span>
             <div className="add-pet-photo__actions">
-              <input ref={fileRef} type="file" accept="image/jpeg,image/png" hidden onChange={(e) => {
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => {
                 const file = e.target.files?.[0];
                 e.target.value = "";
                 if (!file) return;

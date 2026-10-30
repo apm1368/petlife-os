@@ -31,6 +31,12 @@ export interface NotificationTemplateVariant {
 type TemplateParams = Record<string, string | number>;
 
 const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVariant>>> = {
+  /** A staff-authored message still uses the normal notification pipeline: it is auditable,
+   * honours the recipient's channel preferences and never bypasses the configured SMS provider. */
+  "admin.message": {
+    fa: { title: "{{title}}", body: "{{body}}", smsBody: "{{smsBody}}" },
+    en: { title: "{{title}}", body: "{{body}}", smsBody: "{{smsBody}}" },
+  },
   "booking.confirmed": {
     fa: { title: "نوبت شما تأیید شد", body: "نوبت شما تأیید شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "نوبت شما در پت‌لایف تأیید شد." },
     en: { title: "Your booking is confirmed", body: "Your booking is confirmed. See the app for details.", smsBody: "Your PET LIFE OS booking is confirmed." },

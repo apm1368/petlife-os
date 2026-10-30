@@ -7,6 +7,7 @@ import { MarketplaceSettlementImportSource } from "@petlife/types";
 import type { MarketplaceSettlementReconciliationResultDto } from "@petlife/types";
 import { adminFinanceService } from "@/services/admin-finance.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { DateField } from "@/features/shared/date-picker/DateField";
 
 function reconciliationTone(status: string) {
   if (status === "MATCHED") return "success" as const;
@@ -98,8 +99,8 @@ export function AdminMarketplaceReconciliationView() {
         <span className="text-section-title text-text-primary">{t("import.title")}</span>
         <div className="flex flex-wrap items-end gap-2">
           <Input label={t("import.channelAccountId")} value={channelAccountId} onChange={(e) => setChannelAccountId(e.target.value)} className="min-w-[220px]" />
-          <Input type="date" label={t("import.periodStart")} value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
-          <Input type="date" label={t("import.periodEnd")} value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
+          <DateField label={t("import.periodStart")} value={periodStart} onChange={setPeriodStart} />
+          <DateField label={t("import.periodEnd")} value={periodEnd} onChange={setPeriodEnd} />
           <Select label={t("import.currency")} value={currency} onChange={(e) => setCurrency(e.target.value)} options={[{ value: "IRR", label: "IRR" }]} />
         </div>
         <label className="flex flex-col gap-1.5">

@@ -53,7 +53,7 @@ const COPY = {
     choosePhoto: "انتخاب عکس",
     replacePhoto: "تغییر عکس",
     removePhoto: "حذف عکس",
-    photoHint: "JPG یا PNG، حداکثر ۱۰ مگابایت. عکس روی پروفایل و کارت حیوان دیده می‌شود.",
+    photoHint: "JPG، PNG یا WebP، حداکثر ۱۰ مگابایت. عکس روی پروفایل و کارت حیوان دیده می‌شود.",
     photoTooBig: "حجم عکس بیشتر از ۱۰ مگابایت است.",
     sex: "جنسیت",
     sexes: { MALE: "نر", FEMALE: "ماده", UNKNOWN: "نمی‌دانم" },
@@ -98,7 +98,7 @@ const COPY = {
     choosePhoto: "Choose a photo",
     replacePhoto: "Replace photo",
     removePhoto: "Remove photo",
-    photoHint: "JPG or PNG, up to 10 MB. Shown on the pet's profile and card.",
+    photoHint: "JPG, PNG or WebP, up to 10 MB. Shown on the pet's profile and card.",
     photoTooBig: "The photo is larger than 10 MB.",
     sex: "Sex",
     sexes: { MALE: "Male", FEMALE: "Female", UNKNOWN: "Not sure" },
@@ -228,7 +228,8 @@ export function AddPetView() {
       let saved = pet;
       if (photo) {
         try {
-          const target = await petsService.createPhotoUploadUrl(pet.id, photo.type === "image/png" ? "image/png" : "image/jpeg");
+          const contentType = photo.type === "image/png" || photo.type === "image/webp" ? photo.type : "image/jpeg";
+          const target = await petsService.createPhotoUploadUrl(pet.id, contentType);
           const put = await fetch(target.uploadUrl, { method: "PUT", body: photo, headers: target.headers });
           if (!put.ok) throw new Error(String(put.status));
           saved = await petsService.update(pet.id, { photoUrl: target.publicUrl });
@@ -288,7 +289,7 @@ export function AddPetView() {
                     {photoPreview ? <img src={photoPreview} alt="" /> : <Camera size={26} aria-hidden="true" />}
                   </span>
                   <div className="add-pet-photo__actions">
-                    <input ref={fileRef} type="file" accept="image/jpeg,image/png" hidden onChange={(e) => { choosePhoto(e.target.files?.[0]); e.target.value = ""; }} />
+                    <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { choosePhoto(e.target.files?.[0]); e.target.value = ""; }} />
                     <Button variant="secondary" onClick={() => fileRef.current?.click()}>{photo ? c.replacePhoto : c.choosePhoto}</Button>
                     {photo ? <Button variant="ghost" onClick={() => { setPhoto(null); setPhotoPreview(null); }}>{c.removePhoto}</Button> : null}
                   </div>

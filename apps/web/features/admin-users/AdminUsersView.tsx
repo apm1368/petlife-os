@@ -65,23 +65,7 @@ function Directory({ id }: { id?: string }) {
     </ContextSurface>}
     {!current ? <p role="status">{t("loading")}</p> : current.error ? <div><p role="alert">{t(current.error)}</p>{current.error === "failed" && <Button onClick={() => setRetry(value => value + 1)}>{t("retry")}</Button>}</div> : <>
       {!id && <p role="status">{t("total", { count: number(current.total) })}</p>}
-      {current.rows.length === 0 ? <p>{t("empty")}</p> : <ul className={`grid min-w-0 gap-4 ${id ? "" : "xl:grid-cols-2"}`}>
-        {current.rows.map(user => <li key={user.id} className="min-w-0"><ContextSurface className="min-w-0 space-y-4 break-words">
-          <div><h2 className="text-section-title">{user.displayName || t("unnamed")}</h2><p>{statusName(user.accountStatus)}</p></div>
-          <dl className="grid gap-3 sm:grid-cols-2">
-            <div><dt>{t("email")}</dt><dd><bdi dir="ltr">{user.emailMasked || t("notRecorded")}</bdi></dd></div>
-            <div><dt>{t("phone")}</dt><dd><bdi dir="ltr">{user.phoneMasked || t("notRecorded")}</bdi></dd></div>
-            <div><dt>{t("created")}</dt><dd>{date(user.createdAt)}</dd></div>
-            <div><dt>{t("lastActive")}</dt><dd>{date(user.lastActiveAt)}</dd></div>
-          </dl>
-          <h3 className="font-medium">{t("relationships")}</h3>
-          {user.roles.length ? <ul className="space-y-2">{user.roles.map((role, index) => <li key={`${role.kind}-${role.business?.id ?? index}`} className="rounded-xl border border-current/20 p-3">
-            <p>{t(`kinds.${role.kind}`)} · {roleName(role.role)}</p>
-            {role.business && <><p>{t("business", { name: role.business.name })}</p><p className="text-sm">{t("verification", { status: statusName(role.business.verificationStatus) })}</p></>}
-          </li>)}</ul> : <p>{t("noRoles")}</p>}
-          {!id && <Link className="underline" href={`/${locale}/admin/users/${encodeURIComponent(user.id)}`}>{t("detail")}</Link>}
-        </ContextSurface></li>)}
-      </ul>}
+      {current.rows.length === 0 ? <p>{t("empty")}</p> : id ? <ContextSurface className="min-w-0 space-y-4 break-words">{current.rows.map(user => <div key={user.id}><h2 className="text-section-title">{user.displayName || t("unnamed")}</h2><p>{statusName(user.accountStatus)}</p><dl className="mt-4 grid gap-3 sm:grid-cols-2"><div><dt>{t("email")}</dt><dd><bdi dir="ltr">{user.emailMasked || t("notRecorded")}</bdi></dd></div><div><dt>{t("phone")}</dt><dd><bdi dir="ltr">{user.phoneMasked || t("notRecorded")}</bdi></dd></div><div><dt>{t("created")}</dt><dd>{date(user.createdAt)}</dd></div><div><dt>{t("lastActive")}</dt><dd>{date(user.lastActiveAt)}</dd></div></dl></div>)}</ContextSurface> : <ContextSurface className="overflow-x-auto"><table className="w-full min-w-[56rem] text-sm"><thead><tr className="border-b text-start text-text-secondary"><th className="p-3 font-medium">{t("title")}</th><th className="p-3 font-medium">{t("email")}</th><th className="p-3 font-medium">{t("phone")}</th><th className="p-3 font-medium">{t("relationships")}</th><th className="p-3 font-medium">{t("lastActive")}</th><th className="p-3 font-medium">{t("detail")}</th></tr></thead><tbody>{current.rows.map(user => <tr key={user.id} className="border-b last:border-0 align-top"><td className="p-3"><p className="font-medium">{user.displayName || t("unnamed")}</p><p>{statusName(user.accountStatus)}</p></td><td className="p-3"><bdi dir="ltr">{user.emailMasked || t("notRecorded")}</bdi></td><td className="p-3"><bdi dir="ltr">{user.phoneMasked || t("notRecorded")}</bdi></td><td className="p-3">{user.roles.length ? <ul className="space-y-1">{user.roles.map((role,index)=><li key={`${role.kind}-${role.business?.id??index}`}><span>{t(`kinds.${role.kind}`)} · {roleName(role.role)}</span>{role.business?<span className="block text-text-secondary">{t("business",{name:role.business.name})}</span>:null}</li>)}</ul> : t("noRoles")}</td><td className="p-3">{date(user.lastActiveAt)}</td><td className="p-3"><Link className="underline" href={`/${locale}/admin/users/${encodeURIComponent(user.id)}`}>{t("detail")}</Link></td></tr>)}</tbody></table></ContextSurface>}
       {current.profile && <ProfileDetails profile={current.profile} />}
       {!id && <nav className="flex flex-wrap items-center gap-3" aria-label={t("pagination")}>
         <Button disabled={filter.page <= 1} onClick={() => setFilter(value => ({ ...value, page: value.page - 1 }))}>{t("previous")}</Button>
@@ -94,6 +78,7 @@ function Directory({ id }: { id?: string }) {
 
 function ProfileDetails({ profile }: { profile: AdminUserProfileDto }) {
   const t = useTranslations("adminUsers"), locale = useLocale();
+  const context = useAdminStore(s => s.context);
   const [tab, setTab] = useState<ProfileTab>("profile");
   const households = profile.households ?? [], businesses = profile.businesses ?? [], orders = profile.orders ?? [], requests = profile.requests ?? [], tickets = profile.tickets ?? [], reviews = profile.reviews ?? [], auditTrail = profile.auditTrail ?? [];
   const number = (value: number) => new Intl.NumberFormat(locale).format(value);
@@ -101,6 +86,7 @@ function ProfileDetails({ profile }: { profile: AdminUserProfileDto }) {
   const empty = <p>{t("sectionEmpty")}</p>;
   const reviewPage = (kind: string) => kind === "PRODUCT" ? "commerce/reviews" : kind === "TRAVEL" ? "travel/reviews" : "services/reviews";
   return <div className="space-y-4">
+    {context?.permissions.includes("support.manage") ? <ManualMessage userId={profile.user.id} fa={locale === "fa"} /> : null}
     <nav className="flex flex-wrap gap-2" aria-label={t("profileSections")}>{PROFILE_TABS.map(value => <Button key={value} variant={tab === value ? "primary" : "secondary"} aria-pressed={tab === value} onClick={() => setTab(value)}>{t(`tabs.${value}`)}</Button>)}</nav>
     <ContextSurface className="space-y-4">
       {tab === "profile" && <><h2 className="text-section-title">{t("tabs.profile")}</h2><p>{t("households", { count: number(profile.householdCount) })}</p><p>{t("pets", { count: number(profile.petCount) })}</p><Link className="underline" href={`/${locale}/admin/customers/${encodeURIComponent(profile.user.id)}`}>{t("customer360")}</Link></>}
@@ -113,4 +99,16 @@ function ProfileDetails({ profile }: { profile: AdminUserProfileDto }) {
       {tab === "audit" && <><h2 className="text-section-title">{t("tabs.audit")}</h2>{auditTrail.length ? <ul className="space-y-3">{auditTrail.map(entry => <li key={entry.id} className="rounded-xl border border-current/20 p-3"><p>{locale === "en" ? <bdi dir="ltr">{entry.action}</bdi> : t("auditEntry")}</p><p>{t("auditActor", { name: entry.adminUser.displayName, date: date(entry.createdAt) })}</p>{entry.reason && <p>{entry.reason}</p>}</li>)}</ul> : empty}</>}
     </ContextSurface>
   </div>;
+}
+
+function ManualMessage({ userId, fa }: { userId: string; fa: boolean }) {
+  const [title, setTitle] = useState(""), [message, setMessage] = useState(""), [attemptSms, setAttemptSms] = useState(true), [busy, setBusy] = useState(false), [result, setResult] = useState<"saved" | "failed" | null>(null);
+  async function send(event: React.FormEvent) {
+    event.preventDefault();
+    if (title.trim().length < 3 || message.trim().length < 3 || busy) return;
+    setBusy(true); setResult(null);
+    try { await adminUsersService.sendMessage(userId, { title: title.trim(), message: message.trim(), attemptSms }); setTitle(""); setMessage(""); setResult("saved"); }
+    catch { setResult("failed"); } finally { setBusy(false); }
+  }
+  return <ContextSurface><form className="space-y-3" onSubmit={send}><h2 className="text-section-title">{fa ? "ارسال پیام به کاربر" : "Send a message to this user"}</h2><p className="text-text-secondary">{fa ? "ارسال پیامک فقط در صورت فعال‌بودن فراز، رضایت کاربر و عبور از قواعد اعلان انجام می‌شود." : "SMS is attempted only when Faraz is live, the recipient allows it, and notification rules permit it."}</p><Input label={fa ? "عنوان" : "Title"} value={title} minLength={3} maxLength={120} required onChange={event => setTitle(event.target.value)} /><label className="flex flex-col gap-1 text-sm"><span className="text-text-secondary">{fa ? "متن پیام" : "Message"}</span><textarea className="min-h-28 rounded-md border border-border-strong bg-surface-elevated p-3" value={message} minLength={3} maxLength={700} required onChange={event => setMessage(event.target.value)} /></label><label className="flex items-center gap-2"><input type="checkbox" checked={attemptSms} onChange={event => setAttemptSms(event.target.checked)} />{fa ? "در صورت مجازبودن، پیامک هم ارسال شود" : "Also attempt SMS when permitted"}</label>{result === "saved" ? <p role="status">{fa ? "پیام ثبت شد." : "Message recorded."}</p> : null}{result === "failed" ? <p role="alert">{fa ? "ارسال پیام ناموفق بود." : "Message could not be sent."}</p> : null}<Button type="submit" disabled={busy || title.trim().length < 3 || message.trim().length < 3}>{busy ? (fa ? "در حال ارسال…" : "Sending…") : (fa ? "ارسال پیام" : "Send message")}</Button></form></ContextSurface>;
 }

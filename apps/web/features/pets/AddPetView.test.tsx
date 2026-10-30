@@ -19,7 +19,7 @@ describe("AddPetView", () => {
   it("offers the common household species, in Persian only on a Persian page", () => {
     renderWithIntl(<AddPetView />, "fa");
     for (const label of ["سگ", "گربه", "پرنده", "خرگوش", "ماهی", "خزنده", "سایر"]) expect(screen.getByRole("button", { name: new RegExp(label) })).toBeTruthy();
-    const ui = document.body.textContent!.replace(/JPG|PNG/g, "");
+    const ui = document.body.textContent!.replace(/JPG|PNG|WebP/g, "");
     expect(ui).not.toMatch(/[A-Za-z]/);
   });
 
