@@ -112,6 +112,29 @@ class ProductStatusDto extends ReasonDto {
   @IsIn([ProductStatus.ACTIVE, ProductStatus.INACTIVE, ProductStatus.ARCHIVED]) status!: ProductStatus;
 }
 
+/** Catalog identity only: seller offers own price and stock, never admin. */
+class CatalogProductInputDto {
+  @IsUUID() categoryId!: string;
+  @IsString() @Length(2, 180) title!: string;
+  @IsString() @Length(2, 180) slug!: string;
+  @IsString() @Length(2, 120) sku!: string;
+  @IsOptional() @IsString() @MaxLength(5000) description?: string;
+  @IsOptional() @IsString() @MaxLength(120) variantTitle?: string;
+  @IsOptional() @IsBoolean() supportsDog?: boolean;
+  @IsOptional() @IsBoolean() supportsCat?: boolean;
+  @IsOptional() @IsEnum(ProductStatus) status?: ProductStatus;
+}
+
+class UpdateCatalogProductDto {
+  @IsOptional() @IsUUID() categoryId?: string;
+  @IsOptional() @IsString() @Length(2, 180) title?: string;
+  @IsOptional() @IsString() @Length(2, 180) slug?: string;
+  @IsOptional() @IsString() @MaxLength(5000) description?: string;
+  @IsOptional() @IsBoolean() supportsDog?: boolean;
+  @IsOptional() @IsBoolean() supportsCat?: boolean;
+  @IsOptional() @IsEnum(ProductStatus) status?: ProductStatus;
+}
+
 class ReviewVisibilityDto extends ReasonDto {
   @IsBoolean() hidden!: boolean;
 }
@@ -174,6 +197,33 @@ export class AdminCommerceController {
   @RequireAdminPermission("commerce.view")
   listProducts(@Query() query: ProductQueryDto) {
     return this.commerce.listProducts(query);
+  }
+
+  @Get("product-categories")
+  @RequireAdminPermission("commerce.view")
+  listProductCategories() {
+    return this.commerce.listProductCategories();
+  }
+
+  @Post("products")
+  @RequireAdminPermission("commerce.manage")
+  createProduct(
+    @Body() dto: CatalogProductInputDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.commerce.createCatalogProduct(admin, dto, req.requestId);
+  }
+
+  @Patch("products/:id")
+  @RequireAdminPermission("commerce.manage")
+  updateProduct(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCatalogProductDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.commerce.updateCatalogProduct(admin, id, dto, req.requestId);
   }
 
   @Patch("products/:id/status")

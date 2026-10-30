@@ -489,6 +489,73 @@ export class AdminCommerceService {
     );
   }
 
+  /** Platform maintains catalog identity; seller offers remain the sole price/inventory owner. */
+  async listProductCategories() {
+    return this.prisma.productCategory.findMany({
+      where: { status: "ACTIVE" },
+      select: { id: true, name: true, slug: true },
+      orderBy: [{ name: "asc" }, { id: "asc" }],
+    });
+  }
+
+  async createCatalogProduct(
+    admin: ResolvedAdminContext,
+    input: {
+      categoryId: string; title: string; slug: string; sku: string; description?: string;
+      variantTitle?: string; supportsDog?: boolean; supportsCat?: boolean; status?: ProductStatus;
+    },
+    httpRequestId?: string,
+  ) {
+    const category = await this.prisma.productCategory.findFirst({
+      where: { id: input.categoryId, status: "ACTIVE" }, select: { id: true },
+    });
+    if (!category) throw new NotFoundApiException("Active product category", { categoryId: input.categoryId });
+    const duplicate = await this.prisma.product.findFirst({ where: { OR: [{ slug: input.slug.trim() }, { variants: { some: { sku: input.sku.trim() } } }] }, select: { id: true } });
+    if (duplicate) throw new ApiException("PRODUCT_IDENTITY_CONFLICT", "Product slug or SKU already exists.", HttpStatus.CONFLICT);
+    const row = await this.prisma.product.create({
+      data: {
+        categoryId: category.id, title: input.title.trim(), slug: input.slug.trim(),
+        description: input.description?.trim() || null,
+        supportsDog: input.supportsDog ?? true, supportsCat: input.supportsCat ?? true,
+        status: input.status ?? ProductStatus.INACTIVE,
+        variants: { create: { sku: input.sku.trim(), title: input.variantTitle?.trim() || null } },
+      },
+      select: { id: true, title: true, slug: true, status: true, categoryId: true },
+    });
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "product.created", entityType: "PRODUCT", entityId: row.id, afterSummary: { title: row.title, status: row.status, categoryId: row.categoryId }, requestId: httpRequestId });
+    return row;
+  }
+
+  async updateCatalogProduct(
+    admin: ResolvedAdminContext,
+    productId: string,
+    input: { categoryId?: string; title?: string; slug?: string; description?: string; supportsDog?: boolean; supportsCat?: boolean; status?: ProductStatus },
+    httpRequestId?: string,
+  ) {
+    const before = await this.prisma.product.findUnique({ where: { id: productId }, select: { id: true, categoryId: true, title: true, slug: true, description: true, supportsDog: true, supportsCat: true, status: true } });
+    if (!before) throw new NotFoundApiException("Product", { productId });
+    if (input.categoryId) {
+      const category = await this.prisma.productCategory.findFirst({ where: { id: input.categoryId, status: "ACTIVE" }, select: { id: true } });
+      if (!category) throw new NotFoundApiException("Active product category", { categoryId: input.categoryId });
+    }
+    if (input.slug && input.slug.trim() !== before.slug) {
+      const duplicate = await this.prisma.product.findUnique({ where: { slug: input.slug.trim() }, select: { id: true } });
+      if (duplicate) throw new ApiException("PRODUCT_SLUG_CONFLICT", "Product slug already exists.", HttpStatus.CONFLICT);
+    }
+    const data = {
+      ...(input.categoryId ? { categoryId: input.categoryId } : {}),
+      ...(input.title !== undefined ? { title: input.title.trim() } : {}),
+      ...(input.slug !== undefined ? { slug: input.slug.trim() } : {}),
+      ...(input.description !== undefined ? { description: input.description.trim() || null } : {}),
+      ...(input.supportsDog !== undefined ? { supportsDog: input.supportsDog } : {}),
+      ...(input.supportsCat !== undefined ? { supportsCat: input.supportsCat } : {}),
+      ...(input.status ? { status: input.status } : {}),
+    };
+    const row = await this.prisma.product.update({ where: { id: productId }, data, select: { id: true, title: true, slug: true, status: true, categoryId: true } });
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "product.updated", entityType: "PRODUCT", entityId: productId, beforeSummary: before, afterSummary: row, requestId: httpRequestId });
+    return row;
+  }
+
   async setProductStatus(
     admin: ResolvedAdminContext,
     productId: string,
