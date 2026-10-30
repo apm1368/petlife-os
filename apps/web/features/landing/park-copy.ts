@@ -50,10 +50,9 @@ export const parkCopy: Record<AppLocale, ParkCopy> = {
     processing: "برش و بازکدگذاری شده", licence: "مجوز و شرایط استفاده",
   },
   en: {
-    // Both locales intentionally render the exact owner-approved park image.
-    // Copy stays localized; a separately regenerated English scene must never
-    // drift in characters, animals, or composition.
-    imageSrc: "/images/landing/tehran-park.webp",
+    // This is the same owner-approved park composition as the Persian hero.
+    // Only pavilion labels are translated in-image for the English locale.
+    imageSrc: "/images/landing/tehran-park-en.webp",
     title: "A whole world for you and your pet",
     description: "Everything your pet needs, in one app",
     subline: "A healthier, happier life with your little companion",

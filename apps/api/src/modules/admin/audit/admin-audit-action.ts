@@ -9,6 +9,8 @@
  */
 export type AdminAuditAction =
   | "user.message_sent"
+  | "product.created"
+  | "product.updated"
   | "admin_user.created"
   | "admin_user.role_changed"
   | "admin_user.suspended"
