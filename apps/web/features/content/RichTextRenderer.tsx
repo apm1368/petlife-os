@@ -63,6 +63,8 @@ function RichTextBlockView({ block }: { block: RichTextBlock }) {
     case "image":
       return (
         <figure className="flex flex-col gap-1.5">
+          {/* Rich-text image URLs are authored CMS content and may be signed/private; do not route them through a static image-host allow-list. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           {block.url ? <img src={block.url} alt={block.alt} className="w-full rounded-md" /> : null}
           {block.caption ? <figcaption className="text-metadata text-text-secondary">{block.caption}</figcaption> : null}
         </figure>
