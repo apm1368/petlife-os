@@ -24,4 +24,12 @@ describe("AddNoteDto", () => {
       ]));
     },
   );
+
+  it("rejects an entity id that cannot be a UUID-backed aggregate", async () => {
+    const dto = input(InternalNoteEntityType.USER);
+    dto.entityId = "not-a-uuid";
+    expect(await validate(dto)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ property: "entityId" }),
+    ]));
+  });
 });

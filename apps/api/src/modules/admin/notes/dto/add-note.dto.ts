@@ -1,4 +1,4 @@
-import { IsEnum, IsIn, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsIn, IsNotEmpty, IsString, IsUUID } from "class-validator";
 import { InternalNoteEntityType } from "@prisma/client";
 
 /**
@@ -18,6 +18,7 @@ export class AddNoteDto {
   @IsIn(CUSTOMER_NOTE_ENTITY_TYPES)
   entityType!: InternalNoteEntityType;
 
+  @IsUUID("4")
   @IsString()
   @IsNotEmpty()
   entityId!: string;
