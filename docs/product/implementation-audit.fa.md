@@ -311,6 +311,7 @@
 - [x] قرارداد منبعی برای تمام controllerهای `/admin/*` افزوده شد تا session guard، admin guard و permission decorator از routeهای تازه حذف نشوند. `/admin/me` و dashboard تنها استثناهای توضیح‌داده‌شده‌اند؛ اولی حالت `isAdmin:false` برای کاربر معمولی دارد و دومی هر شمارش را در service با permission جداگانه gate می‌کند.
 - [x] `POST /admin/notes` از «هر ادمین فعال/هر entity type» به `customer.view` و فقط `USER/HOUSEHOLD/PET` محدود شد. case noteها باید از route تخصصی domain خود استفاده کنند.
 - [x] پیش از ثبت internal note، وجود aggregate هدف در همان transaction چک می‌شود؛ note، audit و domain event یتیم ساخته نمی‌شود.
+- [x] status پنل integration برای Payment/BNPL/Shipping/Marketplace fail-closed شد: credential تنها آن‌ها را `LIVE` نمی‌کند؛ تا adapter رسمی شبکه تکمیل نشود status `NOT_IMPLEMENTED` است و credential ناقص `NOT_CONFIGURED` می‌ماند.
 - [x] برای موارد بالا test منفی و مثبت اضافه شد؛ migration ندارد.
 
 #### باقی‌ماندهٔ فاز 1
