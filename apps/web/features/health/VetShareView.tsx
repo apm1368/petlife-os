@@ -15,7 +15,7 @@ const scopes:Record<string,[string,string]>={CONDITIONS:["بیماری‌های 
 export function VetShareView({petId}:{petId:string}) {
   const fa=useLocale()==="fa", ix=fa?0:1, base=`/pets/${petId}/vet-shares`;
   const [providers,setProviders]=useState<Provider[]|null>(null),[documents,setDocuments]=useState<MedicalDocumentDto[]>([]),[grants,setGrants]=useState<Grant[]>([]),[providerId,setProviderId]=useState(""),[chosen,setChosen]=useState<string[]>([]),[docIds,setDocIds]=useState<string[]>([]),[expiry,setExpiry]=useState(""),[preview,setPreview]=useState<Preview|null>(null),[error,setError]=useState<string|null>(null),[actionError,setActionError]=useState<string|null>(null),[busy,setBusy]=useState(false),[planError,setPlanError]=useState<ApiError|null>(null);
-  const load=useCallback(async()=>{setError(null);try{const[p,d,g]=await Promise.all([apiFetch<Provider[]>(`${base}/providers`),healthAdvancedService.listDocuments(petId),apiFetch<Grant[]>(base)]);setProviders(p);setDocuments(d);setGrants(g);}catch(e){setError(apiErrorText(e,undefined,fa?"اشتراک‌گذاری بارگیری نشد.":"Sharing could not load."));}},[base,petId]);
+  const load=useCallback(async()=>{setError(null);try{const[p,d,g]=await Promise.all([apiFetch<Provider[]>(`${base}/providers`),healthAdvancedService.listDocuments(petId),apiFetch<Grant[]>(base)]);setProviders(p);setDocuments(d);setGrants(g);}catch(e){setError(apiErrorText(e,undefined,fa?"اشتراک‌گذاری بارگیری نشد.":"Sharing could not load."));}},[base,fa,petId]);
   useEffect(()=>{void load();},[load]);
   const fmt=(d:string)=>new Intl.DateTimeFormat(fa?"fa-IR-u-ca-persian":"en-US",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Tehran"}).format(new Date(d));
   function invalidate(){setPreview(null);setActionError(null);}

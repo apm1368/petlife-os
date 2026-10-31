@@ -98,6 +98,8 @@ export function AdminContentMediaView() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {page.items.map((asset) => (
             <ContextSurface key={asset.id} className="flex flex-col gap-2">
+              {/* Assets are delivered by the configured storage driver, including short-lived signed URLs. They cannot be safely restricted to a static Next image host allow-list. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={asset.url} alt={asset.altText ?? ""} className="h-32 w-full rounded-md object-cover" />
               <Input label={t("altText")} defaultValue={asset.altText ?? ""} onBlur={(e) => setAltText(asset.id, e.target.value)} />
               <span className="text-metadata text-text-secondary">{asset.mimeType} · {Math.round(asset.fileSizeBytes / 1024)} KB</span>
