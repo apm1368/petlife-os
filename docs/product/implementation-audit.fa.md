@@ -305,7 +305,17 @@
 
 ### فاز 1 — ایمنی، قرارداد داده و قابلیت مشاهده
 
-1. ساخت matrix role × endpoint × tenant و تست‌های negative authorization برای routeهای حساس.
+#### پیشرفت ثبت‌شده در این PR
+
+- [x] lint وب بدون warning شد؛ تصویرهای CMS/signed-media به‌صورت آگاهانه و با rationale از optimizer با allow-list ثابت مستثنا هستند.
+- [x] قرارداد منبعی برای تمام controllerهای `/admin/*` افزوده شد تا session guard، admin guard و permission decorator از routeهای تازه حذف نشوند. `/admin/me` و dashboard تنها استثناهای توضیح‌داده‌شده‌اند؛ اولی حالت `isAdmin:false` برای کاربر معمولی دارد و دومی هر شمارش را در service با permission جداگانه gate می‌کند.
+- [x] `POST /admin/notes` از «هر ادمین فعال/هر entity type» به `customer.view` و فقط `USER/HOUSEHOLD/PET` محدود شد. case noteها باید از route تخصصی domain خود استفاده کنند.
+- [x] پیش از ثبت internal note، وجود aggregate هدف در همان transaction چک می‌شود؛ note، audit و domain event یتیم ساخته نمی‌شود.
+- [x] برای موارد بالا test منفی و مثبت اضافه شد؛ migration ندارد.
+
+#### باقی‌ماندهٔ فاز 1
+
+1. ساخت matrix کامل role × endpoint × tenant و تست‌های negative authorization برای routeهای حساس خارج از namespace ادمین (seller/provider/clinic/media).
 2. policy مشترک برای state machine، idempotency و domain event؛ inventory transitionهای پول/رزرو/اعتماد.
 3. media policy: مالک، scope، size/mime/virus scan، signed URL، lifecycle deletion و audit download.
 4. production readiness dashboard برای SMS/payment/storage/map با status صادقانه و alarmهای پایه.
