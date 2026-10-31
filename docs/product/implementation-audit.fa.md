@@ -5,13 +5,14 @@
 > مبنای کد: `origin/main` در کامیت `b8c57c098e1c8d47a652ccefee7b4c16d76ef96b`
 > شاخهٔ سند: `codex/phase-zero-implementation-audit`
 > مالک تصمیم‌های محصول/حقوقی: Product / Legal / Operations
-> اسناد مکمل: [تصمیم‌های باز](./open-decisions.fa.md)، `docs/release/external-adapter-status.md` و `docs/product/data-retention-decisions.md`
+> اسناد مکمل: [قرارداد مالی، پرداخت و تسویه](./finance-payment-settlement-spec.fa.md)، [تصمیم‌های باز](./open-decisions.fa.md)، `docs/release/external-adapter-status.md` و `docs/product/data-retention-decisions.md`
 
 ### اولویت منابع این ممیزی
 
 1. پرامپت مادرِ پیوست‌شده توسط مالک محصول (اجبارهای ایمنی، دامنه‌ها و ترتیب وابستگی).
-2. جلسهٔ مالی/فلوهای Manus که در ۲۰۲۶-۱۰-۳۱ خوانده شد؛ آن جلسه در انتهای دادهٔ قابل‌مشاهده به‌دلیل کمبود اعتبار ناتمام بود، بنابراین فقط تصمیم‌های صریح آن به‌عنوان ورودی استفاده شده و شکاف‌ها در سند تصمیم‌های باز آمده‌اند.
-3. کد `origin/main`، اسکیما، CI، health زنده و مستندات versioned مخزن.
+2. «مشخصات مالی، پرداخت و تسویه — نسخهٔ ۱.۱، ۳۰ اکتبر ۲۰۲۶»؛ تصمیم‌های صریح آن در [قرارداد مالی](./finance-payment-settlement-spec.fa.md) ثبت شده‌اند و بر جلسهٔ مالی/فلوهای Manus ناتمام اولویت دارند.
+3. جلسهٔ مالی/فلوهای Manus که در ۲۰۲۶-۱۰-۳۱ خوانده شد؛ فقط بخش‌های ناسازگارنبودن آن با سند مالی نسخه‌دار به‌عنوان زمینه استفاده شده‌اند.
+4. کد `origin/main`، اسکیما، CI، health زنده و مستندات versioned مخزن.
 
 هر جا این منابع با هم ناسازگارند، این سند به‌جای انتخاب پنهانی، مورد را به تصمیم باز تبدیل می‌کند.
 
@@ -47,7 +48,7 @@
 ### آنچه نباید آماده تلقی شود
 
 - هیچ evidence این ممیزی، فعال‌بودن واقعی درگاه پرداخت، نقشه/فاصله، ناوگان تاکسی، ارسال، بازارهای بیرونی، بیمه، اقامت، S3 یا Google OAuth را نشان نمی‌دهد.
-- «کیف پول عمومی کاربر»، گردش اعتبار قابل برداشت، حساب بانکی/شبا و فلو کامل کارت‌به‌کارت با آپلود فیش و بررسی ادمین، مدل دامنهٔ تأییدشده و کامل ندارند.
+- «کیف پول عمومی کاربر»، گردش اعتبار قابل برداشت، حساب بانکی/شبا و فلو کامل کارت‌به‌کارت با آپلود فیش و بررسی ادمین، اکنون قرارداد محصول نسخه‌دار دارند، اما مدل دامنه و اتصال production کامل ندارند.
 - عملیات اضطراری ۲۴/۷، واگذاری حیوان به همراه انتقال مالکیت، ویدئوی اشتراکی خصوصی، سفر خارجی با SLA انسانی، و تسویهٔ واقعی شرکا نباید بدون تکمیل برنامهٔ این سند عرضه شوند.
 - تصمیم حقوقی برای retention/delete/export داده هنوز صریحاً `DECISION_PENDING` است؛ حذف واقعی حساب عمداً اجرا نمی‌شود.
 
@@ -284,8 +285,8 @@
 | موضوع | تعارض/ریسک | تصمیم یا اقدام لازم |
 | --- | --- | --- |
 | آدرس | درخواست قبلی «اطلاعات آدرسی را هیچ جا نمی‌گیریم» با نیاز delivery، visit در محل و taxi ناسازگار است؛ schema `CustomerAddress` موجود است. | rule محصول را دقیق کنید: چه journeyهایی آدرس می‌گیرند، زمان نگهداری، mask/share و حذف. تا آن زمان expansion جمع‌آوری آدرس متوقف. |
-| کیف‌پول | تصمیم‌های مالی جریان wallet/combined payment را می‌خواهند، ولی wallet عمومی در schema تأیید نشد. | model پیشنهادی، currency/rounding، double-entry posting، limits، reversal، KYC/withdrawal، UI و migration جداگانه. |
-| کارت‌به‌کارت | نیاز محصول شامل کارت فعال ادمین، upload فیش و verification است؛ core commerce entity کامل برایش پیدا نشد. | immutable transfer receipt flow با virus scan، idempotency، review، expiry و audit طراحی/پیاده‌سازی شود؛ نه field پراکنده. |
+| کیف‌پول | قرارداد [مالی نسخهٔ ۱.۱](./finance-payment-settlement-spec.fa.md) جریان wallet/combined payment و withdrawal را تعیین کرده، ولی wallet عمومی در schema تأیید نشد. | model پیشنهادی، currency/rounding، double-entry posting، limits، reversal، verification، UI و migration جداگانه. |
+| کارت‌به‌کارت | قرارداد [مالی نسخهٔ ۱.۱](./finance-payment-settlement-spec.fa.md) کارت فعال، receipt، SLA و review را تعیین کرده؛ core commerce entity کامل هنوز پیدا نشد. | immutable transfer receipt flow با virus scan، idempotency، review، expiry و audit پیاده‌سازی شود؛ نه field پراکنده. |
 | پول واقعی | test سبز با gateway simulated است. | هیچ order مالی live بدون adapter رسمی، webhook verification، reconciliation و merchant readiness منتشر نشود. |
 | emergency | طراحی emergency با کد فعلی فراتر از `PetEmergencyInfo` است. | legal disclaimer، manual escalation، verified directory و failure states پیش از ادعای ۲۴/۷. |
 | حذف/retention | execution حذف حساب عمداً اجرا نمی‌شود. | تصمیم حقوقی شش‌گانه و worker audit-friendly پیش از فعال‌سازی. |
@@ -350,7 +351,7 @@
 
 1. catalog مرکزی، ۳ رسانه/alt/order و admin moderation را در contract واحد کامل کنید.
 2. multi-vendor cart rule، inventory reservation، order split، receipt/tax و fulfillment.
-3. کارت‌به‌کارت را صرفاً پس از design مالی مستقل، سپس active card management در admin ارائه کنید.
+3. کارت‌به‌کارت را طبق [قرارداد مالی مصوب](./finance-payment-settlement-spec.fa.md)، سپس active-card management در admin پیاده‌سازی کنید.
 
 ### فاز 7 — سفر، تاکسی و حمایت حیوانات
 

@@ -2,18 +2,18 @@
 
 > وضعیت: **ورودی اجباری Product / Legal / Finance / Operations**
 > تاریخ: ۲۰۲۶-۱۰-۳۱
-> مرتبط با: [ممیزی پیاده‌سازی](./implementation-audit.fa.md)
+> مرتبط با: [ممیزی پیاده‌سازی](./implementation-audit.fa.md) و [قرارداد مالی، پرداخت و تسویه](./finance-payment-settlement-spec.fa.md)
 
-این فهرست چیزی را به‌جای مالک محصول تصمیم نمی‌گیرد. هر مورد شامل اثر فنی آن است تا تیم نتواند با default پنهان یا UI ساختگی از کنارش عبور کند.
+این فهرست چیزی را به‌جای مالک محصول تصمیم نمی‌گیرد. هر مورد شامل اثر فنی آن است تا تیم نتواند با default پنهان یا UI ساختگی از کنارش عبور کند. تصمیم‌های مالیِ نسخه‌دار از این فهرست حذف نشده‌اند؛ وضعیت آن‌ها برای جلوگیری از تصمیم‌گیری دوباره به‌روز شده است.
 
 ## A. تصمیم‌های مسدودکنندهٔ انتشار دامنه
 
 | ID | تصمیم لازم | گزینه/ابهام دقیق | مالک پیشنهادی | اثر تا زمان تصمیم |
 | --- | --- | --- | --- | --- |
 | DEC-001 | policy آدرس | آیا هیچ آدرس دائمی نگیریم، یا فقط در checkout/visit/taxi و با چه retention/masking؟ | Product + Privacy/Legal | توسعهٔ جمع‌آوری/نمایش آدرس، map و delivery فراتر از مدل فعلی متوقف است. |
-| DEC-002 | پرداخت کارت‌به‌کارت | چه کارت‌هایی در admin فعال می‌شوند؟ owner، currency، expiry، receipt format، SLA review، failure/refund چگونه است؟ | Finance + Product + Security | نباید «پرداخت دستی» یا آپلود فیش بدون domain model و review state ساخته شود. |
-| DEC-003 | کیف‌پول و combined payment | آیا balance قابل‌خرج/برداشت داریم؟ owner حساب، limits، debt، top-up، reversal، KYC و unit پول چیست؟ | Finance + Product + Legal | wallet UI/credit/debt و combined payment blocked است. |
-| DEC-004 | multi-vendor checkout | یک checkout با چند فروشنده در unavailable package/partial fulfillment/cancel/refund چه می‌کند؟ | Commerce Product + Ops | order split/fulfillment policy باید از cart API و UI جدا نشود. |
+| DEC-002 | پرداخت کارت‌به‌کارت — **قرارداد محصول بسته** | registry کارت فعال، owner/currency/window، رسید نسخه‌دار خصوصی، SLA، rejection/resubmit و refund در [قرارداد مالی](./finance-payment-settlement-spec.fa.md) آمده است. | Finance + Security | implementation، scanner/media، RBAC و adapter/payout واقعی باقی است؛ آپلود فیش بدون domain model ممنوع است. |
+| DEC-003 | کیف‌پول و combined payment — **قرارداد محصول بسته** | top-up/refund/spend/withdrawal، entryهای برگشت‌پذیر، combined payment و review در [قرارداد مالی](./finance-payment-settlement-spec.fa.md) آمده است. | Finance + Legal | currency canonical، limits/KYC و event→posting map هنوز باید به ADR/قرارداد حقوقی تبدیل و پیاده‌سازی شوند. |
+| DEC-004 | multi-vendor checkout — **قرارداد محصول بسته** | package مستقل، یک پرداخت، partial cancel/refund، shipping و eligibility تسویه در [قرارداد مالی](./finance-payment-settlement-spec.fa.md) آمده است. | Commerce Product + Ops | باید با cart/order/fulfillment API، inventory reservation و E2E پیاده‌سازی شود. |
 | DEC-005 | تاکسی subsidy/debt | یارانه برای چه کاربر/منطقه/فصل/سقف است؟ بدهی چه زمانی ایجاد و چگونه وصول/بخشوده می‌شود؟ | Product + Finance + Ops | قیمت‌گذاری/تخفیف تاکسی یا status بدهی نباید hard-code شود. |
 | DEC-006 | provider calendar و rounding | zone زمانی، slot granularity، buffer، overbooking، no-show، گردکردن پول/زمان و waitlist؟ | Services Product + Ops | availability/rate engine کامل و SLA رزرو قابل انتشار نیست. |
 | DEC-007 | emergency duty of care | محدودهٔ جغرافیایی/زمانی، partner verified، disclaimer، escalation انسانی، مسئولیت و fallback چیست؟ | Medical/Ops + Legal + Product | عنوان/CTA «اورژانس ۲۴/۷» نباید live claim شود. |
