@@ -9,9 +9,10 @@ import { AddNoteDto } from "./dto/add-note.dto";
 
 /**
  * The generic internal-note entry point (Customer 360's USER-scoped notes,
- * and any other entity type not already covered by a domain-specific route
- * like /admin/support/:id/notes). It is customer-context work today, so an
- * active admin also needs customer.view; auditability is not authorization.
+ * for USER/HOUSEHOLD/PET. Case notes such as /admin/support/:id/notes have
+ * their domain-specific routes and stronger action permissions. It is
+ * customer-context work today, so an active admin also needs customer.view;
+ * auditability is not authorization.
  */
 @Controller("admin/notes")
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
