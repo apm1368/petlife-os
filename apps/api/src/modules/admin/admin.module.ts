@@ -7,7 +7,10 @@ import { AdminCommerceService } from "./commerce/admin-commerce.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { Module } from "@nestjs/common";
 import { SupportOpsService } from "./support/support-ops.service";
-import { AdminSupportOpsController, UserSupportAttachmentsController } from "./support/support-ops.controller";
+import {
+  AdminSupportOpsController,
+  UserSupportAttachmentsController,
+} from "./support/support-ops.controller";
 import { DisputeOutcomeService } from "./dispute/dispute-outcome.service";
 import { FinanceReconciliationService } from "./finance/finance-reconciliation.service";
 import { FinanceReconciliationWorker } from "./finance/finance-reconciliation.worker";
@@ -25,6 +28,8 @@ import { AdminAccessControlService } from "./access/admin-access-control.service
 import { AdminAccessControlController } from "./access/admin-access-control.controller";
 import { AdminSettingsService } from "./settings/admin-settings.service";
 import { AdminSettingsController } from "./settings/admin-settings.controller";
+import { AdminFeatureFlagsController } from "./feature-flags/admin-feature-flags.controller";
+import { AdminFeatureFlagsService } from "./feature-flags/admin-feature-flags.service";
 import { AdminSystemService } from "./system/admin-system.service";
 import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
@@ -117,7 +122,19 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
  * consumer/seller/provider route.
  */
 @Module({
-  imports: [NotificationsModule, RefundsModule, PromotionsModule, TravelMarketplaceModule, PetAccessModule, SellerFinanceModule, StorageModule, SubscriptionsModule, LedgerModule, CommunityModule, BookingModule],
+  imports: [
+    NotificationsModule,
+    RefundsModule,
+    PromotionsModule,
+    TravelMarketplaceModule,
+    PetAccessModule,
+    SellerFinanceModule,
+    StorageModule,
+    SubscriptionsModule,
+    LedgerModule,
+    CommunityModule,
+    BookingModule,
+  ],
   controllers: [
     AdminMeController,
     AdminSupportOpsController,
@@ -127,6 +144,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminPet360Controller,
     AdminAccessControlController,
     AdminSettingsController,
+    AdminFeatureFlagsController,
     AdminSystemController,
     AdminNoteController,
     AdminCustomerController,
@@ -171,6 +189,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminCustomerOverviewService,
     AdminAccessControlService,
     AdminSettingsService,
+    AdminFeatureFlagsService,
     AdminSystemService,
     AdminServicesService,
     AdminLostPetService,
