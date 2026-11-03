@@ -10302,6 +10302,54 @@ model PlatformSettingChange {
   @@map("platform_setting_changes")
 }
 
+/// TC-12 / P-03 — controlled release switches. Targeting is intentionally
+/// explicit and limited to deterministic rollout, city and an allow-list; it
+/// is not a remote configuration bucket for secrets or arbitrary JSON.
+model FeatureFlag {
+  key               String   @id
+  description       String?
+  isEnabled         Boolean  @default(false)
+  rolloutPercentage Int      @default(0)
+  cities            String[] @default([])
+  betaUserIds       String[] @default([]) @db.Uuid
+  version           Int      @default(1)
+  updatedByAdminId  String?  @db.Uuid
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+
+  @@map("feature_flags")
+}
+
+enum FeatureFlagChangeStatus {
+  PENDING
+  APPLIED
+  REJECTED
+  CANCELLED
+  SUPERSEDED
+}
+
+/// All feature-flag mutations require a second, different administrator to
+/// approve. `flagKey` remains a plain key so a first enablement can be
+/// proposed before the corresponding FeatureFlag exists.
+model FeatureFlagChange {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  flagKey            String
+  previousValue      Json?
+  proposedValue      Json
+  baseVersion        Int
+  status             FeatureFlagChangeStatus @default(PENDING)
+  reason             String
+  requestedByAdminId String                  @db.Uuid
+  reviewedByAdminId  String?                 @db.Uuid
+  reviewNote         String?
+  createdAt          DateTime                @default(now())
+  reviewedAt         DateTime?
+
+  @@index([flagKey, createdAt])
+  @@index([status])
+  @@map("feature_flag_changes")
+}
+
 enum UserAccountStatus {
   ACTIVE
   SUSPENDED
