@@ -8115,3 +8115,6 @@ IRR summed with `Prisma.Decimal` and rounded once; and the clinical board
 stays free of revenue, lifetime totals, per-vet productivity, and compliance
 percentages — a clinical surface that doubles as a performance dashboard
 changes what people write down.
+
+## Product decisions
+All product decisions live in [docs/decisions.md](docs/decisions.md). Every implementation prompt references decision codes from this file. Changes to decisions require a new code (see GR-16, WB-08).
