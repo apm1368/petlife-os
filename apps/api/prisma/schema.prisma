@@ -4297,6 +4297,28 @@ model NotificationQuietHours {
   @@map("notification_quiet_hours")
 }
 
+/// AD-13 — an internal, auditable binding from a notification event and
+/// recipient language to an already-approved Faraz pattern code. Credentials
+/// and pattern text remain in Faraz/the server environment; this table stores
+/// only safe operational metadata required to select a pattern at send time.
+model SmsPatternTemplate {
+  id               String   @id @default(uuid()) @db.Uuid
+  key              String
+  locale           Locale
+  displayName      String
+  farazPatternCode String
+  bodyAttributeKey String   @default("message")
+  isActive         Boolean  @default(true)
+  version          Int      @default(1)
+  updatedByAdminId String?  @db.Uuid
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([key, locale])
+  @@index([isActive])
+  @@map("sms_pattern_templates")
+}
+
 // ---------------------------------------------------------------------------
 // Admin CRM, Support, Disputes, Trust & Safety, Audit (Handoff 11)
 // ---------------------------------------------------------------------------

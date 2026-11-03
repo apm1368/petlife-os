@@ -72,6 +72,7 @@ const NAV_ITEMS: {
   { href: "/access", labelKey: "nav.access", permission: "access.view" },
   { href: "/settings", labelKey: "nav.settings", permission: "settings.view" },
   { href: "/feature-flags", labelKey: "nav.featureFlags", permission: "settings.view" },
+  { href: "/sms-patterns", labelKey: "nav.smsPatterns", permission: "system.view" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];
 
@@ -119,7 +120,7 @@ const NAV_GROUPS: { key: string; hrefs: string[] }[] = [
       "/content/placements",
     ],
   },
-  { key: "system", hrefs: ["/access", "/settings", "/feature-flags", "/audit"] },
+  { key: "system", hrefs: ["/access", "/settings", "/feature-flags", "/sms-patterns", "/audit"] },
 ];
 
 const GROUP_ICONS = {

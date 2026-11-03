@@ -30,6 +30,8 @@ import { AdminSettingsService } from "./settings/admin-settings.service";
 import { AdminSettingsController } from "./settings/admin-settings.controller";
 import { AdminFeatureFlagsController } from "./feature-flags/admin-feature-flags.controller";
 import { AdminFeatureFlagsService } from "./feature-flags/admin-feature-flags.service";
+import { AdminSmsPatternsController } from "./sms-patterns/admin-sms-patterns.controller";
+import { AdminSmsPatternsService } from "./sms-patterns/admin-sms-patterns.service";
 import { AdminSystemService } from "./system/admin-system.service";
 import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
@@ -145,6 +147,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminAccessControlController,
     AdminSettingsController,
     AdminFeatureFlagsController,
+    AdminSmsPatternsController,
     AdminSystemController,
     AdminNoteController,
     AdminCustomerController,
@@ -190,6 +193,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminAccessControlService,
     AdminSettingsService,
     AdminFeatureFlagsService,
+    AdminSmsPatternsService,
     AdminSystemService,
     AdminServicesService,
     AdminLostPetService,

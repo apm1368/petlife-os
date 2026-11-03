@@ -111,6 +111,8 @@ export type AdminAuditAction =
   | "feature_flag.change_approved"
   | "feature_flag.change_rejected"
   | "feature_flag.change_cancelled"
+  | "sms_pattern.created"
+  | "sms_pattern.updated"
   | "customer.suspended"
   | "customer.unsuspended"
   | "customer.sessions_revoked"

@@ -7,6 +7,9 @@ export interface SendSmsInput {
   /** Always an already-normalized E.164 destination — MessagingGateway implementations never see a raw 09.../+98... string. */
   destination: string;
   body: string;
+  /** Optional event key and recipient locale for an admin-managed Faraz pattern binding. */
+  templateKey?: string;
+  locale?: "fa" | "en";
   /** Used only for DEV's own deterministic-outcome test hook; a real adapter ignores it. */
   mode?: MessagingSimMode;
 }
