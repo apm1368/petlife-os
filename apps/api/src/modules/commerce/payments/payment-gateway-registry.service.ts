@@ -5,6 +5,7 @@ import type { AppEnv } from "../../../config/env";
 import { PaymentProviderUnavailableException } from "../../../common/errors/api-exception";
 import { DevPaymentGateway } from "./dev-payment-gateway.service";
 import { StandardGatewayAdapter } from "./standard-gateway.adapter";
+import { ZibalGateway } from "./zibal.gateway";
 import type { PaymentGateway } from "./payment-gateway.interface";
 
 /**
@@ -21,11 +22,13 @@ export class PaymentGatewayRegistry {
   constructor(
     dev: DevPaymentGateway,
     standard: StandardGatewayAdapter,
+    zibal: ZibalGateway,
     private readonly config: ConfigService<AppEnv, true>,
   ) {
     this.gateways = new Map<PaymentProvider, PaymentGateway>([
       [PaymentProvider.DEV_SIMULATED, dev],
       [PaymentProvider.STANDARD_GATEWAY, standard],
+      [PaymentProvider.ZIBAL, zibal],
     ]);
   }
 
@@ -36,6 +39,7 @@ export class PaymentGatewayRegistry {
     const isProduction = this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) === "production";
     if (provider === PaymentProvider.DEV_SIMULATED) return !isProduction;
     if (provider === PaymentProvider.STANDARD_GATEWAY) return this.config.get("STANDARD_GATEWAY_ENABLED", { infer: true });
+    if (provider === PaymentProvider.ZIBAL) return this.config.get("ZIBAL_ENABLED", { infer: true });
     return false;
   }
 

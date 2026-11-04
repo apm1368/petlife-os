@@ -19,6 +19,12 @@ const SEEDED_ACCOUNTS: { code: LedgerAccountCode; name: string }[] = [
   { code: LedgerAccountCode.PLATFORM_REVENUE, name: "Platform Revenue" },
   { code: LedgerAccountCode.MARKETPLACE_RECEIVABLE, name: "Marketplace Receivable" },
   { code: LedgerAccountCode.DONATION_PAYABLE, name: "Donation Payable" },
+  { code: LedgerAccountCode.WALLET_WITHDRAWABLE_LIABILITY, name: "Wallet Withdrawable Liability" },
+  { code: LedgerAccountCode.WALLET_PURCHASE_LIABILITY, name: "Wallet Purchase-only Liability" },
+  { code: LedgerAccountCode.CARD_TRANSFER_RECEIVABLE, name: "Card Transfer Receivable" },
+  { code: LedgerAccountCode.PROVIDER_PAYABLE, name: "Provider Payable" },
+  { code: LedgerAccountCode.CPC_RECEIVABLE, name: "CPC Receivable" },
+  { code: LedgerAccountCode.PAWMA_REWARD_LIABILITY, name: "Pawma Reward Liability" },
 ];
 
 /**
@@ -62,11 +68,12 @@ export class LedgerService implements OnModuleInit {
 
   async recordBalanced(
     description: string,
-    referenceType: "PAYMENT" | "REFUND",
+    referenceType: string,
     referenceId: string,
     currency: string,
     entries: LedgerEntryInput[],
     client: QueryClient = this.prisma,
+    correction?: { reversesLedgerTransactionId: string; reason: string },
   ): Promise<string> {
     if (entries.length === 0) throw new Error("LedgerService.recordBalanced called with no entries");
     for (const entry of entries) {
@@ -82,7 +89,15 @@ export class LedgerService implements OnModuleInit {
     const accountByCode = new Map(accounts.map((a) => [a.code, a.id]));
 
     const transaction = await client.ledgerTransaction.create({
-      data: { description, referenceType, referenceId, currency },
+      data: {
+        description,
+        referenceType,
+        referenceId,
+        currency,
+        ...(correction
+          ? { reversesLedgerTransactionId: correction.reversesLedgerTransactionId, correctionReason: correction.reason }
+          : {}),
+      },
     });
     for (const entry of entries) {
       const accountId = accountByCode.get(entry.accountCode);
@@ -98,6 +113,34 @@ export class LedgerService implements OnModuleInit {
       { aggregateType: "LedgerTransaction", aggregateId: transaction.id },
     );
     return transaction.id;
+  }
+
+  /**
+   * FE-16 correction path.  The original posting is never changed; this
+   * creates exactly one reversed transaction with every debit/credit flipped
+   * and retains the operational reason on the new immutable record.
+   */
+  async reverse(referenceId: string, reason: string, client: QueryClient = this.prisma): Promise<string> {
+    if (!reason.trim()) throw new Error("Ledger correction reason is required");
+    const original = await client.ledgerTransaction.findUnique({
+      where: { id: referenceId },
+      include: { entries: { include: { ledgerAccount: true } }, reversal: true },
+    });
+    if (!original) throw new Error(`Ledger transaction ${referenceId} does not exist`);
+    if (original.reversal) throw new Error(`Ledger transaction ${referenceId} has already been reversed`);
+    return this.recordBalanced(
+      `Reversal: ${original.description}`,
+      "LEDGER_REVERSAL",
+      original.id,
+      original.currency,
+      original.entries.map((entry) => ({
+        accountCode: entry.ledgerAccount.code,
+        direction: entry.direction === LedgerEntryDirection.DEBIT ? LedgerEntryDirection.CREDIT : LedgerEntryDirection.DEBIT,
+        amount: entry.amount,
+      })),
+      client,
+      { reversesLedgerTransactionId: original.id, reason: reason.trim() },
+    );
   }
 
   /**
@@ -134,6 +177,23 @@ export class LedgerService implements OnModuleInit {
       ],
       client,
     );
+  }
+
+  /** Future advertising click billing posts here; CPC has no product flow yet,
+   * but it can never become an off-ledger balance when introduced. */
+  async recordCpcCharge(referenceId: string, amount: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced("CPC charge accrued", "CPC", referenceId, currency, [
+      { accountCode: LedgerAccountCode.CPC_RECEIVABLE, direction: LedgerEntryDirection.DEBIT, amount },
+      { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.CREDIT, amount },
+    ], client);
+  }
+
+  /** Pawma is a customer reward liability, never a reduction of wallet cash. */
+  async recordPawmaReward(referenceId: string, amount: number, currency: string, client: QueryClient = this.prisma): Promise<string> {
+    return this.recordBalanced("Pawma reward issued", "PAWMA", referenceId, currency, [
+      { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.DEBIT, amount },
+      { accountCode: LedgerAccountCode.PAWMA_REWARD_LIABILITY, direction: LedgerEntryDirection.CREDIT, amount },
+    ], client);
   }
 
   /**

@@ -33,6 +33,8 @@ import { AdminFeatureFlagsService } from "./feature-flags/admin-feature-flags.se
 import { AdminSystemService } from "./system/admin-system.service";
 import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
+import { PaymentsModule } from "../commerce/payments/payments.module";
+import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
 import { AdminServicesService } from "./services/admin-services.service";
 import { AdminServicesController } from "./services/admin-services.controller";
 import { NotificationsModule } from "../notifications/notifications.module";
@@ -134,12 +136,14 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     LedgerModule,
     CommunityModule,
     BookingModule,
+    PaymentsModule,
   ],
   controllers: [
     AdminMeController,
     AdminSupportOpsController,
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
+    AdminCardTransferController,
     AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,

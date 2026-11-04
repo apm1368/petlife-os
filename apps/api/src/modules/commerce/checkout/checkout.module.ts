@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { HouseholdsModule } from "../../households/households.module";
 import { CartModule } from "../cart/cart.module";
 import { PaymentsModule } from "../payments/payments.module";
@@ -16,9 +16,9 @@ import { FinancingEventsListener } from "./financing-events.listener";
 import { PaymentWebhooksController } from "./payment-webhooks.controller";
 
 @Module({
-  imports: [HouseholdsModule, CartModule, PaymentsModule, FinancingModule, LedgerModule, RefundsModule, OrdersModule, LogisticsModule, SellerFinanceModule],
+  imports: [HouseholdsModule, CartModule, forwardRef(() => PaymentsModule), FinancingModule, LedgerModule, RefundsModule, OrdersModule, LogisticsModule, SellerFinanceModule],
   controllers: [CheckoutController, PaymentWebhooksController],
   providers: [CheckoutService, InventoryReservationService, PaymentEventsListener, FinancingEventsListener],
-  exports: [CheckoutService],
+  exports: [CheckoutService, InventoryReservationService],
 })
 export class CheckoutModule {}

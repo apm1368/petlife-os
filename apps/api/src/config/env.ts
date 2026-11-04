@@ -110,6 +110,14 @@ const envSchema = z.object({
   /// never actually wired up.
   PAYMENT_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
   STANDARD_GATEWAY_ENABLED: flag(true),
+  ZIBAL_ENABLED: flag(true),
+  ZIBAL_MERCHANT: z.string().optional(),
+  ZIBAL_API_BASE_URL: z.string().url().default("https://gateway.zibal.ir"),
+  ZIBAL_CALLBACK_URL: z.string().url().optional(),
+  /// Company card details are operational configuration, never stored in
+  /// payment rows.  Only a masked snapshot is retained for audit/display.
+  CARD_TRANSFER_ACCOUNT_NUMBER: z.string().optional(),
+  CARD_TRANSFER_ACCOUNT_HOLDER: z.string().optional(),
   SNAPPAY_ENABLED: flag(true),
   DIGIPAY_ENABLED: flag(true),
   /// Optional and unused by the sandbox-stub adapters — present only so a
@@ -245,6 +253,7 @@ function validatePaymentConfig(env: AppEnv): void {
   if (env.PAYMENT_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
   if (env.STANDARD_GATEWAY_ENABLED && !(env.STANDARD_GATEWAY_MERCHANT_ID && env.STANDARD_GATEWAY_API_KEY)) missing.push("STANDARD_GATEWAY_MERCHANT_ID/STANDARD_GATEWAY_API_KEY");
+  if (env.ZIBAL_ENABLED && !(env.ZIBAL_MERCHANT && env.ZIBAL_CALLBACK_URL)) missing.push("ZIBAL_MERCHANT/ZIBAL_CALLBACK_URL");
   if (env.SNAPPAY_ENABLED && !(env.SNAPPAY_MERCHANT_ID && env.SNAPPAY_API_KEY)) missing.push("SNAPPAY_MERCHANT_ID/SNAPPAY_API_KEY");
   if (env.DIGIPAY_ENABLED && !(env.DIGIPAY_MERCHANT_ID && env.DIGIPAY_API_KEY)) missing.push("DIGIPAY_MERCHANT_ID/DIGIPAY_API_KEY");
   if (missing.length > 0) {

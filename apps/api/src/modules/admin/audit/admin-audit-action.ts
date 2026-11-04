@@ -127,6 +127,7 @@ export type AdminAuditAction =
   | "settlement.released"
   | "settlement.exported"
   | "finance.trace_viewed"
+  | "card_transfer.reviewed"
   | "support_case.tags_changed"
   | "support_case.linked"
   | "support_case.unlinked"
