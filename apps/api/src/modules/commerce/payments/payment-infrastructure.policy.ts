@@ -28,13 +28,20 @@ export function cardTransferAllowedForBooking(startAt: Date, now = new Date()): 
 }
 
 /** Wallet balances are derived, never persisted. Expired credit is ignored even before the expiry worker appends its audit entry. */
-export function deriveWalletBalances(entries: Pick<WalletEntry, "balanceType" | "kind" | "amount" | "expiresAt">[], now = new Date()): Record<WalletBalanceType, number> {
+export function deriveWalletBalances(entries: Pick<WalletEntry, "id" | "balanceType" | "kind" | "amount" | "expiresAt" | "source" | "referenceType" | "referenceId">[], now = new Date()): Record<WalletBalanceType, number> {
   const balances: Record<WalletBalanceType, number> = {
     [WalletBalanceType.WITHDRAWABLE]: 0,
     [WalletBalanceType.PURCHASE_ONLY]: 0,
   };
+  // Expired gift credit is excluded immediately, even before the worker has
+  // written its audit expiry row. Once that row exists it must also be
+  // excluded, otherwise the same gift would be subtracted twice.
+  const expiredGiftIds = new Set(entries
+    .filter((entry) => entry.kind === WalletEntryKind.CREDIT && entry.source === "GIFT" && entry.expiresAt && entry.expiresAt <= now)
+    .map((entry) => entry.id));
   for (const entry of entries) {
     if (entry.kind === WalletEntryKind.CREDIT && entry.expiresAt && entry.expiresAt <= now) continue;
+    if (entry.kind === WalletEntryKind.EXPIRY && entry.referenceType === "WALLET_GIFT_EXPIRY" && expiredGiftIds.has(entry.referenceId)) continue;
     balances[entry.balanceType] += entry.kind === WalletEntryKind.CREDIT ? entry.amount : -entry.amount;
   }
   return balances;

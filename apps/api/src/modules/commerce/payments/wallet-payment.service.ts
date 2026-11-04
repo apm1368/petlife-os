@@ -1,4 +1,5 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { ModuleRef } from "@nestjs/core";
 import { PaymentIntentStatus, PaymentProvider } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { CheckoutService } from "../checkout/checkout.service";
@@ -12,8 +13,12 @@ export class WalletPaymentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly wallet: WalletService,
-    @Inject(forwardRef(() => CheckoutService)) private readonly checkout: CheckoutService,
+    private readonly moduleRef: ModuleRef,
   ) {}
+
+  private get checkout(): CheckoutService {
+    return this.moduleRef.get(CheckoutService, { strict: false });
+  }
 
   async payCheckout(userId: string, checkoutId: string, idempotencyKey?: string) {
     const intent = await this.checkout.createPaymentIntent(userId, checkoutId, PaymentProvider.DEV_SIMULATED, idempotencyKey);

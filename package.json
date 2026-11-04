@@ -15,7 +15,8 @@
     "db:migrate": "pnpm --filter @petlife/api db:migrate",
     "db:seed": "pnpm --filter @petlife/api db:seed",
     "infra:up": "docker compose up -d",
-    "infra:down": "docker compose down"
+    "infra:down": "docker compose down",
+    "test:e2e:fresh": "pnpm infra:up && pnpm --filter @petlife/api test:e2e:fresh"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

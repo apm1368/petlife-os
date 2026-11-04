@@ -58,6 +58,38 @@ export class InventoryReservationService {
     }
   }
 
+  /**
+   * Releases only time-expired holds.  Expiry is deliberately an append-only
+   * state transition on the reservation; the inventory counter is adjusted
+   * in the same transaction so an old hold can never keep the final unit
+   * unavailable indefinitely.  This is also callable by the worker in a
+   * deterministic test with an explicit clock.
+   */
+  async releaseExpired(now = new Date()): Promise<number> {
+    const due = await this.prisma.inventoryReservation.findMany({
+      where: { status: InventoryReservationStatus.ACTIVE, expiresAt: { lte: now } },
+      select: { id: true },
+      take: 500,
+    });
+    let released = 0;
+    for (const candidate of due) {
+      const won = await this.prisma.$transaction(async (tx) => {
+        const reservation = await tx.inventoryReservation.findUnique({ where: { id: candidate.id } });
+        if (!reservation || reservation.status !== InventoryReservationStatus.ACTIVE || reservation.expiresAt > now) return false;
+        const [item] = await tx.$queryRaw<{ id: string }[]>`
+          SELECT "id" FROM "inventory_items" WHERE "sellerOfferId" = ${reservation.sellerOfferId}::uuid FOR UPDATE
+        `;
+        if (!item) return false;
+        await tx.inventoryItem.update({ where: { id: item.id }, data: { reserved: { decrement: reservation.quantity } } });
+        await tx.inventoryReservation.update({ where: { id: reservation.id }, data: { status: InventoryReservationStatus.EXPIRED } });
+        await this.events.publish("InventoryReservationExpired", { checkoutId: reservation.checkoutId, reservationId: reservation.id }, { tx, aggregateType: "InventoryReservation", aggregateId: reservation.id });
+        return true;
+      });
+      if (won) released++;
+    }
+    return released;
+  }
+
   /** Consumes every ACTIVE reservation on successful payment — stock actually leaves onHand, not just reserved (spec section 38: "Consume inventory reservation"). */
   async consumeAllForCheckout(tx: Prisma.TransactionClient, checkoutId: string): Promise<void> {
     const active = await tx.inventoryReservation.findMany({ where: { checkoutId, status: InventoryReservationStatus.ACTIVE } });

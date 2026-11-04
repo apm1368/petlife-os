@@ -13,7 +13,13 @@
 const { spawnSync } = require("node:child_process");
 const { PrismaClient } = require("@prisma/client");
 
-const base = new URL(process.env.TEST_DATABASE_URL || process.env.DATABASE_URL || "");
+// Safe local default: points only at the docker-compose test database name;
+// the *_test guard below still refuses any production-looking target.
+const base = new URL(
+  process.env.TEST_DATABASE_URL ||
+    process.env.DATABASE_URL ||
+    "postgresql://petlife:petlife@127.0.0.1:5432/petlife_os_test?schema=public",
+);
 if (!base.pathname.endsWith("_test")) {
   console.error("e2e-fresh: TEST_DATABASE_URL must point at a *_test database on the server to use.");
   process.exit(2);
@@ -41,10 +47,20 @@ for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => drop().finally(()
   try {
     await db.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
     console.log(`e2e-fresh: created ${name}`);
-    const env = { ...process.env, DATABASE_URL: fresh.toString(), TEST_DATABASE_URL: fresh.toString() };
+    const env = {
+      ...process.env,
+      DATABASE_URL: fresh.toString(),
+      TEST_DATABASE_URL: fresh.toString(),
+      // docker-compose's local Redis requires its documented default
+      // password. GitHub Actions supplies its own unauthenticated service URL.
+      REDIS_URL: process.env.REDIS_URL || "redis://:petlife@127.0.0.1:6379",
+    };
     const migrate = spawnSync("npx", ["prisma", "migrate", "deploy"], { env, stdio: "inherit" });
     if (migrate.status !== 0) throw new Error("migrate deploy failed");
-    const jest = spawnSync("npx", ["jest", "--config", "./test/jest-e2e.json", ...process.argv.slice(2)], { env, stdio: "inherit" });
+    // Package-manager script forwarding can leave a standalone `--` in argv;
+    // it is a separator, not a Jest test path.
+    const jestArgs = process.argv.slice(2).filter((arg) => arg !== "--");
+    const jest = spawnSync("npx", ["jest", "--config", "./test/jest-e2e.json", ...jestArgs], { env, stdio: "inherit" });
     code = jest.status ?? 1;
   } catch (e) {
     console.error(`e2e-fresh: ${e.message}`);

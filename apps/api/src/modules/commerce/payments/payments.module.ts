@@ -1,5 +1,5 @@
-import { forwardRef, Module } from "@nestjs/common";
-import { CheckoutModule } from "../checkout/checkout.module";
+import { Module } from "@nestjs/common";
+import { LedgerModule } from "../ledger/ledger.module";
 import { PaymentsService } from "./payments.service";
 import { DevPaymentGateway } from "./dev-payment-gateway.service";
 import { StandardGatewayAdapter } from "./standard-gateway.adapter";
@@ -16,7 +16,7 @@ import { WalletPaymentService } from "./wallet-payment.service";
 
 /** Webhook/callback routes live in CheckoutModule's PaymentWebhooksController (both PaymentsService and FinancingService are needed there). The only route here is the read-only payment environment (Batch 6). */
 @Module({
-  imports: [forwardRef(() => CheckoutModule)],
+  imports: [LedgerModule],
   controllers: [PaymentEnvironmentController, PaymentInfrastructureController],
   providers: [PaymentsService, DevPaymentGateway, StandardGatewayAdapter, ZibalGateway, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService],
   exports: [PaymentsService, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService],

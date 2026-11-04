@@ -74,6 +74,7 @@ export const DOMAIN_EVENT_TYPES = [
   "CheckoutCreated",
   "InventoryReserved",
   "InventoryReleased",
+  "InventoryReservationExpired",
   "PaymentIntentCreated",
   "PaymentAttemptStarted",
   "PaymentSucceeded",

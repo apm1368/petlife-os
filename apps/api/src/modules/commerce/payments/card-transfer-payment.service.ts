@@ -1,5 +1,6 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { ModuleRef } from "@nestjs/core";
 import { CardTransferPaymentStatus, CheckoutStatus, LedgerAccountCode, LedgerEntryDirection, PaymentStatus, WalletBalanceType, WalletCreditSource } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import type { AppEnv } from "../../../config/env";
@@ -19,9 +20,16 @@ export class CardTransferPaymentService {
     private readonly config: ConfigService<AppEnv, true>,
     private readonly ledger: LedgerService,
     private readonly wallet: WalletService,
-    @Inject(forwardRef(() => CheckoutService)) private readonly checkout: CheckoutService,
-    private readonly reservations: InventoryReservationService,
+    private readonly moduleRef: ModuleRef,
   ) {}
+
+  private get checkout(): CheckoutService {
+    return this.moduleRef.get(CheckoutService, { strict: false });
+  }
+
+  private get reservations(): InventoryReservationService {
+    return this.moduleRef.get(InventoryReservationService, { strict: false });
+  }
 
   private accountDetails() {
     const raw = this.config.get("CARD_TRANSFER_ACCOUNT_NUMBER", { infer: true });

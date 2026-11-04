@@ -1,4 +1,5 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { ModuleRef } from "@nestjs/core";
 import { PaymentAttemptStatus, PaymentIntentStatus, PaymentProvider, TransactionStatus, TransactionType, ZibalPaymentStatus } from "@prisma/client";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -14,8 +15,12 @@ export class ZibalPaymentService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService<AppEnv, true>,
     private readonly gateway: ZibalGateway,
-    @Inject(forwardRef(() => CheckoutService)) private readonly checkout: CheckoutService,
+    private readonly moduleRef: ModuleRef,
   ) {}
+
+  private get checkout(): CheckoutService {
+    return this.moduleRef.get(CheckoutService, { strict: false });
+  }
 
   async initiate(userId: string, checkoutId: string, idempotencyKey?: string) {
     const intent = await this.checkout.createPaymentIntent(userId, checkoutId, PaymentProvider.ZIBAL, idempotencyKey);
