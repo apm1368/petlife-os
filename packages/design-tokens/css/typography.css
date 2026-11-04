@@ -8,6 +8,16 @@
   /* --font-vazirmatn / --font-inter are injected by next/font (see apps/web/lib/fonts.ts); fall back gracefully without it. */
   --font-fa: var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
   --font-en: var(--font-inter, "Inter"), var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
+  --font-ar: "IBM Plex Sans Arabic", var(--font-vazirmatn, "Vazirmatn"), system-ui, sans-serif;
+
+  /* DS-09: the only permitted UI font-size scale. */
+  --font-size-12: 0.75rem;
+  --font-size-14: 0.875rem;
+  --font-size-16: 1rem;
+  --font-size-20: 1.25rem;
+  --font-size-24: 1.5rem;
+  --font-size-32: 2rem;
+  --line-height-fa: 1.7;
 
   /* Nine roles, fewer sizes, stronger contrast between them (visual direction 2027). */
   --text-display-size: 2.5rem;
@@ -64,4 +74,8 @@
 
 [dir="ltr"] {
   font-family: var(--font-en);
+}
+
+[lang="ar"] {
+  font-family: var(--font-ar);
 }

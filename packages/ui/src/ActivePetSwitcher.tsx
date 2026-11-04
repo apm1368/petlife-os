@@ -28,7 +28,7 @@ export function ActivePetSwitcher({ pets, activePetId, onSelect, className }: Ac
             )}
           >
             <Avatar src={pet.photoUrl} name={pet.name} size="md" />
-            <span className="max-w-[4.5rem] truncate text-metadata text-text-primary">{pet.name}</span>
+            <span className="pl-pet-name truncate text-metadata text-text-primary">{pet.name}</span>
           </button>
         );
       })}
