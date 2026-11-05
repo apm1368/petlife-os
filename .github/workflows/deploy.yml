@@ -42,7 +42,12 @@ jobs:
             git reset --hard "${{ github.sha }}"
             export BUILD_SHA='${{ github.sha }}'
             export BUILD_TIME='${{ github.event.head_commit.timestamp }}'
-            export DEPLOYMENT_ENVIRONMENT='staging'
+            # This workflow deploys the canonical `main` branch to the public VPS behind
+            # opetlife.ir. Labeling that process as staging made /health/version and the
+            # backoffice release trace disagree with the actual destination (TC-04).
+            export DEPLOYMENT_ENVIRONMENT='production'
             export DEPLOYMENT_ID='github-${{ github.run_id }}-${{ github.run_attempt }}'
             /var/www/petlife-os/deploy.sh
-            bash scripts/smoke-staging.sh
+            export EXPECTED_BUILD_SHA='${{ github.sha }}'
+            export EXPECTED_DEPLOYMENT_ENVIRONMENT='production'
+            bash scripts/smoke-production.sh
