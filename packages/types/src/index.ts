@@ -6543,3 +6543,13 @@ export type {
   PartnerVerificationPolicyDto,
   PartnerVerificationDocumentKind,
 } from "./partner-verification";
+
+export type {
+  PetOwnershipDto,
+  PetOwnershipTransferDto,
+  PetOwnershipTransferOutcomeDto,
+  PetMemoryCopyDto,
+  PetMemoryDisposition,
+  PetOwnershipTransferStatusName,
+} from "./ownership";
+export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";

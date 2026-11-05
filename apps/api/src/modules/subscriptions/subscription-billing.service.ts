@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import {
   CartStatus,
@@ -6,6 +6,7 @@ import {
   HouseholdRole,
   PaymentMethodType,
   PaymentProvider,
+  PetOwnershipTransferStatus,
   Prisma,
   RefundStatus,
   SubscriptionBillingAttemptStatus,
@@ -81,6 +82,8 @@ export interface BillingOutcome {
  */
 @Injectable()
 export class SubscriptionBillingService {
+  private readonly logger = new Logger(SubscriptionBillingService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly payments: PaymentsService,
@@ -117,6 +120,26 @@ export class SubscriptionBillingService {
 
   private async lockSubscription(tx: Prisma.TransactionClient, subscriptionId: string): Promise<void> {
     await tx.$queryRaw`SELECT "id" FROM "subscriptions" WHERE "id" = ${subscriptionId}::uuid FOR UPDATE`;
+  }
+
+  /**
+   * ID-07: is the recorded payer waiting to approve a pet-ownership transfer?
+   *
+   * A payer with an unanswered transfer — as either the outgoing or the incoming
+   * party — has not yet agreed to keep paying for this household, so the renewal
+   * must wait. A payer with no transfer at all, or one whose transfer has already
+   * been answered, renews normally.
+   */
+  private async isPayerAwaitingOwnershipApproval(tx: Prisma.TransactionClient, payerUserId: string | null): Promise<boolean> {
+    if (!payerUserId) return false;
+    const pending = await tx.petOwnershipTransfer.findFirst({
+      where: {
+        status: PetOwnershipTransferStatus.PENDING_REVIEW,
+        OR: [{ fromUserId: payerUserId }, { toUserId: payerUserId }],
+      },
+      select: { id: true },
+    });
+    return pending !== null;
   }
 
   /**
@@ -227,6 +250,20 @@ export class SubscriptionBillingService {
       const hasPendingChange = sub.pendingPlanId !== null;
       const targetPlanId = hasPendingChange ? sub.pendingPlanId! : sub.planId;
       const targetPriceId = hasPendingChange ? sub.pendingPriceId : sub.priceId;
+
+      // ID-07: "the payer of recurring items transfers to the new owner; it is suspended
+      // until their approval."
+      //
+      // While the recorded payer is the subject of an unanswered pet-ownership
+      // transfer, the renewal must not charge them. Charging the previous owner for a
+      // household they no longer run is exactly what this decision forbids, so the
+      // renewal is held rather than attempted. The subscription itself is left
+      // untouched — the period simply is not extended, and the renewal worker tries
+      // again once the transfer has been answered.
+      if (await this.isPayerAwaitingOwnershipApproval(tx, sub.payerUserId)) {
+        this.logger.warn(`Renewal held for subscription ${sub.id}: the recorded payer has an unanswered ownership transfer.`);
+        return null;
+      }
 
       if (!targetPriceId) {
         // Downgrading to (or already resolving toward) the FREE plan at the boundary — nothing to charge.
