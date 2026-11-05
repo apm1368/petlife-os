@@ -11,6 +11,7 @@ import { NotificationEventsListener } from "./notification-events.listener";
 import { MessagingProviderRegistry } from "./messaging/messaging-provider-registry.service";
 import { DevMessagingAdapter } from "./messaging/dev-messaging.adapter";
 import { FarazSmsAdapter } from "./messaging/faraz-sms.adapter";
+import { SmsPatternTemplateService } from "./sms-pattern-template.service";
 
 @Module({
   controllers: [NotificationsController, NotificationPreferenceController, NotificationDevController],
@@ -24,7 +25,8 @@ import { FarazSmsAdapter } from "./messaging/faraz-sms.adapter";
     MessagingProviderRegistry,
     DevMessagingAdapter,
     FarazSmsAdapter,
+    SmsPatternTemplateService,
   ],
-  exports: [NotificationOrchestratorService],
+  exports: [NotificationOrchestratorService, SmsPatternTemplateService],
 })
 export class NotificationsModule {}

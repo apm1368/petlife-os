@@ -1,5 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { NotificationCategory, NotificationChannel, NotificationDeliveryStatus, NotificationPriority, Prisma, type Notification } from "@prisma/client";
+import {
+  NotificationCategory,
+  NotificationChannel,
+  NotificationDeliveryStatus,
+  NotificationPriority,
+  Prisma,
+  type Notification,
+} from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { getCountryConfig } from "../../common/country/country-config";
@@ -66,7 +73,11 @@ export class NotificationOrchestratorService {
 
     // Batch 8 — the in-app preference is honoured: a switched-off category is still recorded (idempotency, audit)
     // but never lands in the inbox or the unread count. SECURITY is non-suppressible inside resolve().
-    const inAppEnabled = await this.preferences.resolve(input.userId, input.category, NotificationChannel.IN_APP);
+    const inAppEnabled = await this.preferences.resolve(
+      input.userId,
+      input.category,
+      NotificationChannel.IN_APP,
+    );
     const suppressedAt = inAppEnabled ? null : new Date();
 
     let notification: Notification;
@@ -102,7 +113,13 @@ export class NotificationOrchestratorService {
       // distinct in a unique index, so two domainEventId-less inserts can never collide in the first
       // place. The non-null assertion is therefore safe, not a cast around a real possibility of null.
       notification = await this.prisma.notification.findUniqueOrThrow({
-        where: { domainEventId_type_userId: { domainEventId: domainEventId!, type: input.type, userId: input.userId } },
+        where: {
+          domainEventId_type_userId: {
+            domainEventId: domainEventId!,
+            type: input.type,
+            userId: input.userId,
+          },
+        },
       });
     }
 
@@ -111,30 +128,78 @@ export class NotificationOrchestratorService {
 
     await this.prisma.notificationDelivery.create({
       data: inAppEnabled
-        ? { notificationId: notification.id, channel: NotificationChannel.IN_APP, status: NotificationDeliveryStatus.DELIVERED, deliveredAt: new Date() }
-        : { notificationId: notification.id, channel: NotificationChannel.IN_APP, status: NotificationDeliveryStatus.SKIPPED, metadata: { reason: "category_disabled" } },
+        ? {
+            notificationId: notification.id,
+            channel: NotificationChannel.IN_APP,
+            status: NotificationDeliveryStatus.DELIVERED,
+            deliveredAt: new Date(),
+          }
+        : {
+            notificationId: notification.id,
+            channel: NotificationChannel.IN_APP,
+            status: NotificationDeliveryStatus.SKIPPED,
+            metadata: { reason: "category_disabled" },
+          },
     });
 
-    await this.events.publish("NotificationCreated", { notificationId: notification.id, userId: input.userId, type: input.type, category: input.category });
+    await this.events.publish("NotificationCreated", {
+      notificationId: notification.id,
+      userId: input.userId,
+      type: input.type,
+      category: input.category,
+    });
 
     if (rendered.smsBody && input.attemptSms !== false) {
-      await this.fanOutSms(notification.id, input.userId, user.phone, input.category, input.priority ?? NotificationPriority.NORMAL, rendered.smsBody, input.smsSimMode);
+      await this.fanOutSms(
+        notification.id,
+        input.userId,
+        user.phone,
+        input.category,
+        input.priority ?? NotificationPriority.NORMAL,
+        rendered.smsBody,
+        input.type,
+        user.locale,
+        input.smsSimMode,
+      );
     }
 
     return { notification, created };
   }
 
-  private async fanOutSms(notificationId: string, userId: string, phone: string | null, category: NotificationCategory, priority: NotificationPriority, smsBody: string, smsSimMode?: NotifyInput["smsSimMode"]): Promise<void> {
+  private async fanOutSms(
+    notificationId: string,
+    userId: string,
+    phone: string | null,
+    category: NotificationCategory,
+    priority: NotificationPriority,
+    smsBody: string,
+    templateKey: string,
+    locale: "fa" | "en",
+    smsSimMode?: NotifyInput["smsSimMode"],
+  ): Promise<void> {
     const normalized = phone ? getCountryConfig().normalizePhone(phone) : null;
     if (!normalized) {
-      await this.prisma.notificationDelivery.create({ data: { notificationId, channel: NotificationChannel.SMS, status: NotificationDeliveryStatus.SKIPPED, metadata: { reason: "no_valid_phone" } } });
+      await this.prisma.notificationDelivery.create({
+        data: {
+          notificationId,
+          channel: NotificationChannel.SMS,
+          status: NotificationDeliveryStatus.SKIPPED,
+          metadata: { reason: "no_valid_phone" },
+        },
+      });
       return;
     }
 
     const enabled = await this.preferences.resolve(userId, category, NotificationChannel.SMS);
     if (!enabled) {
       await this.prisma.notificationDelivery.create({
-        data: { notificationId, channel: NotificationChannel.SMS, status: NotificationDeliveryStatus.SKIPPED, destinationMasked: maskPhone(normalized.e164), metadata: { reason: "category_disabled" } },
+        data: {
+          notificationId,
+          channel: NotificationChannel.SMS,
+          status: NotificationDeliveryStatus.SKIPPED,
+          destinationMasked: maskPhone(normalized.e164),
+          metadata: { reason: "category_disabled" },
+        },
       });
       return;
     }
@@ -142,7 +207,11 @@ export class NotificationOrchestratorService {
     const quietHours = await this.prisma.notificationQuietHours.findUnique({ where: { userId } });
     const now = new Date();
     // URGENT is the one explicit "bypass quiet hours" signal (spec: "high-priority transactional messages may bypass quiet hours only where explicitly permitted") — callers must deliberately pass NotificationPriority.URGENT, never inferred from category.
-    if (quietHours?.enabled && priority !== NotificationPriority.URGENT && isWithinQuietHours(now, quietHours.startTime, quietHours.endTime, quietHours.timezone)) {
+    if (
+      quietHours?.enabled &&
+      priority !== NotificationPriority.URGENT &&
+      isWithinQuietHours(now, quietHours.startTime, quietHours.endTime, quietHours.timezone)
+    ) {
       await this.prisma.notificationDelivery.create({
         data: {
           notificationId,
@@ -150,14 +219,26 @@ export class NotificationOrchestratorService {
           status: NotificationDeliveryStatus.QUEUED,
           scheduledAt: nextQuietHoursEndUtc(now, quietHours.endTime, quietHours.timezone),
           destinationMasked: maskPhone(normalized.e164),
-          metadata: { destination: normalized.e164, smsBody, reason: "quiet_hours_deferred" },
+          metadata: {
+            destination: normalized.e164,
+            smsBody,
+            templateKey,
+            locale,
+            reason: "quiet_hours_deferred",
+          },
         },
       });
       return;
     }
 
     const delivery = await this.prisma.notificationDelivery.create({
-      data: { notificationId, channel: NotificationChannel.SMS, status: NotificationDeliveryStatus.PENDING, destinationMasked: maskPhone(normalized.e164), metadata: { destination: normalized.e164, smsBody, mode: smsSimMode } },
+      data: {
+        notificationId,
+        channel: NotificationChannel.SMS,
+        status: NotificationDeliveryStatus.PENDING,
+        destinationMasked: maskPhone(normalized.e164),
+        metadata: { destination: normalized.e164, smsBody, templateKey, locale, mode: smsSimMode },
+      },
     });
     await this.delivery.attempt(delivery.id);
   }

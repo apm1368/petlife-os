@@ -2,10 +2,18 @@ import { Injectable } from "@nestjs/common";
 import { MessagingProvider, NotificationDeliveryStatus } from "@prisma/client";
 import { ConfigService } from "@nestjs/config";
 import type { AppEnv } from "../../../config/env";
-import type { MessageStatusResult, MessagingGateway, MessagingWebhookInput, MessagingWebhookResult, SendSmsInput, SendSmsResult } from "./messaging-gateway.interface";
+import type {
+  MessageStatusResult,
+  MessagingGateway,
+  MessagingWebhookInput,
+  MessagingWebhookResult,
+  SendSmsInput,
+  SendSmsResult,
+} from "./messaging-gateway.interface";
 import { MESSAGING_PROVIDER_CAPABILITIES } from "./messaging-provider-registry";
 import { simulateSendSms } from "./messaging-simulation.util";
 import { FarazSmsClient } from "../../../common/faraz/faraz-sms.client";
+import { SmsPatternTemplateService } from "../sms-pattern-template.service";
 
 /** Faraz Pattern API adapter. A successful response means accepted/queued, never delivered. */
 @Injectable()
@@ -13,7 +21,11 @@ export class FarazSmsAdapter implements MessagingGateway {
   readonly provider = MessagingProvider.FARAZ;
   readonly capabilities = MESSAGING_PROVIDER_CAPABILITIES[MessagingProvider.FARAZ];
 
-  constructor(private readonly config: ConfigService<AppEnv, true>, private readonly faraz: FarazSmsClient) {}
+  constructor(
+    private readonly config: ConfigService<AppEnv, true>,
+    private readonly faraz: FarazSmsClient,
+    private readonly patterns: SmsPatternTemplateService,
+  ) {}
 
   private isProductionConfigured(): boolean {
     return this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production";
@@ -21,13 +33,27 @@ export class FarazSmsAdapter implements MessagingGateway {
 
   async sendSms(input: SendSmsInput): Promise<SendSmsResult> {
     if (this.isProductionConfigured()) {
+      // Backward-compatible fallback to the env-bound notification pattern.
+      // A missing/inactive admin binding can never turn a real notification
+      // into a silent drop.
+      const pattern = await this.patterns.resolve(input.templateKey, input.locale);
+      const bodyAttributeKey =
+        pattern?.bodyAttributeKey ??
+        this.config.get("FARAZ_SMS_NOTIFICATION_BODY_ATTRIBUTE", { infer: true })!;
       const result = await this.faraz.sendPattern({
-        patternCode: this.config.get("FARAZ_SMS_NOTIFICATION_PATTERN_CODE", { infer: true })!,
+        patternCode:
+          pattern?.farazPatternCode ??
+          this.config.get("FARAZ_SMS_NOTIFICATION_PATTERN_CODE", { infer: true })!,
         recipient: input.destination,
-        attributes: { [this.config.get("FARAZ_SMS_NOTIFICATION_BODY_ATTRIBUTE", { infer: true })]: input.body },
+        attributes: { [bodyAttributeKey]: input.body },
       });
       if (result.ok) return { status: "SENT", providerMessageId: result.providerMessageId };
-      return { status: "FAILED", failureKind: result.kind, failureCode: result.code, failureMessage: "Faraz SMS did not accept the message." };
+      return {
+        status: "FAILED",
+        failureKind: result.kind,
+        failureCode: result.code,
+        failureMessage: "Faraz SMS did not accept the message.",
+      };
     }
     return simulateSendSms(input, "faraz");
   }
