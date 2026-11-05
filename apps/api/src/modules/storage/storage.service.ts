@@ -1,7 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
-import { DocumentTooLargeException, UnsupportedDocumentTypeException } from "../../common/errors/api-exception";
-import { type DownloadOptions, DownloadTarget, STORAGE_DRIVER, type StorageDriver, type UploadTarget } from "./storage-driver.interface";
+import {
+  DocumentTooLargeException,
+  UnsupportedDocumentTypeException,
+} from "../../common/errors/api-exception";
+import {
+  type DownloadOptions,
+  DownloadTarget,
+  STORAGE_DRIVER,
+  type StorageDriver,
+  type UploadTarget,
+} from "./storage-driver.interface";
 
 /** Handoff 17: allow-listed MIME types for a medical document — a narrow, explicit set, never "anything the client sends". */
 const HEALTH_DOCUMENT_MIME_EXTENSIONS: Record<string, string> = {
@@ -56,6 +65,16 @@ const TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS: Record<string, string> = {
 };
 const TRAVEL_COMMERCE_MEDIA_MAX_BYTES = 10 * 1024 * 1024; // 10MB
 
+/** Product-gallery images are public catalogue media. The catalog retains at
+ * most three approved images per product; upload validation lives here so a
+ * browser can never mint arbitrary storage targets. */
+const PRODUCT_MEDIA_MIME_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+const PRODUCT_MEDIA_MAX_BYTES = 10 * 1024 * 1024; // 10MB
+
 @Injectable()
 export class StorageService {
   constructor(@Inject(STORAGE_DRIVER) private readonly driver: StorageDriver) {}
@@ -76,6 +95,27 @@ export class StorageService {
   }
 
   /**
+   * A catalogue-product image is public by definition, but it is still
+   * scoped under the product UUID. The confirm endpoint checks that exact
+   * scope before attaching it, preventing a user from reusing an upload
+   * target issued for another product.
+   */
+  async createProductMediaUploadTarget(
+    productId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
+    const extension = PRODUCT_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > PRODUCT_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: PRODUCT_MEDIA_MAX_BYTES });
+    }
+    const key = `product-media/${productId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
+  /**
    * Handoff 17: medical documents live under a PRIVATE key prefix
    * (`health-documents/...`, never `pets/...`'s public-URL scheme) — see the
    * locked principle "private medical documents must never be publicly
@@ -85,7 +125,11 @@ export class StorageService {
    * canRecordClinicalData) BEFORE calling this — this method only validates
    * the file itself.
    */
-  async createHealthDocumentUploadTarget(petId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createHealthDocumentUploadTarget(
+    petId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
@@ -98,17 +142,26 @@ export class StorageService {
   }
 
   /** A private file on a booking (owner ↔ provider). Same file types and size cap as medical documents. */
-  async createBookingAttachmentUploadTarget(bookingId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createBookingAttachmentUploadTarget(
+    bookingId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
-    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
+    if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES)
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: HEALTH_DOCUMENT_MAX_BYTES });
     const key = `booking-attachments/${bookingId}/${randomUUID()}.${extension}`;
     const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }
 
   /** Owner photo/video observations — same private-storage treatment as medical documents, under their own key prefix. */
-  async createObservationMediaUploadTarget(petId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createObservationMediaUploadTarget(
+    petId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = OBSERVATION_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > OBSERVATION_MEDIA_MAX_BYTES) {
@@ -141,7 +194,10 @@ export class StorageService {
   }
 
   /** A completely separate key namespace (`cms/media/...`) from `pets/...` — spec: "strongly separate CMS media authorization from private pet documents." CMS media is meant to be public (blog images), so this uses the same plain-public-URL delivery `createPetPhotoUploadTarget` already established, never a signed-read scheme this codebase has no other precedent for. Returns `key` alongside the target (unlike the pet-photo variant) since the CMS confirm step needs it verbatim, not reconstructed from the URL. */
-  async createCmsMediaUploadTarget(contentType: string, extension: string): Promise<UploadTarget & { key: string }> {
+  async createCmsMediaUploadTarget(
+    contentType: string,
+    extension: string,
+  ): Promise<UploadTarget & { key: string }> {
     const key = `cms/media/${randomUUID()}.${extension}`;
     const target = await this.driver.createUploadTarget(key, contentType);
     return { ...target, key };
@@ -155,7 +211,11 @@ export class StorageService {
    * already real at request time, the same reasoning the private
    * health-document/observation upload targets already use.
    */
-  async createLostPetPhotoUploadTarget(petId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createLostPetPhotoUploadTarget(
+    petId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = LOST_PET_PHOTO_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > LOST_PET_PHOTO_MAX_BYTES) {
@@ -167,7 +227,11 @@ export class StorageService {
   }
 
   /** A sighting's own photo — same allow-list/cap as an incident photo, own key prefix so a sighting's evidence and the incident's own primary photo are never confused. */
-  async createLostPetSightingPhotoUploadTarget(incidentId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createLostPetSightingPhotoUploadTarget(
+    incidentId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = LOST_PET_PHOTO_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > LOST_PET_PHOTO_MAX_BYTES) {
@@ -186,7 +250,12 @@ export class StorageService {
    * PRIVATE reuses the exact `pet-observations/...`-style private prefix/
    * signed-download pattern; PUBLIC reuses the plain public-URL scheme.
    */
-  async createPetMemoryMediaUploadTarget(petId: string, contentType: string, fileSizeBytes: number, visibility: "PRIVATE" | "PUBLIC"): Promise<UploadTarget & { key: string }> {
+  async createPetMemoryMediaUploadTarget(
+    petId: string,
+    contentType: string,
+    fileSizeBytes: number,
+    visibility: "PRIVATE" | "PUBLIC",
+  ): Promise<UploadTarget & { key: string }> {
     const extension = MEMORY_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > MEMORY_MEDIA_MAX_BYTES) {
@@ -199,7 +268,11 @@ export class StorageService {
   }
 
   /** An Animal Support organization's logo or gallery image — public, keyed by organizationId. */
-  async createAnimalSupportOrgMediaUploadTarget(organizationId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createAnimalSupportOrgMediaUploadTarget(
+    organizationId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = ANIMAL_SUPPORT_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > ANIMAL_SUPPORT_MEDIA_MAX_BYTES) {
@@ -211,7 +284,11 @@ export class StorageService {
   }
 
   /** An Insurance provider's logo — public, keyed by providerId. */
-  async createInsuranceProviderLogoUploadTarget(providerId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createInsuranceProviderLogoUploadTarget(
+    providerId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > TRAVEL_COMMERCE_MEDIA_MAX_BYTES) {
@@ -223,7 +300,11 @@ export class StorageService {
   }
 
   /** A Pet-Friendly Place's gallery image — public, keyed by placeId. */
-  async createPetFriendlyPlaceImageUploadTarget(placeId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createPetFriendlyPlaceImageUploadTarget(
+    placeId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > TRAVEL_COMMERCE_MEDIA_MAX_BYTES) {
@@ -235,7 +316,11 @@ export class StorageService {
   }
 
   /** Evidence for a rescue case (or, later, a campaign update) — public, same allow-list, own key prefix per aggregate id. */
-  async createAnimalSupportEvidenceUploadTarget(aggregateId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createAnimalSupportEvidenceUploadTarget(
+    aggregateId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = ANIMAL_SUPPORT_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > ANIMAL_SUPPORT_MEDIA_MAX_BYTES) {
@@ -247,7 +332,11 @@ export class StorageService {
   }
 
   /** Batch 6: an NGO's verification documents — private (same allow-list and limits as medical documents); only admins read them, through signed download targets. */
-  async createOrgVerificationDocumentUploadTarget(organizationId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createOrgVerificationDocumentUploadTarget(
+    organizationId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
@@ -259,7 +348,11 @@ export class StorageService {
   }
 
   /** ERP-F: a support-case attachment — private, same allow-list and limits as medical documents; read only via signed downloads after a case-access check. */
-  async createSupportAttachmentUploadTarget(caseId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createSupportAttachmentUploadTarget(
+    caseId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
@@ -271,7 +364,12 @@ export class StorageService {
   }
 
   /** ERP-C: a provider's or seller's verification evidence — private, same allow-list and limits as medical documents; staff read it only through signed, audited downloads. */
-  async createPartnerVerificationUploadTarget(subject: "provider" | "seller", subjectId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createPartnerVerificationUploadTarget(
+    subject: "provider" | "seller",
+    subjectId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = HEALTH_DOCUMENT_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > HEALTH_DOCUMENT_MAX_BYTES) {
@@ -283,7 +381,11 @@ export class StorageService {
   }
 
   /** Handoff 18: Community post media — public, same allow-list as Memory media, keyed by the posting user's id. Post-hoc moderation (Trust & Safety) governs visibility, not upload-time review. */
-  async createCommunityMediaUploadTarget(userId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createCommunityMediaUploadTarget(
+    userId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = MEMORY_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > MEMORY_MEDIA_MAX_BYTES) {
@@ -300,7 +402,11 @@ export class StorageService {
    * size cap as Community media, keyed by the publishing user. Post-hoc
    * moderation governs visibility, exactly as it does for Community.
    */
-  async createSupportNeedImageUploadTarget(userId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createSupportNeedImageUploadTarget(
+    userId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = MEMORY_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > MEMORY_MEDIA_MAX_BYTES) {
@@ -316,7 +422,11 @@ export class StorageService {
    * public marketplace page), so the key deliberately stays outside
    * PRIVATE_OBJECT_KEY_PREFIXES and resolves through resolveObjectUrls().
    */
-  async createTravelListingImageUploadTarget(organizationId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+  async createTravelListingImageUploadTarget(
+    organizationId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
     const extension = MEMORY_MEDIA_MIME_EXTENSIONS[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     if (fileSizeBytes <= 0 || fileSizeBytes > MEMORY_MEDIA_MAX_BYTES) {

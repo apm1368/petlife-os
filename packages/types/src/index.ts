@@ -6089,6 +6089,9 @@ export interface AdminProductRowDto {
   activeOfferCount: number;
   sellerCount: number;
   rating: RatingSummaryDto;
+  /** Public products require exactly three gallery images; this count lets
+   * admin identify incomplete drafts without inferring it from a boolean. */
+  mediaCount: number;
   hasMedia: boolean;
   createdAt: string;
 }
@@ -6530,7 +6533,11 @@ export interface PetExpensesDto {
 export interface PetYearReviewDto {
   from: string;
   to: string;
-  memories: { total: number; photos: number; highlights: { id: string; title: string; occurredAt: string }[] };
+  memories: {
+    total: number;
+    photos: number;
+    highlights: { id: string; title: string; occurredAt: string }[];
+  };
   care: { completed: number; topTypes: { type: string; count: number }[] } | null;
   services: { completed: number; byCategory: { category: string; count: number }[] } | null;
   trips: { count: number; destinations: string[] } | null;

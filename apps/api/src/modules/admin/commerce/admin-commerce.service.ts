@@ -29,7 +29,11 @@ import {
   ApiException,
   NotFoundApiException,
   OrderNotFoundException,
+  ValidationApiException,
 } from "../../../common/errors/api-exception";
+import { assertObjectKeyUnder } from "../../../common/storage-keys/object-key.validator";
+import { resolveObjectUrl } from "../../storage/object-url.util";
+import { StorageService } from "../../storage/storage.service";
 import { toPaginatedDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
@@ -87,6 +91,7 @@ export class AdminCommerceService {
     private readonly events: DomainEventsService,
     private readonly audit: AdminAuditLogService,
     private readonly refundApprovals: AdminRefundService,
+    private readonly storage: StorageService,
   ) {}
 
   // ---------------------------------------------------------------- orders
@@ -479,6 +484,7 @@ export class AdminCommerceService {
             average: r?._avg.rating ? Math.round(r._avg.rating * 10) / 10 : null,
             count: r?._count._all ?? 0,
           },
+          mediaCount: p._count.media,
           hasMedia: p._count.media > 0,
           createdAt: p.createdAt.toISOString(),
         };
@@ -501,46 +507,134 @@ export class AdminCommerceService {
   async createCatalogProduct(
     admin: ResolvedAdminContext,
     input: {
-      categoryId: string; title: string; slug: string; sku: string; description?: string;
-      variantTitle?: string; supportsDog?: boolean; supportsCat?: boolean; status?: ProductStatus;
+      categoryId: string;
+      title: string;
+      slug: string;
+      sku: string;
+      description?: string;
+      variantTitle?: string;
+      supportsDog?: boolean;
+      supportsCat?: boolean;
+      status?: ProductStatus;
     },
     httpRequestId?: string,
   ) {
+    // Product creation intentionally starts as INACTIVE. Gallery upload is a
+    // separate, direct-to-storage step and cannot happen before a product id
+    // exists, so accepting ACTIVE here would create a bypass around C-03.
+    if (input.status === ProductStatus.ACTIVE) {
+      throw new ApiException(
+        "PRODUCT_MEDIA_INCOMPLETE",
+        "A public product needs exactly three images with alternative text.",
+        HttpStatus.CONFLICT,
+        { mediaCount: 0, hasDescriptiveAlt: false },
+      );
+    }
     const category = await this.prisma.productCategory.findFirst({
-      where: { id: input.categoryId, status: "ACTIVE" }, select: { id: true },
+      where: { id: input.categoryId, status: "ACTIVE" },
+      select: { id: true },
     });
-    if (!category) throw new NotFoundApiException("Active product category", { categoryId: input.categoryId });
-    const duplicate = await this.prisma.product.findFirst({ where: { OR: [{ slug: input.slug.trim() }, { variants: { some: { sku: input.sku.trim() } } }] }, select: { id: true } });
-    if (duplicate) throw new ApiException("PRODUCT_IDENTITY_CONFLICT", "Product slug or SKU already exists.", HttpStatus.CONFLICT);
+    if (!category)
+      throw new NotFoundApiException("Active product category", { categoryId: input.categoryId });
+    const duplicate = await this.prisma.product.findFirst({
+      where: { OR: [{ slug: input.slug.trim() }, { variants: { some: { sku: input.sku.trim() } } }] },
+      select: { id: true },
+    });
+    if (duplicate)
+      throw new ApiException(
+        "PRODUCT_IDENTITY_CONFLICT",
+        "Product slug or SKU already exists.",
+        HttpStatus.CONFLICT,
+      );
     const row = await this.prisma.product.create({
       data: {
-        categoryId: category.id, title: input.title.trim(), slug: input.slug.trim(),
+        categoryId: category.id,
+        title: input.title.trim(),
+        slug: input.slug.trim(),
         description: input.description?.trim() || null,
-        supportsDog: input.supportsDog ?? true, supportsCat: input.supportsCat ?? true,
+        supportsDog: input.supportsDog ?? true,
+        supportsCat: input.supportsCat ?? true,
         status: input.status ?? ProductStatus.INACTIVE,
         variants: { create: { sku: input.sku.trim(), title: input.variantTitle?.trim() || null } },
       },
       select: { id: true, title: true, slug: true, status: true, categoryId: true },
     });
-    await this.audit.record({ adminUserId: admin.adminUserId, action: "product.created", entityType: "PRODUCT", entityId: row.id, afterSummary: { title: row.title, status: row.status, categoryId: row.categoryId }, requestId: httpRequestId });
+    await this.audit.record({
+      adminUserId: admin.adminUserId,
+      action: "product.created",
+      entityType: "PRODUCT",
+      entityId: row.id,
+      afterSummary: { title: row.title, status: row.status, categoryId: row.categoryId },
+      requestId: httpRequestId,
+    });
     return row;
+  }
+
+  /** Draft products may be incomplete, but public catalogue records may not
+   * claim to be ready without the three reviewed, accessible gallery images
+   * required by the approved Shop pattern. This is enforced at the domain
+   * boundary, not only in the admin browser. */
+  private async assertProductReadyForPublic(productId: string): Promise<void> {
+    const media = await this.prisma.productMedia.findMany({
+      where: { productId },
+      select: { alt: true },
+      orderBy: { sortOrder: "asc" },
+    });
+    const hasDescriptiveAlt = media.every((item) => Boolean(item.alt?.trim()));
+    if (media.length !== 3 || !hasDescriptiveAlt) {
+      throw new ApiException(
+        "PRODUCT_MEDIA_INCOMPLETE",
+        "A public product needs exactly three images with alternative text.",
+        HttpStatus.CONFLICT,
+        { mediaCount: media.length, hasDescriptiveAlt },
+      );
+    }
   }
 
   async updateCatalogProduct(
     admin: ResolvedAdminContext,
     productId: string,
-    input: { categoryId?: string; title?: string; slug?: string; description?: string; supportsDog?: boolean; supportsCat?: boolean; status?: ProductStatus },
+    input: {
+      categoryId?: string;
+      title?: string;
+      slug?: string;
+      description?: string;
+      supportsDog?: boolean;
+      supportsCat?: boolean;
+      status?: ProductStatus;
+    },
     httpRequestId?: string,
   ) {
-    const before = await this.prisma.product.findUnique({ where: { id: productId }, select: { id: true, categoryId: true, title: true, slug: true, description: true, supportsDog: true, supportsCat: true, status: true } });
+    const before = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true,
+        categoryId: true,
+        title: true,
+        slug: true,
+        description: true,
+        supportsDog: true,
+        supportsCat: true,
+        status: true,
+      },
+    });
     if (!before) throw new NotFoundApiException("Product", { productId });
+    if (input.status === ProductStatus.ACTIVE) await this.assertProductReadyForPublic(productId);
     if (input.categoryId) {
-      const category = await this.prisma.productCategory.findFirst({ where: { id: input.categoryId, status: "ACTIVE" }, select: { id: true } });
-      if (!category) throw new NotFoundApiException("Active product category", { categoryId: input.categoryId });
+      const category = await this.prisma.productCategory.findFirst({
+        where: { id: input.categoryId, status: "ACTIVE" },
+        select: { id: true },
+      });
+      if (!category)
+        throw new NotFoundApiException("Active product category", { categoryId: input.categoryId });
     }
     if (input.slug && input.slug.trim() !== before.slug) {
-      const duplicate = await this.prisma.product.findUnique({ where: { slug: input.slug.trim() }, select: { id: true } });
-      if (duplicate) throw new ApiException("PRODUCT_SLUG_CONFLICT", "Product slug already exists.", HttpStatus.CONFLICT);
+      const duplicate = await this.prisma.product.findUnique({
+        where: { slug: input.slug.trim() },
+        select: { id: true },
+      });
+      if (duplicate)
+        throw new ApiException("PRODUCT_SLUG_CONFLICT", "Product slug already exists.", HttpStatus.CONFLICT);
     }
     const data = {
       ...(input.categoryId ? { categoryId: input.categoryId } : {}),
@@ -551,8 +645,20 @@ export class AdminCommerceService {
       ...(input.supportsCat !== undefined ? { supportsCat: input.supportsCat } : {}),
       ...(input.status ? { status: input.status } : {}),
     };
-    const row = await this.prisma.product.update({ where: { id: productId }, data, select: { id: true, title: true, slug: true, status: true, categoryId: true } });
-    await this.audit.record({ adminUserId: admin.adminUserId, action: "product.updated", entityType: "PRODUCT", entityId: productId, beforeSummary: before, afterSummary: row, requestId: httpRequestId });
+    const row = await this.prisma.product.update({
+      where: { id: productId },
+      data,
+      select: { id: true, title: true, slug: true, status: true, categoryId: true },
+    });
+    await this.audit.record({
+      adminUserId: admin.adminUserId,
+      action: "product.updated",
+      entityType: "PRODUCT",
+      entityId: productId,
+      beforeSummary: before,
+      afterSummary: row,
+      requestId: httpRequestId,
+    });
     return row;
   }
 
@@ -568,6 +674,7 @@ export class AdminCommerceService {
       select: { status: true },
     });
     if (!before) throw new NotFoundApiException("Product", { productId });
+    if (status === ProductStatus.ACTIVE) await this.assertProductReadyForPublic(productId);
     const row = await this.prisma.product.update({ where: { id: productId }, data: { status } });
     await this.audit.record({
       adminUserId: admin.adminUserId,
@@ -580,6 +687,169 @@ export class AdminCommerceService {
       requestId: httpRequestId,
     });
     return { id: row.id, status: row.status };
+  }
+
+  // ---------------------------------------------------------- product media
+
+  private async productOrThrow(productId: string): Promise<void> {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
+    });
+    if (!product) throw new NotFoundApiException("Product", { productId });
+  }
+
+  async listProductMedia(productId: string) {
+    await this.productOrThrow(productId);
+    const media = await this.prisma.productMedia.findMany({
+      where: { productId },
+      orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+      select: { id: true, url: true, alt: true, variantId: true, sortOrder: true, createdAt: true },
+    });
+    return media.map((item) => ({ ...item, createdAt: item.createdAt.toISOString() }));
+  }
+
+  async requestProductMediaUpload(productId: string, input: { contentType: string; fileSizeBytes: number }) {
+    await this.productOrThrow(productId);
+    const count = await this.prisma.productMedia.count({ where: { productId } });
+    if (count >= 3) {
+      throw new ApiException(
+        "PRODUCT_MEDIA_LIMIT_REACHED",
+        "A product can have at most three images. Remove one before adding another.",
+        HttpStatus.CONFLICT,
+        { maximum: 3 },
+      );
+    }
+    return this.storage.createProductMediaUploadTarget(productId, input.contentType, input.fileSizeBytes);
+  }
+
+  async confirmProductMediaUpload(
+    admin: ResolvedAdminContext,
+    productId: string,
+    input: { objectKey: string; alt: string; variantId?: string },
+    httpRequestId?: string,
+  ) {
+    await this.productOrThrow(productId);
+    assertObjectKeyUnder(input.objectKey, "product-media", productId);
+    const alt = input.alt.trim();
+    if (!alt) throw new ValidationApiException({ field: "alt", reason: "REQUIRED" });
+    if (input.variantId) {
+      const variant = await this.prisma.productVariant.findFirst({
+        where: { id: input.variantId, productId },
+        select: { id: true },
+      });
+      if (!variant) throw new ValidationApiException({ field: "variantId", reason: "NOT_IN_PRODUCT" });
+    }
+
+    const row = await this.prisma.$transaction(async (tx) => {
+      const count = await tx.productMedia.count({ where: { productId } });
+      if (count >= 3) {
+        throw new ApiException(
+          "PRODUCT_MEDIA_LIMIT_REACHED",
+          "A product can have at most three images. Remove one before adding another.",
+          HttpStatus.CONFLICT,
+          { maximum: 3 },
+        );
+      }
+      const created = await tx.productMedia.create({
+        data: {
+          productId,
+          variantId: input.variantId ?? null,
+          objectKey: input.objectKey,
+          url: resolveObjectUrl(input.objectKey)!,
+          alt,
+          sortOrder: count,
+        },
+        select: { id: true, url: true, alt: true, variantId: true, sortOrder: true, createdAt: true },
+      });
+      await this.audit.record({
+        adminUserId: admin.adminUserId,
+        action: "product.media_added",
+        entityType: "PRODUCT",
+        entityId: productId,
+        afterSummary: { mediaId: created.id, variantId: created.variantId, sortOrder: created.sortOrder },
+        requestId: httpRequestId,
+        tx,
+      });
+      return created;
+    });
+    return { ...row, createdAt: row.createdAt.toISOString() };
+  }
+
+  async reorderProductMedia(
+    admin: ResolvedAdminContext,
+    productId: string,
+    mediaIds: string[],
+    httpRequestId?: string,
+  ) {
+    await this.productOrThrow(productId);
+    if (new Set(mediaIds).size !== mediaIds.length) {
+      throw new ValidationApiException({ field: "mediaIds", reason: "DUPLICATE_MEDIA_ID" });
+    }
+    const existing = await this.prisma.productMedia.findMany({
+      where: { productId },
+      select: { id: true, sortOrder: true },
+      orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+    });
+    if (existing.length !== mediaIds.length || existing.some((item) => !mediaIds.includes(item.id))) {
+      throw new ValidationApiException({ field: "mediaIds", reason: "MUST_CONTAIN_EVERY_PRODUCT_MEDIA_ID" });
+    }
+    await this.prisma.$transaction(async (tx) => {
+      await Promise.all(
+        mediaIds.map((id, sortOrder) => tx.productMedia.update({ where: { id }, data: { sortOrder } })),
+      );
+      await this.audit.record({
+        adminUserId: admin.adminUserId,
+        action: "product.media_reordered",
+        entityType: "PRODUCT",
+        entityId: productId,
+        beforeSummary: { mediaIds: existing.map((item) => item.id) },
+        afterSummary: { mediaIds },
+        requestId: httpRequestId,
+        tx,
+      });
+    });
+    return this.listProductMedia(productId);
+  }
+
+  async removeProductMedia(
+    admin: ResolvedAdminContext,
+    productId: string,
+    mediaId: string,
+    httpRequestId?: string,
+  ) {
+    await this.productOrThrow(productId);
+    const existing = await this.prisma.productMedia.findFirst({
+      where: { id: mediaId, productId },
+      select: { id: true, variantId: true, sortOrder: true },
+    });
+    if (!existing) throw new NotFoundApiException("Product media", { productId, mediaId });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.productMedia.delete({ where: { id: mediaId } });
+      const remaining = await tx.productMedia.findMany({
+        where: { productId },
+        select: { id: true },
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+      });
+      await Promise.all(
+        remaining.map((item, sortOrder) =>
+          tx.productMedia.update({ where: { id: item.id }, data: { sortOrder } }),
+        ),
+      );
+      await this.audit.record({
+        adminUserId: admin.adminUserId,
+        action: "product.media_removed",
+        entityType: "PRODUCT",
+        entityId: productId,
+        beforeSummary: { mediaId: existing.id, variantId: existing.variantId, sortOrder: existing.sortOrder },
+        requestId: httpRequestId,
+        tx,
+      });
+    });
+    // The object is deliberately retained under storage lifecycle policy.
+    // Deleting a database link must not race an in-flight CDN read; the
+    // unreachable object can be reclaimed by an audited storage sweeper.
+    return { removed: true as const, mediaId };
   }
 
   async listSellerOffersForModeration(query: {
