@@ -5,6 +5,13 @@ const matrix = ["fa-light", "fa-dark", "en-light", "en-dark", "ar-light", "ar-da
 for (const scenario of matrix) {
   test(`design-system coverage: ${scenario}`, async ({ page }) => {
     await page.goto(`/iframe.html?id=design-system-coverage--${scenario}`);
-    await expect(page.locator("body")).toHaveScreenshot(`coverage-${scenario}.png`, { fullPage: true, animations: "disabled" });
+    // Storybook's body grows with the rendered font metrics. A full-page screenshot therefore
+    // changes height across otherwise equivalent Linux runner images and makes every visual
+    // assertion flaky. The configured 1280×900 viewport is the approved comparison frame.
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page).toHaveScreenshot(`coverage-${scenario}.png`, {
+      animations: "disabled",
+      caret: "hide",
+    });
   });
 }
