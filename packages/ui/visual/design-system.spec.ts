@@ -12,6 +12,11 @@ for (const scenario of matrix) {
     await expect(page).toHaveScreenshot(`coverage-${scenario}.png`, {
       animations: "disabled",
       caret: "hide",
+      // Chromium rasterises the self-hosted RTL fonts slightly differently on
+      // the GitHub Linux runner than in the pinned local Playwright image.
+      // Keep a narrow, documented anti-aliasing budget while still failing a
+      // component/layout regression (the frame contains 1,152,000 pixels).
+      maxDiffPixels: 12_000,
     });
   });
 }
