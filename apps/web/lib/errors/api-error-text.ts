@@ -65,6 +65,7 @@ const FA: Record<string, string> = {
   PAYMENT_PROVIDER_UNAVAILABLE: "این درگاه پرداخت فعلاً در دسترس نیست.",
   PAYMENT_STATE_UNKNOWN: "وضعیت پرداخت هنوز مشخص نیست.",
   PET_ACCESS_DENIED: "به این حیوان دسترسی ندارید.",
+  PET_LIFECYCLE_CORRECTION_WINDOW_EXPIRED: "مهلت اصلاح مستقیم این وضعیت تمام شده است. برای ادامه، از پشتیبانی کمک بگیرید.",
   PET_CONTEXT_INCOMPLETE: "برای رزرو این خدمت، اطلاعات بیشتری از حیوان لازم است.",
   PET_NOT_SUPPORTED: "این ارائه‌دهنده این خدمت را برای این گونه ارائه نمی‌دهد.",
   PRICE_CHANGED: "قیمت این کالا از زمان افزودن به سبد تغییر کرده است.",

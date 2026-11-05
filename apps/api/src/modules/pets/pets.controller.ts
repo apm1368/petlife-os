@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
-import { IsIn, IsOptional, IsString } from "class-validator";
+import { IsIn, IsOptional, IsString, Length } from "class-validator";
 import type { PetAccessFlags } from "@petlife/types";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
@@ -21,6 +21,12 @@ class PetLifecycleTransitionDto {
   @IsOptional()
   @IsString()
   reason?: string;
+}
+
+class CorrectPetLifecycleDto {
+  @IsString()
+  @Length(3, 500)
+  reason!: string;
 }
 
 @Controller("pets")
@@ -70,13 +76,31 @@ export class PetsController {
 
   @Post(":id/mark-deceased")
   @RequirePetAccess("canEditIdentity")
-  markDeceased(@Param("id") id: string, @CurrentUser() user: SessionUser, @Body() dto: PetLifecycleTransitionDto) {
+  markDeceased(
+    @Param("id") id: string,
+    @CurrentUser() user: SessionUser,
+    @Body() dto: PetLifecycleTransitionDto,
+  ) {
     return this.petsService.markDeceased(id, user.id, dto.reason);
   }
 
   @Post(":id/transition-to-memorial")
   @RequirePetAccess("canEditIdentity")
-  transitionToMemorial(@Param("id") id: string, @CurrentUser() user: SessionUser, @Body() dto: PetLifecycleTransitionDto) {
+  transitionToMemorial(
+    @Param("id") id: string,
+    @CurrentUser() user: SessionUser,
+    @Body() dto: PetLifecycleTransitionDto,
+  ) {
     return this.petsService.transitionToMemorial(id, user.id, dto.reason);
+  }
+
+  @Post(":id/correct-lifecycle-to-active")
+  @RequirePetAccess("canEditIdentity")
+  correctLifecycleToActive(
+    @Param("id") id: string,
+    @CurrentUser() user: SessionUser,
+    @Body() dto: CorrectPetLifecycleDto,
+  ) {
+    return this.petsService.correctLifecycleToActive(id, user.id, dto.reason);
   }
 }

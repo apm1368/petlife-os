@@ -1,6 +1,6 @@
 import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
-import { AdminMembershipStatus, AdminRole, PetLifecycleStatus } from "@prisma/client";
+import { AdminMembershipStatus, AdminRole, HouseholdRole, PetLifecycleStatus } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
 import { AdminDonationService } from "../src/modules/animal-support/admin-donation.service";
@@ -15,7 +15,9 @@ interface Cookies {
 }
 
 function captureOtpCode(logSpy: jest.SpyInstance, identifier: string): string {
-  const call = logSpy.mock.calls.find((args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(identifier));
+  const call = logSpy.mock.calls.find(
+    (args) => typeof args[0] === "string" && args[0].includes("[DEV OTP]") && args[0].includes(identifier),
+  );
   if (!call) throw new Error(`No OTP log found for ${identifier}`);
   const match = /code=(\d+)/.exec(call[0] as string);
   if (!match) throw new Error("Could not parse OTP code from log line");
@@ -29,9 +31,19 @@ async function primeCsrf(app: INestApplication): Promise<Cookies> {
 
 async function signUp(app: INestApplication, logSpy: jest.SpyInstance, identifier: string): Promise<Cookies> {
   const primed = await primeCsrf(app);
-  await request(app.getHttpServer()).post("/auth/request-otp").set("Cookie", `petlife_csrf=${primed.csrf}`).set("x-csrf-token", primed.csrf!).send({ identifier }).expect(200);
+  await request(app.getHttpServer())
+    .post("/auth/request-otp")
+    .set("Cookie", `petlife_csrf=${primed.csrf}`)
+    .set("x-csrf-token", primed.csrf!)
+    .send({ identifier })
+    .expect(200);
   const code = captureOtpCode(logSpy, identifier);
-  const verifyRes = await request(app.getHttpServer()).post("/auth/verify-otp").set("Cookie", `petlife_csrf=${primed.csrf}`).set("x-csrf-token", primed.csrf!).send({ identifier, code }).expect(200);
+  const verifyRes = await request(app.getHttpServer())
+    .post("/auth/verify-otp")
+    .set("Cookie", `petlife_csrf=${primed.csrf}`)
+    .set("x-csrf-token", primed.csrf!)
+    .send({ identifier, code })
+    .expect(200);
   const session = extractCookie(verifyRes.headers["set-cookie"], "petlife_session");
   return { session, csrf: primed.csrf };
 }
@@ -40,9 +52,12 @@ function authedRequest(app: INestApplication, cookies: Cookies) {
   const cookieHeader = `petlife_session=${cookies.session}; petlife_csrf=${cookies.csrf}`;
   return {
     get: (url: string) => request(app.getHttpServer()).get(url).set("Cookie", cookieHeader),
-    post: (url: string) => request(app.getHttpServer()).post(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
-    patch: (url: string) => request(app.getHttpServer()).patch(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
-    delete: (url: string) => request(app.getHttpServer()).delete(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
+    post: (url: string) =>
+      request(app.getHttpServer()).post(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
+    patch: (url: string) =>
+      request(app.getHttpServer()).patch(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
+    delete: (url: string) =>
+      request(app.getHttpServer()).delete(url).set("Cookie", cookieHeader).set("x-csrf-token", cookies.csrf!),
   };
 }
 
@@ -81,7 +96,10 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const ownerUser = await prisma.user.findUniqueOrThrow({ where: { email: identifier } });
     const household = await client.post("/households").send({}).expect(201);
     const householdId = household.body.id as string;
-    const pet = await client.post(`/households/${householdId}/pets`).send({ name: petName, species: "DOG", approximateAgeMonths: 30 }).expect(201);
+    const pet = await client
+      .post(`/households/${householdId}/pets`)
+      .send({ name: petName, species: "DOG", approximateAgeMonths: 30 })
+      .expect(201);
     return { client, householdId, ownerUserId: ownerUser.id as string, petId: pet.body.id as string };
   }
 
@@ -93,14 +111,32 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     return { client, userId: user.id as string };
   }
 
-  async function setupVerifiedOrgWithActiveCampaign(admin: ReturnType<typeof setupAdmin> extends Promise<infer T> ? T : never, fundType: "GENERAL" | "RESTRICTED") {
-    const org = await admin.client.post("/admin/animal-support/organizations").send({ type: "NGO", name: `Rescue Org ${unique()}` }).expect(201);
+  async function setupVerifiedOrgWithActiveCampaign(
+    admin: ReturnType<typeof setupAdmin> extends Promise<infer T> ? T : never,
+    fundType: "GENERAL" | "RESTRICTED",
+  ) {
+    const org = await admin.client
+      .post("/admin/animal-support/organizations")
+      .send({ type: "NGO", name: `Rescue Org ${unique()}` })
+      .expect(201);
     const organizationId = org.body.id as string;
-    await admin.client.post(`/admin/animal-support/organizations/${organizationId}/verification`).send({ verificationStatus: "VERIFIED" }).expect(201);
-    await admin.client.post(`/admin/animal-support/organizations/${organizationId}/listing`).send({ isPubliclyListed: true }).expect(201);
-    const campaign = await admin.client.post(`/admin/animal-support/organizations/${organizationId}/campaigns`).send({ title: `Campaign ${unique()}`, description: "Help the animals", fundType }).expect(201);
+    await admin.client
+      .post(`/admin/animal-support/organizations/${organizationId}/verification`)
+      .send({ verificationStatus: "VERIFIED" })
+      .expect(201);
+    await admin.client
+      .post(`/admin/animal-support/organizations/${organizationId}/listing`)
+      .send({ isPubliclyListed: true })
+      .expect(201);
+    const campaign = await admin.client
+      .post(`/admin/animal-support/organizations/${organizationId}/campaigns`)
+      .send({ title: `Campaign ${unique()}`, description: "Help the animals", fundType })
+      .expect(201);
     const campaignId = campaign.body.id as string;
-    await admin.client.patch(`/admin/animal-support/campaigns/${campaignId}/status`).send({ status: "ACTIVE" }).expect(200);
+    await admin.client
+      .patch(`/admin/animal-support/campaigns/${campaignId}/status`)
+      .send({ status: "ACTIVE" })
+      .expect(200);
     return { organizationId, campaignId };
   }
 
@@ -111,7 +147,12 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
 
     const incident = await client
       .post(`/pets/${petId}/lost-incidents`)
-      .send({ description: "Ran off during a walk", lastKnownLocation: "Central Park", privateNotes: "Chip number 12345", contactPreference: "IN_APP_MESSAGE" })
+      .send({
+        description: "Ran off during a walk",
+        lastKnownLocation: "Central Park",
+        privateNotes: "Chip number 12345",
+        contactPreference: "IN_APP_MESSAGE",
+      })
       .expect(201);
     const incidentId = incident.body.id as string;
     expect(incident.body.status).toBe("OPEN");
@@ -126,11 +167,148 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     expect(publicView.body.petName).toBe("Luna");
   });
 
+  it("PT-03: an owner can correct a recent accidental LOST state, preserving the lifecycle trail and closing the false public incident", async () => {
+    const { client, petId } = await setupHousehold();
+    const incident = await client
+      .post(`/pets/${petId}/lost-incidents`)
+      .send({ description: "This report was opened by mistake", contactPreference: "IN_APP_MESSAGE" })
+      .expect(201);
+
+    await client
+      .post(`/pets/${petId}/correct-lifecycle-to-active`)
+      .send({ reason: "The pet was safely at home; this was an accidental report." })
+      .expect(201);
+
+    await expect(prisma.pet.findUniqueOrThrow({ where: { id: petId } })).resolves.toMatchObject({
+      lifecycleStatus: PetLifecycleStatus.ACTIVE,
+    });
+    await expect(
+      prisma.lostPetIncident.findUniqueOrThrow({ where: { id: incident.body.id } }),
+    ).resolves.toMatchObject({ status: "CLOSED" });
+    const transitions = await prisma.petLifecycleTransition.findMany({
+      where: { petId },
+      orderBy: { createdAt: "asc" },
+    });
+    expect(
+      transitions.map((transition) => [transition.fromStatus, transition.toStatus, transition.sourceType]),
+    ).toEqual([
+      [PetLifecycleStatus.ACTIVE, PetLifecycleStatus.LOST, "LOST_PET_INCIDENT"],
+      [PetLifecycleStatus.LOST, PetLifecycleStatus.ACTIVE, "MANUAL_CORRECTION"],
+    ]);
+    await request(app.getHttpServer()).get(`/lost-pets/${incident.body.id}`).expect(404);
+  });
+
+  it("PT-03: correction is owner-only and expires after seven days", async () => {
+    const { client, householdId, petId } = await setupHousehold();
+    await client.post(`/pets/${petId}/mark-deceased`).send({ reason: "Recorded by mistake" }).expect(201);
+
+    const memberIdentifier = `h18-family-${unique()}@example.com`;
+    const memberClient = authedRequest(app, await signUp(app, logSpy, memberIdentifier));
+    const member = await prisma.user.findUniqueOrThrow({ where: { email: memberIdentifier } });
+    await prisma.householdMember.create({
+      data: { householdId, userId: member.id, role: HouseholdRole.FAMILY },
+    });
+    await prisma.petAccessGrant.create({ data: { petId, userId: member.id, canEditIdentity: true } });
+    await memberClient
+      .post(`/pets/${petId}/correct-lifecycle-to-active`)
+      .send({ reason: "A family member cannot make this correction." })
+      .expect(403);
+
+    await prisma.petLifecycleTransition.updateMany({
+      where: { petId, toStatus: PetLifecycleStatus.DECEASED },
+      data: { createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) },
+    });
+    const expired = await client
+      .post(`/pets/${petId}/correct-lifecycle-to-active`)
+      .send({ reason: "This request is intentionally outside the owner self-service window." })
+      .expect(409);
+    expect(expired.body.error.code).toBe("PET_LIFECYCLE_CORRECTION_WINDOW_EXPIRED");
+    await expect(prisma.pet.findUniqueOrThrow({ where: { id: petId } })).resolves.toMatchObject({
+      lifecycleStatus: PetLifecycleStatus.DECEASED,
+    });
+  });
+
+  it("PT-03: an owner can correct a recent accidental deceased state with an immutable correction transition", async () => {
+    const { client, petId } = await setupHousehold();
+    await client.post(`/pets/${petId}/mark-deceased`).send({ reason: "Recorded by mistake" }).expect(201);
+    await client
+      .post(`/pets/${petId}/correct-lifecycle-to-active`)
+      .send({ reason: "The pet is alive; the prior lifecycle action was accidental." })
+      .expect(201);
+
+    const pet = await prisma.pet.findUniqueOrThrow({ where: { id: petId } });
+    expect(pet.lifecycleStatus).toBe(PetLifecycleStatus.ACTIVE);
+    const correction = await prisma.petLifecycleTransition.findFirstOrThrow({
+      where: { petId, sourceType: "MANUAL_CORRECTION" },
+    });
+    expect(correction).toMatchObject({
+      fromStatus: PetLifecycleStatus.DECEASED,
+      toStatus: PetLifecycleStatus.ACTIVE,
+      actorUserId: expect.any(String),
+    });
+  });
+
+  it("PT-12/PT-03: deceased status safely pauses open care and a valid correction restores only lifecycle-paused reminders", async () => {
+    const { client, ownerUserId, petId } = await setupHousehold();
+    const dueAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const openReminder = await prisma.careReminder.create({
+      data: {
+        petId,
+        createdByUserId: ownerUserId,
+        title: "Vaccination follow-up",
+        type: "FOLLOW_UP",
+        dueAt,
+        originalDueAt: dueAt,
+      },
+    });
+    const manuallyCancelled = await prisma.careReminder.create({
+      data: {
+        petId,
+        createdByUserId: ownerUserId,
+        title: "Old reminder",
+        type: "CUSTOM",
+        dueAt,
+        originalDueAt: dueAt,
+        state: "CANCELLED",
+        cancelledAt: new Date(),
+      },
+    });
+
+    await client.post(`/pets/${petId}/mark-deceased`).send({ reason: "Recorded by mistake" }).expect(201);
+    await expect(prisma.careReminder.findUniqueOrThrow({ where: { id: openReminder.id } })).resolves.toMatchObject({
+      state: "CANCELLED",
+      lifecycleSuspendedState: "UPCOMING",
+      lifecycleSuspendedAt: expect.any(Date),
+    });
+    await expect(prisma.careReminder.findUniqueOrThrow({ where: { id: manuallyCancelled.id } })).resolves.toMatchObject({
+      state: "CANCELLED",
+      lifecycleSuspendedAt: null,
+    });
+
+    await client
+      .post(`/pets/${petId}/correct-lifecycle-to-active`)
+      .send({ reason: "The pet is alive; restore the safely paused care plan." })
+      .expect(201);
+    await expect(prisma.careReminder.findUniqueOrThrow({ where: { id: openReminder.id } })).resolves.toMatchObject({
+      state: "UPCOMING",
+      cancelledAt: null,
+      lifecycleSuspendedAt: null,
+      lifecycleSuspendedState: null,
+    });
+    await expect(prisma.careReminder.findUniqueOrThrow({ where: { id: manuallyCancelled.id } })).resolves.toMatchObject({
+      state: "CANCELLED",
+      lifecycleSuspendedAt: null,
+    });
+  });
+
   // -- Flow C + D: Sighting + Reunification ---------------------------------
 
   it("Flow C/D: an anonymous sighting is accepted without exposing the reporter, and reuniting returns the pet to ACTIVE", async () => {
     const { client, petId } = await setupHousehold();
-    const incident = await client.post(`/pets/${petId}/lost-incidents`).send({ description: "Lost near the park" }).expect(201);
+    const incident = await client
+      .post(`/pets/${petId}/lost-incidents`)
+      .send({ description: "Lost near the park" })
+      .expect(201);
     const incidentId = incident.body.id as string;
 
     const primed = await primeCsrf(app);
@@ -138,7 +316,11 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
       .post(`/lost-pets/${incidentId}/sightings`)
       .set("Cookie", `petlife_csrf=${primed.csrf}`)
       .set("x-csrf-token", primed.csrf!)
-      .send({ location: "5th Ave", seenAt: new Date().toISOString(), description: "Saw a dog matching the description" })
+      .send({
+        location: "5th Ave",
+        seenAt: new Date().toISOString(),
+        description: "Saw a dog matching the description",
+      })
       .expect(201);
     expect(sighting.body.isAnonymous).toBe(true);
     expect(sighting.body.reporterUserId).toBeNull();
@@ -157,10 +339,16 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
 
   it("Flow L: sharing an incident to community creates a distribution post without affecting the incident", async () => {
     const { client, petId } = await setupHousehold();
-    const incident = await client.post(`/pets/${petId}/lost-incidents`).send({ description: "Lost near downtown" }).expect(201);
+    const incident = await client
+      .post(`/pets/${petId}/lost-incidents`)
+      .send({ description: "Lost near downtown" })
+      .expect(201);
     const incidentId = incident.body.id as string;
 
-    const post = await client.post(`/pets/${petId}/lost-incidents/${incidentId}/share-to-community`).send({}).expect(201);
+    const post = await client
+      .post(`/pets/${petId}/lost-incidents/${incidentId}/share-to-community`)
+      .send({})
+      .expect(201);
     expect(post.body.sourceType).toBe("LOST_PET_INCIDENT");
     expect(post.body.sourceLostPetIncidentId).toBe(incidentId);
 
@@ -172,16 +360,29 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
 
   it("Flow F: only a VERIFIED and publicly-listed organization is visible on the public directory", async () => {
     const admin = await setupAdmin(AdminRole.ADMIN);
-    const org = await admin.client.post("/admin/animal-support/organizations").send({ type: "SHELTER", name: `Shelter ${unique()}` }).expect(201);
+    const org = await admin.client
+      .post("/admin/animal-support/organizations")
+      .send({ type: "SHELTER", name: `Shelter ${unique()}` })
+      .expect(201);
     const organizationId = org.body.id as string;
 
-    const hiddenBefore = await request(app.getHttpServer()).get(`/animal-support/organizations/${organizationId}`);
+    const hiddenBefore = await request(app.getHttpServer()).get(
+      `/animal-support/organizations/${organizationId}`,
+    );
     expect(hiddenBefore.status).toBe(404);
 
-    await admin.client.post(`/admin/animal-support/organizations/${organizationId}/verification`).send({ verificationStatus: "VERIFIED" }).expect(201);
-    await admin.client.post(`/admin/animal-support/organizations/${organizationId}/listing`).send({ isPubliclyListed: true }).expect(201);
+    await admin.client
+      .post(`/admin/animal-support/organizations/${organizationId}/verification`)
+      .send({ verificationStatus: "VERIFIED" })
+      .expect(201);
+    await admin.client
+      .post(`/admin/animal-support/organizations/${organizationId}/listing`)
+      .send({ isPubliclyListed: true })
+      .expect(201);
 
-    const visible = await request(app.getHttpServer()).get(`/animal-support/organizations/${organizationId}`).expect(200);
+    const visible = await request(app.getHttpServer())
+      .get(`/animal-support/organizations/${organizationId}`)
+      .expect(200);
     expect(visible.body.verificationStatus).toBe("VERIFIED");
   });
 
@@ -191,9 +392,16 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const finance = await setupAdmin(AdminRole.FINANCE);
     const { organizationId, campaignId } = await setupVerifiedOrgWithActiveCampaign(manager, "RESTRICTED");
     const { client: donor } = await setupHousehold();
-    await donor.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 500_000 }).expect(201);
+    await donor
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 500_000 })
+      .expect(201);
     const orgPath = `/admin/animal-support/organizations/${organizationId}`;
-    const payout = { amountIrr: 100_000, fundType: "RESTRICTED", reason: "Existing bank receipt, ledger record only" };
+    const payout = {
+      amountIrr: 100_000,
+      fundType: "RESTRICTED",
+      reason: "Existing bank receipt, ledger record only",
+    };
     await reader.client.get(`${orgPath}/fund-balance`).expect(200);
     await reader.client.patch(orgPath).send({ description: "Must not be written" }).expect(403);
     await reader.client.post(`${orgPath}/payouts`).send(payout).expect(403);
@@ -201,13 +409,26 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     await finance.client.patch(orgPath).send({ description: "Finance cannot edit" }).expect(403);
     await donor.get(`${orgPath}/fund-balance`).expect(403);
     await finance.client.post(`${orgPath}/payouts`).send(payout).expect(201);
-    expect((await reader.client.get(`${orgPath}/fund-balance`).expect(200)).body.restrictedAvailableIrr).toBe(400_000);
-    expect(await prisma.donationLedgerTransaction.count({ where: { organizationId, referenceType: "PAYOUT" } })).toBe(1);
+    expect((await reader.client.get(`${orgPath}/fund-balance`).expect(200)).body.restrictedAvailableIrr).toBe(
+      400_000,
+    );
+    expect(
+      await prisma.donationLedgerTransaction.count({ where: { organizationId, referenceType: "PAYOUT" } }),
+    ).toBe(1);
   });
 
   it("organization PATCH preserves omitted fields, explicitly clears nullable text and rejects null names", async () => {
     const admin = await setupAdmin(AdminRole.ADMIN);
-    const created = await admin.client.post("/admin/animal-support/organizations").send({ type: "SHELTER", name: `Patch org ${unique()}`, description: "Original description", location: "Tehran", contactEmail: "shelter@example.test" }).expect(201);
+    const created = await admin.client
+      .post("/admin/animal-support/organizations")
+      .send({
+        type: "SHELTER",
+        name: `Patch org ${unique()}`,
+        description: "Original description",
+        location: "Tehran",
+        contactEmail: "shelter@example.test",
+      })
+      .expect(201);
     const url = `/admin/animal-support/organizations/${created.body.id}`;
     const updated = await admin.client.patch(url).send({ description: null }).expect(200);
     expect(updated.body.description).toBeNull();
@@ -219,21 +440,48 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
 
   it("rescue evidence registration is case-scoped, deduplicated and permission protected", async () => {
     const admin = await setupAdmin(AdminRole.ADMIN);
-    const org = await admin.client.post("/admin/animal-support/organizations").send({ type: "SHELTER", name: `Evidence org ${unique()}` }).expect(201);
-    const rescue = await admin.client.post(`/admin/animal-support/organizations/${org.body.id}/rescue-cases`).send({ title: "Rescue case", description: "Treatment" }).expect(201);
+    const org = await admin.client
+      .post("/admin/animal-support/organizations")
+      .send({ type: "SHELTER", name: `Evidence org ${unique()}` })
+      .expect(201);
+    const rescue = await admin.client
+      .post(`/admin/animal-support/organizations/${org.body.id}/rescue-cases`)
+      .send({ title: "Rescue case", description: "Treatment" })
+      .expect(201);
     const url = `/admin/animal-support/rescue-cases/${rescue.body.id}/evidence`;
-    const target = await admin.client.post(`/admin/animal-support/rescue-cases/${rescue.body.id}/evidence-upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 10 }).expect(201);
+    const target = await admin.client
+      .post(`/admin/animal-support/rescue-cases/${rescue.body.id}/evidence-upload-url`)
+      .send({ contentType: "image/jpeg", fileSizeBytes: 10 })
+      .expect(201);
     const key = target.body.key as string;
-    const other = await admin.client.post(`/admin/animal-support/organizations/${org.body.id}/rescue-cases`).send({ title: "Other real rescue case", description: "Separate evidence scope" }).expect(201);
-    const foreignTarget = await admin.client.post(`/admin/animal-support/rescue-cases/${other.body.id}/evidence-upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 10 }).expect(201);
-    await admin.client.post(url).send({ evidenceObjectKeys: [foreignTarget.body.key] }).expect(400);
+    const other = await admin.client
+      .post(`/admin/animal-support/organizations/${org.body.id}/rescue-cases`)
+      .send({ title: "Other real rescue case", description: "Separate evidence scope" })
+      .expect(201);
+    const foreignTarget = await admin.client
+      .post(`/admin/animal-support/rescue-cases/${other.body.id}/evidence-upload-url`)
+      .send({ contentType: "image/jpeg", fileSizeBytes: 10 })
+      .expect(201);
+    await admin.client
+      .post(url)
+      .send({ evidenceObjectKeys: [foreignTarget.body.key] })
+      .expect(400);
     await admin.client.post(url).send({ evidenceObjectKeys: [] }).expect(400);
-    const registered = await admin.client.post(url).send({ evidenceObjectKeys: [key] }).expect(201);
+    const registered = await admin.client
+      .post(url)
+      .send({ evidenceObjectKeys: [key] })
+      .expect(201);
     expect(registered.body.evidenceObjectKeys).toEqual([key]);
-    const repeated = await admin.client.post(url).send({ evidenceObjectKeys: [key] }).expect(201);
+    const repeated = await admin.client
+      .post(url)
+      .send({ evidenceObjectKeys: [key] })
+      .expect(201);
     expect(repeated.body.evidenceObjectKeys).toEqual([key]);
     const consumer = await setupHousehold();
-    await consumer.client.post(url).send({ evidenceObjectKeys: [key] }).expect(403);
+    await consumer.client
+      .post(url)
+      .send({ evidenceObjectKeys: [key] })
+      .expect(403);
   });
 
   // -- Flow G: Restricted Donation fund separation ---------------------------
@@ -243,9 +491,14 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { organizationId, campaignId } = await setupVerifiedOrgWithActiveCampaign(admin, "RESTRICTED");
     const { client: donorClient } = await setupHousehold();
 
-    await donorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 500_000 }).expect(201);
+    await donorClient
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 500_000 })
+      .expect(201);
 
-    const balance = await admin.client.get(`/admin/animal-support/organizations/${organizationId}/fund-balance`).expect(200);
+    const balance = await admin.client
+      .get(`/admin/animal-support/organizations/${organizationId}/fund-balance`)
+      .expect(200);
     expect(balance.body.restrictedAvailableIrr).toBe(500_000);
     expect(balance.body.generalAvailableIrr).toBe(0);
   });
@@ -254,18 +507,31 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const admin = await setupAdmin(AdminRole.ADMIN);
     const { organizationId, campaignId } = await setupVerifiedOrgWithActiveCampaign(admin, "RESTRICTED");
     const { client: donor } = await setupHousehold();
-    await donor.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 500_000 }).expect(201);
+    await donor
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 500_000 })
+      .expect(201);
     const membership = await prisma.adminUser.findUniqueOrThrow({ where: { userId: admin.userId } });
     const context = { adminUserId: membership.id, userId: admin.userId } as ResolvedAdminContext;
     const service = app.get(AdminDonationService);
-    const results = await Promise.allSettled([1, 2].map(() => service.recordPayout(context, organizationId, { amountIrr: 400_000, fundType: CampaignFundType.RESTRICTED, reason: "Recorded bank receipt" })));
-    expect(results.filter(result => result.status === "fulfilled")).toHaveLength(1);
-    const rejected = results.find(result => result.status === "rejected") as PromiseRejectedResult;
+    const results = await Promise.allSettled(
+      [1, 2].map(() =>
+        service.recordPayout(context, organizationId, {
+          amountIrr: 400_000,
+          fundType: CampaignFundType.RESTRICTED,
+          reason: "Recorded bank receipt",
+        }),
+      ),
+    );
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    const rejected = results.find((result) => result.status === "rejected") as PromiseRejectedResult;
     expect(rejected.reason).toBeInstanceOf(DonationInsufficientFundBalanceException);
     const balance = await service.getFundBalance(organizationId);
     expect(balance.restrictedAvailableIrr).toBe(100_000);
     expect(balance.generalAvailableIrr).toBe(0);
-    expect(await prisma.donationLedgerTransaction.count({ where: { organizationId, referenceType: "PAYOUT" } })).toBe(1);
+    expect(
+      await prisma.donationLedgerTransaction.count({ where: { organizationId, referenceType: "PAYOUT" } }),
+    ).toBe(1);
   });
 
   // -- Flow H: Duplicate Donation idempotency --------------------------------
@@ -276,11 +542,19 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client: donorClient } = await setupHousehold();
     const idempotencyKey = `donate-${unique()}`;
 
-    const first = await donorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 250_000, idempotencyKey }).expect(201);
-    const second = await donorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 250_000, idempotencyKey }).expect(201);
+    const first = await donorClient
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 250_000, idempotencyKey })
+      .expect(201);
+    const second = await donorClient
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 250_000, idempotencyKey })
+      .expect(201);
     expect(second.body.donationIntentId).toBe(first.body.donationIntentId);
 
-    const transactionCount = await prisma.donationTransaction.count({ where: { donationIntentId: first.body.donationIntentId } });
+    const transactionCount = await prisma.donationTransaction.count({
+      where: { donationIntentId: first.body.donationIntentId },
+    });
     expect(transactionCount).toBe(1);
   });
 
@@ -292,12 +566,23 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client: anonDonorClient } = await setupHousehold();
     const { client: publicDonorClient } = await setupHousehold();
 
-    await anonDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 100_000 }).expect(201);
+    await anonDonorClient
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 100_000 })
+      .expect(201);
     // Batch 6: showing publicly requires a donor-chosen name (the account name is never shown).
-    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true }).expect(400);
-    await publicDonorClient.post(`/animal-support/campaigns/${campaignId}/donate`).send({ amountIrr: 200_000, showDonorPublicly: true, publicDisplayName: "Sara" }).expect(201);
+    await publicDonorClient
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 200_000, showDonorPublicly: true })
+      .expect(400);
+    await publicDonorClient
+      .post(`/animal-support/campaigns/${campaignId}/donate`)
+      .send({ amountIrr: 200_000, showDonorPublicly: true, publicDisplayName: "Sara" })
+      .expect(201);
 
-    const donors = await request(app.getHttpServer()).get(`/animal-support/campaigns/${campaignId}/donors`).expect(200);
+    const donors = await request(app.getHttpServer())
+      .get(`/animal-support/campaigns/${campaignId}/donors`)
+      .expect(200);
     expect(donors.body).toHaveLength(1);
     expect(donors.body[0].amountIrr).toBe(200_000);
     expect(donors.body[0].displayName).toBe("Sara");
@@ -308,13 +593,19 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
   it("Flow J: an authenticated user can create and read back a community post, anonymous users can only read", async () => {
     const { client } = await setupHousehold();
 
-    const created = await client.post("/community/posts").send({ type: "GENERAL", body: "Any tips for a picky eater?" }).expect(201);
+    const created = await client
+      .post("/community/posts")
+      .send({ type: "GENERAL", body: "Any tips for a picky eater?" })
+      .expect(201);
     expect(created.body.status).toBe("PUBLISHED");
 
     const publicList = await request(app.getHttpServer()).get("/community/posts").expect(200);
     expect(publicList.body.items.some((p: { id: string }) => p.id === created.body.id)).toBe(true);
 
-    await request(app.getHttpServer()).post("/community/posts").send({ type: "GENERAL", body: "should be rejected" }).expect(403);
+    await request(app.getHttpServer())
+      .post("/community/posts")
+      .send({ type: "GENERAL", body: "should be rejected" })
+      .expect(403);
   });
 
   // -- Flow K: Community Report + moderation escalation ------------------------
@@ -324,13 +615,22 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client: reporterClient } = await setupHousehold();
     const trustAdmin = await setupAdmin(AdminRole.TRUST_SAFETY);
 
-    const post = await authorClient.post("/community/posts").send({ type: "GENERAL", body: "Some post" }).expect(201);
+    const post = await authorClient
+      .post("/community/posts")
+      .send({ type: "GENERAL", body: "Some post" })
+      .expect(201);
     const postId = post.body.id as string;
 
-    const report = await reporterClient.post(`/community/posts/${postId}/report`).send({ reason: "SPAM" }).expect(201);
+    const report = await reporterClient
+      .post(`/community/posts/${postId}/report`)
+      .send({ reason: "SPAM" })
+      .expect(201);
     const reportId = report.body.id as string;
 
-    const escalated = await trustAdmin.client.post(`/admin/community/reports/${reportId}/escalate`).send({ reason: "Looks like spam" }).expect(201);
+    const escalated = await trustAdmin.client
+      .post(`/admin/community/reports/${reportId}/escalate`)
+      .send({ reason: "Looks like spam" })
+      .expect(201);
     expect(escalated.body.status).toBe("ESCALATED");
     expect(escalated.body.trustCaseId).toBeTruthy();
 
@@ -345,7 +645,10 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client, petId } = await setupHousehold();
     const { client: otherClient } = await setupHousehold();
 
-    const memory = await client.post(`/pets/${petId}/memories`).send({ type: "MILESTONE", title: "First swim", occurredAt: new Date().toISOString() }).expect(201);
+    const memory = await client
+      .post(`/pets/${petId}/memories`)
+      .send({ type: "MILESTONE", title: "First swim", occurredAt: new Date().toISOString() })
+      .expect(201);
     expect(memory.body.visibility).toBe("PRIVATE");
 
     await otherClient.get(`/pets/${petId}/memories`).expect(403);
@@ -357,7 +660,14 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
   it("Flow O/P: an observation never changes lifecycle status, and an explicit memorial transition suppresses commercial Home actions", async () => {
     const { client, petId } = await setupHousehold();
 
-    await client.post(`/pets/${petId}/observations`).send({ category: "APPETITE", description: "Ate less than usual", observedAt: new Date().toISOString() }).expect(201);
+    await client
+      .post(`/pets/${petId}/observations`)
+      .send({
+        category: "APPETITE",
+        description: "Ate less than usual",
+        observedAt: new Date().toISOString(),
+      })
+      .expect(201);
     const afterObservation = await prisma.pet.findUniqueOrThrow({ where: { id: petId } });
     expect(afterObservation.lifecycleStatus).toBe(PetLifecycleStatus.ACTIVE);
 
@@ -378,7 +688,14 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
   it("H21: a quick entry with no title is accepted and falls back to nothing forced server-side", async () => {
     const { client, petId } = await setupHousehold();
 
-    const created = await client.post(`/pets/${petId}/memories`).send({ type: "STORY", occurredAt: new Date().toISOString(), description: "Chased a squirrel all afternoon" }).expect(201);
+    const created = await client
+      .post(`/pets/${petId}/memories`)
+      .send({
+        type: "STORY",
+        occurredAt: new Date().toISOString(),
+        description: "Chased a squirrel all afternoon",
+      })
+      .expect(201);
     expect(created.body.title).toBeNull();
     expect(created.body.tags).toEqual([]);
     expect(created.body.archivedAt).toBeNull();
@@ -387,8 +704,24 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
   it("H21: memories can be filtered by tag, year, and free-text search", async () => {
     const { client, petId } = await setupHousehold();
 
-    await client.post(`/pets/${petId}/memories`).send({ type: "TRAVEL", title: "Trip to the mountains", occurredAt: "2024-06-01T00:00:00.000Z", tags: ["trip", "milestone"] }).expect(201);
-    await client.post(`/pets/${petId}/memories`).send({ type: "STORY", title: "A quiet Sunday nap", occurredAt: "2025-03-10T00:00:00.000Z", tags: ["funny-moment"] }).expect(201);
+    await client
+      .post(`/pets/${petId}/memories`)
+      .send({
+        type: "TRAVEL",
+        title: "Trip to the mountains",
+        occurredAt: "2024-06-01T00:00:00.000Z",
+        tags: ["trip", "milestone"],
+      })
+      .expect(201);
+    await client
+      .post(`/pets/${petId}/memories`)
+      .send({
+        type: "STORY",
+        title: "A quiet Sunday nap",
+        occurredAt: "2025-03-10T00:00:00.000Z",
+        tags: ["funny-moment"],
+      })
+      .expect(201);
 
     const byTag = await client.get(`/pets/${petId}/memories?tag=trip`).expect(200);
     expect(byTag.body.map((m: { title: string }) => m.title)).toEqual(["Trip to the mountains"]);
@@ -406,7 +739,10 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
   it("H21: archiving a memory is a soft-delete — it disappears from the default list and Life Timeline but is never destroyed, and restore brings it back", async () => {
     const { client, petId } = await setupHousehold();
 
-    const memory = await client.post(`/pets/${petId}/memories`).send({ type: "MILESTONE", title: "Learned to sit", occurredAt: new Date().toISOString() }).expect(201);
+    const memory = await client
+      .post(`/pets/${petId}/memories`)
+      .send({ type: "MILESTONE", title: "Learned to sit", occurredAt: new Date().toISOString() })
+      .expect(201);
     const memoryId = memory.body.id as string;
 
     await client.delete(`/pets/${petId}/memories/${memoryId}`).expect(200);
@@ -434,10 +770,16 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client, petId } = await setupHousehold();
     const { client: otherClient } = await setupHousehold();
 
-    const memory = await client.post(`/pets/${petId}/memories`).send({ type: "STORY", title: "Draft title", occurredAt: "2025-05-05T00:00:00.000Z" }).expect(201);
+    const memory = await client
+      .post(`/pets/${petId}/memories`)
+      .send({ type: "STORY", title: "Draft title", occurredAt: "2025-05-05T00:00:00.000Z" })
+      .expect(201);
     const memoryId = memory.body.id as string;
 
-    const edited = await client.patch(`/pets/${petId}/memories/${memoryId}`).send({ title: "A better title", tags: ["milestone"], description: "Added later" }).expect(200);
+    const edited = await client
+      .patch(`/pets/${petId}/memories/${memoryId}`)
+      .send({ title: "A better title", tags: ["milestone"], description: "Added later" })
+      .expect(200);
     expect(edited.body.title).toBe("A better title");
     expect(edited.body.tags).toEqual(["milestone"]);
     expect(edited.body.description).toBe("Added later");
@@ -456,17 +798,27 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client, petId } = await setupHousehold();
     const { client: otherClient } = await setupHousehold();
 
-    const upload = await client.post(`/pets/${petId}/memories/upload-url`).send({ contentType: "image/jpeg", fileSizeBytes: 2048, visibility: "PRIVATE" }).expect(201);
+    const upload = await client
+      .post(`/pets/${petId}/memories/upload-url`)
+      .send({ contentType: "image/jpeg", fileSizeBytes: 2048, visibility: "PRIVATE" })
+      .expect(201);
     const memory = await client
       .post(`/pets/${petId}/memories`)
-      .send({ type: "PHOTO", title: "Beach day", occurredAt: new Date().toISOString(), mediaObjectKeys: [upload.body.key] })
+      .send({
+        type: "PHOTO",
+        title: "Beach day",
+        occurredAt: new Date().toISOString(),
+        mediaObjectKeys: [upload.body.key],
+      })
       .expect(201);
 
     // The DTO never leaks a plain URL for private media (Handoff 20 guarantee).
     expect(memory.body.visibility).toBe("PRIVATE");
     expect(memory.body.mediaUrls).toEqual([]);
 
-    const download = await client.get(`/pets/${petId}/memories/${memory.body.id}/media/0/download`).expect(200);
+    const download = await client
+      .get(`/pets/${petId}/memories/${memory.body.id}/media/0/download`)
+      .expect(200);
     expect(download.body.downloadUrl).toBeTruthy();
 
     // Another household cannot mint a download for it.
@@ -475,15 +827,36 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
 
   it("H21: exceeding memories.entries.max is rejected, but every existing memory remains fully readable — a downgrade never holds memories hostage", async () => {
     const { client, petId, householdId } = await setupHousehold();
-    const adminUserForOverride = await prisma.user.create({ data: { email: `h21-super-${unique()}@example.com`, displayName: "H21 Test Admin" } });
-    const superAdmin = await prisma.adminUser.create({ data: { userId: adminUserForOverride.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } });
+    const adminUserForOverride = await prisma.user.create({
+      data: { email: `h21-super-${unique()}@example.com`, displayName: "H21 Test Admin" },
+    });
+    const superAdmin = await prisma.adminUser.create({
+      data: {
+        userId: adminUserForOverride.id,
+        role: AdminRole.SUPER_ADMIN,
+        status: AdminMembershipStatus.ACTIVE,
+      },
+    });
     await prisma.subscriptionEntitlementOverride.create({
-      data: { householdId, key: "memories.entries.max", type: "LIMIT", limitValue: 1, reason: "H21 test — force a low limit", createdByAdminId: superAdmin.id },
+      data: {
+        householdId,
+        key: "memories.entries.max",
+        type: "LIMIT",
+        limitValue: 1,
+        reason: "H21 test — force a low limit",
+        createdByAdminId: superAdmin.id,
+      },
     });
 
-    const first = await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", title: "First one", occurredAt: new Date().toISOString() }).expect(201);
+    const first = await client
+      .post(`/pets/${petId}/memories`)
+      .send({ type: "PHOTO", title: "First one", occurredAt: new Date().toISOString() })
+      .expect(201);
 
-    const rejected = await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", title: "One too many", occurredAt: new Date().toISOString() }).expect(409);
+    const rejected = await client
+      .post(`/pets/${petId}/memories`)
+      .send({ type: "PHOTO", title: "One too many", occurredAt: new Date().toISOString() })
+      .expect(409);
     expect(rejected.body.error.code).toBe("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED");
     expect(rejected.body.error.details.key).toBe("memories.entries.max");
 
@@ -492,6 +865,9 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
 
     // Archiving the one memory frees a slot without ever hard-deleting it.
     await client.delete(`/pets/${petId}/memories/${first.body.id}`).expect(200);
-    await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", title: "Now there's room", occurredAt: new Date().toISOString() }).expect(201);
+    await client
+      .post(`/pets/${petId}/memories`)
+      .send({ type: "PHOTO", title: "Now there's room", occurredAt: new Date().toISOString() })
+      .expect(201);
   });
 });

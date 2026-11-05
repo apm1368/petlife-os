@@ -222,6 +222,7 @@ export const DOMAIN_EVENT_TYPES = [
 
   // Handoff 18: Lost Pet + Animal Support + Community + Memories
   "PetLifecycleTransitioned",
+  "PetLifecycleCorrectionApplied",
   "LostPetIncidentOpened",
   "LostPetSightingSubmitted",
   "LostPetSightingAccepted",
