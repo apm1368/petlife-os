@@ -6822,6 +6822,12 @@ model LostPetIncident {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  /// LP-06 — set only after the household has been reminded to either keep
+  /// this active listing current or close it.  It is deliberately a single,
+  /// immutable-in-effect delivery marker: the reminder is not a recurring
+  /// marketing notification and must never be sent repeatedly.
+  renewalReminderSentAt DateTime?
+
   foundAt    DateTime?
   reunitedAt DateTime?
   closedAt   DateTime?
@@ -6831,6 +6837,7 @@ model LostPetIncident {
   @@index([petId])
   @@index([householdId])
   @@index([status])
+  @@index([renewalReminderSentAt])
   @@map("lost_pet_incidents")
 }
 

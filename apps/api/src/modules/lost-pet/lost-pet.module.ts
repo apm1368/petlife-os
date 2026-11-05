@@ -7,13 +7,21 @@ import { NotificationsModule } from "../notifications/notifications.module";
 import { CommunityModule } from "../community/community.module";
 import { LostPetIncidentService } from "./lost-pet-incident.service";
 import { LostPetNotificationListener } from "./lost-pet-notification.listener";
+import { LostPetRenewalReminderWorker } from "./lost-pet-renewal-reminder.worker";
 import { LostPetController } from "./lost-pet.controller";
 import { PublicLostPetController } from "./public-lost-pet.controller";
 
 @Module({
-  imports: [PetAccessModule, StorageModule, PetsModule, NotificationsModule, CommunityModule, PetSafetyModule],
+  imports: [
+    PetAccessModule,
+    StorageModule,
+    PetsModule,
+    NotificationsModule,
+    CommunityModule,
+    PetSafetyModule,
+  ],
   controllers: [LostPetController, PublicLostPetController],
-  providers: [LostPetIncidentService, LostPetNotificationListener],
+  providers: [LostPetIncidentService, LostPetNotificationListener, LostPetRenewalReminderWorker],
   exports: [LostPetIncidentService],
 })
 export class LostPetModule {}
