@@ -70,6 +70,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
   const [communication, setCommunication] = useState(5);
   const [timeliness, setTimeliness] = useState(5);
   const [reviewText, setReviewText] = useState("");
+  const [reviewClock, setReviewClock] = useState(() => Date.now());
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleSlots, setRescheduleSlots] = useState<AvailabilitySlotDto[] | null>(null);
   const [rescheduleSlot, setRescheduleSlot] = useState<string | null>(null);
@@ -136,7 +137,17 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
     if (!booking?.completedAt) return null;
     return new Date(new Date(booking.completedAt).getTime() + PROVIDER_REVIEW_DELAY_MS);
   }, [booking?.completedAt]);
-  const reviewReady = reviewAvailableAt !== null && reviewAvailableAt.getTime() <= Date.now();
+  useEffect(() => {
+    if (!reviewAvailableAt) return;
+    const delay = reviewAvailableAt.getTime() - Date.now();
+    if (delay <= 0) {
+      setReviewClock(Date.now());
+      return;
+    }
+    const timer = window.setTimeout(() => setReviewClock(Date.now()), delay);
+    return () => window.clearTimeout(timer);
+  }, [reviewAvailableAt]);
+  const reviewReady = reviewAvailableAt !== null && reviewAvailableAt.getTime() <= reviewClock;
 
   async function act(run: () => Promise<unknown>, success: string) {
     setBusy(true);
