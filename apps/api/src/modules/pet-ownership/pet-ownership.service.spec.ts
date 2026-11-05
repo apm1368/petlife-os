@@ -203,8 +203,11 @@ function makePrisma(overrides: Record<string, unknown> = {}) {
 function makeService(prisma: unknown) {
   const events = { publish: jest.fn(async () => undefined) };
   const notifications = { notify: jest.fn(async () => undefined) };
-  const service = new PetOwnershipService(prisma as never, events as never, notifications as never);
-  return { service, events, notifications };
+  // Ownership is only readable by somebody with access to the pet, so the
+  // access service is part of the service's collaborators.
+  const access = { findAccessiblePet: jest.fn(async (petId: string, userId: string) => (petId && userId ? { id: petId } : null)) };
+  const service = new PetOwnershipService(prisma as never, events as never, notifications as never, access as never);
+  return { service, events, notifications, access };
 }
 
 function seedHouseholdWithPet() {
@@ -246,6 +249,26 @@ describe("pet ownership — ID-01: exactly one primary owner", () => {
     const owned = await service.listOwnedPets(OWNER_ID);
 
     expect(owned.map((pet) => pet.petId)).toEqual([PET_ID]);
+  });
+
+  it("does not reveal a pet's owner to somebody without access to that pet", async () => {
+    const { prisma } = seedHouseholdWithPet();
+    const { service, access } = makeService(prisma);
+    // An unrelated signed-in account has no grant on this pet.
+    access.findAccessiblePet.mockResolvedValue(null as never);
+
+    const ownership = await service.getOwnershipForViewer(PET_ID, "a-stranger");
+
+    expect(ownership).toBeNull();
+  });
+
+  it("reveals the owner to somebody who does have access to the pet", async () => {
+    const { prisma } = seedHouseholdWithPet();
+    const { service } = makeService(prisma);
+
+    const ownership = await service.getOwnershipForViewer(PET_ID, RECIPIENT_ID);
+
+    expect(ownership?.ownerUserId).toBe(OWNER_ID);
   });
 });
 

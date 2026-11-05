@@ -42,10 +42,15 @@ export class PetOwnershipController {
     return this.ownership.listOwnedPets(user.id);
   }
 
-  /** The primary owner of one pet. */
+  /**
+   * The primary owner of one pet.
+   *
+   * Ownership is not public: the caller must already have access to the pet, so
+   * an unrelated account learns nothing about who owns it.
+   */
   @Get("pets/:petId")
-  getOwnership(@Param("petId", ParseUUIDPipe) petId: string) {
-    return this.ownership.getOwnership(petId);
+  getOwnership(@Param("petId", ParseUUIDPipe) petId: string, @CurrentUser() user: SessionUser) {
+    return this.ownership.getOwnershipForViewer(petId, user.id);
   }
 
   /** Transfers waiting for the caller's answer. */

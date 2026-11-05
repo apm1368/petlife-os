@@ -22,7 +22,7 @@ import {
 } from "../../common/errors/api-exception";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
-import { OWNER_PRESET } from "../pet-access/pet-access.service";
+import { OWNER_PRESET, PetAccessService } from "../pet-access/pet-access.service";
 
 const TRANSFER_EXPIRY_MS = OWNERSHIP_TRANSFER_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
 
@@ -34,11 +34,26 @@ export class PetOwnershipService {
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
     private readonly notifications: NotificationOrchestratorService,
+    private readonly access: PetAccessService,
   ) {}
 
   // ---------------------------------------------------------------------------
   // Reading ownership
   // ---------------------------------------------------------------------------
+
+  /**
+   * The pet's primary owner, as seen by somebody who may look at it.
+   *
+   * Ownership is not public: an unrelated signed-in account must not learn who
+   * owns somebody else's pet, so the caller needs access to the pet first. The
+   * internal `getOwnership` skips that check because it is already on the path
+   * of the owner themselves.
+   */
+  async getOwnershipForViewer(petId: string, userId: string): Promise<PetOwnershipDto | null> {
+    const pet = await this.access.findAccessiblePet(petId, userId);
+    if (!pet) return null;
+    return this.getOwnership(petId);
+  }
 
   /** The pet's primary owner. Falls back to the household's earliest owner member for pets created before the ownership table existed. */
   async getOwnership(petId: string, client: Tx | PrismaService = this.prisma): Promise<PetOwnershipDto | null> {

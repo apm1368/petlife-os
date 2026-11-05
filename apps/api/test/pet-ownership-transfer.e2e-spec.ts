@@ -58,6 +58,16 @@ describe("Pet ownership transfer", () => {
     expect(owned.map((pet) => pet.petId)).toContain(petId);
   });
 
+  it("does not reveal a pet's owner to an unrelated account", async () => {
+    const petId = await createPet("Private");
+
+    // Ownership is not public: a signed-in stranger learns nothing about who
+    // owns somebody else's pet.
+    const seen = await stranger.get(`/pet-ownership/pets/${petId}`);
+    expect(seen.status).toBe(200);
+    expect(seen.body).toBeNull();
+  });
+
   it("does not move the pet until the recipient approves (ID-01)", async () => {
     const petId = await createPet("Pending");
 
