@@ -317,7 +317,7 @@ export class PetOwnershipService {
       entityId: pet.id,
     }).catch(() => undefined);
 
-    const [decoratedTransfer] = await this.toDtos([applied]);
+    const decoratedTransfer = await this.toDtoOne(applied);
     return {
       transfer: decoratedTransfer,
       ownership: ownership!,
@@ -362,8 +362,7 @@ export class PetOwnershipService {
       entityType: "Pet",
       entityId: transfer.petId,
     }).catch(() => undefined);
-    const [decorated] = await this.toDtos([declined]);
-    return decorated;
+    return this.toDtoOne(declined);
   }
 
   /** The owner withdraws their own request. */
@@ -395,8 +394,7 @@ export class PetOwnershipService {
       entityType: "Pet",
       entityId: transfer.petId,
     }).catch(() => undefined);
-    const [decorated] = await this.toDtos([cancelled]);
-    return decorated;
+    return this.toDtoOne(cancelled);
   }
 
   /**
@@ -426,8 +424,7 @@ export class PetOwnershipService {
         );
         return updated;
       });
-      const [decorated] = await this.toDtos([disputed]);
-      return decorated;
+      return this.toDtoOne(disputed);
     }
     if (transfer.status !== PetOwnershipTransferStatus.PENDING_REVIEW) {
       throw new ValidationApiException({ field: "status", reason: "This transfer request can no longer be disputed." });
@@ -444,8 +441,7 @@ export class PetOwnershipService {
       );
       return updated;
     });
-    const [decorated] = await this.toDtos([disputed]);
-    return decorated;
+    return this.toDtoOne(disputed);
   }
 
   // ---------------------------------------------------------------------------
@@ -489,8 +485,7 @@ export class PetOwnershipService {
     const row = await this.prisma.petOwnershipTransfer.findUnique({ where: { id: transferId } });
     if (!row) throw new NotFoundApiException("Ownership transfer");
     if (row.fromUserId !== userId && row.toUserId !== userId) throw new HouseholdAccessDeniedException();
-    const [decorated] = await this.toDtos([row]);
-    return decorated;
+    return this.toDtoOne(row);
   }
 
   // ---------------------------------------------------------------------------
@@ -703,5 +698,18 @@ export class PetOwnershipService {
       fromDisplayName: userName.get(row.fromUserId) ?? null,
       toDisplayName: userName.get(row.toUserId) ?? null,
     }));
+  }
+
+  /**
+   * The single-row variant, with the pet and user names resolved.
+   *
+   * The batch helper returns an array, so taking its first element would widen the
+   * type to `| undefined` — the caller always has exactly one row here, so the
+   * row is looked up directly instead.
+   */
+  private async toDtoOne(row: Parameters<typeof this.toDto>[0]): Promise<PetOwnershipTransferDto> {
+    const [decorated] = await this.toDtos([row]);
+    // `toDtos` returns one entry per input row, and the input had exactly one row.
+    return decorated!;
   }
 }

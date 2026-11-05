@@ -129,7 +129,7 @@ describe("PetOwnershipView", () => {
     vi.mocked(petOwnershipService.cancelTransfer).mockReset().mockResolvedValue(transfer({ id: "t2", status: "CANCELLED" }));
     renderWithIntl(<PetOwnershipView />, "en");
     await screen.findByText("Cookie");
-    fireEvent.click(screen.getByRole("tab", { name: /Outgoing/ }));
+    fireEvent.click(await screen.findByRole("tab", { name: /Outgoing/ }));
 
     // The proposer proposed it; the API refuses them an approval, so the UI must
     // not offer one. What they may do is withdraw.
@@ -154,7 +154,9 @@ describe("PetOwnershipView", () => {
       },
     ]);
     renderWithIntl(<PetOwnershipView />, "en");
-    fireEvent.click(screen.getByRole("tab", { name: /My memories/ }));
+    // The tabs only render once the lists have loaded, so the tab is awaited
+    // rather than queried synchronously.
+    fireEvent.click(await screen.findByRole("tab", { name: /My memories/ }));
     expect(await screen.findByText("First walk")).toBeTruthy();
     expect(screen.getByText("Read-only")).toBeTruthy();
   });
