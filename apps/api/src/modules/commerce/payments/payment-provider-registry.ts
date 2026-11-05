@@ -27,6 +27,14 @@ export const PROVIDER_CAPABILITIES: Record<PaymentProvider, ProviderCapabilities
     supportsAsyncWebhook: true,
     supportsEligibilityCheck: false,
   },
+  ZIBAL: {
+    supportsDirectPayment: true,
+    supportsInstallments: false,
+    supportsRefund: false,
+    supportsPartialRefund: false,
+    supportsAsyncWebhook: true,
+    supportsEligibilityCheck: false,
+  },
   /// SnappPay's real product exposes a pre-authorization eligibility check
   /// (spec section 8) — modeled here since the *shape* of that capability is
   /// well known conceptually, even though this project has no official docs

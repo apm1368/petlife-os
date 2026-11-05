@@ -2123,17 +2123,23 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       expect(denied.body.error.details.reason).toBe("INSUFFICIENT_INVENTORY");
     });
 
-    it("creates an inventory reservation transactionally when a checkout is created", async () => {
-      const { client } = await setupOwnerWithPets();
+    it("creates an inventory reservation transactionally when payment starts, not when a checkout is created", async () => {
+      const { client, householdId } = await setupOwnerWithPets();
       const { variant } = await seedProduct();
       const seller = await seedSeller();
       const offer = await seedOffer(seller.id, variant.id, 100_000, 10);
 
       await client.post("/cart/items").send({ offerId: offer.id, quantity: 3 }).expect(201);
-      const checkout = await client.post("/checkout").send({}).expect(201);
+      const addressId = await seedAddress(client, householdId);
+      const checkout = await client.post("/checkout").send({ addressId }).expect(201);
 
       const inventory = await prisma.inventoryItem.findUnique({ where: { sellerOfferId: offer.id } });
-      expect(inventory?.reserved).toBe(3);
+      expect(inventory?.reserved).toBe(0);
+      expect(await prisma.inventoryReservation.findFirst({ where: { checkoutId: checkout.body.id, sellerOfferId: offer.id } })).toBeNull();
+
+      await client.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+      const reservedInventory = await prisma.inventoryItem.findUnique({ where: { sellerOfferId: offer.id } });
+      expect(reservedInventory?.reserved).toBe(3);
       const reservation = await prisma.inventoryReservation.findFirst({ where: { checkoutId: checkout.body.id, sellerOfferId: offer.id } });
       expect(reservation?.status).toBe("ACTIVE");
       expect(reservation?.quantity).toBe(3);
@@ -2406,7 +2412,7 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
       const online = options.body.filter((o: { methodType: string }) => o.methodType === "ONLINE_PAYMENT").map((o: { provider: string }) => o.provider);
       const installments = options.body.filter((o: { methodType: string }) => o.methodType === "INSTALLMENTS").map((o: { provider: string }) => o.provider);
-      expect(online.sort()).toEqual(["DEV_SIMULATED", "STANDARD_GATEWAY"].sort());
+      expect(online.sort()).toEqual(["DEV_SIMULATED", "STANDARD_GATEWAY", "ZIBAL"].sort());
       expect(installments.sort()).toEqual(["DIGI_PAY", "SNAPP_PAY"].sort());
 
       const snapp = options.body.find((o: { provider: string }) => o.provider === "SNAPP_PAY");
@@ -3572,13 +3578,15 @@ describe("PET LIFE OS critical paths (e2e)", () => {
       const channelAccountId = await connectDevChannel(client, sellerId);
       const listing = await createAndPublishListing(client, sellerId, channelAccountId, offer.id);
 
-      // A PET LIFE OS checkout reserves the last unit first (a real InventoryReservation, not just onHand).
+      // OF-13: a PET LIFE OS payment start, not merely checkout creation,
+      // reserves the last unit first.
       const buyerIdentifier = `checkout-buyer-${unique()}@example.com`;
       const buyer = authedRequest(app, await signUp(app, logSpy, buyerIdentifier));
       await buyer.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
       const household = await buyer.post("/households").send({}).expect(201);
       const addressRes = await buyer.post("/addresses").send({ householdId: household.body.id, addressLine: "1 Test St.", city: "Testville", countryCode: "US" }).expect(201);
-      await buyer.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+      const checkout = await buyer.post("/checkout").send({ addressId: addressRes.body.id }).expect(201);
+      await buyer.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
 
       // A marketplace order for the same (now-reserved) unit must not succeed in decrementing onHand below reserved.
       const marketplaceResult = await client

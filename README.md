@@ -5826,7 +5826,15 @@ pnpm --filter @petlife/api test:e2e
   reading another user's financing intent or checkout ops view returns
   `404 CHECKOUT_NOT_FOUND` (IDOR).
 
-  The e2e suite needs its own database (kept separate from your dev data):
+  The e2e suite needs its own database (kept separate from your dev data).
+  One command starts the local compose services, creates a fresh Postgres
+  database, applies migrations, runs tests and drops that database afterward:
+
+  ```bash
+  pnpm test:e2e:fresh
+  ```
+
+  To target an existing CI-style service manually:
 
   ```bash
   createdb -O petlife petlife_os_test   # or: psql -c "..." if createdb isn't available

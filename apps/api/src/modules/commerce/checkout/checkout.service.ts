@@ -136,8 +136,8 @@ function computeValidationIssues(cart: Pick<CartDto, "sellerGroups">): CheckoutV
 /**
  * Checkout is a snapshot-at-creation-time attempt over the cart (spec
  * section 25) — full revalidation happens at creation (spec section 26)
- * and inventory is reserved in the same transaction (spec section 38's
- * "Create Checkout → Reserve Inventory" ordering). Every hard-blocking
+ * and inventory is deliberately NOT reserved until a payment is started
+ * (OF-13). Every hard-blocking
  * condition (unavailable offer/seller, insufficient inventory, an
  * unacknowledged safety conflict, an empty cart) throws; the two
  * advisory-only conditions (a price that moved, a NEEDS_REVIEW/
@@ -234,8 +234,6 @@ export class CheckoutService {
     // promotion discount is shown separately and subtracted once.
     const { subtotalAmount, discountAmount } = pricedTotals(lines);
     const totalAmount = subtotalAmount - discountAmount + deliveryAmount;
-    const expiresAt = new Date(Date.now() + RESERVATION_TTL_MINUTES * 60_000);
-
     const checkoutId = await this.prisma.$transaction(async (tx) => {
       const checkout = await tx.checkout.create({
         data: {
@@ -250,14 +248,12 @@ export class CheckoutService {
           discountAmount,
           totalAmount,
           currency: cartDto.currency,
-          expiresAt,
+          // A checkout is only a priced snapshot.  `expiresAt` becomes the
+          // 15-minute inventory reservation expiry when payment starts.
+          expiresAt: null,
           pricedLinesSnapshot: lines as unknown as Prisma.InputJsonValue,
         },
       });
-
-      for (const line of lines) {
-        await this.reservations.reserve(tx, checkout.id, line.sellerOffer.id, line.quantity, expiresAt);
-      }
 
       await this.events.publish(
         "CheckoutCreated",
@@ -369,13 +365,24 @@ export class CheckoutService {
       });
     }
 
-    const intent = await this.payments.createIntent(
-      checkout.id,
-      checkout.totalAmount,
-      checkout.currency,
-      provider,
-      idempotencyKey,
-    );
+    const expiresAt = new Date(Date.now() + RESERVATION_TTL_MINUTES * 60_000);
+    const intent = await this.prisma.$transaction(async (tx) => {
+      // An existing active reservation/intention is idempotently reused.  A
+      // payment retry must not reserve stock twice, while two checkouts racing
+      // for the last unit still serialize inside InventoryReservationService.
+      const activeReservation = await tx.inventoryReservation.findFirst({
+        where: { checkoutId: checkout.id, status: "ACTIVE", expiresAt: { gt: new Date() } },
+      });
+      if (!activeReservation) {
+        const lines = checkout.pricedLinesSnapshot as unknown as CartLineDto[];
+        if (!lines?.length) throw new ValidationApiException({ field: "checkout", reason: "MISSING_PRICED_LINES" });
+        for (const line of lines) {
+          await this.reservations.reserve(tx, checkout.id, line.sellerOffer.id, line.quantity, expiresAt);
+        }
+        await tx.checkout.update({ where: { id: checkout.id }, data: { expiresAt } });
+      }
+      return this.payments.createIntent(checkout.id, checkout.totalAmount, checkout.currency, provider, idempotencyKey, tx);
+    });
     return {
       id: intent.id,
       checkoutId: intent.checkoutId,
@@ -448,7 +455,7 @@ export class CheckoutService {
    * the PaymentOrderConfirmationIssue-shaped state itself, inspectable via
    * `getOpsView`, since no separate ops alerting channel exists yet.
    */
-  async finalizeSuccessfulPayment(checkoutId: string): Promise<string[]> {
+  async finalizeSuccessfulPayment(checkoutId: string, recordGatewayReceipt = true): Promise<string[]> {
     const checkout = await this.prisma.checkout.findUnique({ where: { id: checkoutId } });
     if (!checkout) return [];
     if (checkout.status === CheckoutStatus.CONFIRMED) {
@@ -523,7 +530,9 @@ export class CheckoutService {
         );
         await tx.checkout.update({ where: { id: checkoutId }, data: { status: CheckoutStatus.CONFIRMED } });
         await tx.cart.update({ where: { id: checkout.cartId }, data: { status: CartStatus.CONVERTED } });
-        await this.ledger.recordPaymentSucceeded(checkout.id, checkout.totalAmount, checkout.currency, tx);
+        if (recordGatewayReceipt) {
+          await this.ledger.recordPaymentSucceeded(checkout.id, checkout.totalAmount, checkout.currency, tx);
+        }
         // Handoff 14: attribute each seller's own economics now that payment is confirmed
         // and their Fulfillment (hence shippingResponsibility) exists — the financial
         // trigger the spec requires ("use H07 payment confirmation as the financial trigger").

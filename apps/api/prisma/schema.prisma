@@ -790,8 +790,69 @@ enum PaymentIntentStatus {
 enum PaymentProvider {
   DEV_SIMULATED
   STANDARD_GATEWAY
+  /// Zibal has a request/redirect/verify protocol. Keeping it distinct
+  /// prevents a generic gateway status from erasing the mandatory verify step.
+  ZIBAL
   SNAPP_PAY
   DIGI_PAY
+}
+
+/// The customer-facing rail, deliberately separate from PaymentProvider.
+/// A card transfer and a wallet debit have materially different evidence,
+/// expiry and refund semantics and must never be hidden behind ONLINE_PAYMENT.
+enum PaymentRail {
+  ZIBAL
+  CARD_TO_CARD
+  WALLET
+}
+
+enum ZibalPaymentStatus {
+  INITIATED
+  REDIRECTED
+  VERIFIED
+  FAILED
+  ABANDONED
+  UNKNOWN
+}
+
+enum CardTransferPaymentStatus {
+  AWAITING_RECEIPT
+  REVIEW_PENDING
+  APPROVED
+  REJECTED
+  UNDERPAID_AWAITING_DIFFERENCE
+  EXPIRED
+  CANCELLED
+}
+
+enum WalletBalanceType {
+  /// Refund-originated funds; the only balance that may later be withdrawn.
+  WITHDRAWABLE
+  /// Top-ups and gifts; usable for purchases only.
+  PURCHASE_ONLY
+}
+
+enum WalletEntryKind {
+  CREDIT
+  DEBIT
+  EXPIRY
+}
+
+enum WalletCreditSource {
+  REFUND
+  TOP_UP
+  GIFT
+  OVERPAYMENT
+  DUPLICATE_PAYMENT
+  MANUAL_CORRECTION
+}
+
+enum ProviderSettlementStatus {
+  CALCULATED
+  APPROVED
+  PAID
+  FAILED
+  CANCELLED
 }
 
 enum PaymentAttemptStatus {
@@ -877,6 +938,16 @@ enum LedgerAccountCode {
   /// organization, not platform income, even though PET LIFE OS is the one
   /// that actually collected the cash from the gateway.
   DONATION_PAYABLE
+  /// Distinct liabilities let the wallet service derive each user balance
+  /// from append-only entries without ever persisting a mutable balance.
+  WALLET_WITHDRAWABLE_LIABILITY
+  WALLET_PURCHASE_LIABILITY
+  /// Cash confirmed from the platform's company card before it is allocated
+  /// to the customer/payment clearing account.
+  CARD_TRANSFER_RECEIVABLE
+  PROVIDER_PAYABLE
+  CPC_RECEIVABLE
+  PAWMA_REWARD_LIABILITY
 }
 
 enum LedgerEntryDirection {
@@ -1166,6 +1237,8 @@ model User {
   blocksMade                UserBlock[]              @relation("BlocksMade")
   blocksReceived            UserBlock[]              @relation("BlocksReceived")
   clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
+  walletAccount              WalletAccount?
+  cardTransferPayments       CardTransferPayment[]
 
   @@map("users")
 }
@@ -1875,6 +1948,7 @@ model ProviderOrganization {
   availabilityRules      ProviderAvailabilityRule[]
   availabilityExceptions ProviderAvailabilityException[]
   bookings               Booking[]
+  providerSettlements    ProviderSettlement[]
   bookingSeries          BookingSeries[]
   contextPreferences     ProviderContextPreference[]
 
@@ -2295,6 +2369,7 @@ model Booking {
   rescheduledFrom               Booking?                @relation("BookingReschedule", fields: [rescheduledFromBookingId], references: [id], onDelete: Restrict)
   rescheduledTo                 Booking?                @relation("BookingReschedule")
   paymentIntentId               String?                 @db.Uuid
+  cardTransferPayments          CardTransferPayment[]
 
   reasonForVisit String?
   ownerNotes     String?
@@ -2850,6 +2925,7 @@ model Checkout {
   reservations     InventoryReservation[]
   orders           Order[]
   paymentIntents   PaymentIntent[]
+  cardTransferPayment CardTransferPayment?
   financingIntents FinancingIntent[]
   shippingQuotes   ShippingQuote[]
 
@@ -3013,6 +3089,7 @@ model PaymentIntent {
   status         PaymentIntentStatus @default(REQUIRES_PAYMENT_METHOD)
   provider       PaymentProvider     @default(DEV_SIMULATED)
   idempotencyKey String?
+  rail           PaymentRail?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3021,6 +3098,7 @@ model PaymentIntent {
   transactions                Transaction[]
   refunds                     Refund[]
   providerEvents              PaymentProviderEvent[]
+  zibalPayment                ZibalPayment?
   /// Handoff 16 — a subscription billing attempt (initial purchase, renewal,
   /// or upgrade) creates exactly one PaymentIntent through this same table,
   /// via a minimal internal Checkout/Cart shell never exposed by any
@@ -3030,7 +3108,97 @@ model PaymentIntent {
   subscriptionBillingAttempts SubscriptionBillingAttempt[]
 
   @@index([checkoutId])
+  @@index([idempotencyKey])
   @@map("payment_intents")
+}
+
+/// Zibal's request/redirect/verify evidence. The status is independent of
+/// PaymentIntentStatus: only VERIFIED can cause an order.
+model ZibalPayment {
+  id              String             @id @default(uuid()) @db.Uuid
+  paymentIntentId String             @unique @db.Uuid
+  paymentIntent   PaymentIntent      @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+  status          ZibalPaymentStatus @default(INITIATED)
+  trackId         String?            @unique
+  requestToken    String?            @unique
+  callbackUrl     String
+  initiatedAt     DateTime           @default(now())
+  verifiedAt      DateTime?
+  failedAt        DateTime?
+  failureCode     String?
+  failureMessage  String?
+
+  @@index([status, initiatedAt])
+  @@map("zibal_payments")
+}
+
+/// A receipt-backed company-card payment. The receipt is an object-storage
+/// key rather than bytes or a public URL; the media layer authorises access.
+model CardTransferPayment {
+  id          String                    @id @default(uuid()) @db.Uuid
+  userId      String                    @db.Uuid
+  user        User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  checkoutId  String?                   @unique @db.Uuid
+  checkout    Checkout?                 @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  bookingId   String?                   @db.Uuid
+  booking     Booking?                  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  status      CardTransferPaymentStatus @default(AWAITING_RECEIPT)
+  idempotencyKey String                  @unique
+  expectedAmount Int
+  receivedAmount Int?
+  currency       String                  @default("IRR")
+  companyCardNumberMasked String
+  accountHolderName       String
+  receiptObjectKey        String?
+  receiptUploadedAt       DateTime?
+  receiptUploadDeadlineAt DateTime
+  reviewAvailableAt       DateTime
+  differenceDueAt         DateTime?
+  reviewedAt              DateTime?
+  reviewedByAdminId       String?       @db.Uuid
+  rejectionReason         String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([bookingId, status])
+  @@index([reviewAvailableAt, status])
+  @@map("card_transfer_payments")
+}
+
+/// Personal wallet identity. There are deliberately no amount/balance
+/// columns here: WalletEntry is the append-only source and balances are
+/// derived by summing its signed entries for each balance type.
+model WalletAccount {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  currency  String   @default("IRR")
+  createdAt DateTime @default(now())
+
+  entries WalletEntry[]
+
+  @@map("wallet_accounts")
+}
+
+model WalletEntry {
+  id                  String             @id @default(uuid()) @db.Uuid
+  walletAccountId     String             @db.Uuid
+  walletAccount       WalletAccount      @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
+  ledgerTransactionId String?            @unique @db.Uuid
+  ledgerTransaction   LedgerTransaction? @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
+  balanceType         WalletBalanceType
+  kind                WalletEntryKind
+  source              WalletCreditSource?
+  amount              Int
+  referenceType       String
+  referenceId         String             @db.Uuid
+  expiresAt           DateTime?
+  createdAt           DateTime           @default(now())
+
+  @@index([walletAccountId, balanceType, createdAt])
+  @@index([expiresAt])
+  @@map("wallet_entries")
 }
 
 model PaymentAttempt {
@@ -3251,9 +3419,17 @@ model LedgerTransaction {
   referenceType String
   referenceId   String   @db.Uuid
   currency      String   @default("IRR")
+  /// A correction never edits an earlier posting: it points to the original
+  /// ledger transaction and reverses it with an explicit operational reason.
+  reversesLedgerTransactionId String? @unique @db.Uuid
+  reversesLedgerTransaction   LedgerTransaction? @relation("LedgerReversal", fields: [reversesLedgerTransactionId], references: [id], onDelete: Restrict)
+  reversal                     LedgerTransaction? @relation("LedgerReversal")
+  correctionReason             String?
   createdAt     DateTime @default(now())
 
   entries LedgerEntry[]
+  walletEntries WalletEntry[]
+  providerSettlement ProviderSettlement?
 
   @@index([referenceType, referenceId])
   @@map("ledger_transactions")
@@ -3527,6 +3703,36 @@ model SellerSettlementItem {
 
   @@index([sellerSettlementId])
   @@map("seller_settlement_items")
+}
+
+/// Provider settlement is intentionally not a renamed SellerSettlement:
+/// provider services, appointment refunds and future provider fee policy are
+/// a different operational domain.  This phase persists the auditable entity
+/// and its ledger linkage only; scheduling/execution remains the existing
+/// settlement workflow's future concern.
+model ProviderSettlement {
+  id                     String                   @id @default(uuid()) @db.Uuid
+  reference              String                   @unique
+  providerOrganizationId String                   @db.Uuid
+  providerOrganization   ProviderOrganization     @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  periodStart            DateTime
+  periodEnd              DateTime
+  currency               String                   @default("IRR")
+  status                 ProviderSettlementStatus @default(CALCULATED)
+  grossIrr               Int
+  commissionIrr          Int                      @default(0)
+  refundsIrr             Int                      @default(0)
+  netIrr                 Int
+  ledgerTransactionId    String?                  @unique @db.Uuid
+  ledgerTransaction      LedgerTransaction?       @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
+  initiatedByAdminId     String?                  @db.Uuid
+  approvedByAdminId      String?                  @db.Uuid
+  createdAt              DateTime                 @default(now())
+  approvedAt             DateTime?
+  paidAt                 DateTime?
+
+  @@index([providerOrganizationId, status])
+  @@map("provider_settlements")
 }
 
 /// An explicit, ledger-backed credit/debit to a seller's balance (spec: "no

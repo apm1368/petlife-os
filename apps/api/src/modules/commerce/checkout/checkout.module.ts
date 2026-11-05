@@ -11,6 +11,7 @@ import { SellerFinanceModule } from "../../seller-finance/seller-finance.module"
 import { CheckoutController } from "./checkout.controller";
 import { CheckoutService } from "./checkout.service";
 import { InventoryReservationService } from "./inventory-reservation.service";
+import { InventoryReservationExpiryWorker } from "./inventory-reservation-expiry.worker";
 import { PaymentEventsListener } from "./payment-events.listener";
 import { FinancingEventsListener } from "./financing-events.listener";
 import { PaymentWebhooksController } from "./payment-webhooks.controller";
@@ -18,7 +19,7 @@ import { PaymentWebhooksController } from "./payment-webhooks.controller";
 @Module({
   imports: [HouseholdsModule, CartModule, PaymentsModule, FinancingModule, LedgerModule, RefundsModule, OrdersModule, LogisticsModule, SellerFinanceModule],
   controllers: [CheckoutController, PaymentWebhooksController],
-  providers: [CheckoutService, InventoryReservationService, PaymentEventsListener, FinancingEventsListener],
-  exports: [CheckoutService],
+  providers: [CheckoutService, InventoryReservationService, InventoryReservationExpiryWorker, PaymentEventsListener, FinancingEventsListener],
+  exports: [CheckoutService, InventoryReservationService],
 })
 export class CheckoutModule {}

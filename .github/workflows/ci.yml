@@ -97,7 +97,10 @@ jobs:
         run: pnpm test
 
       - name: API e2e tests
-        run: pnpm --filter @petlife/api test:e2e
+        # Each run receives a newly-created, migrated *_test database and it
+        # is removed afterwards. Running in-band prevents financial scenarios
+        # from sharing mutable inventory/payment state across Jest workers.
+        run: pnpm --filter @petlife/api test:e2e:fresh -- --runInBand
 
       - name: Build
         run: pnpm build

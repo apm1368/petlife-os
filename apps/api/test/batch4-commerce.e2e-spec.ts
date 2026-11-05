@@ -308,7 +308,7 @@ describe("Batch 4 — Commerce", () => {
       expect(res.body.error.details.reason).toBe("DELIVERY_METHOD_UNAVAILABLE");
     });
 
-    it("two customers racing for the last unit: exactly one checkout reserves it", async () => {
+    it("two customers racing to start payment for the last unit: exactly one reserves it", async () => {
       const a = await customer();
       const b = await customer();
       const s = await seller();
@@ -316,7 +316,16 @@ describe("Batch 4 — Commerce", () => {
       const o = await offer(s.id, variant.id, 100_000, 1);
       await a.c.post("/cart/items").send({ offerId: o.id, quantity: 1 }).expect(201);
       await b.c.post("/cart/items").send({ offerId: o.id, quantity: 1 }).expect(201);
-      const results = await Promise.all([a.c.post("/checkout").send({ addressId: a.addressId }), b.c.post("/checkout").send({ addressId: b.addressId })]);
+      // OF-13: creating a checkout is only a priced snapshot.  The inventory
+      // lock happens when a payment attempt begins.
+      const [aCheckout, bCheckout] = await Promise.all([
+        a.c.post("/checkout").send({ addressId: a.addressId }).expect(201),
+        b.c.post("/checkout").send({ addressId: b.addressId }).expect(201),
+      ]);
+      const results = await Promise.all([
+        a.c.post(`/checkout/${aCheckout.body.id}/payment-intent`).send({}),
+        b.c.post(`/checkout/${bCheckout.body.id}/payment-intent`).send({}),
+      ]);
       const statuses = results.map((r) => r.status).sort();
       expect(statuses[0]).toBe(201);
       expect([400, 409]).toContain(statuses[1]);
