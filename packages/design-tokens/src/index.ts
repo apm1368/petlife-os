@@ -1,4 +1,10 @@
 export const typographyTokens = [
+  "12",
+  "14",
+  "16",
+  "20",
+  "24",
+  "32",
   "hero",
   "pageTitle",
   "sectionTitle",
@@ -12,6 +18,12 @@ export const typographyTokens = [
 export type TypographyToken = (typeof typographyTokens)[number];
 
 export const semanticColorTokens = [
+  "brand",
+  "success",
+  "warning",
+  "error",
+  "info",
+  "pending",
   "surface-base",
   "surface-subtle",
   "surface-elevated",

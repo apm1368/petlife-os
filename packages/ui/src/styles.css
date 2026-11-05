@@ -1,0 +1,43 @@
+/* Public entrypoint: consumers import "@petlife/ui/styles.css" once at the app root. */
+@import "@fontsource/ibm-plex-sans-arabic/400.css";
+@import "@fontsource/ibm-plex-sans-arabic/600.css";
+@import "../../design-tokens/css/tokens.css";
+@import "../../design-tokens/css/typography.css";
+
+.pl-card {
+  border-radius: var(--radius-card);
+}
+
+.pl-chart-bar {
+  block-size: calc(var(--pl-chart-bar-size) * var(--chart-bar-height));
+}
+
+.pl-pet-name {
+  max-inline-size: var(--pet-name-max-inline-size);
+}
+
+.pl-touch-target {
+  min-block-size: var(--touch-target-min);
+}
+
+.pl-sheet {
+  max-block-size: var(--sheet-max-height);
+  padding-block-end: max(var(--space-6), env(safe-area-inset-bottom));
+}
+
+.pl-primary-action {
+  position: sticky;
+  inset-block-end: 0;
+  padding-block: var(--space-3);
+  background: var(--surface-page);
+  border-block-start: var(--border-width-default) solid var(--border-default);
+}
+
+@media (min-width: 640px) {
+  .pl-primary-action {
+    position: static;
+    padding-block: 0;
+    background: transparent;
+    border-block-start-width: 0;
+  }
+}

@@ -42,7 +42,7 @@ export function Sheet({ open, onClose, title, children, className }: SheetProps)
         animate={{ opacity: open ? 1 : 0, y: open ? 0 : 16 }}
         transition={{ duration: reducedMotion ? 0 : 0.18 }}
         className={cn(
-          "flex w-full max-h-[85dvh] flex-col gap-4 rounded-t-lg border-t border-border-subtle bg-surface-elevated p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-text-primary",
+          "pl-sheet flex w-full flex-col gap-4 rounded-t-lg border-t border-border-subtle bg-surface-elevated p-6 text-text-primary",
           "sm:max-h-full sm:rounded-none sm:border-s",
           className,
         )}

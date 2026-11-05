@@ -80,6 +80,13 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Design-system contract and visual stories
+        run: |
+          pnpm --filter @petlife/ui test
+          pnpm --filter @petlife/ui storybook:build
+          pnpm --filter @petlife/ui exec playwright install --with-deps chromium
+          pnpm --filter @petlife/ui test:visual
+
       - name: Typecheck
         run: pnpm typecheck
 

@@ -32,7 +32,7 @@ export function PetIdentity({ pet, isActive, size = "md", className, labels }: P
         <span className="text-metadata text-text-secondary">
           {pet.breed ? `${pet.breed}` : labels.species}
         </span>
-        {pet.lifecycleStatus !== PetLifecycleStatus.ACTIVE ? (
+        {pet.lifecycleStatus && pet.lifecycleStatus !== PetLifecycleStatus.ACTIVE ? (
           <StatusLabel tone={lifecycleTone[pet.lifecycleStatus]} className="mt-1 w-fit">
             {labels.lifecycle}
           </StatusLabel>

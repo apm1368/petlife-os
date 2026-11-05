@@ -4,14 +4,25 @@
   "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "node ../../scripts/verify-design-system.mjs",
+    "test": "node ../../scripts/verify-design-system.mjs",
+    "storybook": "storybook dev -p 6006 --config-dir .storybook",
+    "storybook:build": "storybook build --config-dir .storybook --output-dir storybook-static",
+    "test:visual": "node ./scripts/verify-stories.mjs && playwright test -c playwright.visual.config.ts"
   },
   "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "dependencies": {
+    "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
+    "@petlife/design-tokens": "workspace:*",
     "@petlife/types": "workspace:*",
     "@petlife/validation": "workspace:*",
     "clsx": "^2.1.1",
@@ -19,9 +30,15 @@
     "motion": "13.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@storybook/addon-a11y": "^8.6.14",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/react-vite": "^8.6.14",
     "@petlife/tsconfig": "workspace:*",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "storybook": "^8.6.14",
     "typescript": "^5.6.3"
   }
 }

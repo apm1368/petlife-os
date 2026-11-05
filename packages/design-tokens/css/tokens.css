@@ -55,12 +55,22 @@
   --status-attention-tint: #f6ebd3;
   --status-concern-tint: #fbf0ed;
 
+  /* DS-03 public semantic aliases. Components consume roles, never palette values. */
+  --color-brand: var(--brand-solid);
+  --color-success: var(--status-success);
+  --color-warning: var(--status-warning);
+  --color-error: var(--status-critical);
+  --color-info: var(--status-info);
+  --color-pending: var(--accent-plum);
+
   --focus-ring: #2d58a6;
 
   /* Geometry */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  /* DS-10. Cards use this radius; smaller radii are reserved for controls. */
+  --radius-card: 16px;
   --radius-media: 18px;
   --radius-pill: 999px;
   --shadow-1: 0 1px 2px rgba(27, 32, 28, 0.06), 0 1px 1px rgba(27, 32, 28, 0.04);
@@ -77,6 +87,12 @@
   --space-8: 40px;
   --space-9: 56px;
   --space-10: 72px;
+  --touch-target-min: 44px;
+  --touch-target-large: 52px;
+  --sheet-max-height: 85dvh;
+  --border-width-default: 1px;
+  --chart-bar-height: 120px;
+  --pet-name-max-inline-size: 4.5rem;
 
   /* Layers */
   --z-sticky: 30;
@@ -141,6 +157,12 @@
     --status-success-tint: #1d2b21;
     --status-attention-tint: #2e2617;
     --status-concern-tint: #33201c;
+    --color-brand: var(--brand-solid);
+    --color-success: var(--status-success);
+    --color-warning: var(--status-warning);
+    --color-error: var(--status-critical);
+    --color-info: var(--status-info);
+    --color-pending: var(--accent-plum);
     --focus-ring: #8eb0f0;
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-2: 0 18px 40px -16px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4);
@@ -186,6 +208,12 @@
   --status-success-tint: #1d2b21;
   --status-attention-tint: #2e2617;
   --status-concern-tint: #33201c;
+  --color-brand: var(--brand-solid);
+  --color-success: var(--status-success);
+  --color-warning: var(--status-warning);
+  --color-error: var(--status-critical);
+  --color-info: var(--status-info);
+  --color-pending: var(--accent-plum);
   --focus-ring: #8eb0f0;
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-2: 0 18px 40px -16px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4);

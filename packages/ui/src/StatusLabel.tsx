@@ -1,7 +1,7 @@
-import { Check, CircleAlert, Dot, OctagonAlert, TriangleAlert } from "lucide-react";
+import { Check, CircleAlert, Clock3, Dot, Info, OctagonAlert, TriangleAlert } from "lucide-react";
 import { cn } from "./cn";
 
-export type StatusTone = "neutral" | "success" | "attention" | "higherConcern" | "urgent" | "emergency";
+export type StatusTone = "neutral" | "success" | "info" | "pending" | "attention" | "higherConcern" | "urgent" | "emergency";
 
 export interface StatusLabelProps {
   tone: StatusTone;
@@ -12,6 +12,8 @@ export interface StatusLabelProps {
 const toneClasses: Record<StatusTone, string> = {
   neutral: "bg-surface-subtle text-text-secondary",
   success: "bg-[var(--status-success-tint)] text-state-success",
+  info: "bg-[var(--brand-tint)] text-[var(--status-info)]",
+  pending: "bg-[var(--status-attention-tint)] text-[var(--accent-plum)]",
   attention: "bg-[var(--status-attention-tint)] text-state-attention",
   higherConcern: "bg-[var(--status-attention-tint)] text-state-higher-concern",
   urgent: "bg-[var(--status-concern-tint)] text-state-urgent",
@@ -21,6 +23,8 @@ const toneClasses: Record<StatusTone, string> = {
 const toneIcon: Record<StatusTone, typeof Check> = {
   neutral: Dot,
   success: Check,
+  info: Info,
+  pending: Clock3,
   attention: TriangleAlert,
   higherConcern: TriangleAlert,
   urgent: CircleAlert,
