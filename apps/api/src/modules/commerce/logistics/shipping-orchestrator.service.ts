@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { FulfillmentStatus, Prisma, SellerMembershipStatus, ShipmentStatus, ShippingProvider, ShippingQuoteStatus, type Fulfillment, type Shipment, type ShippingQuote } from "@prisma/client";
-import type { AddressSnapshotDto, SellerShippingOptionsDto } from "@petlife/types";
+import type { AddressSnapshotDto, CartLineDto, SellerShippingOptionsDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService, type DomainEventType } from "../../../common/events/domain-events.service";
 import {
@@ -56,22 +56,36 @@ export class ShippingOrchestrator {
     return checkout;
   }
 
-  /** One seller "bucket" per Checkout — derived from its InventoryReservations, which already exist for every seller in the checkout (spec section 24-25: quotes are requested per seller before Orders exist). */
-  private async loadSellerContexts(checkoutId: string): Promise<SellerContext[]> {
+  /**
+   * One seller bucket per checkout.  Payment-start reservations are preferred
+   * once they exist; before payment starts we use the immutable priced-line
+   * snapshot instead.  Quotes must be selectable before payment, while
+   * OF-13 deliberately forbids reserving inventory merely by creating a
+   * checkout.
+   */
+  private async loadSellerContexts(checkout: { id: string; pricedLinesSnapshot: Prisma.JsonValue | null }): Promise<SellerContext[]> {
     const reservations = await this.prisma.inventoryReservation.findMany({
-      where: { checkoutId },
+      where: { checkoutId: checkout.id },
       include: { sellerOffer: { include: { sellerOrganization: true, productVariant: true } } },
     });
 
     const bySeller = new Map<string, SellerContext>();
-    for (const reservation of reservations) {
-      const seller = reservation.sellerOffer.sellerOrganization;
+    const addLine = (
+      sellerOffer: {
+        sellerOrganization: { id: string; name: string; verificationStatus: string; status: string; city: string | null; countryCode: string };
+        productVariant: { weightValue: Prisma.Decimal | null; weightUnit: string | null };
+        priceAmount: number;
+      },
+      quantity: number,
+      unitPriceAmount: number,
+    ) => {
+      const seller = sellerOffer.sellerOrganization;
       const existing = bySeller.get(seller.id);
       const line = {
-        quantity: reservation.quantity,
-        unitPriceAmount: reservation.sellerOffer.priceAmount,
-        variantWeightValue: reservation.sellerOffer.productVariant.weightValue ? Number(reservation.sellerOffer.productVariant.weightValue) : null,
-        variantWeightUnit: reservation.sellerOffer.productVariant.weightUnit,
+        quantity,
+        unitPriceAmount,
+        variantWeightValue: sellerOffer.productVariant.weightValue ? Number(sellerOffer.productVariant.weightValue) : null,
+        variantWeightUnit: sellerOffer.productVariant.weightUnit,
       };
       if (existing) {
         existing.shippingPackageLines.push(line);
@@ -85,6 +99,26 @@ export class ShippingOrchestrator {
           pickupAddress: { recipient: seller.name, phone: null, addressLine: null, city: seller.city, region: null, countryCode: seller.countryCode, instructions: null },
           shippingPackageLines: [line],
         });
+      }
+    };
+
+    for (const reservation of reservations) {
+      addLine(reservation.sellerOffer, reservation.quantity, reservation.sellerOffer.priceAmount);
+    }
+
+    if (reservations.length === 0) {
+      const snapshot = checkout.pricedLinesSnapshot as unknown as CartLineDto[] | null;
+      const offerIds = [...new Set(snapshot?.map((line) => line.sellerOffer.id) ?? [])];
+      if (offerIds.length > 0) {
+        const offers = await this.prisma.sellerOffer.findMany({
+          where: { id: { in: offerIds } },
+          include: { sellerOrganization: true, productVariant: true },
+        });
+        const offersById = new Map(offers.map((offer) => [offer.id, offer]));
+        for (const line of snapshot ?? []) {
+          const offer = offersById.get(line.sellerOffer.id);
+          if (offer) addLine(offer, line.quantity, line.currentPriceAmount);
+        }
       }
     }
     return [...bySeller.values()];
@@ -137,7 +171,7 @@ export class ShippingOrchestrator {
 
   async getShippingOptions(userId: string, checkoutId: string): Promise<SellerShippingOptionsDto[]> {
     const checkout = await this.loadOwnedCheckout(userId, checkoutId);
-    const sellers = await this.loadSellerContexts(checkoutId);
+    const sellers = await this.loadSellerContexts(checkout);
     const deliveryAddress = await this.loadDeliveryAddress(checkout);
     const now = new Date();
 
@@ -155,7 +189,7 @@ export class ShippingOrchestrator {
 
   async refreshShippingOptions(userId: string, checkoutId: string): Promise<SellerShippingOptionsDto[]> {
     const checkout = await this.loadOwnedCheckout(userId, checkoutId);
-    const sellers = await this.loadSellerContexts(checkoutId);
+    const sellers = await this.loadSellerContexts(checkout);
     const deliveryAddress = await this.loadDeliveryAddress(checkout);
 
     await this.prisma.shippingQuote.updateMany({

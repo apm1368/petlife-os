@@ -47,10 +47,20 @@ for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => drop().finally(()
   try {
     await db.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
     console.log(`e2e-fresh: created ${name}`);
+    // The end-to-end suite intentionally exercises every domain in one clean,
+    // serial database run.  Its Prisma/Nest test process can exceed Node's
+    // conservative ~2 GiB default heap before Jest gets a chance to release
+    // the final suites.  Keep the parent process untouched and give only the
+    // disposable Jest child a deterministic CI/local heap budget.
+    const inheritedNodeOptions = process.env.NODE_OPTIONS || "";
+    const nodeOptionsWithoutHeapLimit = inheritedNodeOptions
+      .replace(/(?:^|\s)--max-old-space-size(?:=|\s+)\d+/g, "")
+      .trim();
     const env = {
       ...process.env,
       DATABASE_URL: fresh.toString(),
       TEST_DATABASE_URL: fresh.toString(),
+      NODE_OPTIONS: `${nodeOptionsWithoutHeapLimit} --max-old-space-size=4096`.trim(),
       // docker-compose's local Redis requires its documented default
       // password. GitHub Actions supplies its own unauthenticated service URL.
       REDIS_URL: process.env.REDIS_URL || "redis://:petlife@127.0.0.1:6379",
