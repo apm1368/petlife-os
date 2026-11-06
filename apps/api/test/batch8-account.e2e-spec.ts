@@ -132,6 +132,16 @@ describe("Batch 8 — Account & security", () => {
   // ------------------------------------------------------------------ 8A account & profile
 
   describe("profile and contact methods", () => {
+    it("registers the requested account identity while keeping the phone explicitly unverified", async () => {
+      const username = `b8new${unique().replace(/-/g, "")}`;
+      const token = await csrf();
+      const response = await request(server).post("/auth/register").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token)
+        .send({ phone: "09123456789", firstName: "سارا", lastName: "احمدی", username, password: "correct-horse-battery" }).expect(200);
+      expect(response.body.user).toMatchObject({ phone: "+989123456789", displayName: "سارا احمدی" });
+      const saved = await prisma.user.findUniqueOrThrow({ where: { normalizedUsername: username.toLowerCase() } });
+      expect(saved).toMatchObject({ firstName: "سارا", lastName: "احمدی", phone: "+989123456789", phoneVerifiedAt: null, email: null });
+    });
+
     it("never returns the password hash, and reports contact verification honestly", async () => {
       const u = await user();
       const changed = await u.c.put("/auth/password").send({ newPassword: "correct horse battery" }).expect(200);
