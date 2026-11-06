@@ -5,7 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetAccessSource, type Prisma } from "@prisma/client";
 import type { PetAccessFlags } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { AlreadyHouseholdMemberException, InvitationAlreadyUsedException, InvitationExpiredException, InvitationNotForYouException, InvitationRevokedException, HouseholdAccessDeniedException, LastHouseholdOwnerException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
+import { AlreadyHouseholdMemberException, HouseholdInvitationAlreadyPendingException, InvitationAlreadyUsedException, InvitationExpiredException, InvitationNotForYouException, InvitationRevokedException, HouseholdAccessDeniedException, LastHouseholdOwnerException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import type { CreateHouseholdDto } from "./dto/create-household.dto";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
@@ -67,7 +67,7 @@ export class HouseholdsService {
     return this.prisma.household.findMany({ where: { members: { some: { userId } } }, orderBy: { createdAt: "asc" } });
   }
 
-  /** Invitations appear in the recipient's account only after they prove control of the exact contact. */
+  /** Only verified contacts see inbox summaries; unverified phone matches must open the owner's secret link. */
   async listIncomingInvitations(userId: string) {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, emailVerifiedAt: true, phoneVerifiedAt: true } });
     const contacts = [...new Set([
@@ -77,22 +77,16 @@ export class HouseholdsService {
     if (!contacts.length) return [];
     const invitations = await this.prisma.householdInvitation.findMany({
       where: { contact: { in: contacts }, status: "PENDING", expiresAt: { gt: new Date() } },
-      include: {
-        household: { select: { id: true, name: true, pets: { where: { deletedAt: null }, select: { id: true, name: true } } } },
-      },
       orderBy: { createdAt: "desc" },
       take: 25,
     });
     const inviters = await this.prisma.user.findMany({ where: { id: { in: [...new Set(invitations.map((invitation) => invitation.invitedByUserId))] } }, select: { id: true, displayName: true } });
     const inviterNames = new Map(inviters.map((inviter) => [inviter.id, inviter.displayName]));
     return invitations.map((invitation) => {
-      const access = invitation.initialAccess as unknown as InitialAccess;
-      const petIds = new Set(access.map((item) => item.petId));
       return {
         id: invitation.id,
-        household: { id: invitation.household.id, name: invitation.household.name },
         inviter: { displayName: inviterNames.get(invitation.invitedByUserId) ?? "" },
-        pets: invitation.household.pets.filter((pet) => petIds.has(pet.id)).map((pet) => pet.name),
+        contactMasked: maskContact(invitation.contact),
         expiresAt: invitation.expiresAt,
         createdAt: invitation.createdAt,
       };
@@ -107,7 +101,11 @@ export class HouseholdsService {
         // Members see each other by name only — contact details stay with their owner.
         members: { include: { user: { select: { id: true, displayName: true, avatarUrl: true } } }, orderBy: { createdAt: "asc" } },
         pets: { where: { deletedAt: null }, select: { id: true, name: true, photoUrl: true, species: true, lifecycleStatus: true } },
-        invitations: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" } },
+        invitations: {
+          where: { status: { in: ["PENDING", "REQUESTED"] } },
+          include: { requestedBy: { select: { id: true, displayName: true, avatarUrl: true, phone: true, phoneVerifiedAt: true } } },
+          orderBy: { createdAt: "desc" },
+        },
       },
     });
     if (!household) throw new NotFoundApiException("Household");
@@ -123,7 +121,7 @@ export class HouseholdsService {
             { aggregateType: "Household", aggregateId: householdId },
             ...(petIds.length ? [{ aggregateType: "Pet", aggregateId: { in: petIds } }] : []),
           ],
-          type: { in: ["HouseholdInvitationCreated", "HouseholdInvitationResent", "HouseholdInvitationCancelled", "HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked", "HouseholdMemberRemoved", "HouseholdMemberLeft", "HouseholdMemberRoleChanged"] },
+          type: { in: ["HouseholdInvitationCreated", "HouseholdInvitationResent", "HouseholdInvitationCancelled", "HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "HouseholdMembershipRequested", "HouseholdMembershipApproved", "HouseholdMembershipRejected", "PetAccessGranted", "PetAccessChanged", "PetAccessRevoked", "HouseholdMemberRemoved", "HouseholdMemberLeft", "HouseholdMemberRoleChanged"] },
         },
         select: { id: true, type: true, occurredAt: true },
         orderBy: { occurredAt: "desc" },
@@ -141,11 +139,38 @@ export class HouseholdsService {
       ...expiredTemporaryGrants.map((grant) => ({ id: `expired-${grant.id}`, type: "TemporaryPetAccessExpired", occurredAt: grant.expiresAt! })),
     ].sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime()).slice(0, 24);
     const membership = household.members.find((member) => member.userId === userId);
+    const isOwner = membership?.role === HouseholdRole.OWNER;
+    const now = new Date();
+    const visiblePetIds = new Set(grants
+      .filter((grant) => grant.userId === userId && grant.canViewIdentity && (!grant.startsAt || grant.startsAt <= now) && (!grant.expiresAt || grant.expiresAt > now))
+      .map((grant) => grant.petId));
     return {
       ...household,
+      // Membership does not imply access to every pet in a household. Owners can manage all;
+      // other members see only identities granted to them and only their own grant details.
+      pets: isOwner ? household.pets : household.pets.filter((pet) => visiblePetIds.has(pet.id)),
       currentUserRole: membership?.role,
-      invitations: household.invitations.map((invitation) => ({ id: invitation.id, contactMasked: maskContact(invitation.contact), status: invitation.status, expiresAt: invitation.expiresAt, createdAt: invitation.createdAt, initialAccess: invitation.initialAccess })),
-      grants,
+      // Requests and their identifying information are owner-only. A regular member must not
+      // learn who was invited or who is asking to join this household.
+      invitations: membership?.role === HouseholdRole.OWNER
+        ? household.invitations.map((invitation) => ({
+          id: invitation.id,
+          contactMasked: maskContact(invitation.contact),
+          status: invitation.status,
+          expiresAt: invitation.expiresAt,
+          createdAt: invitation.createdAt,
+          requestedAt: invitation.requestedAt,
+          initialAccess: invitation.initialAccess,
+          requester: invitation.requestedBy ? {
+            id: invitation.requestedBy.id,
+            displayName: invitation.requestedBy.displayName,
+            avatarUrl: invitation.requestedBy.avatarUrl,
+            phoneMasked: invitation.requestedBy.phone ? maskContact(normalizeStoredContact(invitation.requestedBy.phone)) : null,
+            phoneVerified: Boolean(invitation.requestedBy.phoneVerifiedAt),
+          } : null,
+        }))
+        : [],
+      grants: isOwner ? grants : grants.filter((grant) => grant.userId === userId && visiblePetIds.has(grant.petId)),
       history,
     };
   }
@@ -155,16 +180,26 @@ export class HouseholdsService {
     const pets = await this.prisma.pet.count({ where: { householdId, id: { in: dto.initialAccess.map((item) => item.petId) } } });
     if (pets !== new Set(dto.initialAccess.map((item) => item.petId)).size) throw new HouseholdAccessDeniedException();
     const contact = normalizeContact(dto.contact);
-    const existingMember = await this.prisma.householdMember.findFirst({ where: { householdId, user: contact.includes("@") ? { email: contact } : { phone: contact } }, select: { id: true } });
-    if (existingMember) throw new AlreadyHouseholdMemberException();
     const rawToken = randomBytes(32).toString("base64url");
-    const invitation = await this.prisma.householdInvitation.create({
-      data: { householdId, contact, tokenHash: tokenHash(rawToken), invitedByUserId: actorUserId, initialAccess: dto.initialAccess as Prisma.InputJsonValue, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    const invitation = await this.prisma.$transaction(async (tx) => {
+      // Serializes concurrent invitations for the same household/contact without imposing a
+      // single-household constraint on the user.
+      await tx.$queryRaw<Array<{ locked: boolean }>>`WITH acquired AS MATERIALIZED (SELECT pg_advisory_xact_lock(hashtext(${householdId}), hashtext(${contact}))) SELECT TRUE AS locked FROM acquired`;
+      const now = new Date();
+      await tx.householdInvitation.updateMany({ where: { householdId, contact, status: "PENDING", expiresAt: { lte: now } }, data: { status: "EXPIRED" } });
+      const currentMembers = await tx.householdMember.findMany({ where: { householdId }, select: { user: { select: { email: true, phone: true } } } });
+      const alreadyMember = currentMembers.some(({ user }) => [user.phone, user.email].filter(Boolean).some((value) => normalizeStoredContact(value!) === contact));
+      if (alreadyMember) throw new AlreadyHouseholdMemberException();
+      const pending = await tx.householdInvitation.findFirst({ where: { householdId, contact, status: { in: ["PENDING", "REQUESTED"] } }, select: { id: true } });
+      if (pending) throw new HouseholdInvitationAlreadyPendingException();
+      return tx.householdInvitation.create({
+        data: { householdId, contact, tokenHash: tokenHash(rawToken), invitedByUserId: actorUserId, initialAccess: dto.initialAccess as Prisma.InputJsonValue, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      });
     });
-    // Notify only an account that verified this contact (see requireInvitee).
+    // This is an in-app notice only, not proof of phone ownership or an SMS/email delivery.
     const target = contact.includes("@")
       ? await this.prisma.user.findFirst({ where: { email: contact, emailVerifiedAt: { not: null } }, select: { id: true, locale: true } })
-      : await this.prisma.user.findFirst({ where: { phone: contact, phoneVerifiedAt: { not: null } }, select: { id: true, locale: true } });
+      : await this.prisma.user.findFirst({ where: { phone: contact }, select: { id: true, locale: true } });
     if (target) {
       const inviter = await this.prisma.user.findUniqueOrThrow({ where: { id: actorUserId }, select: { displayName: true } });
       await this.notifications.notify({
@@ -178,7 +213,7 @@ export class HouseholdsService {
       });
     }
     await this.events.publish("HouseholdInvitationCreated", { householdId, invitationId: invitation.id, actorUserId }, { aggregateType: "Household", aggregateId: householdId });
-    return { id: invitation.id, status: invitation.status, contactMasked: maskContact(contact), expiresAt: invitation.expiresAt, delivery: target ? "DELIVERED" : "BLOCKED_EXTERNAL", sharePath: NotificationDeepLinks.householdInvitation(rawToken) };
+    return { id: invitation.id, status: invitation.status, contactMasked: maskContact(contact), expiresAt: invitation.expiresAt, delivery: target ? "IN_APP" : "LINK_ONLY", sharePath: NotificationDeepLinks.householdInvitation(rawToken) };
   }
 
   async resendInvitation(householdId: string, invitationId: string, actorUserId: string) {
@@ -189,7 +224,7 @@ export class HouseholdsService {
     const updated = await this.prisma.householdInvitation.update({ where: { id: invitationId }, data: { tokenHash: tokenHash(rawToken), expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) } });
     const target = updated.contact.includes("@")
       ? await this.prisma.user.findFirst({ where: { email: updated.contact, emailVerifiedAt: { not: null } }, select: { id: true, locale: true } })
-      : await this.prisma.user.findFirst({ where: { phone: updated.contact, phoneVerifiedAt: { not: null } }, select: { id: true, locale: true } });
+      : await this.prisma.user.findFirst({ where: { phone: updated.contact }, select: { id: true, locale: true } });
     if (target) {
       const inviter = await this.prisma.user.findUniqueOrThrow({ where: { id: actorUserId }, select: { displayName: true } });
       await this.notifications.notify({
@@ -203,40 +238,93 @@ export class HouseholdsService {
       });
     }
     await this.events.publish("HouseholdInvitationResent", { householdId, invitationId, actorUserId }, { aggregateType: "Household", aggregateId: householdId });
-    return { id: updated.id, status: updated.status, contactMasked: maskContact(updated.contact), expiresAt: updated.expiresAt, delivery: target ? "DELIVERED" : "BLOCKED_EXTERNAL", sharePath: NotificationDeepLinks.householdInvitation(rawToken) };
+    return { id: updated.id, status: updated.status, contactMasked: maskContact(updated.contact), expiresAt: updated.expiresAt, delivery: target ? "IN_APP" : "LINK_ONLY", sharePath: NotificationDeepLinks.householdInvitation(rawToken) };
   }
 
   async cancelInvitation(householdId: string, invitationId: string, actorUserId: string) {
     await this.requireOwner(householdId, actorUserId);
-    const result = await this.prisma.householdInvitation.updateMany({ where: { id: invitationId, householdId, status: "PENDING" }, data: { status: "CANCELLED", cancelledAt: new Date() } });
+    const result = await this.prisma.householdInvitation.updateMany({ where: { id: invitationId, householdId, status: { in: ["PENDING", "REQUESTED"] } }, data: { status: "CANCELLED", cancelledAt: new Date() } });
     if (!result.count) throw new NotFoundApiException("Invitation");
     await this.events.publish("HouseholdInvitationCancelled", { householdId, invitationId, actorUserId }, { aggregateType: "Household", aggregateId: householdId });
     return { ok: true };
   }
 
   async inspectInvitation(token: string, userId: string) {
-    const invitation = await this.findActiveInvitation(token);
+    const invitation = await this.prisma.householdInvitation.findUnique({ where: { tokenHash: tokenHash(token) } });
+    if (!invitation) throw new NotFoundApiException("Invitation");
     await this.requireInvitee(invitation.contact, userId);
-    const household = await this.prisma.household.findUniqueOrThrow({ where: { id: invitation.householdId }, select: { id: true, name: true } });
-    const inviter = await this.prisma.user.findUnique({ where: { id: invitation.invitedByUserId }, select: { displayName: true } });
-    return { household, inviter, expiresAt: invitation.expiresAt, initialAccess: invitation.initialAccess };
+    if (invitation.status === "REQUESTED" && invitation.requestedByUserId === userId) {
+      return { contactMasked: maskContact(invitation.contact), phoneVerified: await this.isPhoneVerified(userId), expiresAt: invitation.expiresAt, requestPending: true };
+    }
+    if (invitation.status === "REQUESTED") throw new InvitationAlreadyUsedException();
+    const active = await this.findActiveInvitation(token);
+    return { contactMasked: maskContact(active.contact), phoneVerified: await this.isPhoneVerified(userId), expiresAt: active.expiresAt, requestPending: false };
   }
 
-  async acceptInvitation(token: string, userId: string) {
-    const invitation = await this.findActiveInvitation(token);
-    return this.acceptActiveInvitation(invitation, userId);
-  }
-
-  async acceptIncomingInvitation(invitationId: string, userId: string) {
-    const invitation = await this.findActiveInvitationById(invitationId);
-    return this.acceptActiveInvitation(invitation, userId);
-  }
-
-  private async acceptActiveInvitation(invitation: NonNullable<Awaited<ReturnType<HouseholdsService["findActiveInvitation"]>>>, userId: string) {
+  async requestMembership(token: string, userId: string) {
+    const invitation = await this.prisma.householdInvitation.findUnique({ where: { tokenHash: tokenHash(token) } });
+    if (!invitation) throw new NotFoundApiException("Invitation");
     await this.requireInvitee(invitation.contact, userId);
+    if (invitation.status === "REQUESTED" && invitation.requestedByUserId === userId) {
+      return { householdId: invitation.householdId, invitationId: invitation.id, status: "REQUESTED", alreadyRequested: true };
+    }
+    if (invitation.status === "REQUESTED") throw new InvitationAlreadyUsedException();
+    const active = await this.findActiveInvitation(token);
+    return this.createMembershipRequest(active, userId);
+  }
+
+  async requestIncomingMembership(invitationId: string, userId: string) {
+    const invitation = await this.prisma.householdInvitation.findUnique({ where: { id: invitationId } });
+    if (!invitation) throw new NotFoundApiException("Invitation");
+    await this.requireInvitee(invitation.contact, userId);
+    if (invitation.status === "REQUESTED" && invitation.requestedByUserId === userId) {
+      return { householdId: invitation.householdId, invitationId: invitation.id, status: "REQUESTED", alreadyRequested: true };
+    }
+    if (invitation.status === "REQUESTED") throw new InvitationAlreadyUsedException();
+    const active = await this.findActiveInvitationById(invitationId);
+    return this.createMembershipRequest(active, userId);
+  }
+
+  private async createMembershipRequest(invitation: NonNullable<Awaited<ReturnType<HouseholdsService["findActiveInvitation"]>>>, userId: string) {
+    await this.requireInvitee(invitation.contact, userId);
+    const requestedAt = new Date();
+    const claimed = await this.prisma.householdInvitation.updateMany({
+      where: { id: invitation.id, status: "PENDING", expiresAt: { gt: requestedAt } },
+      data: { status: "REQUESTED", requestedByUserId: userId, requestedAt },
+    });
+    if (!claimed.count) {
+      const current = await this.prisma.householdInvitation.findUniqueOrThrow({ where: { id: invitation.id } });
+      if (current.status === "REQUESTED" && current.requestedByUserId === userId) {
+        return { householdId: current.householdId, invitationId: current.id, status: "REQUESTED", alreadyRequested: true };
+      }
+      throw new InvitationAlreadyUsedException();
+    }
+    await this.events.publish("HouseholdMembershipRequested", { householdId: invitation.householdId, invitationId: invitation.id, userId }, { aggregateType: "Household", aggregateId: invitation.householdId });
+    return { householdId: invitation.householdId, invitationId: invitation.id, status: "REQUESTED", alreadyRequested: false };
+  }
+
+  async approveMembershipRequest(householdId: string, invitationId: string, actorUserId: string) {
+    await this.requireOwner(householdId, actorUserId);
     return this.prisma.$transaction(async (tx) => {
-      const claimed = await tx.householdInvitation.updateMany({ where: { id: invitation.id, status: "PENDING" }, data: { status: "ACCEPTED", acceptedByUserId: userId, acceptedAt: new Date() } });
+      const invitation = await tx.householdInvitation.findFirst({ where: { id: invitationId, householdId, status: "REQUESTED" } });
+      if (!invitation?.requestedByUserId) {
+        const existing = await tx.householdInvitation.findFirst({ where: { id: invitationId, householdId }, select: { status: true } });
+        if (existing) throw new InvitationAlreadyUsedException();
+        throw new NotFoundApiException("Membership request");
+      }
+      const userId = invitation.requestedByUserId;
+      // The phone remains unverified. Matching permits a request only; owner approval grants access.
+      const account = await tx.user.findUniqueOrThrow({ where: { id: userId }, select: { phone: true, phoneVerifiedAt: true, email: true, emailVerifiedAt: true } });
+      const phoneMatches = Boolean(account.phone && normalizeStoredContact(account.phone) === invitation.contact);
+      const emailMatches = Boolean(account.emailVerifiedAt && account.email && normalizeStoredContact(account.email) === invitation.contact);
+      if (!phoneMatches && !emailMatches) throw new InvitationNotForYouException();
+      const reviewedAt = new Date();
+      const claimed = await tx.householdInvitation.updateMany({
+        where: { id: invitation.id, householdId, status: "REQUESTED", requestedByUserId: userId },
+        data: { status: "ACCEPTED", acceptedByUserId: userId, acceptedAt: reviewedAt, reviewedByUserId: actorUserId, reviewedAt },
+      });
       if (!claimed.count) throw new InvitationAlreadyUsedException();
+      const existingMember = await tx.householdMember.findUnique({ where: { householdId_userId: { householdId: invitation.householdId, userId } }, select: { id: true } });
       await tx.householdMember.upsert({ where: { householdId_userId: { householdId: invitation.householdId, userId } }, create: { householdId: invitation.householdId, userId, role: "FAMILY" }, update: {} });
       const access = invitation.initialAccess as unknown as InitialAccess;
       for (const item of access) {
@@ -247,9 +335,24 @@ export class HouseholdsService {
         if (existing) continue;
         await tx.petAccessGrant.create({ data: { petId: item.petId, userId, source: PetAccessSource.HOUSEHOLD, grantedByUserId: invitation.invitedByUserId, ...PRESETS[item.preset] } });
       }
-      await this.events.publish("HouseholdInvitationAccepted", { householdId: invitation.householdId, invitationId: invitation.id, userId }, { tx, aggregateType: "Household", aggregateId: invitation.householdId });
-      return { householdId: invitation.householdId };
+      await this.events.publish("HouseholdMembershipApproved", { householdId: invitation.householdId, invitationId: invitation.id, userId, approvedByUserId: actorUserId }, { tx, aggregateType: "Household", aggregateId: invitation.householdId });
+      await this.events.publish("HouseholdInvitationAccepted", { householdId: invitation.householdId, invitationId: invitation.id, userId, approvedByUserId: actorUserId }, { tx, aggregateType: "Household", aggregateId: invitation.householdId });
+      return { householdId: invitation.householdId, userId, status: "ACCEPTED", alreadyMember: Boolean(existingMember) };
     });
+  }
+
+  async rejectMembershipRequest(householdId: string, invitationId: string, actorUserId: string) {
+    await this.requireOwner(householdId, actorUserId);
+    const reviewedAt = new Date();
+    const invitation = await this.prisma.householdInvitation.findFirst({ where: { id: invitationId, householdId, status: "REQUESTED" }, select: { requestedByUserId: true } });
+    if (!invitation?.requestedByUserId) throw new NotFoundApiException("Membership request");
+    const result = await this.prisma.householdInvitation.updateMany({
+      where: { id: invitationId, householdId, status: "REQUESTED", requestedByUserId: invitation.requestedByUserId },
+      data: { status: "DECLINED", declinedAt: reviewedAt, reviewedByUserId: actorUserId, reviewedAt },
+    });
+    if (!result.count) throw new InvitationAlreadyUsedException();
+    await this.events.publish("HouseholdMembershipRejected", { householdId, invitationId, userId: invitation.requestedByUserId, rejectedByUserId: actorUserId }, { aggregateType: "Household", aggregateId: householdId });
+    return { ok: true };
   }
 
   async declineInvitation(token: string, userId: string) {
@@ -352,18 +455,24 @@ export class HouseholdsService {
   }
 
   private async requireInvitee(contact: string, userId: string) {
-    // Only a contact the account has proven it controls: anyone can type someone else's number or address into
-    // their profile, and that must not let them accept (and gain pet access from) an invitation meant for it.
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, emailVerifiedAt: true, phoneVerifiedAt: true } });
-    const contacts = [user.emailVerifiedAt ? user.email : null, user.phoneVerifiedAt ? user.phone : null].filter(Boolean).map((value) => normalizeStoredContact(value!));
-    if (!contacts.includes(contact)) throw new InvitationNotForYouException();
+    // An unverified matching phone may submit a request, but it never grants access. A verified email
+    // remains supported for legacy invitations; typed email addresses are not treated as proof.
+    const phoneMatches = Boolean(user.phone && normalizeStoredContact(user.phone) === contact);
+    const emailMatches = Boolean(user.emailVerifiedAt && user.email && normalizeStoredContact(user.email) === contact);
+    if (!phoneMatches && !emailMatches) throw new InvitationNotForYouException();
+  }
+
+  private async isPhoneVerified(userId: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { phoneVerifiedAt: true } });
+    return Boolean(user.phoneVerifiedAt);
   }
 
 
   private async findActiveInvitation(token: string) {
     const invitation = await this.prisma.householdInvitation.findUnique({ where: { tokenHash: tokenHash(token) } });
     if (!invitation) throw new NotFoundApiException("Invitation");
-    if (invitation.status === "ACCEPTED" || invitation.status === "DECLINED") throw new InvitationAlreadyUsedException();
+    if (invitation.status === "REQUESTED" || invitation.status === "ACCEPTED" || invitation.status === "DECLINED") throw new InvitationAlreadyUsedException();
     if (invitation.status === "CANCELLED") throw new InvitationRevokedException();
     if (invitation.status === "EXPIRED") throw new InvitationExpiredException();
     if (invitation.expiresAt <= new Date()) {
@@ -376,7 +485,7 @@ export class HouseholdsService {
   private async findActiveInvitationById(id: string) {
     const invitation = await this.prisma.householdInvitation.findUnique({ where: { id } });
     if (!invitation) throw new NotFoundApiException("Invitation");
-    if (invitation.status === "ACCEPTED" || invitation.status === "DECLINED") throw new InvitationAlreadyUsedException();
+    if (invitation.status === "REQUESTED" || invitation.status === "ACCEPTED" || invitation.status === "DECLINED") throw new InvitationAlreadyUsedException();
     if (invitation.status === "CANCELLED") throw new InvitationRevokedException();
     if (invitation.status === "EXPIRED") throw new InvitationExpiredException();
     if (invitation.expiresAt <= new Date()) {

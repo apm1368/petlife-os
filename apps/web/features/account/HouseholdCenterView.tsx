@@ -33,6 +33,9 @@ const HISTORY_LABELS: Record<string, [string, string]> = {
   HouseholdInvitationCancelled: ["دعوت لغو شد", "Invitation cancelled"],
   HouseholdInvitationAccepted: ["دعوت پذیرفته شد", "Invitation accepted"],
   HouseholdInvitationDeclined: ["دعوت رد شد", "Invitation declined"],
+  HouseholdMembershipRequested: ["درخواست عضویت ثبت شد", "Membership requested"],
+  HouseholdMembershipApproved: ["عضویت تأیید شد", "Membership approved"],
+  HouseholdMembershipRejected: ["درخواست عضویت رد شد", "Membership request rejected"],
   PetAccessGranted: ["دسترسی داده شد", "Access granted"],
   PetAccessChanged: ["دسترسی تغییر کرد", "Access changed"],
   PetAccessRevoked: ["دسترسی لغو شد", "Access revoked"],
@@ -129,7 +132,7 @@ export function HouseholdCenterView() {
   const ownerCount = data.members.filter((m) => m.role === "OWNER").length;
   const householdName = data.name || t("خانهٔ من", "My household");
 
-  async function invitationAction(id: string, action: "resend" | "cancel") {
+  async function invitationAction(id: string, action: "resend" | "cancel" | "approve" | "reject") {
     if (!data) return;
     setBusyInvitation(id);
     setNotice(null);
@@ -138,9 +141,18 @@ export function HouseholdCenterView() {
         const result = await householdsService.resendInvitation(data.id, id);
         const inviteUrl = new URL(`/${locale}${result.sharePath}`, window.location.origin).toString();
         setResentInvite({ url: inviteUrl, text: t("برای پیوستن به خانوادهٔ من در اپت‌لایف، این پیوند را باز کنید.", "Join my family on opetlife by opening this link.") });
-      }
-      else await householdsService.cancelInvitation(data.id, id);
-      setNotice(action === "resend" ? t("دعوت دوباره ارسال شد و مهلت آن تمدید شد.", "The invitation was resent with a fresh expiry.") : t("دعوت لغو شد.", "The invitation was cancelled."));
+      } else if (action === "approve") {
+        await householdsService.approveMembershipRequest(data.id, id);
+      } else if (action === "reject") {
+        await householdsService.rejectMembershipRequest(data.id, id);
+      } else await householdsService.cancelInvitation(data.id, id);
+      setNotice(action === "resend"
+        ? t("پیوند تازه ساخته شد؛ آن را شخصاً برای فرد بفرستید.", "A fresh link is ready; share it directly with the person.")
+        : action === "approve"
+          ? t("درخواست تأیید شد و فقط دسترسی‌های انتخاب‌شده فعال شدند.", "The request was approved; only the selected access is now active.")
+          : action === "reject"
+            ? t("درخواست عضویت رد شد.", "The membership request was rejected.")
+            : t("دعوت یا درخواست عضویت لغو شد.", "The invitation or membership request was revoked."));
       await loadDetail();
     } catch (err) {
       setNotice(apiErrorText(err, undefined, t("انجام نشد.", "That didn't work.")));
@@ -202,8 +214,8 @@ export function HouseholdCenterView() {
         <section aria-labelledby="invites-title">
           <div className="account-section-title">
             <div>
-              <h2 id="invites-title">{t("دعوت‌های در انتظار", "Pending invitations")}</h2>
-              <p>{t("هر دعوت فقط یک بار و فقط توسط همان ایمیل یا موبایل قابل پذیرش است و پس از ۷ روز منقضی می‌شود.", "Each invitation works once, only for that email or phone, and expires after 7 days.")}</p>
+              <h2 id="invites-title">{t("دعوت‌ها و درخواست‌های عضویت", "Invitations and membership requests")}</h2>
+        <p>{t("پیوند پس از ۷ روز منقضی می‌شود و فقط درخواست می‌سازد. تطبیق شماره به‌معنای تأیید مالکیت آن نیست؛ عضویت و دسترسی پت فقط پس از تأیید شما فعال می‌شود.", "The link expires after 7 days and only submits a request. A matching number does not prove ownership; membership and pet access start only after you approve.")}</p>
             </div>
           </div>
           <div className="security-list">
@@ -211,13 +223,37 @@ export function HouseholdCenterView() {
               <div className="security-row" key={invite.id}>
                 <div className="security-row__icon" aria-hidden>✉</div>
                 <div>
-                  <b dir="ltr" className="contact-row__value">{invite.contactMasked}</b>
-                  <p>{t("انقضا", "Expires")}: {formatAccountDate(invite.expiresAt, locale)}</p>
+                  {invite.status === "REQUESTED" && invite.requester ? (
+                    <>
+                      <b>{invite.requester.displayName || t("حساب درخواست‌دهنده", "Requesting account")}</b>
+                      <p dir="ltr" className="contact-row__value">{invite.requester.phoneMasked ?? invite.contactMasked}</p>
+                      <p>{invite.requester.phoneVerified ? t("شماره در حساب تأیید شده", "Mobile verified on account") : t("شماره در حساب تأیید نشده؛ تطبیق آن اثبات مالکیت نیست", "Mobile is unverified; a match is not proof of ownership")}</p>
+                      {invite.requestedAt ? <p>{t("درخواست در", "Requested at")}: {formatAccountDate(invite.requestedAt, locale)}</p> : null}
+                      <div>
+                        <p>{t("دسترسی پیشنهادی", "Proposed access")}</p>
+                        <ul className="list-inside list-disc text-metadata text-text-secondary">
+                          {invite.initialAccess.map((item) => {
+                            const petName = data.pets.find((pet) => pet.id === item.petId)?.name ?? t("حیوان حذف‌شده", "Removed pet");
+                            const preset = PRESET_COPY[item.preset];
+                            return <li key={`${item.petId}:${item.preset}`}>{petName}: {t(preset.fa, preset.en)}</li>;
+                          })}
+                        </ul>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <b dir="ltr" className="contact-row__value">{invite.contactMasked}</b>
+                      <p>{t("پیوند در انتظار استفاده · انقضا", "Link awaiting use · expires")}: {formatAccountDate(invite.expiresAt, locale)}</p>
+                    </>
+                  )}
                 </div>
                 {isOwner ? (
                   <div className="member-row__actions">
-                    <Button variant="ghost" size="sm" isLoading={busyInvitation === invite.id} onClick={() => invitationAction(invite.id, "resend")}>{t("ارسال دوباره", "Resend")}</Button>
-                    <Button variant="ghost" size="sm" disabled={busyInvitation === invite.id} onClick={() => invitationAction(invite.id, "cancel")}>{t("لغو", "Cancel")}</Button>
+                    {invite.status === "REQUESTED" ? <>
+                      <Button size="sm" isLoading={busyInvitation === invite.id} onClick={() => invitationAction(invite.id, "approve")}>{t("تأیید عضویت", "Approve membership")}</Button>
+                      <Button variant="secondary" size="sm" disabled={busyInvitation === invite.id} onClick={() => invitationAction(invite.id, "reject")}>{t("رد درخواست", "Reject request")}</Button>
+                    </> : <Button variant="ghost" size="sm" isLoading={busyInvitation === invite.id} onClick={() => invitationAction(invite.id, "resend")}>{t("ساخت پیوند تازه", "Create fresh link")}</Button>}
+                    <Button variant="ghost" size="sm" disabled={busyInvitation === invite.id} onClick={() => invitationAction(invite.id, "cancel")}>{t("لغو", "Revoke")}</Button>
                   </div>
                 ) : null}
               </div>
@@ -369,9 +405,9 @@ function InviteDialog({ open, onClose, household, onSent }: { open: boolean; onC
       setInviteUrl(absoluteInviteUrl);
       setInviteText(t("برای پیوستن به خانوادهٔ من در اپت‌لایف، این پیوند را باز کنید.", "Join my family on opetlife by opening this link."));
       await onSent(
-        result.delivery === "DELIVERED"
-          ? t("دعوت داخل حساب opetlife او قرار گرفت؛ پس از پذیرش، دسترسی‌های انتخاب‌شده فعال می‌شود.", "The invitation is in their opetlife account. Selected access starts only after they accept.")
-          : t("دعوت ثبت شد؛ پیامک ارسال نمی‌شود. وقتی حسابی با همین شمارهٔ تأییدشده وجود داشته باشد، دعوت در پروفایل او نمایش داده می‌شود.", "The invitation was saved; no SMS was sent. It will appear in the matching account once this mobile number is verified."),
+        result.delivery === "IN_APP"
+          ? t("پیوند داخل حساب او هم قرار گرفت. پس از درخواست عضویت، تأیید نهایی با شماست؛ هیچ دسترسی‌ای زودتر فعال نمی‌شود.", "The link is also in their account. You must approve after they request membership; no access is granted beforehand.")
+          : t("دعوت ثبت شد. پیوند را شخصاً به او بدهید؛ پیامک یا ایمیلی ارسال نشده است. عضویت فقط پس از تأیید شما فعال می‌شود.", "The invitation is saved. Share the link directly; no SMS or email was sent. Membership starts only after your approval."),
       );
     } catch (err) {
       setError(err instanceof ApiError && err.code === "ALREADY_HOUSEHOLD_MEMBER" ? t("این فرد همین حالا عضو خانواده است.", "This person is already in your household.") : apiErrorText(err, undefined, t("دعوت ارسال نشد.", "The invitation wasn't sent.")));
@@ -384,8 +420,8 @@ function InviteDialog({ open, onClose, household, onSent }: { open: boolean; onC
     <Dialog open={open} onClose={onClose} title={t("دعوت به خانواده", "Invite to household")}>
       <div className="flex flex-col gap-4">
         <Input label={t("شمارهٔ موبایل عضو خانواده", "Family member's mobile number")} type="tel" dir="ltr" autoComplete="tel" value={contact} onChange={(e) => setContact(e.target.value)} autoFocus />
-        <p className="text-metadata text-text-secondary">{t("برای اتصال امن، پذیرش دعوت فقط با همان شمارهٔ تأییدشده ممکن است. پیامک اینجا ارسال نمی‌شود.", "For secure linking, the invitation can only be accepted by an account with this verified mobile. No SMS is sent here.")}</p>
-        <p className="text-metadata text-text-secondary">{t("برای هر حیوان دسترسی اولیه را انتخاب کنید. دعوت‌شونده پیش از پذیرش همین خلاصه را می‌بیند و بعداً می‌توانید آن را دقیق‌تر تنظیم کنید.", "Choose starting access for each pet. The invitee sees this summary before accepting, and you can fine-tune it later.")}</p>
+        <p className="text-metadata text-text-secondary">{t("شماره فقط برای تطبیق درخواست با حساب استفاده می‌شود و تأیید مالکیت نیست. پیامک یا ایمیلی برای تأیید فرستاده نمی‌شود؛ پیوند را خودتان به فرد بدهید.", "The number only matches the request to an account; it does not prove ownership. No verification SMS or email is sent; share the link yourself.")}</p>
+        <p className="text-metadata text-text-secondary">{t("دسترسی پیشنهادی هر حیوان را انتخاب کنید. اطلاعات پت تا زمانی که درخواست را تأیید نکنید در اختیار عضو جدید قرار نمی‌گیرد.", "Choose proposed access for each pet. The new member cannot see pet information until you approve their request.")}</p>
         {household.pets.map((pet) => {
           const value = presets[pet.id] ?? "VIEW_ONLY";
           return (
@@ -400,7 +436,7 @@ function InviteDialog({ open, onClose, household, onSent }: { open: boolean; onC
           <section className="flex flex-col gap-3 rounded-2xl border border-border-subtle p-4" aria-labelledby="share-invite-title">
             <div>
               <h3 id="share-invite-title" className="text-heading-sm">{t("پیوند دعوت آماده است", "Invitation link is ready")}</h3>
-              <p className="text-metadata text-text-secondary">{t("می‌توانید پیوند را کپی کنید یا برنامهٔ دلخواه را باز کنید. هیچ پیامی خودکار فرستاده نمی‌شود. پذیرش فقط با حسابی ممکن است که همین شمارهٔ موبایل را تأیید کرده باشد.", "Copy the link or open a sharing app. Nothing is sent automatically. It can only be accepted by an account that has verified this mobile number.")}</p>
+              <p className="text-metadata text-text-secondary">{t("پیوند را کپی یا با برنامهٔ دلخواه به اشتراک بگذارید. تطبیق شماره آن را تأیید نمی‌کند؛ لینک فقط درخواست می‌سازد و عضویت تا تأیید شما فعال نمی‌شود.", "Copy or share the link. A number match does not verify it; the link only submits a request, and membership stays inactive until you approve.")}</p>
             </div>
             <Input label={t("پیوند دعوت", "Invitation link")} dir="ltr" readOnly value={inviteUrl} onFocus={(event) => event.currentTarget.select()} />
             <ShareBar url={inviteUrl} text={inviteText} />

@@ -11,9 +11,8 @@ export interface CreateHouseholdInput {
 
 export interface IncomingHouseholdInvitation {
   id: string;
-  household: { id: string; name: string | null };
   inviter: { displayName: string };
-  pets: string[];
+  contactMasked: string;
   expiresAt: string;
   createdAt: string;
 }
@@ -24,17 +23,19 @@ export const householdsService = {
   getById: (id: string) => apiFetch<HouseholdDto>(`/households/${id}`),
   collaboration: (id: string) => apiFetch<HouseholdCollaborationDto>(`/households/${id}/collaboration`),
   update: (id: string, input: Partial<CreateHouseholdInput>) => apiFetch<HouseholdDto>(`/households/${id}`, { method: "PATCH", body: input }),
-  invite: (id: string, input: { contact: string; initialAccess: Array<{ petId: string; preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" }> }) => apiFetch<{ id: string; delivery: "DELIVERED" | "BLOCKED_EXTERNAL"; sharePath: string }>(`/households/${id}/invitations`, { method: "POST", body: input }),
+  invite: (id: string, input: { contact: string; initialAccess: Array<{ petId: string; preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" }> }) => apiFetch<{ id: string; delivery: "IN_APP" | "LINK_ONLY"; sharePath: string }>(`/households/${id}/invitations`, { method: "POST", body: input }),
   incomingInvitations: () => apiFetch<IncomingHouseholdInvitation[]>("/household-invitations"),
-  acceptIncomingInvitation: (id: string) => apiFetch<{ householdId: string }>(`/household-invitations/by-id/${id}/accept`, { method: "POST" }),
+  requestIncomingMembership: (id: string) => apiFetch<{ householdId: string; invitationId: string; status: "REQUESTED"; alreadyRequested: boolean }>(`/household-invitations/by-id/${id}/request`, { method: "POST" }),
   declineIncomingInvitation: (id: string) => apiFetch<{ ok: true }>(`/household-invitations/by-id/${id}/decline`, { method: "POST" }),
-  resendInvitation: (householdId: string, invitationId: string) => apiFetch<{ id: string; delivery: "DELIVERED" | "BLOCKED_EXTERNAL"; sharePath: string }>(`/households/${householdId}/invitations/${invitationId}/resend`, { method: "POST" }),
+  resendInvitation: (householdId: string, invitationId: string) => apiFetch<{ id: string; delivery: "IN_APP" | "LINK_ONLY"; sharePath: string }>(`/households/${householdId}/invitations/${invitationId}/resend`, { method: "POST" }),
   removeMember: (householdId: string, memberId: string) => apiFetch<{ ok: true }>(`/households/${householdId}/members/${memberId}`, { method: "DELETE" }),
   changeMemberRole: (householdId: string, memberId: string, role: "OWNER" | "FAMILY") => apiFetch<{ ok: true }>(`/households/${householdId}/members/${memberId}`, { method: "PATCH", body: { role } }),
   leave: (householdId: string) => apiFetch<{ ok: true }>(`/households/${householdId}/leave`, { method: "POST" }),
   cancelInvitation: (householdId: string, invitationId: string) => apiFetch(`/households/${householdId}/invitations/${invitationId}`, { method: "DELETE" }),
-  inspectInvitation: (token: string) => apiFetch<{ household: { id: string; name: string | null }; inviter: { displayName: string } | null; expiresAt: string; initialAccess: unknown }>(`/household-invitations/${token}`),
-  acceptInvitation: (token: string) => apiFetch<{ householdId: string }>(`/household-invitations/${token}/accept`, { method: "POST" }),
+  approveMembershipRequest: (householdId: string, invitationId: string) => apiFetch<{ householdId: string; userId: string; status: "ACCEPTED" }>(`/households/${householdId}/invitations/${invitationId}/approve`, { method: "POST" }),
+  rejectMembershipRequest: (householdId: string, invitationId: string) => apiFetch<{ ok: true }>(`/households/${householdId}/invitations/${invitationId}/reject`, { method: "POST" }),
+  inspectInvitation: (token: string) => apiFetch<{ contactMasked: string; phoneVerified: boolean; expiresAt: string; requestPending: boolean }>(`/household-invitations/${token}`),
+  requestMembership: (token: string) => apiFetch<{ householdId: string; invitationId: string; status: "REQUESTED"; alreadyRequested: boolean }>(`/household-invitations/${token}/request`, { method: "POST" }),
   declineInvitation: (token: string) => apiFetch<{ ok: true }>(`/household-invitations/${token}/decline`, { method: "POST" }),
   listPets: (householdId: string) => apiFetch<PetDto[]>(`/households/${householdId}/pets`),
   getActivePet: (householdId: string) => apiFetch<PetDto | null>(`/households/${householdId}/active-pet`),

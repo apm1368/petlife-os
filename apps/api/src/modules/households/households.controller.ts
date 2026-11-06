@@ -95,6 +95,18 @@ export class HouseholdsController {
   cancel(@Param("id") id: string, @Param("invitationId") invitationId: string, @CurrentUser() user: SessionUser) {
     return this.householdsService.cancelInvitation(id, invitationId, user.id);
   }
+
+  @Post(":id/invitations/:invitationId/approve")
+  @UseGuards(HouseholdMemberGuard)
+  approveMembershipRequest(@Param("id") id: string, @Param("invitationId") invitationId: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.approveMembershipRequest(id, invitationId, user.id);
+  }
+
+  @Post(":id/invitations/:invitationId/reject")
+  @UseGuards(HouseholdMemberGuard)
+  rejectMembershipRequest(@Param("id") id: string, @Param("invitationId") invitationId: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.rejectMembershipRequest(id, invitationId, user.id);
+  }
 }
 
 @Controller("household-invitations")
@@ -112,9 +124,9 @@ export class HouseholdInvitationsController {
     return this.householdsService.inspectInvitation(token, user.id);
   }
 
-  @Post(":token/accept")
-  accept(@Param("token") token: string, @CurrentUser() user: SessionUser) {
-    return this.householdsService.acceptInvitation(token, user.id);
+  @Post(":token/request")
+  requestMembership(@Param("token") token: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.requestMembership(token, user.id);
   }
 
   @Post(":token/decline")
@@ -122,9 +134,9 @@ export class HouseholdInvitationsController {
     return this.householdsService.declineInvitation(token, user.id);
   }
 
-  @Post("by-id/:invitationId/accept")
-  acceptFromInbox(@Param("invitationId", ParseUUIDPipe) invitationId: string, @CurrentUser() user: SessionUser) {
-    return this.householdsService.acceptIncomingInvitation(invitationId, user.id);
+  @Post("by-id/:invitationId/request")
+  requestFromInbox(@Param("invitationId", ParseUUIDPipe) invitationId: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.requestIncomingMembership(invitationId, user.id);
   }
 
   @Post("by-id/:invitationId/decline")
