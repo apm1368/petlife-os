@@ -8,9 +8,9 @@ This checkpoint is factual as of 2026-11-06. It is not a completion or productio
 - `https://opetlife.ir/api/health/version` reports the same SHA, environment `production`,
   deployment `github-42091865674-1`. No newer release was verified.
 - Current implementation branch: `feat/public-pet-memorial`, based on the above main SHA.
-- The current branch contains the public memorial implementation; commit `33dd9db`, PR #117
-  against `main`. Local checks passed, GitHub CI is running, and review is required. It is not
-  deployed or LIVE_VERIFIED.
+- The current branch contains the public memorial implementation; latest commit `52e1eb2`, PR #117
+  against `main`. Latest GitHub CI run
+  42280222282 passed all steps; review is required. It is not deployed or LIVE_VERIFIED.
 - Payment-control work remains in a separate dirty worktree at
   `/workspace/petlife-payment-controls-live`; preserve its four modified files and two new
   service/spec files. Other known dirty worktrees: `/workspace/petlife-phase-zero-audit` and
@@ -31,7 +31,7 @@ All listed open PRs require human review or are dependency-blocked. Do not bypas
 | #111 household invitations/multi-pet | #110 head (`codex/finalize-support`) | dependent on #110; retarget and rerun signup/household/permission/booking checks after #110 merges. |
 | #115 simple display mode | `main` | latest checked run 42274224922 succeeded; `REVIEW_REQUIRED`. |
 | #116 public landing articles | `main` | latest checked run 42273854807 succeeded; `REVIEW_REQUIRED`. |
-| #117 consented public memorial workflow | `main` | latest PR check run 42279835224 in progress; `REVIEW_REQUIRED`. |
+| #117 consented public memorial workflow | `main` | run 42280222282 passed all checks; `REVIEW_REQUIRED`. |
 | #108 PY-19 reconciliation | `main` | `REVIEW_REQUIRED`. |
 | #109 admin role builder | `main` | `REVIEW_REQUIRED`. |
 | #102–106 | `main` | `REVIEW_REQUIRED`; review individually for decision coverage/dependencies. |
@@ -85,7 +85,7 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
 
 ## Next actions
 
-1. Monitor #117 CI run 42279835224 through completion; fix actual failures and await review.
+1. Await required human review on #117; latest full CI run 42280222282 passed.
 2. Recheck #115/#116 checks and request/await authorized reviews; they were green on the latest
    checked runs but remain blocked by required review.
 3. Keep #107 at top of review queue. No production switch/deploy is authorized through bypass.
