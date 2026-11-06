@@ -7,6 +7,7 @@ import { accountService, type AccountOverviewDto } from "@/services/account.serv
 import { AccountPageHeader } from "./AccountNav";
 import { formatCount } from "@/lib/number/format-number";
 import { statusLabel } from "@/lib/status/status-labels";
+import { householdsService, type IncomingHouseholdInvitation } from "@/services/households.service";
 
 export function AccountOverviewView() {
   const locale = useLocale(); const router = useRouter();
@@ -23,6 +24,7 @@ export function AccountOverviewView() {
       <div><h2>{data.user.displayName}</h2><p>{data.user.email || data.user.phone ? <span dir="ltr">{data.user.email ?? data.user.phone}</span> : locale === "fa" ? "راه ارتباطی ثبت نشده" : "No contact method"}</p></div>
       <Button variant="secondary" onClick={() => router.push(`/${locale}/profile/personal`)}>{locale === "fa" ? "ویرایش اطلاعات" : "Edit profile"}</Button>
     </section>
+    <HouseholdInvitationInbox locale={locale} onAccepted={() => void load()} />
     {(data.attention.pendingInvitations > 0 || data.security.activeSessions > 1) && <ContextSurface className="account-attention">
       <div><p className="text-label font-semibold">{locale === "fa" ? "نیازمند توجه" : "Needs attention"}</p><p className="text-metadata text-text-secondary">{locale === "fa" ? `${formatCount(data.attention.pendingInvitations, locale)} دعوت باز و ${formatCount(data.security.activeSessions, locale)} نشست فعال دارید.` : `${data.attention.pendingInvitations} pending invites and ${data.security.activeSessions} active sessions.`}</p></div>
       <Button size="sm" onClick={() => router.push(`/${locale}/profile/security`)}>{locale === "fa" ? "بررسی امنیت" : "Review security"}</Button>
@@ -43,4 +45,52 @@ export function AccountOverviewView() {
       </button>
     </section>
   </div>;
+}
+
+function HouseholdInvitationInbox({ locale, onAccepted }: { locale: string; onAccepted: () => void }) {
+  const fa = locale === "fa";
+  const [invitations, setInvitations] = useState<IncomingHouseholdInvitation[] | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void householdsService.incomingInvitations().then((items) => { if (active) setInvitations(items); }).catch(() => { if (active) setError(true); });
+    return () => { active = false; };
+  }, []);
+
+  async function respond(invitation: IncomingHouseholdInvitation, action: "accept" | "decline") {
+    setBusyId(invitation.id);
+    setError(false);
+    try {
+      if (action === "accept") await householdsService.acceptIncomingInvitation(invitation.id);
+      else await householdsService.declineIncomingInvitation(invitation.id);
+      setInvitations((current) => current?.filter((item) => item.id !== invitation.id) ?? []);
+      if (action === "accept") onAccepted();
+    } catch {
+      setError(true);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (invitations === null || invitations.length === 0) return error ? <p role="status" className="text-sm text-text-secondary">{fa ? "دعوت‌های خانواده بارگیری نشد." : "Family invitations could not be loaded."}</p> : null;
+  return (
+    <section className="account-stack" aria-labelledby="incoming-household-invitations">
+      <h2 id="incoming-household-invitations" className="text-section-title">{fa ? "دعوت‌های خانواده برای شما" : "Family invitations for you"}</h2>
+      {invitations.map((invitation) => (
+        <ContextSurface key={invitation.id} className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="font-semibold text-text-primary">{fa ? `${invitation.inviter.displayName || "یکی از نزدیکانتان"} شما را به ${invitation.household.name || "خانواده"} دعوت کرده است` : `${invitation.inviter.displayName || "Someone you know"} invited you to ${invitation.household.name || "a household"}`}</p>
+            <p className="mt-1 text-sm text-text-secondary">{fa ? "حیوان‌های انتخاب‌شده: " : "Selected pets: "}{invitation.pets.length ? invitation.pets.join(fa ? "، " : ", ") : (fa ? "بدون دسترسی به پت؛ مدیر خانواده می‌تواند جداگانه دسترسی بدهد." : "No pet access; the household owner can grant it separately.")}</p>
+            <p className="mt-1 text-xs text-text-secondary">{fa ? "دعوت فقط پس از پذیرش شما فعال می‌شود؛ شمارهٔ موبایل باید در حساب شما تأیید شده باشد." : "Access starts only after you accept; your mobile number must be verified on your account."}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={busyId !== null} isLoading={busyId === invitation.id} onClick={() => void respond(invitation, "accept")}>{fa ? "پذیرفتن" : "Accept"}</Button>
+            <Button variant="secondary" disabled={busyId !== null} onClick={() => void respond(invitation, "decline")}>{fa ? "رد کردن" : "Decline"}</Button>
+          </div>
+        </ContextSurface>
+      ))}
+      {error ? <p role="alert" className="text-sm text-state-urgent">{fa ? "تغییر دعوت انجام نشد؛ دوباره تلاش کنید." : "That invitation could not be updated. Please try again."}</p> : null}
+    </section>
+  );
 }

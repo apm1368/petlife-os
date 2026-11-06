@@ -102,6 +102,11 @@ export class HouseholdsController {
 export class HouseholdInvitationsController {
   constructor(private readonly householdsService: HouseholdsService) {}
 
+  @Get()
+  listIncoming(@CurrentUser() user: SessionUser) {
+    return this.householdsService.listIncomingInvitations(user.id);
+  }
+
   @Get(":token")
   inspect(@Param("token") token: string, @CurrentUser() user: SessionUser) {
     return this.householdsService.inspectInvitation(token, user.id);
@@ -115,5 +120,15 @@ export class HouseholdInvitationsController {
   @Post(":token/decline")
   decline(@Param("token") token: string, @CurrentUser() user: SessionUser) {
     return this.householdsService.declineInvitation(token, user.id);
+  }
+
+  @Post("by-id/:invitationId/accept")
+  acceptFromInbox(@Param("invitationId", ParseUUIDPipe) invitationId: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.acceptIncomingInvitation(invitationId, user.id);
+  }
+
+  @Post("by-id/:invitationId/decline")
+  declineFromInbox(@Param("invitationId", ParseUUIDPipe) invitationId: string, @CurrentUser() user: SessionUser) {
+    return this.householdsService.declineIncomingInvitation(invitationId, user.id);
   }
 }

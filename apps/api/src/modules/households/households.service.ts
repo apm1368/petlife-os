@@ -67,6 +67,38 @@ export class HouseholdsService {
     return this.prisma.household.findMany({ where: { members: { some: { userId } } }, orderBy: { createdAt: "asc" } });
   }
 
+  /** Invitations appear in the recipient's account only after they prove control of the exact contact. */
+  async listIncomingInvitations(userId: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true, emailVerifiedAt: true, phoneVerifiedAt: true } });
+    const contacts = [...new Set([
+      user.emailVerifiedAt ? normalizeStoredContact(user.email!) : null,
+      user.phoneVerifiedAt ? normalizeStoredContact(user.phone!) : null,
+    ].filter((value): value is string => Boolean(value)))];
+    if (!contacts.length) return [];
+    const invitations = await this.prisma.householdInvitation.findMany({
+      where: { contact: { in: contacts }, status: "PENDING", expiresAt: { gt: new Date() } },
+      include: {
+        household: { select: { id: true, name: true, pets: { where: { deletedAt: null }, select: { id: true, name: true } } } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 25,
+    });
+    const inviters = await this.prisma.user.findMany({ where: { id: { in: [...new Set(invitations.map((invitation) => invitation.invitedByUserId))] } }, select: { id: true, displayName: true } });
+    const inviterNames = new Map(inviters.map((inviter) => [inviter.id, inviter.displayName]));
+    return invitations.map((invitation) => {
+      const access = invitation.initialAccess as unknown as InitialAccess;
+      const petIds = new Set(access.map((item) => item.petId));
+      return {
+        id: invitation.id,
+        household: { id: invitation.household.id, name: invitation.household.name },
+        inviter: { displayName: inviterNames.get(invitation.invitedByUserId) ?? "" },
+        pets: invitation.household.pets.filter((pet) => petIds.has(pet.id)).map((pet) => pet.name),
+        expiresAt: invitation.expiresAt,
+        createdAt: invitation.createdAt,
+      };
+    });
+  }
+
   async getCollaboration(householdId: string, userId: string) {
     await this.expireInvitations(householdId);
     const household = await this.prisma.household.findUnique({
@@ -146,7 +178,7 @@ export class HouseholdsService {
       });
     }
     await this.events.publish("HouseholdInvitationCreated", { householdId, invitationId: invitation.id, actorUserId }, { aggregateType: "Household", aggregateId: householdId });
-    return { id: invitation.id, status: invitation.status, contactMasked: maskContact(contact), expiresAt: invitation.expiresAt, delivery: target ? "DELIVERED" : "BLOCKED_EXTERNAL" };
+    return { id: invitation.id, status: invitation.status, contactMasked: maskContact(contact), expiresAt: invitation.expiresAt, delivery: target ? "DELIVERED" : "BLOCKED_EXTERNAL", sharePath: NotificationDeepLinks.householdInvitation(rawToken) };
   }
 
   async resendInvitation(householdId: string, invitationId: string, actorUserId: string) {
@@ -171,7 +203,7 @@ export class HouseholdsService {
       });
     }
     await this.events.publish("HouseholdInvitationResent", { householdId, invitationId, actorUserId }, { aggregateType: "Household", aggregateId: householdId });
-    return { id: updated.id, status: updated.status, contactMasked: maskContact(updated.contact), expiresAt: updated.expiresAt, delivery: target ? "DELIVERED" : "BLOCKED_EXTERNAL" };
+    return { id: updated.id, status: updated.status, contactMasked: maskContact(updated.contact), expiresAt: updated.expiresAt, delivery: target ? "DELIVERED" : "BLOCKED_EXTERNAL", sharePath: NotificationDeepLinks.householdInvitation(rawToken) };
   }
 
   async cancelInvitation(householdId: string, invitationId: string, actorUserId: string) {
@@ -192,6 +224,15 @@ export class HouseholdsService {
 
   async acceptInvitation(token: string, userId: string) {
     const invitation = await this.findActiveInvitation(token);
+    return this.acceptActiveInvitation(invitation, userId);
+  }
+
+  async acceptIncomingInvitation(invitationId: string, userId: string) {
+    const invitation = await this.findActiveInvitationById(invitationId);
+    return this.acceptActiveInvitation(invitation, userId);
+  }
+
+  private async acceptActiveInvitation(invitation: NonNullable<Awaited<ReturnType<HouseholdsService["findActiveInvitation"]>>>, userId: string) {
     await this.requireInvitee(invitation.contact, userId);
     return this.prisma.$transaction(async (tx) => {
       const claimed = await tx.householdInvitation.updateMany({ where: { id: invitation.id, status: "PENDING" }, data: { status: "ACCEPTED", acceptedByUserId: userId, acceptedAt: new Date() } });
@@ -213,6 +254,15 @@ export class HouseholdsService {
 
   async declineInvitation(token: string, userId: string) {
     const invitation = await this.findActiveInvitation(token);
+    return this.declineActiveInvitation(invitation, userId);
+  }
+
+  async declineIncomingInvitation(invitationId: string, userId: string) {
+    const invitation = await this.findActiveInvitationById(invitationId);
+    return this.declineActiveInvitation(invitation, userId);
+  }
+
+  private async declineActiveInvitation(invitation: NonNullable<Awaited<ReturnType<HouseholdsService["findActiveInvitation"]>>>, userId: string) {
     await this.requireInvitee(invitation.contact, userId);
     await this.prisma.householdInvitation.update({ where: { id: invitation.id }, data: { status: "DECLINED", declinedAt: new Date() } });
     await this.events.publish("HouseholdInvitationDeclined", { householdId: invitation.householdId, invitationId: invitation.id, userId }, { aggregateType: "Household", aggregateId: invitation.householdId });
@@ -318,6 +368,19 @@ export class HouseholdsService {
     if (invitation.status === "EXPIRED") throw new InvitationExpiredException();
     if (invitation.expiresAt <= new Date()) {
       await this.prisma.householdInvitation.update({ where: { id: invitation.id }, data: { status: "EXPIRED" } });
+      throw new InvitationExpiredException();
+    }
+    return invitation;
+  }
+
+  private async findActiveInvitationById(id: string) {
+    const invitation = await this.prisma.householdInvitation.findUnique({ where: { id } });
+    if (!invitation) throw new NotFoundApiException("Invitation");
+    if (invitation.status === "ACCEPTED" || invitation.status === "DECLINED") throw new InvitationAlreadyUsedException();
+    if (invitation.status === "CANCELLED") throw new InvitationRevokedException();
+    if (invitation.status === "EXPIRED") throw new InvitationExpiredException();
+    if (invitation.expiresAt <= new Date()) {
+      await this.prisma.householdInvitation.update({ where: { id }, data: { status: "EXPIRED" } });
       throw new InvitationExpiredException();
     }
     return invitation;

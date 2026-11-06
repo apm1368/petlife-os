@@ -213,6 +213,35 @@ describe("Batch 8 — Account & security", () => {
   // ------------------------------------------------------------------ 8B household & access
 
   describe("household membership and pet access", () => {
+    it("lets a household owner invite a verified mobile number and lets that matching account accept from its inbox", async () => {
+      const o = await owner("Phone-invited pet");
+      const phone = uniquePhone();
+      const invitee = client(await signIn(phone));
+      const inviteeRow = await prisma.user.findUniqueOrThrow({ where: { phone: canonicalIdentifier(phone) } });
+
+      const created = await o.c.post(`/households/${o.householdId}/invitations`).send({
+        contact: phone,
+        initialAccess: [{ petId: o.petId, preset: "CARE_HELPER" }],
+      }).expect(201);
+      expect(created.body).toMatchObject({ delivery: "DELIVERED", status: "PENDING" });
+      expect(created.body.sharePath).toMatch(/^\/invitations\/[A-Za-z0-9_-]+$/);
+      expect(JSON.stringify(created.body)).not.toContain(phone);
+
+      const inbox = await invitee.get("/household-invitations").expect(200);
+      expect(inbox.body).toEqual([expect.objectContaining({
+        id: created.body.id,
+        household: { id: o.householdId, name: null },
+        inviter: { displayName: expect.any(String) },
+        pets: ["Phone-invited pet"],
+      })]);
+      expect(JSON.stringify(inbox.body)).not.toContain(phone);
+
+      await invitee.post(`/household-invitations/by-id/${created.body.id}/accept`).expect(201);
+      expect(await prisma.householdMember.findUnique({ where: { householdId_userId: { householdId: o.householdId, userId: inviteeRow.id } } })).not.toBeNull();
+      expect(await prisma.petAccessGrant.findFirst({ where: { petId: o.petId, userId: inviteeRow.id, canBookCare: true, revokedAt: null } })).not.toBeNull();
+      await invitee.post(`/household-invitations/by-id/${created.body.id}/accept`).expect(409);
+    });
+
     it("invitations are single-use, bound to the invited person, and never duplicate a member or their grants", async () => {
       const o = await owner();
       const member = await user("b8-member");

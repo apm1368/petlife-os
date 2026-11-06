@@ -9,14 +9,26 @@ export interface CreateHouseholdInput {
   countryCode?: string;
 }
 
+export interface IncomingHouseholdInvitation {
+  id: string;
+  household: { id: string; name: string | null };
+  inviter: { displayName: string };
+  pets: string[];
+  expiresAt: string;
+  createdAt: string;
+}
+
 export const householdsService = {
   create: (input: CreateHouseholdInput) => apiFetch<HouseholdDto>("/households", { method: "POST", body: input }),
   listMine: () => apiFetch<HouseholdDto[]>("/households"),
   getById: (id: string) => apiFetch<HouseholdDto>(`/households/${id}`),
   collaboration: (id: string) => apiFetch<HouseholdCollaborationDto>(`/households/${id}/collaboration`),
   update: (id: string, input: Partial<CreateHouseholdInput>) => apiFetch<HouseholdDto>(`/households/${id}`, { method: "PATCH", body: input }),
-  invite: (id: string, input: { contact: string; initialAccess: Array<{ petId: string; preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" }> }) => apiFetch<{ id: string; delivery: "DELIVERED" | "BLOCKED_EXTERNAL" }>(`/households/${id}/invitations`, { method: "POST", body: input }),
-  resendInvitation: (householdId: string, invitationId: string) => apiFetch<{ id: string; delivery: "DELIVERED" | "BLOCKED_EXTERNAL" }>(`/households/${householdId}/invitations/${invitationId}/resend`, { method: "POST" }),
+  invite: (id: string, input: { contact: string; initialAccess: Array<{ petId: string; preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" }> }) => apiFetch<{ id: string; delivery: "DELIVERED" | "BLOCKED_EXTERNAL"; sharePath: string }>(`/households/${id}/invitations`, { method: "POST", body: input }),
+  incomingInvitations: () => apiFetch<IncomingHouseholdInvitation[]>("/household-invitations"),
+  acceptIncomingInvitation: (id: string) => apiFetch<{ householdId: string }>(`/household-invitations/by-id/${id}/accept`, { method: "POST" }),
+  declineIncomingInvitation: (id: string) => apiFetch<{ ok: true }>(`/household-invitations/by-id/${id}/decline`, { method: "POST" }),
+  resendInvitation: (householdId: string, invitationId: string) => apiFetch<{ id: string; delivery: "DELIVERED" | "BLOCKED_EXTERNAL"; sharePath: string }>(`/households/${householdId}/invitations/${invitationId}/resend`, { method: "POST" }),
   removeMember: (householdId: string, memberId: string) => apiFetch<{ ok: true }>(`/households/${householdId}/members/${memberId}`, { method: "DELETE" }),
   changeMemberRole: (householdId: string, memberId: string, role: "OWNER" | "FAMILY") => apiFetch<{ ok: true }>(`/households/${householdId}/members/${memberId}`, { method: "PATCH", body: { role } }),
   leave: (householdId: string) => apiFetch<{ ok: true }>(`/households/${householdId}/leave`, { method: "POST" }),
