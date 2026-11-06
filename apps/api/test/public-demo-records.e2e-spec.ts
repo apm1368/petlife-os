@@ -40,7 +40,7 @@ describe("production public reads exclude seed-origin records", () => {
     const [demoVet, realVet] = await Promise.all([
       prisma.providerOrganization.create({
         data: {
-          name: `Demo Vet ${suffix}`,
+          name: `QA-${suffix} Demo Vet`,
           type: ProviderType.VET_CLINIC,
           verificationStatus: ProviderVerificationStatus.VERIFIED,
           isDemoRecord: true,
@@ -48,7 +48,7 @@ describe("production public reads exclude seed-origin records", () => {
       }),
       prisma.providerOrganization.create({
         data: {
-          name: `Reviewed Vet ${suffix}`,
+          name: `QA-${suffix} Reviewed Vet`,
           type: ProviderType.VET_CLINIC,
           verificationStatus: ProviderVerificationStatus.VERIFIED,
         },
@@ -200,7 +200,8 @@ describe("production public reads exclude seed-origin records", () => {
         .get(`/provider-services/${serviceIds.get(demoVet.id)}`)
         .expect(404);
 
-      const discovery = await request(app.getHttpServer()).get("/discovery/providers").expect(200);
+      const discoveryQuery = new URLSearchParams({ q: `QA-${suffix}` }).toString();
+      const discovery = await request(app.getHttpServer()).get(`/discovery/providers?${discoveryQuery}`).expect(200);
       expect(discovery.body.items.map((row: { id: string }) => row.id)).toContain(realVet.id);
       expect(discovery.body.items.map((row: { id: string }) => row.id)).not.toContain(demoVet.id);
       await request(app.getHttpServer()).get(`/discovery/providers/${demoVet.id}`).expect(404);
