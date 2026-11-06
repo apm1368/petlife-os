@@ -257,9 +257,7 @@ describe("pet ownership — ID-01: exactly one primary owner", () => {
     // An unrelated signed-in account has no grant on this pet.
     access.findAccessiblePet.mockResolvedValue(null as never);
 
-    const ownership = await service.getOwnershipForViewer(PET_ID, "a-stranger");
-
-    expect(ownership).toBeNull();
+    await expect(service.getOwnershipForViewer(PET_ID, "a-stranger")).rejects.toThrow("Pet not found.");
   });
 
   it("reveals the owner to somebody who does have access to the pet", async () => {
