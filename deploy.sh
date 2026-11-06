@@ -160,6 +160,30 @@ healthy() {
       http://127.0.0.1:3000/fa >/dev/null
 }
 
+# TC-04: this host is the production host behind opetlife.ir, so the environment it
+# advertises must say so. A production release that reports "staging" makes staging
+# meaningless as a pre-release gate (TC-11) and hides the fact that no separate
+# staging deployment exists. The value is asserted here (not just exported) because
+# the API process is what actually serves /health/version.
+assert_production_environment() {
+  local reported
+  reported="$(curl --fail --silent --show-error --max-time 15 \
+    http://127.0.0.1:4000/health/version 2>/dev/null || true)"
+  if [ -z "$reported" ]; then
+    log "could not read /health/version yet; skipping the environment assertion"
+    return 0
+  fi
+  case "$reported" in
+    *'"environment":"production"'*) log "health/version reports environment=production" ;;
+    *)
+      echo "deploy: the running API does not report environment=production" >&2
+      echo "deploy: health/version said: $reported" >&2
+      echo "deploy: refusing to leave production advertising a different environment" >&2
+      return 1
+      ;;
+  esac
+}
+
 rollback() {
   trap - ERR
   if [ "$api_origin_present" = true ]; then
@@ -256,6 +280,8 @@ fi
 # delete+start gap; it starts the apps when they are not registered yet.
 reload_apps
 healthy
+# The environment must be the truth before the release is accepted (TC-04, TC-11).
+assert_production_environment
 
 # HTTPS is applied only after the new same-origin build is healthy. The domain script restores nginx and any
 # firewall rule it added if certificate issuance or its HTTPS/API/JavaScript smoke check fails; this outer trap

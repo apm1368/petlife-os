@@ -34,6 +34,7 @@ describe("P1-a payment infrastructure (e2e)", () => {
   let wallet: WalletService;
   let server: ReturnType<INestApplication["getHttpServer"]>;
   let logSpy: jest.SpyInstance;
+  let ledgerScenarioStartedAt: Date;
   const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   beforeAll(async () => {
@@ -46,7 +47,10 @@ describe("P1-a payment infrastructure (e2e)", () => {
     wallet = app.get(WalletService);
   });
   afterAll(async () => app.close());
-  beforeEach(() => { logSpy = jest.spyOn(Logger.prototype, "log").mockImplementation(() => undefined); });
+  beforeEach(() => {
+    ledgerScenarioStartedAt = new Date();
+    logSpy = jest.spyOn(Logger.prototype, "log").mockImplementation(() => undefined);
+  });
   afterEach(() => logSpy.mockRestore());
 
   async function session(identifier: string) {
@@ -93,7 +97,13 @@ describe("P1-a payment infrastructure (e2e)", () => {
   }
 
   async function assertAllLedgerTransactionsBalanced() {
-    const transactions = await prisma.ledgerTransaction.findMany({ include: { entries: true } });
+    // Other E2E suites intentionally create malformed ledger fixtures to prove
+    // reconciliation catches them. Validate only the transactions this payment
+    // scenario created; never let a prior suite's fixture contaminate it.
+    const transactions = await prisma.ledgerTransaction.findMany({
+      where: { createdAt: { gte: ledgerScenarioStartedAt } },
+      include: { entries: true },
+    });
     for (const transaction of transactions) {
       const debits = transaction.entries.filter((entry) => entry.direction === "DEBIT").reduce((sum, entry) => sum + entry.amount, 0);
       const credits = transaction.entries.filter((entry) => entry.direction === "CREDIT").reduce((sum, entry) => sum + entry.amount, 0);

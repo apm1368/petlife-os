@@ -5,7 +5,12 @@ import { DomainEventsService } from "../../common/events/domain-events.service";
 import { HouseholdAccessDeniedException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
-const OWNER_PRESET: PetAccessFlags = {
+/**
+ * The primary owner's capabilities. Exported so the ownership module grants the new
+ * owner exactly the same access an owner already had, instead of keeping a second
+ * copy of these flags that could drift.
+ */
+export const OWNER_PRESET: PetAccessFlags = {
   canViewIdentity: true, canEditIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true,
   canViewCareProfile: true, canEditCareProfile: true, canViewLocation: true, canManageAccess: true, canRecordClinicalData: false,
 };

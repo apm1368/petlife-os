@@ -147,6 +147,11 @@ export function HouseholdCenterView() {
       <AccountPageHeader eyebrow={t("خانواده و دسترسی", "HOUSEHOLD & ACCESS")} title={householdName} description={t("عضویت در خانواده به معنی دسترسی کامل به اطلاعات حیوان نیست؛ هر دسترسی جداگانه، شفاف و قابل لغو است.", "Being in a household never means automatic full pet access; every grant is separate, visible and reversible.")} />
       {isOwner ? <HouseholdNameEditor key={data.id + householdName} id={data.id} name={householdName} onSaved={async () => { await loadList(); await loadDetail(); }} /> : null}
       {notice ? <div className="account-notice" role="status">{notice}</div> : null}
+      <div>
+        <Button variant="secondary" size="sm" onClick={() => router.push(`/${locale}/profile/household/ownership`)}>
+          {t("مالکیت پت و انتقال", "Pet ownership & transfers")}
+        </Button>
+      </div>
       {households.length > 1 ? <Select label={t("خانواده", "Household")} value={selectedId} onChange={(e) => setSelectedId(e.target.value)} options={households.map((h) => ({ value: h.id, label: h.name || t("خانهٔ بدون نام", "Unnamed household") }))} /> : null}
 
       <section aria-labelledby="members-title">
