@@ -48,7 +48,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         <div className="public-header-actions flex items-center gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
-          <DisplayModeToggle compact />
+          <DisplayModeToggle locale={locale as "fa" | "en"} compact />
           {preview ? <Link href={`/${locale}/home`}>{locale === "fa" ? "ورود به برنامه" : "Open app"}</Link> : status === "authenticated" && user ? (
             <Link href={`/${locale}/home`}>
               <Avatar name={user.displayName} src={user.avatarUrl} size="sm" />

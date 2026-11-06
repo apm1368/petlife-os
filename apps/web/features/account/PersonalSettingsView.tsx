@@ -114,7 +114,7 @@ export function PersonalSettingsView() {
             <b>{t("نمایش ساده", "Simple display")}</b>
             <p>{t("متن خواناتر و کنترل‌های بزرگ‌تر؛ این انتخاب فقط روی همین دستگاه ذخیره می‌شود و به زبان یا پوسته وابسته نیست.", "Clearer text and larger controls. This choice is saved on this device and is independent of language and theme.")}</p>
           </div>
-          <DisplayModeToggle />
+          <DisplayModeToggle locale={uiLocale} />
         </div>
         {saveError ? <p role="alert" className="text-body text-state-urgent">{saveError}</p> : null}
         <div className="flex items-center gap-3">

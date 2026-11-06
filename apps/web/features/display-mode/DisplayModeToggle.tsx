@@ -1,11 +1,10 @@
 "use client";
 
-import { useLocale } from "next-intl";
 import { Button } from "@petlife/ui";
 import { useDisplayModeStore } from "@/stores/display-mode-store";
+import type { AppLocale } from "@/lib/i18n/config";
 
-export function DisplayModeToggle({ compact = false }: { compact?: boolean }) {
-  const locale = useLocale();
+export function DisplayModeToggle({ locale, compact = false }: { locale: AppLocale; compact?: boolean }) {
   const simple = useDisplayModeStore((state) => state.simple);
   const setSimple = useDisplayModeStore((state) => state.setSimple);
   const label = locale === "fa" ? "نمایش ساده" : "Simple display";

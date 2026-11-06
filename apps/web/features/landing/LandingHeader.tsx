@@ -56,7 +56,7 @@ export function LandingHeader({ locale, copy }: { locale: AppLocale; copy: Landi
           <div className="lp-header__prefs">
             <a className="lp-lang" href={`/${other}`} hrefLang={other} lang={other} aria-label={copy.actions.languageLabel}>{copy.actions.language}</a>
             <ThemeToggle />
-            <DisplayModeToggle compact />
+            <DisplayModeToggle locale={locale} compact />
           </div>
           <div className="lp-header__account">{account}</div>
           <div className="lp-header__menu">
@@ -76,7 +76,7 @@ export function LandingHeader({ locale, copy }: { locale: AppLocale; copy: Landi
         <div className="lp-sheet-prefs">
           <a className="lp-lang" href={`/${other}`} hrefLang={other} lang={other} aria-label={copy.actions.languageLabel}>{copy.actions.language}</a>
           <ThemeToggle />
-          <DisplayModeToggle />
+          <DisplayModeToggle locale={locale} />
         </div>
         <div className="lp-sheet-actions">{account}</div>
       </Sheet>

@@ -60,7 +60,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
             <span className="member-header__secondary">
               <LanguageToggle />
               <ThemeToggle />
-              <DisplayModeToggle compact />
+              <DisplayModeToggle locale={locale as "fa" | "en"} compact />
             </span>
             {user ? <AccountMenu user={user} /> : null}
           </div>
