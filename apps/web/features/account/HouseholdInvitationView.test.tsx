@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { ApiError } from "@/lib/api/client";
 import { householdsService } from "@/services/households.service";
@@ -7,14 +7,14 @@ import { HouseholdInvitationView } from "./HouseholdInvitationView";
 
 const replace = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push: vi.fn() }) }));
-vi.mock("@/services/households.service", () => ({ householdsService: { inspectInvitation: vi.fn(), acceptInvitation: vi.fn(), declineInvitation: vi.fn() } }));
+vi.mock("@/services/households.service", () => ({ householdsService: { inspectInvitation: vi.fn(), requestMembership: vi.fn(), declineInvitation: vi.fn() } }));
 const err = (status: number, code: string) => new ApiError({ code, message: "raw backend text", requestId: "r" }, status);
 
 describe("HouseholdInvitationView", () => {
   beforeEach(() => {
     replace.mockReset();
     vi.mocked(householdsService.inspectInvitation).mockReset();
-    vi.mocked(householdsService.acceptInvitation).mockReset();
+    vi.mocked(householdsService.requestMembership).mockReset();
   });
 
   it("an expired invitation explains itself without showing the household", async () => {
@@ -30,21 +30,22 @@ describe("HouseholdInvitationView", () => {
     expect(await screen.findByRole("heading", { name: "این دعوت برای حساب دیگری است" })).toBeTruthy();
   });
 
-  it("an accept failure is shown, not swallowed; success goes to the household", async () => {
-    vi.mocked(householdsService.inspectInvitation).mockResolvedValue({ household: { id: "h1", name: "Rezaei home" }, inviter: { displayName: "Sara" }, expiresAt: "2026-10-05T10:00:00.000Z", initialAccess: [] });
-    vi.mocked(householdsService.acceptInvitation).mockRejectedValueOnce(err(409, "INVITATION_ALREADY_USED")).mockResolvedValueOnce({ householdId: "h1" });
+  it("a request failure is shown, not swallowed", async () => {
+    vi.mocked(householdsService.inspectInvitation).mockResolvedValue({ contactMasked: "+98912***34", phoneVerified: false, expiresAt: "2026-10-05T10:00:00.000Z", requestPending: false });
+    vi.mocked(householdsService.requestMembership).mockRejectedValueOnce(err(409, "INVITATION_ALREADY_USED"));
     renderWithIntl(<HouseholdInvitationView token="t" />, "en");
-    fireEvent.click(await screen.findByRole("button", { name: "Accept invitation" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Request membership" }));
     expect(await screen.findByRole("heading", { name: "This invitation was already answered" })).toBeTruthy();
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it("accepting a live invitation lands on the household page", async () => {
-    vi.mocked(householdsService.inspectInvitation).mockResolvedValue({ household: { id: "h1", name: "Rezaei home" }, inviter: { displayName: "Sara" }, expiresAt: "2026-10-05T10:00:00.000Z", initialAccess: [] });
-    vi.mocked(householdsService.acceptInvitation).mockResolvedValue({ householdId: "h1" });
+  it("a verified number still needs explicit owner approval", async () => {
+    vi.mocked(householdsService.inspectInvitation).mockResolvedValue({ contactMasked: "+98912***34", phoneVerified: true, expiresAt: "2026-10-05T10:00:00.000Z", requestPending: false });
+    vi.mocked(householdsService.requestMembership).mockResolvedValue({ householdId: "h1", invitationId: "i1", status: "REQUESTED", alreadyRequested: false });
     renderWithIntl(<HouseholdInvitationView token="t" />, "en");
-    expect(await screen.findByText("Sara invited you to Rezaei home")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Accept invitation" }));
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/en/profile/household"));
+    fireEvent.click(await screen.findByRole("button", { name: "Request membership" }));
+    expect((await screen.findByRole("status")).textContent).toContain("Your request was submitted");
+    expect(screen.getByText(/membership and pet access still begin only after the owner approves/)).toBeTruthy();
+    expect(replace).not.toHaveBeenCalled();
   });
 });

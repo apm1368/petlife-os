@@ -5,7 +5,7 @@ import { randomId } from "@/lib/id/random-id";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Button, ContextSurface, EmptyState, ErrorRecovery, ShieldCheck, Skeleton, Timer } from "@petlife/ui";
+import { Avatar, Button, ContextSurface, EmptyState, ErrorRecovery, ShieldCheck, Skeleton, Timer } from "@petlife/ui";
 import type { AvailabilitySlotDto, BookingHoldDto, CustomerAddressDto, PetDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
@@ -15,6 +15,7 @@ import { bookingsService } from "@/services/bookings.service";
 import { householdsService } from "@/services/households.service";
 import { addressesService } from "@/services/addresses.service";
 import { useSessionStore } from "@/stores/session-store";
+import { usePetStore } from "@/stores/pet-store";
 import { categoryLabel, paymentModeLabel } from "@/features/discovery/labels";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
@@ -56,6 +57,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const pathname = usePathname();
   const params = useSearchParams();
   const session = useSessionStore((s) => s.status);
+  const activePetId = usePetStore((s) => s.activePetId);
 
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "notFound" | "error">("loading");
@@ -63,6 +65,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const [serviceId, setServiceId] = useState<string | null>(params.get("serviceId"));
   const [variantId, setVariantId] = useState<string | null>(params.get("variantId"));
   const [pets, setPets] = useState<PetDto[] | null>(null);
+  const [petHouseholdIds, setPetHouseholdIds] = useState<Record<string, string>>({});
   const [petIds, setPetIds] = useState<string[]>([]);
   const [staffId, setStaffId] = useState<string | null>(null);
   const [date, setDate] = useState<string>(params.get("date") ?? dayKey(new Date()));
@@ -97,7 +100,27 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const isRange = service ? RANGE_CATEGORIES.includes(service.category) : false;
   const locationId = service?.locationId ?? profile?.locations[0]?.id ?? null;
   const needsAddress = service ? service.locationMode !== "AT_PROVIDER" : false;
+  const selectedHouseholdId = petIds[0] ? petHouseholdIds[petIds[0]] : null;
   const qualifiedStaff = useMemo(() => (profile && service ? profile.team.filter((m) => !service.staffIds.length || service.staffIds.includes(m.providerUserId)) : []), [profile, service]);
+
+  useEffect(() => {
+    if (step !== "details" || !needsAddress) return;
+    if (!selectedHouseholdId) {
+      setAddresses([]);
+      setAddressId(null);
+      return;
+    }
+    let current = true;
+    setAddresses(null);
+    void addressesService.list(selectedHouseholdId).then((list) => {
+      if (!current) return;
+      setAddresses(list);
+      setAddressId((existing) => (existing && list.some((address) => address.id === existing) ? existing : null));
+    }).catch(() => {
+      if (current) setError(fa ? "نشانی‌های همین خانواده بارگیری نشد." : "Addresses for this household could not be loaded.");
+    });
+    return () => { current = false; };
+  }, [step, needsAddress, selectedHouseholdId, fa]);
 
   // Keep service/variant/date in the URL so sign-in (returnTo) and refresh resume the same choice.
   useEffect(() => {
@@ -119,16 +142,19 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
     void (async () => {
       try {
         const households = await householdsService.listMine();
-        const lists = await Promise.all(households.map((h) => householdsService.listPets(h.id)));
-        const all = lists.flat();
+        const grouped = await Promise.all(households.map(async (household) => ({ householdId: household.id, pets: await householdsService.listPets(household.id) })));
+        const petHouseholdMap = Object.fromEntries(grouped.flatMap(({ householdId, pets: householdPets }) => householdPets.map((pet) => [pet.id, householdId])));
+        const all = [...new Map(grouped.flatMap(({ pets: householdPets }) => householdPets).map((pet) => [pet.id, pet])).values()];
         setPets(all);
-        if (all.length === 1) setPetIds([all[0]!.id]);
-        if (households[0]) setAddresses(await addressesService.list(households[0].id));
+        setPetHouseholdIds(petHouseholdMap);
+        const preferred = all.find((pet) => pet.id === activePetId);
+        if (preferred) setPetIds([preferred.id]);
+        else if (all.length === 1) setPetIds([all[0]!.id]);
       } catch {
         setError(fa ? "فهرست حیوانات بارگیری نشد." : "Your pets could not be loaded.");
       }
     })();
-  }, [step, session, pets, fa]);
+  }, [step, session, pets, fa, activePetId]);
 
   useEffect(() => {
     if (step !== "time" || !service || !locationId || isRange) return;
@@ -157,6 +183,9 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const unitPrice = variant?.priceAmount ?? service?.priceAmount ?? null;
   const total = unitPrice === null ? null : unitPrice * Math.max(1, petIds.length);
   const fmtDateTime = (iso: string, tz?: string) => new Intl.DateTimeFormat(fa ? "fa-IR-u-ca-persian" : "en-GB", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: tz ?? "Asia/Tehran" }).format(new Date(iso));
+  const isSupportedForService = (pet: PetDto) => !service || (service.supportedSpecies
+    ? service.supportedSpecies.includes(pet.species)
+    : pet.species === "DOG" ? service.supportsDog : pet.species === "CAT" ? service.supportsCat : false);
 
   async function createHold() {
     if (!service || !locationId || !requireSession()) return;
@@ -217,7 +246,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const stepIndex = STEPS.indexOf(step);
   const canContinue: Record<Step, boolean> = {
     service: Boolean(service && (!service.variants.length || variant)),
-    pets: petIds.length > 0 && petIds.length <= (service?.maxPetsPerBooking ?? 1),
+    pets: petIds.length > 0 && petIds.length <= (service?.maxPetsPerBooking ?? 1) && pets?.filter((pet) => petIds.includes(pet.id)).every(isSupportedForService) === true,
     time: isRange ? Boolean(rangeEnd && rangeEnd > date) : Boolean(slot),
     details: (!needsAddress || Boolean(addressId)) && (service?.locationMode !== "TRANSPORT" || Boolean(dropoffId)) && (service?.category !== "VET" || healthShare !== null) && !holdExpired,
     review: Boolean(hold) && !holdExpired,
@@ -281,14 +310,22 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
         ) : (
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-2 font-bold">{service && service.maxPetsPerBooking > 1 ? (fa ? `تا ${service.maxPetsPerBooking.toLocaleString(locale)} حیوان انتخاب کنید` : `Choose up to ${service.maxPetsPerBooking} pets`) : fa ? "برای کدام حیوان؟" : "For which pet?"}</legend>
+            <p className="mb-2 text-sm text-text-secondary">{fa ? "همهٔ حیوان‌های قابل‌رزرو خانواده در این فهرست هستند؛ برای این خدمت تا " + (service?.maxPetsPerBooking ?? 1).toLocaleString(locale) + " حیوان می‌توانید انتخاب کنید." : `All bookable pets in your household are listed. This service allows up to ${service?.maxPetsPerBooking ?? 1} pet${(service?.maxPetsPerBooking ?? 1) === 1 ? "" : "s"}.`}</p>
             {pets.map((p) => {
-              const supported = !service || (p.species === "DOG" ? service.supportsDog : p.species === "CAT" ? service.supportsCat : false);
+              const supported = isSupportedForService(p);
               const multi = (service?.maxPetsPerBooking ?? 1) > 1;
+              const maxSelected = service?.maxPetsPerBooking ?? 1;
+              const limitReached = petIds.length >= maxSelected && !petIds.includes(p.id);
+              const selectedHouseholdId = petIds[0] ? petHouseholdIds[petIds[0]] : null;
+              const differentHousehold = Boolean(multi && selectedHouseholdId && petHouseholdIds[p.id] !== selectedHouseholdId && !petIds.includes(p.id));
               return (
-                <label key={p.id} className={`flex items-center gap-3 rounded-md border p-3 ${petIds.includes(p.id) ? "border-brand-natural" : "border-border-subtle"} ${supported ? "" : "opacity-60"}`}>
-                  <input type={multi ? "checkbox" : "radio"} name="pet" disabled={!supported} checked={petIds.includes(p.id)} onChange={(e) => setPetIds((prev) => (multi ? (e.target.checked ? [...prev, p.id] : prev.filter((id) => id !== p.id)) : [p.id]))} />
+                <label key={p.id} className={`flex min-h-16 items-center gap-3 rounded-md border p-3 ${petIds.includes(p.id) ? "border-brand-natural bg-surface-subtle" : "border-border-subtle"} ${supported ? "" : "opacity-60"}`}>
+                  <input type={multi ? "checkbox" : "radio"} name="pet" disabled={!supported || limitReached || differentHousehold} checked={petIds.includes(p.id)} onChange={(e) => setPetIds((prev) => (multi ? (e.target.checked ? (prev.length < maxSelected ? [...prev, p.id] : prev) : prev.filter((id) => id !== p.id)) : [p.id]))} />
+                  <Avatar name={p.name} src={p.photoUrl} size="sm" />
                   <span className="font-bold">{p.name}</span>
                   {!supported ? <span className="text-sm text-text-secondary">{fa ? "این خدمت برای این گونه ارائه نمی‌شود" : "Not offered for this species"}</span> : null}
+                  {limitReached ? <span className="text-sm text-text-secondary">{fa ? "سقف این خدمت تکمیل شده" : "Service limit reached"}</span> : null}
+                  {differentHousehold ? <span className="text-sm text-text-secondary">{fa ? "برای رزرو چندحیوانی، حیوان‌ها باید از یک خانواده باشند" : "Pets in one booking must belong to the same household"}</span> : null}
                 </label>
               );
             })}
@@ -359,7 +396,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
           {needsAddress ? (
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 font-bold">{service.locationMode === "TRANSPORT" ? (fa ? "مبدأ" : "Pickup") : fa ? "آدرس محل خدمت" : "Service address"}</legend>
-              {addresses?.length ? addresses.map((a) => (
+              {addresses === null ? <Skeleton className="h-16 w-full" aria-label={fa ? "در حال بارگیری نشانی‌ها" : "Loading addresses"} /> : addresses.length ? addresses.map((a) => (
                 <label key={a.id} className="flex items-center gap-3"><input type="radio" name="address" checked={addressId === a.id} onChange={() => setAddressId(a.id)} />{[a.label, a.addressLine, a.city].filter(Boolean).join("، ")}</label>
               )) : <p className="text-sm text-text-secondary">{fa ? "آدرسی ثبت نشده است؛ از بخش حساب کاربری آدرس اضافه کنید." : "No saved address; add one in your account."}</p>}
               {service.locationMode === "TRANSPORT" && addresses?.length ? (

@@ -100,7 +100,10 @@ describe("ERP-B Customer 360 and Pet 360", () => {
     const chip = `98511${Math.floor(Math.random() * 1e10).toString().padStart(10, "0")}`;
     const hh = await db.household.create({ data: { name: "hh", members: { create: { userId: owner.id, role: "OWNER" } } } });
     const name = `Pet360-${randomUUID().slice(0, 6)}`;
-    const pet = await db.pet.create({ data: { householdId: hh.id, name, species: "CAT", approximateAgeMonths: 30, microchipNumber: chip, microchipNormalized: chip } });
+    const pet = await db.pet.create({ data: { householdId: hh.id, name, species: "CAT", approximateAgeMonths: 30, microchipNumber: chip, microchipNormalized: chip, photoUrl: "https://media.example.test/pet-photo.jpg" } });
+    const privatePhone = "+989123456789";
+    await db.householdInvitation.create({ data: { householdId: hh.id, contact: privatePhone, tokenHash: randomUUID(), invitedByUserId: owner.id, initialAccess: [{ petId: pet.id, preset: "VIEW_ONLY" }], expiresAt: new Date(Date.now() + 86400000) } });
+    await db.domainEvent.create({ data: { type: "PetProfileUpdated", aggregateType: "Pet", aggregateId: pet.id, payload: { petId: pet.id, changedFields: ["photoUrl"] } } });
     const ownerGrant = await db.petAccessGrant.create({ data: { petId: pet.id, userId: owner.id, canViewHealth: true, canManageAccess: true } });
     const stale = await db.petAccessGrant.create({ data: { petId: pet.id, userId: leaver.id, canViewHealth: true, source: "HOUSEHOLD" } });
     await db.medicalDocument.create({ data: { petId: pet.id, householdId: hh.id, title: "SECRET-LAB-TITLE", documentType: "LAB_REPORT", sourceType: "OWNER", fileObjectKey: `health-documents/${pet.id}/${randomUUID()}.pdf`, mimeType: "application/pdf", fileSizeBytes: 10 } });
@@ -110,6 +113,10 @@ describe("ERP-B Customer 360 and Pet 360", () => {
     await get(owner, `/admin/pets/${pet.id}`).expect(403);
     const view = (await get(support, `/admin/pets/${pet.id}`).expect(200)).body;
     expect(view.identity.microchipMasked).toBe(`${chip.slice(0, 3)}***${chip.slice(-3)}`);
+    expect(view.identity.hasPhoto).toBe(true);
+    expect(view.household.pendingInvitations).toEqual([expect.objectContaining({ contactMasked: "+989***89" })]);
+    expect(JSON.stringify(view.household.pendingInvitations)).not.toContain(privatePhone);
+    expect(view.activity).toEqual(expect.arrayContaining([expect.objectContaining({ type: "PetProfileUpdated", photoChanged: true, changedFields: ["photoUrl"] })]));
     expect(view.health.documentsByType).toEqual([expect.objectContaining({ documentType: "LAB_REPORT", count: 1 })]);
     expect(JSON.stringify(view)).not.toContain("SECRET-LAB-TITLE");
     expect(JSON.stringify(view)).not.toContain(chip);
