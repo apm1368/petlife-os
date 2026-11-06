@@ -81,7 +81,7 @@ export type AdminPermission =
   | "travel.listing.manage"
   | "travel.override.manage";
 
-const ALL_PERMISSIONS: AdminPermission[] = [
+export const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
   "customer.pii.reveal",
   "support.view",
@@ -345,8 +345,37 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   // Front-line support: reads a customer, works their cases and disputes, and can rescue a
   // compromised account by revoking sessions — but never reveals PII or touches money.
   [AdminRole.SUPPORT_AGENT]: ["customer.view", "support.view", "support.manage", "dispute.view", "task.manage", "customer.sessions.revoke"],
+  [AdminRole.CUSTOM]: [],
 };
+
+const CUSTOM_ROLE_PERMISSION_ALLOWLIST = new Set<AdminPermission>([
+  "commerce.view", "commerce.manage", "promotions.manage",
+  "content.view", "content.create", "content.edit", "content.publish", "content.archive", "content.media.manage",
+  "services.view", "services.manage",
+  "insurance.view", "insurance.manage", "insurance.applications.view",
+  "places.view", "places.manage",
+  "travel.view", "travel.manage", "travel.requirements.manage", "travel.source.view", "travel.source.manage", "travel.sync.run", "travel.listing.manage", "travel.override.manage",
+  "animalSupport.view", "animalSupport.manage",
+]);
 
 export function roleHasPermission(role: AdminRole, permission: AdminPermission): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
+}
+
+/** A custom role may safely add catalogued permissions to its built-in baseline, but it cannot
+ * delegate the role-builder capability itself. That prevents privilege chains outside the
+ * superadmin + second-approver workflow. */
+export function isCustomRolePermission(permission: string): permission is AdminPermission {
+  return CUSTOM_ROLE_PERMISSION_ALLOWLIST.has(permission as AdminPermission);
+}
+
+export function canUseCustomRolePermission(permission: AdminPermission): boolean {
+  return CUSTOM_ROLE_PERMISSION_ALLOWLIST.has(permission);
+}
+
+export function adminHasPermission(
+  admin: { role: AdminRole; customPermissions?: readonly string[] },
+  permission: AdminPermission,
+): boolean {
+  return roleHasPermission(admin.role, permission) || !!admin.customPermissions?.includes(permission);
 }

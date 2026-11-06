@@ -10,7 +10,7 @@ import {
 import { resolvePagination, toPaginatedDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminHasPermission } from "../auth/admin-permissions";
 import {
   evaluateFeatureFlag,
   type FeatureFlagAudience,
@@ -67,7 +67,7 @@ export class AdminFeatureFlagsService {
   }
 
   async review(actor: ResolvedAdminContext, changeId: string, decision: "APPROVE" | "REJECT", note?: string) {
-    if (!roleHasPermission(actor.role, "settings.approve"))
+    if (!adminHasPermission(actor, "settings.approve"))
       throw new AdminGovernanceRuleException({ rule: "APPROVER_REQUIRED" });
     await this.prisma.$transaction(async (tx) => {
       const change = await tx.featureFlagChange.findUnique({ where: { id: changeId } });

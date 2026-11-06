@@ -24,7 +24,7 @@ import {
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
-import { roleHasPermission, type AdminPermission } from "../auth/admin-permissions";
+import { adminHasPermission, type AdminPermission } from "../auth/admin-permissions";
 import { allowedProviderTypes, canReachVertical } from "../auth/admin-verticals";
 
 type Query = PaginationQueryDto & { vertical: AdminReviewVertical; status?: string; q?: string };
@@ -49,7 +49,7 @@ export class AdminReviewModerationService {
           : manage
             ? "travel.manage"
             : "travel.view";
-    if (!roleHasPermission(admin.role, permission))
+    if (!adminHasPermission(admin, permission))
       throw new AdminAccessDeniedException({ permission, vertical });
     if (vertical === "TRAVEL" && !canReachVertical(admin, AdminVertical.ACCOMMODATION))
       throw new AdminAccessDeniedException({ reason: "OUT_OF_VERTICAL_SCOPE", vertical });

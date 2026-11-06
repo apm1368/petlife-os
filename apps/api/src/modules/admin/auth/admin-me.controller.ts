@@ -33,7 +33,7 @@ export class AdminMeController {
   getCapabilities(@CurrentAdmin() admin: ResolvedAdminContext): AdminCapabilitiesDto {
     return {
       role: admin.role as AdminCapabilitiesDto["role"],
-      permissions: [...ROLE_PERMISSIONS[admin.role]],
+      permissions: [...new Set([...ROLE_PERMISSIONS[admin.role], ...(admin.customPermissions ?? [])])] as AdminCapabilitiesDto["permissions"],
       verticals: allowedVerticals(admin) as AdminCapabilitiesDto["verticals"],
     };
   }

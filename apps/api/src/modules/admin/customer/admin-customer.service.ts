@@ -1,4 +1,4 @@
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminHasPermission } from "../auth/admin-permissions";
 import { Injectable } from "@nestjs/common";
 import type { Prisma } from "@prisma/client";
 import type {
@@ -76,9 +76,9 @@ export class AdminCustomerService {
    */
   async globalSearch(q: string, admin: ResolvedAdminContext): Promise<AdminSearchResultDto> {
     const searched = {
-      customers: roleHasPermission(admin.role, "customer.view"),
-      orders: roleHasPermission(admin.role, "commerce.view"),
-      supportCases: roleHasPermission(admin.role, "support.view"),
+      customers: adminHasPermission(admin, "customer.view"),
+      orders: adminHasPermission(admin, "commerce.view"),
+      supportCases: adminHasPermission(admin, "support.view"),
     };
     if (!q) return { customers: [], orders: [], supportCases: [], searched };
     // Order.id is a Postgres UUID column — no partial/prefix match is

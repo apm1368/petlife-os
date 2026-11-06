@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { AdminMembershipStatus, AdminRole, AdminVertical, Prisma } from "@prisma/client";
+import { AdminCustomRoleStatus, AdminMembershipStatus, AdminRole, AdminRoleAssignmentStatus, AdminVertical, Prisma } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { AdminGovernanceRuleException, NotFoundApiException, ValidationApiException } from "../../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
-import { ROLE_PERMISSIONS, type AdminPermission } from "../auth/admin-permissions";
+import { ROLE_PERMISSIONS, canUseCustomRolePermission, isCustomRolePermission, type AdminPermission } from "../auth/admin-permissions";
 import { SERVICE_VERTICALS } from "../auth/admin-verticals";
 
 /** Roles whose holders may not be created, changed or suspended by anyone but a SUPER_ADMIN (all of access control is admin.manage = SUPER_ADMIN today; the rule is explicit so delegating admin.manage later can't escalate). */
@@ -35,7 +35,7 @@ export class AdminAccessControlService {
   async roles() {
     const counts = await this.prisma.adminUser.groupBy({ by: ["role", "status"], _count: { _all: true } });
     const count = (role: AdminRole, status: AdminMembershipStatus) => counts.find((c) => c.role === role && c.status === status)?._count._all ?? 0;
-    return (Object.values(AdminRole) as AdminRole[]).map((role) => ({
+    return (Object.values(AdminRole) as AdminRole[]).filter((role) => role !== AdminRole.CUSTOM).map((role) => ({
       role,
       protected: PROTECTED_ROLES.includes(role),
       permissions: ROLE_PERMISSIONS[role],
@@ -44,12 +44,131 @@ export class AdminAccessControlService {
     }));
   }
 
+  async customRoles() {
+    const [roles, assignments] = await Promise.all([
+      this.prisma.adminCustomRole.findMany({ orderBy: [{ status: "asc" }, { createdAt: "desc" }] }),
+      this.prisma.adminRoleAssignment.findMany({
+        where: { status: AdminRoleAssignmentStatus.PENDING },
+        include: { adminUser: { include: { user: { select: { displayName: true } } } }, customRole: { select: { key: true, label: true } } },
+        orderBy: { createdAt: "asc" },
+      }),
+    ]);
+    return {
+      roles: roles.map((role) => ({ ...role, createdAt: role.createdAt.toISOString(), approvedAt: role.approvedAt?.toISOString() ?? null })),
+      pendingAssignments: assignments.map((change) => ({
+        id: change.id, adminUserId: change.adminUserId, displayName: change.adminUser.user.displayName,
+        customRoleId: change.customRoleId, customRoleKey: change.customRole?.key ?? null,
+        customRoleLabel: change.customRole?.label ?? null, reason: change.reason,
+        requestedByAdminId: change.requestedByAdminId, createdAt: change.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  async createCustomRole(actor: ResolvedAdminContext, input: { key: string; label: string; description: string; permissions: string[]; verticals: AdminVertical[]; reason: string }) {
+    this.assertSuperAdmin(actor);
+    const key = input.key.trim().toLowerCase();
+    const permissions = [...new Set(input.permissions)];
+    const verticals = [...new Set(input.verticals)];
+    const invalid = permissions.filter((permission) => !isCustomRolePermission(permission));
+    if (!/^[a-z][a-z0-9-]{1,39}$/.test(key) || !permissions.length || invalid.length || !verticals.length) {
+      throw new ValidationApiException({ field: invalid.length ? "permissions" : "key", reason: "INVALID_CUSTOM_ROLE", invalid });
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const row = await tx.adminCustomRole.create({ data: {
+        key, label: input.label.trim(), description: input.description.trim(), permissions, verticals,
+        reason: input.reason.trim(), requestedByAdminId: actor.adminUserId,
+      } });
+      await this.audit.record({
+        adminUserId: actor.adminUserId, action: "admin_custom_role.proposed", entityType: "AdminCustomRole", entityId: row.id,
+        reason: input.reason, afterSummary: { key, label: row.label, permissions, verticals, status: row.status }, tx,
+      });
+      return { ...row, createdAt: row.createdAt.toISOString(), approvedAt: null };
+    });
+  }
+
+  async reviewCustomRole(actor: ResolvedAdminContext, roleId: string, decision: "APPROVE" | "REJECT", reason: string) {
+    this.assertSuperAdmin(actor);
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('admin-custom-role:' || ${roleId}))`;
+      const role = await tx.adminCustomRole.findUnique({ where: { id: roleId } });
+      if (!role) throw new NotFoundApiException("AdminCustomRole");
+      if (role.status !== AdminCustomRoleStatus.PENDING) throw new ValidationApiException({ field: "status", reason: "NOT_PENDING" });
+      if (role.requestedByAdminId === actor.adminUserId) throw new AdminGovernanceRuleException({ rule: "SELF_APPROVAL_FORBIDDEN" });
+      const status = decision === "APPROVE" ? AdminCustomRoleStatus.ACTIVE : AdminCustomRoleStatus.REJECTED;
+      const updated = await tx.adminCustomRole.update({ where: { id: role.id }, data: { status, approvedByAdminId: actor.adminUserId, approvedAt: new Date() } });
+      await this.audit.record({
+        adminUserId: actor.adminUserId, action: decision === "APPROVE" ? "admin_custom_role.approved" : "admin_custom_role.rejected",
+        entityType: "AdminCustomRole", entityId: role.id, reason,
+        beforeSummary: { status: role.status }, afterSummary: { status, permissions: role.permissions, key: role.key }, tx,
+      });
+      return { ...updated, createdAt: updated.createdAt.toISOString(), approvedAt: updated.approvedAt?.toISOString() ?? null };
+    });
+  }
+
+  async requestCustomRoleAssignment(actor: ResolvedAdminContext, targetId: string, customRoleId: string | null, reason: string) {
+    this.assertSuperAdmin(actor);
+    if (targetId === actor.adminUserId) throw new AdminGovernanceRuleException({ rule: "SELF_CHANGE_FORBIDDEN" });
+    const target = await this.prisma.adminUser.findUnique({ where: { id: targetId }, select: { id: true, role: true } });
+    if (!target) throw new NotFoundApiException("AdminUser");
+    if (target.role === AdminRole.SUPER_ADMIN) throw new AdminGovernanceRuleException({ rule: "PROTECTED_ROLE", role: target.role });
+    if (target.role !== AdminRole.READ_ONLY) throw new AdminGovernanceRuleException({ rule: "CUSTOM_ROLE_REQUIRES_READ_ONLY_BASE", role: target.role });
+    if (customRoleId) {
+      const role = await this.prisma.adminCustomRole.findUnique({ where: { id: customRoleId }, select: { status: true } });
+      if (role?.status !== AdminCustomRoleStatus.ACTIVE) throw new ValidationApiException({ field: "customRoleId", reason: "ROLE_NOT_ACTIVE" });
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const pending = await tx.adminRoleAssignment.count({ where: { adminUserId: targetId, status: AdminRoleAssignmentStatus.PENDING } });
+      if (pending) throw new ValidationApiException({ field: "adminUserId", reason: "ASSIGNMENT_ALREADY_PENDING" });
+      const assignment = await tx.adminRoleAssignment.create({ data: { adminUserId: targetId, customRoleId, requestedByAdminId: actor.adminUserId, reason: reason.trim() } });
+      await this.audit.record({
+        adminUserId: actor.adminUserId, action: "admin_custom_role.assignment_proposed", entityType: "AdminUser", entityId: targetId,
+        reason, afterSummary: { assignmentId: assignment.id, customRoleId }, tx,
+      });
+      return { id: assignment.id, status: assignment.status, adminUserId: targetId, customRoleId, createdAt: assignment.createdAt.toISOString() };
+    });
+  }
+
+  async reviewCustomRoleAssignment(actor: ResolvedAdminContext, assignmentId: string, decision: "APPROVE" | "REJECT", reason: string) {
+    this.assertSuperAdmin(actor);
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('admin-role-assignment:' || ${assignmentId}))`;
+      const change = await tx.adminRoleAssignment.findUnique({ where: { id: assignmentId }, include: { adminUser: true, customRole: true } });
+      if (!change) throw new NotFoundApiException("AdminRoleAssignment");
+      if (change.status !== AdminRoleAssignmentStatus.PENDING) throw new ValidationApiException({ field: "status", reason: "NOT_PENDING" });
+      if (change.requestedByAdminId === actor.adminUserId) throw new AdminGovernanceRuleException({ rule: "SELF_APPROVAL_FORBIDDEN" });
+      if (change.adminUserId === actor.adminUserId) throw new AdminGovernanceRuleException({ rule: "SELF_CHANGE_FORBIDDEN" });
+      if (change.adminUser.role === AdminRole.SUPER_ADMIN) throw new AdminGovernanceRuleException({ rule: "PROTECTED_ROLE", role: change.adminUser.role });
+      if (change.adminUser.role !== AdminRole.READ_ONLY) throw new AdminGovernanceRuleException({ rule: "CUSTOM_ROLE_REQUIRES_READ_ONLY_BASE", role: change.adminUser.role });
+      if (decision === "APPROVE" && change.customRoleId && change.customRole?.status !== AdminCustomRoleStatus.ACTIVE) {
+        throw new ValidationApiException({ field: "customRoleId", reason: "ROLE_NOT_ACTIVE" });
+      }
+      const now = new Date();
+      if (decision === "APPROVE") await tx.adminUser.update({ where: { id: change.adminUserId }, data: { customRoleId: change.customRoleId } });
+      const updated = await tx.adminRoleAssignment.update({ where: { id: change.id }, data: {
+        status: decision === "APPROVE" ? AdminRoleAssignmentStatus.APPLIED : AdminRoleAssignmentStatus.REJECTED,
+        approvedByAdminId: actor.adminUserId, reviewedAt: now,
+      } });
+      await this.audit.record({
+        adminUserId: actor.adminUserId,
+        action: decision === "APPROVE" ? "admin_custom_role.assignment_approved" : "admin_custom_role.assignment_rejected",
+        entityType: "AdminUser", entityId: change.adminUserId, reason,
+        beforeSummary: { customRoleId: change.adminUser.customRoleId }, afterSummary: { customRoleId: decision === "APPROVE" ? change.customRoleId : change.adminUser.customRoleId, assignmentId: change.id }, tx,
+      });
+      return { id: updated.id, status: updated.status, adminUserId: updated.adminUserId, customRoleId: updated.customRoleId, reviewedAt: updated.reviewedAt?.toISOString() ?? null };
+    });
+  }
+
+  private assertSuperAdmin(actor: ResolvedAdminContext) {
+    if (actor.role !== AdminRole.SUPER_ADMIN) throw new AdminGovernanceRuleException({ rule: "SUPER_ADMIN_REQUIRED" });
+  }
+
   permissions() {
     const all = ROLE_PERMISSIONS[AdminRole.SUPER_ADMIN];
     return all.map((permission: AdminPermission) => ({
       permission,
       domain: permission.split(".")[0],
-      roles: (Object.keys(ROLE_PERMISSIONS) as AdminRole[]).filter((r) => ROLE_PERMISSIONS[r].includes(permission)),
+      roles: (Object.keys(ROLE_PERMISSIONS) as AdminRole[]).filter((r) => r !== AdminRole.CUSTOM && ROLE_PERMISSIONS[r].includes(permission)),
+      customRoleAllowed: canUseCustomRolePermission(permission),
     }));
   }
 
@@ -61,16 +180,17 @@ export class AdminAccessControlService {
       ...(q.q ? { user: { OR: [{ displayName: { contains: q.q, mode: "insensitive" } }, { email: { contains: q.q, mode: "insensitive" } }] } } : {}),
     };
     const [rows, total] = await Promise.all([
-      this.prisma.adminUser.findMany({ where, include: { user: { select: { displayName: true, email: true } } }, orderBy: [{ status: "asc" }, { createdAt: "asc" }], skip, take }),
+      this.prisma.adminUser.findMany({ where, include: { user: { select: { displayName: true, email: true } }, customRole: { select: { id: true, key: true, label: true, status: true } } }, orderBy: [{ status: "asc" }, { createdAt: "asc" }], skip, take }),
       this.prisma.adminUser.count({ where }),
     ]);
     return toPaginatedDto(rows.map((r) => this.toDto(r)), total, page, pageSize);
   }
 
   async get(adminUserId: string) {
-    const row = await this.prisma.adminUser.findUnique({ where: { id: adminUserId }, include: { user: { select: { displayName: true, email: true } } } });
+    const row = await this.prisma.adminUser.findUnique({ where: { id: adminUserId }, include: { user: { select: { displayName: true, email: true } }, customRole: { select: { id: true, key: true, label: true, permissions: true, status: true } } } });
     if (!row) throw new NotFoundApiException("AdminUser");
-    return { ...this.toDto(row), permissions: ROLE_PERMISSIONS[row.role] };
+    const effectiveRole = row.customRole?.status === AdminCustomRoleStatus.ACTIVE ? AdminRole.CUSTOM : row.role;
+    return { ...this.toDto(row), permissions: [...new Set([...ROLE_PERMISSIONS[effectiveRole], ...(row.customRole?.status === AdminCustomRoleStatus.ACTIVE ? row.customRole.permissions : [])])] };
   }
 
   /** Grant admin access to an existing member account (by email). Never creates a login. */
@@ -94,7 +214,7 @@ export class AdminAccessControlService {
       const row = await this.lockTarget(tx, actor, adminUserId);
       if (row.role === role) throw new ValidationApiException({ field: "role", reason: "UNCHANGED" });
       if (row.role === AdminRole.SUPER_ADMIN && row.status === AdminMembershipStatus.ACTIVE) await this.assertNotLastSuperAdmin(tx);
-      const updated = await tx.adminUser.update({ where: { id: row.id }, data: { role, serviceScopes } });
+      const updated = await tx.adminUser.update({ where: { id: row.id }, data: { role, serviceScopes, customRoleId: null } });
       return { row: updated, action: "admin_user.role_changed" as const, before: { role: row.role, serviceScopes: row.serviceScopes }, after: { role, serviceScopes } };
     }, reason);
   }
@@ -121,6 +241,7 @@ export class AdminAccessControlService {
   }
 
   private assertMayAssign(actor: ResolvedAdminContext, role: AdminRole) {
+    if (role === AdminRole.CUSTOM) throw new AdminGovernanceRuleException({ rule: "CUSTOM_ROLE_ASSIGNMENT_REQUIRED" });
     if (PROTECTED_ROLES.includes(role) && actor.role !== AdminRole.SUPER_ADMIN) throw new AdminGovernanceRuleException({ rule: "PROTECTED_ROLE", role });
   }
 
@@ -165,7 +286,7 @@ export class AdminAccessControlService {
     return this.get(result.id);
   }
 
-  private toDto(r: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus; serviceScopes: AdminVertical[]; createdAt: Date; updatedAt: Date; lastActiveAt: Date | null; user: { displayName: string | null; email: string | null } }) {
-    return { id: r.id, userId: r.userId, displayName: r.user.displayName, emailMasked: maskEmail(r.user.email), role: r.role, serviceScopes: r.serviceScopes, status: r.status, createdAt: r.createdAt.toISOString(), updatedAt: r.updatedAt.toISOString(), lastActiveAt: r.lastActiveAt?.toISOString() ?? null };
+  private toDto(r: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus; serviceScopes: AdminVertical[]; customRoleId?: string | null; customRole?: { id: string; key: string; label: string; status: AdminCustomRoleStatus } | null; createdAt: Date; updatedAt: Date; lastActiveAt: Date | null; user: { displayName: string | null; email: string | null } }) {
+    return { id: r.id, userId: r.userId, displayName: r.user.displayName, emailMasked: maskEmail(r.user.email), role: r.role, serviceScopes: r.serviceScopes, customRole: r.customRole?.status === AdminCustomRoleStatus.ACTIVE ? { id: r.customRole.id, key: r.customRole.key, label: r.customRole.label } : null, status: r.status, createdAt: r.createdAt.toISOString(), updatedAt: r.updatedAt.toISOString(), lastActiveAt: r.lastActiveAt?.toISOString() ?? null };
   }
 }

@@ -14,7 +14,7 @@ import { CATEGORY_INCLUDE, CONTENT_AUTHOR_INCLUDE, MEDIA_ASSET_INCLUDE, TAG_INCL
 import { validateRichTextDocument } from "../../content/rich-text.util";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminHasPermission } from "../auth/admin-permissions";
 import { AdminMediaService } from "./admin-media.service";
 
 /** Exactly the five transitions the spec enumerates — ARCHIVED is a deliberate terminal state this phase (see ArticleLifecycleStatus's own schema.prisma doc comment). */
@@ -244,7 +244,7 @@ export class AdminArticleService {
 
     const row = await this.prisma.$transaction(async (tx) => {
       const [locked] = await tx.$queryRaw<{ id: string; status: ArticleLifecycleStatus }[]>`SELECT "id", "status" FROM "content_article_locales" WHERE "articleId" = ${articleId}::uuid AND "locale" = ${locale}::"Locale" FOR UPDATE`;
-      if (locked?.status === ArticleLifecycleStatus.VISIBLE && !roleHasPermission(admin.role, "content.publish")) {
+      if (locked?.status === ArticleLifecycleStatus.VISIBLE && !adminHasPermission(admin, "content.publish")) {
         throw new AdminAccessDeniedException({ reason: "LIVE_EDIT_REQUIRES_CONTENT_PUBLISH", requiredPermission: "content.publish", articleId, locale });
       }
       await this.assertSlugAvailable(locale, input.slug, locked?.id);

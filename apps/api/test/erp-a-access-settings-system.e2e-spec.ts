@@ -63,9 +63,12 @@ describe("ERP-A access control, settings, system", () => {
     const candidate = await actor("candidate");
 
     const roles = (await get(admin, "/admin/access/roles").expect(200)).body;
+    expect(roles.some((r: { role: string }) => r.role === "CUSTOM")).toBe(false);
     expect(roles.find((r: { role: string }) => r.role === "SUPER_ADMIN")).toMatchObject({ protected: true });
     expect(roles.find((r: { role: string }) => r.role === "ANALYTICS").permissions).toEqual(["analytics.view"]);
-    expect((await get(admin, "/admin/access/permissions").expect(200)).body.find((p: { permission: string }) => p.permission === "admin.manage").roles).toEqual(["SUPER_ADMIN"]);
+    const permissions = (await get(admin, "/admin/access/permissions").expect(200)).body;
+    expect(permissions.find((p: { permission: string }) => p.permission === "admin.manage")).toMatchObject({ roles: ["SUPER_ADMIN"], customRoleAllowed: false });
+    expect(permissions.find((p: { permission: string }) => p.permission === "commerce.manage").customRoleAllowed).toBe(true);
     await get(support, "/admin/access/roles").expect(403);
     await get(member, "/admin/access/admins").expect(403);
     const listed = (await get(admin, `/admin/access/admins?q=${encodeURIComponent(root.email.slice(0, 14))}`).expect(200)).body;
@@ -92,6 +95,48 @@ describe("ERP-A access control, settings, system", () => {
     const byPrefix = (await get(root, `/admin/audit?action=admin_user.&from=${new Date(Date.now() - 60e3).toISOString()}`).expect(200)).body;
     expect(byPrefix.items.every((a: { action: string }) => a.action.startsWith("admin_user."))).toBe(true);
     expect(await db.domainEvent.count({ where: { type: "AdminMembershipChanged", aggregateId: granted.id } })).toBe(4);
+  });
+
+  it("custom roles require a second super-admin for definition and assignment, then enforce permissions and verticals", async () => {
+    const requester = await actor("custom-role requester", AdminRole.SUPER_ADMIN);
+    const reviewer = await actor("custom-role reviewer", AdminRole.SUPER_ADMIN);
+    const target = await actor("custom-role target", AdminRole.READ_ONLY);
+    const proposal = (await send("post", requester, "/admin/access/custom-roles").send({
+      key: `shop-${randomUUID().slice(0, 8)}`,
+      label: "Shop catalog reviewer",
+      description: "Read and manage shop catalog listings",
+      permissions: ["commerce.view", "commerce.manage"],
+      verticals: ["SHOP"],
+      reason: "Allow delegated catalog review",
+    }).expect(201)).body;
+    expect(proposal.status).toBe("PENDING");
+    expect((await get(target, "/admin/me/capabilities").expect(200)).body.permissions).not.toContain("commerce.manage");
+    expect((await send("post", requester, `/admin/access/custom-roles/${proposal.id}/review`).send({ decision: "APPROVE", reason: "Self approval test" }).expect(409)).body.error.details.rule).toBe("SELF_APPROVAL_FORBIDDEN");
+    await send("post", reviewer, `/admin/access/custom-roles/${proposal.id}/review`).send({ decision: "APPROVE", reason: "Reviewed permissions and scope" }).expect(201);
+
+    const privilegedTarget = await db.adminUser.findFirstOrThrow({ where: { role: AdminRole.SUPPORT } });
+    await send("post", requester, `/admin/access/admins/${privilegedTarget.id}/custom-role-assignment`)
+      .send({ customRoleId: proposal.id, reason: "Try to add a custom role to a privileged base" })
+      .expect((response) => {
+        expect(response.status).toBe(409);
+        expect(response.body.error.details.rule).toBe("CUSTOM_ROLE_REQUIRES_READ_ONLY_BASE");
+      });
+
+    const assignment = (await send("post", requester, `/admin/access/admins/${target.adminUserId}/custom-role-assignment`).send({ customRoleId: proposal.id, reason: "Request shop role for catalog work" }).expect(201)).body;
+    expect(assignment.status).toBe("PENDING");
+    expect((await get(target, "/admin/me/capabilities").expect(200)).body.permissions).not.toContain("commerce.manage");
+    expect((await send("post", requester, `/admin/access/custom-role-assignments/${assignment.id}/review`).send({ decision: "APPROVE", reason: "Self approval test" }).expect(409)).body.error.details.rule).toBe("SELF_APPROVAL_FORBIDDEN");
+    await send("post", reviewer, `/admin/access/custom-role-assignments/${assignment.id}/review`).send({ decision: "APPROVE", reason: "Reviewed staff and scope" }).expect(201);
+
+    const caps = (await get(target, "/admin/me/capabilities").expect(200)).body;
+    expect(caps.role).toBe("CUSTOM");
+    expect(caps.permissions).toContain("commerce.manage");
+    expect(caps.permissions).not.toContain("support.view");
+    expect(caps.permissions).not.toContain("audit.view");
+    expect(caps.verticals).toEqual(["SHOP"]);
+    await get(target, "/admin/commerce/products").expect(200);
+    const audit = (await get(reviewer, `/admin/audit?entityType=AdminUser&entityId=${target.adminUserId}`).expect(200)).body;
+    expect(audit.items.map((entry: { action: string }) => entry.action)).toContain("admin_custom_role.assignment_approved");
   });
 
   it("settings: harmless keys apply at once and are public only when PUBLIC; high-impact keys need a different approver; stale versions are refused", async () => {

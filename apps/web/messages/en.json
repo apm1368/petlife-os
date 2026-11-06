@@ -5654,7 +5654,8 @@
       "CONTENT_ADMIN": "Content administrator",
       "SHOP_ADMIN": "Shop administrator",
       "SERVICE_ADMIN": "Scoped service administrator",
-      "SUPPORT_AGENT": "Support agent"
+      "SUPPORT_AGENT": "Support agent",
+      "CUSTOM": "Custom role"
     },
     "rules": {
       "ALREADY_ADMIN": "This account is already an admin; open its existing membership.",
@@ -5663,7 +5664,9 @@
       "PROTECTED_ROLE": "You cannot assign or change this protected role.",
       "SERVICE_SCOPES_REQUIRED": "A service administrator must have at least one service scope.",
       "INVALID_SERVICE_SCOPE": "One or more selected service scopes are invalid.",
-      "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Service scopes can only be assigned to a service administrator."
+      "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Service scopes can only be assigned to a service administrator.",
+      "CUSTOM_ROLE_ASSIGNMENT_REQUIRED": "Assign a custom role through the separately approved role-assignment flow.",
+      "CUSTOM_ROLE_REQUIRES_READ_ONLY_BASE": "Custom roles can only be assigned to a read-only admin account."
     },
     "verticals": {
       "CLINIC": "Clinic and veterinary",
@@ -5679,6 +5682,41 @@
       "admins": "Admins",
       "roles": "Roles",
       "permissions": "Permissions"
+    },
+    "customRoles": {
+      "createTitle": "Create a custom role",
+      "approvalHelp": "Role definitions and assignments stay pending until a different super admin approves them. Custom roles are limited to selected product verticals and cannot manage admin access.",
+      "key": "Role key",
+      "label": "Role name",
+      "description": "Purpose",
+      "role": "Custom role",
+      "permissions": "Permissions",
+      "verticals": "Allowed product areas",
+      "reason": "Request reason (at least 5 characters)",
+      "reviewReason": "Approval/rejection reason",
+      "propose": "Submit for approval",
+      "working": "Saving…",
+      "proposed": "Role submitted; it is not active until a second super admin approves it.",
+      "reviewed": "Review recorded.",
+      "definitions": "Custom role definitions",
+      "pendingAssignments": "Pending role assignments",
+      "assignmentTitle": "Request custom role assignment",
+      "requestAssignment": "Request second-admin approval",
+      "removeRole": "No custom role",
+      "approve": "Approve",
+      "reject": "Reject",
+      "status": { "PENDING": "Pending approval", "ACTIVE": "Active", "REJECTED": "Rejected" },
+      "vertical": { "CLINIC": "Veterinary care", "GROOMING": "Grooming", "ACCOMMODATION": "Accommodation", "INSURANCE": "Insurance", "SHOP": "Shop", "CONTENT": "Content", "SUPPORT": "Support" },
+      "empty": "No custom roles or pending assignments.",
+      "loading": "Loading custom roles…",
+      "loadFailed": "Custom roles could not be loaded.",
+      "retry": "Retry",
+      "unnamed": "Admin without a display name",
+      "invalid": "Choose valid permissions and at least one product area.",
+      "saveFailed": "The request could not be saved. Check the details and try again.",
+      "selfApproval": "The requester cannot approve their own change. Ask another super admin.",
+      "scope": "Scope",
+      "customRoleEligible": "Eligible for a custom role with explicit, vertically limited permissions."
     }
   },
   "partnerVerification": {
