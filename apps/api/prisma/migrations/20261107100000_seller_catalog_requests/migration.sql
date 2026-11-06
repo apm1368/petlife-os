@@ -28,8 +28,8 @@ CREATE TABLE "catalog_product_requests" (
   CONSTRAINT "catalog_product_requests_reviewedByAdminId_fkey" FOREIGN KEY ("reviewedByAdminId") REFERENCES "admin_users"("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
-CREATE INDEX "catalog_product_requests_sellerOrganizationId_status_createdAt_idx" ON "catalog_product_requests"("sellerOrganizationId", "status", "createdAt");
+CREATE INDEX "catalog_req_seller_status_created_idx" ON "catalog_product_requests"("sellerOrganizationId", "status", "createdAt");
 CREATE INDEX "catalog_product_requests_status_createdAt_idx" ON "catalog_product_requests"("status", "createdAt");
 CREATE INDEX "catalog_product_requests_resolvedProductId_idx" ON "catalog_product_requests"("resolvedProductId");
-CREATE INDEX "catalog_product_requests_sellerOrganizationId_normalizedTitle_status_idx" ON "catalog_product_requests"("sellerOrganizationId", "normalizedTitle", "status");
+CREATE INDEX "catalog_req_seller_norm_title_status_idx" ON "catalog_product_requests"("sellerOrganizationId", "normalizedTitle", "status");
 CREATE UNIQUE INDEX "catalog_product_requests_one_pending_title_per_seller" ON "catalog_product_requests"("sellerOrganizationId", "normalizedTitle") WHERE "status" = 'PENDING_REVIEW';

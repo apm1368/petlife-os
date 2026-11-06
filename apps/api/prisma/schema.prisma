@@ -2896,10 +2896,10 @@ model CatalogProductRequest {
   updatedAt            DateTime @updatedAt
   reviewedAt           DateTime?
 
-  @@index([sellerOrganizationId, status, createdAt])
+  @@index([sellerOrganizationId, status, createdAt], map: "catalog_req_seller_status_created_idx")
   @@index([status, createdAt])
   @@index([resolvedProductId])
-  @@index([sellerOrganizationId, normalizedTitle, status])
+  @@index([sellerOrganizationId, normalizedTitle, status], map: "catalog_req_seller_norm_title_status_idx")
   @@map("catalog_product_requests")
 }
 
