@@ -152,9 +152,10 @@ describe("Phone numbers are canonical E.164 everywhere", () => {
       .set("x-csrf-token", csrfToken)
       .send({ username, password: "family-password-123", firstName: "New", lastName: "Member", phone })
       .expect(200);
-    expect(registration.body.user).toMatchObject({ phone, phoneVerified: false });
+    expect(registration.body.user).toMatchObject({ phone });
     const cookie = `petlife_session=${extractCookie(registration.headers["set-cookie"], "petlife_session")}; petlife_csrf=${csrfToken}`;
     const registeredUserId = registration.body.user.id as string;
+    expect((await prisma.user.findUniqueOrThrow({ where: { id: registeredUserId } })).phoneVerifiedAt).toBeNull();
     const registered = {
       get: (path: string) => request(server).get(path).set("Cookie", cookie),
       post: (path: string) => request(server).post(path).set("Cookie", cookie).set("x-csrf-token", csrfToken),
