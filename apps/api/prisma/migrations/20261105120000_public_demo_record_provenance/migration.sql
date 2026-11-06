@@ -28,6 +28,26 @@ WHERE "slug" IN (
   'soft-sided-travel-carrier'
 );
 
+-- Batch 4 commerce QA fixtures have lived in long-running databases under a
+-- reserved qa-b4-* slug namespace. Mark every known fixture when upgrading
+-- those databases; otherwise the new boolean's safe default would classify
+-- these legacy demo products as real.
+UPDATE "products"
+SET "isDemoRecord" = true
+WHERE "slug" IN (
+  'qa-b4-dry-dog',
+  'qa-b4-cat-pouch',
+  'qa-b4-litter',
+  'qa-b4-harness',
+  'qa-b4-omega',
+  'qa-b4-shampoo',
+  'qa-b4-cat-toy',
+  'qa-b4-dog-bed',
+  'qa-b4-carrier',
+  'qa-b4-dog-treats',
+  'qa-b4-scratcher'
+);
+
 -- Only classify paid plans carrying the exact seed price set. A real plan
 -- with a familiar code but owner-configured prices is left untouched.
 UPDATE "subscription_plans" AS plan
