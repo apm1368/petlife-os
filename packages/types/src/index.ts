@@ -2452,6 +2452,7 @@ export enum AdminRole {
   SHOP_ADMIN = "SHOP_ADMIN",
   SERVICE_ADMIN = "SERVICE_ADMIN",
   SUPPORT_AGENT = "SUPPORT_AGENT",
+  CUSTOM = "CUSTOM",
 }
 
 /**

@@ -2,7 +2,7 @@ import { Injectable, type CanActivate, type ExecutionContext } from "@nestjs/com
 import { Reflector } from "@nestjs/core";
 import { UnauthenticatedException, AdminAccessDeniedException } from "../../../common/errors/api-exception";
 import { AdminAccessService } from "./admin-access.service";
-import { roleHasPermission, type AdminPermission } from "./admin-permissions";
+import { adminHasPermission, type AdminPermission } from "./admin-permissions";
 import { ADMIN_PERMISSION_KEY } from "./require-admin-permission.decorator";
 import { ADMIN_VERTICAL_KEY } from "./require-admin-vertical.decorator";
 import { allowedVerticals } from "./admin-verticals";
@@ -35,7 +35,7 @@ export class AdminAuthGuard implements CanActivate {
 
     const requiredPermissions = this.reflector.get<AdminPermission[] | undefined>(ADMIN_PERMISSION_KEY, context.getHandler());
     if (requiredPermissions && requiredPermissions.length > 0) {
-      const satisfied = requiredPermissions.some((permission) => roleHasPermission(resolved.role, permission));
+      const satisfied = requiredPermissions.some((permission) => adminHasPermission(resolved, permission));
       if (!satisfied) {
         throw new AdminAccessDeniedException({ reason: "INSUFFICIENT_PERMISSION", requiredPermissions, role: resolved.role });
       }
@@ -48,6 +48,9 @@ export class AdminAuthGuard implements CanActivate {
     // whole controller ("everything under /admin/commerce is the shop"), and a single handler may
     // still override it.
     const requiredVerticals = this.reflector.getAllAndOverride<AdminVertical[] | undefined>(ADMIN_VERTICAL_KEY, [context.getHandler(), context.getClass()]);
+    if (requiredPermissions?.some((permission) => resolved.customPermissions?.includes(permission)) && !requiredVerticals?.length) {
+      throw new AdminAccessDeniedException({ reason: "CUSTOM_ROLE_VERTICAL_REQUIRED", permissions: requiredPermissions });
+    }
     if (requiredVerticals && requiredVerticals.length > 0) {
       const allowed = allowedVerticals(resolved);
       if (allowed !== null && !requiredVerticals.some((vertical) => allowed.includes(vertical))) {

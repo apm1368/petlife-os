@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
-import { ArrayUnique, IsArray, IsEmail, IsEnum, IsIn, IsOptional, IsString, Length } from "class-validator";
+import { ArrayUnique, IsArray, IsEmail, IsEnum, IsIn, IsOptional, IsString, IsUUID, Length, Matches } from "class-validator";
 import { AdminMembershipStatus, AdminRole, AdminVertical } from "@prisma/client";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
@@ -29,6 +29,19 @@ class ChangeRoleDto extends ReasonDto {
 class ChangeScopesDto extends ReasonDto {
   @IsArray() @ArrayUnique() @IsEnum(AdminVertical, { each: true }) serviceScopes!: AdminVertical[];
 }
+class CreateCustomRoleDto extends ReasonDto {
+  @IsString() @Matches(/^[a-z][a-z0-9-]{1,39}$/) key!: string;
+  @IsString() @Length(2, 80) label!: string;
+  @IsString() @Length(5, 300) description!: string;
+  @IsArray() @ArrayUnique() @IsString({ each: true }) @Length(3, 80, { each: true }) permissions!: string[];
+  @IsArray() @ArrayUnique() @IsEnum(AdminVertical, { each: true }) verticals!: AdminVertical[];
+}
+class ReviewCustomRoleDto extends ReasonDto {
+  @IsIn(["APPROVE", "REJECT"]) decision!: "APPROVE" | "REJECT";
+}
+class CustomRoleAssignmentDto extends ReasonDto {
+  @IsOptional() @IsUUID() customRoleId?: string | null;
+}
 
 /** Access Control: reading is access.view (ADMIN, SUPER_ADMIN); every change is admin.manage (SUPER_ADMIN only) and needs a reason. */
 @Controller("admin/access")
@@ -43,6 +56,26 @@ export class AdminAccessControlController {
   @Get("permissions")
   @RequireAdminPermission("access.view")
   permissions() { return this.access.permissions(); }
+
+  @Get("custom-roles")
+  @RequireAdminPermission("access.view")
+  customRoles() { return this.access.customRoles(); }
+
+  @Post("custom-roles")
+  @RequireAdminPermission("admin.manage")
+  createCustomRole(@CurrentAdmin() admin: ResolvedAdminContext, @Body() dto: CreateCustomRoleDto) { return this.access.createCustomRole(admin, dto); }
+
+  @Post("custom-roles/:id/review")
+  @RequireAdminPermission("admin.manage")
+  reviewCustomRole(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ReviewCustomRoleDto) { return this.access.reviewCustomRole(admin, id, dto.decision, dto.reason); }
+
+  @Post("admins/:id/custom-role-assignment")
+  @RequireAdminPermission("admin.manage")
+  requestCustomRoleAssignment(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: CustomRoleAssignmentDto) { return this.access.requestCustomRoleAssignment(admin, id, dto.customRoleId ?? null, dto.reason); }
+
+  @Post("custom-role-assignments/:id/review")
+  @RequireAdminPermission("admin.manage")
+  reviewCustomRoleAssignment(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ReviewCustomRoleDto) { return this.access.reviewCustomRoleAssignment(admin, id, dto.decision, dto.reason); }
 
   @Get("admins")
   @RequireAdminPermission("access.view")

@@ -17,6 +17,10 @@ export interface ResolvedAdminContext {
   status: AdminMembershipStatus;
   /// Only meaningful for a SERVICE_ADMIN; empty for every other role (see admin-verticals.ts).
   serviceScopes: AdminVertical[];
+  customRoleId?: string | null;
+  customRoleKey?: string | null;
+  customPermissions?: string[];
+  customRoleVerticals?: AdminVertical[];
 }
 
 export type AdminAuthedRequest = AuthedRequest & { adminContext?: ResolvedAdminContext };

@@ -35,7 +35,13 @@ export function isScopedRole(role: AdminRole): boolean {
  * kept distinct from an empty list on purpose. A SERVICE_ADMIN with no scopes configured yet reaches
  * nothing rather than everything: an unconfigured scope must fail closed.
  */
-export function allowedVerticals(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes">): AdminVertical[] | null {
+export function allowedVerticals(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes"> & Partial<Pick<ResolvedAdminContext, "customRoleVerticals">>): AdminVertical[] | null {
+  if (admin.customRoleVerticals?.length) {
+    const base = admin.role === AdminRole.SERVICE_ADMIN
+      ? admin.serviceScopes.filter((scope) => SERVICE_VERTICALS.includes(scope))
+      : ROLE_VERTICALS[admin.role] ?? null;
+    return base === null ? admin.customRoleVerticals : admin.customRoleVerticals.filter((vertical) => base.includes(vertical));
+  }
   if (admin.role === AdminRole.SERVICE_ADMIN) {
     return admin.serviceScopes.filter((scope) => SERVICE_VERTICALS.includes(scope));
   }
@@ -43,7 +49,7 @@ export function allowedVerticals(admin: Pick<ResolvedAdminContext, "role" | "ser
 }
 
 /** Whether this admin may act on rows belonging to `vertical`. */
-export function canReachVertical(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes">, vertical: AdminVertical): boolean {
+export function canReachVertical(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes"> & Partial<Pick<ResolvedAdminContext, "customRoleVerticals">>, vertical: AdminVertical): boolean {
   const allowed = allowedVerticals(admin);
   return allowed === null || allowed.includes(vertical);
 }
@@ -71,14 +77,14 @@ const VERTICAL_PROVIDER_TYPES: Partial<Record<AdminVertical, ProviderType[]>> = 
  * type (an unscoped role). A scoped role whose verticals map to no provider type returns `[]`, which
  * callers must treat as "no rows", never "all rows".
  */
-export function allowedProviderTypes(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes">): ProviderType[] | null {
+export function allowedProviderTypes(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes"> & Partial<Pick<ResolvedAdminContext, "customRoleVerticals">>): ProviderType[] | null {
   const verticals = allowedVerticals(admin);
   if (verticals === null) return null;
   return [...new Set(verticals.flatMap((v) => VERTICAL_PROVIDER_TYPES[v] ?? []))];
 }
 
 /** True when this admin may act on a provider organization of the given type. */
-export function canReachProviderType(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes">, type: ProviderType): boolean {
+export function canReachProviderType(admin: Pick<ResolvedAdminContext, "role" | "serviceScopes"> & Partial<Pick<ResolvedAdminContext, "customRoleVerticals">>, type: ProviderType): boolean {
   const allowed = allowedProviderTypes(admin);
   return allowed === null || allowed.includes(type);
 }
