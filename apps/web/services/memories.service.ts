@@ -1,5 +1,5 @@
 import type { LifeTimelineEntryDto, PetMemoryDto, PetMemoryType, PetMemoryVisibility } from "@petlife/types";
-import { apiFetch } from "@/lib/api/client";
+import { API_BASE_URL, apiFetch } from "@/lib/api/client";
 
 export interface UploadTargetDto {
   uploadUrl: string;
@@ -43,6 +43,18 @@ export interface MemoryMediaDownloadDto {
   expiresInSeconds: number;
 }
 
+export interface PetMemorialStatusDto {
+  id: string;
+  displayName: string;
+  status: "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "WITHDRAWN";
+  consentedAt: string;
+  submittedAt: string;
+  reviewedAt: string | null;
+  reviewReason: string | null;
+  withdrawnAt: string | null;
+}
+export interface PublicPetMemorialDto { id: string; name: string; imageUrl: string }
+
 function buildMemoriesQuery(filter?: ListPetMemoriesFilter): string {
   if (!filter) return "";
   const params = new URLSearchParams();
@@ -68,4 +80,11 @@ export const memoriesService = {
   getMediaDownload: (petId: string, memoryId: string, index: number) => apiFetch<MemoryMediaDownloadDto>(`/pets/${petId}/memories/${memoryId}/media/${index}/download`),
 
   getLifeTimeline: (petId: string) => apiFetch<LifeTimelineEntryDto[]>(`/pets/${petId}/life-timeline`),
+  getMemorial: (petId: string) => apiFetch<PetMemorialStatusDto | null>(`/pets/${petId}/memories/memorial`),
+  submitMemorial: (petId: string, input: { displayName: string; imageMemoryId: string; consent: true }) => apiFetch<PetMemorialStatusDto>(`/pets/${petId}/memories/memorial`, { method: "POST", body: input }),
+  withdrawMemorial: (petId: string) => apiFetch<{ withdrawn: boolean }>(`/pets/${petId}/memories/memorial/withdraw`, { method: "POST" }),
+  listPublicMemorials: async () => (await apiFetch<PublicPetMemorialDto[]>("/public/pet-memorials")).map((item) => ({
+    ...item,
+    imageUrl: new URL(item.imageUrl, API_BASE_URL).toString(),
+  })),
 };

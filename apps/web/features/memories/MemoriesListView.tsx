@@ -13,6 +13,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { calendarFromIso, localizeDigits, monthName } from "@/lib/date/jalali";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { PetMemorialConsentPanel } from "./PetMemorialConsentPanel";
 
 type ViewMode = "JOURNAL" | "GALLERY";
 
@@ -122,6 +123,8 @@ export function MemoriesListView({ petId }: { petId: string }) {
           <Button variant="primary">{t("list.addMemory")}</Button>
         </Link>
       </header>
+
+      {isMemorial ? <PetMemorialConsentPanel petId={petId} petName={pet.name} memories={memories} /> : null}
 
       <div className="mem-filters">
         <Input label={t("list.searchLabel")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("list.searchPlaceholder")} />

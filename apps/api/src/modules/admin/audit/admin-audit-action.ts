@@ -203,4 +203,6 @@ export type AdminAuditAction =
   | "insurer_membership.granted"
   | "insurer_membership.revoked"
   | "place_report.resolved"
-  | "place_report.dismissed";
+  | "place_report.dismissed"
+  | "pet_memorial.approved"
+  | "pet_memorial.rejected";

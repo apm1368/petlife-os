@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query, Res, UseGuards } from "@nestjs/common";
+import type { Response } from "express";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { PetAccessGuard } from "../../common/auth/pet-access.guard";
 import { RequirePetAccess } from "../../common/auth/require-pet-access.decorator";
@@ -8,6 +9,14 @@ import { PetMemoryService } from "./pet-memory.service";
 import { LifeTimelineService } from "./life-timeline.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CreatePetMemoryDto, ListPetMemoriesQueryDto, RequestPetMemoryMediaUploadDto, UpdatePetMemoryDto } from "./dto/memory.dto";
+import { PetMemorialService, type SubmitPetMemorialInput } from "./pet-memorial.service";
+import { IsBoolean, IsString, IsUUID, Length } from "class-validator";
+
+class SubmitMemorialDto implements SubmitPetMemorialInput {
+  @IsString() @Length(1, 120) displayName!: string;
+  @IsUUID() imageMemoryId!: string;
+  @IsBoolean() consent!: boolean;
+}
 
 /**
  * spec: "private Life Timeline" (auth-required, household-scoped) —
@@ -24,6 +33,7 @@ export class MemoryController {
     private readonly memories: PetMemoryService,
     private readonly lifeTimeline: LifeTimelineService,
     private readonly prisma: PrismaService,
+    private readonly memorials: PetMemorialService,
   ) {}
 
   @Post()
@@ -37,6 +47,24 @@ export class MemoryController {
   @RequirePetAccess("canViewIdentity")
   list(@Param("petId") petId: string, @Query() query: ListPetMemoriesQueryDto) {
     return this.memories.list(petId, query);
+  }
+
+  @Get("memorial")
+  @RequirePetAccess("canViewIdentity")
+  memorial(@Param("petId") petId: string, @CurrentUser() user: SessionUser) {
+    return this.memorials.getForOwner(petId, user.id);
+  }
+
+  @Post("memorial")
+  @RequirePetAccess("canEditIdentity")
+  submitMemorial(@Param("petId") petId: string, @CurrentUser() user: SessionUser, @Body() dto: SubmitMemorialDto) {
+    return this.memorials.submit(petId, user.id, dto);
+  }
+
+  @Post("memorial/withdraw")
+  @RequirePetAccess("canEditIdentity")
+  withdrawMemorial(@Param("petId") petId: string, @CurrentUser() user: SessionUser) {
+    return this.memorials.withdraw(petId, user.id);
   }
 
   @Get(":memoryId")
@@ -75,5 +103,25 @@ export class MemoryController {
   @RequirePetAccess("canViewIdentity")
   getMediaDownload(@Param("petId") petId: string, @Param("memoryId") memoryId: string, @Param("index") index: string) {
     return this.memories.getMediaDownload(petId, memoryId, Number(index));
+  }
+}
+
+/** Public read-only listing. The service intentionally returns only a random
+ * publication id, owner-approved display name and image URL. */
+@Controller("public/pet-memorials")
+export class PublicPetMemorialController {
+  constructor(private readonly memorials: PetMemorialService) {}
+
+  @Get()
+  list() {
+    return this.memorials.listPublic();
+  }
+
+  @Get(":submissionId/image")
+  async image(@Param("submissionId", ParseUUIDPipe) submissionId: string, @Res() response: Response) {
+    const imageUrl = await this.memorials.getPublishedImageUrl(submissionId);
+    if (!imageUrl) return response.sendStatus(HttpStatus.NOT_FOUND);
+    response.setHeader("Cache-Control", "no-store");
+    return response.redirect(HttpStatus.FOUND, imageUrl);
   }
 }

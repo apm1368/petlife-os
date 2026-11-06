@@ -1540,6 +1540,7 @@ model Pet {
   lifecycleTransitions PetLifecycleTransition[]
   lostPetIncidents     LostPetIncident[]
   memories             PetMemory[]
+  memorialSubmissions  PetMemorialSubmission[]
   communityPosts       CommunityPost[]
 
   vitalsRecords          PatientVitalsRecord[]
@@ -7604,6 +7605,13 @@ enum PetMemoryVisibility {
   PUBLIC
 }
 
+enum PetMemorialStatus {
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  WITHDRAWN
+}
+
 model PetMemory {
   id              String    @id @default(uuid()) @db.Uuid
   petId           String    @db.Uuid
@@ -7630,6 +7638,8 @@ model PetMemory {
   /// spec explicitly asks to "keep extensible" rather than hardcode a list.
   tags String[] @default([])
 
+  memorialSubmissions PetMemorialSubmission[]
+
   /// Handoff 21 — soft-delete/archive per spec: "Memories are personally
   /// meaningful data. Avoid destructive deletion." A non-null value means the
   /// household chose to archive the memory; the row is never hard-deleted by
@@ -7642,6 +7652,52 @@ model PetMemory {
   @@index([petId])
   @@index([householdId])
   @@map("pet_memories")
+}
+
+/// A separate, explicitly consented memorial publication. This never flips
+/// the source memory's visibility and the public API exposes only the
+/// display-name snapshot and selected image URL.
+model PetMemorialSubmission {
+  id                String            @id @default(uuid()) @db.Uuid
+  petId             String            @db.Uuid
+  pet               Pet               @relation(fields: [petId], references: [id], onDelete: Restrict)
+  ownerUserId       String            @db.Uuid
+  displayName       String            @db.VarChar(120)
+  imageMemoryId     String            @db.Uuid
+  imageMemory       PetMemory         @relation(fields: [imageMemoryId], references: [id], onDelete: Restrict)
+  imageObjectKey    String
+  consentVersion    String            @db.VarChar(32)
+  consentedAt       DateTime
+  status            PetMemorialStatus @default(PENDING_REVIEW)
+  submittedAt       DateTime          @default(now())
+  reviewedByAdminId String?           @db.Uuid
+  reviewedAt        DateTime?
+  reviewReason      String?           @db.VarChar(1000)
+  publishedAt       DateTime?
+  withdrawnAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([status, submittedAt])
+  @@index([ownerUserId, petId, createdAt])
+  @@map("pet_memorial_submissions")
+}
+
+/// Append-only event history for consent, moderation and withdrawal.
+/// Database triggers enforce immutability; no public endpoint reads this table.
+model PetMemorialAuditEvent {
+  id           String   @id @default(uuid()) @db.Uuid
+  submissionId String   @db.Uuid
+  actorUserId  String?  @db.Uuid
+  actorAdminId String?  @db.Uuid
+  action       String   @db.VarChar(40)
+  fromStatus   String?  @db.VarChar(40)
+  toStatus     String?  @db.VarChar(40)
+  reason       String?  @db.VarChar(1000)
+  createdAt    DateTime @default(now())
+
+  @@index([submissionId, createdAt])
+  @@map("pet_memorial_audit_events")
 }
 
 // ---------------------------------------------------------------------------
