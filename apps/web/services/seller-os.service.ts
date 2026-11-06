@@ -81,6 +81,9 @@ export const sellerOsService = {
   getOffer: (sellerId: string, offerId: string) => apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers/${offerId}`),
   createOffer: (sellerId: string, input: { productVariantId: string; priceAmount: number; compareAtAmount?: number; sellerSku?: string; initialOnHand?: number }) =>
     apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers`, { method: "POST", body: input }),
+  listCatalogProductRequests: (sellerId: string) => apiFetch<Array<{ id: string; requestedTitle: string; brandName: string | null; status: string; decisionReason: string | null; resolvedProductId: string | null; createdAt: string }>>(`/seller-organizations/${sellerId}/catalog-product-requests`),
+  createCatalogProductRequest: (sellerId: string, input: { requestedTitle: string; brandName?: string; categoryId?: string; description?: string; sourceUrl?: string; sourceName?: string }) =>
+    apiFetch<{ id: string; requestedTitle: string; status: string; createdAt: string }>(`/seller-organizations/${sellerId}/catalog-product-requests`, { method: "POST", body: input }),
   updateOffer: (sellerId: string, offerId: string, patch: { priceAmount?: number; compareAtAmount?: number; sellerSku?: string; status?: SellerOfferStatus; repeatDeliveryEligible?: boolean; repeatIntervalsDays?: number[] }) =>
     apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers/${offerId}`, { method: "PATCH", body: patch }),
 
