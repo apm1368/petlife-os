@@ -8,7 +8,12 @@ export class ApiException extends HttpException {
   public readonly code: string;
   public readonly details?: Record<string, unknown>;
 
-  constructor(code: string, message: string, status: HttpStatus = HttpStatus.BAD_REQUEST, details?: Record<string, unknown>) {
+  constructor(
+    code: string,
+    message: string,
+    status: HttpStatus = HttpStatus.BAD_REQUEST,
+    details?: Record<string, unknown>,
+  ) {
     super(message, status);
     this.code = code;
     this.details = details;
@@ -23,7 +28,12 @@ export class PetAccessDeniedException extends ApiException {
 
 export class HouseholdAccessDeniedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("HOUSEHOLD_ACCESS_DENIED", "You do not have access to this household.", HttpStatus.FORBIDDEN, details);
+    super(
+      "HOUSEHOLD_ACCESS_DENIED",
+      "You do not have access to this household.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
@@ -56,7 +66,9 @@ export class OtpRateLimitedException extends ApiException {
 /** Per-identifier sign-in budget exhausted (password attempts) — same response whether or not the account exists. */
 export class AuthRateLimitedException extends ApiException {
   constructor(retryAfterSeconds: number) {
-    super("AUTH_RATE_LIMITED", "Too many attempts. Please try again later.", HttpStatus.TOO_MANY_REQUESTS, { retryAfterSeconds });
+    super("AUTH_RATE_LIMITED", "Too many attempts. Please try again later.", HttpStatus.TOO_MANY_REQUESTS, {
+      retryAfterSeconds,
+    });
   }
 }
 
@@ -72,7 +84,12 @@ export class ValidationApiException extends ApiException {
 
 export class SlotUnavailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SLOT_UNAVAILABLE", "That time is no longer available. Please choose another slot.", HttpStatus.CONFLICT, details);
+    super(
+      "SLOT_UNAVAILABLE",
+      "That time is no longer available. Please choose another slot.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -84,7 +101,12 @@ export class HoldExpiredException extends ApiException {
 
 export class BookingConflictException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("BOOKING_CONFLICT", "This slot was just booked by someone else. Please choose another slot.", HttpStatus.CONFLICT, details);
+    super(
+      "BOOKING_CONFLICT",
+      "This slot was just booked by someone else. Please choose another slot.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -96,26 +118,46 @@ export class ProviderNotVerifiedException extends ApiException {
 
 export class ServiceNotAvailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SERVICE_NOT_AVAILABLE", "This service is not currently available.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SERVICE_NOT_AVAILABLE",
+      "This service is not currently available.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 /** G13: an at-home service whose area doesn't include the booking address's city. */
 export class ServiceLocationNotSupportedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SERVICE_LOCATION_NOT_SUPPORTED", "This provider does not serve this address for the selected service.", HttpStatus.BAD_REQUEST, { reason: "LOCATION_NOT_SUPPORTED", ...details });
+    super(
+      "SERVICE_LOCATION_NOT_SUPPORTED",
+      "This provider does not serve this address for the selected service.",
+      HttpStatus.BAD_REQUEST,
+      { reason: "LOCATION_NOT_SUPPORTED", ...details },
+    );
   }
 }
 
 export class PetNotSupportedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PET_NOT_SUPPORTED", "This provider does not support this pet's species for the selected service.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "PET_NOT_SUPPORTED",
+      "This provider does not support this pet's species for the selected service.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class BookingNotCancellableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("BOOKING_NOT_CANCELLABLE", "This booking can no longer be cancelled.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "BOOKING_NOT_CANCELLABLE",
+      "This booking can no longer be cancelled.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -125,7 +167,12 @@ export class BookingNotCancellableException extends ApiException {
 
 export class AddressRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("ADDRESS_REQUIRED", "This service needs an address before it can be booked.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "ADDRESS_REQUIRED",
+      "This service needs an address before it can be booked.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -137,7 +184,12 @@ export class AddressRequiredException extends ApiException {
  */
 export class PetContextIncompleteException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PET_CONTEXT_INCOMPLETE", "This pet's profile needs more information before this service can be booked.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "PET_CONTEXT_INCOMPLETE",
+      "This pet's profile needs more information before this service can be booked.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -155,13 +207,23 @@ export class PetContextIncompleteException extends ApiException {
  */
 export class ProviderAccessDeniedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PROVIDER_ACCESS_DENIED", "You do not have access to this provider resource.", HttpStatus.FORBIDDEN, details);
+    super(
+      "PROVIDER_ACCESS_DENIED",
+      "You do not have access to this provider resource.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
 export class ProviderOrgNotVerifiedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PROVIDER_NOT_VERIFIED", "Your organization must be verified before taking this action.", HttpStatus.FORBIDDEN, details);
+    super(
+      "PROVIDER_NOT_VERIFIED",
+      "Your organization must be verified before taking this action.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
@@ -180,7 +242,12 @@ export class BookingNotFoundException extends ApiException {
 
 export class InvalidBookingTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_BOOKING_TRANSITION", "This booking cannot move to that state right now.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "INVALID_BOOKING_TRANSITION",
+      "This booking cannot move to that state right now.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -191,13 +258,23 @@ export class InvalidBookingTransitionException extends ApiException {
  */
 export class AvailabilityConflictException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("AVAILABILITY_CONFLICT", "This change conflicts with existing confirmed bookings.", HttpStatus.CONFLICT, details);
+    super(
+      "AVAILABILITY_CONFLICT",
+      "This change conflicts with existing confirmed bookings.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class ServiceHasFutureBookingsException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SERVICE_HAS_FUTURE_BOOKINGS", "This change is not allowed while future bookings exist for this service.", HttpStatus.CONFLICT, details);
+    super(
+      "SERVICE_HAS_FUTURE_BOOKINGS",
+      "This change is not allowed while future bookings exist for this service.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -222,7 +299,12 @@ export class AccessExpiredException extends ApiException {
 
 export class ProductNotAvailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PRODUCT_NOT_AVAILABLE", "This product is not currently available.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "PRODUCT_NOT_AVAILABLE",
+      "This product is not currently available.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -234,19 +316,34 @@ export class OfferNotAvailableException extends ApiException {
 
 export class SellerNotAvailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SELLER_NOT_AVAILABLE", "This seller is not currently verified/active.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SELLER_NOT_AVAILABLE",
+      "This seller is not currently verified/active.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class InsufficientInventoryException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INSUFFICIENT_INVENTORY", "There isn't enough stock available for this quantity.", HttpStatus.CONFLICT, details);
+    super(
+      "INSUFFICIENT_INVENTORY",
+      "There isn't enough stock available for this quantity.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class PriceChangedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PRICE_CHANGED", "This item's price has changed since it was added to your cart.", HttpStatus.CONFLICT, details);
+    super(
+      "PRICE_CHANGED",
+      "This item's price has changed since it was added to your cart.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -260,7 +357,12 @@ export class PriceChangedException extends ApiException {
  */
 export class CompatibilityReviewRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("COMPATIBILITY_REVIEW_REQUIRED", "This item needs your review before it can be purchased for this pet.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "COMPATIBILITY_REVIEW_REQUIRED",
+      "This item needs your review before it can be purchased for this pet.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -272,7 +374,12 @@ export class CompatibilityReviewRequiredException extends ApiException {
  */
 export class SafetyConflictException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SAFETY_CONFLICT", "This item may not be safe for this pet. Please review before continuing.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SAFETY_CONFLICT",
+      "This item may not be safe for this pet. Please review before continuing.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -320,13 +427,23 @@ export class OrderNotFoundException extends ApiException {
 
 export class OrderNotCancellableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("ORDER_NOT_CANCELLABLE", "This order can no longer be cancelled — it has already been handed to the courier.", HttpStatus.CONFLICT, details);
+    super(
+      "ORDER_NOT_CANCELLABLE",
+      "This order can no longer be cancelled — it has already been handed to the courier.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class RefundRequestNotAllowedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("REFUND_REQUEST_NOT_ALLOWED", "A refund request is not available for this order right now.", HttpStatus.CONFLICT, details);
+    super(
+      "REFUND_REQUEST_NOT_ALLOWED",
+      "A refund request is not available for this order right now.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -348,38 +465,68 @@ export class CheckoutNotFoundException extends ApiException {
 
 export class PaymentProviderUnavailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PAYMENT_PROVIDER_UNAVAILABLE", "This payment provider is not currently available.", HttpStatus.SERVICE_UNAVAILABLE, details);
+    super(
+      "PAYMENT_PROVIDER_UNAVAILABLE",
+      "This payment provider is not currently available.",
+      HttpStatus.SERVICE_UNAVAILABLE,
+      details,
+    );
   }
 }
 
 export class PaymentAuthorizationFailedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PAYMENT_AUTHORIZATION_FAILED", "The payment provider declined this authorization.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "PAYMENT_AUTHORIZATION_FAILED",
+      "The payment provider declined this authorization.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 /** Distinct from PaymentPendingException below — this one means the provider's own status query came back neither terminal nor pending in any recognizable way (spec section 28: "UNKNOWN must remain explicit"). */
 export class PaymentStateUnknownException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PAYMENT_STATE_UNKNOWN", "The payment provider's current status could not be determined.", HttpStatus.CONFLICT, details);
+    super(
+      "PAYMENT_STATE_UNKNOWN",
+      "The payment provider's current status could not be determined.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class FinancingNotAvailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("FINANCING_NOT_AVAILABLE", "Installment payment is not available for this provider or amount.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "FINANCING_NOT_AVAILABLE",
+      "Installment payment is not available for this provider or amount.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class FinancingNotEligibleException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("FINANCING_NOT_ELIGIBLE", "This checkout is not eligible for installment payment.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "FINANCING_NOT_ELIGIBLE",
+      "This checkout is not eligible for installment payment.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class FinancingDeclinedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("FINANCING_DECLINED", "The installment provider declined this request.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "FINANCING_DECLINED",
+      "The installment provider declined this request.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -391,19 +538,34 @@ export class FinancingExpiredException extends ApiException {
 
 export class InvalidFinancingPlanException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_FINANCING_PLAN", "The selected installment plan is not valid for this request.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "INVALID_FINANCING_PLAN",
+      "The selected installment plan is not valid for this request.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class WebhookSignatureInvalidException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("WEBHOOK_SIGNATURE_INVALID", "The webhook signature could not be verified.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "WEBHOOK_SIGNATURE_INVALID",
+      "The webhook signature could not be verified.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class RefundNotSupportedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("REFUND_NOT_SUPPORTED", "This refund is not supported by the provider.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "REFUND_NOT_SUPPORTED",
+      "This refund is not supported by the provider.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -415,20 +577,35 @@ export class RefundFailedException extends ApiException {
 
 export class InventoryChangedAfterPaymentException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVENTORY_CHANGED_AFTER_PAYMENT", "Inventory changed after payment and could not be safely confirmed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVENTORY_CHANGED_AFTER_PAYMENT",
+      "Inventory changed after payment and could not be safely confirmed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Never thrown as a request-blocking error this phase — surfaced only as Checkout.PAYMENT_SUCCEEDED_ORDER_ISSUE in the response body (spec section 21) so the caller never sees a bare 4xx for money that already moved. Kept here for API completeness/documentation. */
 export class PaymentOrderConfirmationIssueException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PAYMENT_ORDER_CONFIRMATION_ISSUE", "Payment succeeded but the order could not be confirmed automatically.", HttpStatus.CONFLICT, details);
+    super(
+      "PAYMENT_ORDER_CONFIRMATION_ISSUE",
+      "Payment succeeded but the order could not be confirmed automatically.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class ForeignUploadKeyException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_UPLOAD_KEY", "This file wasn't uploaded for this item. Upload it again.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "INVALID_UPLOAD_KEY",
+      "This file wasn't uploaded for this item. Upload it again.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -456,13 +633,23 @@ export class RefundNotFoundException extends ApiException {
 
 export class ShippingProviderUnavailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPPING_PROVIDER_UNAVAILABLE", "This delivery provider is currently unavailable.", HttpStatus.SERVICE_UNAVAILABLE, details);
+    super(
+      "SHIPPING_PROVIDER_UNAVAILABLE",
+      "This delivery provider is currently unavailable.",
+      HttpStatus.SERVICE_UNAVAILABLE,
+      details,
+    );
   }
 }
 
 export class ShippingProviderDisabledException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPPING_PROVIDER_DISABLED", "This delivery provider is not enabled.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SHIPPING_PROVIDER_DISABLED",
+      "This delivery provider is not enabled.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -474,20 +661,35 @@ export class ShippingQuoteNotFoundException extends ApiException {
 
 export class ShippingQuoteExpiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPPING_QUOTE_EXPIRED", "This shipping quote has expired. Please refresh and choose again.", HttpStatus.GONE, details);
+    super(
+      "SHIPPING_QUOTE_EXPIRED",
+      "This shipping quote has expired. Please refresh and choose again.",
+      HttpStatus.GONE,
+      details,
+    );
   }
 }
 
 export class ShippingQuoteNotEligibleException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPPING_QUOTE_NOT_ELIGIBLE", "This shipping quote does not belong to the given order/checkout.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SHIPPING_QUOTE_NOT_ELIGIBLE",
+      "This shipping quote does not belong to the given order/checkout.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 /** Never thrown for a re-selection of the already-selected quote (spec section 21: "duplicate quote selection must be safe/idempotent") — only for selecting a *different* quote while checkout has moved past the shipping step. */
 export class ShippingQuoteAlreadySelectedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPPING_QUOTE_ALREADY_SELECTED", "A different shipping option has already been selected and locked in.", HttpStatus.CONFLICT, details);
+    super(
+      "SHIPPING_QUOTE_ALREADY_SELECTED",
+      "A different shipping option has already been selected and locked in.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -499,7 +701,12 @@ export class FulfillmentNotFoundException extends ApiException {
 
 export class FulfillmentInvalidTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("FULFILLMENT_INVALID_TRANSITION", "This fulfillment cannot move to the requested state from its current state.", HttpStatus.CONFLICT, details);
+    super(
+      "FULFILLMENT_INVALID_TRANSITION",
+      "This fulfillment cannot move to the requested state from its current state.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -511,38 +718,68 @@ export class ShipmentNotFoundException extends ApiException {
 
 export class ShipmentAlreadyExistsException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPMENT_ALREADY_EXISTS", "A shipment already exists for this fulfillment.", HttpStatus.CONFLICT, details);
+    super(
+      "SHIPMENT_ALREADY_EXISTS",
+      "A shipment already exists for this fulfillment.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class ShipmentCreationFailedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPMENT_CREATION_FAILED", "The delivery provider could not create this shipment.", HttpStatus.BAD_GATEWAY, details);
+    super(
+      "SHIPMENT_CREATION_FAILED",
+      "The delivery provider could not create this shipment.",
+      HttpStatus.BAD_GATEWAY,
+      details,
+    );
   }
 }
 
 export class ShipmentCancelNotAllowedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPMENT_CANCEL_NOT_ALLOWED", "This shipment can no longer be canceled.", HttpStatus.CONFLICT, details);
+    super(
+      "SHIPMENT_CANCEL_NOT_ALLOWED",
+      "This shipment can no longer be canceled.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Explicit, never silently treated as success (spec section 6/28: "UNKNOWN must never imply success"). */
 export class ShipmentProviderStatusUnknownException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPMENT_PROVIDER_STATUS_UNKNOWN", "The delivery provider returned an unrecognized status.", HttpStatus.CONFLICT, details);
+    super(
+      "SHIPMENT_PROVIDER_STATUS_UNKNOWN",
+      "The delivery provider returned an unrecognized status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class ShipmentReconciliationFailedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPMENT_RECONCILIATION_FAILED", "Reconciliation with the delivery provider failed.", HttpStatus.BAD_GATEWAY, details);
+    super(
+      "SHIPMENT_RECONCILIATION_FAILED",
+      "Reconciliation with the delivery provider failed.",
+      HttpStatus.BAD_GATEWAY,
+      details,
+    );
   }
 }
 
 export class ShippingWebhookInvalidException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SHIPPING_WEBHOOK_INVALID", "The shipping webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SHIPPING_WEBHOOK_INVALID",
+      "The shipping webhook payload could not be verified.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -553,7 +790,12 @@ export class ShippingWebhookInvalidException extends ApiException {
 /** Mirrors ProviderAccessDeniedException — `details.reason` distinguishes NOT_A_SELLER / AMBIGUOUS_CONTEXT / CROSS_ORGANIZATION / INSUFFICIENT_ROLE / SELLER_SUSPENDED. */
 export class SellerAccessDeniedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SELLER_ACCESS_DENIED", "You do not have access to this seller organization.", HttpStatus.FORBIDDEN, details);
+    super(
+      "SELLER_ACCESS_DENIED",
+      "You do not have access to this seller organization.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
@@ -572,31 +814,56 @@ export class SellerMembershipNotFoundException extends ApiException {
 /** Spec section 48: "prevent removal of the last active OWNER". */
 export class SellerLastOwnerException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SELLER_LAST_OWNER", "A seller organization must always have at least one active owner.", HttpStatus.CONFLICT, details);
+    super(
+      "SELLER_LAST_OWNER",
+      "A seller organization must always have at least one active owner.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class InventoryMovementInvalidException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVENTORY_MOVEMENT_INVALID", "This inventory adjustment would make stock negative.", HttpStatus.CONFLICT, details);
+    super(
+      "INVENTORY_MOVEMENT_INVALID",
+      "This inventory adjustment would make stock negative.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class MarketplaceProviderUnavailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_PROVIDER_UNAVAILABLE", "This marketplace provider is not available.", HttpStatus.BAD_GATEWAY, details);
+    super(
+      "MARKETPLACE_PROVIDER_UNAVAILABLE",
+      "This marketplace provider is not available.",
+      HttpStatus.BAD_GATEWAY,
+      details,
+    );
   }
 }
 
 export class MarketplaceProviderDisabledException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_PROVIDER_DISABLED", "This marketplace provider is disabled.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "MARKETPLACE_PROVIDER_DISABLED",
+      "This marketplace provider is disabled.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class MarketplaceChannelAccountNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_CHANNEL_ACCOUNT_NOT_FOUND", "Marketplace channel account not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "MARKETPLACE_CHANNEL_ACCOUNT_NOT_FOUND",
+      "Marketplace channel account not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
@@ -609,19 +876,34 @@ export class MarketplaceListingNotFoundException extends ApiException {
 /** Spec section 46 error-UX example verbatim: "Listing mapping required". */
 export class MarketplaceListingMappingRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_LISTING_MAPPING_REQUIRED", "This offer must be mapped to a marketplace listing before it can be synced.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "MARKETPLACE_LISTING_MAPPING_REQUIRED",
+      "This offer must be mapped to a marketplace listing before it can be synced.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class MarketplaceListingCapabilityUnsupportedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_CAPABILITY_UNSUPPORTED", "This marketplace provider does not support this operation.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "MARKETPLACE_CAPABILITY_UNSUPPORTED",
+      "This marketplace provider does not support this operation.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class MarketplaceSyncFailedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_SYNC_FAILED", "The marketplace provider could not complete this operation.", HttpStatus.BAD_GATEWAY, details);
+    super(
+      "MARKETPLACE_SYNC_FAILED",
+      "The marketplace provider could not complete this operation.",
+      HttpStatus.BAD_GATEWAY,
+      details,
+    );
   }
 }
 
@@ -633,14 +915,24 @@ export class MarketplaceOrderNotFoundException extends ApiException {
 
 export class MarketplaceOrderIngestionFailedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_ORDER_INGESTION_FAILED", "This marketplace order could not be processed.", HttpStatus.CONFLICT, details);
+    super(
+      "MARKETPLACE_ORDER_INGESTION_FAILED",
+      "This marketplace order could not be processed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Mirrors ShippingWebhookInvalidException — never mutates state on an unverified payload. */
 export class MarketplaceWebhookInvalidException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_WEBHOOK_INVALID", "The marketplace webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "MARKETPLACE_WEBHOOK_INVALID",
+      "The marketplace webhook payload could not be verified.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -653,13 +945,23 @@ export class NotificationNotFoundException extends ApiException {
 
 export class MessagingProviderUnavailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MESSAGING_PROVIDER_UNAVAILABLE", "This messaging provider is not available.", HttpStatus.BAD_GATEWAY, details);
+    super(
+      "MESSAGING_PROVIDER_UNAVAILABLE",
+      "This messaging provider is not available.",
+      HttpStatus.BAD_GATEWAY,
+      details,
+    );
   }
 }
 
 export class MessagingProviderDisabledException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MESSAGING_PROVIDER_DISABLED", "This messaging provider is disabled.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "MESSAGING_PROVIDER_DISABLED",
+      "This messaging provider is disabled.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -673,20 +975,35 @@ export class MessagingSendFailedException extends ApiException {
 /** Thrown by a real (non-DEV) adapter's production-path methods when MESSAGING_SANDBOX_MODE=production is set without real credentials configured — never a silent fallback to simulation. */
 export class MessagingProviderNotConfiguredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MESSAGING_PROVIDER_NOT_CONFIGURED", "This messaging provider is not configured for production use.", HttpStatus.SERVICE_UNAVAILABLE, details);
+    super(
+      "MESSAGING_PROVIDER_NOT_CONFIGURED",
+      "This messaging provider is not configured for production use.",
+      HttpStatus.SERVICE_UNAVAILABLE,
+      details,
+    );
   }
 }
 
 export class InvalidPhoneNumberException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_PHONE_NUMBER", "This phone number could not be normalized.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "INVALID_PHONE_NUMBER",
+      "This phone number could not be normalized.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 /** Mirrors ShippingWebhookInvalidException/MarketplaceWebhookInvalidException — never mutates state on an unverified payload. */
 export class MessagingWebhookInvalidException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MESSAGING_WEBHOOK_INVALID", "The messaging webhook payload could not be verified.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "MESSAGING_WEBHOOK_INVALID",
+      "The messaging webhook payload could not be verified.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -704,7 +1021,12 @@ export class MessagingWebhookInvalidException extends ApiException {
  */
 export class AdminAccessDeniedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("ADMIN_ACCESS_DENIED", "You do not have access to this admin operation.", HttpStatus.FORBIDDEN, details);
+    super(
+      "ADMIN_ACCESS_DENIED",
+      "You do not have access to this admin operation.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
@@ -730,21 +1052,36 @@ export class SupportCaseNotFoundException extends ApiException {
 /** Thrown by the centralized support-case transition validator — spec: "no arbitrary status PATCH". */
 export class InvalidSupportCaseTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_SUPPORT_CASE_TRANSITION", "This support case status transition is not allowed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_SUPPORT_CASE_TRANSITION",
+      "This support case status transition is not allowed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A user tried to reopen a case that isn't RESOLVED/CLOSED — reopen is a narrower, user-triggered action than the admin transition map allows. */
 export class InvalidSupportCaseReopenException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_SUPPORT_CASE_REOPEN", "This support case cannot be reopened right now.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_SUPPORT_CASE_REOPEN",
+      "This support case cannot be reopened right now.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A user-created support case referenced a household/pet/order/booking they don't have access to — IDOR guard, deliberately generic rather than per-entity to avoid leaking which kind of reference failed. */
 export class SupportCaseInvalidReferenceException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUPPORT_CASE_INVALID_REFERENCE", "That item could not be linked to your support case.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SUPPORT_CASE_INVALID_REFERENCE",
+      "That item could not be linked to your support case.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -763,7 +1100,12 @@ export class DisputeNotFoundException extends ApiException {
 /** Thrown by the centralized dispute transition validator — also the mechanism that makes concurrent-resolution races safe (see DisputeService.transition()'s optimistic status-guarded update). */
 export class InvalidDisputeTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_DISPUTE_TRANSITION", "This dispute status transition is not allowed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_DISPUTE_TRANSITION",
+      "This dispute status transition is not allowed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -775,7 +1117,12 @@ export class TrustCaseNotFoundException extends ApiException {
 
 export class InvalidTrustCaseTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_TRUST_CASE_TRANSITION", "This trust case status transition is not allowed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_TRUST_CASE_TRANSITION",
+      "This trust case status transition is not allowed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -794,14 +1141,24 @@ export class TrustActionNotFoundException extends ApiException {
 /** Appeal.trustActionId is @unique — one appeal per action (spec gives no provision for repeated appeals of the same action this phase). */
 export class AppealAlreadyExistsException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("APPEAL_ALREADY_EXISTS", "An appeal already exists for this trust action.", HttpStatus.CONFLICT, details);
+    super(
+      "APPEAL_ALREADY_EXISTS",
+      "An appeal already exists for this trust action.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Used only by admin-facing lookups (e.g. verification-status overrides) — consumer-facing provider routes have their own not-found handling. */
 export class ProviderOrganizationNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PROVIDER_ORGANIZATION_NOT_FOUND", "Provider organization not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "PROVIDER_ORGANIZATION_NOT_FOUND",
+      "Provider organization not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
@@ -813,21 +1170,36 @@ export class AdminRefundApprovalNotFoundException extends ApiException {
 
 export class InvalidAdminRefundApprovalTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_ADMIN_REFUND_APPROVAL_TRANSITION", "This refund approval status transition is not allowed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_ADMIN_REFUND_APPROVAL_TRANSITION",
+      "This refund approval status transition is not allowed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Two-person control (spec: "a *different* admin than the requester must APPROVE") — never bypassable, including by a SUPER_ADMIN. */
 export class AdminRefundSelfApprovalException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("ADMIN_REFUND_SELF_APPROVAL", "A refund approval must be approved by a different admin than the requester.", HttpStatus.CONFLICT, details);
+    super(
+      "ADMIN_REFUND_SELF_APPROVAL",
+      "A refund approval must be approved by a different admin than the requester.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Thrown when a request tries to jump straight to EXECUTED for an amount at/above ADMIN_REFUND_APPROVAL_THRESHOLD_IRR without a prior APPROVED transition by a different admin. */
 export class AdminRefundApprovalRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("ADMIN_REFUND_APPROVAL_REQUIRED", "This refund amount requires a second admin's approval before it can be executed.", HttpStatus.CONFLICT, details);
+    super(
+      "ADMIN_REFUND_APPROVAL_REQUIRED",
+      "This refund amount requires a second admin's approval before it can be executed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -836,7 +1208,11 @@ export class AdminRefundApprovalRequiredException extends ApiException {
 /** Deliberately identical message/code whether the username doesn't exist or the password is wrong — never lets a caller distinguish the two (enumeration resistance). */
 export class InvalidCredentialsException extends ApiException {
   constructor() {
-    super("INVALID_CREDENTIALS", "The username or password you entered is incorrect.", HttpStatus.UNAUTHORIZED);
+    super(
+      "INVALID_CREDENTIALS",
+      "The username or password you entered is incorrect.",
+      HttpStatus.UNAUTHORIZED,
+    );
   }
 }
 
@@ -862,35 +1238,55 @@ export class CurrentPasswordIncorrectException extends ApiException {
 /** Thrown when GOOGLE_AUTH_ENABLED is false (or credentials are unset) — never a silent fake login. */
 export class GoogleAuthDisabledException extends ApiException {
   constructor() {
-    super("GOOGLE_AUTH_DISABLED", "Google sign-in is not available right now.", HttpStatus.SERVICE_UNAVAILABLE);
+    super(
+      "GOOGLE_AUTH_DISABLED",
+      "Google sign-in is not available right now.",
+      HttpStatus.SERVICE_UNAVAILABLE,
+    );
   }
 }
 
 /** Covers every real-flow failure mode: missing/mismatched state cookie, expired handshake, and (for the callback) a rejected/unverifiable id_token — deliberately one generic code so a caller can't probe which check failed. */
 export class GoogleAuthFailedException extends ApiException {
   constructor() {
-    super("GOOGLE_AUTH_FAILED", "We couldn't complete Google sign-in. Please try again.", HttpStatus.BAD_REQUEST);
+    super(
+      "GOOGLE_AUTH_FAILED",
+      "We couldn't complete Google sign-in. Please try again.",
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
 /** A verified Google/consumer identity that already resolves to a *different* existing User than the one implied by the request — never silently merged. */
 export class AccountLinkingConflictException extends ApiException {
   constructor() {
-    super("ACCOUNT_LINKING_CONFLICT", "This account is already linked to a different sign-in method.", HttpStatus.CONFLICT);
+    super(
+      "ACCOUNT_LINKING_CONFLICT",
+      "This account is already linked to a different sign-in method.",
+      HttpStatus.CONFLICT,
+    );
   }
 }
 
 /** Deliberately generic and only used for the token-*consumption* step (reset submission) — the token-*request* step (forgot-password) never reveals whether the identifier matched anything. */
 export class PasswordResetTokenInvalidException extends ApiException {
   constructor() {
-    super("PASSWORD_RESET_TOKEN_INVALID", "This password reset link is invalid or has expired.", HttpStatus.BAD_REQUEST);
+    super(
+      "PASSWORD_RESET_TOKEN_INVALID",
+      "This password reset link is invalid or has expired.",
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
 /** returnTo must be an internal, same-origin relative path — anything else (a full URL, protocol-relative //host, or a path escaping the app) is rejected rather than silently downgraded to "/", so a caller integrating against this API notices immediately. */
 export class InvalidReturnToException extends ApiException {
   constructor() {
-    super("INVALID_RETURN_TO", "The returnTo destination is not a valid internal path.", HttpStatus.BAD_REQUEST);
+    super(
+      "INVALID_RETURN_TO",
+      "The returnTo destination is not a valid internal path.",
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
@@ -898,28 +1294,48 @@ export class InvalidReturnToException extends ApiException {
 
 export class SellerFinancialAccountNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SELLER_FINANCIAL_ACCOUNT_NOT_FOUND", "Seller financial account not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "SELLER_FINANCIAL_ACCOUNT_NOT_FOUND",
+      "Seller financial account not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 /** Thrown by CommissionRuleService if no rule at all resolves — should be unreachable once the platform default seed row exists, but never silently defaults to 0%. */
 export class CommissionRuleNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("COMMISSION_RULE_NOT_FOUND", "No effective commission rule could be resolved for this order.", HttpStatus.CONFLICT, details);
+    super(
+      "COMMISSION_RULE_NOT_FOUND",
+      "No effective commission rule could be resolved for this order.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Guards SellerFinanceService.attributeOrderEconomics — an Order can only ever be attributed once (its OrderFinancialBreakdown's own existence is the idempotency check). */
 export class OrderAlreadyAttributedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("ORDER_ALREADY_ATTRIBUTED", "This order's financial economics have already been attributed.", HttpStatus.CONFLICT, details);
+    super(
+      "ORDER_ALREADY_ATTRIBUTED",
+      "This order's financial economics have already been attributed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A computed platform commission came out negative — an order-level discount exceeded the recoverable commission, a documented unhandled edge case (see README "Commission model") rather than a silently wrong ledger posting. */
 export class NegativePlatformRevenueException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("NEGATIVE_PLATFORM_REVENUE", "This order's discount exceeds the commission that would normally fund it — not supported this phase.", HttpStatus.CONFLICT, details);
+    super(
+      "NEGATIVE_PLATFORM_REVENUE",
+      "This order's discount exceeds the commission that would normally fund it — not supported this phase.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -932,21 +1348,36 @@ export class SellerSettlementNotFoundException extends ApiException {
 /** Thrown by the centralized settlement transition validator — no arbitrary status PATCH, mirroring InvalidSupportCaseTransitionException's own precedent. */
 export class InvalidSellerSettlementTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_SELLER_SETTLEMENT_TRANSITION", "This settlement status transition is not allowed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_SELLER_SETTLEMENT_TRANSITION",
+      "This settlement status transition is not allowed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Two-person control (spec: "creator/initiator should not approve their own payout") — mirrors AdminRefundSelfApprovalException exactly. */
 export class SellerSettlementSelfApprovalException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SELLER_SETTLEMENT_SELF_APPROVAL", "A settlement must be approved by a different admin than the one who calculated it.", HttpStatus.CONFLICT, details);
+    super(
+      "SELLER_SETTLEMENT_SELF_APPROVAL",
+      "A settlement must be approved by a different admin than the one who calculated it.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** Thrown when payout is attempted on a settlement at/above SETTLEMENT_APPROVAL_THRESHOLD_IRR without a prior APPROVED transition by a different admin — mirrors AdminRefundApprovalRequiredException exactly. */
 export class SellerSettlementApprovalRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SELLER_SETTLEMENT_APPROVAL_REQUIRED", "This settlement amount requires a second admin's approval before payout.", HttpStatus.CONFLICT, details);
+    super(
+      "SELLER_SETTLEMENT_APPROVAL_REQUIRED",
+      "This settlement amount requires a second admin's approval before payout.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -958,20 +1389,35 @@ export class SellerAdjustmentNotFoundException extends ApiException {
 
 export class MarketplaceSettlementStatementNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_SETTLEMENT_STATEMENT_NOT_FOUND", "Marketplace settlement statement not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "MARKETPLACE_SETTLEMENT_STATEMENT_NOT_FOUND",
+      "Marketplace settlement statement not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 export class MarketplaceReconciliationResultNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_RECONCILIATION_RESULT_NOT_FOUND", "Reconciliation result not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "MARKETPLACE_RECONCILIATION_RESULT_NOT_FOUND",
+      "Reconciliation result not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 /** A reconciliation result already marked resolved cannot be resolved again with different data — a reopened finding is a new row, never an edited one (append-only discipline, matching the ledger's own). */
 export class MarketplaceReconciliationAlreadyResolvedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MARKETPLACE_RECONCILIATION_ALREADY_RESOLVED", "This reconciliation finding has already been resolved.", HttpStatus.CONFLICT, details);
+    super(
+      "MARKETPLACE_RECONCILIATION_ALREADY_RESOLVED",
+      "This reconciliation finding has already been resolved.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -984,32 +1430,57 @@ export class ArticleNotFoundException extends ApiException {
 /** Thrown for both "no ArticleLocale row exists for this locale yet" and (on the public read path) "this locale isn't publicly visible" — the public path never distinguishes the two, so an unpublished draft's existence is never leaked (mirrors SupportCase's own "404 for both not-found and not-yours" precedent). */
 export class ArticleLocaleNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("ARTICLE_LOCALE_NOT_FOUND", "This article is not available in the requested locale.", HttpStatus.NOT_FOUND, details);
+    super(
+      "ARTICLE_LOCALE_NOT_FOUND",
+      "This article is not available in the requested locale.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 export class InvalidArticleLifecycleTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_ARTICLE_LIFECYCLE_TRANSITION", "This article status transition is not allowed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_ARTICLE_LIFECYCLE_TRANSITION",
+      "This article status transition is not allowed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A locale+slug pair must be unique across every article (spec: "duplicate localized slug rejected... avoid collisions per locale") — thrown instead of letting a raw P2002 leak. */
 export class DuplicateArticleSlugException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DUPLICATE_ARTICLE_SLUG", "This slug is already used by another article in this locale.", HttpStatus.CONFLICT, details);
+    super(
+      "DUPLICATE_ARTICLE_SLUG",
+      "This slug is already used by another article in this locale.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class DuplicateCategorySlugException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DUPLICATE_CATEGORY_SLUG", "This slug is already used by another category in this locale.", HttpStatus.CONFLICT, details);
+    super(
+      "DUPLICATE_CATEGORY_SLUG",
+      "This slug is already used by another category in this locale.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class DuplicateTagSlugException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DUPLICATE_TAG_SLUG", "This slug is already used by another tag in this locale.", HttpStatus.CONFLICT, details);
+    super(
+      "DUPLICATE_TAG_SLUG",
+      "This slug is already used by another tag in this locale.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1040,19 +1511,34 @@ export class MediaAssetNotFoundException extends ApiException {
 /** A disabled asset can never be attached to new content (spec: "media deleted/disabled") — its existing, already-published usages keep resolving; only new selection is blocked. */
 export class MediaAssetDisabledException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MEDIA_ASSET_DISABLED", "This media asset has been disabled and cannot be attached to new content.", HttpStatus.CONFLICT, details);
+    super(
+      "MEDIA_ASSET_DISABLED",
+      "This media asset has been disabled and cannot be attached to new content.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class UnsupportedMediaTypeException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("UNSUPPORTED_MEDIA_TYPE", "This file type is not supported for CMS media.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "UNSUPPORTED_MEDIA_TYPE",
+      "This file type is not supported for CMS media.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class MediaTooLargeException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("MEDIA_TOO_LARGE", "This file exceeds the maximum allowed size for CMS media.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "MEDIA_TOO_LARGE",
+      "This file exceeds the maximum allowed size for CMS media.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -1065,7 +1551,12 @@ export class ContentVersionNotFoundException extends ApiException {
 /** Thrown when a RichTextDocument fails structural validation (spec: "sanitize rich content"; "prevent arbitrary script injection") — an unrecognized block/mark type or an unsafe link href (not http(s):// or a same-origin relative path) is rejected outright rather than silently stripped, so an editor always knows their save failed rather than silently losing content. */
 export class InvalidRichTextContentException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_RICH_TEXT_CONTENT", "This content contains an unsupported or unsafe structure.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "INVALID_RICH_TEXT_CONTENT",
+      "This content contains an unsupported or unsafe structure.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -1093,71 +1584,126 @@ export class SubscriptionPlanNotFoundException extends ApiException {
 
 export class SubscriptionPlanPriceNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_PLAN_PRICE_NOT_FOUND", "No active price exists for this plan in the requested country/interval.", HttpStatus.NOT_FOUND, details);
+    super(
+      "SUBSCRIPTION_PLAN_PRICE_NOT_FOUND",
+      "No active price exists for this plan in the requested country/interval.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 export class DuplicateSubscriptionPlanCodeException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DUPLICATE_SUBSCRIPTION_PLAN_CODE", "A plan with this code already exists.", HttpStatus.CONFLICT, details);
+    super(
+      "DUPLICATE_SUBSCRIPTION_PLAN_CODE",
+      "A plan with this code already exists.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** spec: "use an explicit state machine... define allowed transitions explicitly." */
 export class InvalidSubscriptionStatusTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_SUBSCRIPTION_STATUS_TRANSITION", "This subscription status transition is not allowed.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_SUBSCRIPTION_STATUS_TRANSITION",
+      "This subscription status transition is not allowed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class SubscriptionPlanNotAvailableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_PLAN_NOT_AVAILABLE", "This plan is not available for subscription right now.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SUBSCRIPTION_PLAN_NOT_AVAILABLE",
+      "This plan is not available for subscription right now.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 /** spec: "one trial per household per relevant plan family unless configured otherwise... no repeated trial abuse." */
 export class SubscriptionTrialNotEligibleException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_TRIAL_NOT_ELIGIBLE", "This household is not eligible for a trial of this plan.", HttpStatus.CONFLICT, details);
+    super(
+      "SUBSCRIPTION_TRIAL_NOT_ELIGIBLE",
+      "This household is not eligible for a trial of this plan.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** spec: "limit checks must happen server-side... API returns typed entitlement/limit error." */
 export class SubscriptionEntitlementLimitExceededException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED", "This action exceeds the current plan's limit.", HttpStatus.CONFLICT, details);
+    super(
+      "SUBSCRIPTION_ENTITLEMENT_LIMIT_EXCEEDED",
+      "This action exceeds the current plan's limit.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A plan feature (BOOLEAN entitlement) the household's current plan does not include. `details.key` names it so the UI can point at the plans that do. */
 export class SubscriptionFeatureNotIncludedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_FEATURE_NOT_INCLUDED", "This feature is not included in the current plan.", HttpStatus.CONFLICT, details);
+    super(
+      "SUBSCRIPTION_FEATURE_NOT_INCLUDED",
+      "This feature is not included in the current plan.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class SubscriptionBillingAttemptNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_BILLING_ATTEMPT_NOT_FOUND", "Billing attempt not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "SUBSCRIPTION_BILLING_ATTEMPT_NOT_FOUND",
+      "Billing attempt not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 export class SubscriptionBillingAttemptNotRefundableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_BILLING_ATTEMPT_NOT_REFUNDABLE", "Only a succeeded billing attempt without an existing refund can be refunded.", HttpStatus.CONFLICT, details);
+    super(
+      "SUBSCRIPTION_BILLING_ATTEMPT_NOT_REFUNDABLE",
+      "Only a succeeded billing attempt without an existing refund can be refunded.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class SubscriptionEntitlementOverrideNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_ENTITLEMENT_OVERRIDE_NOT_FOUND", "Entitlement override not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "SUBSCRIPTION_ENTITLEMENT_OVERRIDE_NOT_FOUND",
+      "Entitlement override not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 export class SubscriptionAlreadyCancelledException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUBSCRIPTION_ALREADY_CANCELLED", "This subscription cannot be cancelled or resumed in its current state.", HttpStatus.CONFLICT, details);
+    super(
+      "SUBSCRIPTION_ALREADY_CANCELLED",
+      "This subscription cannot be cancelled or resumed in its current state.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1173,20 +1719,35 @@ export class MedicalDocumentNotFoundException extends ApiException {
 
 export class UnsupportedDocumentTypeException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("UNSUPPORTED_DOCUMENT_TYPE", "This file type is not supported for medical documents.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "UNSUPPORTED_DOCUMENT_TYPE",
+      "This file type is not supported for medical documents.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class DocumentTooLargeException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DOCUMENT_TOO_LARGE", "This file exceeds the maximum allowed size for a medical document.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "DOCUMENT_TOO_LARGE",
+      "This file exceeds the maximum allowed size for a medical document.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 /** spec: "provider-originated clinical records must not be silently overwritten by owners" — thrown when an owner attempts to directly edit a PROVIDER-sourced row instead of filing a MedicalRecordCorrection. */
 export class ProviderRecordNotOwnerEditableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("PROVIDER_RECORD_NOT_OWNER_EDITABLE", "This record was entered by a provider and cannot be edited directly — add a correction instead.", HttpStatus.FORBIDDEN, details);
+    super(
+      "PROVIDER_RECORD_NOT_OWNER_EDITABLE",
+      "This record was entered by a provider and cannot be edited directly — add a correction instead.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
@@ -1205,7 +1766,12 @@ export class ClinicalVisitNotFoundException extends ApiException {
 /** spec: "Do not allow silent editing after completion." Thrown by any mutation attempted outside the defined ClinicalVisitStatus transition graph. */
 export class InvalidClinicalVisitTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_CLINICAL_VISIT_TRANSITION", "This action is not valid for the visit's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_CLINICAL_VISIT_TRANSITION",
+      "This action is not valid for the visit's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1229,7 +1795,12 @@ export class ReferralNotFoundException extends ApiException {
 
 export class InvalidReferralTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_REFERRAL_TRANSITION", "This action is not valid for the referral's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_REFERRAL_TRANSITION",
+      "This action is not valid for the referral's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1248,7 +1819,12 @@ export class CarePlanItemNotFoundException extends ApiException {
 /** Thrown when a provider action requires canRecordClinicalData and the caller's PetAccessGrant union does not include it — distinct from PetAccessDeniedException so the client can show provider-specific guidance. */
 export class ClinicalRecordingNotAuthorizedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("CLINICAL_RECORDING_NOT_AUTHORIZED", "You are not authorized to record clinical data for this pet.", HttpStatus.FORBIDDEN, details);
+    super(
+      "CLINICAL_RECORDING_NOT_AUTHORIZED",
+      "You are not authorized to record clinical data for this pet.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
@@ -1264,14 +1840,24 @@ export class LostPetIncidentNotFoundException extends ApiException {
 
 export class InvalidLostPetIncidentTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_LOST_PET_INCIDENT_TRANSITION", "This action is not valid for the incident's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_LOST_PET_INCIDENT_TRANSITION",
+      "This action is not valid for the incident's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A household already has an OPEN/SEARCHING/SIGHTING_REPORTED/FOUND incident for this pet — mirrors the partial unique index at the DB level with a typed, friendlier error. */
 export class LostPetIncidentAlreadyOpenException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("LOST_PET_INCIDENT_ALREADY_OPEN", "This pet already has an open lost-pet incident.", HttpStatus.CONFLICT, details);
+    super(
+      "LOST_PET_INCIDENT_ALREADY_OPEN",
+      "This pet already has an open lost-pet incident.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1301,7 +1887,12 @@ export class SupportCampaignNotFoundException extends ApiException {
 
 export class SupportCampaignNotAcceptingDonationsException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUPPORT_CAMPAIGN_NOT_ACCEPTING_DONATIONS", "This campaign is not currently accepting donations.", HttpStatus.CONFLICT, details);
+    super(
+      "SUPPORT_CAMPAIGN_NOT_ACCEPTING_DONATIONS",
+      "This campaign is not currently accepting donations.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1313,14 +1904,24 @@ export class DonationNotFoundException extends ApiException {
 
 export class DonationAmountInvalidException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DONATION_AMOUNT_INVALID", "Donation amount must be a positive whole amount.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "DONATION_AMOUNT_INVALID",
+      "Donation amount must be a positive whole amount.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 /** Thrown by DonationLedgerService.recordPayout when the requested amount exceeds the actual available balance in that specific fund-type account — the enforcement point for "restricted donations must remain restricted" and "no hidden fund movement". */
 export class DonationInsufficientFundBalanceException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DONATION_INSUFFICIENT_FUND_BALANCE", "The requested payout exceeds the available balance for this fund.", HttpStatus.CONFLICT, details);
+    super(
+      "DONATION_INSUFFICIENT_FUND_BALANCE",
+      "The requested payout exceeds the available balance for this fund.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1338,7 +1939,12 @@ export class CommunityCommentNotFoundException extends ApiException {
 
 export class CommunityContentNotVisibleException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("COMMUNITY_CONTENT_NOT_VISIBLE", "This content is no longer visible.", HttpStatus.NOT_FOUND, details);
+    super(
+      "COMMUNITY_CONTENT_NOT_VISIBLE",
+      "This content is no longer visible.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
@@ -1364,19 +1970,34 @@ export class SupportNeedListingNotFoundException extends ApiException {
 /** Thrown when a listing transition isn't legal in SupportNeedService's explicit state table (e.g. publishing an already-CLOSED listing). */
 export class InvalidSupportNeedTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_SUPPORT_NEED_TRANSITION", "That change is not allowed for this listing's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_SUPPORT_NEED_TRANSITION",
+      "That change is not allowed for this listing's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class SupportNeedListingNotEditableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUPPORT_NEED_LISTING_NOT_EDITABLE", "This listing can no longer be edited.", HttpStatus.CONFLICT, details);
+    super(
+      "SUPPORT_NEED_LISTING_NOT_EDITABLE",
+      "This listing can no longer be edited.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class SupportNeedDeadlineInvalidException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUPPORT_NEED_DEADLINE_INVALID", "The deadline must be in the future and at most 180 days away.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "SUPPORT_NEED_DEADLINE_INVALID",
+      "The deadline must be in the future and at most 180 days away.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -1388,28 +2009,60 @@ export class HelpOfferNotFoundException extends ApiException {
 
 export class InvalidHelpOfferTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_HELP_OFFER_TRANSITION", "That change is not allowed for this offer's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_HELP_OFFER_TRANSITION",
+      "That change is not allowed for this offer's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A helper already has an unresolved offer on this listing — they may offer again only once the previous one is resolved. */
 export class DuplicateHelpOfferException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DUPLICATE_HELP_OFFER", "You already have an open offer on this listing.", HttpStatus.CONFLICT, details);
+    super(
+      "DUPLICATE_HELP_OFFER",
+      "You already have an open offer on this listing.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** The caller is authenticated but is not this listing's publisher. */
 export class SupportNeedListingAccessDeniedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("SUPPORT_NEED_LISTING_ACCESS_DENIED", "You do not have access to this listing.", HttpStatus.FORBIDDEN, details);
+    super(
+      "SUPPORT_NEED_LISTING_ACCESS_DENIED",
+      "You do not have access to this listing.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
 /** Thrown by PetLifecycleService when a requested transition isn't a legal move in the explicit state table (e.g. MEMORIAL -> ACTIVE without going through DECEASED first is not modeled). */
 export class InvalidPetLifecycleTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_PET_LIFECYCLE_TRANSITION", "This lifecycle transition is not valid for the pet's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_PET_LIFECYCLE_TRANSITION",
+      "This lifecycle transition is not valid for the pet's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
+  }
+}
+
+/** PT-03: a household owner can correct an accidental LOST/DECEASED state for seven days only. */
+export class PetLifecycleCorrectionWindowExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      "PET_LIFECYCLE_CORRECTION_WINDOW_EXPIRED",
+      "The self-service correction window has expired. Please contact support.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1425,7 +2078,12 @@ export class TripNotFoundException extends ApiException {
 
 export class InvalidTripTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_TRIP_TRANSITION", "This action is not valid for the trip's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_TRIP_TRANSITION",
+      "This action is not valid for the trip's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1438,7 +2096,12 @@ export class TravelRequirementNotFoundException extends ApiException {
 /** Thrown when a TravelRequirement is linked to a MedicalDocument that does not belong to the same pet as the trip — never trust a client-supplied documentId across pets. */
 export class TravelRequirementDocumentMismatchException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("TRAVEL_REQUIREMENT_DOCUMENT_MISMATCH", "This document does not belong to the trip's pet.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "TRAVEL_REQUIREMENT_DOCUMENT_MISMATCH",
+      "This document does not belong to the trip's pet.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -1456,14 +2119,24 @@ export class InsuranceProductNotFoundException extends ApiException {
 
 export class InsuranceApplicationNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INSURANCE_APPLICATION_NOT_FOUND", "Insurance application not found.", HttpStatus.NOT_FOUND, details);
+    super(
+      "INSURANCE_APPLICATION_NOT_FOUND",
+      "Insurance application not found.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 /** Thrown by InsuranceApplicationService when a requested transition isn't in the explicit state table — never a real underwriting decision (spec: "do not simulate underwriting approval"). */
 export class InvalidInsuranceApplicationTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_INSURANCE_APPLICATION_TRANSITION", "This action is not valid for the application's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_INSURANCE_APPLICATION_TRANSITION",
+      "This action is not valid for the application's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1491,7 +2164,12 @@ export class TravelListingAccessDeniedException extends ApiException {
 /** Thrown when a listing transition isn't in TravelListingService's explicit state table. */
 export class InvalidTravelListingTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_TRAVEL_LISTING_TRANSITION", "This action is not valid for the listing's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_TRAVEL_LISTING_TRANSITION",
+      "This action is not valid for the listing's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1509,14 +2187,24 @@ export class TravelBookingNotFoundException extends ApiException {
 
 export class TravelBookingAccessDeniedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("TRAVEL_BOOKING_ACCESS_DENIED", "You do not have access to this booking.", HttpStatus.FORBIDDEN, details);
+    super(
+      "TRAVEL_BOOKING_ACCESS_DENIED",
+      "You do not have access to this booking.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
 /** Thrown when a booking transition isn't in TravelBookingService's explicit state table. */
 export class InvalidTravelBookingTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_TRAVEL_BOOKING_TRANSITION", "This action is not valid for the booking's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_TRAVEL_BOOKING_TRANSITION",
+      "This action is not valid for the booking's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1546,7 +2234,12 @@ export class InvalidTravelDateRangeException extends ApiException {
  */
 export class TravelPetPolicyViolationException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("TRAVEL_PET_POLICY_VIOLATION", "The provider's pet policy does not allow this booking.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "TRAVEL_PET_POLICY_VIOLATION",
+      "The provider's pet policy does not allow this booking.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -1568,7 +2261,12 @@ export class VitalsRecordNotFoundException extends ApiException {
  */
 export class InvalidVitalsValueException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_VITALS_VALUE", "That measurement is outside the range this field can record.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "INVALID_VITALS_VALUE",
+      "That measurement is outside the range this field can record.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
@@ -1587,7 +2285,12 @@ export class PrescriptionNotFoundException extends ApiException {
 /** A prescription is never deleted or silently rewritten — cancelling a cancelled one, or refilling past the authorised count, lands here. */
 export class InvalidPrescriptionTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_PRESCRIPTION_TRANSITION", "This action is not valid for the prescription's current state.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_PRESCRIPTION_TRANSITION",
+      "This action is not valid for the prescription's current state.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1600,7 +2303,12 @@ export class HospitalizationNotFoundException extends ApiException {
 /** Also thrown when a second admission is attempted for a pet that is already admitted — one live stay per patient, enforced by a claim-then-check write. */
 export class InvalidHospitalizationTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_HOSPITALIZATION_TRANSITION", "This action is not valid for the hospitalization's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_HOSPITALIZATION_TRANSITION",
+      "This action is not valid for the hospitalization's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1613,7 +2321,12 @@ export class TreatmentTaskNotFoundException extends ApiException {
 /** A completed task's outcome is a record of care that already happened — it is never re-stated silently. */
 export class InvalidTreatmentTaskTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_TREATMENT_TASK_TRANSITION", "This action is not valid for the task's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_TREATMENT_TASK_TRANSITION",
+      "This action is not valid for the task's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1626,7 +2339,12 @@ export class ClinicalEstimateNotFoundException extends ApiException {
 /** Covers editing a presented estimate, responding twice, and a provider attempting to approve on the owner's behalf. */
 export class InvalidClinicalEstimateTransitionException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("INVALID_CLINICAL_ESTIMATE_TRANSITION", "This action is not valid for the estimate's current status.", HttpStatus.CONFLICT, details);
+    super(
+      "INVALID_CLINICAL_ESTIMATE_TRANSITION",
+      "This action is not valid for the estimate's current status.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1645,7 +2363,12 @@ export class DischargeSummaryNotFoundException extends ApiException {
 /** An ISSUED discharge summary is immutable — the owner has already read it. */
 export class DischargeSummaryAlreadyIssuedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DISCHARGE_SUMMARY_ALREADY_ISSUED", "This discharge summary has already been issued and cannot be changed.", HttpStatus.CONFLICT, details);
+    super(
+      "DISCHARGE_SUMMARY_ALREADY_ISSUED",
+      "This discharge summary has already been issued and cannot be changed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1657,37 +2380,65 @@ export class ProviderClinicalAlertNotFoundException extends ApiException {
 
 export class DuplicateReportException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("DUPLICATE_REPORT", "You have already reported this and it is being reviewed.", HttpStatus.CONFLICT, details);
+    super(
+      "DUPLICATE_REPORT",
+      "You have already reported this and it is being reviewed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class ReportLimitReachedException extends ApiException {
   constructor() {
-    super("REPORT_LIMIT_REACHED", "You have sent many reports today. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS);
+    super(
+      "REPORT_LIMIT_REACHED",
+      "You have sent many reports today. Please try again tomorrow.",
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
   }
 }
 
 export class ReportNotOpenException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("REPORT_NOT_OPEN", "Only open reports can be escalated or dismissed.", HttpStatus.CONFLICT, details);
+    super(
+      "REPORT_NOT_OPEN",
+      "Only open reports can be escalated or dismissed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class TrustActionNotApplicableException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("TRUST_ACTION_NOT_APPLICABLE", "This action can't be applied to the subject in its current state.", HttpStatus.CONFLICT, details);
+    super(
+      "TRUST_ACTION_NOT_APPLICABLE",
+      "This action can't be applied to the subject in its current state.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class TrustSubjectNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("TRUST_SUBJECT_NOT_FOUND", "The subject of this case no longer exists.", HttpStatus.NOT_FOUND, details);
+    super(
+      "TRUST_SUBJECT_NOT_FOUND",
+      "The subject of this case no longer exists.",
+      HttpStatus.NOT_FOUND,
+      details,
+    );
   }
 }
 
 export class ContactUnavailableException extends ApiException {
   constructor() {
-    super("CONTACT_UNAVAILABLE", "This email or phone number can't be used for your account.", HttpStatus.CONFLICT);
+    super(
+      "CONTACT_UNAVAILABLE",
+      "This email or phone number can't be used for your account.",
+      HttpStatus.CONFLICT,
+    );
   }
 }
 
@@ -1699,37 +2450,65 @@ export class ContactUnchangedException extends ApiException {
 
 export class LastHouseholdOwnerException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("LAST_HOUSEHOLD_OWNER", "A household must keep at least one owner. Make another member an owner first.", HttpStatus.CONFLICT, details);
+    super(
+      "LAST_HOUSEHOLD_OWNER",
+      "A household must keep at least one owner. Make another member an owner first.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class AlreadyHouseholdMemberException extends ApiException {
   constructor() {
-    super("ALREADY_HOUSEHOLD_MEMBER", "This person is already a member of your household.", HttpStatus.CONFLICT);
+    super(
+      "ALREADY_HOUSEHOLD_MEMBER",
+      "This person is already a member of your household.",
+      HttpStatus.CONFLICT,
+    );
   }
 }
 
 export class ConsentRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("CONSENT_REQUIRED", "This agreement is required to use PET LIFE. To stop, request account deletion instead.", HttpStatus.BAD_REQUEST, details);
+    super(
+      "CONSENT_REQUIRED",
+      "This agreement is required to use PET LIFE. To stop, request account deletion instead.",
+      HttpStatus.BAD_REQUEST,
+      details,
+    );
   }
 }
 
 export class ExportLimitReachedException extends ApiException {
   constructor() {
-    super("EXPORT_LIMIT_REACHED", "You've requested several exports today. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS);
+    super(
+      "EXPORT_LIMIT_REACHED",
+      "You've requested several exports today. Please try again tomorrow.",
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
   }
 }
 
 export class DeletionBlockedException extends ApiException {
   constructor(details: Record<string, unknown>) {
-    super("DELETION_BLOCKED", "Some things need to be resolved before your account can be deleted.", HttpStatus.CONFLICT, details);
+    super(
+      "DELETION_BLOCKED",
+      "Some things need to be resolved before your account can be deleted.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 export class ReauthenticationRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("REAUTHENTICATION_REQUIRED", "Confirm it's you with your password or the code we sent.", HttpStatus.UNAUTHORIZED, details);
+    super(
+      "REAUTHENTICATION_REQUIRED",
+      "Confirm it's you with your password or the code we sent.",
+      HttpStatus.UNAUTHORIZED,
+      details,
+    );
   }
 }
 
@@ -1754,7 +2533,11 @@ export class InvitationRevokedException extends ApiException {
 
 export class InvitationNotForYouException extends ApiException {
   constructor() {
-    super("INVITATION_NOT_FOR_YOU", "This invitation was sent to a different email or phone number.", HttpStatus.FORBIDDEN);
+    super(
+      "INVITATION_NOT_FOR_YOU",
+      "This invitation was sent to a different email or phone number.",
+      HttpStatus.FORBIDDEN,
+    );
   }
 }
 
@@ -1768,7 +2551,12 @@ export class ClinicStaffAlreadyMemberException extends ApiException {
 /** Clinic OS invitations / removal. `details.reason` says exactly why. */
 export class ClinicInvitationConflictException extends ApiException {
   constructor(details: Record<string, unknown>) {
-    super("CLINIC_INVITATION_CONFLICT", "This invitation can't be used in its current state.", HttpStatus.CONFLICT, details);
+    super(
+      "CLINIC_INVITATION_CONFLICT",
+      "This invitation can't be used in its current state.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
@@ -1780,28 +2568,48 @@ export class ClinicMemberNotRemovableException extends ApiException {
 
 export class ClinicBranchInUseException extends ApiException {
   constructor(details: Record<string, unknown>) {
-    super("CLINIC_BRANCH_IN_USE", "This branch is still in use and can't be removed.", HttpStatus.CONFLICT, details);
+    super(
+      "CLINIC_BRANCH_IN_USE",
+      "This branch is still in use and can't be removed.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** A block between two members stops comments and replies between them (either direction). */
 export class CommunityInteractionBlockedException extends ApiException {
   constructor(details?: Record<string, unknown>) {
-    super("COMMUNITY_INTERACTION_BLOCKED", "You can't interact with this member.", HttpStatus.FORBIDDEN, details);
+    super(
+      "COMMUNITY_INTERACTION_BLOCKED",
+      "You can't interact with this member.",
+      HttpStatus.FORBIDDEN,
+      details,
+    );
   }
 }
 
 /** ERP-A: an access-control change that would break a governance rule (last SUPER_ADMIN, changing your own role, granting above your own reach). */
 export class AdminGovernanceRuleException extends ApiException {
   constructor(details: Record<string, unknown>) {
-    super("ADMIN_GOVERNANCE_RULE", "This change is not allowed by the admin governance rules.", HttpStatus.CONFLICT, details);
+    super(
+      "ADMIN_GOVERNANCE_RULE",
+      "This change is not allowed by the admin governance rules.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 
 /** ERP-A: a setting change based on a version that is no longer current, or a review of a change that is no longer pending. */
 export class SettingChangeConflictException extends ApiException {
   constructor(details: Record<string, unknown>) {
-    super("SETTING_CHANGE_CONFLICT", "This setting changed in the meantime. Reload and try again.", HttpStatus.CONFLICT, details);
+    super(
+      "SETTING_CHANGE_CONFLICT",
+      "This setting changed in the meantime. Reload and try again.",
+      HttpStatus.CONFLICT,
+      details,
+    );
   }
 }
 

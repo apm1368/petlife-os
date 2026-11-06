@@ -5155,6 +5155,11 @@ model CareReminder {
   intervalDays      Int?
   completedAt       DateTime?
   cancelledAt       DateTime?
+  /// PT-12: lifecycle suspension is reversible. We retain the visible state
+  /// that existed before a pet was marked deceased instead of treating this
+  /// safety stop as a member-initiated cancellation.
+  lifecycleSuspendedAt    DateTime?
+  lifecycleSuspendedState String?
   notifiedAt        DateTime?
   version           Int       @default(0)
   parentId          String?   @db.Uuid
@@ -6752,6 +6757,10 @@ model PetLifecycleTransition {
 enum PetLifecycleTransitionSource {
   LOST_PET_INCIDENT
   MANUAL_MEMORIAL
+  /// A household owner's time-bounded correction of an accidental LOST or
+  /// DECEASED transition. This remains distinct from a reunion or memorial
+  /// action so the immutable lifecycle history explains why ACTIVE returned.
+  MANUAL_CORRECTION
 }
 
 enum LostPetIncidentStatus {
