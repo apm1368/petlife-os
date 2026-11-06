@@ -13,7 +13,17 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useSearchParams: () => searchParamsMock,
 }));
-vi.mock("@/services/bookings.service", () => ({ bookingsService: { getById: vi.fn(), cancel: vi.fn(), recur: vi.fn(), pay: vi.fn(), review: vi.fn(), reschedule: vi.fn(), cancelFollowing: vi.fn() } }));
+vi.mock("@/services/bookings.service", () => ({
+  bookingsService: {
+    getById: vi.fn(),
+    cancel: vi.fn(),
+    recur: vi.fn(),
+    pay: vi.fn(),
+    review: vi.fn(),
+    reschedule: vi.fn(),
+    cancelFollowing: vi.fn(),
+  },
+}));
 vi.mock("@/services/services.service", () => ({ servicesService: { getAvailability: vi.fn() } }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn() } }));
 
@@ -106,13 +116,44 @@ const BASE_BOOKING: BookingDto = {
     requiresCareProfile: false,
     requiresHealthBasics: false,
     locationMode: "AT_PROVIDER" as never,
-    isActive: true, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, depositAmount: null, cancellationPolicy: null, freeCancellationHours: 24, lateCancellationRefundPercent: 0, preparationNotes: null, maxPetsPerBooking: 1, requiredResourceType: null, variants: [],
+    isActive: true,
+    bookingMode: "INSTANT" as never,
+    paymentMode: "PAY_AT_PROVIDER" as never,
+    depositAmount: null,
+    cancellationPolicy: null,
+    freeCancellationHours: 24,
+    lateCancellationRefundPercent: 0,
+    preparationNotes: null,
+    maxPetsPerBooking: 1,
+    requiredResourceType: null,
+    variants: [],
   },
   customerAddress: null,
   dropoffAddress: null,
   bookingSeriesId: null,
   petAccess: { scopePreset: "HEALTH_BASICS" as never, expiresAt: "2026-09-11T06:00:00.000Z" },
-  bookingNumber: "PL-B-000001", variantId: null, variantName: null, serviceName: null, bookingMode: "INSTANT" as never, paymentMode: "PAY_AT_PROVIDER" as never, priceAmount: null, discountAmount: 0, depositAmount: null, currency: null, durationMinutes: null, cancellationPolicy: null, freeCancellationHours: null, lateCancellationRefundPercent: null, preparation: null, requestExpiresAt: null, rejectedReason: null, rescheduledFromBookingId: null, rescheduledToBookingId: null, additionalPetIds: [], timeline: [], review: null,
+  bookingNumber: "PL-B-000001",
+  variantId: null,
+  variantName: null,
+  serviceName: null,
+  bookingMode: "INSTANT" as never,
+  paymentMode: "PAY_AT_PROVIDER" as never,
+  priceAmount: null,
+  discountAmount: 0,
+  depositAmount: null,
+  currency: null,
+  durationMinutes: null,
+  cancellationPolicy: null,
+  freeCancellationHours: null,
+  lateCancellationRefundPercent: null,
+  preparation: null,
+  requestExpiresAt: null,
+  rejectedReason: null,
+  rescheduledFromBookingId: null,
+  rescheduledToBookingId: null,
+  additionalPetIds: [],
+  timeline: [],
+  review: null,
 };
 
 describe("BookingDetailView", () => {
@@ -135,7 +176,16 @@ describe("BookingDetailView", () => {
       currency: "IRR",
       cancellationPolicy: "لغو رایگان تا ۲۴ ساعت قبل",
       preparation: "۸ ساعت ناشتا",
-      timeline: [{ id: "e1", fromStatus: null, toStatus: "CONFIRMED" as never, actorType: "USER", reason: null, createdAt: "2026-09-01T00:00:00.000Z" }],
+      timeline: [
+        {
+          id: "e1",
+          fromStatus: null,
+          toStatus: "CONFIRMED" as never,
+          actorType: "USER",
+          reason: null,
+          createdAt: "2026-09-01T00:00:00.000Z",
+        },
+      ],
     });
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
     expect((await screen.findAllByText("قطعی")).length).toBeGreaterThan(0);
@@ -149,7 +199,16 @@ describe("BookingDetailView", () => {
 
   it("previews the policy refund before a paid late cancellation and calls the real cancel endpoint", async () => {
     const soon = new Date(Date.now() + 2 * 3600_000).toISOString();
-    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, startAt: soon, endAt: soon, paymentMode: "FULL_PREPAYMENT" as never, paymentStatus: "PAID" as never, priceAmount: 1_000_000, freeCancellationHours: 24, lateCancellationRefundPercent: 50 });
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      startAt: soon,
+      endAt: soon,
+      paymentMode: "FULL_PREPAYMENT" as never,
+      paymentStatus: "PAID" as never,
+      priceAmount: 1_000_000,
+      freeCancellationHours: 24,
+      lateCancellationRefundPercent: 50,
+    });
     vi.mocked(bookingsService.cancel).mockResolvedValue(BASE_BOOKING);
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
     fireEvent.click(await screen.findByRole("button", { name: "لغو نوبت" }));
@@ -159,7 +218,15 @@ describe("BookingDetailView", () => {
   });
 
   it("offers payment only while awaiting payment and never marks it paid itself", async () => {
-    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "AWAITING_PAYMENT" as never, paymentStatus: "PENDING" as never, paymentMode: "DEPOSIT" as never, depositAmount: 2_000_000, priceAmount: 10_000_000, requestExpiresAt: future });
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      bookingStatus: "AWAITING_PAYMENT" as never,
+      paymentStatus: "PENDING" as never,
+      paymentMode: "DEPOSIT" as never,
+      depositAmount: 2_000_000,
+      priceAmount: 10_000_000,
+      requestExpiresAt: future,
+    });
     vi.mocked(bookingsService.pay).mockResolvedValue(BASE_BOOKING);
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
     fireEvent.click(await screen.findByRole("button", { name: "پرداخت امن" }));
@@ -168,22 +235,50 @@ describe("BookingDetailView", () => {
   });
 
   it("explains a declined request and offers rebooking, not cancellation", async () => {
-    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "REJECTED" as never, rejectedReason: "تعطیلی کلینیک" });
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      bookingStatus: "REJECTED" as never,
+      rejectedReason: "تعطیلی کلینیک",
+    });
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "fa");
     expect(await screen.findByText(/تعطیلی کلینیک/)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "رزرو دوباره" }).getAttribute("href")).toContain("/providers/provider-1/book?serviceId=svc-1");
+    expect(screen.getByRole("link", { name: "رزرو دوباره" }).getAttribute("href")).toContain(
+      "/providers/provider-1/book?serviceId=svc-1",
+    );
     expect(screen.queryByRole("button", { name: "لغو نوبت" })).toBeNull();
   });
 
   it("shows a forbidden state instead of an endless skeleton", async () => {
-    vi.mocked(bookingsService.getById).mockRejectedValue(new ApiError({ code: "PET_ACCESS_DENIED", message: "x", requestId: "r" }, 403));
+    vi.mocked(bookingsService.getById).mockRejectedValue(
+      new ApiError({ code: "PET_ACCESS_DENIED", message: "x", requestId: "r" }, 403),
+    );
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
     expect(await screen.findByText("You do not have access to this booking")).toBeTruthy();
   });
 
-  it("lets a completed booking be reviewed once", async () => {
-    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "COMPLETED" as never, review: null });
+  it("opens the complete three-criterion review only two hours after completion", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      bookingStatus: "COMPLETED" as never,
+      completedAt: new Date(Date.now() - 2 * 3600_000 - 1).toISOString(),
+      review: null,
+    });
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
-    expect(await screen.findByRole("button", { name: "Leave a review" })).toBeTruthy();
+    fireEvent.click(await screen.findByRole("button", { name: "Leave a review" }));
+    expect(screen.getByText("Timeliness")).toBeTruthy();
+    expect(screen.getByText("Care and communication")).toBeTruthy();
+    expect(screen.getByText("Service quality")).toBeTruthy();
+  });
+
+  it("does not offer a review before the two-hour reflection window", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      bookingStatus: "COMPLETED" as never,
+      completedAt: new Date(Date.now() - 90 * 60_000).toISOString(),
+      review: null,
+    });
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+    expect(await screen.findByText(/Rating opens two hours after the service ends/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Leave a review" })).toBeNull();
   });
 });

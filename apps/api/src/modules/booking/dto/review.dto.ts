@@ -11,10 +11,10 @@ export class CreateProviderReviewDto {
   @MaxLength(2000)
   body?: string;
 
-  /** Optional 1–5 dimensions, given explicitly by the reviewer. */
-  @IsOptional() @IsInt() @Min(1) @Max(5) quality?: number;
-  @IsOptional() @IsInt() @Min(1) @Max(5) communication?: number;
-  @IsOptional() @IsInt() @Min(1) @Max(5) timeliness?: number;
+  /** BK-19: each verified service review contains all three 1–5 criteria. */
+  @IsInt() @Min(1) @Max(5) quality!: number;
+  @IsInt() @Min(1) @Max(5) communication!: number;
+  @IsInt() @Min(1) @Max(5) timeliness!: number;
 }
 
 export class RespondToReviewDto {
