@@ -120,3 +120,24 @@
  }
  :root:not([data-theme="light"]) .design-root[data-pattern="admin"] .erp-shell { background:var(--campaign-plum); }
 }
+
+/* Optional simplified display. It is deliberately content-preserving and does not style the
+   approved landing hero. The preference is device-local and independent of locale and theme. */
+:root[data-display-mode="simple"] .design-root:not([data-pattern="landing"]) {
+  --touch-target-min: 48px;
+}
+:root[data-display-mode="simple"] .design-root:not([data-pattern="landing"]) :where(p,li,dd,dt,label,legend,th,td) {
+  line-height: 1.75;
+  font-size: max(1em, 1.0625rem);
+}
+:root[data-display-mode="simple"] .design-root:not([data-pattern="landing"]) :where(button,[role="button"],[role="switch"],input,select,textarea) {
+  min-block-size: 48px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-display-mode="simple"] .design-root:not([data-pattern="landing"]) :where(*, *::before, *::after) {
+    scroll-behavior: auto;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

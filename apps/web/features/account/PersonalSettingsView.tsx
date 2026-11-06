@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/client";
 import { usersService } from "@/services/users.service";
 import { useSessionStore } from "@/stores/session-store";
 import { useThemeStore } from "@/stores/theme-store";
+import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { useLocale } from "next-intl";
 import { AccountPageHeader } from "./AccountNav";
 import { useAccountCopy } from "./account-copy";
@@ -108,6 +109,13 @@ export function PersonalSettingsView() {
           />
         </div>
         <p className="text-metadata text-text-secondary">{t("تاریخ‌ها در فارسی به تقویم شمسی و در انگلیسی به تقویم میلادی نمایش داده می‌شوند.", "Dates show in the Solar Hijri calendar in Persian and the Gregorian calendar in English.")}</p>
+        <div className="security-row">
+          <div>
+            <b>{t("نمایش ساده", "Simple display")}</b>
+            <p>{t("متن خواناتر و کنترل‌های بزرگ‌تر؛ این انتخاب فقط روی همین دستگاه ذخیره می‌شود و به زبان یا پوسته وابسته نیست.", "Clearer text and larger controls. This choice is saved on this device and is independent of language and theme.")}</p>
+          </div>
+          <DisplayModeToggle locale={uiLocale} />
+        </div>
         {saveError ? <p role="alert" className="text-body text-state-urgent">{saveError}</p> : null}
         <div className="flex items-center gap-3">
           <Button type="submit" isLoading={saving} disabled={!name.trim() || !dirty}>{t("ذخیره تغییرات", "Save changes")}</Button>
