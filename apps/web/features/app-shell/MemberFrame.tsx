@@ -8,6 +8,7 @@ import { CircleHelp, IconButton } from "@petlife/ui";
 import { useSessionStore } from "@/stores/session-store";
 import { MobileTabBar, PetContextControl, PrimaryNav } from "@/features/navigation/MemberNavigation";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 import { AccountMenu } from "@/features/account/AccountMenu";
@@ -59,6 +60,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
             <span className="member-header__secondary">
               <LanguageToggle />
               <ThemeToggle />
+              <DisplayModeToggle compact />
             </span>
             {user ? <AccountMenu user={user} /> : null}
           </div>
