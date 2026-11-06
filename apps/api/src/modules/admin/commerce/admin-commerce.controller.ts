@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -20,6 +22,7 @@ import {
 import { Transform, Type } from "class-transformer";
 import {
   IsBoolean,
+  IsArray,
   IsDateString,
   IsEnum,
   IsIn,
@@ -27,6 +30,8 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  ArrayMaxSize,
+  ArrayMinSize,
   Length,
   Max,
   MaxLength,
@@ -135,6 +140,44 @@ class UpdateCatalogProductDto {
   @IsOptional() @IsEnum(ProductStatus) status?: ProductStatus;
 }
 
+const PRODUCT_MEDIA_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+
+/** The browser uploads directly to the signed target, then confirms this
+ * product-scoped key. Images are intentionally not accepted as base64 or
+ * multipart bodies by the API. */
+class ProductMediaUploadTargetDto {
+  @IsIn(PRODUCT_MEDIA_MIME_TYPES)
+  contentType!: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(10 * 1024 * 1024)
+  fileSizeBytes!: number;
+}
+
+class ConfirmProductMediaDto {
+  @IsString()
+  @Length(10, 300)
+  objectKey!: string;
+
+  @IsString()
+  @Length(3, 300)
+  alt!: string;
+
+  @IsOptional()
+  @IsUUID()
+  variantId?: string;
+}
+
+class ReorderProductMediaDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(3)
+  @IsUUID("4", { each: true })
+  mediaIds!: string[];
+}
+
 class ReviewVisibilityDto extends ReasonDto {
   @IsBoolean() hidden!: boolean;
 }
@@ -235,6 +278,57 @@ export class AdminCommerceController {
     @Req() req: AdminAuthedRequest,
   ) {
     return this.commerce.setProductStatus(admin, id, dto.status, dto.reason, req.requestId);
+  }
+
+  /** Product images are a platform-catalog concern, separate from seller
+   * offers. Commerce managers get a short-lived direct-upload target and
+   * then attach up to three scoped images with meaningful alternative text. */
+  @Get("products/:id/media")
+  @RequireAdminPermission("commerce.view")
+  listProductMedia(@Param("id", ParseUUIDPipe) id: string) {
+    return this.commerce.listProductMedia(id);
+  }
+
+  @Post("products/:id/media/upload-url")
+  @RequireAdminPermission("commerce.manage")
+  requestProductMediaUpload(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: ProductMediaUploadTargetDto,
+  ) {
+    return this.commerce.requestProductMediaUpload(id, dto);
+  }
+
+  @Post("products/:id/media")
+  @RequireAdminPermission("commerce.manage")
+  confirmProductMediaUpload(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: ConfirmProductMediaDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.commerce.confirmProductMediaUpload(admin, id, dto, req.requestId);
+  }
+
+  @Put("products/:id/media/order")
+  @RequireAdminPermission("commerce.manage")
+  reorderProductMedia(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: ReorderProductMediaDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.commerce.reorderProductMedia(admin, id, dto.mediaIds, req.requestId);
+  }
+
+  @Delete("products/:id/media/:mediaId")
+  @RequireAdminPermission("commerce.manage")
+  removeProductMedia(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Param("mediaId", ParseUUIDPipe) mediaId: string,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.commerce.removeProductMedia(admin, id, mediaId, req.requestId);
   }
 
   @Get("offers/moderation")
