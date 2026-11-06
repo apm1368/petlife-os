@@ -50,6 +50,19 @@ export const adminCommerceService = {
     }),
   listProducts: (input: { status?: string; q?: string; page?: number }) =>
     apiFetch<PaginatedDto<AdminProductRowDto>>(`/admin/commerce/products${qs(input)}`),
+  listProductCategories: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-categories"),
+  listProductBrands: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-brands"),
+  listCatalogImports: () => apiFetch<Array<{
+    id: string; status: string; submittedUrls: string[]; pagesVisited: number; productsSeen: number;
+    productsImported: number; productsFailed: number; lastError: string | null; createdAt: string;
+    targetCategory: { id: string; name: string };
+    items: Array<{ id: string; sourceItemId: string; sourceUrl: string; sourceSnapshot: { title?: string; brandName?: string | null }; pendingSnapshot?: { title?: string; brandName?: string | null } | null; status: string; errorCode: string | null; errorDetail: string | null; product: { id: string; title: string; status: string } | null }>;
+  }>>("/admin/commerce/catalog-imports"),
+  createCatalogImport: (input: { urls: string[]; categoryId: string; brandId?: string; maxPages: number; maxProducts: number; idempotencyKey: string }) =>
+    apiFetch("/admin/commerce/catalog-imports", { method: "POST", body: input }),
+  cancelCatalogImport: (id: string) => apiFetch(`/admin/commerce/catalog-imports/${id}/cancel`, { method: "POST" }),
+  applyCatalogSourceUpdate: (id: string, reason: string) => apiFetch(`/admin/commerce/catalog-import-items/${id}/apply-source-update`, { method: "POST", body: { reason } }),
+  rejectCatalogSourceUpdate: (id: string, reason: string) => apiFetch(`/admin/commerce/catalog-import-items/${id}/reject-source-update`, { method: "POST", body: { reason } }),
   setProductStatus: (id: string, status: string, reason: string) =>
     apiFetch<{ id: string; status: string }>(`/admin/commerce/products/${id}/status`, {
       method: "PATCH",

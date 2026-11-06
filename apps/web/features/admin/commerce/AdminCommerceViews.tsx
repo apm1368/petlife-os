@@ -122,6 +122,7 @@ export function AdminCommerceNav() {
     { href: `${base}/orders`, fa: "سفارش‌ها", en: "Orders" },
     { href: `${base}/refund-requests`, fa: "درخواست‌های بازگشت وجه", en: "Refund requests" },
     { href: `${base}/products`, fa: "کالاها", en: "Products" },
+    { href: `${base}/catalog-imports`, fa: "واردسازی کاتالوگ", en: "Catalog importer" },
     { href: `${base}/product-moderation`, fa: "تأیید پیشنهادها", en: "Offer moderation" },
     { href: `${base}/reviews`, fa: "نظرات", en: "Reviews" },
     { href: `${base}/inventory`, fa: "موجودی", en: "Inventory" },

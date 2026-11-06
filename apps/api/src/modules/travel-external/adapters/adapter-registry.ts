@@ -1,6 +1,7 @@
 import type { TravelSourceAdapter } from "./travel-source-adapter";
 import { AlibabaPublicWebAdapter } from "./alibaba.adapter";
 import { JabamaPublicWebAdapter } from "./jabama.adapter";
+import { JajigaPublicWebAdapter } from "./jajiga.adapter";
 import { FixtureAdapter } from "./fixture.adapter";
 
 export const TRAVEL_SOURCE_ADAPTERS = Symbol("TRAVEL_SOURCE_ADAPTERS");
@@ -9,6 +10,7 @@ export const TRAVEL_SOURCE_ADAPTERS = Symbol("TRAVEL_SOURCE_ADAPTERS");
 export function buildAdapterRegistry(): Map<string, TravelSourceAdapter> {
   const m = new Map<string, TravelSourceAdapter>([
     ["JABAMA", new JabamaPublicWebAdapter()],
+    ["JAJIGA", new JajigaPublicWebAdapter()],
     ["ALIBABA", new AlibabaPublicWebAdapter()],
   ]);
   if (process.env.NODE_ENV === "test") m.set("FIXTURE", new FixtureAdapter());
