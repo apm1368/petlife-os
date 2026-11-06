@@ -9,6 +9,7 @@ import { PrismaService } from "../src/common/prisma/prisma.service";
 import { InventoryReservationService } from "../src/modules/commerce/checkout/inventory-reservation.service";
 import { CardTransferPaymentService } from "../src/modules/commerce/payments/card-transfer-payment.service";
 import { WalletService } from "../src/modules/commerce/payments/wallet.service";
+import { ZibalGateway } from "../src/modules/commerce/payments/zibal.gateway";
 
 // ConfigModule is instantiated only by createTestApp(), after this module is
 // evaluated. These values are test-only operational configuration, never
@@ -58,7 +59,10 @@ describe("P1-a payment infrastructure (e2e)", () => {
   }
   function client(cookies: Cookies) {
     const cookie = `petlife_session=${cookies.session}; petlife_csrf=${cookies.csrf}`;
-    return { post: (path: string) => request(server).post(path).set("Cookie", cookie).set("x-csrf-token", cookies.csrf!) };
+    return {
+      post: (path: string) => request(server).post(path).set("Cookie", cookie).set("x-csrf-token", cookies.csrf!),
+      patch: (path: string) => request(server).patch(path).set("Cookie", cookie).set("x-csrf-token", cookies.csrf!),
+    };
   }
 
   async function buyer() {
@@ -92,8 +96,8 @@ describe("P1-a payment infrastructure (e2e)", () => {
     return c;
   }
 
-  async function assertAllLedgerTransactionsBalanced() {
-    const transactions = await prisma.ledgerTransaction.findMany({ include: { entries: true } });
+  async function assertLedgerTransactionsBalanced(references: Array<{ referenceType: string; referenceId: string }>) {
+    const transactions = await prisma.ledgerTransaction.findMany({ where: { OR: references.map((reference) => ({ referenceType: reference.referenceType, referenceId: reference.referenceId })) }, include: { entries: true } });
     for (const transaction of transactions) {
       const debits = transaction.entries.filter((entry) => entry.direction === "DEBIT").reduce((sum, entry) => sum + entry.amount, 0);
       const credits = transaction.entries.filter((entry) => entry.direction === "CREDIT").reduce((sum, entry) => sum + entry.amount, 0);
@@ -108,9 +112,63 @@ describe("P1-a payment infrastructure (e2e)", () => {
     expect(await prisma.order.count({ where: { checkoutId } })).toBe(0);
     await b.c.post(`/payments/zibal/verify/${initiated.body.trackId}`).expect(201);
     expect(await prisma.order.count({ where: { checkoutId } })).toBe(1);
-    await assertAllLedgerTransactionsBalanced();
+    await assertLedgerTransactionsBalanced([{ referenceType: "PAYMENT", referenceId: checkoutId }]);
+    const intent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId } });
+    const chargeCountBeforeReplay = await prisma.transaction.count({ where: { paymentIntentId: intent.id, type: "CHARGE", status: "SUCCEEDED" } });
+    const ledgerCountBeforeReplay = await prisma.ledgerTransaction.count({ where: { referenceType: "PAYMENT", referenceId: checkoutId, description: "Payment captured" } });
+    const walletEntryCountBeforeReplay = await prisma.walletEntry.count({ where: { walletAccount: { userId: b.user.id } } });
+    jest.spyOn(app.get(ZibalGateway), "verify").mockResolvedValue({ verified: true, trackId: initiated.body.trackId, refNumber: `replay-${unique()}`, amount: 1_000_000, paidAt: new Date(), resultCode: 201, returnedOrderId: intent.id });
     await b.c.post(`/payments/zibal/verify/${initiated.body.trackId}`).expect(201);
     expect(await prisma.order.count({ where: { checkoutId } })).toBe(1);
+    expect(await prisma.transaction.count({ where: { paymentIntentId: intent.id, type: "CHARGE", status: "SUCCEEDED" } })).toBe(chargeCountBeforeReplay);
+    expect(await prisma.ledgerTransaction.count({ where: { referenceType: "PAYMENT", referenceId: checkoutId, description: "Payment captured" } })).toBe(ledgerCountBeforeReplay);
+    expect(await prisma.walletEntry.count({ where: { walletAccount: { userId: b.user.id } } })).toBe(walletEntryCountBeforeReplay);
+    const observations = await prisma.zibalVerifyObservation.findMany({ where: { zibalPayment: { paymentIntentId: intent.id } }, orderBy: { observedAt: "asc" } });
+    expect(observations).toHaveLength(2);
+    expect(observations[1]).toMatchObject({ trackId: initiated.body.trackId, refNumber: expect.stringMatching(/^replay-/), amount: 1_000_000, resultCode: 201, returnedOrderId: intent.id, verified: true });
+    await expect(prisma.zibalVerifyObservation.update({ where: { id: observations[1]!.id }, data: { refNumber: "attempted-overwrite" } })).rejects.toThrow(/financial evidence is append-only/);
+    expect((await prisma.zibalVerifyObservation.findUniqueOrThrow({ where: { id: observations[1]!.id } })).refNumber).toBe(observations[1]!.refNumber);
+    await assertLedgerTransactionsBalanced([{ referenceType: "PAYMENT", referenceId: checkoutId }]);
+  });
+
+  it("detects a confirmed duplicate only from distinct settlement references and requires an audited second-admin wallet correction", async () => {
+    const b = await buyer();
+    const { checkoutId } = await checkoutFor(b, 1_000_000);
+    const initiated = await b.c.post(`/payments/zibal/checkout/${checkoutId}/initiate`).set("idempotency-key", `zibal-statement-${unique()}`).expect(201);
+    await b.c.post(`/payments/zibal/verify/${initiated.body.trackId}`).expect(201);
+    const intent = await prisma.paymentIntent.findFirstOrThrow({ where: { checkoutId } });
+    const order = await prisma.order.findFirstOrThrow({ where: { checkoutId } });
+    const adminA = await financeAdmin();
+    const adminB = await financeAdmin();
+    const paidAt = new Date().toISOString();
+    const imported = await adminA.post("/admin/finance/reconciliation/zibal-statement").send({ rows: [
+      { merchantReference: intent.id, refNumber: `bank-a-${unique()}`, amount: intent.amount, paidAt },
+      { merchantReference: intent.id, refNumber: `bank-b-${unique()}`, amount: intent.amount, paidAt },
+    ] }).expect(201);
+    expect(imported.body.newRows).toBe(2);
+    const finding = await prisma.financeReconciliationFinding.findUniqueOrThrow({ where: { check_entityType_entityId: { check: "ZIBAL_DUPLICATE_CAPTURE", entityType: "ZibalDuplicateCapture", entityId: intent.id } } });
+    expect(finding).toMatchObject({ outcome: "DUPLICATE", status: "OPEN" });
+    expect(finding.detail).toMatchObject({ paymentIntentId: intent.id, orderId: order.id, userId: b.user.id, amount: intent.amount, surplusAmount: intent.amount, statementCaptures: [expect.objectContaining({ refNumber: expect.stringMatching(/^bank-a-/), amount: intent.amount }), expect.objectContaining({ refNumber: expect.stringMatching(/^bank-b-/), amount: intent.amount })] });
+    const importedLine = await prisma.zibalSettlementStatementLine.findFirstOrThrow({ where: { merchantReference: intent.id } });
+    await expect(prisma.zibalSettlementStatementLine.update({ where: { id: importedLine.id }, data: { refNumber: "attempted-overwrite" } })).rejects.toThrow(/financial evidence is append-only/);
+
+    const approval = await adminA.post(`/admin/finance/reconciliation/findings/${finding.id}/zibal-refund-approval`).send({ reason: "Confirmed by settlement statement", idempotencyKey: `zibal-refund-${unique()}` }).expect(201);
+    await adminA.patch(`/admin/transactions/refund-approvals/${approval.body.id}/approve`).expect(409);
+    await adminB.patch(`/admin/transactions/refund-approvals/${approval.body.id}/approve`).expect(200);
+    const transactionsBeforeExecute = await prisma.transaction.count({ where: { paymentIntentId: intent.id } });
+    const settlementsBeforeExecute = await prisma.sellerSettlement.count({ where: { sellerOrganizationId: order.sellerOrganizationId } });
+    await adminB.patch(`/admin/transactions/refund-approvals/${approval.body.id}/execute`).expect(200);
+
+    const credit = await prisma.walletEntry.findFirstOrThrow({ where: { walletAccount: { userId: b.user.id }, referenceType: "ZIBAL_DUPLICATE_CAPTURE", referenceId: finding.id } });
+    expect(credit).toMatchObject({ balanceType: WalletBalanceType.WITHDRAWABLE, kind: WalletEntryKind.CREDIT, source: WalletCreditSource.REFUND, amount: intent.amount });
+    expect(await prisma.order.findUniqueOrThrow({ where: { id: order.id } })).toMatchObject({ status: order.status, totalAmount: order.totalAmount });
+    expect(await prisma.transaction.count({ where: { paymentIntentId: intent.id } })).toBe(transactionsBeforeExecute);
+    expect(await prisma.sellerSettlement.count({ where: { sellerOrganizationId: order.sellerOrganizationId } })).toBe(settlementsBeforeExecute);
+    const correctionLedger = await prisma.ledgerTransaction.findFirstOrThrow({ where: { referenceType: "WALLET_CREDIT", referenceId: finding.id }, include: { entries: true } });
+    expect(correctionLedger.entries.filter((entry) => entry.direction === "DEBIT").reduce((sum, entry) => sum + entry.amount, 0)).toBe(intent.amount);
+    expect(correctionLedger.entries.filter((entry) => entry.direction === "CREDIT").reduce((sum, entry) => sum + entry.amount, 0)).toBe(intent.amount);
+    expect(await prisma.adminAuditLog.count({ where: { entityId: approval.body.id, action: { in: ["admin_refund_approval.zibal_duplicate_requested", "admin_refund_approval.approved", "admin_refund_approval.executed"] } } })).toBeGreaterThanOrEqual(3);
+    await assertLedgerTransactionsBalanced([{ referenceType: "PAYMENT", referenceId: checkoutId }, { referenceType: "WALLET_CREDIT", referenceId: finding.id }]);
   });
 
   it("reviews card-to-card receipts and credits a surplus to the withdrawable wallet", async () => {
@@ -125,7 +183,7 @@ describe("P1-a payment infrastructure (e2e)", () => {
     expect(await prisma.order.count({ where: { checkoutId } })).toBe(1);
     const wallet = await prisma.walletAccount.findUniqueOrThrow({ where: { userId: b.user.id }, include: { entries: true } });
     expect(wallet.entries.filter((entry) => entry.source === "OVERPAYMENT").reduce((sum, entry) => sum + entry.amount, 0)).toBe(50_000);
-    await assertAllLedgerTransactionsBalanced();
+    await assertLedgerTransactionsBalanced([{ referenceType: "CARD_TRANSFER", referenceId: started.body.id }, { referenceType: "WALLET_CREDIT", referenceId: started.body.id }]);
   });
 
   it("keeps an underpaid receipt pending for its difference window instead of confirming an order", async () => {
@@ -144,7 +202,7 @@ describe("P1-a payment infrastructure (e2e)", () => {
     expect(await cardTransfer.expireOverdue(new Date())).toBe(1);
     const refunded = await prisma.walletEntry.findFirstOrThrow({ where: { referenceId: started.body.id, source: "REFUND" } });
     expect(refunded).toMatchObject({ balanceType: "WITHDRAWABLE", amount: amount - 10_000 });
-    await assertAllLedgerTransactionsBalanced();
+    await assertLedgerTransactionsBalanced([{ referenceType: "CARD_TRANSFER", referenceId: started.body.id }, { referenceType: "WALLET_CREDIT", referenceId: started.body.id }]);
   });
 
   it("uses one idempotent payment intent, reserves stock only at payment start, and releases it after 15 minutes", async () => {
@@ -195,8 +253,10 @@ describe("P1-a payment infrastructure (e2e)", () => {
 
   it("derives separate wallet balances, expires gift credit, and has no persisted wallet balance field", async () => {
     const b = await buyer();
-    await wallet.credit({ userId: b.user.id, balanceType: WalletBalanceType.WITHDRAWABLE, amount: 70_000, source: WalletCreditSource.REFUND, referenceType: "TEST_REFUND", referenceId: randomUUID() });
-    await wallet.credit({ userId: b.user.id, balanceType: WalletBalanceType.PURCHASE_ONLY, amount: 30_000, source: WalletCreditSource.GIFT, referenceType: "TEST_GIFT", referenceId: randomUUID(), expiresAt: new Date(Date.now() + 60_000) });
+    const refundReference = randomUUID();
+    const giftReference = randomUUID();
+    await wallet.credit({ userId: b.user.id, balanceType: WalletBalanceType.WITHDRAWABLE, amount: 70_000, source: WalletCreditSource.REFUND, referenceType: "TEST_REFUND", referenceId: refundReference });
+    await wallet.credit({ userId: b.user.id, balanceType: WalletBalanceType.PURCHASE_ONLY, amount: 30_000, source: WalletCreditSource.GIFT, referenceType: "TEST_GIFT", referenceId: giftReference, expiresAt: new Date(Date.now() + 60_000) });
     expect(await wallet.getBalances(b.user.id)).toEqual({ WITHDRAWABLE: 70_000, PURCHASE_ONLY: 30_000 });
     const gift = await prisma.walletEntry.findFirstOrThrow({ where: { walletAccount: { userId: b.user.id }, source: WalletCreditSource.GIFT } });
     await prisma.walletEntry.update({ where: { id: gift.id }, data: { expiresAt: new Date(0) } });
@@ -205,6 +265,6 @@ describe("P1-a payment infrastructure (e2e)", () => {
     expect(readFileSync("prisma/schema.prisma", "utf8")).toMatch(/model WalletAccount \{[\s\S]*?entries WalletEntry\[\]/);
     expect(readFileSync("prisma/schema.prisma", "utf8")).not.toMatch(/model WalletAccount \{[\s\S]*?\n\s*(?:balance|withdrawableBalance|purchaseOnlyBalance)\s+/);
     expect(await prisma.walletEntry.count({ where: { walletAccount: { userId: b.user.id }, kind: WalletEntryKind.EXPIRY } })).toBe(1);
-    await assertAllLedgerTransactionsBalanced();
+    await assertLedgerTransactionsBalanced([{ referenceType: "WALLET_CREDIT", referenceId: refundReference }, { referenceType: "WALLET_CREDIT", referenceId: giftReference }, { referenceType: "WALLET_EXPIRY", referenceId: gift.id }]);
   });
 });

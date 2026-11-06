@@ -2334,6 +2334,7 @@
         "providers": "Providers",
         "sellers": "Sellers",
         "transactions": "Transactions",
+        "financeReconciliation": "Payment reconciliation",
         "tasks": "Tasks",
         "access": "Access & roles",
         "audit": "Audit",
@@ -2649,6 +2650,34 @@
           "REJECTED": "Rejected",
           "EXECUTED": "Executed"
         }
+      }
+    },
+    "zibalReconciliation": {
+      "title": "Zibal settlement reconciliation",
+      "importTitle": "Import an actual settlement statement",
+      "importHelp": "Paste only rows from the Zibal or bank statement. No payment or refund is inferred from a repeated callback.",
+      "statementRows": "Settlement rows (JSON)",
+      "importAction": "Import and reconcile",
+      "importFailed": "The statement could not be imported. Check the actual statement rows and try again.",
+      "loadFailed": "Reconciliation findings could not be loaded.",
+      "empty": "No confirmed duplicate captures were found.",
+      "anomaly": "Confirmed duplicate capture",
+      "merchantReference": "Merchant reference",
+      "paymentIntent": "Payment intent",
+      "order": "Related order",
+      "orderUnavailable": "No related order found",
+      "amount": "Confirmed surplus",
+      "reason": "Reason for manual wallet refund",
+      "requestRefund": "Request withdrawable-wallet refund",
+      "approve": "Approve as second admin",
+      "executeRefund": "Issue approved refund",
+      "secondAdminOnly": "A different administrator must approve this request.",
+      "actionFailed": "The requested action was not completed. Refresh and verify its status.",
+      "approval": {
+        "REQUESTED": "Awaiting second-admin approval",
+        "APPROVED": "Approved; ready to issue",
+        "REJECTED": "Rejected",
+        "EXECUTED": "Refund issued"
       }
     },
     "tasks": {

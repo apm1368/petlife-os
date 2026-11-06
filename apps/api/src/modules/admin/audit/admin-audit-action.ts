@@ -129,6 +129,8 @@ export type AdminAuditAction =
   | "settlement.released"
   | "settlement.exported"
   | "finance.trace_viewed"
+  | "finance.zibal_settlement_statement.imported"
+  | "admin_refund_approval.zibal_duplicate_requested"
   | "card_transfer.reviewed"
   | "support_case.tags_changed"
   | "support_case.linked"

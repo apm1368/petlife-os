@@ -30,6 +30,27 @@ export class FinanceReconciliationService {
     private readonly audit: AdminAuditLogService,
   ) {}
 
+  async importZibalSettlementLines(admin: ResolvedAdminContext, rows: Array<{ merchantReference: string; refNumber: string; amount: number; paidAt: Date }>) {
+    if (!rows.length || rows.length > 5000) throw new ValidationApiException({ field: "rows", reason: "EXPECTED_1_TO_5000_STATEMENT_ROWS" });
+    for (const [index, row] of rows.entries()) {
+      if (!row.merchantReference.trim() || !row.refNumber.trim() || !Number.isSafeInteger(row.amount) || row.amount <= 0 || !Number.isFinite(row.paidAt.getTime())) {
+        throw new ValidationApiException({ field: `rows.${index}`, reason: "INVALID_SETTLEMENT_STATEMENT_ROW" });
+      }
+    }
+    const imported = await this.prisma.zibalSettlementStatementLine.createMany({
+      data: rows.map((row) => ({ ...row, importedByAdminId: admin.adminUserId })),
+      skipDuplicates: true,
+    });
+    await this.audit.record({
+      adminUserId: admin.adminUserId,
+      action: "finance.zibal_settlement_statement.imported",
+      entityType: "ZIBAL_SETTLEMENT_STATEMENT",
+      reason: "Imported actual Zibal/bank settlement statement rows",
+      afterSummary: { submittedRows: rows.length, newRows: imported.count },
+    });
+    return { submittedRows: rows.length, newRows: imported.count, reconciliation: await this.run({ adminUserId: admin.adminUserId }) };
+  }
+
   // ------------------------------------------------------------------ checks
   private async intentTransaction(): Promise<Result[]> {
     const intents = await this.prisma.paymentIntent.findMany({ take: ROW_CAP, orderBy: { createdAt: "desc" }, include: { transactions: { where: { type: TransactionType.CHARGE, status: TransactionStatus.SUCCEEDED } } } });
@@ -161,6 +182,39 @@ export class FinanceReconciliationService {
     return rows.map((x) => ({ check: ReconciliationCheck.LEDGER_BALANCE, entityType: `${x.ledger}_LEDGER_TRANSACTION`, entityId: x.id, outcome: ReconciliationOutcome.MISMATCH, detail: { ledger: x.ledger, debitMinusCredit: Number(x.diff) } }));
   }
 
+  /** A duplicate capture is actionable only when an imported settlement statement confirms distinct bank references. */
+  private async zibalDuplicateCaptures(): Promise<Result[]> {
+    const lines = await this.prisma.zibalSettlementStatementLine.findMany({ orderBy: [{ merchantReference: "asc" }, { paidAt: "asc" }], take: ROW_CAP });
+    const groups = new Map<string, typeof lines>();
+    for (const line of lines) {
+      const key = `${line.merchantReference}:${line.amount}`;
+      groups.set(key, [...(groups.get(key) ?? []), line]);
+    }
+    const duplicates = [...groups.values()].filter((group) => new Set(group.map((line) => line.refNumber)).size > 1);
+    const results: Result[] = [];
+    for (const group of duplicates) {
+      const merchantReference = group[0]!.merchantReference;
+      const distinctCaptureCount = new Set(group.map((line) => line.refNumber)).size;
+      const intent = await this.prisma.paymentIntent.findUnique({
+        where: { id: merchantReference },
+        include: { checkout: { include: { orders: { select: { id: true, userId: true, status: true } } } }, zibalPayment: { include: { verifyObservations: { orderBy: { observedAt: "asc" } } } } },
+      });
+      const detail = {
+        merchantReference,
+        amount: group[0]!.amount,
+        surplusAmount: group[0]!.amount * (distinctCaptureCount - 1),
+        statementCaptures: group.map((line) => ({ refNumber: line.refNumber, amount: line.amount, paidAt: line.paidAt.toISOString(), importedAt: line.importedAt.toISOString() })),
+        verifyReceipts: intent?.zibalPayment?.verifyObservations.map((receipt) => ({ trackId: receipt.trackId, refNumber: receipt.refNumber, amount: receipt.amount, paidAt: receipt.paidAt?.toISOString() ?? null, resultCode: receipt.resultCode, returnedOrderId: receipt.returnedOrderId, observedAt: receipt.observedAt.toISOString() })) ?? [],
+        paymentIntentId: intent?.id ?? null,
+        orderId: intent?.checkout?.orders[0]?.id ?? null,
+        userId: intent?.checkout?.orders[0]?.userId ?? null,
+        orderIds: intent?.checkout?.orders.map((order) => order.id) ?? [],
+      };
+      results.push({ check: ReconciliationCheck.ZIBAL_DUPLICATE_CAPTURE, entityType: "ZibalDuplicateCapture", entityId: merchantReference, outcome: ReconciliationOutcome.DUPLICATE, detail });
+    }
+    return results;
+  }
+
   // ------------------------------------------------------------------ run + findings
   async run(trigger: { adminUserId?: string } = {}) {
     const ranAt = new Date();
@@ -173,6 +227,7 @@ export class FinanceReconciliationService {
       DONATION_LEDGER: () => this.donationLedger(),
       SETTLEMENT_LEDGER: () => this.settlementLedger(),
       LEDGER_BALANCE: () => this.ledgerBalance(),
+      ZIBAL_DUPLICATE_CAPTURE: () => this.zibalDuplicateCaptures(),
     };
     const summary: Record<string, Record<Outcome, number>> = {};
     let opened = 0;
@@ -214,9 +269,20 @@ export class FinanceReconciliationService {
       this.prisma.financeReconciliationFinding.count({ where }),
       this.prisma.financeReconciliationFinding.groupBy({ by: ["status", "check"], _count: { _all: true } }),
     ]);
-    const tasks = await this.prisma.adminTask.findMany({ where: { dedupeKey: { in: rows.map((r) => r.taskDedupeKey).filter((x): x is string => Boolean(x)) } }, select: { id: true, dedupeKey: true, status: true, assigneeAdminId: true } });
+    const [tasks, zibalRefundApprovals] = await Promise.all([
+      this.prisma.adminTask.findMany({ where: { dedupeKey: { in: rows.map((r) => r.taskDedupeKey).filter((x): x is string => Boolean(x)) } }, select: { id: true, dedupeKey: true, status: true, assigneeAdminId: true } }),
+      this.prisma.adminRefundApproval.findMany({ where: { zibalDuplicateFindingId: { in: rows.map((r) => r.id) } }, select: { id: true, zibalDuplicateFindingId: true, amount: true, reason: true, status: true, requestedByAdminId: true, approvedByAdminId: true, createdAt: true, executedAt: true } }),
+    ]);
+    const items = rows.map((r) => ({
+      ...r,
+      firstDetectedAt: r.firstDetectedAt.toISOString(),
+      lastSeenAt: r.lastSeenAt.toISOString(),
+      resolvedAt: r.resolvedAt?.toISOString() ?? null,
+      task: tasks.find((t) => t.dedupeKey === r.taskDedupeKey) ?? null,
+      zibalRefundApproval: zibalRefundApprovals.find((a) => a.zibalDuplicateFindingId === r.id) ?? null,
+    }));
     return {
-      ...toPaginatedDto(rows.map((r) => ({ ...r, firstDetectedAt: r.firstDetectedAt.toISOString(), lastSeenAt: r.lastSeenAt.toISOString(), resolvedAt: r.resolvedAt?.toISOString() ?? null, task: tasks.find((t) => t.dedupeKey === r.taskDedupeKey) ?? null })), total, page, pageSize),
+      ...toPaginatedDto(items, total, page, pageSize),
       counts: counts.map((c) => ({ status: c.status, check: c.check, count: c._count._all })),
     };
   }

@@ -48,30 +48,57 @@ export class ZibalPaymentService {
   async verify(trackId: string) {
     const payment = await this.prisma.zibalPayment.findUnique({ where: { trackId }, include: { paymentIntent: true } });
     if (!payment) throw new ValidationApiException({ field: "trackId", reason: "ZIBAL_PAYMENT_NOT_FOUND" });
-    if (payment.status === ZibalPaymentStatus.VERIFIED) return { verified: true, checkoutId: payment.paymentIntent.checkoutId, orderIds: await this.checkout.finalizeSuccessfulPayment(payment.paymentIntent.checkoutId) };
+    let remote;
     try {
-      const remote = await this.gateway.verify(trackId);
-      if (!remote.verified) {
-        await this.prisma.$transaction(async (tx) => {
-          await tx.zibalPayment.update({ where: { id: payment.id }, data: { status: ZibalPaymentStatus.FAILED, failedAt: new Date(), failureCode: remote.failureCode, failureMessage: remote.failureMessage } });
-          await tx.paymentIntent.update({ where: { id: payment.paymentIntentId }, data: { status: PaymentIntentStatus.FAILED } });
-        });
-        return { verified: false, checkoutId: payment.paymentIntent.checkoutId, orderIds: [] as string[] };
-      }
-      await this.prisma.$transaction(async (tx) => {
-        const current = await tx.paymentIntent.findUniqueOrThrow({ where: { id: payment.paymentIntentId } });
-        if (current.status === PaymentIntentStatus.CAPTURED) return;
-        await tx.zibalPayment.update({ where: { id: payment.id }, data: { status: ZibalPaymentStatus.VERIFIED, verifiedAt: new Date() } });
-        await tx.paymentIntent.update({ where: { id: current.id }, data: { status: PaymentIntentStatus.CAPTURED, rail: "ZIBAL" } });
-        const attempt = await tx.paymentAttempt.create({ data: { paymentIntentId: current.id, provider: PaymentProvider.ZIBAL, providerReference: trackId, status: PaymentAttemptStatus.SUCCEEDED, completedAt: new Date() } });
-        await tx.transaction.create({ data: { paymentIntentId: current.id, paymentAttemptId: attempt.id, type: TransactionType.CHARGE, amount: current.amount, currency: current.currency, status: TransactionStatus.SUCCEEDED } });
-      });
-      return { verified: true, checkoutId: payment.paymentIntent.checkoutId, orderIds: await this.checkout.finalizeSuccessfulPayment(payment.paymentIntent.checkoutId) };
+      remote = await this.gateway.verify(trackId);
     } catch (error) {
-      await this.prisma.zibalPayment.update({ where: { id: payment.id }, data: { status: ZibalPaymentStatus.UNKNOWN, failureCode: "VERIFY_UNAVAILABLE", failureMessage: error instanceof Error ? error.message : "Unknown verify failure" } });
+      const message = error instanceof Error ? error.message : "Unknown verify failure";
+      await this.prisma.zibalVerifyObservation.create({ data: { zibalPaymentId: payment.id, trackId, verified: false, failureCode: "VERIFY_UNAVAILABLE", failureMessage: message } });
+      if (payment.status !== ZibalPaymentStatus.VERIFIED) {
+        await this.prisma.zibalPayment.update({ where: { id: payment.id }, data: { status: ZibalPaymentStatus.UNKNOWN, failureCode: "VERIFY_UNAVAILABLE", failureMessage: message } });
+      }
       // Unknown is deliberately not FAILED: reconciliation/manual dashboard
       // verification is required before any order, refund or wallet credit.
       throw new ValidationApiException({ field: "zibal", reason: "ZIBAL_VERIFY_UNKNOWN_MANUAL_RECONCILIATION_REQUIRED" });
     }
+
+    // Persist every provider response as immutable evidence, including a replay response (result 201).
+    // The evidence is deliberately separate from payment state: repeated verify is not a new capture.
+    await this.prisma.zibalVerifyObservation.create({ data: {
+      zibalPaymentId: payment.id,
+      trackId,
+      refNumber: remote.refNumber,
+      amount: remote.amount,
+      paidAt: remote.paidAt,
+      resultCode: remote.resultCode,
+      returnedOrderId: remote.returnedOrderId,
+      verified: remote.verified,
+      failureCode: remote.failureCode,
+      failureMessage: remote.failureMessage,
+    } });
+
+    if (!remote.verified) {
+      if (payment.status !== ZibalPaymentStatus.VERIFIED) {
+        await this.prisma.$transaction(async (tx) => {
+          await tx.zibalPayment.update({ where: { id: payment.id }, data: { status: ZibalPaymentStatus.FAILED, failedAt: new Date(), failureCode: remote.failureCode, failureMessage: remote.failureMessage } });
+          await tx.paymentIntent.updateMany({ where: { id: payment.paymentIntentId, status: { not: PaymentIntentStatus.CAPTURED } }, data: { status: PaymentIntentStatus.FAILED } });
+        });
+      }
+      return { verified: false, replay: payment.status === ZibalPaymentStatus.VERIFIED, checkoutId: payment.paymentIntent.checkoutId, orderIds: [] as string[] };
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "payment_intents" WHERE "id" = ${payment.paymentIntentId}::uuid FOR UPDATE`;
+      const current = await tx.paymentIntent.findUniqueOrThrow({ where: { id: payment.paymentIntentId } });
+      await tx.zibalPayment.update({ where: { id: payment.id }, data: { status: ZibalPaymentStatus.VERIFIED, verifiedAt: payment.verifiedAt ?? new Date(), failureCode: null, failureMessage: null } });
+      if (current.status === PaymentIntentStatus.CAPTURED) return;
+      await tx.paymentIntent.update({ where: { id: current.id }, data: { status: PaymentIntentStatus.CAPTURED, rail: "ZIBAL" } });
+      const attempt = await tx.paymentAttempt.create({ data: { paymentIntentId: current.id, provider: PaymentProvider.ZIBAL, providerReference: trackId, status: PaymentAttemptStatus.SUCCEEDED, completedAt: new Date() } });
+      await tx.transaction.create({ data: { paymentIntentId: current.id, paymentAttemptId: attempt.id, type: TransactionType.CHARGE, amount: current.amount, currency: current.currency, status: TransactionStatus.SUCCEEDED } });
+    });
+
+    // finalizeSuccessfulPayment is itself idempotent. Calling it after every successful observation
+    // also recovers a process interruption after capture but before order finalization.
+    return { verified: true, replay: payment.status === ZibalPaymentStatus.VERIFIED, checkoutId: payment.paymentIntent.checkoutId, orderIds: await this.checkout.finalizeSuccessfulPayment(payment.paymentIntent.checkoutId) };
   }
 }

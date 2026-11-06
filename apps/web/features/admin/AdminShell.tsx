@@ -59,6 +59,7 @@ const NAV_ITEMS: {
   { href: "/places", labelKey: "nav.places", permission: "places.view" },
   { href: "/sellers", labelKey: "nav.sellers", permission: ["verification.manage", "customer.view"] },
   { href: "/transactions", labelKey: "nav.transactions", permission: "finance.view" },
+  { href: "/finance-reconciliation", labelKey: "nav.financeReconciliation", permission: "finance.view" },
   { href: "/seller-finance", labelKey: "nav.sellerFinance", permission: "sellerFinance.view" },
   { href: "/reconciliation", labelKey: "nav.reconciliation", permission: "sellerFinance.view" },
   { href: "/content", labelKey: "nav.content", permission: "content.view" },
@@ -108,7 +109,7 @@ const NAV_GROUPS: { key: string; hrefs: string[] }[] = [
       "/places",
     ],
   },
-  { key: "finance", hrefs: ["/transactions", "/seller-finance", "/reconciliation", "/subscriptions"] },
+  { key: "finance", hrefs: ["/transactions", "/finance-reconciliation", "/seller-finance", "/reconciliation", "/subscriptions"] },
   {
     key: "content",
     hrefs: [
