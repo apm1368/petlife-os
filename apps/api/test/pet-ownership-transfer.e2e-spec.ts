@@ -64,8 +64,8 @@ describe("Pet ownership transfer", () => {
     // Ownership is not public: a signed-in stranger learns nothing about who
     // owns somebody else's pet.
     const seen = await stranger.get(`/pet-ownership/pets/${petId}`);
-    expect(seen.status).toBe(200);
-    expect(seen.body).toBeNull();
+    expect(seen.status).toBe(404);
+    expect(seen.body).toMatchObject({ error: { code: "NOT_FOUND" } });
   });
 
   it("does not move the pet until the recipient approves (ID-01)", async () => {

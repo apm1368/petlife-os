@@ -51,8 +51,14 @@ export class PetOwnershipService {
    */
   async getOwnershipForViewer(petId: string, userId: string): Promise<PetOwnershipDto | null> {
     const pet = await this.access.findAccessiblePet(petId, userId);
-    if (!pet) return null;
-    return this.getOwnership(petId);
+    // Use the same not-found response for an unknown pet and one the caller
+    // cannot access. Returning `null` here became an empty HTTP 200 response
+    // in Nest/Express, which both leaked that the pet exists and failed the
+    // cross-domain authorization sweep.
+    if (!pet) throw new NotFoundApiException("Pet");
+    const ownership = await this.getOwnership(petId);
+    if (!ownership) throw new NotFoundApiException("Pet ownership");
+    return ownership;
   }
 
   /** The pet's primary owner. Falls back to the household's earliest owner member for pets created before the ownership table existed. */
