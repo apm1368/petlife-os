@@ -228,6 +228,7 @@ export const DOMAIN_EVENT_TYPES = [
   "LostPetMarkedFound",
   "LostPetReunited",
   "LostPetIncidentClosed",
+  "LostPetRenewalReminderDue",
   "AnimalSupportOrganizationVerified",
   "AnimalSupportOrganizationVerificationSubmitted",
   "AnimalSupportOrganizationVerificationChanged",
