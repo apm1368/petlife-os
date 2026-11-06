@@ -1166,6 +1166,9 @@ model User {
   /// (lowercased) so "Sarah" and "sarah" can never collide.
   username           String?
   normalizedUsername String?           @unique
+  /// Names entered during password registration; optional for accounts created before these fields existed.
+  firstName          String?
+  lastName           String?
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
   passwordHash       String?
