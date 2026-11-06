@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Header, Param, ParseUUIDPipe, Post, Query, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Header, Param, ParseUUIDPipe, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { Type } from "class-transformer";
-import { IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Min } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsDateString, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Min, ValidateNested } from "class-validator";
 import type { Response } from "express";
 import { ReconciliationCheck, ReconciliationFindingStatus } from "@prisma/client";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
@@ -12,6 +12,8 @@ import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { FinanceReconciliationService, RESOLUTIONS } from "./finance-reconciliation.service";
 import { PaymentTraceService, TRACE_TYPES } from "./payment-trace.service";
 import { SettlementOpsService } from "./settlement-ops.service";
+import { AdminRefundService } from "./admin-refund.service";
+import type { AdminAuthedRequest } from "../auth/admin-context.types";
 
 class TraceQueryDto {
   @IsIn(TRACE_TYPES as unknown as string[]) type!: string;
@@ -32,6 +34,20 @@ class ReasonDto {
 class RefundPreviewDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) amount?: number;
 }
+class ZibalSettlementLineDto {
+  @IsString() @Length(1, 128) merchantReference!: string;
+  @IsString() @Length(1, 128) refNumber!: string;
+  @Type(() => Number) @IsInt() @Min(1) amount!: number;
+  @IsDateString() paidAt!: string;
+}
+class ImportZibalSettlementDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(5000) @ValidateNested({ each: true }) @Type(() => ZibalSettlementLineDto)
+  rows!: ZibalSettlementLineDto[];
+}
+class ZibalDuplicateRefundRequestDto {
+  @IsString() @Length(5, 1000) reason!: string;
+  @IsOptional() @IsString() @Length(8, 128) idempotencyKey?: string;
+}
 
 /** ERP-E finance control plane: trace, reconciliation findings, settlement hold/release/breakdown/export, refund preview. */
 @Controller("admin/finance")
@@ -41,6 +57,7 @@ export class AdminFinanceOpsController {
     private readonly trace: PaymentTraceService,
     private readonly reconciliation: FinanceReconciliationService,
     private readonly settlements: SettlementOpsService,
+    private readonly refunds: AdminRefundService,
   ) {}
 
   @Get("trace")
@@ -54,6 +71,18 @@ export class AdminFinanceOpsController {
   @Post("reconciliation/run")
   @RequireAdminPermission("finance.reconcile")
   run(@CurrentAdmin() admin: ResolvedAdminContext) { return this.reconciliation.run({ adminUserId: admin.adminUserId }); }
+
+  @Post("reconciliation/zibal-statement")
+  @RequireAdminPermission("finance.reconcile")
+  importZibalStatement(@CurrentAdmin() admin: ResolvedAdminContext, @Body() dto: ImportZibalSettlementDto) {
+    return this.reconciliation.importZibalSettlementLines(admin, dto.rows.map((row) => ({ ...row, paidAt: new Date(row.paidAt) })));
+  }
+
+  @Post("reconciliation/findings/:id/zibal-refund-approval")
+  @RequireAdminPermission("finance.refund.request")
+  requestZibalDuplicateRefund(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ZibalDuplicateRefundRequestDto, @Req() request: AdminAuthedRequest) {
+    return this.refunds.requestZibalDuplicateRefund(admin, id, dto.reason, dto.idempotencyKey, request.requestId);
+  }
 
   @Post("reconciliation/findings/:id/resolve")
   @RequireAdminPermission("finance.reconcile")

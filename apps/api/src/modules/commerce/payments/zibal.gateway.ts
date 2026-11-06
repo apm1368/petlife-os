@@ -8,7 +8,17 @@ import { PROVIDER_CAPABILITIES } from "./payment-provider-registry";
 import type { PaymentChargeInput, PaymentChargeResult, PaymentGateway, PaymentRefundInput, PaymentRefundResult, PaymentStatusResult } from "./payment-gateway.interface";
 
 export interface ZibalRequestResult { trackId: string; redirectUrl: string; }
-export interface ZibalVerifyResult { verified: boolean; trackId: string; failureCode?: string; failureMessage?: string; }
+export interface ZibalVerifyResult {
+  verified: boolean;
+  trackId: string;
+  refNumber?: string;
+  amount?: number;
+  paidAt?: Date;
+  resultCode?: number;
+  returnedOrderId?: string;
+  failureCode?: string;
+  failureMessage?: string;
+}
 
 /**
  * Zibal's request/verify protocol. Network failure is deliberately surfaced
@@ -41,16 +51,28 @@ export class ZibalGateway implements PaymentGateway {
   }
 
   async verify(trackId: string): Promise<ZibalVerifyResult> {
-    if (this.sandbox) return { verified: true, trackId };
+    if (this.sandbox) return { verified: true, trackId, resultCode: 100 };
     const response = await fetch(`${this.config.get("ZIBAL_API_BASE_URL", { infer: true })}/v1/verify`, {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ merchant: this.config.get("ZIBAL_MERCHANT", { infer: true }), trackId }),
     });
     if (!response.ok) throw new Error(`ZIBAL_VERIFY_HTTP_${response.status}`);
-    const body = await response.json() as { result?: number; message?: string };
-    return body.result === 100 || body.result === 201
-      ? { verified: true, trackId }
-      : { verified: false, trackId, failureCode: `ZIBAL_${body.result ?? "UNKNOWN"}`, failureMessage: body.message };
+    const body = await response.json() as {
+      result?: number; message?: string; refNumber?: string | number; amount?: number; paidAt?: string;
+      orderId?: string | number;
+    };
+    const success = body.result === 100 || body.result === 201;
+    const paidAt = body.paidAt ? new Date(body.paidAt) : undefined;
+    return {
+      verified: success,
+      trackId,
+      ...(body.refNumber !== undefined ? { refNumber: String(body.refNumber) } : {}),
+      ...(Number.isInteger(body.amount) ? { amount: body.amount } : {}),
+      ...(paidAt && Number.isFinite(paidAt.getTime()) ? { paidAt } : {}),
+      ...(body.result !== undefined ? { resultCode: body.result } : {}),
+      ...(body.orderId !== undefined ? { returnedOrderId: String(body.orderId) } : {}),
+      ...(!success ? { failureCode: `ZIBAL_${body.result ?? "UNKNOWN"}`, failureMessage: body.message } : {}),
+    };
   }
 
   // The generic interface remains usable by existing reconciliation code,

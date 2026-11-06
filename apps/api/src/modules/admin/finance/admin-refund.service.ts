@@ -2,7 +2,7 @@ import { ValidationApiException } from "../../../common/errors/api-exception";
 import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { AdminRefundApprovalStatus, Prisma } from "@prisma/client";
+import { AdminRefundApprovalStatus, LedgerAccountCode, Prisma, WalletBalanceType, WalletCreditSource } from "@prisma/client";
 import type { AdminRefundApprovalDto } from "@petlife/types";
 import type { AppEnv } from "../../../config/env";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -17,6 +17,7 @@ import {
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { RefundsService } from "../../commerce/refunds/refunds.service";
+import { WalletService } from "../../commerce/payments/wallet.service";
 
 const APPROVAL_INCLUDE = { requestedByAdmin: { include: { user: true } }, approvedByAdmin: { include: { user: true } } } as const;
 type ApprovalWithRelations = Prisma.AdminRefundApprovalGetPayload<{ include: typeof APPROVAL_INCLUDE }>;
@@ -57,6 +58,7 @@ export class AdminRefundService {
     private readonly config: ConfigService<AppEnv, true>,
     private readonly refunds: RefundsService,
     private readonly settings: PlatformSettingsService,
+    private readonly wallet: WalletService,
   ) {}
 
   private threshold(): number {
@@ -92,6 +94,36 @@ export class AdminRefundService {
 
     await this.events.publish("AdminRefundApprovalRequested", { approvalId: row.id, orderId, amount }, { aggregateType: "AdminRefundApproval", aggregateId: row.id });
     await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.requested", entityType: "ADMIN_REFUND_APPROVAL", entityId: row.id, reason, afterSummary: { orderId, amount }, requestId });
+    return toDto(row);
+  }
+
+  async requestZibalDuplicateRefund(admin: ResolvedAdminContext, findingId: string, reason: string, idempotencyKey?: string, requestId?: string): Promise<AdminRefundApprovalDto> {
+    if (!reason?.trim()) throw new ValidationApiException({ field: "reason", reason: "REASON_REQUIRED" });
+    const finding = await this.prisma.financeReconciliationFinding.findUnique({ where: { id: findingId } });
+    if (!finding || finding.check !== "ZIBAL_DUPLICATE_CAPTURE" || finding.outcome !== "DUPLICATE" || finding.status !== "OPEN") {
+      throw new ValidationApiException({ field: "findingId", reason: "OPEN_ZIBAL_DUPLICATE_ANOMALY_REQUIRED" });
+    }
+    const detail = finding.detail as Record<string, unknown>;
+    const orderId = typeof detail.orderId === "string" ? detail.orderId : undefined;
+    const amount = typeof detail.surplusAmount === "number" ? detail.surplusAmount : undefined;
+    if (!orderId || !Number.isSafeInteger(amount) || amount! <= 0) throw new ValidationApiException({ field: "findingId", reason: "ANOMALY_HAS_NO_REFUNDABLE_ORDER_EVIDENCE" });
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new OrderNotFoundException({ orderId });
+    let row: ApprovalWithRelations;
+    try {
+      row = await this.prisma.adminRefundApproval.create({
+        data: { orderId, amount: amount!, reason: reason.trim(), idempotencyKey, zibalDuplicateFindingId: findingId, requestedByAdminId: admin.adminUserId },
+        include: APPROVAL_INCLUDE,
+      });
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
+      row = idempotencyKey
+        ? await this.prisma.adminRefundApproval.findUniqueOrThrow({ where: { idempotencyKey }, include: APPROVAL_INCLUDE })
+        : await this.prisma.adminRefundApproval.findUniqueOrThrow({ where: { zibalDuplicateFindingId: findingId }, include: APPROVAL_INCLUDE });
+      return toDto(row);
+    }
+    await this.events.publish("AdminRefundApprovalRequested", { approvalId: row.id, orderId, amount: amount!, findingId }, { aggregateType: "AdminRefundApproval", aggregateId: row.id });
+    await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.zibal_duplicate_requested", entityType: "ADMIN_REFUND_APPROVAL", entityId: row.id, reason: reason.trim(), afterSummary: { orderId, amount, findingId }, requestId });
     return toDto(row);
   }
 
@@ -152,7 +184,10 @@ export class AdminRefundService {
       if (existing.status === AdminRefundApprovalStatus.EXECUTED) {
         return tx.adminRefundApproval.findUniqueOrThrow({ where: { id: approvalId }, include: APPROVAL_INCLUDE });
       }
-      if (existing.amount >= this.threshold() && existing.status !== AdminRefundApprovalStatus.APPROVED) {
+      if (existing.zibalDuplicateFindingId && existing.status !== AdminRefundApprovalStatus.APPROVED) {
+        throw new AdminRefundApprovalRequiredException({ approvalId, reason: "SECOND_ADMIN_APPROVAL_REQUIRED" });
+      }
+      if (!existing.zibalDuplicateFindingId && existing.amount >= this.threshold() && existing.status !== AdminRefundApprovalStatus.APPROVED) {
         throw new AdminRefundApprovalRequiredException({ approvalId, threshold: this.threshold() });
       }
       if (existing.status !== AdminRefundApprovalStatus.REQUESTED && existing.status !== AdminRefundApprovalStatus.APPROVED) {
@@ -162,15 +197,31 @@ export class AdminRefundService {
       const order = await tx.order.findUnique({ where: { id: existing.orderId } });
       if (!order || !order.userId) throw new OrderNotFoundException({ orderId: existing.orderId });
 
-      const refund = await this.refunds.request(order.userId, existing.orderId, existing.reason, existing.amount);
+      let refundId: string | null = null;
+      if (existing.zibalDuplicateFindingId) {
+        if (existing.status !== AdminRefundApprovalStatus.APPROVED || !existing.approvedByAdminId || existing.approvedByAdminId === existing.requestedByAdminId) {
+          throw new AdminRefundApprovalRequiredException({ approvalId, reason: "SECOND_ADMIN_APPROVAL_REQUIRED" });
+        }
+        const finding = await tx.financeReconciliationFinding.findUnique({ where: { id: existing.zibalDuplicateFindingId } });
+        const detail = finding?.detail as Record<string, unknown> | undefined;
+        const userId = typeof detail?.userId === "string" ? detail.userId : null;
+        const surplusAmount = typeof detail?.surplusAmount === "number" ? detail.surplusAmount : null;
+        if (!finding || finding.status !== "OPEN" || !userId || surplusAmount !== existing.amount) {
+          throw new ValidationApiException({ field: "findingId", reason: "ANOMALY_EVIDENCE_CHANGED_OR_INCOMPLETE" });
+        }
+        await this.wallet.credit({ userId, balanceType: WalletBalanceType.WITHDRAWABLE, amount: existing.amount, source: WalletCreditSource.REFUND, referenceType: "ZIBAL_DUPLICATE_CAPTURE", referenceId: finding.id, debitAccount: LedgerAccountCode.CASH_GATEWAY_RECEIVABLE }, tx);
+      } else {
+        const refund = await this.refunds.request(order.userId, existing.orderId, existing.reason, existing.amount);
+        refundId = refund.id;
+      }
 
       const row = await tx.adminRefundApproval.update({
         where: { id: approvalId },
-        data: { status: AdminRefundApprovalStatus.EXECUTED, refundId: refund.id, executedAt: new Date() },
+        data: { status: AdminRefundApprovalStatus.EXECUTED, refundId, executedAt: new Date() },
         include: APPROVAL_INCLUDE,
       });
-      await this.events.publish("AdminRefundApprovalExecuted", { approvalId, refundId: refund.id }, { tx, aggregateType: "AdminRefundApproval", aggregateId: approvalId });
-      await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.executed", entityType: "ADMIN_REFUND_APPROVAL", entityId: approvalId, afterSummary: { refundId: refund.id }, requestId, tx });
+      await this.events.publish("AdminRefundApprovalExecuted", { approvalId, refundId, findingId: existing.zibalDuplicateFindingId }, { tx, aggregateType: "AdminRefundApproval", aggregateId: approvalId });
+      await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.executed", entityType: "ADMIN_REFUND_APPROVAL", entityId: approvalId, afterSummary: { refundId, zibalDuplicateFindingId: existing.zibalDuplicateFindingId }, requestId, tx });
       return row;
     });
     return toDto(updated);

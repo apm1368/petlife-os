@@ -67,6 +67,11 @@ export interface TrustQueueItem { kind: "REPORT" | "PLACE_REPORT" | "TRUST_CASE"
 export interface TrustQueueSummary { total: number; byKind: Record<string, number>; bySeverity: Record<string, number>; slaBreached: number; unassigned: number; oldestOpenedAt: string | null }
 /** ERP-A system health. */
 export interface SystemHealth { status: "HEALTHY" | "DEGRADED" | "LAGGING" | "DOWN"; checkedAt: string; components: Record<string, unknown> & { workers?: { name: string; intervalMs: number; lastSucceededAt: string | null; lastFailedAt: string | null; status: string }[] } }
+export interface ZibalDuplicateFinding {
+  id: string; entityId: string; status: string; outcome: string; firstDetectedAt: string; lastSeenAt: string;
+  detail: { merchantReference?: string; amount?: number; surplusAmount?: number; paymentIntentId?: string | null; orderId?: string | null; statementCaptures?: { refNumber: string; amount: number; paidAt: string }[] };
+  zibalRefundApproval: null | { id: string; amount: number; reason: string; status: string; requestedByAdminId: string; approvedByAdminId: string | null; createdAt: string; executedAt: string | null };
+}
 
 export const adminService = {
   getTrustQueue: (pageSize = 30) => apiFetch<PaginatedDto<TrustQueueItem>>(`/admin/trust/queue?pageSize=${pageSize}`),
@@ -166,6 +171,11 @@ export const adminService = {
 
   // Finance / refunds
   getOrderFinancials: (orderId: string) => apiFetch<AdminOrderFinancialsDto>(`/admin/transactions/orders/${orderId}`),
+  listZibalDuplicateFindings: () => apiFetch<PaginatedDto<ZibalDuplicateFinding>>(`/admin/finance/reconciliation/findings?status=OPEN&check=ZIBAL_DUPLICATE_CAPTURE&pageSize=50`),
+  importZibalSettlementStatement: (rows: { merchantReference: string; refNumber: string; amount: number; paidAt: string }[]) =>
+    apiFetch<{ submittedRows: number; newRows: number }>('/admin/finance/reconciliation/zibal-statement', { method: "POST", body: { rows } }),
+  requestZibalDuplicateRefund: (findingId: string, reason: string) =>
+    apiFetch<AdminRefundApprovalDto>(`/admin/finance/reconciliation/findings/${findingId}/zibal-refund-approval`, { method: "POST", body: { reason, idempotencyKey: `zibal-refund:${findingId}` } }),
   requestRefundApproval: (input: { orderId: string; amount: number; reason: string; idempotencyKey?: string }) =>
     apiFetch<AdminRefundApprovalDto>("/admin/transactions/refund-approvals", { method: "POST", body: input, idempotencyKey: input.idempotencyKey }),
   getRefundApproval: (id: string) => apiFetch<AdminRefundApprovalDto>(`/admin/transactions/refund-approvals/${id}`),
