@@ -9,7 +9,7 @@ This checkpoint is factual as of 2026-11-07. It is not a completion or productio
   deployment `github-42091865674-1`. No newer release was verified.
 - Current implementation branch: `feat/public-pet-memorial`, based on the above main SHA.
 - The current branch contains the public memorial implementation and a private publication-asset
-  follow-up. PR #117 head is `e5e9645bad1560f49d01be526529821d80ee9292`; CI run 42348024226
+  follow-up. PR #117 head is `f3057e37e72b51c1b95974729a29e43c6e245a3e`; CI run 42348903818
   passed all steps. Review remains required. The changes are not deployed or LIVE_VERIFIED.
 - Payment-control work remains in a separate dirty worktree at
   `/workspace/petlife-payment-controls-live`; preserve its four modified files and two new
@@ -31,7 +31,7 @@ All listed open PRs require human review or are dependency-blocked. Do not bypas
 | #111 household invitations/multi-pet | #110 head (`codex/finalize-support`) | dependent on #110; retarget and rerun signup/household/permission/booking checks after #110 merges. |
 | #115 simple display mode | `main` | latest checked run 42274224922 succeeded; `REVIEW_REQUIRED`. |
 | #116 public landing articles | `main` | latest checked run 42273854807 succeeded; `REVIEW_REQUIRED`. |
-| #117 consented public memorial workflow | `main` | head e5e9645; CI run 42348024226 green; `REVIEW_REQUIRED`. |
+| #117 consented public memorial workflow | `main` | head f3057e3; CI run 42348903818 green; `REVIEW_REQUIRED`. |
 | #108 PY-19 reconciliation | `main` | `REVIEW_REQUIRED`. |
 | #109 admin role builder | `main` | `REVIEW_REQUIRED`. |
 | #102–106 | `main` | `REVIEW_REQUIRED`; review individually for decision coverage/dependencies. |
@@ -115,7 +115,7 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
 
 ## Next actions
 
-1. Await required human review on #117 head e5e9645. Verify production storage/CDN access rules
+1. Await required human review on #117 head f3057e3. Verify production storage/CDN access rules
    before claiming edge-level revocation; no direct storage-edge privacy claim is made meanwhile.
 2. Recheck #115/#116 checks and request/await authorized reviews; they were green on the latest
    checked runs but remain blocked by required review.
@@ -126,8 +126,8 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
 
 ## Current check-in — 2026-11-07
 
-- Current local branch remains `feat/public-pet-memorial`, clean after commit `e5e9645`, which
-  is pushed to PR #117. GitHub CI run 42348024226 completed successfully on that head. The
+- Current local branch remains `feat/public-pet-memorial`, clean after commit `f3057e3`, which
+  is pushed to PR #117. GitHub CI run 42348903818 completed successfully on that head. The
   current branch does not contain payment-control changes.
 - Latest live query confirms production `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`, deployment
   `github-42091865674-1`, and 15 public products. The 15 comprise ten `qa-b4-*` records plus
@@ -143,6 +143,6 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
   is external and remains unverified; edge-level direct-object privacy is not claimed.
 - Focused checks on the follow-up before push: E2E 23/23 passed; API typecheck passed;
   changed-file ESLint passed; storage/object-key unit tests 11/11 passed; diff check passed.
-  GitHub CI run 42347154530 passed the code changes in 10m50s, and run 42348024226 passed the
-  final handoff head in 11m57s. The payment worktree remains
+  GitHub CI run 42347154530 passed the code changes in 10m50s, run 42348024226 passed the
+  handoff update in 11m57s, and run 42348903818 passed the latest handoff head in 8m04s. The payment worktree remains
   independently dirty and intact.
