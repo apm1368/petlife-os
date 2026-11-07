@@ -1944,6 +1944,20 @@
         "REJECTED": "رد شد",
         "WITHDRAWN": "لغو شد"
       },
+    "fulfillmentStatus": {
+      "PENDING": "در انتظار آماده‌سازی",
+      "AWAITING_SELLER_PREPARATION": "در حال آماده‌سازی",
+      "READY_FOR_PICKUP": "آماده تحویل به پیک",
+      "PICKUP_REQUESTED": "درخواست پیک ثبت شد",
+      "PICKUP_ASSIGNED": "پیک تخصیص داده شد",
+      "ASSIGNED": "پیک تخصیص داده شد",
+      "PICKED_UP": "تحویل به پیک",
+      "IN_TRANSIT": "در مسیر",
+      "OUT_FOR_DELIVERY": "در حال تحویل",
+      "DELIVERED": "تحویل شد",
+      "FAILED": "مشکل در ارسال",
+      "CANCELED": "لغو شد"
+    },
       "refundRequestsNote": "درخواست‌ها را opetlife بررسی می‌کند؛ مبلغ بازپرداخت‌های تأییدشده از تسویه شما کسر می‌شود."
     },
     "offers": {

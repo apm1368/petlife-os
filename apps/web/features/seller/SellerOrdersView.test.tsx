@@ -59,4 +59,14 @@ describe("SellerOrdersView", () => {
       expect(screen.getByText(locale === "de" ? "Zugestellt" : "Entregado")).toBeTruthy();
     },
   );
+
+  it("keeps Persian fulfillment labels in Persian", async () => {
+    vi.mocked(sellerOsService.listOrders).mockResolvedValue(
+      page([{ orderId: "order-1", source: null, externalOrderId: null, status: "CONFIRMED" as never, paymentSource: "PETLIFE_PAYMENT" as never, fulfillmentStatus: "DELIVERED" as never, itemCount: 1, totalAmount: 300_000, currency: "IRR", createdAt: "2026-01-01T00:00:00.000Z" }]),
+    );
+
+    renderWithIntl(<SellerOrdersView />, "fa");
+
+    await waitFor(() => expect(screen.getByText("تحویل شد")).toBeTruthy());
+  });
 });
