@@ -20,7 +20,7 @@
 - Local branch `feat/i18n-de-es`, based on `origin/main`; it extends the public landing route and language selector to Persian, English, German and Spanish. Persian remains RTL; the other languages are LTR. Existing approved landing composition is unchanged. German/Spanish use the existing English-labelled hero artwork because the pavilion text is embedded in the image.
 - Added German and Spanish copy for the landing story and service pavilions, route-preserving locale links, localized number/date formatting helpers, and tests. Current application route localization is intentionally partial: non-landing page families still fall back to English, and account locale persistence remains Persian/English. See `docs/product/localization-rollout.md` for the family-by-family backlog.
 - Verification: web typecheck and lint passed on the current local head. The full web suite passed immediately before the final member-language selector/path-preservation adjustment (229 files, 993 tests); after that adjustment, the affected landing/navigation/locale suite passed again (31 tests). Full E2E, production build, complete locale coverage and deployment were not run/verified.
-- The localization branch has not been pushed or opened as a PR because the available GitHub token is invalid. Local changes are preserved in the current worktree.
+- Localization implementation is committed as `f15617e` and pushed to `origin/feat/i18n-de-es`. A PR has not been opened: `gh` has no usable logged-in account (`GH_TOKEN` is invalid and no keyring login is configured), even though the Git remote can push. Do not bypass that authorization gap; PR creation is the remaining handoff action for this slice.
 
 ## Preserved work
 
@@ -30,7 +30,7 @@
 
 ## Exact next actions
 
-1. Restore valid GitHub CLI authentication, then refresh PR heads, reviews and required checks. Keep #107 first in the release queue; do not bypass protection.
+1. Restore valid GitHub CLI authentication, open a PR for `feat/i18n-de-es`, then refresh PR heads, reviews and required checks. Keep #107 first in the release queue; do not bypass protection.
 2. After review/checks permit, merge #107 through the protected path, deploy via the authorized pipeline, and verify deployed SHA plus the live public API; confirm a legitimate reviewed product remains visible before calling it resolved.
 3. Have an authorized operator inspect original and memorial object access, bucket/CDN caching and shared image consumers. Correct the disclosure if the source remains public; do not revoke shared access without impact/reversibility review.
 4. Push/review the local `feat/i18n-de-es` batch. Continue German/Spanish by page family, including saved preferences, translations, formatting and tests; do not call other page families translated until they are.
