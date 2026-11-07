@@ -4,6 +4,7 @@ import type { TravelBookingDto, TravelListingDetailDto, TravelSearchResultDto, T
 import { renderWithIntl } from "@/test/render-with-intl";
 import { useSessionStore } from "@/stores/session-store";
 import { travelMarketService } from "@/services/travel-marketplace.service";
+import { formatDay } from "@/lib/date/jalali";
 import { TravelResultsView } from "./TravelResultsView";
 import { TravelListingDetailView } from "./TravelListingDetailView";
 import { TravelBookingFlowView } from "./TravelBookingFlowView";
@@ -167,5 +168,15 @@ describe("trip hub", () => {
     expect(screen.getByText(new RegExp(source))).toBeTruthy();
     expect(screen.queryByText("Trip readiness")).toBeNull();
     expect(screen.queryByText("Insurance")).toBeNull();
+  });
+
+  it("keeps the Persian Jalali trip dates and Persian digits", async () => {
+    vi.mocked(travelMarketService.hub).mockResolvedValue(tripHubFixture());
+    renderWithIntl(<TripHubView tripId="t1" />, "fa");
+
+    const jalaliDate = formatDay("2026-10-10", "fa", { weekday: true, year: false });
+    expect(await screen.findByRole("heading", { level: 1, name: "سفر به Shiraz" })).toBeTruthy();
+    expect(screen.getByText((content) => content.includes(jalaliDate))).toBeTruthy();
+    expect(screen.getByText("۰ از ۱ آماده")).toBeTruthy();
   });
 });

@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, HeartPulse, MapPin, ShieldCheck, Skeleton, StatusLabel, Stethoscope } from "@petlife/ui";
 import type { TripHubDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
-import { formatDay } from "@/lib/date/jalali";
+import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { requirementStatusTone } from "@/features/travel/travel-status";
 import { bookingStatusTone } from "./labels";
@@ -33,6 +33,7 @@ function tripDate(value: string, locale: "fa" | "en" | "de" | "es", detail = fal
  */
 export function TripHubView({ tripId }: { tripId: string }) {
   const lang = useLocale() as "fa" | "en" | "de" | "es";
+  const fa = lang === "fa";
   const t = useTranslations("travel");
   const th = useTranslations("travelHub");
   const [hub, setHub] = useState<TripHubDto | null>(null);
@@ -99,7 +100,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
           <section aria-labelledby="h-ready" className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 id="h-ready" className="text-section-title">{th("readiness")}</h2>
-              <span className="text-sm text-text-secondary">{th("readinessCount", { ready: readiness.readyCount, total: readiness.totalCount })}</span>
+              <span className="text-sm text-text-secondary">{th("readinessCount", { ready: fa ? localizeDigits(readiness.readyCount, "fa") : readiness.readyCount, total: fa ? localizeDigits(readiness.totalCount, "fa") : readiness.totalCount })}</span>
             </div>
             {readiness.hasStaleRequirement ? <p className="rounded-md bg-state-attention/10 p-3 text-sm text-state-attention">{th("staleWarning")}</p> : null}
             {readiness.requirements.length === 0 ? <p className="text-sm text-text-secondary">{th("noRequirements")}</p> : (
