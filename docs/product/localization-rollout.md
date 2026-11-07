@@ -10,8 +10,8 @@ German and Spanish cover personal settings, appearance, contact methods, verific
 
 ## Travel localization (PR #152 — current)
 
-The core `travel` namespace has 93/93 keys in fa/en/de/es, including hub, trip creation/detail, readiness, passport, requirements and transitions. External stays have 72/72 keys, marketplace home/search has 34/34 keys, and the legacy trip editor has 9/9 keys. Persian keeps Jalali dates/digits; en/de/es use locale-aware dates/numbers.
+Travel hub, trip creation/detail, readiness/passport, external stays, discovery/search, legacy trip editor and per-trip hub are localized across fa/en/de/es. Namespace parity is 93 core travel keys, 72 external-stay keys, 34 travel-marketplace keys, 9 legacy trip-editor keys and 74 travel-hub keys. Persian preserves Jalali dates and Persian digits; en/de/es use locale-aware Gregorian dates and number formatting. API-supplied names, notes and generic content remain source data.
 
 External prices/availability are source observations, not reservations; source listing links remain the final confirmation path. No partner data, price, availability, SMS delivery or booking is simulated. This translation does not establish a working Jajiga connector.
 
-Trip hub and remaining marketplace results/listings/booking are being finalized in this PR. Other internal page families remain incomplete; generic API errors and any unlisted keys may fall back to English. German/Spanish SMS templates are unavailable. Continue responsive, RTL/LTR, accessibility and visual checks by family.
+Other page families remain incomplete; generic API errors and unlisted keys may fall back to English. German/Spanish SMS templates are unavailable. Continue responsive, RTL/LTR, accessibility and visual checks; this is not a claim of complete product localization.

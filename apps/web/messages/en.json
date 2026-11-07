@@ -5194,6 +5194,18 @@
       "CUSTOM": "Custom interval"
     }
   },
+  "travelHub": {
+    "breadcrumb": "Breadcrumb", "myTrips": "My trips", "notFound": "Trip not found", "loadFailed": "Could not load", "loadError": "Please try again.", "retry": "Try again",
+    "phase": { "PLANNING": "Planning", "UPCOMING": "Upcoming", "IN_PROGRESS": "Travelling", "COMPLETED": "Completed", "CANCELLED": "Cancelled" },
+    "tripTo": "Trip to {destination}", "stays": "Stays", "findStay": "Find a stay", "noStays": "No stays in this trip yet.", "nights": "{count, plural, =0 {No nights} one {# night} other {# nights}}",
+    "readiness": "Trip readiness", "readinessCount": "{ready, number} of {total, number} ready", "staleWarning": "Some requirements have not been re-verified recently; check the official source before travelling.", "noRequirements": "No requirements recorded yet.",
+    "documentState": { "FOUND": "Evidence on file", "MISSING": "Missing", "EXPIRING": "Expiring soon", "EXPIRED": "Expired", "UNKNOWN": "Unknown" },
+    "source": "Source", "noSource": "No source recorded", "verified": "verified", "needsRecheck": "needs re-checking", "officialSource": "Official source", "document": "Document", "editRequirements": "Edit requirements and link documents",
+    "suggestionsTitle": "Suggested for this destination", "suggestionsIntro": "From the requirement library opetlife maintains with sources. Added rows start as required until you provide evidence.", "mayBeOutdated": "may be outdated", "addToChecklist": "Add to checklist", "addFailed": "Could not add.", "activity": "Recent activity", "noActivity": "No activity yet.",
+    "bookingStatus": { "HELD": "Dates held", "DRAFT": "Draft", "AWAITING_PROVIDER": "Awaiting the property", "AWAITING_PAYMENT": "Awaiting payment", "CONFIRMED": "Confirmed", "IN_PROGRESS": "Checked in", "COMPLETED": "Completed", "CANCELLED": "Cancelled", "REJECTED": "Declined", "EXPIRED": "Expired", "REFUNDED": "Refunded", "NO_SHOW": "No-show", "MODIFIED": "Replaced by a change", "UNKNOWN": "Unknown" },
+    "insuranceApplicationStatus": { "DRAFT": "Draft", "SUBMITTED": "Submitted", "UNDER_REVIEW": "Under review", "APPROVED": "Approved", "DECLINED": "Declined", "CANCELLED": "Cancelled", "NEEDS_INFORMATION": "Needs information" },
+    "insurance": "Insurance", "companions": "Trip companions", "noInsurance": "No insurance applications for this pet.", "compareInsurance": "Compare insurance", "places": "Places at the destination", "noPlaces": "No places listed in this city yet.", "allPlaces": "All places", "vets": "Vets at the destination", "noVets": "No vets listed in this city yet.", "travelDocuments": "Travel documents", "linked": "linked", "noDocuments": "No travel or vaccination documents on file.", "documents": "Documents", "supportTrip": "Get help with this trip"
+  },
   "travelMarketplace": {
     "searchAria": "Search stays",
     "heroEyebrow": "Travel with your pet",
