@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, Dialog, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ProductCategoryDto, PromotionDto, PromotionInput, PromotionScopeName } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { formatCount } from "@/lib/number/format-number";
 import { commerceService } from "@/services/commerce.service";
 
 export interface PromotionApi {
@@ -20,57 +21,6 @@ export interface TargetOption {
   label: string;
 }
 
-const L = {
-  title: { fa: "تخفیف‌ها", en: "Promotions" },
-  intro: {
-    fa: "تخفیف‌ها خودکار روی قیمت اعمال می‌شوند؛ کد تخفیف ندارند و با هم جمع نمی‌شوند — برای هر کالا فقط بهترین تخفیف فعال حساب می‌شود. قیمت نهایی همیشه روی سرور محاسبه می‌شود.",
-    en: "Promotions apply automatically — no codes, never stacked: each item gets only its single best live promotion. The final price is always computed on the server.",
-  },
-  create: { fa: "تخفیف جدید", en: "New promotion" },
-  empty: { fa: "هنوز تخفیفی ساخته نشده است", en: "No promotions yet" },
-  name: { fa: "نام (برای مشتری نمایش داده می‌شود)", en: "Name (shown to customers)" },
-  type: { fa: "نوع تخفیف", en: "Discount type" },
-  percent: { fa: "درصدی", en: "Percent" },
-  fixed: { fa: "مبلغ ثابت برای هر واحد", en: "Fixed amount per unit" },
-  value: { fa: "مقدار", en: "Value" },
-  valuePercentHint: { fa: "۱ تا ۹۰ درصد", en: "1 to 90 percent" },
-  valueFixedHint: { fa: "به تومان، برای هر واحد", en: "In Toman, per unit" },
-  cap: { fa: "سقف تخفیف هر واحد (تومان، اختیاری)", en: "Max discount per unit (Toman, optional)" },
-  scope: { fa: "دامنه", en: "Applies to" },
-  scopeALL: { fa: "همه کالاها", en: "All products" },
-  scopeCATEGORY: { fa: "دسته‌بندی‌های انتخاب‌شده", en: "Selected categories" },
-  scopePRODUCT: { fa: "کالاهای انتخاب‌شده", en: "Selected products" },
-  scopeSELLER: { fa: "فروشندگان انتخاب‌شده", en: "Selected sellers" },
-  sellerAll: { fa: "همه کالاهای شما", en: "All of your products" },
-  startsAt: { fa: "شروع", en: "Starts" },
-  endsAt: { fa: "پایان (اختیاری)", en: "Ends (optional)" },
-  usageLimit: { fa: "حداکثر تعداد سفارش (اختیاری)", en: "Max number of orders (optional)" },
-  save: { fa: "ذخیره به‌عنوان پیش‌نویس", en: "Save as draft" },
-  saveChanges: { fa: "ذخیره تغییرات", en: "Save changes" },
-  cancel: { fa: "انصراف", en: "Cancel" },
-  activate: { fa: "فعال‌سازی", en: "Activate" },
-  pause: { fa: "توقف موقت", en: "Pause" },
-  end: { fa: "پایان دادن", en: "End" },
-  edit: { fa: "ویرایش", en: "Edit" },
-  live: { fa: "در حال اجرا", en: "Live" },
-  searchProducts: { fa: "جست‌وجوی کالا", en: "Search products" },
-  selected: { fa: "انتخاب‌شده", en: "Selected" },
-  used: { fa: "استفاده", en: "Used" },
-  given: { fa: "تخفیف داده‌شده", en: "Discount given" },
-  failed: { fa: "ذخیره نشد. دوباره تلاش کنید.", en: "Could not save. Please try again." },
-  pauseToEdit: { fa: "برای تغییر مقدار یا دامنه، ابتدا تخفیف را متوقف کنید.", en: "Pause the promotion before changing its value or scope." },
-  status: {
-    DRAFT: { fa: "پیش‌نویس", en: "Draft" },
-    ACTIVE: { fa: "فعال", en: "Active" },
-    PAUSED: { fa: "متوقف", en: "Paused" },
-    ENDED: { fa: "پایان‌یافته", en: "Ended" },
-  },
-  retry: { fa: "تلاش دوباره", en: "Retry" },
-  loadFailed: { fa: "بارگیری نشد", en: "Could not load" },
-} as const;
-
-type Lang = "fa" | "en";
-
 function toLocalInput(iso: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -79,16 +29,18 @@ function toLocalInput(iso: string | null): string {
 }
 
 /** Native date inputs are Gregorian; the Persian UI always shows the Jalali reading next to them. */
-function jalali(value: string, lang: Lang): string | null {
+function localizedDate(value: string, locale: string): string | null {
   if (!value) return null;
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
-  return new Intl.DateTimeFormat(lang === "fa" ? "fa-IR" : "en-US", { dateStyle: "full", timeStyle: "short" }).format(d);
+  const intlLocale = locale === "fa" ? "fa-IR-u-ca-persian-nu-arabext" : locale;
+  return new Intl.DateTimeFormat(intlLocale, { dateStyle: "full", timeStyle: "short" }).format(d);
 }
 
-function describe(p: PromotionDto, lang: Lang): string {
-  const value = p.discountType === "PERCENT" ? `${p.value.toLocaleString(lang === "fa" ? "fa-IR" : "en-US")}٪` : formatCurrency(p.value, lang);
-  return value;
+function describe(p: PromotionDto, locale: string): string {
+  return p.discountType === "PERCENT"
+    ? `${formatCount(p.value, locale)}${locale === "fa" ? "٪" : "%"}`
+    : formatCurrency(p.value, locale);
 }
 
 /**
@@ -96,7 +48,8 @@ function describe(p: PromotionDto, lang: Lang): string {
  * may target). Shows live state, usage and discount actually given.
  */
 export function PromotionManager({ api, mode, sellerOptions, productOptions }: { api: PromotionApi; mode: "PLATFORM" | "SELLER"; sellerOptions?: TargetOption[]; productOptions?: TargetOption[] }) {
-  const lang = useLocale() as Lang;
+  const locale = useLocale();
+  const t = useTranslations("commerce.promotions");
   const [items, setItems] = useState<PromotionDto[] | null>(null);
   const [error, setError] = useState(false);
   const [editing, setEditing] = useState<PromotionDto | "new" | null>(null);
@@ -124,30 +77,30 @@ export function PromotionManager({ api, mode, sellerOptions, productOptions }: {
       const updated = await api.transition(p.id, status);
       setItems((prev) => prev?.map((x) => (x.id === p.id ? updated : x)) ?? null);
     } catch (err) {
-      setActionError(err instanceof ApiError && err.status < 500 ? err.message : L.failed[lang]);
+      setActionError(err instanceof ApiError && err.status < 500 ? err.message : t("failed"));
     } finally {
       setBusyId(null);
     }
   }
 
-  if (error) return <ErrorRecovery title={L.loadFailed[lang]} message="" retryLabel={L.retry[lang]} onRetry={load} />;
+  if (error) return <ErrorRecovery title={t("loadFailed")} message="" retryLabel={t("retry")} onRetry={load} />;
   if (!items) return <Skeleton className="h-64 w-full" />;
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-2xl">
-          <h1 className="text-page-title text-text-primary">{L.title[lang]}</h1>
-          <p className="text-metadata text-text-secondary">{L.intro[lang]}</p>
+          <h1 className="text-page-title text-text-primary">{t("title")}</h1>
+          <p className="text-metadata text-text-secondary">{t("intro")}</p>
         </div>
-        <Button onClick={() => setEditing("new")}>{L.create[lang]}</Button>
+        <Button onClick={() => setEditing("new")}>{t("create")}</Button>
       </div>
       {actionError ? (
         <p role="alert" className="text-metadata text-state-urgent">
           {actionError}
         </p>
       ) : null}
-      {items.length === 0 ? <EmptyState title={L.empty[lang]} /> : null}
+      {items.length === 0 ? <EmptyState title={t("empty")} /> : null}
       <div className="flex flex-col gap-3">
         {items.map((p) => (
           <ContextSurface key={p.id} className="flex flex-col gap-2">
@@ -155,42 +108,42 @@ export function PromotionManager({ api, mode, sellerOptions, productOptions }: {
               <div>
                 <p className="text-body font-medium text-text-primary">{p.name}</p>
                 <p className="text-metadata text-text-secondary">
-                  {describe(p, lang)} · {L[`scope${p.scope}` as "scopeALL"]?.[lang] ?? p.scope}
-                  {p.maxDiscountAmount ? ` · ${L.cap[lang].split(" (")[0]}: ${formatCurrency(p.maxDiscountAmount, lang)}` : ""}
+                  {describe(p, locale)} · {t(`scope.${p.scope}`)}
+                  {p.maxDiscountAmount ? ` · ${t("capShort")}: ${formatCurrency(p.maxDiscountAmount, locale)}` : ""}
                 </p>
               </div>
               <div className="flex gap-1.5">
-                {p.isLive ? <StatusLabel tone="success">{L.live[lang]}</StatusLabel> : null}
-                <StatusLabel tone={p.status === "ACTIVE" ? "success" : p.status === "PAUSED" ? "attention" : "neutral"}>{L.status[p.status][lang]}</StatusLabel>
+                {p.isLive ? <StatusLabel tone="success">{t("live")}</StatusLabel> : null}
+                <StatusLabel tone={p.status === "ACTIVE" ? "success" : p.status === "PAUSED" ? "attention" : "neutral"}>{t(`status.${p.status}`)}</StatusLabel>
               </div>
             </div>
             <p className="text-metadata text-text-secondary">
-              {jalali(p.startsAt, lang)}
-              {p.endsAt ? ` — ${jalali(p.endsAt, lang)}` : ""}
+              {localizedDate(p.startsAt, locale)}
+              {p.endsAt ? ` — ${localizedDate(p.endsAt, locale)}` : ""}
             </p>
             <p className="text-metadata text-text-secondary">
-              {L.used[lang]}: {p.usageCount.toLocaleString(lang === "fa" ? "fa-IR" : "en-US")}
-              {p.usageLimit ? ` / ${p.usageLimit.toLocaleString(lang === "fa" ? "fa-IR" : "en-US")}` : ""} · {L.given[lang]}: {formatCurrency(p.discountGivenAmount, lang)}
+              {t("used")}: {formatCount(p.usageCount, locale)}
+              {p.usageLimit ? ` / ${formatCount(p.usageLimit, locale)}` : ""} · {t("given")}: {formatCurrency(p.discountGivenAmount, locale)}
             </p>
             <div className="flex flex-wrap gap-2">
               {p.status !== "ENDED" ? (
                 <Button size="sm" variant="ghost" onClick={() => setEditing(p)}>
-                  {L.edit[lang]}
+                  {t("edit")}
                 </Button>
               ) : null}
               {p.status === "DRAFT" || p.status === "PAUSED" ? (
                 <Button size="sm" variant="secondary" isLoading={busyId === p.id} onClick={() => transition(p, "ACTIVE")}>
-                  {L.activate[lang]}
+                  {t("activate")}
                 </Button>
               ) : null}
               {p.status === "ACTIVE" ? (
                 <Button size="sm" variant="secondary" isLoading={busyId === p.id} onClick={() => transition(p, "PAUSED")}>
-                  {L.pause[lang]}
+                  {t("pause")}
                 </Button>
               ) : null}
               {p.status !== "ENDED" ? (
                 <Button size="sm" variant="ghost" disabled={busyId === p.id} onClick={() => transition(p, "ENDED")}>
-                  {L.end[lang]}
+                  {t("end")}
                 </Button>
               ) : null}
             </div>
@@ -201,7 +154,7 @@ export function PromotionManager({ api, mode, sellerOptions, productOptions }: {
       {editing ? (
         <PromotionForm
           key={editing === "new" ? "new" : editing.id}
-          lang={lang}
+          locale={locale}
           mode={mode}
           initial={editing === "new" ? null : editing}
           sellerOptions={sellerOptions ?? []}
@@ -219,7 +172,7 @@ export function PromotionManager({ api, mode, sellerOptions, productOptions }: {
 }
 
 function PromotionForm({
-  lang,
+  locale,
   mode,
   initial,
   sellerOptions,
@@ -227,7 +180,7 @@ function PromotionForm({
   onClose,
   onSave,
 }: {
-  lang: Lang;
+  locale: string;
   mode: "PLATFORM" | "SELLER";
   initial: PromotionDto | null;
   sellerOptions: TargetOption[];
@@ -235,6 +188,7 @@ function PromotionForm({
   onClose: () => void;
   onSave: (input: PromotionInput) => Promise<void>;
 }) {
+  const t = useTranslations("commerce.promotions");
   const [name, setName] = useState(initial?.name ?? "");
   const [discountType, setDiscountType] = useState<"PERCENT" | "FIXED">(initial?.discountType ?? "PERCENT");
   const [value, setValue] = useState(initial ? String(initial.discountType === "FIXED" ? initial.value / 10 : initial.value) : "");
@@ -312,35 +266,35 @@ function PromotionForm({
         await onSave(input);
       }
     } catch (err) {
-      setError(err instanceof ApiError && err.status < 500 ? err.message : L.failed[lang]);
+      setError(err instanceof ApiError && err.status < 500 ? err.message : t("failed"));
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Dialog open onClose={onClose} title={initial ? initial.name : L.create[lang]}>
+    <Dialog open onClose={onClose} title={initial ? initial.name : t("create")}>
       <div className="flex max-h-[70dvh] flex-col gap-3 overflow-y-auto">
-        <Input label={L.name[lang]} value={name} maxLength={120} onChange={(e) => setName(e.target.value)} />
-        {priceLocked ? <p className="text-metadata text-state-attention">{L.pauseToEdit[lang]}</p> : null}
+        <Input label={t("name")} value={name} maxLength={120} onChange={(e) => setName(e.target.value)} />
+        {priceLocked ? <p className="text-metadata text-state-attention">{t("pauseToEdit")}</p> : null}
         <Select
-          label={L.type[lang]}
+          label={t("type")}
           disabled={priceLocked}
           value={discountType}
           onChange={(e) => setDiscountType(e.target.value as "PERCENT" | "FIXED")}
           options={[
-            { value: "PERCENT", label: L.percent[lang] },
-            { value: "FIXED", label: L.fixed[lang] },
+            { value: "PERCENT", label: t("percent") },
+            { value: "FIXED", label: t("fixed") },
           ]}
         />
-        <Input label={L.value[lang]} hint={discountType === "PERCENT" ? L.valuePercentHint[lang] : L.valueFixedHint[lang]} inputMode="numeric" disabled={priceLocked} value={value} onChange={(e) => setValue(e.target.value.replace(/[^\d.]/g, ""))} />
-        {discountType === "PERCENT" ? <Input label={L.cap[lang]} inputMode="numeric" disabled={priceLocked} value={cap} onChange={(e) => setCap(e.target.value.replace(/[^\d]/g, ""))} /> : null}
+        <Input label={t("value")} hint={discountType === "PERCENT" ? t("valuePercentHint") : t("valueFixedHint")} inputMode="numeric" disabled={priceLocked} value={value} onChange={(e) => setValue(e.target.value.replace(/[^\d.]/g, ""))} />
+        {discountType === "PERCENT" ? <Input label={t("cap")} inputMode="numeric" disabled={priceLocked} value={cap} onChange={(e) => setCap(e.target.value.replace(/[^\d]/g, ""))} /> : null}
         <Select
-          label={L.scope[lang]}
+          label={t("scope")}
           disabled={priceLocked}
           value={scope}
           onChange={(e) => setScope(e.target.value as PromotionScopeName)}
-          options={scopes.map((s) => ({ value: s, label: s === "ALL" && mode === "SELLER" ? L.sellerAll[lang] : L[`scope${s}` as "scopeALL"][lang] }))}
+          options={scopes.map((s) => ({ value: s, label: s === "ALL" && mode === "SELLER" ? t("sellerAll") : t(`scope.${s}`) }))}
         />
         {scope === "CATEGORY" ? (
           <fieldset className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-md border border-border-subtle p-2" disabled={priceLocked}>
@@ -355,10 +309,10 @@ function PromotionForm({
         ) : null}
         {scope === "PRODUCT" ? (
           <div className="flex flex-col gap-2">
-            <Input label={L.searchProducts[lang]} value={productQuery} disabled={priceLocked} onChange={(e) => setProductQuery(e.target.value)} />
+            <Input label={t("searchProducts")} value={productQuery} disabled={priceLocked} onChange={(e) => setProductQuery(e.target.value)} />
             {productIds.length ? (
               <p className="text-metadata text-text-secondary">
-                {L.selected[lang]}: {productIds.map((id) => knownProducts[id] ?? id.slice(0, 8)).join(lang === "fa" ? "، " : ", ")}
+                {t("selected")}: {productIds.map((id) => knownProducts[id] ?? id.slice(0, 8)).join(locale === "fa" ? "، " : ", ")}
               </p>
             ) : null}
             <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
@@ -381,9 +335,9 @@ function PromotionForm({
             ))}
           </fieldset>
         ) : null}
-        <Input label={L.startsAt[lang]} type="datetime-local" disabled={priceLocked} value={startsAt} hint={jalali(startsAt, lang) ?? undefined} onChange={(e) => setStartsAt(e.target.value)} />
-        <Input label={L.endsAt[lang]} type="datetime-local" value={endsAt} hint={jalali(endsAt, lang) ?? undefined} onChange={(e) => setEndsAt(e.target.value)} />
-        <Input label={L.usageLimit[lang]} inputMode="numeric" value={usageLimit} onChange={(e) => setUsageLimit(e.target.value.replace(/[^\d]/g, ""))} />
+        <Input label={t("startsAt")} type="datetime-local" disabled={priceLocked} value={startsAt} hint={localizedDate(startsAt, locale) ?? undefined} onChange={(e) => setStartsAt(e.target.value)} />
+        <Input label={t("endsAt")} type="datetime-local" value={endsAt} hint={localizedDate(endsAt, locale) ?? undefined} onChange={(e) => setEndsAt(e.target.value)} />
+        <Input label={t("usageLimit")} inputMode="numeric" value={usageLimit} onChange={(e) => setUsageLimit(e.target.value.replace(/[^\d]/g, ""))} />
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
             {error}
@@ -391,10 +345,10 @@ function PromotionForm({
         ) : null}
         <div className="flex gap-2">
           <Button variant="ghost" onClick={onClose}>
-            {L.cancel[lang]}
+            {t("cancel")}
           </Button>
           <Button className="flex-1" disabled={!valid} isLoading={saving} onClick={submit}>
-            {initial ? L.saveChanges[lang] : L.save[lang]}
+            {initial ? t("saveChanges") : t("save")}
           </Button>
         </div>
       </div>

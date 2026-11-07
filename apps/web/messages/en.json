@@ -1150,6 +1150,10 @@
     }
   },
   "commerce": {
+    "promotions": {
+      "title": "Promotions", "intro": "Promotions apply automatically — no codes, never stacked: each item gets only its single best live promotion. The final price is always computed on the server.", "create": "New promotion", "empty": "No promotions yet", "name": "Name (shown to customers)", "type": "Discount type", "percent": "Percent", "fixed": "Fixed amount per unit", "value": "Value", "valuePercentHint": "1 to 90 percent", "valueFixedHint": "In Toman, per unit", "cap": "Max discount per unit (Toman, optional)", "capShort": "Max discount", "scope": "Applies to", "sellerAll": "All of your products", "startsAt": "Starts", "endsAt": "Ends (optional)", "usageLimit": "Max number of orders (optional)", "save": "Save as draft", "saveChanges": "Save changes", "cancel": "Cancel", "activate": "Activate", "pause": "Pause", "end": "End", "edit": "Edit", "live": "Live", "searchProducts": "Search products", "selected": "Selected", "used": "Used", "given": "Discount given", "failed": "Could not save. Please try again.", "pauseToEdit": "Pause the promotion before changing its value or scope.", "retry": "Retry", "loadFailed": "Could not load",
+      "scope": { "ALL": "All products", "CATEGORY": "Selected categories", "PRODUCT": "Selected products", "SELLER": "Selected sellers" }, "status": { "DRAFT": "Draft", "ACTIVE": "Active", "PAUSED": "Paused", "ENDED": "Ended" }
+    },
     "shopHome": {
       "title": "Shop",
       "subtitle": "For {name}",

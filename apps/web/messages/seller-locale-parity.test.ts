@@ -25,4 +25,15 @@ describe("seller DE/ES catalog coverage", () => {
       }
     }
   });
+
+  it.each([["de", de.commerce.promotions], ["es", es.commerce.promotions]] as const)("translates promotion management and preserves placeholders for %s", (_locale, localized) => {
+    const base = flatten(en.commerce.promotions);
+    const translated = flatten(localized);
+    expect(translated.map(([key]) => key).sort()).toEqual(base.map(([key]) => key).sort());
+    for (const [key, source] of base) {
+      const target = translated.find(([targetKey]) => targetKey === key)?.[1];
+      expect(target, key).toBeTruthy();
+      expect(placeholders(target!), key).toEqual(placeholders(source));
+    }
+  });
 });
