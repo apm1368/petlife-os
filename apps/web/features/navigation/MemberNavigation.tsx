@@ -9,6 +9,14 @@ import { useActivePet } from "@/hooks/use-active-pet";
 import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { EXPLORE_GROUPS, PRIMARY_DESTINATIONS, currentDestination } from "./consumer-nav";
+import type { RouteLocale } from "@/lib/i18n/config";
+
+const NAV_COPY: Record<RouteLocale, { main: string; destinations: string; everything: string; addPet: string; activePet: string; petProfile: (name: string) => string; bottom: string; explore: string; preferences: string; support: string; close: string }> = {
+  fa: { main: "منوی اصلی", destinations: "بخش‌های opetlife", everything: "همهٔ بخش‌های opetlife", addPet: "افزودن حیوان", activePet: "حیوان فعال", petProfile: (name) => `پروفایل ${name}`, bottom: "منوی پایین", explore: "کاوش", preferences: "زبان و ظاهر", support: "کمک و پشتیبانی", close: "بستن" },
+  en: { main: "Main menu", destinations: "opetlife destinations", everything: "Everything in opetlife", addPet: "Add a pet", activePet: "Active pet", petProfile: (name) => `${name}'s profile`, bottom: "Bottom menu", explore: "Explore", preferences: "Language and appearance", support: "Help and support", close: "Close" },
+  de: { main: "Hauptmenü", destinations: "opetlife-Bereiche", everything: "Alle Bereiche von opetlife", addPet: "Tier hinzufügen", activePet: "Aktives Tier", petProfile: (name) => `Profil von ${name}`, bottom: "Untere Navigation", explore: "Entdecken", preferences: "Sprache und Darstellung", support: "Hilfe und Support", close: "Schließen" },
+  es: { main: "Menú principal", destinations: "Secciones de opetlife", everything: "Todo opetlife", addPet: "Añadir mascota", activePet: "Mascota activa", petProfile: (name) => `Perfil de ${name}`, bottom: "Menú inferior", explore: "Explorar", preferences: "Idioma y apariencia", support: "Ayuda y soporte", close: "Cerrar" },
+};
 
 const usePathKey = (locale: string) => (usePathname() ?? "").replace(new RegExp(`^/${locale}`), "") || "/";
 
@@ -38,8 +46,8 @@ function useDismiss(open: boolean, close: () => void, boundary: React.RefObject<
 
 /** Desktop primary navigation with the Explore mega menu. Hidden below 1024px (the bottom bar takes over). */
 export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }) {
-  const locale = useLocale();
-  const fa = locale === "fa";
+  const locale = useLocale() as RouteLocale;
+  const c = NAV_COPY[locale];
   const current = currentDestination(usePathKey(locale));
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -68,11 +76,11 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
     if (!next && panel.current?.contains(document.activeElement)) return;
     hoverTimer.current = setTimeout(() => setOpen(next), next ? 90 : 180);
   };
-  const Forward = fa ? ChevronLeft : ChevronRight;
+  const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
 
   return (
     <div className="member-nav" ref={wrap} onPointerLeave={hover(false)}>
-      <nav aria-label={fa ? "منوی اصلی" : "Main menu"}>
+      <nav aria-label={c.main}>
         <ul>
           {PRIMARY_DESTINATIONS.filter(d => d.key !== "health" || canViewHealth).map((d) =>
             d.key === "explore" ? (
@@ -97,31 +105,31 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
                     }
                   }}
                 >
-                  {fa ? d.fa : d.en}
+                  {d[locale]}
                   <span className="member-nav__caret" aria-hidden="true" />
                 </button>
               </li>
             ) : (
               <li key={d.key} onPointerEnter={hover(false)}>
                 <Link href={`/${locale}${d.href}`} className="member-nav__link" aria-current={current === d.key ? "page" : undefined}>
-                  {fa ? d.fa : d.en}
+                  {d[locale]}
                 </Link>
               </li>
             ),
           )}
         </ul>
       </nav>
-      <div id={panelId} ref={panel} className="mega" role="navigation" data-open={open} hidden={!open} onPointerEnter={hover(true)} aria-label={fa ? "بخش‌های opetlife" : "opetlife destinations"}>
+      <div id={panelId} ref={panel} className="mega" role="navigation" data-open={open} hidden={!open} onPointerEnter={hover(true)} aria-label={c.destinations}>
         <div className="mega__inner">
           {EXPLORE_GROUPS.map((group, gi) => (
             <section key={group.key} className="mega__group" style={{ ["--g" as string]: gi }} aria-labelledby={`${panelId}-${group.key}`}>
-              <h2 id={`${panelId}-${group.key}`}>{fa ? group.fa : group.en}</h2>
+              <h2 id={`${panelId}-${group.key}`}>{group[locale]}</h2>
               <ul>
-                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, fa: f, en }) => (
+                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, ...labels }) => (
                   <li key={href}>
                     <Link href={`/${locale}${href}`} className="mega__link" onClick={close}>
                       <span className="mega__icon"><Icon size={18} aria-hidden="true" /></span>
-                      <span className="mega__text"><strong>{fa ? f[0] : en[0]}</strong><span>{fa ? f[1] : en[1]}</span></span>
+                      <span className="mega__text"><strong>{labels[locale][0]}</strong><span>{labels[locale][1]}</span></span>
                     </Link>
                   </li>
                 ))}
@@ -130,7 +138,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
           ))}
         </div>
         <div className="mega__foot">
-          <Link href={`/${locale}/explore`} onClick={close}>{fa ? "همهٔ بخش‌های opetlife" : "Everything in opetlife"}<Forward size={16} aria-hidden="true" /></Link>
+          <Link href={`/${locale}/explore`} onClick={close}>{c.everything}<Forward size={16} aria-hidden="true" /></Link>
         </div>
       </div>
     </div>
@@ -139,8 +147,8 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
 
 /** The active pet, always visible: switch pets or jump to the pet without hunting through menus. */
 export function PetContextControl({ compact = false }: { compact?: boolean }) {
-  const locale = useLocale();
-  const fa = locale === "fa";
+  const locale = useLocale() as RouteLocale;
+  const c = NAV_COPY[locale];
   const { pets, activePetId, switchActivePet } = useActivePet();
   const activeId = activePetId ?? pets[0]?.id ?? null;
   const active = pets.find((p) => p.id === activeId) ?? null;
@@ -151,17 +159,17 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
   const close = useCallback(() => setOpen(false), []);
   useDismiss(open, close, wrap, button);
   if (!active) {
-    return <Link href={`/${locale}/pets/new`} className="pet-context pet-context--add">{fa ? "افزودن حیوان" : "Add a pet"}</Link>;
+    return <Link href={`/${locale}/pets/new`} className="pet-context pet-context--add">{c.addPet}</Link>;
   }
   return (
     <div className="pet-context" ref={wrap}>
-      <button ref={button} type="button" className="pet-context__trigger" aria-expanded={open} aria-controls={listId} aria-label={fa ? `حیوان فعال: ${active.name}` : `Active pet: ${active.name}`} onClick={() => setOpen((v) => !v)}>
+      <button ref={button} type="button" className="pet-context__trigger" aria-expanded={open} aria-controls={listId} aria-label={`${c.activePet}: ${active.name}`} onClick={() => setOpen((v) => !v)}>
         <Avatar name={active.name} src={active.photoUrl ?? undefined} size="sm" />
         {compact ? null : <span>{active.name}</span>}
         <span className="member-nav__caret" aria-hidden="true" />
       </button>
       <div id={listId} className="pet-context__menu" data-open={open} hidden={!open}>
-        <p>{fa ? "حیوان فعال" : "Active pet"}</p>
+        <p>{c.activePet}</p>
         <ul>
           {pets.map((p) => (
             <li key={p.id}>
@@ -173,8 +181,8 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
           ))}
         </ul>
         <div className="pet-context__links">
-          <Link href={`/${locale}/pets/${active.id}`}>{fa ? `پروفایل ${active.name}` : `${active.name}'s profile`}</Link>
-          <Link href={`/${locale}/pets/new`}>{fa ? "افزودن حیوان" : "Add a pet"}</Link>
+          <Link href={`/${locale}/pets/${active.id}`}>{c.petProfile(active.name)}</Link>
+          <Link href={`/${locale}/pets/new`}>{c.addPet}</Link>
         </div>
       </div>
     </div>
@@ -183,8 +191,8 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
 
 /** Below 1024px: five large targets at the thumb; Explore opens a grouped sheet instead of a page. */
 export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean }) {
-  const locale = useLocale();
-  const fa = locale === "fa";
+  const locale = useLocale() as RouteLocale;
+  const c = NAV_COPY[locale];
   const router = useRouter();
   const current = currentDestination(usePathKey(locale));
   const [sheet, setSheet] = useState(false);
@@ -192,46 +200,46 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
   useEffect(() => setSheet(false), [pathname]);
   return (
     <>
-      <nav className="member-tabbar" aria-label={fa ? "منوی پایین" : "Bottom menu"}>
-        {PRIMARY_DESTINATIONS.filter((d) => d.mobile && (d.key !== "health" || canViewHealth)).map(({ key, href, fa: labelFa, en, icon: Icon }) =>
+      <nav className="member-tabbar" aria-label={c.bottom}>
+        {PRIMARY_DESTINATIONS.filter((d) => d.mobile && (d.key !== "health" || canViewHealth)).map(({ key, href, icon: Icon, ...labels }) =>
           key === "explore" ? (
             <button key={key} type="button" aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === key ? "page" : undefined} onClick={() => setSheet(true)}>
               <Compass size={21} aria-hidden="true" />
-              <span>{fa ? labelFa : en}</span>
+              <span>{labels[locale]}</span>
             </button>
           ) : (
             <Link key={key} href={`/${locale}${href}`} aria-current={current === key ? "page" : undefined}>
               <Icon size={21} aria-hidden="true" />
-              <span>{fa ? labelFa : en}</span>
+              <span>{labels[locale]}</span>
             </Link>
           ),
         )}
       </nav>
-      <Sheet open={sheet} onClose={() => setSheet(false)} title={fa ? "کاوش" : "Explore"} className="member-explore-panel">
+      <Sheet open={sheet} onClose={() => setSheet(false)} title={c.explore} className="member-explore-panel">
         <div className="explore-sheet">
           <PetContextSheetRow onNavigate={() => setSheet(false)} />
-          <div className="explore-sheet__preferences" role="group" aria-label={fa ? "زبان و ظاهر" : "Language and appearance"}>
-            <span>{fa ? "زبان و ظاهر" : "Language and appearance"}</span>
+          <div className="explore-sheet__preferences" role="group" aria-label={c.preferences}>
+            <span>{c.preferences}</span>
             <LanguageToggle />
             <ThemeToggle />
           </div>
           {EXPLORE_GROUPS.map((group) => (
             <section key={group.key}>
-              <h3>{fa ? group.fa : group.en}</h3>
+              <h3>{group[locale]}</h3>
               <ul>
-                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, fa: f, en }) => (
+                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, ...labels }) => (
                   <li key={href}>
                     <button type="button" onClick={() => { setSheet(false); router.push(`/${locale}${href}`); }}>
                       <Icon size={20} aria-hidden="true" />
-                      <span><strong>{fa ? f[0] : en[0]}</strong><small>{fa ? f[1] : en[1]}</small></span>
+                      <span><strong>{labels[locale][0]}</strong><small>{labels[locale][1]}</small></span>
                     </button>
                   </li>
                 ))}
               </ul>
             </section>
           ))}
-          <Link href={`/${locale}/support`} className="explore-sheet__support" onClick={() => setSheet(false)}>{fa ? "کمک و پشتیبانی" : "Help and support"}</Link>
-          <button type="button" className="explore-sheet__close" onClick={() => setSheet(false)}>{fa ? "بستن" : "Close"}</button>
+          <Link href={`/${locale}/support`} className="explore-sheet__support" onClick={() => setSheet(false)}>{c.support}</Link>
+          <button type="button" className="explore-sheet__close" onClick={() => setSheet(false)}>{c.close}</button>
         </div>
       </Sheet>
     </>
@@ -239,15 +247,15 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
 }
 
 function PetContextSheetRow({ onNavigate }: { onNavigate: () => void }) {
-  const locale = useLocale();
-  const fa = locale === "fa";
+  const locale = useLocale() as RouteLocale;
+  const c = NAV_COPY[locale];
   const router = useRouter();
   const { pets, activePetId, switchActivePet } = useActivePet();
   const activeId = activePetId ?? pets[0]?.id ?? null;
   if (pets.length === 0) return null;
   return (
     <section>
-      <h3>{fa ? "حیوان فعال" : "Active pet"}</h3>
+      <h3>{c.activePet}</h3>
       <div className="explore-sheet__pets">
         {pets.map((p) => (
           <button key={p.id} type="button" aria-pressed={p.id === activeId} onClick={() => { void switchActivePet(p.id); onNavigate(); router.push(`/${locale}/pets/${p.id}`); }}>
