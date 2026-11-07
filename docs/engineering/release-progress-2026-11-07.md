@@ -66,3 +66,11 @@
 - Continued #118 with DE/ES household collaboration copy: member management, invitations, pet access presets, confirmation actions, access history and delivery-unavailable copy. Account dates now use `Intl.DateTimeFormat` for selected en/de/es locale while Persian remains Jalali; account numbers use locale digits/grouping.
 - Validation: all account tests passed (9 files, 29 tests); the full web suite passed (233 files, 1,021 tests); web typecheck and lint passed; the production web build passed and generated all 724 localized route variants. `git diff --check` passed. Commit `10394b3` is pushed, and CI run `42389734102` passed all required jobs in 11m7s.
 - Separate payment worktrees remain untouched. #117's source-image/CDN privacy boundary remains unverified because no authorized production storage configuration is available.
+
+## Localization / disk / release continuation — 2026-11-07 21:58 UTC
+
+- `origin/main` and production remain `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; deployment remains `github-42091865674-1`. The read-only public products API returned 15 items, of which 10 have `qa-b4-*` demo slugs. #107 remains open at `4ade2952`, CI successful but `REVIEW_REQUIRED`; no deploy occurred.
+- #118 (`e57dd039`) remains review-required with successful CI. #119–#130 remain open/unmerged with successful latest builds and their current dependency bases unchanged. #131 (`4515b779`, based on #118) CI passed, no review is recorded. #132 (`01c3aa2a`, based on #122) CI run `42417793232` was still running; no review is recorded.
+- PR #133 is open from `feat/i18n-orders`, code head `7fffe047`, based on #122. It translates customer order list/detail, payment/fulfillment/refund statuses, cancellation/refund/review copy and de/es timestamps. Local focused tests passed (13); web typecheck/lint and message key/interpolation parity passed. CI run `42418207458` was still in progress at this checkpoint; no review is recorded.
+- Disk remains 673 MiB available (98% used). Only the confirmed regenerable `.turbo/cache` (~8 MiB) was removed during this continuation; source, `.git`, worktrees, databases and volumes were preserved. Local production build remains deferred due low free space.
+- Payment-controls worktree was not touched. Memorial original object/bucket/CDN exposure remains unverified. No localization work here is merged or LIVE.
