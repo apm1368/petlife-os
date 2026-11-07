@@ -68,5 +68,29 @@
       "passwordMismatch": "Las contraseñas no coinciden.",
       "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
     }
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "retry": "Intentar de nuevo",
+    "loading": "Cargando",
+    "optional": "Opcional"
+  },
+  "care": {
+    "profile": {
+      "title": "Perfil de cuidados",
+      "edit": "Editar perfil de cuidados",
+      "readOnlyNotice": "Puedes consultar este perfil de cuidados, pero no editarlo.",
+      "temperament": "Temperamento",
+      "aroundPeople": "Comportamiento con personas",
+      "aroundAnimals": "Comportamiento con otros animales",
+      "leashBehavior": "Comportamiento con la correa",
+      "handlingSensitivity": "Sensibilidad al manejo",
+      "feedingRoutine": "Rutina de alimentación",
+      "toiletRoutine": "Rutina para hacer sus necesidades",
+      "separationBehavior": "Comportamiento al quedarse solo/a",
+      "specialInstructions": "Instrucciones especiales",
+      "empty": "Aún no se ha configurado."
+    }
   }
 }

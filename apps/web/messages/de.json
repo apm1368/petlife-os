@@ -68,5 +68,29 @@
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
       "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen",
+    "optional": "Optional"
+  },
+  "care": {
+    "profile": {
+      "title": "Pflegeprofil",
+      "edit": "Pflegeprofil bearbeiten",
+      "readOnlyNotice": "Sie können dieses Pflegeprofil ansehen, aber nicht bearbeiten.",
+      "temperament": "Temperament",
+      "aroundPeople": "Verhalten gegenüber Menschen",
+      "aroundAnimals": "Verhalten gegenüber anderen Tieren",
+      "leashBehavior": "Verhalten an der Leine",
+      "handlingSensitivity": "Empfindlichkeit bei Berührungen",
+      "feedingRoutine": "Fütterungsroutine",
+      "toiletRoutine": "Toilettenroutine",
+      "separationBehavior": "Verhalten beim Alleinsein",
+      "specialInstructions": "Besondere Hinweise",
+      "empty": "Noch nicht eingerichtet."
+    }
   }
 }
