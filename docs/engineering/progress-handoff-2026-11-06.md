@@ -9,9 +9,9 @@ This checkpoint is factual as of 2026-11-07. It is not a completion or productio
   deployment `github-42091865674-1`. No newer release was verified.
 - Current implementation branch: `feat/public-pet-memorial`, based on the above main SHA.
 - The current branch contains the public memorial implementation and the photo privacy fix;
-  PR #117 targets `main`. Local API typecheck and lint passed, and the fresh-database affected
-  E2E file passed 23/23. The privacy-fix commit has not yet been pushed/checked by GitHub CI at
-  this checkpoint; review is required. It is not deployed or LIVE_VERIFIED.
+  PR #117 targets `main`, head `a3e398e09d7da6784b73b964690eced52926c5ca`. GitHub CI run
+  42335798635 passed all steps, including migrations, tests, API E2E and build. Review is
+  required. It is not deployed or LIVE_VERIFIED.
 - Payment-control work remains in a separate dirty worktree at
   `/workspace/petlife-payment-controls-live`; preserve its four modified files and two new
   service/spec files. Other known dirty worktrees: `/workspace/petlife-phase-zero-audit` and
@@ -102,7 +102,7 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
 
 ## Next actions
 
-1. Push and monitor the memorial photo proxy fix on #117, then await its required human review.
+1. Await required human review on #117. Latest code head `a3e398e`; full CI run 42335798635 passed.
 2. Recheck #115/#116 checks and request/await authorized reviews; they were green on the latest
    checked runs but remain blocked by required review.
 3. Keep #107 at top of review queue. No production switch/deploy is authorized through bypass.
