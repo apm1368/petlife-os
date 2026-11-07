@@ -52,6 +52,16 @@
 3. Have an authorized operator inspect original and memorial object access, bucket/CDN caching and shared image consumers. Correct the disclosure if the source remains public; do not revoke shared access without impact/reversibility review.
 4. Push/review the local `feat/i18n-de-es` batch. Continue German/Spanish by page family, including saved preferences, translations, formatting and tests; do not call other page families translated until they are.
 
+## Localization / disk / release recheck — 2026-11-07 21:50 UTC
+
+- `origin/main` and production remain `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; production deployment id remains `github-42091865674-1`. The public products API again returned 15 records, 10 with `qa-b4-*` slugs. #107 head `4ade2952` still has a successful build but is `REVIEW_REQUIRED`; it is not merged or live.
+- Localization queue recheck: #118 (`e57dd039`) remains blocked on required review, with CI successful. #119–#130 each have a successful latest build and are open/unmerged; their current bases still form the documented dependency chain. #131 (`4515b779`, travel discovery results) has successful CI, base #118, no recorded review. #132 (`d481e48e`, German/Spanish checkout) is open on #122 and its CI run `42417515295` is still in progress; no review is recorded. Do not treat pending #132 CI as passing.
+- Checkout implementation: German/Spanish checkout branches and locale-aware counts/country names are translated, with Persian number digits/Jalali behavior preserved. Local focused suite: 24 tests passed; web typecheck and lint passed; the checkout key/placeholder parity check matched English for de/es. The prior accidental broad web test invocation completed successfully: 233 files, 1,028 tests. #132 remains not merged and not live.
+- PR #131 CI run `42415997431` passed. This PR localizes travel search results only; it does not claim live accommodation availability or booking. The shared landing HERO was not changed by these localization slices.
+- Disk was 667 MiB available at the start of the cleanup recheck. Removed only the confirmed regenerable `.turbo/cache` (about 8 MiB); current `df -h /workspace` is 673 MiB available (98% used). `node_modules` (~865 MiB) and `.git` (~179 MiB) were inspected but retained; no source, git history, uncommitted work, databases, volumes or unknown artifacts were deleted. Local production build remains deferred due low free space.
+- The payment-controls worktree remains untouched. Memorial source object/bucket/CDN access is still not available for authorized verification, so full source-image privacy is not claimed. No PR was merged and no deployment was triggered.
+- Next: keep #107 first for qualified review; once #122 merges, retarget #132 to main and rerun checkout/commerce tests. Continue only independent localization slices while reviews are pending. Never bypass branch protection; production remains NOT LIVE for these changes.
+
 ## Latest recheck for this handoff
 
 - #118 is open at `49316af9bfdfc62acf949b741d2e38e1715cb698`, base `main`, mergeable, review required. CI run `42387689186` succeeded (lint, design-system/visual, typecheck, migrations, tests, API E2E and build). No qualifying review has been submitted.
