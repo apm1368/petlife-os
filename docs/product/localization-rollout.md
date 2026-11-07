@@ -8,9 +8,12 @@ The personal account settings page (`PersonalSettingsView`) now has German and S
 
 Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 
-## Account settings follow-up (PR #119)
+## Personal settings (PR #119 — merged)
 
-- `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
-- Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
-- PR #118 has merged to `main`; this change has been replayed onto that merged base. The new head must pass fresh CI before it can merge. No production behavior is claimed from this PR yet.
-- This follow-up only translates the personal settings page and updates this rollout note. It changes no API, persistence, verification or notification contract. The four-locale preference foundation is supplied by #118 on `main`.
+German and Spanish cover the personal settings page, appearance, contact methods, verification states and the existing OTP flow. This is a UI translation only; provider behavior and delivery are unchanged.
+
+## Customer notification center and preferences (PR #148 — current)
+
+The notification-center chrome, category labels, empty/loading/retry actions, unread accessibility prefix, preference page, category/channel labels, required-category note, consent state, quiet-hours controls, save feedback and SMS channel-status copy have German and Spanish translations. Center timestamps use locale-aware formatting (`fa-IR` remains unchanged). Dynamic titles and bodies remain exactly as supplied by the server; this UI slice does not translate user/server content.
+
+SMS sandbox remains explicitly labelled as not delivered. This work adds no SMS templates, provider configuration or send simulation; email and push channels remain absent. Backend error details and other notification pages may still fall back to English.

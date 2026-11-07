@@ -1,5 +1,15 @@
 # PET LIFE OS release and development handoff — 2026-11-07
 
+## 2026-11-07 18:42 UTC — Notification localization slice
+
+- Fresh GitHub check: #107 remains `REVIEW_REQUIRED` at `4ade2952`; production version endpoint returns `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`. Public product API still returns 15 items: 10 `qa-b4-*` demo records and five other slugs (the carrier, grooming wipes, training treats, Royal Canin kitten food and Royal Canin adult dog food). This remains a live launch defect and no release was made.
+- Localization current heads/checks: #118 `e57dd039` build passed / review required; #119 `83fe67c9`, #120 `434757a5`, #121 `0345abf4`, #122 `2e1816b7`, #123 `d963f84d`, and #124 `d34bb985` build passed. #125 customer support localization `b20026d4` remains pending on build run `42402066951`. #122/#123/#124/#125 remain open; dependency order is #118→#119→#120→#121 and #118→#122→#123→#124; #125 is based directly on #118. None is live.
+- Notification center and preferences DE/ES were implemented in this worktree as a separate slice directly based on #118: translated static page and category copy, accessibility unread prefix and preference controls/statuses; timestamps use de-DE/es-ES while fa-IR remains as before. Dynamic notification text is unchanged server content. No provider sends, SMS templates, email, or push were introduced.
+- Focused notification checks: 14 tests / 4 files passed; en/fa/de/es notification key-shape parity passed. Package install completed with one small registry fetch after the cached/offline store lacked `esbuild`; no full build was run. Typecheck/lint/diff checks are pending before PR creation.
+- Current disk: last observed ~846 MiB free, 98% used; after the notification worktree install, remeasure. `pnpm store prune` removed only one 9.2 KiB metadata entry and zero packages. A completed, ignored 1.1 GiB `.next` artifact remains because the shell safety layer rejected a direct removal command; no source or Git data was removed. Do not run a local production build at this headroom.
+- Payment-control worktree `/workspace/petlife-payment-controls-live` remains untouched, with its existing modified service files and untracked test/service preserved.
+- Next: finish checks and create the notification localization PR against #118, then monitor its CI. Keep #107 first for qualified review; never merge until the required approval exists. No PR or feature is LIVE_VERIFIED without merged and deployed SHA plus behavior verification.
+
 ## Production and release queue
 
 - Current `origin/main`: `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; the previously reported deployment id was `github-42091865674-1`.
