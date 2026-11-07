@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetLifecycleStatus, PetMemorialStatus, PetMemoryType, PetMemoryVisibility, Prisma } from "@prisma/client";
 import { HouseholdAccessDeniedException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { resolveObjectUrls } from "../storage/object-url.util";
 
 export const PET_MEMORIAL_CONSENT_VERSION = "public-pet-memorial-v1";
 
@@ -99,7 +98,7 @@ export class PetMemorialService {
     });
   }
 
-  async getPublishedImageUrl(submissionId: string) {
+  async getPublishedImage(submissionId: string) {
     const row = await this.prisma.petMemorialSubmission.findFirst({
       where: {
         id: submissionId,
@@ -108,9 +107,9 @@ export class PetMemorialService {
         pet: { lifecycleStatus: { in: [PetLifecycleStatus.DECEASED, PetLifecycleStatus.MEMORIAL] } },
         imageMemory: { is: { type: PetMemoryType.PHOTO, visibility: PetMemoryVisibility.PUBLIC, archivedAt: null } },
       },
-      select: { imageObjectKey: true, imageMemory: { select: { mediaObjectKeys: true } } },
+      select: { petId: true, imageObjectKey: true, imageMemory: { select: { mediaObjectKeys: true } } },
     });
     if (!row || !row.imageMemory.mediaObjectKeys.includes(row.imageObjectKey)) throw new NotFoundApiException("Pet memorial", { submissionId });
-    return resolveObjectUrls([row.imageObjectKey])[0] ?? null;
+    return { petId: row.petId, imageObjectKey: row.imageObjectKey };
   }
 }

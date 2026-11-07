@@ -1,3 +1,5 @@
+import type { Readable } from "node:stream";
+
 export const STORAGE_DRIVER = Symbol("STORAGE_DRIVER");
 
 export interface UploadTarget {
@@ -37,6 +39,8 @@ export interface StorageDriver {
   createDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget>;
   /** Batch 8 — server-generated private files (account exports). Never exposed as an upload target. */
   putObject(key: string, body: Buffer, contentType: string): Promise<void>;
+  /** Read object bytes through the application so controlled public aliases need not redirect to storage keys. */
+  openObject(key: string): Promise<{ body: Readable; contentType?: string }>;
   deleteObject(key: string): Promise<void>;
 }
 

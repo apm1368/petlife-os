@@ -4,7 +4,8 @@ import { randomUUID } from "node:crypto";
 import type Redis from "ioredis";
 import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { AppEnv } from "../../config/env";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { mkdir, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, normalize } from "node:path";
 import type { DownloadOptions, DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
 
@@ -62,6 +63,14 @@ export class LocalStorageDriver implements StorageDriver {
     const target = this.resolve(key);
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, body, { mode: 0o600 });
+  }
+
+  async openObject(key: string) {
+    const target = this.resolve(key);
+    await stat(target);
+    const extension = target.split(".").pop()?.toLowerCase();
+    const contentType = extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : extension === "jpg" || extension === "jpeg" ? "image/jpeg" : undefined;
+    return { body: createReadStream(target), contentType };
   }
 
   async deleteObject(key: string): Promise<void> {

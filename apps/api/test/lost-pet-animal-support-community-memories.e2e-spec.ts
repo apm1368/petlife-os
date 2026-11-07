@@ -9,6 +9,8 @@ import { DonationInsufficientFundBalanceException } from "../src/common/errors/a
 import type { ResolvedAdminContext } from "../src/modules/admin/auth/admin-context.types";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
+import { STORAGE_DRIVER, type StorageDriver } from "../src/modules/storage/storage-driver.interface";
 
 interface Cookies {
   session?: string;
@@ -389,6 +391,7 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const submitted = await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "Milo", imageMemoryId: photo.body.id, consent: true }).expect(201);
     expect(submitted.body.status).toBe("PENDING_REVIEW");
     expect(await request(app.getHttpServer()).get("/public/pet-memorials").expect(200).then((r) => r.body)).toEqual([]);
+    await request(app.getHttpServer()).get(`/public/pet-memorials/${submitted.body.id}/image`).expect(404);
     await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "Milo", imageMemoryId: photo.body.id, consent: true }).expect(400);
 
     await contentEditor.get("/admin/pet-memorials").expect(403);
@@ -405,11 +408,23 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     expect(Object.keys(publicRows.body[0]).sort()).toEqual(["id", "imageUrl", "name"]);
     expect(JSON.stringify(publicRows.body)).not.toContain("private memory text");
     expect(JSON.stringify(publicRows.body)).not.toContain(petId);
-    await request(app.getHttpServer()).get(publicRows.body[0].imageUrl).expect(302);
+    const storage = app.get<StorageDriver>(STORAGE_DRIVER);
+    const imageBytes = Buffer.from("memorial-image-payload");
+    const openObject = jest.spyOn(storage, "openObject").mockResolvedValue({ body: Readable.from([imageBytes]), contentType: "image/jpeg" });
+    const imageResponse = await request(app.getHttpServer()).get(publicRows.body[0].imageUrl).expect(200);
+    expect(imageResponse.headers.location).toBeUndefined();
+    expect(imageResponse.headers["cache-control"]).toBe("no-store");
+    expect(imageResponse.headers["cdn-cache-control"]).toBe("no-store");
+    expect(imageResponse.headers["surrogate-control"]).toBe("no-store");
+    expect(imageResponse.headers["x-content-type-options"]).toBe("nosniff");
+    expect(Buffer.isBuffer(imageResponse.body) ? imageResponse.body : Buffer.from(imageResponse.text)).toEqual(imageBytes);
+    expect(openObject).toHaveBeenCalledWith(expect.stringContaining(`pet-memories-public/${petId}/`));
+    expect(JSON.stringify({ headers: imageResponse.headers, url: publicRows.body[0].imageUrl })).not.toContain(petId);
 
     await client.post(`/pets/${petId}/memories/memorial/withdraw`).send({}).expect(201);
     await request(app.getHttpServer()).get("/public/pet-memorials").expect(200).expect([]);
     await request(app.getHttpServer()).get(publicRows.body[0].imageUrl).expect(404);
+    openObject.mockRestore();
     const events = await prisma.petMemorialAuditEvent.findMany({ where: { submissionId: submitted.body.id }, orderBy: { createdAt: "asc" } });
     expect(events.map((row) => row.action)).toEqual(["OWNER_CONSENT_SUBMITTED", "ADMIN_APPROVED", "OWNER_WITHDREW_CONSENT"]);
     await expect(prisma.petMemorialAuditEvent.updateMany({ where: { submissionId: submitted.body.id }, data: { reason: "tamper" } })).rejects.toThrow();
@@ -418,6 +433,8 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     await trustAdmin.post(`/admin/pet-memorials/${resubmission.body.id}/review`).send({ action: "REJECT", reason: "The selected image needs a different crop" }).expect(201);
     expect((await client.get(`/pets/${petId}/memories/memorial`).expect(200)).body.status).toBe("REJECTED");
     await request(app.getHttpServer()).get("/public/pet-memorials").expect(200).expect([]);
+    await request(app.getHttpServer()).get(`/public/pet-memorials/${resubmission.body.id}/image`).expect(404);
+    await request(app.getHttpServer()).get(`/public/pet-memorials/${randomUUID()}/image`).expect(404);
   });
 
   it("U-02: consent cannot be borrowed from another household or an active pet", async () => {

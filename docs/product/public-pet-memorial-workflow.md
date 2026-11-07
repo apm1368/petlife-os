@@ -20,9 +20,12 @@ and disables its image alias. A withdrawn or rejected request remains in the aud
 
 The public endpoint returns only the submission ID, explicitly consented display name, and an
 opaque image route. It does not return household IDs, pet IDs, owner IDs, notes, or other
-memories. The image route redirects only while the submission remains published and the pet
-remains in the deceased/memorial lifecycle. The underlying selected memory photo must already
-be marked public; this flow never silently makes a private image public.
+memories. The image route streams the selected image through the API only while the submission
+remains published and the pet remains in the deceased/memorial lifecycle. It does not redirect
+to the legacy pet-scoped storage URL. Responses use `no-store` cache directives so withdrawal
+or unpublishing blocks subsequent requests instead of leaving a cached redirect. The underlying
+selected memory photo must already be marked public; this flow never silently makes a private
+image public.
 
 ## Admin review
 
@@ -36,9 +39,9 @@ one can win; the losing request must reload and retry if appropriate.
 ## Privacy and limitations
 
 - Publication is limited to 12 most-recent approved submissions on the landing endpoint.
-- The image alias avoids exposing the pet ID in the public listing payload. The redirect target
-  is the already-public image object URL, whose legacy storage key includes the pet ID; removing
-  that from the browser's network trace requires a storage/CDN migration to opaque object keys.
+- The image alias avoids exposing the pet ID or object key in the public listing and network
+  redirect chain. The legacy source object still has a pet-scoped key internally; the API only
+  reads that key server-side and never returns it to a visitor.
 - The currently supported application locales are fa/en. German and Spanish localization is a
   separate cross-application task; this addition does not claim that language expansion is done.
 - No existing private memories are migrated, published, or modified.

@@ -56,6 +56,12 @@ export class S3StorageDriver implements StorageDriver {
     await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: body, ContentType: contentType }));
   }
 
+  async openObject(key: string) {
+    const result = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    if (!result.Body || !("pipe" in result.Body)) throw new Error("Storage object is not a readable stream");
+    return { body: result.Body as import("node:stream").Readable, contentType: result.ContentType };
+  }
+
   async deleteObject(key: string): Promise<void> {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }

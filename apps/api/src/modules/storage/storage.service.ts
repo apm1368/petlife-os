@@ -75,6 +75,16 @@ export class StorageService {
     return this.driver.createUploadTarget(key, contentType);
   }
 
+  /** Streams an allow-listed public memory image without exposing its legacy pet-scoped object URL. */
+  async openPetMemorialImage(petId: string, key: string) {
+    const prefix = `pet-memories-public/${petId}/`;
+    const filename = key.startsWith(prefix) ? key.slice(prefix.length) : "";
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpe?g|png|webp)$/i.test(filename)) {
+      throw new Error("Invalid memorial image object key");
+    }
+    return this.driver.openObject(key);
+  }
+
   /**
    * Handoff 17: medical documents live under a PRIVATE key prefix
    * (`health-documents/...`, never `pets/...`'s public-URL scheme) — see the

@@ -1,6 +1,6 @@
-# PET LIFE OS progress handoff — 2026-11-06
+# PET LIFE OS progress handoff — 2026-11-07
 
-This checkpoint is factual as of 2026-11-06. It is not a completion or production-readiness claim.
+This checkpoint is factual as of 2026-11-07. It is not a completion or production-readiness claim.
 
 ## Git and production
 
@@ -8,9 +8,10 @@ This checkpoint is factual as of 2026-11-06. It is not a completion or productio
 - `https://opetlife.ir/api/health/version` reports the same SHA, environment `production`,
   deployment `github-42091865674-1`. No newer release was verified.
 - Current implementation branch: `feat/public-pet-memorial`, based on the above main SHA.
-- The current branch contains the public memorial implementation; latest commit `52e1eb2`, PR #117
-  against `main`. Latest GitHub CI run
-  42280222282 passed all steps; review is required. It is not deployed or LIVE_VERIFIED.
+- The current branch contains the public memorial implementation and the photo privacy fix;
+  PR #117 targets `main`. Local API typecheck and lint passed, and the fresh-database affected
+  E2E file passed 23/23. The privacy-fix commit has not yet been pushed/checked by GitHub CI at
+  this checkpoint; review is required. It is not deployed or LIVE_VERIFIED.
 - Payment-control work remains in a separate dirty worktree at
   `/workspace/petlife-payment-controls-live`; preserve its four modified files and two new
   service/spec files. Other known dirty worktrees: `/workspace/petlife-phase-zero-audit` and
@@ -60,10 +61,13 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
 - API typecheck, changed-file ESLint, Prisma schema validation, migration application through
   disposable `test:e2e:fresh`, and `git diff --check`: passed.
 - `fa.json` / `en.json` parse; no German/Spanish catalogs currently exist in main.
-- A public response initially exposed the pet ID in the image URL. It was corrected to use an
-  opaque public image alias; withdrawal makes that alias return 404. The alias redirects to the
-  legacy already-public image key, so the pet ID can still appear in the browser's redirect
-  network trace. Fully removing that requires opaque storage keys/CDN proxy support.
+- The public image endpoint now streams bytes through the API, returns no `Location` header,
+  and sets browser/CDN/surrogate `no-store` directives. Its response and application warning
+  contain no pet/household ID or storage key. Each image request rechecks publication and
+  withdrawal, so pending, rejected, withdrawn and unknown submissions return 404.
+- The legacy source image remains in the already-public pet-memory storage namespace and its
+  internal object key remains pet-scoped. The memorial list and image response no longer disclose
+  that key; no source-image rekeying or production cache purge has been performed.
 
 ## External source evidence and status
 
@@ -83,9 +87,22 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
 - #107 is CI-green but `REVIEW_REQUIRED`; no policy bypass or production database write was
   attempted. It cannot be released until authorized review/merge and pipeline deployment.
 
+## Latest live verification — 2026-11-07
+
+- `GET /api/health/version` still reports `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`
+  (`github-42091865674-1`).
+- `GET /api/shop/products?page=1&pageSize=50` still returns 15 products, including all ten
+  `qa-b4-*` records listed in the previous section. #107 remains `REVIEW_REQUIRED`; CI run
+  42231686406 passed. No production writes were made.
+- PRs #107, #112, #113, #115, #116 and #117 report green CI and `REVIEW_REQUIRED`. #114 is
+  green but based on #113. #110 is green and requires review; #111 is based on #110's branch.
+  No merge or deployment was performed.
+- Required docs source `docs/design/product-design-reference.md` is absent on this branch;
+  the available design source is `docs/design/README.md` with its preserved visual-reference set.
+
 ## Next actions
 
-1. Await required human review on #117; latest full CI run 42280222282 passed.
+1. Push and monitor the memorial photo proxy fix on #117, then await its required human review.
 2. Recheck #115/#116 checks and request/await authorized reviews; they were green on the latest
    checked runs but remain blocked by required review.
 3. Keep #107 at top of review queue. No production switch/deploy is authorized through bypass.
