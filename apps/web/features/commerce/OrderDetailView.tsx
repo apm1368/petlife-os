@@ -14,8 +14,8 @@ import { ApiError } from "@/lib/api/client";
 import { fulfillmentTone } from "./fulfillment-tone";
 import { StarRow } from "./commerce-ui";
 
-function dateTime(value: string, locale: "fa" | "en", withTime = true) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" }).format(new Date(value));
+function dateTime(value: string, locale: string, withTime = true) {
+  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale, withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" }).format(new Date(value));
 }
 
 /**
@@ -28,7 +28,7 @@ function dateTime(value: string, locale: "fa" | "en", withTime = true) {
 export function OrderDetailView({ orderId }: { orderId: string }) {
   const t = useTranslations("commerce.orderDetail");
   const tStatus = useTranslations("commerce.statusLabels");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
   const router = useRouter();
   const pets = usePetStore((s) => s.pets);
 
@@ -310,7 +310,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
 
 function OrderItemRow({ orderId, item, canReview, petName, onReviewed }: { orderId: string; item: OrderItemDto; canReview: boolean; petName: string | null; onReviewed: () => void }) {
   const t = useTranslations("commerce.orderDetail");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);

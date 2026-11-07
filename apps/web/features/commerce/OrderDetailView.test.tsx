@@ -91,6 +91,21 @@ describe("OrderDetailView", () => {
     expect(screen.getByText("Fulfillment tracking coming soon")).toBeTruthy();
   });
 
+  it.each([
+    ["de", "Bestellung von Pet Bazaar Tehran", "Zahlungsstatus", "Bezahlt"],
+    ["es", "Pedido de Pet Bazaar Tehran", "Estado del pago", "Pagado"],
+  ] as const)("localizes order details in %s", async (locale, title, paymentLabel, paidLabel) => {
+    vi.mocked(commerceService.getOrder).mockResolvedValue(ORDER);
+
+    renderWithIntl(<OrderDetailView orderId="order-1" />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(paymentLabel)).toBeTruthy();
+    expect(screen.getByText(paidLabel)).toBeTruthy();
+    expect(screen.getAllByText("125.000 Toman").length).toBeGreaterThan(0);
+    expect(screen.getByText(new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(ORDER.createdAt)), { exact: false })).toBeTruthy();
+  });
+
   it("shows the Fulfillment status, tracking code, and a milestone timeline once a Fulfillment exists", async () => {
     const fulfillment = {
       id: "fulfillment-1",

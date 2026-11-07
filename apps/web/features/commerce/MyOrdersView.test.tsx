@@ -44,6 +44,20 @@ describe("MyOrdersView", () => {
     expect(screen.getByText("125,000 Toman")).toBeTruthy();
   });
 
+  it.each([
+    ["de", "Meine Bestellungen", "Bestätigt", "125.000 Toman"],
+    ["es", "Mis pedidos", "Confirmado", "125.000 Toman"],
+  ] as const)("localizes the order list in %s", async (locale, title, status, total) => {
+    vi.mocked(commerceService.listOrders).mockResolvedValue([ORDER]);
+
+    renderWithIntl(<MyOrdersView />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(status)).toBeTruthy();
+    expect(screen.getByText(total)).toBeTruthy();
+    expect(screen.getByText(new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(ORDER.createdAt)))).toBeTruthy();
+  });
+
   it("shows the Fulfillment status as its own separate badge, never collapsed into Order status", async () => {
     vi.mocked(commerceService.listOrders).mockResolvedValue([{ ...ORDER, fulfillmentStatus: "OUT_FOR_DELIVERY" as never }]);
 

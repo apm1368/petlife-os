@@ -23,7 +23,7 @@ export function MyOrdersView() {
   const t = useTranslations("commerce.myOrders");
   const tStatus = useTranslations("commerce.statusLabels");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
 
   const [orders, setOrders] = useState<OrderSummaryDto[] | null>(null);
   const [error, setError] = useState(false);
@@ -113,7 +113,7 @@ export function MyOrdersView() {
                     ) : null}
                   </span>
                   <span className="text-body font-semibold text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
-                  <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(order.createdAt))}</span>
+                  <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale, { dateStyle: "medium" }).format(new Date(order.createdAt))}</span>
                 </span>
               </button>
             </li>
