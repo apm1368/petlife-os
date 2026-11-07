@@ -55,6 +55,12 @@ const COPY = {
     failed: "Saving didn't work. Please try again.",
     photoFailed: "The photo didn't upload, so none of the changes were saved. Please try again.",
   },
+  de: {
+    title: "Angaben bearbeiten", photo: "Foto", choose: "Foto auswählen", replace: "Foto ändern", remove: "Foto entfernen", photoHint: "JPG, PNG oder WebP, höchstens 10 MB.", tooBig: "Das Foto ist größer als 10 MB.", name: "Name", sex: "Geschlecht", sexes: { MALE: "Männlich", FEMALE: "Weiblich", UNKNOWN: "Nicht sicher" }, birth: "Geburtsdatum", breed: "Rasse", color: "Farbe und besondere Merkmale", weight: "Gewicht", units: { KG: "kg", LB: "lb" }, microchip: "Mikrochipnummer", neutered: "Kastrationsstatus", neuteredOptions: { NEUTERED: "Kastriert", INTACT: "Nicht kastriert", UNKNOWN: "Nicht bekannt" }, cancel: "Abbrechen", save: "Speichern", failed: "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.", photoFailed: "Das Foto konnte nicht hochgeladen werden; die übrigen Änderungen wurden gespeichert.",
+  },
+  es: {
+    title: "Editar datos", photo: "Foto", choose: "Elegir una foto", replace: "Cambiar foto", remove: "Quitar foto", photoHint: "JPG, PNG o WebP, hasta 10 MB.", tooBig: "La foto supera los 10 MB.", name: "Nombre", sex: "Sexo", sexes: { MALE: "Macho", FEMALE: "Hembra", UNKNOWN: "No lo sé" }, birth: "Fecha de nacimiento", breed: "Raza", color: "Color y marcas", weight: "Peso", units: { KG: "kg", LB: "lb" }, microchip: "Número de microchip", neutered: "Esterilización", neuteredOptions: { NEUTERED: "Esterilizada", INTACT: "No esterilizada", UNKNOWN: "No lo sé" }, cancel: "Cancelar", save: "Guardar", failed: "No se pudo guardar. Inténtalo de nuevo.", photoFailed: "No se pudo subir la foto; los demás cambios se guardaron.",
+  },
 } as const;
 
 const toLatin = (v: string) => v.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace("٫", ".");
@@ -63,7 +69,7 @@ const toLatin = (v: string) => v.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵
  * The pet's identity in one form — the same fields as adding a pet, prefilled. The photo is uploaded
  * through the signed pet-photo path and only then attached; "remove" clears it.
  */
-export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDto; locale: "fa" | "en"; onCancel: () => void; onSaved: (pet: PetDto) => void }) {
+export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDto; locale: keyof typeof COPY; onCancel: () => void; onSaved: (pet: PetDto) => void }) {
   const c = COPY[locale];
   const [name, setName] = useState(pet.name);
   const [sex, setSex] = useState<PetSex | null>(pet.sex ?? null);
