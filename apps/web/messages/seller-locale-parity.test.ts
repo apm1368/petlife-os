@@ -10,7 +10,7 @@ function flatten(value: unknown, prefix = ""): Array<[string, string]> {
 }
 
 const placeholders = (message: string) => [...message.matchAll(/\{([\w]+)(?:\s*,[^}]*)?\}/g)].map((match) => match[1]).sort();
-const sellerScope = ["shell", "dashboard", "orders", "orderDetail", "finance"] as const;
+const sellerScope = ["shell", "dashboard", "orders", "orderDetail", "inventory", "channels", "team", "settings", "finance"] as const;
 
 describe("seller DE/ES catalog coverage", () => {
   it.each([["de", de.seller], ["es", es.seller]] as const)("translates seller operations and preserves placeholders for %s", (_locale, localized) => {

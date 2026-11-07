@@ -125,6 +125,21 @@
       "refundStatus": { "PENDING_REVIEW": "En revisión", "APPROVED": "Aprobado", "REJECTED": "Rechazado", "WITHDRAWN": "Retirado" },
       "fulfillmentStatus": { "PENDING": "Pedido recibido", "AWAITING_SELLER_PREPARATION": "El vendedor está preparando el pedido", "READY_FOR_PICKUP": "Listo para recoger", "PICKUP_REQUESTED": "Mensajero solicitado", "PICKUP_ASSIGNED": "Mensajero asignado", "ASSIGNED": "Mensajero asignado", "PICKED_UP": "Recogido", "IN_TRANSIT": "En tránsito", "OUT_FOR_DELIVERY": "En reparto", "DELIVERED": "Entregado", "FAILED": "Problema con la entrega", "CANCELED": "Cancelado" }
     },
+    "inventory": {
+      "title": "Inventario", "loading": "Cargando inventario…", "retry": "Reintentar", "empty": "Todavía no hay inventario.", "lowStock": "Pocas unidades", "reserved": "Reservado", "available": "Disponible", "onHand": "Existencias", "save": "Guardar", "adjustFailed": "Este ajuste dejaría el inventario por debajo de cero."
+    },
+    "channels": {
+      "title": "Canales", "loading": "Cargando canales…", "retry": "Reintentar", "connections": "Conexiones", "lastSync": "Última sincronización: {when}", "neverSynced": "Nunca se ha sincronizado", "connect": "Conectar", "listings": "Publicaciones en marketplaces", "noListings": "Todavía no hay publicaciones en marketplaces", "noListingsBody": "Asocia una oferta a un canal desde la página Ofertas para publicarla.", "resync": "Sincronizar de nuevo", "publish": "Publicar", "reconcile": "Conciliar", "inventoryMismatch": "El inventario publicado ({published}) no coincide con el inventario de opetlife ({canonical}).", "noDiscrepancy": "No se encontraron diferencias.",
+      "discrepancy": { "INVENTORY_MISMATCH": "Se detectó una diferencia de inventario.", "PRICE_MISMATCH": "Se detectó una diferencia de precio.", "LISTING_STATUS_MISMATCH": "Se detectó una diferencia en el estado de la publicación.", "ORDER_STATUS_MISMATCH": "Se detectó una diferencia en el estado del pedido.", "UNKNOWN_PROVIDER_REFERENCE": "Es necesario asociar la publicación." }
+    },
+    "team": {
+      "title": "Equipo", "loading": "Cargando equipo…", "retry": "Reintentar", "invite": "Invitar a una persona", "inviteIdentifier": "Correo electrónico o teléfono", "inviteHint": "La persona ya debe tener una cuenta de opetlife.", "role": "Rol", "inviteAction": "Invitar", "inviteFailed": "No se pudo invitar a esta persona. Inténtalo de nuevo.",
+      "statusLabel": { "PENDING": "Pendiente", "ACTIVE": "Activo", "DEACTIVATED": "Desactivado" }, "remove": "Quitar",
+      "roles": { "OWNER": "Propietario", "ADMIN": "Administrador", "OPERATIONS": "Operaciones", "CATALOG_MANAGER": "Gestión del catálogo", "ORDER_MANAGER": "Gestión de pedidos", "FINANCE": "Finanzas", "SUPPORT": "Soporte", "VIEWER": "Solo lectura" }
+    },
+    "settings": {
+      "title": "Ajustes", "loading": "Cargando ajustes…", "retry": "Reintentar", "verificationNote": "La revisión de opetlife gestiona los datos legales y de verificación; no se pueden editar aquí.", "supportEmail": "Correo de soporte", "supportPhone": "Teléfono de soporte", "city": "Ciudad", "timezone": "Zona horaria", "description": "Descripción", "save": "Guardar", "saved": "Guardado", "saveFailed": "No se pudieron guardar los ajustes. Inténtalo de nuevo."
+    },
     "finance": {
       "title": "Finanzas", "loading": "Cargando finanzas…", "retry": "Reintentar", "viewTransactions": "Ver transacciones", "viewAllSettlements": "Ver todas las liquidaciones",
       "balance": { "pending": "Pendiente", "reserved": "Reservado para liquidación", "available": "Disponible para retirar", "paid": "Total pagado" },

@@ -17,6 +17,7 @@ export function SellerSettingsView() {
   const [draft, setDraft] = useState<{ supportContactEmail: string; supportContactPhone: string; timezone: string; city: string; description: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   async function load() {
     if (!sellerId) return;
@@ -45,10 +46,13 @@ export function SellerSettingsView() {
     if (!sellerId || !draft) return;
     setSaving(true);
     setSaved(false);
+    setSaveError(false);
     try {
       const updated = await sellerOsService.updateOrganization(sellerId, draft);
       setOrg(updated);
       setSaved(true);
+    } catch {
+      setSaveError(true);
     } finally {
       setSaving(false);
     }
@@ -77,6 +81,7 @@ export function SellerSettingsView() {
           </Button>
           {saved ? <span className="text-metadata text-state-success">{t("saved")}</span> : null}
         </div>
+        {saveError ? <p role="alert" className="text-metadata text-state-urgent">{t("saveFailed")}</p> : null}
       </ContextSurface>
     </div>
   );

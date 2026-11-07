@@ -1,5 +1,15 @@
 # PET LIFE OS release and development handoff — 2026-11-07
 
+## Continuation checkpoint — 2026-11-07 23:20 UTC
+
+- Re-fetched `origin/main`: `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`. The primary worktree had no pre-existing uncommitted changes before this seller follow-up. Payment worktree `/workspace/petlife-payment-controls-live` still has four modified payment service/module files and two untracked payment-control service/spec files. It was inspected only and left untouched.
+- Disk: 32G total, 30G used, 672M available (98%). Project `node_modules` is 865M and `.git` is 180M. No cleanup was performed; local full production builds are deferred.
+- #107 remains OPEN at `4ade295291f96a8e68b2b4698d6d298b770ed88c`; hosted build check is `SUCCESS`, review is `REVIEW_REQUIRED`, and it is not eligible to merge. A fresh public GET of `/api/shop/products?page=1&pageSize=50` returned 15 products, including 10 `qa-b4-*` products whose titles explicitly say they are demonstrations. The #107 fix is therefore NOT LIVE. No deployment was attempted.
+- Public `GET /api/health` returns 404; this is not the documented readiness route. Use `/api/health/version` and `/api/health/ready` for release verification.
+- PRs #112–#135 remain open/unmerged. The latest exposed `build` checks for #112–#135 are successful; #107 and #112–#118 still show review-required where applicable. #110 awaits review and #111 remains on its non-main dependency base; #113 awaits review and #114 remains based on #113. No branch protection was bypassed.
+- Continuing #135: German/Spanish seller inventory, channels/listing reconciliation, team and settings translations; seller settings now presents an accessible error when its update fails. Latest local focused run: 5 files / 9 tests pass; web typecheck and lint pass; JSON parsing and `git diff --check` pass. An earlier full web run overlapped live file edits and ended with 235 files passed and 2 files/3 assertions failing because the test runner had loaded an intermediate catalog/test state; after the final corrections, the focused affected tests pass, but the full suite has not yet been rerun. Hosted CI for the updated head is pending until push. Seller onboarding/promotions/backoffice translation remains incomplete. This work is not live.
+- Memorial image boundary unchanged: production bucket/CDN configuration is inaccessible. Withdrawal is not verified to revoke original public URLs or prior CDN copies.
+
 ## Production and release queue
 
 - Current `origin/main`: `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; the previously reported deployment id was `github-42091865674-1`.

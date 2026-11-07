@@ -2065,7 +2065,8 @@
       "timezone": "Timezone",
       "description": "Description",
       "save": "Save",
-      "saved": "Saved"
+      "saved": "Saved",
+      "saveFailed": "Couldn't save these settings. Please try again."
     },
     "finance": {
       "title": "Finance",

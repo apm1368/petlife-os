@@ -125,6 +125,21 @@
       "refundStatus": { "PENDING_REVIEW": "Wird geprüft", "APPROVED": "Genehmigt", "REJECTED": "Abgelehnt", "WITHDRAWN": "Zurückgezogen" },
       "fulfillmentStatus": { "PENDING": "Bestellung eingegangen", "AWAITING_SELLER_PREPARATION": "Verkäufer bereitet die Bestellung vor", "READY_FOR_PICKUP": "Abholbereit", "PICKUP_REQUESTED": "Kurier angefordert", "PICKUP_ASSIGNED": "Kurier zugewiesen", "ASSIGNED": "Kurier zugewiesen", "PICKED_UP": "Abgeholt", "IN_TRANSIT": "Unterwegs", "OUT_FOR_DELIVERY": "Wird zugestellt", "DELIVERED": "Zugestellt", "FAILED": "Zustellproblem", "CANCELED": "Storniert" }
     },
+    "inventory": {
+      "title": "Lagerbestand", "loading": "Lagerbestand wird geladen …", "retry": "Erneut versuchen", "empty": "Noch kein Lagerbestand vorhanden.", "lowStock": "Niedriger Bestand", "reserved": "Reserviert", "available": "Verfügbar", "onHand": "Gesamtbestand", "save": "Speichern", "adjustFailed": "Diese Anpassung würde den Bestand ins Negative setzen."
+    },
+    "channels": {
+      "title": "Vertriebskanäle", "loading": "Vertriebskanäle werden geladen …", "retry": "Erneut versuchen", "connections": "Verbindungen", "lastSync": "Zuletzt synchronisiert: {when}", "neverSynced": "Noch nie synchronisiert", "connect": "Verbinden", "listings": "Angebote auf Marktplätzen", "noListings": "Noch keine Marktplatzangebote", "noListingsBody": "Ordne auf der Seite Angebote ein Angebot einem Kanal zu, um es zu veröffentlichen.", "resync": "Erneut synchronisieren", "publish": "Veröffentlichen", "reconcile": "Abgleichen", "inventoryMismatch": "Der veröffentlichte Bestand ({published}) weicht vom opetlife-Bestand ({canonical}) ab.", "noDiscrepancy": "Keine Abweichung gefunden.",
+      "discrepancy": { "INVENTORY_MISMATCH": "Bestandsabweichung erkannt.", "PRICE_MISMATCH": "Preisabweichung erkannt.", "LISTING_STATUS_MISMATCH": "Abweichender Angebotsstatus erkannt.", "ORDER_STATUS_MISMATCH": "Abweichender Bestellstatus erkannt.", "UNKNOWN_PROVIDER_REFERENCE": "Zuordnung des Angebots erforderlich." }
+    },
+    "team": {
+      "title": "Team", "loading": "Team wird geladen …", "retry": "Erneut versuchen", "invite": "Teammitglied hinzufügen", "inviteIdentifier": "E-Mail oder Telefonnummer", "inviteHint": "Die Person benötigt bereits ein opetlife-Konto.", "role": "Rolle", "inviteAction": "Einladen", "inviteFailed": "Die Einladung konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "statusLabel": { "PENDING": "Ausstehend", "ACTIVE": "Aktiv", "DEACTIVATED": "Deaktiviert" }, "remove": "Entfernen",
+      "roles": { "OWNER": "Inhaber", "ADMIN": "Administration", "OPERATIONS": "Betrieb", "CATALOG_MANAGER": "Katalogverwaltung", "ORDER_MANAGER": "Bestellverwaltung", "FINANCE": "Finanzen", "SUPPORT": "Support", "VIEWER": "Leseberechtigt" }
+    },
+    "settings": {
+      "title": "Einstellungen", "loading": "Einstellungen werden geladen …", "retry": "Erneut versuchen", "verificationNote": "Rechts- und Prüfungsangaben werden durch die Prüfung von opetlife verwaltet und können hier nicht geändert werden.", "supportEmail": "Support-E-Mail", "supportPhone": "Support-Telefon", "city": "Stadt", "timezone": "Zeitzone", "description": "Beschreibung", "save": "Speichern", "saved": "Gespeichert", "saveFailed": "Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut."
+    },
     "finance": {
       "title": "Finanzen", "loading": "Finanzen werden geladen …", "retry": "Erneut versuchen", "viewTransactions": "Transaktionen ansehen", "viewAllSettlements": "Alle Abrechnungen ansehen",
       "balance": { "pending": "Ausstehend", "reserved": "Zur Abrechnung vorgemerkt", "available": "Auszahlbar", "paid": "Bisher ausgezahlt" },
