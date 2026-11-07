@@ -12,10 +12,10 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
 import { formatNumber, ProductImage } from "./commerce-ui";
 
-type Locale = "fa" | "en";
+type Locale = "fa" | "en" | "de" | "es";
 
 function day(value: string, locale: Locale) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(value));
+  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale, { dateStyle: "medium" }).format(new Date(value));
 }
 
 function statusTone(status: RepeatDeliveryDto["status"]): "success" | "neutral" | "attention" {
