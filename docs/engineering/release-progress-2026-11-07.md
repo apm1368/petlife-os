@@ -82,3 +82,37 @@
 - #135's previous code head `fc3d61d32111853a71b4c239f8a7e4e7bb9f5a14` was being checked in run `42421492102`, but that run is superseded by the new finance-localization work. The next push advances the head and supersedes this status; report green only after the new latest-head run finishes.
 - The expanded #135 work adds Persian seller fulfillment labels and seller finance translations/tests while keeping fa/en/de/es catalog coverage intact. Its latest local validation is 35 seller tests, 2 seller key/interpolation parity tests, 4 locale date tests, and passing typecheck/lint. The existing finance ledger/payout behavior is unchanged.
 - Disk check remains `673 MiB` free (98% used); production build remains deferred locally. Payment worktree and its pre-existing uncommitted changes remain preserved. `origin/main`/production SHA `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; #107 still requires review and production still exposes 10 demo records out of 15.
+
+## Final localization/release check — 2026-11-07 22:57 UTC
+
+- Fresh `git fetch origin`: `origin/main` remains `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`. Production `/api/health/version` returns the same SHA and deployment `github-42091865674-1`. Safe public GET of `/api/shop/products?page=1&pageSize=50` still returns 15 items, 10 with `qa-b4-*` slugs. #107 remains open, head `4ade295291f96a8e68b2b4698d6d298b770ed88c`, base `main`, CI run `42231686406` passed, review required/merge blocked. Do not claim the live demo exposure is resolved.
+- Current localization/landing PR state (all open, unmerged; head hashes abbreviated to first 7 characters):
+
+| PR | Base | Head | Latest CI | Review |
+| --- | --- | --- | --- | --- |
+| #115 | `main` | `1618a68` | pass `42274224922` | required |
+| #116 | `main` | `1e16a2f` | pass `42273854807` | required |
+| #117 | `main` | `6c8693d` | pass `42349510739` | required |
+| #118 | `main` | `e57dd03` | pass `42390739809` | required |
+| #119 | `feat/i18n-de-es` | `83fe67c` | pass `42396271324` | no review recorded |
+| #120 | `feat/i18n-account-settings` | `434757a` | pass `42397371104` | no review recorded |
+| #121 | `feat/i18n-pet-profile` | `0345abf` | pass `42397981911` | no review recorded |
+| #122 | `feat/i18n-de-es` | `2e1816b` | pass `42400163736` | no review recorded |
+| #123 | `feat/i18n-shop-customer` | `d963f84` | pass `42400557006` | no review recorded |
+| #124 | `feat/i18n-seller-catalog` | `d34bb98` | pass `42401121091` | no review recorded |
+| #125 | `feat/i18n-de-es` | `b20026d` | pass `42402066951` | no review recorded |
+| #126 | `feat/i18n-de-es` | `b47c9e6` | pass `42402629254` | no review recorded |
+| #127 | `feat/i18n-customer-bookings` | `a89201f` | pass `42403758722` | no review recorded |
+| #128 | `feat/i18n-de-es` | `eb1dc3a` | pass `42406445315` | no review recorded |
+| #129 | `feat/i18n-de-es` | `94ffaba` | pass `42407730664` | no review recorded |
+| #130 | `feat/i18n-de-es` | `62cca06` | pass `42413171313` | no review recorded |
+| #131 | `feat/i18n-de-es` | `4515b77` | pass `42415997431` | no review recorded |
+| #132 | `feat/i18n-shop-customer` | `01c3aa2` | pass `42417793232` | no review recorded |
+| #133 | `feat/i18n-shop-customer` | `77c9250` | pass `42418431721` | no review recorded |
+| #134 | `feat/i18n-shop-customer` | `9b7949f` | pass `42420743583` | no review recorded |
+| #135 | `feat/i18n-shop-customer` | `79853f1` | pass `42422190037` | no review recorded |
+
+- #135's final code head adds seller shell/dashboard/order/finance localization in de/es, Persian fulfillment regression coverage, and locale-aware date/count formatting; it changes no ledger, payout, payment or seller authorization behavior. Local validation on that code: 35 focused tests (25 seller view tests, 2 seller key/interpolation parity tests, 4 date tests, 4 number tests), web typecheck/lint, JSON and diff checks passed. Hosted run `42422190037` passed all checks in 9m47s. The handoff and rollout documents were updated in this commit; that documentation-only follow-up will trigger a new run, which must be checked before describing the PR's latest *documentation head* CI as green.
+- Already-shipped slices still await their required base reviews: #118 is required before #119/#122 chains can be retargeted; #122 is the base for #132–#135. Booking/customer support/notifications/travel localization exists in #124–#131 but is not in production. No branch bases were retargeted and no PR was merged.
+- Disk at this check: `672 MiB` free, 98% used. Largest measured project items: root `node_modules` 865 MiB, root `.git` 180 MiB, project worktree 438 MiB; largest sibling worktrees measured included `petlife-catalog-import` 1.4 GiB and `petlife-booking-service-patterns` 860 MiB. Only `.turbo/cache` was previously removed as confirmed regenerable (~8 MiB); source, history, DB volumes, user data, and uncertain worktrees were preserved. Local production build remains deferred due low headroom; hosted production build passed on #135 code head.
+- The payment-controls worktree `/workspace/petlife-payment-controls-live` remains unchanged with its pre-existing modified payment services/module and untracked controls service/spec. No translation changes are LIVE. Memorial original-object/CDN privacy remains unverified because authorized bucket/CDN access is unavailable.
