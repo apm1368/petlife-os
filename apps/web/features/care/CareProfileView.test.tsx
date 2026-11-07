@@ -64,4 +64,12 @@ describe("CareProfileView", () => {
     expect(screen.queryByRole("button", { name: "Edit Care Profile" })).toBeNull();
     expect(screen.queryByRole("textbox")).toBeNull();
   });
+
+  it.each([["de", "Pflegeprofil", "Pflegeprofil bearbeiten"], ["es", "Perfil de cuidados", "Editar perfil de cuidados"]] as const)("localizes the care profile in %s", async (locale, title, editLabel) => {
+    vi.mocked(careProfileService.get).mockResolvedValue(PROFILE);
+    vi.mocked(petsService.getMyAccess).mockResolvedValue(FULL_ACCESS);
+    renderWithIntl(<CareProfileView petId="pet-1" />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("button", { name: editLabel })).toBeTruthy();
+  });
 });
