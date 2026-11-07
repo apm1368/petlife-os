@@ -2,22 +2,16 @@
 
 The public landing route is available in Persian, English, German and Spanish. Persian uses RTL; the other three use LTR. The German and Spanish landing copy includes the public navigation, service descriptions, partner entry, trust/privacy copy, footer and image-credit disclosures. The existing approved landing composition and source images are unchanged; the German and Spanish hero use the existing English-labelled artwork because the pavilion labels are baked into the image.
 
-This is not full application localization. The account preference API and database support saving all four locales (fa/en/de/es). The shared member navigation (desktop, mobile and Explore sheet), Explore index and Account navigation now have explicit copy in all four locales; links retain the active locale. Registration, password login, phone/OTP login, forgot/reset password, auth-shell copy and household collaboration copy also have German/Spanish translations. Household copy covers members, invitations, pet permissions, access presets, confirmation actions and access history. Account dates use the selected locale (fa retains Jalali) and account counts use locale-specific number formatting. The DE/ES auth catalogs overlay the English catalog so unfinished message keys remain readable instead of raising missing-key errors. These page families have focused component tests. The landing and personal-settings locale selector/calendar explanation were already localized in all four languages.
-
-The personal account settings page (`PersonalSettingsView`) now has German and Spanish copy for its display name, appearance, save/error/loading states, contact methods and OTP-based contact-change flow. This is a focused UI translation only: changing a contact still depends on the existing verification provider flow, and no SMS delivery is simulated. Other account settings pages and pet profile, health, booking, provider, seller, shop, admin, support and legal copy remain partially or mostly Persian/English only. German and Spanish message catalogs currently translate auth-specific branches; other keys fall back to English to avoid missing-key errors. Notification and trip-checklist copy also falls back to English for German and Spanish; German/Spanish SMS templates are not implemented and must not be simulated. Outside the components named above, do not present fallback text as a completed translation.
-
-Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
+This is not full application localization. The account preference API and database support saving fa/en/de/es. Shared member navigation, Explore and account navigation, authentication, household collaboration, and the landing are localized with route preservation. Persian is RTL/Jalali; en/de/es are LTR with locale-aware formatting.
 
 ## Personal settings (PR #119 — merged)
 
-German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. UI-only; no provider delivery was added.
-
-## Personal settings (PR #119 — merged)
-
-German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. UI-only; no provider delivery was added.
+German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. This UI-only change does not alter provider delivery.
 
 ## Travel localization (PR #152 — current)
 
-Travel hub, trip creation, detail and readiness/passport surfaces now have German/Spanish copy. The core `travel` namespace has structural parity in fa/en/de/es (93 keys); trip detail uses locale-aware dates (Persian remains Jalali), and country names/counts use locale data. External stays, marketplace results/listings and legacy trip editor are also being localized in this same reviewable slice.
+Travel hub, trip creation, detail, readiness/passport, external stays, discovery/search results, and trip hub/editor surfaces are being localized into German and Spanish. The core `travel` and `externalTravel` namespaces have structural parity across fa/en/de/es. Persian keeps Jalali dates and digits; other locales use locale-aware dates/numbers.
 
-External prices/availability remain source observations, not reservations; no provider data is simulated. Generic API errors or any unlisted keys may fall back to English, and German/Spanish SMS is not implemented. This is not a claim of complete travel localization; continue the locale/responsive/accessibility check.
+External-stay prices and availability remain observations, not reservations; source listings remain the final confirmation path. No partner/provider data, price, availability, SMS delivery or booking is simulated. The Jajiga integration is not made production-ready by this translation work.
+
+Still incomplete: other account pages; health records/documents/care calendar; checkout/orders/seller operations; provider console and booking details; support/admin/legal; community/backoffice; generic API errors and notification content. Fallbacks remain visible in those areas, and German/Spanish SMS templates are not implemented. Continue responsive, RTL/LTR, accessibility and visual checks by page family.
