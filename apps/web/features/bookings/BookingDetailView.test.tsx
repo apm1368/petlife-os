@@ -186,4 +186,28 @@ describe("BookingDetailView", () => {
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
     expect(await screen.findByRole("button", { name: "Leave a review" })).toBeTruthy();
   });
+
+  it("localizes German booking details and cancellation while preserving the German support route", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, startAt: future, endAt: futureEnd, paymentMode: "FULL_PREPAYMENT" as never });
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "de");
+
+    expect(await screen.findByText("Bestätigt")).toBeTruthy();
+    expect(screen.getByText("Haustier")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Support kontaktieren" }).getAttribute("href")).toBe("/de/support/new?relatedEntityType=BOOKING&relatedEntityId=booking-1&category=BOOKING");
+    fireEvent.click(screen.getByRole("button", { name: "Buchung stornieren" }));
+    expect(screen.getByText("Diese Buchung stornieren?")).toBeTruthy();
+    expect(screen.getByText("Der Anbieter hält diesen Termin dann nicht mehr für dich frei.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Ja, Buchung stornieren" })).toBeTruthy();
+  });
+
+  it("localizes Spanish awaiting-payment state and keeps the actual pay action", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "AWAITING_PAYMENT" as never, paymentStatus: "PENDING" as never, paymentMode: "DEPOSIT" as never, depositAmount: 2_000_000, priceAmount: 10_000_000, requestExpiresAt: future });
+    vi.mocked(bookingsService.pay).mockResolvedValue(BASE_BOOKING);
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "es");
+
+    expect(await screen.findByText("Pendiente de pago")).toBeTruthy();
+    expect(screen.getByText("Proveedor")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Pagar de forma segura" })).toBeTruthy();
+    expect(screen.getByText(/La reserva solo se confirma cuando la pasarela confirma el pago/)).toBeTruthy();
+  });
 });
