@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { usePetStore } from "@/stores/pet-store";
 import { householdsService } from "@/services/households.service";
@@ -31,6 +31,14 @@ describe("PetContextShell — the pet on screen is the pet in context", () => {
     renderWithIntl(<PetContextShell petId="cookie"><p>overview</p></PetContextShell>, "fa");
     await new Promise((r) => setTimeout(r, 50));
     expect(householdsService.setActivePet).not.toHaveBeenCalled();
+  });
+
+  it.each([["de", "Übersicht", "Hund"], ["es", "Resumen", "Perro"]] as const)("localizes the pet identity shell in %s", async (locale, overviewLabel, speciesLabel) => {
+    usePetStore.setState({ householdId: "h1", pets: [pet("cookie", "Cookie")], activePetId: "cookie" });
+    renderWithIntl(<PetContextShell petId="cookie"><p>overview</p></PetContextShell>, locale);
+    expect(await screen.findByRole("navigation", { name: locale === "de" ? "Bereiche des Haustierprofils" : "Secciones del perfil de la mascota" })).toBeTruthy();
+    expect(screen.getByText(overviewLabel)).toBeTruthy();
+    expect(screen.getByText(new RegExp(speciesLabel))).toBeTruthy();
   });
 });
 

@@ -31,6 +31,13 @@ describe("pet overview reads", () => {
     expect(screen.getByRole("heading", { name: "Recent health" })).toBeTruthy();
   });
 
+  it.each([["de", "Erfordert Aufmerksamkeit", "Anstehend", "Gesundheitsakte öffnen"], ["es", "Requiere atención", "Próximos", "Abrir historial de salud"]] as const)("renders the pet overview in %s", async (locale, attention, upcoming, healthShortcut) => {
+    renderWithIntl(<PetProfileView petId="one" />, locale);
+    expect(await screen.findByRole("heading", { name: attention })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: upcoming })).toBeTruthy();
+    expect(screen.getByRole("link", { name: healthShortcut })).toBeTruthy();
+  });
+
   it("retries reads and restores a real overdue care item after recovery", async () => {
     vi.mocked(careRemindersService.list).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce([{ id: "care1", title: "Follow up", type: "CUSTOM", state: "OVERDUE", dueAt: "2026-10-01T10:00:00Z" }] as never);
     renderWithIntl(<PetProfileView petId="one" />);
