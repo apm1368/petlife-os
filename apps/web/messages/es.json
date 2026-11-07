@@ -68,5 +68,11 @@
       "passwordMismatch": "Las contraseñas no coinciden.",
       "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
     }
+  },
+  "travel": {
+    "status": { "DRAFT": "Borrador", "PLANNING": "En planificación", "READY": "Listo", "IN_PROGRESS": "En curso", "COMPLETED": "Completado", "CANCELLED": "Cancelado" },
+    "travelMode": { "AIR": "Avión", "ROAD": "Carretera", "RAIL": "Tren", "SEA": "Barco", "OTHER": "Otro" },
+    "hub": { "title": "Viajes", "newTrip": "Nuevo viaje", "passportReadinessLink": "Preparación de viaje de la mascota", "placesLink": "Buscar lugares que admiten mascotas", "insuranceLink": "Ver seguros para mascotas", "empty": "Aún no hay viajes. Planifica el primero.", "requirementsCount": "{count, plural, one {# requisito} other {# requisitos}}", "staysLink": "Buscar alojamiento que admite mascotas" },
+    "newTrip": { "title": "Planificar un viaje", "subtitle": "Empieza con los datos principales; puedes completar la lista más adelante.", "originCountryLabel": "País de origen (código ISO)", "originCityLabel": "Ciudad de salida", "destinationCountryLabel": "País de destino (código ISO)", "destinationCityLabel": "Ciudad de destino", "departAtLabel": "Fecha de salida", "returnAtLabel": "Fecha de regreso", "travelModeLabel": "Medio de transporte", "notesLabel": "Notas", "submit": "Crear viaje" }
   }
 }

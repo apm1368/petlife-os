@@ -8,9 +8,12 @@ The personal account settings page (`PersonalSettingsView`) now has German and S
 
 Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 
-## Account settings follow-up (PR #119)
+## Personal settings (PR #119 — merged)
 
-- `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
-- Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
-- PR #118 has merged to `main`; this change has been replayed onto that merged base. The new head must pass fresh CI before it can merge. No production behavior is claimed from this PR yet.
-- This follow-up only translates the personal settings page and updates this rollout note. It changes no API, persistence, verification or notification contract. The four-locale preference foundation is supplied by #118 on `main`.
+German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. UI-only; no provider delivery was added.
+
+## Travel localization (PR #152 — current)
+
+Travel hub and trip creation now have German/Spanish copy for headings, actions, empty state, trip status/mode, fields and links. The shared date controls retain Persian Jalali behavior and locale-aware Gregorian dates for en/de/es. This changes no travel API, does not create sample trips or claim live availability, and does not implement SMS.
+
+Travel detail, readiness/passport, marketplace search/results/listings, external stays and trip hub/editor copy are being completed in this same reviewable slice. External prices/availability remain source observations and are not reservations; no provider data is simulated.
