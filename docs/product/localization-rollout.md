@@ -12,8 +12,12 @@ Next slices: remaining account settings; customer pet/health/care calendar; comm
 
 German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. UI-only; no provider delivery was added.
 
+## Personal settings (PR #119 — merged)
+
+German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. UI-only; no provider delivery was added.
+
 ## Travel localization (PR #152 — current)
 
-Travel hub and trip creation now have German/Spanish copy for headings, actions, empty state, trip status/mode, fields and links. The shared date controls retain Persian Jalali behavior and locale-aware Gregorian dates for en/de/es. This changes no travel API, does not create sample trips or claim live availability, and does not implement SMS.
+Travel hub, trip creation, detail and readiness/passport surfaces now have German/Spanish copy. The core `travel` namespace has structural parity in fa/en/de/es (93 keys); trip detail uses locale-aware dates (Persian remains Jalali), and country names/counts use locale data. External stays, marketplace results/listings and legacy trip editor are also being localized in this same reviewable slice.
 
-Travel detail, readiness/passport, marketplace search/results/listings, external stays and trip hub/editor copy are being completed in this same reviewable slice. External prices/availability remain source observations and are not reservations; no provider data is simulated.
+External prices/availability remain source observations, not reservations; no provider data is simulated. Generic API errors or any unlisted keys may fall back to English, and German/Spanish SMS is not implemented. This is not a claim of complete travel localization; continue the locale/responsive/accessibility check.
