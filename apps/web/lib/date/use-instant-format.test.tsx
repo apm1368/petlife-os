@@ -23,4 +23,12 @@ describe("useInstantFormat", () => {
     expect(text).toContain("October 4, 2026");
     expect(text).toContain("1,250,000");
   });
+
+  it.each([["de", "Oktober"], ["es", "octubre"]] as const)("%s pages get localized Gregorian dates and number grouping", (locale, month) => {
+    renderWithIntl(<Probe />, locale);
+    const text = screen.getByTestId("out").textContent!;
+    expect(text).toContain(month);
+    expect(text).toContain("2026");
+    expect(text).toContain("1.250.000");
+  });
 });

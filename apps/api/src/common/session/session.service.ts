@@ -1,4 +1,4 @@
-import { UserAccountStatus } from "@prisma/client";
+import { UserAccountStatus, type Locale } from "@prisma/client";
 import { AccountSuspendedException } from "../errors/api-exception";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -14,7 +14,7 @@ export interface SessionUser {
   email: string | null;
   phone: string | null;
   displayName: string;
-  locale: "fa" | "en";
+  locale: Locale;
   themePreference: "SYSTEM" | "LIGHT" | "DARK";
 }
 

@@ -3,28 +3,31 @@
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 
-/**
- * The consumer header's language control: a single toggle naming the other language — in the language of
- * the current page (Persian pages say «انگلیسی», English pages say "Persian"), so the visible UI never mixes
- * languages. It changes only the locale segment of the URL — path, query and theme stay as they are.
- */
+const localeNames = {
+  fa: { label: "زبان", fa: "فارسی", en: "انگلیسی", de: "آلمانی", es: "اسپانیایی" },
+  en: { label: "Language", fa: "Persian", en: "English", de: "German", es: "Spanish" },
+  de: { label: "Sprache", fa: "Persisch", en: "Englisch", de: "Deutsch", es: "Spanisch" },
+  es: { label: "Idioma", fa: "persa", en: "inglés", de: "alemán", es: "español" },
+} as const;
+
+/** Changes only the locale path segment, retaining the current page, query, fragment and theme. */
 export function LanguageToggle() {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
-  const next = locale === "fa" ? "en" : "fa";
+  const names = localeNames[locale as keyof typeof localeNames] ?? localeNames.en;
   return (
-    <button
-      type="button"
+    <select
       className="language-toggle"
-      aria-label={locale === "fa" ? "تغییر زبان به انگلیسی" : "Switch language to Persian"}
-      onClick={() => {
+      aria-label={names.label}
+      value={locale}
+      onChange={(event) => {
         const segments = pathname.split("/");
-        segments[1] = next;
-        router.push((segments.join("/") || "/") + window.location.search);
+        segments[1] = event.target.value;
+        router.push((segments.join("/") || "/") + window.location.search + window.location.hash);
       }}
     >
-      {locale === "fa" ? "انگلیسی" : "Persian"}
-    </button>
+      {(["fa", "en", "de", "es"] as const).map((code) => <option key={code} value={code}>{names[code]}</option>)}
+    </select>
   );
 }
