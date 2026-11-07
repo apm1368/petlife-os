@@ -37,7 +37,7 @@ export class AdminPetMemorialService {
         consentVersion: row.consentVersion,
         consentedAt: row.consentedAt.toISOString(),
         submittedAt: row.submittedAt.toISOString(),
-        imageUrl: resolveObjectUrls([row.imageObjectKey])[0] ?? null,
+        imageUrl: resolveObjectUrls([row.sourceImageObjectKey])[0] ?? null,
       })),
       total,
       page: safePage,
@@ -53,7 +53,7 @@ export class AdminPetMemorialService {
       if (!current) throw new NotFoundApiException("Pet memorial submission", { id });
       if (current.status !== PetMemorialStatus.PENDING_REVIEW) throw new ValidationApiException({ field: "status", reason: "SUBMISSION_NOT_PENDING" });
       const approved = action === "APPROVE";
-      if (approved && (!current.consentedAt || current.withdrawnAt || current.imageMemory.type !== PetMemoryType.PHOTO || current.imageMemory.visibility !== PetMemoryVisibility.PUBLIC || current.imageMemory.archivedAt || !current.imageMemory.mediaObjectKeys.includes(current.imageObjectKey) || (current.pet.lifecycleStatus !== PetLifecycleStatus.DECEASED && current.pet.lifecycleStatus !== PetLifecycleStatus.MEMORIAL))) {
+      if (approved && (!current.consentedAt || current.withdrawnAt || current.imageMemory.type !== PetMemoryType.PHOTO || current.imageMemory.visibility !== PetMemoryVisibility.PUBLIC || current.imageMemory.archivedAt || !current.imageMemory.mediaObjectKeys.includes(current.sourceImageObjectKey) || (current.pet.lifecycleStatus !== PetLifecycleStatus.DECEASED && current.pet.lifecycleStatus !== PetLifecycleStatus.MEMORIAL))) {
         throw new ValidationApiException({ field: "submission", reason: "CONSENT_IMAGE_OR_LIFECYCLE_NO_LONGER_VALID" });
       }
       const nextStatus = approved ? PetMemorialStatus.PUBLISHED : PetMemorialStatus.REJECTED;

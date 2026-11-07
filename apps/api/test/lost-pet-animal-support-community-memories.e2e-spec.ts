@@ -10,6 +10,9 @@ import type { ResolvedAdminContext } from "../src/modules/admin/auth/admin-conte
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { randomUUID } from "node:crypto";
 import { Readable } from "node:stream";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { STORAGE_DRIVER, type StorageDriver } from "../src/modules/storage/storage-driver.interface";
 
 interface Cookies {
@@ -58,14 +61,28 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
   let app: INestApplication;
   let prisma: PrismaService;
   let logSpy: jest.SpyInstance;
+  let storageDir: string;
 
   beforeAll(async () => {
-    app = await createTestApp();
+    const originalStorageDir = process.env.STORAGE_LOCAL_DIR;
+    const originalStorageDriver = process.env.STORAGE_DRIVER;
+    storageDir = await mkdtemp(join(tmpdir(), "petlife-memorial-e2e-"));
+    process.env.STORAGE_LOCAL_DIR = storageDir;
+    process.env.STORAGE_DRIVER = "local";
+    try {
+      app = await createTestApp({ mountLocalUploads: true, storageLocalDir: storageDir });
+    } finally {
+      if (originalStorageDir === undefined) delete process.env.STORAGE_LOCAL_DIR;
+      else process.env.STORAGE_LOCAL_DIR = originalStorageDir;
+      if (originalStorageDriver === undefined) delete process.env.STORAGE_DRIVER;
+      else process.env.STORAGE_DRIVER = originalStorageDriver;
+    }
     prisma = app.get(PrismaService);
   });
 
   afterAll(async () => {
     await app.close();
+    if (storageDir) await rm(storageDir, { recursive: true, force: true });
   });
 
   beforeEach(() => {
@@ -74,6 +91,7 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
 
   afterEach(() => {
     logSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
   const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -380,16 +398,32 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     const { client, petId } = await setupHousehold("Milo");
     await client.post(`/pets/${petId}/mark-deceased`).send({ reason: "Passed away" }).expect(201);
     await client.post(`/pets/${petId}/transition-to-memorial`).send({}).expect(201);
+    const sourceImageKey = `pet-memories-public/${petId}/${randomUUID()}.webp`;
+    const sourceBytes = Buffer.from("original-public-memory-photo");
+    await mkdir(dirname(join(storageDir, sourceImageKey)), { recursive: true });
+    await writeFile(join(storageDir, sourceImageKey), sourceBytes);
     const photo = await client.post(`/pets/${petId}/memories`).send({
       type: "PHOTO", title: "A private note must never leak", description: "This private memory text stays private.",
-      occurredAt: new Date().toISOString(), visibility: "PUBLIC", mediaObjectKeys: [`pet-memories-public/${petId}/${randomUUID()}.webp`],
+      occurredAt: new Date().toISOString(), visibility: "PUBLIC", mediaObjectKeys: [sourceImageKey],
     }).expect(201);
+    const storage = app.get<StorageDriver>(STORAGE_DRIVER);
+    const copyObject = jest.spyOn(storage, "copyObject").mockResolvedValue();
     const { client: trustAdmin } = await setupAdmin(AdminRole.TRUST_SAFETY);
     const { client: contentEditor } = await setupAdmin(AdminRole.EDITOR);
 
     await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "Milo", imageMemoryId: photo.body.id, consent: false }).expect(400);
     const submitted = await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "Milo", imageMemoryId: photo.body.id, consent: true }).expect(201);
     expect(submitted.body.status).toBe("PENDING_REVIEW");
+    const submissionRecord = await prisma.petMemorialSubmission.findUniqueOrThrow({ where: { id: submitted.body.id } });
+    expect(submissionRecord.sourceImageObjectKey).toBe(sourceImageKey);
+    expect(submissionRecord.publicationObjectKey).toMatch(/^pet-memorial-assets\/[0-9a-f-]{36}\.webp$/i);
+    expect(submissionRecord.publicationObjectKey).not.toContain(petId);
+    expect(copyObject).toHaveBeenCalledWith(sourceImageKey, submissionRecord.publicationObjectKey, "image/webp");
+    await mkdir(dirname(join(storageDir, submissionRecord.publicationObjectKey)), { recursive: true });
+    await writeFile(join(storageDir, submissionRecord.publicationObjectKey), Buffer.from("private-copy-bytes"));
+    const directSource = await request(app.getHttpServer()).get(`/uploads/${sourceImageKey}`).expect(200);
+    expect(Buffer.isBuffer(directSource.body) ? directSource.body : Buffer.from(directSource.text)).toEqual(sourceBytes);
+    expect(await request(app.getHttpServer()).get(`/uploads/${submissionRecord.publicationObjectKey}`).expect(404).then((r) => r.headers.location)).toBeUndefined();
     expect(await request(app.getHttpServer()).get("/public/pet-memorials").expect(200).then((r) => r.body)).toEqual([]);
     await request(app.getHttpServer()).get(`/public/pet-memorials/${submitted.body.id}/image`).expect(404);
     await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "Milo", imageMemoryId: photo.body.id, consent: true }).expect(400);
@@ -408,8 +442,7 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     expect(Object.keys(publicRows.body[0]).sort()).toEqual(["id", "imageUrl", "name"]);
     expect(JSON.stringify(publicRows.body)).not.toContain("private memory text");
     expect(JSON.stringify(publicRows.body)).not.toContain(petId);
-    const storage = app.get<StorageDriver>(STORAGE_DRIVER);
-    const imageBytes = Buffer.from("memorial-image-payload");
+    const imageBytes = Buffer.from("independent-memorial-publication-asset");
     const openObject = jest.spyOn(storage, "openObject").mockResolvedValue({ body: Readable.from([imageBytes]), contentType: "image/jpeg" });
     const imageResponse = await request(app.getHttpServer()).get(publicRows.body[0].imageUrl).expect(200);
     expect(imageResponse.headers.location).toBeUndefined();
@@ -418,12 +451,18 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     expect(imageResponse.headers["surrogate-control"]).toBe("no-store");
     expect(imageResponse.headers["x-content-type-options"]).toBe("nosniff");
     expect(Buffer.isBuffer(imageResponse.body) ? imageResponse.body : Buffer.from(imageResponse.text)).toEqual(imageBytes);
-    expect(openObject).toHaveBeenCalledWith(expect.stringContaining(`pet-memories-public/${petId}/`));
+    expect(openObject).toHaveBeenCalledWith(submissionRecord.publicationObjectKey);
+    expect(openObject).not.toHaveBeenCalledWith(sourceImageKey);
     expect(JSON.stringify({ headers: imageResponse.headers, url: publicRows.body[0].imageUrl })).not.toContain(petId);
 
     await client.post(`/pets/${petId}/memories/memorial/withdraw`).send({}).expect(201);
     await request(app.getHttpServer()).get("/public/pet-memorials").expect(200).expect([]);
     await request(app.getHttpServer()).get(publicRows.body[0].imageUrl).expect(404);
+    const retainedSource = await client.get(`/pets/${petId}/memories`).expect(200);
+    expect(retainedSource.body.find((memory: { id: string }) => memory.id === photo.body.id)?.mediaUrls[0]).toContain(sourceImageKey);
+    const sourceAfterWithdrawal = await request(app.getHttpServer()).get(`/uploads/${sourceImageKey}`).expect(200);
+    expect(Buffer.isBuffer(sourceAfterWithdrawal.body) ? sourceAfterWithdrawal.body : Buffer.from(sourceAfterWithdrawal.text)).toEqual(sourceBytes);
+    await request(app.getHttpServer()).get(`/uploads/${submissionRecord.publicationObjectKey}`).expect(404);
     openObject.mockRestore();
     const events = await prisma.petMemorialAuditEvent.findMany({ where: { submissionId: submitted.body.id }, orderBy: { createdAt: "asc" } });
     expect(events.map((row) => row.action)).toEqual(["OWNER_CONSENT_SUBMITTED", "ADMIN_APPROVED", "OWNER_WITHDREW_CONSENT"]);
@@ -435,19 +474,23 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     await request(app.getHttpServer()).get("/public/pet-memorials").expect(200).expect([]);
     await request(app.getHttpServer()).get(`/public/pet-memorials/${resubmission.body.id}/image`).expect(404);
     await request(app.getHttpServer()).get(`/public/pet-memorials/${randomUUID()}/image`).expect(404);
+    copyObject.mockRestore();
   });
 
   it("U-02: consent cannot be borrowed from another household or an active pet", async () => {
     const { client, petId } = await setupHousehold("New pet");
     const photo = await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", occurredAt: new Date().toISOString(), visibility: "PUBLIC", mediaObjectKeys: [`pet-memories-public/${petId}/${randomUUID()}.jpg`] }).expect(201);
     await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "New pet", imageMemoryId: photo.body.id, consent: true }).expect(400);
-    const { client: otherOwner } = await setupHousehold("Other household pet");
+    const { client: otherOwner, petId: otherPetId } = await setupHousehold("Other household pet");
     await otherOwner.post(`/pets/${petId}/memories/memorial`).send({ displayName: "Taken name", imageMemoryId: photo.body.id, consent: true }).expect(403);
     expect(await request(app.getHttpServer()).get("/public/pet-memorials").expect(200).then((r) => r.body)).toEqual([]);
 
     await client.post(`/pets/${petId}/mark-deceased`).send({ reason: "Passed away" }).expect(201);
     await client.post(`/pets/${petId}/transition-to-memorial`).send({}).expect(201);
     const selectedPhoto = await client.post(`/pets/${petId}/memories`).send({ type: "PHOTO", occurredAt: new Date().toISOString(), visibility: "PUBLIC", mediaObjectKeys: [`pet-memories-public/${petId}/${randomUUID()}.jpg`] }).expect(201);
+    const otherPetPhoto = await otherOwner.post(`/pets/${otherPetId}/memories`).send({ type: "PHOTO", occurredAt: new Date().toISOString(), visibility: "PUBLIC", mediaObjectKeys: [`pet-memories-public/${otherPetId}/${randomUUID()}.jpg`] }).expect(201);
+    await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "New pet", imageMemoryId: otherPetPhoto.body.id, consent: true }).expect(400);
+    jest.spyOn(app.get<StorageDriver>(STORAGE_DRIVER), "copyObject").mockResolvedValue();
     const submission = await client.post(`/pets/${petId}/memories/memorial`).send({ displayName: "New pet", imageMemoryId: selectedPhoto.body.id, consent: true }).expect(201);
     await client.delete(`/pets/${petId}/memories/${selectedPhoto.body.id}`).expect(200);
     const { client: trustAdmin } = await setupAdmin(AdminRole.TRUST_SAFETY);

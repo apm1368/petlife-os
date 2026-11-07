@@ -39,6 +39,8 @@ export interface StorageDriver {
   createDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget>;
   /** Batch 8 — server-generated private files (account exports). Never exposed as an upload target. */
   putObject(key: string, body: Buffer, contentType: string): Promise<void>;
+  /** Server-side copy used to create an independently controlled private publication asset. */
+  copyObject(sourceKey: string, destinationKey: string, contentType: string): Promise<void>;
   /** Read object bytes through the application so controlled public aliases need not redirect to storage keys. */
   openObject(key: string): Promise<{ body: Readable; contentType?: string }>;
   deleteObject(key: string): Promise<void>;

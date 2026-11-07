@@ -125,7 +125,7 @@ export class PublicPetMemorialController {
     const image = await this.memorials.getPublishedImage(submissionId);
     let object;
     try {
-      object = await this.storage.openPetMemorialImage(image.petId, image.imageObjectKey);
+      object = await this.storage.openPetMemorialPublicationAsset(image.publicationObjectKey);
     } catch {
       // Storage exceptions may include the internal object key. Keep both the
       // response and application log free of pet/household identifiers.

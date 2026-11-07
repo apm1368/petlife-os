@@ -5,7 +5,7 @@ import type Redis from "ioredis";
 import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { AppEnv } from "../../config/env";
 import { createReadStream } from "node:fs";
-import { mkdir, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, normalize } from "node:path";
 import type { DownloadOptions, DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
 
@@ -63,6 +63,13 @@ export class LocalStorageDriver implements StorageDriver {
     const target = this.resolve(key);
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, body, { mode: 0o600 });
+  }
+
+  async copyObject(sourceKey: string, destinationKey: string): Promise<void> {
+    const source = this.resolve(sourceKey);
+    const destination = this.resolve(destinationKey);
+    await mkdir(dirname(destination), { recursive: true });
+    await copyFile(source, destination);
   }
 
   async openObject(key: string) {

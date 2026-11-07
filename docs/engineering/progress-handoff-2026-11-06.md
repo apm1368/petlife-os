@@ -8,15 +8,16 @@ This checkpoint is factual as of 2026-11-07. It is not a completion or productio
 - `https://opetlife.ir/api/health/version` reports the same SHA, environment `production`,
   deployment `github-42091865674-1`. No newer release was verified.
 - Current implementation branch: `feat/public-pet-memorial`, based on the above main SHA.
-- The current branch contains the public memorial implementation and the photo privacy fix;
-  PR #117 targets `main`, head `a3e398e09d7da6784b73b964690eced52926c5ca`. GitHub CI run
-  42335798635 passed all steps, including migrations, tests, API E2E and build. Review is
-  required. It is not deployed or LIVE_VERIFIED.
+- The current branch contains the public memorial implementation and an additional private
+  publication-asset change in the working tree (not yet committed/pushed at this checkpoint).
+  PR #117 still points at head `c851d173e774a742793fb9ab52c51458dbb70ff3`; latest CI run
+  42336731430 passed, but review remains required. The local follow-up has not run on GitHub CI
+  and is not deployed or LIVE_VERIFIED.
 - Payment-control work remains in a separate dirty worktree at
   `/workspace/petlife-payment-controls-live`; preserve its four modified files and two new
   service/spec files. Other known dirty worktrees: `/workspace/petlife-phase-zero-audit` and
   `/workspace/petlife-pr110-111-check`. Do not reset, clean or overwrite them.
-- Disk was 98% full with about 679 MB free at the last check. No cleanup was performed.
+- Disk is 98% full with about 677 MB free. No cleanup was performed.
 
 ## Review queue
 
@@ -32,7 +33,7 @@ All listed open PRs require human review or are dependency-blocked. Do not bypas
 | #111 household invitations/multi-pet | #110 head (`codex/finalize-support`) | dependent on #110; retarget and rerun signup/household/permission/booking checks after #110 merges. |
 | #115 simple display mode | `main` | latest checked run 42274224922 succeeded; `REVIEW_REQUIRED`. |
 | #116 public landing articles | `main` | latest checked run 42273854807 succeeded; `REVIEW_REQUIRED`. |
-| #117 consented public memorial workflow | `main` | run 42280222282 passed all checks; `REVIEW_REQUIRED`. |
+| #117 consented public memorial workflow | `main` | latest remote head c851d17, CI run 42336731430 green, `REVIEW_REQUIRED`; local private-copy hardening is not yet pushed. |
 | #108 PY-19 reconciliation | `main` | `REVIEW_REQUIRED`. |
 | #109 admin role builder | `main` | `REVIEW_REQUIRED`. |
 | #102–106 | `main` | `REVIEW_REQUIRED`; review individually for decision coverage/dependencies. |
@@ -48,15 +49,28 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
   Trust & Safety moderation, database append-only audit events, admin audit log, public data
   minimization and a landing carousel with loading/empty/error/reduced-motion behavior.
 - No private memory is made public; only already-public, non-archived pet photos may be selected.
+- Current uncommitted follow-up copies the selected public source image to an independently
+  keyed `pet-memorial-assets/<uuid>.<ext>` object before submission. The object is classified
+  private by application URL generation and local `/uploads` static middleware. The memorial
+  endpoint streams from this copy only and rechecks approval/withdrawal on every request.
+- The original `pet-memories-public/<petId>/<uuid>.<ext>` image remains independently public
+  and is still used by the existing owner memory feature. No source object was moved, deleted,
+  rekeyed, or cache-purged. Withdrawal disables the memorial copy/path, not the original image
+  or copies/CDN caches created outside the memorial route.
+- Production S3/bucket/CDN access policies are external to this repository and were not
+  inspected. The opaque copy key is not included in public payloads, but do not claim direct
+  object access is revoked at the storage edge until the production bucket/CDN policy is
+  verified. The new memorial API itself does not redirect or disclose that key.
 - No live or production verification. Do not apply the migration in production until review,
   CI, backup/rollback readiness, and authorized deployment are confirmed.
 - Design detail and known limitation: `docs/product/public-pet-memorial-workflow.md`.
 
 ### Checks performed
 
-- Fresh DB E2E affected file: 23/23 passed, including consent, owner withdrawal, rejection,
+- Fresh DB E2E affected file: 23/23 passed on the latest working tree, including consent, owner withdrawal, rejection,
   non-owner denial, role permission denial, stale/archived image rejection, public response
-  minimization, opaque image alias invalidation, and append-only audit enforcement.
+  minimization, public-source/private-copy separation, local direct URL behavior, opaque image
+  alias invalidation, and append-only audit enforcement.
 - Web typecheck and three focused test files: passed (14 tests).
 - API typecheck, changed-file ESLint, Prisma schema validation, migration application through
   disposable `test:e2e:fresh`, and `git diff --check`: passed.
@@ -67,7 +81,8 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
   withdrawal, so pending, rejected, withdrawn and unknown submissions return 404.
 - The legacy source image remains in the already-public pet-memory storage namespace and its
   internal object key remains pet-scoped. The memorial list and image response no longer disclose
-  that key; no source-image rekeying or production cache purge has been performed.
+  that key; no source-image rekeying or production cache purge has been performed. The separately
+  copied memorial asset is not surfaced except through the approved, no-store streaming route.
 
 ## External source evidence and status
 
@@ -109,3 +124,24 @@ The PR checks above are point-in-time checks from 2026-11-06. Requery before any
 4. After #110/#113 merge, retarget dependent PRs #111/#114, inspect their new diffs and rerun
    the listed domain tests before considering merge.
 5. Recheck production SHA after any approved deployment; only then verify released flows.
+
+## Current check-in — 2026-11-07
+
+- Current local branch remains `feat/public-pet-memorial`. #117 remote head has not yet been
+  updated with this session's work; all local changes are preserved and will be pushed only
+  after the final focused tests. The current branch does not contain payment-control changes.
+- Latest live query confirms production `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`, deployment
+  `github-42091865674-1`, and 15 public products. The 15 comprise ten `qa-b4-*` records plus
+  five seeded fixture slugs listed above. #107 remains CI-success/review-required; it has not
+  been merged or deployed, so demo/seed product exposure is still LIVE.
+- Latest queue query: #107, #110, #112, #113, #115, #116 and #117 are open with green CI and
+  `REVIEW_REQUIRED`; #114 is green on #113's base, and #111 is green on #110's base. Neither
+  dependent branch has been retargeted because its prerequisite remains unmerged. #108, #109,
+  #102–106 also remain review-required. No branch-protection bypass was attempted.
+- Current memorial follow-up adds an opaque private publication copy and retains the original
+  public source photo for the existing memory feature. The API alias gates access on current
+  consent/approval and does not redirect or emit the storage key. The production S3/CDN policy
+  is external and remains unverified; edge-level direct-object privacy is not claimed.
+- Focused checks on the local follow-up: E2E 23/23 passed; API typecheck passed; changed-file
+  ESLint passed; storage/object-key unit tests 11/11 passed; diff check passed. Full GitHub CI
+  has not run on the local changes. The payment worktree remains independently dirty and intact.

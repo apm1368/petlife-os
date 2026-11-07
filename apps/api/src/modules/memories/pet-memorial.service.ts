@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetLifecycleStatus, PetMemorialStatus, PetMemoryType, PetMemoryVisibility, Prisma } from "@prisma/client";
 import { HouseholdAccessDeniedException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { StorageService } from "../storage/storage.service";
 
 export const PET_MEMORIAL_CONSENT_VERSION = "public-pet-memorial-v1";
 
@@ -13,7 +14,7 @@ export interface SubmitPetMemorialInput {
 
 @Injectable()
 export class PetMemorialService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly storage: StorageService) {}
 
   private async requireOwner(petId: string, userId: string) {
     const pet = await this.prisma.pet.findUnique({ where: { id: petId }, select: { id: true, name: true, householdId: true, lifecycleStatus: true } });
@@ -41,9 +42,12 @@ export class PetMemorialService {
       where: { id: input.imageMemoryId, petId, type: PetMemoryType.PHOTO, visibility: PetMemoryVisibility.PUBLIC, archivedAt: null },
       select: { id: true, mediaObjectKeys: true },
     });
-    const imageObjectKey = memory?.mediaObjectKeys.find((key) => key.startsWith(`pet-memories-public/${petId}/`));
-    if (!memory || !imageObjectKey) throw new ValidationApiException({ field: "imageMemoryId", reason: "SELECT_A_NON_ARCHIVED_PUBLIC_PHOTO_FOR_THIS_PET" });
+    const sourceImageObjectKey = memory?.mediaObjectKeys.find((key) => key.startsWith(`pet-memories-public/${petId}/`));
+    if (!memory || !sourceImageObjectKey) throw new ValidationApiException({ field: "imageMemoryId", reason: "SELECT_A_NON_ARCHIVED_PUBLIC_PHOTO_FOR_THIS_PET" });
+    const activeSubmission = await this.prisma.petMemorialSubmission.findFirst({ where: { petId, status: { in: [PetMemorialStatus.PENDING_REVIEW, PetMemorialStatus.PUBLISHED] }, withdrawnAt: null }, select: { id: true } });
+    if (activeSubmission) throw new ValidationApiException({ field: "memorial", reason: "ACTIVE_SUBMISSION_ALREADY_EXISTS" });
 
+    const publicationObjectKey = await this.storage.createPetMemorialPublicationAsset(petId, sourceImageObjectKey);
     try {
       return await this.prisma.$transaction(async (tx) => {
         const created = await tx.petMemorialSubmission.create({ data: {
@@ -51,7 +55,8 @@ export class PetMemorialService {
           ownerUserId: userId,
           displayName,
           imageMemoryId: memory.id,
-          imageObjectKey,
+          sourceImageObjectKey,
+          publicationObjectKey,
           consentVersion: PET_MEMORIAL_CONSENT_VERSION,
           consentedAt: new Date(),
           status: PetMemorialStatus.PENDING_REVIEW,
@@ -60,6 +65,7 @@ export class PetMemorialService {
         return { id: created.id, displayName: created.displayName, status: created.status, consentedAt: created.consentedAt.toISOString(), submittedAt: created.submittedAt.toISOString(), reviewedAt: null, reviewReason: null, withdrawnAt: null };
       });
     } catch (error) {
+      await this.storage.deletePetMemorialPublicationAsset(publicationObjectKey).catch(() => undefined);
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         throw new ValidationApiException({ field: "memorial", reason: "ACTIVE_SUBMISSION_ALREADY_EXISTS" });
       }
@@ -88,13 +94,13 @@ export class PetMemorialService {
         pet: { lifecycleStatus: { in: [PetLifecycleStatus.DECEASED, PetLifecycleStatus.MEMORIAL] } },
         imageMemory: { is: { type: PetMemoryType.PHOTO, visibility: PetMemoryVisibility.PUBLIC, archivedAt: null } },
       },
-      select: { id: true, displayName: true, imageObjectKey: true, publishedAt: true, imageMemory: { select: { mediaObjectKeys: true } } },
+      select: { id: true, displayName: true, sourceImageObjectKey: true, publishedAt: true, imageMemory: { select: { mediaObjectKeys: true } } },
       orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
       take: 12,
     });
     return rows.flatMap((row) => {
       const imageUrl = `/public/pet-memorials/${row.id}/image`;
-      return imageUrl && row.imageMemory.mediaObjectKeys.includes(row.imageObjectKey) ? [{ id: row.id, name: row.displayName, imageUrl }] : [];
+      return imageUrl && row.imageMemory.mediaObjectKeys.includes(row.sourceImageObjectKey) ? [{ id: row.id, name: row.displayName, imageUrl }] : [];
     });
   }
 
@@ -107,9 +113,9 @@ export class PetMemorialService {
         pet: { lifecycleStatus: { in: [PetLifecycleStatus.DECEASED, PetLifecycleStatus.MEMORIAL] } },
         imageMemory: { is: { type: PetMemoryType.PHOTO, visibility: PetMemoryVisibility.PUBLIC, archivedAt: null } },
       },
-      select: { petId: true, imageObjectKey: true, imageMemory: { select: { mediaObjectKeys: true } } },
+      select: { publicationObjectKey: true, sourceImageObjectKey: true, imageMemory: { select: { mediaObjectKeys: true } } },
     });
-    if (!row || !row.imageMemory.mediaObjectKeys.includes(row.imageObjectKey)) throw new NotFoundApiException("Pet memorial", { submissionId });
-    return { petId: row.petId, imageObjectKey: row.imageObjectKey };
+    if (!row || !row.imageMemory.mediaObjectKeys.includes(row.sourceImageObjectKey)) throw new NotFoundApiException("Pet memorial", { submissionId });
+    return { publicationObjectKey: row.publicationObjectKey };
   }
 }
