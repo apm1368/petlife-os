@@ -18,6 +18,6 @@ The external-stay search, details, favorites and trip-plan surfaces also now hav
 
 The travel marketplace home and pet/date search form now use 34/34 `travelMarketplace` keys in fa/en/de/es. Persian stays RTL/Jalali and the other locales use locale-aware digits and dates. The copy no longer claims source calendar dates are held for 15 minutes: it states that availability/prices may change, users must confirm with the source, and this directory does not reserve a stay. No partner behavior was simulated.
 
-Remaining travel fallback: marketplace result/listing/booking flows, legacy `rollout.trip` editor strings and generic API errors are not yet translated in DE/ES. SMS is not implemented. The travel family still needs visual/responsive/accessibility review beyond the focused component tests.
+The legacy `rollout.trip` editor is now translated in German and Spanish as well (9/9 message keys in each locale); its existing Persian Jalali date picker is retained. Focused tests exercise the editor labels in both languages. Remaining travel fallback: some marketplace result/listing/booking copy and generic API errors are not yet fully translated in DE/ES. SMS is not implemented. The travel family still needs visual/responsive/accessibility review beyond the focused component tests.
 
 Implementation is in PR #130 on `feat/i18n-travel-trip-setup`, based on the localization foundation branch used by #118. It should be retargeted only after the owner-approved #118 base is merged; do not merge by bypassing review.
