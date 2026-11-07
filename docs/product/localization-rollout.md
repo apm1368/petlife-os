@@ -8,9 +8,12 @@ The personal account settings page (`PersonalSettingsView`) now has German and S
 
 Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 
-## Account settings follow-up (PR #119)
+## Personal settings (PR #119 — merged)
 
-- `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
-- Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
-- PR #118 has merged to `main`; this change has been replayed onto that merged base. The new head must pass fresh CI before it can merge. No production behavior is claimed from this PR yet.
-- This follow-up only translates the personal settings page and updates this rollout note. It changes no API, persistence, verification or notification contract. The four-locale preference foundation is supplied by #118 on `main`.
+German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. This UI-only change leaves verification/delivery contracts unchanged.
+
+### Customer booking creation and calendar (PR #150 — current)
+
+Booking creation has fa/en/de/es copy for steps, service categories, pet selection, provider/staff labels, time selection, waitlist, address collection, health-sharing choices, review/terms, summaries, actions and mapped booking errors. The date/range picker localizes Gregorian controls and weekday/month/date formatting for en/de/es; Persian remains RTL/Jalali with its optional Gregorian switch. ISO dates and booking/payment/hold/permission/availability contracts are unchanged. Display-only Toman amounts come from existing Rial values; no price or availability is fabricated.
+
+Provider-authored service/variant names, provider/pet names, addresses and cancellation-policy text remain source-authored. Booking detail/rescheduling and provider-console copy remain incomplete. Unmapped API errors use the generic localized message. German/Spanish SMS templates and delivery are not implemented.

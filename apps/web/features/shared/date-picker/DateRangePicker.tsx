@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ChevronLeft, ChevronRight, Sheet, CalendarDays, cn } from "@petlife/ui";
 import {
   addDays,
@@ -14,10 +14,10 @@ import {
   monthGrid,
   monthName,
   todayIso,
-  WEEKDAYS_EN_SHORT,
   WEEKDAYS_FA_SHORT,
   type CalendarSystem,
 } from "@/lib/date/jalali";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 export interface DateRangeValue {
   start: string | null;
@@ -42,14 +42,28 @@ export interface DateRangePickerProps {
   maxNights?: number;
   /** 2 on wide screens by default; the second month hides below the `md` breakpoint. */
   months?: 1 | 2;
-  /** Defaults to Jalali in Persian and Gregorian in English. */
+  /** Defaults to Jalali in Persian and Gregorian in English, German and Spanish. */
   system?: CalendarSystem;
   /** Lets a Persian reader flip to the Gregorian calendar (and back). */
   allowSystemToggle?: boolean;
   className?: string;
 }
 
-type Lang = "fa" | "en";
+type Lang = RouteLocale;
+
+const DATE_LOCALES: Record<Lang, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES" };
+function localizedDate(iso: string, locale: Lang, options: { system?: CalendarSystem; weekday?: boolean; year?: boolean } = {}): string {
+  if (locale === "fa") return formatDay(iso, "fa", options);
+  const g = calendarFromIso(options.system ?? "gregorian", iso);
+  const date = new Date(Date.UTC(g.year, g.month - 1, g.day, 12));
+  return new Intl.DateTimeFormat(DATE_LOCALES[locale], {
+    ...(options.weekday ? { weekday: "long" as const } : {}),
+    day: "numeric",
+    month: "long",
+    ...(options.year === false ? {} : { year: "numeric" as const }),
+    timeZone: "UTC",
+  }).format(date);
+}
 
 /**
  * Reusable Jalali / Gregorian date (range) picker — the canonical date control.
@@ -75,6 +89,7 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const lang = useLocale() as Lang;
   const fa = lang === "fa";
+  const t = useTranslations("datePicker");
   const [system, setSystem] = useState<CalendarSystem>(systemProp ?? (fa ? "jalali" : "gregorian"));
   const today = useMemo(() => todayIso(), []);
   const floor = min ?? today;
@@ -103,38 +118,38 @@ export function DateRangePicker({
   /** Why a day cannot be chosen right now, or null. */
   const blockReason = useCallback(
     (iso: string): string | null => {
-      if (iso < floor) return fa ? "گذشته یا خارج از بازه" : "Past or outside the allowed range";
-      if (max && iso > max) return fa ? "خارج از بازهٔ مجاز" : "Outside the allowed range";
+      if (iso < floor) return t("range.pastOrOutside");
+      if (max && iso > max) return t("range.outside");
       if (choosingEnd && value.start && iso > value.start) {
         const nights = daysBetween(value.start, iso);
-        if (nights < minNights) return fa ? `حداقل ${localizeDigits(minNights, "fa")} شب` : `Minimum ${minNights} nights`;
-        if (nights > maxNights) return fa ? `حداکثر ${localizeDigits(maxNights, "fa")} شب` : `Maximum ${maxNights} nights`;
+        if (nights < minNights) return t("range.minimumNights", { count: minNights });
+        if (nights > maxNights) return t("range.maximumNights", { count: maxNights });
         for (let d = value.start; d < iso; d = addDays(d, 1)) {
-          if (isUnavailable?.(d)) return fa ? "بازه شامل شب ناموجود است" : "The stay would include an unavailable night";
+          if (isUnavailable?.(d)) return t("range.includesUnavailable");
         }
         return null;
       }
-      if (isUnavailable?.(iso)) return fa ? "ناموجود" : "Unavailable";
+      if (isUnavailable?.(iso)) return t("range.unavailable");
       return null;
     },
-    [floor, max, choosingEnd, value.start, minNights, maxNights, isUnavailable, fa],
+    [floor, max, choosingEnd, value.start, minNights, maxNights, isUnavailable, t],
   );
 
   const select = (iso: string) => {
     if (blockReason(iso)) return;
     if (mode === "single") {
       onChange({ start: iso, end: null });
-      setLive(formatDay(iso, lang, { system, weekday: true }));
+      setLive(localizedDate(iso, lang, { system, weekday: true }));
       return;
     }
     if (choosingEnd && value.start && iso > value.start) {
       onChange({ start: value.start, end: iso });
       const nights = daysBetween(value.start, iso);
-      setLive(fa ? `خروج ${formatDay(iso, lang, { system })}، ${localizeDigits(nights, "fa")} شب` : `Check-out ${formatDay(iso, lang, { system })}, ${nights} nights`);
+      setLive(t("range.checkOutSelected", { date: localizedDate(iso, lang, { system }), count: nights }));
       return;
     }
     onChange({ start: iso, end: null });
-    setLive(fa ? `ورود ${formatDay(iso, lang, { system })}؛ روز خروج را انتخاب کنید` : `Check-in ${formatDay(iso, lang, { system })}; now choose check-out`);
+    setLive(t("range.checkInSelected"));
   };
 
   const move = (days: number) => {
@@ -169,7 +184,10 @@ export function DateRangePicker({
   };
 
   const rangeEnd = value.end ?? (choosingEnd && hovered && hovered > (value.start ?? "") && !blockReason(hovered) ? hovered : null);
-  const weekdayLabels = Array.from({ length: 7 }, (_, i) => (fa ? WEEKDAYS_FA_SHORT : WEEKDAYS_EN_SHORT)[(firstDayOfWeek(system) + i) % 7]!);
+  const weekdays = fa
+    ? WEEKDAYS_FA_SHORT
+    : Array.from({ length: 7 }, (_, day) => new Intl.DateTimeFormat(DATE_LOCALES[lang], { weekday: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2026, 8, 27 + day))));
+  const weekdayLabels = Array.from({ length: 7 }, (_, i) => weekdays[(firstDayOfWeek(system) + i) % 7]!);
   const panels = months === 2 ? [view, addMonths(view.year, view.month, 1)] : [view];
   const canGoBack = (() => {
     const prev = addMonths(view.year, view.month, -1);
@@ -187,11 +205,11 @@ export function DateRangePicker({
   return (
     <div className={cn("flex flex-col gap-3", className)} dir={fa ? "rtl" : "ltr"}>
       <div className="flex items-center justify-between gap-2">
-        <button type="button" onClick={() => shiftView(-1)} disabled={!canGoBack} aria-label={fa ? "ماه قبل" : "Previous month"} className="min-h-11 min-w-11 rounded-full border border-border-subtle p-2 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+        <button type="button" onClick={() => shiftView(-1)} disabled={!canGoBack} aria-label={t("previousMonth")} className="min-h-11 min-w-11 rounded-full border border-border-subtle p-2 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
           {fa ? <ChevronRight aria-hidden className="mx-auto h-5 w-5" /> : <ChevronLeft aria-hidden className="mx-auto h-5 w-5" />}
         </button>
         {allowSystemToggle && fa ? (
-          <div role="group" aria-label={fa ? "تقویم" : "Calendar"} className="flex rounded-full border border-border-subtle p-0.5 text-metadata">
+          <div role="group" aria-label={t("calendarSystem")} className="flex rounded-full border border-border-subtle p-0.5 text-metadata">
             {(["jalali", "gregorian"] as const).map((s) => (
               <button key={s} type="button" aria-pressed={system === s} onClick={() => setSystem(s)} className={cn("min-h-9 rounded-full px-3", system === s ? "bg-brand-solid text-on-brand" : "text-text-secondary")}>
                 {s === "jalali" ? "شمسی" : "میلادی"}
@@ -199,7 +217,7 @@ export function DateRangePicker({
             ))}
           </div>
         ) : null}
-        <button type="button" onClick={() => shiftView(1)} disabled={!!max && monthGrid(system, addMonths(view.year, view.month, months).year, addMonths(view.year, view.month, months).month)[0]!.iso > max} aria-label={fa ? "ماه بعد" : "Next month"} className="min-h-11 min-w-11 rounded-full border border-border-subtle p-2 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+        <button type="button" onClick={() => shiftView(1)} disabled={!!max && monthGrid(system, addMonths(view.year, view.month, months).year, addMonths(view.year, view.month, months).month)[0]!.iso > max} aria-label={t("nextMonth")} className="min-h-11 min-w-11 rounded-full border border-border-subtle p-2 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
           {fa ? <ChevronLeft aria-hidden className="mx-auto h-5 w-5" /> : <ChevronRight aria-hidden className="mx-auto h-5 w-5" />}
         </button>
       </div>
@@ -207,7 +225,8 @@ export function DateRangePicker({
       <div ref={gridRef} className="grid gap-6 md:grid-cols-2" onKeyDown={onKeyDown} onMouseLeave={() => setHovered(null)}>
         {panels.map((p, index) => {
           const cells = monthGrid(system, p.year, p.month);
-          const title = `${monthName(system, p.month, lang)} ${localizeDigits(p.year, lang)}`;
+          const firstDay = monthGrid(system, p.year, p.month).find((cell) => cell.inMonth)!.iso;
+          const title = fa ? `${monthName(system, p.month, "fa")} ${localizeDigits(p.year, "fa")}` : new Intl.DateTimeFormat(DATE_LOCALES[lang], { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${firstDay}T12:00:00Z`));
           return (
             <div key={`${p.year}-${p.month}`} className={cn(index === 1 && "hidden md:block")}>
               <h3 className="mb-2 text-center font-bold text-text-primary" id={`dp-${p.year}-${p.month}`}>{title}</h3>
@@ -226,7 +245,7 @@ export function DateRangePicker({
                       const isEnd = cell.iso === value.end;
                       const inRange = !!value.start && !!rangeEnd && cell.iso > value.start && cell.iso < rangeEnd;
                       const isToday = cell.iso === today;
-                      const label = `${formatDay(cell.iso, lang, { system, weekday: true })}${isStart ? (fa ? "، ورود" : ", check-in") : ""}${isEnd ? (fa ? "، خروج" : ", check-out") : ""}${reason ? `، ${reason}` : ""}`;
+                      const label = `${localizedDate(cell.iso, lang, { system, weekday: true })}${isStart ? t("range.checkInSuffix") : ""}${isEnd ? t("range.checkOutSuffix") : ""}${reason ? `${fa ? "، " : ", "}${reason}` : ""}`;
                       return (
                         <div role="gridcell" key={cell.iso} aria-selected={isStart || isEnd || inRange} className={cn("relative h-11", inRange && "bg-brand-solid/10", isStart && value.end && (fa ? "rounded-r-full bg-brand-solid/10" : "rounded-l-full bg-brand-solid/10"), isEnd && (fa ? "rounded-l-full bg-brand-solid/10" : "rounded-r-full bg-brand-solid/10"))}>
                           <button
@@ -245,7 +264,7 @@ export function DateRangePicker({
                               isToday && !isStart && !isEnd && "ring-1 ring-inset ring-border-strong",
                             )}
                           >
-                            {localizeDigits(cell.day, lang)}
+                            {fa ? localizeDigits(cell.day, "fa") : cell.day.toLocaleString(lang)}
                           </button>
                         </div>
                       );
@@ -265,10 +284,11 @@ export function DateRangePicker({
 /** "۶ مهر — ۸ مهر ۱۴۰۵ · ۲ شب" style summary for a chosen range. */
 export function formatStayRange(value: DateRangeValue, lang: Lang, system?: CalendarSystem): string | null {
   if (!value.start) return null;
-  if (!value.end) return formatDay(value.start, lang, { system });
+  if (!value.end) return localizedDate(value.start, lang, { system });
   const nights = daysBetween(value.start, value.end);
-  const n = lang === "fa" ? `${localizeDigits(nights, "fa")} شب` : `${nights} night${nights === 1 ? "" : "s"}`;
-  return `${formatDay(value.start, lang, { system, year: false })} — ${formatDay(value.end, lang, { system })}${lang === "fa" ? "، " : " · "}${n}`;
+  const number = lang === "fa" ? localizeDigits(nights, "fa") : new Intl.NumberFormat(lang).format(nights);
+  const nightLabel = lang === "fa" ? `${number} شب` : `${number} ${nights === 1 ? (lang === "de" ? "Nacht" : lang === "es" ? "noche" : "night") : (lang === "de" ? "Nächte" : lang === "es" ? "noches" : "nights")}`;
+  return `${localizedDate(value.start, lang, { system, year: false })} — ${localizedDate(value.end, lang, { system })}${lang === "fa" ? "، " : " · "}${nightLabel}`;
 }
 
 export interface DateRangeFieldProps extends Omit<DateRangePickerProps, "className"> {
@@ -288,7 +308,7 @@ export function DateRangeField({ label, placeholder, id: idProp, error, classNam
   const autoId = useId();
   const id = idProp ?? autoId;
   const lang = useLocale() as Lang;
-  const fa = lang === "fa";
+  const t = useTranslations("datePicker");
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DateRangeValue>(value);
   useEffect(() => { if (open) setDraft(value); }, [open, value]);
@@ -306,19 +326,19 @@ export function DateRangeField({ label, placeholder, id: idProp, error, classNam
         className={cn("flex min-h-12 items-center gap-2 rounded-md border bg-surface-base px-3 text-start text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]", error ? "border-state-urgent" : "border-border-subtle")}
       >
         <CalendarDays aria-hidden className="h-5 w-5 shrink-0 text-text-secondary" />
-        <span className={summary ? "" : "text-text-secondary"}>{summary ?? placeholder ?? (fa ? "انتخاب تاریخ" : "Choose dates")}</span>
+        <span className={summary ? "" : "text-text-secondary"}>{summary ?? placeholder ?? t("chooseDates")}</span>
       </button>
       {error ? <span className="text-metadata text-state-urgent" role="alert">{error}</span> : null}
       <Sheet open={open} onClose={() => setOpen(false)} title={label} className="sm:max-w-3xl">
         {/* The sheet is at most ~384px wide at every breakpoint, so it always holds one month. */}
         <DateRangePicker {...picker} months={1} mode={mode} value={draft} onChange={setDraft} />
         <p className="mt-3 text-sm text-text-secondary" aria-live="polite">
-          {formatStayRange(draft, lang) ?? (mode === "range" ? (fa ? "روز ورود را انتخاب کنید." : "Choose your check-in day.") : fa ? "روز را انتخاب کنید." : "Choose a day.")}
-          {mode === "range" && draft.start && !draft.end ? (fa ? " اکنون روز خروج را انتخاب کنید." : " Now choose check-out.") : ""}
+          {formatStayRange(draft, lang) ?? t(mode === "range" ? "selectCheckIn" : "selectDay")}
+          {mode === "range" && draft.start && !draft.end ? ` ${t("selectCheckOut")}` : ""}
         </p>
         <div className="sticky bottom-0 mt-4 flex gap-3 bg-surface-elevated pt-2">
-          <Button type="button" variant="ghost" onClick={() => { onChange({ start: null, end: null }); setOpen(false); }}>{fa ? "پاک کردن" : "Clear"}</Button>
-          <Button type="button" className="flex-1" disabled={!complete} onClick={() => { onChange(draft); setOpen(false); }}>{fa ? "تأیید تاریخ" : "Apply dates"}</Button>
+          <Button type="button" variant="ghost" onClick={() => { onChange({ start: null, end: null }); setOpen(false); }}>{t("clear")}</Button>
+          <Button type="button" className="flex-1" disabled={!complete} onClick={() => { onChange(draft); setOpen(false); }}>{t("apply")}</Button>
         </div>
       </Sheet>
     </div>
