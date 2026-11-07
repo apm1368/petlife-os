@@ -36,14 +36,14 @@
 
 ## Exact next actions
 
-1. Push the reviewed localization navigation slice to #118, then wait for the CI run on its exact new head and obtain the required review. Keep #107 first in the release queue; do not bypass protection.
+1. Wait for the CI run on #118's pushed head `2018d7f27add34b876688c38559cf4933c93bb17` and obtain the required review. Keep #107 first in the release queue; do not bypass protection.
 2. After review/checks permit, merge #107 through the protected path, deploy via the authorized pipeline, and verify deployed SHA plus the live public API; confirm a legitimate reviewed product remains visible before calling it resolved.
 3. Have an authorized operator inspect original and memorial object access, bucket/CDN caching and shared image consumers. Correct the disclosure if the source remains public; do not revoke shared access without impact/reversibility review.
 4. Push/review the local `feat/i18n-de-es` batch. Continue German/Spanish by page family, including saved preferences, translations, formatting and tests; do not call other page families translated until they are.
 
 ## Latest recheck for this handoff
 
-- #118 remains open at `b6a71966ba41b3bd1b328b2d2ec8f7f680db6dea`, base `main`, mergeable, CI `build` succeeded (run `42376716267`), review required. This is the pre-localization-slice remote head; the current working-tree slice still needs its commit/push and CI.
+- #118 is open at `2018d7f27add34b876688c38559cf4933c93bb17`, base `main`, mergeable, review required. CI run `42386377927` is currently in progress; the prior head `b6a71966` had a successful CI build (`42376716267`).
 - #107 remains open at `4ade295291f96a8e68b2b4698d6d298b770ed88c`, mergeable, `REVIEW_REQUIRED`, last `build` check succeeded (run `42231686406`). The production API still shows the demo exposure recorded above; no release/merge/deploy was made.
 - #115 (`1618a683`), #116 (`1e16a2fd`) and #117 (`6c8693de`) are open and review-required. Their heads have not changed in this recheck. Landing PR overlaps remain; no branch was retargeted.
 - Production version endpoint still reports `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`. Payment worktrees remain present and untouched: `/workspace/petlife-payment-controls` (`codex/payment-controls`), `/workspace/petlife-payment-controls-live` (`feat/payment-controls`) and `/workspace/petlife-payment-infrastructure` (`feat/payment-infrastructure`).
