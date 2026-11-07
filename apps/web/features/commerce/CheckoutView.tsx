@@ -65,7 +65,7 @@ export function CheckoutView() {
   const design = useTranslations("commerce.design");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
   const progress = (current: number) => (
     <Stepper steps={[t("progress.steps.address"), t("progress.steps.review"), t("progress.steps.shipping"), t("progress.steps.payment")]} current={current} label={t("progress.label")} />
   );
@@ -849,7 +849,7 @@ function CheckoutSummary({ cart, checkout }: { cart: CartDto; checkout: Checkout
   const t = useTranslations("commerce.checkout.summary");
   const tCart = useTranslations("commerce.cart");
   const tOrder = useTranslations("commerce.orderDetail");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
   const lines = cart.sellerGroups.flatMap((g) => g.lines);
   return (
     <aside className="flow-summary" aria-label={t("title")}>

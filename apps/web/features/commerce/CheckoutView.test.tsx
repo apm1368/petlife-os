@@ -242,6 +242,21 @@ describe("CheckoutView", () => {
     push.mockReset();
   });
 
+  it.each([
+    ["de", "Lieferadresse", "Weiter", "Bestellübersicht"],
+    ["es", "Dirección de entrega", "Continuar", "Resumen del pedido"],
+  ] as const)("renders localized checkout address and summary in %s", async (locale, title, continueLabel, summaryTitle) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+
+    renderWithIntl(<CheckoutView />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("button", { name: continueLabel })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: summaryTitle })).toBeTruthy();
+    expect(screen.getByText("Tehran, 12 Valiasr St.")).toBeTruthy();
+  });
+
   it("routes to the confirmation page on a successful simulated payment", async () => {
     await advanceToPayment();
     vi.mocked(commerceService.pay).mockResolvedValue({ checkout: { ...CHECKOUT, status: "CONFIRMED" as never }, paymentStatus: "SUCCEEDED", orderIds: ["order-1", "order-2"] });

@@ -173,7 +173,7 @@ export const WEEKDAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursda
 export const WEEKDAYS_EN_SHORT = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
-export function localizeDigits(value: string | number, locale: "fa" | "en"): string {
+export function localizeDigits(value: string | number, locale: string): string {
   const s = String(value);
   return locale === "fa" ? s.replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)]!) : s;
 }
