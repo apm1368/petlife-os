@@ -68,5 +68,17 @@
       "passwordMismatch": "Las contraseñas no coinciden.",
       "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
     }
+  },
+  "travelResults": {
+    "allDestinations": "Todos los destinos", "anyDates": "Cualquier fecha", "cityHeading": "Alojamientos en {city}", "defaultHeading": "Alojamientos que admiten mascotas", "editSearch": "Editar búsqueda",
+    "datesNote": "Elige las fechas de entrada y salida para consultar el total de la estancia y la disponibilidad indicada por el servicio de anuncios.", "filters": "Filtros", "sort": "Ordenar", "view": "Vista", "list": "Lista", "map": "Mapa",
+    "sortOptions": { "RECOMMENDED": "Recomendados", "BEST_PET_MATCH": "Mejor compatibilidad con mascotas", "PRICE_ASC": "Precio más bajo", "PRICE_DESC": "Precio más alto", "RATING": "Mejor valorados" },
+    "bestMatchHelp": "Primero se muestran los alojamientos cuyas normas declaradas coinciden con tu mascota, seguidos de los que necesitan más información. Dentro de cada grupo se ordenan por valoración y precio.",
+    "mapUnavailable": "El mapa no está disponible ahora", "mapUnavailableHelp": "Todavía no hay un servicio de mapas conectado. Los mismos resultados aparecen abajo en una lista; las distancias conocidas se muestran junto al alojamiento.",
+    "loadFailed": "No se pudieron cargar los resultados", "loadError": "Comprueba la conexión e inténtalo de nuevo.", "retry": "Reintentar", "emptyTitle": "Ningún alojamiento coincide con estas opciones", "emptyDescription": "Prueba otras fechas o usa menos filtros. No se muestran alojamientos que la fuente indique como completos para esas fechas o cuyas normas declaradas claramente no encajen con tu mascota.", "clearFilters": "Borrar filtros",
+    "resultCount": "{count, plural, =0 {Ningún alojamiento} one {# alojamiento} other {# alojamientos}}", "pages": "Páginas", "previous": "Anterior", "next": "Siguiente",
+    "compare": "Comparar", "compareSelected": "{selected, number} de 3 seleccionados", "clear": "Borrar", "pickAtLeast": "Elige al menos 2",
+    "conditions": "Condiciones", "freeCancellation": "Cancelación gratuita", "noPetFee": "Sin suplemento para mascotas", "instantBooking": "Reserva inmediata", "verifiedOnly": "Solo verificados", "stayType": "Tipo de alojamiento", "maximumTotal": "Total máximo (Toman)", "minimumRating": "Valoración mínima", "any": "Cualquiera", "amenities": "Servicios", "applyFilters": "Aplicar filtros",
+    "card": { "noPhoto": "No se ha proporcionado una foto", "save": "Guardar", "removeSaved": "Quitar de guardados", "verified": "Verificado", "petRulesUnknown": "Normas para mascotas: no especificadas", "dogs": "Perros", "cats": "Gatos", "and": "y", "upToWeight": "hasta {weight, number} kg", "noPetFee": "sin suplemento para mascotas", "petFee": "suplemento para mascotas: {amount}", "totalStay": "Total por {count, plural, one {# noche} other {# noches}}", "includingPetFee": "incluye el suplemento para mascotas", "freeCancellation": "Cancelación gratuita disponible", "fromNightly": "Desde {amount} por noche", "requestToBook": "Solicitar reserva", "instantBooking": "Reserva inmediata", "compare": "Comparar", "fit": "Coincide con las normas declaradas para mascotas", "possibleConflict": "Podría no coincidir con las normas para mascotas", "moreInfo": "Se necesita más información", "distanceKm": "{distance} km" }
   }
 }

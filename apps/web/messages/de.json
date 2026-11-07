@@ -68,5 +68,17 @@
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
       "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
+  },
+  "travelResults": {
+    "allDestinations": "Alle Reiseziele", "anyDates": "Beliebige Daten", "cityHeading": "Unterkünfte in {city}", "defaultHeading": "Haustierfreundliche Unterkünfte", "editSearch": "Suche ändern",
+    "datesNote": "Wähle An- und Abreise aus, um den Gesamtpreis für den Aufenthalt und die vom Eintragsdienst gemeldete Verfügbarkeit zu sehen.", "filters": "Filter", "sort": "Sortieren", "view": "Ansicht", "list": "Liste", "map": "Karte",
+    "sortOptions": { "RECOMMENDED": "Empfohlen", "BEST_PET_MATCH": "Beste Übereinstimmung für Haustiere", "PRICE_ASC": "Niedrigster Preis", "PRICE_DESC": "Höchster Preis", "RATING": "Beste Bewertung" },
+    "bestMatchHelp": "Unterkünfte mit passenden angegebenen Regeln werden zuerst angezeigt, danach Unterkünfte mit weiterem Klärungsbedarf. Innerhalb der Gruppen wird nach Bewertung und Preis sortiert.",
+    "mapUnavailable": "Die Karte ist derzeit nicht verfügbar", "mapUnavailableHelp": "Ein Kartendienst ist noch nicht verbunden. Dieselben Ergebnisse stehen unten in der Liste; bekannte Entfernungen werden beim Eintrag angezeigt.",
+    "loadFailed": "Ergebnisse konnten nicht geladen werden", "loadError": "Prüfe deine Verbindung und versuche es erneut.", "retry": "Erneut versuchen", "emptyTitle": "Keine Unterkunft passt zu diesen Angaben", "emptyDescription": "Ändere die Daten oder verwende weniger Filter. Unterkünfte, die für diese Daten als ausgebucht gemeldet sind oder deren angegebene Regeln offensichtlich nicht zu deinem Haustier passen, werden nicht angezeigt.", "clearFilters": "Filter zurücksetzen",
+    "resultCount": "{count, plural, =0 {Keine Unterkünfte} one {# Unterkunft} other {# Unterkünfte}}", "pages": "Seiten", "previous": "Zurück", "next": "Weiter",
+    "compare": "Vergleichen", "compareSelected": "{selected, number} von 3 ausgewählt", "clear": "Leeren", "pickAtLeast": "Wähle mindestens 2 aus",
+    "conditions": "Bedingungen", "freeCancellation": "Kostenlos stornierbar", "noPetFee": "Keine Haustiergebühr", "instantBooking": "Sofortbuchung", "verifiedOnly": "Nur verifizierte", "stayType": "Unterkunftsart", "maximumTotal": "Höchstpreis gesamt (Toman)", "minimumRating": "Mindestbewertung", "any": "Beliebig", "amenities": "Ausstattung", "applyFilters": "Filter anwenden",
+    "card": { "noPhoto": "Kein Foto vorhanden", "save": "Speichern", "removeSaved": "Aus Merkliste entfernen", "verified": "Verifiziert", "petRulesUnknown": "Haustierregeln: nicht angegeben", "dogs": "Hunde", "cats": "Katzen", "and": "und", "upToWeight": "bis {weight, number} kg", "noPetFee": "keine Haustiergebühr", "petFee": "Haustiergebühr {amount}", "totalStay": "Gesamtpreis für {count, plural, one {# Übernachtung} other {# Übernachtungen}}", "includingPetFee": "inklusive Haustiergebühr", "freeCancellation": "Kostenlose Stornierung möglich", "fromNightly": "Ab {amount} pro Nacht", "requestToBook": "Buchungsanfrage", "instantBooking": "Sofortbuchung", "compare": "Vergleichen", "fit": "Passt zu den angegebenen Haustierregeln", "possibleConflict": "Passt möglicherweise nicht zu den Haustierregeln", "moreInfo": "Weitere Angaben erforderlich", "distanceKm": "{distance} km" }
   }
 }
