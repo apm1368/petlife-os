@@ -95,6 +95,18 @@
       "failed": "Die Änderungen konnten nicht gespeichert werden. Deine Eingaben sind weiterhin vorhanden."
     }
   },
+  "travelHub": {
+    "breadcrumb": "Brotkrumennavigation", "myTrips": "Meine Reisen", "notFound": "Diese Reise wurde nicht gefunden", "loadFailed": "Konnte nicht geladen werden", "loadError": "Bitte versuche es erneut.", "retry": "Erneut versuchen",
+    "phase": { "PLANNING": "In Planung", "UPCOMING": "Bevorstehend", "IN_PROGRESS": "Unterwegs", "COMPLETED": "Abgeschlossen", "CANCELLED": "Abgebrochen" },
+    "tripTo": "Reise nach {destination}", "stays": "Unterkünfte", "findStay": "Unterkunft finden", "noStays": "Für diese Reise wurde noch keine Unterkunft hinzugefügt.", "nights": "{count, plural, =0 {Keine Übernachtungen} one {# Übernachtung} other {# Übernachtungen}}",
+    "readiness": "Reisevorbereitung", "readinessCount": "{ready, number} von {total, number} bereit", "staleWarning": "Einige Anforderungen wurden länger nicht überprüft. Bitte prüfe sie vor der Reise bei der offiziellen Quelle.", "noRequirements": "Noch keine Anforderungen erfasst.",
+    "documentState": { "FOUND": "Nachweis hinterlegt", "MISSING": "Nicht erfasst", "EXPIRING": "Läuft bald ab", "EXPIRED": "Abgelaufen", "UNKNOWN": "Unbekannt" },
+    "source": "Quelle", "noSource": "Keine Quelle erfasst", "verified": "geprüft", "needsRecheck": "erneut zu prüfen", "officialSource": "Offizielle Quelle", "document": "Dokument", "editRequirements": "Anforderungen bearbeiten und Dokumente verknüpfen",
+    "suggestionsTitle": "Empfohlene Anforderungen für dieses Reiseziel", "suggestionsIntro": "Aus der von opetlife mit Quellen gepflegten Anforderungsbibliothek. Neue Einträge gelten zunächst als erforderlich, bis ein Nachweis vorliegt.", "mayBeOutdated": "möglicherweise veraltet", "addToChecklist": "Zur Checkliste hinzufügen", "addFailed": "Konnte nicht hinzugefügt werden.", "activity": "Letzte Aktivitäten", "noActivity": "Noch keine Aktivitäten.",
+    "bookingStatus": { "HELD": "Termine vorgemerkt", "DRAFT": "Entwurf", "AWAITING_PROVIDER": "Warten auf die Unterkunft", "AWAITING_PAYMENT": "Warten auf Zahlung", "CONFIRMED": "Bestätigt", "IN_PROGRESS": "Eingecheckt", "COMPLETED": "Abgeschlossen", "CANCELLED": "Storniert", "REJECTED": "Abgelehnt", "EXPIRED": "Abgelaufen", "REFUNDED": "Erstattet", "NO_SHOW": "Nicht erschienen", "MODIFIED": "Durch Änderung ersetzt", "UNKNOWN": "Unbekannt" },
+    "insuranceApplicationStatus": { "DRAFT": "Entwurf", "SUBMITTED": "Eingereicht", "UNDER_REVIEW": "Wird geprüft", "APPROVED": "Genehmigt", "DECLINED": "Abgelehnt", "CANCELLED": "Storniert", "NEEDS_INFORMATION": "Weitere Angaben erforderlich" },
+    "insurance": "Versicherung", "companions": "Reisebegleitung", "noInsurance": "Für dieses Haustier liegen keine Versicherungsanträge vor.", "compareInsurance": "Versicherungen vergleichen", "places": "Orte am Reiseziel", "noPlaces": "Für diese Stadt sind noch keine Orte eingetragen.", "allPlaces": "Alle Orte", "vets": "Tierarzt am Reiseziel", "noVets": "Für diese Stadt ist noch keine Tierarztpraxis eingetragen.", "travelDocuments": "Reisedokumente", "linked": "verknüpft", "noDocuments": "Keine Reise- oder Impfbescheinigungen hinterlegt.", "documents": "Dokumentenakte", "supportTrip": "Support zu dieser Reise kontaktieren"
+  },
   "travelMarketplace": {
     "searchAria": "Unterkünfte suchen",
     "heroEyebrow": "Mit deinem Haustier verreisen",
