@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import Image from "next/image";
 import { PawPrint, LockKeyhole, X } from "@petlife/ui";
-import { isAppLocale } from "@/lib/i18n/config";
+import { isRouteLocale } from "@/lib/i18n/config";
 import { useAuthModalOrigin } from "./AuthModalOrigin";
 import { parkCopy } from "@/features/landing/park-copy";
 import { parkAuthCopy } from "./park-auth-copy";
@@ -18,7 +18,9 @@ export function ParkAuthModal({ children, registration = false }: { children: Re
   const router = useRouter();
   const locale = useLocale();
   const origin = useAuthModalOrigin();
-  const c = parkAuthCopy[isAppLocale(locale) ? locale : "fa"];
+  const copyLocale = locale === "fa" ? "fa" : "en";
+  const c = parkAuthCopy[copyLocale];
+  const imageLocale = isRouteLocale(locale) ? locale : "en";
   const ref = useRef<HTMLDialogElement>(null);
   const dismissing = useRef(false);
   const titleId = useId();
@@ -52,7 +54,7 @@ export function ParkAuthModal({ children, registration = false }: { children: Re
     <h2 id={titleId} className="sr-only">{registration ? c.register : c.title}</h2>
     <div className="park-auth__grid">
       <aside className="park-auth__scene" aria-label="opetlife">
-        <Image unoptimized src={parkCopy[isAppLocale(locale) ? locale : "fa"].imageSrc} alt="" fill sizes="340px" />
+        <Image unoptimized src={parkCopy[imageLocale].imageSrc} alt="" fill sizes="340px" />
         <div className="park-auth__scene-copy"><PawPrint size={27} aria-hidden="true" /><h3>{c.tagline}</h3><p>{c.description}</p></div>
       </aside>
       <div className="park-auth__panel">

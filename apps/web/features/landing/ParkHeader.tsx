@@ -4,24 +4,24 @@ import { Brand } from "@/features/brand/Brand";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { Menu, X, UserRound, Users } from "@petlife/ui";
-import type { AppLocale } from "@/lib/i18n/config";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { landingCopy } from "./copy";
 import { parkCopy } from "./park-copy";
 
-export function ParkHeader({ locale }: { locale: AppLocale }) {
+export function ParkHeader({ locale }: { locale: RouteLocale }) {
   useSessionBootstrap();
   const signedIn = useSessionStore(s => s.status === "authenticated" && !!s.user);
   const [open, setOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const c = parkCopy[locale];
-  const base = landingCopy[locale];
+  const base = landingCopy[locale === "fa" ? "fa" : "en"];
   const root = `/${locale}`;
-  const other = locale === "fa" ? "en" : "fa";
+  const languageNames: Record<RouteLocale, string> = { fa: "زبان", en: "Language", de: "Sprache", es: "Idioma" };
   const links = [
     { href: root, label: c.home },
-    { href: `${root}#park-services`, label: base.nav.items[0]!.label },
+    { href: `${root}#park-services`, label: c.services.vet.title },
     { href: `${root}#park-about`, label: c.about },
     { href: `${root}#park-partners`, label: c.partners },
   ];
@@ -48,7 +48,14 @@ export function ParkHeader({ locale }: { locale: AppLocale }) {
             <Link href={`${root}/register`}>{c.memberJoin}</Link>
           </>}
         </div>
-        <a className="park-language" href={`/${other}`} hrefLang={other} lang={other} aria-label={base.actions.languageLabel}>{other.toUpperCase()}</a>
+        <label className="sr-only" htmlFor="park-language-select">{languageNames[locale]}</label>
+        <select id="park-language-select" className="park-language" aria-label={languageNames[locale]} value={locale} onChange={event => {
+          const url = new URL(window.location.href);
+          url.pathname = `/${event.target.value}${url.pathname.replace(/^\/(fa|en|de|es)/, "")}`;
+          window.location.assign(url.toString());
+        }}>
+          <option value="fa">فارسی</option><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option>
+        </select>
         <button ref={menuButton} type="button" className="park-menu-toggle" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="park-mobile-nav" aria-label={open ? base.nav.close : base.nav.menu}>
           {open ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
         </button>

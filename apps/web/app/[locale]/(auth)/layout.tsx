@@ -3,7 +3,7 @@ import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
 import { LockKeyhole, ShieldCheck } from "@petlife/ui";
 import { notFound } from "next/navigation";
-import { isAppLocale } from "@/lib/i18n/config";
+import { isRouteLocale } from "@/lib/i18n/config";
 import { parkCopy } from "@/features/landing/park-copy";
 import { parkAuthCopy } from "@/features/auth/park-auth-copy";
 import "@/features/auth/auth.css";
@@ -11,8 +11,9 @@ import "@/features/auth/park-auth.css";
 
 export default async function AuthLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  if (!isAppLocale(locale)) notFound();
-  const c = parkAuthCopy[locale];
+  if (!isRouteLocale(locale)) notFound();
+  const copyLocale = locale === "fa" ? "fa" : "en";
+  const c = parkAuthCopy[copyLocale];
   return <div className="auth-frame park-auth-page">
     <aside className="auth-brand-panel" aria-label="opetlife">
       <Image unoptimized src={parkCopy[locale].imageSrc} alt="" fill sizes="(max-width: 820px) 100vw, 50vw" priority />

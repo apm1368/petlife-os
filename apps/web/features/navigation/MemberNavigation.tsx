@@ -10,8 +10,6 @@ import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { EXPLORE_GROUPS, PRIMARY_DESTINATIONS, currentDestination } from "./consumer-nav";
 
-type Locale = "fa" | "en";
-const useMemberLocale = (): Locale => (useLocale() === "en" ? "en" : "fa");
 const usePathKey = (locale: string) => (usePathname() ?? "").replace(new RegExp(`^/${locale}`), "") || "/";
 
 /** Non-modal disclosures leave Tab free; Escape alone returns focus to the trigger. */
@@ -40,7 +38,7 @@ function useDismiss(open: boolean, close: () => void, boundary: React.RefObject<
 
 /** Desktop primary navigation with the Explore mega menu. Hidden below 1024px (the bottom bar takes over). */
 export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }) {
-  const locale = useMemberLocale();
+  const locale = useLocale();
   const fa = locale === "fa";
   const current = currentDestination(usePathKey(locale));
   const [open, setOpen] = useState(false);
@@ -141,7 +139,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
 
 /** The active pet, always visible: switch pets or jump to the pet without hunting through menus. */
 export function PetContextControl({ compact = false }: { compact?: boolean }) {
-  const locale = useMemberLocale();
+  const locale = useLocale();
   const fa = locale === "fa";
   const { pets, activePetId, switchActivePet } = useActivePet();
   const activeId = activePetId ?? pets[0]?.id ?? null;
@@ -185,7 +183,7 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
 
 /** Below 1024px: five large targets at the thumb; Explore opens a grouped sheet instead of a page. */
 export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean }) {
-  const locale = useMemberLocale();
+  const locale = useLocale();
   const fa = locale === "fa";
   const router = useRouter();
   const current = currentDestination(usePathKey(locale));
@@ -241,7 +239,7 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
 }
 
 function PetContextSheetRow({ onNavigate }: { onNavigate: () => void }) {
-  const locale = useMemberLocale();
+  const locale = useLocale();
   const fa = locale === "fa";
   const router = useRouter();
   const { pets, activePetId, switchActivePet } = useActivePet();

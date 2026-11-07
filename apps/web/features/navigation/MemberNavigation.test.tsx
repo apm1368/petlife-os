@@ -146,7 +146,8 @@ describe("member navigation", () => {
     fireEvent.click(trigger);
     const dialog = screen.getByRole("dialog", { name: fa ? "کاوش" : "Explore" });
     expect(within(dialog).getByRole("group", { name: fa ? "زبان و ظاهر" : "Language and appearance" })).toBeTruthy();
-    expect(within(dialog).getByRole("button", { name: fa ? "تغییر زبان به انگلیسی" : "Switch language to Persian" })).toBeTruthy();
+    const language = within(dialog).getByRole("combobox", { name: fa ? "زبان" : "Language" });
+    expect(within(language).getByRole("option", { name: fa ? "آلمانی" : "German" })).toBeTruthy();
     expect(within(dialog).getByRole("link", { name: fa ? "کمک و پشتیبانی" : "Help and support" }).getAttribute("href")).toBe(`/${locale}/support`);
     fireEvent.click(within(dialog).getByRole("button", { name: fa ? /راهنماها راهنمای عملی/ : /Guides Practical/ }));
     expect(routing.push).toHaveBeenCalledWith(`/${locale}/guides`);
