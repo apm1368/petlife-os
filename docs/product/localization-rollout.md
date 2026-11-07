@@ -4,13 +4,18 @@ The public landing route is available in Persian, English, German and Spanish. P
 
 This is not full application localization. The account preference API and database support saving all four locales (fa/en/de/es). The shared member navigation (desktop, mobile and Explore sheet), Explore index and Account navigation now have explicit copy in all four locales; links retain the active locale. Registration, password login, phone/OTP login, forgot/reset password, auth-shell copy and household collaboration copy also have German/Spanish translations. Household copy covers members, invitations, pet permissions, access presets, confirmation actions and access history. Account dates use the selected locale (fa retains Jalali) and account counts use locale-specific number formatting. The DE/ES auth catalogs overlay the English catalog so unfinished message keys remain readable instead of raising missing-key errors. These page families have focused component tests. The landing and personal-settings locale selector/calendar explanation were already localized in all four languages.
 
-The personal account settings page (`PersonalSettingsView`) now has German and Spanish copy for its display name, appearance, save/error/loading states, contact methods and OTP-based contact-change flow. This is a focused UI translation only: changing a contact still depends on the existing verification provider flow, and no SMS delivery is simulated. Other account settings pages and pet profile, health, booking, provider, seller, shop, admin, support and legal copy remain partially or mostly Persian/English only. German and Spanish message catalogs currently translate auth-specific branches; other keys fall back to English to avoid missing-key errors. Notification and trip-checklist copy also falls back to English for German and Spanish; German/Spanish SMS templates are not implemented and must not be simulated. Outside the components named above, do not present fallback text as a completed translation.
+## Personal settings (PR #119 — merged)
 
-Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
+German and Spanish cover the personal settings page, including display name, appearance, contact methods, verification state and existing OTP flow. This UI-only change preserves the existing provider contract; it does not implement or simulate SMS delivery.
 
-## Account settings follow-up (PR #119)
+## Pet profile (PR #120 — current)
 
-- `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
-- Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
-- PR #118 has merged to `main`; this change has been replayed onto that merged base. The new head must pass fresh CI before it can merge. No production behavior is claimed from this PR yet.
-- This follow-up only translates the personal settings page and updates this rollout note. It changes no API, persistence, verification or notification contract. The four-locale preference foundation is supplied by #118 on `main`.
+German and Spanish copy covers the pet identity shell, overview, identity editor, lifecycle/access labels, and derived care-kind labels. User-entered pet names, breeds, provider names and custom reminder titles remain source data. en/de/es use locale-aware dates and numbers; Persian keeps Jalali behavior. Health records, documents, care-calendar bodies, memories and activity remain untranslated in this slice.
+
+## Shop discovery and cart (PR #146 — current)
+
+German and Spanish copy covers customer shop home, catalog search/results and filters, product details, compatibility guidance, cart, stock/rating labels, and shared commerce navigation/feedback. Prices retain the Rial-to-Toman display conversion; digit grouping is locale-aware. Product titles, seller names, brands and offer values remain server-provided data.
+
+Checkout, order history/details, repeat-delivery, favorites, seller operations and commerce backoffice remain fallback areas. German/Spanish SMS templates and delivery are not implemented.
+
+Next slices: health/documents/care calendar; checkout and orders; seller operations; provider/booking; support/legal; travel/community/partner; backoffice and notifications. Preserve route switching, RTL/LTR, locale dates/numbers, accessibility and Jalali behavior; track fallbacks explicitly.
