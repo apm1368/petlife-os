@@ -129,6 +129,12 @@
       "refundStatus": { "PENDING_REVIEW": "En revisión", "APPROVED": "Aprobado", "REJECTED": "Rechazado", "WITHDRAWN": "Retirado" },
       "fulfillmentStatus": { "PENDING": "Pedido recibido", "AWAITING_SELLER_PREPARATION": "El vendedor está preparando el pedido", "READY_FOR_PICKUP": "Listo para recoger", "PICKUP_REQUESTED": "Mensajero solicitado", "PICKUP_ASSIGNED": "Mensajero asignado", "ASSIGNED": "Mensajero asignado", "PICKED_UP": "Recogido", "IN_TRANSIT": "En tránsito", "OUT_FOR_DELIVERY": "En reparto", "DELIVERED": "Entregado", "FAILED": "Problema con la entrega", "CANCELED": "Cancelado" }
     },
+    "offers": {
+      "title": "Ofertas", "loading": "Cargando ofertas…", "retry": "Reintentar", "empty": "Todavía no hay ofertas.", "lowStock": "Pocas existencias", "syncErrors": "{count} errores de sincronización", "price": "Precio (IRR)", "status": "Estado",
+      "statusOptions": { "ACTIVE": "Activa", "PAUSED": "En pausa", "SUSPENDED": "Suspendida" }, "save": "Guardar", "available": "{count} disponibles · {currency}", "saveFailed": "No se pudo guardar la oferta.",
+      "moderation": { "PENDING_REVIEW": "En revisión", "APPROVED": "Aprobada para la venta", "REJECTED": "Se requieren cambios", "pendingHelp": "Esta oferta no será pública hasta que opetlife la apruebe.", "rejectedHelp": "Actualiza y guarda la oferta para volver a enviarla a revisión." },
+      "repeat": { "enable": "Ofrecer entrega periódica", "intervals": "Intervalos de entrega", "everyDays": "Cada {days} días", "pickOne": "Elige al menos un intervalo." }
+    },
     "inventory": {
       "title": "Inventario", "loading": "Cargando inventario…", "retry": "Reintentar", "empty": "Todavía no hay inventario.", "lowStock": "Pocas unidades", "reserved": "Reservado", "available": "Disponible", "onHand": "Existencias", "save": "Guardar", "adjustFailed": "Este ajuste dejaría el inventario por debajo de cero."
     },
