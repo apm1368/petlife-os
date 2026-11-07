@@ -67,15 +67,15 @@ export function bookingStatusTone(status: string): "success" | "attention" | "ne
   return "neutral";
 }
 
-const PAYMENT_MODE: Record<string, [string, string]> = {
-  NONE: ["بدون پرداخت آنلاین", "No online payment"],
-  PAY_AT_PROVIDER: ["پرداخت در محل", "Pay at the provider"],
-  FULL_PREPAYMENT: ["پرداخت کامل آنلاین", "Full online prepayment"],
-  DEPOSIT: ["پیش‌پرداخت آنلاین", "Online deposit"],
+const PAYMENT_MODE: Record<string, [string, string, string, string]> = {
+  NONE: ["بدون پرداخت آنلاین", "No online payment", "Keine Onlinezahlung", "Sin pago en línea"],
+  PAY_AT_PROVIDER: ["پرداخت در محل", "Pay at the provider", "Zahlung beim Anbieter", "Pago al proveedor"],
+  FULL_PREPAYMENT: ["پرداخت کامل آنلاین", "Full online prepayment", "Vollständige Online-Vorauszahlung", "Pago anticipado completo en línea"],
+  DEPOSIT: ["پیش‌پرداخت آنلاین", "Online deposit", "Online-Anzahlung", "Anticipo en línea"],
 };
 
-export function paymentModeLabel(mode: string, fa: boolean): string {
-  return PAYMENT_MODE[mode]?.[fa ? 0 : 1] ?? mode;
+export function paymentModeLabel(mode: string, locale: RouteLocale | boolean): string {
+  return PAYMENT_MODE[mode]?.[localeIndex(locale)] ?? mode;
 }
 
 export const TIMELINE_ACTOR: Record<string, [string, string]> = {

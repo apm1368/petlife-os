@@ -21,3 +21,9 @@ The seller offers screen and its surrounding seller shell now have explicit Germ
 ### Customer booking list and waitlist (PR slice based on #123)
 
 The customer booking list now has explicit German and Spanish labels for booking tabs, empty/error/loading states, pet filtering and waitlist actions/statuses. Booking state and service-category names are localized in the shared label helpers. Date/time formatting uses the selected locale; Persian Jalali behavior remains provided by the existing date helper. Booking detail, provider discovery/profile, booking creation/reschedule forms, provider console and notifications are still English fallback for German/Spanish. No booking, payment, SMS or availability behavior changed in this slice.
+
+### Customer booking detail (follow-up to #124)
+
+The customer booking detail view now has German and Spanish strings for its booking/payment statuses, summary labels, timeline, access-sharing text, cancellation/refund explanation, reschedule and review dialogs, actions, feedback, and error/empty/loading states. Date/time and reschedule-slot formatting use the selected locale; Persian remains RTL and retains the Jalali calendar. The shared payment-mode labels now support all four locales. Tests cover German detail/cancellation/support routing, Spanish awaiting-payment display and action, and message-key parity. No booking, cancellation, payment, refund, review, availability or authorization behavior changed.
+
+Remaining fallback: provider discovery/profile, booking creation and reschedule forms outside the detail dialog, provider console, API-generated error detail and server-authored booking/service/pet/provider names. Those dynamic names are source data, not UI translations. SMS delivery/templates are not implemented or simulated. This slice depends on #124's booking-list branch and must be reviewed/retargeted only after its base is merged.
