@@ -27,7 +27,7 @@
 - Continued auth slice: German/Spanish localized messages now cover registration, password login, phone/OTP login, password recovery/reset and the auth shell. The DE/ES auth message branches are deeply merged over English fallback so untranslated namespaces still render instead of throwing missing-key errors. This does not implement or simulate provider SMS templates.
 - Localization slice verification: relevant Vitest files pass (8 files, 43 tests), including a DE/ES auth-key and interpolation-placeholder parity test; web typecheck, web lint and `git diff --check` pass. Production web build passed with `NEXT_PUBLIC_API_ORIGIN=http://localhost:4000` and generated 724 locale route variants/pages. An earlier full web run executed 230 files and reported 229 passing / 1 failing (four assertions in the newly added Explore test incorrectly searched for a travel link inside the Care section); the assertion was corrected and the affected test now passes. The full web suite has not yet been rerun after the latest auth changes.
 - Production remains SHA `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; live public product API still returns 15 items, including 10 `qa-b4-*` records. #107 remains open, build-successful, mergeable but `REVIEW_REQUIRED`; no production release has occurred.
-- Current GitHub status: #118's code head `d296dddc` is pushed, CI-successful, mergeable and awaiting review. #115/#116/#117 are likewise open with successful builds but no reviews. #118 overlaps `HomeLanding.tsx` with #116/#117 and `ParkHeader.tsx` with #115; avoid retargeting/rebasing until those owner reviews/merges, then inspect and rerun the resulting diff.
+- Current GitHub status before the latest auth push: #118 head `58a8707` is pushed and mergeable, review required; CI was queued. #115/#116/#117 are likewise open with successful builds but no reviews. #118 overlaps `HomeLanding.tsx` with #116/#117 and `ParkHeader.tsx` with #115; avoid retargeting/rebasing until those owner reviews/merges, then inspect and rerun the resulting diff.
 
 ## Preserved work
 
@@ -37,14 +37,14 @@
 
 ## Exact next actions
 
-1. Wait for the CI run on #118's pushed head `2018d7f27add34b876688c38559cf4933c93bb17` and obtain the required review. Keep #107 first in the release queue; do not bypass protection.
+1. Wait for CI on the latest #118 head and obtain the required review. Keep #107 first in the release queue; do not bypass protection.
 2. After review/checks permit, merge #107 through the protected path, deploy via the authorized pipeline, and verify deployed SHA plus the live public API; confirm a legitimate reviewed product remains visible before calling it resolved.
 3. Have an authorized operator inspect original and memorial object access, bucket/CDN caching and shared image consumers. Correct the disclosure if the source remains public; do not revoke shared access without impact/reversibility review.
 4. Push/review the local `feat/i18n-de-es` batch. Continue German/Spanish by page family, including saved preferences, translations, formatting and tests; do not call other page families translated until they are.
 
 ## Latest recheck for this handoff
 
-- #118 is open at `2018d7f27add34b876688c38559cf4933c93bb17`, base `main`, mergeable, review required. CI run `42386377927` is currently in progress; the prior head `b6a71966` had a successful CI build (`42376716267`).
+- #118 is open at `58a8707ccf9c045ce549a88fe4cd99b0936ccb69`, base `main`, mergeable, review required. CI run `42387580400` is queued; the preceding head `b6a71966` had a successful CI build (`42376716267`).
 - #107 remains open at `4ade295291f96a8e68b2b4698d6d298b770ed88c`, mergeable, `REVIEW_REQUIRED`, last `build` check succeeded (run `42231686406`). The production API still shows the demo exposure recorded above; no release/merge/deploy was made.
 - #115 (`1618a683`), #116 (`1e16a2fd`) and #117 (`6c8693de`) are open and review-required. Their heads have not changed in this recheck. Landing PR overlaps remain; no branch was retargeted.
 - Production version endpoint still reports `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`. Payment worktrees remain present and untouched: `/workspace/petlife-payment-controls` (`codex/payment-controls`), `/workspace/petlife-payment-controls-live` (`feat/payment-controls`) and `/workspace/petlife-payment-infrastructure` (`feat/payment-infrastructure`).
