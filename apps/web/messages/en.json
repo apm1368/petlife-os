@@ -2156,6 +2156,7 @@
     "loadMore": "Load more",
     "bellLabel": "Notifications",
     "bellLabelUnread": "Notifications, {count} unread",
+    "unreadPrefix": "Unread: ",
     "category": {
       "SECURITY": "Security",
       "HEALTH": "Health",

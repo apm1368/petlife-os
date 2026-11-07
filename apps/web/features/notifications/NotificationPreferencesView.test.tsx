@@ -76,4 +76,15 @@ describe("NotificationPreferencesView", () => {
     expect(screen.queryByLabelText("Email")).toBeNull();
     expect(screen.queryByLabelText("Push")).toBeNull();
   });
+
+  it("localizes German preference copy and keeps the sandbox delivery warning explicit", async () => {
+    vi.mocked(notificationsService.getPreferences).mockResolvedValue(PREFS);
+
+    renderWithIntl(<NotificationPreferencesView />, "de");
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Benachrichtigungseinstellungen" })).toBeTruthy());
+    expect(screen.getByText("Sicherheitsmeldungen können nicht ausgeschaltet werden.")).toBeTruthy();
+    expect(screen.getByText(/SMS befindet sich im Testmodus/)).toBeTruthy();
+    expect(screen.getByText("Marketingnachrichten bleiben ausgeschaltet, bis du sie im Datenschutzbereich erlaubst.")).toBeTruthy();
+  });
 });
