@@ -8,9 +8,12 @@ The personal account settings page (`PersonalSettingsView`) now has German and S
 
 Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 
-## Account settings follow-up (PR #119)
+## Personal settings (PR #119 — merged)
 
-- `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
-- Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
-- PR #118 has merged to `main`; this change has been replayed onto that merged base. The new head must pass fresh CI before it can merge. No production behavior is claimed from this PR yet.
-- This follow-up only translates the personal settings page and updates this rollout note. It changes no API, persistence, verification or notification contract. The four-locale preference foundation is supplied by #118 on `main`.
+German and Spanish cover personal settings, appearance, contact methods, verification state and the existing OTP flow. This UI-only change does not alter providers or delivery.
+
+### Public service-provider discovery (PR #149 — current)
+
+The discovery page has fa/en/de/es copy for search, categories, filters/chips, sorting, verification labels, counts, prices, availability, empty/error states, favorite labels and the map-provider-unavailable notice. Dates/counts and Toman display digits follow locale; Persian retains RTL/Jalali. Search, availability, favorites, booking links and ranking behavior are unchanged. The map remains unavailable until a real map provider is connected.
+
+Provider details, booking/rescheduling forms, provider console and API-generated errors remain incomplete in German/Spanish. Provider-authored descriptions, FAQs, policies, reviews, service/staff names and addresses remain source content. No fabricated providers, ratings, prices, availability or map results are added.

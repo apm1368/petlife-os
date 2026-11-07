@@ -6351,5 +6351,16 @@
         "REJECTED": "رد شده"
       }
     }
+  },
+  "providerDiscovery": {
+    "allServices": "همه خدمات", "verifiedOnly": "فقط ارائه‌دهندگان تأییدشده", "intro": "زمان‌های آزاد واقعی و نظر کسانی که واقعاً رزرو کرده‌اند.", "serviceCategories": "دسته‌های خدمات", "all": "همه", "results": "نتایج", "searching": "در حال جست‌وجو…", "providerCount": "{count, number} ارائه‌دهنده", "loadFailed": "نتایج بارگیری نشد", "retry": "تلاش دوباره", "verified": "تأییدشده", "distanceUnit": "کیلومتر", "currencyUnit": "تومان", "nextOpening": "اولین زمان آزاد", "noOpening": "در ۷ روز آینده زمان آزاد ندارد", "noReviews": "هنوز نظری ثبت نشده", "from": "از", "priceOnRequest": "قیمت پس از استعلام", "viewAndBook": "مشاهده و رزرو", "mapUnavailable": "نمای نقشه تا اتصال سرویس نقشه در دسترس نیست؛ فاصله‌ها از مختصات ثبت‌شده محاسبه می‌شوند.", "recommendedOrderNote": "ترتیب بر اساس زمان آزاد، امتیاز، تجربه و فاصله است؛ جایگاه تبلیغاتی وجود ندارد.", "ratingAria": "امتیاز {average} از ۵ در {count} نظر", "showResults": "نمایش {count, number} نتیجه", "showResultsFallback": "نمایش نتایج", "save": "ذخیره {name}", "removeSaved": "حذف {name} از ذخیره‌ها",
+    "search": { "label": "جست‌وجوی نام یا تخصص", "placeholder": "نام کلینیک، متخصص یا تخصص…", "submit": "جست‌وجو" },
+    "filters": { "title": "فیلترها", "active": "فیلترهای فعال", "remove": "حذف فیلتر {label}", "clear": "پاک کردن", "clearAll": "پاک کردن همه", "city": "شهر", "allCities": "همه شهرها", "date": "روز مراجعه", "anyDay": "هر روز", "pet": "حیوان", "maxPrice": "حداکثر قیمت (تومان)", "homeVisit": "در منزل", "homeVisitPlural": "خدمات در منزل", "ratedFourPlus": "امتیاز ۴ به بالا", "fourStarsAndUp": "امتیاز ۴ به بالا", "nearMe": "نزدیک من", "locationUnavailable": "دسترسی به موقعیت داده نشد؛ شهر را انتخاب کنید.", "veterinaryService": "نوع خدمت دامپزشکی", "upTo": "تا {amount}" },
+    "sort": { "label": "مرتب‌سازی", "RECOMMENDED": "پیشنهادی", "EARLIEST": "نزدیک‌ترین زمان آزاد", "NEAREST": "نزدیک‌ترین مکان", "TOP_RATED": "بیشترین امتیاز", "LOWEST_PRICE": "کمترین قیمت" },
+    "empty": { "title": "ارائه‌دهنده‌ای با این فیلترها پیدا نشد", "description": "فیلترها را کمتر کنید یا شهر دیگری انتخاب کنید.", "clearFilters": "پاک کردن فیلترها" },
+    "categories": { "VET": "دامپزشکی", "GROOMING": "آرایش و شست‌وشو", "TRAINING": "آموزش", "WALKING": "پیاده‌روی", "SITTING": "نگهداری در منزل", "BOARDING": "پانسیون", "PET_TAXI": "تاکسی حیوانات" },
+    "providerTypes": { "VET_CLINIC": "کلینیک دامپزشکی", "VET_HOSPITAL": "بیمارستان دامپزشکی", "VETERINARIAN": "دامپزشک", "GROOMER": "آرایشگر", "TRAINER": "مربی", "WALKER": "پیاده‌روی‌بر", "SITTER": "پرستار حیوان", "BOARDING": "پانسیون", "PET_TAXI": "تاکسی حیوانات", "MULTI_SERVICE_PROVIDER": "مرکز چندخدمتی", "TRAVEL_ACCOMMODATION": "اقامتگاه سفر" },
+    "species": { "DOG": "سگ", "CAT": "گربه", "dogs": "سگ‌ها", "cats": "گربه‌ها" },
+    "specialties": { "LAB_TEST": "آزمایشگاه", "IMAGING_STUDY": "تصویربرداری", "DENTAL_CARE": "دندانپزشکی", "REHAB_SESSION": "توان‌بخشی", "NUTRITION_CONSULT": "تغذیه", "VACCINATION": "واکسیناسیون" }
   }
 }
