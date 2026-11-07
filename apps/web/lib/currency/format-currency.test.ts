@@ -10,6 +10,11 @@ describe("formatCurrency", () => {
     expect(formatCurrency(1_250_000, "fa")).toBe("۱۲۵٬۰۰۰ تومان");
   });
 
+  it("uses German and Spanish grouping without changing the Toman unit", () => {
+    expect(formatCurrency(1_250_000, "de")).toBe("125.000 Toman");
+    expect(formatCurrency(1_250_000, "es")).toBe("125.000 Toman");
+  });
+
   it("rounds rather than truncating a non-multiple-of-10 amount", () => {
     expect(formatCurrency(1_255_005, "en")).toBe("125,501 Toman");
   });
