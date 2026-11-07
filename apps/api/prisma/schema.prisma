@@ -1159,39 +1159,39 @@ enum ShippingQuoteStatus {
 /// no multi-column CHECK syntax, so it is not representable here. Application-layer
 /// validation in AuthService remains, but this is no longer the only guarantee.
 model User {
-  id                 String            @id @default(uuid()) @db.Uuid
-  email              String?           @unique
-  phone              String?           @unique
+  id                     String            @id @default(uuid()) @db.Uuid
+  email                  String?           @unique
+  phone                  String?           @unique
   /// Case-preserved as entered; uniqueness is enforced on normalizedUsername
   /// (lowercased) so "Sarah" and "sarah" can never collide.
-  username           String?
-  normalizedUsername String?           @unique
+  username               String?
+  normalizedUsername     String?           @unique
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
-  passwordHash       String?
+  passwordHash           String?
   /// Batch 8 — when each contact was proven (OTP code or a Google-verified email). A contact
   /// set any other way (e.g. typed at password sign-up) stays unverified and is never trusted
   /// for account linking.
-  emailVerifiedAt    DateTime?
-  phoneVerifiedAt    DateTime?
-  displayName        String
-  avatarUrl          String?
-  locale             Locale            @default(fa)
-  themePreference    ThemePreference   @default(SYSTEM)
+  emailVerifiedAt        DateTime?
+  phoneVerifiedAt        DateTime?
+  displayName            String
+  avatarUrl              String?
+  locale                 Locale            @default(fa)
+  themePreference        ThemePreference   @default(SYSTEM)
   /// ERP-B: platform-level account suspension by staff (trust/admin). A suspended account can't sign in and its
   /// sessions stop resolving; nothing is deleted. Reason is internal (never shown on member-facing APIs).
-  accountStatus      UserAccountStatus @default(ACTIVE)
+  accountStatus          UserAccountStatus @default(ACTIVE)
   /// Decision 4: set (atomically, once) when this user starts their one lifetime trial; never cleared.
   welcomeTrialConsumedAt DateTime?
-  suspendedAt        DateTime?
-  suspendedReason    String?
-  suspendedByAdminId String?           @db.Uuid
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  suspendedAt            DateTime?
+  suspendedReason        String?
+  suspendedByAdminId     String?           @db.Uuid
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
   /// W2-5: a coarse "last active" for the admin users directory, bumped from session resolution at
   /// most once every 15 minutes per user (see SessionService.resolveUser). Never used for auth or
   /// billing — updatedAt moves on every profile change, so it cannot answer "when were they last here".
-  lastActiveAt       DateTime?
+  lastActiveAt           DateTime?
 
   authIdentities          AuthIdentity[]
   passwordResetTokens     PasswordResetToken[]
@@ -1237,8 +1237,8 @@ model User {
   blocksMade                UserBlock[]              @relation("BlocksMade")
   blocksReceived            UserBlock[]              @relation("BlocksReceived")
   clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
-  walletAccount              WalletAccount?
-  cardTransferPayments       CardTransferPayment[]
+  walletAccount             WalletAccount?
+  cardTransferPayments      CardTransferPayment[]
 
   @@map("users")
 }
@@ -1306,15 +1306,15 @@ model Session {
 }
 
 model Household {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String?
-  city        String?
-  region      String?
-  countryCode String?
+  id                     String    @id @default(uuid()) @db.Uuid
+  name                   String?
+  city                   String?
+  region                 String?
+  countryCode            String?
   /// Decision 4: set (atomically, once) when this household starts its one lifetime trial; never cleared.
   welcomeTrialConsumedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   members              HouseholdMember[]
   pets                 Pet[]
@@ -1540,6 +1540,7 @@ model Pet {
   lifecycleTransitions PetLifecycleTransition[]
   lostPetIncidents     LostPetIncident[]
   memories             PetMemory[]
+  memorialSubmissions  PetMemorialSubmission[]
   communityPosts       CommunityPost[]
 
   vitalsRecords          PatientVitalsRecord[]
@@ -1910,13 +1911,13 @@ model CareProfile {
 // ---------------------------------------------------------------------------
 
 model ProviderOrganization {
-  id                      String                     @id @default(uuid()) @db.Uuid
-  name                    String
-  type                    ProviderType
-  verificationStatus      ProviderVerificationStatus @default(NOT_STARTED)
+  id                        String                     @id @default(uuid()) @db.Uuid
+  name                      String
+  type                      ProviderType
+  verificationStatus        ProviderVerificationStatus @default(NOT_STARTED)
   /// ERP-C: partner-side submission time and the last admin note the partner may see (request for info / rejection).
-  verificationSubmittedAt DateTime?
-  verificationNote        String?
+  verificationSubmittedAt   DateTime?
+  verificationNote          String?
   /// Null retains the evidence policy of cases submitted before the Wave 2 rollout.
   verificationPolicyVersion String?
 
@@ -2088,8 +2089,8 @@ model ProviderService {
   priceAmount     Decimal? @db.Decimal(10, 2)
   currency        String?
 
-  supportsDog Boolean @default(true)
-  supportsCat Boolean @default(true)
+  supportsDog       Boolean      @default(true)
+  supportsCat       Boolean      @default(true)
   additionalSpecies PetSpecies[] @default([])
 
   /// At-home (AT_CUSTOMER/MOBILE) service area: cities served, matched against the booking address's city. Empty =
@@ -2538,17 +2539,17 @@ model CareCalendarEvent {
 /// SellerOffers (see ShopService); a seller under review or suspended stays
 /// fully readable for admin/history purposes, just never discoverable.
 model SellerOrganization {
-  id                      String                   @id @default(uuid()) @db.Uuid
-  name                    String
-  verificationStatus      SellerVerificationStatus @default(NOT_STARTED)
-  verificationSubmittedAt DateTime?
-  verificationNote        String?
+  id                        String                   @id @default(uuid()) @db.Uuid
+  name                      String
+  verificationStatus        SellerVerificationStatus @default(NOT_STARTED)
+  verificationSubmittedAt   DateTime?
+  verificationNote          String?
   verificationPolicyVersion String?
-  status                  SellerStatus             @default(ACTIVE)
-  countryCode             String
-  city                    String?
-  logoUrl                 String?
-  description             String?
+  status                    SellerStatus             @default(ACTIVE)
+  countryCode               String
+  city                      String?
+  logoUrl                   String?
+  description               String?
 
   /// Handoff 09 (spec section 3) — all additive/optional so every existing
   /// SellerOrganization row remains valid without a data backfill.
@@ -2682,13 +2683,13 @@ model Product {
   slug        String  @unique
   description String?
 
-  supportsDog          Boolean  @default(true)
-  supportsCat          Boolean  @default(true)
+  supportsDog          Boolean      @default(true)
+  supportsCat          Boolean      @default(true)
   additionalSpecies    PetSpecies[] @default([])
   minAgeMonths         Int?
   maxAgeMonths         Int?
-  minWeightKg          Decimal? @db.Decimal(6, 2)
-  maxWeightKg          Decimal? @db.Decimal(6, 2)
+  minWeightKg          Decimal?     @db.Decimal(6, 2)
+  maxWeightKg          Decimal?     @db.Decimal(6, 2)
   /// Normalized (upper-case) ingredient/allergen tags (e.g. "CHICKEN",
   /// "GRAIN") — matched literally against the pet's own recorded Allergy
   /// names by ProductCompatibilityService. Deliberately a flat string match,
@@ -2697,7 +2698,7 @@ model Product {
   allergenTags         String[]
   /// When true, NEEDS_REVIEW is forced until the pet's Health Basics are
   /// COMPLETE — mirrors ProviderService.requiresHealthBasics exactly.
-  requiresHealthReview Boolean  @default(false)
+  requiresHealthReview Boolean      @default(false)
 
   status ProductStatus @default(ACTIVE)
 
@@ -2783,7 +2784,7 @@ model SellerOffer {
 
   moderationStatus   SellerOfferModerationStatus @default(APPROVED)
   moderatedAt        DateTime?
-  moderatedByAdminId String?                      @db.Uuid
+  moderatedByAdminId String?                     @db.Uuid
   moderationReason   String?
 
   createdAt DateTime @default(now())
@@ -2922,12 +2923,12 @@ model Checkout {
   updatedAt DateTime  @updatedAt
   expiresAt DateTime?
 
-  reservations     InventoryReservation[]
-  orders           Order[]
-  paymentIntents   PaymentIntent[]
+  reservations        InventoryReservation[]
+  orders              Order[]
+  paymentIntents      PaymentIntent[]
   cardTransferPayment CardTransferPayment?
-  financingIntents FinancingIntent[]
-  shippingQuotes   ShippingQuote[]
+  financingIntents    FinancingIntent[]
+  shippingQuotes      ShippingQuote[]
 
   @@index([userId])
   @@index([cartId])
@@ -3135,18 +3136,18 @@ model ZibalPayment {
 /// A receipt-backed company-card payment. The receipt is an object-storage
 /// key rather than bytes or a public URL; the media layer authorises access.
 model CardTransferPayment {
-  id          String                    @id @default(uuid()) @db.Uuid
-  userId      String                    @db.Uuid
-  user        User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
-  checkoutId  String?                   @unique @db.Uuid
-  checkout    Checkout?                 @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
-  bookingId   String?                   @db.Uuid
-  booking     Booking?                  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
-  status      CardTransferPaymentStatus @default(AWAITING_RECEIPT)
-  idempotencyKey String                  @unique
-  expectedAmount Int
-  receivedAmount Int?
-  currency       String                  @default("IRR")
+  id                      String                    @id @default(uuid()) @db.Uuid
+  userId                  String                    @db.Uuid
+  user                    User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  checkoutId              String?                   @unique @db.Uuid
+  checkout                Checkout?                 @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  bookingId               String?                   @db.Uuid
+  booking                 Booking?                  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  status                  CardTransferPaymentStatus @default(AWAITING_RECEIPT)
+  idempotencyKey          String                    @unique
+  expectedAmount          Int
+  receivedAmount          Int?
+  currency                String                    @default("IRR")
   companyCardNumberMasked String
   accountHolderName       String
   receiptObjectKey        String?
@@ -3155,10 +3156,10 @@ model CardTransferPayment {
   reviewAvailableAt       DateTime
   differenceDueAt         DateTime?
   reviewedAt              DateTime?
-  reviewedByAdminId       String?       @db.Uuid
+  reviewedByAdminId       String?                   @db.Uuid
   rejectionReason         String?
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
 
   @@index([userId, status])
   @@index([bookingId, status])
@@ -3182,19 +3183,19 @@ model WalletAccount {
 }
 
 model WalletEntry {
-  id                  String             @id @default(uuid()) @db.Uuid
-  walletAccountId     String             @db.Uuid
-  walletAccount       WalletAccount      @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
-  ledgerTransactionId String?            @unique @db.Uuid
-  ledgerTransaction   LedgerTransaction? @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
+  id                  String              @id @default(uuid()) @db.Uuid
+  walletAccountId     String              @db.Uuid
+  walletAccount       WalletAccount       @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
+  ledgerTransactionId String?             @unique @db.Uuid
+  ledgerTransaction   LedgerTransaction?  @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
   balanceType         WalletBalanceType
   kind                WalletEntryKind
   source              WalletCreditSource?
   amount              Int
   referenceType       String
-  referenceId         String             @db.Uuid
+  referenceId         String              @db.Uuid
   expiresAt           DateTime?
-  createdAt           DateTime           @default(now())
+  createdAt           DateTime            @default(now())
 
   @@index([walletAccountId, balanceType, createdAt])
   @@index([expiresAt])
@@ -3413,22 +3414,22 @@ model LedgerAccount {
 }
 
 model LedgerTransaction {
-  id            String   @id @default(uuid()) @db.Uuid
-  description   String
+  id                          String             @id @default(uuid()) @db.Uuid
+  description                 String
   /// "PAYMENT" | "REFUND" — which financial event this transaction records.
-  referenceType String
-  referenceId   String   @db.Uuid
-  currency      String   @default("IRR")
+  referenceType               String
+  referenceId                 String             @db.Uuid
+  currency                    String             @default("IRR")
   /// A correction never edits an earlier posting: it points to the original
   /// ledger transaction and reverses it with an explicit operational reason.
-  reversesLedgerTransactionId String? @unique @db.Uuid
+  reversesLedgerTransactionId String?            @unique @db.Uuid
   reversesLedgerTransaction   LedgerTransaction? @relation("LedgerReversal", fields: [reversesLedgerTransactionId], references: [id], onDelete: Restrict)
-  reversal                     LedgerTransaction? @relation("LedgerReversal")
-  correctionReason             String?
-  createdAt     DateTime @default(now())
+  reversal                    LedgerTransaction? @relation("LedgerReversal")
+  correctionReason            String?
+  createdAt                   DateTime           @default(now())
 
-  entries LedgerEntry[]
-  walletEntries WalletEntry[]
+  entries            LedgerEntry[]
+  walletEntries      WalletEntry[]
   providerSettlement ProviderSettlement?
 
   @@index([referenceType, referenceId])
@@ -4755,14 +4756,14 @@ enum AdminRefundApprovalStatus {
 /// SellerMembership/ProviderUser's own shape (role + status keyed to a
 /// real User) rather than inventing a parallel credential system.
 model AdminUser {
-  id     String                @id @default(uuid()) @db.Uuid
-  userId String                @unique @db.Uuid
-  user   User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
-  role   AdminRole
-  status AdminMembershipStatus @default(ACTIVE)
+  id            String                @id @default(uuid()) @db.Uuid
+  userId        String                @unique @db.Uuid
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  role          AdminRole
+  status        AdminMembershipStatus @default(ACTIVE)
   /// Only read for SERVICE_ADMIN, whose vertical is not implied by its role. Empty for every other
   /// role: an empty list never widens access, it just leaves the role's own verticals in charge.
-  serviceScopes AdminVertical[] @default([])
+  serviceScopes AdminVertical[]       @default([])
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -7604,6 +7605,13 @@ enum PetMemoryVisibility {
   PUBLIC
 }
 
+enum PetMemorialStatus {
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  WITHDRAWN
+}
+
 model PetMemory {
   id              String    @id @default(uuid()) @db.Uuid
   petId           String    @db.Uuid
@@ -7630,6 +7638,8 @@ model PetMemory {
   /// spec explicitly asks to "keep extensible" rather than hardcode a list.
   tags String[] @default([])
 
+  memorialSubmissions PetMemorialSubmission[]
+
   /// Handoff 21 — soft-delete/archive per spec: "Memories are personally
   /// meaningful data. Avoid destructive deletion." A non-null value means the
   /// household chose to archive the memory; the row is never hard-deleted by
@@ -7642,6 +7652,54 @@ model PetMemory {
   @@index([petId])
   @@index([householdId])
   @@map("pet_memories")
+}
+
+/// A separate, explicitly consented memorial publication. This never flips
+/// the source memory's visibility and the public API exposes only the
+/// display-name snapshot and selected image URL.
+model PetMemorialSubmission {
+  id                   String            @id @default(uuid()) @db.Uuid
+  petId                String            @db.Uuid
+  pet                  Pet               @relation(fields: [petId], references: [id], onDelete: Restrict)
+  ownerUserId          String            @db.Uuid
+  displayName          String            @db.VarChar(120)
+  imageMemoryId        String            @db.Uuid
+  imageMemory          PetMemory         @relation(fields: [imageMemoryId], references: [id], onDelete: Restrict)
+  sourceImageObjectKey String
+  /// Private, opaque copy used only for public memorial delivery; never the source photo URL.
+  publicationObjectKey String
+  consentVersion       String            @db.VarChar(32)
+  consentedAt          DateTime
+  status               PetMemorialStatus @default(PENDING_REVIEW)
+  submittedAt          DateTime          @default(now())
+  reviewedByAdminId    String?           @db.Uuid
+  reviewedAt           DateTime?
+  reviewReason         String?           @db.VarChar(1000)
+  publishedAt          DateTime?
+  withdrawnAt          DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([status, submittedAt])
+  @@index([ownerUserId, petId, createdAt])
+  @@map("pet_memorial_submissions")
+}
+
+/// Append-only event history for consent, moderation and withdrawal.
+/// Database triggers enforce immutability; no public endpoint reads this table.
+model PetMemorialAuditEvent {
+  id           String   @id @default(uuid()) @db.Uuid
+  submissionId String   @db.Uuid
+  actorUserId  String?  @db.Uuid
+  actorAdminId String?  @db.Uuid
+  action       String   @db.VarChar(40)
+  fromStatus   String?  @db.VarChar(40)
+  toStatus     String?  @db.VarChar(40)
+  reason       String?  @db.VarChar(1000)
+  createdAt    DateTime @default(now())
+
+  @@index([submissionId, createdAt])
+  @@map("pet_memorial_audit_events")
 }
 
 // ---------------------------------------------------------------------------
@@ -9192,24 +9250,24 @@ enum ProductReviewStatus {
 
 /// One review per delivered order item, by the order's own customer.
 model ProductReview {
-  id               String              @id @default(uuid()) @db.Uuid
-  orderItemId      String              @unique @db.Uuid
-  orderItem        OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
-  productId        String              @db.Uuid
-  product          Product             @relation(fields: [productId], references: [id], onDelete: Restrict)
-  productVariantId String              @db.Uuid
-  productVariant   ProductVariant      @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
-  userId           String              @db.Uuid
-  user             User                @relation(fields: [userId], references: [id], onDelete: Restrict)
-  rating           Int
-  body             String?
-  status           ProductReviewStatus @default(PENDING)
-  hiddenReason     String?
-  moderationLabels String[]            @default([])
-  moderatedAt      DateTime?
-  moderatedByAdminId String?           @db.Uuid
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  id                 String              @id @default(uuid()) @db.Uuid
+  orderItemId        String              @unique @db.Uuid
+  orderItem          OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  productId          String              @db.Uuid
+  product            Product             @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productVariantId   String              @db.Uuid
+  productVariant     ProductVariant      @relation(fields: [productVariantId], references: [id], onDelete: Restrict)
+  userId             String              @db.Uuid
+  user               User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rating             Int
+  body               String?
+  status             ProductReviewStatus @default(PENDING)
+  hiddenReason       String?
+  moderationLabels   String[]            @default([])
+  moderatedAt        DateTime?
+  moderatedByAdminId String?             @db.Uuid
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
   @@index([productId, status, createdAt])
   @@map("product_reviews")
@@ -9410,27 +9468,27 @@ enum TravelReviewStatus {
 }
 
 model TravelReview {
-  id               String             @id @default(uuid()) @db.Uuid
-  bookingId        String             @unique @db.Uuid
-  booking          TravelBooking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
-  listingId        String             @db.Uuid
-  listing          TravelListing      @relation(fields: [listingId], references: [id], onDelete: Restrict)
-  userId           String             @db.Uuid
-  overall          Int
-  petFriendliness  Int?
-  cleanliness      Int?
-  accuracy         Int?
-  location         Int?
-  body             String?
-  status           TravelReviewStatus @default(PENDING)
-  hiddenReason     String?
-  moderationLabels String[]           @default([])
-  moderatedAt      DateTime?
-  moderatedByAdminId String?          @db.Uuid
-  providerResponse String?
-  respondedAt      DateTime?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                 String             @id @default(uuid()) @db.Uuid
+  bookingId          String             @unique @db.Uuid
+  booking            TravelBooking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  listingId          String             @db.Uuid
+  listing            TravelListing      @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  userId             String             @db.Uuid
+  overall            Int
+  petFriendliness    Int?
+  cleanliness        Int?
+  accuracy           Int?
+  location           Int?
+  body               String?
+  status             TravelReviewStatus @default(PENDING)
+  hiddenReason       String?
+  moderationLabels   String[]           @default([])
+  moderatedAt        DateTime?
+  moderatedByAdminId String?            @db.Uuid
+  providerResponse   String?
+  respondedAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   @@index([listingId, status, createdAt])
   @@map("travel_reviews")
@@ -10601,19 +10659,19 @@ enum PartnerDocumentKind {
 
 /// Private applicant profile; mobile is copied only from an OTP-verified account.
 model PartnerVerificationProfile {
-  id                 String             @id @default(uuid()) @db.Uuid
-  subjectType        PartnerSubjectType
-  subjectId          String             @db.Uuid
-  firstName          String
-  lastName           String
-  landline           String
-  websiteUrl         String?
-  enamadId           String?
-  mobile             String
-  mobileVerifiedAt   DateTime
-  updatedByUserId    String             @db.Uuid
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id               String             @id @default(uuid()) @db.Uuid
+  subjectType      PartnerSubjectType
+  subjectId        String             @db.Uuid
+  firstName        String
+  lastName         String
+  landline         String
+  websiteUrl       String?
+  enamadId         String?
+  mobile           String
+  mobileVerifiedAt DateTime
+  updatedByUserId  String             @db.Uuid
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
   @@unique([subjectType, subjectId])
   @@map("partner_verification_profiles")

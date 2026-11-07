@@ -17,6 +17,7 @@ export function AdminAnimalSupportNav() {
     { href: `/${lang}/admin/lost-pets`, label: t("lostPets") },
     { href: `/${lang}/admin/community`, label: t("reports") },
     { href: `/${lang}/admin/trust`, label: t("trust") },
+    { href: `/${lang}/admin/pet-memorials`, label: t("memorials") },
   ];
   return (
     <nav aria-label={t("label")} className="mb-4 flex gap-1 overflow-x-auto border-b border-border-subtle">

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, ServiceUnavailableException } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import { DocumentTooLargeException, UnsupportedDocumentTypeException } from "../../common/errors/api-exception";
 import { type DownloadOptions, DownloadTarget, STORAGE_DRIVER, type StorageDriver, type UploadTarget } from "./storage-driver.interface";
@@ -73,6 +73,40 @@ export class StorageService {
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     const key = `pets/${petId}/${randomUUID()}.${extension}`;
     return this.driver.createUploadTarget(key, contentType);
+  }
+
+  /** Copies a validated, already-public source photo into an independently controlled private memorial asset. */
+  async createPetMemorialPublicationAsset(petId: string, sourceKey: string): Promise<string> {
+    const prefix = `pet-memories-public/${petId}/`;
+    const filename = sourceKey.startsWith(prefix) ? sourceKey.slice(prefix.length) : "";
+    const match = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.(jpe?g|png|webp)$/i.exec(filename);
+    if (!match) throw new Error("Invalid memorial source image object key");
+    const extension = match[2]!.toLowerCase();
+    const contentType = extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : "image/jpeg";
+    const publicationKey = `pet-memorial-assets/${randomUUID()}.${extension}`;
+    try {
+      await this.driver.copyObject(sourceKey, publicationKey, contentType);
+      return publicationKey;
+    } catch {
+      // Storage errors can contain object keys; do not expose them in API errors/logs.
+      throw new ServiceUnavailableException("The selected photo is temporarily unavailable.");
+    }
+  }
+
+  /** Streams only an opaque private publication asset; never accepts the source pet-scoped key. */
+  async openPetMemorialPublicationAsset(key: string) {
+    if (!/^pet-memorial-assets\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpe?g|png|webp)$/i.test(key)) {
+      throw new Error("Invalid memorial publication asset key");
+    }
+    return this.driver.openObject(key);
+  }
+
+  /** Removes only a newly created orphan after its database transaction failed; never the owner's source photo. */
+  async deletePetMemorialPublicationAsset(key: string): Promise<void> {
+    if (!/^pet-memorial-assets\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpe?g|png|webp)$/i.test(key)) {
+      throw new Error("Invalid memorial publication asset key");
+    }
+    await this.driver.deleteObject(key);
   }
 
   /**

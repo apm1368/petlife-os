@@ -7,10 +7,13 @@ import { PetMemoryService } from "./pet-memory.service";
 import { LifeTimelineService } from "./life-timeline.service";
 import { MemoryController } from "./memory.controller";
 import { LifeTimelineController } from "./life-timeline.controller";
+import { PetMemorialService } from "./pet-memorial.service";
+import { PublicPetMemorialController } from "./memory.controller";
 
 @Module({
   imports: [PetAccessModule, StorageModule, ClinicalHealthModule, SubscriptionsModule],
-  controllers: [MemoryController, LifeTimelineController],
-  providers: [PetMemoryService, LifeTimelineService],
+  controllers: [MemoryController, LifeTimelineController, PublicPetMemorialController],
+  providers: [PetMemoryService, PetMemorialService, LifeTimelineService],
+  exports: [PetMemorialService],
 })
 export class MemoriesModule {}

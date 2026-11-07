@@ -2302,6 +2302,27 @@
     }
   },
   "admin": {
+    "memorials": {
+      "title": "Public pet memorials",
+      "description": "Publish only when explicit owner consent is present. Review each name and selected photo; household and health data are not part of this view.",
+      "filter": "Submission status",
+      "empty": "No memorial submissions in this status.",
+      "error": "The memorial queue could not be loaded or the review action failed.",
+      "photoAlt": "Selected photo for {name}",
+      "missingImage": "Selected image is unavailable",
+      "pet": "Pet: {name}",
+      "submitted": "Submitted: {date}",
+      "consentVersion": "Consent text version: {version}",
+      "reason": "Review reason (required)",
+      "approve": "Approve and publish",
+      "reject": "Reject",
+      "status": {
+        "PENDING_REVIEW": "Pending review",
+        "PUBLISHED": "Published",
+        "REJECTED": "Rejected",
+        "WITHDRAWN": "Withdrawn"
+      }
+    },
     "shell": {
       "accessLoadFailed": "Admin permissions could not be loaded. Retry to verify your current access.",
       "title": "opetlife Admin",
@@ -3368,6 +3389,30 @@
     }
   },
   "memories": {
+    "publicMemorial": {
+      "title": "Share a memorial",
+      "explanation": "You may submit your pet’s name and one photo for the public memorial. It is shown only after review and can be withdrawn by you at any time.",
+      "displayName": "Name shown publicly",
+      "image": "Choose a photo",
+      "chooseImage": "Select a photo",
+      "photoOption": "Photo memory",
+      "noPublicPhoto": "No shareable photo is available. A non-archived photo memory already marked public is required; private memories are never published by this form.",
+      "consent": "I explicitly agree to display “{name}” and the selected photo publicly after admin approval.",
+      "privacy": "No household details, private notes, health records, or account information are published.",
+      "submit": "Submit for review",
+      "withdraw": "Withdraw public consent and remove from the memorial",
+      "ownerOnly": "Only a household owner can manage this public memorial.",
+      "loading": "Loading memorial settings",
+      "error": "The memorial could not be updated. Please retry.",
+      "retry": "Retry",
+      "rejected": "This submission was not approved. You may submit it again after reviewing the note.",
+      "status": {
+        "PENDING_REVIEW": "Waiting for admin review. It is not public yet.",
+        "PUBLISHED": "Published on the public memorial. You can remove it at any time.",
+        "REJECTED": "Not approved.",
+        "WITHDRAWN": "Your public consent was withdrawn; this memorial is no longer listed."
+      }
+    },
     "memoryType": {
       "PHOTO": "Photo",
       "VIDEO": "Video",
@@ -3795,6 +3840,17 @@
     }
   },
   "landing": {
+    "publicMemorial": {
+      "eyebrow": "In loving memory",
+      "title": "Remembering our companions",
+      "description": "Names and photos appear here only after explicit owner consent and admin review.",
+      "empty": "No public memorials have been approved yet.",
+      "loadError": "Public memorials could not be loaded.",
+      "carousel": "Memorial photo slider",
+      "previous": "Previous",
+      "next": "Next",
+      "imageAlt": "Memorial photo of {name}"
+    },
     "hero": {
       "title": "Everything your pet needs, in one place",
       "subtitle": "Find a vet, book an appointment, shop, report a lost pet — without signing up first.",
@@ -6216,6 +6272,7 @@
     "lostPets": "Lost pets",
     "reports": "Reports",
     "trust": "Trust & safety cases",
+    "memorials": "Pet memorials",
     "label": "Animal support section"
   },
   "birthDateField": {
