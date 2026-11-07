@@ -82,6 +82,19 @@
     "readiness": { "summary": "{ready, number} de {total, number} requisitos listos", "allReady": "Listo para viajar", "notReady": "Aún no está listo", "stale": "Desactualizado", "staleWarning": "Algunos requisitos no se han verificado recientemente. Revísalos antes del viaje." },
     "passport": { "title": "Preparación de viaje de {name}", "microchip": "Número de microchip", "missing": "No registrado", "vaccinationStatus": "Estado de vacunación", "healthDocumentsCount": "Documentos de salud registrados", "travelDocumentsCount": "Documentos de viaje registrados", "missingItemsTitle": "Pendiente", "missingItem": { "MICROCHIP_NUMBER": "No se ha registrado el número de microchip", "VACCINATION_STATUS": "Las vacunas no están al día", "HEALTH_DOCUMENTS": "No hay documentos de salud cargados", "TRAVEL_DOCUMENTS": "No hay documentos de viaje cargados" } }
   },
+  "rollout": {
+    "trip": {
+      "title": "Editar plan de viaje",
+      "origin": "Ciudad de origen",
+      "destination": "Ciudad de destino",
+      "notes": "Notas",
+      "depart": "Salida",
+      "return": "Regreso",
+      "mode": "Medio de transporte",
+      "save": "Guardar",
+      "failed": "No se pudieron guardar los cambios. Tus datos siguen aquí."
+    }
+  },
   "travelMarketplace": {
     "searchAria": "Buscar alojamientos",
     "heroEyebrow": "Viaja con tu mascota",

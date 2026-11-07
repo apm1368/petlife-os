@@ -82,6 +82,19 @@
     "readiness": { "summary": "{ready, number} von {total, number} Anforderungen erfüllt", "allReady": "Reisebereit", "notReady": "Noch nicht reisefertig", "stale": "Veraltet", "staleWarning": "Einige Angaben wurden länger nicht überprüft — bitte vor der Reise nochmals kontrollieren." },
     "passport": { "title": "Reisebereitschaft von {name}", "microchip": "Mikrochipnummer", "missing": "Nicht erfasst", "vaccinationStatus": "Impfstatus", "healthDocumentsCount": "Gesundheitsdokumente", "travelDocumentsCount": "Reisedokumente", "missingItemsTitle": "Noch fehlend", "missingItem": { "MICROCHIP_NUMBER": "Mikrochipnummer nicht erfasst", "VACCINATION_STATUS": "Impfstatus nicht aktuell", "HEALTH_DOCUMENTS": "Keine Gesundheitsdokumente hochgeladen", "TRAVEL_DOCUMENTS": "Keine Reisedokumente hochgeladen" } }
   },
+  "rollout": {
+    "trip": {
+      "title": "Reiseplan bearbeiten",
+      "origin": "Abreiseort",
+      "destination": "Zielort",
+      "notes": "Notizen",
+      "depart": "Abreise",
+      "return": "Rückreise",
+      "mode": "Verkehrsmittel",
+      "save": "Speichern",
+      "failed": "Die Änderungen konnten nicht gespeichert werden. Deine Eingaben sind weiterhin vorhanden."
+    }
+  },
   "travelMarketplace": {
     "searchAria": "Unterkünfte suchen",
     "heroEyebrow": "Mit deinem Haustier verreisen",
