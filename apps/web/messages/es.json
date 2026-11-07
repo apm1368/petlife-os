@@ -96,5 +96,23 @@
     "design": {
       "navLabel": "La tienda para tu mascota", "shop": "Tienda", "orders": "Mis pedidos", "repeat": "Entrega periódica", "favorites": "Productos guardados", "cart": "Carrito", "browse": "Explorar todos los productos", "filters": "Encuentra su próximo favorito", "filterHint": "Elige lo que mejor le va a tu compañero.", "allProducts": "Todos los productos", "applyFilters": "Mostrar productos", "repeatTitle": "Un poco de cuidado, una y otra vez.", "repeatDescription": "Planifica la próxima entrega de un producto apto. Tú decides cada pedido.", "repeatCta": "Explorar entregas periódicas", "viewProduct": "Ver producto", "summary": "Resumen del pedido", "cartStep": "Carrito", "checkoutStep": "Datos de pago", "completeStep": "Estado del pedido", "journey": "Progreso de compra", "categoryFailed": "No se pudieron cargar las categorías. Aún puedes buscar en el catálogo.", "loadFailed": "No se pudo cargar esta información. Inténtalo de nuevo.", "favoriteFailed": "No se pudieron actualizar los productos guardados. Inténtalo de nuevo.", "reviewsFailed": "No se pudieron cargar más reseñas. Inténtalo de nuevo.", "shopCredit": "Imagen de tienda: concepto fotorrealista generado por IA de OpenAI, recortado y recodificado. No es una tienda ni una fotografía real de producto.", "clearCart": "Vaciar carrito", "clearTitle": "¿Vaciar el carrito?", "clearHint": "Se quitarán todos los artículos de este carrito.", "clearConfirm": "Sí, vaciar carrito", "keepCart": "Conservar artículos", "editAddress": "Editar dirección seleccionada", "defaultAddress": "Dirección predeterminada del hogar", "editOptionalHint": "Al editar, los campos opcionales vacíos conservan sus valores actuales."
     }
+  },
+  "seller": {
+    "shell": {
+      "nav": { "overview": "Resumen", "orders": "Pedidos", "offers": "Ofertas", "inventory": "Inventario", "channels": "Canales", "team": "Equipo", "settings": "Ajustes", "finance": "Finanzas", "promotions": "Promociones" },
+      "notASeller": { "title": "Sin acceso de vendedor", "body": "Tu cuenta no pertenece a ninguna organización de vendedores.", "backToApp": "Volver a opetlife" },
+      "chooseOrg": { "title": "Elige un vendedor", "body": "Perteneces a varias organizaciones de vendedores. Elige en cuál quieres trabajar." },
+      "headerRole": "{role}",
+      "role": { "OWNER": "Propietario", "ADMIN": "Administrador", "OPERATIONS": "Operaciones", "CATALOG_MANAGER": "Gestor del catálogo", "ORDER_MANAGER": "Gestor de pedidos", "FINANCE": "Finanzas", "SUPPORT": "Soporte", "VIEWER": "Consulta" },
+      "switchOrg": "Cambiar de vendedor", "suspendedBanner": "Esta organización de vendedores está suspendida. Las nuevas acciones operativas están bloqueadas."
+    },
+    "offers": {
+      "title": "Ofertas", "loading": "Cargando ofertas…", "retry": "Reintentar", "empty": "Aún no hay ofertas.", "lowStock": "Pocas unidades", "syncErrors": "Errores de sincronización: {count}", "price": "Precio (IRR)", "status": "Estado", "statusOptions": { "ACTIVE": "Activa", "PAUSED": "Pausada", "SUSPENDED": "Suspendida" }, "save": "Guardar", "available": "{count} disponibles · {currency}", "saveFailed": "No se pudo guardar la oferta.",
+      "moderation": { "PENDING_REVIEW": "Pendiente de revisión", "APPROVED": "Aprobada para la venta", "REJECTED": "Se requieren cambios", "pendingHelp": "La oferta no será pública hasta que opetlife la apruebe.", "rejectedHelp": "Actualiza y guarda la oferta para volver a enviarla a revisión." },
+      "repeat": { "enable": "Ofrecer entrega periódica", "intervals": "Intervalos de entrega", "everyDays": "Cada {days} días", "pickOne": "Elige al menos un intervalo." }
+    }
+  },
+  "rollout": {
+    "sellerOffer": { "title": "Añadir oferta del vendedor", "search": "Buscar en el catálogo central de productos", "find": "Buscar", "empty": "No se encontraron productos.", "variant": "Variante del producto", "choose": "Elegir una variante", "price": "Precio (IRR)", "stock": "Existencias iniciales", "save": "Añadir oferta", "failed": "No se pudo completar la acción. Se conservaron tus datos.", "saved": "Oferta del vendedor creada." }
   }
 }

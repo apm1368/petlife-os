@@ -96,5 +96,23 @@
     "design": {
       "navLabel": "Dein Tiershop", "shop": "Shop", "orders": "Meine Bestellungen", "repeat": "Wiederkehrende Lieferung", "favorites": "Gespeicherte Produkte", "cart": "Warenkorb", "browse": "Alle Produkte entdecken", "filters": "Finde den nächsten Favoriten", "filterHint": "Wähle, was zu deinem Tier passt.", "allProducts": "Alle Produkte", "applyFilters": "Produkte anzeigen", "repeatTitle": "Ein bisschen Fürsorge – immer wieder.", "repeatDescription": "Plane die nächste Lieferung eines geeigneten Produkts. Du behältst bei jeder Bestellung die Kontrolle.", "repeatCta": "Wiederkehrende Lieferung entdecken", "viewProduct": "Produkt ansehen", "summary": "Bestellübersicht", "cartStep": "Warenkorb", "checkoutStep": "Kassendetails", "completeStep": "Bestellstatus", "journey": "Kaufübersicht", "categoryFailed": "Kategorien konnten nicht geladen werden. Du kannst den Katalog weiterhin durchsuchen.", "loadFailed": "Diese Informationen konnten nicht geladen werden. Bitte versuche es erneut.", "favoriteFailed": "Gespeicherte Produkte konnten nicht aktualisiert werden. Bitte versuche es erneut.", "reviewsFailed": "Weitere Bewertungen konnten nicht geladen werden. Bitte versuche es erneut.", "shopCredit": "Shop-Motiv: KI-generiertes fotorealistisches Konzept von OpenAI; zugeschnitten und neu codiert. Kein echtes Geschäft und kein Produktfoto.", "clearCart": "Warenkorb leeren", "clearTitle": "Warenkorb leeren?", "clearHint": "Alle Artikel in diesem Warenkorb werden entfernt.", "clearConfirm": "Ja, Warenkorb leeren", "keepCart": "Artikel behalten", "editAddress": "Ausgewählte Adresse bearbeiten", "defaultAddress": "Standardadresse des Haushalts", "editOptionalHint": "Beim Bearbeiten behalten leere optionale Felder ihre bisherigen Werte."
     }
+  },
+  "seller": {
+    "shell": {
+      "nav": { "overview": "Übersicht", "orders": "Bestellungen", "offers": "Angebote", "inventory": "Lagerbestand", "channels": "Kanäle", "team": "Team", "settings": "Einstellungen", "finance": "Finanzen", "promotions": "Aktionen" },
+      "notASeller": { "title": "Kein Verkäuferzugang", "body": "Dein Konto gehört keiner Verkäuferorganisation an.", "backToApp": "Zurück zu opetlife" },
+      "chooseOrg": { "title": "Verkäufer auswählen", "body": "Du gehörst mehreren Verkäuferorganisationen an. Wähle aus, in welcher du arbeiten möchtest." },
+      "headerRole": "{role}",
+      "role": { "OWNER": "Inhaber", "ADMIN": "Administrator", "OPERATIONS": "Betrieb", "CATALOG_MANAGER": "Katalogverwaltung", "ORDER_MANAGER": "Bestellverwaltung", "FINANCE": "Finanzen", "SUPPORT": "Support", "VIEWER": "Leser" },
+      "switchOrg": "Verkäufer wechseln", "suspendedBanner": "Diese Verkäuferorganisation ist gesperrt. Neue operative Aktionen sind deaktiviert."
+    },
+    "offers": {
+      "title": "Angebote", "loading": "Angebote werden geladen …", "retry": "Erneut versuchen", "empty": "Noch keine Angebote.", "lowStock": "Wenig auf Lager", "syncErrors": "Synchronisierungsfehler: {count}", "price": "Preis (IRR)", "status": "Status", "statusOptions": { "ACTIVE": "Aktiv", "PAUSED": "Pausiert", "SUSPENDED": "Gesperrt" }, "save": "Speichern", "available": "{count} verfügbar · {currency}", "saveFailed": "Das Angebot konnte nicht gespeichert werden.",
+      "moderation": { "PENDING_REVIEW": "Wird geprüft", "APPROVED": "Zum Verkauf freigegeben", "REJECTED": "Änderung erforderlich", "pendingHelp": "Dieses Angebot ist erst nach der Freigabe durch opetlife öffentlich.", "rejectedHelp": "Aktualisiere und speichere das Angebot, um es erneut zur Prüfung einzureichen." },
+      "repeat": { "enable": "Wiederkehrende Lieferung anbieten", "intervals": "Lieferintervalle", "everyDays": "Alle {days} Tage", "pickOne": "Wähle mindestens ein Intervall aus." }
+    }
+  },
+  "rollout": {
+    "sellerOffer": { "title": "Verkäuferangebot hinzufügen", "search": "Im zentralen Produktkatalog suchen", "find": "Suchen", "empty": "Keine Produkte gefunden.", "variant": "Produktvariante", "choose": "Variante auswählen", "price": "Preis (IRR)", "stock": "Anfangsbestand", "save": "Angebot hinzufügen", "failed": "Die Aktion konnte nicht abgeschlossen werden. Deine Eingaben sind erhalten geblieben.", "saved": "Verkäuferangebot erstellt." }
   }
 }
