@@ -74,3 +74,11 @@
 - #133 (`77c9250c`, base #122) localizes order history/detail and is open; latest CI run `42418431721` is in progress. #134 (`fc52c237`, base #122) localizes repeat delivery/favorites and latest CI run `42418666028` is in progress. Neither has a recorded review. Do not describe either as CI-green until the latest run finishes.
 - #133 local validation: focused order list/detail tests passed (13), web typecheck/lint passed and de/es order/status message keys and interpolation placeholders match English. #134 local validation: repeat/favorites tests passed (4), web typecheck/lint passed and message key/interpolation parity matched English. Persian Jalali behavior and no-autopay semantics are preserved.
 - Disk is 673 MiB available (98% used), after removal of only `.turbo/cache` (~8 MiB). Source, git history, worktrees, data and database volumes were retained; local production build is deferred. Payment worktree is untouched. No localization changes are merged or LIVE; memorial source/bucket/CDN privacy remains unverified.
+
+## CI completion recheck — 2026-11-07 22:14 UTC
+
+- #132 remains based on #122 at head `01c3aa2a`; CI run `42417793232` passed. No review is recorded.
+- #133 remains based on #122 at head `77c9250c`; CI run `42418431721` passed all steps, including API E2E and build. No review is recorded.
+- #134 remains based on #122 at head `496bf41a`; latest CI run `42419574972` is in progress after adding explicit de/es repeat-delivery date formatting tests. Local repeat/favorites tests passed (6), web typecheck and earlier lint passed; message keys/placeholders match English. No review is recorded.
+- #131 remains based on #118 at `4515b779`, CI passed, no review. #118 itself remains review-required. #107 remains the top release blocker; production still SHA `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41` and live product API still returns 15 entries including 10 `qa-b4-*` records. No merge/deploy occurred.
+- Free space remains 673 MiB (98% used). The separate payment-controls worktree still has its pre-existing uncommitted payment-control changes and was not edited. All these product changes remain NOT LIVE.
