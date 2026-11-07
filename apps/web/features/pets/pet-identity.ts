@@ -1,6 +1,7 @@
 import type { PetDto } from "@petlife/types";
 import { localizeDigits } from "@/lib/date/jalali";
 import { statusLabel } from "@/lib/status/status-labels";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 /** Shared pet identity text — the pet header, the home hero and the pet list say the same thing. */
 export const SPECIES_LABELS: Record<string, [string, string]> = {
@@ -16,8 +17,14 @@ export const SPECIES_LABELS: Record<string, [string, string]> = {
 
 /** Short species name for identity lines ("Rodent" rather than the long picker hint). */
 const SPECIES_SHORT: Record<string, [string, string]> = { RODENT: ["جونده", "Rodent"] };
+const SPECIES_DE_ES: Record<string, [string, string]> = {
+  DOG: ["Hund", "Perro"], CAT: ["Katze", "Gato"], BIRD: ["Vogel", "Ave"],
+  RABBIT: ["Kaninchen", "Conejo"], RODENT: ["Nagetier", "Roedor"], FISH: ["Fisch", "Pez"],
+  REPTILE: ["Reptil", "Reptil"], OTHER: ["Andere", "Otro"],
+};
 
-export function speciesLabel(pet: Pick<PetDto, "species">, locale: "fa" | "en"): string {
+export function speciesLabel(pet: Pick<PetDto, "species">, locale: RouteLocale): string {
+  if (locale === "de" || locale === "es") return SPECIES_DE_ES[pet.species]?.[locale === "de" ? 0 : 1] ?? (locale === "de" ? "Haustier" : "Mascota");
   const entry = SPECIES_SHORT[pet.species] ?? SPECIES_LABELS[pet.species];
   return entry ? entry[locale === "fa" ? 0 : 1] : locale === "fa" ? "حیوان" : "Pet";
 }
