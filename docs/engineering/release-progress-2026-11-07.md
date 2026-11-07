@@ -27,7 +27,7 @@
 - Continued auth slice: German/Spanish localized messages now cover registration, password login, phone/OTP login, password recovery/reset and the auth shell. The DE/ES auth message branches are deeply merged over English fallback so untranslated namespaces still render instead of throwing missing-key errors. This does not implement or simulate provider SMS templates.
 - Localization slice verification: relevant Vitest files pass (8 files, 43 tests), including a DE/ES auth-key and interpolation-placeholder parity test; web typecheck, web lint and `git diff --check` pass. Production web build passed with `NEXT_PUBLIC_API_ORIGIN=http://localhost:4000` and generated 724 locale route variants/pages. An earlier full web run executed 230 files and reported 229 passing / 1 failing (four assertions in the newly added Explore test incorrectly searched for a travel link inside the Care section); the assertion was corrected and the affected test now passes. The full web suite has not yet been rerun after the latest auth changes.
 - Production remains SHA `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; live public product API still returns 15 items, including 10 `qa-b4-*` records. #107 remains open, build-successful, mergeable but `REVIEW_REQUIRED`; no production release has occurred.
-- Current GitHub status before the latest auth push: #118 head `58a8707` is pushed and mergeable, review required; CI was queued. #115/#116/#117 are likewise open with successful builds but no reviews. #118 overlaps `HomeLanding.tsx` with #116/#117 and `ParkHeader.tsx` with #115; avoid retargeting/rebasing until those owner reviews/merges, then inspect and rerun the resulting diff.
+- Current GitHub status: #118 head `4f9a4a4` is pushed and mergeable, review required; CI run `42387637367` is queued. #115/#116/#117 are likewise open with successful builds but no reviews. #118 overlaps `HomeLanding.tsx` with #116/#117 and `ParkHeader.tsx` with #115; avoid retargeting/rebasing until those owner reviews/merges, then inspect and rerun the resulting diff.
 
 ## Preserved work
 
@@ -44,7 +44,7 @@
 
 ## Latest recheck for this handoff
 
-- #118 is open at `58a8707ccf9c045ce549a88fe4cd99b0936ccb69`, base `main`, mergeable, review required. CI run `42387580400` is queued; the preceding head `b6a71966` had a successful CI build (`42376716267`).
+- #118 is open at `4f9a4a4058af08cf42bd54dfb9dd925f22436650`, base `main`, mergeable, review required. CI run `42387637367` is queued; the preceding code head `58a8707` is the current implementation batch and has local focused tests/build recorded above.
 - #107 remains open at `4ade295291f96a8e68b2b4698d6d298b770ed88c`, mergeable, `REVIEW_REQUIRED`, last `build` check succeeded (run `42231686406`). The production API still shows the demo exposure recorded above; no release/merge/deploy was made.
 - #115 (`1618a683`), #116 (`1e16a2fd`) and #117 (`6c8693de`) are open and review-required. Their heads have not changed in this recheck. Landing PR overlaps remain; no branch was retargeted.
 - Production version endpoint still reports `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`. Payment worktrees remain present and untouched: `/workspace/petlife-payment-controls` (`codex/payment-controls`), `/workspace/petlife-payment-controls-live` (`feat/payment-controls`) and `/workspace/petlife-payment-infrastructure` (`feat/payment-infrastructure`).
