@@ -167,3 +167,12 @@
 - Local `codex/review-trip-setup` now merges `origin/main` at `8d892b2` after PR #165 merged. The previously running hosted CI started before this update and is stale for final merge.
 - German/Spanish message catalogs merged without conflicts. Documentation conflicts were resolved from latest main, with this travel-specific status restored. The local branch needs focused tests, commit/push and new exact-head CI before merge.
 - Production still needs rechecking after deploy run `42519281605`; last verified production SHA is `3155232`. Trip setup/hub remains PARTIAL pending authenticated responsive checks.
+
+## Localization queue — 2026-11-08 20:50 UTC
+
+- `main` is `b6b61c4124640a496c6d2cda5566ee509d07c953` after #152 merged with exact-head CI green. Production reports `8d892b2ea8b2b408f517b26866118acd8ca8e96d`; deploy `42521413577` for #152 is in progress.
+- #160 is synchronized at `44eac6ee86e4a4dd9735de99c5df6b79af1f76d3`; 21 landing/memorial/public-shell tests, typecheck, targeted lint and HERO-diff check pass locally. Current hosted CI `42521671723` is pending.
+- #166 is synchronized at `062da1127181b3ab477ef4cb1d7bfda55f0939ba`; 27 dashboard-state tests, typecheck, targeted lint and diff checks pass locally. Current hosted CI `42521799060` is pending.
+- #167 admin-user directory is synchronized at `3dee5c0cd17cd8f3c985fc6916ed90adfd8a11e2`; 17 focused tests and typecheck/lint/catalog/diff checks pass locally. Current hosted CI `42521920173` is pending.
+- Isolated seller-offers localization from #123 is being prepared on `codex/i18n-seller-offers-main`; after syncing through #152, 7 focused component/parity tests pass. It is not pushed/opened yet; typecheck/lint/hosted CI remain to run.
+- None of these post-#152 PRs is merged or LIVE_VERIFIED. Disk headroom remains about 104 MiB; no cleanup/build or payment-worktree change.
