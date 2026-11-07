@@ -12,8 +12,7 @@ import "@/features/auth/park-auth.css";
 export default async function AuthLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRouteLocale(locale)) notFound();
-  const copyLocale = locale === "fa" ? "fa" : "en";
-  const c = parkAuthCopy[copyLocale];
+  const c = parkAuthCopy[locale];
   return <div className="auth-frame park-auth-page">
     <aside className="auth-brand-panel" aria-label="opetlife">
       <Image unoptimized src={parkCopy[locale].imageSrc} alt="" fill sizes="(max-width: 820px) 100vw, 50vw" priority />

@@ -18,8 +18,7 @@ export function ParkAuthModal({ children, registration = false }: { children: Re
   const router = useRouter();
   const locale = useLocale();
   const origin = useAuthModalOrigin();
-  const copyLocale = locale === "fa" ? "fa" : "en";
-  const c = parkAuthCopy[copyLocale];
+  const c = parkAuthCopy[isRouteLocale(locale) ? locale : "en"];
   const imageLocale = isRouteLocale(locale) ? locale : "en";
   const ref = useRef<HTMLDialogElement>(null);
   const dismissing = useRef(false);

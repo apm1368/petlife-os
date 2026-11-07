@@ -60,4 +60,18 @@ describe("RegisterPage", () => {
     expect(accountService.setConsent).toHaveBeenCalledWith("TERMS", true);
     expect(accountService.setConsent).toHaveBeenCalledWith("PRIVACY", true);
   });
+
+  it.each([
+    ["de", "Konto erstellen", "Benutzername", "Passwort", "Passwort bestätigen", "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung von opetlife.", "Anzeigen"],
+    ["es", "Crear una cuenta", "Nombre de usuario", "Contraseña", "Confirmar contraseña", "Acepto las condiciones de uso y la política de privacidad de opetlife.", "Mostrar"],
+  ] as const)("renders translated registration fields and consent copy in %s", (locale, title, username, password, confirmPassword, terms, showPassword) => {
+    renderWithIntl(<RegisterPage />, locale);
+    expect(screen.getByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByLabelText(username)).toBeTruthy();
+    expect(screen.getByLabelText(password)).toBeTruthy();
+    expect(screen.getByLabelText(confirmPassword)).toBeTruthy();
+    expect(screen.getByText(terms)).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: showPassword })).toHaveLength(2);
+    expect(screen.getByRole("button", { name: locale === "de" ? "Konto erstellen" : "Crear cuenta" })).toBeTruthy();
+  });
 });

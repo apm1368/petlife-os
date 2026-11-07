@@ -1,0 +1,72 @@
+{
+  "auth": {
+    "welcome": {
+      "title": "Te damos la bienvenida a opetlife",
+      "subtitle": "Todo sobre la vida de tu mascota, en un solo lugar.",
+      "continueWithEmail": "Continuar con correo electrónico",
+      "continueWithPhone": "Continuar con teléfono",
+      "continueWithGoogle": "Continuar con Google",
+      "continueWithUsername": "Continuar con nombre de usuario",
+      "createAccount": "Crear una cuenta",
+      "googleAuthFailed": "No se pudo iniciar sesión con Google. Prueba otro método."
+    },
+    "identifier": {
+      "emailLabel": "Correo electrónico",
+      "invalidPhone": "Introduce un número de móvil iraní válido.",
+      "phoneLabel": "Número de teléfono",
+      "sendCode": "Enviar código",
+      "changeIdentifier": "Cambiar correo o teléfono"
+    },
+    "otp": {
+      "title": "Introduce el código",
+      "subtitle": "Hemos enviado un código de 6 dígitos a {identifier}.",
+      "resend": "Reenviar código",
+      "resendIn": "Reenviar en {seconds, number} s",
+      "passcodeLabel": "Código de un solo uso",
+      "verify": "Verificar",
+      "invalid": "El código es incorrecto o ha caducado.",
+      "rateLimited": "Demasiados intentos. Inténtalo de nuevo en {seconds, number} segundos.",
+      "rateLimitedMinutes": "Demasiados intentos. Inténtalo de nuevo en unos {minutes, number} minutos.",
+      "genericError": "Se ha producido un error. Inténtalo de nuevo."
+    },
+    "password": {
+      "usernameLabel": "Nombre de usuario",
+      "passwordLabel": "Contraseña",
+      "login": "Iniciar sesión",
+      "forgotPassword": "¿Has olvidado tu contraseña?",
+      "invalidCredentials": "El nombre de usuario o la contraseña no son correctos."
+    },
+    "register": {
+      "title": "Crear una cuenta",
+      "usernameLabel": "Nombre de usuario",
+      "passwordLabel": "Contraseña",
+      "displayNameLabel": "Nombre visible (opcional)",
+      "emailLabel": "Correo electrónico (opcional)",
+      "submit": "Crear cuenta",
+      "usernameTaken": "Ese nombre de usuario ya está en uso.",
+      "haveAccount": "¿Ya tienes una cuenta? Inicia sesión",
+      "confirmPassword": "Confirmar contraseña",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "terms": "Acepto las condiciones de uso y la política de privacidad de opetlife.",
+      "genericError": "No se pudo crear tu cuenta. Revisa los datos e inténtalo de nuevo."
+    },
+    "forgot": {
+      "title": "Restablecer contraseña",
+      "identifierLabel": "Nombre de usuario o correo electrónico",
+      "submit": "Enviar enlace de restablecimiento",
+      "sent": "Si existe una cuenta coincidente, se ha enviado un enlace para restablecer la contraseña.",
+      "backToLogin": "Volver a iniciar sesión",
+      "genericError": "No se pudo enviar la solicitud. Inténtalo de nuevo."
+    },
+    "reset": {
+      "title": "Elige una contraseña nueva",
+      "newPasswordLabel": "Nueva contraseña",
+      "submit": "Restablecer contraseña",
+      "invalidToken": "Este enlace no es válido o ha caducado.",
+      "success": "Se ha restablecido tu contraseña. Ya puedes iniciar sesión.",
+      "confirmPassword": "Confirmar contraseña",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
+    }
+  }
+}
