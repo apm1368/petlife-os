@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { formatDay } from "@/lib/date/jalali";
 import { Button, EmptyState, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import type { MedicalDocumentDto, TravelRequirementDto, TripDto, TripReadinessSummaryDto } from "@petlife/types";
 import { MedicalDocumentType, TravelRequirementStatus, TravelRequirementType, TripStatus } from "@petlife/types";
@@ -53,7 +52,8 @@ const REQUIREMENT_STATUSES: TravelRequirementStatus[] = [
 export function TripDetailView({ petId, tripId }: { petId: string; tripId: string }) {
   const t = useTranslations("travel");
   const externalT = useTranslations("externalTravel");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const fmt = useInstantFormat();
   const tCommon = useTranslations("common");
 
   const [trip, setTrip] = useState<TripDto | null>(null);
@@ -200,11 +200,11 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
         </div>
         <aside className="split-aside">
           <section className="split-panel flex flex-col gap-2">
-            <p className="text-body text-text-primary">{t("detail.departAt", { date: formatDay(trip.departAt.slice(0, 10), locale) })}</p>
-            {trip.returnAt ? <p className="text-body text-text-primary">{t("detail.returnAt", { date: formatDay(trip.returnAt.slice(0, 10), locale) })}</p> : null}
+            <p className="text-body text-text-primary">{t("detail.departAt", { date: fmt.date(trip.departAt) })}</p>
+            {trip.returnAt ? <p className="text-body text-text-primary">{t("detail.returnAt", { date: fmt.date(trip.returnAt) })}</p> : null}
             <p className="text-metadata text-text-secondary">{t(`travelMode.${trip.travelMode}`)}</p>
             {trip.notes ? <p className="text-metadata text-text-secondary">{trip.notes}</p> : null}
-            <Link href={`/${locale}/travel/trips/${trip.id}`} className="w-fit text-sm font-bold text-brand-natural underline">{locale === "fa" ? "مرکز سفر: اقامت‌ها، آمادگی و مکان‌ها" : "Trip hub: stays, readiness and places"}</Link>
+            <Link href={`/${locale}/travel/trips/${trip.id}`} className="w-fit text-sm font-bold text-brand-natural underline">{t("detail.hubLink")}</Link>
           </section>
           <Link className="underline" href={`/${locale}/pets/${petId}/travel/${tripId}/external-stays`}>{externalT("tripTitle")}</Link>
       <TripEditor key={trip.id + trip.updatedAt} petId={petId} trip={trip} onSaved={load} />
@@ -246,7 +246,7 @@ function RequirementCard({
   const fmt = useInstantFormat();
   const t = useTranslations("travel");
   const tCommon = useTranslations("common");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
 
   return (
     <article className="req-row flex flex-col gap-2">

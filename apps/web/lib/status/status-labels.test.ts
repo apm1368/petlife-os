@@ -26,7 +26,11 @@ describe("status vocabulary", () => {
   it("counts and country names follow the UI language", () => {
     expect(formatCount(1250, "fa")).toBe("۱٬۲۵۰");
     expect(formatCount(1250, "en")).toBe("1,250");
+    expect(formatCount(1250, "de")).toBe("1.250");
+    expect(formatCount(1250, "es")).toBe("1250");
     expect(countryName("IR", "fa")).toBe("ایران");
     expect(countryName("IR", "en")).toBe("Iran");
+    expect(countryName("IR", "de")).toBe("Iran");
+    expect(countryName("IR", "es")).toBe("Irán");
   });
 });

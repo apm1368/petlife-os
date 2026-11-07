@@ -3539,7 +3539,8 @@
       "jurisdiction": "حوزه قضایی: {jurisdiction}",
       "verifiedAt": "آخرین تأیید {date}",
       "neverVerified": "هرگز تأیید نشده",
-      "linkedDocument": "مدرک پیوست‌شده: {title}"
+      "linkedDocument": "مدرک پیوست‌شده: {title}",
+      "hubLink": "مرکز سفر: اقامت‌ها، آمادگی و مکان‌ها"
     },
     "readiness": {
       "summary": "{ready, number} از {total, number} الزام آماده است",

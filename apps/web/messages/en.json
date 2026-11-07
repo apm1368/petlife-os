@@ -3539,7 +3539,8 @@
       "jurisdiction": "Jurisdiction: {jurisdiction}",
       "verifiedAt": "Last verified {date}",
       "neverVerified": "Never verified",
-      "linkedDocument": "Linked document: {title}"
+      "linkedDocument": "Linked document: {title}",
+      "hubLink": "Trip hub: stays, readiness and places"
     },
     "readiness": {
       "summary": "{ready, number} of {total, number} requirements ready",
