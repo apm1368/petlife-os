@@ -8,9 +8,12 @@ The personal account settings page (`PersonalSettingsView`) now has German and S
 
 Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 
-## Account settings follow-up (PR #119)
+## Personal settings (PR #119 — merged)
 
-- `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
-- Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
-- PR #118 has merged to `main`; this change has been replayed onto that merged base. The new head must pass fresh CI before it can merge. No production behavior is claimed from this PR yet.
-- This follow-up only translates the personal settings page and updates this rollout note. It changes no API, persistence, verification or notification contract. The four-locale preference foundation is supplied by #118 on `main`.
+German and Spanish cover personal settings, appearance, contact methods, verification state and the existing OTP flow. This UI-only change does not alter provider delivery.
+
+## Travel discovery results (PR #151 — current)
+
+The search-results shell, filters, sort controls, map-unavailable state, pagination/compare labels and result-card UI have fa/en/de/es copy. Listing type, amenity labels, pet-rule summary, match status, rating, distance, counts, date range and Toman number formatting use the selected locale; Persian retains Jalali rendering and Persian digits. The interface still displays source-reported values, not a reservation guarantee.
+
+This is not complete travel localization: search editor, listing details, comparison, booking, trip planning and partner/backoffice flows remain separate. Property names, cities, rules and free text remain source content. Map integration remains unavailable. No fake results or availability, prices or SMS delivery are added.
