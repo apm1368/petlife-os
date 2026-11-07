@@ -35,6 +35,16 @@
 - Separate household/family worktree and audit-workbook worktree were not touched.
 - Current worktree is the localization branch; do not reset or clean it.
 
+## Live recheck and localization shop slice — 2026-11-07 18:10 UTC
+
+- Fresh `git fetch origin` confirms `origin/main` remains `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; production `/api/health/version` returned the same SHA, `production`, and deployment `github-42091865674-1`.
+- Fresh safe GET `https://opetlife.ir/api/shop/products?page=1&pageSize=50`: 15 products total; 10 `qa-b4-*` demo records and five other slugs. #107 remains open at `4ade295291f96a8e68b2b4698d6d298b770ed88c`, `REVIEW_REQUIRED`; its build check passed (run `42231686406`). No merge or deploy was attempted. This is the highest-priority release blocker.
+- Localization queue recheck: #118 `e57dd039` → `main`, CI passed, review required; #119 `83fe67c` → #118, CI passed; #120 `434757a` → #119, CI passed; #121 `0345abf` → #120, latest API E2E/build check passed (run `42397981911`). No localization PR is merged. Retarget only after the preceding base is approved, green and merged, then inspect and test the changed diff.
+- Opened #122 (`feat/i18n-shop-customer`, head `962589871c46ad44ba306223fe3687a0a5332b33`) directly against #118 to keep the seller/account PR chain out of the customer shop work. It adds DE/ES shop home, product discovery, product detail, compatibility, cart and commerce labels plus locale-aware Toman, number and review-date display. CI run `42399845774` was still in progress at this checkpoint: lint, design-system checks, typecheck and migrations succeeded; web tests were running; API E2E and production build were pending. Local focused tests passed (7 files / 44 tests), web typecheck and lint passed, and `git diff --check` passed. Local full production build was not run due disk headroom.
+- Explicit fallback remaining: checkout, orders, repeat delivery, favorites, seller catalog/onboarding/finance, booking, support/legal, travel, community, backoffice and notifications. DE/ES SMS templates/delivery are not implemented. Persian remains RTL with Jalali date behavior; no locale-driven language save/API behavior changed in #122.
+- Disk: initial `df` showed 49 MiB available. Removing the confirmed generated project `.next` build raised it to about 1.6 GiB. The three inspected old temporary Node/Jest/Next build-output directories were also removed; the latest exact `df -B1` shows 1,443,729,408 bytes available (96% used). `/tmp` is now 35 MiB. Only those named regenerable artifacts were removed; source, `.git`, production data, DB volumes and worktrees were not cleaned. Payment-controls worktree still contains the same uncommitted service/module/spec changes and was not modified.
+- #117 memorial source-image/direct storage URL and CDN privacy remains unverified without authorized production bucket/CDN access. #110→#111 and #113→#114 dependencies remain open and unchanged. No branch protection was bypassed; all features remain NOT LIVE unless separately production-verified.
+
 ## Exact next actions
 
 1. Wait for CI on the latest #118 head and obtain the required review. Keep #107 first in the release queue; do not bypass protection.
