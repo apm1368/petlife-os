@@ -154,16 +154,19 @@ describe("member navigation", () => {
     routing.pathname = `/${locale}/home`;
     renderWithIntl(<MobileTabBar />, locale);
     const labels = {
-      fa: { home: "داشبورد", explore: "کاوش", preferences: "زبان و ظاهر", help: "کمک و پشتیبانی", guides: /راهنماها راهنمای عملی/ },
-      en: { home: "Dashboard", explore: "Explore", preferences: "Language and appearance", help: "Help and support", guides: /Guides Practical/ },
-      de: { home: "Übersicht", explore: "Entdecken", preferences: "Sprache und Darstellung", help: "Hilfe und Support", guides: /Ratgeber Praktische Pflegehinweise/ },
-      es: { home: "Inicio", explore: "Explorar", preferences: "Idioma y apariencia", help: "Ayuda y soporte", guides: /Guías Consejos prácticos/ },
+      fa: { home: "داشبورد", explore: "کاوش", preferences: "زبان و ظاهر", language: "زبان", german: "آلمانی", help: "کمک و پشتیبانی", guides: /راهنماها راهنمای عملی/ },
+      en: { home: "Dashboard", explore: "Explore", preferences: "Language and appearance", language: "Language", german: "German", help: "Help and support", guides: /Guides Practical/ },
+      de: { home: "Übersicht", explore: "Entdecken", preferences: "Sprache und Darstellung", language: "Sprache", german: "Deutsch", help: "Hilfe und Support", guides: /Ratgeber Praktische Pflegehinweise/ },
+      es: { home: "Inicio", explore: "Explorar", preferences: "Idioma y apariencia", language: "Idioma", german: "alemán", help: "Ayuda y soporte", guides: /Guías Consejos prácticos/ },
     }[locale];
     expect(screen.getByRole("link", { name: labels.home }).getAttribute("href")).toBe(`/${locale}/home`);
     const trigger = screen.getByRole("button", { name: labels.explore });
     fireEvent.click(trigger);
     const dialog = screen.getByRole("dialog", { name: labels.explore });
     expect(within(dialog).getByRole("group", { name: labels.preferences })).toBeTruthy();
+    const language = within(dialog).getByRole("combobox", { name: labels.language });
+    expect((language as HTMLSelectElement).value).toBe(locale);
+    expect(within(language).getByRole("option", { name: labels.german })).toBeTruthy();
     expect(within(dialog).getByRole("link", { name: labels.help }).getAttribute("href")).toBe(`/${locale}/support`);
     fireEvent.click(within(dialog).getByRole("button", { name: labels.guides }));
     expect(routing.push).toHaveBeenCalledWith(`/${locale}/guides`);
