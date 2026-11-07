@@ -68,5 +68,11 @@
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
       "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
+  },
+  "travel": {
+    "status": { "DRAFT": "Entwurf", "PLANNING": "In Planung", "READY": "Bereit", "IN_PROGRESS": "Unterwegs", "COMPLETED": "Abgeschlossen", "CANCELLED": "Abgebrochen" },
+    "travelMode": { "AIR": "Flugzeug", "ROAD": "Auto", "RAIL": "Zug", "SEA": "Schiff", "OTHER": "Sonstiges" },
+    "hub": { "title": "Reisen", "newTrip": "Neue Reise", "passportReadinessLink": "Reisebereitschaft des Haustiers", "placesLink": "Haustierfreundliche Orte finden", "insuranceLink": "Tierversicherungen ansehen", "empty": "Noch keine Reisen. Plane deine erste Reise.", "requirementsCount": "{count, plural, one {# Anforderung} other {# Anforderungen}}", "staysLink": "Haustierfreundliche Unterkunft finden" },
+    "newTrip": { "title": "Neue Reise planen", "subtitle": "Beginne mit den wichtigsten Angaben — die Checkliste kannst du später ergänzen.", "originCountryLabel": "Herkunftsland (ISO-Code)", "originCityLabel": "Abreiseort", "destinationCountryLabel": "Zielland (ISO-Code)", "destinationCityLabel": "Zielort", "departAtLabel": "Abreisedatum", "returnAtLabel": "Rückreisedatum", "travelModeLabel": "Verkehrsmittel", "notesLabel": "Notizen", "submit": "Reise erstellen" }
   }
 }
