@@ -114,5 +114,10 @@
   },
   "rollout": {
     "sellerOffer": { "title": "Verkäuferangebot hinzufügen", "search": "Im zentralen Produktkatalog suchen", "find": "Suchen", "empty": "Keine Produkte gefunden.", "variant": "Produktvariante", "choose": "Variante auswählen", "price": "Preis (IRR)", "stock": "Anfangsbestand", "save": "Angebot hinzufügen", "failed": "Die Aktion konnte nicht abgeschlossen werden. Deine Eingaben sind erhalten geblieben.", "saved": "Verkäuferangebot erstellt." }
+  },
+  "customerBookings": {
+    "title": "Meine Buchungen", "bookService": "Dienst buchen", "tabsLabel": "Buchungen", "pet": "Tier", "allPets": "Alle Tiere", "loadFailed": "Buchungen konnten nicht geladen werden", "retry": "Erneut versuchen", "loading": "Wird geladen", "empty": "Keine Buchungen in diesem Bereich", "findService": "Dienst finden",
+    "tabs": { "upcoming": "Bevorstehend", "requested": "Anfragen und Zahlung", "past": "Abgeschlossen", "cancelled": "Storniert und abgelaufen", "waitlist": "Warteliste" },
+    "waitlist": { "empty": "Du stehst auf keiner Warteliste", "emptyHint": "Wenn ein Tag ausgebucht ist, kannst du dich auf der Buchungsseite auf die Warteliste setzen lassen.", "book": "Buchen", "leave": "Warteliste verlassen", "status": { "NOTIFIED": "Ein Termin ist frei geworden – buche ihn jetzt (er wird nicht für dich reserviert).", "ACTIVE": "Wartend", "BOOKED": "Gebucht", "CANCELLED": "Geschlossen" } }
   }
 }

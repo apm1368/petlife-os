@@ -45,6 +45,15 @@
 - Disk: initial `df` showed 49 MiB available. Removing the confirmed generated project `.next` build raised it to about 1.6 GiB. The three inspected old temporary Node/Jest/Next build-output directories were also removed; the latest exact `df -B1` shows 1,443,729,408 bytes available (96% used). `/tmp` is now 35 MiB. Only those named regenerable artifacts were removed; source, `.git`, production data, DB volumes and worktrees were not cleaned. Payment-controls worktree still contains the same uncommitted service/module/spec changes and was not modified.
 - #117 memorial source-image/direct storage URL and CDN privacy remains unverified without authorized production bucket/CDN access. #110→#111 and #113→#114 dependencies remain open and unchanged. No branch protection was bypassed; all features remain NOT LIVE unless separately production-verified.
 
+## Booking localization slice and current PR queue — 2026-11-07 18:23 UTC
+
+- Added a separate customer booking-list localization slice on `feat/i18n-customer-bookings`, based on #123. It localizes bookings tabs, pet filter, waitlist states/actions, empty/error/loading states, service categories and booking statuses for fa/en/de/es; dates use the existing route-locale formatter. Booking creation, booking detail, provider pages, provider console and notification copy remain untranslated in DE/ES. This changes no availability, booking, payment or messaging behavior.
+- Local verification for this slice: MyBookingsView 6/6 tests pass (including DE/ES strings and locale-preserving service link); web typecheck, lint and `git diff --check` pass. Full production build is deferred because only about 1.0 GiB was available. The prior two localization PRs require CI build results before any merge.
+- #122 latest head `2e1816b79078bc4861d6c662992782a96ee58633`, base `feat/i18n-de-es`; current run `42400163736` is still in progress. Earlier run on previous code-only head `9625898` succeeded but does not certify the current head. Review is still outstanding.
+- #123 head `d963f84deb168e41a01161ce18d3cfe009006e9b`, base `feat/i18n-shop-customer`; current run `42400557006` is in progress, review outstanding. #124 will be based on #123 because all locale overlays share the DE/ES message catalog files.
+- #118 remains review-required on main; #119→#121 are green on their latest reported heads but remain unmerged and dependent. #107 is still first in the release queue; the verified production API continues to show 15 products, including 10 `qa-b4-*`, and its build is green but approval is missing. Production remains SHA `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; no deployment occurred.
+- Current disk status after removing the specifically verified generated caches is about 1.0 GiB available (97% used). No project source, Git history, database volume, production data or payment worktree was removed or changed. The payment-controls worktree still contains its pre-existing uncommitted payment-control changes.
+
 ## Exact next actions
 
 1. Wait for CI on the latest #118 head and obtain the required review. Keep #107 first in the release queue; do not bypass protection.

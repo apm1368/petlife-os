@@ -6281,5 +6281,10 @@
         "REJECTED": "Rejected"
       }
     }
+  },
+  "customerBookings": {
+    "title": "My bookings", "bookService": "Book a service", "tabsLabel": "Booking tabs", "pet": "Pet", "allPets": "All pets", "loadFailed": "Bookings could not load", "retry": "Retry", "loading": "Loading", "empty": "No bookings here", "findService": "Find a service",
+    "tabs": { "upcoming": "Upcoming", "requested": "Requests and payment", "past": "Completed", "cancelled": "Cancelled and expired", "waitlist": "Waitlist" },
+    "waitlist": { "empty": "You are not on any waitlist", "emptyHint": "When a day is full you can join its waitlist from the booking page.", "book": "Book", "leave": "Leave waitlist", "status": { "NOTIFIED": "A time opened — book it (it is not held for you).", "ACTIVE": "Waiting", "BOOKED": "Booked", "CANCELLED": "Closed" } }
   }
 }

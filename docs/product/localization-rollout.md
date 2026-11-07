@@ -17,3 +17,7 @@ Next slices: checkout/order/repeat-delivery; the remainder of seller operations;
 ### Seller catalog offers (PR slice based on #122)
 
 The seller offers screen and its surrounding seller shell now have explicit German and Spanish copy. The seller can search the central catalog and create an offer for an existing product variant; this slice does not create central products or alter permissions, prices, inventory, moderation or sales logic. Offer schedule intervals use locale-aware digit grouping. German/Spanish seller orders, fulfillment, inventory, promotions, channels, team, settings and finance pages remain English fallback; shop checkout/order pages are also still English fallback. The verification-required notice shown to unverified sellers also remains English fallback because the shared verification flow has not yet been localized. SMS templates remain unavailable.
+
+### Customer booking list and waitlist (PR slice based on #123)
+
+The customer booking list now has explicit German and Spanish labels for booking tabs, empty/error/loading states, pet filtering and waitlist actions/statuses. Booking state and service-category names are localized in the shared label helpers. Date/time formatting uses the selected locale; Persian Jalali behavior remains provided by the existing date helper. Booking detail, provider discovery/profile, booking creation/reschedule forms, provider console and notifications are still English fallback for German/Spanish. No booking, payment, SMS or availability behavior changed in this slice.

@@ -1,13 +1,15 @@
+import type { RouteLocale } from "@/lib/i18n/config";
+
 /** Human labels for internal enums — the UI never shows raw enum names. */
-const CATEGORY: Record<string, [string, string]> = {
-  VET: ["دامپزشکی", "Veterinary"],
-  GROOMING: ["آرایش و شست‌وشو", "Grooming"],
-  TRAINING: ["آموزش", "Training"],
-  WALKING: ["پیاده‌روی", "Dog walking"],
-  SITTING: ["نگهداری در منزل", "Pet sitting"],
-  BOARDING: ["پانسیون", "Boarding"],
-  PET_TAXI: ["تاکسی حیوانات", "Pet taxi"],
-  OTHER: ["سایر خدمات", "Other services"],
+const CATEGORY: Record<string, [string, string, string, string]> = {
+  VET: ["دامپزشکی", "Veterinary", "Tiermedizin", "Veterinaria"],
+  GROOMING: ["آرایش و شست‌وشو", "Grooming", "Fellpflege", "Peluquería"],
+  TRAINING: ["آموزش", "Training", "Training", "Adiestramiento"],
+  WALKING: ["پیاده‌روی", "Dog walking", "Gassigehen", "Paseo de perros"],
+  SITTING: ["نگهداری در منزل", "Pet sitting", "Haustierbetreuung", "Cuidado de mascotas"],
+  BOARDING: ["پانسیون", "Boarding", "Tierpension", "Residencia"],
+  PET_TAXI: ["تاکسی حیوانات", "Pet taxi", "Tier-Taxi", "Taxi para mascotas"],
+  OTHER: ["سایر خدمات", "Other services", "Weitere Dienste", "Otros servicios"],
 };
 
 const PROVIDER_TYPE: Record<string, [string, string]> = {
@@ -24,33 +26,38 @@ const PROVIDER_TYPE: Record<string, [string, string]> = {
   TRAVEL_ACCOMMODATION: ["اقامتگاه سفر", "Travel accommodation"],
 };
 
-export function categoryLabel(category: string, fa: boolean): string {
-  return CATEGORY[category]?.[fa ? 0 : 1] ?? category;
+function localeIndex(locale: RouteLocale | boolean): number {
+  if (typeof locale === "boolean") return locale ? 0 : 1;
+  return ({ fa: 0, en: 1, de: 2, es: 3 })[locale];
+}
+
+export function categoryLabel(category: string, locale: RouteLocale | boolean): string {
+  return CATEGORY[category]?.[localeIndex(locale)] ?? category;
 }
 
 export function providerTypeLabel(type: string, fa: boolean): string {
   return PROVIDER_TYPE[type]?.[fa ? 0 : 1] ?? type;
 }
 
-const BOOKING_STATUS: Record<string, [string, string]> = {
-  HOLD: ["در حال رزرو", "Holding"],
-  PENDING_CONFIRMATION: ["در انتظار تأیید", "Pending confirmation"],
-  REQUESTED: ["درخواست ارسال شد", "Requested"],
-  AWAITING_PAYMENT: ["در انتظار پرداخت", "Awaiting payment"],
-  REJECTED: ["پذیرفته نشد", "Declined"],
-  EXPIRED: ["منقضی شد", "Expired"],
-  RESCHEDULED: ["منتقل شد", "Rescheduled"],
-  CONFIRMED: ["قطعی", "Confirmed"],
-  CHECKED_IN: ["پذیرش شد", "Checked in"],
-  IN_PROGRESS: ["در حال انجام", "In progress"],
-  COMPLETED: ["انجام شد", "Completed"],
-  CANCELLED_BY_USER: ["لغو توسط شما", "Cancelled by you"],
-  CANCELLED_BY_PROVIDER: ["لغو توسط ارائه‌دهنده", "Cancelled by provider"],
-  NO_SHOW: ["عدم حضور", "No-show"],
+const BOOKING_STATUS: Record<string, [string, string, string, string]> = {
+  HOLD: ["در حال رزرو", "Holding", "Wird reserviert", "En reserva"],
+  PENDING_CONFIRMATION: ["در انتظار تأیید", "Pending confirmation", "Bestätigung ausstehend", "Pendiente de confirmación"],
+  REQUESTED: ["درخواست ارسال شد", "Requested", "Angefragt", "Solicitada"],
+  AWAITING_PAYMENT: ["در انتظار پرداخت", "Awaiting payment", "Zahlung ausstehend", "Pendiente de pago"],
+  REJECTED: ["پذیرفته نشد", "Declined", "Abgelehnt", "Rechazada"],
+  EXPIRED: ["منقضی شد", "Expired", "Abgelaufen", "Caducada"],
+  RESCHEDULED: ["منتقل شد", "Rescheduled", "Verschoben", "Reprogramada"],
+  CONFIRMED: ["قطعی", "Confirmed", "Bestätigt", "Confirmada"],
+  CHECKED_IN: ["پذیرش شد", "Checked in", "Eingecheckt", "Registrada"],
+  IN_PROGRESS: ["در حال انجام", "In progress", "In Bearbeitung", "En curso"],
+  COMPLETED: ["انجام شد", "Completed", "Abgeschlossen", "Completada"],
+  CANCELLED_BY_USER: ["لغو توسط شما", "Cancelled by you", "Von dir storniert", "Cancelada por ti"],
+  CANCELLED_BY_PROVIDER: ["لغو توسط ارائه‌دهنده", "Cancelled by provider", "Vom Anbieter storniert", "Cancelada por el proveedor"],
+  NO_SHOW: ["عدم حضور", "No-show", "Nicht erschienen", "Ausencia"],
 };
 
-export function bookingStatusLabel(status: string, fa: boolean): string {
-  return BOOKING_STATUS[status]?.[fa ? 0 : 1] ?? status;
+export function bookingStatusLabel(status: string, locale: RouteLocale | boolean): string {
+  return BOOKING_STATUS[status]?.[localeIndex(locale)] ?? status;
 }
 
 export function bookingStatusTone(status: string): "success" | "attention" | "neutral" | "urgent" {

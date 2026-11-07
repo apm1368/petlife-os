@@ -65,7 +65,7 @@ describe("MyBookingsView", () => {
   it("switches tabs through the URL so the view is shareable and restorable", async () => {
     vi.mocked(bookingsService.list).mockResolvedValue([]);
     renderWithIntl(<MyBookingsView />, "en");
-    fireEvent.click(await screen.findByRole("button", { name: "Requested" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Requests and payment" }));
     expect(replace).toHaveBeenCalledWith(expect.stringContaining("tab=requested"), { scroll: false });
   });
 
@@ -81,5 +81,17 @@ describe("MyBookingsView", () => {
     vi.mocked(bookingsService.list).mockResolvedValue([]);
     renderWithIntl(<MyBookingsView />, "en");
     await waitFor(() => expect(screen.getByText("No bookings here")).toBeTruthy());
+  });
+
+  it.each([
+    ["de", "Meine Buchungen", "Bevorstehend", "Bestätigt"],
+    ["es", "Mis reservas", "Próximas", "Confirmada"],
+  ] as const)("localizes booking list states and labels for %s", async (locale, title, tab, status) => {
+    vi.mocked(bookingsService.list).mockResolvedValue([BOOKING]);
+    renderWithIntl(<MyBookingsView />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("link", { name: locale === "de" ? "Dienst buchen" : "Reservar un servicio" }).getAttribute("href")).toBe(`/${locale}/services`);
+    expect(screen.getByRole("button", { name: tab })).toBeTruthy();
+    expect(await screen.findByText(status)).toBeTruthy();
   });
 });

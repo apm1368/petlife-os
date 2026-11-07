@@ -114,5 +114,10 @@
   },
   "rollout": {
     "sellerOffer": { "title": "Añadir oferta del vendedor", "search": "Buscar en el catálogo central de productos", "find": "Buscar", "empty": "No se encontraron productos.", "variant": "Variante del producto", "choose": "Elegir una variante", "price": "Precio (IRR)", "stock": "Existencias iniciales", "save": "Añadir oferta", "failed": "No se pudo completar la acción. Se conservaron tus datos.", "saved": "Oferta del vendedor creada." }
+  },
+  "customerBookings": {
+    "title": "Mis reservas", "bookService": "Reservar un servicio", "tabsLabel": "Reservas", "pet": "Mascota", "allPets": "Todas las mascotas", "loadFailed": "No se pudieron cargar las reservas", "retry": "Reintentar", "loading": "Cargando", "empty": "No hay reservas en esta sección", "findService": "Buscar un servicio",
+    "tabs": { "upcoming": "Próximas", "requested": "Solicitudes y pagos", "past": "Completadas", "cancelled": "Canceladas y caducadas", "waitlist": "Lista de espera" },
+    "waitlist": { "empty": "No estás en ninguna lista de espera", "emptyHint": "Cuando un día esté completo, puedes unirte a la lista de espera desde la página de reserva.", "book": "Reservar", "leave": "Salir de la lista", "status": { "NOTIFIED": "Se ha liberado una hora; resérvala (no queda bloqueada para ti).", "ACTIVE": "En espera", "BOOKED": "Reservada", "CANCELLED": "Cerrada" } }
   }
 }
