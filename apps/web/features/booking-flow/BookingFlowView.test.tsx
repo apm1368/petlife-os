@@ -55,4 +55,17 @@ describe("BookingFlowView", () => {
     renderWithIntl(<BookingFlowView providerId="p1" />, "en");
     expect(await screen.findByText("This provider cannot be booked")).toBeTruthy();
   });
+
+  it.each([
+    ["de", "Termin buchen", "Tiermedizin", "30 Min."],
+    ["es", "Reservar una cita", "Atención veterinaria", "30 min"],
+  ] as const)("renders the %s booking flow in the selected locale", async (locale, title, category, duration) => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    renderWithIntl(<BookingFlowView providerId="p1" />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(new RegExp(`${category} · ${duration}`))).toBeTruthy();
+    expect(screen.getByText(/Toman/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: locale === "de" ? "Weiter" : "Continuar" })).toBeTruthy();
+  });
 });

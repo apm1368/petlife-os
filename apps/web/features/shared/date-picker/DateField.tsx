@@ -6,7 +6,7 @@ const PAST_FLOOR = "1900-01-01";
 
 /**
  * One calendar day, picked in the canonical PET LIFE picker: Jalali with Persian digits in fa,
- * Gregorian in en. The value stays an ISO day ("2026-10-04") — only presentation changes.
+ * Gregorian in en/de/es. The value stays an ISO day ("2026-10-04") — only presentation changes.
  */
 export function DateField({ label, value, onChange, min, max, placeholder, error, className }: {
   label: string;
