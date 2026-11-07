@@ -124,6 +124,17 @@
       "refundReason": { "DAMAGED": "Beschädigt angekommen", "WRONG_ITEM": "Falscher Artikel", "NOT_AS_DESCRIBED": "Entspricht nicht der Beschreibung", "MISSING_ITEMS": "Artikel fehlen", "NOT_DELIVERED": "Nicht geliefert", "PET_REACTION": "Mein Tier hat schlecht darauf reagiert", "OTHER": "Sonstiges" },
       "refundStatus": { "PENDING_REVIEW": "Wird geprüft", "APPROVED": "Genehmigt", "REJECTED": "Abgelehnt", "WITHDRAWN": "Zurückgezogen" },
       "fulfillmentStatus": { "PENDING": "Bestellung eingegangen", "AWAITING_SELLER_PREPARATION": "Verkäufer bereitet die Bestellung vor", "READY_FOR_PICKUP": "Abholbereit", "PICKUP_REQUESTED": "Kurier angefordert", "PICKUP_ASSIGNED": "Kurier zugewiesen", "ASSIGNED": "Kurier zugewiesen", "PICKED_UP": "Abgeholt", "IN_TRANSIT": "Unterwegs", "OUT_FOR_DELIVERY": "Wird zugestellt", "DELIVERED": "Zugestellt", "FAILED": "Zustellproblem", "CANCELED": "Storniert" }
+    },
+    "finance": {
+      "title": "Finanzen", "loading": "Finanzen werden geladen …", "retry": "Erneut versuchen", "viewTransactions": "Transaktionen ansehen", "viewAllSettlements": "Alle Abrechnungen ansehen",
+      "balance": { "pending": "Ausstehend", "reserved": "Zur Abrechnung vorgemerkt", "available": "Auszahlbar", "paid": "Bisher ausgezahlt" },
+      "nextSettlementEligible": "Betrag für die nächste Abrechnung", "accountCurrency": "{currency}-Konto · Abrechnungsrhythmus: {schedule}",
+      "schedule": { "WEEKLY": "Wöchentlich", "BIWEEKLY": "Alle zwei Wochen", "MONTHLY": "Monatlich", "MANUAL": "Manuell" },
+      "lastSettlement": "Letzte Abrechnung", "noSettlementsYet": "Noch keine Abrechnungen.",
+      "status": { "CALCULATED": "Berechnet", "APPROVED": "Genehmigt", "PAID": "Ausgezahlt", "FAILED": "Fehlgeschlagen", "RECONCILIATION_REQUIRED": "Abgleich erforderlich", "CANCELLED": "Storniert" },
+      "transactions": { "title": "Transaktionen", "loading": "Transaktionen werden geladen …", "retry": "Erneut versuchen", "empty": "Noch keine Transaktionen.", "loadMore": "Mehr laden", "gross": "Brutto: {amount}", "commission": "Provision: {amount}", "settlementStatus": { "CALCULATED": "Berechnet", "APPROVED": "Genehmigt", "PAID": "Ausgezahlt", "FAILED": "Fehlgeschlagen", "RECONCILIATION_REQUIRED": "Abgleich erforderlich", "CANCELLED": "Storniert", "UNSETTLED": "Nicht abgerechnet" } },
+      "settlements": { "title": "Abrechnungen", "loading": "Abrechnungen werden geladen …", "retry": "Erneut versuchen", "empty": "Noch keine Abrechnungen.", "status": { "CALCULATED": "Berechnet", "APPROVED": "Genehmigt", "PAID": "Ausgezahlt", "FAILED": "Fehlgeschlagen", "RECONCILIATION_REQUIRED": "Abgleich erforderlich", "CANCELLED": "Storniert" } },
+      "settlementDetail": { "title": "Abrechnung", "loading": "Abrechnung wird geladen …", "retry": "Erneut versuchen", "status": { "CALCULATED": "Berechnet", "APPROVED": "Genehmigt", "PAID": "Ausgezahlt", "FAILED": "Fehlgeschlagen", "RECONCILIATION_REQUIRED": "Abgleich erforderlich", "CANCELLED": "Storniert" }, "period": "{start} – {end}", "breakdown": { "gross": "Bruttowarenwert", "commission": "Plattformprovision", "refunds": "Erstattungen", "adjustments": "Anpassungen", "net": "Nettoauszahlung" }, "payoutMethod": "Auszahlungsmethode", "paidAt": "Ausgezahlt am {date}", "items": "{count, plural, one {# Position} other {# Positionen}}", "sourceType": { "ORDER": "Bestellung", "REFUND": "Erstattung", "ADJUSTMENT": "Anpassung" } }
     }
   }
 }

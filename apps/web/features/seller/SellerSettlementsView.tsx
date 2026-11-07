@@ -8,12 +8,13 @@ import type { SellerSettlementDto } from "@petlife/types";
 import { sellerFinanceService } from "@/services/seller-finance.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { formatLocaleDate } from "@/lib/date/format-locale-date";
 import { settlementTone } from "./settlement-tone";
 
 export function SellerSettlementsView() {
   const t = useTranslations("seller.finance.settlements");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale();
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [items, setItems] = useState<SellerSettlementDto[] | null>(null);
@@ -50,7 +51,7 @@ export function SellerSettlementsView() {
               <StatusLabel tone={settlementTone(settlement.status)}>{t(`status.${settlement.status}`)}</StatusLabel>
             </div>
             <span className="text-metadata text-text-secondary">
-              {new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(settlement.periodStart))} – {new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(settlement.periodEnd))}
+              {formatLocaleDate(settlement.periodStart, locale)} – {formatLocaleDate(settlement.periodEnd, locale)}
             </span>
             <span className="text-body text-text-primary">{formatCurrency(settlement.netIrr, locale)}</span>
           </ContextSurface>

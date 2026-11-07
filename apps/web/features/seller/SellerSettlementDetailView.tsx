@@ -7,12 +7,13 @@ import type { SellerSettlementDetailDto } from "@petlife/types";
 import { sellerFinanceService } from "@/services/seller-finance.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { formatLocaleDate } from "@/lib/date/format-locale-date";
 import { settlementTone } from "./settlement-tone";
 
 /** Seller settlement detail (spec: "reference/period/status/gross/commission/channel fee/refunds/adjustments/net payout/contained orders/payout reference/timeline"). Isolation is enforced server-side (SellerFinanceReadService.getSettlement 404s a foreign settlement) — this view never assumes the id it was given belongs to the active seller. */
 export function SellerSettlementDetailView({ settlementId }: { settlementId: string }) {
   const t = useTranslations("seller.finance.settlementDetail");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale();
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [settlement, setSettlement] = useState<SellerSettlementDetailDto | null>(null);
@@ -53,8 +54,8 @@ export function SellerSettlementDetailView({ settlementId }: { settlementId: str
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-metadata text-text-secondary">
           {t("period", {
-            start: new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(settlement.periodStart)),
-            end: new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(settlement.periodEnd)),
+            start: formatLocaleDate(settlement.periodStart, locale),
+            end: formatLocaleDate(settlement.periodEnd, locale),
           })}
         </span>
         {rows.map((row) => (
@@ -73,7 +74,7 @@ export function SellerSettlementDetailView({ settlementId }: { settlementId: str
         <ContextSurface className="flex flex-col gap-1">
           <span className="text-metadata text-text-secondary">{t("payoutMethod")}</span>
           <span className="text-body text-text-primary">{settlement.payoutMethodType}</span>
-          {settlement.paidAt ? <span className="text-metadata text-text-secondary">{t("paidAt", { date: new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(settlement.paidAt)) })}</span> : null}
+          {settlement.paidAt ? <span className="text-metadata text-text-secondary">{t("paidAt", { date: formatLocaleDate(settlement.paidAt, locale) })}</span> : null}
         </ContextSurface>
       ) : null}
 

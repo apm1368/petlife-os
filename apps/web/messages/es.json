@@ -124,6 +124,17 @@
       "refundReason": { "DAMAGED": "Llegó dañado", "WRONG_ITEM": "Artículo equivocado", "NOT_AS_DESCRIBED": "No coincide con la descripción", "MISSING_ITEMS": "Faltan artículos", "NOT_DELIVERED": "No se entregó", "PET_REACTION": "A mi mascota le sentó mal", "OTHER": "Otro" },
       "refundStatus": { "PENDING_REVIEW": "En revisión", "APPROVED": "Aprobado", "REJECTED": "Rechazado", "WITHDRAWN": "Retirado" },
       "fulfillmentStatus": { "PENDING": "Pedido recibido", "AWAITING_SELLER_PREPARATION": "El vendedor está preparando el pedido", "READY_FOR_PICKUP": "Listo para recoger", "PICKUP_REQUESTED": "Mensajero solicitado", "PICKUP_ASSIGNED": "Mensajero asignado", "ASSIGNED": "Mensajero asignado", "PICKED_UP": "Recogido", "IN_TRANSIT": "En tránsito", "OUT_FOR_DELIVERY": "En reparto", "DELIVERED": "Entregado", "FAILED": "Problema con la entrega", "CANCELED": "Cancelado" }
+    },
+    "finance": {
+      "title": "Finanzas", "loading": "Cargando finanzas…", "retry": "Reintentar", "viewTransactions": "Ver transacciones", "viewAllSettlements": "Ver todas las liquidaciones",
+      "balance": { "pending": "Pendiente", "reserved": "Reservado para liquidación", "available": "Disponible para retirar", "paid": "Total pagado" },
+      "nextSettlementEligible": "Importe apto para la próxima liquidación", "accountCurrency": "Cuenta en {currency} · frecuencia de liquidación: {schedule}",
+      "schedule": { "WEEKLY": "Semanal", "BIWEEKLY": "Cada dos semanas", "MONTHLY": "Mensual", "MANUAL": "Manual" },
+      "lastSettlement": "Última liquidación", "noSettlementsYet": "Todavía no hay liquidaciones.",
+      "status": { "CALCULATED": "Calculada", "APPROVED": "Aprobada", "PAID": "Pagada", "FAILED": "Fallida", "RECONCILIATION_REQUIRED": "Requiere conciliación", "CANCELLED": "Cancelada" },
+      "transactions": { "title": "Transacciones", "loading": "Cargando transacciones…", "retry": "Reintentar", "empty": "Todavía no hay transacciones.", "loadMore": "Cargar más", "gross": "Bruto: {amount}", "commission": "Comisión: {amount}", "settlementStatus": { "CALCULATED": "Calculada", "APPROVED": "Aprobada", "PAID": "Pagada", "FAILED": "Fallida", "RECONCILIATION_REQUIRED": "Requiere conciliación", "CANCELLED": "Cancelada", "UNSETTLED": "Sin liquidar" } },
+      "settlements": { "title": "Liquidaciones", "loading": "Cargando liquidaciones…", "retry": "Reintentar", "empty": "Todavía no hay liquidaciones.", "status": { "CALCULATED": "Calculada", "APPROVED": "Aprobada", "PAID": "Pagada", "FAILED": "Fallida", "RECONCILIATION_REQUIRED": "Requiere conciliación", "CANCELLED": "Cancelada" } },
+      "settlementDetail": { "title": "Liquidación", "loading": "Cargando liquidación…", "retry": "Reintentar", "status": { "CALCULATED": "Calculada", "APPROVED": "Aprobada", "PAID": "Pagada", "FAILED": "Fallida", "RECONCILIATION_REQUIRED": "Requiere conciliación", "CANCELLED": "Cancelada" }, "period": "{start} – {end}", "breakdown": { "gross": "Importe bruto de mercancía", "commission": "Comisión de la plataforma", "refunds": "Reembolsos", "adjustments": "Ajustes", "net": "Pago neto" }, "payoutMethod": "Método de pago", "paidAt": "Pagado el {date}", "items": "{count, plural, one {# concepto} other {# conceptos}}", "sourceType": { "ORDER": "Pedido", "REFUND": "Reembolso", "ADJUSTMENT": "Ajuste" } }
     }
   }
 }

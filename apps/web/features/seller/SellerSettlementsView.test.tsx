@@ -69,4 +69,16 @@ describe("SellerSettlementsView", () => {
 
     await waitFor(() => expect(screen.getByText("Retry")).toBeTruthy());
   });
+
+  it.each([["de", "Abrechnungen", "Ausgezahlt"], ["es", "Liquidaciones", "Pagada"]] as const)(
+    "localizes settlement status and period date in %s",
+    async (locale, title, status) => {
+      vi.mocked(sellerFinanceService.listSettlements).mockResolvedValue([settlement()]);
+      renderWithIntl(<SellerSettlementsView />, locale);
+
+      await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+      expect(screen.getByText(status)).toBeTruthy();
+      expect(screen.getByText(locale === "de" ? /1\.1\.2026/ : /1\/1\/2026/)).toBeTruthy();
+    },
+  );
 });

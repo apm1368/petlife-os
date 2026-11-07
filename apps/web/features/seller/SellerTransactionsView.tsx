@@ -8,6 +8,7 @@ import type { SellerTransactionDto } from "@petlife/types";
 import { sellerFinanceService } from "@/services/seller-finance.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { formatLocaleDate } from "@/lib/date/format-locale-date";
 import { settlementTone } from "./settlement-tone";
 
 const PAGE_SIZE = 25;
@@ -16,7 +17,7 @@ const PAGE_SIZE = 25;
 export function SellerTransactionsView() {
   const t = useTranslations("seller.finance.transactions");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale();
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [items, setItems] = useState<SellerTransactionDto[] | null>(null);
@@ -76,7 +77,7 @@ export function SellerTransactionsView() {
               </div>
             ) : null}
             <div className="flex items-center justify-between gap-3">
-              <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(row.createdAt))}</span>
+              <span className="text-metadata text-text-secondary">{formatLocaleDate(row.createdAt, locale)}</span>
               <span className={"text-body " + (row.netAmountIrr < 0 ? "text-state-urgent" : "text-text-primary")}>{formatCurrency(row.netAmountIrr, locale)}</span>
             </div>
           </ContextSurface>

@@ -80,4 +80,16 @@ describe("SellerFinanceView", () => {
     await waitFor(() => expect(screen.getByText("امور مالی")).toBeTruthy());
     expect(screen.getAllByText(/تومان/).length).toBeGreaterThan(0);
   });
+
+  it.each([["de", "Finanzen", "450.000 Toman", "14.1.2026"], ["es", "Finanzas", "450.000 Toman", "14/1/2026"]] as const)(
+    "localizes financial labels, amounts and dates for %s",
+    async (locale, title, amount, date) => {
+      vi.mocked(sellerFinanceService.getSummary).mockResolvedValue(SUMMARY);
+      renderWithIntl(<SellerFinanceView />, locale);
+
+      await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+      expect(screen.getByText(amount)).toBeTruthy();
+      expect(screen.getByText(date)).toBeTruthy();
+    },
+  );
 });

@@ -8,6 +8,7 @@ import type { SellerFinanceSummaryDto } from "@petlife/types";
 import { sellerFinanceService } from "@/services/seller-finance.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { formatLocaleDate } from "@/lib/date/format-locale-date";
 import { settlementTone } from "./settlement-tone";
 
 /**
@@ -20,7 +21,7 @@ import { settlementTone } from "./settlement-tone";
 export function SellerFinanceView() {
   const t = useTranslations("seller.finance");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale();
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [summary, setSummary] = useState<SellerFinanceSummaryDto | null>(null);
@@ -85,7 +86,7 @@ export function SellerFinanceView() {
                 <StatusLabel tone={settlementTone(summary.lastSettlement.status)}>{t(`status.${summary.lastSettlement.status}`)}</StatusLabel>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(summary.lastSettlement.periodEnd))}</span>
+                <span className="text-metadata text-text-secondary">{formatLocaleDate(summary.lastSettlement.periodEnd, locale)}</span>
                 <span className="text-body text-text-primary">{formatCurrency(summary.lastSettlement.netIrr, locale)}</span>
               </div>
             </ContextSurface>

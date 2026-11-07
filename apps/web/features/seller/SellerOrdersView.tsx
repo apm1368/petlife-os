@@ -8,6 +8,7 @@ import type { SellerOrderSummaryDto } from "@petlife/types";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { formatLocaleDate } from "@/lib/date/format-locale-date";
 import { fulfillmentTone } from "@/features/commerce/fulfillment-tone";
 
 /** Seller Orders (spec section 37, 42) — spans PET LIFE OS checkout Orders and marketplace-origin Orders, source always shown explicitly. */
@@ -59,7 +60,7 @@ export function SellerOrdersView() {
               {order.fulfillmentStatus ? <StatusLabel tone={fulfillmentTone(order.fulfillmentStatus)}>{tStatus(order.fulfillmentStatus as "PENDING")}</StatusLabel> : null}
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US").format(new Date(order.createdAt))}</span>
+              <span className="text-metadata text-text-secondary">{formatLocaleDate(order.createdAt, locale)}</span>
               <span className="text-body text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
             </div>
           </ContextSurface>
