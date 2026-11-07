@@ -17,6 +17,7 @@
 
 ## Independent development completed in this batch
 
+- Decision reconciliation: `docs/decisions.md` still has historical `GL-06` naming Arabic; open PR #112 records the later owner target of Persian/English/German/Spanish. This branch follows that owner decision without deleting or rewriting `GL-06`; reconcile the log when #112 is approved/merged.
 - Local branch `feat/i18n-de-es`, based on `origin/main`; it extends the public landing route and language selector to Persian, English, German and Spanish. Persian remains RTL; the other languages are LTR. Existing approved landing composition is unchanged. German/Spanish use the existing English-labelled hero artwork because the pavilion text is embedded in the image.
 - Added German and Spanish copy for the landing story and service pavilions, route-preserving locale links, localized number/date formatting helpers, and tests. Current application route localization is intentionally partial: non-landing page families still fall back to English, and account locale persistence remains Persian/English. See `docs/product/localization-rollout.md` for the family-by-family backlog.
 - Verification: web typecheck and lint passed on the current local head. The full web suite passed immediately before the final member-language selector/path-preservation adjustment (229 files, 993 tests); after that adjustment, the affected landing/navigation/locale suite passed again (31 tests). Full E2E, production build, complete locale coverage and deployment were not run/verified.
