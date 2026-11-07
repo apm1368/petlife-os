@@ -10,10 +10,10 @@ Next slices: remaining account settings; customer pet/health/care calendar; comm
 
 ## Personal settings (PR #119 — merged)
 
-German and Spanish cover personal settings, appearance, contact methods, verification state and the existing OTP flow. This UI-only change does not alter providers or delivery.
+German and Spanish cover personal settings, appearance, contact methods, verification state and existing OTP flow. This is UI-only; it does not change provider or delivery contracts.
 
-### Public service-provider discovery (PR #149 — current)
+### Public service-provider discovery and profiles (PR #149 — current)
 
-The discovery page has fa/en/de/es copy for search, categories, filters/chips, sorting, verification labels, counts, prices, availability, empty/error states, favorite labels and the map-provider-unavailable notice. Dates/counts and Toman display digits follow locale; Persian retains RTL/Jalali. Search, availability, favorites, booking links and ranking behavior are unchanged. The map remains unavailable until a real map provider is connected.
+Discovery and public provider profiles have fa/en/de/es copy for search, categories, filters, sorting, verification, counts, prices, availability, empty/error states, favorites, map-unavailable notice, profile anchors, service and booking-mode labels, duration, provider/team roles, about/location/review/policy/FAQ chrome, loading states and booking-panel actions. Week availability dates use selected Gregorian locale for en/de/es and Persian Jalali for fa. Counts and prices use locale-aware formatting; route locale is preserved. Search, availability, favorites, booking links, ranking and APIs are unchanged.
 
-Provider details, booking/rescheduling forms, provider console and API-generated errors remain incomplete in German/Spanish. Provider-authored descriptions, FAQs, policies, reviews, service/staff names and addresses remain source content. No fabricated providers, ratings, prices, availability or map results are added.
+The map remains unavailable until a real provider is connected. Provider-authored descriptions, FAQs, policy text, reviews, service names, staff names, city/address remain source data. Provider console, booking creation/rescheduling forms, and API-generated error details remain incomplete in German/Spanish. No fake providers, prices, ratings, availability or map results are introduced; SMS templates/delivery remain unavailable.
