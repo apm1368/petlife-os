@@ -68,7 +68,8 @@ export class NotificationOrchestratorService {
 
   async notify(input: NotifyInput): Promise<{ notification: Notification; created: boolean }> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: input.userId } });
-    const rendered = renderNotificationTemplate(input.type, user.locale, input.templateParams ?? {});
+    // Notification copy currently exists in Persian and English only; newly supported UI locales use English fallback.
+    const rendered = renderNotificationTemplate(input.type, user.locale === "fa" ? "fa" : "en", input.templateParams ?? {});
     const domainEventId = input.domainEventId ?? null;
 
     // Batch 8 — the in-app preference is honoured: a switched-off category is still recorded (idempotency, audit)
@@ -158,7 +159,7 @@ export class NotificationOrchestratorService {
         input.priority ?? NotificationPriority.NORMAL,
         rendered.smsBody,
         input.type,
-        user.locale,
+        user.locale === "fa" ? "fa" : "en",
         input.smsSimMode,
       );
     }

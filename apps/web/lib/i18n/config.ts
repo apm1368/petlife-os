@@ -1,6 +1,6 @@
 export const locales = ["fa", "en", "de", "es"] as const;
 export type RouteLocale = (typeof locales)[number];
-/** Locales persisted by the current account API. New UI locales roll out by page family. */
+/** Locales with complete copy for the currently localized public/auth surfaces. */
 export type AppLocale = "fa" | "en";
 export const defaultLocale: AppLocale = "fa";
 

@@ -1,4 +1,6 @@
-export type AppLocale = "fa" | "en";
+import type { RouteLocale } from "@/lib/i18n/config";
+
+export type AppLocale = RouteLocale;
 
 /**
  * Persian UI shows Jalali dates, English UI shows Gregorian — both via the
@@ -8,7 +10,7 @@ export type AppLocale = "fa" | "en";
  * this is purely a display concern.
  */
 function calendarLocale(locale: AppLocale): string {
-  return locale === "fa" ? "fa-IR-u-ca-persian" : "en-US-u-ca-gregory";
+  return ({ fa: "fa-IR-u-ca-persian", en: "en-US-u-ca-gregory", de: "de-DE-u-ca-gregory", es: "es-ES-u-ca-gregory" })[locale];
 }
 
 /** The provider location's timezone is authoritative for an appointment's time — always format in it, never the viewer's own. */
@@ -23,7 +25,8 @@ export function formatDayLabel(iso: string, locale: AppLocale, timeZone: string)
 }
 
 export function formatTimeLabel(iso: string, locale: AppLocale, timeZone: string): string {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { hour: "numeric", minute: "2-digit", timeZone }).format(
+  const languageLocale = ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" })[locale];
+  return new Intl.DateTimeFormat(languageLocale, { hour: "numeric", minute: "2-digit", timeZone }).format(
     new Date(iso),
   );
 }
