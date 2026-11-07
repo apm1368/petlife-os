@@ -2,7 +2,7 @@
 
 The public landing route is available in Persian, English, German and Spanish. Persian uses RTL; the other three use LTR. The German and Spanish landing copy includes the public navigation, service descriptions, partner entry, trust/privacy copy, footer and image-credit disclosures. The existing approved landing composition and source images are unchanged; the German and Spanish hero use the existing English-labelled artwork because the pavilion labels are baked into the image.
 
-This is not full application localization. The account preference API and database support saving fa/en/de/es. Shared member navigation, Explore and account navigation, authentication, household collaboration, and the landing are localized with route preservation. Persian is RTL/Jalali; en/de/es are LTR with locale-aware formatting.
+This is not full application localization. The account preference API and database support fa/en/de/es. Shared member navigation, Explore/account navigation, authentication, household collaboration, landing and personal settings are localized in the covered surfaces. Persian is RTL/Jalali; en/de/es are LTR with locale-aware formatting.
 
 ## Personal settings (PR #119 — merged)
 
@@ -10,8 +10,8 @@ German and Spanish cover personal settings, appearance, contact methods, verific
 
 ## Travel localization (PR #152 — current)
 
-Travel hub, trip creation, detail, readiness/passport, external stays, discovery/search results, and trip hub/editor surfaces are being localized into German and Spanish. The core `travel` and `externalTravel` namespaces have structural parity across fa/en/de/es. Persian keeps Jalali dates and digits; other locales use locale-aware dates/numbers.
+The core `travel` namespace has 93/93 structural keys in fa/en/de/es, including hub, trip creation/detail, readiness, passport, requirements and transitions. External-stay surfaces have 72/72 keys, and travel marketplace home/search has 34/34 keys. Persian keeps Jalali dates/digits; en/de/es use locale-aware dates/numbers. Trip hub/editor translations are being added in this PR.
 
-External-stay prices and availability remain observations, not reservations; source listings remain the final confirmation path. No partner/provider data, price, availability, SMS delivery or booking is simulated. The Jajiga integration is not made production-ready by this translation work.
+External prices/availability are source observations, not reservations; source listing links remain the final confirmation path. No partner data, price, availability, SMS delivery or booking is simulated. This translation does not establish a working Jajiga connector.
 
-Still incomplete: other account pages; health records/documents/care calendar; checkout/orders/seller operations; provider console and booking details; support/admin/legal; community/backoffice; generic API errors and notification content. Fallbacks remain visible in those areas, and German/Spanish SMS templates are not implemented. Continue responsive, RTL/LTR, accessibility and visual checks by page family.
+Remaining fallback: result/listing/booking and partner/backoffice pages outside the covered screens, generic API errors, and other internal page families. English fallback may remain in those surfaces; German/Spanish SMS templates are unavailable. This is not complete travel localization—continue responsive, RTL/LTR, accessibility and visual checks by family.

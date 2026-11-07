@@ -8,6 +8,8 @@ import { TravelResultsView } from "./TravelResultsView";
 import { TravelListingDetailView } from "./TravelListingDetailView";
 import { TravelBookingFlowView } from "./TravelBookingFlowView";
 import { TripHubView } from "./TripHubView";
+import { TravelHomeView } from "./TravelHomeView";
+import { TravelSearchForm } from "./TravelSearchForm";
 import { matchReason, policyFacts } from "./labels";
 
 const params = new URLSearchParams();
@@ -41,6 +43,36 @@ describe("travel results", () => {
     renderWithIntl(<TravelResultsView />, "en");
     expect(await screen.findByText("Pet rules: not specified")).toBeTruthy();
     expect(screen.getByText("Request to book")).toBeTruthy();
+  });
+});
+
+describe("travel discovery localization", () => {
+  beforeEach(() => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    vi.mocked(travelMarketService.destinations).mockResolvedValue([]);
+  });
+
+  it.each([
+    ["de", "Finde eine Unterkunft, die auch dein Haustier aufnimmt", "Dieses Verzeichnis hält kein Zimmer und erstellt keine Reservierung."],
+    ["es", "Encuentra un alojamiento que también acepte a tu mascota", "Este directorio no bloquea habitaciones ni crea reservas."],
+  ] as const)("uses translated and non-promissory travel copy in %s", async (locale, heading, noReservation) => {
+    renderWithIntl(<TravelHomeView />, locale);
+
+    expect(screen.getByRole("heading", { level: 1, name: heading })).toBeTruthy();
+    expect(screen.getByText(new RegExp(noReservation))).toBeTruthy();
+    expect(screen.queryByText(/held for you for 15 minutes/i)).toBeNull();
+  });
+
+  it.each([
+    ["de", "Reiseziel", "Tierart", "Suchen"],
+    ["es", "Destino", "Especie", "Buscar"],
+  ] as const)("localizes destination and pet search controls in %s", (locale, destination, species, action) => {
+    renderWithIntl(<TravelSearchForm />, locale);
+
+    expect(screen.getByRole("search")).toBeTruthy();
+    expect(screen.getByText(destination)).toBeTruthy();
+    expect(screen.getByLabelText(species)).toBeTruthy();
+    expect(screen.getByRole("button", { name: action })).toBeTruthy();
   });
 });
 
