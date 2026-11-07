@@ -50,4 +50,16 @@ describe("SellerDashboardView", () => {
     await waitFor(() => expect(screen.getByText("داشبورد")).toBeTruthy());
     expect(screen.getByText("سفارش‌های اخیر")).toBeTruthy();
   });
+
+  it.each([["de", "Übersicht", "Letzte Bestellungen"], ["es", "Resumen", "Pedidos recientes"]] as const)(
+    "renders the %s seller dashboard in the selected language",
+    async (locale, title, recentOrders) => {
+      vi.mocked(sellerOsService.getDashboard).mockResolvedValue(DASHBOARD);
+
+      renderWithIntl(<SellerDashboardView />, locale);
+
+      await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+      expect(screen.getByText(recentOrders)).toBeTruthy();
+    },
+  );
 });

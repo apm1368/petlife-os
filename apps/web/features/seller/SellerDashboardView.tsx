@@ -10,14 +10,13 @@ import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatCount } from "@/lib/number/format-number";
-import { useStatusText } from "@/lib/status/use-status-text";
 
 /** Minimal but operational Seller Dashboard (spec section 40) — priorities are orders needing action, low stock, and channel sync health; never a marketing-style landing page. */
 export function SellerDashboardView() {
-  const statusText = useStatusText();
   const t = useTranslations("seller.dashboard");
+  const tOrder = useTranslations("seller.orderDetail");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale();
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [dashboard, setDashboard] = useState<SellerDashboardDto | null>(null);
@@ -83,7 +82,7 @@ export function SellerDashboardView() {
                     <span className="text-metadata text-text-secondary">{t("itemCount", { count: order.itemCount })}</span>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <StatusLabel tone={order.status === "CANCELLED" ? "urgent" : "neutral"}>{statusText.label(order.status, "order")}</StatusLabel>
+                    <StatusLabel tone={order.status === "CANCELLED" ? "urgent" : "neutral"}>{tOrder(`orderStatus.${order.status}` as "orderStatus.CONFIRMED")}</StatusLabel>
                     <span className="text-body text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
                   </div>
                 </ContextSurface>

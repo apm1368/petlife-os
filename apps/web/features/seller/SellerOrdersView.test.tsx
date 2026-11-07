@@ -44,4 +44,19 @@ describe("SellerOrdersView", () => {
 
     await waitFor(() => expect(screen.getByText("No orders yet.")).toBeTruthy());
   });
+
+  it.each([["de", "Bestellungen", "Vom Marktplatz eingezogen"], ["es", "Pedidos", "Cobrado por el marketplace"]] as const)(
+    "localizes seller order source and list in %s",
+    async (locale, title, paymentSource) => {
+      vi.mocked(sellerOsService.listOrders).mockResolvedValue(
+        page([{ orderId: "order-1", source: "TOROB" as never, externalOrderId: "TOROB-123", status: "CONFIRMED" as never, paymentSource: "MARKETPLACE_COLLECTED" as never, fulfillmentStatus: "DELIVERED" as never, itemCount: 1, totalAmount: 300_000, currency: "IRR", createdAt: "2026-01-01T00:00:00.000Z" }]),
+      );
+
+      renderWithIntl(<SellerOrdersView />, locale);
+
+      await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+      expect(screen.getByText(paymentSource)).toBeTruthy();
+      expect(screen.getByText(locale === "de" ? "Zugestellt" : "Entregado")).toBeTruthy();
+    },
+  );
 });

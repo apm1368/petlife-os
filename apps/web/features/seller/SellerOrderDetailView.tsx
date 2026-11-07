@@ -16,12 +16,12 @@ type SellerOrderDetail = OrderDetailDto & { source: string | null; externalOrder
 /** Seller Order detail (spec section 38) — shows source/settlement honestly, and every commercial fact is the immutable snapshot from order creation, never re-derived from the live catalog. */
 export function SellerOrderDetailView({ orderId }: { orderId: string }) {
   const t = useTranslations("seller.orderDetail");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale();
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [order, setOrder] = useState<SellerOrderDetail | null>(null);
   const [error, setError] = useState(false);
-  const tStatus = useTranslations("commerce.statusLabels");
+  const tStatus = useTranslations("seller.orderDetail.fulfillmentStatus");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -111,7 +111,7 @@ export function SellerOrderDetailView({ orderId }: { orderId: string }) {
         </div>
         {order.externalOrderId ? <p className="text-metadata text-text-secondary">{t("externalOrderId", { id: order.externalOrderId })}</p> : null}
         <StatusLabel tone="neutral">{t(`paymentSource.${order.paymentSource}`)}</StatusLabel>
-        {order.fulfillment ? <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tStatus(`fulfillment.${order.fulfillment.status}`)}</StatusLabel> : null}
+        {order.fulfillment ? <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tStatus(order.fulfillment.status as "PENDING")}</StatusLabel> : null}
       </ContextSurface>
 
       <div>

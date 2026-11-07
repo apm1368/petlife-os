@@ -96,5 +96,34 @@
     "design": {
       "navLabel": "Dein Tiershop", "shop": "Shop", "orders": "Meine Bestellungen", "repeat": "Wiederkehrende Lieferung", "favorites": "Gespeicherte Produkte", "cart": "Warenkorb", "browse": "Alle Produkte entdecken", "filters": "Finde den nächsten Favoriten", "filterHint": "Wähle, was zu deinem Tier passt.", "allProducts": "Alle Produkte", "applyFilters": "Produkte anzeigen", "repeatTitle": "Ein bisschen Fürsorge – immer wieder.", "repeatDescription": "Plane die nächste Lieferung eines geeigneten Produkts. Du behältst bei jeder Bestellung die Kontrolle.", "repeatCta": "Wiederkehrende Lieferung entdecken", "viewProduct": "Produkt ansehen", "summary": "Bestellübersicht", "cartStep": "Warenkorb", "checkoutStep": "Kassendetails", "completeStep": "Bestellstatus", "journey": "Kaufübersicht", "categoryFailed": "Kategorien konnten nicht geladen werden. Du kannst den Katalog weiterhin durchsuchen.", "loadFailed": "Diese Informationen konnten nicht geladen werden. Bitte versuche es erneut.", "favoriteFailed": "Gespeicherte Produkte konnten nicht aktualisiert werden. Bitte versuche es erneut.", "reviewsFailed": "Weitere Bewertungen konnten nicht geladen werden. Bitte versuche es erneut.", "shopCredit": "Shop-Motiv: KI-generiertes fotorealistisches Konzept von OpenAI; zugeschnitten und neu codiert. Kein echtes Geschäft und kein Produktfoto.", "clearCart": "Warenkorb leeren", "clearTitle": "Warenkorb leeren?", "clearHint": "Alle Artikel in diesem Warenkorb werden entfernt.", "clearConfirm": "Ja, Warenkorb leeren", "keepCart": "Artikel behalten", "editAddress": "Ausgewählte Adresse bearbeiten", "defaultAddress": "Standardadresse des Haushalts", "editOptionalHint": "Beim Bearbeiten behalten leere optionale Felder ihre bisherigen Werte."
     }
+  },
+  "seller": {
+    "shell": {
+      "nav": { "overview": "Übersicht", "orders": "Bestellungen", "offers": "Angebote", "inventory": "Lagerbestand", "channels": "Vertriebskanäle", "team": "Team", "settings": "Einstellungen", "finance": "Finanzen", "promotions": "Aktionen" },
+      "notASeller": { "title": "Kein Verkäuferzugang", "body": "Dein Konto gehört keiner Verkäuferorganisation an.", "backToApp": "Zurück zu opetlife" },
+      "chooseOrg": { "title": "Verkäufer auswählen", "body": "Du gehörst zu mehreren Verkäuferorganisationen. Wähle aus, in welcher du arbeiten möchtest." },
+      "headerRole": "{role}",
+      "role": { "OWNER": "Inhaber", "ADMIN": "Administration", "OPERATIONS": "Betrieb", "CATALOG_MANAGER": "Katalogverwaltung", "ORDER_MANAGER": "Bestellverwaltung", "FINANCE": "Finanzen", "SUPPORT": "Support", "VIEWER": "Leseberechtigt" },
+      "switchOrg": "Verkäufer wechseln",
+      "suspendedBanner": "Diese Verkäuferorganisation ist gesperrt. Neue operative Aktionen sind blockiert."
+    },
+    "dashboard": {
+      "title": "Übersicht", "loading": "Übersicht wird geladen …", "retry": "Erneut versuchen",
+      "tiles": { "ordersRequiringAction": "Bestellungen mit Handlungsbedarf", "lowStockOffers": "Angebote mit niedrigem Bestand", "activeOffers": "Aktive Angebote", "channelSyncErrors": "Synchronisierungsfehler der Vertriebskanäle", "fulfillmentExceptions": "Ausnahmen bei der Lieferung", "ordersToday": "Bestellungen heute", "unitsSoldToday": "Verkaufte Einheiten heute", "gmvToday": "Umsatz heute" },
+      "recentOrders": "Letzte Bestellungen", "noRecentOrders": "Noch keine Bestellungen.", "marketplaceOrderLabel": "Bestellung über {provider}", "petlifeOrderLabel": "opetlife-Bestellung", "itemCount": "{count, plural, one {# Artikel} other {# Artikel}}", "verificationLink": "Unternehmensprüfung und Dokumente"
+    },
+    "orders": {
+      "title": "Bestellungen", "loading": "Bestellungen werden geladen …", "retry": "Erneut versuchen", "empty": "Noch keine Bestellungen.", "sourceMarketplace": "{provider}", "sourcePetlife": "opetlife", "externalOrderId": "Externe Bestellnummer: {id}",
+      "paymentSource": { "PETLIFE_PAYMENT": "Über opetlife bezahlt", "MARKETPLACE_COLLECTED": "Vom Marktplatz eingezogen", "CASH_ON_DELIVERY": "Nachnahme", "UNKNOWN": "Zahlungsquelle unbekannt" }
+    },
+    "orderDetail": {
+      "title": "Bestelldetails", "loading": "Bestellung wird geladen …", "retry": "Erneut versuchen", "sourceMarketplace": "{provider}", "sourcePetlife": "opetlife", "externalOrderId": "Externe Bestellnummer: {id}",
+      "paymentSource": { "PETLIFE_PAYMENT": "Über opetlife bezahlt", "MARKETPLACE_COLLECTED": "Vom Marktplatz eingezogen", "CASH_ON_DELIVERY": "Nachnahme", "UNKNOWN": "Zahlungsquelle unbekannt" },
+      "items": "Artikel", "quantity": "Menge: {count}", "subtotal": "Zwischensumme", "delivery": "Lieferung", "total": "Gesamt", "cancelledDoNotShip": "Diese Bestellung wurde storniert und erstattet. Bitte nicht versenden.", "actionFailed": "Die Aktion ist fehlgeschlagen. Bitte versuche es erneut.", "nextStep": "Nächster Schritt", "markReady": "Verpackt und abholbereit markieren", "requestCourier": "Kurier anfordern", "cancelOrder": "Bestellung kann nicht erfüllt werden – stornieren", "cancelExplain": "Der Kunde erhält sofort eine vollständige Erstattung ({amount}); die Artikel werden wieder deinem Bestand hinzugefügt.", "cancelReason": "Grund (wird dem Kunden angezeigt)", "cancelConfirm": "Stornieren und erstatten", "promotionApplied": "Aktion: {name}", "discount": "Rabatte", "refundRequests": "Erstattungsanfragen", "refundRequestsNote": "opetlife prüft Erstattungsanfragen; genehmigte Erstattungen werden mit deiner Abrechnung verrechnet.",
+      "orderStatus": { "PENDING": "Ausstehend", "CONFIRMED": "Bestätigt", "PREPARING": "Wird vorbereitet", "READY_FOR_FULFILLMENT": "Versandbereit", "FULFILLED": "Abgeschlossen", "CANCELLED": "Storniert", "PARTIALLY_REFUNDED": "Teilweise erstattet", "REFUNDED": "Erstattet" },
+      "refundReason": { "DAMAGED": "Beschädigt angekommen", "WRONG_ITEM": "Falscher Artikel", "NOT_AS_DESCRIBED": "Entspricht nicht der Beschreibung", "MISSING_ITEMS": "Artikel fehlen", "NOT_DELIVERED": "Nicht geliefert", "PET_REACTION": "Mein Tier hat schlecht darauf reagiert", "OTHER": "Sonstiges" },
+      "refundStatus": { "PENDING_REVIEW": "Wird geprüft", "APPROVED": "Genehmigt", "REJECTED": "Abgelehnt", "WITHDRAWN": "Zurückgezogen" },
+      "fulfillmentStatus": { "PENDING": "Bestellung eingegangen", "AWAITING_SELLER_PREPARATION": "Verkäufer bereitet die Bestellung vor", "READY_FOR_PICKUP": "Abholbereit", "PICKUP_REQUESTED": "Kurier angefordert", "PICKUP_ASSIGNED": "Kurier zugewiesen", "ASSIGNED": "Kurier zugewiesen", "PICKED_UP": "Abgeholt", "IN_TRANSIT": "Unterwegs", "OUT_FOR_DELIVERY": "Wird zugestellt", "DELIVERED": "Zugestellt", "FAILED": "Zustellproblem", "CANCELED": "Storniert" }
+    }
   }
 }

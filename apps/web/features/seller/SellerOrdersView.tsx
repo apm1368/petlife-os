@@ -14,9 +14,9 @@ import { fulfillmentTone } from "@/features/commerce/fulfillment-tone";
 export function SellerOrdersView() {
   const t = useTranslations("seller.orders");
   const tOrder = useTranslations("seller.orderDetail");
-  const tStatus = useTranslations("commerce.statusLabels");
+  const tStatus = useTranslations("seller.orderDetail.fulfillmentStatus");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale();
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [orders, setOrders] = useState<SellerOrderSummaryDto[] | null>(null);
@@ -56,10 +56,10 @@ export function SellerOrdersView() {
             {order.externalOrderId ? <span className="text-metadata text-text-secondary">{t("externalOrderId", { id: order.externalOrderId })}</span> : null}
             <div className="flex flex-wrap gap-1.5">
               <StatusLabel tone="neutral">{t(`paymentSource.${order.paymentSource}`)}</StatusLabel>
-              {order.fulfillmentStatus ? <StatusLabel tone={fulfillmentTone(order.fulfillmentStatus)}>{tStatus(`fulfillment.${order.fulfillmentStatus}` as "fulfillment.PENDING")}</StatusLabel> : null}
+              {order.fulfillmentStatus ? <StatusLabel tone={fulfillmentTone(order.fulfillmentStatus)}>{tStatus(order.fulfillmentStatus as "PENDING")}</StatusLabel> : null}
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(order.createdAt))}</span>
+              <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US").format(new Date(order.createdAt))}</span>
               <span className="text-body text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
             </div>
           </ContextSurface>

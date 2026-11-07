@@ -1,6 +1,12 @@
 /** Counts and plain numbers in the UI language: Persian digits and separators in fa, Latin in en. */
 export function formatCount(value: number, locale: string): string {
-  return value.toLocaleString(locale === "fa" ? "fa-IR" : "en-US");
+  const intlLocale: Record<string, string> = {
+    fa: "fa-IR",
+    en: "en-GB",
+    de: "de-DE",
+    es: "es-ES",
+  };
+  return value.toLocaleString(intlLocale[locale] ?? "en-GB");
 }
 
 /** ISO country code → its name in the UI language ("IR" → "ایران" / "Iran"); the code itself if unknown. */
