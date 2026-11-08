@@ -4,32 +4,41 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { ContextSurface, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, EmptyState, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import type { SellerDashboardDto } from "@petlife/types";
+import { ApiError } from "@/lib/api/client";
 import { sellerOsService } from "@/services/seller-os.service";
 import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatCount } from "@/lib/number/format-number";
 import { useStatusText } from "@/lib/status/use-status-text";
+import type { RouteLocale } from "@/lib/i18n/config";
+
+type LoadFailure = "failed" | "offline" | "noAccess";
+function loadFailure(error: unknown): LoadFailure {
+  if (error instanceof ApiError && (error.status === 401 || error.status === 403)) return "noAccess";
+  if (typeof navigator !== "undefined" && !navigator.onLine) return "offline";
+  return "failed";
+}
 
 /** Minimal but operational Seller Dashboard (spec section 40) — priorities are orders needing action, low stock, and channel sync health; never a marketing-style landing page. */
 export function SellerDashboardView() {
   const statusText = useStatusText();
   const t = useTranslations("seller.dashboard");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const sellerId = useSellerStore((s) => s.context?.active?.sellerOrganizationId);
 
   const [dashboard, setDashboard] = useState<SellerDashboardDto | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<LoadFailure | null>(null);
 
   async function load() {
     if (!sellerId) return;
-    setError(false);
+    setError(null);
     try {
       setDashboard(await sellerOsService.getDashboard(sellerId));
-    } catch {
-      setError(true);
+    } catch (cause) {
+      setError(loadFailure(cause));
     }
   }
 
@@ -38,7 +47,8 @@ export function SellerDashboardView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sellerId]);
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
+  if (!sellerId) return <EmptyState title={t("noWorkspace")} description={t("noWorkspaceDescription")} />;
+  if (error) return <ErrorRecovery title={t("title")} message={t(error)} retryLabel={t("retry")} onRetry={load} />;
   if (!dashboard) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   const tiles = [

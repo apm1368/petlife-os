@@ -1947,6 +1947,11 @@
       "title": "Dashboard",
       "loading": "Loading dashboard…",
       "retry": "Retry",
+      "failed": "The seller dashboard could not be loaded.",
+      "offline": "You are offline. Check your connection and try again.",
+      "noAccess": "You do not have permission to view this seller workspace.",
+      "noWorkspace": "No seller workspace is selected.",
+      "noWorkspaceDescription": "Select an authorized seller workspace to see its live orders and offers.",
       "tiles": {
         "ordersRequiringAction": "Orders requiring action",
         "lowStockOffers": "Low-stock offers",
@@ -4026,6 +4031,8 @@
   "vetPanel": {
     "dashboard": {
       "title": "Clinical board",
+      "offline": "You are offline. Check your connection and try again.",
+      "noAccess": "You do not have permission to view this clinical dashboard.",
       "todaysAppointments": "{count, number} appointments today",
       "openVisits": "{count, number} open visits",
       "overdueTasks": "{count, number} overdue treatments",
