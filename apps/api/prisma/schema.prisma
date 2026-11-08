@@ -5482,6 +5482,9 @@ model MediaAsset {
 model Article {
   id String @id @default(uuid()) @db.Uuid
 
+  /// Development and QA seed articles are never public in production, even if a seed accidentally left a locale visible.
+  isDemoRecord Boolean @default(false)
+
   authorId String?        @db.Uuid
   author   ContentAuthor? @relation(fields: [authorId], references: [id], onDelete: SetNull)
 

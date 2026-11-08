@@ -261,8 +261,8 @@ async function main() {
     const articleId = id(`article:${a.key}`);
     await db.article.upsert({
       where: { id: articleId },
-      create: { id: articleId, authorId: author.id, categoryId: id(`category:${a.section}`), coverMediaAssetId: mediaId, createdByAdminId: editor.id },
-      update: { authorId: author.id, categoryId: id(`category:${a.section}`), coverMediaAssetId: mediaId },
+      create: { id: articleId, isDemoRecord: true, authorId: author.id, categoryId: id(`category:${a.section}`), coverMediaAssetId: mediaId, createdByAdminId: editor.id },
+      update: { isDemoRecord: true, authorId: author.id, categoryId: id(`category:${a.section}`), coverMediaAssetId: mediaId },
     });
     const publishedAt = new Date(Date.now() - a.publishedDaysAgo * 86_400_000);
     for (const locale of [Locale.fa, Locale.en] as const) {
