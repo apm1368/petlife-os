@@ -199,7 +199,7 @@ async function main() {
   const orgId: Record<string, string> = {};
   for (const [key, p] of Object.entries(partners)) {
     orgId[key] = id(`org:${key}`);
-    await db.providerOrganization.upsert({ where: { id: orgId[key] }, create: { id: orgId[key], name: p.name, type: "TRAVEL_ACCOMMODATION", verificationStatus: "VERIFIED" }, update: {} });
+    await db.providerOrganization.upsert({ where: { id: orgId[key] }, create: { id: orgId[key], name: p.name, type: "TRAVEL_ACCOMMODATION", verificationStatus: "VERIFIED", isDemoRecord: true }, update: {} });
     const owner = await user(p.owner, p.ownerName);
     await db.providerUser.upsert({ where: { id: id(`provider-user:${key}`) }, create: { id: id(`provider-user:${key}`), userId: owner.id, providerOrganizationId: orgId[key]!, role: "OWNER" }, update: {} });
   }
@@ -439,7 +439,7 @@ async function main() {
     const placeId = id(`place:${p.key}`);
     await db.petFriendlyPlace.upsert({
       where: { id: placeId },
-      create: { id: placeId, name: p.name, category: p.category, country: "IR", city: p.city, province: p.province, latitude: p.lat, longitude: p.lng, speciesAllowed: ["DOG", "CAT"], outdoorAllowed: true, indoorAllowed: p.category === "CAFE" || p.category === "STORE", leashRequired: p.leash, waterAvailable: p.water, petArea: p.area, status: "VERIFIED", isPubliclyListed: true, verificationSource: "بازدید تیم QA (نمایشی)", verifiedAt: new Date(Date.now() - 15 * DAY), openingHours: p.category === "CAFE" ? ([0, 1, 2, 3, 4, 5, 6].map((day) => ({ day, open: "09:00", close: "22:00" })) as Prisma.InputJsonValue) : Prisma.JsonNull },
+      create: { id: placeId, isDemoRecord: true, name: p.name, category: p.category, country: "IR", city: p.city, province: p.province, latitude: p.lat, longitude: p.lng, speciesAllowed: ["DOG", "CAT"], outdoorAllowed: true, indoorAllowed: p.category === "CAFE" || p.category === "STORE", leashRequired: p.leash, waterAvailable: p.water, petArea: p.area, status: "VERIFIED", isPubliclyListed: true, verificationSource: "بازدید تیم QA (نمایشی)", verifiedAt: new Date(Date.now() - 15 * DAY), openingHours: p.category === "CAFE" ? ([0, 1, 2, 3, 4, 5, 6].map((day) => ({ day, open: "09:00", close: "22:00" })) as Prisma.InputJsonValue) : Prisma.JsonNull },
       update: {},
     });
     await db.$executeRaw`UPDATE pet_friendly_places SET location = ST_SetSRID(ST_MakePoint(${p.lng}, ${p.lat}), 4326)::geography WHERE id = ${placeId}::uuid`;

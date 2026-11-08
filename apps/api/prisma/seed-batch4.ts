@@ -239,6 +239,7 @@ async function main() {
       where: { id: productId },
       create: {
         id: productId,
+        isDemoRecord: true,
         title: p.title,
         slug: `qa-b4-${p.key}`,
         description: p.description,

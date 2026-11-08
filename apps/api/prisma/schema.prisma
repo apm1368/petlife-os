@@ -1166,6 +1166,9 @@ model User {
   /// (lowercased) so "Sarah" and "sarah" can never collide.
   username           String?
   normalizedUsername String?           @unique
+  /// Names entered during password registration; optional for accounts created before these fields existed.
+  firstName          String?
+  lastName           String?
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
   passwordHash       String?
@@ -1911,6 +1914,8 @@ model CareProfile {
 
 model ProviderOrganization {
   id                      String                     @id @default(uuid()) @db.Uuid
+  /// Fixture-origin records are safe for local/test flows but must never be surfaced by public production reads.
+  isDemoRecord             Boolean                    @default(false)
   name                    String
   type                    ProviderType
   verificationStatus      ProviderVerificationStatus @default(NOT_STARTED)
@@ -2668,6 +2673,8 @@ model ProductCategory {
 /// stay easy to compare and maintain side by side.
 model Product {
   id             String            @id @default(uuid()) @db.Uuid
+  /// Seed/demo catalog fixtures are explicitly excluded from public production discovery.
+  isDemoRecord   Boolean           @default(false)
   /// Batch 4: structured specs [{ label, value }] supplied by manufacturer/seller — never medical claims.
   specifications Json?
   media          ProductMedia[]
@@ -5621,6 +5628,8 @@ enum SubscriptionBillingAttemptStatus {
 /// need, unlike a growing article library.
 model SubscriptionPlan {
   id            String                 @id @default(uuid()) @db.Uuid
+  /// Dev-only paid plans/prices are hidden from customer-facing production plan reads.
+  isDemoRecord  Boolean                @default(false)
   code          String                 @unique
   nameFa        String
   nameEn        String
@@ -7967,6 +7976,8 @@ enum PetFriendlyPlaceStatus {
 
 model PetFriendlyPlace {
   id               String                   @id @default(uuid()) @db.Uuid
+  /// Imported/test place records are not public production content until reviewed and published.
+  isDemoRecord     Boolean                  @default(false)
   /// Batch 5 — null means "not stated", never "no".
   leashRequired    Boolean?
   waterAvailable   Boolean?
@@ -11319,4 +11330,230 @@ model PetExpense {
 
   @@index([petId, spentOn])
   @@map("pet_expenses")
+}
+
+// ---------------------------------------------------------------------------
+// Help Center, legal documents and system status (Support & Legal surface).
+//
+// New tables only: nothing here alters an existing table, and none of it touches payment, ledger,
+// wallet, booking, clinical or pet-health data. Editor/actor columns are plain UUID references with
+// no Prisma relation (the same actor-reference convention InsurerMembership.userId uses), so adding
+// these tables needs no back-relation on AdminUser, User or any other pre-existing model.
+//
+// Decisions: AD-07..AD-10 (ticket queues, first-reply target, reopen window — served by the existing
+// SupportCase), GC-02/GC-05/GC-10/GC-12 (consent, authoritative legal text, RTL/LTR, calendars).
+// ---------------------------------------------------------------------------
+
+enum HelpArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LegalDocumentKind {
+  TERMS_OF_SERVICE
+  PRIVACY_POLICY
+  COOKIE_CONSENT
+  COMMUNITY_GUIDELINES
+  ANIMAL_WELFARE
+  AI_AND_SAFETY
+  PAYMENT_AND_REFUND
+  DELIVERY
+  INSTALLMENT_HELP
+  ACCESSIBILITY
+}
+
+enum SystemIncidentStatus {
+  INVESTIGATING
+  IDENTIFIED
+  MONITORING
+  RESOLVED
+}
+
+enum SystemIncidentImpact {
+  NONE
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+/// A Help Center section. Titles are per-locale JSON ({ fa, en }) so a category needs no sibling table;
+/// `slug` is the stable URL key and never changes once published.
+model HelpCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  slug        String   @unique
+  titleFa     String
+  titleEn     String?
+  descriptionFa String?
+  descriptionEn String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles HelpArticle[]
+
+  @@index([isActive, sortOrder])
+  @@map("help_categories")
+}
+
+/// One Help Center article in one locale. `publishedVersion` points at the HelpArticleVersion the public
+/// reads, so a draft edit never leaks to readers and a rollback is just re-pointing it — the same
+/// "editing and publishing are separate actions" rule the blog follows. An article with nothing
+/// published has publishedVersion = null and is invisible publicly: empty means empty.
+model HelpArticle {
+  id         String       @id @default(uuid()) @db.Uuid
+  categoryId String       @db.Uuid
+  category   HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  locale     Locale
+  slug       String
+  title      String
+  summary    String?
+  body       String
+  status     HelpArticleStatus @default(DRAFT)
+  /// Deep-link keys of the screens this article is "contextual help" for (e.g. "checkout.payment").
+  contextKeys String[] @default([])
+  isFaq      Boolean   @default(false)
+  sortOrder  Int       @default(0)
+  helpfulCount    Int  @default(0)
+  notHelpfulCount Int  @default(0)
+
+  publishedAt      DateTime?
+  publishedVersion Int?
+  /// Actor reference (no relation) — see the header comment.
+  createdByAdminId String   @db.Uuid
+  updatedByAdminId String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  versions HelpArticleVersion[]
+
+  @@unique([locale, slug])
+  @@index([categoryId, locale, status])
+  @@index([locale, status, isFaq])
+  @@map("help_articles")
+}
+
+/// An immutable snapshot of a HelpArticle, written on every save. Rollback copies a snapshot back and
+/// writes a NEW version, so history is append-only and no version is ever rewritten.
+model HelpArticleVersion {
+  id            String      @id @default(uuid()) @db.Uuid
+  articleId     String      @db.Uuid
+  article       HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  editorAdminId String      @db.Uuid
+  changeNote    String?
+  snapshot      Json
+  createdAt     DateTime    @default(now())
+
+  @@unique([articleId, versionNumber])
+  @@index([articleId])
+  @@map("help_article_versions")
+}
+
+/// A legal document in one locale, versioned. The platform NEVER ships legal text it did not receive:
+/// a document with no published version renders an explicit empty state. `effectiveAt` is the date the
+/// published text takes effect and is what the public page shows as "last updated".
+/// GC-05: the English text is the authoritative reference; the Persian is informational.
+model LegalDocument {
+  id     String            @id @default(uuid()) @db.Uuid
+  kind   LegalDocumentKind
+  locale Locale
+  /// The number of the version currently published, or null when nothing is published yet.
+  publishedVersion Int?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  versions LegalDocumentVersion[]
+
+  @@unique([kind, locale])
+  @@map("legal_documents")
+}
+
+model LegalDocumentVersion {
+  id            String        @id @default(uuid()) @db.Uuid
+  documentId    String        @db.Uuid
+  document      LegalDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  title         String
+  body          String
+  /// When this text takes effect — shown publicly as the "last updated" date.
+  effectiveAt   DateTime
+  editorAdminId String        @db.Uuid
+  changeNote    String?
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@map("legal_document_versions")
+}
+
+/// A public incident on the status page. Components affected are free-form labels, not a table: the
+/// status page reports what the operations team wrote, and an empty list is rendered as "all systems
+/// operational" only when there is genuinely no open incident.
+model SystemIncident {
+  id         String               @id @default(uuid()) @db.Uuid
+  title      String
+  status     SystemIncidentStatus @default(INVESTIGATING)
+  impact     SystemIncidentImpact @default(MINOR)
+  components String[]             @default([])
+  startedAt  DateTime             @default(now())
+  resolvedAt DateTime?
+  createdByAdminId String         @db.Uuid
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+
+  updates SystemIncidentUpdate[]
+
+  @@index([status, startedAt])
+  @@map("system_incidents")
+}
+
+model SystemIncidentUpdate {
+  id         String               @id @default(uuid()) @db.Uuid
+  incidentId String               @db.Uuid
+  incident   SystemIncident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  status     SystemIncidentStatus
+  body       String
+  authorAdminId String            @db.Uuid
+  createdAt  DateTime             @default(now())
+
+  @@index([incidentId, createdAt])
+  @@map("system_incident_updates")
+}
+
+/// A scheduled maintenance window shown on the status page and, while active, on the maintenance page.
+model MaintenanceWindow {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  message   String?
+  startsAt  DateTime
+  endsAt    DateTime
+  createdByAdminId String @db.Uuid
+  cancelledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startsAt, endsAt])
+  @@map("maintenance_windows")
+}
+
+/// The human hand-off on a support ticket (decision AD-07..AD-10). A request to reach a person is its own
+/// row, linked to the existing SupportCase by id rather than by new columns on it, so SupportCase is not
+/// altered. `referenceNumber` is the value the member is shown and quotes back; it is unique and
+/// generated server-side, never client-supplied.
+model SupportEscalation {
+  id              String   @id @default(uuid()) @db.Uuid
+  referenceNumber String   @unique
+  caseId          String   @db.Uuid
+  requesterUserId String   @db.Uuid
+  reason          String
+  /// Whether the member confirmed the hand-off on the confirmation step.
+  confirmedAt     DateTime
+  createdAt       DateTime @default(now())
+
+  @@index([caseId])
+  @@index([requesterUserId])
+  @@map("support_escalations")
 }
