@@ -251,5 +251,30 @@
     "limit": "Bis zu {limit, number} aktuelle Ereignisse sowie ältere gespeicherte Versionen ohne protokollierte Ereignisse. In diesem Bereich können Sie Ihre Einwilligungen nicht ändern.",
     "kinds": {"TERMS": "Nutzungsbedingungen", "PRIVACY": "Datenschutz", "MARKETING": "Marketingnachrichten"},
     "sources": {"PRIVACY_CENTER": "Im Datenschutzbereich gespeichert", "LEGACY_RECORD": "Älterer gespeicherter Stand; der vollständige Ereignisverlauf ist nicht verfügbar.", "ONBOARDING": "Bei der Registrierung gespeichert"}
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen",
+    "optional": "Optional"
+  },
+  "care": {
+    "profile": {
+      "title": "Pflegeprofil",
+      "edit": "Pflegeprofil bearbeiten",
+      "readOnlyNotice": "Sie können dieses Pflegeprofil ansehen, aber nicht bearbeiten.",
+      "temperament": "Temperament",
+      "aroundPeople": "Verhalten gegenüber Menschen",
+      "aroundAnimals": "Verhalten gegenüber anderen Tieren",
+      "leashBehavior": "Verhalten an der Leine",
+      "handlingSensitivity": "Empfindlichkeit bei Berührungen",
+      "feedingRoutine": "Fütterungsroutine",
+      "toiletRoutine": "Toilettenroutine",
+      "separationBehavior": "Verhalten beim Alleinsein",
+      "specialInstructions": "Besondere Hinweise",
+      "empty": "Noch nicht eingerichtet.",
+      "saveFailed": "Das Pflegeprofil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    }
   }
 }
